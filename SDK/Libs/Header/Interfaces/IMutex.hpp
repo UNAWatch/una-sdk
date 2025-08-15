@@ -13,9 +13,9 @@
 #ifndef __INTERFACE_I_MUTEX_HPP
 #define __INTERFACE_I_MUTEX_HPP
 
+#include <stdio.h>
+
 #include <cstdbool>
-#include <cstdint>
-#include <cstddef>
 #include <memory>
 
 namespace Interface {
@@ -33,28 +33,23 @@ namespace Interface {
     class MutexLock
     {
     public:
-        MutexLock(std::shared_ptr<IMutex> mutex)
-            : mMutexPtr(std::move(mutex))
-            , mMutexRef(*mMutexPtr)
+        MutexLock(IMutex& mutex) noexcept : mMutex(mutex)
         {
-            mMutexRef.lock();
+            mMutex.lock();
         }
 
-        MutexLock(IMutex& mutex)
-            : mMutexPtr(nullptr)
-            , mMutexRef(mutex)
-        {
-            mMutexRef.lock();
-        }
+        MutexLock(const MutexLock&)            = delete;
+        MutexLock& operator=(const MutexLock&) = delete;
+        MutexLock(MutexLock&&)                 = delete;
+        MutexLock& operator=(MutexLock&&)      = delete;
 
-        ~MutexLock()
+        ~MutexLock() noexcept
         {
-            mMutexRef.unLock();
+            mMutex.unLock();
         }
 
     private:
-        std::shared_ptr<IMutex> mMutexPtr;
-        IMutex&                 mMutexRef;
+        IMutex& mMutex;
     };
 }
 
