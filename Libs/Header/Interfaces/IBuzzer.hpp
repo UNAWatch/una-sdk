@@ -13,7 +13,7 @@
 #ifndef __IBUZZER_HPP
 #define __IBUZZER_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace Interface
 {
@@ -28,10 +28,10 @@ public:
     static const uint8_t skMaxNotes = 10;
 
 
-    typedef struct {
-        uint32_t time;      ///< Duration in ms
-        uint8_t  level;     ///< Sound level 1,2,3, 0 - no sound
-    } Note_t;
+    struct Note {
+        uint32_t time = 100;    ///< Duration in ms
+        uint8_t  level = 2;     ///< Sound level 1,2,3, 0 - no sound
+    };
 
     /**
      * @brief   Play short beep.
@@ -45,7 +45,7 @@ public:
      * @param   note: Note_t to play;
      * @retval  Execution status. 'true' - success, 'false' - otherwise.
      */
-    virtual bool play(Note_t note) = 0;
+    virtual bool play(Note note) = 0;
 
     /**
      * @brief   Play melody.
@@ -53,7 +53,7 @@ public:
      * @param   len: length of the array. (Max len is skNoteQueueSize)
      * @retval  Execution status. 'true' - success, 'false' - otherwise.
      */
-    virtual bool play(const Note_t melody[], uint8_t len) = 0;
+    virtual bool play(const Note melody[], uint8_t len) = 0;
 
     /**
      * @brief   Check whether the buzzer is playing.

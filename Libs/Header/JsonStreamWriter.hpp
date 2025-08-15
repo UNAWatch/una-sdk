@@ -34,6 +34,14 @@ public:
     JsonStreamWriter(Interface::IFile *output);
 
     /**
+     * @brief Constructor with output target.
+     * @param output: Buffer to write JSON to.
+     * @param buffSize: Output buffer size.
+     */
+    JsonStreamWriter(char *output, size_t buffSize);
+
+
+    /**
      * @brief Default constructor without output target.
      * Must call `setOutput()` before writing.
      */
@@ -44,6 +52,20 @@ public:
      * @param output: Target output stream implementing `IFile`.
      */
     void setOutput(Interface::IFile *output);
+
+    /**
+     * @brief Set the output stream for JSON output.
+     * @param output: Buffer to write JSON to.
+     * @param buffSize: Output buffer size.
+     */
+    void setOutput(char *output, size_t buffSize);
+
+    /**
+     * @brief Check if any error occurs during writing..
+     * @retval 'true' - there was an error, JSON is not valid,
+     *         'false' - no error, JSON is valid.
+     */
+    bool isError();
 
     /**
      * @brief Start a new JSON object (map).
@@ -312,6 +334,12 @@ public:
 private:
     /// Output file interface.
     Interface::IFile *out;
+
+    char *outBuff;
+    size_t outBuffSize;
+    size_t outbuffWritten;
+
+    bool error;
 
     /**
      * @brief Enum representing the current context (object or array).

@@ -24,7 +24,7 @@ namespace Interface
 class IVibro {
 public:
 
-    typedef enum {
+    enum Effect {
         NO_EFFECT                            = 0,  // silent
         STRONG_CLICK_100                     = 1,
         SHARP_CLICK_100                      = 4,
@@ -32,6 +32,7 @@ public:
         DOUBLE_CLICK_100                     = 10,
         STRONG_BUZZ_100                      = 14,
         ALERT_750MS_100                      = 15,
+        ALERT_1000MS_100                     = 16,
         STRONG_CLICK_1_100                   = 17,
         MEDIUM_CLICK_1_100                   = 21,
         SHARP_TICK_1_100                     = 24,
@@ -45,16 +46,16 @@ public:
         PULSING_STRONG_1_100                 = 52,
         PULSING_MEDIUM_1_100                 = 54,
         PULSING_SHARP_1_100                  = 56,
-    } Effect_t;
+    };
 
     // Maximum Notes includes pauses.
     static const uint8_t skMaxNotes = 8;
 
-    typedef struct {
-        Effect_t effect;    // 1 - 127, 0 - for pause
+    struct Note {
+        Effect effect;      // 1 - 127, 0 - for pause
         uint8_t  loop;      // 1 - 3,   0 - no repeat (only for effect)
         uint32_t pause;     // 1 - 127, 0 - for effect. In ms. Step 10 ms.
-    } Note_t;
+    };
 
     /**
      * @brief   Play effect.
@@ -62,7 +63,7 @@ public:
      * @note    Commands are queued, so you can call this method without delay.
      * @param   effect: Effect to play;
      */
-    virtual void play(uint8_t effect = Effect_t::STRONG_CLICK_100) = 0;
+    virtual void play(uint8_t effect = Effect::STRONG_CLICK_100) = 0;
 
     /**
      * @brief   Play melody.
@@ -71,7 +72,7 @@ public:
      * @param   len: length of the array. (Max len is skMaxNotes)
      * @param   loop: main loop 1-6 times, 0 - no repeat, 7 - infinity loop.
      */
-    virtual void play(const Note_t melody[], uint8_t len, uint8_t loop = 0) = 0;
+    virtual void play(const Note melody[], uint8_t len, uint8_t loop = 0) = 0;
 
     /**
      * @brief   Check whether the vibro is playing.

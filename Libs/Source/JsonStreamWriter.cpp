@@ -14,20 +14,48 @@
 #include "JsonStreamWriter.hpp"
 
 JsonStreamWriter::JsonStreamWriter(Interface::IFile *output) :
-        out(output), mContainerStackTop(0)
+        out(output), outBuff(nullptr), outBuffSize(0), outbuffWritten(0),
+        error(false), mContainerStackTop(0)
+{
+    // We don't create a root container automatically -
+    // the user must call startMap() or startArray() to start the document.
+}
+
+JsonStreamWriter::JsonStreamWriter(char *output, size_t buffSize) :
+        out(nullptr), outBuff(output), outBuffSize(buffSize), outbuffWritten(0),
+        error(false), mContainerStackTop(0)
 {
     // We don't create a root container automatically -
     // the user must call startMap() or startArray() to start the document.
 }
 
 JsonStreamWriter::JsonStreamWriter() :
-        out(nullptr), mContainerStackTop(0)
+        out(nullptr), outBuff(nullptr), outBuffSize(0), outbuffWritten(0),
+        error(false), mContainerStackTop(0)
 {
 }
 
 void JsonStreamWriter::setOutput(Interface::IFile *output)
 {
     out = output;
+    outBuff = nullptr;
+    outBuffSize = 0;
+    outbuffWritten = 0;
+    error = false;
+}
+
+void JsonStreamWriter::setOutput(char *output, size_t buffSize)
+{
+    out = nullptr;
+    outBuff = output;
+    outBuffSize = buffSize;
+    outbuffWritten = 0;
+    error = false;
+}
+
+bool JsonStreamWriter::isError()
+{
+    return error;
 }
 
 void JsonStreamWriter::startMap(size_t size)
@@ -520,13 +548,34 @@ void JsonStreamWriter::writeHexString(const uint8_t *data, size_t len)
 
 void JsonStreamWriter::writeData(const char *data, size_t len)
 {
+    if (error) {
+        return;
+    }
+
     size_t written = 0;
-    out->write(data, len, written);
-    // ignore errors
+    if (out) {
+        if (!out->write(data, len, written)) {
+            error = true;
+        }
+    } else if (outBuff) {
+        if (len + outbuffWritten < outBuffSize) {
+            memcpy(&outBuff[outbuffWritten], data, len);
+            outbuffWritten += len;
+            outBuff[outbuffWritten] = '\0';
+        } else {
+            error = true;
+        }
+    }
 }
 
 void JsonStreamWriter::flushOutput()
 {
-    out->flush();
+    if (error) {
+        return;
+    }
+
+    if (out) {
+        out->flush();
+    }
 }
 
