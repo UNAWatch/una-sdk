@@ -143,13 +143,6 @@ public:
      */
     virtual bool setTime(const std::time_t &utc) = 0;
 
-    /**
-     * @brief Returns the number of ticks (in ms) since the system started
-     *
-     * @return Number of ticks
-     */
-    virtual uint32_t getTicks() = 0;
-
 protected:
 
     /**

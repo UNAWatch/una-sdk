@@ -29,7 +29,6 @@
 #include "IUserAppControl.hpp"
 #include "IUserAppMemAllocator.hpp"
 #include "ISettings.hpp"
-#include "IActivity.hpp"
 #include "IFileSystem.hpp"
 #include "ITime.hpp"
 #include "IPower.hpp"
@@ -45,7 +44,6 @@ struct IKernel {
     IKernel(Interface::IPower               &pwr,
             Interface::ITime                &time,
             Interface::ISettings            &settings,
-            Interface::IActivity            &activity,
             Interface::IFileSystem          &fs,
             Interface::IUserAppMemAllocator &mem,
             Interface::ISynchManager        &synchManager,
@@ -59,7 +57,6 @@ struct IKernel {
         : pwr(pwr)
         , time(time)
         , settings(settings)
-        , activity(activity)
         , fs(fs)
         , mem(mem)
         , synchManager(synchManager)
@@ -79,7 +76,6 @@ struct IKernel {
     Interface::IPower    &pwr;
     Interface::ITime     &time;
     Interface::ISettings &settings;
-    Interface::IActivity &activity;
 
     // Individual interfaces for each app
     Interface::IFileSystem          &fs;
