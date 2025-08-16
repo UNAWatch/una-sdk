@@ -15,6 +15,9 @@
 #include <cstring>
 #include <string_view>
 
+namespace sdk
+{
+
 /**
  * @class JsonStreamReader
  * @brief A JSON deserializer that facilitates validating and extracting data
@@ -158,6 +161,8 @@ private:
     size_t mLen;        ///< Length of the JSON buffer.
     bool mIsValid;      ///< Validation status of the JSON buffer.
 };
+
+} /* namespace sdk */
 
 #endif /* __JSON_STREAM_READER_HPP */
 

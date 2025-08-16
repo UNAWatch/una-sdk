@@ -13,6 +13,9 @@
 
 #include "JsonStreamWriter.hpp"
 
+namespace sdk
+{
+
 JsonStreamWriter::JsonStreamWriter(Interface::IFile *output) :
         out(output), outBuff(nullptr), outBuffSize(0), outbuffWritten(0),
         error(false), mContainerStackTop(0)
@@ -605,4 +608,6 @@ void JsonStreamWriter::flushOutput()
         out->flush();
     }
 }
+
+} /* namespace sdk */
 

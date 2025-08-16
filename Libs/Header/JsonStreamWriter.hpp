@@ -16,6 +16,9 @@
 
 #include "IFileSystem.hpp"
 
+namespace sdk
+{
+
 /**
  * @class JsonStreamWriter
  * @brief A streaming JSON writer for serializing data into JSON format without
@@ -456,5 +459,8 @@ private:
      */
     void flushOutput();
 };
+
+
+} /* namespace sdk */
 
 #endif /* __JSON_STREAM_WRITER_HPP */
