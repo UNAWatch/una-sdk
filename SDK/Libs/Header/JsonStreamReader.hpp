@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <string_view>
 
 /**
  * @class JsonStreamReader
@@ -121,6 +122,17 @@ public:
      *         `false` otherwise.
      */
     bool get(const char *query, const char *&outValue, size_t &outLen) const;
+
+    /**
+     * @brief Retrieve a string value from the JSON buffer.
+     * @note The string is not null-terminated, so its length is also provided.
+     * @param query: The object keys and array indexes to search for.
+     * @param[out] outValue: Reference to store the string value associated
+     *             with the query.
+     * @return `true` if the query is found and the value is successfully retrieved,
+     *         `false` otherwise.
+     */
+    bool get(const char *query, std::string_view &outValue) const;
 
     /**
      * @brief Get the number of elements in an array specified by a query path.

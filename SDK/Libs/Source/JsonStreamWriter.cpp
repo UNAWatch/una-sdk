@@ -263,6 +263,21 @@ void JsonStreamWriter::add(const char *key, const char *value)
     curr->expectingKey = true;
 }
 
+void JsonStreamWriter::add(const char *key, const std::string_view &value)
+{
+    Container *curr = currentContainer();
+    assert(curr && curr->type == ContainerType::OBJECT);
+    if (!curr->first) {
+        writeChar(',');
+    } else {
+        curr->first = false;
+    }
+    writeString(key);
+    writeChar(':');
+    writeString(value);
+    curr->expectingKey = true;
+}
+
 void JsonStreamWriter::addNull()
 {
     Container *curr = currentContainer();
@@ -531,6 +546,18 @@ void JsonStreamWriter::writeString(const char *s)
             writeChar('\\');
         }
         writeChar(*p);
+    }
+    writeChar('\"');
+}
+
+void JsonStreamWriter::writeString(std::string_view s)
+{
+    writeChar('\"');
+    for (char c : s) {
+        if (c == '\"' || c == '\\') {
+            writeChar('\\');
+        }
+        writeChar(c);
     }
     writeChar('\"');
 }

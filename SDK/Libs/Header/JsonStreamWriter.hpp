@@ -12,6 +12,7 @@
 
 #include <cstdint>
 #include <array>
+#include <string_view>
 
 #include "IFileSystem.hpp"
 
@@ -144,6 +145,13 @@ public:
      * @param value: Null-terminated string.
      */
     void add(const char *key, const char *value);
+
+    /**
+     * @brief Add a string value with a key.
+     * @param key: Key name.
+     * @param value: Null-terminated string.
+     */
+    void add(const char *key, const std::string_view &value);
 
     /**
      * @brief Add a null value to the current container (array or object).
@@ -417,6 +425,17 @@ private:
      * @param s Null-terminated string to write.
      */
     void writeString(const char *s);
+
+    /**
+     * @brief Writes a string with JSON-compatible escaping and enclosing quotes.
+     *
+     * Escapes only `"` and `\\` characters. This method does not escape control
+     * characters or Unicode, so it is suitable for simple JSON serialization but
+     * not full compliance.
+     *
+     * @param s String to write.
+     */
+    void writeString(std::string_view s);
 
     /**
      * @brief Writes a HEX string with JSON-compatible enclosing quotes.
