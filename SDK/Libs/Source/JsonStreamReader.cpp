@@ -19,6 +19,9 @@ extern "C" {
 #include <cstdint>
 #include <stdio.h>
 
+namespace sdk
+{
+
 JsonStreamReader::JsonStreamReader() :
         mData(nullptr), mLen(0), mIsValid(false)
 {
@@ -280,3 +283,5 @@ bool JsonStreamReader::getArrayLength(const char *query,
     outLength = i - 1;
     return true;
 }
+
+} /* namespace sdk */
