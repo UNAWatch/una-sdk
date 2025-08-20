@@ -10,27 +10,32 @@
  ******************************************************************************
  */
 
-#include "BacklightStub.hpp"
+#include "Simulator/Kernel/Mock/Backlight.hpp"
 
-#define TAG                 "Backlight"
+#define TAG                 "Mock::Backlight"
 #define LOG_MODULE_PRX      TAG"::"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "Logger.h"
 
-bool Stub::Backlight::on(uint32_t timeout)
-{
-    LOG_INFO("called, timeout = %u\n", timeout);
-    return true;
-}
+namespace Mock {
+    bool Backlight::on(uint32_t timeout)
+    {
+        LOG_INFO("called, timeout = %u\n", timeout);
+        m_isOn = true;
+        // TODO: Implement timeout handling if needed
+        return true;
+    }
 
-bool Stub::Backlight::off()
-{
-    LOG_INFO("called\n");
-    return true;
-}
+    bool Backlight::off()
+    {
+        LOG_INFO("called\n");
+        m_isOn = false;
+        return true;
+    }
 
-bool Stub::Backlight::isOn()
-{
-    LOG_INFO("called\n");
-    return false;
+    bool Backlight::isOn()
+    {
+        LOG_INFO("called\n");
+        return m_isOn;
+    }
 }

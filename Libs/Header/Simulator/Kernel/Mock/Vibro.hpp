@@ -12,19 +12,19 @@
 
 #pragma once
 
-#include "IVibro.hpp"
+#include "API/Vibro.hpp"
 
-namespace Stub {
+namespace Mock {
 
 /**
  * @brief Stub implementation of Interface::IVibro.
  */
-class Vibro : public Interface::IVibro {
+class Vibro : public sdk::api::Vibro {
 public:
-    bool play(uint8_t effect = Effect_t::STRONG_CLICK_100) override;
-    bool play(Note_t melody[], uint8_t len)                override;
-    bool stop()                                            override;
-    bool isPlaying()                                       override;
+    void play(uint8_t effect = Effect::STRONG_CLICK_100) override;
+    void play(const Note melody[], uint8_t len, uint8_t loop = 0)  override;
+    bool isPlaying()                                     override;
+    void stop()                                          override;
 };
 
 } // namespace Stub

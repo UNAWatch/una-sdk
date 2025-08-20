@@ -11,7 +11,8 @@
 
 #include "KernelBase.hpp"
 #include "gui/common/GuiConfig.hpp"
-#include "SensorLayer/SensorManager.hpp"
+#include "Simulator/Kernel/Mock/MockServiceControl.hpp"
+#include "Simulator/Sensors/ISensorCore.hpp"
 
 namespace Simulator
 {
@@ -19,7 +20,6 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
     : mIPower()
     , mITime()
     , mISettings()
-    , mIActivity()
     , mIFilesystem("../../../../../Output/")
     , mIUserAppMemAllocator()
     , mSynchManager()
@@ -32,11 +32,10 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
     , mKernel(new IKernel(mIPower,
                           mITime,
                           mISettings,
-                          mIActivity,
                           mIFilesystem,
                           mIUserAppMemAllocator,
                           mSynchManager,
-                          Sensor::Manager::getInstance(),
+                          mSensorManager,
                           mIUserApp,
                           mServiceControl,
                           mServiceControl,
@@ -44,17 +43,6 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
                           mVibro,
                           mBuzer))
 {
-}
-
-void KernelBase::initInterface()
-{
-    //mKernel = new IKernel(mIPower,
-    //                      mITime,
-    //                      mISettings,
-    //                      mIActivity,
-    //                      mIFilesystem,
-    //                      mIUserAppMemAllocator,
-    //                      mIUserApp);
 }
 
 void KernelBase::startApp()
@@ -76,8 +64,6 @@ void KernelBase::tick()
     if (mSensoreCore) {
         mSensoreCore->tick();
     }
-    
-    mIActivity.execute();
 }
 
 bool KernelBase::keyFilter(uint8_t key)

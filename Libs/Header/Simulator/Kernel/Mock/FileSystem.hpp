@@ -1,16 +1,5 @@
-/**
- ******************************************************************************
- * @file    FileSystem.hpp
- * @date    04-04-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Mock for IFileSystem interface.
- ******************************************************************************
- *
- ******************************************************************************
- */
 
-#ifndef __SIMULATOR_KERNEL_FILE_SYSTEM_HPP
-#define __SIMULATOR_KERNEL_FILE_SYSTEM_HPP
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -18,15 +7,15 @@
 #include <sstream>
 #include <windows.h>
 
-#include "IFileSystem.hpp"
+#include "API/FileSystem.hpp"
 
-namespace Simulator
+namespace Mock
 {
 
 /**
  * @brief Implementation of the IFile interface for Windows.
  */
-class File : public Interface::IFile {
+class File : public sdk::api::File {
 public:
 
     File(const char *prefix, const char *relativePath);
@@ -68,7 +57,7 @@ private:
     std::string path;
     std::fstream file;
     bool isOpenFlag = false;
-    char pathBuffer[Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
+    char pathBuffer[sdk::api::FileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;
 };
@@ -77,7 +66,7 @@ private:
 /**
  * @brief Implementation of the IDirectory interface for Windows.
  */
-class Directory : public Interface::IDirectory {
+class Directory : public sdk::api::Directory {
 public:
     Directory(const char *prefix, const char *relativePath);
 
@@ -99,7 +88,7 @@ public:
 
     virtual bool isOpen() const override;
 
-    virtual bool readNext(Interface::IFileSystem::ObjectInfo &item, bool reset = false) override;
+    virtual bool readNext(sdk::api::FileSystem::ObjectInfo &item, bool reset = false) override;
 
     virtual bool close() override;
 
@@ -108,7 +97,7 @@ private:
     HANDLE handle;
     WIN32_FIND_DATAA findData;
     bool isOpenFlag = false;
-    char pathBuffer[Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
+    char pathBuffer[sdk::api::FileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;
 };
@@ -117,16 +106,16 @@ private:
 /**
  * @brief Implementation of the IFileSystem interface for Windows.
  */
-class FileSystem : public Interface::IFileSystem {
+class FileSystem : public sdk::api::FileSystem {
 public:
 
     FileSystem(const char *rootPath);
 
     virtual bool mkdir(const char *path) override;
 
-    virtual std::unique_ptr<Interface::IFile> file(const char *path) override;
+    virtual std::unique_ptr<sdk::api::File> file(const char *path) override;
 
-    virtual std::unique_ptr<Interface::IDirectory> dir(const char *path) override;
+    virtual std::unique_ptr<sdk::api::Directory> dir(const char *path) override;
 
     virtual bool exist(const char *path) const override;
 
@@ -143,6 +132,4 @@ private:
 };
 
 
-} /* namespace Simulator */
-
-#endif /* __SIMULATOR_KERNEL_FILE_SYSTEM_HPP */
+} // namespace Mock

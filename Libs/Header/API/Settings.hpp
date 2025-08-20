@@ -1,10 +1,33 @@
 
 #pragma once
 
-//TODO: make real wrapper
+#include <cstdint>
+#include <cstdbool>
 
-#include "Interfaces/ISettings.hpp"
+namespace sdk::api
+{
 
-namespace sdk::api {
-    using Settings = Interface::ISettings;
+/**
+ * @brief   Settings Interface.
+ */
+class Settings
+{
+
+public:
+
+    /**
+     * @brief   Check if the units are imperial.
+     * @retval  true if the units are imperial, false otherwise.
+     */
+    virtual bool isUnitsImperial() = 0;
+
+protected:
+
+    /**
+     * @brief   Destructor.
+     */
+    virtual ~Settings() = default;
+
+};
+
 }

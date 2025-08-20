@@ -12,7 +12,7 @@
 #ifndef __SIMULATOR_KERNEL_TIME_HPP
 #define __SIMULATOR_KERNEL_TIME_HPP
 
-#include "ITime.hpp"
+#include "API/Time.hpp"
 #include "Wrappers/StdLibWrappers.h"
 
 #include <cstdint>
@@ -36,7 +36,7 @@ namespace Simulator
  * user can set their own offsets relative to the system time, such as
  * time zone offsets and daylight saving time offsets.
  */
-class MockTime : public Interface::ITime {
+class MockTime : public sdk::api::Time {
 public:
     MockTime() 
         : mTimeZoneOffset(0), mDstOffset(0)
@@ -152,11 +152,6 @@ public:
         std::time_t current = std::time(nullptr);
         mUserOffset = static_cast<int>(std::difftime(utc, current));
         return true;
-    }
-
-    uint32_t getTicks() override
-    {
-        return (uint32_t)GetTickCount64();
     }
 
 private:
