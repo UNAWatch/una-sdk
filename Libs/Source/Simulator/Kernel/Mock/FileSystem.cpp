@@ -9,12 +9,13 @@
  ******************************************************************************
  */
 
-#include "Simulator/Kernel/FileSystem.hpp"
+#include "Simulator/Kernel/Mock/FileSystem.hpp"
 #include "Wrappers/StdLibWrappers.h"
 
 #include <vector>
+#include < filesystem >
 
-namespace Simulator
+namespace Mock
 {
 
 // Method to add prefix to the path
@@ -57,6 +58,7 @@ void File::setPath(const char *path)
     // Update pathBuffer whenever the path is set
     safe_strcpy(pathBuffer, path, sizeof(pathBuffer) - 1);
 }
+
 
 const char *File::getPath() const
 {
@@ -256,7 +258,7 @@ bool Directory::isOpen() const
     return isOpenFlag;
 }
 
-bool Directory::readNext(Interface::IFileSystem::ObjectInfo &item, bool reset)
+bool Directory::readNext(sdk::api::FileSystem::ObjectInfo &item, bool reset)
 {
     if (!isOpenFlag) return false;
 
@@ -295,6 +297,12 @@ FileSystem::FileSystem(const char *rootPath)
     CreateDirectoryA(mPathPrefix, nullptr);
 }
 
+std::string FileSystem::getRootPath()
+{
+    std::filesystem::path relPath{ mPathPrefix };
+    return std::filesystem::absolute(relPath).string();
+}
+
 bool FileSystem::mkdir(const char *path)
 {
     std::string directory(path);
@@ -322,12 +330,12 @@ bool FileSystem::mkdir(const char *path)
     return true;
 }
 
-std::unique_ptr<Interface::IFile> FileSystem::file(const char *path)
+std::unique_ptr<sdk::api::File> FileSystem::file(const char *path)
 {
     return std::make_unique<File>(mPathPrefix, path);
 }
 
-std::unique_ptr<Interface::IDirectory> FileSystem::dir(const char *path)
+std::unique_ptr<sdk::api::Directory> FileSystem::dir(const char *path)
 {
     return std::make_unique<Directory>(mPathPrefix, path);
 }

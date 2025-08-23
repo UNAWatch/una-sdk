@@ -12,19 +12,22 @@
 
 #pragma once
 
-#include "IBacklight.hpp"
+#include "API/Backlight.hpp"
 
-namespace Stub {
+namespace Mock
+{
 
 /**
  * @brief   Stub implementation of Interface::IBacklight.
  */
-class Backlight : public Interface::IBacklight {
+class Backlight : public sdk::api::Backlight {
 
 public:
     bool on(uint32_t timeout = 0) override;
     bool off()                    override;
     bool isOn()                   override;
+private:
+    bool m_isOn = false;
 };
 
-} // namespace Stub
+} // namespace Mock

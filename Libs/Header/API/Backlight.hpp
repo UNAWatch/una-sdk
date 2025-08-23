@@ -1,26 +1,15 @@
-/**
- ******************************************************************************
- * @file    IBacklight.hpp
- * @date    14-01-2024
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Backlight Interface.
- ******************************************************************************
- *
- ******************************************************************************
- */
 
-#ifndef __INTERFACE_I_BACKLIGHT_HPP
-#define __INTERFACE_I_BACKLIGHT_HPP
+#pragma once
 
-#include <stdint.h>
+#include <cstdint>
+#include <cstdbool>
 
-namespace Interface
-{
+namespace sdk::api {
 
 /**
  * @brief   Backlight Interface.
  */
-class IBacklight
+class Backlight
 {
 public:
 
@@ -48,10 +37,8 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~IBacklight() = default;
+    virtual ~Backlight() = default;
 
 };
 
-} /* namespace Interface */
-
-#endif /* __INTERFACE_I_BACKLIGHT_HPP */
+} // namespace sdk::api

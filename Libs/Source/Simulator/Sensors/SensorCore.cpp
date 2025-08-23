@@ -1,0 +1,28 @@
+#include "Simulator/Sensors/SensorCore.hpp"
+//#include "SensorLayer/SensorManager.hpp"
+
+#include <assert.h>
+
+#define TAG                 "SensorCore"
+#define LOG_MODULE_PRX      TAG"::"
+#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#include "Logger.h"
+
+Sensor::Core::Core()
+	/*: mDS18B20()
+	, mBME280()
+	, mAltimeter(mDS18B20.getDriver(), mBME280.getPressureDriver())*/
+{
+	//Sensor::Manager::getInstance().regSensor(&mDS18B20.getDriver());			// Temp default
+
+	//Sensor::Manager::getInstance().regSensor(&mBME280.getPressureDriver());		// Pressure default
+	//Sensor::Manager::getInstance().regSensor(&mBME280.getTempDriver());
+
+	//Sensor::Manager::getInstance().regSensor(&mAltimeter.getDriver());			// Altimeter default
+}
+
+void Sensor::Core::tick()
+{
+	//mDS18B20.refresh(25.1f);
+	//mBME280.refresh(23.0f, 500.0f);
+}

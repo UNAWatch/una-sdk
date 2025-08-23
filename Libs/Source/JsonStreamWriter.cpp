@@ -13,6 +13,9 @@
 
 #include "JsonStreamWriter.hpp"
 
+namespace sdk
+{
+
 JsonStreamWriter::JsonStreamWriter(Interface::IFile *output) :
         out(output), outBuff(nullptr), outBuffSize(0), outbuffWritten(0),
         error(false), mContainerStackTop(0)
@@ -249,6 +252,21 @@ void JsonStreamWriter::add(const char *key, double value)
 }
 
 void JsonStreamWriter::add(const char *key, const char *value)
+{
+    Container *curr = currentContainer();
+    assert(curr && curr->type == ContainerType::OBJECT);
+    if (!curr->first) {
+        writeChar(',');
+    } else {
+        curr->first = false;
+    }
+    writeString(key);
+    writeChar(':');
+    writeString(value);
+    curr->expectingKey = true;
+}
+
+void JsonStreamWriter::add(const char *key, const std::string_view &value)
 {
     Container *curr = currentContainer();
     assert(curr && curr->type == ContainerType::OBJECT);
@@ -535,6 +553,18 @@ void JsonStreamWriter::writeString(const char *s)
     writeChar('\"');
 }
 
+void JsonStreamWriter::writeString(std::string_view s)
+{
+    writeChar('\"');
+    for (char c : s) {
+        if (c == '\"' || c == '\\') {
+            writeChar('\\');
+        }
+        writeChar(c);
+    }
+    writeChar('\"');
+}
+
 void JsonStreamWriter::writeHexString(const uint8_t *data, size_t len)
 {
     writeChar('\"');
@@ -578,4 +608,6 @@ void JsonStreamWriter::flushOutput()
         out->flush();
     }
 }
+
+} /* namespace sdk */
 

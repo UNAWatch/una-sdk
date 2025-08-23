@@ -28,32 +28,33 @@
 #include "IUserApp.hpp"
 #include "IUserAppControl.hpp"
 #include "IUserAppMemAllocator.hpp"
-#include "ISettings.hpp"
-#include "IFileSystem.hpp"
-#include "ITime.hpp"
-#include "IPower.hpp"
 #include "ISynchManager.hpp"
 #include "ISensorManager.hpp"
-#include "IBacklight.hpp"
-#include "IVibro.hpp"
-#include "IBuzzer.hpp"
+
+#include "API/Settings.hpp"
+#include "API/FileSystem.hpp"
+#include "API/Time.hpp"
+#include "API/Power.hpp"
+#include "API/Backlight.hpp"
+#include "API/Vibro.hpp"
+#include "API/Buzzer.hpp"
 
 #define KERNEL_INTERFACE_VERSION    (0)
 
 struct IKernel {
-    IKernel(Interface::IPower               &pwr,
-            Interface::ITime                &time,
-            Interface::ISettings            &settings,
-            Interface::IFileSystem          &fs,
+    IKernel(sdk::api::Power                 &pwr,
+            sdk::api::Time                  &time,
+            sdk::api::Settings              &settings,
+            sdk::api::FileSystem            &fs,
             Interface::IUserAppMemAllocator &mem,
             Interface::ISynchManager        &synchManager,
             Interface::ISensorManager       &sensorManager,
             Interface::IUserApp             &app,
             Interface::IServiceControl      &sctrl,
             Interface::IGUIControl          &gctrl,
-            Interface::IBacklight           &backlight,
-            Interface::IVibro               &vibro,
-            Interface::IBuzzer              &buzzer)
+            sdk::api::Backlight             &backlight,
+            sdk::api::Vibro                 &vibro,
+            sdk::api::Buzzer                &buzzer)
         : pwr(pwr)
         , time(time)
         , settings(settings)
@@ -73,12 +74,12 @@ struct IKernel {
     const uint32_t version = KERNEL_INTERFACE_VERSION;
 
     // Common interfaces
-    Interface::IPower    &pwr;
-    Interface::ITime     &time;
-    Interface::ISettings &settings;
+    sdk::api::Power      &pwr;
+    sdk::api::Time       &time;
+    sdk::api::Settings   &settings;
 
     // Individual interfaces for each app
-    Interface::IFileSystem          &fs;
+    sdk::api::FileSystem            &fs;
     Interface::IUserAppMemAllocator &mem;
     Interface::ISynchManager        &synchManager;
     Interface::ISensorManager       &sensorManager;
@@ -89,9 +90,9 @@ struct IKernel {
     Interface::IGUIControl     &gctrl;
 
     // Feedback controller interfaces
-    Interface::IBacklight &backlight;
-    Interface::IVibro     &vibro;
-    Interface::IBuzzer    &buzzer;
+    sdk::api::Backlight   &backlight;
+    sdk::api::Vibro       &vibro;
+    sdk::api::Buzzer      &buzzer;
 };
 
 #define DUMMY_KERNEL_ADDR  (0xA5A5A5A5)

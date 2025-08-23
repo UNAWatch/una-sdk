@@ -1,27 +1,16 @@
-/**
- ******************************************************************************
- * @file    IBuzzer.hpp
- * @date    14-July-2025
- * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   Buzzer interface.
- *
- ******************************************************************************
- *
- ******************************************************************************
- */
 
-#ifndef __IBUZZER_HPP
-#define __IBUZZER_HPP
+#pragma once
 
 #include <cstdint>
+#include <cstdbool>
 
-namespace Interface
+namespace sdk::api 
 {
 
 /**
  * @brief   Buzzer interface.
  */
-class IBuzzer {
+class Buzzer {
 public:
 
     // Maximum Notes includes pauses.
@@ -71,10 +60,8 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~IBuzzer() = default;
+    virtual ~Buzzer() = default;
 
 };
 
-} /* namespace Interface */
-
-#endif /* __IBUZZER_HPP */
+} // namespace sdk::api

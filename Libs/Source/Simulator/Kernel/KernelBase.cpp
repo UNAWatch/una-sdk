@@ -11,7 +11,10 @@
 
 #include "KernelBase.hpp"
 #include "gui/common/GuiConfig.hpp"
-#include "SensorLayer/SensorManager.hpp"
+#include "Simulator/Kernel/Mock/MockServiceControl.hpp"
+#include "Simulator/Sensors/ISensorCore.hpp"
+
+static constexpr char sFsPath[] = "../../../../../../UserAppFS/";
 
 namespace Simulator
 {
@@ -19,8 +22,7 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
     : mIPower()
     , mITime()
     , mISettings()
-    , mIActivity()
-    , mIFilesystem("../../../../../Output/")
+    , mIFilesystem(sFsPath)
     , mIUserAppMemAllocator()
     , mSynchManager()
     , mIUserApp(useMutex)
@@ -32,11 +34,10 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
     , mKernel(new IKernel(mIPower,
                           mITime,
                           mISettings,
-                          mIActivity,
                           mIFilesystem,
                           mIUserAppMemAllocator,
                           mSynchManager,
-                          Sensor::Manager::getInstance(),
+                          mSensorManager,
                           mIUserApp,
                           mServiceControl,
                           mServiceControl,
@@ -44,17 +45,6 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
                           mVibro,
                           mBuzer))
 {
-}
-
-void KernelBase::initInterface()
-{
-    //mKernel = new IKernel(mIPower,
-    //                      mITime,
-    //                      mISettings,
-    //                      mIActivity,
-    //                      mIFilesystem,
-    //                      mIUserAppMemAllocator,
-    //                      mIUserApp);
 }
 
 void KernelBase::startApp()
@@ -76,8 +66,6 @@ void KernelBase::tick()
     if (mSensoreCore) {
         mSensoreCore->tick();
     }
-    
-    mIActivity.execute();
 }
 
 bool KernelBase::keyFilter(uint8_t key)
@@ -93,6 +81,11 @@ bool KernelBase::keyFilter(uint8_t key)
 const IKernel* KernelBase::getIKernel()
 {
     return mKernel;
+}
+
+std::string KernelBase::getFsPath()
+{
+    return mIFilesystem.getRootPath();
 }
 
 } /* namespace Simulator */

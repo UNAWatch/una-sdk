@@ -19,6 +19,9 @@ extern "C" {
 #include <cstdint>
 #include <stdio.h>
 
+namespace sdk
+{
+
 JsonStreamReader::JsonStreamReader() :
         mData(nullptr), mLen(0), mIsValid(false)
 {
@@ -229,6 +232,21 @@ bool JsonStreamReader::get(const char *query, const char *&outValue,
     return false;
 }
 
+bool JsonStreamReader::get(const char *query, std::string_view &outValue) const
+{
+    const char *pValue = nullptr;
+    size_t valueLen = 0;
+    JSONTypes_t type;
+    if (JSON_SearchConst(mData, mLen, query, std::strlen(query), &pValue,
+                &valueLen, &type) == JSONSuccess)
+    {
+        std::string_view out {pValue, valueLen};
+        outValue = out;
+        return true;
+    }
+    return false;
+}
+
 bool JsonStreamReader::getArrayLength(const char *query,
         size_t &outLength) const
 {
@@ -265,3 +283,5 @@ bool JsonStreamReader::getArrayLength(const char *query,
     outLength = i - 1;
     return true;
 }
+
+} /* namespace sdk */

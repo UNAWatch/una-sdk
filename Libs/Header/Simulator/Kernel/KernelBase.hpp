@@ -14,22 +14,25 @@
 
 #include <cstdint>
 #include <cassert>
+#include <string>
 
 #include "IKernel.hpp"
 
-#include "MockPower.hpp"
-#include "MockTime.hpp"
-#include "MockSettings.hpp"
-#include "MockActivity.hpp"
-#include "FileSystem.hpp"
-#include "MockUserAppMemAllocator.hpp"
+#include "Simulator/Kernel/Mock/Power.hpp"
+#include "Simulator/Kernel/Mock/Settings.hpp"
+#include "Simulator/Kernel/Mock/FileSystem.hpp"
+#include "Simulator/Kernel/Mock/SensorManager.hpp"
+#include "Simulator/Kernel/Mock/Backlight.hpp"
+#include "Simulator/Kernel/Mock/Buzzer.hpp"
+#include "Simulator/Kernel/Mock/Vibro.hpp"
+
 #include "SynchManager/SynchManager.hpp"
-#include "MockUserApp.hpp"
-#include "MockServiceControl.hpp"
-#include "BacklightStub.hpp"
-#include "BuzzerStub.hpp"
-#include "VibroStub.hpp"
-#include "ISensorCore.hpp"
+#include "Simulator/Kernel/Mock/MockUserAppMemAllocator.hpp"
+#include "Simulator/Kernel/Mock/MockTime.hpp"
+#include "Simulator/Kernel/Mock/MockUserApp.hpp"
+#include "Simulator/Kernel/Mock/MockServiceControl.hpp"
+
+#include "Simulator/Sensors/ISensorCore.hpp"
 
 namespace Simulator
 {
@@ -43,6 +46,12 @@ namespace Simulator
 class KernelBase {
 public:
 
+    /**
+     * @brief   Constructor.
+     * @param   useMutex: If 'true', the kernel will use mutexes for synchronization.
+     * @param   serviceControl: Reference to the service control object.
+     * @param   sensoreCore: Pointer to the sensor core interface (optional).
+     */
     KernelBase(bool useMutex, MockServiceControl& serviceControl, Interface::ISensorCore* sensoreCore = nullptr);
 
     virtual ~KernelBase() = default;
@@ -78,29 +87,28 @@ public:
      */
     virtual bool keyFilter(uint8_t key);
 
+    /**
+     * @brief   Get the pointer to the kernel interface.
+     * @retval  Pointer to the kernel interface (IKernel).
+     */
     const IKernel* getIKernel();
 
+    std::string getFsPath();
+
 protected:
-    MockPower               mIPower;
+    Mock::Power             mIPower;
     MockTime                mITime;
-    MockSettings            mISettings;
-    MockActivity            mIActivity;
-    FileSystem              mIFilesystem;
+    Mock::Settings          mISettings;
+    Mock::FileSystem        mIFilesystem;
     MockUserAppMemAllocator mIUserAppMemAllocator;
     OS::SynchManager        mSynchManager;
+    Mock::SensorManager     mSensorManager;
     MockUserApp             mIUserApp;
     MockServiceControl&     mServiceControl;
-    Stub::Backlight         mBacklight;
-    Stub::Buzzer            mBuzer;
-    Stub::Vibro             mVibro;
+    Mock::Backlight         mBacklight;
+    Mock::Buzzer            mBuzer;
+    Mock::Vibro             mVibro;
     Interface::ISensorCore* mSensoreCore;
-
-    /**
-     * @brief   The function initializes the "app <-> kernel" interface (IKernel).
-     * @note    This function is called via KernelHolder::Create(). It must be 
-     *          called before the first kernel access.
-     */
-    virtual void initInterface();
 
 private:
 
@@ -117,18 +125,29 @@ private:
  */
 class KernelHolder {
 public:
+    /**
+     * @brief   Create a kernel instance and initialize the interface.
+     * @param   kernel: The kernel instance to be created.
+     */
     static void Create(KernelBase &kernel)
     {
         instance() = &kernel;
-        kernel.initInterface();
     }
 
+    /**
+     * @brief   Get the kernel instance.
+     */
     static KernelBase &Get()
     {
         assert(instance() != nullptr);
         return *instance();
     }
 private:
+    
+    /**
+     * @brief   Get the pointer to the kernel instance.
+     * @note    This function is used to access the kernel instance.
+     */
     static KernelBase *&instance()
     {
         static KernelBase *pKernel;

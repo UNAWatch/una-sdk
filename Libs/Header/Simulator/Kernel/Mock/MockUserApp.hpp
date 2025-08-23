@@ -233,6 +233,8 @@ public:
         }
     }
 
+
+
 private:
     Interface::IUserApp::Callback* mpCallback;
     State                          mState;

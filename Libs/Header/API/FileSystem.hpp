@@ -1,16 +1,5 @@
-/**
- ******************************************************************************
- * @file    IFileSystem.hpp
- * @date    17-10-2024
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Interface for file/directory operations.
- ******************************************************************************
- *
- ******************************************************************************
- */
 
-#ifndef __INTERFACE_I_FILE_SYSTEM_HPP
-#define __INTERFACE_I_FILE_SYSTEM_HPP
+#pragma once
 
 #include <cstdint>
 #include <ctime>
@@ -18,11 +7,11 @@
 #include <cstdio>
 
 
-namespace Interface
+namespace sdk::api
 {
 
-class IFile;
-class IDirectory;
+class File;
+class Directory;
 
 /**
  * @brief   Interface for the file system.
@@ -30,7 +19,7 @@ class IDirectory;
  * Provides an abstraction for creating files and directories, and performing
  * operations such as removing and renaming.
  */
-class IFileSystem {
+class FileSystem {
 public:
 
     ///< Maximum length of a filesystem object path including '\0'.
@@ -53,35 +42,35 @@ public:
      * @retval  'true' if the directory was successfully created or existed,
      *          'false' otherwise.
      */
-    virtual bool mkdir(const char *path) = 0;
+    virtual bool mkdir(const char* path) = 0;
 
     /**
      * @brief   Creates a file object.
      * @param   path: Path to the file.
      * @retval  Unique pointer to the created file object.
      */
-    virtual std::unique_ptr<Interface::IFile> file(const char *path) = 0;
+    virtual std::unique_ptr<File> file(const char* path) = 0;
 
     /**
      * @brief   Creates a directory object.
      * @param   path: Path to the directory.
      * @retval  Unique pointer to the created directory object.
      */
-    virtual std::unique_ptr<Interface::IDirectory> dir(const char *path) = 0;
+    virtual std::unique_ptr<Directory> dir(const char* path) = 0;
 
     /**
      * @brief   Checks if a file/directory exists.
      * @param   path: Path to the file.
      * @retval  'true' if the file exists, 'false' otherwise.
      */
-    virtual bool exist(const char *path) const = 0;
+    virtual bool exist(const char* path) const = 0;
 
     /**
      * @brief   Removes a file or directory.
      * @param   path: Path to the file or directory.
      * @retval  'true' if the item was successfully removed, 'false' otherwise.
      */
-    virtual bool remove(const char *path) = 0;
+    virtual bool remove(const char* path) = 0;
 
     /**
      * @brief   Renames a file or directory.
@@ -89,7 +78,7 @@ public:
      * @param   newPath: New path for the item.
      * @retval  'true' if the item was successfully renamed, 'false' otherwise.
      */
-    virtual bool rename(const char *oldPath, const char *newPath) = 0;
+    virtual bool rename(const char* oldPath, const char* newPath) = 0;
 
     /**
      * @brief   Copy a file to another location.
@@ -97,7 +86,7 @@ public:
      * @param   newPath: New path for the item.
      * @retval  'true' if the item was successfully moved, 'false' otherwise.
      */
-    virtual bool copy(const char *oldPath, const char *newPath) = 0;
+    virtual bool copy(const char* oldPath, const char* newPath) = 0;
 
     /**
      * @brief   Get object info.
@@ -105,14 +94,14 @@ public:
      * @param   name: Reference to save item info.
      * @retval  Execution status. 'true' - if success, 'false' - otherwise.
      */
-    virtual bool objectInfo(const char *path, ObjectInfo &item) const = 0;
+    virtual bool objectInfo(const char* path, ObjectInfo& item) const = 0;
 
 protected:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~IFileSystem() = default;
+    virtual ~FileSystem() = default;
 
 };
 
@@ -122,19 +111,19 @@ protected:
  *
  * Provides common functionality for both files and directories.
  */
-class IFsObject {
+class FsObject {
 public:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~IFsObject() = default;
+    virtual ~FsObject() = default;
 
     /**
      * @brief   Sets the path of the object.
      * @param   path: Path to the file or directory.
      */
-    virtual void setPath(const char *path) = 0;
+    virtual void setPath(const char* path) = 0;
 
     /**
      * @brief   Returns the object's path.
@@ -153,7 +142,7 @@ public:
      * @param   newPath: New object path.
      * @retval  'true' if the file was successfully renamed, 'false' otherwise.
      */
-    virtual bool rename(const char *newPath) = 0;
+    virtual bool rename(const char* newPath) = 0;
 
     /**
      * @brief   Removes the object from the filesystem.
@@ -169,13 +158,13 @@ public:
  * Provides an abstraction over file operations such as opening, reading,
  * writing, and managing the file's state.
  */
-class IFile : public IFsObject {
+class File : public FsObject {
 public:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~IFile() = default;
+    virtual ~File() = default;
 
     /**
      * @brief   Returns the size of the file in bytes.
@@ -210,7 +199,7 @@ public:
      * @param   br: Reference to store the number of bytes actually read.
      * @retval  'true' if the read was successful, 'false' otherwise.
      */
-    virtual bool read(char *buff, size_t btr, size_t &br) = 0;
+    virtual bool read(char* buff, size_t btr, size_t& br) = 0;
 
     /**
      * @brief   Writes data to the file.
@@ -219,7 +208,7 @@ public:
      * @param   bw: Reference to store the number of bytes actually written.
      * @retval  'true' if the write was successful, 'false' otherwise.
      */
-    virtual bool write(const char *buff, size_t btw, size_t &bw) = 0;
+    virtual bool write(const char* buff, size_t btw, size_t& bw) = 0;
 
     /**
      * @brief   Sets the current file position.
@@ -256,13 +245,13 @@ public:
  * Provides an abstraction over directory management, including opening,
  * reading contents, and creating directories.
  */
-class IDirectory : public IFsObject {
+class Directory : public FsObject {
 public:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~IDirectory() = default;
+    virtual ~Directory() = default;
 
     /**
      * @brief   Creates the directory if it does not exist.
@@ -290,7 +279,7 @@ public:
      * @param   reset: Reset the read position if true.
      * @retval  'true' if the item was successfully read, 'false' otherwise.
      */
-    virtual bool readNext(IFileSystem::ObjectInfo &item, bool reset = false) = 0;
+    virtual bool readNext(FileSystem::ObjectInfo& item, bool reset = false) = 0;
 
     /**
      * @brief   Closes the directory.
@@ -301,6 +290,4 @@ public:
 
 };
 
-} /* namespace Interface */
-
-#endif /* __INTERFACE_I_FILE_SYSTEM_HPP */
+} // namespace sdk::api

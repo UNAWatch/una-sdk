@@ -13,7 +13,7 @@
 #ifndef __SIMULATOR_KERNEL_SERVICE_CONTROL_HPP
 #define __SIMULATOR_KERNEL_SERVICE_CONTROL_HPP
 
-#include "IUserAppControl.hpp"
+#include "Interfaces/IUserAppControl.hpp"
 
 namespace Simulator {
 
