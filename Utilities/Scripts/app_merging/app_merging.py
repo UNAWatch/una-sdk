@@ -105,6 +105,12 @@ def parse_libc_version_from_include(main_ld_path: Path) -> int:
             raise argparse.ArgumentTypeError(f"LibC exports version component {name} must be 0..255.")
     return (a << 16) | (b << 8) | c
 
+def format_semver_u32(v: int) -> str:
+    a = (v >> 16) & 0xFF
+    b = (v >> 8)  & 0xFF
+    c =  v        & 0xFF
+    return f"{a}.{b}.{c}"
+
 logging.basicConfig(level=logging.INFO)
 
 # ---------- args ----------
@@ -184,9 +190,9 @@ with open(output_path, "wb") as f:
 
 logging.info(f"Merge complete")
 logging.info(f"Name         : {args.name}")
-logging.info(f"ID           : 0x{app_id_u64:016X}")
-logging.info(f"App Version  : 0x{app_version_u32:08X}")
-logging.info(f"LibC Version : 0x{libc_version_u32:08X}")
+logging.info(f"ID           : %016X", app_id_u64)
+logging.info(f"App Version  : %s", format_semver_u32(app_version_u32))
+logging.info(f"LibC Version : %s", format_semver_u32(libc_version_u32))
 logging.info(f"Flags        : 0x{flags:08X}")
 logging.info(f"CRC          : 0x{crc:08X}")
 logging.info(f"Image        : {output_path} ({len(final_data)} bytes)")
