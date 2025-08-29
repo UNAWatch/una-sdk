@@ -182,11 +182,13 @@ final_data = blob_without_crc + struct.pack("<I", crc)
 # [normal_icon 60x60][small_icon 30x30][service app][gui app][crc u32]
 
 # ---------- output ----------
-output_file = args.out if args.out else f"Output/{args.name}.uapp"
-output_path = Path(output_file)
-output_path.parent.mkdir(parents=True, exist_ok=True)
+# Output file name template: AppName_A.B.C.uapp
+version_str = format_semver_u32(app_version_u32)
+out_dir = Path(args.out) if args.out else Path("Output")
+out_dir.mkdir(parents=True, exist_ok=True)
+output_path = out_dir / f"{args.name}_{version_str}.uapp"
 with open(output_path, "wb") as f:
-    f.write(final_data)
+ f.write(final_data)
 
 logging.info(f"Merge complete")
 logging.info(f"Name         : {args.name}")
@@ -199,7 +201,7 @@ logging.info(f"Image        : {output_path} ({len(final_data)} bytes)")
 
 # ---------- optional .h ----------
 if args.header:
-    header_filename = f"{args.name}_merged.h"
+    header_filename = f"{args.name}_{version_str}.h"
     header_path = output_path.parent / header_filename
     macro_guard = '__' + header_path.stem.upper().replace('.', '_').replace('-', '_') + '_H__'
     array_name = f"{args.name}_merged".replace("-", "_")
