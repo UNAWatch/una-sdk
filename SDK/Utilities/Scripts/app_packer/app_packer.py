@@ -352,9 +352,9 @@ if __name__ == '__main__':
     path_out = Path(args.out).resolve()
     ver_major, ver_minor = parse_firmware_version(args.version)
 
-    logging.info(f"ELF:     {path_elf}")
-    logging.info(f"Out:     {path_out}")
-    logging.info(f"Version: {ver_major}.{ver_minor}")
+    logging.info(f"ELF-file    : {path_elf}")
+    logging.info(f"Out         : {path_out}")
+    logging.info(f"Version     : {ver_major}.{ver_minor}")
 
     out = convert_file(path_elf, "userapp", ver_major, ver_minor)
 
@@ -371,7 +371,7 @@ if __name__ == '__main__':
 
         with open(uapp_file, "wb") as f:
             f.write(out)
-            logging.info(f"Output file: {uapp_file}")
+            logging.info(f"Output file : {uapp_file}")
 
 
         # Create header file as well to test easily
@@ -390,3 +390,4 @@ if __name__ == '__main__':
             f.write('\n};\n\n')
             f.write(f'#endif // {macro_guard}\n')
 
+    print(f"")
