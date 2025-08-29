@@ -40,9 +40,9 @@ namespace sdk::api {
         static const uint8_t skMaxNotes = 8;
 
         struct Note {
-            uint8_t  effect;    // 1 - 127, 0 - for pause
-            uint8_t  loop;      // 1 - 3,   0 - no repeat (only for effect)
-            uint32_t pause;     // 1 - 127, 0 - for effect. In ms. Step 10 ms.
+            uint8_t  effect;    // 1 - 127,  0 - for pause
+            uint8_t  loop;      // 1 - 3,    0 - no repeat (only for effect)
+            uint32_t pause;     // 1 - 1270, 0 - for effect. In ms. Step 10 ms.
         };
 
         /**
