@@ -141,7 +141,7 @@ if args.autostart:
     flags |= 0x00000008  # bit 3
 
 # Find .uapp inputs
-service_files = glob.glob("../../../../../Service/Output/userapp*.uapp")
+service_files = glob.glob("../../../../../Output/userapp*.uapp")
 gui_files = glob.glob("../../../../../GUI/Output/userapp*.uapp")
 if not service_files:
     print("Missing .uapp files for Service"); sys.exit(2)

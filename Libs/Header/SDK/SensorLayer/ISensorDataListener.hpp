@@ -15,8 +15,8 @@
 #ifndef __I_SENSOR_DATA_LISTENER_HPP
 #define __I_SENSOR_DATA_LISTENER_HPP
 
-#include "SensorLayer/SensorTypes.hpp"
-#include "SensorLayer/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorTypes.hpp"
+#include "SDK/SensorLayer/ISensorData.hpp"
 
 #include <vector>
 

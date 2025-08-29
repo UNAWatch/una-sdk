@@ -28,7 +28,7 @@
 #include <cstring>
 #include <inttypes.h>
 
-#include "Interfaces/IKernel.hpp"
+#include "SDK/Interfaces/IKernel.hpp"
 
 // The section ".sys_calls" will be at the beginning of the data section which
 // will be replaced.

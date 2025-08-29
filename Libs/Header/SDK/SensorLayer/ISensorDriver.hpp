@@ -13,9 +13,9 @@
 #ifndef __I_SENSOR_DRIVER_HPP
 #define __I_SENSOR_DRIVER_HPP
 
-#include "SensorLayer/SensorTypes.hpp"
-#include "SensorLayer/ISensorDataListener.hpp"
-#include "Interfaces/IUserApp.hpp"
+#include "SDK/SensorLayer/SensorTypes.hpp"
+#include "SDK/SensorLayer/ISensorDataListener.hpp"
+#include "SDK/Interfaces/IUserApp.hpp"
 
 namespace Interface
 {
