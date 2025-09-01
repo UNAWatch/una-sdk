@@ -7,7 +7,7 @@
  ******************************************************************************
  */
 
-#include "JsonStreamReader.hpp"
+#include "SDK/JsonStreamReader.hpp"
 
 extern "C" {
 #include "core_json.h"
