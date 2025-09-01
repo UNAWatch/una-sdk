@@ -1,7 +1,7 @@
 #ifndef __TRACK_HPP
 #define __TRACK_HPP
 
-#include "TrackMapBuilder.hpp"
+#include "SDK/TrackMapBuilder.hpp"
 
 constexpr TrackMapBuilder::GpsPoint walkTrack[] = {
     { 50.457914f, 30.364938f },
