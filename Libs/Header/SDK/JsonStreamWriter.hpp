@@ -14,7 +14,7 @@
 #include <array>
 #include <string_view>
 
-#include "IFileSystem.hpp"
+#include "API/FileSystem.hpp"
 
 namespace sdk
 {
@@ -35,7 +35,7 @@ public:
      * @brief Constructor with output target.
      * @param output: Output stream to write JSON to.
      */
-    JsonStreamWriter(Interface::IFile *output);
+    JsonStreamWriter(sdk::api::File *output);
 
     /**
      * @brief Constructor with output target.
@@ -55,7 +55,7 @@ public:
      * @brief Set the output stream for JSON output.
      * @param output: Target output stream implementing `IFile`.
      */
-    void setOutput(Interface::IFile *output);
+    void setOutput(sdk::api::File *output);
 
     /**
      * @brief Set the output stream for JSON output.
@@ -344,7 +344,7 @@ public:
 
 private:
     /// Output file interface.
-    Interface::IFile *out;
+    sdk::api::File *out;
 
     char *outBuff;
     size_t outBuffSize;

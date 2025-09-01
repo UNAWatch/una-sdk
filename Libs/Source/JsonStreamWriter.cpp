@@ -16,7 +16,7 @@
 namespace sdk
 {
 
-JsonStreamWriter::JsonStreamWriter(Interface::IFile *output) :
+JsonStreamWriter::JsonStreamWriter(sdk::api::File *output) :
         out(output), outBuff(nullptr), outBuffSize(0), outbuffWritten(0),
         error(false), mContainerStackTop(0)
 {
@@ -38,7 +38,7 @@ JsonStreamWriter::JsonStreamWriter() :
 {
 }
 
-void JsonStreamWriter::setOutput(Interface::IFile *output)
+void JsonStreamWriter::setOutput(sdk::api::File *output)
 {
     out = output;
     outBuff = nullptr;
