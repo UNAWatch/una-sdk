@@ -70,6 +70,9 @@ namespace Sensor
 
         /*!<  */
         SENSOR_TYPE_ECG,
+
+        SENSOR_TYPE_GPS,
+        SENSOR_TYPE_FLOOR_COUNTER,
     };
 
 } /* namespace Sensor */

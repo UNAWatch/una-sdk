@@ -112,7 +112,7 @@ void TrackMapBuilder::rotateMap(TrackMapScreen &map, float angleDegrees)
     map.maxy = 0;
 
     // Convert angle to radians
-    float angleRad = toRadians(angleDegrees);
+    float angleRad = ToRadians(angleDegrees);
 
     // Calculate trigonometric values
     float cosTheta = std::cos(angleRad);
@@ -141,6 +141,46 @@ void TrackMapBuilder::rotateMap(TrackMapScreen &map, float angleDegrees)
         map.maxy = std::max(map.maxy, point.y);
     }
 }
+
+void TrackMapBuilder::reset()
+{
+    mMin = {};
+    mMax = {};
+    mThresholds = {};
+    mBasePoint = {};
+    mUseRelative = false;
+    mMaxDistanceFromCenter = 0.0f;
+    mGpsPoints.clear();
+}
+
+#if 0 // Use for debug
+// This method uses a Haversine formula.
+float TrackMapBuilder::distance(const GpsPoint& p1, const GpsPoint& p2) const
+{
+    float dLat = toRadians(p2.latitude - p1.latitude);
+    float dLon = toRadians(p2.longitude - p1.longitude);
+
+    float lat1 = toRadians(p1.latitude);
+    float lat2 = toRadians(p2.latitude);
+
+    float a = std::sin(dLat / 2) * std::sin(dLat / 2)
+        + std::cos(lat1) * std::cos(lat2) * std::sin(dLon / 2)
+        * std::sin(dLon / 2);
+    float c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+    return kEarthRadius * c;
+}
+#else
+
+// This method uses a simplified (Euclidean) flat-earth formula assuming
+// small distances, which is appropriate for local map rendering purposes.
+float TrackMapBuilder::Distance(const GpsPoint& p1, const GpsPoint& p2)
+{
+    float dx = (p2.longitude - p1.longitude)
+        * std::cos(ToRadians((p1.latitude + p2.latitude) * 0.5f));
+    float dy = (p2.latitude - p1.latitude);
+    return kMetersPerDegree * std::hypot(dx, dy);
+}
+#endif
 
 TrackMapBuilder::GpsPoint TrackMapBuilder::calculateThresholds(const GpsPoint &basePoint,
         float minDistance) const
@@ -183,46 +223,17 @@ void TrackMapBuilder::updateRange(const GpsPoint &p, GpsPoint &min,
         real += mBasePoint;
     }
 
-    float dist = distance(center, real);
+    float dist = Distance(center, real);
     if (maxDistance < dist) {
         maxDistance = dist;
     }
 }
 
-float TrackMapBuilder::toRadians(float degrees) const
+float TrackMapBuilder::ToRadians(float degrees)
 {
     // Conversion factor from degrees to radians.
     return static_cast<float>((degrees * M_PI) / 180.0);
 }
-
-#if 0 // Use for debug
-// This method uses a Haversine formula.
-float TrackMapBuilder::distance(const GpsPoint &p1, const GpsPoint &p2) const
-{
-    float dLat = toRadians(p2.latitude - p1.latitude);
-    float dLon = toRadians(p2.longitude - p1.longitude);
-
-    float lat1 = toRadians(p1.latitude);
-    float lat2 = toRadians(p2.latitude);
-
-    float a = std::sin(dLat / 2) * std::sin(dLat / 2)
-            + std::cos(lat1) * std::cos(lat2) * std::sin(dLon / 2)
-              * std::sin(dLon / 2);
-    float c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
-    return kEarthRadius * c;
-}
-#else
-
-// This method uses a simplified (Euclidean) flat-earth formula assuming
-// small distances, which is appropriate for local map rendering purposes.
-float TrackMapBuilder::distance(const GpsPoint &p1, const GpsPoint &p2) const
-{
-    float dx = (p2.longitude - p1.longitude)
-            * std::cos(toRadians((p1.latitude + p2.latitude) * 0.5f));
-    float dy = (p2.latitude - p1.latitude);
-    return kMetersPerDegree * std::hypot(dx, dy);
-}
-#endif
 
 TrackMapBuilder::GpsPoint TrackMapBuilder::getCenter(const GpsPoint &p1,
         const GpsPoint &p2) const
@@ -239,7 +250,7 @@ float TrackMapBuilder::getScale(float distance, uint8_t pixels) const
 
 float TrackMapBuilder::metersPerDegreeLon(const GpsPoint &p) const
 {
-    return kMetersPerDegree * static_cast<float>(std::cos(toRadians(p.latitude)));
+    return kMetersPerDegree * static_cast<float>(std::cos(ToRadians(p.latitude)));
 }
 
 TrackMapScreen TrackMapBuilder::buildFromRaw(

@@ -223,12 +223,12 @@ void JsonStreamWriter::add(const char *key, uint32_t value)
 
 void JsonStreamWriter::add(const char *key, int64_t value)
 {
-    add(key, static_cast<double>(value));
+    add(key, static_cast<double>(value));   // TODO: make correct int64_t instead of double
 }
 
 void JsonStreamWriter::add(const char *key, uint64_t value)
 {
-    add(key, static_cast<double>(value));
+    add(key, static_cast<double>(value)); // TODO: make correct uint64_t instead of double
 }
 
 void JsonStreamWriter::add(const char *key, float value)

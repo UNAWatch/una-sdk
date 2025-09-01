@@ -17,6 +17,11 @@ public:
         return unitsImperial;
     }
 
+    virtual std::array<uint8_t, 4> getHrThresholds() override
+    {
+        return { 150, 170, 190, 210 };
+    }
+
     // Simulator-specific method to set the units
     void setUnitsImperial(bool imperial)
     {
