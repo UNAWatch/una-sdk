@@ -74,8 +74,8 @@ bool TrackMapBuilder::addPoint(const GpsPoint &p)
 
 TrackMapScreen TrackMapBuilder::build(uint8_t radiusPx)
 {
-    return std::move(buildFromRaw(mGpsPoints.data(), mGpsPoints.size(), radiusPx,
-            mMin, mMax, mMaxDistanceFromCenter));
+    return buildFromRaw(mGpsPoints.data(), mGpsPoints.size(), radiusPx,
+            mMin, mMax, mMaxDistanceFromCenter);
 }
 
 TrackMapScreen TrackMapBuilder::build(const GpsPoint *points, size_t pointsNum, uint8_t radiusPx)
@@ -96,7 +96,7 @@ TrackMapScreen TrackMapBuilder::build(const GpsPoint *points, size_t pointsNum, 
         updateRange(points[i], min, max, maxDist);
     }
 
-    return std::move(buildFromRaw(points, pointsNum, radiusPx, min, max, maxDist));
+    return buildFromRaw(points, pointsNum, radiusPx, min, max, maxDist);
 }
 
 void TrackMapBuilder::rotateMap(TrackMapScreen &map, float angleDegrees)
