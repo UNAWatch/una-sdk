@@ -1,9 +1,9 @@
 /**
  ******************************************************************************
- * @file    ISensorData.hpp
- * @date    01-August-2025
+ * @file    SensorDataParserGPS.hpp
+ * @date    02-August-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   ISensorData interface for user applications
+ * @brief   SensorData parser for SENSOR_TYPE_GPS
  * 
  ******************************************************************************
  *
@@ -53,6 +53,15 @@ namespace SDK
             }
 
             /**
+             * @brief Get mask
+             * @return Mask
+             */
+            uint32_t getMask()
+            {
+                return mData.getAsU32(Field::kMask);
+            }
+
+            /**
              * @brief Check if time field is valid
              * @return true if time is valid
              */
@@ -93,6 +102,33 @@ namespace SDK
             }
 
             /**
+             * @brief Get latitude
+             * @return Latitude in decimal degrees
+             */
+            float getLatitude()
+            {
+                return mData.getAsFloat(Field::kLat);
+            }
+
+            /**
+             * @brief Get longitude
+             * @return Longitude in decimal degrees
+             */
+            float getLongitude()
+            {
+                return mData.getAsFloat(Field::kLon);
+            }
+
+            /**
+             * @brief Get altitude
+             * @return Altitude in meters
+             */
+            float getAltitude()
+            {
+                return mData.getAsFloat(Field::kAlt);
+            }
+
+            /**
              * @brief Check if speed is valid
              * @return true if speed is valid
              */
@@ -114,7 +150,7 @@ namespace SDK
              * @brief Get total number of expected fields
              * @return Field count (6)
              */
-            static uint8_t getFieldsNumber() const
+            static uint8_t getFieldsNumber()
             {
                 return Field::kCount;
             }
