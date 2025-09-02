@@ -24,20 +24,22 @@
 #include <cstdint>
 #include <cstddef>
 
-// Kernel interfaces
-#include "IUserApp.hpp"
-#include "IUserAppControl.hpp"
-#include "IUserAppMemAllocator.hpp"
-#include "ISynchManager.hpp"
-#include "ISensorManager.hpp"
+#include "IKernel.hpp"
 
-#include "API/Settings.hpp"
-#include "API/FileSystem.hpp"
-#include "API/Time.hpp"
-#include "API/Power.hpp"
-#include "API/Backlight.hpp"
-#include "API/Vibro.hpp"
-#include "API/Buzzer.hpp"
+// Kernel interfaces
+#include "SDK/Interfaces/IUserApp.hpp"
+#include "SDK/Interfaces/IUserAppControl.hpp"
+#include "SDK/Interfaces/IUserAppMemAllocator.hpp"
+#include "SDK/Interfaces/ISynchManager.hpp"
+#include "SDK/Interfaces/ISensorManager.hpp"
+
+#include "SDK/API/Settings.hpp"
+#include "SDK/API/FileSystem.hpp"
+#include "SDK/API/Time.hpp"
+#include "SDK/API/Power.hpp"
+#include "SDK/API/Backlight.hpp"
+#include "SDK/API/Vibro.hpp"
+#include "SDK/API/Buzzer.hpp"
 
 #define KERNEL_INTERFACE_VERSION    (0)
 

@@ -344,6 +344,7 @@ if __name__ == '__main__':
     parser.add_argument("-e", "--elf", help="Elf file to convert", required=True)
     parser.add_argument("-o", "--out", help="Path to the output directory", required=True)
     parser.add_argument("-v", "--version", help="Version <major>.<minor>", default="1.0")
+    parser.add_argument("-header", action="store_true", help="Generate a C header (.h) alongside the .uapp")
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -352,9 +353,9 @@ if __name__ == '__main__':
     path_out = Path(args.out).resolve()
     ver_major, ver_minor = parse_firmware_version(args.version)
 
-    logging.info(f"ELF:     {path_elf}")
-    logging.info(f"Out:     {path_out}")
-    logging.info(f"Version: {ver_major}.{ver_minor}")
+    logging.info(f"ELF-file    : {path_elf}")
+    logging.info(f"Out         : {path_out}")
+    logging.info(f"Version     : {ver_major}.{ver_minor}")
 
     out = convert_file(path_elf, "userapp", ver_major, ver_minor)
 
@@ -371,22 +372,25 @@ if __name__ == '__main__':
 
         with open(uapp_file, "wb") as f:
             f.write(out)
-            logging.info(f"Output file: {uapp_file}")
+            logging.info(f"Output file : {uapp_file}")
 
 
-        # Create header file as well to test easily
-        header_file = uapp_name + '_uapp.h'
-        header_file = os.path.normpath(os.path.join(path_out, header_file))
-        macro_guard = '__' + uapp_name.upper().replace('.', '_') + '_UAPP_H__'
+        # Create header file only if -header is specified
+        if args.header:
+            header_file = uapp_name + '.h'   # e.g. userapp_1.2.h
+            header_file = os.path.normpath(os.path.join(path_out, header_file))
+            macro_guard = '__' + uapp_name.upper().replace('.', '_') + '_H__'
+            array_name = uapp_name.replace('.', '_').replace('-', '_')  # e.g. userapp_1_2
 
-        with open(header_file, "w") as f:
-            f.write(f'#ifndef {macro_guard}\n')
-            f.write(f'#define {macro_guard}\n\n')
-            f.write('const uint8_t app[] = {\n    ')
-            for i, hex_val in enumerate(out):
-                f.write(f'0x{hex_val:02X},')
-                if (i + 1) % 16 == 0:
-                    f.write('\n    ')
-            f.write('\n};\n\n')
-            f.write(f'#endif // {macro_guard}\n')
+            with open(header_file, "w") as f:
+                f.write(f'#ifndef {macro_guard}\n')
+                f.write(f'#define {macro_guard}\n\n#include <stdint.h>\n\n')
+                f.write(f'const uint8_t {array_name}[] = {{\n    ')
+                for i, hex_val in enumerate(out):
+                    f.write(f'0x{hex_val:02X},')
+                    if (i + 1) % 16 == 0:
+                        f.write('\n    ')
+                f.write('\n};\n\n')
+                f.write(f'#endif // {macro_guard}\n')
 
+    print(f"")

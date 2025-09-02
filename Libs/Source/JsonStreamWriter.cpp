@@ -11,7 +11,7 @@
 #include <cstring>
 #include <cassert>
 
-#include "JsonStreamWriter.hpp"
+#include "SDK/JsonStreamWriter.hpp"
 
 namespace sdk
 {

@@ -13,8 +13,8 @@
 #ifndef __I_SENSOR_MANAGER_HPP
 #define __I_SENSOR_MANAGER_HPP
 
-#include "SensorLayer/SensorTypes.hpp"
-#include "SensorLayer/ISensorDriver.hpp"
+#include "SDK/SensorLayer/SensorTypes.hpp"
+#include "SDK/SensorLayer/ISensorDriver.hpp"
 
 #include <vector>
 

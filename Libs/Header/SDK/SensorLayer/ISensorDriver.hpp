@@ -13,14 +13,17 @@
 #ifndef __I_SENSOR_DRIVER_HPP
 #define __I_SENSOR_DRIVER_HPP
 
-#include "SensorLayer/SensorTypes.hpp"
-#include "SensorLayer/ISensorDataListener.hpp"
-#include "Interfaces/IUserApp.hpp"
+#include "SDK/SensorLayer/SensorTypes.hpp"
+#include "SDK/SensorLayer/ISensorDataListener.hpp"
+#include "SDK/Interfaces/IUserApp.hpp"
 
 namespace Interface
 {
     class ISensorDriver {
     public:
+        ISensorDriver() : mPeriod(1000) {}
+        virtual ~ISensorDriver() = default;
+
         virtual bool connect(Interface::ISensorDataListener* listener,
                              Interface::IUserApp*            userapp = nullptr,
                              float                           period  = 0,
@@ -29,6 +32,11 @@ namespace Interface
         virtual void disconnect(Interface::ISensorDataListener* listener) = 0;
         
         virtual Sensor::Type getType() = 0;
+
+        virtual float getPeriod() { return mPeriod; }
+
+    protected:
+        float mPeriod;
     };
 
 } /* namespace Sensor */

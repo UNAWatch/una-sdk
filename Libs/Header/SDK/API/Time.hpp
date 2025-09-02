@@ -3,7 +3,7 @@
 
 //TODO: make real wrapper
 
-#include "Interfaces/ITime.hpp"
+#include "SDK/Interfaces/ITime.hpp"
 
 namespace sdk::api {
     using Time = Interface::ITime;
