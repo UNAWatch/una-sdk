@@ -253,17 +253,17 @@ namespace __gnu_cxx {
 
 namespace std
 {
-    void __throw_bad_alloc()
+    __attribute__((weak)) void __throw_bad_alloc()
     {
         assert(false);
     }
 
-    void __throw_bad_array_new_length()
+    __attribute__((weak)) void __throw_bad_array_new_length()
     {
         assert(false);
     }
 
-    void __throw_length_error(const char* msg)
+    __attribute__((weak)) void __throw_length_error(const char* msg)
     {
         (void) msg;
 
