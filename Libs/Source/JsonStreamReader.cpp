@@ -19,7 +19,7 @@ extern "C" {
 #include <cstdint>
 #include <stdio.h>
 
-namespace sdk
+namespace SDK
 {
 
 JsonStreamReader::JsonStreamReader() :

@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <cstdbool>
 
-namespace sdk::api 
+namespace SDK::Interface
 {
 
 /**
  * @brief   Buzzer interface.
  */
-class Buzzer {
+class IBuzzer {
 public:
 
     // Maximum Notes includes pauses.
@@ -60,7 +60,7 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~Buzzer() = default;
+    virtual ~IBuzzer() = default;
 
 };
 

@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <cstdbool>
 
-namespace sdk::api
+namespace SDK::Interface
 {
 
 /**
  * @brief   Power Interface.
  */
-class Power {
+class IPower {
 
 public:
 
@@ -25,7 +25,7 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~Power() = default;
+    virtual ~IPower() = default;
 
 };
 

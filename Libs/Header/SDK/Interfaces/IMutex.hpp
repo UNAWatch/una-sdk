@@ -18,7 +18,7 @@
 #include <cstdbool>
 #include <memory>
 
-namespace Interface {
+namespace SDK::Interface {
 
     class IMutex
     {
@@ -33,7 +33,7 @@ namespace Interface {
     class MutexLock
     {
     public:
-        MutexLock(IMutex& mutex) noexcept : mMutex(mutex)
+        MutexLock(SDK::Interface::IMutex& mutex) noexcept : mMutex(mutex)
         {
             mMutex.lock();
         }
@@ -49,7 +49,7 @@ namespace Interface {
         }
 
     private:
-        IMutex& mMutex;
+        SDK::Interface::IMutex& mMutex;
     };
 }
 

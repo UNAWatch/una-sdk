@@ -14,11 +14,11 @@
 #define __I_SENSOR_MANAGER_HPP
 
 #include "SDK/SensorLayer/SensorTypes.hpp"
-#include "SDK/SensorLayer/ISensorDriver.hpp"
+#include "SDK/Interfaces/ISensorDriver.hpp"
 
 #include <vector>
 
-namespace Interface
+namespace SDK::Interface
 {
     class ISensorManager {
     public:
@@ -32,14 +32,14 @@ namespace Interface
          * @return The default sensor matching the requested type if one exists,
          *         or null otherwise.
          */
-        virtual Interface::ISensorDriver* getDefaultSensor(Sensor::Type type) = 0;
+        virtual SDK::Interface::ISensorDriver* getDefaultSensor(SDK::Sensor::Type type) = 0;
 
         /**
          * @brief Get the list of available sensors of a certain type.
          * @param type: Sensor requested type.
          * @return A list of sensors matching the asked type.
          */
-        virtual std::vector<Interface::ISensorDriver*> getSensorList(Sensor::Type type) = 0;
+        virtual std::vector<SDK::Interface::ISensorDriver*> getSensorList(SDK::Sensor::Type type) = 0;
     };
 
 } /* namespace Sensor */

@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <cstdbool>
 
-namespace sdk::api {
+namespace SDK::Interface {
 
     /**
      * @brief   Vibro motor interface.
      */
-    class Vibro {
+    class IVibro {
     public:
 
         enum Effect {
@@ -78,7 +78,7 @@ namespace sdk::api {
         /**
          * @brief   Destructor.
          */
-        virtual ~Vibro() = default;
+        virtual ~IVibro() = default;
 
     };
 }

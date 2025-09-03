@@ -20,7 +20,7 @@
 #include <cstdbool>
 #include <memory>
 
-namespace Interface {
+namespace SDK::Interface {
 
     /**
      * @class IUserAppControl

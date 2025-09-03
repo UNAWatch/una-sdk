@@ -13,10 +13,10 @@
 
 #include "SDK/JsonStreamWriter.hpp"
 
-namespace sdk
+namespace SDK
 {
 
-JsonStreamWriter::JsonStreamWriter(sdk::api::File *output) :
+JsonStreamWriter::JsonStreamWriter(SDK::Interface::IFile *output) :
         out(output), outBuff(nullptr), outBuffSize(0), outbuffWritten(0),
         error(false), mContainerStackTop(0)
 {
@@ -38,7 +38,7 @@ JsonStreamWriter::JsonStreamWriter() :
 {
 }
 
-void JsonStreamWriter::setOutput(sdk::api::File *output)
+void JsonStreamWriter::setOutput(SDK::Interface::IFile *output)
 {
     out = output;
     outBuff = nullptr;

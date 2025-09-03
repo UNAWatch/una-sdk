@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace Interface
+namespace SDK::Interface
 {
 
 /**

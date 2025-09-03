@@ -48,6 +48,10 @@ extern "C" {
         if ((uintptr_t)kernel == (uintptr_t)DUMMY_KERNEL_ADDR) {
             for(;;){}
         }
+
+        if (kernel->version != KERNEL_INTERFACE_VERSION) {
+            exit(-4);
+        }
     }
 
     /* Iterate over all the init routines.  */
@@ -246,7 +250,7 @@ extern "C" {
 }
 
 namespace __gnu_cxx {
-    void __verbose_terminate_handler() {
+    __attribute__((weak)) void __verbose_terminate_handler() {
         for(;;) { /* trap */ }
     }
 }

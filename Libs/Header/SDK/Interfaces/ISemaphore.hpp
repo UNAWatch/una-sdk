@@ -18,7 +18,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace Interface {
+namespace SDK::Interface {
 
     class ISemaphore
     {

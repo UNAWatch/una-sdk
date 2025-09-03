@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <cstdbool>
 
-namespace sdk::api
+namespace SDK::Interface
 {
 
 /**
  * @brief   Settings Interface.
  */
-class Settings
+class ISettings
 {
 
 public:
@@ -26,7 +26,7 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~Settings() = default;
+    virtual ~ISettings() = default;
 
 };
 

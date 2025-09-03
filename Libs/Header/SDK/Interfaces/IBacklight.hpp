@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <cstdbool>
 
-namespace sdk::api {
+namespace SDK::Interface {
 
 /**
  * @brief   Backlight Interface.
  */
-class Backlight
+class IBacklight
 {
 public:
 
@@ -37,7 +37,7 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~Backlight() = default;
+    virtual ~IBacklight() = default;
 
 };
 

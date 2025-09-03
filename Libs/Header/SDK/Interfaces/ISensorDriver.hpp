@@ -14,24 +14,24 @@
 #define __I_SENSOR_DRIVER_HPP
 
 #include "SDK/SensorLayer/SensorTypes.hpp"
-#include "SDK/SensorLayer/ISensorDataListener.hpp"
+#include "SDK/Interfaces/ISensorDataListener.hpp"
 #include "SDK/Interfaces/IUserApp.hpp"
 
-namespace Interface
+namespace SDK::Interface
 {
     class ISensorDriver {
     public:
         ISensorDriver() : mPeriod(1000) {}
         virtual ~ISensorDriver() = default;
 
-        virtual bool connect(Interface::ISensorDataListener* listener,
-                             Interface::IUserApp*            userapp = nullptr,
-                             float                           period  = 0,
-                             uint32_t                        latency = 0) = 0;
+        virtual bool connect(SDK::Interface::ISensorDataListener* listener,
+                             SDK::Interface::IUserApp*            userapp = nullptr,
+                             float                                period  = 0,
+                             uint32_t                             latency = 0) = 0;
 
-        virtual void disconnect(Interface::ISensorDataListener* listener) = 0;
+        virtual void disconnect(SDK::Interface::ISensorDataListener* listener) = 0;
         
-        virtual Sensor::Type getType() = 0;
+        virtual SDK::Sensor::Type getType() = 0;
 
         virtual float getPeriod() { return mPeriod; }
 
