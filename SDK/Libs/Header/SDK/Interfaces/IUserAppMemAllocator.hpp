@@ -15,7 +15,7 @@
 
 #include <cstddef>
 
-namespace Interface
+namespace SDK::Interface
 {
 
 /**

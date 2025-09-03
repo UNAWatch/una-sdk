@@ -7,11 +7,11 @@
 #include <cstdio>
 
 
-namespace sdk::api
+namespace SDK::Interface
 {
 
-class File;
-class Directory;
+class IFile;
+class IDirectory;
 
 /**
  * @brief   Interface for the file system.
@@ -19,7 +19,7 @@ class Directory;
  * Provides an abstraction for creating files and directories, and performing
  * operations such as removing and renaming.
  */
-class FileSystem {
+class IFileSystem {
 public:
 
     ///< Maximum length of a filesystem object path including '\0'.
@@ -49,14 +49,14 @@ public:
      * @param   path: Path to the file.
      * @retval  Unique pointer to the created file object.
      */
-    virtual std::unique_ptr<File> file(const char* path) = 0;
+    virtual std::unique_ptr<IFile> file(const char* path) = 0;
 
     /**
      * @brief   Creates a directory object.
      * @param   path: Path to the directory.
      * @retval  Unique pointer to the created directory object.
      */
-    virtual std::unique_ptr<Directory> dir(const char* path) = 0;
+    virtual std::unique_ptr<IDirectory> dir(const char* path) = 0;
 
     /**
      * @brief   Checks if a file/directory exists.
@@ -101,7 +101,7 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~FileSystem() = default;
+    virtual ~IFileSystem() = default;
 
 };
 
@@ -111,13 +111,13 @@ protected:
  *
  * Provides common functionality for both files and directories.
  */
-class FsObject {
+class IFsObject {
 public:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~FsObject() = default;
+    virtual ~IFsObject() = default;
 
     /**
      * @brief   Sets the path of the object.
@@ -158,13 +158,13 @@ public:
  * Provides an abstraction over file operations such as opening, reading,
  * writing, and managing the file's state.
  */
-class File : public FsObject {
+class IFile : public IFsObject {
 public:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~File() = default;
+    virtual ~IFile() = default;
 
     /**
      * @brief   Returns the size of the file in bytes.
@@ -245,13 +245,13 @@ public:
  * Provides an abstraction over directory management, including opening,
  * reading contents, and creating directories.
  */
-class Directory : public FsObject {
+class IDirectory : public IFsObject {
 public:
 
     /**
      * @brief   Destructor.
      */
-    virtual ~Directory() = default;
+    virtual ~IDirectory() = default;
 
     /**
      * @brief   Creates the directory if it does not exist.
@@ -279,7 +279,7 @@ public:
      * @param   reset: Reset the read position if true.
      * @retval  'true' if the item was successfully read, 'false' otherwise.
      */
-    virtual bool readNext(FileSystem::ObjectInfo& item, bool reset = false) = 0;
+    virtual bool readNext(IFileSystem::ObjectInfo& item, bool reset = false) = 0;
 
     /**
      * @brief   Closes the directory.
@@ -290,4 +290,4 @@ public:
 
 };
 
-} // namespace sdk::api
+} // namespace SDK::Interfaces

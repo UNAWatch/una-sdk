@@ -13,7 +13,7 @@
 #ifndef __SENSOR_TYPES_HPP
 #define __SENSOR_TYPES_HPP
 
-namespace Sensor
+namespace SDK::Sensor
 {
     enum class Type : int {
         /*!< Unknown or invalid sensor type. */

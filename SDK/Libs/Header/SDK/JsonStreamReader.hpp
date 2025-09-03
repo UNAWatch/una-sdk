@@ -15,7 +15,7 @@
 #include <cstring>
 #include <string_view>
 
-namespace sdk
+namespace SDK
 {
 
 /**

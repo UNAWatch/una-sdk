@@ -15,7 +15,7 @@
 
 #include <cstdint>
 
-namespace Interface
+namespace SDK::Interface
 {
     class ISensorData
     {

@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_GPS_HPP
 #define __SENSOR_DATA_PARSER_GPS_HPP
 
-#include "SDK/SensorLayer/ISensorData.hpp"
+#include "SDK/Interfaces/ISensorData.hpp"
 
 #include <cstdint>
 
@@ -41,7 +41,7 @@ namespace SDK
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GPS(const Interface::ISensorData& data) : mData(data) {}
+            GPS(const SDK::Interface::ISensorData& data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -173,7 +173,7 @@ namespace SDK
             static constexpr uint8_t mMaskCoords = 0x02;
             static constexpr uint8_t mMaskSpeed  = 0x04;
 
-            const Interface::ISensorData& mData;
+            const SDK::Interface::ISensorData& mData;
         }; /* class GPS */
     }; /* namespace SensorDataParser */
 

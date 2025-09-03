@@ -16,11 +16,11 @@
 #define __I_SENSOR_DATA_LISTENER_HPP
 
 #include "SDK/SensorLayer/SensorTypes.hpp"
-#include "SDK/SensorLayer/ISensorData.hpp"
+#include "SDK/Interfaces/ISensorData.hpp"
 
 #include <vector>
 
-namespace Interface
+namespace SDK::Interface
 {
     class ISensorDriver;    //// Forward declaration
 
@@ -29,9 +29,9 @@ namespace Interface
     public:
         virtual ~ISensorDataListener() = default;
 
-        virtual void onNewSensorData(const Interface::ISensorDriver*             sensor,
-                                     const std::vector<Interface::ISensorData*>& data,
-                                     bool                                        first) = 0;
+        virtual void onNewSensorData(const SDK::Interface::ISensorDriver*             sensor,
+                                     const std::vector<SDK::Interface::ISensorData*>& data,
+                                     bool                                             first) = 0;
     }; /* class ISensorDataListener */
 
 } /* namespace Interface */

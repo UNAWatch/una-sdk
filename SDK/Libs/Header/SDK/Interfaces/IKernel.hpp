@@ -27,38 +27,34 @@
 #include "IKernel.hpp"
 
 // Kernel interfaces
-#include "SDK/Interfaces/IUserApp.hpp"
-#include "SDK/Interfaces/IUserAppControl.hpp"
+#include "SDK/Interfaces/IPower.hpp"
+#include "SDK/Interfaces/ISettings.hpp"
+#include "SDK/Interfaces/IFileSystem.hpp"
 #include "SDK/Interfaces/IUserAppMemAllocator.hpp"
 #include "SDK/Interfaces/ISynchManager.hpp"
 #include "SDK/Interfaces/ISensorManager.hpp"
-
-#include "SDK/API/Settings.hpp"
-#include "SDK/API/FileSystem.hpp"
-#include "SDK/API/Time.hpp"
-#include "SDK/API/Power.hpp"
-#include "SDK/API/Backlight.hpp"
-#include "SDK/API/Vibro.hpp"
-#include "SDK/API/Buzzer.hpp"
+#include "SDK/Interfaces/IUserApp.hpp"
+#include "SDK/Interfaces/IUserAppControl.hpp"
+#include "SDK/Interfaces/IBacklight.hpp"
+#include "SDK/Interfaces/IVibro.hpp"
+#include "SDK/Interfaces/IBuzzer.hpp"
 
 #define KERNEL_INTERFACE_VERSION    (0)
 
 struct IKernel {
-    IKernel(sdk::api::Power                 &pwr,
-            sdk::api::Time                  &time,
-            sdk::api::Settings              &settings,
-            sdk::api::FileSystem            &fs,
-            Interface::IUserAppMemAllocator &mem,
-            Interface::ISynchManager        &synchManager,
-            Interface::ISensorManager       &sensorManager,
-            Interface::IUserApp             &app,
-            Interface::IServiceControl      &sctrl,
-            Interface::IGUIControl          &gctrl,
-            sdk::api::Backlight             &backlight,
-            sdk::api::Vibro                 &vibro,
-            sdk::api::Buzzer                &buzzer)
+    IKernel(SDK::Interface::IPower               &pwr,
+            SDK::Interface::ISettings            &settings,
+            SDK::Interface::IFileSystem          &fs,
+            SDK::Interface::IUserAppMemAllocator &mem,
+            SDK::Interface::ISynchManager        &synchManager,
+            SDK::Interface::ISensorManager       &sensorManager,
+            SDK::Interface::IUserApp             &app,
+            SDK::Interface::IServiceControl      &sctrl,
+            SDK::Interface::IGUIControl          &gctrl,
+            SDK::Interface::IBacklight           &backlight,
+            SDK::Interface::IVibro               &vibro,
+            SDK::Interface::IBuzzer              &buzzer)
         : pwr(pwr)
-        , time(time)
         , settings(settings)
         , fs(fs)
         , mem(mem)
@@ -76,25 +72,24 @@ struct IKernel {
     const uint32_t version = KERNEL_INTERFACE_VERSION;
 
     // Common interfaces
-    sdk::api::Power      &pwr;
-    sdk::api::Time       &time;
-    sdk::api::Settings   &settings;
+    SDK::Interface::IPower    &pwr;
+    SDK::Interface::ISettings &settings;
 
     // Individual interfaces for each app
-    sdk::api::FileSystem            &fs;
-    Interface::IUserAppMemAllocator &mem;
-    Interface::ISynchManager        &synchManager;
-    Interface::ISensorManager       &sensorManager;
-    Interface::IUserApp             &app;
+    SDK::Interface::IFileSystem          &fs;
+    SDK::Interface::IUserAppMemAllocator &mem;
+    SDK::Interface::ISynchManager        &synchManager;
+    SDK::Interface::ISensorManager       &sensorManager;
+    SDK::Interface::IUserApp             &app;
 
     // Control
-    Interface::IServiceControl &sctrl;
-    Interface::IGUIControl     &gctrl;
+    SDK::Interface::IServiceControl &sctrl;
+    SDK::Interface::IGUIControl     &gctrl;
 
     // Feedback controller interfaces
-    sdk::api::Backlight   &backlight;
-    sdk::api::Vibro       &vibro;
-    sdk::api::Buzzer      &buzzer;
+    SDK::Interface::IBacklight &backlight;
+    SDK::Interface::IVibro     &vibro;
+    SDK::Interface::IBuzzer    &buzzer;
 };
 
 #define DUMMY_KERNEL_ADDR  (0xA5A5A5A5)
