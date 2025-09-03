@@ -25,12 +25,12 @@ public:
     ~GSModel() override = default;
 
     // GUI -> Service
-    void checkG2SEvents()
+    void checkG2SEvents(uint32_t timeout = 1000)
     {
         G2S data{};
 
         mServiceKernel.app.unLock();
-        bool status = mG2SQueue.pop(data, 1000);
+        bool status = mG2SQueue.pop(data, timeout);
         mServiceKernel.app.lock();
 
         if (!status) return;
