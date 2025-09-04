@@ -46,12 +46,12 @@ public:
     }
 
     // Service -> GUI
-    void checkS2GEvents() override
+    void checkS2GEvents(uint32_t timeout = 0) override
     {
         S2G data{};
 
         this->mGUIKernel->app.unLock();
-        bool status = mS2GQueue.pop(data, 1000);
+        bool status = mS2GQueue.pop(data, timeout);
         this->mGUIKernel->app.lock();
 
         if (!status) return;
