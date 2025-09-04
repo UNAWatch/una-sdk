@@ -12,7 +12,7 @@
 #ifndef __CIRCULAR_BUFFER_HPP
 #define __CIRCULAR_BUFFER_HPP
 
-#include "Interfaces/IKernel.hpp"
+#include "SDK/Interfaces/IKernel.hpp"
 
 #include <array>
 #include <memory>
@@ -247,28 +247,28 @@ public:
 
     bool empty() const
     {
-        Interface::MutexLock lock(mMutex);
+        SDK::Interface::MutexLock lock(mMutex);
 
         return (mSize == 0);
     }
 
     size_t size() const
     {
-        Interface::MutexLock lock(mMutex);
+        SDK::Interface::MutexLock lock(mMutex);
 
         return mSize;
     }
 
     uint32_t available() const
     {
-        Interface::MutexLock lock(mMutex);
+        SDK::Interface::MutexLock lock(mMutex);
 
         return (N - mSize);
     }
 
     void clear()
     {
-        Interface::MutexLock lock(mMutex);
+        SDK::Interface::MutexLock lock(mMutex);
 
         for (size_t i = 0; i < N; ++i) {
             mBuffer[i] = T{};
@@ -290,13 +290,13 @@ public:
     }
 
 private:
-    const IKernel&                         mKernel;
-    std::shared_ptr<Interface::IMutex>     mMutex;
-    std::shared_ptr<Interface::ISemaphore> mNotEmpty;
-    std::shared_ptr<Interface::ISemaphore> mNotFull;
-    std::array<T, N>                       mBuffer;
-    size_t                                 mHead;
-    size_t                                 mSize;
+    const IKernel&                              mKernel;
+    std::shared_ptr<SDK::Interface::IMutex>     mMutex;
+    std::shared_ptr<SDK::Interface::ISemaphore> mNotEmpty;
+    std::shared_ptr<SDK::Interface::ISemaphore> mNotFull;
+    std::array<T, N>                            mBuffer;
+    size_t                                      mHead;
+    size_t                                      mSize;
 };
 
 #endif /* __CIRCULAR_BUFFER_HPP */

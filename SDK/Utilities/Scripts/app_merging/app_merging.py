@@ -1,5 +1,4 @@
 import struct
-import glob
 import zlib
 import logging
 import argparse
@@ -55,10 +54,7 @@ def parse_appid_64(s: str) -> int:
     return int(s, 16)
 
 def parse_semver_u32(s: str) -> int:
-    """
-    Parse 'A.B.C' into uint32: 0x00AABBCC (A=major, B=minor, C=patch).
-    Each component must be 0..255.
-    """
+    """Parse 'A.B.C' into uint32: 0x00AABBCC (A=major, B=minor, C=patch)."""
     s = s.strip().lstrip('vV')
     m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", s)
     if not m:
@@ -70,10 +66,7 @@ def parse_semver_u32(s: str) -> int:
     return (a << 16) | (b << 8) | c
 
 def find_first_main_ld(scripts_root: Path) -> Path:
-    """
-    Pick the first linker script under <scripts_root>/linker/Main.
-    Deterministic: choose the lexicographically first '*.ld'.
-    """
+    """Pick the first linker script under <scripts_root>/linker/Main (lexicographically sorted)."""
     main_dir = scripts_root / "linker" / "Main"
     if not main_dir.is_dir():
         raise argparse.ArgumentTypeError(f"Directory not found: {main_dir}")
@@ -83,14 +76,8 @@ def find_first_main_ld(scripts_root: Path) -> Path:
     return candidates[0]
 
 def parse_libc_version_from_include(main_ld_path: Path) -> int:
-    """
-    Parse INCLUDE line from the main linker script:
-      INCLUDE "LibC/libc_exports_A.B.C.ld"
-    Accepts forward or backslashes after 'LibC'.
-    Returns version packed as 0x00AABBCC.
-    """
+    """Parse INCLUDE line with LibC version from the main linker script."""
     text = main_ld_path.read_text(encoding="utf-8", errors="ignore")
-    # LibC/libc_exports_1.2.3.ld OR LibC\libc_exports_1.2.3.ld
     m = re.search(
         r'^\s*INCLUDE\s+"LibC[\\/]+libc_exports_(\d+)\.(\d+)\.(\d+)\.ld"\s*$',
         text, flags=re.MULTILINE
@@ -100,12 +87,10 @@ def parse_libc_version_from_include(main_ld_path: Path) -> int:
             f'Cannot find INCLUDE "LibC/libc_exports_A.B.C.ld" in {main_ld_path}'
         )
     a, b, c = map(int, m.groups())
-    for v, name in [(a, "A"), (b, "B"), (c, "C")]:
-        if not (0 <= v <= 255):
-            raise argparse.ArgumentTypeError(f"LibC exports version component {name} must be 0..255.")
     return (a << 16) | (b << 8) | c
 
 def format_semver_u32(v: int) -> str:
+    """Return string A.B.C from packed uint32 0x00AABBCC."""
     a = (v >> 16) & 0xFF
     b = (v >> 8)  & 0xFF
     c =  v        & 0xFF
@@ -114,16 +99,14 @@ def format_semver_u32(v: int) -> str:
 logging.basicConfig(level=logging.INFO)
 
 # ---------- args ----------
-parser = argparse.ArgumentParser(description="Merge Service and GUI .uapp files with extended MainHeader_t header")
+parser = argparse.ArgumentParser(description="Merge Service and GUI images with extended MainHeader_t header")
 parser.add_argument("-name", required=True, help="Application name (used in output file)")
 parser.add_argument("-autostart", action="store_true", help="Set bit 3 (0x08) in flags for autostart")
 parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()), help="Application type")
-parser.add_argument("-out", type=str, help="Custom output file path (optional)")
-parser.add_argument("-header", action="store_true", help="Generate .h file with uapp binary as C array")
+parser.add_argument("-out", type=str, help="Custom output directory (also the place where Tmp/*.srv and Tmp/*.gui are searched)")
+parser.add_argument("-header", action="store_true", help="Generate .h file with merged binary as C array")
 parser.add_argument("-normal_icon", type=Path, required=True, help="Path to normal 60x60 icon PNG")
 parser.add_argument("-small_icon", type=Path, required=True, help="Path to small 30x30 icon PNG")
-
-# New CLI per your spec:
 parser.add_argument("-appid", type=parse_appid_64, required=True, help="16-hex AppID (e.g., 0123ABCD89EF4560)")
 parser.add_argument("-appver", type=parse_semver_u32, required=True, help="App version A.B.C (e.g., 1.2.3)")
 parser.add_argument("-scripts", type=Path, required=True, help="Path to SDK Utilities/Scripts (PATH_SCRIPTS)")
@@ -140,16 +123,32 @@ flags = APP_TYPES[args.type]
 if args.autostart:
     flags |= 0x00000008  # bit 3
 
-# Find .uapp inputs
-service_files = glob.glob("../../../../../Output/userapp*.uapp")
-gui_files = glob.glob("../../../../../GUI/Output/userapp*.uapp")
-if not service_files:
-    print("Missing .uapp files for Service"); sys.exit(2)
-if not gui_files:
-    print("Missing .uapp files for GUI"); sys.exit(2)
+# ---------- input discovery under <out>/Tmp ----------
+out_dir = Path(args.out) if args.out else Path("Output")
+tmp_dir = out_dir / "Tmp"
 
-service_data = verify_uapp_crc(Path(service_files[0]))
-gui_data     = verify_uapp_crc(Path(gui_files[0]))
+def pick_newest(pattern: str):
+    """Return newest file in tmp_dir matching pattern or None."""
+    files = list(tmp_dir.glob(pattern))
+    if not files:
+        return None
+    return max(files, key=lambda f: f.stat().st_mtime)
+
+srv_path = pick_newest("*.srv")
+gui_path = pick_newest("*.gui")
+
+if not srv_path:
+    print(f"Missing .srv file in {tmp_dir}")
+    sys.exit(2)
+
+# GUI presence rule: allowed missing only for type Glance
+gui_optional = (args.type == "Glance")
+if not gui_path and not gui_optional:
+    print(f"Missing .gui file in {tmp_dir} (required for type {args.type})")
+    sys.exit(2)
+
+service_data = verify_uapp_crc(srv_path)
+gui_data     = verify_uapp_crc(gui_path) if gui_path else b""
 normal_icon  = convert_icon_to_abgr2222(args.normal_icon)
 small_icon   = convert_icon_to_abgr2222(args.small_icon)
 
@@ -158,43 +157,42 @@ name_bytes         = args.name.encode('utf-8')[:15].ljust(16, b'\0')
 normal_icon_size   = len(normal_icon)
 small_icon_size    = len(small_icon)
 
-# Build the three extra fields
+# Build extra fields
 app_id_u64         = args.appid
 app_version_u32    = args.appver
-# Derive LibC version by reading the first main LD under <scripts>/linker/Main
 main_ld_path       = find_first_main_ld(args.scripts)
 libc_version_u32   = parse_libc_version_from_include(main_ld_path)
 
 # ---------- header ----------
-# Previous header: <II16sII>  (service_size, flags, name[16], normal_icon_size, small_icon_size)
-# New header = [AppID(u64)][AppVersion(u32)][LibC_Version(u32)] + previous header
+# [AppID u64][AppVersion u32][LibCVersion u32][service_size u32][flags u32]
+# [AppName char[16]][normal_icon_size u32][small_icon_size u32]
 prefix = struct.pack("<QII", app_id_u64, app_version_u32, libc_version_u32)
 oldhdr = struct.pack("<II16sII", service_size, flags, name_bytes, normal_icon_size, small_icon_size)
 header = prefix + oldhdr
 
 # ---------- blob + CRC ----------
+# GUI payload is appended only if present (non-Glance or Glance with .gui provided).
 blob_without_crc = header + normal_icon + small_icon + service_data + gui_data
 crc = zlib.crc32(blob_without_crc) & 0xFFFFFFFF
 final_data = blob_without_crc + struct.pack("<I", crc)
 
-# Format:
-# [AppID u64][AppVersion u32][LibCVersion u32][service_size u32][flags u32][AppName char[16]][normal_icon_size u32][small_icon_size u32]
-# [normal_icon 60x60][small_icon 30x30][service app][gui app][crc u32]
-
 # ---------- output ----------
-# Output file name template: AppName_A.B.C.uapp
 version_str = format_semver_u32(app_version_u32)
-out_dir = Path(args.out) if args.out else Path("Output")
 out_dir.mkdir(parents=True, exist_ok=True)
 output_path = out_dir / f"{args.name}_{version_str}.uapp"
 with open(output_path, "wb") as f:
- f.write(final_data)
+    f.write(final_data)
 
-logging.info(f"Merge complete")
+logging.info("Merge complete")
+logging.info(f"Service file : {srv_path}")
+if gui_path:
+    logging.info(f"GUI file     : {gui_path}")
+else:
+    logging.info("GUI file     : (absent, allowed for type Glance)")
 logging.info(f"Name         : {args.name}")
-logging.info(f"ID           : %016X", app_id_u64)
-logging.info(f"App Version  : %s", format_semver_u32(app_version_u32))
-logging.info(f"LibC Version : %s", format_semver_u32(libc_version_u32))
+logging.info("ID           : %016X", app_id_u64)
+logging.info("App Version  : %s", format_semver_u32(app_version_u32))
+logging.info("LibC Version : %s", format_semver_u32(libc_version_u32))
 logging.info(f"Flags        : 0x{flags:08X}")
 logging.info(f"CRC          : 0x{crc:08X}")
 logging.info(f"Image        : {output_path} ({len(final_data)} bytes)")
@@ -215,4 +213,4 @@ if args.header:
         f.write("\n};\n\n#endif // {macro_guard}\n")
     logging.info(f"Header file  : {header_path}")
 
-print(f"")
+print("")
