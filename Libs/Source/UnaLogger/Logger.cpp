@@ -33,7 +33,7 @@
  ******************************************************************************
  */
 
-#include "UnaLogger/Logger.h"
+#include "Logger.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -42,9 +42,9 @@
 //// Private data
 ////////////////////////////////////////////////////////////////////////////////
 
-static Interface::IMutex* mMutex;
-static LoggerTimeFunc_t   mGetTime;
-static LoggerPrint_t      mPrint;
+static SDK::Interface::IMutex* mMutex;
+static LoggerTimeFunc_t        mGetTime;
+static LoggerPrint_t           mPrint;
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Private code
@@ -92,7 +92,7 @@ void Logger_init(LoggerPrint_t print)
     mPrint = print;
 }
 
-void Logger_setMutex(Interface::IMutex* mutex)
+void Logger_setMutex(SDK::Interface::IMutex* mutex)
 {
     mMutex = mutex;
 }

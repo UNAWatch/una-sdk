@@ -19,9 +19,9 @@
 #include <cassert>
 #include <touchgfx/hal/HAL.hpp>
 #include <touchgfx/hal/OSWrappers.hpp>
-#include "KernelManager.hpp"
+#include "SDK/KernelManager.hpp"
 
-#include "Interfaces/IKernel.hpp"
+#include "SDK/Interfaces/IKernel.hpp"
 
 using namespace touchgfx;
 
