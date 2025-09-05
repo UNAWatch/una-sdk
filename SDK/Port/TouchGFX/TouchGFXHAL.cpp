@@ -28,7 +28,7 @@
 #include <platform/driver/button/ButtonController.hpp>
 #include <touchgfx/hal/OSWrappers.hpp>
 
-#include "KernelManager.hpp"
+#include "SDK/KernelManager.hpp"
 
 using namespace touchgfx;
 

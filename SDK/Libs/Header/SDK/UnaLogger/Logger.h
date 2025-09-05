@@ -12,7 +12,7 @@
 #ifndef __LOGGER_HPP
 #define __LOGGER_HPP
 
-#include "Interfaces/IMutex.hpp"
+#include "SDK/Interfaces/IMutex.hpp"
 
 #include <stdio.h>
 
@@ -33,7 +33,7 @@ typedef uint32_t (*LoggerTimeFunc_t)(void);
 typedef void     (*LoggerPrint_t)(const char* str);
 
 void Logger_init(LoggerPrint_t print);
-void Logger_setMutex(Interface::IMutex* mutex);
+void Logger_setMutex(SDK::Interface::IMutex* mutex);
 void Logger_setTimeFunc(LoggerTimeFunc_t pTimefn); 
 void Logger_printf(const char* format, ...);
 void Logger_printTimestamp();
