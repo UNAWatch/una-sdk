@@ -10,17 +10,17 @@
  ******************************************************************************
  */
 
-#include "SynchManager/SynchManager.hpp"
-#include "OS/OS.hpp"
+#include "SDK/SynchManager/SynchManager.hpp"
+#include "SDK/Platform/OS/OS.hpp"
 
 namespace OS {
 
-std::shared_ptr<Interface::IMutex> SynchManager::createMutex()
+std::shared_ptr<SDK::Interface::IMutex> SynchManager::createMutex()
 {
     return std::make_shared<OS::Mutex>();
 }
 
-std::shared_ptr<Interface::ISemaphore> SynchManager::createSemaphore(uint32_t max, uint32_t init)
+std::shared_ptr<SDK::Interface::ISemaphore> SynchManager::createSemaphore(uint32_t max, uint32_t init)
 {
     return std::make_shared<OS::Semaphore>(max, init);
 }

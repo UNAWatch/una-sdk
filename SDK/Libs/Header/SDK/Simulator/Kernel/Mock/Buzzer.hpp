@@ -12,7 +12,7 @@
 
  #pragma once
 
-#include "API/Buzzer.hpp"
+#include "SDK/Interfaces/IBuzzer.hpp"
 
 namespace Mock 
 {
@@ -20,7 +20,7 @@ namespace Mock
 /**
  * @brief Stub implementation of Interface::IBuzzer.
  */
-class Buzzer : public sdk::api::Buzzer {
+class Buzzer : public SDK::Interface::IBuzzer {
 public:
     bool play()                                     override;
     bool play(Note note)                            override;

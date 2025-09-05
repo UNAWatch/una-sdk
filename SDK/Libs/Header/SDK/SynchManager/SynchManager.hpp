@@ -13,7 +13,7 @@
 #ifndef __SYNCH_MANAGER_HPP
 #define __SYNCH_MANAGER_HPP
 
-#include "ISynchManager.hpp"
+#include "SDK/Interfaces/ISynchManager.hpp"
 
 #include <mutex>
 #include <memory>
@@ -28,13 +28,13 @@
 
 namespace OS {
 
-    class SynchManager : public Interface::ISynchManager
+    class SynchManager : public SDK::Interface::ISynchManager
     {
     public:
         virtual ~SynchManager() = default;
 
-        std::shared_ptr<Interface::IMutex>     createMutex()                                override;
-        std::shared_ptr<Interface::ISemaphore> createSemaphore(uint32_t max, uint32_t init) override;
+        std::shared_ptr<SDK::Interface::IMutex>     createMutex()                                override;
+        std::shared_ptr<SDK::Interface::ISemaphore> createSemaphore(uint32_t max, uint32_t init) override;
     };
 
 }

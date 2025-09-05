@@ -13,8 +13,8 @@
 #ifndef __OS_HPP
 #define __OS_HPP
 
-#include "IMutex.hpp"
-#include "ISemaphore.hpp"
+#include "SDK/Interfaces/IMutex.hpp"
+#include "SDK/Interfaces/ISemaphore.hpp"
 
 #include <mutex>
 #include <memory>
@@ -29,7 +29,7 @@
 
 namespace OS {
 
-    class Mutex : public Interface::IMutex
+    class Mutex : public SDK::Interface::IMutex
     {
     public:
         Mutex();
@@ -46,7 +46,7 @@ namespace OS {
     class MutexCS
     {
     public:
-        MutexCS(Interface::IMutex& mutex) : mMutex(mutex)
+        MutexCS(SDK::Interface::IMutex& mutex) : mMutex(mutex)
         {
             mMutex.lock();
         }
@@ -57,16 +57,16 @@ namespace OS {
         }
 
     private:
-        Interface::IMutex& mMutex;
+        SDK::Interface::IMutex& mMutex;
     };
 
-    class Semaphore : public Interface::ISemaphore {
+    class Semaphore : public SDK::Interface::ISemaphore {
     public:
         Semaphore(uint32_t max, uint32_t init);
         ~Semaphore();
 
         bool take(uint32_t timeout) override;
-        void give() override;
+        void give()                 override;
 
     private:
     #ifdef _WIN32

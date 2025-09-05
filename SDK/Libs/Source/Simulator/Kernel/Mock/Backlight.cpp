@@ -10,7 +10,7 @@
  ******************************************************************************
  */
 
-#include "Simulator/Kernel/Mock/Backlight.hpp"
+#include "SDK/Simulator/Kernel/Mock/Backlight.hpp"
 
 #define TAG                 "Mock::Backlight"
 #define LOG_MODULE_PRX      TAG"::"

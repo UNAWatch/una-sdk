@@ -7,7 +7,7 @@
 #include <sstream>
 #include <windows.h>
 
-#include "API/FileSystem.hpp"
+#include "SDK/Interfaces/IFileSystem.hpp"
 
 namespace Mock
 {
@@ -15,7 +15,7 @@ namespace Mock
 /**
  * @brief Implementation of the IFile interface for Windows.
  */
-class File : public sdk::api::File {
+class File : public SDK::Interface::IFile {
 public:
 
     File(const char *prefix, const char *relativePath);
@@ -57,7 +57,7 @@ private:
     std::string path;
     std::fstream file;
     bool isOpenFlag = false;
-    char pathBuffer[sdk::api::FileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
+    char pathBuffer[SDK::Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;
 };
@@ -66,7 +66,7 @@ private:
 /**
  * @brief Implementation of the IDirectory interface for Windows.
  */
-class Directory : public sdk::api::Directory {
+class Directory : public SDK::Interface::IDirectory {
 public:
     Directory(const char *prefix, const char *relativePath);
 
@@ -88,7 +88,7 @@ public:
 
     virtual bool isOpen() const override;
 
-    virtual bool readNext(sdk::api::FileSystem::ObjectInfo &item, bool reset = false) override;
+    virtual bool readNext(SDK::Interface::IFileSystem::ObjectInfo &item, bool reset = false) override;
 
     virtual bool close() override;
 
@@ -97,7 +97,7 @@ private:
     HANDLE handle;
     WIN32_FIND_DATAA findData;
     bool isOpenFlag = false;
-    char pathBuffer[sdk::api::FileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
+    char pathBuffer[SDK::Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;
 };
@@ -106,7 +106,7 @@ private:
 /**
  * @brief Implementation of the IFileSystem interface for Windows.
  */
-class FileSystem : public sdk::api::FileSystem {
+class FileSystem : public SDK::Interface::IFileSystem {
 public:
 
     FileSystem(const char *rootPath);
@@ -115,9 +115,9 @@ public:
 
     virtual bool mkdir(const char *path) override;
 
-    virtual std::unique_ptr<sdk::api::File> file(const char *path) override;
+    virtual std::unique_ptr<SDK::Interface::IFile> file(const char *path) override;
 
-    virtual std::unique_ptr<sdk::api::Directory> dir(const char *path) override;
+    virtual std::unique_ptr<SDK::Interface::IDirectory> dir(const char *path) override;
 
     virtual bool exist(const char *path) const override;
 

@@ -12,14 +12,14 @@
 #ifndef __SIMULATOR_KERNEL_USER_MEM_ALLOCATOR_HPP
 #define __SIMULATOR_KERNEL_USER_MEM_ALLOCATOR_HPP
 
-#include "IUserAppMemAllocator.hpp"
+#include "SDK/Interfaces/IUserAppMemAllocator.hpp"
 
 
 
 namespace Simulator
 {
 
-class MockUserAppMemAllocator : public Interface::IUserAppMemAllocator {
+class MockUserAppMemAllocator : public SDK::Interface::IUserAppMemAllocator {
 public:
     MockUserAppMemAllocator() = default;
     virtual ~MockUserAppMemAllocator() = default;
@@ -35,6 +35,12 @@ public:
     {
         printf("free  %p\n", ptr);
         std::free(ptr);
+    }
+
+    void* realloc(void* ptr, size_t size) override
+    {
+        printf("realloc  %p:%d\n", ptr, size);
+        return std::realloc(ptr, size);
     }
 
 private:

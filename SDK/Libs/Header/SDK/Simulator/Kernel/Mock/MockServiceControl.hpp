@@ -13,12 +13,12 @@
 #ifndef __SIMULATOR_KERNEL_SERVICE_CONTROL_HPP
 #define __SIMULATOR_KERNEL_SERVICE_CONTROL_HPP
 
-#include "Interfaces/IUserAppControl.hpp"
+#include "SDK/Interfaces/IUserAppControl.hpp"
 
 namespace Simulator {
 
-class MockServiceControl : public Interface::IServiceControl,
-                           public Interface::IGUIControl
+class MockServiceControl : public SDK::Interface::IServiceControl,
+                           public SDK::Interface::IGUIControl
 {
 public:
     MockServiceControl() : mContext()

@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "API/Backlight.hpp"
+#include "SDK/Interfaces/IBacklight.hpp"
 
 namespace Mock
 {
@@ -20,7 +20,7 @@ namespace Mock
 /**
  * @brief   Stub implementation of Interface::IBacklight.
  */
-class Backlight : public sdk::api::Backlight {
+class Backlight : public SDK::Interface::IBacklight {
 
 public:
     bool on(uint32_t timeout = 0) override;

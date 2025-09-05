@@ -9,18 +9,17 @@
  ******************************************************************************
  */
 
-#include "KernelBase.hpp"
+#include "SDK/Simulator/Kernel/KernelBase.hpp"
 #include "gui/common/GuiConfig.hpp"
-#include "Simulator/Kernel/Mock/MockServiceControl.hpp"
-#include "Simulator/Sensors/ISensorCore.hpp"
+#include "SDK/Simulator/Kernel/Mock/MockServiceControl.hpp"
+#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 
-static constexpr char sFsPath[] = "../../../../../../UserAppFS/";
+static constexpr char sFsPath[] = "../../../../../Output/";
 
 namespace Simulator
 {
 KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interface::ISensorCore* sensoreCore)
     : mIPower()
-    , mITime()
     , mISettings()
     , mIFilesystem(sFsPath)
     , mIUserAppMemAllocator()
@@ -32,7 +31,6 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
     , mVibro()
     , mSensoreCore(sensoreCore)
     , mKernel(new IKernel(mIPower,
-                          mITime,
                           mISettings,
                           mIFilesystem,
                           mIUserAppMemAllocator,

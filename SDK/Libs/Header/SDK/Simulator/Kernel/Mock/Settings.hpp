@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "API/Settings.hpp"
+#include "SDK/Interfaces/ISettings.hpp"
 
 namespace Mock
 {
 
-class Settings : public sdk::api::Settings {
+class Settings : public SDK::Interface::ISettings {
 public:
 
     Settings() = default;

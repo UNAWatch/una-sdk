@@ -10,7 +10,7 @@
  ******************************************************************************
  */
 
-#include "Simulator/Kernel/Mock/Buzzer.hpp"
+#include "SDK/Simulator/Kernel/Mock/Buzzer.hpp"
 
 #define TAG                 "Buzzer"
 #define LOG_MODULE_PRX      TAG"::"

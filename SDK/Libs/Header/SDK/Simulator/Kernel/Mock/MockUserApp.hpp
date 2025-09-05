@@ -17,20 +17,19 @@
 #include <stdio.h>
 #include <windows.h>
 
-#include "OS/OS.hpp"
-#include "IUserApp.hpp"
+#include "SDK/Platform/OS/OS.hpp"
+#include "SDK/Interfaces/IUserApp.hpp"
 
 #include <platform/hal/simulator/sdl2/HALSDL2.hpp>
-
 
 namespace Simulator
 {
 
-class MockUserApp : public Interface::IUserApp {
+class MockUserApp : public SDK::Interface::IUserApp {
 
 public:
 
-    class FakeMutex : public Interface::IMutex
+    class FakeMutex : public SDK::Interface::IMutex
     {
     public:
         FakeMutex() = default;
@@ -45,13 +44,13 @@ public:
         , mState(State::DESTROYED)
         , mMutex()
         , mFakeMutex()
-        , mAppMutex(useMutex ? static_cast<Interface::IMutex*>(&mMutex)
-                    : static_cast<Interface::IMutex*>(&mFakeMutex))
+        , mAppMutex(useMutex ? static_cast<SDK::Interface::IMutex*>(&mMutex)
+                    : static_cast<SDK::Interface::IMutex*>(&mFakeMutex))
     {}
 
     virtual ~MockUserApp() = default;
 
-    virtual void registerApp(Interface::IUserApp::Callback *pCallback) override
+    virtual void registerApp(SDK::Interface::IUserApp::Callback *pCallback) override
     {
         mpCallback = pCallback;
     }
@@ -236,11 +235,11 @@ public:
 
 
 private:
-    Interface::IUserApp::Callback* mpCallback;
-    State                          mState;
-    OS::Mutex                      mMutex;
-    FakeMutex                      mFakeMutex;
-    Interface::IMutex*             mAppMutex;
+    SDK::Interface::IUserApp::Callback* mpCallback;
+    State                               mState;
+    OS::Mutex                           mMutex;
+    FakeMutex                           mFakeMutex;
+    SDK::Interface::IMutex*             mAppMutex;
 
 };
 

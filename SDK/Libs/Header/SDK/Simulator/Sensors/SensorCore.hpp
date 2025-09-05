@@ -4,7 +4,7 @@
 //#include "Simulator/Sensors/DS18B20.hpp"
 //#include "Simulator/Sensors/BME280.hpp"
 //#include "Simulator/Sensors/Altimeter.hpp"
-#include "Simulator/Sensors/ISensorCore.hpp"
+#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 
 namespace Sensor {
 

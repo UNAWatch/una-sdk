@@ -3,12 +3,12 @@
 
 #include <cstdint>
 #include <algorithm>
-#include "API/Power.hpp"
+#include "SDK/Interfaces/IPower.hpp"
 
 namespace Mock 
 {
 
-class Power : public sdk::api::Power {
+class Power : public SDK::Interface::IPower {
 public:
 
     Power() = default;

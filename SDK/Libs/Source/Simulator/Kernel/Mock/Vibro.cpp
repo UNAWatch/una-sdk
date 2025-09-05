@@ -10,7 +10,7 @@
  ******************************************************************************
  */
 
-#include "Simulator/Kernel/Mock/Vibro.hpp"
+#include "SDK/Simulator/Kernel/Mock/Vibro.hpp"
 
 #define TAG                 "Vibro"
 #define LOG_MODULE_PRX      TAG"::"

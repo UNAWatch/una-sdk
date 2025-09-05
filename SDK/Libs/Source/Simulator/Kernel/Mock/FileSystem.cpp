@@ -9,8 +9,8 @@
  ******************************************************************************
  */
 
-#include "Simulator/Kernel/Mock/FileSystem.hpp"
-#include "Wrappers/StdLibWrappers.h"
+#include "SDK/Simulator/Kernel/Mock/FileSystem.hpp"
+#include "SDK/Wrappers/StdLibWrappers.h"
 
 #include <vector>
 #include < filesystem >
@@ -258,7 +258,7 @@ bool Directory::isOpen() const
     return isOpenFlag;
 }
 
-bool Directory::readNext(sdk::api::FileSystem::ObjectInfo &item, bool reset)
+bool Directory::readNext(SDK::Interface::IFileSystem::ObjectInfo &item, bool reset)
 {
     if (!isOpenFlag) return false;
 
@@ -330,12 +330,12 @@ bool FileSystem::mkdir(const char *path)
     return true;
 }
 
-std::unique_ptr<sdk::api::File> FileSystem::file(const char *path)
+std::unique_ptr<SDK::Interface::IFile> FileSystem::file(const char *path)
 {
     return std::make_unique<File>(mPathPrefix, path);
 }
 
-std::unique_ptr<sdk::api::Directory> FileSystem::dir(const char *path)
+std::unique_ptr<SDK::Interface::IDirectory> FileSystem::dir(const char *path)
 {
     return std::make_unique<Directory>(mPathPrefix, path);
 }

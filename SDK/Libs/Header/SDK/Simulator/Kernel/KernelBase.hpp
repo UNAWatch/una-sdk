@@ -16,23 +16,22 @@
 #include <cassert>
 #include <string>
 
-#include "IKernel.hpp"
+#include "SDK/Interfaces/IKernel.hpp"
 
-#include "Simulator/Kernel/Mock/Power.hpp"
-#include "Simulator/Kernel/Mock/Settings.hpp"
-#include "Simulator/Kernel/Mock/FileSystem.hpp"
-#include "Simulator/Kernel/Mock/SensorManager.hpp"
-#include "Simulator/Kernel/Mock/Backlight.hpp"
-#include "Simulator/Kernel/Mock/Buzzer.hpp"
-#include "Simulator/Kernel/Mock/Vibro.hpp"
+#include "SDK/Simulator/Kernel/Mock/Power.hpp"
+#include "SDK/Simulator/Kernel/Mock/Settings.hpp"
+#include "SDK/Simulator/Kernel/Mock/FileSystem.hpp"
+#include "SDK/Simulator/Kernel/Mock/SensorManager.hpp"
+#include "SDK/Simulator/Kernel/Mock/Backlight.hpp"
+#include "SDK/Simulator/Kernel/Mock/Buzzer.hpp"
+#include "SDK/Simulator/Kernel/Mock/Vibro.hpp"
 
-#include "SynchManager/SynchManager.hpp"
-#include "Simulator/Kernel/Mock/MockUserAppMemAllocator.hpp"
-#include "Simulator/Kernel/Mock/MockTime.hpp"
-#include "Simulator/Kernel/Mock/MockUserApp.hpp"
-#include "Simulator/Kernel/Mock/MockServiceControl.hpp"
+#include "SDK/SynchManager/SynchManager.hpp"
+#include "SDK/Simulator/Kernel/Mock/MockUserAppMemAllocator.hpp"
+#include "SDK/Simulator/Kernel/Mock/MockUserApp.hpp"
+#include "SDK/Simulator/Kernel/Mock/MockServiceControl.hpp"
 
-#include "Simulator/Sensors/ISensorCore.hpp"
+#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 
 namespace Simulator
 {
@@ -97,7 +96,6 @@ public:
 
 protected:
     Mock::Power             mIPower;
-    MockTime                mITime;
     Mock::Settings          mISettings;
     Mock::FileSystem        mIFilesystem;
     MockUserAppMemAllocator mIUserAppMemAllocator;
