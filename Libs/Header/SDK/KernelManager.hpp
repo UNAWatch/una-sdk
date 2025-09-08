@@ -15,7 +15,7 @@
 #ifndef __KERNEL_MANAGER_HPP
 #define __KERNEL_MANAGER_HPP
 
-#include "Interfaces/IKernel.hpp"
+#include "SDK/Interfaces/IKernel.hpp"
 
 /**
  * @class KernelManager

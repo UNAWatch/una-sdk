@@ -10,7 +10,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "TrackMapBuilder.hpp"
+#include "SDK/TrackMapBuilder.hpp"
 
 
 TrackMapBuilder::TrackMapBuilder(size_t expectedPointsNum)

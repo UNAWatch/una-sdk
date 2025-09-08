@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- User macro that points to ...\una-watch\SDK\Libs\  -->
+  <PropertyGroup Label="UserMacros">
+    <SdkPath>$(SolutionDir)..\..\..\..\..\..\..\SDK\</SdkPath>
+    <LibsPath>$(SdkPath)Libs\</LibsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>SDK</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>
+        $(LibsPath)Header;
+        $(LibsPath)Header\SDK\UnaLogger;
+        $(SdkPath)ThirdParty\coreJSON\source\include;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(LibsPath)Source\JsonStreamReader.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\JsonStreamWriter.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Platform\OS\OS.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Simulator\Kernel\KernelBase.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Simulator\Kernel\Mock\Backlight.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Simulator\Kernel\Mock\Buzzer.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Simulator\Kernel\Mock\FileSystem.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Simulator\Kernel\Mock\Vibro.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Simulator\Sensors\SensorCore.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\SynchManager\SynchManager.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\UnaLogger\Logger.cpp"/>
+    <ClCompile Include="$(LibsPath)Source\Wrappers\StdLibWrappers.c"/>
+    <ClCompile Include="$(SdkPath)ThirdParty\coreJSON\source\core_json.c"/>
+  </ItemGroup>
+</Project>

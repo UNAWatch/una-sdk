@@ -13,7 +13,7 @@
 #include "SDK/Wrappers/StdLibWrappers.h"
 
 #include <vector>
-#include < filesystem >
+#include <filesystem>
 
 namespace Mock
 {

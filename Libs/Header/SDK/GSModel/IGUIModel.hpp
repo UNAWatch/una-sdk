@@ -18,7 +18,7 @@ public:
     void setGUIHandler(const IKernel* kernel, GH* handler);
 
     // Обробка черги Service->GUI (S2G) — сигнатура лишається віртуальною
-    virtual void checkS2GEvents() = 0;
+    virtual void checkS2GEvents(uint32_t timeout) = 0;
 
     // Надсилання даних GUI->Service (G2S) — тепер тип параметра шаблонний
     virtual bool sendToService(const G2S& data) = 0;
