@@ -3,7 +3,7 @@
 
 #include "SDK/TrackMapBuilder.hpp"
 
-constexpr TrackMapBuilder::GpsPoint walkTrack[] = {
+const TrackMapBuilder::GpsPoint walkTrack[] = {
     { 50.457914f, 30.364938f },
     { 50.457914f, 30.364959f },
     { 50.457914f, 30.364980f },
