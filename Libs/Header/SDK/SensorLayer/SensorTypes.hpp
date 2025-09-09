@@ -78,7 +78,12 @@ namespace SDK::Sensor
         FLOOR_COUNTER,
 
         /*!< Activity */
-        ACTIVITY
+        ACTIVITY,
+
+        /*!< A sensor of this type returns an event every time a step is detected.
+             Each event corresponds to a single human step, similar to how
+             HEART_BEAT represents a single heartbeat peak. */
+        STEP_DETECTOR
     };
 
 } /* namespace Sensor */

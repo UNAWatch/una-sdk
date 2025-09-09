@@ -32,9 +32,16 @@ namespace SDK
         public:
             /**
              * @brief Construct a new FloorCounter parser over given ISensorData
-             * @param data Reference to sensor data containing 1 int32_t field
+             * @param data Reference to sensor data containing 2 int32_t field
              */
-            FloorCounter(const Interface::ISensorData& data) : mData(data) {}
+            FloorCounter(const Interface::ISensorData& data) : mData(&data) {}
+
+            /**
+             * @brief Construct a new FloorCounter parser over given ISensorData
+             * @param data Pointer to sensor data containing 2 int32_t field
+             */
+            FloorCounter(const Interface::ISensorData* data) : mData(data) {}
+
 
             /**
              * @brief Check if data is valid (should contain exactly 1 field)
@@ -42,18 +49,36 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return mData.getLength() == Field::kCount;
+                return (mData != nullptr) && (mData->getLength() == Field::kCount);
             }
 
             /**
-             * @brief Get floor count (signed)
-             * @return Floor count as int32_t (0 if invalid)
+             * @brief Get floorsUp count (signed)
+             * @return FloorsUp count as int32_t (0 if invalid)
              */
-            int32_t getFloorCount() const
+            int32_t getFloorsUp() const
             {
-                return isDataValid() ? mData.getAsI32(Field::kFloors) : 0;
+                return isDataValid() ? mData->getAsI32(Field::kFloorsUp) : 0;
             }
 
+            /**
+             * @brief Get floorsDown count (signed)
+             * @return Floors down count as int32_t (0 if invalid)
+             */
+            int32_t getFloorsDown() const
+            {
+                return isDataValid() ? mData->getAsI32(Field::kFloorsDown) : 0;
+            }
+
+            /**
+             * @brief Get data timestamp in ms
+             * @return Data timestamp in ms (0.0f if invalid)
+             */
+            float getTimestamp() const
+            {
+                return isDataValid() ? mData->getTimestamp() : 0.0f;
+            }
+            
             /**
              * @brief Get number of expected fields (always 1)
              */
@@ -67,11 +92,12 @@ namespace SDK
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                kFloors = 0, ///< Signed floor counter (int32_t)
-                kCount        ///< Total number of fields
+                kFloorsUp = 0,  ///< Signed floorsUp counter (int32_t)
+                kFloorsDown,    ///< Signed floorsDown counter (int32_t)
+                kCount          ///< Total number of fields
             };
 
-            const Interface::ISensorData& mData;
+            const Interface::ISensorData* mData;
         }; /* class FloorCounter */
     }; /* namespace SensorDataParser */
 
