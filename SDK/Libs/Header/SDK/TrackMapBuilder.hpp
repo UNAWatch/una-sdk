@@ -32,6 +32,10 @@ public:
         float latitude;  ///< Latitude in degrees.
         float longitude; ///< Longitude in degrees.
 
+        GpsPoint() = default;
+        GpsPoint(float lat, float lon) : latitude(lat), longitude(lon) {}
+        ~GpsPoint() = default;
+
         /**
          * @brief Checks if the GPS point has valid latitude and longitude.
          * @return True if valid, false otherwise.
@@ -154,6 +158,16 @@ public:
      */
     void rotateMap(TrackMapScreen &map, float angleDegrees);
 
+    void reset();
+
+    /**
+     * @brief Calculates the distance in meters between two GPS points.
+     * @param p1: First GPS point.
+     * @param p2: Second GPS point.
+     * @return Approximate distance between the two points in meters.
+     */
+    static float Distance(const GpsPoint& p1, const GpsPoint& p2);
+
 private:
     GpsPoint mMin { }; ///< Minimum GPS coordinates in the track.
     GpsPoint mMax { }; ///< Maximum GPS coordinates in the track.
@@ -204,15 +218,7 @@ private:
      * @param degrees Angle in degrees.
      * @return Angle in radians.
      */
-    float toRadians(float degrees) const;
-
-    /**
-     * @brief Calculates the distance in meters between two GPS points.
-     * @param p1: First GPS point.
-     * @param p2: Second GPS point.
-     * @return Approximate distance between the two points in meters.
-     */
-    float distance(const GpsPoint &p1, const GpsPoint &p2) const;
+    static float ToRadians(float degrees);
 
     /**
      * @brief Calculates the center point between two GPS coordinates.

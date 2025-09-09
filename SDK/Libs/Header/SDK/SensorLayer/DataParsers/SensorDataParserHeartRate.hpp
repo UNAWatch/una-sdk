@@ -47,11 +47,11 @@ namespace SDK
 
             /**
              * @brief Get heart rate in beats per minute (bpm)
-             * @return Heart rate as float (0.0f if invalid)
+             * @return Heart rate as uint32_t.
              */
-            float getBpm() const
+            uint32_t getBpm() const
             {
-                return isDataValid() ? mData.getAsFloat(Field::kBpm) : 0.0f;
+                return isDataValid() ? mData.getAsU32(Field::kBpm) : 0.0f;
             }
 
             /**

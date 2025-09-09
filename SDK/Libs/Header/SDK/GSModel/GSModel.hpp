@@ -46,7 +46,7 @@ public:
     }
 
     // Service -> GUI
-    void checkS2GEvents(uint32_t timeout) override
+    void checkS2GEvents(uint32_t timeout = 0) override
     {
         S2G data{};
 
