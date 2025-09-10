@@ -72,11 +72,11 @@ namespace SDK
 
             /**
              * @brief Get data timestamp in ms
-             * @return Data timestamp in ms (0.0f if invalid)
+             * @return Data timestamp in ms (0 if invalid)
              */
-            float getTimestamp() const
+            uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0.0f;
+                return isDataValid() ? mData->getTimestamp() : 0;
             }
             
             /**

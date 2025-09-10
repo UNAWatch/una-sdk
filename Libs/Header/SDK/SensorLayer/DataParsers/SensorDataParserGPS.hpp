@@ -41,7 +41,13 @@ namespace SDK
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GPS(const SDK::Interface::ISensorData& data) : mData(data) {}
+            GPS(const SDK::Interface::ISensorData& data) : mData(&data) {}
+
+            /**
+             * @brief Construct a new GPS parser over given ISensorData
+             * @param data Pointer to sensor data containing GPS fields
+             */
+            GPS(const SDK::Interface::ISensorData* data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -49,7 +55,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return mData.getLength() == Field::kCount;
+                return (mData != nullptr) && (mData->getLength() == Field::kCount);
             }
 
             /**
@@ -58,7 +64,7 @@ namespace SDK
              */
             uint32_t getMask() const
             {
-                return mData.getAsU32(Field::kMask);
+                return mData->getAsU32(Field::kMask);
             }
 
             /**
@@ -67,7 +73,7 @@ namespace SDK
              */
             bool isTimeValid() const
             {
-                return ((mData.getAsU32(Field::kMask) & mMaskTime) != 0) && isDataValid();
+                return ((mData->getAsU32(Field::kMask) & mMaskTime) != 0) && isDataValid();
             }
 
             /**
@@ -76,7 +82,7 @@ namespace SDK
              */
             uint32_t getTime() const
             {
-                return mData.getAsU32(Field::kTime);
+                return mData->getAsU32(Field::kTime);
             }
 
             /**
@@ -85,7 +91,7 @@ namespace SDK
              */
             bool isCoordinatesValid() const
             {
-                return ((mData.getAsU32(Field::kMask) & mMaskCoords) != 0) && isDataValid();
+                return ((mData->getAsU32(Field::kMask) & mMaskCoords) != 0) && isDataValid();
             }
 
             /**
@@ -96,9 +102,9 @@ namespace SDK
              */
             void getCoordinates(float& lat, float& lon, float& alt) const
             {
-                lat = mData.getAsFloat(Field::kLat);
-                lon = mData.getAsFloat(Field::kLon);
-                alt = mData.getAsFloat(Field::kAlt);
+                lat = mData->getAsFloat(Field::kLat);
+                lon = mData->getAsFloat(Field::kLon);
+                alt = mData->getAsFloat(Field::kAlt);
             }
 
             /**
@@ -107,7 +113,7 @@ namespace SDK
              */
             float getLatitude() const
             {
-                return mData.getAsFloat(Field::kLat);
+                return mData->getAsFloat(Field::kLat);
             }
 
             /**
@@ -116,7 +122,7 @@ namespace SDK
              */
             float getLongitude() const
             {
-                return mData.getAsFloat(Field::kLon);
+                return mData->getAsFloat(Field::kLon);
             }
 
             /**
@@ -125,7 +131,7 @@ namespace SDK
              */
             float getAltitude() const
             {
-                return mData.getAsFloat(Field::kAlt);
+                return mData->getAsFloat(Field::kAlt);
             }
 
             /**
@@ -134,7 +140,7 @@ namespace SDK
              */
             bool isSpeedValid() const
             {
-                return ((mData.getAsU32(Field::kMask) & mMaskSpeed) != 0) && isDataValid();
+                return ((mData->getAsU32(Field::kMask) & mMaskSpeed) != 0) && isDataValid();
             }
 
             /**
@@ -143,7 +149,16 @@ namespace SDK
              */
             float getSpeed() const
             {
-                return mData.getAsFloat(Field::kSpeed);
+                return mData->getAsFloat(Field::kSpeed);
+            }
+
+            /**
+             * @brief Get data timestamp in ms
+             * @return Data timestamp in ms (0 if invalid)
+             */
+            uint32_t getTimestamp() const
+            {
+                return isDataValid() ? mData->getTimestamp() : 0;
             }
 
             /**
@@ -173,7 +188,7 @@ namespace SDK
             static constexpr uint8_t mMaskCoords = 0x02;
             static constexpr uint8_t mMaskSpeed  = 0x04;
 
-            const SDK::Interface::ISensorData& mData;
+            const SDK::Interface::ISensorData* mData;
         }; /* class GPS */
     }; /* namespace SensorDataParser */
 

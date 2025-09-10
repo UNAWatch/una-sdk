@@ -62,7 +62,7 @@ namespace SDK::SensorDataParser
 
         /**
          * @brief Get data timestamp in ms
-         * @return Data timestamp in ms (0.0f if invalid)
+         * @return Data timestamp in ms (0 if invalid)
          */
         uint32_t getTimestamp() const
         {
