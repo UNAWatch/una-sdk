@@ -54,10 +54,14 @@ namespace SDK::Sensor
          device has been at rest to trigger this event. */
         STATIONARY_DETECT,
 
-        /*!< A virtual sensor that produces event  if the device has been in
-         motion for at least 5 seconds with a maximal latency of 5 additional
-         seconds. ie: it may take up anywhere from 5 to 10 seconds after the
-         device has been at rest to trigger this event. */
+        /*!< Motion detection virtual sensor event types
+         This virtual sensor reports one of the following event types:
+
+         - 0: No motion — device has stopped moving after previous motion.
+         - 1: Motion — device has started moving (continuous motion detected).
+         - 2: Significant motion — sudden or strong motion event.
+         Typical usage includes detecting activity changes (e.g. start walking),
+         power-saving transitions, or triggering other sensor logic.*/
         MOTION_DETECT,
 
         /*!< A sensor of this type returns an event everytime a heart beat peak
@@ -83,7 +87,25 @@ namespace SDK::Sensor
         /*!< A sensor of this type returns an event every time a step is detected.
              Each event corresponds to a single human step, similar to how
              HEART_BEAT represents a single heartbeat peak. */
-        STEP_DETECTOR
+        STEP_DETECTOR,
+
+        /*!< Activity recognition virtual sensor event types
+         This virtual sensor detects and reports the user's current physical activity.
+
+         Supported activities include:
+         - STILL — user is not moving
+         - WALKING — user is walking
+         - RUNNING — user is running
+
+         Activity events represent ongoing states and may change over time.*/
+        ACTIVITY_RECOGNITION,
+
+        /*!< Gesture recognition virtual sensor
+         This virtual sensor detects and reports discrete user gestures.
+
+         Gesture events are triggered immediately upon recognition.
+         The specific gesture types are implementation-defined. */
+        GESTURE_RECOGNITION,
     };
 
 } /* namespace Sensor */
