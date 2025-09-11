@@ -48,7 +48,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData.getLength() == Field::kCount);
+                return (mData != nullptr) && (mData->getLength() == Field::kCount);
             }
 
             /**
@@ -57,7 +57,7 @@ namespace SDK
              */
             uint32_t getStepCount() const
             {
-                return isDataValid() ? mData.getAsU32(Field::kStepCount) : 0;
+                return isDataValid() ? mData->getAsU32(Field::kStepCount) : 0;
             }
 
             /**
