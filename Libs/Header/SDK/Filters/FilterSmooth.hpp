@@ -22,13 +22,16 @@ public:
     explicit Smooth(float alpha = 0.5f);
 
     void  reset();
+    float forceValue(float value);
     float execute(float value);
     float getValue() const;
     void  setAlpha(float alpha);
     float getAlpha() const;
 
+    bool isReseted() const;
+
 private:
-    bool  mCleared;
+    bool  mReseted;
     float mValue;
     float mAlpha;
 };

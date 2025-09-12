@@ -19,7 +19,7 @@ namespace SDK::Filter {
  * @param alpha Smoothing factor (0 < alpha < 1).
  */
 Smooth::Smooth(float alpha)
-    : mCleared(true)
+    : mReseted(true)
     , mValue(0.0f)
     , mAlpha(0.5f)
 {
@@ -33,7 +33,24 @@ Smooth::Smooth(float alpha)
  */
 void Smooth::reset()
 {
-    mCleared = true;
+    mReseted = true;
+}
+
+/**
+ * @brief Forcefully apply a new value to the filter.
+ *
+ * This method resets the filter state and directly applies the given value
+ * as the current output. Unlike @ref execute, the value is not smoothed
+ * with the previous state.
+ *
+ * @param value Input sample to be applied.
+ * @return The forced output value (equal to @p value).
+ */
+float Smooth::forceValue(float value)
+{
+    reset();
+
+    return execute(value);
 }
 
 /**
@@ -48,9 +65,9 @@ void Smooth::reset()
  */
 float Smooth::execute(float value)
 {
-    if (mCleared) {
+    if (mReseted) {
         mValue   = value;
-        mCleared = false;
+        mReseted = false;
     } else {
         mValue = mValue * mAlpha + value * (1.0f - mAlpha);
     }
@@ -84,6 +101,15 @@ void Smooth::setAlpha(float alpha)
 float Smooth::getAlpha() const
 {
     return mAlpha;
+}
+
+/**
+ * @brief Check if the filter is reseted
+ * @return True - reseted, false otherwise
+ */
+bool Smooth::isReseted() const
+{
+    return mReseted;
 }
 
 } // namespace SDK::Filter
