@@ -29,9 +29,9 @@ namespace SDK::Interface
     public:
         virtual ~ISensorDataListener() = default;
 
-        virtual void onNewSensorData(const SDK::Interface::ISensorDriver*             sensor,
-                                     const std::vector<SDK::Interface::ISensorData*>& data,
-                                     bool                                             first) = 0;
+        virtual void sdlNewData(const SDK::Interface::ISensorDriver*             sensor,
+                                const std::vector<SDK::Interface::ISensorData*>& data,
+                                bool                                             first) = 0;
     }; /* class ISensorDataListener */
 
 } /* namespace Interface */
