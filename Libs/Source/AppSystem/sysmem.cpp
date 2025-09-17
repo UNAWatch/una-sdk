@@ -222,7 +222,6 @@ extern "C" {
 
         while (1) {}    /* Make sure we hang here */
     }
-
 }
 
 namespace __gnu_cxx {
