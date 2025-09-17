@@ -209,13 +209,4 @@ uint32_t SwTimer::passed(void)
     return passed(mPrevSysTimer);
 }
 
-/**
- * @brief Get current system tick in milliseconds.
- * @return Current tick count (monotonic, wraps naturally).
- */
-uint32_t SwTimer::getTicks(void)
-{
-    return kernel->app.getTimeMs();
-}
-
 } // namespace SDK
