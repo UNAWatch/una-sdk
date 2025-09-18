@@ -15,6 +15,11 @@
 
 #include <cstdint>
 #include <cstdbool>
+#include <variant>
+#include <cstdio>
+#include <cstdarg>
+#include <cstring>
+#include <type_traits>
 
 namespace SDK::Interface {
 
@@ -22,19 +27,7 @@ namespace SDK::Interface {
     public:
         virtual ~IGlance() = default;
 
-        enum class AlighH {
-            LEFT,
-            CENTER,
-            RIGHT
-        };
-
-        enum class AlighV { 
-            TOP,
-            CENTER,
-            BOTTOM
-        };
-
-        enum Color {
+        enum Color : uint8_t {
             WHITE        = 0x3F, // C0C0C0 -> 11 11 11
             GRAY         = 0x2A, // 808080 -> 10 10 10
             GRAY_DARK    = 0x15, // 404040 -> 01 01 01
@@ -105,39 +98,253 @@ namespace SDK::Interface {
             uint16_t h;
         };
 
-        class Region {
-        public:
-            Region()
-                : p()
-                , s()
-                , alignH(AlighH::CENTER)
-                , alignV(AlighV::CENTER)
-                , fontID(Font::POPPINS_REGULAR_18)
-            {}
+        //// Payloads
+        struct Text {
+            static constexpr std::size_t kMax = 64;  ///< Buffer size incl. '\0'
 
-            Region(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
-                : p(x, y)
-                , s(w, h)
-                , alignH(AlighH::CENTER)
-                , alignV(AlighV::CENTER)
-                , fontID(Font::POPPINS_REGULAR_18)
-            {}
+            Point   pos{};                                  ///< Text position
+            char    str[kMax]{};                            ///< Storage for text (NUL-terminated)
+            Font    fontID = Font::POPPINS_REGULAR_18;      ///< Default font
+            uint8_t color  = static_cast<uint8_t>(Color::WHITE);  ///< Default color
 
-            Point  p;
-            Size   s;
-            AlighH alignH;
-            AlighV alignV;
-            Font   fontID;
+            /// @brief Replace text with a C-string, clamped to kMax-1 chars.
+            void set(const char* s)
+            {
+                if (!s) {
+                    str[0] = '\0';
+                    return;
+                }
+
+                // snprintf ensures null-termination
+                std::snprintf(str, kMax, "%s", s);
+            }
+
+            /// @brief Append C-string, clamped to buffer.
+            void append(const char* s)
+            {
+                if (!s || !*s) {
+                    return;
+                }
+
+                const std::size_t cur = std::strlen(str);
+
+                if (cur + 1 >= kMax) {
+                    return;
+                }
+
+                const std::size_t cap = kMax - cur - 1;
+                std::strncat(str, s, cap);
+                str[kMax - 1] = '\0';
+            }
+
+            /// @brief printf-like into the same buffer.
+            void print(const char* fmt, ...)
+            {
+                if (!fmt) {
+                    str[0] = '\0';
+                    return;
+                }
+
+                va_list args;
+                va_start(args, fmt);
+            #if defined(_MSC_VER)
+                _vsnprintf_s(str, kMax, _TRUNCATE, fmt, args);
+            #else
+                std::vsnprintf(str, kMax, fmt, args);
+                str[kMax - 1] = '\0';
+            #endif
+                va_end(args);
+            }
         };
 
-        //// API
-        virtual Size getRegionSize()                                                       = 0;
-        virtual void fill(const Region& r, uint8_t color)                                  = 0;
-        virtual void line(const Point& from, const Point& to, uint8_t color)               = 0;
-        virtual void circle(const Point& center, uint16_t radius, uint8_t color)           = 0;
-        virtual void text(const Region&  r, const char* str)                               = 0;
-        virtual void image(const Region& r, uint16_t w, uint16_t h, const uint8_t* image)  = 0;
-        virtual void image(const Region& r, uint16_t w, uint16_t h, const char* file)      = 0;
+        struct Image {
+            Point       pos{};
+            Size        size{};
+            const char* buff = nullptr; // Points to persistent image data
+        };
+
+        struct Line {
+            Point   start{};
+            Point   stop{};
+            uint8_t color = Color::WHITE;
+        };
+
+        struct Rectangle {
+            Point   pos{};
+            Size    size{};
+            uint8_t color           = Color::WHITE; // Color Line
+            uint8_t colorBackground = Color::BLACK;
+            bool    transparent     = false;
+        };
+
+        using Data = std::variant<std::monostate, Text, Image, Line, Rectangle>;
+
+        class Tile {
+        public:
+            Tile() : data(Text{ {}, "", Font::POPPINS_REGULAR_18, Color::WHITE })
+            {}
+
+            Data data;
+
+            // --- Full "emplace" setters (init all important fields at once) ---
+            Tile& setText(Point pos, const char* s, Font fontID, uint8_t color)
+            {
+                Text t;
+
+                t.pos    = pos;
+                t.fontID = fontID;
+                t.color  = color;
+                t.set(s);
+
+                data = t;
+
+                return *this;
+            }
+
+            Tile& setImage(Point p, Size sz, const char* b)
+            {
+                data = Image{ p, sz, b };
+
+                return *this;
+            }
+
+            Tile& setLine(Point a, Point b, uint8_t color)
+            {
+                data = Line{ a, b, color };
+
+                return *this;
+            }
+
+            Tile& setRectangle(Point pos, Size size, uint8_t lineColor, uint8_t bgColor, bool transparent=false)
+            {
+                data = Rectangle{ pos, size, lineColor, bgColor, transparent };
+
+                return *this;
+            }
+
+            // --- Fluent helpers to tweak geometry after type is chosen ---
+            /// @brief Set position depending on active type (ext/Image/Rectangle: pos).
+            Tile& at(Point pos)
+            {
+                std::visit([&](auto& v) {
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, Text> || std::is_same_v<T, Image> || std::is_same_v<T, Rectangle>) {
+                        v.pos = pos;
+                    }
+                  }, data);
+
+                return *this;
+            }
+
+            /// @brief Resize for types that have Size.
+            Tile& size(Size size)
+            {
+                std::visit([&](auto& v){
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, Image> || std::is_same_v<T, Rectangle>) {
+                        v.size = size;
+                    }
+                }, data);
+
+                return *this;
+            }
+
+            /// @brief Update color
+            Tile& color(uint8_t color)
+            {
+                std::visit([&](auto& v){
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, Text> || std::is_same_v<T, Line> || std::is_same_v<T, Rectangle>) {
+                        v.color = color;
+                    }
+                }, data);
+
+                return *this;
+            }
+
+            /// @brief Update color
+            Tile& bgColor(uint8_t color)
+            {
+                std::visit([&](auto& v){
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, Rectangle>) {
+                        v.colorBackground = color;
+                    }
+                }, data);
+
+                return *this;
+            }
+
+            /// @brief Toggle rectangle transparency.
+            Tile& setTransparent(bool t)
+            {
+                if (auto* v = std::get_if<Rectangle>(&data)) {
+                    v->transparent = t;
+                }
+
+                return *this;
+            }
+
+            // Minimal setText that only updates text on existing Text payload,
+            // or creates a default Text once and preserves style/pos next time.
+            Tile& setText(const char* s)
+            {
+                Text& t = ensureText();
+
+                t.set(s);
+
+                return *this;
+            }
+
+            Tile& appendText(const char* s)
+            {
+                Text& t = ensureText();
+
+                t.append(s);
+
+                return *this;
+            }
+
+            Tile& printText(const char* fmt, ...)
+            {
+                Text& t = ensureText();
+
+                va_list args;
+                va_start(args, fmt);
+            #if defined(_MSC_VER)
+                _vsnprintf_s(t.str, Text::kMax, _TRUNCATE, fmt, args);
+            #else
+                std::vsnprintf(t.str, Text::kMax, fmt, args);
+                t.str[Text::kMax - 1] = '\0';
+            #endif
+                va_end(args);
+
+                return *this;
+            }
+
+        private:
+            /// Ensure variant holds Text; if not, switch once to default Text.
+            Text& ensureText()
+            {
+                if (auto* t = std::get_if<Text>(&data)) {
+                    return *t;
+                }
+
+                data = Text{};
+
+                return std::get<Text>(data);
+            }
+        };
+
+//        std::vector<TileData> tiles;
+//        tiles.reserve(8); // не обов'язково, але корисно
+//
+//        tiles.emplace_back().setText("Hello", Font::Small, /*color*/ 0x2A);
+//        tiles.emplace_back().setLine({0,10}, {50,10}, /*color*/ 0x10);
+//        tiles.emplace_back().setRectangle({{5,5}}, {{40,20}}, /*line*/0x30, /*bg*/0x00);
+//        tiles.emplace_back().setImage(myIconPtr);
+//
+//        render(tiles); // передав кудись
     };
 
 }
