@@ -23,6 +23,18 @@ extern "C" {
 #define GLANCE_TEXT_SIZE    (16)
 
 typedef enum {
+    GLANCE_ALIGN_H_LEFT = 0,
+    GLANCE_ALIGN_H_CENTER,
+    GLANCE_ALIGN_H_RIGHT
+} GlanceAlignH_t;
+
+typedef enum {
+    GLANCE_ALIGN_V_TOP = 0,
+    GLANCE_ALIGN_V_CENTER,
+    GLANCE_ALIGN_V_BOTTOM
+} GlanceAlignV_t;
+
+typedef enum {
     GLANCE_TYPE_TEXT = 0,
     GLANCE_TYPE_IMAGE,
     GLANCE_TYPE_LINE,

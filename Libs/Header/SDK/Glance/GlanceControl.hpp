@@ -24,6 +24,59 @@
 
 namespace SDK::Glance {
 
+    GlancePoint_t align(GlancePoint_t  areaPos,
+                        GlanceSize_t   areaSize,
+                        GlanceSize_t   objSize,
+                        GlanceAlignH_t alignH,
+                        GlanceAlignV_t alignV)
+    {
+        // Signed deltas to avoid unsigned underflow
+        int32_t dx = (int32_t)areaSize.w - (int32_t)objSize.w;
+        int32_t dy = (int32_t)areaSize.h - (int32_t)objSize.h;
+
+        // Horizontal placement (X): LEFT/CENTER/RIGHT lives in alignH
+        int32_t offX;
+        switch (alignH) {
+            case GLANCE_ALIGN_H_LEFT:   offX = 0;      break;
+            case GLANCE_ALIGN_H_CENTER: offX = dx / 2; break;
+            case GLANCE_ALIGN_H_RIGHT:  offX = dx;     break;
+            default:                    offX = 0;      break;
+        }
+
+        // Vertical placement (Y): TOP/CENTER/BOTTOM lives in alignV
+        int32_t offY;
+        switch (alignV) {
+            case GLANCE_ALIGN_V_TOP:    offY = 0;      break;
+            case GLANCE_ALIGN_V_CENTER: offY = dy / 2; break;
+            case GLANCE_ALIGN_V_BOTTOM: offY = dy;     break;
+            default:                    offY = 0;      break;
+        }
+
+        // Clamp negatives to avoid underflow when object is larger than area
+        if (offX < 0) {
+            offX = 0;
+        }
+
+        if (offY < 0) {
+            offY = 0;
+        }
+
+        uint32_t x = (uint32_t)areaPos.x + (uint32_t)offX;
+        uint32_t y = (uint32_t)areaPos.y + (uint32_t)offY;
+
+        if (x > 0xFFFFu) {
+            x = 0xFFFFu;
+        }
+
+        if (y > 0xFFFFu) {
+            y = 0xFFFFu;
+        }
+
+        GlancePoint_t pos = { static_cast<uint16_t>(x), static_cast<uint16_t>(y) };
+
+        return pos;
+    }
+
     class Control {
     public:
         Control(GlanceControl_t& control, GlanceType_t t)
@@ -87,13 +140,18 @@ namespace SDK::Glance {
             return *this;
         }
 
-        ControlText& at(GlancePoint_t pos)
+        ControlText& pos(GlancePoint_t pos)
         {
             mText.pos = pos;
 
             invalidate();
 
             return *this;
+        }
+
+        GlancePoint_t pos()
+        {
+            return mText.pos;
         }
 
         ControlText& font(GlanceFont_t id)
@@ -184,13 +242,18 @@ namespace SDK::Glance {
             return *this;
         }
 
-        ControlImage& at(GlancePoint_t pos)
+        ControlImage& pos(GlancePoint_t pos)
         {
             mImage.pos = pos;
 
             invalidate();
 
             return *this;
+        }
+
+        GlancePoint_t pos()
+        {
+            return mImage.pos;
         }
 
         /// @brief Resize for types that have GlanceSize_t.
@@ -227,13 +290,18 @@ namespace SDK::Glance {
             return *this;
         }
 
-        ControlLine& at(GlancePoint_t start)
+        ControlLine& pos(GlancePoint_t start)
         {
             mLine.start = start;
 
             invalidate();
 
             return *this;
+        }
+
+        GlancePoint_t pos()
+        {
+            return mLine.start;
         }
 
         ControlLine& to(GlancePoint_t stop)
@@ -284,13 +352,18 @@ namespace SDK::Glance {
             return *this;
         }
 
-        ControlRectangle& at(GlancePoint_t pos)
+        ControlRectangle& pos(GlancePoint_t p) noexcept
         {
-            mRect.pos = pos;
+            mRect.pos = p;
 
             invalidate();
 
             return *this;
+        }
+
+        GlancePoint_t pos() const noexcept
+        {
+            return mRect.pos;
         }
 
         ControlRectangle& size(GlanceSize_t sz)
@@ -302,6 +375,11 @@ namespace SDK::Glance {
             return *this;
         }
         
+        GlanceSize_t size()
+        {
+            return mRect.size;
+        }
+
         ControlRectangle& color(uint8_t color)
         {
             mRect.color = color;
