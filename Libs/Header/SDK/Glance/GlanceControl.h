@@ -128,14 +128,6 @@ typedef struct {
     GlancePayload_t payload;
 } GlanceControl_t;
 
-
-// GlanceControl_t mControls[5];
-
-// ControlText      text(mControls[0]);
-// ControlImage     image(mControls[1]);
-// ControlLine      line(mControls[2]);
-// ControlRectangle rect(mControls[3]);
-
 #ifdef __cplusplus
 }
 #endif

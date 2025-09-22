@@ -13,14 +13,14 @@
 #ifndef __GLANCE_CONTROL_HPP
 #define __GLANCE_CONTROL_HPP
 
-#include "SDK/Glance/GlanceControl.h"
+#include "SDK/Glance/GlanceControlText.hpp"
+#include "SDK/Glance/GlanceControlImage.hpp"
+#include "SDK/Glance/GlanceControlLine.hpp"
+#include "SDK/Glance/GlanceControlRect.hpp"
 
 #include <cstdint>
 #include <cstdbool>
-#include <cstdio>
-#include <cstdarg>
-#include <cstring>
-#include <stdlib.h>
+#include <vector>
 
 namespace SDK::Glance {
 
@@ -77,374 +77,105 @@ namespace SDK::Glance {
         return pos;
     }
 
-    class Control {
-    public:
-        Control(GlanceControl_t& control, GlanceType_t t)
-            : mControl(control)
-        {
-            memset(&mControl, 0, sizeof(GlanceControl_t));
-
-            mControl.type = t;
-        }
-
-        virtual ~Control() = default;
-
-        void invalidate()
-        {
-            mControl.valid = false;
-        }
-
-    private:
-        GlanceControl_t& mControl;
-    };
-
-    class ControlText : public Control {
-    public:
-        ControlText(GlanceControl_t& control)
-            : Control(control, GLANCE_TYPE_TEXT)
-            , mText(control.payload.text)
-        {}
-
-        virtual ~ControlText() = default;
-
-        ControlText& init(GlancePoint_t pos, const char* s, GlanceFont_t fontID, uint8_t color)
-        {
-            const char* str = (s == nullptr) ? "" : s;
-
-            if ((strlen(str) >= GLANCE_TEXT_SIZE)) {
-                return *this;
-            }
-            
-            mText.pos    = pos;
-            mText.font   = fontID;
-            mText.color  = color;
-            strcpy(mText.str, str);
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlText& setText(const char* s = nullptr)
-        {
-            const char* str = (s == nullptr) ? "" : s;
-
-            if ((strlen(str) >= GLANCE_TEXT_SIZE)) {
-                return *this;
-            }
-            
-            strcpy(mText.str, str);
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlText& pos(GlancePoint_t pos)
-        {
-            mText.pos = pos;
-
-            invalidate();
-
-            return *this;
-        }
-
-        GlancePoint_t pos()
-        {
-            return mText.pos;
-        }
-
-        ControlText& font(GlanceFont_t id)
-        {
-            mText.font = id;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlText& color(uint8_t color)
-        {
-            mText.color = color;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlText& appendText(const char* s)
-        {
-            if (s == nullptr) {
-                return *this;
-            }
-
-            const std::size_t cur = std::strlen(mText.str);
-
-            if (cur + 1 >= GLANCE_TEXT_SIZE) {
-                return *this;
-            }
-
-            const std::size_t cap = GLANCE_TEXT_SIZE - cur - 1;
-            std::strncat(mText.str, s, cap);
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlText& print(const char* fmt, ...)
-        {
-          va_list args;
-            va_start(args, fmt);
-        #if defined(_MSC_VER)
-            _vsnprintf_s(mText.str, GLANCE_TEXT_SIZE, _TRUNCATE, fmt, args);
-        #else
-            std::vsnprintf(mText.str, GLANCE_TEXT_SIZE, fmt, args);
-            mText.str[GLANCE_TEXT_SIZE - 1] = '\0';
-        #endif
-            va_end(args);
-
-            invalidate();
-
-            return *this;
-        }
-    private:
-        GlanceText_t& mText;
-    };
-
-
-    class ControlImage : public Control {
-    public:
-        ControlImage(GlanceControl_t& control)
-            : Control(control, GLANCE_TYPE_IMAGE)
-            , mImage(control.payload.image)
-        {}
-
-        virtual ~ControlImage() = default;
-
-        ControlImage& init(GlancePoint_t pos, GlanceSize_t size, const uint8_t* buff)
-        {
-            mImage.pos  = pos;
-            mImage.size = size;
-            mImage.buff = buff;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlImage& setImage(const uint8_t* buff)
-        {
-            mImage.buff = buff;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlImage& pos(GlancePoint_t pos)
-        {
-            mImage.pos = pos;
-
-            invalidate();
-
-            return *this;
-        }
-
-        GlancePoint_t pos()
-        {
-            return mImage.pos;
-        }
-
-        /// @brief Resize for types that have GlanceSize_t.
-        ControlImage& size(GlanceSize_t size)
-        {
-            mImage.size = size;
-
-            invalidate();
-
-            return *this;
-        }
-
-    private:
-        GlanceImage_t& mImage;
-    };
-
-    class ControlLine : public Control {
-    public:
-        ControlLine(GlanceControl_t& control)
-            : Control(control, GLANCE_TYPE_LINE)
-            , mLine(control.payload.line)
-        {}
-
-        virtual ~ControlLine() = default;
-
-        ControlLine& init(GlancePoint_t start, GlancePoint_t stop, uint8_t color)
-        {
-            mLine.start = start;
-            mLine.stop  = stop;
-            mLine.color = color;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlLine& pos(GlancePoint_t start)
-        {
-            mLine.start = start;
-
-            invalidate();
-
-            return *this;
-        }
-
-        GlancePoint_t pos()
-        {
-            return mLine.start;
-        }
-
-        ControlLine& to(GlancePoint_t stop)
-        {
-            mLine.stop = stop;
-
-            invalidate();
-
-            return *this;
-        }
-        
-        ControlLine& color(uint8_t color)
-        {
-            mLine.color = color;
-
-            invalidate();
-
-            return *this;
-        }
-
-    private:
-        GlanceLine_t& mLine;
-    };
-
-    class ControlRectangle : public Control {
-    public:
-        ControlRectangle(GlanceControl_t& control)
-            : Control(control, GLANCE_TYPE_RECT)
-            , mRect(control.payload.rect)
-        {}
-
-        virtual ~ControlRectangle() = default;
-
-        ControlRectangle& init(GlancePoint_t pos,
-                  GlanceSize_t  size,
-                  uint8_t       lineColor,
-                  uint8_t       bgColor,
-                  bool          fill = true)
-        {
-            mRect.pos     = pos;
-            mRect.size    = size;
-            mRect.color   = lineColor;
-            mRect.bgColor = bgColor;
-            mRect.fill    = fill;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlRectangle& pos(GlancePoint_t p) noexcept
-        {
-            mRect.pos = p;
-
-            invalidate();
-
-            return *this;
-        }
-
-        GlancePoint_t pos() const noexcept
-        {
-            return mRect.pos;
-        }
-
-        ControlRectangle& size(GlanceSize_t sz)
-        {
-            mRect.size = sz;
-
-            invalidate();
-
-            return *this;
-        }
-        
-        GlanceSize_t size()
-        {
-            return mRect.size;
-        }
-
-        ControlRectangle& color(uint8_t color)
-        {
-            mRect.color = color;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlRectangle& bgColor(uint8_t color)
-        {
-            mRect.bgColor = color;
-
-            invalidate();
-
-            return *this;
-        }
-
-        ControlRectangle& fill(bool f = true)
-        {
-            mRect.fill = f;
-
-            invalidate();
-
-            return *this;
-        }
-
-    private:
-        GlanceRect_t& mRect;
-    };
-
-    template<std::size_t N>
+    /**
+     * @brief Builder/container for a contiguous list of Glance controls.
+     *
+     * This class owns a dynamically-growing contiguous buffer of `GlanceControl_t`
+     * and provides typed factory methods (`createText()`, `createImage()`, etc.)
+     * that append a new record and return a lightweight view (e.g., `ControlText`)
+     * bound to the internal storage and the index of the created element.
+     *
+     * @note The returned views are non-owning and are expected to reference the
+     *       internal vector by (vector, index). Appending more items does not
+     *       invalidate such views (they re-locate the element by index each time).
+     *       However, any raw pointer obtained via `data()` may be invalidated by
+     *       subsequent appends if reallocation occurs. Prefer to call `data()` only
+     *       after you finish building the form for the current frame.
+     */
     class Form {
     public:
+        /**
+         * @brief Constructs an empty form with an initial reserved capacity.
+         *
+         * The constructor reserves space for 16 elements to reduce early reallocations.
+         * Capacity will grow automatically as needed on subsequent appends.
+         */
         explicit Form() noexcept
             : mControls{}
-            , mIndex()
-        {}
-
-        size_t size()     const noexcept { return mIndex; }
-        size_t capacity() const noexcept { return N;      }
-
-        GlanceControl_t&       data()       noexcept { return mControls; }
-        const GlanceControl_t& data() const noexcept { return mControls; }
-
-        ControlText      createText()  { return ControlText     { next(GLANCE_TYPE_TEXT)  }; }
-        ControlImage     createImage() { return ControlImage    { next(GLANCE_TYPE_IMAGE) }; }
-        ControlLine      createLine()  { return ControlLine     { next(GLANCE_TYPE_LINE)  }; }
-        ControlRectangle createRect()  { return ControlRectangle{ next(GLANCE_TYPE_RECT)  }; }
-
-    private:
-        GlanceControl_t& next(GlanceType_t t)
         {
-            assert(mIndex < N && "Form: out of capacity");
-
-            auto& control = mControls[mIndex++];
-
-            control.type  = t;
-
-            return control;
+            mControls.reserve(16);
         }
 
-        GlanceControl_t mControls[N];
-        size_t          mIndex;
+        /**
+         * @brief Current number of controls stored in the form.
+         * @return The number of appended elements.
+         *
+         * @warning Calling `create*()` after taking a raw pointer from `data()`
+         *          may invalidate that pointer due to vector reallocation.
+         *          Fetch `data()`/`size()` after you finish building.
+         */
+        size_t size() { return mControls.size(); }
+
+        /**
+         * @brief Returns a raw pointer to the underlying contiguous array.
+         * @return Pointer to the first element, or `nullptr` if the form is empty.
+         *
+         * @note The memory is owned by this `Form` and remains valid until the
+         *       `Form` is destroyed or the internal vector reallocated (e.g., by
+         *       calling another `create*()` that grows capacity).
+         */
+        GlanceControl_t* data() { return mControls.data(); }
+
+        /**
+         * @brief Appends a new TEXT control and returns a typed view for configuration.
+         * @return A lightweight `ControlText` view bound to the newly appended record.
+         */
+        ControlText createText()  { return ControlText(mControls, append(GLANCE_TYPE_TEXT));      }
+
+        /**
+         * @brief Appends a new IMAGE control and returns a typed view for configuration.
+         * @return A lightweight `ControlImage` view bound to the newly appended record.
+         */
+        ControlImage createImage() { return ControlImage(mControls, append(GLANCE_TYPE_IMAGE));    }
+
+        /**
+         * @brief Appends a new LINE control and returns a typed view for configuration.
+         * @return A lightweight `ControlLine` view bound to the newly appended record.
+         */
+        ControlLine createLine()  { return ControlLine(mControls, append(GLANCE_TYPE_LINE));      }
+
+        /**
+         * @brief Appends a new RECT control and returns a typed view for configuration.
+         * @return A lightweight `ControlRectangle` view bound to the newly appended record.
+         */
+        ControlRectangle createRect()  { return ControlRectangle(mControls, append(GLANCE_TYPE_RECT)); }
+
+    private:
+        /**
+         * @brief Appends a zero-initialized control with the given type tag.
+         *
+         * The new record is value-initialized (`GlanceControl_t{}`), then its
+         * `type` field is set to @p t, and it is pushed to the end of the vector.
+         *
+         * @param t The type tag to place into the new `GlanceControl_t`.
+         * @return The index of the newly appended element (0-based).
+         *
+         * @complexity Amortized O(1). May trigger reallocation when capacity grows.
+         */
+        std::size_t append(GlanceType_t t)
+        {
+            GlanceControl_t c{};
+            c.type = t;
+            
+            mControls.push_back(c);
+            
+            return mControls.size() - 1;
+        }
+
+        /** @brief Contiguous storage of control records owned by this form. */
+        std::vector<GlanceControl_t> mControls;
     };
+
 }
 
 #endif
