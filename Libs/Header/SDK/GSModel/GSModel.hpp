@@ -3,6 +3,7 @@
 
 #include "SDK/GSModel/IGUIModel.hpp"
 #include "SDK/CircularBuffer.hpp"
+#include "SDK/AppSystem/AppKernel.hpp"
 
 #include <type_traits>
 #include <variant>
@@ -12,10 +13,10 @@ template<typename S2G, typename G2S, typename SH, typename GH>
 class GSModel : public IGUIModel<G2S, GH>
 {
 public:
-    GSModel(const IKernel& kernel, SH& handler)
-        : mServiceKernel(kernel)
-        , mS2GQueue(kernel)
-        , mG2SQueue(kernel)
+    GSModel(SH& handler)
+        : mServiceKernel(SDK::Kernel::GetInstance())
+        , mS2GQueue(mServiceKernel)
+        , mG2SQueue(mServiceKernel)
         , mServiceHandler(handler)
     {
         mS2GQueue.init();
@@ -69,7 +70,7 @@ public:
     }
 
 private:
-    const IKernel&          mServiceKernel;
+    const SDK::Kernel&      mServiceKernel;
     CircularBuffer<S2G, 20> mS2GQueue;
     CircularBuffer<G2S, 20> mG2SQueue;
     SH&                     mServiceHandler;

@@ -9,7 +9,7 @@
  */
 
 #include "SDK/SwTimer/SwTimer.hpp"
-#include "SDK/Interfaces/IKernel.hpp"
+#include "SDK/AppSystem/AppKernel.hpp"
 
 /// Global kernel pointer (defined elsewhere in system).
 extern const IKernel* kernel;
@@ -23,7 +23,7 @@ namespace SDK
  */
 uint32_t SwTimer::getTicks(void)
 {
-    return kernel->app.getTimeMs();
+    return SDK::Kernel::GetInstance().app.getTimeMs();
 }
 
 } // namespace SDK

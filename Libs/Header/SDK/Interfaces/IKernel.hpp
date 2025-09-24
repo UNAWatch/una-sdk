@@ -1,18 +1,18 @@
 /**
  ******************************************************************************
  * @file    IKernel.hpp
- * @date    05-09-2024
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   This struct contains APIs for calling system functions
-            It is basically a jump table.
-            Depending on weather the KERNEL is built or the libs for the app,
-            different sys_struct definitions are compiled.
-            For Kernel:
-                The complete struct with each member is compiled
-            For userlib for the app:
-                Only a 'const sys_struct* sys' pointer is defined. The address
-                of this pointer is made to point to the actual sys_struct in
-                the kernel at load time in the LoadApp API.
+ * @date    24-September-2022
+ * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
+ * @brief   Kernel interface for dynamic service discovery.
+ * @details This header defines the @c IKernel interface used to obtain pointers
+ *          to subsystem interfaces (e.g., power, settings, filesystem) at run time.
+ *          Services are addressed via the @ref IKernel::IntfID enumeration and
+ *          retrieved through a COM-style @ref IKernel::queryInterface method.
+ *
+ * @note    Returned pointers are borrowed (non-owning) and remain valid as long
+ *          as the underlying kernel instance and the corresponding service exist.
+ *          Callers must cast the returned @c void* back to the requested interface
+ *          type that matches the provided @ref IKernel::IntfID.
  ******************************************************************************
  *
  ******************************************************************************
@@ -23,8 +23,8 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <cassert>
 
-// Kernel interfaces
 #include "SDK/Interfaces/IPower.hpp"
 #include "SDK/Interfaces/ISettings.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
@@ -37,59 +37,32 @@
 #include "SDK/Interfaces/IVibro.hpp"
 #include "SDK/Interfaces/IBuzzer.hpp"
 
+#define DUMMY_KERNEL_ADDR           (0xA5A5A5A5)
 #define KERNEL_INTERFACE_VERSION    (0)
 
-struct IKernel {
-    IKernel(SDK::Interface::IPower               &pwr,
-            SDK::Interface::ISettings            &settings,
-            SDK::Interface::IFileSystem          &fs,
-            SDK::Interface::IUserAppMemAllocator &mem,
-            SDK::Interface::ISynchManager        &synchManager,
-            SDK::Interface::ISensorManager       &sensorManager,
-            SDK::Interface::IUserApp             &app,
-            SDK::Interface::IServiceControl      &sctrl,
-            SDK::Interface::IGUIControl          &gctrl,
-            SDK::Interface::IBacklight           &backlight,
-            SDK::Interface::IVibro               &vibro,
-            SDK::Interface::IBuzzer              &buzzer)
-        : pwr(pwr)
-        , settings(settings)
-        , fs(fs)
-        , mem(mem)
-        , synchManager(synchManager)
-        , sensorManager(sensorManager)
-        , app(app)
-        , sctrl(sctrl)
-        , gctrl(gctrl)
-        , backlight(backlight)
-        , vibro(vibro)
-        , buzzer(buzzer)
-    {
-    }
+class IKernel {
+public:
+    enum class IntfID : uint32_t {
+        IID_POWER = 0,          // SDK::Interface::IPower
+        IID_SETTINGS,           // SDK::Interface::ISettings
+        IID_FILESYSTEM,         // SDK::Interface::IFileSystem
+        IID_MEM_ALLOCATOR,      // SDK::Interface::IUserAppMemAllocator
+        IID_SYNCH_MANAGER,      // SDK::Interface::ISynchManager
+        IID_SENSOR_MANAGER,     // SDK::Interface::ISensorManager
+        IID_USER_APP,           // SDK::Interface::IUserApp
+        IID_SERVICE_CONTROL,    // SDK::Interface::IServiceControl
+        IID_GUI_CONTROL,        // SDK::Interface::IGUIControl
+        IID_BACKLIGHT,          // SDK::Interface::IBacklight
+        IID_VIBRO,              // SDK::Interface::IVibro
+        IID_BUZZER,             // SDK::Interface::IBuzzer
+        IID_COUNT               // Number of entries
+    };
 
-    const uint32_t version = KERNEL_INTERFACE_VERSION;
+    virtual ~IKernel() = default;
 
-    // Common interfaces
-    SDK::Interface::IPower    &pwr;
-    SDK::Interface::ISettings &settings;
+    uint32_t version = KERNEL_INTERFACE_VERSION;
 
-    // Individual interfaces for each app
-    SDK::Interface::IFileSystem          &fs;
-    SDK::Interface::IUserAppMemAllocator &mem;
-    SDK::Interface::ISynchManager        &synchManager;
-    SDK::Interface::ISensorManager       &sensorManager;
-    SDK::Interface::IUserApp             &app;
-
-    // Control
-    SDK::Interface::IServiceControl &sctrl;
-    SDK::Interface::IGUIControl     &gctrl;
-
-    // Feedback controller interfaces
-    SDK::Interface::IBacklight &backlight;
-    SDK::Interface::IVibro     &vibro;
-    SDK::Interface::IBuzzer    &buzzer;
+    virtual void* queryInterface(IntfID iid) const = 0;
 };
-
-#define DUMMY_KERNEL_ADDR  (0xA5A5A5A5)
 
 #endif /* __INTERFACE_I_KERNEL_HPP */
