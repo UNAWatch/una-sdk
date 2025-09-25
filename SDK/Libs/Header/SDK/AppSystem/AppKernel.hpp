@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file    AppKernel.hpp
- * @date    24-September-2022
+ * @date    24-September-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Client-side Kernel facade that binds interface references via IKernel::queryInterface.
  * @details This wrapper resolves all required subsystem interfaces from a provided @c IKernel
@@ -31,18 +31,18 @@ namespace SDK {
     public:
         static Kernel& GetInstance();
 
-        SDK::Interface::IPower               &pwr;
-        SDK::Interface::ISettings            &settings;
-        SDK::Interface::IFileSystem          &fs;
-        SDK::Interface::IUserAppMemAllocator &mem;
-        SDK::Interface::ISynchManager        &synchManager;
-        SDK::Interface::ISensorManager       &sensorManager;
-        SDK::Interface::IUserApp             &app;
-        SDK::Interface::IServiceControl      &sctrl;
-        SDK::Interface::IGUIControl          &gctrl;
-        SDK::Interface::IBacklight           &backlight;
-        SDK::Interface::IVibro               &vibro;
-        SDK::Interface::IBuzzer              &buzzer;
+        SDK::Interface::IPower&               pwr;
+        SDK::Interface::ISettings&            settings;
+        SDK::Interface::IFileSystem&          fs;
+        SDK::Interface::IUserAppMemAllocator& mem;
+        SDK::Interface::ISynchManager&        synchManager;
+        SDK::Interface::ISensorManager&       sensorManager;
+        SDK::Interface::IUserApp&             app;
+        SDK::Interface::IServiceControl&      sctrl;
+        SDK::Interface::IGUIControl&          gctrl;
+        SDK::Interface::IBacklight&           backlight;
+        SDK::Interface::IVibro&               vibro;
+        SDK::Interface::IBuzzer&              buzzer;
 
     private:
         Kernel();

@@ -1,5 +1,8 @@
 /**
+ ******************************************************************************
  * @file    UserAppCppAdapters.hpp
+ * @date    24-September-2025
+ * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   C++ adapters for C runtime hooks that use kernel services.
  * @details Provides inline C++ wrappers that call into the client-side Kernel
  *          facade instead of using a global `kernel` pointer. Include this
@@ -12,6 +15,10 @@
  * @code
  * extern "C" void* _sbrk(ptrdiff_t incr) { return _sbrk_cpp_adapter(incr); }
  * @endcode
+ *
+ ******************************************************************************
+ *
+ ******************************************************************************
  */
 
 #ifndef USER_APP_CPP_ADAPTERS_HPP

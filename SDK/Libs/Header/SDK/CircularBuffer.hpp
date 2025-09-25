@@ -22,8 +22,8 @@ class CircularBuffer {
 public:
     using ValueType = T;
 
-    CircularBuffer()
-        : mKernel(SDK::Kernel::GetInstance())
+    CircularBuffer(const SDK::Kernel& kernel)
+        : mKernel(kernel)
         , mMutex{}
         , mNotEmpty{}
         , mNotFull{}
