@@ -15,7 +15,7 @@
 #ifndef __KERNEL_MANAGER_HPP
 #define __KERNEL_MANAGER_HPP
 
-#include "SDK/Interfaces/IKernel.hpp"
+#include "SDK/AppSystem/AppKernel.hpp"
 
 /**
  * @class KernelManager
@@ -25,7 +25,7 @@
 class KernelManager
 {
 public:
-    static KernelManager& CreateInstance(const IKernel* kernel)
+    static KernelManager& CreateInstance(const SDK::Kernel* kernel)
     {
         static bool initialized;
         
@@ -46,7 +46,7 @@ public:
         return mInstance;
     }
 
-    const IKernel* getKernel()
+    const SDK::Kernel* getKernel()
     {
         return mKernel;
     }
@@ -55,12 +55,12 @@ private:
     KernelManager() : mKernel(nullptr)
     {}
 
-    void init(const IKernel* kernel)
+    void init(const SDK::Kernel* kernel)
     {
         mKernel = kernel;
     }
     
-    const IKernel* mKernel;
+    const SDK::Kernel* mKernel;
 };
 
 
