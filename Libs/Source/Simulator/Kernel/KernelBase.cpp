@@ -32,18 +32,18 @@ KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interf
     , mBuzer()
     , mVibro()
     , mSensoreCore(sensoreCore)
-    , mKernel(new IKernel(mIPower,
-                          mISettings,
-                          mIFilesystem,
-                          mIUserAppMemAllocator,
-                          mSynchManager,
-                          mSensorManager,
-                          mIUserApp,
-                          mServiceControl,
-                          mServiceControl,
-                          mBacklight,
-                          mVibro,
-                          mBuzer))
+    , mKernel(new SDK::Kernel(mIPower,
+                              mISettings,
+                              mIFilesystem,
+                              mIUserAppMemAllocator,
+                              mSynchManager,
+                              mSensorManager,
+                              mIUserApp,
+                              mServiceControl,
+                              mServiceControl,
+                              mBacklight,
+                              mVibro,
+                              mBuzer))
 {
 }
 
@@ -78,7 +78,7 @@ bool KernelBase::keyFilter(uint8_t key)
              Gui::Config::Button::L1R2 == key));
 }
 
-const IKernel* KernelBase::getIKernel()
+const SDK::Kernel* KernelBase::getKernel()
 {
     return mKernel;
 }

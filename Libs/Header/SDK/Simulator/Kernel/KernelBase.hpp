@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <string>
 
-#include "SDK/Interfaces/IKernel.hpp"
+#include "SDK/Kernel/Kernel.hpp"
 #include "SDK/SynchManager/SynchManager.hpp"
 
 #include "SDK/Simulator/Sensors/ISensorCore.hpp"
@@ -89,7 +89,7 @@ public:
      * @brief   Get the pointer to the kernel interface.
      * @retval  Pointer to the kernel interface (IKernel).
      */
-    const IKernel* getIKernel();
+    const SDK::Kernel* getKernel();
 
     std::string getFsPath();
 
@@ -111,7 +111,7 @@ private:
 
     friend class KernelHolder;
 
-    const IKernel* mKernel;
+    const SDK::Kernel* mKernel;
 };
 
 
