@@ -46,10 +46,8 @@ public:
         IID_POWER = 0,          // SDK::Interface::IPower
         IID_SETTINGS,           // SDK::Interface::ISettings
         IID_FILESYSTEM,         // SDK::Interface::IFileSystem
-        IID_MEM_ALLOCATOR,      // SDK::Interface::IUserAppMemAllocator
         IID_SYNCH_MANAGER,      // SDK::Interface::ISynchManager
         IID_SENSOR_MANAGER,     // SDK::Interface::ISensorManager
-        IID_USER_APP,           // SDK::Interface::IUserApp
         IID_SERVICE_CONTROL,    // SDK::Interface::IServiceControl
         IID_GUI_CONTROL,        // SDK::Interface::IGUIControl
         IID_BACKLIGHT,          // SDK::Interface::IBacklight
@@ -58,9 +56,18 @@ public:
         IID_COUNT               // Number of entries
     };
 
+    IKernel(SDK::Interface::IUserApp             &app,
+            SDK::Interface::IUserAppMemAllocator &mem)
+        : app(app)
+        , mem(mem)
+    {}
+
     virtual ~IKernel() = default;
 
     uint32_t version = KERNEL_INTERFACE_VERSION;
+
+    SDK::Interface::IUserApp&             app;
+    SDK::Interface::IUserAppMemAllocator& mem;
 
     virtual void* queryInterface(IntfID iid) const = 0;
 };

@@ -19,7 +19,7 @@
 #include <cassert>
 #include <touchgfx/hal/HAL.hpp>
 #include <touchgfx/hal/OSWrappers.hpp>
-#include "SDK/KernelManager.hpp"
+#include "SDK/Kernel/KernelProviderGUI.hpp"
 
 #include "SDK/Interfaces/IKernel.hpp"
 
@@ -103,7 +103,7 @@ void OSWrappers::signalRenderingDone()
  */
 void OSWrappers::waitForVSync()
 {
-    KernelManager::GetInstance().getKernel()->app.waitForFrame();
+    SDK::KernelProviderGUI::GetInstance().getKernel().app.waitForFrame();
 }
 
 /*
@@ -121,7 +121,7 @@ void OSWrappers::waitForVSync()
  */
 void OSWrappers::taskDelay(uint16_t ms)
 {
-    KernelManager::GetInstance().getKernel()->app.delay(static_cast<uint32_t>(ms));
+    SDK::KernelProviderGUI::GetInstance().getKernel().app.delay(static_cast<uint32_t>(ms));
 }
 
 /**
@@ -136,7 +136,7 @@ void OSWrappers::taskDelay(uint16_t ms)
  */
 void OSWrappers::taskYield()
 {
-    KernelManager::GetInstance().getKernel()->app.yield();
+    SDK::KernelProviderGUI::GetInstance().getKernel().app.yield();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

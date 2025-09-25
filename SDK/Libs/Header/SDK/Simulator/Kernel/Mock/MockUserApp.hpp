@@ -19,6 +19,7 @@
 
 #include "SDK/Platform/OS/OS.hpp"
 #include "SDK/Interfaces/IUserApp.hpp"
+#include "SDK/Interfaces/IGlance.hpp"
 
 #include <platform/hal/simulator/sdl2/HALSDL2.hpp>
 
@@ -54,7 +55,23 @@ public:
     {
         mpCallback = pCallback;
     }
-    
+
+    void registerGlance(SDK::Interface::IGlance* glance) override
+    {
+        mpGlance = glance;
+    }
+
+    struct GlanceArea getGlanceArea() override
+    {
+        struct GlanceArea area = {240, 240};
+        return area;
+    }
+
+    LaunchReason getLaunchReason() override
+    {
+        return LaunchReason::AUTO_START;
+    }
+
     virtual void initialized() override
     {
         mAppMutex->lock();
@@ -236,6 +253,7 @@ public:
 
 private:
     SDK::Interface::IUserApp::Callback* mpCallback;
+	SDK::Interface::IGlance*            mpGlance;
     State                               mState;
     OS::Mutex                           mMutex;
     FakeMutex                           mFakeMutex;

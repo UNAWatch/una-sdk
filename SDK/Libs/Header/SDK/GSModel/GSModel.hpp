@@ -32,7 +32,7 @@
 
 #include "SDK/GSModel/IGUIModel.hpp"
 #include "SDK/CircularBuffer.hpp"
-#include "SDK/AppSystem/AppKernel.hpp"
+#include "SDK/Kernel/KernelProviderService.hpp"
 
 #include <type_traits>
 #include <variant>
@@ -62,7 +62,7 @@ public:
      * @post Queues are initialized; the Service kernel facade is cached.
      */
     GSModel(SH& handler)
-        : mServiceKernel(SDK::Kernel::GetInstance())
+        : mServiceKernel(SDK::KernelProviderService::GetInstance().getKernel())
         , mS2GQueue(mServiceKernel)
         , mG2SQueue(mServiceKernel)
         , mServiceHandler(handler)

@@ -25,7 +25,7 @@
 #ifndef __I_GUI_MODEL_HPP__
 #define __I_GUI_MODEL_HPP__
 
-#include "SDK/AppSystem/AppKernel.hpp"
+#include "SDK/Kernel/Kernel.hpp"
 #include <variant>
 #include <string>
 #include <stdint.h>

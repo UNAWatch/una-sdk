@@ -9,7 +9,7 @@
  ******************************************************************************
  */
 
-#include "SDK/Kernel/KernelProviderService.hpp"
+#include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/AppSystem/UserAppEntry.hpp"
 
@@ -17,18 +17,20 @@
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
 
+extern const IKernel* kernel;
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Logger's callbacks
 ////////////////////////////////////////////////////////////////////////////////
 
 static uint32_t LoggerGetTicks()
 {
-    return SDK::KernelProviderService::GetInstance().getKernel().app.getTimeMs();
+    return kernel->app.getTimeMs();
 }
 
 static void LoggerPrint(const char* str)
 {
-    SDK::KernelProviderService::GetInstance().getKernel().app.log(str);
+    kernel->app.log(str);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +40,7 @@ static void LoggerPrint(const char* str)
 int main()
 {
     SDK::Kernel kernel = SDK::KernelBuilder::make();
-    SDK::KernelProviderService::CreateInstance(&kernel);
+    SDK::KernelProviderGUI::CreateInstance(&kernel);
 
     Logger_init(LoggerPrint);
     Logger_setTimeFunc(LoggerGetTicks);

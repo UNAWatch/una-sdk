@@ -36,7 +36,6 @@
 #include <cstring>
 #include <inttypes.h>
 
-#include "SDK/AppSystem/SysMemCppAdapters.hpp"
 #include "SDK/AppSystem/AtExitImpl.hpp"
 #include "SDK/Interfaces/IKernel.hpp"
 
@@ -141,7 +140,10 @@ extern "C" {
      */
     void* _sbrk(ptrdiff_t incr)
     {
-        return _sbrk_cpp_adapter(incr);
+        kernel->app.log("_sbrk %d\n", (int)incr);
+        assert(0 && "_sbrk must not be used in user app");
+        errno = ENOMEM;
+        return (void*)-1;
     }
 
     /**
@@ -201,7 +203,10 @@ extern "C" {
      */
     void* _malloc_r(struct _reent *r, size_t size)
     {
-        return _malloc_r_cpp_adapter(r, size);
+        (void)r;
+        void* ptr = kernel->mem.malloc(size);
+        kernel->app.log("malloc 0x%08" PRIx32 " %u b\n", (uint32_t)(uintptr_t)ptr, (unsigned)size);
+        return ptr;
     }
 
     /**
@@ -211,7 +216,12 @@ extern "C" {
      */
     void _free_r(struct _reent *r, void *ptr)
     {
-        _free_r_cpp_adapter(r, ptr);
+        (void)r;
+
+        if (ptr) {
+            kernel->app.log("free   0x%08" PRIx32 "\n", (uint32_t)(uintptr_t)ptr);
+            kernel->mem.free(ptr);
+        }
     }
 
     /**
@@ -240,7 +250,8 @@ extern "C" {
      */
     void* _realloc_r(struct _reent *r, void *ptr, size_t new_size)
     {
-        return _realloc_r_cpp_adapter(r, ptr, new_size);
+        (void)r;
+        return kernel->mem.realloc(ptr, new_size);
     }
 
     /**
@@ -294,7 +305,7 @@ extern "C" {
                                                  const char *func,
                                                  const char *failedexpr)
     {
-        __assert_func_cpp_adapter(file, line, func, failedexpr);
+        kernel->app.log("assert: %s %d %s %s\n", file, line, func, failedexpr);
         exit(-1);
     }
 
@@ -315,7 +326,8 @@ extern "C" {
      */
     __attribute__((noreturn)) void exitA(int status)
     {
-        exitA_cpp_adapter(status);
+        kernel->app.log("exit %d\n", status);
+        kernel->app.exit(status);
 
         for (;;) { /* stop */ }
     }

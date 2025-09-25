@@ -11,7 +11,7 @@
  */
 
 #include "SDK/SensorLayer/SensorDriverConnection.hpp"
-#include "SDK/AppSystem/AppKernel.hpp"
+#include "SDK/Kernel/KernelProviderService.hpp"
 
 /// Global kernel pointer (defined elsewhere in system).
 extern const IKernel* kernel;
@@ -36,11 +36,11 @@ DriverConnection::DriverConnection(SDK::Sensor::Type                    id,
                                    SDK::Interface::ISensorDataListener* listener,
                                    float                                period,
                                    uint32_t                             latency)
-    : mDriver(SDK::Kernel::GetInstance().sensorManager.getDefaultSensor(id))
+    : mDriver(SDK::KernelProviderService::GetInstance().getKernel().sensorManager.getDefaultSensor(id))
     , mListener(listener)
     , mPeriod(period)
     , mLatency(latency)
-    , mUserApp(&SDK::Kernel::GetInstance().app)
+    , mUserApp(&SDK::KernelProviderService::GetInstance().getKernel().app)
 {}
 
 /**

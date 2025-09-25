@@ -28,7 +28,7 @@
 #include <platform/driver/button/ButtonController.hpp>
 #include <touchgfx/hal/OSWrappers.hpp>
 
-#include "SDK/KernelManager.hpp"
+#include "SDK/Kernel/KernelProviderGUI.hpp"
 
 using namespace touchgfx;
 
@@ -45,11 +45,8 @@ public:
 
     virtual bool sample(uint8_t &key)
     {
-        return KernelManager::GetInstance().getKernel()->app.keySample(key);
+        return SDK::KernelProviderGUI::GetInstance().getKernel().app.keySample(key);
     }
-
-private:
-
 };
 
 static HWButtonController sButtonController;
@@ -213,7 +210,7 @@ bool TouchGFXHAL::beginFrame()
 void TouchGFXHAL::endFrame()
 {
     if (sFlushBufferReq) {
-        KernelManager::GetInstance().getKernel()->app.writeFrameBuffer(spActiveBuffer);
+        SDK::KernelProviderGUI::GetInstance().getKernel().app.writeFrameBuffer(spActiveBuffer);
         sFlushBufferReq = false;
     }
     TouchGFXGeneratedHAL::endFrame();

@@ -12,7 +12,7 @@
 #ifndef __CIRCULAR_BUFFER_HPP
 #define __CIRCULAR_BUFFER_HPP
 
-#include "SDK/AppSystem/AppKernel.hpp"
+#include "SDK/Kernel/Kernel.hpp"
 
 #include <array>
 #include <memory>
