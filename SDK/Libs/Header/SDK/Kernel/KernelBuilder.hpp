@@ -36,8 +36,8 @@ namespace SDK {
         ~KernelBuilder() = delete;
 
         template <class T>
-        static T& require(const IKernel* k, IKernel::IntfID id) {
-            void* p = k->queryInterface(id);
+        static T& require(const IKernel* k, SDK::Interface::IKIP::IntfID id) {
+            void* p = k->kip.queryInterface(id);
             assert(p && "Kernel::require: requested interface is not available");
             return *static_cast<T*>(p);
         }

@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cassert>
 
+#include "SDK/Interfaces/IKernelIntfProvider.hpp"
 #include "SDK/Interfaces/IPower.hpp"
 #include "SDK/Interfaces/ISettings.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
@@ -56,9 +57,11 @@ public:
         IID_COUNT               // Number of entries
     };
 
-    IKernel(SDK::Interface::IUserApp             &app,
-            SDK::Interface::IUserAppMemAllocator &mem)
-        : app(app)
+    IKernel(SDK::Interface::IKIP&                 kip,
+            SDK::Interface::IUserApp&             app,
+            SDK::Interface::IUserAppMemAllocator& mem)
+        : kip(kip)
+        , app(app)
         , mem(mem)
     {}
 
@@ -66,10 +69,9 @@ public:
 
     uint32_t version = KERNEL_INTERFACE_VERSION;
 
+    SDK::Interface::IKIP&                 kip;
     SDK::Interface::IUserApp&             app;
     SDK::Interface::IUserAppMemAllocator& mem;
-
-    virtual void* queryInterface(IntfID iid) const = 0;
 };
 
 #endif /* __INTERFACE_I_KERNEL_HPP */

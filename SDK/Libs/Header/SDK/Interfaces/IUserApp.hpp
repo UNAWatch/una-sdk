@@ -21,6 +21,8 @@
 
 #include "SDK/Interfaces/IGlance.hpp"
 
+class IKernel;
+
 namespace SDK::Interface
 {
 
@@ -32,7 +34,6 @@ namespace SDK::Interface
  */
 class IUserApp {
 public:
-
     struct GlanceArea {
         uint16_t w;
         uint16_t h;
