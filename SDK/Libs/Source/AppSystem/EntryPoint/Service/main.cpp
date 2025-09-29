@@ -12,6 +12,7 @@
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/AppSystem/UserAppEntry.hpp"
+#include "Service.hpp"
 
 #define LOG_MODULE_PRX      "main::"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
@@ -43,7 +44,8 @@ int main()
     Logger_init(LoggerPrint);
     Logger_setTimeFunc(LoggerGetTicks);
 
-    UserAppEntry();
+    Service service;
+    service.run();
 
     return 0;
 }

@@ -20,9 +20,24 @@
 
 #include "SDK/Kernel/KernelBuilder.hpp"
 
-/// Global kernel pointer
+/**
+ * @brief Global kernel provider pointer (non-owning).
+ * @details Supplied by the platform/loader; must point to a valid provider that
+ *          implements the required interfaces for this application.
+ */
 extern const IKernel* kernel;
 
+/**
+ * @brief Build a @ref SDK::Kernel façade by querying the underlying provider.
+ * @details Fetches each required sub-interface by its @ref SDK::Interface::IKIP::IntfID
+ *          and binds them into a single convenience object.
+ *
+ * @return A value instance of @ref SDK::Kernel holding references to all sub-interfaces.
+ *
+ * @pre @c kernel is non-null and provides all interfaces used below.
+ * @note The façade is returned by value; the contained references remain valid only
+ *       as long as the underlying kernel provider remains alive.
+ */
 SDK::Kernel SDK::KernelBuilder::make()
 {
     SDK::Kernel k(require<SDK::Interface::IPower>(kernel,               SDK::Interface::IKIP::IntfID::IID_POWER),

@@ -27,8 +27,30 @@
 
 namespace SDK {
 
+    /**
+     * @brief Aggregate of kernel service interfaces (non-owning references).
+     *
+     * @note This façade does not perform any validation or lifetime management.
+     *       The caller must ensure that referenced interfaces outlive this object.
+     */
     class Kernel {
     public:
+        /**
+         * @brief Construct the façade by binding kernel service references.
+         *
+         * @param pwr           Reference to power control interface.
+         * @param settings      Reference to settings interface.
+         * @param fs            Reference to filesystem interface.
+         * @param mem           Reference to user-app memory allocator.
+         * @param synchManager  Reference to synchronization manager.
+         * @param sensorManager Reference to sensor manager.
+         * @param app           Reference to user-app control interface.
+         * @param sctrl         Reference to service control interface.
+         * @param gctrl         Reference to GUI control interface.
+         * @param backlight     Reference to backlight interface.
+         * @param vibro         Reference to vibration interface.
+         * @param buzzer        Reference to buzzer interface.
+         */
         Kernel(SDK::Interface::IPower&               pwr,
                SDK::Interface::ISettings&            settings,
                SDK::Interface::IFileSystem&          fs,

@@ -200,8 +200,10 @@ public:
     {
         if (mState == State::CREATED) {
             mState = State::STARTED;
-            OS::MutexCS cs(*mAppMutex);
-            mpCallback->onStart();
+            if (mpCallback) {
+                OS::MutexCS cs(*mAppMutex);
+                mpCallback->onStart();
+            }
         }
     }
 
