@@ -53,11 +53,20 @@ namespace SDK
 
             /**
              * @brief Get heart rate in beats per minute (bpm)
-             * @return Heart rate as uint32_t.
+             * @return Heart rate as float
              */
-            uint32_t getBpm() const
+            float getBpm() const
             {
                 return isDataValid() ? mData->getAsU32(Field::kBpm) : 0;
+            }
+
+            /**
+             * @brief Get trust level
+             * @return Trust level
+             */
+            float getTrustLevel() const
+            {
+                return isDataValid() ? mData->getAsU32(Field::kTrustLevel) : 0.f;
             }
 
             /**
@@ -82,8 +91,9 @@ namespace SDK
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                kBpm = 0,   ///< Heart rate in bpm (float)
-                kCount      ///< Total number of fields
+                kBpm = 0,       ///< Heart rate in bpm (float)
+                kTrustLevel,    ///< Trust level (uint32_t)
+                kCount          ///< Total number of fields
             };
 
             const Interface::ISensorData* mData;
