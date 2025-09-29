@@ -57,7 +57,7 @@ namespace SDK
              */
             float getBpm() const
             {
-                return isDataValid() ? mData->getAsU32(Field::kBpm) : 0;
+                return isDataValid() ? mData->getAsFloat(Field::kBpm) : 0.f;
             }
 
             /**
@@ -66,7 +66,7 @@ namespace SDK
              */
             float getTrustLevel() const
             {
-                return isDataValid() ? mData->getAsU32(Field::kTrustLevel) : 0.f;
+                return isDataValid() ? mData->getAsFloat(Field::kTrustLevel) : 0.f;
             }
 
             /**
