@@ -38,7 +38,7 @@ public:
      * @param steps: Reference to save target number of steps per day.
      * @param floors: Reference to save target number of floors climbed per day.
      */
-    virtual void getDailyGoals(uint32_t &activityMinutes, uint32_t &steps, uint32_t &floors);
+    virtual void getDailyGoals(uint32_t &activityMinutes, uint32_t &steps, uint32_t &floors) = 0;
 
 protected:
 
