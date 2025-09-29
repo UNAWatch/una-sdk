@@ -32,6 +32,14 @@ public:
      */
     virtual std::array<uint8_t, 4> getHrThresholds() = 0;
 
+    /**
+     * @brief Get daily goals.
+     * @param activityMinutes: Reference to save target number of active minutes per day.
+     * @param steps: Reference to save target number of steps per day.
+     * @param floors: Reference to save target number of floors climbed per day.
+     */
+    virtual void getDailyGoals(uint32_t &activityMinutes, uint32_t &steps, uint32_t &floors);
+
 protected:
 
     /**
