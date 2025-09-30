@@ -24,9 +24,15 @@ namespace SDK::Interface {
     public:
         virtual ~IGlance() = default;
 
-        virtual GlanceControl_t* glanceGetControls(uint8_t& count) = 0;
-        virtual void             glanceUpdate()                    = 0;
-        virtual void             glanceClose()                     = 0;
+        struct Info {
+            uint8_t count;
+            GlanceControl_t* ctrls;
+            const char* altname;
+        };
+
+        virtual Info glanceGetInfo() = 0;
+        virtual void glanceUpdate()  = 0;
+        virtual void glanceClose()   = 0;
     };
 
 }

@@ -73,7 +73,6 @@ typedef enum {
     GLANCE_FONT_POPPINS_SEMIBOLD_35,
     GLANCE_FONT_POPPINS_ITALIC_18,
     GLANCE_FONT_POPPINS_ITALIC_20,
-    GLANCE_FONT_POPPINS_LIGHTITALIC_18,
     GLANCE_FONTS_COUNT
 } GlanceFont_t;
 
@@ -88,10 +87,12 @@ typedef struct {
 } GlanceSize_t;
 
 typedef struct {
-    GlancePoint_t pos;
-    uint8_t       font;
-    uint8_t       color;
-    char          str[GLANCE_TEXT_SIZE + 1];
+    GlancePoint_t  pos;
+    GlanceSize_t   size;
+    GlanceFont_t   font;
+    GlanceAlignH_t align;
+    uint8_t        color;
+    char           str[GLANCE_TEXT_SIZE + 1];
 } GlanceText_t;
 
 typedef struct {

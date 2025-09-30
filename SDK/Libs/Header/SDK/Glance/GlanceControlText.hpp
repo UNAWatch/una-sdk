@@ -66,14 +66,16 @@ namespace SDK::Glance {
          * sets position, font and color, then invalidates the control.
          *
          * @param pos    Top-left position.
+         * @param size   Size (width/height).
          * @param s      C-string to copy (if @c nullptr, treated as empty).
          * @param fontID Font identifier.
          * @param color  Text color (RGB222 or palette index).
+         * @param align  Text horizontal alignment. Default LEFT.
          * @return Reference to @c *this for fluent chaining.
          *
          * @note If @p s length is @c >= GLANCE_TEXT_SIZE, the call is ignored.
          */
-        ControlText& init(GlancePoint_t pos, const char* s, GlanceFont_t fontID, uint8_t color)
+        ControlText& init(GlancePoint_t pos, GlanceSize_t  size, const char* s, GlanceFont_t fontID, uint8_t color, GlanceAlignH_t align = GLANCE_ALIGN_H_LEFT)
         {
             const char* str = (s == nullptr) ? "" : s;
 
@@ -84,8 +86,10 @@ namespace SDK::Glance {
             GlanceText_t& text = getText();
 
             text.pos    = pos;
+            text.size   = size;
             text.font   = fontID;
             text.color  = color;
+            text.align  = align;
             strcpy(text.str, str);
 
             invalidate();
@@ -120,6 +124,20 @@ namespace SDK::Glance {
         }
 
         /**
+         * @brief Sets the top-left position of the text and size.
+         * @param pos New position.
+         * @param size Size (width/height).
+         * @return Reference to @c *this for fluent chaining.
+         */
+        ControlText& pos(GlancePoint_t pos, GlanceSize_t sz)
+        {
+            getText().pos = pos;
+            getText().size = sz;
+            invalidate();
+            return *this;
+        }
+
+        /**
          * @brief Sets the top-left position of the text.
          *
          * @param pos New position.
@@ -128,9 +146,7 @@ namespace SDK::Glance {
         ControlText& pos(GlancePoint_t pos)
         {
             getText().pos = pos;
-
             invalidate();
-
             return *this;
         }
 
@@ -141,6 +157,27 @@ namespace SDK::Glance {
         GlancePoint_t pos()
         {
             return getText().pos;
+        }
+
+        /**
+         * @brief Set size
+         * @param size      Size (width/height).
+         * @return *this for fluent chaining.
+         */
+        ControlText& size(GlanceSize_t sz)
+        {
+            getText().size = sz;
+            invalidate();
+            return *this;
+        }
+
+        /**
+         * @brief Returns size
+         * @return Current size (w/h).
+         */
+        GlanceSize_t size()
+        {
+            return getText().size;
         }
 
         /**
@@ -171,6 +208,27 @@ namespace SDK::Glance {
             invalidate();
 
             return *this;
+        }
+
+        /**
+         * @brief Set alignment
+         * @param alignment New horizontal alignment.
+         * @return *this for fluent chaining.
+         */
+        ControlText& alignment(GlanceAlignH_t align)
+        {
+            getText().align = align;
+            invalidate();
+            return *this;
+        }
+
+        /**
+         * @brief Returns alignment
+         * @return Current alignment.
+         */
+        GlanceAlignH_t alignment()
+        {
+            return getText().align;
         }
 
         /**
