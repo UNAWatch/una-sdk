@@ -23,6 +23,10 @@ namespace SDK::Sensor
          along the three sensor axes. */
         ACCELEROMETER,
 
+        /*!< An accelerometer sensor reports the acceleration of the device
+         along the three sensor axes as int16_t. */
+        ACCELEROMETER_RAW,
+
         /*!< A gyroscope sensor reports the rate of rotation of the device
          around the three sensor axes. */
         GYROSCOPE,
