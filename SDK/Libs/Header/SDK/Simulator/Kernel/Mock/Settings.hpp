@@ -22,6 +22,13 @@ public:
         return { 150, 170, 190, 210 };
     }
 
+    virtual void getDailyGoals(uint32_t& activityMinutes, uint32_t& steps, uint32_t& floors) override
+    {
+        activityMinutes = 120;
+        steps = 7000;
+        floors = 50;
+    }
+
     // Simulator-specific method to set the units
     void setUnitsImperial(bool imperial)
     {
