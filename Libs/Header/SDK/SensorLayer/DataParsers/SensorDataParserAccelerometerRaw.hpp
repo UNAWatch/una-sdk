@@ -57,7 +57,7 @@ namespace SDK
              */
             int16_t getX() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::X) : 0;
+                return isDataValid() ? mData->getAsI32(Field::X) : 0;
             }
 
             /**
@@ -66,7 +66,7 @@ namespace SDK
              */
             int16_t getY() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::Y) : 0;
+                return isDataValid() ? mData->getAsI32(Field::Y) : 0;
             }
 
             /**
@@ -75,7 +75,7 @@ namespace SDK
              */
             int16_t getZ() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::Z) : 0;
+                return isDataValid() ? mData->getAsI32(Field::Z) : 0;
             }
 
             /**
