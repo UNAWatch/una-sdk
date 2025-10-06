@@ -60,9 +60,9 @@ public:
     /**
      * @brief Publish a dummy event to your own queue to break the wait timeout.
      */
-    void refresh()
+    void abortProcessWait()
     {
-        //mGSBridge->post();
+        mGSBridge->post(G2SEvent::Default{});
     }
 
     /**

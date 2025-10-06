@@ -1,9 +1,9 @@
 /**
  ******************************************************************************
- * @file    sysmem.cpp
+ * @file    system.cpp
  * @date    25-September-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   System runtime glue for user apps (memory hooks, init/fini, exit).
+ * @brief   System runtime glue for user apps (memory hooks, init/fini, exit, etc).
  * @details This module wires C/C++ runtime entry points to the platform kernel:
  *          - Redirects allocation hooks (`_malloc_r/_free_r/_realloc_r`, `new/delete`)
  *            to the SDK memory interface via C++ adapters declared in

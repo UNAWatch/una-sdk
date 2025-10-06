@@ -34,13 +34,10 @@ public:
 
     /**
      * @brief Starts the GUI part and pass a pointer to the shared context
-     * @param context A pointer to the context
      * @return        True if GUI started, false otherwise
      */
-    virtual bool runGUI(std::shared_ptr<void> context)
+    virtual bool runGUI()
     {
-        (void) context;
-
         return false;
     }
 
