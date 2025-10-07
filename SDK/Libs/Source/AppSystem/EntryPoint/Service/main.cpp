@@ -33,6 +33,12 @@ static void LoggerPrint(const char* str)
     SDK::KernelProviderService::GetInstance().getKernel().app.log(str);
 }
 
+extern "C" int _gettimeofday (struct timeval *__restrict __p,
+              void *__restrict __tz)    // __tz deprecated parameter
+{
+    return 42;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Main
 ////////////////////////////////////////////////////////////////////////////////
