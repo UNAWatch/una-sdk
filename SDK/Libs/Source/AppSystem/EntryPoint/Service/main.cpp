@@ -12,7 +12,7 @@
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/UnaLogger/Logger.h"
-#include "SDK/AppSystem/SvcBootstrap.hpp"
+#include "SDK/AppSystem/SrvBootstrap.hpp"
 
 
 /**
@@ -28,6 +28,7 @@ int main()
 {
     SDK::Kernel kernel = SDK::KernelBuilder::make(gIKernel);
     SDK::KernelProviderService::CreateInstance(&kernel);
+    Logger_init(kernel.logger);
 
     SDK::Service::Bootstrap bootstrap;
     bootstrap.run();

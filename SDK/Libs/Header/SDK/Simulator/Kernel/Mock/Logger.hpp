@@ -62,7 +62,7 @@ private:
 
         static char levelBuff[10]{};
         if (level) {
-            sprintf(timeBuff, "-%s- ", level);
+            sprintf(levelBuff, "-%s- ", level);
         }
 
         static char meta[64]{};

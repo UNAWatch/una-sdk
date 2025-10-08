@@ -32,12 +32,22 @@ namespace SDK::Interface
 class IApp {
 public:
 
+    /**
+     * @brief Application frame rate for display updates.
+     */
+    static constexpr const uint32_t kFrameRate = 10;
 
+    /**
+     * @brief Reasons for application launch.
+     */
     enum class LaunchReason {
         AUTO_START,
         ON_DEMAND
     };
 
+    /**
+     * @brief External button definitions.
+     */
     enum Button : uint8_t
     {
         BUTTON_L1   = '1',

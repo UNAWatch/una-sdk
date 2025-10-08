@@ -70,6 +70,17 @@ void initInterfaces() {
 
 extern "C" {
 
+    /**
+     * @brief   Platform-specific final termination path.
+     * @details Logs and notifies kernel via C++ adapter, then halts.
+     * @param   status Exit status code.
+     * @note    Marked @c noreturn.
+     */
+    __attribute__((noreturn)) void exitA(int status)
+    {
+        isys->exit(status);
+        for (;;) { /* stop */ }
+    }
 
     /**
      * @brief  Sanity-check kernel pointer and interface version and init required interfaces.
@@ -89,20 +100,8 @@ extern "C" {
         if (gIKernel->version < KERNEL_INTERFACE_VERSION) {
             ilog->printf("-E- system::una_init_kernel:%d: Kernel not supported. Minimum %d, got %d\n",
                     __LINE__, KERNEL_INTERFACE_VERSION, gIKernel->version);
-            isys->exit(-4);
+            exitA(-4);
         }
-    }
-
-    /**
-     * @brief   Platform-specific final termination path.
-     * @details Logs and notifies kernel via C++ adapter, then halts.
-     * @param   status Exit status code.
-     * @note    Marked @c noreturn.
-     */
-    __attribute__((noreturn)) void exitA(int status)
-    {
-        isys->exit(status);
-        for (;;) { /* stop */ }
     }
 
     /**
