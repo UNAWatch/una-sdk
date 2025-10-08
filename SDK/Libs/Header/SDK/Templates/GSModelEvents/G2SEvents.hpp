@@ -12,7 +12,9 @@
  *
  * It **must** be included in every user application, even if no custom
  * event types are defined.
- * At least one event type — **std::monostate** — must always be present.
+ * At least one event type - **std::monostate** - must always be present.
+ *
+ * Typically this file should be located in: 'GSModelEvents/G2SEvents.hpp'
  *
  * The 'std::monostate' event is used as a "dummy" signal, for example,
  * to abort waiting for a queue pop operation or to signal a timeout.
@@ -25,24 +27,24 @@
  *
  ******************************************************************************
  * @attention
- * Do not remove or rename this file — it is a required part of the framework.
+ * Do not remove or rename this file - it is a required part of the framework.
  * Even an empty application must include it, as it defines base event behavior.
  ******************************************************************************
  */
 
- /**
-  * @defgroup G2SEvents GUI-to-Service Event Types
-  * @brief User-defined event data types sent from GUI to Service.
-  * @{
-  */
+/**
+ * @defgroup G2SEvents GUI-to-Service Event Types
+ * @brief User-defined event data types sent from GUI to Service.
+ * @{
+ */
 
 #pragma once
 
 #include <cstdint>
 #include <variant>
 
-  // Include user-defined typses
-  // #include "UserTypes.hpp"
+// Include user-defined typses
+// #include "UserTypes.hpp"
 
 
   /**
@@ -63,6 +65,11 @@ namespace G2SEvent
 using Default = std::monostate;
 
 
+// USER SECTION: Add your custom event types below
+// Example:
+// struct MyEvent1 { int id; float value; };
+// struct MyEvent2  { std::vector<MyCustomType> list; };
+
 
 /**
  * @brief Define all possible event types transmitted from GUI to Service.
@@ -74,12 +81,12 @@ using Default = std::monostate;
 using Data = std::variant<
     Default
 
-    // ---------------------------------------------------------------------
-    // USER SECTION: Add your custom event types below
-    // Example:
-    // , struct MyEvent1 { int id; float value; }
-    // , struct MyEvent2  { std::vector<MyCustomType> list; }
-    // ---------------------------------------------------------------------
+
+// USER SECTION: Add your custom event types below
+// Example:
+// , MyEvent1
+// , MyEvent2
+
 
 >;
 }; // namespace G2SEvent
@@ -100,14 +107,13 @@ public:
      * Usually used to handle "abort" or "no-op" signals.
      * The user may override this method if necessary.
      */
-    virtual void handleEvent(const std::monostate& event) {};
+    virtual void handleEvent(const G2SEvent::Default& event) {};
 
-    // -------------------------------------------------------------------------
     // USER SECTION: Add handlers for your custom event types here
     // Example:
     // virtual void handleEvent(const G2SEvent::MyEvent1& event) = 0;
     // virtual void handleEvent(const G2SEvent::MyEvent2& event) = 0;
-    // -------------------------------------------------------------------------
+
 };
 
 /** @} */ // end of G2SEvents

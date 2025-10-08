@@ -13,10 +13,7 @@
  */
 
 #include "SDK/SwTimer/SwTimer.hpp"
-#include "SDK/Interfaces/IKernel.hpp"
 
-/// Global kernel pointer (defined elsewhere in system).
-extern const IKernel* kernel;
 
 namespace SDK
 {

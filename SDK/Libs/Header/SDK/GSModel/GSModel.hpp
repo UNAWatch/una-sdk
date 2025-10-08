@@ -62,6 +62,14 @@ public:
      */
     void abortProcessWait()
     {
+        // 'Default' is "empty" event type.
+        // This type is always required. It is typically used
+        // here to interrupt waiting on a queue.
+        //
+        // Add file G2SEvents.hpp to the project.
+        // Typically this file should be located in: 'GSModelEvents/G2SEvents.hpp'
+        // see template:
+        // {SDK location}/Libs/Header/SDK/Templates/GSModelEvents/G2SEvents.hpp
         mGSBridge->post(G2SEvent::Default{});
     }
 
