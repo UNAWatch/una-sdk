@@ -16,8 +16,7 @@
  ******************************************************************************
  */
 
-#ifndef __SDK_SERVICE_BOOTSTRAP_HPP
-#define __SDK_SERVICE_BOOTSTRAP_HPP
+#pragma once
 
 #include "Service.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
@@ -74,6 +73,10 @@ public:
         kernel.app.initialized();
 
         mService.run();
+
+        exit(0);    // Exit from app in correct way
+        // The following callbacks will be triggered in sequence: 
+        // 'onPause() -> onStop() -> onDestroy()'.
     }
 
 private:
@@ -81,5 +84,3 @@ private:
 };
 
 } // namespace SDK::Service
-
-#endif // __SDK_SERVICE_BOOTSTRAP_HPP

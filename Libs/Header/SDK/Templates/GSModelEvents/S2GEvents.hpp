@@ -38,7 +38,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <variant>
 
 // Include user-defined typses
