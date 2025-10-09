@@ -30,7 +30,7 @@ APP_TYPES = {
 }
 
 def convert_icon_to_abgr2222(png_path: Path) -> bytes:
-    """Convert RGBA PNG to ABGR2222 (rotate 90°, pack 2 bits per channel)."""
+    """Convert RGBA PNG to ABGR2222 (rotate 90 degrees, pack 2 bits per channel)."""
     img = Image.open(png_path).convert("RGBA")
     if img.width != img.height:
         raise ValueError("Image must be square")
@@ -102,6 +102,8 @@ logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="Merge Service and GUI images with extended MainHeader_t header")
 parser.add_argument("-name", required=True, help="Application name (used in output file)")
 parser.add_argument("-autostart", action="store_true", help="Set bit 3 (0x08) in flags for autostart")
+parser.add_argument("-glance_capable", action="store_true",
+                    help="Set bit 5 (0x20) in flags to mark the app as Glance-capable")
 parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()), help="Application type")
 parser.add_argument("-out", type=str, help="Custom output directory (also the place where Tmp/*.srv and Tmp/*.gui are searched)")
 parser.add_argument("-header", action="store_true", help="Generate .h file with merged binary as C array")
@@ -122,6 +124,8 @@ if Image.open(args.small_icon).size != (30, 30):
 flags = APP_TYPES[args.type]
 if args.autostart:
     flags |= 0x00000008  # bit 3
+if args.glance_capable:
+    flags |= 0x00000020  # bit 5
 
 # ---------- input discovery under <out>/Tmp ----------
 out_dir = Path(args.out) if args.out else Path("Output")
@@ -141,7 +145,8 @@ if not srv_path:
     print(f"Missing .srv file in {tmp_dir}")
     sys.exit(2)
 
-# GUI presence rule: allowed missing only for type Glance
+# GUI presence rule:
+# - GUI may be absent for type Glance
 gui_optional = (args.type == "Glance")
 if not gui_path and not gui_optional:
     print(f"Missing .gui file in {tmp_dir} (required for type {args.type})")
@@ -184,18 +189,19 @@ with open(output_path, "wb") as f:
     f.write(final_data)
 
 logging.info("Merge complete")
-logging.info(f"Service file : {srv_path}")
+logging.info(f"Service file   : {srv_path}")
 if gui_path:
-    logging.info(f"GUI file     : {gui_path}")
+    logging.info(f"GUI file       : {gui_path}")
 else:
-    logging.info("GUI file     : (absent, allowed for type Glance)")
-logging.info(f"Name         : {args.name}")
-logging.info("ID           : %016X", app_id_u64)
-logging.info("App Version  : %s", format_semver_u32(app_version_u32))
-logging.info("LibC Version : %s", format_semver_u32(libc_version_u32))
-logging.info(f"Flags        : 0x{flags:08X}")
-logging.info(f"CRC          : 0x{crc:08X}")
-logging.info(f"Image        : {output_path} ({len(final_data)} bytes)")
+    logging.info("GUI file       : (absent, allowed for type Glance)")
+logging.info(f"Name           : {args.name}")
+logging.info("ID             : %016X", app_id_u64)
+logging.info("App Version    : %s", format_semver_u32(app_version_u32))
+logging.info("LibC Version   : %s", format_semver_u32(libc_version_u32))
+logging.info(f"Flags          : 0x{flags:08X}")
+logging.info(f"Glance-capable : {'yes' if args.glance_capable else 'no'}")
+logging.info(f"CRC            : 0x{crc:08X}")
+logging.info(f"Image          : {output_path} ({len(final_data)} bytes)")
 
 # ---------- optional .h ----------
 if args.header:
@@ -210,7 +216,6 @@ if args.header:
             f.write(f"0x{byte:02X}, ")
             if (i + 1) % 12 == 0:
                 f.write("\n    ")
-        f.write("\n};\n\n#endif // {macro_guard}\n")
-    logging.info(f"Header file  : {header_path}")
+        f.write(f"\n}};\n\n#endif // {macro_guard}\n")
 
 print("")
