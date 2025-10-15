@@ -10,55 +10,55 @@
  */
 
 #include "SDK/Simulator/Kernel/KernelBase.hpp"
-#include "SDK/Simulator/Kernel/Mock/MockServiceControl.hpp"
+#include "SDK/Simulator/Kernel/Mock/ServiceControl.hpp"
 #include "SDK/Simulator/Sensors/ISensorCore.hpp"
-
-// TODO: Move to common SDK file
-#include "gui/common/GuiConfig.hpp"
+#include "SDK/Interfaces/IKernelIntfProvider.hpp"
 
 static constexpr char sFsPath[] = "../../../../../Output/";
 
-namespace Simulator
+namespace SDK::Simulator
 {
-KernelBase::KernelBase(bool useMutex, MockServiceControl& serviceControl, Interface::ISensorCore* sensoreCore)
-    : mIPower()
-    , mISettings()
-    , mIFilesystem(sFsPath)
-    , mIUserAppMemAllocator()
-    , mSynchManager()
-    , mIUserApp(useMutex)
-    , mServiceControl(serviceControl)
-    , mBacklight()
-    , mBuzer()
-    , mVibro()
-    , mSensoreCore(sensoreCore)
-    , mKernel(new SDK::Kernel(mIPower,
-                              mISettings,
-                              mIFilesystem,
-                              mIUserAppMemAllocator,
-                              mSynchManager,
-                              mSensorManager,
-                              mIUserApp,
-                              mServiceControl,
-                              mServiceControl,
-                              mBacklight,
-                              mVibro,
-                              mBuzer))
+
+KernelBase::KernelBase(Mock::ServiceControl& serviceControl,
+    Sensors::ISensorCore* sensoreCore,
+    Mock::App* srvApp)
+    : mIsServise(srvApp == nullptr) , mSrvApp(srvApp) , mSensoreCore(sensoreCore), mAppMutex()
+    // Init Mocks
+    , mISystem(mIsServise ? &mAppMutex : nullptr), mILogger()
+    , mIAppMemory(), mIApp(mIsServise ? &mAppMutex : nullptr), mIAppCapabilities()
+    , mSynchManager(), mServiceControl(serviceControl), mIPower(), mISettings()
+    , mIFilesystem(sFsPath), mIBacklight(), mIVibro(), mIBuzer(), mITime(), mSensorManager()
+    // Init pointers to the mocks
+    , isystem(&mISystem), ilogger(&mILogger), imem(&mIAppMemory), iappmock(&mIApp)
+    , iappCapabilities(&mIAppCapabilities), isynchManager(&mSynchManager)
+    , isctrl(&mServiceControl), igctrl(&mServiceControl), ipwr(&mIPower)
+    , isettings(&mISettings), ifs(&mIFilesystem), ibacklight(&mIBacklight)
+    , ivibro(&mIVibro), ibuzzer(&mIBuzer), itime(&mITime), isensorManager(&mSensorManager)
+    // Init KIP with references
+    , mKip(*this)
+    // Init base class with KIP
+    , IKernel(mKip)
 {
 }
 
 void KernelBase::startApp()
-{ 
-    mIUserApp.create();
-    mIUserApp.start();
-    mIUserApp.resume();
+{
+    iappmock->create();
+    iappmock->start();
+    if (mSrvApp) {
+        mSrvApp->guiState(true);
+    }
+    iappmock->resume();
 }
 
 void KernelBase::stopApp()
 {
-    mIUserApp.pause();
-    mIUserApp.stop();
-    mIUserApp.destroy();
+    iappmock->pause();
+    if (mSrvApp) {
+        mSrvApp->guiState(false);
+    }
+    iappmock->stop();
+    iappmock->destroy();
 }
 
 void KernelBase::tick()
@@ -70,17 +70,18 @@ void KernelBase::tick()
 
 bool KernelBase::keyFilter(uint8_t key)
 {
-    return (mIUserApp.getState() == MockUserApp::State::RESUMED &&
-            (Gui::Config::Button::L1 == key ||
-             Gui::Config::Button::L2 == key ||
-             Gui::Config::Button::R1 == key ||
-             Gui::Config::Button::R2 == key ||
-             Gui::Config::Button::L1R2 == key));
+    return (!mIsServise && iappmock->getState() == Mock::App::State::RESUMED &&
+            (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
+             SDK::Interface::IApp::Button::BUTTON_L2 == key ||
+             SDK::Interface::IApp::Button::BUTTON_R1 == key ||
+             SDK::Interface::IApp::Button::BUTTON_R2 == key ||
+             SDK::Interface::IApp::Button::BUTTON_L1R2 == key));
+
 }
 
-const SDK::Kernel* KernelBase::getKernel()
+Mock::App& KernelBase::getApp()
 {
-    return mKernel;
+    return *iappmock;
 }
 
 std::string KernelBase::getFsPath()
@@ -88,4 +89,4 @@ std::string KernelBase::getFsPath()
     return mIFilesystem.getRootPath();
 }
 
-} /* namespace Simulator */
+} // namespace SDK::Simulator

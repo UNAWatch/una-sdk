@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_GLANCE_HPP
-#define __INTERFACE_GLANCE_HPP
+#pragma once
 
 #include "SDK/Glance/GlanceControl.h"
 
@@ -20,21 +19,19 @@
 
 namespace SDK::Interface {
 
-    class IGlance {
-    public:
-        virtual ~IGlance() = default;
+class IGlance {
+public:
+    virtual ~IGlance() = default;
 
-        struct Info {
-            uint8_t count;
-            GlanceControl_t* ctrls;
-            const char* altname;
-        };
-
-        virtual Info glanceGetInfo() = 0;
-        virtual void glanceUpdate()  = 0;
-        virtual void glanceClose()   = 0;
+    struct Info {
+        uint8_t count;
+        GlanceControl_t* ctrls;
+        const char* altname;
     };
 
-}
+    virtual Info glanceGetInfo() = 0;
+    virtual void glanceUpdate()  = 0;
+    virtual void glanceClose()   = 0;
+};
 
-#endif  /* __INTERFACE_GLANCE_HPP */
+} // namespace SDK::Interface

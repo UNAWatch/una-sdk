@@ -3,11 +3,11 @@
 
 #include <assert.h>
 
-#define LOG_MODULE_PRX      "SensorCore::"
+#define LOG_MODULE_PRX      "SensorCore"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK\UnaLogger\Logger.h"
 
-Sensor::Core::Core()
+SDK::Simulator::Sensors::Core::Core()
 	/*: mDS18B20()
 	, mBME280()
 	, mAltimeter(mDS18B20.getDriver(), mBME280.getPressureDriver())*/
@@ -20,7 +20,7 @@ Sensor::Core::Core()
 	//Sensor::Manager::getInstance().regSensor(&mAltimeter.getDriver());			// Altimeter default
 }
 
-void Sensor::Core::tick()
+void SDK::Simulator::Sensors::Core::tick()
 {
 	//mDS18B20.refresh(25.1f);
 	//mBME280.refresh(23.0f, 500.0f);

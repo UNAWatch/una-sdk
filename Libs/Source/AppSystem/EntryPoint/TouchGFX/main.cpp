@@ -9,44 +9,29 @@
  ******************************************************************************
  */
 
-#include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Kernel/KernelBuilder.hpp"
-
-#define LOG_MODULE_PRX      "main::"
-#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/UnaLogger/Logger.h"
+
+/**
+ * @brief  Global kernel pointer defined in system.cpp.
+ */
+extern const SDK::Interface::IKernel* gIKernel;
 
 extern "C" void touchgfx_init(void);
 extern "C" void touchgfx_components_init(void);
 extern "C" void touchgfx_taskEntry(void);
 
-extern const IKernel* kernel;
 
-////////////////////////////////////////////////////////////////////////////////
-//// Logger's callbacks
-////////////////////////////////////////////////////////////////////////////////
-
-static uint32_t LoggerGetTicks()
-{
-    return kernel->app.getTimeMs();
-}
-
-static void LoggerPrint(const char* str)
-{
-    kernel->app.log(str);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//// Main
-////////////////////////////////////////////////////////////////////////////////
-
+/*
+ * @brief Main entry point for a GUI application based on the TouchGFX framework.
+ * @retval int
+ */
 int main()
 {
-    SDK::Kernel kernel = SDK::KernelBuilder::make();
+    SDK::Kernel kernel = SDK::KernelBuilder::make(gIKernel);
     SDK::KernelProviderGUI::CreateInstance(&kernel);
-
-    Logger_init(LoggerPrint);
-    Logger_setTimeFunc(LoggerGetTicks);
+    Logger_init(kernel.logger);
 
     touchgfx_components_init();
     touchgfx_init();

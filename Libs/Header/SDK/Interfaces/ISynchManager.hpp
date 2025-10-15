@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    ISynch.hpp
+ * @file    ISynchManager.hpp
  * @date    09-June-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   A set of synchronization objects, such as mutex and semaphore.
@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_I_SYNCH_HPP
-#define __INTERFACE_I_SYNCH_HPP
+#pragma once
 
 #include "SDK/Interfaces/IMutex.hpp"
 #include "SDK/Interfaces/ISemaphore.hpp"
@@ -23,15 +22,13 @@
 
 namespace SDK::Interface {
 
-    class ISynchManager
-    {
-    public:
-        virtual ~ISynchManager() = default;
+class ISynchManager
+{
+public:
+    virtual ~ISynchManager() = default;
 
-        virtual std::shared_ptr<SDK::Interface::IMutex>     createMutex()                                = 0;    // create a mutex
-        virtual std::shared_ptr<SDK::Interface::ISemaphore> createSemaphore(uint32_t max, uint32_t init) = 0;    // create a semaphore
-    };
+    virtual std::shared_ptr<SDK::Interface::IMutex>     createMutex()                                = 0;    // create a mutex
+    virtual std::shared_ptr<SDK::Interface::ISemaphore> createSemaphore(uint32_t max, uint32_t init) = 0;    // create a semaphore
+};
 
-}
-
-#endif /* __INTERFACE_I_SYNCH_HPP */
+} // namespace SDK::Interface

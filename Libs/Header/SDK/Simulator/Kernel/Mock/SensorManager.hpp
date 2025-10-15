@@ -3,7 +3,7 @@
 
 #include "SDK/Interfaces/ISensorManager.hpp"
 
-namespace Mock 
+namespace SDK::Simulator::Mock
 {
 
 class SensorManager : public SDK::Interface::ISensorManager
@@ -27,4 +27,4 @@ private:
 
 };
 
-} /* namespace Mock */
+} // namespace SDK::Simulator::Mock

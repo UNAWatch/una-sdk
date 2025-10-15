@@ -11,7 +11,7 @@
 
 #include "SDK/Simulator/Kernel/Mock/FileSystem.hpp"
 
-#define LOG_MODULE_PRX      "Mock::FileSystem::"
+#define LOG_MODULE_PRX      "Mock.FileSystem"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
 
@@ -20,7 +20,7 @@
 #include <vector>
 #include <filesystem>
 
-namespace Mock
+namespace SDK::Simulator::Mock
 {
 
 // Method to add prefix to the path

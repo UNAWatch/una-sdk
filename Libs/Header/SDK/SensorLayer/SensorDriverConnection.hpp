@@ -10,15 +10,13 @@
  ******************************************************************************
  */
 
-#ifndef __SENSOR_DRIVER_CONNECTION_HPP
-#define __SENSOR_DRIVER_CONNECTION_HPP
-
+#pragma once
 
 #include "SDK/SensorLayer/SensorTypes.hpp"
 #include "SDK/Interfaces/ISensorDriver.hpp"
 #include "SDK/Interfaces/ISensorDataListener.hpp"
 
-namespace SDK::Sensors {
+namespace SDK::Sensor {
 
     class DriverConnection {
     public:
@@ -40,9 +38,7 @@ namespace SDK::Sensors {
         SDK::Interface::ISensorDataListener* mListener;
         float                                mPeriod;
         uint32_t                             mLatency;
-        SDK::Interface::IUserApp*            mUserApp;
+        SDK::Interface::IApp*                mUserApp;
     };
 
-} /* namespace SDK::Sensors */
-
-#endif /* __SENSOR_DRIVER_CONNECTION_HPP */
+} // namespace SDK::Sensor

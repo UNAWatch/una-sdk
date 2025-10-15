@@ -98,6 +98,21 @@ namespace SDK::Glance {
      */
     class Form {
     public:
+
+        /**
+         * @brief Constructs an empty form with an initial reserved capacity.
+         *
+         * The constructor reserves space for 16 elements to reduce early reallocations.
+         * Capacity will grow automatically as needed on subsequent appends.
+         */
+        Form() noexcept
+            : mControls{}
+            , mWidth(0)
+            , mHeight(0)
+        {
+            mControls.reserve(16);
+        }
+
         /**
          * @brief Constructs an empty form with an initial reserved capacity.
          *
@@ -113,8 +128,11 @@ namespace SDK::Glance {
             mControls.reserve(16);
         }
 
-        uint16_t getWidth()     { return mWidth;  }
-        uint16_t getHeight()    { return mHeight; }
+        void setWidth(uint16_t w)  { mWidth = w;  }
+        void setHeight(uint16_t h) { mHeight = h; }
+
+        uint16_t getWidth()        { return mWidth;  }
+        uint16_t getHeight()       { return mHeight; }
 
         /**
          * @brief Current number of controls stored in the form.

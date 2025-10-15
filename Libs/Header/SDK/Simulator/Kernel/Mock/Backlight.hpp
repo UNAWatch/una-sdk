@@ -14,7 +14,7 @@
 
 #include "SDK/Interfaces/IBacklight.hpp"
 
-namespace Mock
+namespace SDK::Simulator::Mock
 {
 
 /**
@@ -30,4 +30,4 @@ private:
     bool m_isOn = false;
 };
 
-} // namespace Mock
+} // namespace SDK::Simulator::Mock

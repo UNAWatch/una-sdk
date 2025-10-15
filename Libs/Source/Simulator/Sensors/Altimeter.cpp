@@ -2,8 +2,7 @@
 
 #include <assert.h>
 
-#define TAG                 "Altimeter"
-#define LOG_MODULE_PRX      TAG"::"
+#define LOG_MODULE_PRX      "Altimeter"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "Logger.h"
 

@@ -9,7 +9,7 @@
 
 #include "SDK/Interfaces/IFileSystem.hpp"
 
-namespace Mock
+namespace SDK::Simulator::Mock
 {
 
 /**
@@ -134,4 +134,4 @@ private:
 };
 
 
-} // namespace Mock
+} // namespace SDK::Simulator::Mock

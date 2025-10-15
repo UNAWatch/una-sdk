@@ -10,11 +10,11 @@
  ******************************************************************************
  */
 
- #pragma once
+#pragma once
 
 #include "SDK/Interfaces/IBuzzer.hpp"
 
-namespace Mock 
+namespace SDK::Simulator::Mock
 {
 
 /**
@@ -29,4 +29,4 @@ public:
     void stop()                                     override;
 };
 
-} // namespace Mock
+} // namespace SDK::Simulator::Mock

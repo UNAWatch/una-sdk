@@ -10,35 +10,33 @@
  ******************************************************************************
  */
 
-#ifndef __I_SENSOR_DRIVER_HPP
-#define __I_SENSOR_DRIVER_HPP
+#pragma once
 
 #include "SDK/SensorLayer/SensorTypes.hpp"
 #include "SDK/Interfaces/ISensorDataListener.hpp"
-#include "SDK/Interfaces/IUserApp.hpp"
+#include "SDK/Interfaces/IApp.hpp"
 
 namespace SDK::Interface
 {
-    class ISensorDriver {
-    public:
-        ISensorDriver() : mPeriod(1000) {}
-        virtual ~ISensorDriver() = default;
+    
+class ISensorDriver {
+public:
+    ISensorDriver() : mPeriod(1000) {}
+    virtual ~ISensorDriver() = default;
 
-        virtual bool connect(SDK::Interface::ISensorDataListener* listener,
-                             SDK::Interface::IUserApp*            userapp = nullptr,
-                             float                                period  = 0,
-                             uint32_t                             latency = 0) = 0;
+    virtual bool connect(SDK::Interface::ISensorDataListener* listener,
+                            SDK::Interface::IApp*                app = nullptr,
+                            float                                period  = 0,
+                            uint32_t                             latency = 0) = 0;
 
-        virtual void disconnect(SDK::Interface::ISensorDataListener* listener) = 0;
-        
-        virtual SDK::Sensor::Type getType() const = 0;
+    virtual void disconnect(SDK::Interface::ISensorDataListener* listener) = 0;
+    
+    virtual SDK::Sensor::Type getType() const = 0;
 
-        virtual float getPeriod() const { return mPeriod; }
+    virtual float getPeriod() const { return mPeriod; }
 
-    protected:
-        float mPeriod;
-    };
+protected:
+    float mPeriod;
+};
 
-} /* namespace Sensor */
-
-#endif /* __I_SENSOR_DRIVER_HPP */
+} // namespace SDK::Interface

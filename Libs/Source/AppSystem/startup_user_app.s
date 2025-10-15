@@ -57,8 +57,8 @@ LoopFillZerobss:
 	cmp	r2, r3
 	bcc	FillZerobss
 
-/* Call to check the kernel pointer */
-    bl una_check_kernel
+/* Call to check the kernel pointer and init interfaces */
+    bl una_init_kernel
 
 /* Call static constructors */
     bl  __una_init_array

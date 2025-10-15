@@ -1,7 +1,6 @@
 #include "Simulator/Sensors/DS18B20.hpp"
 
-#define TAG                 "DS18B20"
-#define LOG_MODULE_PRX      TAG"::"
+#define LOG_MODULE_PRX      "DS18B20"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "Logger.h"
 

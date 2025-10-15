@@ -10,43 +10,39 @@
  ******************************************************************************
  */
 
-#ifndef __SDK_API_I_ENVIRONMENT_HPP
-#define __SDK_API_I_ENVIRONMENT_HPP
+#pragma once
 
 #include <cstdint>
 
-namespace SDK {
-    namespace Interface
-    {
+namespace SDK::Interface
+{
 
+/**
+ * @brief Environment interface.
+ *
+ * Provides access to environment and system-level information.
+ * This interface can be extended to include various services such as
+ * kernel version, hardware details, or platform-specific parameters.
+ */
+class IEnvironment {
+public:
     /**
-     * @brief Environment interface.
+     * @brief Get the kernel version.
      *
-     * Provides access to environment and system-level information.
-     * This interface can be extended to include various services such as
-     * kernel version, hardware details, or platform-specific parameters.
+     * This method returns the current version of the system kernel.
+     *
+     * @return Kernel version as an unsigned 8-bit integer.
      */
-    class IEnvironment {
-    public:
-        /**
-         * @brief Get the kernel version.
-         *
-         * This method returns the current version of the system kernel.
-         *
-         * @return Kernel version as an unsigned 8-bit integer.
-         */
-        virtual uint8_t getKernelVersion() = 0;
+    virtual uint8_t getKernelVersion() = 0;
 
-    protected:
-        /**
-         * @brief Virtual destructor.
-         *
-         * Ensures proper cleanup of derived classes.
-         */
-        virtual ~IEnvironment() = default;
-    }; /* class IEnvironment */
+protected:
+    /**
+     * @brief Virtual destructor.
+     *
+     * Ensures proper cleanup of derived classes.
+     */
+    virtual ~IEnvironment() = default;
 
-    } /* namespace Interface */
-} /* namespace SDK */
+};
 
-#endif /* __INTERFACE_I_ENVIRONMENT_HPP */
+} // namespace SDK::Interface

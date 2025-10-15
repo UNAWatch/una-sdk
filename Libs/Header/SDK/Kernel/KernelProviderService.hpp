@@ -12,59 +12,56 @@
  ******************************************************************************
  */
 
-#ifndef __KERNEL_PROVIDER_SERVICE_HPP
-#define __KERNEL_PROVIDER_SERVICE_HPP
+#pragma once
 
 #include "SDK/Kernel/Kernel.hpp"
 
 namespace SDK {
 
-    /**
-     * @class KernelProviderService
-     *
-     * Helper class for storing a pointer to the SDK::Kernel object.
-     */
-    class KernelProviderService
+/**
+ * @class KernelProviderService
+ *
+ * Helper class for storing a pointer to the SDK::Kernel object.
+ */
+class KernelProviderService
+{
+public:
+    static KernelProviderService& CreateInstance(const SDK::Kernel* kernel)
     {
-    public:
-        static KernelProviderService& CreateInstance(const SDK::Kernel* kernel)
-        {
-            static bool initialized;
+        static bool initialized;
 
-            KernelProviderService& instance = GetInstance();
+        KernelProviderService& instance = GetInstance();
 
-            if (!initialized) {
-                instance.init(kernel);
-                initialized = true;
-            }
-
-            return instance;
+        if (!initialized) {
+            instance.init(kernel);
+            initialized = true;
         }
 
-        static KernelProviderService& GetInstance()
-        {
-            static KernelProviderService mInstance;
+        return instance;
+    }
 
-            return mInstance;
-        }
+    static KernelProviderService& GetInstance()
+    {
+        static KernelProviderService mInstance;
 
-        const SDK::Kernel& getKernel()
-        {
-            return *mKernel;
-        }
+        return mInstance;
+    }
 
-    private:
-        KernelProviderService() : mKernel(nullptr)
-        {}
+    const SDK::Kernel& getKernel()
+    {
+        return *mKernel;
+    }
 
-        void init(const SDK::Kernel* kernel)
-        {
-            mKernel = kernel;
-        }
-        
-        const SDK::Kernel* mKernel;
-    };
+private:
+    KernelProviderService() : mKernel(nullptr)
+    {}
 
-}
+    void init(const SDK::Kernel* kernel)
+    {
+        mKernel = kernel;
+    }
+    
+    const SDK::Kernel* mKernel;
+};
 
-#endif /* __KERNEL_PROVIDER_SERVICE_HPP */
+} // namespace SDK

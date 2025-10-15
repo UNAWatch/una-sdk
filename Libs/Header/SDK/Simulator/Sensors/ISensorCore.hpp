@@ -10,19 +10,16 @@
  ******************************************************************************
  */
 
-#ifndef __I_SENSOR_CORE_HPP
-#define __I_SENSOR_CORE_HPP
+#pragma once
 
-namespace Interface {
+namespace SDK::Simulator::Sensors {
 
-    class ISensorCore
-    {
-    public:
-        virtual ~ISensorCore() = default;
+class ISensorCore
+{
+public:
+    virtual ~ISensorCore() = default;
 
-        virtual void tick() = 0;
-    };
+    virtual void tick() = 0;
+};
 
-}
-
-#endif
+} // namespace SDK::Simulator::Sensors

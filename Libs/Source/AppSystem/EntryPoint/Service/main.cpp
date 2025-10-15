@@ -9,59 +9,26 @@
  ******************************************************************************
  */
 
-#include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Kernel/KernelBuilder.hpp"
-#include "SDK/AppSystem/SvcBootstrap.hpp"
-#include "SDK/AppSystem/UserAppEntry.hpp"
-#include "Service.hpp"
-
-#define LOG_MODULE_PRX      "main::"
-#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/UnaLogger/Logger.h"
+#include "SDK/AppSystem/SrvBootstrap.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
-//// Logger's callbacks
-////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t LoggerGetTicks()
-{
-    return SDK::KernelProviderService::GetInstance().getKernel().app.getTimeMs();
-}
+/**
+ * @brief  Global kernel pointer defined in system.cpp.
+ */
+extern const SDK::Interface::IKernel* gIKernel;
 
-static void LoggerPrint(const char* str)
-{
-    SDK::KernelProviderService::GetInstance().getKernel().app.log(str);
-}
-
-extern "C" int _gettimeofday (struct timeval *__restrict __p,
-              void *__restrict __tz)    // __tz deprecated parameter
-{
-    return 42;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//// Main
-////////////////////////////////////////////////////////////////////////////////
-
+/*
+ * @brief Main entry point for an application service.
+ * @retval int
+ */
 int main()
 {
-    ///////////////////////////
-    //// Build the kernel
-    ///////////////////////////
-
-    SDK::Kernel kernel = SDK::KernelBuilder::make();
+    SDK::Kernel kernel = SDK::KernelBuilder::make(gIKernel);
     SDK::KernelProviderService::CreateInstance(&kernel);
-
-    ///////////////////////////
-    //// Init logger
-    ///////////////////////////
-
-    Logger_init(LoggerPrint);
-    Logger_setTimeFunc(LoggerGetTicks);
-
-    ///////////////////////////
-    //// Start
-    ///////////////////////////
+    Logger_init(kernel.logger);
 
     SDK::Service::Bootstrap bootstrap;
     bootstrap.run();

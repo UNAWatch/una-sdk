@@ -13,10 +13,7 @@
 #include "SDK/SensorLayer/SensorDriverConnection.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 
-/// Global kernel pointer (defined elsewhere in system).
-extern const IKernel* kernel;
-
-namespace SDK::Sensors {
+namespace SDK::Sensor {
 
 /**
  * @brief Construct a connection wrapper for a sensor driver.
@@ -105,4 +102,4 @@ void DriverConnection::disconnect()
     mDriver->disconnect(mListener);
 }
         
-} /* namespace SDK::Sensors */
+} // namespace SDK::Sensors

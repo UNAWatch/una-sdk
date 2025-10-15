@@ -1,28 +1,27 @@
 /**
  ******************************************************************************
- * @file    MockAppUserMemAllocator.hpp
+ * @file    AppMemory.hpp
  * @date    04-04-2025
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Mock for IUserAppMemAllocator interface.
+ * @brief   Mock for IAppMemory interface.
  ******************************************************************************
  *
  ******************************************************************************
  */
 
-#ifndef __SIMULATOR_KERNEL_USER_MEM_ALLOCATOR_HPP
-#define __SIMULATOR_KERNEL_USER_MEM_ALLOCATOR_HPP
+#pragma once
 
-#include "SDK/Interfaces/IUserAppMemAllocator.hpp"
+#include "SDK/Interfaces/IAppMemory.hpp"
+#include <cstdio>
+#include <memory>
 
-
-
-namespace Simulator
+namespace SDK::Simulator::Mock
 {
 
-class MockUserAppMemAllocator : public SDK::Interface::IUserAppMemAllocator {
+class AppMemory : public SDK::Interface::IAppMemory {
 public:
-    MockUserAppMemAllocator() = default;
-    virtual ~MockUserAppMemAllocator() = default;
+    AppMemory() = default;
+    virtual ~AppMemory() = default;
 
     virtual void *malloc(size_t size) override
     { 
@@ -47,6 +46,4 @@ private:
 
 };
 
-} /* namespace Simulator */
-
-#endif /* __SIMULATOR_KERNEL_USER_MEM_ALLOCATOR_HPP */
+} // namespace SDK::Simulator::Mock

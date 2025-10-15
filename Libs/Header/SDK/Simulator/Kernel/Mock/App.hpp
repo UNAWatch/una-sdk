@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    MockUserApp.hpp
+ * @file    App.hpp
  * @date    04-02-2025
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
  * @brief   Mock for IUserApp interface.
@@ -9,8 +9,7 @@
  ******************************************************************************
  */
 
-#ifndef __SIMULATOR_KERNEL_USER_APP_HPP
-#define __SIMULATOR_KERNEL_USER_APP_HPP
+#pragma once
 
 #include <cstdint>
 #include <cstdarg>
@@ -18,15 +17,16 @@
 #include <windows.h>
 
 #include "SDK/Platform/OS/OS.hpp"
-#include "SDK/Interfaces/IUserApp.hpp"
+#include "SDK/Interfaces/IApp.hpp"
 #include "SDK/Interfaces/IGlance.hpp"
 
-#include <platform/hal/simulator/sdl2/HALSDL2.hpp>
 
-namespace Simulator
+#include "touchgfx/Utils.hpp"
+
+namespace SDK::Simulator::Mock
 {
 
-class MockUserApp : public SDK::Interface::IUserApp {
+class App : public SDK::Interface::IApp {
 
 public:
 
@@ -40,34 +40,34 @@ public:
         bool tryLock() override { return true; }
     };
 
-    MockUserApp(bool useMutex = true)
+    App(OS::Mutex* appMutex)
         : mpCallback(nullptr)
+        , mpGlance(nullptr)
         , mState(State::DESTROYED)
-        , mMutex()
         , mFakeMutex()
-        , mAppMutex(useMutex ? static_cast<SDK::Interface::IMutex*>(&mMutex)
+        , mAppMutex(appMutex ? static_cast<SDK::Interface::IMutex*>(appMutex)
                     : static_cast<SDK::Interface::IMutex*>(&mFakeMutex))
     {}
 
-    virtual ~MockUserApp() = default;
+    virtual ~App() = default;
 
-    virtual void registerApp(SDK::Interface::IUserApp::Callback *pCallback) override
+    virtual void registerApp(SDK::Interface::IApp::Callback *pCallback) override
     {
         mpCallback = pCallback;
     }
 
-    void registerGlance(SDK::Interface::IGlance* glance) override
+    virtual void registerGlance(SDK::Interface::IGlance* glance) override
     {
         mpGlance = glance;
     }
 
-    struct GlanceArea getGlanceArea() override
+    virtual void getGlanceArea(int16_t& width, int16_t& height) override
     {
-        struct GlanceArea area = {240, 240};
-        return area;
+        width = 240;
+        height = 60;
     }
 
-    LaunchReason getLaunchReason() override
+    virtual LaunchReason getLaunchReason() override
     {
         return LaunchReason::AUTO_START;
     }
@@ -88,15 +88,6 @@ public:
         resume();
     }
 
-    virtual void restartRequest() override
-    {
-        exit();
-    }
-    
-    virtual void exit(int status = 0) override
-    {
-        static_cast<touchgfx::HALSDL2 *>(touchgfx::HAL::getInstance())->stopApplication();
-    }
 
     virtual void getDisplayResolution(int16_t &width, int16_t &height) override
     {
@@ -115,51 +106,7 @@ public:
         return false;
     }
     
-    virtual void log(const char *format, ...) override
-    {
-        va_list args;
-        va_start(args, format);
-        vprintf(format, args);
-        va_end(args);
-    }
-    
-    virtual uint32_t getTimeMs() override 
-    { 
-        return static_cast<uint32_t>(GetTickCount64());
-    }
-    
-    virtual void delay(uint32_t ms) override
-    {
-        mAppMutex->unLock();
-        Sleep(ms);
-        mAppMutex->lock();
-    }
 
-    virtual void yield() override { }
-
-    virtual void notifySettingsChanged() override
-    {
-    }
-
-    virtual void notifyActivityEnd() override
-    {
-    }
-
-    virtual void notifyLapAlert() override
-    {
-    }
-
-    virtual void enablePhoneNotification(bool enable) override
-    {
-    }
-
-    virtual void enableMusicControl(bool enable) override
-    {
-    }
-
-    virtual void enableUsbCharging(bool enable) override
-    {
-    }
 
     virtual void lock() override
     {
@@ -179,12 +126,12 @@ public:
         RESUMED,
     };
 
-    State  getState()
+    virtual State  getState()
     {
         return mState;
     }
 
-    void create() 
+    virtual void create()
     { 
         if (mState == State::DESTROYED) {
             mState = State::CREATED;
@@ -196,7 +143,7 @@ public:
     }
 
 
-    void start()
+    virtual void start()
     {
         if (mState == State::CREATED) {
             mState = State::STARTED;
@@ -208,7 +155,7 @@ public:
     }
 
 
-    void resume()
+    virtual void resume()
     {
         if (mState == State::STARTED) {
             mState = State::RESUMED;
@@ -220,7 +167,7 @@ public:
     }
 
 
-    void pause()
+    virtual void pause()
     {
         if (mState == State::RESUMED) {
             mState = State::STARTED;
@@ -231,7 +178,7 @@ public:
         }
     }
 
-    void stop()
+    virtual void stop()
     {
         if (mState == State::STARTED) {
             mState = State::CREATED;
@@ -242,27 +189,38 @@ public:
         }
     }
 
-    void destroy()
+    virtual void destroy()
     {
         if (mState == State::CREATED) {
             mState = State::DESTROYED;
-            OS::MutexCS cs(*mAppMutex);
-            mpCallback->onDestroy();
+            if (mpCallback) {
+                OS::MutexCS cs(*mAppMutex);
+                mpCallback->onDestroy();
+            }
         }
     }
 
-
+    virtual void guiState(bool isRun)
+    {
+        if (mState >= State::STARTED) {
+            if (mpCallback) {
+                OS::MutexCS cs(*mAppMutex);
+                if (isRun) {
+                    mpCallback->onStartGUI();
+                } else {
+                    mpCallback->onStopGUI();
+                }
+            }
+        }
+    }
 
 private:
-    SDK::Interface::IUserApp::Callback* mpCallback;
-	SDK::Interface::IGlance*            mpGlance;
-    State                               mState;
-    OS::Mutex                           mMutex;
-    FakeMutex                           mFakeMutex;
-    SDK::Interface::IMutex*             mAppMutex;
-
+    SDK::Interface::IApp::Callback* mpCallback;
+	SDK::Interface::IGlance*        mpGlance;
+    State                           mState;
+    FakeMutex                       mFakeMutex;
+    SDK::Interface::IMutex*         mAppMutex;
+    
 };
 
-} /* namespace Simulator */
-
-#endif /* __SIMULATOR_KERNEL_USER_APP_HPP */
+} // namespace SDK::Simulator::Mock

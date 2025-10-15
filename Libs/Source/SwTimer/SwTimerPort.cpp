@@ -12,7 +12,7 @@
 #include "SDK/Interfaces/IKernel.hpp"
 
 /// Global kernel pointer (defined elsewhere in system).
-extern const IKernel* kernel;
+extern const SDK::Interface::IKernel* gIKernel;
 
 namespace SDK
 {
@@ -23,7 +23,8 @@ namespace SDK
  */
 uint32_t SwTimer::getTicks(void)
 {
-    return kernel->app.getTimeMs();
+    static SDK::Interface::ISystem* isys = static_cast<SDK::Interface::ISystem*>(gIKernel->kip.queryInterface(SDK::Interface::IKIP::IntfID::IID_SYSTEM));
+    return isys->getTimeMs();
 }
 
 } // namespace SDK

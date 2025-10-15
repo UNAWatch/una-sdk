@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_I_SEMAPHORE_HPP
-#define __INTERFACE_I_SEMAPHORE_HPP
+#pragma once
 
 #include <cstdbool>
 #include <cstdint>
@@ -20,15 +19,13 @@
 
 namespace SDK::Interface {
 
-    class ISemaphore
-    {
-    public:
-        virtual ~ISemaphore() = default;
+class ISemaphore
+{
+public:
+    virtual ~ISemaphore() = default;
 
-        virtual bool take(uint32_t timeout) = 0;
-        virtual void give() = 0;
-    };
+    virtual bool take(uint32_t timeout) = 0;
+    virtual void give() = 0;
+};
 
-}
-
-#endif /* __INTERFACE_I_SEMAPHORE_HPP */
+} // namespace SDK::Interface

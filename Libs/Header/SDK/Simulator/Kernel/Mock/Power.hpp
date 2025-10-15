@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "SDK/Interfaces/IPower.hpp"
 
-namespace Mock 
+namespace SDK::Simulator::Mock
 {
 
 class Power : public SDK::Interface::IPower {
@@ -43,4 +43,4 @@ private:
 
 };
 
-} // namespace Mock
+} // namespace SDK::Simulator::Mock

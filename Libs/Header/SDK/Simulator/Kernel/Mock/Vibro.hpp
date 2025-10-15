@@ -14,7 +14,7 @@
 
 #include "SDK/Interfaces/IVibro.hpp"
 
-namespace Mock {
+namespace SDK::Simulator::Mock {
 
 /**
  * @brief Stub implementation of Interface::IVibro.
@@ -27,4 +27,4 @@ public:
     void stop()                                                                  override;
 };
 
-} // namespace Stub
+} // namespace SDK::Simulator::Mock

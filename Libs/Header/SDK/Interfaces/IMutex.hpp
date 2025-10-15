@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_I_MUTEX_HPP
-#define __INTERFACE_I_MUTEX_HPP
+#pragma once
 
 #include <stdio.h>
 
@@ -20,37 +19,36 @@
 
 namespace SDK::Interface {
 
-    class IMutex
+class IMutex
+{
+public:
+    virtual ~IMutex() = default;
+
+    virtual void lock()    = 0;
+    virtual void unLock()  = 0;
+    virtual bool tryLock() = 0;
+};
+
+class MutexLock
+{
+public:
+    MutexLock(SDK::Interface::IMutex& mutex) noexcept : mMutex(mutex)
     {
-    public:
-        virtual ~IMutex() = default;
+        mMutex.lock();
+    }
 
-        virtual void lock()    = 0;
-        virtual void unLock()  = 0;
-        virtual bool tryLock() = 0;
-    };
+    MutexLock(const MutexLock&)            = delete;
+    MutexLock& operator=(const MutexLock&) = delete;
+    MutexLock(MutexLock&&)                 = delete;
+    MutexLock& operator=(MutexLock&&)      = delete;
 
-    class MutexLock
+    ~MutexLock() noexcept
     {
-    public:
-        MutexLock(SDK::Interface::IMutex& mutex) noexcept : mMutex(mutex)
-        {
-            mMutex.lock();
-        }
+        mMutex.unLock();
+    }
 
-        MutexLock(const MutexLock&)            = delete;
-        MutexLock& operator=(const MutexLock&) = delete;
-        MutexLock(MutexLock&&)                 = delete;
-        MutexLock& operator=(MutexLock&&)      = delete;
+private:
+    SDK::Interface::IMutex& mMutex;
+};
 
-        ~MutexLock() noexcept
-        {
-            mMutex.unLock();
-        }
-
-    private:
-        SDK::Interface::IMutex& mMutex;
-    };
-}
-
-#endif /* __INTERFACE_I_MUTEX_HPP */
+} // namespace SDK::Interface

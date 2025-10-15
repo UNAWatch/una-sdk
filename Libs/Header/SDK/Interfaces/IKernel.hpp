@@ -18,60 +18,49 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_I_KERNEL_HPP
-#define __INTERFACE_I_KERNEL_HPP
+#pragma once
 
 #include <cstdint>
 #include <cstddef>
-#include <cassert>
 
 #include "SDK/Interfaces/IKernelIntfProvider.hpp"
+
+#include "SDK/Interfaces/ISystem.hpp"
+#include "SDK/Interfaces/ILogger.hpp"
+#include "SDK/Interfaces/IAppMemory.hpp"
+#include "SDK/Interfaces/IApp.hpp"
+#include "SDK/Interfaces/IAppCapabilities.hpp"
+
+#include "SDK/Interfaces/ISynchManager.hpp"
+#include "SDK/Interfaces/IAppControl.hpp"
+
 #include "SDK/Interfaces/IPower.hpp"
 #include "SDK/Interfaces/ISettings.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
-#include "SDK/Interfaces/IUserAppMemAllocator.hpp"
-#include "SDK/Interfaces/ISynchManager.hpp"
-#include "SDK/Interfaces/ISensorManager.hpp"
-#include "SDK/Interfaces/IUserApp.hpp"
-#include "SDK/Interfaces/IUserAppControl.hpp"
 #include "SDK/Interfaces/IBacklight.hpp"
 #include "SDK/Interfaces/IVibro.hpp"
 #include "SDK/Interfaces/IBuzzer.hpp"
+#include "SDK/Interfaces/ITime.hpp"
+
+#include "SDK/Interfaces/ISensorManager.hpp"
+
+namespace SDK::Interface
+{
 
 #define DUMMY_KERNEL_ADDR           (0xA5A5A5A5)
-#define KERNEL_INTERFACE_VERSION    (0)
+#define KERNEL_INTERFACE_VERSION    (1)
 
 class IKernel {
 public:
-    enum class IntfID : uint32_t {
-        IID_POWER = 0,          // SDK::Interface::IPower
-        IID_SETTINGS,           // SDK::Interface::ISettings
-        IID_FILESYSTEM,         // SDK::Interface::IFileSystem
-        IID_SYNCH_MANAGER,      // SDK::Interface::ISynchManager
-        IID_SENSOR_MANAGER,     // SDK::Interface::ISensorManager
-        IID_SERVICE_CONTROL,    // SDK::Interface::IServiceControl
-        IID_GUI_CONTROL,        // SDK::Interface::IGUIControl
-        IID_BACKLIGHT,          // SDK::Interface::IBacklight
-        IID_VIBRO,              // SDK::Interface::IVibro
-        IID_BUZZER,             // SDK::Interface::IBuzzer
-        IID_COUNT               // Number of entries
-    };
 
-    IKernel(SDK::Interface::IKIP&                 kip,
-            SDK::Interface::IUserApp&             app,
-            SDK::Interface::IUserAppMemAllocator& mem)
-        : kip(kip)
-        , app(app)
-        , mem(mem)
+    IKernel(SDK::Interface::IKIP& kip) : kip(kip)
     {}
 
     virtual ~IKernel() = default;
 
     uint32_t version = KERNEL_INTERFACE_VERSION;
 
-    SDK::Interface::IKIP&                 kip;
-    SDK::Interface::IUserApp&             app;
-    SDK::Interface::IUserAppMemAllocator& mem;
+    SDK::Interface::IKIP& kip;
 };
 
-#endif /* __INTERFACE_I_KERNEL_HPP */
+} // namespace SDK::Interface

@@ -49,4 +49,4 @@ protected:
 
 };
 
-}
+} // namespace SDK::Interface

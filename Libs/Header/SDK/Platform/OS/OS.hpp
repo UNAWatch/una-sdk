@@ -51,7 +51,7 @@ namespace OS {
             mMutex.lock();
         }
 
-        ~MutexCS()
+        virtual ~MutexCS()
         {
             mMutex.unLock();
         }

@@ -15,13 +15,13 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_I_KERNEL_INTERFACE_PROVIDER_HPP
-#define __INTERFACE_I_KERNEL_INTERFACE_PROVIDER_HPP
+#pragma once
 
 #include <cstdint>
 
 namespace SDK::Interface
 {
+
 /**
  * @brief Interface to query kernel sub-interfaces by identifier.
  *
@@ -39,17 +39,27 @@ public:
      * be cast to the documented interface type.
      */
     enum class IntfID : uint32_t {
-        IID_POWER = 0,          // SDK::Interface::IPower
-        IID_SETTINGS,           // SDK::Interface::ISettings
-        IID_FILESYSTEM,         // SDK::Interface::IFileSystem
-        IID_SYNCH_MANAGER,      // SDK::Interface::ISynchManager
-        IID_SENSOR_MANAGER,     // SDK::Interface::ISensorManager
-        IID_SERVICE_CONTROL,    // SDK::Interface::IServiceControl
-        IID_GUI_CONTROL,        // SDK::Interface::IGUIControl
-        IID_BACKLIGHT,          // SDK::Interface::IBacklight
-        IID_VIBRO,              // SDK::Interface::IVibro
-        IID_BUZZER,             // SDK::Interface::IBuzzer
-        IID_COUNT               // Number of entries
+        IID_SYSTEM              = 0x00010000,   // SDK::Interface::ISystem
+        IID_LOGGER              = 0x00020000,   // SDK::Interface::ILogger
+        IID_APP_MEMORY          = 0x00030000,   // SDK::Interface::IAppMemory
+        IID_APP                 = 0x00040000,   // SDK::Interface::IApp
+        IID_APP_CAPABILITIES    = 0x00050000,   // SDK::Interface::IAppCapabilities
+
+        IID_SYNCH_MANAGER       = 0x00060000,   // SDK::Interface::ISynchManager
+        IID_SERVICE_CONTROL     = 0x00070000,   // SDK::Interface::IServiceControl
+        IID_GUI_CONTROL         = 0x00080000,   // SDK::Interface::IGUIControl
+
+        IID_POWER               = 0x00090000,   // SDK::Interface::IPower
+        IID_SETTINGS            = 0x000A0000,   // SDK::Interface::ISettings
+        IID_FILESYSTEM          = 0x000B0000,   // SDK::Interface::IFileSystem
+        IID_BACKLIGHT           = 0x000C0000,   // SDK::Interface::IBacklight
+        IID_VIBRO               = 0x000D0000,   // SDK::Interface::IVibro
+        IID_BUZZER              = 0x000E0000,   // SDK::Interface::IBuzzer
+        IID_TIME                = 0x000F0000,   // SDK::Interface::ITime
+
+        IID_SENSOR_MANAGER      = 0x00100000,   // SDK::Interface::ISensorManager
+
+        IID_COUNT                               // Number of entries
     };
 
     /**
@@ -73,6 +83,4 @@ protected:
     virtual ~IKIP() = default;
 };
 
-} /* namespace SDK::Interface */
-
-#endif /* __INTERFACE_I_KERNEL_INTERFACE_PROVIDER_HPP */
+} // namespace SDK::Interface

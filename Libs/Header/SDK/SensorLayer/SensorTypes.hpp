@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __SENSOR_TYPES_HPP
-#define __SENSOR_TYPES_HPP
+#pragma once
 
 namespace SDK::Sensor
 {
@@ -112,6 +111,4 @@ namespace SDK::Sensor
         GESTURE_RECOGNITION,
     };
 
-} /* namespace Sensor */
-
-#endif /* __SENSOR_TYPES_HPP */
+} // namespace Sensor

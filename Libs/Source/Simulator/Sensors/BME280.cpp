@@ -2,8 +2,7 @@
 
 #include <assert.h>
 
-#define TAG                 "BME280"
-#define LOG_MODULE_PRX      TAG"::"
+#define LOG_MODULE_PRX      "BME280"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "Logger.h"
 

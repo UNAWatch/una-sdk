@@ -1,26 +1,24 @@
-#ifndef __SENSOR_CORE_HPP
-#define __SENSOR_CORE_HPP
 
+#pragma once
+
+#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 //#include "Simulator/Sensors/DS18B20.hpp"
 //#include "Simulator/Sensors/BME280.hpp"
 //#include "Simulator/Sensors/Altimeter.hpp"
-#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 
-namespace Sensor {
+namespace SDK::Simulator::Sensors {
 
-    class Core : public Interface::ISensorCore
-    {
-    public:
-        Core();
+class Core : public SDK::Simulator::Sensors::ISensorCore
+{
+public:
+    Core();
 
-        void tick() override;
+    void tick() override;
 
-    private:
-        //Sensor::DS18B20   mDS18B20;
-        //Sensor::BME280    mBME280;
-        //Sensor::Altimeter mAltimeter;
-    };
+private:
+    //Sensor::DS18B20   mDS18B20;
+    //Sensor::BME280    mBME280;
+    //Sensor::Altimeter mAltimeter;
+};
 
-}
-
-#endif
+} // namespace SDK::Simulator::Sensors

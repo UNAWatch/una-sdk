@@ -121,7 +121,7 @@ void OSWrappers::waitForVSync()
  */
 void OSWrappers::taskDelay(uint16_t ms)
 {
-    SDK::KernelProviderGUI::GetInstance().getKernel().app.delay(static_cast<uint32_t>(ms));
+    SDK::KernelProviderGUI::GetInstance().getKernel().system.delay(static_cast<uint32_t>(ms));
 }
 
 /**
@@ -136,7 +136,7 @@ void OSWrappers::taskDelay(uint16_t ms)
  */
 void OSWrappers::taskYield()
 {
-    SDK::KernelProviderGUI::GetInstance().getKernel().app.yield();
+    SDK::KernelProviderGUI::GetInstance().getKernel().system.yield();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

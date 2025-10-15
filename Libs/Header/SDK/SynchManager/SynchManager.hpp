@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __SYNCH_MANAGER_HPP
-#define __SYNCH_MANAGER_HPP
+#pragma once
 
 #include "SDK/Interfaces/ISynchManager.hpp"
 
@@ -28,15 +27,13 @@
 
 namespace OS {
 
-    class SynchManager : public SDK::Interface::ISynchManager
-    {
-    public:
-        virtual ~SynchManager() = default;
+class SynchManager : public SDK::Interface::ISynchManager
+{
+public:
+    virtual ~SynchManager() = default;
 
-        std::shared_ptr<SDK::Interface::IMutex>     createMutex()                                override;
-        std::shared_ptr<SDK::Interface::ISemaphore> createSemaphore(uint32_t max, uint32_t init) override;
-    };
+    virtual std::shared_ptr<SDK::Interface::IMutex>     createMutex()                                override;
+    virtual std::shared_ptr<SDK::Interface::ISemaphore> createSemaphore(uint32_t max, uint32_t init) override;
+};
 
-}
-
-#endif /* __SYNCH_MANAGER_HPP */
+} // namespace OS

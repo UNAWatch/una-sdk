@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    IUserAppMemAllocator.hpp
+ * @file    IAppMemory.hpp
  * @date    04-02-2025
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
  * @brief   Interface for the memory allocator of the user application.
@@ -10,8 +10,7 @@
  ******************************************************************************
  */
 
-#ifndef __INTERFACE_I_USER_APP_MEM_ALLOCATOR_HPP
-#define __INTERFACE_I_USER_APP_MEM_ALLOCATOR_HPP
+#pragma once
 
 #include <cstddef>
 
@@ -21,7 +20,7 @@ namespace SDK::Interface
 /**
  * @brief   Interface for the memory allocator of the user application.
  */
-class IUserAppMemAllocator {
+class IAppMemory {
 public:
     /**
      * @brief   Allocates a block of memory.
@@ -50,10 +49,7 @@ protected:
     /**
      * @brief   Destructor.
      */
-    virtual ~IUserAppMemAllocator() = default;
+    virtual ~IAppMemory() = default;
 };
 
-} /* namespace Interface */
-
-#endif /* __INTERFACE_I_USER_APP_MEM_ALLOCATOR_HPP */
-
+} // namespace SDK::Interface

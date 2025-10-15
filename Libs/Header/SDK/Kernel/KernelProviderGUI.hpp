@@ -12,59 +12,56 @@
  ******************************************************************************
  */
 
-#ifndef __KERNEL_PROVIDER_GUI_HPP
-#define __KERNEL_PROVIDER_GUI_HPP
+#pragma once
 
 #include "SDK/Kernel/Kernel.hpp"
 
 namespace SDK {
 
-    /**
-     * @class KernelProviderGUI
-     *
-     * Helper class for storing a pointer to the SDK::Kernel object.
-     */
-    class KernelProviderGUI
+/**
+ * @class KernelProviderGUI
+ *
+ * Helper class for storing a pointer to the SDK::Kernel object.
+ */
+class KernelProviderGUI
+{
+public:
+    static KernelProviderGUI& CreateInstance(const SDK::Kernel* kernel)
     {
-    public:
-        static KernelProviderGUI& CreateInstance(const SDK::Kernel* kernel)
-        {
-            static bool initialized;
+        static bool initialized;
 
-            KernelProviderGUI& instance = GetInstance();
+        KernelProviderGUI& instance = GetInstance();
 
-            if (!initialized) {
-                instance.init(kernel);
-                initialized = true;
-            }
-
-            return instance;
+        if (!initialized) {
+            instance.init(kernel);
+            initialized = true;
         }
 
-        static KernelProviderGUI& GetInstance()
-        {
-            static KernelProviderGUI mInstance;
+        return instance;
+    }
 
-            return mInstance;
-        }
+    static KernelProviderGUI& GetInstance()
+    {
+        static KernelProviderGUI mInstance;
 
-        const SDK::Kernel& getKernel()
-        {
-            return *mKernel;
-        }
+        return mInstance;
+    }
 
-    private:
-        KernelProviderGUI() : mKernel(nullptr)
-        {}
+    const SDK::Kernel& getKernel()
+    {
+        return *mKernel;
+    }
 
-        void init(const SDK::Kernel* kernel)
-        {
-            mKernel = kernel;
-        }
-        
-        const SDK::Kernel* mKernel;
-    };
+private:
+    KernelProviderGUI() : mKernel(nullptr)
+    {}
 
-}
+    void init(const SDK::Kernel* kernel)
+    {
+        mKernel = kernel;
+    }
+    
+    const SDK::Kernel* mKernel;
+};
 
-#endif /* __KERNEL_PROVIDER_GUI_HPP */
+} // namespace SDK

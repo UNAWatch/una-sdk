@@ -3,7 +3,7 @@
 
 #include "SDK/Interfaces/ISettings.hpp"
 
-namespace Mock
+namespace SDK::Simulator::Mock
 {
 
 class Settings : public SDK::Interface::ISettings {
@@ -39,4 +39,4 @@ private:
     bool unitsImperial = false;
 };
 
-} // namespace Mock
+} // namespace SDK::Simulator::Mock
