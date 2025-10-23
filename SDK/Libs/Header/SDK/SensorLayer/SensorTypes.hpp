@@ -109,6 +109,15 @@ namespace SDK::Sensor
          Gesture events are triggered immediately upon recognition.
          The specific gesture types are implementation-defined. */
         GESTURE_RECOGNITION,
+
+        /*!< Battery level sensor reports the charge level in percentage */
+        BATTERY_LEVEL,
+
+        /*!< Battery charge sensor tells you whether charging is currently taking place or not.*/
+        BATTERY_CHARGING,
+
+        /*!< Battery telemetry sensor reports voltage, current and capacity values.*/
+        BATTERY_TELEMETRY,
     };
 
 } // namespace Sensor
