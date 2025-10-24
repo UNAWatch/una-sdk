@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-namespace SDK::SensorDataParser{
+namespace SDK::SensorDataParser {
 
 /**
  * @brief   SensorData parser for the Battery Charging state/event
@@ -29,6 +29,13 @@ namespace SDK::SensorDataParser{
 class BatteryCharging
 {
 public:
+    enum class State {
+        USB_CONNNECTED,
+        USB_DISCONNNECTED,
+        CHARGING,
+        NO_CHARGING,
+    };
+
     /**
      * @brief   SensorData parser for the Battery Charging state/event
      * @param data Reference to sensor data
