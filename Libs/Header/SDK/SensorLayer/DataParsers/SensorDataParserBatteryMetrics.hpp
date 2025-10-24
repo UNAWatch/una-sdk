@@ -1,17 +1,17 @@
 /**
  ******************************************************************************
- * @file    SensorDataParserBatteryTelemetry.hpp
+ * @file    SensorDataParserBatteryMetrics.hpp
  * @date    23-October-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+ * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
  * 
  ******************************************************************************
  *
  ******************************************************************************
  */
 
-#ifndef __SENSOR_DATA_PARSER_BATTERY_TELEMETRY_HPP
-#define __SENSOR_DATA_PARSER_BATTERY_TELEMETRY_HPP
+#ifndef __SENSOR_DATA_PARSER_BATTERY_METRICS_HPP
+#define __SENSOR_DATA_PARSER_BATTERY_METRICS_HPP
 
 #include "SDK/Interfaces/ISensorData.hpp"
 
@@ -20,30 +20,30 @@
 namespace SDK::SensorDataParser {
 
 /**
- * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+ * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
  *
  * @details
  * The parser reads float fields from ISensorData and provides type-safe accessors.
  * It does not own the underlying storage.
  * No unit conversions are performed here; values are returned as-is from firmware.
  */
-class BatteryTelemetry
+class BatteryMetrics
 {
 public:
     /**
-     * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      * @param data Reference to sensor data with
      */
-    explicit BatteryTelemetry(const Interface::ISensorData& data) : mData(&data) {}
+    explicit BatteryMetrics(const Interface::ISensorData& data) : mData(&data) {}
 
     /**
-     * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      * @param data Pointer to sensor data
      */
-    explicit BatteryTelemetry(const Interface::ISensorData* data) : mData(data) {}
+    explicit BatteryMetrics(const Interface::ISensorData* data) : mData(data) {}
 
     /**
-     * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      *
      * @details
      * The parser reads float fields from ISensorData and provides type-safe accessors.
@@ -57,7 +57,7 @@ public:
     }
 
     /**
-     * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      *
      * @details
      * The parser reads float fields from ISensorData and provides type-safe accessors.
@@ -145,7 +145,7 @@ public:
 
 private:
     /**
-     * @brief   SensorData parser for the Battery Telemetry (V/I/mAh) sensor
+     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      */
     enum Field : uint8_t {
         kVOLTAGE = 0,      ///< Battery voltage (V)
@@ -157,10 +157,10 @@ private:
     };
 
     const Interface::ISensorData* mData { nullptr };
-}; /* class BatteryTelemetry */
+}; /* class BatteryMetrics */
 
 } /* namespace SDK::SensorDataParser */
 
-#endif /* __SENSOR_DATA_PARSER_BATTERY_TELEMETRY_HPP */
+#endif /* __SENSOR_DATA_PARSER_BATTERY_METRICS_HPP */
 
 

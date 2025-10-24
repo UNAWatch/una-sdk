@@ -117,7 +117,7 @@ namespace SDK::Sensor
         BATTERY_CHARGING,
 
         /*!< Battery telemetry sensor reports voltage, current and capacity values.*/
-        BATTERY_TELEMETRY,
+        BATTERY_METRICS,
     };
 
 } // namespace Sensor
