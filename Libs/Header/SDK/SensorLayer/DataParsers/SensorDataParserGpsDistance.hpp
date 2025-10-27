@@ -1,0 +1,103 @@
+/**
+ ******************************************************************************
+ * @file    SensorDataParserGpsDistance.hpp
+ * @date    27-October-2025
+ * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
+ * @brief   SensorData parser for GPS Distance sensor
+ * 
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
+
+#ifndef __SENSOR_DATA_PARSER_GPS_DISTANCE_HPP
+#define __SENSOR_DATA_PARSER_GPS_DISTANCE_HPP
+
+#include "SDK/Interfaces/ISensorData.hpp"
+
+#include <cstdint>
+
+namespace SDK
+{
+    namespace SensorDataParser
+    {
+        /**
+         * @brief Helper class to parse GPS sensor data from ISensorData
+         *
+         * Expected data layout:
+         * - [0] uint32_t mask (bitmask of valid fields)
+         * - [1] uint32_t time (e.g., UNIX timestamp)
+         * - [2] float latitude
+         * - [3] float longitude
+         * - [4] float altitude
+         * - [5] float speed (m/s)
+         *
+         * Validity of each field is checked via corresponding mask bit.
+         */
+        class GpsDistance
+        {
+        public:
+            /**
+             * @brief Construct a new GPS parser over given ISensorData
+             * @param data Reference to sensor data containing GPS fields
+             */
+            GpsDistance(const SDK::Interface::ISensorData& data) : mData(&data) {}
+
+            /**
+             * @brief Construct a new GPS parser over given ISensorData
+             * @param data Pointer to sensor data containing GPS fields
+             */
+            GpsDistance(const SDK::Interface::ISensorData* data) : mData(data) {}
+
+            /**
+             * @brief Check if datais valid
+             * @return true if data length is Field::COUNT
+             */
+            bool isDataValid() const
+            {
+                return (mData != nullptr) && (mData->getLength() == Field::COUNT);
+            }
+
+            /**
+             * @brief Get distance
+             * @return Distance in meters
+             */
+            float getDistance() const
+            {
+                return isDataValid() ? mData->getAsFloat(Field::DISTANCE) : 0.0f;
+            }
+
+            /**
+             * @brief Get data timestamp in ms
+             * @return Data timestamp in ms (0 if invalid)
+             */
+            uint32_t getTimestamp() const
+            {
+                return isDataValid() ? mData->getTimestamp() : 0;
+            }
+
+            /**
+             * @brief Get total number of expected fields
+             * @return Field count (6)
+             */
+            static constexpr uint8_t getFieldsNumber()
+            {
+                return Field::COUNT;
+            }
+
+            /**
+             * @brief Field layout indices
+             */
+            enum Field : uint8_t {
+                DISTANCE = 0,   ///< Distance, m(float)
+                COUNT           ///< Total number of fields
+            };
+
+        private:
+            const SDK::Interface::ISensorData* mData;
+        }; /* class GpsDistance */
+    }; /* namespace SensorDataParser */
+
+} /* namespace SDK */
+
+#endif /* __SENSOR_DATA_PARSER_GPS_DISTANCE_HPP */

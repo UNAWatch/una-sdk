@@ -1,17 +1,17 @@
 /**
  ******************************************************************************
- * @file    SensorDataParserGPS.hpp
+ * @file    SensorDataParserGpsLocation.hpp
  * @date    02-August-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   SensorData parser for GPS sensor
+ * @brief   SensorData parser for GPS Location sensor
  * 
  ******************************************************************************
  *
  ******************************************************************************
  */
 
-#ifndef __SENSOR_DATA_PARSER_GPS_HPP
-#define __SENSOR_DATA_PARSER_GPS_HPP
+#ifndef __SENSOR_DATA_PARSER_GPS_LOCATION_HPP
+#define __SENSOR_DATA_PARSER_GPS_LOCATION_HPP
 
 #include "SDK/Interfaces/ISensorData.hpp"
 
@@ -30,24 +30,23 @@ namespace SDK
          * - [2] float latitude
          * - [3] float longitude
          * - [4] float altitude
-         * - [5] float speed (m/s)
          *
          * Validity of each field is checked via corresponding mask bit.
          */
-        class GPS
+        class GpsLocation
         {
         public:
             /**
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GPS(const SDK::Interface::ISensorData& data) : mData(&data) {}
+            GpsLocation(const SDK::Interface::ISensorData& data) : mData(&data) {}
 
             /**
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Pointer to sensor data containing GPS fields
              */
-            GPS(const SDK::Interface::ISensorData* data) : mData(data) {}
+            GpsLocation(const SDK::Interface::ISensorData* data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -59,39 +58,12 @@ namespace SDK
             }
 
             /**
-             * @brief Get mask
-             * @return Mask
-             */
-            uint32_t getMask() const
-            {
-                return isDataValid() ? mData->getAsU32(Field::MASK) : 0;
-            }
-
-            /**
-             * @brief Check if time field is valid
-             * @return true if time is valid
-             */
-            bool isTimeValid() const
-            {
-                return (isDataValid() && (mData->getAsU32(Field::MASK) & mMaskTime) != 0);
-            }
-
-            /**
              * @brief Get GPS time
              * @return Time as uint32_t (e.g., UNIX timestamp)
              */
             uint32_t getTime() const
             {
-                return mData->getAsU32(Field::TIME);
-            }
-
-            /**
-             * @brief Check if coordinates (lat/lon/alt) are valid
-             * @return true if coordinates are valid
-             */
-            bool isCoordinatesValid() const
-            {
-                return (isDataValid() && (mData->getAsU32(Field::MASK) & mMaskLocation) != 0);
+                return isDataValid() ? mData->getAsU32(Field::TIME) : 0UL;
             }
 
             /**
@@ -102,9 +74,9 @@ namespace SDK
              */
             void getCoordinates(float& lat, float& lon, float& alt) const
             {
-                lat = mData->getAsFloat(Field::LAT);
-                lon = mData->getAsFloat(Field::LON);
-                alt = mData->getAsFloat(Field::ALT);
+                lat = getLatitude();
+                lon = getLongitude();
+                alt = getAltitude();
             }
 
             /**
@@ -113,7 +85,7 @@ namespace SDK
              */
             float getLatitude() const
             {
-                return mData->getAsFloat(Field::LAT);
+                return isDataValid() ? mData->getAsFloat(Field::LAT) : 0.0f;
             }
 
             /**
@@ -122,7 +94,7 @@ namespace SDK
              */
             float getLongitude() const
             {
-                return mData->getAsFloat(Field::LON);
+                return isDataValid() ? mData->getAsFloat(Field::LON) : 0.0f;
             }
 
             /**
@@ -131,25 +103,7 @@ namespace SDK
              */
             float getAltitude() const
             {
-                return mData->getAsFloat(Field::ALT);
-            }
-
-            /**
-             * @brief Check if speed is valid
-             * @return true if speed is valid
-             */
-            bool isSpeedValid() const
-            {
-                return ((mData->getAsU32(Field::MASK) & mMaskSpeed) != 0) && isDataValid();
-            }
-
-            /**
-             * @brief Get GPS speed
-             * @return Speed in meters per second
-             */
-            float getSpeed() const
-            {
-                return mData->getAsFloat(Field::SPEED);
+                return isDataValid() ? mData->getAsFloat(Field::ALT) : 0.0f;
             }
 
             /**
@@ -170,28 +124,22 @@ namespace SDK
                 return Field::COUNT;
             }
 
-            static constexpr uint8_t mMaskTime     = 0x01;
-            static constexpr uint8_t mMaskLocation = 0x02;
-            static constexpr uint8_t mMaskSpeed    = 0x04;
-
             /**
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                MASK = 0,  ///< Bitmask field (uint32_t)
-                TIME,      ///< Timestamp (uint32_t)
-                LAT,       ///< Latitude (float)
-                LON,       ///< Longitude (float)
-                ALT,       ///< Altitude (float)
-                SPEED,     ///< Speed (float)
-                COUNT      ///< Total number of fields
+                TIME = 0,   ///< Timestamp (uint32_t)
+                LAT,        ///< Latitude,m (float)
+                LON,        ///< Longitude,m (float)
+                ALT,        ///< Altitude,m (float)
+                COUNT       ///< Total number of fields
             };
 
         private:
             const SDK::Interface::ISensorData* mData;
-        }; /* class GPS */
+        }; /* class GpsLication */
     }; /* namespace SensorDataParser */
 
 } /* namespace SDK */
 
-#endif /* __SENSOR_DATA_PARSER_GPS_HPP */
+#endif /* __SENSOR_DATA_PARSER_GPS_LOCATION_HPP */

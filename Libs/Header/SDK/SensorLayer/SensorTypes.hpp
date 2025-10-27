@@ -78,8 +78,14 @@ namespace SDK::Sensor
         /*!<  */
         ECG,
 
-        /*!< GPS */
-        GPS,
+        /*!< GPS Location */
+        GPS_LOCATION,
+
+        /*!< GPS Speed */
+        GPS_SPEED,
+
+        /*!< GPS Distance*/
+        GPS_DISTANCE ,
 
         /*!< Floor counter */
         FLOOR_COUNTER,
