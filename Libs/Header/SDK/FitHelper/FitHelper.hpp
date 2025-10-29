@@ -30,27 +30,26 @@ namespace SDK::Component {
     class FitHelper
     {
     public:
-        FitHelper(uint8_t msgID, const FIT_MESG_DEF& msgDef, uint16_t msgDefSize);
+        FitHelper(uint8_t msgID, const FIT_MESG_DEF& msgDef);
 
         bool init(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
 
         bool writeDef(SDK::Interface::IFile* fp);
         bool writeData(void* data, SDK::Interface::IFile* fp);
 
-    private:
-        typedef struct
-        {
-            FIT_UINT8  reserved_1;
-            FIT_UINT8  arch;
-            FIT_UINT16 global_mesg_num;
-            FIT_UINT8  num_fields;
-            FIT_UINT8* fields;
-        } MESG_DEF;
+        void printMsgDef(const FIT_MESG_DEF* msgDef);
 
-        bool isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
-        bool isValid(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
-        void makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
-        void makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
+    private:
+        FitHelper(const FitHelper&)            = delete;
+        FitHelper& operator=(const FitHelper&) = delete;
+        
+        FitHelper(FitHelper&&)            = delete;
+        FitHelper& operator=(FitHelper&&) = delete;
+
+        bool isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
+        bool isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
+        void makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
+        void makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
 
         uint16_t getFieldOffset(FIT_EVENT_FIELD_NUM field);
         uint16_t getFieldSize(FIT_EVENT_FIELD_NUM field);
@@ -76,11 +75,11 @@ namespace SDK::Component {
             uint16_t size;
         };
 
+        bool                         mInited;
         uint8_t                      mMsgID;
         const FIT_MESG_DEF&          mMsgDefOrigin;
-        const uint16_t               mMsgDefOriginSize;
-		MESG_DEF                     mMsgDef;
-        std::unique_ptr<FIT_UINT8[]> mMsgDefFields;
+        std::unique_ptr<uint8_t[]>   mMsgDefBuffer;
+        FIT_MESG_DEF*                mMsgDef;
         std::unique_ptr<MsgField[]>  mMsgFields;
         FIT_UINT16                   mDataCRC;
     };

@@ -14,22 +14,28 @@
 
 #include <unordered_set>
 
+#define LOG_MODULE_PRX      "FitHelper"
+#define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
+#include "SDK/UnaLogger/Logger.h"
+
 namespace SDK::Component {
 
-FitHelper::FitHelper(uint8_t             msgID, 
-                     const FIT_MESG_DEF& msgDef,
-                     uint16_t            msgDefSize)
-	: mMsgID(msgID)
+FitHelper::FitHelper(uint8_t msgID, const FIT_MESG_DEF& msgDef)
+	: mInited(false)
+    , mMsgID(msgID)
     , mMsgDefOrigin(msgDef)
-	, mMsgDefOriginSize(msgDefSize)
+	, mMsgDefBuffer()
     , mMsgDef()
-    , mMsgDefFields()
 	, mDataCRC(0)
 {
 }
 
 bool FitHelper::init(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
+    if (mInited) {
+        return false;
+    }
+
     if (!isUnique(fields)) {
         return false;
     }
@@ -42,14 +48,16 @@ bool FitHelper::init(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 
     makeMsgFields(fields);
 
+    mInited = true;
+
     return true;
 }
 
 bool FitHelper::writeDef(SDK::Interface::IFile* fp)
 {
     WriteMessageDefinition(mMsgID,
-                           (const void*)&mMsgDef,
-                           static_cast<FIT_UINT16>(sizeof(FIT_MESG_DEF) - FIT_FLEX_ARRAY + mMsgDef.num_fields * FIT_FIELD_DEF_SIZE),
+                           (const void*)mMsgDef,
+                           static_cast<FIT_UINT16>(sizeof(FIT_MESG_DEF) - FIT_FLEX_ARRAY + mMsgDef->num_fields * FIT_FIELD_DEF_SIZE),
 						   fp);
     return true;
 }
@@ -62,14 +70,29 @@ bool FitHelper::writeData(void* data, SDK::Interface::IFile * fp)
 
     const uint8_t* buff = (const uint8_t*) data;
 
-    for (uint8_t idx = 0; idx < mMsgDef.num_fields; ++idx) {
+    for (uint8_t idx = 0; idx < mMsgDef->num_fields; ++idx) {
         WriteData(&buff[mMsgFields[idx].offset], mMsgFields[idx].size, fp);
     }
 
 	return true;
 }
 
-bool FitHelper::isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields)
+void FitHelper::printMsgDef(const FIT_MESG_DEF* msgDef)
+{
+    LOG_INFO("reserved_1      = %d\n", (int) msgDef->reserved_1);
+    LOG_INFO("arch            = %d\n", (int) msgDef->arch);
+    LOG_INFO("global_mesg_num = %d\n", (int) msgDef->global_mesg_num);
+    LOG_INFO("num_fields      = %d\n", (int) msgDef->num_fields);
+
+    LOG_INFO("  ID SIZE TYPE\n");
+    for (uint8_t idx = 0; idx < msgDef->num_fields; ++idx) {
+        LOG_INFO("%4d %4d %4d\n", (int)msgDef->fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx)], 
+                                  (int)msgDef->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)],
+                                  (int)msgDef->fields[FIT_MESG_DEF_FIELD_OFFSET(base_type, idx)]);
+    }
+}
+
+bool FitHelper::isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
     std::unordered_set<FIT_EVENT_FIELD_NUM> uniq;
     uniq.reserve(fields.size());
@@ -84,7 +107,7 @@ bool FitHelper::isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields)
     return true;
 }
 
-bool FitHelper::isValid(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields)
+bool FitHelper::isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
     for (auto f : fields) {
 		bool ok = false;
@@ -103,30 +126,48 @@ bool FitHelper::isValid(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields)
     return true;
 }
 
-void FitHelper::makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields)
+void FitHelper::makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
-    mMsgDefFields  = std::make_unique<FIT_UINT8[]>(fields.size() * FIT_FIELD_DEF_SIZE);
-    mMsgDef.fields = mMsgDefFields.get();
+    mMsgDefBuffer = std::make_unique<uint8_t[]>(sizeof(FIT_MESG_DEF) - FIT_FLEX_ARRAY + fields.size() * FIT_FIELD_DEF_SIZE);
 
-    mMsgDef.reserved_1      = mMsgDefOrigin.reserved_1;
-    mMsgDef.arch            = mMsgDefOrigin.arch;
-    mMsgDef.global_mesg_num = mMsgDefOrigin.global_mesg_num;
-    mMsgDef.num_fields      = static_cast<FIT_UINT8>(fields.size());
+    mMsgDef = (FIT_MESG_DEF*) mMsgDefBuffer.get();
+
+    mMsgDef->reserved_1      = mMsgDefOrigin.reserved_1;
+    mMsgDef->arch            = mMsgDefOrigin.arch;
+    mMsgDef->global_mesg_num = mMsgDefOrigin.global_mesg_num;
+    mMsgDef->num_fields      = static_cast<FIT_UINT8>(fields.size());
 
 	uint8_t offset = 0;
 
     for (auto f : fields) {
         for (uint8_t idx = 0; idx < mMsgDefOrigin.num_fields; ++idx) {
-            if (f == mMsgDefOrigin.fields[idx * FIT_FIELD_DEF_SIZE]) {
-                memcpy(&mMsgDef.fields[offset], &mMsgDefOrigin.fields[idx * FIT_FIELD_DEF_SIZE], FIT_FIELD_DEF_SIZE);
-                offset += FIT_FIELD_DEF_SIZE;
+            if (f == mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx)]) {
+                uint8_t field_def_num_dst = FIT_MESG_DEF_FIELD_OFFSET(field_def_num, offset);
+                uint8_t size_dst = FIT_MESG_DEF_FIELD_OFFSET(size, offset);
+                uint8_t base_type_dst = FIT_MESG_DEF_FIELD_OFFSET(base_type, offset);
+
+                uint8_t field_def_num_src = FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx);
+                uint8_t size_src          = FIT_MESG_DEF_FIELD_OFFSET(size, idx);
+                uint8_t base_type_src     = FIT_MESG_DEF_FIELD_OFFSET(base_type, idx);
+
+                mMsgDef->fields[field_def_num_dst] = mMsgDefOrigin.fields[field_def_num_src];
+                mMsgDef->fields[size_dst]          = mMsgDefOrigin.fields[size_src];
+                mMsgDef->fields[base_type_dst]     = mMsgDefOrigin.fields[base_type_src];
+
+                //mMsgDef.fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, offset)] = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx)];
+                //mMsgDef.fields[FIT_MESG_DEF_FIELD_OFFSET(size, offset)]          = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
+                //mMsgDef.fields[FIT_MESG_DEF_FIELD_OFFSET(base_type, offset)]     = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(base_type, idx)];
+                ++offset;
                 break;
             }
         }
     }
+
+    LOG_INFO("Optimized MsgDef\n");
+    printMsgDef((const FIT_MESG_DEF*)mMsgDef);
 }
 
-void FitHelper::makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields)
+void FitHelper::makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
     mMsgFields = std::make_unique<MsgField[]>(fields.size());
     uint16_t idx = 0;
@@ -149,10 +190,13 @@ uint16_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field)
         if (base_type_num >= FIT_BASE_TYPES) {
             return UINT16_MAX;
         }
-        
-        FIT_UINT8 base_type_size = fit_base_type_sizes[base_type_num];
-        FIT_UINT8 fieldSize      = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
-        offset += fieldSize * base_type_size;
+
+        FIT_UINT8 fieldSize = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
+        offset += fieldSize;
+ 
+        //FIT_UINT8 base_type_size = fit_base_type_sizes[base_type_num];
+        //FIT_UINT8 fieldSize      = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
+        //offset += fieldSize * base_type_size;
     }
 	
     return UINT16_MAX;
@@ -167,10 +211,14 @@ uint16_t FitHelper::getFieldSize(FIT_EVENT_FIELD_NUM field)
                 return UINT16_MAX;
             }
 
-            FIT_UINT8 base_type_size = fit_base_type_sizes[base_type_num];
-            FIT_UINT8 fieldSize      = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
+            FIT_UINT8 fieldSize = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
 
-            return fieldSize * base_type_size;
+            return fieldSize;
+
+            //FIT_UINT8 base_type_size = fit_base_type_sizes[base_type_num];
+            //FIT_UINT8 fieldSize      = mMsgDefOrigin.fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
+
+            //return fieldSize * base_type_size;
         }
     }
 
