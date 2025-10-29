@@ -30,7 +30,7 @@ namespace SDK::Component {
     class FitHelper
     {
     public:
-        FitHelper(const FIT_MESG_DEF& msgDef, uint16_t msgDefSize);
+        FitHelper(uint8_t msgID, const FIT_MESG_DEF& msgDef, uint16_t msgDefSize);
 
         bool init(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
 
@@ -48,11 +48,41 @@ namespace SDK::Component {
         } MESG_DEF;
 
         bool isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
+        bool isValid(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
+        void makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
+        void makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM>& fields);
 
+        uint16_t getFieldOffset(FIT_EVENT_FIELD_NUM field);
+        uint16_t getFieldSize(FIT_EVENT_FIELD_NUM field);
+
+        void WriteFileHeader(SDK::Interface::IFile* fp);
+        void WriteData(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp);
+        void WriteCRC(SDK::Interface::IFile* fp);
+        void WriteMessageDefinition(FIT_UINT8              local_mesg_number,
+                                    const void*            mesg_def_pointer,
+                                    FIT_UINT16             mesg_def_size,
+                                    SDK::Interface::IFile* fp);
+        void WriteMessageDefinitionWithDevFields(FIT_UINT8              local_mesg_number,
+                                                 const void*            mesg_def_pointer,
+                                                 FIT_UINT16             mesg_def_size,
+                                                 FIT_UINT8              number_dev_fields,
+                                                 FIT_DEV_FIELD_DEF*     dev_field_definitions,
+                                                 SDK::Interface::IFile* fp);
+        void WriteMessage(FIT_UINT8 local_mesg_number, const void* mesg_pointer, FIT_UINT16 mesg_size, SDK::Interface::IFile* fp);
+        void WriteDeveloperField(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp);
+
+        struct MsgField {
+            uint16_t offset;
+            uint16_t size;
+        };
+
+        uint8_t                      mMsgID;
         const FIT_MESG_DEF&          mMsgDefOrigin;
         const uint16_t               mMsgDefOriginSize;
-		MESG_DEF                     mMesgDef;
-        std::unique_ptr<FIT_UINT8[]> mFields;
+		MESG_DEF                     mMsgDef;
+        std::unique_ptr<FIT_UINT8[]> mMsgDefFields;
+        std::unique_ptr<MsgField[]>  mMsgFields;
+        FIT_UINT16                   mDataCRC;
     };
 
 }
