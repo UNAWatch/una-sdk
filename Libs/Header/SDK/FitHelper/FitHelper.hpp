@@ -30,9 +30,9 @@ namespace SDK::Component {
     class FitHelper
     {
     public:
-        FitHelper(uint8_t msgID, const FIT_MESG_DEF& msgDef);
+        FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef);
 
-        bool init(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
+        bool init(std::initializer_list<FIT_EVENT_FIELD_NUM> fields = {});
 
         bool writeDef(SDK::Interface::IFile* fp);
         bool writeData(void* data, SDK::Interface::IFile* fp);
@@ -77,7 +77,7 @@ namespace SDK::Component {
 
         bool                         mInited;
         uint8_t                      mMsgID;
-        const FIT_MESG_DEF&          mMsgDefOrigin;
+        FIT_MESG_DEF*                mMsgDefOrigin;
         std::unique_ptr<uint8_t[]>   mMsgDefBuffer;
         FIT_MESG_DEF*                mMsgDef;
         std::unique_ptr<MsgField[]>  mMsgFields;
