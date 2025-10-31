@@ -87,16 +87,16 @@ namespace SDK::Component {
             uint16_t size;
         };
 
-        bool                        mInited;
-        uint8_t                     mMsgID;
-        FIT_MESG_DEF*               mMsgDefOrigin;
-        std::unique_ptr<uint8_t[]>  mMsgDefBuffer;
-        FIT_MESG_DEF*               mMsgDef;
-        std::unique_ptr<MsgField[]> mMsgFields;
-        FIT_UINT16                  mDataCRC;
-        bool                        mIsField;
-        FIT_FIT_BASE_TYPE           mBaseType;
-		std::vector<FitHelper*>     mFields;
+        bool                       mInited;
+        uint8_t                    mMsgID;
+        FIT_MESG_DEF*              mMsgDefOrigin;
+        std::unique_ptr<uint8_t[]> mMsgDefBuffer;
+        FIT_MESG_DEF*              mMsgDef;
+        std::vector<MsgField>      mMsgFields;
+        FIT_UINT16                 mDataCRC;
+        bool                       mIsField;
+        FIT_FIT_BASE_TYPE          mBaseType;
+		std::vector<FitHelper*>    mFields;
     };
 
 }
