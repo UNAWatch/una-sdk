@@ -48,6 +48,9 @@ namespace SDK::Component {
 
         FIT_FIT_BASE_TYPE FitHelper::getBaseType();
 
+        void WriteCRC(SDK::Interface::IFile* fp);
+        void WriteFileHeader(SDK::Interface::IFile* fp);
+
     private:
         FitHelper(const FitHelper&)            = delete;
         FitHelper& operator=(const FitHelper&) = delete;
@@ -65,9 +68,7 @@ namespace SDK::Component {
         uint16_t getFieldOffset(FIT_EVENT_FIELD_NUM field);
         uint16_t getFieldSize(FIT_EVENT_FIELD_NUM field);
 
-        void WriteFileHeader(SDK::Interface::IFile* fp);
         void WriteData(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp);
-        void WriteCRC(SDK::Interface::IFile* fp);
         void WriteMessageDefinition(FIT_UINT8              local_mesg_number,
                                     const void*            mesg_def_pointer,
                                     FIT_UINT16             mesg_def_size,

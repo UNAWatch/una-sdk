@@ -99,19 +99,25 @@ bool FitHelper::writeMessage(void* data, SDK::Interface::IFile * fp)
 		return false;
 	}
 
-    if (!mIsField) {
-		FIT_FIELD_DESCRIPTION_MESG* msg = (FIT_FIELD_DESCRIPTION_MESG*)data;
-		mBaseType = (FIT_FIT_BASE_TYPE)msg->fit_base_type_id;
+    if (mIsField) {
+        FIT_FIELD_DESCRIPTION_MESG* msg = (FIT_FIELD_DESCRIPTION_MESG*)data;
+        mBaseType = (FIT_FIT_BASE_TYPE)msg->fit_base_type_id;
+    }
 
-        WriteData(data, mMsgFields[0].size, fp);
-    } else {
+
+  //  if (mIsField) {
+		//FIT_FIELD_DESCRIPTION_MESG* msg = (FIT_FIELD_DESCRIPTION_MESG*)data;
+		//mBaseType = (FIT_FIT_BASE_TYPE)msg->fit_base_type_id;
+
+  //      WriteData(data, mMsgFields[0].size, fp);
+  //  } else {
         WriteData(&mMsgID, FIT_HDR_SIZE, fp);
 
         const uint8_t* buff = (const uint8_t*)data;
         for (uint8_t idx = 0; idx < mMsgDef->num_fields; ++idx) {
             WriteData(&buff[mMsgFields[idx].offset], mMsgFields[idx].size, fp);
         }
-    }
+    //}
 
 	return true;
 }
@@ -282,14 +288,19 @@ FIT_UINT8 FitHelper::getBaseTypeSize(FIT_FIT_BASE_TYPE base_type)
 
 void FitHelper::makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
-    if (mIsField) {
-        mMsgFields = std::make_unique<MsgField[]>(1);
+    //if (mIsField) {
+    //    mMsgFields = std::make_unique<MsgField[]>(1);
 
-        mMsgFields[0].offset = 0;
-        mMsgFields[0].size   = getBaseTypeSize();
+    //    uint16_t size = 0;
+    //    for (uint8_t idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
+    //        size += mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
+    //    }
 
-        return;
-    }
+    //    mMsgFields[0].offset = 0;
+    //    mMsgFields[0].size   = size;
+
+    //    return;
+    //}
 
     if (fields.size() == 0) {
         mMsgFields = std::make_unique<MsgField[]>(1);
