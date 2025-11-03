@@ -44,12 +44,8 @@ namespace SDK::Component {
 
 		void writeFieldMessage(uint8_t idx, const void* data, SDK::Interface::IFile* fp);
 
-        FIT_UINT8 getBaseTypeSize();
-
-        FIT_FIT_BASE_TYPE FitHelper::getBaseType();
-
-        void WriteCRC(SDK::Interface::IFile* fp);
-        void WriteFileHeader(SDK::Interface::IFile* fp);
+        FIT_UINT8         getBaseTypeSize();
+        FIT_FIT_BASE_TYPE getBaseType();
 
     private:
         FitHelper(const FitHelper&)            = delete;
@@ -93,7 +89,6 @@ namespace SDK::Component {
         std::unique_ptr<uint8_t[]> mMsgDefBuffer;
         FIT_MESG_DEF*              mMsgDef;
         std::vector<MsgField>      mMsgFields;
-        FIT_UINT16                 mDataCRC;
         bool                       mIsField;
         FIT_FIT_BASE_TYPE          mBaseType;
 		std::vector<FitHelper*>    mFields;

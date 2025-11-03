@@ -12,6 +12,7 @@
 #include "SDK/FitHelper/FitHelper.hpp"
 
 #include <unordered_set>
+#include <algorithm>
 
 #define LOG_MODULE_PRX      "FitHelper"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -25,7 +26,6 @@ FitHelper::FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef)
     , mMsgDefOrigin(msgDef)
 	, mMsgDefBuffer()
     , mMsgDef()
-	, mDataCRC(0)
 	, mIsField(msgDef == fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION])
     , mBaseType(FIT_FIT_BASE_TYPE_INVALID)
 {
@@ -105,11 +105,6 @@ bool FitHelper::writeMessage(void* data, SDK::Interface::IFile * fp)
     }
 
     WriteData(&mMsgID, FIT_HDR_SIZE, fp);
-
-    //const uint8_t* buff = (const uint8_t*)data;
-    //for (uint8_t idx = 0; idx < mMsgDef->num_fields; ++idx) {
-    //    WriteData(&buff[mMsgFields[idx].offset], mMsgFields[idx].size, fp);
-    //}
 
     const uint8_t* buff = (const uint8_t*)data;
     for (uint8_t idx = 0; idx < mMsgFields.size(); ++idx) {
@@ -286,20 +281,6 @@ FIT_UINT8 FitHelper::getBaseTypeSize(FIT_FIT_BASE_TYPE base_type)
 
 void FitHelper::makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
 {
-    //if (mIsField) {
-    //    mMsgFields = std::make_unique<MsgField[]>(1);
-
-    //    uint16_t size = 0;
-    //    for (uint8_t idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
-    //        size += mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
-    //    }
-
-    //    mMsgFields[0].offset = 0;
-    //    mMsgFields[0].size   = size;
-
-    //    return;
-    //}
-
     if (fields.size() == 0) {
 		mMsgFields.clear();
 
@@ -340,10 +321,6 @@ uint16_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field)
 
         FIT_UINT8 fieldSize = mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
         offset += fieldSize;
- 
-        //FIT_UINT8 base_type_size = fit_base_type_sizes[base_type_num];
-        //FIT_UINT8 fieldSize      = mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
-        //offset += fieldSize * base_type_size;
     }
 	
     return UINT16_MAX;
@@ -361,110 +338,17 @@ uint16_t FitHelper::getFieldSize(FIT_EVENT_FIELD_NUM field)
             FIT_UINT8 fieldSize = mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
 
             return fieldSize;
-
-            //FIT_UINT8 base_type_size = fit_base_type_sizes[base_type_num];
-            //FIT_UINT8 fieldSize      = mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
-
-            //return fieldSize * base_type_size;
         }
     }
 
     return UINT16_MAX;
 }
 
-void FitHelper::WriteFileHeader(SDK::Interface::IFile* fp)
-{
-    FIT_FILE_HDR file_header{};
-
-    file_header.header_size = FIT_FILE_HDR_SIZE;
-    file_header.profile_version = FIT_PROFILE_VERSION;
-    file_header.protocol_version = FIT_PROTOCOL_VERSION_20;
-    memcpy((FIT_UINT8*)&file_header.data_type, ".FIT", 4);
-
-    fp->flush();
-    size_t fileSize = fp->size();
-
-    //if (fileSize > FIT_FILE_HDR_SIZE - sizeof(FIT_UINT16)) {
-    //    file_header.data_size = static_cast<FIT_UINT32>(fileSize - FIT_FILE_HDR_SIZE - sizeof(FIT_UINT16));
-    //}
-    //else {
-    //    file_header.data_size = 0;
-    //}
-
-    if (fileSize > FIT_FILE_HDR_SIZE) {
-        file_header.data_size = static_cast<FIT_UINT32>(fileSize - FIT_FILE_HDR_SIZE);
-    }
-    else {
-        file_header.data_size = 0;
-    }
-
-    file_header.crc = FitCRC_Calc16(&file_header, FIT_STRUCT_OFFSET(crc, FIT_FILE_HDR));
-
-    fp->seek(0);
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&file_header), FIT_FILE_HDR_SIZE, bw);
-
-    fp->flush();
-
-    // Move pointer to the end of the file
-    if (fileSize > 0) {
-        fp->seek(fileSize);
-    }
-}
-
 void FitHelper::WriteData(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp)
 {
-    //FIT_UINT16 offset;
-
     size_t bw;
     fp->write(reinterpret_cast<const char*>(data), static_cast<size_t>(data_size), bw);
     fp->flush();
-
-    mDataCRC = FitCRC_Update16(mDataCRC, data, data_size);
-
-    //for (offset = 0; offset < data_size; offset++) {
-    //    mDataCRC = FitCRC_Get16(mDataCRC, *((FIT_UINT8*)data + offset));
-    //}
-}
-
-void FitHelper::WriteCRC(SDK::Interface::IFile* fp)
-{
-	fp->close();
-
-    fp->open(false);
-
-    FIT_UINT8 buffer[512];
-    size_t    size = fp->size();
-    size_t    pos  = 0;
-	uint16_t  crc  = 0;
-
-    while (pos < size) {
-        size_t toRead = size - pos;
-        if (toRead > sizeof(buffer)) {
-            toRead = sizeof(buffer);
-        }
-
-        size_t br;
-        fp->read(reinterpret_cast<char*>(buffer), toRead, br);
-
-        crc = FitCRC_Update16(crc, buffer, static_cast<FIT_UINT32>(br));
-
-		pos += br;
-	}
-
-    fp->close();
-
-    fp->open(true, false);
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&crc), sizeof(FIT_UINT16), bw);
-    fp->flush();
-
-
-    //size_t bw;
-    //fp->write(reinterpret_cast<const char*>(&mDataCRC), sizeof(FIT_UINT16), bw);
-    //fp->flush();
 }
 
 void FitHelper::WriteMessageDefinition(FIT_UINT8 local_mesg_number, const void* mesg_def_pointer, FIT_UINT16 mesg_def_size, SDK::Interface::IFile* fp)
