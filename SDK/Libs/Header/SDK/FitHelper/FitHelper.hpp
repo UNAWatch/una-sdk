@@ -31,6 +31,7 @@ namespace SDK::Component {
     {
     public:
         FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef);
+        FitHelper(uint8_t msgID, FitHelper& container, FIT_UINT8 itemsCount = 1);
 
         bool init(std::initializer_list<FIT_UINT8> fields = {});
 
@@ -44,6 +45,7 @@ namespace SDK::Component {
 
 		void writeFieldMessage(uint8_t idx, const void* data, SDK::Interface::IFile* fp);
 
+        FIT_UINT8         getFieldSize();
         FIT_UINT8         getBaseTypeSize();
         FIT_FIT_BASE_TYPE getBaseType();
 
@@ -61,26 +63,15 @@ namespace SDK::Component {
         void makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
         void makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
 
-        uint16_t getFieldOffset(FIT_EVENT_FIELD_NUM field);
-        uint16_t getFieldSize(FIT_EVENT_FIELD_NUM field);
+        uint8_t getFieldOffset(FIT_EVENT_FIELD_NUM field);
+        uint8_t getFieldSize(FIT_EVENT_FIELD_NUM field);
 
         void WriteData(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp);
-        void WriteMessageDefinition(FIT_UINT8              local_mesg_number,
-                                    const void*            mesg_def_pointer,
-                                    FIT_UINT16             mesg_def_size,
-                                    SDK::Interface::IFile* fp);
-        void WriteMessageDefinitionWithDevFields(FIT_UINT8              local_mesg_number,
-                                                 const void*            mesg_def_pointer,
-                                                 FIT_UINT16             mesg_def_size,
-                                                 FIT_UINT8              number_dev_fields,
-                                                 FIT_DEV_FIELD_DEF*     dev_field_definitions,
-                                                 SDK::Interface::IFile* fp);
         void WriteMessage(FIT_UINT8 local_mesg_number, const void* mesg_pointer, FIT_UINT16 mesg_size, SDK::Interface::IFile* fp);
-        void WriteDeveloperField(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp);
 
         struct MsgField {
-            uint16_t offset;
-            uint16_t size;
+            uint8_t offset;
+            uint8_t size;
         };
 
         bool                       mInited;
@@ -91,6 +82,7 @@ namespace SDK::Component {
         std::vector<MsgField>      mMsgFields;
         bool                       mIsField;
         FIT_FIT_BASE_TYPE          mBaseType;
+        uint8_t                    mDevelopFieldSize;
 		std::vector<FitHelper*>    mFields;
     };
 
