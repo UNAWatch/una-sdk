@@ -25,11 +25,11 @@ namespace SDK
          * @brief Helper class to parse GPS sensor data from ISensorData
          *
          * Expected data layout:
-         * - [0] uint32_t mask (bitmask of valid fields)
-         * - [1] uint32_t time (e.g., UNIX timestamp)
-         * - [2] float latitude
-         * - [3] float longitude
-         * - [4] float altitude
+         * - [0] float - precision
+         * - [1] bool  - flag 'coordinates are valid'
+         * - [2] float - latitude
+         * - [3] float - longitude
+         * - [4] float - altitude
          *
          * Validity of each field is checked via corresponding mask bit.
          */
@@ -55,27 +55,17 @@ namespace SDK
             bool isDataValid() const
             {
                 return ((mData != nullptr) &&
-                        (mData->getAsU32(Field::TIME_VALID) <= 1) &&
                         (mData->getAsU32(Field::COORDS_VALID) <= 1) &&
                         (mData->getLength() == Field::COUNT));
-            }
-
-            /**
-             * @brief Check if time is valid
-             * @return true if valide false otherwise
-             */
-            bool isTimeValid() const
-            {
-                return isDataValid() && (mData->getAsU32(Field::TIME_VALID) == 1);
             }
 
             /**
              * @brief Get GPS time
              * @return Time as uint32_t (e.g., UNIX timestamp)
              */
-            uint32_t getTime() const
+            float getPrecision() const
             {
-                return isDataValid() ? mData->getAsU32(Field::TIME) : 0UL;
+                return isDataValid() ? mData->getAsFloat(Field::PRECISION) : 0.0f;
             }
 
             /**
@@ -149,8 +139,7 @@ namespace SDK
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                TIME_VALID = 0, ///< Time is valid
-                TIME,           ///< Time (uint32_t)
+                PRECISION = 0,  ///< Precision (in meters)
                 COORDS_VALID,   ///< Coordinates are valid
                 LAT,            ///< Latitude,m (float)
                 LON,            ///< Longitude,m (float)
@@ -160,7 +149,7 @@ namespace SDK
 
         private:
             const SDK::Interface::ISensorData* mData;
-        }; /* class GpsLication */
+        }; /* class GpsLocation */
     }; /* namespace SensorDataParser */
 
 } /* namespace SDK */
