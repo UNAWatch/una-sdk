@@ -34,7 +34,9 @@ namespace SDK::Component {
         , mMsgDef()
 	    , mIsField(false)
         , mBaseType(FIT_FIT_BASE_TYPE_INVALID)
-	    , mDevelopFieldSize(1)
+	    , mDevelopItemsCount(1)
+		, mDevelopIndex(0)
+		, mUserFields()
     {
     }
 
@@ -46,11 +48,14 @@ namespace SDK::Component {
      * in the specified parent container. Each developer field is associated
      * with a fixed number of base-type elements (e.g., bytes for STRING fields).
      *
-     * @param msgID        Local message number for this field.
-     * @param container    Parent FitHelper to which this field belongs.
-     * @param itemsCount   Number of elements (bytes) in the developer field.
+     * @param msgID      Local message number for this field.
+     * @param container  Parent FitHelper to which this field belongs.
+     * @param itemsCount Number of elements.
      */
-    FitHelper::FitHelper(uint8_t msgID, FitHelper& container, FIT_UINT8 itemsCount)
+    FitHelper::FitHelper(uint8_t    msgID,
+                         FitHelper& container,
+                         FIT_UINT8  itemsCount,
+                         FIT_UINT8  devIndex)
         : mInited(false)
         , mMsgID(msgID)
         , mMsgDefOrigin((FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION])
@@ -58,7 +63,9 @@ namespace SDK::Component {
         , mMsgDef()
         , mIsField(true)
         , mBaseType(FIT_FIT_BASE_TYPE_INVALID)
-        , mDevelopFieldSize(itemsCount)
+        , mDevelopItemsCount(itemsCount == 0 ? 1 : itemsCount)
+        , mDevelopIndex(devIndex)
+        , mUserFields()
     {
         container.addField(this);
     }
@@ -107,22 +114,22 @@ namespace SDK::Component {
             return false;
 	    }
 
-        if (mFields.size()) {
+        if (mUserFields.size()) {
             FIT_UINT8 header = mMsgID | FIT_HDR_TYPE_DEF_BIT | FIT_HDR_DEV_DATA_BIT;
             WriteData(&header, FIT_HDR_SIZE, fp);
             WriteData((const void*)mMsgDef,
                       static_cast<FIT_UINT16>(sizeof(FIT_MESG_DEF) - FIT_FLEX_ARRAY + mMsgDef->num_fields * FIT_FIELD_DEF_SIZE),
                       fp);
 
-            FIT_UINT8 numberFields = static_cast<FIT_UINT8>(mFields.size());
+            FIT_UINT8 numberFields = static_cast<FIT_UINT8>(mUserFields.size());
             WriteData(&numberFields, sizeof(FIT_UINT8), fp);
 
             for (FIT_UINT8 i = 0; i < numberFields; i++) {
                 FIT_DEV_FIELD_DEF dev_field_def{};
 
                 dev_field_def.def_num   = i;
-                dev_field_def.size      = mFields[i]->getFieldSize() * mFields[i]->getBaseTypeSize();
-                dev_field_def.dev_index = 0;
+                dev_field_def.size      = mUserFields[i]->getFieldSize();
+                dev_field_def.dev_index = mDevelopIndex;
 
                 WriteData(&dev_field_def, sizeof(FIT_DEV_FIELD_DEF), fp);
             }
@@ -197,11 +204,11 @@ namespace SDK::Component {
             return;
 	    }
 
-        if (std::find(mFields.begin(), mFields.end(), field) != mFields.end()) {
+        if (std::find(mUserFields.begin(), mUserFields.end(), field) != mUserFields.end()) {
             return;
         }
 
-        mFields.push_back(field);
+        mUserFields.push_back(field);
     }
 
     /**
@@ -213,13 +220,13 @@ namespace SDK::Component {
      */
     void FitHelper::writeFieldMessage(uint8_t idx, const void* data, SDK::Interface::IFile* fp)
     {
-        if (idx >= mFields.size()) {
+        if (idx >= mUserFields.size()) {
             return;
         }
  
-        FitHelper* field = mFields[idx];
+        FitHelper* field = mUserFields[idx];
 
-	    uint8_t fieldSize = field->getFieldSize() * field->getBaseTypeSize();
+	    uint8_t fieldSize = field->getFieldSize();
 
         if (field->getBaseType() == FIT_FIT_BASE_TYPE_STRING) {
 		    const char* str = (const char*)data;
@@ -241,9 +248,17 @@ namespace SDK::Component {
     /**
      * @brief Get declared developer field size.
      */
+    FIT_UINT8 FitHelper::getItemsCount()
+    {
+        return mDevelopItemsCount;
+    }
+
+    /**
+     * @brief Get field size.
+     */
     FIT_UINT8 FitHelper::getFieldSize()
     {
-        return mDevelopFieldSize;
+        return getItemsCount() * getBaseTypeSize(mBaseType);
     }
 
     /**

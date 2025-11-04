@@ -31,7 +31,7 @@ namespace SDK::Component {
     {
     public:
         FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef);
-        FitHelper(uint8_t msgID, FitHelper& container, FIT_UINT8 itemsCount = 1);
+        FitHelper(uint8_t msgID, FitHelper& container, FIT_UINT8 itemsCount = 1, FIT_UINT8 devIndex = 0);
 
         bool init(std::initializer_list<FIT_UINT8> fields = {});
 
@@ -45,6 +45,7 @@ namespace SDK::Component {
 
 		void writeFieldMessage(uint8_t idx, const void* data, SDK::Interface::IFile* fp);
 
+        FIT_UINT8         getItemsCount();
         FIT_UINT8         getFieldSize();
         FIT_UINT8         getBaseTypeSize();
         FIT_FIT_BASE_TYPE getBaseType();
@@ -75,15 +76,16 @@ namespace SDK::Component {
         };
 
         bool                       mInited;
-        uint8_t                    mMsgID;
+        const uint8_t              mMsgID;
         FIT_MESG_DEF*              mMsgDefOrigin;
         std::unique_ptr<uint8_t[]> mMsgDefBuffer;
         FIT_MESG_DEF*              mMsgDef;
         std::vector<MsgField>      mMsgFields;
-        bool                       mIsField;
+        const bool                 mIsField;
         FIT_FIT_BASE_TYPE          mBaseType;
-        uint8_t                    mDevelopFieldSize;
-		std::vector<FitHelper*>    mFields;
+        const uint8_t              mDevelopItemsCount;
+        const FIT_UINT8            mDevelopIndex;
+		std::vector<FitHelper*>    mUserFields;
     };
 
 }
