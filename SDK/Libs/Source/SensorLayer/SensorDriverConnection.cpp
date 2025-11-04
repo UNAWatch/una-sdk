@@ -101,5 +101,30 @@ void DriverConnection::disconnect()
 
     mDriver->disconnect(mListener);
 }
-        
+
+/**
+ * @brief Check if the specified driver matches the connected one.
+ *
+ * @details
+ * Compares the given driver pointer with the internal driver instance
+ * associated with this connection. Returns true only if both pointers
+ * are valid and refer to the same ISensorDriver object.
+ *
+ * @param  driver Pointer to a sensor driver to compare against.
+ * @return true  If the specified driver is the same as the one managed by this connection.
+ * @return false If either pointer is null or they do not match.
+ */
+bool DriverConnection::matchesDriver(const SDK::Interface::ISensorDriver* driver)
+{
+    if (!isValid()) {
+        return false;
+    }
+
+    if (driver == nullptr) {
+        return false;
+    }
+
+    return mDriver == driver;
+}
+
 } // namespace SDK::Sensors

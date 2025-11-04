@@ -33,6 +33,8 @@ namespace SDK::Sensor {
         bool connect(float period, uint32_t latency);
         void disconnect();
         
+        bool matchesDriver(const SDK::Interface::ISensorDriver* driver);
+
     protected:
         SDK::Interface::ISensorDriver*       mDriver;
         SDK::Interface::ISensorDataListener* mListener;

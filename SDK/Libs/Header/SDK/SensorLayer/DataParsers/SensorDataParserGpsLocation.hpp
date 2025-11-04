@@ -54,7 +54,19 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::COUNT);
+                return ((mData != nullptr) &&
+                        (mData->getAsU32(Field::TIME_VALID) <= 1) &&
+                        (mData->getAsU32(Field::COORDS_VALID) <= 1) &&
+                        (mData->getLength() == Field::COUNT));
+            }
+
+            /**
+             * @brief Check if time is valid
+             * @return true if valide false otherwise
+             */
+            bool isTimeValid() const
+            {
+                return isDataValid() && (mData->getAsU32(Field::TIME_VALID) == 1);
             }
 
             /**
@@ -64,6 +76,15 @@ namespace SDK
             uint32_t getTime() const
             {
                 return isDataValid() ? mData->getAsU32(Field::TIME) : 0UL;
+            }
+
+            /**
+             * @brief Check if Coordinates are valid
+             * @return true if valide false otherwise
+             */
+            bool isCoordinatesValid() const
+            {
+                return isDataValid() && (mData->getAsU32(Field::COORDS_VALID) == 1);
             }
 
             /**
@@ -128,11 +149,13 @@ namespace SDK
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                TIME = 0,   ///< Timestamp (uint32_t)
-                LAT,        ///< Latitude,m (float)
-                LON,        ///< Longitude,m (float)
-                ALT,        ///< Altitude,m (float)
-                COUNT       ///< Total number of fields
+                TIME_VALID = 0, ///< Time is valid
+                TIME,           ///< Time (uint32_t)
+                COORDS_VALID,   ///< Coordinates are valid
+                LAT,            ///< Latitude,m (float)
+                LON,            ///< Longitude,m (float)
+                ALT,            ///< Altitude,m (float)
+                COUNT           ///< Total number of fields
             };
 
         private:
