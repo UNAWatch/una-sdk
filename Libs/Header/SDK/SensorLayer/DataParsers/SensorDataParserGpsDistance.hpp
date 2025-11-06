@@ -25,12 +25,7 @@ namespace SDK
          * @brief Helper class to parse GPS sensor data from ISensorData
          *
          * Expected data layout:
-         * - [0] uint32_t mask (bitmask of valid fields)
-         * - [1] uint32_t time (e.g., UNIX timestamp)
-         * - [2] float latitude
-         * - [3] float longitude
-         * - [4] float altitude
-         * - [5] float speed (m/s)
+         * - [0] float distance (m)
          *
          * Validity of each field is checked via corresponding mask bit.
          */
