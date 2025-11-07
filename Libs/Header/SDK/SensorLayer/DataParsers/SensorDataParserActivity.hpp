@@ -70,6 +70,7 @@ public:
         if (!isDataValid()) {
             return 0U;
         }
+
         return mData->getAsU32(static_cast<uint8_t>(Field::kDURATION));
     }
 
