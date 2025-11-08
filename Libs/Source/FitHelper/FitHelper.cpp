@@ -369,7 +369,7 @@ namespace SDK::Component {
             }
         }
 
-        LOG_INFO("Optimized MsgDef\n");
+        LOG_DEBUG("Optimized MsgDef\n");
         printMsgDef((const FIT_MESG_DEF*)mMsgDef);
     }
 
