@@ -25,6 +25,17 @@ namespace SDK::Sensor {
                          float                                period  = 0,
                          uint32_t                             latency = 0);
 
+        DriverConnection(SDK::Interface::ISensorDriver*       driver,
+                         SDK::Interface::ISensorDataListener* listener,
+                         float                                period  = 0,
+                         uint32_t                             latency = 0);
+
+        DriverConnection(SDK::Interface::ISensorDriver*       driver,
+                         SDK::Interface::ISensorDataListener* listener,
+                         SDK::Interface::IApp*                app,
+                         float                                period  = 0,
+                         uint32_t                             latency = 0);
+
         virtual ~DriverConnection() = default;
 
         bool isValid();
@@ -41,6 +52,7 @@ namespace SDK::Sensor {
         float                                mPeriod;
         uint32_t                             mLatency;
         SDK::Interface::IApp*                mUserApp;
+        bool                                 mIsConnected;
     };
 
 } // namespace SDK::Sensor
