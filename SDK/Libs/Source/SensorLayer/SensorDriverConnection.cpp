@@ -38,6 +38,58 @@ DriverConnection::DriverConnection(SDK::Sensor::Type                    id,
     , mPeriod(period)
     , mLatency(latency)
     , mUserApp(&SDK::KernelProviderService::GetInstance().getKernel().app)
+    , mIsConnected(false)
+{}
+
+/**
+ * @brief Construct a connection wrapper using an explicit sensor driver.
+ *
+ * Stores the provided driver and connection parameters for subsequent @ref connect() calls.
+ *
+ * @param driver   Pointer to the sensor driver to use.
+ * @param listener Pointer to a data listener (must remain valid while connected).
+ * @param period   Desired sampling/update period (units as defined by the driver; commonly seconds).
+ * @param latency  Maximum report latency/batching tolerance (units as defined by the driver; commonly milliseconds).
+ *
+ * @pre `driver` must be valid and compatible with the listener.
+ */
+DriverConnection::DriverConnection(SDK::Interface::ISensorDriver*       driver,
+                                   SDK::Interface::ISensorDataListener* listener,
+                                   float                                period,
+                                   uint32_t                             latency)
+    : mDriver(driver)
+    , mListener(listener)
+    , mPeriod(period)
+    , mLatency(latency)
+    , mUserApp(&SDK::KernelProviderService::GetInstance().getKernel().app)
+    , mIsConnected(false)
+{}
+
+/**
+ * @brief Construct a connection wrapper using an explicit driver and application context.
+ *
+ * Stores the provided driver, listener, and application pointer along with connection parameters
+ * for subsequent @ref connect() calls.
+ *
+ * @param driver   Pointer to the sensor driver to use.
+ * @param listener Pointer to a data listener (must remain valid while connected).
+ * @param app      Pointer to the application context (used for driver registration or callbacks).
+ * @param period   Desired sampling/update period (units as defined by the driver; commonly seconds).
+ * @param latency  Maximum report latency/batching tolerance (units as defined by the driver; commonly milliseconds).
+ *
+ * @pre `driver`, `listener`, and `app` must remain valid during the connection lifetime.
+ */
+DriverConnection::DriverConnection(SDK::Interface::ISensorDriver*       driver,
+                                   SDK::Interface::ISensorDataListener* listener,
+                                   SDK::Interface::IApp*                app,
+                                   float                                period,
+                                   uint32_t                             latency)
+    : mDriver(driver)
+    , mListener(listener)
+    , mPeriod(period)
+    , mLatency(latency)
+    , mUserApp(app)
+    , mIsConnected(false)
 {}
 
 /**
@@ -63,7 +115,13 @@ bool DriverConnection::connect()
         return false;
     }
 
-    return mDriver->connect(mListener, mUserApp, mPeriod, mLatency);
+    if (mIsConnected) {
+        return false;
+    }
+
+    mIsConnected = mDriver->connect(mListener, mUserApp, mPeriod, mLatency);
+
+    return mIsConnected;
 }
 
 /**
@@ -78,6 +136,10 @@ bool DriverConnection::connect()
 bool DriverConnection::connect(float period, uint32_t latency)
 {
     if (!isValid()) {
+        return false;
+    }
+
+    if (mIsConnected) {
         return false;
     }
 
@@ -99,7 +161,13 @@ void DriverConnection::disconnect()
         return;
     }
 
+    if (!mIsConnected) {
+        return;
+    }
+
     mDriver->disconnect(mListener);
+
+    mIsConnected = false;
 }
 
 /**

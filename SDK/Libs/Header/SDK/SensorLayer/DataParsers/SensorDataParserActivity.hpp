@@ -33,6 +33,11 @@ namespace SensorDataParser {
 class Activity
 {
 public:
+    enum Field : uint8_t {
+        kDURATION = 0,  ///< Activity duration in milliseconds
+        kCOUNT          ///< Number of fields (must be last)
+    };
+
     /**
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 1 field: DURATION.
@@ -93,14 +98,6 @@ public:
     }
 
 private:
-    /**
-     * @brief Field layout indices.
-     */
-    enum Field : uint8_t {
-        kDURATION = 0,  ///< Activity duration in milliseconds
-        kCOUNT          ///< Number of fields (must be last)
-    };
-
     const Interface::ISensorData* mData { nullptr };
 }; /* class Activity */
 

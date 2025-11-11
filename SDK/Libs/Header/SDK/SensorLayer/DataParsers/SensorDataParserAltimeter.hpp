@@ -31,6 +31,14 @@ namespace SDK
         {
         public:
             /**
+             * @brief Field layout indices
+             */
+            enum Field : uint8_t {
+                kAltitude = 0, ///< Altitude in meters
+                kCount         ///< Number of fields
+            };
+
+            /**
              * @brief Construct a new Altimeter parser over given ISensorData
              * @param data Reference to sensor data containing 1 float value
              */
@@ -78,14 +86,6 @@ namespace SDK
             }
 
         private:
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                kAltitude = 0, ///< Altitude in meters
-                kCount         ///< Number of fields
-            };
-
             const Interface::ISensorData* mData;
         }; /* class Altimeter */
     }; /* namespace SensorDataParser */
