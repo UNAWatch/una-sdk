@@ -1,4 +1,4 @@
-INCLUDE "LibC/libc_exports_0.0.2.ld"
+INCLUDE "LibC/libc_exports_0.0.3.ld"
 
 /* Entry Point */
 ENTRY(AppStart)
