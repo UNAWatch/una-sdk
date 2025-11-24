@@ -56,7 +56,7 @@ public:
      * @details
      * Validity conditions:
      *  - Non-null pointer.
-     *  - Exactly 1 field present (DURATION).
+     *  - Only needed fields present.
      *
      * @return true if the data passes basic structural checks.
      */
@@ -86,6 +86,15 @@ public:
     uint32_t getTimestamp() const
     {
         return (mData != nullptr) ? mData->getTimestamp() : 0U;
+    }
+
+    /**
+     * @brief Get data timestamp in us
+     * @return Data timestamp in us (0 if invalid)
+     */
+    uint64_t getTimestampUs() const
+    {
+        return isDataValid() ? mData->getTimestampUs() : 0;
     }
 
     /**

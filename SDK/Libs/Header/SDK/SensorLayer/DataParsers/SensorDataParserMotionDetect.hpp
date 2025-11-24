@@ -33,6 +33,14 @@ class MotionDetect
 {
 public:
     /**
+     * @brief Field layout indices.
+     */
+    enum Field : uint8_t {
+        ID = 0,   ///< Motion identifier (see @ref Motion)
+        COUNT     ///< Number of fields (must be last)
+    };
+
+    /**
      * @brief Motion identifier values.
      */
     enum class Motion : uint8_t {
@@ -102,6 +110,15 @@ public:
     }
 
     /**
+     * @brief Get data timestamp in us
+     * @return Data timestamp in us (0 if invalid)
+     */
+    uint64_t getTimestampUs() const
+    {
+        return isDataValid() ? mData->getTimestampUs() : 0;
+    }
+
+    /**
      * @brief Get the number of expected fields.
      * @return Always returns 1 (ID).
      */
@@ -111,14 +128,6 @@ public:
     }
 
 private:
-    /**
-     * @brief Field layout indices.
-     */
-    enum class Field : uint8_t {
-        ID = 0,   ///< Motion identifier (see @ref Motion)
-        COUNT     ///< Number of fields (must be last)
-    };
-
     const Interface::ISensorData* mData { nullptr };
 }; /* class MotionDetect */
 

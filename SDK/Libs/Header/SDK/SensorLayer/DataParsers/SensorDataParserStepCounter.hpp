@@ -31,6 +31,14 @@ namespace SDK
         {
         public:
             /**
+             * @brief Field layout indices
+             */
+            enum Field : uint8_t {
+                kStepCount = 0, ///< Step count (uint32_t)
+                kCount           ///< Total number of fields
+            };
+
+            /**
              * @brief Construct a new StepCounter parser over given ISensorData
              * @param data Reference to sensor data containing 1 field
              */
@@ -70,6 +78,15 @@ namespace SDK
             }
 
             /**
+             * @brief Get data timestamp in us
+             * @return Data timestamp in us (0 if invalid)
+             */
+            uint64_t getTimestampUs() const
+            {
+                return isDataValid() ? mData->getTimestampUs() : 0;
+            }
+
+            /**
              * @brief Get number of expected fields (always 1)
              */
             static constexpr uint8_t getFieldsNumber()
@@ -78,14 +95,6 @@ namespace SDK
             }
 
         private:
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                kStepCount = 0, ///< Step count (uint32_t)
-                kCount           ///< Total number of fields
-            };
-
             const Interface::ISensorData* mData;
         }; /* class StepCounter */
     }; /* namespace SensorDataParser */

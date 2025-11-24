@@ -34,6 +34,15 @@ class ActivityRecognition
 {
 public:
     /**
+     * @brief Field layout indices.
+     */
+    enum Field : uint8_t {
+        kID = 0,        ///< Activity identifier (see @ref Activity)
+        kCONFIDENCE,    ///< Confidence in percent [0..100]
+        kCOUNT          ///< Number of fields (must be last)
+    };
+
+    /**
      * @brief Activity identifier values.
      */
     enum class Activity : uint8_t {
@@ -125,6 +134,15 @@ public:
     }
 
     /**
+     * @brief Get data timestamp in us
+     * @return Data timestamp in us (0 if invalid)
+     */
+    uint64_t getTimestampUs() const
+    {
+        return isDataValid() ? mData->getTimestampUs() : 0;
+    }
+
+    /**
      * @brief Get the number of expected fields.
      * @return Always returns 2 (ID, CONFIDENCE).
      */
@@ -134,15 +152,6 @@ public:
     }
 
 private:
-    /**
-     * @brief Field layout indices.
-     */
-    enum Field : uint8_t {
-        kID = 0,        ///< Activity identifier (see @ref Activity)
-        kCONFIDENCE,    ///< Confidence in percent [0..100]
-        kCOUNT          ///< Number of fields (must be last)
-    };
-
     const Interface::ISensorData* mData { nullptr };
 }; /* class ActivityRecognition */
 

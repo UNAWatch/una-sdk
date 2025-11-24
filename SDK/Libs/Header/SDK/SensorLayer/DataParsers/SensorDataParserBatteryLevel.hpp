@@ -80,6 +80,15 @@ public:
     }
 
     /**
+     * @brief Get data timestamp in us
+     * @return Data timestamp in us (0 if invalid)
+     */
+    uint64_t getTimestampUs() const
+    {
+        return isDataValid() ? mData->getTimestampUs() : 0;
+    }
+
+    /**
      * @brief  Returns the number of fields
      * @return The number of fields
      */

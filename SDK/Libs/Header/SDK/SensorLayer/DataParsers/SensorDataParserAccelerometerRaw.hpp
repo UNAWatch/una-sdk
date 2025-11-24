@@ -31,6 +31,16 @@ namespace SDK
         {
         public:
             /**
+             * @brief Field layout indices
+             */
+            enum Field : uint8_t {
+                X = 0, ///< Axis X
+                Y,     ///< Axis Y
+                Z,     ///< Axis Z
+                COUNT  ///< Number of fields
+            };
+
+            /**
              * @brief Construct a new Accelerometer parser over given ISensorData
              * @param data Reference to sensor data containing 1 int16 value
              */
@@ -43,14 +53,21 @@ namespace SDK
             AccelerometerRaw(const Interface::ISensorData* data) : mData(data) {}
 
             /**
-             * @brief Check if data is valid (should contain exactly 1 float field)
-             * @return true if valid
+             * @brief Check if data is valid.
+             *
+             * @details
+             * Validity conditions:
+             *  - Non-null pointer.
+             *  - Only needed fields present.
+             *
+             * @return true if the data passes basic structural checks.
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::COUNT);
+                return (mData != nullptr) &&
+                       (mData->getLength() == static_cast<uint8_t>(Field::COUNT));
             }
-
+            
             /**
              * @brief Get acceleration on X axis
              * @return Acceleration in g (if data is valid), otherwise 0
@@ -88,6 +105,15 @@ namespace SDK
             }
 
             /**
+             * @brief Get data timestamp in us
+             * @return Data timestamp in us (0 if invalid)
+             */
+            uint64_t getTimestampUs() const
+            {
+                return isDataValid() ? mData->getTimestampUs() : 0;
+            }
+
+            /**
              * @brief Get number of expected fields (always 1)
              */
             static constexpr uint8_t getFieldsNumber()
@@ -96,16 +122,6 @@ namespace SDK
             }
 
         private:
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                X = 0, ///< Axis X
-                Y,     ///< Axis Y
-                Z,     ///< Axis Z
-                COUNT  ///< Number of fields
-            };
-
             /**
              * @brief Reference to sensor data storage
              */

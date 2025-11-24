@@ -71,6 +71,15 @@ namespace SDK
                 return isDataValid() ? mData->getTimestamp() : 0;
             }
 
+	    /**
+	     * @brief Get data timestamp in us
+	     * @return Data timestamp in us (0 if invalid)
+	     */
+	    uint64_t getTimestampUs() const
+	    {
+        	return isDataValid() ? mData->getTimestampUs() : 0;
+	    }
+
             /**
              * @brief Get total number of expected fields
              * @return Field count (6)
