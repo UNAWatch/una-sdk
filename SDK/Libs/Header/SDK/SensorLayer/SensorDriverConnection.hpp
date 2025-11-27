@@ -20,6 +20,8 @@ namespace SDK::Sensor {
 
     class DriverConnection {
     public:
+        DriverConnection();
+
         DriverConnection(SDK::Sensor::Type                    id,
                          SDK::Interface::ISensorDataListener* listener,
                          float                                period  = 0,
@@ -42,6 +44,13 @@ namespace SDK::Sensor {
 
         bool connect();
         bool connect(float period, uint32_t latency);
+        bool connect(SDK::Interface::ISensorDriver*       driver,
+                     SDK::Interface::ISensorDataListener* listener,
+                     float                                period = 0,
+                     uint32_t                             latency = 0);
+
+        bool isConnected();
+
         void disconnect();
         
         bool matchesDriver(const SDK::Interface::ISensorDriver* driver);

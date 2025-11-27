@@ -15,6 +15,15 @@
 
 namespace SDK::Sensor {
 
+DriverConnection::DriverConnection()
+    : mDriver(nullptr)
+    , mListener(nullptr)
+    , mPeriod(0)
+    , mLatency(0)
+    , mUserApp(nullptr)
+    , mIsConnected(false)
+{}
+
 /**
  * @brief Construct a connection wrapper for a sensor driver.
  *
@@ -147,6 +156,29 @@ bool DriverConnection::connect(float period, uint32_t latency)
     mLatency = latency;
 
     return connect();
+}
+
+bool DriverConnection::connect(SDK::Interface::ISensorDriver*       driver,
+                               SDK::Interface::ISensorDataListener* listener,
+                               float                                period,
+                               uint32_t                             latency)
+{
+    if (isConnected()) {
+        return false;
+    }
+
+    mDriver   = driver;
+    mListener = listener;
+    mPeriod   = period;
+    mLatency  = latency;
+
+    return connect();
+}
+
+
+bool DriverConnection::isConnected()
+{
+    return mIsConnected;
 }
 
 /**
