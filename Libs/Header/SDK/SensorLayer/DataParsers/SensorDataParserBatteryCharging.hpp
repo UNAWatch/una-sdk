@@ -71,13 +71,13 @@ public:
      * It reads from ISensorData without owning the underlying storage.
      * No conversions are performed beyond basic type reads.
      */
-    bool isCharging() const
+    State getState() const
     {
         if (!isDataValid()) {
-            return false;
+            return State::USB_DISCONNNECTED;
         }
 
-        return (mData->getAsU32(static_cast<uint8_t>(Field::kCHARGING)) == 1);
+        return static_cast<State>(mData->getAsU32(static_cast<uint8_t>(Field::kCHARGING)));
     }
 
     /**
