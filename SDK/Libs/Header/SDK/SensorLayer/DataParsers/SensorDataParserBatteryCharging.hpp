@@ -29,11 +29,10 @@ namespace SDK::SensorDataParser {
 class BatteryCharging
 {
 public:
-    enum class State {
-        USB_CONNNECTED,
-        USB_DISCONNNECTED,
-        CHARGING,
-        NO_CHARGING,
+    enum Field : uint8_t {
+        CONNECTED = 0,  ///< USB cable connect status
+        CHARGING,       ///< Charging status
+        COUNT           ///< Number of fields (must be last)
     };
 
     /**
@@ -58,26 +57,36 @@ public:
      */
     bool isDataValid() const
     {
-        return (mData != nullptr) &&
-               (mData->getLength() == static_cast<uint8_t>(Field::kCOUNT) &&
-               (mData->getAsU32(static_cast<uint8_t>(Field::kCHARGING)) <= 1));
+        return (mData != nullptr)                                             &&
+               (mData->getLength() == static_cast<uint8_t>(Field::COUNT)      &&
+               (mData->getAsU32(static_cast<uint8_t>(Field::CONNECTED)) <= 1) &&
+               (mData->getAsU32(static_cast<uint8_t>(Field::CHARGING)) <= 1));
     }
 
     /**
-     * @brief   SensorData parser for the Battery Charging state/event
+     * @brief   SensorData parser for the USB cable connect state
      *
-     * @details
-     * The parser provides type-safe accessors for the charging state/event.
-     * It reads from ISensorData without owning the underlying storage.
-     * No conversions are performed beyond basic type reads.
      */
-    State getState() const
+    bool isUsbConnected() const
     {
         if (!isDataValid()) {
-            return State::USB_DISCONNNECTED;
+            return false;
         }
 
-        return static_cast<State>(mData->getAsU32(static_cast<uint8_t>(Field::kCHARGING)));
+        return static_cast<bool>(mData->getAsU32(static_cast<uint8_t>(Field::CONNECTED)));
+    }
+
+    /**
+     * @brief   SensorData parser for charging state
+     *
+     */
+    bool isCharging() const
+    {
+        if (!isDataValid()) {
+            return false;
+        }
+
+        return static_cast<bool>(mData->getAsU32(static_cast<uint8_t>(Field::CHARGING)));
     }
 
     /**
@@ -104,18 +113,10 @@ public:
      */
     static constexpr uint8_t getFieldsNumber()
     {
-        return static_cast<uint8_t>(Field::kCOUNT);
+        return static_cast<uint8_t>(Field::COUNT);
     }
 
 private:
-    /**
-     * @brief   SensorData parser for the Battery Charging state/event
-     */
-    enum Field : uint8_t {
-        kCHARGING = 0,  ///< Raw charge value
-        kCOUNT          ///< Number of fields (must be last)
-    };
-
     const Interface::ISensorData* mData { nullptr };
 }; /* class BatteryCharging */
 
