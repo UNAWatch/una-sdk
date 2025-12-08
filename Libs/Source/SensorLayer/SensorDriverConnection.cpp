@@ -11,7 +11,8 @@
  */
 
 #include "SDK/SensorLayer/SensorDriverConnection.hpp"
-#include "SDK/Kernel/KernelProviderService.hpp"
+//#include "SDK/Kernel/KernelProviderService.hpp"
+#include "SensorLayer/SensorManager.hpp"
 
 namespace SDK::Sensor {
 
@@ -42,11 +43,11 @@ DriverConnection::DriverConnection(SDK::Sensor::Type                    id,
                                    SDK::Interface::ISensorDataListener* listener,
                                    float                                period,
                                    uint32_t                             latency)
-    : mDriver(SDK::KernelProviderService::GetInstance().getKernel().sensorManager.getDefaultSensor(id))
+    : mDriver(::Sensor::Manager::getInstance().getDefaultSensor(id))
     , mListener(listener)
     , mPeriod(period)
     , mLatency(latency)
-    , mUserApp(&SDK::KernelProviderService::GetInstance().getKernel().app)
+    , mUserApp(nullptr)
     , mIsConnected(false)
 {}
 
@@ -70,7 +71,7 @@ DriverConnection::DriverConnection(SDK::Interface::ISensorDriver*       driver,
     , mListener(listener)
     , mPeriod(period)
     , mLatency(latency)
-    , mUserApp(&SDK::KernelProviderService::GetInstance().getKernel().app)
+    , mUserApp(nullptr)
     , mIsConnected(false)
 {}
 
@@ -128,7 +129,7 @@ bool DriverConnection::connect()
         return false;
     }
 
-    mIsConnected = mDriver->connect(mListener, mUserApp, mPeriod, mLatency);
+    mIsConnected = mDriver->connect(mListener, nullptr, mPeriod, mLatency);
 
     return mIsConnected;
 }

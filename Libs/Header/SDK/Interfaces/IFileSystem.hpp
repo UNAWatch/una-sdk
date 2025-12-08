@@ -1,3 +1,13 @@
+/**
+ ******************************************************************************
+ * @file    IFileSystem.hpp
+ * @date    06-12-2025
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   Interface for file/directory operations.
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
 
 #pragma once
 
@@ -10,6 +20,7 @@
 namespace SDK::Interface
 {
 
+// Forward declarations
 class IFile;
 class IDirectory;
 
@@ -235,6 +246,7 @@ public:
      * @retval  Current file position in bytes.
      */
     virtual size_t getPosition() const = 0;
+
 };
 
 

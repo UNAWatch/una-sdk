@@ -64,9 +64,6 @@ static SDK::Interface::ISystem*     isys;
 static SDK::Interface::ILogger*     ilog;   // Do not use Logger directly here, use raw interface instead
 static SDK::Interface::IAppMemory*  imem;
 
-void initInterfaces() {
-
-}
 
 extern "C" {
 

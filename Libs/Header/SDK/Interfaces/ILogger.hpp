@@ -1,8 +1,19 @@
+/**
+ ******************************************************************************
+ * @file    ILogger.hpp
+ * @date    06-12-2025
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   Interface for logging operations.
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
 
 #pragma once
 
 #include <cstdint>
 #include <cstdarg>
+
 
 namespace SDK::Interface
 {
@@ -44,8 +55,9 @@ public:
      * @param fmt Format string (printf-style).
      * @param args Variable argument list
      */
-    virtual void mvprintf(const char *level, const char *module_name, const char *func, int line,
-                       const char *fmt, va_list args) = 0;
+    virtual void mvprintf(const char *level, const char *module_name,
+            const char *func, int line, const char *fmt, va_list args) = 0;
+
 protected:
 
     /**

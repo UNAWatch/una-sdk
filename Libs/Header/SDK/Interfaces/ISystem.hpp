@@ -1,3 +1,13 @@
+/**
+ ******************************************************************************
+ * @file    ISystem.hpp
+ * @date    06-12-2025
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   System interface.
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
 
 #pragma once
 
@@ -5,7 +15,8 @@
 #include <cstdbool>
 
 
-namespace SDK::Interface {
+namespace SDK::Interface
+{
 
 class ISystem
 {
@@ -14,11 +25,11 @@ public:
     /**
      * @brief Terminates the application.
      *
-     * When this method is called, the following callbacks will be triggered
-     * in sequence (depending on the current state): 'onPause() -> onStop() -> onDestroy()'.
+     * When this method is called, no additional events will be sent.
      * After execution, the application is removed from memory.
      *
-     * @param status Exit status (0 for normal exit, <0 for errors).
+     * @param status Exit status (0 for normal exit, < 0 for errors).
+     * @note No return.
      */
     virtual void exit(int status = 0) = 0;
 
@@ -40,8 +51,8 @@ public:
      */
     virtual void yield() = 0;
 
-
 protected:
+
     /**
      * @brief Virtual destructor.
      */
