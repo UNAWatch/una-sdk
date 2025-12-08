@@ -135,34 +135,7 @@ struct BatteryRequestMsg : public MessageBase {
     {}
 };
 
-/**
- * @brief Run GUI request message
- *
- * Service sends this request when it needs to show information to user.
- * Kernel will launch GUI part of the application if not already running.
- * Response indicates whether GUI was successfully started.
- *
- * Use case: Background service detects important event and needs to
- * notify user by showing GUI interface.
- *
- * Example:
- * @code
- * // Service detects incoming call
- * auto* req = srvComm->allocateMessage<RunGuiRequest>();
- * if (srvComm->sendMessage(req, 1000)) {
- *     if (req->getResult() == MessageResult::SUCCESS) {
- *         // GUI is now running, can send internal messages
- *     }
- * }
- * srvComm->releaseMessage(req);
- * @endcode
- */
-struct RunGuiRequest : public MessageBase {
-    RunGuiRequest()
-        : MessageBase(MessageType::REQUEST_RUN_GUI)
-    {
-    }
-};
+
 
 /**
  * @brief Display update request message
