@@ -42,7 +42,7 @@ namespace SDK
              * @brief Construct a new Altimeter parser over given ISensorData
              * @param data Reference to sensor data containing 1 float value
              */
-            Altimeter(const SDK::Sensor::DataView& data) : mData(data) {}
+            Altimeter(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid (should contain exactly 1 float field)
@@ -89,7 +89,7 @@ namespace SDK
         }
 
         private:
-            const SDK::Sensor::DataView& mData;
+            const SDK::Sensor::DataView mData;
         }; /* class Altimeter */
     }; /* namespace SensorDataParser */
 

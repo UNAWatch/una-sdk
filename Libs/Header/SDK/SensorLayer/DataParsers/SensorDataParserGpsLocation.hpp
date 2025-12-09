@@ -49,7 +49,7 @@ namespace SDK
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GpsLocation(const SDK::Sensor::DataView& data) : mData(data) {}
+            GpsLocation(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -147,7 +147,7 @@ namespace SDK
             }
 
         private:
-            const SDK::Sensor::DataView& mData;
+            const SDK::Sensor::DataView mData;
         }; /* class GpsLocation */
     }; /* namespace SensorDataParser */
 

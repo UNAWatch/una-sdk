@@ -43,7 +43,7 @@ public:
      * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      * @param data Reference to sensor data with
      */
-    explicit BatteryMetrics(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit BatteryMetrics(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
@@ -135,7 +135,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class BatteryMetrics */
 
 } /* namespace SDK::SensorDataParser */

@@ -37,7 +37,7 @@ public:
      * @brief   Construct parser from a reference to sensor data
      * @param   data Reference to sensor data
      */
-    explicit Temperature(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit Temperature(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   Check if data is valid
@@ -85,7 +85,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class Temperature */
 
 } /* namespace SensorDataParser */

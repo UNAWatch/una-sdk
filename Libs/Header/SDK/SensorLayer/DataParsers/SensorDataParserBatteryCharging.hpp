@@ -39,7 +39,7 @@ public:
      * @brief   SensorData parser for the Battery Charging state/event
      * @param data Reference to sensor data
      */
-    explicit BatteryCharging(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit BatteryCharging(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   SensorData parser for the Battery Charging state/event
@@ -102,7 +102,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class BatteryCharging */
 
 } /* namespace SDK::SensorDataParser */

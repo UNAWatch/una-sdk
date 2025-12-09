@@ -56,7 +56,7 @@ public:
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 2 fields: ID, CONFIDENCE.
      */
-    explicit ActivityRecognition(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit ActivityRecognition(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief Check if data is valid.
@@ -134,7 +134,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class ActivityRecognition */
 
 } /* namespace SDK::SensorDataParser */

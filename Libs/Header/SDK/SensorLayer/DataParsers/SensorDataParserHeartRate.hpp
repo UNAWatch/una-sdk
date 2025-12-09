@@ -40,7 +40,7 @@ namespace SDK
              * @brief Construct a new HeartRate parser over given ISensorData
              * @param data Reference to sensor data containing 1 float field
              */
-            HeartRate(const SDK::Sensor::DataView& view) : mData(view) {}
+            HeartRate(const SDK::Sensor::DataView view) : mData(view) {}
 
             /**
              * @brief Check if data is valid (should contain exactly 1 field)
@@ -96,7 +96,7 @@ namespace SDK
             }
 
         private:
-            const SDK::Sensor::DataView& mData;
+            const SDK::Sensor::DataView mData;
         }; /* class HeartRate */
     }; /* namespace SensorDataParser */
 

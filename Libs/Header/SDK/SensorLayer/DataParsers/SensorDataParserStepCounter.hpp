@@ -42,7 +42,7 @@ namespace SDK
              * @brief Construct a new StepCounter parser over given ISensorData
              * @param data Reference to sensor data containing 1 field
              */
-            StepCounter(const SDK::Sensor::DataView& data) : mData(data) {}
+            StepCounter(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid (should contain exactly 1 field)
@@ -89,7 +89,7 @@ namespace SDK
             }
 
         private:
-            const SDK::Sensor::DataView& mData;
+            const SDK::Sensor::DataView mData;
         }; /* class StepCounter */
     }; /* namespace SensorDataParser */
 

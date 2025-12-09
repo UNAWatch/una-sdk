@@ -38,7 +38,7 @@ public:
      * @brief   SensorData parser for the Battery Level sensor
      * @param data Reference to sensor data
      */
-    explicit BatteryLevel(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit BatteryLevel(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   SensorData parser for the Battery Level sensor
@@ -92,7 +92,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class Power */
 
 } /* namespace SensorDataParser */

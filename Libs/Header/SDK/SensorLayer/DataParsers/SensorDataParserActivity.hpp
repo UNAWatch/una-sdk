@@ -42,7 +42,7 @@ public:
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 1 field: DURATION.
      */
-    explicit Activity(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit Activity(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief Check if data is valid.
@@ -96,7 +96,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class Activity */
 
 } /* namespace SensorDataParser */

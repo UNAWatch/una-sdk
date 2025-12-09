@@ -44,7 +44,7 @@ namespace SDK
              * @brief Construct a new Accelerometer parser over given ISensorData
              * @param data Reference to sensor data containing 1 int16 value
              */
-            AccelerometerRaw(const SDK::Sensor::DataView& data) : mData(data) {}
+            AccelerometerRaw(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid.
@@ -118,7 +118,7 @@ namespace SDK
             /**
              * @brief Reference to sensor data storage
              */
-            const SDK::Sensor::DataView& mData;
+            const SDK::Sensor::DataView mData;
         }; /* class Accelerometer */
     }; /* namespace SensorDataParser */
 

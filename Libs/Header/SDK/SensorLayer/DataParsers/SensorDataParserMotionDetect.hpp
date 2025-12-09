@@ -54,7 +54,7 @@ public:
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 1 field: ID.
      */
-    explicit MotionDetect(const SDK::Sensor::DataView& data) : mData(data) {}
+    explicit MotionDetect(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief Check if data is valid.
@@ -117,7 +117,7 @@ public:
     }
 
 private:
-    const SDK::Sensor::DataView& mData;
+    const SDK::Sensor::DataView mData;
 }; /* class MotionDetect */
 
 } /* namespace SDK::SensorDataParser */
