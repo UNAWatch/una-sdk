@@ -103,7 +103,7 @@ public:
      * @note Kernel automatically increments reference count when queuing
      * @note Message type determines if response is expected
      */
-    virtual bool sendMessage(MessageBase* msg, uint32_t timeoutMs) = 0;
+    virtual bool sendMessage(MessageBase* msg, uint32_t timeoutMs = 0xFFFFFFFF) = 0;
 
     /**
      * @brief Allocate typed message object from kernel pool
