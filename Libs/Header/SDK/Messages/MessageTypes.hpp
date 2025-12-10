@@ -115,7 +115,6 @@ namespace MessageType {
 
     constexpr Type EVENT_GUI_FRAME_TICK        = 0x3010;
 
-
     // =========================================================================
     // Range Constants (for validation and custom type allocation)
     // =========================================================================
