@@ -19,7 +19,7 @@ namespace SDK::Sensor
 {
     struct Data
     {
-        struct Field {
+        union Field {
             float    f;
             uint32_t u32;
             int32_t  i32;

@@ -88,6 +88,19 @@ namespace SDK
                 return isDataValid() ? mData.i[Field::Z] : 0;
             }
 
+            bool getXYZ(int16_t& x, int16_t& y, int16_t& z) const
+            {
+                if (!isDataValid()) {
+                    return false;
+                }
+
+                x = mData.i[Field::X];
+                y = mData.i[Field::Y];
+                z = mData.i[Field::Z];
+
+                return true;
+            }
+
             /**
              * @brief Get data timestamp in ms
              * @return Data timestamp in ms (0 if invalid)
