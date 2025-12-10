@@ -14,7 +14,7 @@
 #pragma once
 
 #include "SDK/SensorLayer/SensorTypes.hpp"
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorData.hpp"
 
 #include <vector>
 
@@ -28,9 +28,10 @@ class ISensorDataListener
 public:
     virtual ~ISensorDataListener() = default;
 
-    virtual void onSdlNewData(const SDK::Interface::ISensorDriver*             sensor,
-                              const std::vector<SDK::Interface::ISensorData*>& data,
-                              bool                                             first) = 0;
+    virtual void onSdlNewData(uint16_t                 handle,
+                              const SDK::Sensor::Data* base,
+                              uint16_t                 count,
+                              uint16_t                 stride) = 0;
 };
 
 } // namespace SDK::Interface

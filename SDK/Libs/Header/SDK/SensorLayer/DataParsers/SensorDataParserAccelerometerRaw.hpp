@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP
 #define __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -44,13 +44,7 @@ namespace SDK
              * @brief Construct a new Accelerometer parser over given ISensorData
              * @param data Reference to sensor data containing 1 int16 value
              */
-            AccelerometerRaw(const Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new Accelerometer parser over given ISensorData
-             * @param data Pointer to sensor data containing 1 int16_t value
-             */
-            AccelerometerRaw(const Interface::ISensorData* data) : mData(data) {}
+            AccelerometerRaw(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid.
@@ -64,8 +58,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) &&
-                       (mData->getLength() == static_cast<uint8_t>(Field::COUNT));
+                return (mData.getFieldCount() == Field::COUNT);
             }
             
             /**
@@ -74,7 +67,7 @@ namespace SDK
              */
             int16_t getX() const
             {
-                return isDataValid() ? mData->getAsI32(Field::X) : 0;
+                return isDataValid() ? mData.i[Field::X] : 0;
             }
 
             /**
@@ -83,7 +76,7 @@ namespace SDK
              */
             int16_t getY() const
             {
-                return isDataValid() ? mData->getAsI32(Field::Y) : 0;
+                return isDataValid() ? mData.i[Field::Y] : 0;
             }
 
             /**
@@ -92,7 +85,20 @@ namespace SDK
              */
             int16_t getZ() const
             {
-                return isDataValid() ? mData->getAsI32(Field::Z) : 0;
+                return isDataValid() ? mData.i[Field::Z] : 0;
+            }
+
+            bool getXYZ(int16_t& x, int16_t& y, int16_t& z) const
+            {
+                if (!isDataValid()) {
+                    return false;
+                }
+
+                x = mData.i[Field::X];
+                y = mData.i[Field::Y];
+                z = mData.i[Field::Z];
+
+                return true;
             }
 
             /**
@@ -101,7 +107,7 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
             /**
@@ -110,7 +116,7 @@ namespace SDK
              */
             uint64_t getTimestampUs() const
             {
-                return isDataValid() ? mData->getTimestampUs() : 0;
+                return isDataValid() ? mData.getTimestampUs() : 0;
             }
 
             /**
@@ -125,7 +131,7 @@ namespace SDK
             /**
              * @brief Reference to sensor data storage
              */
-            const Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class Accelerometer */
     }; /* namespace SensorDataParser */
 

@@ -11,7 +11,7 @@
 #ifndef __SENSOR_DATA_PARSER_TEMPERATURE_HPP
 #define __SENSOR_DATA_PARSER_TEMPERATURE_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -28,17 +28,16 @@ namespace SensorDataParser {
 class Temperature
 {
 public:
+    enum Field : uint8_t {
+        TEMP = 0,   ///< Temperature value (units are device-specific)
+        COUNT       ///< Number of fields (must be last)
+    };
+
     /**
      * @brief   Construct parser from a reference to sensor data
      * @param   data Reference to sensor data
      */
-    explicit Temperature(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief   Construct parser from a pointer to sensor data
-     * @param   data Pointer to sensor data
-     */
-    explicit Temperature(const Interface::ISensorData* data) : mData(data) {}
+    explicit Temperature(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   Check if data is valid
@@ -46,19 +45,16 @@ public:
      */
     bool isDataValid() const
     {
-        return (mData != nullptr) && (mData->getLength() == static_cast<uint8_t>(Field::COUNT));
+        return (mData.getFieldCount() == Field::COUNT);
     }
 
     /**
      * @brief   Get temperature value
-     * @return  Temperature in °C (or device-specific units). Returns -1.0f if invalid.
+     * @return  Temperature in °C (or device-specific units). Returns -273.15f if invalid.
      */
     float getTemperature() const
     {
-        if (!isDataValid()) {
-            return -1.0f;
-        }
-        return mData->getAsFloat(static_cast<uint8_t>(Field::TEMP));
+        return isDataValid() ? mData.f[Field::TEMP] : -273.15f;
     }
 
     /**
@@ -67,7 +63,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return isDataValid() ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -76,7 +72,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -89,15 +85,7 @@ public:
     }
 
 private:
-    /**
-     * @brief   Fields for the Temperature sensor
-     */
-    enum Field : uint8_t {
-        TEMP = 0,   ///< Temperature value (units are device-specific)
-        COUNT       ///< Number of fields (must be last)
-    };
-
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class Temperature */
 
 } /* namespace SensorDataParser */

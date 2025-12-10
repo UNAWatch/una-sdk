@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_BATTERY_METRICS_HPP
 #define __SENSOR_DATA_PARSER_BATTERY_METRICS_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -30,17 +30,20 @@ namespace SDK::SensorDataParser {
 class BatteryMetrics
 {
 public:
+    enum Field : uint8_t {
+        VOLTAGE = 0,      ///< Battery voltage (V)
+        CURRENT,          ///< Instantaneous current (mA); sign per firmware contract
+        AVERAGE_CURRENT,  ///< Averaged/filtered current (mA)
+        CAPACITY,         ///< Remaining capacity (mAh)
+        DESIGN_CAPACITY,  ///< Full charge (design) capacity (mAh)
+        COUNT             ///< Number of fields (must be last)
+    };
+
     /**
      * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
      * @param data Reference to sensor data with
      */
-    explicit BatteryMetrics(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
-     * @param data Pointer to sensor data
-     */
-    explicit BatteryMetrics(const Interface::ISensorData* data) : mData(data) {}
+    explicit BatteryMetrics(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
@@ -52,8 +55,7 @@ public:
      */
     bool isDataValid() const
     {
-        return (mData != nullptr) &&
-               (mData->getLength() == static_cast<uint8_t>(Field::kCOUNT));
+        return (mData.getFieldCount() == Field::COUNT);
     }
 
     /**
@@ -66,11 +68,7 @@ public:
      */
     float getVoltage() const
     {
-        if (!isDataValid()) {
-            return -1.0f;
-        }
-
-        return mData->getAsFloat(static_cast<uint8_t>(Field::kVOLTAGE));
+        return isDataValid() ? mData.f[Field::VOLTAGE] : -1.0f;
     }
         
     /**
@@ -79,11 +77,7 @@ public:
      */
     float getCurrent() const
     {
-        if (!isDataValid()) {
-            return 0.0f;
-        }
-
-        return mData->getAsFloat(static_cast<uint8_t>(Field::kCURRENT));
+        return isDataValid() ? mData.f[Field::CURRENT] : 0.0f;
     }
 
     /**
@@ -92,11 +86,7 @@ public:
      */
     float getAverageCurrent() const
     {
-        if (!isDataValid()) {
-            return 0.0f;
-        }
-        
-        return mData->getAsFloat(static_cast<uint8_t>(Field::kAVERAGE_CURRENT));
+        return isDataValid() ? mData.f[Field::AVERAGE_CURRENT] : 0.0f;
     }
 
     /**
@@ -105,11 +95,7 @@ public:
      */
     float getCapacity() const
     {
-        if (!isDataValid()) {
-            return -1.0f;
-        }
-        
-        return mData->getAsFloat(static_cast<uint8_t>(Field::kCAPACITY));
+        return isDataValid() ? mData.f[Field::CAPACITY] : -1.0f;
     }
 
     /**
@@ -118,11 +104,7 @@ public:
      */
     float getDesignCapacity() const
     {
-        if (!isDataValid()) {
-            return -1.0f;
-        }
-        
-        return mData->getAsFloat(static_cast<uint8_t>(Field::kDESIGN_CAPACITY));
+        return isDataValid() ? mData.f[Field::DESIGN_CAPACITY] : -1.0f;
     }
 
     /**
@@ -131,7 +113,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return (mData != nullptr) ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -140,7 +122,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -149,23 +131,11 @@ public:
      */
     static constexpr uint8_t getFieldsNumber()
     {
-        return static_cast<uint8_t>(Field::kCOUNT);
+        return Field::COUNT;
     }
 
 private:
-    /**
-     * @brief   SensorData parser for the Battery Metrics (V/I/mAh) sensor
-     */
-    enum Field : uint8_t {
-        kVOLTAGE = 0,      ///< Battery voltage (V)
-        kCURRENT,          ///< Instantaneous current (mA); sign per firmware contract
-        kAVERAGE_CURRENT,  ///< Averaged/filtered current (mA)
-        kCAPACITY,         ///< Remaining capacity (mAh)
-        kDESIGN_CAPACITY,  ///< Full charge (design) capacity (mAh)
-        kCOUNT             ///< Number of fields (must be last)
-    };
-
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class BatteryMetrics */
 
 } /* namespace SDK::SensorDataParser */

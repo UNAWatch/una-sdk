@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_MOTION_DETECT_HPP
 #define __SENSOR_DATA_PARSER_MOTION_DETECT_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -54,13 +54,7 @@ public:
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 1 field: ID.
      */
-    explicit MotionDetect(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief Construct a new parser over the given ISensorData.
-     * @param data Pointer to sensor data with 1 field: ID (may be nullptr).
-     */
-    explicit MotionDetect(const Interface::ISensorData* data) : mData(data) {}
+    explicit MotionDetect(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief Check if data is valid.
@@ -75,16 +69,14 @@ public:
      */
     bool isDataValid() const
     {
-        if (mData == nullptr) {
+        if (mData.getFieldCount() != Field::COUNT) {
             return false;
         }
-        if (mData->getLength() != static_cast<uint8_t>(Field::COUNT)) {
+
+        if (mData.u[Field::ID] > static_cast<uint32_t>(Motion::UNKNOWN)) {
             return false;
         }
-        const uint32_t id = mData->getAsU32(static_cast<uint8_t>(Field::ID));
-        if (id > static_cast<uint32_t>(Motion::UNKNOWN)) {
-            return false;
-        }
+
         return true;
     }
 
@@ -94,10 +86,7 @@ public:
      */
     Motion getID() const
     {
-        if (!isDataValid()) {
-            return Motion::UNKNOWN;
-        }
-        return static_cast<Motion>(mData->getAsU32(static_cast<uint8_t>(Field::ID)));
+        return isDataValid() ? static_cast<Motion>(mData.u[Field::ID]) : Motion::UNKNOWN;
     }
 
     /**
@@ -106,7 +95,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return (mData != nullptr) ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -115,7 +104,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -124,11 +113,11 @@ public:
      */
     static constexpr uint8_t getFieldsNumber()
     {
-        return static_cast<uint8_t>(Field::COUNT);
+        return Field::COUNT;
     }
 
 private:
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class MotionDetect */
 
 } /* namespace SDK::SensorDataParser */

@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_GPS_SPEED_HPP
 #define __SENSOR_DATA_PARSER_GPS_SPEED_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -32,17 +32,16 @@ namespace SDK
         class GpsSpeed
         {
         public:
+            enum Field : uint8_t {
+                SPEED = 0,  ///< Speed, m/s (float)
+                COUNT       ///< Total number of fields
+            };
+
             /**
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GpsSpeed(const SDK::Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new GPS parser over given ISensorData
-             * @param data Pointer to sensor data containing GPS fields
-             */
-            GpsSpeed(const SDK::Interface::ISensorData* data) : mData(data) {}
+            GpsSpeed(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -50,7 +49,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::COUNT);
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -59,7 +58,7 @@ namespace SDK
              */
             float getSpeed() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::SPEED) : 0.0f;
+                return isDataValid() ? mData.f[Field::SPEED] : 0.0f;
             }
 
             /**
@@ -68,7 +67,7 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
             /**
@@ -77,7 +76,7 @@ namespace SDK
              */
             uint64_t getTimestampUs() const
             {
-                return isDataValid() ? mData->getTimestampUs() : 0;
+                return isDataValid() ? mData.getTimestampUs() : 0;
             }
 
             /**
@@ -89,16 +88,8 @@ namespace SDK
                 return Field::COUNT;
             }
 
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                SPEED = 0,  ///< Speed, m/s (float)
-                COUNT       ///< Total number of fields
-            };
-
         private:
-            const SDK::Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class GpsSpeed */
     }; /* namespace SensorDataParser */
 

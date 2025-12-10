@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_HEART_RATE_HPP
 #define __SENSOR_DATA_PARSER_HEART_RATE_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -30,17 +30,17 @@ namespace SDK
         class HeartRate
         {
         public:
+            enum Field : uint8_t {
+                BPM = 0,       ///< Heart rate in bpm (float)
+                TRUST_LEVEL,    ///< Trust level (uint32_t)
+                COUNT          ///< Total number of fields
+            };
+
             /**
              * @brief Construct a new HeartRate parser over given ISensorData
              * @param data Reference to sensor data containing 1 float field
              */
-            HeartRate(const Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new HeartRate parser over given ISensorData
-             * @param data Pointer to sensor data containing 1 float field
-             */
-            HeartRate(const Interface::ISensorData* data) : mData(data) {}
+            HeartRate(const SDK::Sensor::DataView view) : mData(view) {}
 
             /**
              * @brief Check if data is valid (should contain exactly 1 field)
@@ -48,7 +48,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::kCount);
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -57,7 +57,7 @@ namespace SDK
              */
             float getBpm() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::kBpm) : 0.f;
+                return isDataValid() ? mData.f[Field::BPM] : 0.f;
             }
 
             /**
@@ -66,7 +66,7 @@ namespace SDK
              */
             float getTrustLevel() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::kTrustLevel) : 0.f;
+                return isDataValid() ? mData.f[Field::TRUST_LEVEL] : 0.f;
             }
 
             /**
@@ -75,7 +75,7 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
             /**
@@ -84,7 +84,7 @@ namespace SDK
              */
             uint64_t getTimestampUs() const
             {
-                return isDataValid() ? mData->getTimestampUs() : 0;
+                return isDataValid() ? mData.getTimestampUs() : 0;
             }
 
             /**
@@ -92,20 +92,11 @@ namespace SDK
              */
             static constexpr uint8_t getFieldsNumber()
             {
-                return Field::kCount;
+                return Field::COUNT;
             }
 
         private:
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                kBpm = 0,       ///< Heart rate in bpm (float)
-                kTrustLevel,    ///< Trust level (uint32_t)
-                kCount          ///< Total number of fields
-            };
-
-            const Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class HeartRate */
     }; /* namespace SensorDataParser */
 

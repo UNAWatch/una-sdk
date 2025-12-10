@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_ACCELEROMETER_HPP
 #define __SENSOR_DATA_PARSER_ACCELEROMETER_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -44,13 +44,7 @@ namespace SDK
              * @brief Construct a new Accelerometer parser over given ISensorData
              * @param data Reference to sensor data containing 1 float value
              */
-            Accelerometer(const Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new Accelerometer parser over given ISensorData
-             * @param data Pointer to sensor data containing 1 float value
-             */
-            Accelerometer(const Interface::ISensorData* data) : mData(data) {}
+            Accelerometer(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid.
@@ -64,8 +58,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) &&
-                       (mData->getLength() == static_cast<uint8_t>(Field::COUNT));
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -74,7 +67,7 @@ namespace SDK
              */
             float getX() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::X) : 0.0f;
+                return isDataValid() ? mData.f[Field::X] : 0.0f;
             }
 
             /**
@@ -83,7 +76,7 @@ namespace SDK
              */
             float getY() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::Y) : 0.0f;
+                return isDataValid() ? mData.f[Field::Y] : 0.0f;
             }
 
             /**
@@ -92,7 +85,7 @@ namespace SDK
              */
             float getZ() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::Z) : 0.0f;
+                return isDataValid() ? mData.f[Field::Z] : 0.0f;
             }
 
             /**
@@ -101,7 +94,7 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
             /**
@@ -110,7 +103,7 @@ namespace SDK
              */
             uint64_t getTimestampUs() const
             {
-                return isDataValid() ? mData->getTimestampUs() : 0;
+                return isDataValid() ? mData.getTimestampUs() : 0;
             }
 
             /**
@@ -125,7 +118,7 @@ namespace SDK
             /**
              * @brief Reference to sensor data storage
              */
-            const Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class Accelerometer */
     }; /* namespace SensorDataParser */
 

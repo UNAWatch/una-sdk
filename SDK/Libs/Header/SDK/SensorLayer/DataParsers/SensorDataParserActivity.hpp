@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_ACTIVITY_HPP
 #define __SENSOR_DATA_PARSER_ACTIVITY_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -34,21 +34,15 @@ class Activity
 {
 public:
     enum Field : uint8_t {
-        kDURATION = 0,  ///< Activity duration in milliseconds
-        kCOUNT          ///< Number of fields (must be last)
+        DURATION = 0,  ///< Activity duration in milliseconds
+        COUNT          ///< Number of fields (must be last)
     };
 
     /**
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 1 field: DURATION.
      */
-    explicit Activity(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief Construct a new parser over the given ISensorData.
-     * @param data Pointer to sensor data with 1 field: DURATION (may be nullptr).
-     */
-    explicit Activity(const Interface::ISensorData* data) : mData(data) {}
+    explicit Activity(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief Check if data is valid.
@@ -62,8 +56,7 @@ public:
      */
     bool isDataValid() const
     {
-        return (mData != nullptr) &&
-               (mData->getLength() == static_cast<uint8_t>(Field::kCOUNT));
+        return (mData.getFieldCount() == Field::COUNT);
     }
 
     /**
@@ -72,11 +65,7 @@ public:
      */
     uint32_t getDuration() const
     {
-        if (!isDataValid()) {
-            return 0U;
-        }
-
-        return mData->getAsU32(static_cast<uint8_t>(Field::kDURATION));
+        return isDataValid() ? mData.u[Field::DURATION] : 0U;
     }
 
     /**
@@ -85,7 +74,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return (mData != nullptr) ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -94,7 +83,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -103,11 +92,11 @@ public:
      */
     static constexpr uint8_t getFieldsNumber()
     {
-        return static_cast<uint8_t>(Field::kCOUNT);
+        return Field::COUNT;
     }
 
 private:
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class Activity */
 
 } /* namespace SensorDataParser */

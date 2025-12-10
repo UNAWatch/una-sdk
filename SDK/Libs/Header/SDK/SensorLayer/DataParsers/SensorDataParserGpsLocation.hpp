@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_GPS_LOCATION_HPP
 #define __SENSOR_DATA_PARSER_GPS_LOCATION_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -36,17 +36,20 @@ namespace SDK
         class GpsLocation
         {
         public:
+            enum Field : uint8_t {
+                PRECISION = 0,  ///< Precision (in meters)
+                COORDS_VALID,   ///< Coordinates are valid
+                LAT,            ///< Latitude,m (float)
+                LON,            ///< Longitude,m (float)
+                ALT,            ///< Altitude,m (float)
+                COUNT           ///< Total number of fields
+            };
+
             /**
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GpsLocation(const SDK::Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new GPS parser over given ISensorData
-             * @param data Pointer to sensor data containing GPS fields
-             */
-            GpsLocation(const SDK::Interface::ISensorData* data) : mData(data) {}
+            GpsLocation(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -54,9 +57,8 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return ((mData != nullptr) &&
-                        (mData->getAsU32(Field::COORDS_VALID) <= 1) &&
-                        (mData->getLength() == Field::COUNT));
+                return ((mData.u[Field::COORDS_VALID] <= 1) &&
+                        (mData.getFieldCount() == Field::COUNT));
             }
 
             /**
@@ -65,7 +67,7 @@ namespace SDK
              */
             float getPrecision() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::PRECISION) : 0.0f;
+                return isDataValid() ? mData.f[Field::PRECISION] : 0.0f;
             }
 
             /**
@@ -74,7 +76,7 @@ namespace SDK
              */
             bool isCoordinatesValid() const
             {
-                return isDataValid() && (mData->getAsU32(Field::COORDS_VALID) == 1);
+                return isDataValid() && (mData.u[Field::COORDS_VALID] == 1);
             }
 
             /**
@@ -96,7 +98,7 @@ namespace SDK
              */
             float getLatitude() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::LAT) : 0.0f;
+                return isDataValid() ? mData.f[Field::LAT] : 0.0f;
             }
 
             /**
@@ -105,7 +107,7 @@ namespace SDK
              */
             float getLongitude() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::LON) : 0.0f;
+                return isDataValid() ? mData.f[Field::LON] : 0.0f;
             }
 
             /**
@@ -114,7 +116,7 @@ namespace SDK
              */
             float getAltitude() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::ALT) : 0.0f;
+                return isDataValid() ? mData.f[Field::ALT] : 0.0f;
             }
 
             /**
@@ -123,17 +125,17 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
-	    /**
-	     * @brief Get data timestamp in us
-	     * @return Data timestamp in us (0 if invalid)
-	     */
-	    uint64_t getTimestampUs() const
-	    {
-        	return isDataValid() ? mData->getTimestampUs() : 0;
-	    }
+            /**
+             * @brief Get data timestamp in us
+             * @return Data timestamp in us (0 if invalid)
+             */
+            uint64_t getTimestampUs() const
+            {
+                return isDataValid() ? mData.getTimestampUs() : 0;
+            }
 
             /**
              * @brief Get total number of expected fields
@@ -144,20 +146,8 @@ namespace SDK
                 return Field::COUNT;
             }
 
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                PRECISION = 0,  ///< Precision (in meters)
-                COORDS_VALID,   ///< Coordinates are valid
-                LAT,            ///< Latitude,m (float)
-                LON,            ///< Longitude,m (float)
-                ALT,            ///< Altitude,m (float)
-                COUNT           ///< Total number of fields
-            };
-
         private:
-            const SDK::Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class GpsLocation */
     }; /* namespace SensorDataParser */
 

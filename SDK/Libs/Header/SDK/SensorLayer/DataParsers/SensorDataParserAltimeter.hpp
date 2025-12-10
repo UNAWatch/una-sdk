@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_ALTIMETER_HPP
 #define __SENSOR_DATA_PARSER_ALTIMETER_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -34,21 +34,15 @@ namespace SDK
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                kAltitude = 0, ///< Altitude in meters
-                kCount         ///< Number of fields
+                ALTITUDE = 0, ///< Altitude in meters
+                COUNT         ///< Number of fields
             };
 
             /**
              * @brief Construct a new Altimeter parser over given ISensorData
              * @param data Reference to sensor data containing 1 float value
              */
-            Altimeter(const Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new Altimeter parser over given ISensorData
-             * @param data Reference to sensor data containing 1 float value
-             */
-            Altimeter(const Interface::ISensorData* data) : mData(data) {}
+            Altimeter(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid (should contain exactly 1 float field)
@@ -56,7 +50,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::kCount);
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -65,7 +59,7 @@ namespace SDK
              */
             float getAltitude() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::kAltitude) : 0.0f;
+                return isDataValid() ? mData.f[Field::ALTITUDE] : 0.0f;
             }
 
             /**
@@ -74,7 +68,7 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
 	    /**
@@ -83,19 +77,19 @@ namespace SDK
 	     */
 	    uint64_t getTimestampUs() const
 	    {
-        	return isDataValid() ? mData->getTimestampUs() : 0;
+        	return isDataValid() ? mData.getTimestampUs() : 0;
 	    }
 
-            /**
-             * @brief Get number of expected fields (always 1)
-             */
-            static constexpr uint8_t getFieldsNumber()
-            {
-                return Field::kCount;
-            }
+        /**
+         * @brief Get number of expected fields (always 1)
+         */
+        static constexpr uint8_t getFieldsNumber()
+        {
+            return Field::COUNT;
+        }
 
         private:
-            const Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class Altimeter */
     }; /* namespace SensorDataParser */
 

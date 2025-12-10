@@ -51,7 +51,9 @@ namespace MessageType {
     constexpr Type COMMAND_APP_NOTIF_GUI_RUN    = 0x01050000;
     constexpr Type COMMAND_APP_NOTIF_GUI_STOP   = 0x01060000;
 
-
+    // =========================================================================
+    // Range Constants (for validation and custom type allocation)
+    // =========================================================================
 
     // Application control requests (app -> Kernel)
     constexpr Type REQUEST_APP_RUN_GUI          = 0x01070000;  // Request kernel to launch GUI

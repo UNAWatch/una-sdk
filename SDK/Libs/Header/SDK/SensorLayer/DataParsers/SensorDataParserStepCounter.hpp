@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_STEP_COUNTER_HPP
 #define __SENSOR_DATA_PARSER_STEP_COUNTER_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -34,21 +34,15 @@ namespace SDK
              * @brief Field layout indices
              */
             enum Field : uint8_t {
-                kStepCount = 0, ///< Step count (uint32_t)
-                kCount           ///< Total number of fields
+                STEP_COUNT = 0, ///< Step count (uint32_t)
+                COUNT           ///< Total number of fields
             };
 
             /**
              * @brief Construct a new StepCounter parser over given ISensorData
              * @param data Reference to sensor data containing 1 field
              */
-            StepCounter(const Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new StepCounter parser over given ISensorData
-             * @param data Pointer to sensor data containing 1 field
-             */
-            StepCounter(const Interface::ISensorData* data) : mData(data) {}
+            StepCounter(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if data is valid (should contain exactly 1 field)
@@ -56,7 +50,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::kCount);
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -65,7 +59,7 @@ namespace SDK
              */
             uint32_t getStepCount() const
             {
-                return isDataValid() ? mData->getAsU32(Field::kStepCount) : 0;
+                return isDataValid() ? mData.u[Field::STEP_COUNT] : 0;
             }
 
             /**
@@ -74,7 +68,7 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
             /**
@@ -83,7 +77,7 @@ namespace SDK
              */
             uint64_t getTimestampUs() const
             {
-                return isDataValid() ? mData->getTimestampUs() : 0;
+                return isDataValid() ? mData.getTimestampUs() : 0;
             }
 
             /**
@@ -91,11 +85,11 @@ namespace SDK
              */
             static constexpr uint8_t getFieldsNumber()
             {
-                return Field::kCount;
+                return Field::COUNT;
             }
 
         private:
-            const Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class StepCounter */
     }; /* namespace SensorDataParser */
 

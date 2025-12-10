@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_GPS_DISTANCE_HPP
 #define __SENSOR_DATA_PARSER_GPS_DISTANCE_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -32,17 +32,16 @@ namespace SDK
         class GpsDistance
         {
         public:
+            enum Field : uint8_t {
+                DISTANCE = 0,   ///< Distance, m(float)
+                COUNT           ///< Total number of fields
+            };
+
             /**
              * @brief Construct a new GPS parser over given ISensorData
              * @param data Reference to sensor data containing GPS fields
              */
-            GpsDistance(const SDK::Interface::ISensorData& data) : mData(&data) {}
-
-            /**
-             * @brief Construct a new GPS parser over given ISensorData
-             * @param data Pointer to sensor data containing GPS fields
-             */
-            GpsDistance(const SDK::Interface::ISensorData* data) : mData(data) {}
+            GpsDistance(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check if datais valid
@@ -50,7 +49,7 @@ namespace SDK
              */
             bool isDataValid() const
             {
-                return (mData != nullptr) && (mData->getLength() == Field::COUNT);
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -59,7 +58,7 @@ namespace SDK
              */
             float getDistance() const
             {
-                return isDataValid() ? mData->getAsFloat(Field::DISTANCE) : 0.0f;
+                return isDataValid() ? mData.f[Field::DISTANCE] : 0.0f;
             }
 
             /**
@@ -68,17 +67,17 @@ namespace SDK
              */
             uint32_t getTimestamp() const
             {
-                return isDataValid() ? mData->getTimestamp() : 0;
+                return isDataValid() ? mData.getTimestamp() : 0;
             }
 
-	    /**
-	     * @brief Get data timestamp in us
-	     * @return Data timestamp in us (0 if invalid)
-	     */
-	    uint64_t getTimestampUs() const
-	    {
-        	return isDataValid() ? mData->getTimestampUs() : 0;
-	    }
+            /**
+             * @brief Get data timestamp in us
+             * @return Data timestamp in us (0 if invalid)
+             */
+            uint64_t getTimestampUs() const
+            {
+                return isDataValid() ? mData.getTimestampUs() : 0;
+            }
 
             /**
              * @brief Get total number of expected fields
@@ -89,16 +88,8 @@ namespace SDK
                 return Field::COUNT;
             }
 
-            /**
-             * @brief Field layout indices
-             */
-            enum Field : uint8_t {
-                DISTANCE = 0,   ///< Distance, m(float)
-                COUNT           ///< Total number of fields
-            };
-
         private:
-            const SDK::Interface::ISensorData* mData;
+            const SDK::Sensor::DataView mData;
         }; /* class GpsDistance */
     }; /* namespace SensorDataParser */
 

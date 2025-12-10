@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_BATTERY_LEVEL_HPP
 #define __SENSOR_DATA_PARSER_BATTERY_LEVEL_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -29,17 +29,16 @@ namespace SensorDataParser {
 class BatteryLevel
 {
 public:
+    enum Field : uint8_t {
+        LEVEL = 0,    ///< Raw charge value (units are device-specific)
+        COUNT          ///< Number of fields (must be last)
+    };
+
     /**
      * @brief   SensorData parser for the Battery Level sensor
      * @param data Reference to sensor data
      */
-    explicit BatteryLevel(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief   SensorData parser for the Battery Level sensor
-     * @param data Pointer to sensor data
-     */
-    explicit BatteryLevel(const Interface::ISensorData* data) : mData(data) {}
+    explicit BatteryLevel(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   SensorData parser for the Battery Level sensor
@@ -49,10 +48,9 @@ public:
  * It does not own the underlying storage.*/
     bool isDataValid() const
     {
-        return (mData != nullptr) &&
-               (mData->getLength() == static_cast<uint8_t>(Field::kCOUNT) &&
-               (mData->getAsFloat(static_cast<uint8_t>(Field::kCHARGE)) >= 0.0) &&
-               (mData->getAsFloat(static_cast<uint8_t>(Field::kCHARGE)) <= 100.0));
+        return ((mData.getFieldCount() == Field::COUNT) &&
+                (mData.f[Field::LEVEL] >= 0.0) &&
+                (mData.f[Field::LEVEL] <= 100.0));
     }
 
     /**
@@ -63,11 +61,7 @@ public:
  * It does not own the underlying storage.*/
     float getCharge() const
     {
-        if (!isDataValid()) {
-            return -1.0f;
-        }
-
-        return mData->getAsFloat(static_cast<uint8_t>(Field::kCHARGE));
+        return isDataValid() ? mData.f[Field::LEVEL] : -1.0f;
     }
 
     /**
@@ -76,7 +70,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return (mData != nullptr) ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -85,7 +79,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -94,19 +88,11 @@ public:
      */
     static constexpr uint8_t getFieldsNumber()
     {
-        return static_cast<uint8_t>(Field::kCOUNT);
+        return Field::COUNT;
     }
 
 private:
-    /**
-     * @brief   SensorData parser for the Battery Level sensor
-     */
-    enum Field : uint8_t {
-        kCHARGE = 0,    ///< Raw charge value (units are device-specific)
-        kCOUNT          ///< Number of fields (must be last)
-    };
-
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class Power */
 
 } /* namespace SensorDataParser */

@@ -11,7 +11,7 @@
 #ifndef __SENSOR_DATA_PARSER_PRESSURE_HPP
 #define __SENSOR_DATA_PARSER_PRESSURE_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -28,17 +28,16 @@ namespace SensorDataParser {
 class Pressure
 {
 public:
+    enum Field : uint8_t {
+        PRESS = 0,   ///< Pressure value (units are device-specific)
+        COUNT        ///< Number of fields (must be last)
+    };
+
     /**
      * @brief   Construct parser from a reference to sensor data
      * @param   data Reference to sensor data
      */
-    explicit Pressure(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief   Construct parser from a pointer to sensor data
-     * @param   data Pointer to sensor data
-     */
-    explicit Pressure(const Interface::ISensorData* data) : mData(data) {}
+    explicit Pressure(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief   Check if data is valid
@@ -46,7 +45,7 @@ public:
      */
     bool isDataValid() const
     {
-        return (mData != nullptr) && (mData->getLength() == static_cast<uint8_t>(Field::COUNT));
+        return (mData.getFieldCount() == Field::COUNT);
     }
 
     /**
@@ -55,10 +54,7 @@ public:
      */
     float getPressure() const
     {
-        if (!isDataValid()) {
-            return -1.0f;
-        }
-        return mData->getAsFloat(static_cast<uint8_t>(Field::PRESS));
+        return isDataValid() ? mData.f[Field::PRESS] : -1.0f;
     }
 
     /**
@@ -67,7 +63,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return isDataValid() ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -76,7 +72,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -89,15 +85,7 @@ public:
     }
 
 private:
-    /**
-     * @brief   Fields for the Pressure sensor
-     */
-    enum Field : uint8_t {
-        PRESS = 0,   ///< Pressure value (units are device-specific)
-        COUNT        ///< Number of fields (must be last)
-    };
-
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class Pressure */
 
 } /* namespace SensorDataParser */

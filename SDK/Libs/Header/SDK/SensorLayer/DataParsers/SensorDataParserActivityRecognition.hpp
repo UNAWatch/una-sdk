@@ -13,7 +13,7 @@
 #ifndef __SENSOR_DATA_PARSER_ACTIVITY_RECOGNITION_HPP
 #define __SENSOR_DATA_PARSER_ACTIVITY_RECOGNITION_HPP
 
-#include "SDK/Interfaces/ISensorData.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 
 #include <cstdint>
 
@@ -37,9 +37,9 @@ public:
      * @brief Field layout indices.
      */
     enum Field : uint8_t {
-        kID = 0,        ///< Activity identifier (see @ref Activity)
-        kCONFIDENCE,    ///< Confidence in percent [0..100]
-        kCOUNT          ///< Number of fields (must be last)
+        ID = 0,        ///< Activity identifier (see @ref Activity)
+        CONFIDENCE,    ///< Confidence in percent [0..100]
+        COUNT          ///< Number of fields (must be last)
     };
 
     /**
@@ -56,13 +56,7 @@ public:
      * @brief Construct a new parser over the given ISensorData.
      * @param data Reference to sensor data with 2 fields: ID, CONFIDENCE.
      */
-    explicit ActivityRecognition(const Interface::ISensorData& data) : mData(&data) {}
-
-    /**
-     * @brief Construct a new parser over the given ISensorData.
-     * @param data Pointer to sensor data with 2 fields: ID, CONFIDENCE (may be nullptr).
-     */
-    explicit ActivityRecognition(const Interface::ISensorData* data) : mData(data) {}
+    explicit ActivityRecognition(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
      * @brief Check if data is valid.
@@ -78,22 +72,16 @@ public:
      */
     bool isDataValid() const
     {
-        if (mData == nullptr) {
-            return false;
-        }
-
         // Expect exactly 2 fields
-        if (mData->getLength() != Field::kCOUNT) {
+        if (mData.getFieldCount() != Field::COUNT) {
             return false;
         }
 
-        const uint32_t id = mData->getAsU32(Field::kID);
-        if (id > static_cast<uint32_t>(Activity::UNKNOWN)) {
+        if (mData.u[Field::ID] > static_cast<uint32_t>(Activity::UNKNOWN)) {
             return false;
         }
 
-        const uint32_t conf = mData->getAsU32(Field::kCONFIDENCE);
-        if (conf > 100U) {
+        if (mData.u[Field::CONFIDENCE] > 100U) {
             return false;
         }
 
@@ -106,10 +94,7 @@ public:
      */
     Activity getID() const
     {
-        if (!isDataValid()) {
-            return Activity::UNKNOWN;
-        }
-        return static_cast<Activity>(mData->getAsU32(Field::kID));
+        return isDataValid() ? static_cast<Activity>(mData.u[Field::ID]) : Activity::UNKNOWN;
     }
 
     /**
@@ -118,10 +103,7 @@ public:
      */
     uint8_t getConfidence() const
     {
-        if (!isDataValid()) {
-            return 0U;
-        }
-        return static_cast<uint8_t>(mData->getAsU32(Field::kCONFIDENCE));
+        return isDataValid() ? static_cast<uint8_t>(mData.u[Field::CONFIDENCE]) : 0;
     }
 
     /**
@@ -130,7 +112,7 @@ public:
      */
     uint32_t getTimestamp() const
     {
-        return (mData != nullptr) ? mData->getTimestamp() : 0U;
+        return isDataValid() ? mData.getTimestamp() : 0U;
     }
 
     /**
@@ -139,7 +121,7 @@ public:
      */
     uint64_t getTimestampUs() const
     {
-        return isDataValid() ? mData->getTimestampUs() : 0;
+        return isDataValid() ? mData.getTimestampUs() : 0;
     }
 
     /**
@@ -148,11 +130,11 @@ public:
      */
     static constexpr uint8_t getFieldsNumber()
     {
-        return static_cast<uint8_t>(Field::kCOUNT);
+        return Field::COUNT;
     }
 
 private:
-    const Interface::ISensorData* mData { nullptr };
+    const SDK::Sensor::DataView mData;
 }; /* class ActivityRecognition */
 
 } /* namespace SDK::SensorDataParser */
