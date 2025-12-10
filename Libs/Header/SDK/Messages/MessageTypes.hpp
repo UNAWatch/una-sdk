@@ -84,15 +84,23 @@ namespace MessageType {
     constexpr Type EVENT_BUTTON                 = 0x03040000;
 
 
+    // Glances (Service only)
+    constexpr Type REQUEST_GLANCE_CONFIG        = 0x030A0000; // Get available glance area
+    constexpr Type REQUEST_GLANCE_UPDATE        = 0x030B0000; // Update glance content
+    // Glance events
+    constexpr Type EVENT_GLANCE_START           = 0x030C0000;
+    constexpr Type EVENT_GLANCE_TICK            = 0x030D0000;
+    constexpr Type EVENT_GLANCE_STOP            = 0x030E0000;
+
 
 
     // Application-specific custom messages (Service <-> GUI direct, used by DualAppComm)
-    constexpr Type RANGE_APP_SPECIFIC_MIN      = 0x00000000;
-    constexpr Type RANGE_APP_SPECIFIC_MAX      = 0x0000FFFF;
+    constexpr Type RANGE_APP_SPECIFIC_MIN       = 0x00000000;
+    constexpr Type RANGE_APP_SPECIFIC_MAX       = 0x0000FFFF;
 
     // Internal kernel messages (kernel subsystems only)
-    constexpr Type RANGE_INTERNAL_KERNEL_MIN   = 0x10000000;
-    constexpr Type RANGE_INTERNAL_KERNEL_MAX   = 0xFFFF0000;
+    constexpr Type RANGE_INTERNAL_KERNEL_MIN    = 0x80000000;
+    constexpr Type RANGE_INTERNAL_KERNEL_MAX    = 0xFFFF0000;
 
 }
 

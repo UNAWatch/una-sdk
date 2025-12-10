@@ -9,7 +9,7 @@
 
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
-
+#include "SDK/Glance/GlanceControl.h"
 
 namespace SDK::Message
 {
@@ -352,6 +352,7 @@ struct RequestVibroPlay : public MessageBase {
     {}
 };
 
+
 /**
  * @brief System power low event
  *
@@ -449,6 +450,78 @@ struct EventButton : public MessageBase {
         , event(Event::PRESS)
     {}
 };
+
+
+
+
+/**
+ * @brief Glance configuration request
+ *
+ * GUI requests glance area parameters.
+ */
+struct RequestGlanceConfig : public MessageBase {
+    // Response fields
+    int16_t width;
+    int16_t height;
+    uint32_t maxControls;
+
+    RequestGlanceConfig()
+        : MessageBase(MessageType::REQUEST_GLANCE_CONFIG)
+        , width(0)
+        , height(0)
+        , maxControls(0)
+    {}
+};
+
+/**
+ * @brief Glance update request
+ *
+ * Service updates glance content.
+ * @note Data must remain valid until response received.
+ */
+struct RequestGlanceUpdate : public MessageBase {
+    const char *name;           // Pointer to glance name
+    GlanceControl_t *controls;  // Pointer to the array with glance controls
+    uint32_t controlsNumber;    // Number of the controls in the array
+
+    RequestGlanceUpdate()
+        : MessageBase(MessageType::REQUEST_GLANCE_UPDATE)
+        , name(nullptr)
+        , controls(nullptr)
+        , controlsNumber(0)
+    {}
+};
+
+/**
+ * @brief Notify service that glance mode started
+ */
+struct EventGlanceStart : public MessageBase {
+    EventGlanceStart() : MessageBase(MessageType::EVENT_GLANCE_START) {}
+};
+
+/**
+ * @brief Glance frame tick command
+ *
+ * Sent to Service periodically (e.g. 60 Hz) for update glance content.
+ */
+struct EventGlanceTick : public MessageBase {
+    uint32_t frameNumber;  // Incremental frame counter
+    uint32_t timestamp;    // System timestamp in ms
+
+    EventGlanceTick()
+        : MessageBase(MessageType::EVENT_GLANCE_TICK)
+        , frameNumber(0)
+        , timestamp(0)
+    {}
+};
+
+/**
+ * @brief Notify service that glance mode stopped
+ */
+struct EventGlanceStop : public MessageBase {
+    EventGlanceStop() : MessageBase(MessageType::EVENT_GLANCE_STOP) {}
+};
+
 
 
 } // namespace SDK::Message
