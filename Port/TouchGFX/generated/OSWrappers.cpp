@@ -20,7 +20,8 @@
 #include <touchgfx/hal/HAL.hpp>
 #include <touchgfx/hal/OSWrappers.hpp>
 
-#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+#include "../TouchGFXCommandProcessor.hpp"
+
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 
 using namespace touchgfx;

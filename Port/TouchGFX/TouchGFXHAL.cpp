@@ -28,7 +28,7 @@
 #include <platform/driver/button/ButtonController.hpp>
 #include <touchgfx/hal/OSWrappers.hpp>
 
-#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+#include "TouchGFXCommandProcessor.hpp"
 
 using namespace touchgfx;
 
