@@ -14,9 +14,9 @@
 
 namespace SDK::Sensor
 {
-    enum class Type : int {
+    enum class Type : uint32_t {
         /*!< Unknown or invalid sensor type. */
-        UNKNOWN = -1,
+        UNKNOWN = 0,
 
         /*!< An accelerometer sensor reports the acceleration of the device
          along the three sensor axes. */
