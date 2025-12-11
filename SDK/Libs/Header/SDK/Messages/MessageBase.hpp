@@ -1,12 +1,14 @@
 /**
  * @file    MessageBase.hpp
- * @date    03-12-2024
+ * @date    11-12-2024
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
  * @brief   Base class for all messages exchanged between kernel and applications
  *
  * This file defines the base message class with reference counting,
  * completion synchronization, and pool management. All concrete message
  * types must inherit from MessageBase.
+ *
+ * Memory layout is stable across compilers (4-byte alignment).
  *
  * Shared between kernel and applications.
  */
@@ -18,6 +20,9 @@
 #include <atomic>
 
 #include "SDK/Messages/MessageTypes.hpp"
+
+// Force 4-byte alignment for serialization compatibility
+#pragma pack(push, 4)
 
 // Forward declarations
 namespace App
@@ -38,6 +43,7 @@ enum class MessageResult : uint8_t {
     TIMEOUT = 3         // Request timed out (no response received)
 };
 
+
 /**
  * @brief Base class for all messages
  *
@@ -47,13 +53,28 @@ enum class MessageResult : uint8_t {
  * - Completion synchronization for request-response pattern
  * - Result status tracking
  *
+ * Memory layout (4-byte aligned, 32 bytes total on 32-bit with vptr):
+ * Offset | Size | Field
+ * -------|------|------------------
+ *   0    |  4   | vptr (virtual table pointer)
+ *   4    |  4   | mMsgType
+ *   8    |  1   | mResult
+ *   9    |  1   | mReserved1
+ *  10    |  1   | mNeedsResponse
+ *  11    |  1   | mCompleted (atomic<bool>, takes 1 bytes)
+ *  12    |  4   | mCompletionSemaphore (pointer)
+ *  16    |  4   | mRefCount (atomic<uint32_t>, takes 4 bytes)
+ *  20    |  4   | mProcessId
+ *  24    |  4   | mReserved2
+ *  28    |  4   | mReserved3
+ *
  * Memory lifecycle:
  * 1. Allocated from pool (refCount = 1)
  * 2. Retained when placed in queue (refCount++)
  * 3. Released after processing (refCount--)
  * 4. Returned to pool when refCount reaches 0
  */
-class MessageBase {
+class alignas(4) MessageBase {
 public:
     // =========================================================================
     // User API - Getters (read message state)
@@ -187,11 +208,14 @@ protected:
     MessageBase(MessageType::Type type)
         : mMsgType(type)
         , mResult(MessageResult::PENDING)
-        , mProcessId(0)
+        , mReserved1(false)
         , mNeedsResponse(false)
-        , mRefCount(1)
-        , mCompletionSemaphore(nullptr)
         , mCompleted(false)
+        , mCompletionSemaphore(nullptr)
+        , mRefCount(1)
+        , mProcessId(0)
+        , mReserved2(0)
+        , mReserved3(0)
     {}
 
     /**
@@ -201,11 +225,22 @@ protected:
     virtual ~MessageBase() = default;
 
     // =========================================================================
-    // Protected fields (accessible by derived message types)
+    // Memory layout fields (FIXED ORDER - DO NOT REORDER)
+    // =========================================================================
+    //
+    // WARNING: Field order is critical for serialization!
+    // Any changes to order or types will break binary compatibility.
+    //
+    // Layout guaranteed by:
+    // 1. #pragma pack(4) - 4-byte alignment
+    // 2. Fixed field order below
+    // 3. static_assert size checks
     // =========================================================================
 
-    MessageType::Type mMsgType; // Type identifier for message dispatch
-    MessageResult mResult;      // Processing result status
+    // offset 0: vtable pointer (4 bytes on 32-bit systems)
+
+    MessageType::Type mMsgType;     // 4 bytes: Type identifier for dispatch
+    MessageResult mResult;          // 1 byte:  Processing result status
 
 private:
     // =========================================================================
@@ -224,16 +259,24 @@ private:
     // - mRefCount: Reference counting
     // - mCompletionSemaphore: Semaphore lifecycle
     // - mCompleted: Completion flag
+    // - mReserved1, mReserved2: Future expansion
     // =========================================================================
 
-    uint32_t mProcessId;                    // Process ID (sender or receiver)
-    bool mNeedsResponse;                    // Response expected flag
-
-    std::atomic<uint32_t> mRefCount;        // Reference counter (thread-safe)
+    bool mReserved1;                        // 1 bytes: Reserved for future use
+    bool mNeedsResponse;                    // 1 byte:  Response expected flag
 
     // Completion synchronization (for request-response pattern)
-    void* mCompletionSemaphore;             // Opaque pointer to semaphore
-    std::atomic<bool> mCompleted;           // Completion flag (thread-safe)
+    std::atomic<bool> mCompleted;           // 1 bytes: Completion flag (atomic takes)
+    void* mCompletionSemaphore;             // 4 bytes: Opaque pointer to semaphore
+
+    std::atomic<uint32_t> mRefCount;        // 4 bytes: Reference counter (thread-safe)
+
+    uint32_t mProcessId;                    // 4 bytes: Process ID (sender/receiver)
+
+    uint32_t mReserved2;                    // 4 bytes: Reserved for future use
+    uint32_t mReserved3;                    // 4 bytes: Reserved for future use
+    // The last field is 4 bytes and 4-byte aligned to prevent the compiler
+    // from placing derived class fields into the base class's tail padding.
 
     // =========================================================================
     // Friend declaration (lifecycle management access)
@@ -249,4 +292,14 @@ private:
     MessageBase& operator=(const MessageBase&) = delete;
 };
 
+// Verify memory layout assumptions
+// Note: Size includes vtable pointer (4 bytes on 32-bit systems)
+static_assert(sizeof(MessageResult) == 1, "MessageResult must be 1 byte");
+static_assert(sizeof(bool) == 1, "bool must be 1 byte");
+static_assert(sizeof(std::atomic<uint32_t>) == 4, "atomic<uint32_t> must be 4 bytes");
+static_assert(sizeof(std::atomic<bool>) == 1, "atomic<bool> must be 1 bytes");
+static_assert(sizeof(MessageBase) == 32, "MessageBase size must be 32 bytes");
+
 } // namespace SDK
+
+#pragma pack(pop)

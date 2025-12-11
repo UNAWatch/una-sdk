@@ -77,7 +77,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
 
             case SDK::MessageType::EVENT_BUTTON: {
                 handleEvent(static_cast<SDK::Message::EventButton*>(msg));
-            }
+            } break;
 
             case SDK::MessageType::COMMAND_APP_GUI_RESUME: {
                 mIsGuiResumed = true;
@@ -95,17 +95,20 @@ void TouchGFXCommandProcessor::waitForFrameTick()
 
 
             default:
+
                 if (SDK::isApplicationSpecificMessage(msg->getType())) {
+                    bool result = false;
                     if (mCustomMessageHandler) {
-                        mCustomMessageHandler->customMessageHandler(msg);
+                        result = mCustomMessageHandler->customMessageHandler(msg);
                     }
+                    msg->setResult(result ? SDK::MessageResult::SUCCESS :  SDK::MessageResult::ERROR);
+                    mKernel.comm.sendResponse(msg);
                 }
                 break;
         }
 
         // Release message after processing
         mKernel.comm.releaseMessage(msg);
-
     }
 
 }
