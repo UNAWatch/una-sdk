@@ -1,8 +1,11 @@
 /**
- * @file CommandMessages.hpp
- * @date 03-12-2024
- * @author Kernel Communication Module
- * @brief Command message definitions (kernel <-> application)
+ * @file    CommandMessages.hpp
+ * @date    11-12-2024
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   Command message definitions (kernel <-> application)
+ *
+ * All message structures use 4-byte alignment for serialization compatibility.
+ * Field order is fixed and must not be changed to maintain binary compatibility.
  */
 
 #pragma once
@@ -11,9 +14,15 @@
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Glance/GlanceControl.h"
 
+// Force 4-byte alignment for all message structures
+#pragma pack(push, 4)
+
 namespace SDK::Message
 {
 
+// =============================================================================
+// Simple command messages (no additional data)
+// =============================================================================
 
 /**
  * @brief Application run command
@@ -62,7 +71,7 @@ struct CommandAppGuiSuspend : public MessageBase {
  * Service can now communicate with GUI if needed.
  */
 struct CommandAppNotifGuiRun : public MessageBase {
-    CommandAppNotifGuiRun() : MessageBase(MessageType::COMMAND_APP_NOTIF_GUI_RUN){}
+    CommandAppNotifGuiRun() : MessageBase(MessageType::COMMAND_APP_NOTIF_GUI_RUN) {}
 };
 
 /**
@@ -74,6 +83,10 @@ struct CommandAppNotifGuiRun : public MessageBase {
 struct CommandAppNotifGuiStop : public MessageBase {
     CommandAppNotifGuiStop() : MessageBase(MessageType::COMMAND_APP_NOTIF_GUI_STOP){}
 };
+
+// =============================================================================
+// Request messages with data
+// =============================================================================
 
 /**
  * @brief Run GUI request message
@@ -87,9 +100,8 @@ struct CommandAppNotifGuiStop : public MessageBase {
  *
  * Example:
  * @code
- * // Service detects incoming call
  * auto* req = srvComm->allocateMessage<RequestAppRunGui>();
- * if (srvComm->sendMessage(req, 1000)) {
+ * if (srvComm->sendMessage(req)) {
  *     if (req->getResult() == MessageResult::SUCCESS) {
  *         // GUI is now running, can send internal messages
  *     }
@@ -98,10 +110,7 @@ struct CommandAppNotifGuiStop : public MessageBase {
  * @endcode
  */
 struct RequestAppRunGui : public MessageBase {
-    RequestAppRunGui()
-        : MessageBase(MessageType::REQUEST_APP_RUN_GUI)
-    {
-    }
+    RequestAppRunGui() : MessageBase(MessageType::REQUEST_APP_RUN_GUI) {}
 };
 
 /**
@@ -112,13 +121,14 @@ struct RequestAppRunGui : public MessageBase {
  * error has occurred (hardfault, assert, etc.)
  */
 struct RequestAppTerminate : public MessageBase {
-    int code;
+    int32_t code;  // Exit code (0 = normal, non-zero = error)
 
     RequestAppTerminate()
         : MessageBase(MessageType::REQUEST_APP_TERMINATE)
         , code(0)
     {}
 };
+static_assert(sizeof(RequestAppTerminate) == 36, "RequestAppTerminate size must be 36 bytes");
 
 /**
  * @brief Set application capabilities
@@ -137,6 +147,7 @@ struct RequestSetCapabilities : public MessageBase {
         , enMusicControl(false)
     {}
 };
+static_assert(sizeof(RequestSetCapabilities) == 36, "RequestSetCapabilities size must be 36 bytes");
 
 /**
  * @brief Battery status request
@@ -156,6 +167,7 @@ struct RequestBatteryStatus : public MessageBase {
         , isCharging(false)
     {}
 };
+static_assert(sizeof(RequestBatteryStatus) == 44, "RequestBatteryStatus size must be 44 bytes");
 
 /**
  * @brief System settings request
@@ -163,20 +175,32 @@ struct RequestBatteryStatus : public MessageBase {
  * App requests system configuration.
  */
 struct RequestSystemSettings : public MessageBase {
+
+    // Maximum HR thresholds (4 thresholds = 5 zones)
+    static const uint32_t skMaxHearRateTh = 8;
+
     // Response fields
     uint8_t languageId;      // System language
-    uint8_t timeFormat;      // 12/24 hour format
-    bool bluetoothEnabled;
-    bool doNotDisturb;
+    bool    imperialUnits;   // Units imperial/metric
+    bool    timeFormat;      // 12/24 hour format
+
+    uint8_t heartRateCount;
+    uint8_t heartRateTh[skMaxHearRateTh];
+
+    uint32_t activityMin;   // target number of active minutes per day.
+    uint32_t steps;         // target number of steps per day
+    uint32_t floors;        // target number of floors climbed per day
 
     RequestSystemSettings()
         : MessageBase(MessageType::REQUEST_SYSTEM_SETTINGS)
         , languageId(0)
-        , timeFormat(24)
-        , bluetoothEnabled(false)
-        , doNotDisturb(false)
+        , imperialUnits(false)
+        , timeFormat(false)
+        , heartRateCount(0)
+        , heartRateTh {}
     {}
 };
+static_assert(sizeof(RequestSystemSettings) == 56, "RequestSystemSettings size must be 56 bytes");
 
 /**
  * @brief System information request
@@ -199,6 +223,7 @@ struct RequestSystemInfo : public MessageBase {
         hardwareVersion[0] = '\0';
     }
 };
+static_assert(sizeof(RequestSystemInfo) == 72, "RequestSystemInfo size must be 72 bytes");
 
 /**
  * @brief Memory information request
@@ -222,6 +247,7 @@ struct RequestMemoryInfo : public MessageBase {
         , fragmentation(0)
     {}
 };
+static_assert(sizeof(RequestMemoryInfo) == 52, "RequestMemoryInfo size must be 52 bytes");
 
 /**
  * @brief Display configuration request
@@ -245,6 +271,7 @@ struct RequestDisplayConfig : public MessageBase {
         , format(0)
     {}
 };
+static_assert(sizeof(RequestDisplayConfig) == 40, "RequestDisplayConfig size must be 40 bytes");
 
 /**
  * @brief Display update request
@@ -268,6 +295,7 @@ struct RequestDisplayUpdate : public MessageBase {
         , width(0), height(0)
     {}
 };
+static_assert(sizeof(RequestDisplayUpdate) == 44, "RequestDisplayUpdate size must be 44 bytes");
 
 /**
  * @brief Backlight control request
@@ -284,6 +312,7 @@ struct RequestBacklightSet : public MessageBase {
         , autoOffTimeoutMs(0)
     {}
 };
+static_assert(sizeof(RequestBacklightSet) == 40, "RequestBacklightSet size must be 40 bytes");
 
 /**
  * @brief Buzzer play request
@@ -299,14 +328,16 @@ struct RequestBuzzerPlay : public MessageBase {
         uint8_t volume;         // 0-100%, 0 - no sound. (Currently supported only 4 levels (0, 33, 66, 100))
     };
 
-    Note notes[skMaxNotes];
     uint32_t notesCount;
+    Note notes[skMaxNotes];
 
     RequestBuzzerPlay()
         : MessageBase(MessageType::REQUEST_BUZZER_PLAY)
+        , notesCount(0)
         , notes {}
     {}
 };
+static_assert(sizeof(RequestBuzzerPlay) == 116, "RequestBuzzerPlay size must be 116 bytes");
 
 /**
  * @brief Vibration play request
@@ -345,15 +376,20 @@ struct RequestVibroPlay : public MessageBase {
         uint32_t pause;     // Pause duration in ms. 0 - if effect specified.
     };
 
-    Note notes[skMaxNotes];
     uint32_t notesCount;
+    Note notes[skMaxNotes];
 
     RequestVibroPlay()
         : MessageBase(MessageType::REQUEST_VIBRO_PLAY)
-        , notes {}, notesCount(0)
+        , notesCount(0)
+        , notes {}
     {}
 };
+static_assert(sizeof(RequestVibroPlay) == 100, "RequestVibroPlay size must be 100 bytes");
 
+// =============================================================================
+// Event messages
+// =============================================================================
 
 /**
  * @brief System power low event
@@ -371,6 +407,7 @@ struct EventSystemPowerLow : public MessageBase {
         , estimatedMinutes(0)
     {}
 };
+static_assert(sizeof(EventSystemPowerLow) == 36, "EventSystemPowerLow size must be 36 bytes");
 
 /**
  * @brief System power critical event
@@ -388,6 +425,7 @@ struct EventSystemPowerCritical : public MessageBase {
         , estimatedMinutes(0)
     {}
 };
+static_assert(sizeof(EventSystemPowerCritical) == 36, "EventSystemPowerCritical size must be 36 bytes");
 
 /**
  * @brief GUI frame tick command
@@ -405,6 +443,7 @@ struct EventGuiTick : public MessageBase {
         , timestamp(0)
     {}
 };
+static_assert(sizeof(EventGuiTick) == 40, "EventGuiTick size must be 40 bytes");
 
 /**
  * @brief Button event
@@ -452,9 +491,11 @@ struct EventButton : public MessageBase {
         , event(Event::PRESS)
     {}
 };
+static_assert(sizeof(EventButton) == 40, "EventButton size must be 40 bytes");
 
-
-
+// =============================================================================
+// Glance messages
+// =============================================================================
 
 /**
  * @brief Glance configuration request
@@ -474,6 +515,7 @@ struct RequestGlanceConfig : public MessageBase {
         , maxControls(0)
     {}
 };
+static_assert(sizeof(RequestGlanceConfig) == 40, "RequestGlanceConfig size must be 40 bytes");
 
 /**
  * @brief Glance update request
@@ -493,6 +535,7 @@ struct RequestGlanceUpdate : public MessageBase {
         , controlsNumber(0)
     {}
 };
+static_assert(sizeof(RequestGlanceUpdate) == 44, "RequestGlanceUpdate size must be 44 bytes");
 
 /**
  * @brief Notify service that glance mode started
@@ -516,6 +559,7 @@ struct EventGlanceTick : public MessageBase {
         , timestamp(0)
     {}
 };
+static_assert(sizeof(EventGlanceTick) == 40, "EventGlanceTick size must be 40 bytes");
 
 /**
  * @brief Notify service that glance mode stopped
@@ -524,6 +568,6 @@ struct EventGlanceStop : public MessageBase {
     EventGlanceStop() : MessageBase(MessageType::EVENT_GLANCE_STOP) {}
 };
 
-
-
 } // namespace SDK::Message
+
+#pragma pack(pop)
