@@ -9,6 +9,11 @@
  ******************************************************************************
  */
 
+
+
+//TODO: Move this functionality to the Kernel class ?
+
+
 #pragma once
 
 #include <cstdint>
@@ -16,6 +21,8 @@
 
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
+#include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
+#include "SDK/Interfaces/ICustomMessageHandler.hpp"
 
 namespace SDK
 {
@@ -36,6 +43,11 @@ public:
         return sInstance;
     }
 
+    void setAppLifeCycleCallback(SDK::Interface::IGuiLifeCycleCallback* cb) { mAppLifeCycleCallback = cb; }
+
+    void setCustomMessageHandler(SDK::Interface::ICustomMessageHandler* h) { mCustomMessageHandler = h; }
+
+
     void waitForFrameTick();
 
     bool getKeySample(uint8_t &key);
@@ -51,15 +63,14 @@ private:
     TouchGFXCommandProcessor(const TouchGFXCommandProcessor&) = delete;
     TouchGFXCommandProcessor& operator=(const TouchGFXCommandProcessor&) = delete;
 
-    SDK::Kernel &mKernel;
-
+    const SDK::Kernel &mKernel;
+    bool mStartCallbackCalled;
     bool mIsGuiResumed;
     uint8_t mLastButtonCode;
+    SDK::Interface::IGuiLifeCycleCallback *mAppLifeCycleCallback;
+    SDK::Interface::ICustomMessageHandler *mCustomMessageHandler;
 
-    void handleEvent(const SDK::Message::CommandAppStop* msg);
-    void handleEvent(const SDK::Message::EventButton* msg);
-
-
+    void handleEvent(SDK::Message::EventButton* msg);
 
 };
 
