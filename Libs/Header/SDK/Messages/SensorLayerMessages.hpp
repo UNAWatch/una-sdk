@@ -106,10 +106,10 @@ struct EventData1 : public MessageBase {
         , stride(0)
     {}
 
-    uint8_t  handle;
-    uint8_t  data[20];
-    uint16_t count;
-    uint16_t stride;
+    uint8_t           handle;
+    SDK::Sensor::Data data[10];
+    uint16_t          count;
+    uint16_t          stride;
 };
 
 struct EventData2 : public MessageBase {
@@ -121,10 +121,10 @@ struct EventData2 : public MessageBase {
         , stride(0)
     {}
 
-    uint8_t  handle;
-    uint8_t  data[20];
-    uint16_t count;
-    uint16_t stride;
+    uint8_t           handle;
+    SDK::Sensor::Data data[20];
+    uint16_t          count;
+    uint16_t          stride;
 };
 
 struct EventData3 : public MessageBase {
@@ -136,10 +136,10 @@ struct EventData3 : public MessageBase {
         , stride(0)
     {}
 
-    uint8_t  handle;
-    uint8_t  data[30];
-    uint16_t count;
-    uint16_t stride;
+    uint8_t           handle;
+    SDK::Sensor::Data data[30];
+    uint16_t          count;
+    uint16_t          stride;
 };
 
 struct EventData4 : public MessageBase {
@@ -151,10 +151,10 @@ struct EventData4 : public MessageBase {
         , stride(0)
     {}
 
-    uint8_t  handle;
-    uint8_t  data[40];
-    uint16_t count;
-    uint16_t stride;
+    uint8_t           handle;
+    SDK::Sensor::Data data[40];
+    uint16_t          count;
+    uint16_t          stride;
 };
 
 } // namespace SDK::Message::Sensor
