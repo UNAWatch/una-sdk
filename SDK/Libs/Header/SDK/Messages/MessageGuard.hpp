@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SDK/Interfaces/IAppComm.hpp"
+#include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Messages/MessageBase.hpp"
 
 namespace SDK
@@ -10,8 +10,8 @@ template<typename T>
 class MessageGuard
 {
 public:
-    MessageGuard(SDK::Interface::IAppComm& comm, T* ptr) noexcept
-        : mComm(comm)
+    MessageGuard(SDK::Kernel& kernel, T* ptr) noexcept
+        : mKernel(kernel)
         , mPtr(ptr)
     {}
 
@@ -44,7 +44,7 @@ public:
             return false;
         }
 
-        return mComm.sendMessage(mPtr, timeout);
+        return mKernel.comm.sendMessage(mPtr, timeout);
     }
 
     bool ok() const noexcept
@@ -60,20 +60,20 @@ private:
     void cleanup() noexcept
     {
         if (mPtr) {
-            mComm.releaseMessage(mPtr);
+            mKernel.comm.releaseMessage(mPtr);
         }
         mPtr = nullptr;
     }
 
-    SDK::Interface::IAppComm& mComm;
-    T*                        mPtr;
+    SDK::Kernel& mKernel;
+    T*           mPtr;
 };
 
 template<typename T>
-MessageGuard<T> make_msg(SDK::Interface::IAppComm& comm)
+MessageGuard<T> make_msg(SDK::Kernel& kernel)
 {
-    T* raw = comm.template allocateMessage<T>();
-    return MessageGuard<T>(comm, raw);
+    T* raw = kernel.comm.template allocateMessage<T>();
+    return MessageGuard<T>(kernel, raw);
 }
 
 } // namespace SDK

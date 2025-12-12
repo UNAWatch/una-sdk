@@ -20,15 +20,13 @@ namespace SDK::Sensor {
 
     class Connection {
     public:
-        Connection(SDK::Sensor::Type                    id,
-                   SDK::Interface::ISensorDataListener* listener,
-                   float                                period  = 0,
-                   uint32_t                             latency = 0);
+        Connection(SDK::Sensor::Type id,
+                   float             period  = 0,
+                   uint32_t          latency = 0);
 
-        Connection(uint8_t                              handle,
-                   SDK::Interface::ISensorDataListener* listener,
-                   float                                period  = 0,
-                   uint32_t                             latency = 0);
+        Connection(uint8_t  handle,
+                   float    period  = 0,
+                   uint32_t latency = 0);
 
         ~Connection();
 
@@ -44,13 +42,12 @@ namespace SDK::Sensor {
         bool matchesDriver(uint16_t handle);
 
     protected:
-        SDK::Kernel&                         mKernel;
-        SDK::Sensor::Type                    mID;
-        uint8_t                              mHandle;
-        SDK::Interface::ISensorDataListener* mListener;
-        float                                mPeriod;
-        uint32_t                             mLatency;
-        bool                                 mIsConnected;
+        SDK::Kernel&      mKernel;
+        SDK::Sensor::Type mID;
+        uint8_t           mHandle;
+        float             mPeriod;
+        uint32_t          mLatency;
+        bool              mIsConnected;
     };
 
 } // namespace SDK::Sensor

@@ -15,6 +15,8 @@
 
 #include <cstdint>
 
+#pragma pack(push, 4)
+
 namespace SDK::Sensor
 {
     struct Data
@@ -30,6 +32,10 @@ namespace SDK::Sensor
         Field    mValue[1];
     };
 
+    static_assert(sizeof(Data) == 12);
+
 } /* namespace SDK::Sensor */
+
+#pragma pack(pop)
 
 #endif /* __SENSOR_DATA_HPP */

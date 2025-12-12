@@ -24,6 +24,8 @@
 #include "SDK/SensorLayer/SensorTypes.hpp"
 #include "SDK/Interfaces/ISensorDataListener.hpp"
 
+#pragma pack(push, 4)
+
 namespace SDK::Message::Sensor
 {
 
@@ -72,15 +74,13 @@ struct RequestConnect : public MessageBase {
     RequestConnect()
         : MessageBase(MessageType::REQUEST_SENSOR_LAYER_CONNECT)
         , handle(0)
-        , listener(nullptr)
         , period(0)
         , latency(0)
     {}
 
-    uint32_t                             handle;
-    SDK::Interface::ISensorDataListener* listener;
-    float                                period;
-    uint32_t                             latency;
+    uint32_t handle;
+    float    period;
+    uint32_t latency;
 };
 
 struct RequestDisconnect : public MessageBase {
@@ -89,72 +89,29 @@ struct RequestDisconnect : public MessageBase {
         , handle(0)
     {}
 
-    uint32_t                             handle;
-    SDK::Interface::ISensorDataListener* listener;
+    uint32_t handle;
 };
 
 /**
  * @brief Sensor layer event message
  *
  */
-struct EventData1 : public MessageBase {
-    EventData1()
-        : MessageBase(MessageType::EVENT_SENSOR_LAYER_DATA_1)
+
+struct EventData : public MessageBase {
+    EventData()
+        : MessageBase(MessageType::EVENT_SENSOR_LAYER_DATA)
         , handle(0)
-        , data{}
         , count(0)
         , stride(0)
-    {}
-
-    uint8_t           handle;
-    SDK::Sensor::Data data[10];
-    uint16_t          count;
-    uint16_t          stride;
-};
-
-struct EventData2 : public MessageBase {
-    EventData2()
-        : MessageBase(MessageType::EVENT_SENSOR_LAYER_DATA_2)
-        , handle(0)
         , data{}
-        , count(0)
-        , stride(0)
     {}
 
-    uint8_t           handle;
-    SDK::Sensor::Data data[20];
-    uint16_t          count;
-    uint16_t          stride;
-};
-
-struct EventData3 : public MessageBase {
-    EventData3()
-        : MessageBase(MessageType::EVENT_SENSOR_LAYER_DATA_3)
-        , handle(0)
-        , data{}
-        , count(0)
-        , stride(0)
-    {}
-
-    uint8_t           handle;
-    SDK::Sensor::Data data[30];
-    uint16_t          count;
-    uint16_t          stride;
-};
-
-struct EventData4 : public MessageBase {
-    EventData4()
-        : MessageBase(MessageType::EVENT_SENSOR_LAYER_DATA_4)
-        , handle(0)
-        , data{}
-        , count(0)
-        , stride(0)
-    {}
-
-    uint8_t           handle;
-    SDK::Sensor::Data data[40];
-    uint16_t          count;
-    uint16_t          stride;
+    uint32_t          handle;
+    uint32_t          count;
+    uint32_t          stride;
+    SDK::Sensor::Data data[1];
 };
 
 } // namespace SDK::Message::Sensor
+
+#pragma pack(pop)

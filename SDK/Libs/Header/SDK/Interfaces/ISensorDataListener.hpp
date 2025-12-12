@@ -29,7 +29,7 @@ public:
     virtual ~ISensorDataListener() = default;
 
     virtual void onSdlNewData(uint16_t                 handle,
-                              const SDK::Sensor::Data* base,
+                              const SDK::Sensor::Data* data,
                               uint16_t                 count,
                               uint16_t                 stride) = 0;
 };

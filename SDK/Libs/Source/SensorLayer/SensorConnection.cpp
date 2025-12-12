@@ -3,8 +3,17 @@
  * @file    SensorConnection.cpp
  * @date    17-September-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   Connection to the Sensor
- * 
+ * @brief   High-level connection wrapper for sensor drivers.
+ *
+ * @details
+ * The Connection class encapsulates IPC-based interaction with the SensorLayer.
+ * It is responsible for:
+ *  - Resolving a sensor driver handle via RequestDefault
+ *  - Establishing a connection via RequestConnect
+ *  - Releasing the connection via RequestDisconnect
+ *
+ * Internally, all communication is performed through Kernel IPC messages.
+ *
  ******************************************************************************
  *
  ******************************************************************************
@@ -17,7 +26,6 @@
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
-#include "SDK/Messages/SensorLayerMessages.hpp"
 #include "SDK/Messages/MessageGuard.hpp"
 
 #include <stdlib.h>
@@ -25,61 +33,63 @@
 namespace SDK::Sensor {
 
 /**
- * @brief Construct a connection wrapper for a sensor driver.
+ * @brief Construct a connection wrapper using a sensor type identifier.
  *
- * Resolves the underlying sensor driver via
- * `kernel->sensorManager.getDefaultSensor(id)` and stores connection
- * parameters for subsequent @ref connect() calls.
+ * @details
+ * This constructor stores the sensor type and desired connection parameters.
+ * The actual sensor driver handle is resolved lazily during the first
+ * call to @ref connect() using an IPC RequestDefault message.
  *
- * @param id       Sensor type identifier to resolve the default driver.
- * @param listener Pointer to a data listener (must remain valid while connected).
- * @param period   Desired sampling/update period (units as defined by the driver; commonly seconds).
- * @param latency  Maximum report latency/batching tolerance (units as defined by the driver; commonly milliseconds).
- * @pre `kernel` must be initialized.
- * @note Use @ref isValid() to check that an underlying driver was found.
+ * @param id       Sensor type used to resolve the default driver.
+ * @param period   Desired sampling/update period (units defined by the driver).
+ * @param latency  Maximum allowed reporting latency (units defined by the driver).
+ *
+ * @note Use @ref isValid() to check whether a driver handle has been resolved.
  */
-Connection::Connection(SDK::Sensor::Type                    id,
-                       SDK::Interface::ISensorDataListener* listener,
-                       float                                period,
-                       uint32_t                             latency)
+Connection::Connection(SDK::Sensor::Type id,
+                       float             period,
+                       uint32_t          latency)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mID(id)
     , mHandle(0)
-    , mListener(nullptr)
     , mPeriod(period)
     , mLatency(latency)
     , mIsConnected(false)
 {}
 
 /**
- * @brief Construct a connection wrapper using an explicit sensor driver.
+ * @brief Construct a connection wrapper with an existing sensor handle.
  *
- * Stores the provided driver and connection parameters for subsequent @ref connect() calls.
+ * @details
+ * This constructor is used when the sensor handle is already known
+ * (for example, restored from persistent state or provided externally).
+ * No driver resolution is performed.
  *
- * @param driver   Pointer to the sensor driver to use.
- * @param listener Pointer to a data listener (must remain valid while connected).
- * @param period   Desired sampling/update period (units as defined by the driver; commonly seconds).
- * @param latency  Maximum report latency/batching tolerance (units as defined by the driver; commonly milliseconds).
- *
- * @pre `driver` must be valid and compatible with the listener.
+ * @param handle   Existing sensor driver handle.
+ * @param period   Desired sampling/update period.
+ * @param latency  Maximum allowed reporting latency.
  */
-
-Connection::Connection(uint8_t                              handle,
-                       SDK::Interface::ISensorDataListener* listener,
-                       float                                period,
-                       uint32_t                             latency)
+Connection::Connection(uint8_t  handle,
+                       float    period,
+                       uint32_t latency)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mID(SDK::Sensor::Type::UNKNOWN)
     , mHandle(handle)
-    , mListener(nullptr)
     , mPeriod(period)
     , mLatency(latency)
     , mIsConnected(false)
 {}
 
+Connection::~Connection()
+{
+    disconnect();
+}
+
 /**
- * @brief Check whether the underlying driver has been resolved.
- * @return `true` if a driver pointer is available, otherwise `false`.
+ * @brief Check whether a valid sensor handle is available.
+ *
+ * @return true  If the internal handle is non-zero.
+ * @return false If no handle has been resolved yet.
  */
 bool Connection::isValid()
 {
@@ -87,38 +97,24 @@ bool Connection::isValid()
 }
 
 /**
- * @brief Connect to the driver using the stored period and latency.
+ * @brief Connect to the sensor using the stored parameters.
  *
- * Delegates to the driver's `connect(listener, userApp, period, latency)`.
+ * @details
+ * Connection procedure:
+ * 1. If no valid handle is present:
+ *    - Send RequestDefault to resolve the default sensor driver.
+ *    - Store the returned handle.
+ * 2. Send RequestConnect using the resolved handle and the configured
+ *    period and latency.
+ * 3. Mark the connection as active if the request succeeds.
  *
- * @return `true` on successful connection, `false` if no driver is available or the driver rejects the request.
- * @see connect(float,uint32_t)
+ * @return true  If the connection was successfully established.
+ * @return false If handle resolution or connection request failed.
  */
 bool Connection::connect()
 {
-//    bool status;
-
     if (!isValid()) {
-//        status = false;
-//        auto* reqDefaultSensor = mKernel.comm.allocateMessage<SDK::Message::Sensor::RequestDefault>();
-//        if (reqDefaultSensor) {
-//            reqDefaultSensor->id = mID;
-//
-//            status = mKernel.comm.sendMessage(reqDefaultSensor, 100);
-//
-//            if (status && reqDefaultSensor->getResult() == SDK::MessageResult::SUCCESS) {
-//                mHandle = reqDefaultSensor->handle;
-//            } else {
-//                status = false;
-//            }
-//
-//            mKernel.comm.releaseMessage(reqDefaultSensor);
-//        }
-//
-//        if (!status) {
-//            return false;
-//        }
-        auto req = make_msg<SDK::Message::Sensor::RequestDefault>(mKernel.comm);
+        auto req = SDK::make_msg<SDK::Message::Sensor::RequestDefault>(mKernel);
         if (!req) {
             return false;
         }
@@ -132,33 +128,14 @@ bool Connection::connect()
         mHandle = req->handle;
     }
 
-//    status = false;
-//
-//    auto* reqConnect = mKernel.comm.allocateMessage<SDK::Message::Sensor::RequestConnect>();
-//    if (reqConnect) {
-//        reqConnect->handle   = mHandle;
-//        reqConnect->listener = mListener;
-//        reqConnect->period   = mPeriod;
-//        reqConnect->latency  = mLatency;
-//
-//        status = mKernel.comm.sendMessage(reqConnect, 100);
-//
-//        if (status && reqConnect->getResult() == SDK::MessageResult::SUCCESS) {
-//            mIsConnected = true;
-//        }
-//
-//        mKernel.comm.releaseMessage(reqConnect);
-//    }
-
-    auto reqConnect = make_msg<SDK::Message::Sensor::RequestConnect>(mKernel.comm);
+    auto reqConnect = SDK::make_msg<SDK::Message::Sensor::RequestConnect>(mKernel);
     if (!reqConnect) {
         return false;
     }
 
-    reqConnect->handle   = mHandle;
-    reqConnect->listener = mListener;
-    reqConnect->period   = mPeriod;
-    reqConnect->latency  = mLatency;
+    reqConnect->handle  = mHandle;
+    reqConnect->period  = mPeriod;
+    reqConnect->latency = mLatency;
 
     if (reqConnect.send(100) || reqConnect.ok()) {
         mIsConnected = true;
@@ -168,13 +145,20 @@ bool Connection::connect()
 }
 
 /**
- * @brief Update period/latency and connect to the driver.
+ * @brief Update connection parameters and connect.
  *
- * Stores the provided parameters and then calls the parameterless @ref connect().
+ * @details
+ * Stores the new period and latency, then delegates to @ref connect().
  *
- * @param period   Desired sampling/update period (units as defined by the driver).
- * @param latency  Maximum report latency/batching tolerance (units as defined by the driver).
- * @return `true` on successful connection, otherwise `false`.
+ * Limitations:
+ * - If no valid handle is present, the function returns false.
+ * - If already connected, parameter updates are rejected.
+ *
+ * @param period   New sampling/update period.
+ * @param latency  New maximum reporting latency.
+ *
+ * @return true  If the connection was successfully established.
+ * @return false If the update or connection failed.
  */
 bool Connection::connect(float period, uint32_t latency)
 {
@@ -192,16 +176,23 @@ bool Connection::connect(float period, uint32_t latency)
     return connect();
 }
 
+/**
+ * @brief Check whether the connection is currently active.
+ *
+ * @return true  If the connection is active.
+ * @return false Otherwise.
+ */
 bool Connection::isConnected()
 {
     return mIsConnected;
 }
 
 /**
- * @brief Disconnect the listener from the underlying driver.
+ * @brief Disconnect from the sensor.
  *
- * Safe to call even if the connection is not valid or already disconnected.
- * If no driver is available, the call is a no-op.
+ * @details
+ * If a valid and active connection exists, a RequestDisconnect message
+ * is sent to the SensorLayer. The function is safe to call multiple times.
  */
 void Connection::disconnect()
 {
@@ -209,34 +200,23 @@ void Connection::disconnect()
         return;
     }
 
-    if (!mIsConnected) {
-        return;
+    if (mIsConnected) {
+        auto request = SDK::make_msg<SDK::Message::Sensor::RequestDisconnect>(mKernel);
+        if (request) {
+            request->handle = mHandle;
+            request.send();
+            mIsConnected = false;
+        }
     }
-
-    auto request = make_msg<SDK::Message::Sensor::RequestDisconnect>(mKernel.comm);
-    if (!request) {
-        return;
-    }
-
-    request->handle   = mHandle;
-    request->listener = mListener;
-
-    request.send();
-
-    mIsConnected = false;
 }
 
 /**
- * @brief Check if the specified driver matches the connected one.
+ * @brief Check whether the given handle matches the connected sensor.
  *
- * @details
- * Compares the given driver pointer with the internal driver instance
- * associated with this connection. Returns true only if both pointers
- * are valid and refer to the same ISensorDriver object.
+ * @param handle Sensor driver handle to compare.
  *
- * @param  driver Pointer to a sensor driver to compare against.
- * @return true  If the specified driver is the same as the one managed by this connection.
- * @return false If either pointer is null or they do not match.
+ * @return true  If the handles match and are valid.
+ * @return false Otherwise.
  */
 bool Connection::matchesDriver(uint16_t handle)
 {
@@ -251,4 +231,4 @@ bool Connection::matchesDriver(uint16_t handle)
     return mHandle == handle;
 }
 
-} // namespace SDK::Sensors
+} // namespace SDK::Sensor
