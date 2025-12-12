@@ -204,15 +204,12 @@ void TouchGFXHAL::enableLCDControllerInterrupt()
 
 bool TouchGFXHAL::beginFrame()
 {
-    LOG_DEBUG("called\n");
-    SDK::TouchGFXCommandProcessor::GetInstance().callCustomHandler();
     // do nothing
     return TouchGFXGeneratedHAL::beginFrame();
 }
 
 void TouchGFXHAL::endFrame()
 {
-    LOG_DEBUG("called\n");
     if (sFlushBufferReq) {
         SDK::TouchGFXCommandProcessor::GetInstance().writeDisplayFrameBuffer(spActiveBuffer);
         sFlushBufferReq = false;

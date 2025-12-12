@@ -57,7 +57,8 @@ public:
 
     void writeDisplayFrameBuffer(const uint8_t* data);
 
-    void callCustomHandler();
+    // Called before Model::tick()
+    void callCustomMessageHandler();
 
 private:
 
@@ -74,7 +75,7 @@ private:
     uint8_t mLastButtonCode;
     SDK::Interface::IGuiLifeCycleCallback *mAppLifeCycleCallback;
     SDK::Interface::ICustomMessageHandler *mCustomMessageHandler;
-    SDK::Tools::FixedQueue<SDK::MessageBase*, 20> mUserQueue;
+    SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
 
     void handleEvent(SDK::Message::EventButton* msg);
 

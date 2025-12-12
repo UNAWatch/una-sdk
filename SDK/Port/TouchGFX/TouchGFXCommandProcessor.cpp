@@ -46,10 +46,10 @@ void TouchGFXCommandProcessor::waitForFrameTick()
         mAppLifeCycleCallback->onStart();
     }
 
-    SDK::MessageBase *msg = nullptr;
-    bool messageQueued = false;
-
     while (true) {
+
+        SDK::MessageBase *msg = nullptr;
+        bool messageQueued = false;
 
         // Wait for command (blocks until available)
         if(!mKernel.comm.getMessage(msg)) {
@@ -59,7 +59,10 @@ void TouchGFXCommandProcessor::waitForFrameTick()
         switch (msg->getType()) {
 
             case SDK::MessageType::COMMAND_APP_STOP: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
+                // We must release the message here because we are exiting this app.
                 mKernel.comm.releaseMessage(msg);
+
                 if (mAppLifeCycleCallback) {
                     // Cleanup recourses
                     mAppLifeCycleCallback->onStop();
@@ -69,19 +72,24 @@ void TouchGFXCommandProcessor::waitForFrameTick()
             } break;
 
             case SDK::MessageType::EVENT_GUI_TICK: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
+                // We must release the message here because we are exiting this method.
                 mKernel.comm.releaseMessage(msg);
+
                 if (mAppLifeCycleCallback) {
                     mAppLifeCycleCallback->onFrame();
                 }
-                LOG_DEBUG("called\n");
                 return; // Allow TouchGFX make frame
             } break;
 
             case SDK::MessageType::EVENT_BUTTON: {
                 handleEvent(static_cast<SDK::Message::EventButton*>(msg));
+                msg->setResult(SDK::MessageResult::SUCCESS);
             } break;
 
             case SDK::MessageType::COMMAND_APP_GUI_RESUME: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
+
                 mIsGuiResumed = true;
                 if (mAppLifeCycleCallback) {
                     mAppLifeCycleCallback->onResume();
@@ -89,6 +97,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
             } break;
 
             case SDK::MessageType::COMMAND_APP_GUI_SUSPEND: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
                 mIsGuiResumed = false;
                 if (mAppLifeCycleCallback) {
                     mAppLifeCycleCallback->onSuspend();
@@ -97,11 +106,22 @@ void TouchGFXCommandProcessor::waitForFrameTick()
 
 
             default:
-                if (SDK::isApplicationSpecificMessage(msg->getType()) &&
-                        mCustomMessageHandler &&
-                        mUserQueue.push(msg))
-                {
-                    messageQueued = true;
+                if (SDK::isApplicationSpecificMessage(msg->getType()) && mCustomMessageHandler) {
+
+                    // Remove oldest message if queue is full
+                    if (mUserQueue.full()) {
+                        LOG_WARNING("Queue for custom messages is full\n");
+                        auto v = mUserQueue.pop();
+                        if (v) {
+                            auto msg = *v;
+                            msg->setResult(SDK::MessageResult::ERROR);
+                            mKernel.comm.sendResponse(msg);
+                            mKernel.comm.releaseMessage(msg);
+                        }
+                    }
+                    // Try to save message
+                    messageQueued = mUserQueue.push(msg);
+
                 } else {
                     msg->setResult(SDK::MessageResult::ERROR);
                     mKernel.comm.sendResponse(msg);
@@ -109,10 +129,17 @@ void TouchGFXCommandProcessor::waitForFrameTick()
                 break;
         }
 
-        if (!messageQueued) {
-            // Release message after processing
-            mKernel.comm.releaseMessage(msg);
+        if (messageQueued) {
+            // The message must be process and release in callCustomMessageHandler()
+            continue;
         }
+
+        // Set the result if the message was not processed
+        if (msg->getResult() == SDK::MessageResult::PENDING) {
+            msg->setResult(SDK::MessageResult::ERROR);
+        }
+        // Release message after processing
+        mKernel.comm.releaseMessage(msg);
     }
 
 }
@@ -125,7 +152,6 @@ bool TouchGFXCommandProcessor::getKeySample(uint8_t &key)
 
 void TouchGFXCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data)
 {
-    LOG_DEBUG("called\n");
     if (!data || !mIsGuiResumed) {
         return;
     }
@@ -133,24 +159,27 @@ void TouchGFXCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data)
     auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestDisplayUpdate>();
     if (msg) {
         msg->pBuffer = data;
-        mKernel.comm.sendMessage(msg);
+        mKernel.comm.sendMessage(msg, 1000);
         mKernel.comm.releaseMessage(msg);
     }
 }
 
-void TouchGFXCommandProcessor::callCustomHandler()
+void TouchGFXCommandProcessor::callCustomMessageHandler()
 {
-    auto msg = mUserQueue.pop();
+    while (!mUserQueue.empty()) {
+        auto v = mUserQueue.pop();
 
-    if (msg) {
-        LOG_DEBUG("called. Message 0x%08X\n", (*msg)->getType());
-        bool result = false;
-        if (mCustomMessageHandler) {
-            result = mCustomMessageHandler->customMessageHandler(*msg);
+        if (v) {
+            auto msg = *v;
+            bool result = false;
+            if (mCustomMessageHandler) {
+                result = mCustomMessageHandler->customMessageHandler(msg);
+            }
+            msg->setResult(result ? SDK::MessageResult::SUCCESS : SDK::MessageResult::ERROR);
+            mKernel.comm.sendResponse(msg);
+            mKernel.comm.releaseMessage(msg);
         }
-        (*msg)->setResult(result ? SDK::MessageResult::SUCCESS :  SDK::MessageResult::ERROR);
-        mKernel.comm.sendResponse(*msg);
-    }
+    };
 }
 
 void TouchGFXCommandProcessor::handleEvent(SDK::Message::EventButton* msg)
