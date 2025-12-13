@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    SensorConnection.cpp
+ * @file    SensorConnection.hpp
  * @date    11-December-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Connection to the SensorDriver using messages
