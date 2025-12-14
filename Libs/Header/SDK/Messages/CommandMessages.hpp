@@ -131,6 +131,15 @@ struct RequestAppTerminate : public MessageBase {
 static_assert(sizeof(RequestAppTerminate) == 36, "RequestAppTerminate size must be 36 bytes");
 
 /**
+ * @brief Notify the Kernel that the activity session has ended.
+ *
+ * Sent by Service/GUI to to Kernel after saving the activity file.
+ */
+struct CommandAppNewActivity : public MessageBase {
+    CommandAppNewActivity() : MessageBase(MessageType::REQUEST_APP_NEW_ACTIVITY){}
+};
+
+/**
  * @brief Set application capabilities
  *
  * Service sends this to configure app behavior.

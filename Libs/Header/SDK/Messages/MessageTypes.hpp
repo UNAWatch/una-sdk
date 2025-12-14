@@ -58,6 +58,7 @@ namespace MessageType {
     // Application control requests (app -> Kernel)
     constexpr Type REQUEST_APP_RUN_GUI          = 0x01070000;  // Request kernel to launch GUI
     constexpr Type REQUEST_APP_TERMINATE        = 0x01080000;
+    constexpr Type REQUEST_APP_NEW_ACTIVITY     = 0x01090000;
 
 
     constexpr Type REQUEST_SET_CAPABILITIES     = 0x02010000; // Set app capabilities
