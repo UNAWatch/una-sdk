@@ -114,7 +114,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
                         auto v = mUserQueue.pop();
                         if (v) {
                             auto msg = *v;
-                            msg->setResult(SDK::MessageResult::ERROR);
+                            msg->setResult(SDK::MessageResult::FAIL);
                             mKernel.comm.sendResponse(msg);
                             mKernel.comm.releaseMessage(msg);
                         }
@@ -123,7 +123,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
                     messageQueued = mUserQueue.push(msg);
 
                 } else {
-                    msg->setResult(SDK::MessageResult::ERROR);
+                    msg->setResult(SDK::MessageResult::FAIL);
                     mKernel.comm.sendResponse(msg);
                 }
                 break;
@@ -136,7 +136,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
 
         // Set the result if the message was not processed
         if (msg->getResult() == SDK::MessageResult::PENDING) {
-            msg->setResult(SDK::MessageResult::ERROR);
+            msg->setResult(SDK::MessageResult::FAIL);
         }
         // Release message after processing
         mKernel.comm.releaseMessage(msg);
@@ -175,7 +175,7 @@ void TouchGFXCommandProcessor::callCustomMessageHandler()
             if (mCustomMessageHandler) {
                 result = mCustomMessageHandler->customMessageHandler(msg);
             }
-            msg->setResult(result ? SDK::MessageResult::SUCCESS : SDK::MessageResult::ERROR);
+            msg->setResult(result ? SDK::MessageResult::SUCCESS : SDK::MessageResult::FAIL);
             mKernel.comm.sendResponse(msg);
             mKernel.comm.releaseMessage(msg);
         }
