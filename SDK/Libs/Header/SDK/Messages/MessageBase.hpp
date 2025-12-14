@@ -39,7 +39,7 @@ namespace SDK
 enum class MessageResult : uint8_t {
     PENDING = 0,        // Message not yet processed
     SUCCESS = 1,        // Processing completed successfully
-    ERROR   = 2,        // Processing failed
+    FAIL    = 2,        // Processing failed
     TIMEOUT = 3         // Request timed out (no response received)
 };
 
@@ -100,7 +100,7 @@ public:
         switch (mResult) {
             case MessageResult::PENDING: return "PENDING";
             case MessageResult::SUCCESS: return "SUCCESS";
-            case MessageResult::ERROR:   return "ERROR";
+            case MessageResult::FAIL:    return "FAIL";
             case MessageResult::TIMEOUT: return "TIMEOUT";
         }
         return "UNKNOWN";
