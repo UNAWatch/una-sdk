@@ -7,9 +7,9 @@ png2abgr2222.py - Convert RGBA PNG(s) to ABGR2222 byte arrays in a C header.
 - Emits one header with arrays + WIDTH/HEIGHT/SIZE macros for each icon.
 
 Usage:
-  python png2abgr2222.py icon.png
-  python png2abgr2222.py icon1.png icon2.png -o icons.h
-  python png2abgr2222.py battery.png -o battery_icon.h --name BATTERY
+  python png2abgr2222.py --inputs icon.png
+  python png2abgr2222.py --inputs icon1.png icon2.png -o icons.h
+  python png2abgr2222.py --inputs battery.png -o battery_icon.h --name BATTERY
 
 Install deps:
   pip install pillow
