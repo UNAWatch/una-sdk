@@ -20,7 +20,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define GLANCE_TEXT_SIZE    (16)
+#define GLANCE_TEXT_SIZE    (32)
 
 typedef enum {
     GLANCE_ALIGN_H_LEFT = 0,
