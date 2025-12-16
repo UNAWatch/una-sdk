@@ -4,7 +4,7 @@
  * @date    28-July-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Set of sensor types.
- * 
+ *
  ******************************************************************************
  *
  ******************************************************************************
@@ -12,118 +12,98 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace SDK::Sensor
 {
-    enum class Type : uint32_t {
-        /*!< Unknown or invalid sensor type. */
-        UNKNOWN              = 0x00000000,
+    enum class Type : uint32_t
+    {
+        UNKNOWN              = 0x00000000, ///< Unknown or invalid sensor type.
 
-        /*!< An accelerometer sensor reports the acceleration of the device
-         along the three sensor axes. */
-        ACCELEROMETER        = 0x00000010,
+        /** @name IMU sensors
+         *  @{
+         */
+        ACCELEROMETER        = 0x00000010, ///< Acceleration (3-axis).
+        ACCELEROMETER_RAW    = 0x00000011, ///< Acceleration raw samples (implementation-defined units).
 
-        /*!< An accelerometer sensor reports the acceleration of the device
-         along the three sensor axes as int16_t. */
-        ACCELEROMETER_RAW    = 0x00000020,
+        GYROSCOPE            = 0x00000020, ///< Angular rate (3-axis).
+        GYROSCOPE_RAW        = 0x00000021, ///< Angular rate raw samples.
 
-        /*!< A gyroscope sensor reports the rate of rotation of the device
-         around the three sensor axes. */
-        GYROSCOPE            = 0x00000030,
+        MAGNETIC_FIELD       = 0x00000030, ///< Magnetic field (3-axis).
+        /** @} */
 
-        /*!< A magnetic field sensor (also known as magnetometer) reports the
-         ambient magnetic field, as measured along the three sensor axes. */
-        MAGNETIC_FIELD       = 0x00000040,
+        /** @name Cardio sensors
+         *  @{
+         */
+        HEART_BEAT           = 0x00000040, ///< Beat peak event.
+        HEART_RATE           = 0x00000041, ///< Current heart rate (bpm).
+        HEART_RATE_METRICS   = 0x00000042, ///< Aggregated metrics (e.g., AHR, RHR).
+        /** @} */
 
-        /*!< A heart rate sensor reports the current heart rate of the person
-         touching the device. */
-        HEART_RATE           = 0x00000050,  //// Heart rate
-        HEART_RATE_METRICS   = 0x00000051,  //// Average value, RHR
+        /** @name Pedometer
+         *  @{
+         */
+        STEP_DETECTOR        = 0x00000050, ///< Step event.
+        STEP_COUNTER         = 0x00000051, ///< Step count since last reboot.
 
-        /*!< A sensor of this type returns the number of steps taken by the
-          user since the last reboot while activated. */
-        STEP_COUNTER         = 0x00000060,
+        FLOOR_COUNTER        = 0x00000060, ///< Floor counter.
+        /** @} */
 
-        /*!< Ambient temperature sensor type. */
-        AMBIENT_TEMPERATURE  = 0x00000070,
 
-        /*!< Atmospheric pressure sensor type. */
-        PRESSURE             = 0x00000080,
+        /** @name Ambient parameters
+         *  @{
+         */
+        AMBIENT_TEMPERATURE  = 0x00000070, ///< Ambient temperature.
+        PRESSURE             = 0x00000080, ///< Atmospheric pressure.
+        ALTIMETER            = 0x00000090, ///< Altimeter.
+        /** @} */
 
-        /*!< Altimeter sensor type. */
-        ALTIMETER            = 0x00000090,
 
-        /*!< A virtual sensor that produces event if the device has been
-         stationary for at least 5 seconds with a maximal latency of 5 additional
-         seconds. ie: it may take up anywhere from 5 to 10 seconds after the
-         device has been at rest to trigger this event. */
-        STATIONARY_DETECT    = 0x000000A0,
+        /** @name Motion / activity
+         *  @{
+         */
+        STATIONARY_DETECT    = 0x000000A0, ///< Stationary event (latency-tolerant).
+        MOTION_DETECT        = 0x000000B0, ///< Motion state events.
+        ACTIVITY_RECOGNITION = 0x000000C0, ///< Activity state classification.
+        GESTURE_RECOGNITION  = 0x000000D0, ///< Discrete gesture events.
+        /** @} */
 
-        /*!< Motion detection virtual sensor event types
-         This virtual sensor reports one of the following event types:
 
-         - 0: No motion — device has stopped moving after previous motion.
-         - 1: Motion — device has started moving (continuous motion detected).
-         - 2: Significant motion — sudden or strong motion event.
-         Typical usage includes detecting activity changes (e.g. start walking),
-         power-saving transitions, or triggering other sensor logic.*/
-        MOTION_DETECT        = 0x000000B0,
+        /** @name Daily activity
+         *  @{
+         */
+        ACTIVITY             = 0x000000E0, ///< Active minutes for the current day (minutes).
+        /** @} */
 
-        /*!< A sensor of this type returns an event everytime a heart beat peak
-         is detected. Peak here ideally corresponds to the positive peak in
-         the QRS complex of an ECG signal.*/
-        HEART_BEAT           = 0x000000C0,
 
-        /*!<  */
-        PPG                  = 0x000000D0,
+        /** @name Optical / bio signals
+         *  @{
+         */
+        PPG                  = 0x000000F0, ///< Photoplethysmogram data.
+        ECG                  = 0x00000100, ///< Electrocardiogram data.
+        /** @} */
 
-        /*!<  */
-        ECG                  = 0x000000E0,
+        /** @name GPS
+         *  @{
+         */
+        GPS_LOCATION         = 0x00000110, ///< GNSS location.
+        GPS_SPEED            = 0x00000111, ///< GNSS speed.
+        GPS_DISTANCE         = 0x00000112, ///< GNSS distance / odometer.
+        /** @} */
 
-        /*!< GPS Location */
-        GPS_LOCATION         = 0x000000F0,
+        /** @name Battery
+         *  @{
+         */
+        BATTERY_LEVEL        = 0x00000120, ///< Charge level (%).
+        BATTERY_CHARGING     = 0x00000121, ///< Charging state.
+        BATTERY_METRICS      = 0x00000122, ///< Voltage/current/capacity metrics.
+        /** @} */
 
-        /*!< GPS Speed */
-        GPS_SPEED            = 0x00000100,
-
-        /*!< GPS Distance*/
-        GPS_DISTANCE         = 0x00000110,
-
-        /*!< Floor counter */
-        FLOOR_COUNTER        = 0x00000120,
-
-        /*!< Activity */
-        ACTIVITY             = 0x00000130,
-
-        /*!< A sensor of this type returns an event every time a step is detected.
-             Each event corresponds to a single human step, similar to how
-             HEART_BEAT represents a single heartbeat peak. */
-        STEP_DETECTOR        = 0x00000140,
-
-        /*!< Activity recognition virtual sensor event types
-         This virtual sensor detects and reports the user's current physical activity.
-
-         Supported activities include:
-         - STILL — user is not moving
-         - WALKING — user is walking
-         - RUNNING — user is running
-
-         Activity events represent ongoing states and may change over time.*/
-        ACTIVITY_RECOGNITION = 0x00000150,
-
-        /*!< Gesture recognition virtual sensor
-         This virtual sensor detects and reports discrete user gestures.
-
-         Gesture events are triggered immediately upon recognition.
-         The specific gesture types are implementation-defined. */
-        GESTURE_RECOGNITION  = 0x00000160,
-
-        /*!< Battery level sensor reports the charge level in percentage */
-        BATTERY_LEVEL        = 0x00000170,
-
-        /*!< Battery charge sensor tells you whether charging is currently taking place or not.*/
-        BATTERY_CHARGING     = 0x00000180,
-
-        /*!< Battery telemetry sensor reports voltage, current and capacity values.*/
-        BATTERY_METRICS      = 0x00000190,
+        /** @name Fusion
+         *  @{
+         */
+        FUSION               = 0x00000130, ///< Fused IMU (accel+gyro+mag).
+        FUSION_RAW           = 0x00000131, ///< Raw fusion inputs.
+        /** @} */
     };
 }
