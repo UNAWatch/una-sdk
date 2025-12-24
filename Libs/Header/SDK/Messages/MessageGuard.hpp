@@ -10,7 +10,7 @@ template<typename T>
 class MessageGuard
 {
 public:
-    MessageGuard(SDK::Kernel& kernel, T* ptr) noexcept
+    MessageGuard(const SDK::Kernel& kernel, T* ptr) noexcept
         : mKernel(kernel)
         , mPtr(ptr)
     {}
@@ -65,12 +65,12 @@ private:
         mPtr = nullptr;
     }
 
-    SDK::Kernel& mKernel;
+    const SDK::Kernel& mKernel;
     T*           mPtr;
 };
 
 template<typename T>
-MessageGuard<T> make_msg(SDK::Kernel& kernel)
+MessageGuard<T> make_msg(const SDK::Kernel& kernel)
 {
     T* raw = kernel.comm.template allocateMessage<T>();
     return MessageGuard<T>(kernel, raw);

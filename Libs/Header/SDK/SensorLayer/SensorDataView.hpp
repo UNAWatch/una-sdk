@@ -14,6 +14,9 @@
 #define __SENSOR_DATA_VIEW_HPP
 
 #include "SDK/SensorLayer/SensorData.hpp"
+
+#include <assert.h>
+
 #include <cstdint>
 
 namespace SDK::Sensor
