@@ -114,18 +114,9 @@ bool Connection::isValid()
 bool Connection::connect()
 {
     if (!isValid()) {
-        auto req = SDK::make_msg<SDK::Message::Sensor::RequestDefault>(mKernel);
-        if (!req) {
+        if (!subscribe()) {
             return false;
         }
-
-        req->id = mID;
-
-        if (!req.send(100) || !req.ok()) {
-            return false;
-        }
-
-        mHandle = req->handle;
     }
 
     auto reqConnect = SDK::make_msg<SDK::Message::Sensor::RequestConnect>(mKernel);
@@ -163,7 +154,9 @@ bool Connection::connect()
 bool Connection::connect(float period, uint32_t latency)
 {
     if (!isValid()) {
-        return false;
+        if (!subscribe()) {
+            return false;
+        }
     }
 
     if (mIsConnected) {
@@ -229,6 +222,24 @@ bool Connection::matchesDriver(uint16_t handle)
     }
 
     return mHandle == handle;
+}
+
+bool Connection::subscribe()
+{
+    auto req = SDK::make_msg<SDK::Message::Sensor::RequestDefault>(mKernel);
+    if (!req) {
+        return false;
+    }
+
+    req->id = mID;
+
+    if (!req.send(100) || !req.ok()) {
+        return false;
+    }
+
+    mHandle = req->handle;
+
+    return true;
 }
 
 } // namespace SDK::Sensor
