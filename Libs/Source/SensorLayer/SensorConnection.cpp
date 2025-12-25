@@ -224,6 +224,22 @@ bool Connection::matchesDriver(uint16_t handle)
     return mHandle == handle;
 }
 
+/**
+ * @brief Resolve the default sensor driver handle.
+ *
+ * @details
+ * Sends a RequestDefault message to the SensorLayer in order to
+ * obtain a valid driver handle for the sensor type specified
+ * during construction. The resolved handle is stored internally
+ * and used for subsequent connection requests.
+ *
+ * Failure cases:
+ * - Message allocation failed.
+ * - IPC request timed out or returned an error.
+ *
+ * @return true  If the driver handle was successfully resolved and stored.
+ * @return false If the request failed or no handle was returned.
+ */
 bool Connection::subscribe()
 {
     auto req = SDK::make_msg<SDK::Message::Sensor::RequestDefault>(mKernel);
