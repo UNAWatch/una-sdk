@@ -48,10 +48,10 @@ public:
         assert(p && "Kernel::require: requested interface is not available");
         return *static_cast<T*>(p);
     }
+
 private:
     KernelBuilder()  = delete;
     ~KernelBuilder() = delete;
-
 };
 
 } // namespace SDK

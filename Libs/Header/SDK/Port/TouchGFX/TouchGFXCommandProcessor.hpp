@@ -9,10 +9,7 @@
  ******************************************************************************
  */
 
-
-
 //TODO: Move this functionality to the Kernel class ?
-
 
 #pragma once
 
@@ -37,9 +34,7 @@ namespace SDK
  */
 class TouchGFXCommandProcessor
 {
-
 public:
-
     static TouchGFXCommandProcessor& GetInstance()
     {
         static TouchGFXCommandProcessor sInstance;
@@ -50,8 +45,7 @@ public:
 
     void setCustomMessageHandler(SDK::Interface::ICustomMessageHandler* h) { mCustomMessageHandler = h; }
 
-
-    void waitForFrameTick();
+    bool waitForFrameTick();
 
     bool getKeySample(uint8_t &key);
 
@@ -61,7 +55,6 @@ public:
     void callCustomMessageHandler();
 
 private:
-
     TouchGFXCommandProcessor();
     virtual ~TouchGFXCommandProcessor();
 
@@ -69,16 +62,15 @@ private:
     TouchGFXCommandProcessor(const TouchGFXCommandProcessor&) = delete;
     TouchGFXCommandProcessor& operator=(const TouchGFXCommandProcessor&) = delete;
 
-    const SDK::Kernel &mKernel;
-    bool mStartCallbackCalled;
-    bool mIsGuiResumed;
-    uint8_t mLastButtonCode;
-    SDK::Interface::IGuiLifeCycleCallback *mAppLifeCycleCallback;
-    SDK::Interface::ICustomMessageHandler *mCustomMessageHandler;
-    SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
-
     void handleEvent(SDK::Message::EventButton* msg);
 
+    const SDK::Kernel&                            mKernel;
+    bool                                          mStartCallbackCalled;
+    bool                                          mIsGuiResumed;
+    uint8_t                                       mLastButtonCode;
+    SDK::Interface::IGuiLifeCycleCallback*        mAppLifeCycleCallback;
+    SDK::Interface::ICustomMessageHandler*        mCustomMessageHandler;
+    SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
 };
 
 } // namespace SDK

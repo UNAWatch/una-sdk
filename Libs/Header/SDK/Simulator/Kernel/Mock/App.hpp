@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <windows.h>
 
-#include "SDK/Platform/OS/OS.hpp"
+#include "SDK/Simulator/OS/OS.hpp"
 #include "SDK/Interfaces/IApp.hpp"
 #include "SDK/Interfaces/IGlance.hpp"
 

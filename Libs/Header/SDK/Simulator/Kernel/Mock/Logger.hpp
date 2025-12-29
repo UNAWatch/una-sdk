@@ -14,7 +14,7 @@
 
 #include "SDK/Interfaces/ILogger.hpp"
 
-#include "SDK/Platform/OS/OS.hpp"
+#include "SDK/Simulator/OS/OS.hpp"
 #include "touchgfx/Utils.hpp"
 
 namespace SDK::Simulator::Mock

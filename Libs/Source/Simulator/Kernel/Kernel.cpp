@@ -1,0 +1,145 @@
+/**
+ ******************************************************************************
+ * @file    Kernel.hpp
+ * @date    05-04-2025
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   The base class of the kernel simulator.
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
+
+#include "SDK/Simulator/Kernel/Kernel.hpp"
+#include "SDK/Simulator/Sensors/ISensorCore.hpp"
+#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+
+static constexpr char sFsPath[] = "../../../../../Output/";
+
+namespace SDK::Simulator
+{
+
+Kernel::Kernel(const char* name, Sensors::ISensorCore* sensoreCore)
+    : mSensoreCore(sensoreCore)
+	, mIsServise(mSensoreCore != nullptr)
+    , mName(name)
+	, mSystem()
+    , mLogger()
+    , mAppMemory()
+    , mFilesystem(sFsPath)
+    , mISystem(&mSystem)
+    , mILogger(&mLogger)
+    , mIAppMemory(&mAppMemory)
+    , mIFilesystem(&mFilesystem)
+    , mIKernel(*this)
+{
+}
+
+SDK::Interface::IKernel* Kernel::getInterface()
+{
+    return &mIKernel;
+}
+
+void Kernel::reset()
+{
+    //imem->freeAll();
+}
+
+void Kernel::startApp()
+{
+    //iappmock->create();
+    //iappmock->start();
+    //if (mSrvApp) {
+    //    mSrvApp->guiState(true);
+    //}
+    //iappmock->resume();
+}
+
+void Kernel::stopApp()
+{
+    //iappmock->pause();
+    //if (mSrvApp) {
+    //    mSrvApp->guiState(false);
+    //}
+    //iappmock->stop();
+    //iappmock->destroy();
+}
+
+void Kernel::tick()
+{
+    if (mSensoreCore) {
+        mSensoreCore->tick();
+    }
+}
+
+bool Kernel::keyFilter(uint8_t key)
+{
+    // if (stopRequest){
+	//  return false;
+    // }
+    // 
+    // 
+    //return (!mIsServise && iappmock->getState() == Mock::App::State::RESUMED &&
+    //        (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
+    //         SDK::Interface::IApp::Button::BUTTON_L2 == key ||
+    //         SDK::Interface::IApp::Button::BUTTON_R1 == key ||
+    //         SDK::Interface::IApp::Button::BUTTON_R2 == key ||
+    //         SDK::Interface::IApp::Button::BUTTON_L1R2 == key));
+
+    return true;
+}
+
+//Mock::App& Kernel::getApp()
+//{
+//    return *iappmock;
+//}
+
+std::string Kernel::getFsPath()
+{
+    return mFilesystem.getRootPath();
+}
+
+void Kernel::setISystem(SDK::Interface::ISystem* isystem)
+{
+    if (isystem) {
+        mISystem = isystem;
+    }
+}
+
+void Kernel::setILogger(SDK::Interface::ILogger* ilogger)
+{
+    if (ilogger) {
+        mILogger = ilogger;
+    }
+}
+
+void Kernel::setIAppMemory(SDK::Interface::IAppMemory* imem)
+{
+    if (imem) {
+        mIAppMemory = imem;
+    }
+}
+
+void Kernel::setIFileSystem(SDK::Interface::IFileSystem* ifs)
+{
+    if (ifs) {
+        mIFilesystem = ifs;
+    }
+}
+
+// IKIP
+void* Kernel::queryInterface(SDK::Interface::IKIP::IntfID iid)
+{
+    switch (iid) {
+    case SDK::Interface::IKIP::IntfID::IID_SYSTEM:              return mISystem;
+    case SDK::Interface::IKIP::IntfID::IID_LOGGER:              return mILogger;
+    case SDK::Interface::IKIP::IntfID::IID_APP_MEMORY:          return mIAppMemory;
+        //case SDK::Interface::IKIP::IntfID::IID_APP_COMM:			return iappcomm;   
+    case SDK::Interface::IKIP::IntfID::IID_FILESYSTEM:          return mIFilesystem;
+
+    default:
+        assert(false);
+        return nullptr;
+    }
+}
+
+} // namespace SDK::Simulator

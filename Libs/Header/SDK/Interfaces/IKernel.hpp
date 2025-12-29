@@ -30,7 +30,6 @@
 #include "SDK/Interfaces/IAppComm.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
 
-
 namespace SDK::Interface
 {
 
@@ -39,7 +38,6 @@ namespace SDK::Interface
 
 class IKernel {
 public:
-
     IKernel(IKIP& kip) : kip(kip)
     {}
 
@@ -48,9 +46,6 @@ public:
     uint32_t version = KERNEL_INTERFACE_VERSION;
 
     IKIP& kip;
-
-protected:
-
 };
 
 } // namespace SDK::Interface

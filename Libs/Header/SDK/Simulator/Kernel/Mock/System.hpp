@@ -3,7 +3,7 @@
 
 #include "SDK/Interfaces/ISystem.hpp"
 #include <platform/hal/simulator/sdl2/HALSDL2.hpp>
-#include "SDK/Platform/OS/OS.hpp"
+#include "SDK/Simulator/OS/OS.hpp"
 
 namespace SDK::Simulator::Mock
 {
@@ -11,7 +11,7 @@ namespace SDK::Simulator::Mock
 class System : public SDK::Interface::ISystem {
 public:
 
-    System(OS::Mutex* appMutex) : mAppMutex(appMutex) {}
+    System() {}
     virtual ~System() = default;
 
 
@@ -27,18 +27,10 @@ public:
 
     virtual void delay(uint32_t ms) override
     {
-        if (mAppMutex) {
-            OS::MutexCS cs(*mAppMutex);
-            Sleep(ms);
-        } else {
-            Sleep(ms);
-        }
+        Sleep(ms);
     }
 
     virtual void yield() override {}
-
-private:
-    OS::Mutex* mAppMutex;
 };
 
 } // namespace SDK::Simulator::Mock

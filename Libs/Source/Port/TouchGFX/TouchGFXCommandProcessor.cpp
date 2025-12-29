@@ -36,7 +36,7 @@ TouchGFXCommandProcessor::~TouchGFXCommandProcessor()
 {
 }
 
-void TouchGFXCommandProcessor::waitForFrameTick()
+bool TouchGFXCommandProcessor::waitForFrameTick()
 {
     mLastButtonCode = 0;
 
@@ -47,13 +47,16 @@ void TouchGFXCommandProcessor::waitForFrameTick()
     }
 
     while (true) {
-
         SDK::MessageBase *msg = nullptr;
         bool messageQueued = false;
 
         // Wait for command (blocks until available)
         if(!mKernel.comm.getMessage(msg)) {
+#if defined(SIMULATOR)
+            return false;
+#else
             continue;
+#endif
         }
 
         switch (msg->getType()) {
@@ -69,6 +72,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
                 }
                 // Waiting for the kernel to kill this app
                 mKernel.sys.exit(0); // no return
+                return true;
             } break;
 
             case SDK::MessageType::EVENT_GUI_TICK: {
@@ -79,7 +83,7 @@ void TouchGFXCommandProcessor::waitForFrameTick()
                 if (mAppLifeCycleCallback) {
                     mAppLifeCycleCallback->onFrame();
                 }
-                return; // Allow TouchGFX make frame
+                return false; // Allow TouchGFX make frame
             } break;
 
             case SDK::MessageType::EVENT_BUTTON: {
