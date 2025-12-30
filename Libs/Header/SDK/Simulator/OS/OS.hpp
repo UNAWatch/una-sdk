@@ -21,6 +21,7 @@
 
 #ifdef _WIN32
     #include <Windows.h>
+    #include <array>
 #else
     #include <semaphore.h>
     #include <ctime>
@@ -78,6 +79,79 @@ namespace OS {
     #endif
     };
 
+    template<typename T, size_t N>
+    class Queue
+    {
+    public:
+        using ValueType = T;
+
+        bool init(const char* /*name*/ = nullptr)
+        {
+            OS::MutexCS lock(mMutex);
+            mInited = true;
+            mHead = mTail = mCount = 0;
+            return true;
+        }
+
+        void deinit()
+        {
+            OS::MutexCS lock(mMutex);
+            mInited = false;
+            mHead = mTail = mCount = 0;
+        }
+
+        constexpr size_t capacity() const { return N; }
+
+        bool push(const T& item)
+        {
+            OS::MutexCS lock(mMutex);
+            if (!mInited || mCount == N) return false;
+            mBuffer[mTail] = item;
+            mTail = (mTail + 1) % N;
+            ++mCount;
+            return true;
+        }
+
+        bool pop(T& item)
+        {
+            OS::MutexCS lock(mMutex);
+            if (!mInited || mCount == 0) return false;
+            item = mBuffer[mHead];
+            mHead = (mHead + 1) % N;
+            --mCount;
+            return true;
+        }
+
+        bool empty() const
+        {
+            OS::MutexCS lock(mMutex);
+            return mCount == 0;
+        }
+
+        uint32_t size() const
+        {
+            OS::MutexCS lock(mMutex);
+            return static_cast<uint32_t>(mCount);
+        }
+
+        uint32_t available() const
+        {
+            OS::MutexCS lock(mMutex);
+            return static_cast<uint32_t>(N - mCount);
+        }
+
+        void clear()
+        {
+            OS::MutexCS lock(mMutex);
+            mHead = mTail = mCount = 0;
+        }
+
+    private:
+        mutable OS::Mutex mMutex;
+        std::array<T, N>  mBuffer{};
+        size_t mHead{ 0 }, mTail{ 0 }, mCount{ 0 };
+        bool mInited{ false };
+    };
 }
 
 #endif /* __OS_HPP */

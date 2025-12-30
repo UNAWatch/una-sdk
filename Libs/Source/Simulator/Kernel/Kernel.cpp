@@ -20,9 +20,9 @@ namespace SDK::Simulator
 
 Kernel::Kernel(const char* name, Sensors::ISensorCore* sensoreCore)
     : mSensoreCore(sensoreCore)
-	, mIsServise(mSensoreCore != nullptr)
+    , mIsServise(mSensoreCore != nullptr)
     , mName(name)
-	, mSystem()
+    , mSystem()
     , mLogger()
     , mAppMemory()
     , mFilesystem(sFsPath)
@@ -74,7 +74,7 @@ void Kernel::tick()
 bool Kernel::keyFilter(uint8_t key)
 {
     // if (stopRequest){
-	//  return false;
+    //  return false;
     // }
     // 
     // 
@@ -133,7 +133,7 @@ void* Kernel::queryInterface(SDK::Interface::IKIP::IntfID iid)
     case SDK::Interface::IKIP::IntfID::IID_SYSTEM:              return mISystem;
     case SDK::Interface::IKIP::IntfID::IID_LOGGER:              return mILogger;
     case SDK::Interface::IKIP::IntfID::IID_APP_MEMORY:          return mIAppMemory;
-        //case SDK::Interface::IKIP::IntfID::IID_APP_COMM:			return iappcomm;   
+        //case SDK::Interface::IKIP::IntfID::IID_APP_COMM:          return iappcomm;   
     case SDK::Interface::IKIP::IntfID::IID_FILESYSTEM:          return mIFilesystem;
 
     default:
