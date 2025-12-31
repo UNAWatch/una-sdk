@@ -300,6 +300,39 @@ static_assert(sizeof(std::atomic<uint32_t>) == 4, "atomic<uint32_t> must be 4 by
 static_assert(sizeof(std::atomic<bool>) == 1, "atomic<bool> must be 1 bytes");
 static_assert(sizeof(MessageBase) == 32, "MessageBase size must be 32 bytes");
 
+/**
+ * @brief ID-only message without payload
+ *
+ * Lightweight message type used when only a MessageType identifier
+ * is required and no additional payload data is needed.
+ *
+ * This class exists to support message allocation through
+ * IAppComm::allocateMessage<T>(), which requires a default-constructible
+ * message type. The actual MessageType is assigned explicitly after
+ * allocation via setType().
+ *
+ * Typical usage:
+ * - Allocate MessageID from the kernel message pool
+ * - Set the desired MessageType using setType()
+ * - Send the message through AppComm
+ *
+ * @note The default message type used in the constructor is a placeholder
+ *       and must be overridden before sending the message.
+ * @note This message does not carry any payload and is intended for
+ *       fire-and-forget or simple command-style messages.
+ */
+struct MessageID : public SDK::MessageBase
+{
+    MessageID()
+        : MessageBase(SDK::MessageType::COMMAND_APP_RUN) // Some default ID
+    {}
+
+    void setType(SDK::MessageType::Type type) noexcept
+    {
+        mMsgType = type;
+    }
+};
+
 } // namespace SDK
 
 #pragma pack(pop)

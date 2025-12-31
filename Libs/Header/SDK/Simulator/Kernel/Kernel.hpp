@@ -11,21 +11,20 @@
 
 #pragma once
 
-#include <cassert>
-#include <cstdint>
-#include <string>
-
-#include "SDK/Interfaces/IKernel.hpp"
-
 #include "SDK/Kernel/Kernel.hpp"
-
+#include "SDK/Interfaces/IKIP.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
 #include "SDK/Simulator/Kernel/Mock/AppMemory.hpp"
 #include "SDK/Simulator/Kernel/Mock/FileSystem.hpp"
 #include "SDK/Simulator/Kernel/Mock/Logger.hpp"
-
 #include "SDK/Simulator/Sensors/ISensorCore.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <string>
+#include <memory>
+
 
 namespace SDK::Simulator
 {
@@ -36,7 +35,7 @@ namespace SDK::Simulator
  * This class initializes the 'app <-> kernel' interface (IKernel), and
  * performs the basic operations required for the application to function.
  */
-class Kernel : public SDK::Interface::IKIP
+class Kernel
 {
 public:
 
@@ -51,24 +50,7 @@ public:
 
     virtual ~Kernel() = default;
 
-    SDK::Interface::IKernel* getInterface();
-
-    void reset();
-
-    /**
-     * @brief   The function should be called to execute a series of callbacks
-     *          to the user application during its loading and startup:
-     *          'onCreate()' -> 'onStart()' -> 'onResume()'
-     */
-    virtual void startApp();
-
-    /**
-     * @brief   The function should be called to execute a series of callbacks
-     *          The function should be called to execute a series of callbacks
-     *          to the user application when it completes:
-     *          'onPause()' -> 'onStop()' -> 'onDestroy()'
-     */
-    virtual void stopApp();
+    SDK::Kernel& getKernel();
 
     /**
      * @brief   The function is called synchronously before the model tick and can
@@ -91,6 +73,7 @@ public:
     void setISystem(SDK::Interface::ISystem* isystem);
     void setILogger(SDK::Interface::ILogger* ilogger);
     void setIAppMemory(SDK::Interface::IAppMemory* imem);
+    void setIAppComm(SDK::Interface::IAppComm* comm);
     void setIFileSystem(SDK::Interface::IFileSystem* ifs);
 
 protected:
@@ -100,7 +83,7 @@ protected:
 
 private:
     // IKIP
-    void* queryInterface(IntfID iid) override;
+    void* queryInterface(SDK::Interface::IKIP::IntfID iid);
 
     const char*                   mName;
 
@@ -112,12 +95,10 @@ private:
     SDK::Interface::ISystem*      mISystem;
     SDK::Interface::ILogger*      mILogger;
     SDK::Interface::IAppMemory*   mIAppMemory;
+    SDK::Interface::IAppComm*     mIAppComm;
     SDK::Interface::IFileSystem*  mIFilesystem;
 
-    //Mock::AppMemory                     mIAppComm;
-    //SDK::Interface::IAppMemory*         iappcom;
-
-    SDK::Interface::IKernel       mIKernel;      /// IKernel instance
+    std::unique_ptr<SDK::Kernel> mKernel;
 };
 
 

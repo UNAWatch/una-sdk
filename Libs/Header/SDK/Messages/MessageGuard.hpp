@@ -66,7 +66,7 @@ private:
     }
 
     const SDK::Kernel& mKernel;
-    T*           mPtr;
+    T*                 mPtr;
 };
 
 template<typename T>
@@ -74,6 +74,14 @@ MessageGuard<T> make_msg(const SDK::Kernel& kernel)
 {
     T* raw = kernel.comm.template allocateMessage<T>();
     return MessageGuard<T>(kernel, raw);
+}
+
+inline SDK::MessageGuard<MessageID> make_msg(const SDK::Kernel&     kernel,
+                                             SDK::MessageType::Type type)
+{
+    auto* raw = kernel.comm.template allocateMessage<MessageID>(); // 0 args
+    raw->setType(type);
+    return SDK::MessageGuard<MessageID>(kernel, raw);
 }
 
 } // namespace SDK

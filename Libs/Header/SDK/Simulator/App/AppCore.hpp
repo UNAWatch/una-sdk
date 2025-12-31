@@ -10,6 +10,8 @@
 
 #include <cstdint>
 
+#include "SDK/Simulator/App/AppComm.hpp"
+#include "SDK/Simulator/Kernel/Kernel.hpp"
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Simulator/App/MessageManager.hpp"
 #include "SDK/Simulator/App/KernelMessageDispatcher.hpp"
@@ -26,7 +28,9 @@ public:
     /**
      * @brief Construct message manager
      */
-    Core();
+    Core(SDK::App::Comm&         appComm,
+         SDK::Simulator::Kernel& srvKernel,
+         SDK::Simulator::Kernel& guiKernel);
 
     /**
      * @brief Destructor
@@ -36,12 +40,9 @@ public:
 	void run();
 
 private:
-    ::App::MessageManager             mMessageManager;
-	SDK::Simulator::Mock::Backlight   mBacklight;
-	SDK::Simulator::Mock::Buzzer      mBuzzer;
-	SDK::Simulator::Mock::Vibro       mVibro;
-	SDK::App::KernelMessageDispatcher mKernelMsgDispatcher;
-    SDK::App::Comm                    mAppComm;
+    SDK::App::Comm&         mAppComm;
+    SDK::Simulator::Kernel& mSrvKernel;
+    SDK::Simulator::Kernel& mGuiKernel;
 };
 
 } // namespace App

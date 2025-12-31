@@ -30,38 +30,21 @@ Kernel::Kernel(const char* name, Sensors::ISensorCore* sensoreCore)
     , mILogger(&mLogger)
     , mIAppMemory(&mAppMemory)
     , mIFilesystem(&mFilesystem)
-    , mIKernel(*this)
+    , mKernel()
 {
 }
 
-SDK::Interface::IKernel* Kernel::getInterface()
+SDK::Kernel& Kernel::getKernel()
 {
-    return &mIKernel;
-}
+    if (!mKernel) {
+        mKernel = std::make_unique<SDK::Kernel>(*((SDK::Interface::ISystem*)queryInterface(SDK::Interface::IKIP::IntfID::IID_SYSTEM)),
+                                                *((SDK::Interface::ILogger*)queryInterface(SDK::Interface::IKIP::IntfID::IID_LOGGER)),
+                                                *((SDK::Interface::IAppMemory*)queryInterface(SDK::Interface::IKIP::IntfID::IID_APP_MEMORY)),
+                                                *((SDK::Interface::IAppComm*)queryInterface(SDK::Interface::IKIP::IntfID::IID_APP_COMM)),
+                                                *((SDK::Interface::IFileSystem*)queryInterface(SDK::Interface::IKIP::IntfID::IID_FILESYSTEM)));
+    }
 
-void Kernel::reset()
-{
-    //imem->freeAll();
-}
-
-void Kernel::startApp()
-{
-    //iappmock->create();
-    //iappmock->start();
-    //if (mSrvApp) {
-    //    mSrvApp->guiState(true);
-    //}
-    //iappmock->resume();
-}
-
-void Kernel::stopApp()
-{
-    //iappmock->pause();
-    //if (mSrvApp) {
-    //    mSrvApp->guiState(false);
-    //}
-    //iappmock->stop();
-    //iappmock->destroy();
+    return *mKernel.get();
 }
 
 void Kernel::tick()
@@ -119,6 +102,13 @@ void Kernel::setIAppMemory(SDK::Interface::IAppMemory* imem)
     }
 }
 
+void Kernel::setIAppComm(SDK::Interface::IAppComm* comm)
+{
+    if (comm) {
+        mIAppComm = comm;
+    }
+}
+
 void Kernel::setIFileSystem(SDK::Interface::IFileSystem* ifs)
 {
     if (ifs) {
@@ -130,11 +120,11 @@ void Kernel::setIFileSystem(SDK::Interface::IFileSystem* ifs)
 void* Kernel::queryInterface(SDK::Interface::IKIP::IntfID iid)
 {
     switch (iid) {
-    case SDK::Interface::IKIP::IntfID::IID_SYSTEM:              return mISystem;
-    case SDK::Interface::IKIP::IntfID::IID_LOGGER:              return mILogger;
-    case SDK::Interface::IKIP::IntfID::IID_APP_MEMORY:          return mIAppMemory;
-        //case SDK::Interface::IKIP::IntfID::IID_APP_COMM:          return iappcomm;   
-    case SDK::Interface::IKIP::IntfID::IID_FILESYSTEM:          return mIFilesystem;
+    case SDK::Interface::IKIP::IntfID::IID_SYSTEM:     return mISystem;
+    case SDK::Interface::IKIP::IntfID::IID_LOGGER:     return mILogger;
+    case SDK::Interface::IKIP::IntfID::IID_APP_MEMORY: return mIAppMemory;
+    case SDK::Interface::IKIP::IntfID::IID_APP_COMM:   return mIAppComm;   
+    case SDK::Interface::IKIP::IntfID::IID_FILESYSTEM: return mIFilesystem;
 
     default:
         assert(false);

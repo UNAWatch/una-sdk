@@ -22,9 +22,7 @@
 
 #include <cstdint>
 
-
-namespace SDK
-{
+namespace SDK {
 
 /**
  * @brief Message type namespace
@@ -37,7 +35,6 @@ namespace SDK
 namespace MessageType {
     // Type alias for message type values
     using Type = uint32_t;
-
 
     // Application lifecycle commands (response expected)
     constexpr Type COMMAND_APP_RUN              = 0x01010000;
@@ -111,7 +108,6 @@ namespace MessageType {
     // Internal kernel messages (kernel subsystems only)
     constexpr Type RANGE_INTERNAL_KERNEL_MIN    = 0x80000000;
     constexpr Type RANGE_INTERNAL_KERNEL_MAX    = 0xFFFF0000;
-
 }
 
 // =============================================================================
@@ -124,7 +120,8 @@ namespace MessageType {
  * @param type Message type to check
  * @retval true if type is in application-specific range
  */
-inline bool isApplicationSpecificMessage(MessageType::Type type) {
+inline bool isApplicationSpecificMessage(MessageType::Type type)
+{
     return (type >= MessageType::RANGE_APP_SPECIFIC_MIN &&
             type <= MessageType::RANGE_APP_SPECIFIC_MAX);
 }
@@ -135,7 +132,8 @@ inline bool isApplicationSpecificMessage(MessageType::Type type) {
  * @retval true if type is in internal kernel range
  * @note Internal messages cannot be sent/received by applications
  */
-inline bool isInternalKernelMessage(MessageType::Type type) {
+inline bool isInternalKernelMessage(MessageType::Type type)
+{
     return (type >= MessageType::RANGE_INTERNAL_KERNEL_MIN &&
             type <= MessageType::RANGE_INTERNAL_KERNEL_MAX);
 }
