@@ -33,9 +33,7 @@ namespace SDK::App
          */
         ~MessageCore() = default;
 
-        SDK::App::Comm&           getAppComm();
-        SDK::Interface::IAppComm* getServiceComm();
-        SDK::Interface::IAppComm* getGuiComm();
+        SDK::App::Comm& getAppComm();
 
     private:
         ::App::MessageManager             mMessageManager;

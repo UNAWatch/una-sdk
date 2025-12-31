@@ -37,12 +37,18 @@ public:
      */
     ~Core() = default;
 
+    void stopRequest();
+
 	void run();
 
 private:
+    bool isStopRequest();
+
     SDK::App::Comm&         mAppComm;
     SDK::Simulator::Kernel& mSrvKernel;
     SDK::Simulator::Kernel& mGuiKernel;
+	volatile bool           mStopRequested;
+    OS::Mutex               mMutex;
 };
 
 } // namespace App

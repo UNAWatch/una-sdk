@@ -30,6 +30,18 @@
 
 namespace OS {
 
+    inline void Delay(uint32_t ms)
+	{
+        #ifdef _WIN32
+    		Sleep(ms);  
+        #else
+            struct timespec ts;
+            ts.tv_sec  = ms / 1000;
+            ts.tv_nsec = (ms % 1000) * 1000000;
+            nanosleep(&ts, nullptr);
+        #endif
+	}
+
     class Mutex : public SDK::Interface::IMutex
     {
     public:
@@ -100,25 +112,40 @@ namespace OS {
             mHead = mTail = mCount = 0;
         }
 
-        constexpr size_t capacity() const { return N; }
+        constexpr size_t capacity() const
+        {
+            return N;
+        }
 
         bool push(const T& item)
         {
             OS::MutexCS lock(mMutex);
-            if (!mInited || mCount == N) return false;
+
+            if (!mInited || mCount == N) {
+                return false;
+            }
+
             mBuffer[mTail] = item;
             mTail = (mTail + 1) % N;
             ++mCount;
+
             return true;
         }
 
-        bool pop(T& item)
+        bool pop(T& item, uint32_t timeoutMs = 0)
         {
+            OS::Delay(timeoutMs);
+
             OS::MutexCS lock(mMutex);
-            if (!mInited || mCount == 0) return false;
+
+            if (!mInited || mCount == 0) {
+                return false;
+            }
+
             item = mBuffer[mHead];
             mHead = (mHead + 1) % N;
             --mCount;
+
             return true;
         }
 
@@ -149,8 +176,10 @@ namespace OS {
     private:
         mutable OS::Mutex mMutex;
         std::array<T, N>  mBuffer{};
-        size_t mHead{ 0 }, mTail{ 0 }, mCount{ 0 };
-        bool mInited{ false };
+        size_t            mHead{0};
+        size_t            mTail{0};
+        size_t            mCount{0};
+        bool              mInited{false};
     };
 }
 

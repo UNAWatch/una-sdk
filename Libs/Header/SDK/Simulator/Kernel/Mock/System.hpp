@@ -8,29 +8,38 @@
 namespace SDK::Simulator::Mock
 {
 
-class System : public SDK::Interface::ISystem {
-public:
+    class SystemGUI : public SDK::Interface::ISystem {
+    public:
 
-    System() {}
-    virtual ~System() = default;
+        SystemGUI()          = default;
+        virtual ~SystemGUI() = default;
 
+        bool isAppRunning() const;
 
-    virtual void exit(int status = 0) override
+        void     exit(int status = 0) override;
+        uint32_t getTimeMs()          override;
+        void     delay(uint32_t ms)   override;
+        void     yield()              override;
+
+	private:
+		bool mAppRunning = true;
+    };
+
+    class SystemService : public SDK::Interface::ISystem
     {
-        static_cast<touchgfx::HALSDL2*>(touchgfx::HAL::getInstance())->stopApplication();
-    }
+    public:
+        SystemService()          = default;
+        virtual ~SystemService() = default;
 
-    virtual uint32_t getTimeMs() override
-    {
-        return static_cast<uint32_t>(GetTickCount64());
-    }
+        bool isAppRunning() const;
 
-    virtual void delay(uint32_t ms) override
-    {
-        Sleep(ms);
-    }
+        void     exit(int status = 0) override;
+        uint32_t getTimeMs()          override;
+        void     delay(uint32_t ms)   override;
+        void     yield()              override;
 
-    virtual void yield() override {}
-};
+    private:
+        bool mAppRunning = true;
+    };
 
 } // namespace SDK::Simulator::Mock

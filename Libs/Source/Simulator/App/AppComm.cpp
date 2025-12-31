@@ -212,8 +212,6 @@ bool Comm::InternalAppComm::sendMessage(SDK::MessageBase* msg, uint32_t timeoutM
 
 bool Comm::InternalAppComm::getMessage(SDK::MessageBase*& msg, uint32_t timeoutMs)
 {
-	(void) timeoutMs;
-
     // Service reads from Service queue, GUI reads from GUI queue
     if (mIsService) {
         return mServiceQueue.pop(msg);

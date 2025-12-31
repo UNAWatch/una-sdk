@@ -47,16 +47,20 @@ public:
      *          If not 'nullptr', the kernel will use mutexes for synchronization.
      */
     Kernel(const char* name, SDK::Simulator::Sensors::ISensorCore* sensoreCore = nullptr);
-
-    virtual ~Kernel() = default;
+    ~Kernel() = default;
 
     SDK::Kernel& getKernel();
+
+    void markAsStopped()
+    {
+        mKernelIsStopped = true;
+    }
 
     /**
      * @brief   The function is called synchronously before the model tick and can
      *          be used for kernel simulator logic.
      */
-    virtual void tick();
+    void tick();
 
     /**
      * @brief   This function allows you to send to the Model and Screens only
@@ -66,7 +70,7 @@ public:
      * @retval  'true' - if the pressed key symbol should be passed to the Model or
      *          to the Screen, 'false' - otherwise.
      */
-    virtual bool keyFilter(uint8_t key);
+    bool keyFilter(uint8_t key);
 
     std::string getFsPath();
 
@@ -79,18 +83,15 @@ public:
 protected:
     Sensors::ISensorCore* mSensoreCore;
     const bool            mIsServise;
-    //OS::Mutex             mAppMutex;
 
 private:
-    // IKIP
     void* queryInterface(SDK::Interface::IKIP::IntfID iid);
 
-    const char*                   mName;
+    const char* mName;
 
-	SDK::Simulator::Mock::System  mSystem;
-    Mock::Logger                  mLogger;
-    Mock::AppMemory               mAppMemory;
-    Mock::FileSystem              mFilesystem;
+    Mock::Logger     mLogger;
+    Mock::AppMemory  mAppMemory;
+    Mock::FileSystem mFilesystem;
 
     SDK::Interface::ISystem*      mISystem;
     SDK::Interface::ILogger*      mILogger;
@@ -99,6 +100,8 @@ private:
     SDK::Interface::IFileSystem*  mIFilesystem;
 
     std::unique_ptr<SDK::Kernel> mKernel;
+
+	volatile bool mKernelIsStopped;
 };
 
 
@@ -119,11 +122,12 @@ public:
     }
 
     /**
-     * @brief   Get the kernel instance.
+     * @brief Get the kernel instance.
      */
-    static Kernel &Get()
+    static Kernel& Get()
     {
         assert(instance() != nullptr);
+        
         return *instance();
     }
 

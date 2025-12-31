@@ -12,6 +12,7 @@
 #include "SDK/Simulator/Kernel/Kernel.hpp"
 #include "SDK/Simulator/Sensors/ISensorCore.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+#include "SDK/Interfaces/IApp.hpp"
 
 static constexpr char sFsPath[] = "../../../../../Output/";
 
@@ -22,15 +23,16 @@ Kernel::Kernel(const char* name, Sensors::ISensorCore* sensoreCore)
     : mSensoreCore(sensoreCore)
     , mIsServise(mSensoreCore != nullptr)
     , mName(name)
-    , mSystem()
     , mLogger()
     , mAppMemory()
     , mFilesystem(sFsPath)
-    , mISystem(&mSystem)
+    , mISystem(nullptr)
     , mILogger(&mLogger)
     , mIAppMemory(&mAppMemory)
+	, mIAppComm(nullptr)
     , mIFilesystem(&mFilesystem)
     , mKernel()
+	, mKernelIsStopped(false)
 {
 }
 
@@ -56,25 +58,17 @@ void Kernel::tick()
 
 bool Kernel::keyFilter(uint8_t key)
 {
-    // if (stopRequest){
-    //  return false;
-    // }
-    // 
-    // 
-    //return (!mIsServise && iappmock->getState() == Mock::App::State::RESUMED &&
-    //        (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
-    //         SDK::Interface::IApp::Button::BUTTON_L2 == key ||
-    //         SDK::Interface::IApp::Button::BUTTON_R1 == key ||
-    //         SDK::Interface::IApp::Button::BUTTON_R2 == key ||
-    //         SDK::Interface::IApp::Button::BUTTON_L1R2 == key));
-
-    return true;
+     if (mKernelIsStopped){
+        return false;
+     }
+     
+    return (!mIsServise && //iappmock->getState() == Mock::App::State::RESUMED &&
+            (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
+             SDK::Interface::IApp::Button::BUTTON_L2 == key ||
+             SDK::Interface::IApp::Button::BUTTON_R1 == key ||
+             SDK::Interface::IApp::Button::BUTTON_R2 == key ||
+             SDK::Interface::IApp::Button::BUTTON_L1R2 == key));
 }
-
-//Mock::App& Kernel::getApp()
-//{
-//    return *iappmock;
-//}
 
 std::string Kernel::getFsPath()
 {
@@ -116,7 +110,6 @@ void Kernel::setIFileSystem(SDK::Interface::IFileSystem* ifs)
     }
 }
 
-// IKIP
 void* Kernel::queryInterface(SDK::Interface::IKIP::IntfID iid)
 {
     switch (iid) {

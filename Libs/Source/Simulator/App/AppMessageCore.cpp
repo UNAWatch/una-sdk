@@ -38,14 +38,4 @@ namespace SDK::App
 		return mAppComm;
 	}
 
-	SDK::Interface::IAppComm* MessageCore::getServiceComm()
-	{
-		return mAppComm.getServiceComm();
-	}
-
-	SDK::Interface::IAppComm* MessageCore::getGuiComm()
-	{
-		return mAppComm.getGuiComm();
-	}
-
 } // namespace App
