@@ -109,5 +109,11 @@ namespace SDK::Sensor
         FUSION               = 0x00000130, ///< Fused IMU (accel+gyro+mag).
         FUSION_RAW           = 0x00000131, ///< Raw fusion inputs.
         /** @} */
+
+        /** @name Touch
+         *  @{
+         */
+        TOUCH_DETECT         = 0x00000140, ///< Touch detection, worn / unworn
+        /** @} */
     };
 }
