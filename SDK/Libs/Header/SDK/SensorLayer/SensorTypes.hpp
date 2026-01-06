@@ -59,12 +59,16 @@ namespace SDK::Sensor
         /** @} */
 
 
+        /** @name Wrist motion detect
+         *  @{
+         */
+        WRIST_MOTION         = 0x000000A0, ///< Wrist-motion event
+
         /** @name Motion / activity
          *  @{
          */
-        STATIONARY_DETECT    = 0x000000A0, ///< Stationary event (latency-tolerant).
-        MOTION_DETECT        = 0x000000B0, ///< Motion state events.
-        ACTIVITY_RECOGNITION = 0x000000C0, ///< Activity state classification.
+        MOTION_DETECT        = 0x000000B0, ///< Motion state events. NO_MOTION, MOTION, SIG_MOTION
+        ACTIVITY_RECOGNITION = 0x000000C0, ///< Activity state classification. STILL, WALKING, RUNNING, UNKNOWN
         GESTURE_RECOGNITION  = 0x000000D0, ///< Discrete gesture events.
         /** @} */
 
