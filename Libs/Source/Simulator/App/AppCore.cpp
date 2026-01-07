@@ -9,6 +9,8 @@
 #include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 
+#include <gui/common/FrontendApplication.hpp>
+
 #include <cstring>
 
 #define LOG_MODULE_PRX      "App.Core"
@@ -46,9 +48,17 @@ namespace App {
 
 			if (isStopRequest()) {
 				LOG_INFO("Stop requested, exiting application core loop...\n");
+				FrontendApplication& app = *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());
+
 				mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_GUI_SUSPEND).release());
+				
+				app.handleTickEvent();
+				
 				mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP).release());
 				mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
+				
+				app.handleTickEvent();
+				
 				mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
 				break;
 			}
