@@ -54,11 +54,11 @@ def parse_appid_64(s: str) -> int:
     return int(s, 16)
 
 def parse_semver_u32(s: str) -> int:
-    """Parse 'A.B.C' into uint32: 0x00AABBCC (A=major, B=minor, C=patch)."""
+    """Parse 'A.B.C' into uint32: 0x00AABBCC (A=major, B=minor, C=patch), allowing pre-release suffixes."""
     s = s.strip().lstrip('vV')
-    m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", s)
+    m = re.match(r"(\d+)\.(\d+)\.(\d+)", s)
     if not m:
-        raise argparse.ArgumentTypeError("Version must be in A.B.C format (e.g., 1.2.3).")
+        raise argparse.ArgumentTypeError("Version must start with A.B.C format (e.g., 1.2.3 or 1.2.3-rc1).")
     a, b, c = (int(m.group(i)) for i in (1, 2, 3))
     for v, name in [(a, "A"), (b, "B"), (c, "C")]:
         if not (0 <= v <= 255):
