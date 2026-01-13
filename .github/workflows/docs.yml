@@ -4,10 +4,10 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'Docs/**'
+      - 'docs/**'
   pull_request:
     paths:
-      - 'Docs/**'
+      - 'docs/**'
 
 permissions:
   contents: read
@@ -27,24 +27,16 @@ jobs:
       with:
         submodules: false
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
+    - name: Build with Jekyll
+      uses: actions/jekyll-build-pages@v1
       with:
-        python-version: '3.12'
-
-    - name: Install dependencies
-      run: |
-        pip install sphinx sphinx-rtd-theme myst-parser
-
-    - name: Build docs
-      run: |
-        cd Docs
-        make html
+        source: ./docs
+        destination: ./_site
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './Docs/_build/html'
+        path: './_site'
 
   deploy:
     environment:
