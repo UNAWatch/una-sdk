@@ -9,11 +9,9 @@ if [ -z "$IMPORT_PATH" ]; then
   exit 1
 fi
 
-# Clean Workspace
-WORKSPACE="${DATA_DIR:-/workspace/.vscode/workspace}"
-rm -rf "$WORKSPACE"
-mkdir -p "$WORKSPACE"
-echo "Workspace: $WORKSPACE"
+NAME="$(basename $IMPORT_PATH)"
+DATA_DIR="${GITHUB_WORKSPACE:-/workspace/}.vscode/workspace/$NAME"
+echo "Building '$NAME' in '$DATA_DIR'"
 
 # Patch __BUILD_VERSION__ in the imported project's prefs (assumes project name matches basename of IMPORT_PATH)
 PREFS_FILE="$IMPORT_PATH/.settings/org.eclipse.cdt.core.prefs"
@@ -28,7 +26,7 @@ fi
 stm32cubeide --launcher.suppressErrors -nosplash \
   -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
   -import "$IMPORT_PATH" \
-  -data "$WORKSPACE" \
+  -data "$DATA_DIR" \
   -build all \
   -vmargs -Djava.awt.headless=true
 
