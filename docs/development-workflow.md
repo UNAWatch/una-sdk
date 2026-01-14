@@ -1,6 +1,53 @@
-# App Development
+# Development Workflow
 
-This document covers the application framework and development aspects of the Una-Watch platform.
+This document outlines the complete development lifecycle for Una-Watch applications.
+
+## Workflow Stages
+
+### 1. Planning
+Before writing code, decide on your app type:
+- **Activity**: For long-running, interactive apps.
+- **Utility**: For tools like calculators or settings.
+- **Glance**: For notification-based widgets.
+- **Clockface**: For time-keeping displays.
+
+### 2. Development
+Use the SDK interfaces to build your app logic.
+- Implement the **Service process** for background tasks.
+- Implement the **GUI process** for user interaction.
+- Use **IPC messages** to communicate between them.
+
+### 3. Building
+Compile your app into an ELF binary using the provided toolchain.
+```bash
+make release
+```
+Ensure you are using the correct optimization flags for PIC execution.
+
+### 4. Testing
+- **Simulator**: Test UI and basic logic on your development machine.
+- **Unit Tests**: Write tests for individual components.
+- **Integration Tests**: Verify IPC and sensor data flow.
+
+### 5. Debugging
+- Use `ILogger` for real-time logging.
+- Set breakpoints in the simulator.
+- Use performance profiling to monitor CPU and memory usage.
+
+### 6. Packaging
+Package your ELF binary and assets into a `.uapp` container using `app_packer.py`.
+- Inject version metadata.
+- Embed app icons.
+
+### 7. Deployment
+Deploy your app to the watch via:
+- **USB**: For direct development flashing.
+- **BLE OTA**: For wireless updates.
+
+### 8. Maintenance
+- Monitor crash reports.
+- Release version updates.
+- Respond to user feedback.
 
 ## Technical Architecture Details
 
