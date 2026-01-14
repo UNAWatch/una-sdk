@@ -49,17 +49,21 @@ The app consists of two main files:
 **Service.hpp** (background logic):
 ```cpp
 class Service : public SDK::Interface::IApp::Callback {
+private:
+    SDK::Kernel& kernel;
 public:
+    Service(SDK::Kernel& k) : kernel(k) {}
+
     void run() {
-        while (!terminated) {
+        while (true) {
             // Get current time from system
-            auto time = kernel.time.getCurrentTime();
+            uint32_t now = kernel.sys.getTimeMs();
 
             // Send time update to GUI process
-            sendTimeUpdate(time);
+            sendTimeUpdate(now);
 
             // Sleep for 1 second
-            kernel.system.delay(1000);
+            kernel.sys.delay(1000);
         }
     }
 };
@@ -112,15 +116,13 @@ make flash
 
 ### Pure Machine Code Execution
 
-Your app isn't interpreted or virtualized - it's compiled to native ARM Cortex-M instructions that run directly on the MCU:
+Your app isn't interpreted or virtualized - it's compiled to native ARM Cortex-M instructions that run directly on the MCU. This provides native performance and minimal overhead.
 
 ```cpp
-// This code runs at MCU speeds with zero abstraction overhead
-void updateDisplay() {
-    // Direct register access to LCD controller
-    LCD->COMMAND = 0x2A;  // Set column address
-    LCD->DATA = x_start >> 8;
-    LCD->DATA = x_start & 0xFF;
+// High-performance direct buffer access
+void updateDisplay(const uint8_t* frameBuffer) {
+    // Write frame buffer directly via SDK interface
+    kernel.app.writeFrameBuffer(frameBuffer);
 }
 ```
 

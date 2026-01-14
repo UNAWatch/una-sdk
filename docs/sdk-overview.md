@@ -29,97 +29,101 @@ The SDK provides a comprehensive set of interfaces that apps use to interact wit
 ```cpp
 class IAppComm {
 public:
-    virtual bool allocateMessage(MessageBase*& msg, MessageType type) = 0;
-    virtual bool sendMessage(MessageBase* msg, uint32_t timeout = 0) = 0;
-    virtual bool getMessage(MessageBase*& msg, uint32_t timeout = 0) = 0;
-    virtual bool sendResponse(MessageBase* msg) = 0;
-    virtual uint32_t getPid() const = 0;
+    virtual uint32_t getProcessId() const = 0;
+    virtual bool getMessage(MessageBase*& msg, uint32_t timeoutMs = 0xFFFFFFFF) = 0;
+    virtual void sendResponse(MessageBase* msg) = 0;
+    virtual void releaseMessage(MessageBase* msg) = 0;
+    virtual bool sendMessage(MessageBase* msg, uint32_t timeoutMs = 0) = 0;
+
+    template<typename T>
+    T* allocateMessage() { ... }
 };
 ```
 
-- **Message Allocation**: Type-safe message creation from kernel pools
-- **IPC Communication**: Send/receive messages between app and kernel
-- **Process Identity**: Unique PID assignment for each app process
+- **Process Identity**: Unique process identifier assigned by kernel.
+- **Message Reception**: Receive messages with configurable timeout (blocking by default).
+- **Response Handling**: Send responses for request-response patterns.
+- **Memory Management**: Explicit message release back to kernel pool.
+- **Type-safe Allocation**: Template-based message allocation from kernel pools.
 
 #### ISystem (System Services Interface)
 
 ```cpp
 class ISystem {
 public:
-    virtual void delay(uint32_t milliseconds) = 0;
-    virtual uint32_t getBatteryLevel() const = 0;
-    virtual bool isCharging() const = 0;
-    virtual const char* getDeviceName() const = 0;
-    virtual uint32_t getFirmwareVersion() const = 0;
+    virtual void exit(int status = 0) = 0;
+    virtual uint32_t getTimeMs() = 0;
+    virtual void delay(uint32_t ms) = 0;
+    virtual void yield() = 0;
 };
 ```
 
-- **Timing**: Millisecond-precision delays
-- **Power Status**: Battery level and charging state
-- **Device Info**: Identification and version information
+- **Lifecycle**: Terminate the application with an exit status.
+- **Timing**: Get system time in milliseconds and perform millisecond-precision delays.
+- **Scheduling**: Yield execution back to the kernel.
 
 #### IFileSystem (Storage Interface)
 
 ```cpp
 class IFileSystem {
 public:
-    virtual bool open(FileHandle& handle, const char* path, FileMode mode) = 0;
-    virtual bool close(FileHandle handle) = 0;
-    virtual bool read(FileHandle handle, void* buffer, size_t size, size_t& read) = 0;
-    virtual bool write(FileHandle handle, const void* buffer, size_t size, size_t& written) = 0;
     virtual bool mkdir(const char* path) = 0;
-    virtual bool listDir(const char* path, DirEntry* entries, size_t maxEntries, size_t& count) = 0;
+    virtual std::unique_ptr<IFile> file(const char* path) = 0;
+    virtual std::unique_ptr<IDirectory> dir(const char* path) = 0;
+    virtual bool exist(const char* path) const = 0;
+    virtual bool remove(const char* path) = 0;
+    virtual bool rename(const char* oldPath, const char* newPath) = 0;
+    virtual bool copy(const char* oldPath, const char* newPath) = 0;
+    virtual bool objectInfo(const char* path, ObjectInfo& item) const = 0;
 };
 ```
 
-- **Multi-Volume Support**: Access to internal flash (0:/), external storage (1:/), USB (2:/)
-- **File Operations**: Standard read/write/seek operations
-- **Directory Management**: Create directories, list contents
+- **Object-Oriented API**: Uses `IFile` and `IDirectory` objects for file and directory operations.
+- **Path Management**: Support for internal flash (`0:/`), external storage (`1:/`), and USB (`2:/`).
+- **File Operations**: Standard read/write/seek via `IFile` interface.
+- **Metadata**: Retrieve object information (size, type, timestamps).
 
 #### ILogger (Debugging Interface)
 
 ```cpp
 class ILogger {
 public:
-    virtual void log(LogLevel level, const char* format, ...) = 0;
-    virtual void logTimestamp(LogLevel level, const char* format, ...) = 0;
+    virtual void printf(const char *format, ...) = 0;
+    virtual void vprintf(const char *format, va_list args) = 0;
+    virtual void mvprintf(const char *level, const char *module_name,
+                         const char *func, int line, const char *fmt, va_list args) = 0;
 };
 ```
 
-- **Log Levels**: Error, Warning, Info, Debug
-- **Timestamp Integration**: Automatic timestamping with system time
-- **Formatted Output**: printf-style logging
+- **Formatted Output**: Standard `printf`-style logging.
+- **Metadata Support**: Log with level, module name, function, and line number.
 
 #### ISensorManager (Sensor Interface)
 
 ```cpp
 class ISensorManager {
 public:
-    virtual bool requestDefaultSensor(SensorType type, SensorHandle& handle) = 0;
-    virtual bool connectSensor(SensorHandle handle, uint32_t periodMs, uint32_t latencyUs = 0) = 0;
-    virtual bool disconnectSensor(SensorHandle handle) = 0;
-    virtual bool getSensorData(SensorHandle handle, SensorData& data) = 0;
+    virtual SDK::Interface::ISensorDriver* getDefaultSensor(SDK::Sensor::Type type) = 0;
+    virtual std::vector<SDK::Interface::ISensorDriver*> getSensorList(SDK::Sensor::Type type) = 0;
 };
 ```
 
-- **Sensor Discovery**: Automatic sensor enumeration by type
-- **Connection Management**: Configurable sampling periods and latency
-- **Data Access**: Type-safe sensor data retrieval
+- **Sensor Discovery**: Retrieve default sensors or a list of available sensors by type.
+- **Driver-based Access**: Interact with sensors via the `ISensorDriver` interface.
 
-#### IGlance (Notification Interface)
+#### IGlance (Glance Application Interface)
 
 ```cpp
 class IGlance {
 public:
-    virtual void showNotification(const char* title, const char* message, uint32_t durationMs = 3000) = 0;
-    virtual void updateProgress(uint8_t percentage) = 0;
-    virtual void hideNotification() = 0;
+    virtual Info glanceGetInfo() = 0;
+    virtual void glanceUpdate()  = 0;
+    virtual void glanceClose()   = 0;
 };
 ```
 
-- **Notification Display**: 240x60 pixel notification area
-- **Progress Indication**: Visual progress bars
-- **Auto-dismiss**: Configurable display duration
+- **Lifecycle Management**: Methods for initializing, updating, and closing glance views.
+- **Meta-information**: Retrieve control information and alternative names for the glance.
 
 ### Message System Architecture
 
@@ -127,33 +131,39 @@ public:
 
 The SDK uses a structured message system for inter-process communication:
 
-| Range | Type | Purpose | Response |
-|-------|------|---------|----------|
-| 0x0000-0x0FFF | Events | Fire-and-forget notifications | No |
-| 0x1000-0x1FFF | Requests | Synchronous calls | Yes |
-| 0x2000-0x2FFF | Responses | Request acknowledgments | No |
-| 0x3000-0x3FFF | Commands | Kernel directives | Yes |
+| Range | Type | Purpose |
+|-------|------|---------|
+| 0x01010000 - 0x01060000 | Commands | Kernel-to-app directives (response expected) |
+| 0x01070000 - 0x01090000 | App Control | App-to-kernel lifecycle requests |
+| 0x02010000 - 0x020A0000 | System/Hardware | Requests for system info, display, backlight, etc. |
+| 0x03010000 - 0x03040000 | Events | System-level notifications (fire-and-forget) |
+| 0x030A0000 - 0x030E0000 | Glances | Glance-specific updates and events |
+| 0x03100000 - 0x03180000 | Sensors | Sensor discovery and data events |
+| 0x00000000 - 0x0000FFFF | Custom | Application-specific internal communication |
 
 #### Key System Messages
 
 ```cpp
-// System Requests
-REQUEST_SYSTEM_SETTINGS      // Get watch settings
+// Application Control
+COMMAND_APP_RUN              // Start application
+COMMAND_APP_STOP             // Stop application
+REQUEST_APP_TERMINATE        // App requesting its own termination
+
+// System Info & Settings
 REQUEST_BATTERY_STATUS       // Get battery level
+REQUEST_SYSTEM_SETTINGS      // Get watch settings
+REQUEST_SYSTEM_INFO          // Get firmware version, device name
+
+// Hardware Control
 REQUEST_DISPLAY_CONFIG       // Get screen dimensions
 REQUEST_BACKLIGHT_SET        // Set screen brightness
-REQUEST_GLANCE_CONFIG        // Get glance area size
+REQUEST_VIBRO_PLAY           // Trigger vibration
+REQUEST_BUZZER_PLAY          // Trigger sound
 
 // Sensor Messages
-REQUEST_SENSOR_DEFAULT       // Request default sensor
-REQUEST_SENSOR_CONNECT       // Connect to sensor
-REQUEST_SENSOR_DISCONNECT    // Disconnect from sensor
-
-// File System Messages
-REQUEST_FILE_OPEN           // Open file
-REQUEST_FILE_READ           // Read file data
-REQUEST_FILE_WRITE          // Write file data
-REQUEST_DIR_LIST            // List directory contents
+REQUEST_SENSOR_LAYER_GET_DEFAULT // Request default sensor
+REQUEST_SENSOR_LAYER_CONNECT     // Start sensor sampling
+EVENT_SENSOR_LAYER_DATA          // Asynchronous sensor data update
 ```
 
 #### Message Processing Pattern
@@ -162,21 +172,24 @@ REQUEST_DIR_LIST            // List directory contents
 // App message handling loop
 void Service::run() {
     MessageBase* msg = nullptr;
-    while (getMessage(msg, 100)) {  // 100ms timeout
-        std::visit([this](auto&& arg) {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, SystemRequest>) {
-                handleSystemRequest(arg);
-            } else if constexpr (std::is_same_v<T, SensorData>) {
-                handleSensorData(arg);
-            }
+    while (comm->getMessage(msg, 100)) {  // 100ms timeout
+        switch (msg->getType()) {
+            case MessageType::EVENT_SENSOR_LAYER_DATA:
+                handleSensorData(static_cast<SensorDataEvent*>(msg));
+                break;
+            case MessageType::COMMAND_APP_STOP:
+                handleStopCommand(static_cast<StopCommand*>(msg));
+                break;
             // ... other message types
-        }, msg->data);
+        }
 
         // Send response if required
-        if (msg->expectsResponse()) {
-            sendResponse(createResponse(msg));
+        if (msg->needsResponse()) {
+            comm->sendResponse(msg);
         }
+
+        // Always release message when done
+        comm->releaseMessage(msg);
     }
 }
 ```

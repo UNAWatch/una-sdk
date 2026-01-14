@@ -100,25 +100,27 @@ void gui_main() {
 ```cpp
 class HeartRateService : public SDK::Interface::IApp::Callback {
 private:
-    SDK::KernelProviderService kernel;
+    SDK::Kernel& kernel;
 
     // Core interfaces
     SDK::Interface::IAppComm* comm;
     SDK::Interface::ISystem* system;
-    SDK::Interface::ISensorManager* sensors;
     SDK::Interface::IFileSystem* storage;
     SDK::Interface::ILogger* logger;
 
-public:
-    HeartRateService()
-        : kernel(SDK::KernelProviderService::GetInstance()) {
+    // Sensor connection
+    SDK::Sensor::Connection hrSensor;
 
-        // Get interface pointers
-        comm = kernel.comm;
-        system = kernel.system;
-        sensors = kernel.sensors;
-        storage = kernel.storage;
-        logger = kernel.logger;
+public:
+    HeartRateService(SDK::Kernel& k)
+        : kernel(k)
+        , hrSensor(SDK::Sensor::Type::HEART_RATE, 1000.0f) { // 1000ms period
+
+        // Get interface pointers from kernel facade
+        comm = &kernel.comm;
+        system = &kernel.sys;
+        storage = &kernel.fs;
+        logger = &kernel.log;
     }
 };
 ```
@@ -127,27 +129,13 @@ public:
 
 ```cpp
 bool initializeSensor() {
-    // Request default heart rate sensor
-    SDK::Sensor::Handle sensorHandle;
-    auto result = sensors->requestDefaultSensor(
-        SDK::Sensor::Type::HEART_RATE,
-        sensorHandle
-    );
-
-    if (!result) {
-        logger->log(SDK::LogLevel::ERROR,
-                   "Failed to get heart rate sensor");
+    // Connect to default heart rate sensor
+    if (!hrSensor.connect()) {
+        logger->printf("Failed to connect heart rate sensor\n");
         return false;
     }
 
-    // Configure sensor with 1Hz sampling
-    result = sensors->connectSensor(sensorHandle, 1000, 0);
-    if (!result) {
-        logger->log(SDK::LogLevel::ERROR,
-                   "Failed to connect heart rate sensor");
-        return false;
-    }
-
+    logger->printf("Heart rate sensor connected successfully\n");
     return true;
 }
 ```
@@ -160,18 +148,22 @@ void run() {
         return;  // Fatal error
     }
 
-    while (!shouldTerminate()) {
-        // Get sensor data
-        SDK::Sensor::Data sensorData;
-        if (sensors->getSensorData(sensorHandle, sensorData)) {
-            processHeartRateReading(sensorData);
+    while (true) {
+        // Process messages from kernel
+        SDK::MessageBase* msg = nullptr;
+        if (comm->getMessage(msg, 100)) {
+            handleMessage(msg);
+            comm->releaseMessage(msg);
         }
+    }
+}
 
-        // Send updates to GUI every second
-        sendUpdateToGui();
-
-        // Sleep to conserve power
-        system->delay(1000);
+void handleMessage(SDK::MessageBase* msg) {
+    if (msg->getType() == SDK::MessageType::EVENT_SENSOR_LAYER_DATA) {
+        auto* dataEvent = static_cast<SDK::Message::Sensor::EventData*>(msg);
+        if (hrSensor.matchesDriver(dataEvent->handle)) {
+            processHeartRateReading(dataEvent->data[0]);
+        }
     }
 }
 ```
@@ -181,33 +173,12 @@ void run() {
 **Heart Rate Algorithm:**
 
 ```cpp
-struct HeartRateReading {
-    uint16_t bpm;
-    uint8_t confidence;  // 0-100%
-    uint32_t timestamp;
-    bool isValid;
-};
-
 void processHeartRateReading(const SDK::Sensor::Data& rawData) {
-    // Extract PPG sensor data
-    auto& ppgData = static_cast<const SDK::Sensor::PPGData&>(rawData);
-
-    // Apply heart rate algorithm
-    HeartRateReading reading = heartRateAlgorithm.process(ppgData);
-
-    // Validate reading quality
-    if (reading.confidence < 70) {
-        logger->log(SDK::LogLevel::WARN,
-                   "Low confidence heart rate reading: %d%%",
-                   reading.confidence);
-        return;
-    }
+    // Extract heart rate value (assuming HEART_RATE type)
+    float bpm = rawData.value;
 
     // Store reading
-    storeReading(reading);
-
-    // Check for abnormal readings
-    checkAbnormalReading(reading);
+    storeReading(bpm);
 }
 ```
 
@@ -216,30 +187,25 @@ void processHeartRateReading(const SDK::Sensor::Data& rawData) {
 **Store Readings in Flash:**
 
 ```cpp
-bool storeReading(const HeartRateReading& reading) {
-    // Open storage file (internal flash: 0:/heart-data.bin)
-    SDK::FileHandle file;
-    auto result = storage->open(file, "0:/heart-data.bin",
-                               SDK::FileMode::APPEND);
+bool storeReading(float bpm) {
+    // Create file object
+    auto file = storage->file("0:/heart-data.bin");
 
-    if (!result) {
-        logger->log(SDK::LogLevel::ERROR,
-                   "Failed to open heart rate data file");
+    // Open for append
+    if (!file->open(true, false)) {
+        logger->printf("Failed to open heart rate data file\n");
         return false;
     }
 
-    // Write reading as CBOR
-    SDK::CBOR::Writer writer;
-    writer.write("bpm", reading.bpm);
-    writer.write("confidence", reading.confidence);
-    writer.write("timestamp", reading.timestamp);
+    // Move to end for append
+    file->seek(file->size());
 
+    // Write reading
     size_t written;
-    result = storage->write(file, writer.getBuffer(),
-                           writer.getSize(), written);
+    bool result = file->write(reinterpret_cast<const char*>(&bpm), sizeof(bpm), written);
 
-    storage->close(file);
-    return result && (written == writer.getSize());
+    file->close();
+    return result && (written == sizeof(bpm));
 }
 ```
 
@@ -249,28 +215,21 @@ bool storeReading(const HeartRateReading& reading) {
 
 ```cpp
 void sendUpdateToGui() {
-    // Allocate message from kernel pool
-    SDK::Message::HeartRateUpdate* msg = nullptr;
-    auto result = comm->allocateMessage(msg,
-                                       SDK::Message::Type::HEART_RATE_UPDATE);
+    // Allocate message using the modern make_msg helper
+    auto msg = SDK::make_msg<SDK::Message::HeartRateUpdate>(kernel);
 
-    if (!result || !msg) {
-        logger->log(SDK::LogLevel::ERROR,
-                   "Failed to allocate GUI update message");
+    if (!msg) {
+        logger->printf("Failed to allocate GUI update message\n");
         return;
     }
 
     // Fill message data
     msg->currentBPM = currentBPM;
     msg->averageBPM = calculateAverage();
-    msg->status = sensorStatus;
 
-    // Send to GUI process
-    result = comm->sendMessage(msg, 100);  // 100ms timeout
-
-    if (!result) {
-        logger->log(SDK::LogLevel::WARN,
-                   "Failed to send GUI update, queue full?");
+    // Send to GUI process with 100ms timeout
+    if (!msg.send(100)) {
+        logger->printf("Failed to send GUI update, queue full?\n");
     }
 }
 ```
@@ -284,29 +243,13 @@ void sendUpdateToGui() {
 ```cpp
 class HeartRateGui : public TouchGFX::Application {
 private:
-    SDK::KernelProviderGUI kernel;
+    SDK::Kernel& kernel;
     SDK::Interface::IAppComm* comm;
-
-    // UI Components
-    TouchGFX::TextArea bpmText;
-    TouchGFX::Image heartIcon;
-    TouchGFX::ProgressBar confidenceBar;
 
 public:
     HeartRateGui()
-        : kernel(SDK::KernelProviderGUI::GetInstance()) {
-        comm = kernel.comm;
-    }
-
-    void setupScreen() {
-        // Initialize UI components
-        add(bpmText);
-        add(heartIcon);
-        add(confidenceBar);
-
-        // Set initial values
-        bpmText.setText("--- BPM");
-        confidenceBar.setValue(0);
+        : kernel(SDK::KernelProviderGUI::GetInstance().getKernel()) {
+        comm = &kernel.comm;
     }
 };
 ```
@@ -316,28 +259,17 @@ public:
 **Receive Updates from Service:**
 
 ```cpp
-bool getMessage(SDK::Message::Base*& msg, uint32_t timeout) {
-    return comm->getMessage(msg, timeout);
-}
-
-void handleMessage(const SDK::Message::Base* msg) {
-    switch (msg->type) {
-        case SDK::Message::Type::HEART_RATE_UPDATE: {
-            auto* update = static_cast<const SDK::Message::HeartRateUpdate*>(msg);
-            updateDisplay(update);
-            break;
+void handleMessages() {
+    SDK::MessageBase* msg = nullptr;
+    while (comm->getMessage(msg, 0)) { // Non-blocking
+        switch (msg->getType()) {
+            case SDK::MessageType::HEART_RATE_UPDATE: {
+                auto* update = static_cast<SDK::Message::HeartRateUpdate*>(msg);
+                updateDisplay(update);
+                break;
+            }
         }
-
-        case SDK::Message::Type::SENSOR_STATUS_CHANGE: {
-            auto* status = static_cast<const SDK::Message::SensorStatus*>(msg);
-            updateSensorStatus(status);
-            break;
-        }
-    }
-
-    // Send response if required
-    if (msg->expectsResponse()) {
-        comm->sendResponse(nullptr);  // Ack message
+        comm->releaseMessage(msg);
     }
 }
 ```

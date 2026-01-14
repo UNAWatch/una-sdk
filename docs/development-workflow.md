@@ -187,9 +187,9 @@ graph TD
     end
 
     subgraph "Message Classification"
-        EVENTS[Events<br/>0x0000-0x0FFF<br/>Fire-and-forget]
-        REQUESTS[Requests<br/>0x1000-0x1FFF<br/>With Response]
-        COMMANDS[Commands<br/>0x3000-0x3FFF<br/>With Confirmation]
+        EVENTS[Events<br/>0x03010000-0x03040000<br/>Fire-and-forget]
+        REQUESTS[Requests<br/>0x01070000-0x020A0000<br/>With Response]
+        COMMANDS[Commands<br/>0x01010000-0x01060000<br/>With Confirmation]
     end
 
     subgraph "Processing Pipeline"
@@ -387,33 +387,36 @@ stateDiagram-v2
 ### Message System Architecture
 
 **Message Type Ranges:**
-- **Events** (0x0000-0x0FFF): Fire-and-forget notifications
-- **Requests** (0x1000-0x1FFF): Synchronous calls with responses
-- **Commands** (0x3000-0x3FFF): Kernel directives requiring confirmation
+- **Custom/App-specific** (0x00000000-0x0000FFFF): Application-specific internal communication
+- **Commands** (0x01010000-0x01060000): Kernel-to-app directives (response expected)
+- **Requests** (0x01070000-0x020A0000): App-to-kernel lifecycle and hardware requests
+- **Events** (0x03010000-0x03040000): System-level notifications (fire-and-forget)
+- **Sensors** (0x03100000-0x03180000): Sensor discovery and data events
 
 **Key System Messages:**
 ```cpp
-REQUEST_SYSTEM_SETTINGS      // Get watch settings
 REQUEST_BATTERY_STATUS       // Get battery level
-REQUEST_DISPLAY_CONFIG       // Get screen dimensions
+REQUEST_SYSTEM_SETTINGS      // Get watch settings
+REQUEST_DISPLAY_CONFIG       // Get screen dimensions (GUI only)
 REQUEST_BACKLIGHT_SET        // Set screen brightness
-REQUEST_GLANCE_CONFIG        // Get glance area size
+REQUEST_SENSOR_LAYER_CONNECT // Start sensor sampling
 ```
 
 ### Sensor Layer Integration
 
 **Sensor Access Pattern:**
 ```cpp
-// Request default sensor
-auto* req = comm->allocateMessage<SDK::Message::Sensor::RequestDefault>();
-req->id = SDK::Sensor::Type::HEART_RATE;
-comm->sendMessage(req, 1000);
+// Modern way using SDK::Sensor::Connection wrapper
+SDK::Sensor::Connection hrSensor(SDK::Sensor::Type::HEART_RATE, 1000.0f);
+hrSensor.connect();
 
-// Connect to sensor
-auto* connect = comm->allocateMessage<SDK::Message::Sensor::RequestConnect>();
-connect->handle = sensorHandle;
-connect->period = 100;  // 100ms sampling
-comm->sendMessage(connect, 1000);
+// Manual way using messages
+auto msg = SDK::make_msg<SDK::Message::Sensor::RequestDefault>(kernel);
+msg->id = SDK::Sensor::Type::HEART_RATE;
+if (msg.send(100) && msg.ok()) {
+    uint32_t handle = msg->handle;
+    // ... use handle to connect
+}
 ```
 
 #### Sensor Data Flow Architecture
@@ -497,16 +500,27 @@ AppName/
 ```cpp
 class Service : public SDK::Interface::IApp::Callback,
                 public SDK::Interface::IGlance {
+private:
+    SDK::Kernel& mKernel;
+    bool mTerminate = false;
+
 public:
-    Service() : mKernel(SDK::KernelProviderService::GetInstance().getKernel()) {
-        // Initialize kernel interfaces
-        mKernel.app.registerGlance(this);
+    Service(SDK::Kernel& kernel) : mKernel(kernel) {
+        // Register this instance as a lifecycle callback
+        // Note: IApp interface must be queried via IKIP if not passed directly
     }
 
     void run() {
         while (!mTerminate) {
             // Main service loop
-            mKernel.system.delay(1000);
+            mKernel.sys.delay(1000);
+
+            // Handle messages
+            SDK::MessageBase* msg = nullptr;
+            if (mKernel.comm.getMessage(msg, 0)) {
+                // ... handle message
+                mKernel.comm.releaseMessage(msg);
+            }
         }
     }
 
