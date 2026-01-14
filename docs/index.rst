@@ -379,14 +379,20 @@ Migration Guide
 - **Upgrade Tools**: Automated migration scripts
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
    README-Kernel.md
+   README-SDK.md
    README-Apps.md
 
 Indices and tables
 ==================
+
+API Reference
+=============
+
+.. doxygenindex::
 
 * :ref:`genindex`
 * :ref:`modindex`

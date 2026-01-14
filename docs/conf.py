@@ -26,7 +26,15 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'myst_parser',
+    'sphinxcontrib.mermaid',
+    'breathe',
 ]
+
+# Breathe configuration
+breathe_projects = {
+    "SDK": "_build/doxygen/xml"
+}
+breathe_default_project = "SDK"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
