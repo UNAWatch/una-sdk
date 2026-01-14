@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    KernelBase.hpp
+ * @file    KernelBase.cpp
  * @date    05-04-2025
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
  * @brief   The base class of the kernel simulator.

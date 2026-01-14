@@ -104,11 +104,6 @@ uint16_t* TouchGFXHAL::getTFTFrameBuffer() const
     return (uint16_t*)spActiveBuffer;
 }
 
-/**
- * Sets the frame buffer address used by the TFT controller.
- *
- * @param [in] address New frame buffer address.
- */
 void TouchGFXHAL::setTFTFrameBuffer(uint16_t* address)
 {
     // Calling parent implementation of setTFTFrameBuffer(uint16_t* address).
@@ -120,13 +115,6 @@ void TouchGFXHAL::setTFTFrameBuffer(uint16_t* address)
     spActiveBuffer = (uint8_t*)address;
 }
 
-/**
- * This function is called whenever the framework has performed a partial draw.
- *
- * @param rect The area of the screen that has been drawn, expressed in absolute coordinates.
- *
- * @see flushFrameBuffer().
- */
 void TouchGFXHAL::flushFrameBuffer(const touchgfx::Rect& rect)
 {
     // Calling parent implementation of flushFrameBuffer(const touchgfx::Rect& rect).

@@ -65,7 +65,7 @@ public:
     /**
      * @brief Query a kernel interface by identifier.
      *
-     * @param iid  The interface identifier (see @ref IKIP::IntfID).
+     * @param iid  The interface identifier (see @ref IntfID).
      * @return     A non-owning pointer to the requested interface, or @c nullptr
      *             if the interface is unavailable.
      *

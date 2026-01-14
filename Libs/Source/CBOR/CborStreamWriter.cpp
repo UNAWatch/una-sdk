@@ -232,8 +232,9 @@ CborEncoder* CborStreamWriter::currentEncoder()
 
 // Output a block of data
 CborError CborStreamWriter::WriteCallback(void *context, const void *data,
-        size_t len, CborEncoderAppendType)
+        size_t len, CborEncoderAppendType type)
 {
+    (void)type;
     CborStreamWriter *self = static_cast<CborStreamWriter*>(context);
     size_t written = 0;
     self->out->write(static_cast<const char*>(data), len, written);

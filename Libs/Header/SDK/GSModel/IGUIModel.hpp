@@ -13,7 +13,7 @@
  *          Implementations keep non-owning pointers to the GUI kernel facade
  *          and the GUI handler, both of which are provided via
  *          @ref IGUIModel::setGUIHandler and must outlive any calls to
- *          @ref IGUIModel::checkS2GEvents.
+ *          @ref IGUIModel::process.
  ******************************************************************************
  */
 
@@ -53,7 +53,7 @@ public:
      * @param handler Pointer to the GUI handler implementation (non-owning).
      *
      * @pre  @p kernel and (if non-null) @p handler must remain valid for as long
-     *       as @ref checkS2GEvents may be invoked.
+     *       as @ref process may be invoked.
      */
     virtual void setGUIHandler(const SDK::Kernel* kernel, IGUIModelHandler* handler) = 0;
 

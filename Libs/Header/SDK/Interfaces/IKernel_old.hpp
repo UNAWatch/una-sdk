@@ -6,13 +6,13 @@
  * @brief   Kernel interface for dynamic service discovery.
  * @details This header defines the @c IKernel interface used to obtain pointers
  *          to subsystem interfaces (e.g., power, settings, filesystem) at run time.
- *          Services are addressed via the @ref IKernel::IntfID enumeration and
- *          retrieved through a COM-style @ref IKernel::queryInterface method.
+ *          Services are addressed via the `SDK::Interface::IKIP::IntfID` enumeration and
+ *          retrieved through a COM-style `SDK::Interface::IKIP::queryInterface` method.
  *
  * @note    Returned pointers are borrowed (non-owning) and remain valid as long
  *          as the underlying kernel instance and the corresponding service exist.
- *          Callers must cast the returned @c void* back to the requested interface
- *          type that matches the provided @ref IKernel::IntfID.
+ *          Callers must cast the returned `void*` back to the requested interface
+ *          type that matches the provided `SDK::Interface::IKIP::IntfID`.
  ******************************************************************************
  *
  ******************************************************************************

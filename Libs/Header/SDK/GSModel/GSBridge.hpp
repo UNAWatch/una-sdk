@@ -117,7 +117,7 @@ public:
      * @param handler Pointer to the GUI handler that will receive dispatched events.
      *
      * @pre  @p kernel and @p handler (if non‑null) must remain valid for as long
-     *       as @ref checkS2GEvents() may be called.
+     *       as @ref process() may be called.
      */
     void setGUIHandler(const SDK::Kernel* kernel, IGUIModelHandler* handler) override
     {

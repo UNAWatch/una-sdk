@@ -56,8 +56,6 @@ public:
     virtual void initialize();
 
     /**
-     * @fn virtual void TouchGFXHAL::disableInterrupts();
-     *
      * @brief Disables the DMA and LCD interrupts.
      *
      *        Disables the DMA and LCD interrupts.
@@ -65,8 +63,6 @@ public:
     virtual void disableInterrupts();
 
     /**
-     * @fn virtual void TouchGFXHAL::enableInterrupts();
-     *
      * @brief Enables the DMA and LCD interrupts.
      *
      *        Enables the DMA and LCD interrupts.
@@ -74,8 +70,6 @@ public:
     virtual void enableInterrupts();
 
     /**
-     * @fn virtual void TouchGFXHAL::configureInterrupts();
-     *
      * @brief Sets the DMA and LCD interrupt priorities.
      *
      *        Sets the DMA and LCD interrupt priorities.
@@ -83,8 +77,6 @@ public:
     virtual void configureInterrupts();
 
     /**
-     * @fn virtual void TouchGFXHAL::enableLCDControllerInterrupt();
-     *
      * @brief Configure the LCD controller to fire interrupts at VSYNC.
      *
      *        Configure the LCD controller to fire interrupts at VSYNC. Called automatically
@@ -97,8 +89,6 @@ public:
     virtual void endFrame();
 
     /**
-     * @fn virtual void TouchGFXHAL::flushFrameBuffer();
-     *
      * @brief This function is called whenever the framework has performed a complete draw.
      *
      * This specialization is only in place to keep compilers happy. Base impl. will call the
@@ -111,8 +101,6 @@ public:
     }
 
     /**
-     * @fn virtual void TouchGFXHAL::flushFrameBuffer(const Rect& rect);
-     *
      * @brief This function is called whenever the framework has performed a partial draw.
      *
      *        This function is called whenever the framework has performed a partial draw.
@@ -126,8 +114,6 @@ public:
     virtual void flushFrameBuffer(const touchgfx::Rect& rect);
 
     /**
-     * @fn virtual bool TouchGFXHAL::blockCopy(void* RESTRICT dest, const void* RESTRICT src, uint32_t numBytes);
-     *
      * @brief This function performs a platform-specific memcpy.
      *
      *        This function performs a platform-specific memcpy, if supported by the hardware.
@@ -142,8 +128,6 @@ public:
 
 protected:
     /**
-     * @fn virtual uint16_t* TouchGFXHAL::getTFTFrameBuffer() const;
-     *
      * @brief Gets the frame buffer address used by the TFT controller.
      *
      *        Gets the frame buffer address used by the TFT controller.
@@ -153,15 +137,13 @@ protected:
     virtual uint16_t* getTFTFrameBuffer() const;
 
     /**
-     * @fn virtual void TouchGFXHAL::setTFTFrameBuffer(uint16_t* adr);
-     *
      * @brief Sets the frame buffer address used by the TFT controller.
      *
      *        Sets the frame buffer address used by the TFT controller.
      *
-     * @param [in,out] adr New frame buffer address.
+     * @param [in,out] address New frame buffer address.
      */
-    virtual void setTFTFrameBuffer(uint16_t* adr);
+    virtual void setTFTFrameBuffer(uint16_t* address);
 };
 
 /* USER CODE END TouchGFXHAL.hpp */
