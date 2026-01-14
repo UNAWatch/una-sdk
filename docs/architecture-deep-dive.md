@@ -1,6 +1,47 @@
-# Kernel Architecture
+# Architecture Deep Dive
 
-This document covers the kernel/firmware implementation details of the Una-Watch platform.
+This document explains the technical magic that enables the Una-Watch platform.
+
+## Core Concepts
+
+### Pure Machine Code Execution
+Una-Watch apps are not interpreted or virtualized. They are compiled ARM Cortex-M ELF binaries that execute directly in the MCU memory. This provides:
+- **Native Performance**: Zero abstraction overhead.
+- **Direct Hardware Access**: Apps can interact with peripherals at MCU speeds.
+- **Efficiency**: Minimal memory and CPU footprint.
+
+### Position-Independent Code (PIC)
+To allow apps to be loaded at any memory address without re-linking, the SDK uses Position-Independent Code.
+- **Kernel Abstraction**: Apps are completely abstracted from the kernel's memory layout.
+- **Dynamic Loading**: The kernel can load, run, and unload apps on demand.
+- **Process Isolation**: Ensures that apps do not interfere with each other or the kernel.
+
+### Shared libc Integration
+Una-Watch implements a shared libc architecture to save memory.
+- **Common Base**: All apps share the same standard library implementation provided by the kernel.
+- **Reduced Footprint**: Significant reduction in the size of each `.uapp` file.
+- **C++ Support**: Full support for modern C++ features (strings, vectors, etc.) via the shared library.
+
+### Dual-Process Model
+Every Una-Watch app consists of two distinct components:
+1. **Service Process**: Handles background logic, sensors, and BLE.
+2. **GUI Process**: Handles user interface and interaction.
+
+### IPC Mechanisms
+Communication between processes is handled via a high-performance message-passing system.
+- **Kernel Pools**: Messages are allocated from pre-defined kernel memory pools.
+- **Type-Safe**: Messages are strongly typed using C++ structures.
+- **Asynchronous**: Non-blocking message exchange for smooth UI performance.
+
+### Memory Management
+- **Pool Allocation**: Prevents heap fragmentation in long-running applications.
+- **RAII Patterns**: Automatic resource cleanup using modern C++ practices.
+- **Protected Regions**: Memory regions are protected to prevent unauthorized access.
+
+### Power Management
+- **Deep Sleep**: The kernel automatically enters low-power modes when idle.
+- **Wake Sources**: Apps can define specific wake sources (timers, sensors, buttons).
+- **Battery Optimization**: Adaptive sampling rates and event-driven design.
 
 ## Technical Architecture Details
 

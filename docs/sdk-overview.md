@@ -1,22 +1,26 @@
 # SDK Overview
 
-This document covers the Software Development Kit (SDK) for developing applications on the Una-Watch platform.
+The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications.
 
-## SDK Overview
+## Key Components
 
-The Una-Watch SDK provides all the necessary tools, libraries, and interfaces for developing third-party applications that run on the watch. The SDK includes:
+- **Core Interfaces**: Type-safe APIs for system services, communication, and hardware access.
+- **Message System**: High-performance inter-process communication (IPC) framework.
+- **Sensor APIs**: Simplified access to PPG, IMU, and GNSS sensors.
+- **File System**: Multi-volume storage management (Flash, USB, External).
+- **Build Tools**: Automated scripts for compilation and `.uapp` packaging.
+- **Simulator**: Desktop-based environment for rapid prototyping and testing.
 
-- **Core Interfaces**: Type-safe APIs for system services, communication, and hardware access
-- **Message System**: Inter-process communication framework
-- **Sensor APIs**: Hardware sensor integration
-- **File System**: Multi-volume storage access
-- **Build Tools**: Scripts for packaging and deployment
-- **Simulator**: Development environment for testing apps
-- **Third-party Libraries**: Integrated dependencies
+## Unique Architecture
 
-## SDK Architecture
+Una-Watch apps are unique in the wearable space:
+- **Pure Machine Code**: Compiled binaries running directly on the MCU.
+- **Position Independent**: Abstracted from kernel memory layout.
+- **Shared libc**: Memory-efficient standard library utilization.
 
-### Core Interfaces
+For a deeper look into how this works, see the [Architecture Deep Dive](architecture-deep-dive.md).
+
+## SDK Project Structure
 
 The SDK provides a comprehensive set of interfaces that apps use to interact with the watch's kernel and hardware:
 
