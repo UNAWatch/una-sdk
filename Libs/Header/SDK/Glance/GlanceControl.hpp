@@ -160,7 +160,6 @@ namespace SDK::Glance {
 
         /**
          * @brief Mark the form valid.
-         * @return True The form needs to be redraw.
          */
         void setValid()
         {
@@ -213,7 +212,7 @@ namespace SDK::Glance {
          * @param t The type tag to place into the new `GlanceControl_t`.
          * @return The index of the newly appended element (0-based).
          *
-         * @complexity Amortized O(1). May trigger reallocation when capacity grows.
+         * @note Complexity: Amortized O(1). May trigger reallocation when capacity grows.
          */
         std::size_t append(GlanceType_t t)
         {

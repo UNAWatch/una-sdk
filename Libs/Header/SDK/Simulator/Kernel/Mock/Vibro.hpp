@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    VibroStub.hpp
+ * @file    Vibro.hpp
  * @date    14-July-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Vibro motor interface stub.

@@ -102,7 +102,7 @@ public:
     /**
      * @brief   Get object info.
      * @param   path: Path to the directory.
-     * @param   name: Reference to save item info.
+     * @param   item: Reference to save item info.
      * @retval  Execution status. 'true' - if success, 'false' - otherwise.
      */
     virtual bool objectInfo(const char* path, ObjectInfo& item) const = 0;

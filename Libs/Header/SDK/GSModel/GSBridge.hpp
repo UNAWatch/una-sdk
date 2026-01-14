@@ -53,7 +53,7 @@ class GSBridge : public IGUIModel
 public:
     /**
      * @brief Construct the model and initialize queues.
-     * @param handler Reference to the Service-side handler implementation.
+     * @param serviceHandler Reference to the Service-side handler implementation.
      *
      * @post Queues are initialized; the Service kernel facade is cached.
      */

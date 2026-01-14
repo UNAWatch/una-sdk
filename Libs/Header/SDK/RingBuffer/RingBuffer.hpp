@@ -40,7 +40,7 @@
 
 namespace SDK::Tools {
 /**
- * @brief This template class implements ring buffer for data with type <T>.
+ * @brief This template class implements ring buffer for data with type T.
  * @note  None.
  * @bug   None.
  */
@@ -50,7 +50,8 @@ public:
     /**
      * @brief  Class constructor.
      * @param  bufferSize: uint16_t value of ring buffer size
-     * @retval none
+     * @param  name: pointer to the buffer name
+     * @param  enableOverload: enable buffer overload
      */
     RingBuffer(uint16_t bufferSize, const char* name, bool enableOverload = false)
     {
@@ -72,8 +73,6 @@ public:
 
     /**
      * @brief   Class destructor.
-     * @param   none.
-     * @retval  none.
      */
     virtual ~RingBuffer()
     {
@@ -85,7 +84,6 @@ public:
     /**
      * @brief   Put new element to ring buffer.
      * @param   element:  new element.
-     * @retval  none.
      */
     void push(const T& element)
     {
@@ -149,7 +147,6 @@ public:
 
     /**
      * @brief   Get a length of received elements in ring buffer.
-     * @param   none.
      * @retval  uint16_t: length of received elements.
      */
     uint16_t getAvailForRead()
@@ -159,7 +156,6 @@ public:
 
     /**
      * @brief   Get a length of received elements in ring buffer.
-     * @param   none.
      * @retval  uint16_t: length of received elements.
      */
     uint16_t getAvailForWrite()
@@ -169,8 +165,6 @@ public:
 
     /**
      * @brief   Clear the ring buffer.
-     * @param   none.
-     * @retval  none.
      */
     void clear()
     {

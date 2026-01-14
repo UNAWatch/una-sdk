@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    StdLibWrappers.hpp
+ * @file    StdLibWrappers.h
  * @date    21-July-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   A set of wrappers for unsafe stdlib functions

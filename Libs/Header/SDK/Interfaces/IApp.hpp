@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    IApp.hpp.hpp
+ * @file    IApp.hpp
  * @date    04-02-2025
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
  * @brief   Interface for a user application interacting with the kernel.

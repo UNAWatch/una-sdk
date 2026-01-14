@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    SvcBootstrap.hpp
+ * @file    SrvBootstrap.hpp
  * @date    09-October-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Application bootstrapper (composition root) for the Service app.

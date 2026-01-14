@@ -336,7 +336,7 @@ private:
      * @return CBOR error status.
      */
     static CborError WriteCallback(void *context, const void *data, size_t len,
-            CborEncoderAppendType);
+            CborEncoderAppendType type);
 
     /**
      * @brief Flushes any buffered output.

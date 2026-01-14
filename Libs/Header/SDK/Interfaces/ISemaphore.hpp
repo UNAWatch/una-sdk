@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    ISynch.hpp
+ * @file    ISemaphore.hpp
  * @date    09-June-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   A set of synchronization objects, such as mutex and semaphore.

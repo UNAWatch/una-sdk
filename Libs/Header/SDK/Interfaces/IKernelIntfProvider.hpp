@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    IKernelInterfaceProvider.hpp
+ * @file    IKernelIntfProvider.hpp
  * @date    24-September-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Kernel Interface Provider (IKIP): typed lookup of kernel sub-interfaces.

@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    AtExitImpl.рpp
+ * @file    AtExitImpl.hpp
  * @date    25-September-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Minimal atexit / __cxa_atexit / __cxa_finalize runtime for bare-metal.

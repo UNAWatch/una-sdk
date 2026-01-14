@@ -33,7 +33,7 @@ public:
      * @brief Build a @ref SDK::Kernel facade by querying the underlying provider.
      * @details Fetches each required sub-interface by its @ref SDK::Interface::IKIP::IntfID
      *          and binds them into a single convenience object.
-     * @param ikernel: A pointer to the @ref SDK::Interface::IKernel.
+     * @param k: A pointer to the @ref SDK::Interface::IKernel.
      * @return A value instance of @ref SDK::Kernel holding references to all sub-interfaces.
      *
      * @pre @c kernel is non-null and provides all interfaces used below.

@@ -24,7 +24,7 @@ For a deeper look into how this works, see the [Architecture Deep Dive](architec
 
 The SDK provides a comprehensive set of interfaces that apps use to interact with the watch's kernel and hardware:
 
-#### IAppComm (Communication Interface)
+### IAppComm (Communication Interface)
 
 ```cpp
 class IAppComm {
@@ -46,7 +46,7 @@ public:
 - **Memory Management**: Explicit message release back to kernel pool.
 - **Type-safe Allocation**: Template-based message allocation from kernel pools.
 
-#### ISystem (System Services Interface)
+### ISystem (System Services Interface)
 
 ```cpp
 class ISystem {
@@ -62,7 +62,7 @@ public:
 - **Timing**: Get system time in milliseconds and perform millisecond-precision delays.
 - **Scheduling**: Yield execution back to the kernel.
 
-#### IFileSystem (Storage Interface)
+### IFileSystem (Storage Interface)
 
 ```cpp
 class IFileSystem {
@@ -83,7 +83,7 @@ public:
 - **File Operations**: Standard read/write/seek via `IFile` interface.
 - **Metadata**: Retrieve object information (size, type, timestamps).
 
-#### ILogger (Debugging Interface)
+### ILogger (Debugging Interface)
 
 ```cpp
 class ILogger {
@@ -98,7 +98,7 @@ public:
 - **Formatted Output**: Standard `printf`-style logging.
 - **Metadata Support**: Log with level, module name, function, and line number.
 
-#### ISensorManager (Sensor Interface)
+### ISensorManager (Sensor Interface)
 
 ```cpp
 class ISensorManager {
@@ -111,7 +111,7 @@ public:
 - **Sensor Discovery**: Retrieve default sensors or a list of available sensors by type.
 - **Driver-based Access**: Interact with sensors via the `ISensorDriver` interface.
 
-#### IGlance (Glance Application Interface)
+### IGlance (Glance Application Interface)
 
 ```cpp
 class IGlance {

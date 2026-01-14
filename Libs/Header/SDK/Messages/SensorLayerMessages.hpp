@@ -1,5 +1,5 @@
 /**
- * @file ConcreteMessages.hpp
+ * @file SensorLayerMessages.hpp
  * @date 02-12-2024
  * @author Kernel Communication Module
  * @brief Concrete message structures for kernel-application communication

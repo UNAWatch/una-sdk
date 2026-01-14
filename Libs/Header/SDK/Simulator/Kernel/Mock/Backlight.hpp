@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    BacklightStub.hpp
+ * @file    Backlight.hpp
  * @date    14-July-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Backlight interface stub.

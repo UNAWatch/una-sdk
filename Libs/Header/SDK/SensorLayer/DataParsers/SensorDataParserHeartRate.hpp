@@ -38,7 +38,7 @@ namespace SDK
 
             /**
              * @brief Construct a new HeartRate parser over given ISensorData
-             * @param data Reference to sensor data containing 1 float field
+             * @param view Reference to sensor data containing 1 float field
              */
             HeartRate(const SDK::Sensor::DataView view) : mData(view) {}
 

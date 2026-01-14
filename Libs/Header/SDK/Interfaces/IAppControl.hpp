@@ -44,7 +44,6 @@ public:
     /**
      * @brief Sets a pointer to a shared context without starting the GUI
      * @param context A pointer to the context
-     * @return        True if GUI started, false otherwise
      */
     virtual void setContext(std::shared_ptr<void> context)
     {

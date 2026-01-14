@@ -126,7 +126,7 @@ namespace SDK::Glance {
         /**
          * @brief Sets the top-left position of the text and size.
          * @param pos New position.
-         * @param size Size (width/height).
+         * @param sz Size (width/height).
          * @return Reference to @c *this for fluent chaining.
          */
         ControlText& pos(GlancePoint_t pos, GlanceSize_t sz)
@@ -161,7 +161,7 @@ namespace SDK::Glance {
 
         /**
          * @brief Set size
-         * @param size      Size (width/height).
+         * @param sz      Size (width/height).
          * @return *this for fluent chaining.
          */
         ControlText& size(GlanceSize_t sz)
@@ -212,7 +212,7 @@ namespace SDK::Glance {
 
         /**
          * @brief Set alignment
-         * @param alignment New horizontal alignment.
+         * @param align New horizontal alignment.
          * @return *this for fluent chaining.
          */
         ControlText& alignment(GlanceAlignH_t align)

@@ -94,7 +94,6 @@ void Logger_init(SDK::Interface::ILogger& ilogger);
  *
  * @param[in]   level       Log level string (e.g., "D", "I", "W", "E")
  * @param[in]   module      Module name or identifier
- * @param[in]   module_sep  Separator string between module and function (e.g., "::")
  * @param[in]   func        Function name (typically __FUNCTION_NAME__)
  * @param[in]   line        Line number (typically __LINE__)
  * @param[in]   fmt         Format string (printf-style)
@@ -117,7 +116,6 @@ void Logger_message(const char *level,
  *
  * @param[in]   level       Log level string (e.g., "D", "I", "W", "E")
  * @param[in]   module      Module name or identifier
- * @param[in]   module_sep  Separator string between module and function (e.g., "::")
  * @param[in]   func        Function name (typically __FUNCTION_NAME__)
  * @param[in]   line        Line number (typically __LINE__)
  * @param[in]   pData       Pointer to data to dump

@@ -225,8 +225,8 @@ private:
 
     /**
      * @brief Calculates the center point between two GPS coordinates.
-     * @param min: Minimum GPS point (lower-left corner).
-     * @param max: Maximum GPS point (upper-right corner).
+     * @param p1: First GPS point.
+     * @param p2: Second GPS point.
      * @return GpsPoint representing the center between min and max.
      */
     GpsPoint getCenter(const GpsPoint &p1, const GpsPoint &p2) const;

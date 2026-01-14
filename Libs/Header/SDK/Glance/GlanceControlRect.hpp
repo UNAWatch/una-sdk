@@ -74,7 +74,7 @@ public:
 
     /**
      * @brief Set new position
-     * @param pos       Top-left position.
+     * @param p       Top-left position.
      * @return *this for fluent chaining.
      */
     ControlRectangle& pos(GlancePoint_t p)
@@ -95,7 +95,7 @@ public:
 
     /**
      * @brief Set size
-     * @param size      Size (width/height).
+     * @param sz      Size (width/height).
      * @return *this for fluent chaining.
      */
     ControlRectangle& size(GlanceSize_t sz)
@@ -116,7 +116,7 @@ public:
     
     /**
      * @brief Sets line color
-     * @param lineColor RGB222 line color.
+     * @param c RGB222 line color.
      * @return *this for fluent chaining.
      */
     ControlRectangle& color(uint8_t c)
@@ -128,7 +128,7 @@ public:
 
     /**
      * @brief Sets background color
-     * @param bgColor   RGB222 background color.
+     * @param c   RGB222 background color.
      * @return *this for fluent chaining.
      */
     ControlRectangle& bgColor(uint8_t c)
@@ -140,7 +140,7 @@ public:
 
     /**
      * @brief Sets fill background flag
-     * @param fill Whether to fill background
+     * @param f Whether to fill background
      * @return *this for fluent chaining.
      */
      ControlRectangle& fill(bool f = true)
