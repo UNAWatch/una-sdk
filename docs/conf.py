@@ -30,6 +30,13 @@ extensions = [
     'breathe',
 ]
 
+# MyST configuration
+myst_enable_extensions = [
+    "colon_fence",
+    "html_image",
+]
+myst_fence_as_directive = ["mermaid"]
+
 # Breathe configuration
 breathe_projects = {
     "SDK": "_build/doxygen/xml"

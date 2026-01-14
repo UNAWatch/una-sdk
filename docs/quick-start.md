@@ -164,8 +164,8 @@ std::string formatTime(const TimeInfo& t) {
 
 ### Learning Resources
 
-- **[Getting Started Guide](step-by-step-development.md)**: Complete development setup
-- **[API Reference](index.rst)**: Comprehensive SDK documentation
+- **[Getting Started Guide](getting-started.md)**: Complete development setup
+- **[API Reference](api-reference.rst)**: Comprehensive SDK documentation
 - **[SDK Overview](sdk-overview.md)**: Core concepts and tools
 - **[Community Forum](https://forum.una-watch.dev)**: Ask questions and share apps
 

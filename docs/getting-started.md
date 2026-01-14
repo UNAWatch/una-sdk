@@ -546,10 +546,10 @@ With your heart rate monitor complete, explore:
 
 ## Resources
 
-- [API Reference](index.rst) - Complete SDK documentation
+- [API Reference](api-reference.rst) - Complete SDK documentation
 - [SDK Overview](sdk-overview.md) - Core concepts and tools
-- [App Development](app-development.md) - Framework details
-- [Kernel Architecture](kernel-architecture.md) - Internal details
+- [Development Workflow](development-workflow.md) - Framework details
+- [Architecture Deep Dive](architecture-deep-dive.md) - Internal details
 
 ---
 
