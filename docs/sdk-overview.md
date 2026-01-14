@@ -1,4 +1,4 @@
-# Una-Watch SDK Documentation
+# SDK Overview
 
 This document covers the Software Development Kit (SDK) for developing applications on the Una-Watch platform.
 
@@ -20,7 +20,8 @@ The Una-Watch SDK provides all the necessary tools, libraries, and interfaces fo
 
 The SDK provides a comprehensive set of interfaces that apps use to interact with the watch's kernel and hardware:
 
-#### **IAppComm (Communication Interface)**
+#### IAppComm (Communication Interface)
+
 ```cpp
 class IAppComm {
 public:
@@ -31,11 +32,13 @@ public:
     virtual uint32_t getPid() const = 0;
 };
 ```
+
 - **Message Allocation**: Type-safe message creation from kernel pools
 - **IPC Communication**: Send/receive messages between app and kernel
 - **Process Identity**: Unique PID assignment for each app process
 
-#### **ISystem (System Services Interface)**
+#### ISystem (System Services Interface)
+
 ```cpp
 class ISystem {
 public:
@@ -46,11 +49,13 @@ public:
     virtual uint32_t getFirmwareVersion() const = 0;
 };
 ```
+
 - **Timing**: Millisecond-precision delays
 - **Power Status**: Battery level and charging state
 - **Device Info**: Identification and version information
 
-#### **IFileSystem (Storage Interface)**
+#### IFileSystem (Storage Interface)
+
 ```cpp
 class IFileSystem {
 public:
@@ -62,11 +67,13 @@ public:
     virtual bool listDir(const char* path, DirEntry* entries, size_t maxEntries, size_t& count) = 0;
 };
 ```
+
 - **Multi-Volume Support**: Access to internal flash (0:/), external storage (1:/), USB (2:/)
 - **File Operations**: Standard read/write/seek operations
 - **Directory Management**: Create directories, list contents
 
-#### **ILogger (Debugging Interface)**
+#### ILogger (Debugging Interface)
+
 ```cpp
 class ILogger {
 public:
@@ -74,11 +81,13 @@ public:
     virtual void logTimestamp(LogLevel level, const char* format, ...) = 0;
 };
 ```
+
 - **Log Levels**: Error, Warning, Info, Debug
 - **Timestamp Integration**: Automatic timestamping with system time
 - **Formatted Output**: printf-style logging
 
-#### **ISensorManager (Sensor Interface)**
+#### ISensorManager (Sensor Interface)
+
 ```cpp
 class ISensorManager {
 public:
@@ -88,11 +97,13 @@ public:
     virtual bool getSensorData(SensorHandle handle, SensorData& data) = 0;
 };
 ```
+
 - **Sensor Discovery**: Automatic sensor enumeration by type
 - **Connection Management**: Configurable sampling periods and latency
 - **Data Access**: Type-safe sensor data retrieval
 
-#### **IGlance (Notification Interface)**
+#### IGlance (Notification Interface)
+
 ```cpp
 class IGlance {
 public:
@@ -101,13 +112,15 @@ public:
     virtual void hideNotification() = 0;
 };
 ```
+
 - **Notification Display**: 240x60 pixel notification area
 - **Progress Indication**: Visual progress bars
 - **Auto-dismiss**: Configurable display duration
 
 ### Message System Architecture
 
-#### **Message Types and Ranges**
+#### Message Types and Ranges
+
 The SDK uses a structured message system for inter-process communication:
 
 | Range | Type | Purpose | Response |
@@ -117,7 +130,8 @@ The SDK uses a structured message system for inter-process communication:
 | 0x2000-0x2FFF | Responses | Request acknowledgments | No |
 | 0x3000-0x3FFF | Commands | Kernel directives | Yes |
 
-#### **Key System Messages**
+#### Key System Messages
+
 ```cpp
 // System Requests
 REQUEST_SYSTEM_SETTINGS      // Get watch settings
@@ -138,7 +152,8 @@ REQUEST_FILE_WRITE          // Write file data
 REQUEST_DIR_LIST            // List directory contents
 ```
 
-#### **Message Processing Pattern**
+#### Message Processing Pattern
+
 ```cpp
 // App message handling loop
 void Service::run() {
@@ -186,27 +201,32 @@ SDK/
 
 ## Build Tools and Scripts
 
-### App Packaging Script (`app_packer.py`)
+### App Packaging Script (app_packer.py)
+
 ```bash
 python app_packer/app_packer.py -e <elf_file> -o <output_dir> -v <version>
 ```
+
 - **ELF Processing**: Parses compiled ELF files
 - **Package Creation**: Generates .uapp container files
 - **Metadata Injection**: Embeds version and configuration data
 
-### App Merging Script (`app_merging.py`)
+### App Merging Script (app_merging.py)
+
 ```bash
 python app_merging.py -name <name> -type <Activity|Utility|Glance|Clockface> \
                      -autostart -header -normal_icon <60x60.png> \
                      -small_icon <30x30.png> -appid <16hex> -appver <A.B.C> \
                      -scripts <SDK/Utilities/Scripts>
 ```
+
 - **App Metadata**: Defines app properties and capabilities
 - **Icon Processing**: Converts and embeds PNG icons
 - **Type Configuration**: Sets app behavior and permissions
 - **ID Assignment**: Unique application identifiers
 
 ### Build Integration Scripts
+
 - **CubeIDE Integration**: Post-build scripts for automatic packaging
 - **Version Management**: Automatic version incrementing
 - **Dependency Checking**: Validates build prerequisites
@@ -216,12 +236,14 @@ python app_merging.py -name <name> -type <Activity|Utility|Glance|Clockface> \
 The SDK includes a comprehensive simulator for app development and testing:
 
 ### Simulator Features
+
 - **Hardware Emulation**: Mock implementations of all watch hardware
 - **Sensor Simulation**: Realistic sensor data generation
 - **UI Testing**: TouchGFX simulator integration
 - **Debugging Tools**: Enhanced logging and breakpoint support
 
 ### Simulator Architecture
+
 ```cpp
 // Mock hardware interfaces
 class MockLcd : public ILcd {
@@ -240,6 +262,7 @@ class MockSensorManager : public ISensorManager {
 ```
 
 ### Development Workflow with Simulator
+
 1. **Code Development**: Write app logic using SDK interfaces
 2. **Compile for Simulator**: Build with simulator target
 3. **Run Tests**: Execute automated test suites
@@ -249,6 +272,7 @@ class MockSensorManager : public ISensorManager {
 ## Third-Party Libraries
 
 ### Core Components
+
 - **coreJSON**: Lightweight JSON parsing for settings and data
 - **FitSDK**: ANT+ fitness data format support
 - **FreeRTOS**: Real-time operating system
@@ -256,6 +280,7 @@ class MockSensorManager : public ISensorManager {
 - **FatFs**: File system implementation
 
 ### Integration Points
+
 - **Automatic Inclusion**: Libraries linked automatically in build process
 - **Header-Only**: Many utilities available as headers only
 - **Namespace Isolation**: Prevent symbol conflicts
@@ -264,21 +289,25 @@ class MockSensorManager : public ISensorManager {
 ## Development Best Practices
 
 ### Memory Management
+
 - **Pool Allocation**: Use kernel message pools for IPC
 - **RAII Pattern**: Automatic resource cleanup
 - **Stack Awareness**: Monitor stack usage in constrained environment
 
 ### Performance Optimization
+
 - **Event-Driven Design**: Avoid polling, use callbacks
 - **Message Batching**: Group related operations
 - **Sensor Optimization**: Configure appropriate sampling rates
 
 ### Error Handling
+
 - **Graceful Degradation**: Handle missing hardware gracefully
 - **Timeout Management**: Prevent infinite waits
 - **Logging**: Comprehensive error reporting
 
 ### Testing
+
 - **Unit Tests**: Test individual components
 - **Integration Tests**: Validate IPC communication
 - **Simulator Validation**: Test on simulated hardware
@@ -287,13 +316,13 @@ class MockSensorManager : public ISensorManager {
 ## SDK Version Compatibility
 
 ### Versioning Scheme
+
 - **Major Version**: Breaking API changes
 - **Minor Version**: New features, backward compatible
 - **Patch Version**: Bug fixes and improvements
 
 ### Migration Guide
+
 - **Deprecation Notices**: Advance warning of API changes
 - **Compatibility Layers**: Support for older app versions
 - **Upgrade Tools**: Automated migration scripts
-
-This SDK provides a robust foundation for developing feature-rich applications on the Una-Watch platform, with comprehensive tooling and extensive hardware access capabilities.

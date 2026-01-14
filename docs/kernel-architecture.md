@@ -1,12 +1,12 @@
-# Una-Watch Kernel Documentation
+# Kernel Architecture
 
 This document covers the kernel/firmware implementation details of the Una-Watch platform.
 
 ## Technical Architecture Details
 
-### **Detailed Implementation Analysis**
+### Detailed Implementation Analysis
 
-#### **1. Backend Core Implementation (Backend.cpp)**
+#### 1. Backend Core Implementation (Backend.cpp)
 The Backend class is a **1,045-line orchestration engine** that implements 10+ callback interfaces:
 
 **Thread Management:**
@@ -47,7 +47,7 @@ Backend thread {
 - Dynamic service allocation with `new (std::nothrow)` placement
 - Firmware update via BLE file transfer with integrity checks
 
-##### **Backend Event Processing Flow**
+#### Backend Event Processing Flow
 
 ```mermaid
 flowchart TD
@@ -100,7 +100,7 @@ flowchart TD
     style T fill:#fff3e0
 ```
 
-##### **Backend Interface Architecture**
+#### Backend Interface Architecture
 
 ```mermaid
 graph TD
@@ -186,7 +186,7 @@ graph TD
     style IBLE_MANAGER fill:#c8e6c9
 ```
 
-##### **Backend State Management**
+#### Backend State Management
 
 ```mermaid
 stateDiagram-v2
@@ -268,7 +268,7 @@ stateDiagram-v2
     end note
 ```
 
-##### **Backend Communication Patterns**
+#### Backend Communication Patterns
 
 ```mermaid
 graph TD
@@ -329,7 +329,7 @@ graph TD
     style TIMERS fill:#c8e6c9
 ```
 
-#### **3. Component Factory Implementation (ComponentFactory.cpp)**
+#### 3. Component Factory Implementation (ComponentFactory.cpp)
 **Hardware Auto-Discovery (202 lines):**
 
 **I2C Bus Probing:**
@@ -359,7 +359,7 @@ void ComponentFactory::scanModules() {
 - Graceful degradation when components not detected
 - Interface-based design enables runtime component replacement
 
-##### **Hardware Component Detection Flow**
+#### Hardware Component Detection Flow
 
 ```mermaid
 flowchart TD
@@ -428,7 +428,7 @@ flowchart TD
     style KK fill:#fff3e0
 ```
 
-##### **Component Factory Interface Architecture**
+#### Component Factory Interface Architecture
 
 ```mermaid
 graph TD
@@ -506,7 +506,7 @@ graph TD
     style IGPS fill:#c8e6c9
 ```
 
-##### **Component Lifecycle and Error Recovery**
+#### Component Lifecycle and Error Recovery
 
 ```mermaid
 stateDiagram-v2
@@ -576,7 +576,7 @@ stateDiagram-v2
     end note
 ```
 
-##### **I2C Bus Probing and Component Identification**
+#### I2C Bus Probing and Component Identification
 
 ```mermaid
 flowchart TD
@@ -645,7 +645,7 @@ flowchart TD
     style KK fill:#fff3e0
 ```
 
-#### **4. Sensor Layer Implementation (SensorManager.cpp)**
+#### 4. Sensor Layer Implementation (SensorManager.cpp)
 **Multi-Sensor Coordination (251 lines):**
 
 **Driver Registration:**
@@ -672,7 +672,7 @@ bool Sensor::Manager::regDriver(Driver* driver) {
 - **Type-Based Queries**: `getSensorList(SDK::Sensor::Type::HEART_RATE)`
 - **Listener Registration**: Separate listeners for service vs GUI processes
 
-##### **Sensor Resource Arbitration Architecture**
+#### Sensor Resource Arbitration Architecture
 
 ```mermaid
 graph TD
@@ -724,7 +724,7 @@ graph TD
     style EXCLUSIVE fill:#fff3e0
 ```
 
-##### **Sensor Data Pipeline and Processing Flow**
+#### Sensor Data Pipeline and Processing Flow
 
 ```mermaid
 flowchart TD
@@ -761,7 +761,7 @@ flowchart TD
     style Q fill:#fff3e0
 ```
 
-##### **Sensor Error Handling and Recovery Mechanisms**
+#### Sensor Error Handling and Recovery Mechanisms
 
 ```mermaid
 stateDiagram-v2
@@ -806,7 +806,7 @@ stateDiagram-v2
     end note
 ```
 
-##### **Sensor Performance Monitoring and Optimization**
+#### Sensor Performance Monitoring and Optimization
 
 ```mermaid
 graph TD
@@ -857,7 +857,7 @@ graph TD
     style THRESHOLDS fill:#fff3e0
 ```
 
-#### **5. Settings Management Implementation (SettingsManager.cpp)**
+#### 5. Settings Management Implementation (SettingsManager.cpp)
 **JSON-Based Persistence (120 lines):**
 
 **Structured Configuration:**
@@ -880,7 +880,7 @@ graph TD
 - **JSON Stream Processing**: Custom reader/writer for structured data
 - **Validation**: Units enum checking, bounds validation for heart rate zones
 
-##### **Settings Persistence and Recovery Flow**
+#### Settings Persistence and Recovery Flow
 
 ```mermaid
 flowchart TD
@@ -921,7 +921,7 @@ flowchart TD
     style N fill:#fff3e0
 ```
 
-##### **Settings Configuration State Machine**
+#### Settings Configuration State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -971,7 +971,7 @@ stateDiagram-v2
     end note
 ```
 
-##### **Settings Access Patterns and Concurrency**
+#### Settings Access Patterns and Concurrency
 
 ```mermaid
 graph TD
@@ -1023,7 +1023,7 @@ graph TD
     style WRITER_LOCK fill:#fff3e0
 ```
 
-##### **Settings Migration and Version Compatibility**
+#### Settings Migration and Version Compatibility
 
 ```mermaid
 flowchart TD
@@ -1059,7 +1059,7 @@ flowchart TD
     style F fill:#fff3e0
 ```
 
-#### **6. File System Implementation (FileSystem.cpp)**
+#### 6. File System Implementation (FileSystem.cpp)
 **FatFs Wrapper (577 lines):**
 
 **Multi-Volume Management:**
@@ -1081,7 +1081,7 @@ flowchart TD
 - **File Copy Operations**: Block-based copying with progress tracking
 - **Factory Reset**: Complete volume reformatting capability
 
-##### **Multi-Volume File System Architecture**
+#### Multi-Volume File System Architecture
 
 ```mermaid
 graph TD
@@ -1135,7 +1135,7 @@ graph TD
     style VOLUME_0 fill:#fff3e0
 ```
 
-##### **File System Operations Flow**
+#### File System Operations Flow
 
 ```mermaid
 flowchart TD
@@ -1175,7 +1175,7 @@ flowchart TD
     style O fill:#c8e6c9
 ```
 
-##### **Thread-Safe File Access State Machine**
+#### Thread-Safe File Access State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -1224,7 +1224,7 @@ stateDiagram-v2
     end note
 ```
 
-##### **File System Error Recovery and Factory Reset Flow**
+#### File System Error Recovery and Factory Reset Flow
 
 ```mermaid
 flowchart TD
@@ -1263,7 +1263,7 @@ flowchart TD
     style H fill:#c8e6c9
 ```
 
-##### **Time Zone and DST Handling Architecture**
+#### Time Zone and DST Handling Architecture
 
 ```mermaid
 graph TD
@@ -1315,7 +1315,8 @@ graph TD
     style FILE_METADATA fill:#fff3e0
 ```
 
-### **System Initialization Sequence**
+### System Initialization Sequence
+
 ```
 HAL_Init() → System Clock → Logging → Watchdog → RTC → Sleep Init →
 Heap Monitor → Observer Dispatcher → StartupTask() → Hardware Init →
@@ -1325,7 +1326,8 @@ DailyHealth.init() → AppManager.scan() → Backend.run() → TouchGFX Init →
 Event Loop Ready
 ```
 
-#### **Sequence Diagram: Detailed Backend Thread Initialization**
+#### Sequence Diagram: Detailed Backend Thread Initialization
+
 ```mermaid
 sequenceDiagram
     participant Main as main()
@@ -1357,7 +1359,7 @@ sequenceDiagram
     end
 ```
 
-#### **System Initialization Flow**
+#### System Initialization Flow
 
 ```mermaid
 flowchart TD
@@ -1401,9 +1403,10 @@ flowchart TD
     style II fill:#c8e6c9
 ```
 
-### **System Initialization from Multiple Perspectives**
+### System Initialization from Multiple Perspectives
 
-#### **1. Thread Perspective: RTOS Task Initialization**
+#### 1. Thread Perspective: RTOS Task Initialization
+
 ```mermaid
 stateDiagram-v2
     [*] --> SystemReset: Power On / Reset
@@ -1447,7 +1450,8 @@ stateDiagram-v2
     end note
 ```
 
-#### **2. Component Dependency Perspective: Initialization Order**
+#### 2. Component Dependency Perspective: Initialization Order
+
 ```mermaid
 graph TD
     subgraph "Phase 1: Core Hardware"
@@ -1517,7 +1521,8 @@ graph TD
     style TOUCHGFX fill:#c8e6c9
 ```
 
-#### **3. Timing Perspective: Initialization Timeline**
+#### 3. Timing Perspective: Initialization Timeline
+
 ```mermaid
 gantt
     title System Initialization Timeline(To-Do)
@@ -1559,7 +1564,8 @@ gantt
     TouchGFX Init     :done, t24, after t23, 200ms
 ```
 
-#### **4. Memory Perspective: Allocation During Initialization**
+#### 4. Memory Perspective: Allocation During Initialization
+
 ```mermaid
 graph TD
     subgraph "Static Memory (Compile-time)"
@@ -1614,7 +1620,8 @@ graph TD
     style WORK_BUFFERS fill:#c8e6c9
 ```
 
-#### **5. Error Handling Perspective: Fault Recovery During Init**
+#### 5. Error Handling Perspective: Fault Recovery During Init
+
 ```mermaid
 flowchart TD
     A[Initialization Step] --> B{Step Success?}
@@ -1656,7 +1663,8 @@ flowchart TD
     style U fill:#fff3e0
 ```
 
-#### **6. Power Management Perspective: Energy During Initialization**
+#### 6. Power Management Perspective: Energy During Initialization
+
 ```mermaid
 graph TD
     subgraph "Power Sources"
@@ -1708,7 +1716,8 @@ graph TD
     style WAKE_SOURCES fill:#c8e6c9
 ```
 
-#### **7. Data Flow Perspective: Information Movement During Init**
+#### 7. Data Flow Perspective: Information Movement During Init
+
 ```mermaid
 flowchart TD
     subgraph "Configuration Data"
@@ -1755,14 +1764,16 @@ flowchart TD
     style SYSTEM_READY fill:#c8e6c9
 ```
 
-### **Memory Management Patterns**
+### Memory Management Patterns
+
 - **Pool-Based Allocation**: Kernel message pools prevent heap fragmentation
 - **Reference Counting**: Message lifecycle management with atomic counters
 - **Placement New**: Direct memory construction for performance
 - **RAII Pattern**: Automatic resource cleanup in destructors
 - **Mutex Protection**: Thread-safe access to shared resources
 
-### **Error Handling & Robustness**
+### Error Handling & Robustness
+
 - **CRC Validation**: .uapp file integrity checking
 - **Exception Safety**: `new (std::nothrow)` for OOM protection
 - **Graceful Degradation**: Stub implementations for missing hardware
@@ -1771,7 +1782,8 @@ flowchart TD
 
 ### Core System Architecture
 
-#### **Backend Class Inheritance Diagram**
+#### Backend Class Inheritance Diagram
+
 ```mermaid
 classDiagram
     class Backend {
@@ -1813,7 +1825,8 @@ classDiagram
     Note right of Backend: Central orchestrator~n~Implements 13 interfaces~n~1045 LOC
 ```
 
-#### **8. BLE Service Stack**
+#### 8. BLE Service Stack
+
 **Standard Services:**
 - **Device Information Service**: Manufacturer, model, serial, firmware info
 - **Current Time Service**: Time synchronization with timezone/DST support
@@ -1822,7 +1835,8 @@ classDiagram
 - **Notification Service**: iOS ANCS (Apple Notification Center Service) integration
 - **Custom Command Service**: Proprietary watch control commands
 
-##### **BLE Service Architecture**
+#### BLE Service Architecture
+
 ```mermaid
 graph TD
     subgraph "BLE Hardware"
@@ -1884,21 +1898,24 @@ graph TD
     style BACKEND fill:#c8e6c9
 ```
 
-#### **9. Settings Management (SettingsManagerBase.hpp)**
+#### 9. Settings Management (SettingsManagerBase.hpp)
+
 **Persistent Configuration:**
 - **Template-Based**: Type-safe settings storage and retrieval
 - **JSON Serialization**: Human-readable configuration files
 - **Thread-Safe**: Mutex-protected read/write operations
 - **Default Fallback**: Automatic default value restoration
 
-#### **10. Power Management System**
+#### 10. Power Management System
+
 **Advanced Power States:**
 - **Sleep Modes**: Configurable low-power states with wake sources
 - **Battery Monitoring**: Real-time voltage, level, and charging status
 - **USB Detection**: Automatic power source switching
 - **Component Control**: Selective peripheral power management
 
-##### **Power Management State Machine**
+#### Power Management State Machine
+
 ```mermaid
 stateDiagram-v2
     [*] --> PowerOff: System Reset
@@ -1948,6 +1965,7 @@ stateDiagram-v2
 ```
 
 ### System Initialization Sequence
+
 ```
 HAL Init → RTOS Start → StartupTask → Hardware Init →
 File System → USB/BLE Setup → Sensor Layer → LCD/GUI →
@@ -1955,6 +1973,7 @@ Backend Launch → TouchGFX Start → App Management Ready
 ```
 
 ### Key Design Patterns
+
 - **Observer Pattern**: Event dispatching and callback systems
 - **Singleton Pattern**: Core system components (Backend, managers, factories)
 - **Factory Pattern**: ComponentFactory for hardware module discovery
@@ -1972,7 +1991,8 @@ This architecture enables a **professional-grade modular smartwatch platform** s
 - Thread-safe inter-process communication
 - TouchGFX-based user interface framework
 
-### **Static Component Architecture**
+### Static Component Architecture
+
 ```mermaid
 graph TB
     subgraph "Hardware Layer"
@@ -2056,7 +2076,8 @@ graph TB
     SETTINGS --> APPS
 ```
 
-#### **Data Flow: User Input to App Response**
+#### Data Flow: User Input to App Response
+
 ```mermaid
 flowchart TD
     A[User Interaction] --> B{Hardware Type}

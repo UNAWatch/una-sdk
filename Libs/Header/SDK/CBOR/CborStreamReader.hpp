@@ -392,7 +392,7 @@ private:
 
 #if 0
 // Future implementation for nested CBOR queries
-#endif
+
 /**
  ******************************************************************************
  * @brief Search for a nested element using a query path string.

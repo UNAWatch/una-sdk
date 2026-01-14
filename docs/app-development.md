@@ -1,11 +1,12 @@
-# Una-Watch Apps Documentation
+# App Development
 
 This document covers the application framework and development aspects of the Una-Watch platform.
 
 ## Technical Architecture Details
 
-#### **2. Application Framework Implementation (Application.cpp)**
-**AppInstance Architecture (1,348 lines):**
+### Application Framework Implementation
+
+**AppInstance Architecture:**
 
 **Dual-Process Model:**
 - **Service Component**: Background logic, sensor access, data processing
@@ -37,7 +38,7 @@ enum AppPartState {
 - **SDK::Sensor::RequestConnect** with period/latency negotiation
 - Listener registration for service vs GUI process isolation
 
-##### **Application Framework Dual-Process Architecture**
+#### Application Framework Dual-Process Architecture
 
 ```mermaid
 graph TD
@@ -87,7 +88,7 @@ graph TD
     style DUAL_APP_COMM fill:#fff3e0
 ```
 
-##### **Dynamic Loading and Memory Management Flow**
+#### Dynamic Loading and Memory Management Flow
 
 ```mermaid
 flowchart TD
@@ -127,7 +128,7 @@ flowchart TD
     style V fill:#fff3e0
 ```
 
-##### **Application Message Processing Architecture**
+#### Application Message Processing Architecture
 
 ```mermaid
 graph TD
@@ -183,7 +184,7 @@ graph TD
     style RESPONSE_SEND fill:#fff3e0
 ```
 
-##### **Sensor Integration and Data Flow Perspective**
+#### Sensor Integration and Data Flow
 
 ```mermaid
 flowchart TD
@@ -232,6 +233,7 @@ flowchart TD
 ## App Development Framework
 
 ### App Architecture & Lifecycle
+
 **Dual-Process Model:**
 - **Service Process**: Background logic, sensor access, data processing, glance notifications
 - **GUI Process**: User interface, TouchGFX integration, screen rendering, user interaction
@@ -253,7 +255,7 @@ enum AppPartState {
 };
 ```
 
-#### **App Lifecycle & Management**
+#### App Lifecycle & Management
 
 ```mermaid
 stateDiagram-v2
@@ -314,6 +316,7 @@ stateDiagram-v2
 ```
 
 ### SDK Interfaces for App Development
+
 **Core Interfaces Available to Apps:**
 
 **1. IAppComm (Communication)**
@@ -335,6 +338,7 @@ stateDiagram-v2
 - System timestamp integration
 
 ### Message System Architecture
+
 **Message Type Ranges:**
 - **Events** (0x0000-0x0FFF): Fire-and-forget notifications
 - **Requests** (0x1000-0x1FFF): Synchronous calls with responses
@@ -350,6 +354,7 @@ REQUEST_GLANCE_CONFIG        // Get glance area size
 ```
 
 ### Sensor Layer Integration
+
 **Sensor Access Pattern:**
 ```cpp
 // Request default sensor
@@ -364,7 +369,7 @@ connect->period = 100;  // 100ms sampling
 comm->sendMessage(connect, 1000);
 ```
 
-#### **Sensor Data Flow Architecture**
+#### Sensor Data Flow Architecture
 
 ```mermaid
 graph TD
@@ -421,6 +426,7 @@ graph TD
 ```
 
 ### App Development Workflow
+
 **1. Project Structure Setup:**
 ```
 AppName/
@@ -476,19 +482,21 @@ void sendResponse(MessageBase* msg) {
 ```
 
 ### App Capabilities System
+
 **Permission-Based Features:**
 - **Phone Notifications**: iOS ANCS integration
 - **USB Charging Screen**: Custom charging UI
 - **Music Control**: Media playback integration
 
 ### App Deployment
+
 **OTA Update Process:**
 1. File transfer via BLE to `2:/Update/` directory
 2. CRC and signature verification
 3. Atomic replacement with rollback capability
 4. System reboot to activate new version
 
-#### **App Development Data Flow**
+#### App Development Data Flow
 
 ```mermaid
 graph LR
@@ -550,6 +558,7 @@ graph LR
 This framework enables **independent app development** with clean SDK interfaces, resource management, and comprehensive tooling support.
 
 ### Building Individual Apps
+
 1. Open STM32CubeIDE
 2. Import the CubeIDE project: `File > Import > Existing Projects into Workspace`
 3. Select the `.cproject` file in `Apps/<AppName>/Software/App/<AppName>-CubeIDE/`
@@ -557,6 +566,7 @@ This framework enables **independent app development** with clean SDK interfaces
 5. The post-build script will automatically generate a `.uapp` file in `Output/Release/`
 
 ### App Installation
+
 - Apps are installed as `.uapp` files
 - Deploy via the watch's companion app or development interface
 - Apps can be updated independently of the main firmware
