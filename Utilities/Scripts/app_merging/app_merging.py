@@ -53,7 +53,7 @@ def parse_appid_64(s: str) -> int:
         raise argparse.ArgumentTypeError("AppID must be exactly 16 hex characters (e.g., 0123ABCD89EF4560).")
     return int(s, 16)
 
-def parse_semver_u32(s: str) -> int:
+def parse_semver_u32(s: str) -> tuple[int, str]:
     """Parse 'A.B.C' into uint32: 0x00AABBCC (A=major, B=minor, C=patch), allowing pre-release suffixes."""
     s = s.strip().lstrip('vV')
     m = re.match(r"(\d+)\.(\d+)\.(\d+)", s)
@@ -63,7 +63,7 @@ def parse_semver_u32(s: str) -> int:
     for v, name in [(a, "A"), (b, "B"), (c, "C")]:
         if not (0 <= v <= 255):
             raise argparse.ArgumentTypeError(f"Version component {name} must be 0..255.")
-    return (a << 16) | (b << 8) | c
+    return (a << 16) | (b << 8) | c, s
 
 def find_first_main_ld(scripts_root: Path) -> Path:
     """Pick the first linker script under <scripts_root>/linker/Main (lexicographically sorted)."""
@@ -163,10 +163,10 @@ normal_icon_size   = len(normal_icon)
 small_icon_size    = len(small_icon)
 
 # Build extra fields
-app_id_u64         = args.appid
-app_version_u32    = args.appver
-main_ld_path       = find_first_main_ld(args.scripts)
-libc_version_u32   = parse_libc_version_from_include(main_ld_path)
+app_id_u64                      = args.appid
+app_version_u32, app_version    = args.appver
+main_ld_path                    = find_first_main_ld(args.scripts)
+libc_version_u32                = parse_libc_version_from_include(main_ld_path)
 
 # ---------- header ----------
 # [AppID u64][AppVersion u32][LibCVersion u32][service_size u32][flags u32]
@@ -182,9 +182,8 @@ crc = zlib.crc32(blob_without_crc) & 0xFFFFFFFF
 final_data = blob_without_crc + struct.pack("<I", crc)
 
 # ---------- output ----------
-version_str = format_semver_u32(app_version_u32)
 out_dir.mkdir(parents=True, exist_ok=True)
-output_path = out_dir / f"{args.name}_{version_str}.uapp"
+output_path = out_dir / f"{args.name}_{app_version}.uapp"
 with open(output_path, "wb") as f:
     f.write(final_data)
 
@@ -205,7 +204,7 @@ logging.info(f"Image          : {output_path} ({len(final_data)} bytes)")
 
 # ---------- optional .h ----------
 if args.header:
-    header_filename = f"{args.name}_{version_str}.h"
+    header_filename = f"{args.name}_{app_version}.h"
     header_path = output_path.parent / header_filename
     macro_guard = '__' + header_path.stem.upper().replace('.', '_').replace('-', '_') + '_H__'
     array_name = f"{args.name}_merged".replace("-", "_")
