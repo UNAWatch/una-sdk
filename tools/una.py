@@ -11,15 +11,25 @@ import argparse
 import shutil
 from pathlib import Path
 
-def check_watch_sdk_path():
-    """Check if UNA_SDK is set"""
+def get_sdk_path():
+    """Get SDK path - either from environment or current directory detection"""
+    # First check if UNA_SDK is set (for external apps)
     sdk_path = os.environ.get('UNA_SDK')
-    if not sdk_path:
-        print("ERROR: UNA_SDK environment variable not set")
-        print("Please set it to the watch SDK path:")
-        print("export UNA_SDK=/path/to/watch-sdk")
-        sys.exit(1)
-    return Path(sdk_path)
+    if sdk_path:
+        return Path(sdk_path)
+
+    # Check if we're within SDK repository
+    current_dir = Path.cwd()
+    # Look for SDK structure
+    if (current_dir / "cmake" / "watch_project.cmake").exists():
+        return current_dir
+    elif (current_dir / "SDK" / "cmake" / "watch_project.cmake").exists():
+        return current_dir / "SDK"
+
+    print("ERROR: Cannot determine SDK path.")
+    print("Either set UNA_SDK environment variable or run from within SDK repository")
+    print("export UNA_SDK=/path/to/una-watch-sdk")
+    sys.exit(1)
 
 def run_command(cmd, cwd=None, check=True):
     """Run a command and return the result"""
@@ -46,7 +56,7 @@ def create_app_template(app_name, template_path=None):
     """Create a new app from template"""
     if template_path is None:
         # Use Running app as template
-        template_path = Path("Apps/Running")
+        template_path = Path("examples/Apps/Running")
 
     app_dir = Path(f"apps/{app_name}")
     if app_dir.exists():
@@ -70,9 +80,41 @@ def create_app_template(app_name, template_path=None):
     print(f"App {app_name} created successfully in {app_dir}")
     return True
 
+def build_example(example_name):
+    """Build an example app within the SDK"""
+    sdk_path = get_sdk_path()
+    example_path = sdk_path / "examples" / "Apps" / example_name
+
+    if not example_path.exists():
+        print(f"ERROR: Example {example_name} not found in {example_path}")
+        return False
+
+    cmake_dir = example_path / "Software" / "Apps" / f"{example_name}-CMake"
+    if not cmake_dir.exists():
+        print(f"ERROR: CMake directory not found: {cmake_dir}")
+        return False
+
+    build_dir = cmake_dir / "build"
+
+    print(f"Building example {example_name}...")
+
+    # Configure
+    if not build_dir.exists():
+        cmake_configure(build_dir, cmake_dir)
+
+    # Build
+    cmake_build(build_dir)
+
+    print(f"Example {example_name} built successfully")
+    return True
+
 def main():
-    parser = argparse.ArgumentParser(description='Watch SDK Build Tool')
+    parser = argparse.ArgumentParser(description='Una-Watch SDK Build Tool')
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
+
+    # build-example command
+    build_example_parser = subparsers.add_parser('build-example', help='Build an example app within SDK')
+    build_example_parser.add_argument('name', help='Example app name (e.g., Running)')
 
     # create-app command
     create_parser = subparsers.add_parser('create-app', help='Create a new app from template')
@@ -96,16 +138,16 @@ def main():
         parser.print_help()
         return
 
-    # Check SDK path for most commands
-    if args.command not in ['create-app']:
-        sdk_path = check_watch_sdk_path()
-
-    # Get current directory as app directory
-    app_dir = Path.cwd()
+    if args.command == 'build-example':
+        build_example(args.name)
+        return
 
     if args.command == 'create-app':
         create_app_template(args.name, args.template)
         return
+
+    # For other commands, get current directory as app directory
+    app_dir = Path.cwd()
 
     # Check if we're in an app directory
     cmake_file = app_dir / "CMakeLists.txt"
