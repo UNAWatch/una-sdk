@@ -31,7 +31,7 @@ The current development process using CubeIDE and TouchGFX remains fully support
 
 ### CubeIDE + TouchGFX Process
 
-1. **Copy App Template**: Copy entire app directory structure from `Apps/<ann_name>` to `Apps/<your_app>`
+1. **Copy App Template**: Copy entire app directory structure from `SDK/examples/Apps/<app_name>` to your workspace
 2. **Modify TouchGFX GUI**: Use TouchGFX Designer to modify GUI screens
 3. **Modify CubeIDE Projects**: Update C++ code in separate GUI and Service projects
 4. **Generate Binaries**: Use app_packer.py to create .gui and .srv files
@@ -75,19 +75,27 @@ Keep existing TouchGFX framework:
 - **Integration**: TouchGFX libraries and generated code stay in project structure
 - **Build process**: Maintains separate GUI/Service binaries with app_packer and app_merging
 
-### Example Project Structure
+### New SDK-Centric Project Structure
 
 ```
-watch-sdk/           # Like ESP-IDF
+una-watch-sdk/        # Main SDK repository
 ├── cmake/            # Common CMake modules
 │   ├── toolchain-arm-none-eabi.cmake
 │   ├── watch_project.cmake  # Common project setup
 │   └── watch_components.cmake  # Component definitions
 ├── tools/
-│   └── una.py       # Build tool
-└── docs/
+│   └── una.py        # Build tool
+├── examples/         # Example apps (submodule)
+│   └── Apps/         # App examples
+│       ├── Running/
+│       ├── Alarm/
+│       └── ...
+├── Libs/            # SDK core libraries
+├── docs/            # SDK documentation
+└── .git/
 
-apps/                 # Project workspace (any folder structure)
+# External app development (outside SDK)
+my-apps-workspace/   # Your development workspace
 ├── my_app/
 │   ├── CMakeLists.txt  # Minimal app-specific CMakeLists.txt
 │   ├── Libs/          # App-specific libraries
@@ -106,7 +114,12 @@ apps/                 # Project workspace (any folder structure)
 ```cmake
 # App-level CMakeLists.txt (minimal)
 cmake_minimum_required(VERSION 3.21)
+
+# For external apps (outside SDK)
 include($ENV{UNA_SDK}/cmake/watch_project.cmake)
+
+# For apps within SDK/examples (relative paths)
+#include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/watch_project.cmake)
 
 project(my_app)
 
@@ -124,17 +137,40 @@ watch_build_app()
 Similar to idf.py, for the CMake-based workflow:
 
 ```bash
-export UNA_SDK=/path/to/watch-sdk
+# Within SDK repository - no environment variables needed
+cd una-watch-sdk
 
-# Create new app template
+# Build example app directly
+una.py build-example Running
+
+# Or work with external apps outside SDK
+export UNA_SDK=/path/to/una-watch-sdk
+
+# Create new app template (copies from SDK examples)
 una.py create-app my_app
 
-# Build (CMake-based)
+# Build external app
 cd my_app
 una.py build
 
 # Package and merge
 una.py package
+```
+
+### Building Examples
+
+The easiest way to get started:
+
+```bash
+# Clone the SDK
+git clone --recursive https://github.com/UNAWatch/una-sdk.git
+cd una-sdk
+
+# Build the Running example
+./tools/una.py build-example Running
+
+# The built .uapp file will be in:
+# examples/Apps/Running/Software/Apps/Running-CMake/build/
 ```
 
 ### Dual Workflow Benefits

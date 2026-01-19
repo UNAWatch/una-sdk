@@ -1,13 +1,20 @@
 # Watch SDK CMake Project Configuration
 # This file contains common CMake logic extracted from app CMakeLists.txt
-# to enable environment-variable based SDK referencing
+# to enable both relative (within SDK) and environment-variable based (external) SDK referencing
 
-# Validate UNA_SDK
-if(NOT DEFINED ENV{UNA_SDK})
-    message(FATAL_ERROR "UNA_SDK environment variable must be set")
+# Determine SDK path - check if we're within SDK or external
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../tools/una.py")
+    # We're within the SDK repository
+    set(UNA_SDK "${CMAKE_CURRENT_LIST_DIR}/..")
+    message("Building within SDK repository: ${UNA_SDK}")
+else()
+    # External app - require UNA_SDK environment variable
+    if(NOT DEFINED ENV{UNA_SDK})
+        message(FATAL_ERROR "UNA_SDK environment variable must be set for external apps")
+    endif()
+    set(UNA_SDK "$ENV{UNA_SDK}")
+    message("Using external SDK: ${UNA_SDK}")
 endif()
-
-set(UNA_SDK "$ENV{UNA_SDK}")
 
 # Common toolchain setup
 set(CMAKE_TOOLCHAIN_FILE "${UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake")
