@@ -2,15 +2,15 @@
 # This file contains common CMake logic extracted from app CMakeLists.txt
 # to enable environment-variable based SDK referencing
 
-# Validate WATCH_SDK_PATH
-if(NOT DEFINED ENV{WATCH_SDK_PATH})
-    message(FATAL_ERROR "WATCH_SDK_PATH environment variable must be set")
+# Validate UNA_SDK
+if(NOT DEFINED ENV{UNA_SDK})
+    message(FATAL_ERROR "UNA_SDK environment variable must be set")
 endif()
 
-set(WATCH_SDK_PATH "$ENV{WATCH_SDK_PATH}")
+set(UNA_SDK "$ENV{UNA_SDK}")
 
 # Common toolchain setup
-set(CMAKE_TOOLCHAIN_FILE "${WATCH_SDK_PATH}/cmake/toolchain-arm-none-eabi.cmake")
+set(CMAKE_TOOLCHAIN_FILE "${UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake")
 
 # Set standards
 set(CMAKE_C_STANDARD 11)
@@ -43,7 +43,7 @@ set(WATCH_COMMON_LINK_OPTIONS
     -nostdlib
     -static
     -Wl,--emit-relocs
-    -Wl,-L${WATCH_SDK_PATH}/Utilities/Scripts/linker
+    -Wl,-L${UNA_SDK}/Utilities/Scripts/linker
     -mcpu=cortex-m33
     -mfpu=fpv5-sp-d16
     -mfloat-abi=hard
@@ -101,33 +101,33 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
         "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp"
 
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/AtExitImpl.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/EntryPoint/Service/main.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/startup_user_app.s"
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/system.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/FitHelper/FitHelper.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/JSON/JsonStreamReader.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/JSON/JsonStreamWriter.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/Kernel/KernelBuilder.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/SensorLayer/SensorConnection.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/TrackMap/TrackMapBuilder.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/UnaLogger/Logger.cpp"
+        "${UNA_SDK}/Libs/Source/AppSystem/AtExitImpl.cpp"
+        "${UNA_SDK}/Libs/Source/AppSystem/EntryPoint/Service/main.cpp"
+        "${UNA_SDK}/Libs/Source/AppSystem/startup_user_app.s"
+        "${UNA_SDK}/Libs/Source/AppSystem/system.cpp"
+        "${UNA_SDK}/Libs/Source/FitHelper/FitHelper.cpp"
+        "${UNA_SDK}/Libs/Source/JSON/JsonStreamReader.cpp"
+        "${UNA_SDK}/Libs/Source/JSON/JsonStreamWriter.cpp"
+        "${UNA_SDK}/Libs/Source/Kernel/KernelBuilder.cpp"
+        "${UNA_SDK}/Libs/Source/SensorLayer/SensorConnection.cpp"
+        "${UNA_SDK}/Libs/Source/TrackMap/TrackMapBuilder.cpp"
+        "${UNA_SDK}/Libs/Source/UnaLogger/Logger.cpp"
 
-        "${WATCH_SDK_PATH}/ThirdParty/FitSDKRelease_21.171.00/c/fit.c"
-        "${WATCH_SDK_PATH}/ThirdParty/FitSDKRelease_21.171.00/c/fit_convert.c"
-        "${WATCH_SDK_PATH}/ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c"
-        "${WATCH_SDK_PATH}/ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c"
+        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit.c"
+        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit_convert.c"
+        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c"
+        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c"
 
-        "${WATCH_SDK_PATH}/ThirdParty/coreJSON/source/core_json.c"
+        "${UNA_SDK}/ThirdParty/coreJSON/source/core_json.c"
     )
 
     add_executable(${TARGET_NAME} ${SERVICE_SOURCES})
 
     target_include_directories(${TARGET_NAME} PRIVATE
         "${LIBS_PATH}/Header"
-        "${WATCH_SDK_PATH}/Libs/Header"
-        "${WATCH_SDK_PATH}/ThirdParty/FitSDKRelease_21.171.00/c"
-        "${WATCH_SDK_PATH}/ThirdParty/coreJSON/source/include"
+        "${UNA_SDK}/Libs/Header"
+        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c"
+        "${UNA_SDK}/ThirdParty/coreJSON/source/include"
         "${TOUCHGFX_GUI_PATH}/gui/include"
     )
 
@@ -140,7 +140,7 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
     target_link_libraries(${TARGET_NAME} PRIVATE
         -Wl,--start-group
-        ${WATCH_SDK_PATH}/libc++/libstdc++.a
+        ${UNA_SDK}/libc++/libstdc++.a
         -Wl,--end-group
     )
 
@@ -148,11 +148,11 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
         -T "${CMAKE_CURRENT_SOURCE_DIR}/RunningService.ld"
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
         ${WATCH_COMMON_LINK_OPTIONS}
-        -L${WATCH_SDK_PATH}/libc++
+        -L${UNA_SDK}/libc++
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND python3 ${WATCH_SDK_PATH}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext srv
+        COMMAND python3 ${UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext srv
         COMMENT "Packing ${TARGET_NAME}"
     )
 endfunction()
@@ -173,31 +173,31 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
         "${CMAKE_CURRENT_SOURCE_DIR}/PaintImpl.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp"
 
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/AtExitImpl.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/startup_user_app.s"
-        "${WATCH_SDK_PATH}/Libs/Source/AppSystem/system.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/Kernel/KernelBuilder.cpp"
-        "${WATCH_SDK_PATH}/Libs/Source/UnaLogger/Logger.cpp"
+        "${UNA_SDK}/Libs/Source/AppSystem/AtExitImpl.cpp"
+        "${UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
+        "${UNA_SDK}/Libs/Source/AppSystem/startup_user_app.s"
+        "${UNA_SDK}/Libs/Source/AppSystem/system.cpp"
+        "${UNA_SDK}/Libs/Source/Kernel/KernelBuilder.cpp"
+        "${UNA_SDK}/Libs/Source/UnaLogger/Logger.cpp"
 
-        "${WATCH_SDK_PATH}/Port/TouchGFX/STM32TouchController.cpp"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/TouchGFXGPIO.cpp"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/TouchGFXHAL.cpp"
+        "${UNA_SDK}/Port/TouchGFX/STM32TouchController.cpp"
+        "${UNA_SDK}/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
+        "${UNA_SDK}/Port/TouchGFX/TouchGFXGPIO.cpp"
+        "${UNA_SDK}/Port/TouchGFX/TouchGFXHAL.cpp"
 
-        "${WATCH_SDK_PATH}/Port/TouchGFX/generated/OSWrappers.cpp"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/generated/STM32DMA.cpp"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/generated/TouchGFXConfiguration.cpp"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp"
+        "${UNA_SDK}/Port/TouchGFX/generated/OSWrappers.cpp"
+        "${UNA_SDK}/Port/TouchGFX/generated/STM32DMA.cpp"
+        "${UNA_SDK}/Port/TouchGFX/generated/TouchGFXConfiguration.cpp"
+        "${UNA_SDK}/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp"
     )
 
     add_executable(${TARGET_NAME} ${GUI_SOURCES})
 
     target_include_directories(${TARGET_NAME} PRIVATE
         "${LIBS_PATH}/Header"
-        "${WATCH_SDK_PATH}/Libs/Header"
-        "${WATCH_SDK_PATH}/Port/TouchGFX"
-        "${WATCH_SDK_PATH}/Port/TouchGFX/generated"
+        "${UNA_SDK}/Libs/Header"
+        "${UNA_SDK}/Port/TouchGFX"
+        "${UNA_SDK}/Port/TouchGFX/generated"
         "${TOUCHGFX_GUI_PATH}/touchgfx/framework/include"
         "${TOUCHGFX_GUI_PATH}/generated/fonts/include"
         "${TOUCHGFX_GUI_PATH}/generated/gui_generated/include"
@@ -209,7 +209,7 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
     target_link_libraries(${TARGET_NAME} PRIVATE
         -Wl,--start-group
-        ${WATCH_SDK_PATH}/libc++/libstdc++.a
+        ${UNA_SDK}/libc++/libstdc++.a
         ${TOUCHGFX_GUI_PATH}/touchgfx/lib/core/cortex_m33/gcc/libtouchgfx-float-abi-hard.a
         -Wl,--end-group
     )
@@ -219,11 +219,11 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
         -T "${CMAKE_CURRENT_SOURCE_DIR}/RunningGUI.ld"
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
         ${WATCH_COMMON_LINK_OPTIONS}
-        -L${WATCH_SDK_PATH}/libc++
+        -L${UNA_SDK}/libc++
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND python3 ${WATCH_SDK_PATH}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext gui
+        COMMAND python3 ${UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext gui
         COMMENT "Packing ${TARGET_NAME}"
     )
 endfunction()
@@ -236,7 +236,7 @@ function(watch_build_app)
     set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Output")
     set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Resources")
     
-    set(SCRIPTS_PATH "${WATCH_SDK_PATH}/Utilities/Scripts")
+    set(SCRIPTS_PATH "${UNA_SDK}/Utilities/Scripts")
 
     # Set up version
     watch_setup_version(BUILD_VERSION)

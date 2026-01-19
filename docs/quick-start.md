@@ -56,13 +56,13 @@ The team goal is to achieve ESP-IDF-like confidence while maintaining compatibil
    - Toolchain configurations tool
    - Build tools and common CMake logic
 
-2. **Project Structure**: Apps reference SDK via environment variable (e.g., `WATCH_SDK_PATH`)
+2. **Project Structure**: Apps reference SDK via environment variable (e.g., `UNA_SDK`)
 
 3. **Dual Build Workflows**:
    - **CubeIDE Workflow**: Keep existing TouchGFX + CubeIDE projects unchanged, copy to start new one.
    - **CMake Workflow**: New ESP-IDF-like build system using extracted common CMake logic
 
-4. **Build Tool**: Create `watch.py` (similar to idf.py) that:
+4. **Build Tool**: Create `una.py` (similar to idf.py) that:
    - Sets up environment
    - Handles CMake configuration for the new workflow
    - Manages app packaging and merging
@@ -84,7 +84,7 @@ watch-sdk/           # Like ESP-IDF
 │   ├── watch_project.cmake  # Common project setup
 │   └── watch_components.cmake  # Component definitions
 ├── tools/
-│   └── watch.py       # Build tool
+│   └── una.py       # Build tool
 └── docs/
 
 apps/                 # Project workspace (any folder structure)
@@ -106,7 +106,7 @@ apps/                 # Project workspace (any folder structure)
 ```cmake
 # App-level CMakeLists.txt (minimal)
 cmake_minimum_required(VERSION 3.21)
-include($ENV{WATCH_SDK_PATH}/cmake/watch_project.cmake)
+include($ENV{UNA_SDK}/cmake/watch_project.cmake)
 
 project(my_app)
 
@@ -119,22 +119,22 @@ set(DEV_ID "UNA")
 watch_build_app()
 ```
 
-### watch.py Tool (CMake Workflow)
+### una.py Tool (CMake Workflow)
 
 Similar to idf.py, for the CMake-based workflow:
 
 ```bash
-export WATCH_SDK_PATH=/path/to/watch-sdk
+export UNA_SDK=/path/to/watch-sdk
 
 # Create new app template
-watch.py create-app my_app
+una.py create-app my_app
 
 # Build (CMake-based)
 cd my_app
-watch.py build
+una.py build
 
 # Package and merge
-watch.py package
+una.py package
 ```
 
 ### Dual Workflow Benefits
@@ -142,7 +142,7 @@ watch.py package
 1. **Backward Compatibility**: Existing CubeIDE + TouchGFX projects remain fully functional
 2. **Choice of Tools**: Developers can use familiar CubeIDE or new CMake workflow
 3. **ESP-IDF-like Experience**: CMake workflow provides the same confidence as ESP-IDF
-4. **Environment-Based**: WATCH_SDK_PATH enables flexible project placement
+4. **Environment-Based**: UNA_SDK enables flexible project placement
 5. **Shared SDK**: Common build logic centralized in SDK, reducing duplication
 6. **Maintainable**: Clear separation between SDK and app-specific code
 
@@ -152,7 +152,7 @@ watch.py package
 ```
 repo/
 ├── Apps/          # Individual app projects
-├── SDK/           # Framework (referenced via WATCH_SDK_PATH)
+├── SDK/           # Framework (referenced via UNA_SDK)
 └── .git/
 ```
 
@@ -178,15 +178,15 @@ watch-sdk-repo/   # Main SDK repository
 #### Implementation for SDK-Centric Structure
 1. Move `SDK/` contents to repository root
 2. Convert `Apps/` to git submodule
-3. Update CMake paths (remove WATCH_SDK_PATH complexity)
-4. Modify `watch.py` to work within SDK repository
+3. Update CMake paths (remove UNA_SDK complexity)
+4. Modify `una.py` to work within SDK repository
 5. Update documentation and examples
 
 ### Migration Path
 
 1. Extract common CMake logic from Running-CMake/CMakeLists.txt to SDK cmake modules
-2. Create WATCH_SDK_PATH environment variable support
-3. Develop watch.py build tool for CMake workflow
+2. Create UNA_SDK environment variable support
+3. Develop una.py build tool for CMake workflow
 4. Keep existing CubeIDE projects unchanged
 5. Update documentation with both workflows
 6. Test CMake workflow compatibility with existing app structures

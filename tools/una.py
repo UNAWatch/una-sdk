@@ -12,12 +12,12 @@ import shutil
 from pathlib import Path
 
 def check_watch_sdk_path():
-    """Check if WATCH_SDK_PATH is set"""
-    sdk_path = os.environ.get('WATCH_SDK_PATH')
+    """Check if UNA_SDK is set"""
+    sdk_path = os.environ.get('UNA_SDK')
     if not sdk_path:
-        print("ERROR: WATCH_SDK_PATH environment variable not set")
+        print("ERROR: UNA_SDK environment variable not set")
         print("Please set it to the watch SDK path:")
-        print("export WATCH_SDK_PATH=/path/to/watch-sdk")
+        print("export UNA_SDK=/path/to/watch-sdk")
         sys.exit(1)
     return Path(sdk_path)
 

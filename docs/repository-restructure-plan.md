@@ -28,7 +28,7 @@ This document outlines the plan to invert the current repository structure from 
 **Issues:**
 
 - SDK is buried within Apps structure
-- External WATCH_SDK_PATH needed for CMake workflow
+- External UNA_SDK needed for CMake workflow
 - Apps and SDK versioned separately
 - CI/CD complexity for SDK testing
 
@@ -48,7 +48,7 @@ This document outlines the plan to invert the current repository structure from 
 │   ├── una_project.cmake
 │   └── una_components.cmake
 ├── tools/                   # SDK tools (moved from SDK/)
-│   └── watch.py
+│   └── una.py
 ├── Libs/                    # SDK core libraries (moved from SDK/)
 ├── ThirdParty/              # Third-party dependencies
 ├── Utilities/               # Build utilities
@@ -92,12 +92,12 @@ This document outlines the plan to invert the current repository structure from 
 ### Phase 2: Code Updates
 
 1. **Update CMake Paths**
-   - Remove WATCH_SDK_PATH dependency
+   - Remove UNA_SDK dependency
    - Update all paths to be relative to repository root
    - Modify `watch_project.cmake` for new structure
 
-2. **Update watch.py Tool**
-   - Remove WATCH_SDK_PATH environment variable handling
+2. **Update una.py Tool**
+   - Remove UNA_SDK environment variable handling
    - Update paths to work within SDK repository
    - Modify app creation to work with submodule structure
 
@@ -111,7 +111,7 @@ This document outlines the plan to invert the current repository structure from 
 1. **App CMakeLists.txt Updates**
 
    ```cmake
-   # Apps no longer need WATCH_SDK_PATH
+   # Apps no longer need UNA_SDK
    cmake_minimum_required(VERSION 3.21)
    include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/watch_project.cmake)
 
@@ -139,7 +139,7 @@ This document outlines the plan to invert the current repository structure from 
 # Single command gets everything
 git clone --recursive https://github.com/una-watch/sdk.git
 cd una-watch-sdk
-watch.py build-example Running
+una.py build-example Running
 ```
 
 ### 2. Version Management
@@ -166,7 +166,7 @@ git commit -m "SDK improvements"
 - name: Build SDK Examples
   run: |
     git submodule update --init --recursive
-    ./tools/watch.py build-all-examples
+    ./tools/una.py build-all-examples
 ```
 
 ### 5. ESP-IDF Alignment
@@ -186,7 +186,7 @@ git commit -m "SDK improvements"
 ### Week 2: Code Migration
 
 - Update CMake files for new paths
-- Modify watch.py tool
+- Modify una.py tool
 - Update documentation
 
 ### Week 3: Testing & Validation
@@ -208,12 +208,12 @@ git commit -m "SDK improvements"
 ```bash
 # Old structure users
 cd /path/to/old/repo
-export WATCH_SDK_PATH=/path/to/old/repo/SDK
+export UNA_SDK=/path/to/old/repo/SDK
 
 # New structure
 git clone --recursive https://github.com/una-watch/sdk.git
 cd una-watch-sdk
-# WATCH_SDK_PATH no longer needed!
+# UNA_SDK no longer needed!
 ```
 
 ### For App Developers
@@ -221,7 +221,7 @@ cd una-watch-sdk
 ```bash
 # Old way
 cp -r Apps/Running Apps/MyApp
-export WATCH_SDK_PATH=/path/to/sdk
+export UNA_SDK=/path/to/sdk
 
 # New way
 cd una-watch-sdk/Apps
