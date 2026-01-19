@@ -16,169 +16,141 @@ Unlike traditional smartwatch platforms, Una-Watch apps are:
 - STM32CubeIDE (recommended) or command-line tools
 - USB cable for device flashing
 
-## One-Command Setup
+## Relation to Watch SDK Current Structure
+
+The current watch SDK structure has several issues:
+
+1. **Monolithic CMakeLists.txt**: Hardcoded paths, not modular
+2. **TouchGFX dependency**: GUI framework tightly coupled, generated code mixed with custom code
+3. **No external SDK reference**: Everything bundled, hard to update SDK independently
+4. **Manual process**: Copy entire apps, modify manually - not sustainable
+
+## Existing CubeIDE Workflow (Maintained)
+
+The current development process using CubeIDE and TouchGFX remains fully supported:
+
+### CubeIDE + TouchGFX Process
+
+1. **Copy App Template**: Copy entire app directory structure from `Apps/<ann_name>` to `Apps/<your_app>`
+2. **Modify TouchGFX GUI**: Use TouchGFX Designer to modify GUI screens
+3. **Modify CubeIDE Projects**: Update C++ code in separate GUI and Service projects
+4. **Generate Binaries**: Use app_packer.py to create .gui and .srv files
+5. **Merge App**: Use app_merging.py to combine into final .uapp package
+
+### Advantages of CubeIDE Workflow
+
+- **Visual GUI Design**: TouchGFX Designer for WYSIWYG interface design
+- **IDE Integration**: Full debugging and development environment
+- **Existing Investment**: All current projects continue to work
+- **Familiar Tools**: Developers already know the workflow
+
+#### Adapting CMake for Watch Apps (TouchGFX-Compatible)
+
+The team goal is to achieve ESP-IDF-like confidence while maintaining compatibility with existing TouchGFX and CubeIDE workflows, we need to restructure the watch SDK build system.
+
+### Future Architecture
+
+1. **Separate SDK/Framework Directory**: Like ESP-IDF, have a central SDK with:
+   - Core libraries (AppSystem, Kernel, etc.)
+   - Existed Apps as templates with TouchGFX integration
+   - Toolchain configurations tool
+   - Build tools and common CMake logic
+
+2. **Project Structure**: Apps reference SDK via environment variable (e.g., `WATCH_SDK_PATH`)
+
+3. **Dual Build Workflows**:
+   - **CubeIDE Workflow**: Keep existing TouchGFX + CubeIDE projects unchanged, copy to start new one.
+   - **CMake Workflow**: New ESP-IDF-like build system using extracted common CMake logic
+
+4. **Build Tool**: Create `watch.py` (similar to idf.py) that:
+   - Sets up environment
+   - Handles CMake configuration for the new workflow
+   - Manages app packaging and merging
+
+### TouchGFX Integration (Maintained)
+
+Keep existing TouchGFX framework:
+
+- **Compatibility**: Existing TouchGFX projects remain functional
+- **Integration**: TouchGFX libraries and generated code stay in project structure
+- **Build process**: Maintains separate GUI/Service binaries with app_packer and app_merging
+
+### Example Project Structure
+
+```
+watch-sdk/           # Like ESP-IDF
+├── cmake/            # Common CMake modules
+│   ├── toolchain-arm-none-eabi.cmake
+│   ├── watch_project.cmake  # Common project setup
+│   └── watch_components.cmake  # Component definitions
+├── tools/
+│   └── watch.py       # Build tool
+└── docs/
+
+apps/                 # Project workspace (any folder structure)
+├── my_app/
+│   ├── CMakeLists.txt  # Minimal app-specific CMakeLists.txt
+│   ├── Libs/          # App-specific libraries
+│   │   ├── Sources/
+│   │   └── Header/
+│   ├── TouchGFX-GUI/  # Existing TouchGFX project
+│   ├── Resources/     # Icons, etc.
+│   └── Output/        # Build output
+└── another_app/      # Different structure possible
+    ├── CMakeLists.txt
+    └── src/
+```
+
+### CMakeLists.txt Example (App-Level)
+
+```cmake
+# App-level CMakeLists.txt (minimal)
+cmake_minimum_required(VERSION 3.21)
+include($ENV{WATCH_SDK_PATH}/cmake/watch_project.cmake)
+
+project(my_app)
+
+# App configuration
+set(APP_ID "A12E9F4C8B7D3A65")
+set(APP_NAME "MyApp")
+set(DEV_ID "UNA")
+
+# Include common build logic
+watch_build_app()
+```
+
+### watch.py Tool (CMake Workflow)
+
+Similar to idf.py, for the CMake-based workflow:
 
 ```bash
-# Clone the SDK and set up development environment
-git clone https://github.com/una-watch/una-sdk.git
-cd una-sdk
-./setup-dev-environment.sh
+export WATCH_SDK_PATH=/path/to/watch-sdk
+
+# Create new app template
+watch.py create-app my_app
+
+# Build (CMake-based)
+cd my_app
+watch.py build
+
+# Package and merge
+watch.py package
 ```
 
-This script will:
-- Install required build tools
-- Set up cross-compilation toolchain
-- Configure simulator environment
-- Download sample apps
+### Dual Workflow Benefits
 
-## Your First App: "Hello World" Clock
+1. **Backward Compatibility**: Existing CubeIDE + TouchGFX projects remain fully functional
+2. **Choice of Tools**: Developers can use familiar CubeIDE or new CMake workflow
+3. **ESP-IDF-like Experience**: CMake workflow provides the same confidence as ESP-IDF
+4. **Environment-Based**: WATCH_SDK_PATH enables flexible project placement
+5. **Shared SDK**: Common build logic centralized in SDK, reducing duplication
+6. **Maintainable**: Clear separation between SDK and app-specific code
 
-### Step 1: Create App Structure
+### Migration Path
 
-```bash
-# Create new app from template
-./create-app.sh hello-clock --type clockface
-
-cd apps/hello-clock
-```
-
-### Step 2: Examine the Code
-
-The app consists of two main files:
-
-**Service.hpp** (background logic):
-```cpp
-class Service : public SDK::Interface::IApp::Callback {
-private:
-    SDK::Kernel& kernel;
-public:
-    Service(SDK::Kernel& k) : kernel(k) {}
-
-    void run() {
-        while (true) {
-            // Get current time from system
-            uint32_t now = kernel.sys.getTimeMs();
-
-            // Send time update to GUI process
-            sendTimeUpdate(now);
-
-            // Sleep for 1 second
-            kernel.sys.delay(1000);
-        }
-    }
-};
-```
-
-**Gui.hpp** (user interface):
-```cpp
-class Gui : public TouchGFX::Application {
-public:
-    void updateTime(const TimeInfo& time) {
-        // Update display with current time
-        hourHand.setRotation(time.hour * 30);
-        minuteHand.setRotation(time.minute * 6);
-        secondHand.setRotation(time.second * 6);
-    }
-};
-```
-
-### Step 3: Build the App
-
-```bash
-# Build for simulator (fast development)
-make simulator
-
-# Or build for hardware
-make release
-```
-
-### Step 4: Test in Simulator
-
-```bash
-# Launch simulator
-./simulator hello-clock.uapp
-
-# The simulator shows your watch app running in a desktop window
-# Interact with virtual buttons and touch screen
-```
-
-### Step 5: Deploy to Device
-
-```bash
-# Connect your Una-Watch via USB
-# Flash the app
-make flash
-
-# Your clock app is now running on the watch!
-```
-
-## Understanding the Magic
-
-### Pure Machine Code Execution
-
-Your app isn't interpreted or virtualized - it's compiled to native ARM Cortex-M instructions that run directly on the MCU. This provides native performance and minimal overhead.
-
-```cpp
-// High-performance direct buffer access
-void updateDisplay(const uint8_t* frameBuffer) {
-    // Write frame buffer directly via SDK interface
-    kernel.app.writeFrameBuffer(frameBuffer);
-}
-```
-
-### Position-Independent Code (PIC)
-
-Apps use PIC to remain kernel-abstracted:
-
-```cpp
-// Function calls use relative addressing
-void drawPixel(int x, int y) {
-    // No absolute memory addresses - all relative
-    lcdBuffer[y * WIDTH + x] = currentColor;
-}
-```
-
-### Shared libc Architecture
-
-All apps share the same libc implementation for memory efficiency:
-
-```cpp
-// Apps can use standard C++ features
-#include <string>
-#include <vector>
-
-std::string formatTime(const TimeInfo& t) {
-    return std::to_string(t.hour) + ":" + std::to_string(t.minute);
-}
-```
-
-## Next Steps
-
-🎉 **Congratulations!** You have a working Una-Watch app.
-
-### What to Explore Next
-
-1. **Add Sensors**: Integrate heart rate or accelerometer data
-2. **Custom UI**: Design beautiful watch faces with TouchGFX
-3. **Notifications**: Handle phone notifications and glances
-4. **Data Persistence**: Store user preferences and app data
-5. **BLE Communication**: Connect with companion apps
-
-### Learning Resources
-
-- **[Getting Started Guide](getting-started.md)**: Complete development setup
-- **[API Reference](api-reference.rst)**: Comprehensive SDK documentation
-- **[SDK Overview](sdk-overview.md)**: Core concepts and tools
-- **[Community Forum](https://forum.una-watch.dev)**: Ask questions and share apps
-
-### Need Help?
-
-- **Discord**: Real-time chat with developers
-- **GitHub Issues**: Bug reports and feature requests
-- **Documentation Issues**: Found a problem? [Edit this page](https://github.com/una-watch/docs/edit/main/quick-start.md)
-
----
-
-**Time to complete**: 10 minutes
-**Skills learned**: App creation, building, testing, deployment
-**Platform concepts**: PIC execution, shared libc, dual-process architecture
+1. Extract common CMake logic from Running-CMake/CMakeLists.txt to SDK cmake modules
+2. Create WATCH_SDK_PATH environment variable support
+3. Develop watch.py build tool for CMake workflow
+4. Keep existing CubeIDE projects unchanged
+5. Update documentation with both workflows
+6. Test CMake workflow compatibility with existing app structures
