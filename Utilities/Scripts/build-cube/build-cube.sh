@@ -2,6 +2,9 @@
 
 set -e
 
+# Source version script to get BUILD_VERSION
+. "$(dirname "$0")/una-version.sh"
+
 IMPORT_PATH="$1"
 
 if [ -z "$IMPORT_PATH" ]; then

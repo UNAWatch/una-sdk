@@ -40,10 +40,13 @@ def run_command(cmd, cwd=None, check=True):
 
 def cmake_configure(build_dir, source_dir, extra_args=None):
     """Configure CMake project"""
+    sdk_path = get_sdk_path()
+    env = os.environ.copy()
+    env['UNA_SDK'] = str(sdk_path)
     cmd = ['cmake', '-S', str(source_dir), '-B', str(build_dir)]
     if extra_args:
         cmd.extend(extra_args)
-    run_command(cmd)
+    subprocess.run(cmd, cwd=None, check=True, env=env)
 
 def cmake_build(build_dir, target=None):
     """Build CMake project"""

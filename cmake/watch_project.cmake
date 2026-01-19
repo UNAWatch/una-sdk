@@ -57,44 +57,42 @@ set(WATCH_COMMON_LINK_OPTIONS
     -mthumb
 )
 
-# Function to set up build version using git describe
-function(watch_setup_version BUILD_VERSION_OUT)
-    set(BUILD_VERSION "1.0.0-dev")  # Default fallback
+# Function to set up build version
+function(watch_setup_version BUILD_VERSION_OUT WORKING_DIR)
+    if(DEFINED BUILD_VERSION)
+        set(${BUILD_VERSION_OUT} "${BUILD_VERSION}" PARENT_SCOPE)
+        message("External BUILD_VERSION: ${BUILD_VERSION}")
+        return()
+    endif()
 
-    execute_process(COMMAND git rev-parse --git-dir OUTPUT_VARIABLE GIT_DIR ERROR_QUIET)
+    # Set version using una-version.sh script
+    execute_process(
+        COMMAND bash $ENV{UNA_SDK}/Utilities/Scripts/build-cube/una-version.sh
+        WORKING_DIRECTORY ${WORKING_DIR}
+        OUTPUT_VARIABLE SCRIPT_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(REGEX MATCH "BUILD_VERSION=(.+)$" _ "${SCRIPT_OUTPUT}")
+    if(CMAKE_MATCH_1)
+        set(BUILD_VERSION "${CMAKE_MATCH_1}")
+        set(${BUILD_VERSION_OUT} "${BUILD_VERSION}" PARENT_SCOPE)
+        message("Detected BUILD_VERSION: ${BUILD_VERSION}")
+        return()
+    endif()
+
+    # Fallback
+    set(BUILD_VERSION "1.0.0")  # Default fallback
+
+    execute_process(COMMAND git rev-parse --git-dir OUTPUT_VARIABLE GIT_DIR ERROR_QUIET WORKING_DIRECTORY ${WORKING_DIR})
     if(GIT_DIR)
-        execute_process(COMMAND git rev-parse --short=7 HEAD OUTPUT_VARIABLE COMMIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE)
-        execute_process(COMMAND git describe --exact-match --tags HEAD RESULT_VARIABLE TAG_RESULT OUTPUT_VARIABLE TAG OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-        if(TAG_RESULT EQUAL 0)
-            string(REGEX REPLACE "^v" "" TAG "${TAG}")
-            set(BUILD_VERSION "${TAG}")
-        else()
-            execute_process(COMMAND git describe --always --tags --abbrev=7 OUTPUT_VARIABLE DESC OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-            if(DESC)
-                if(DESC MATCHES "^g")
-                    string(REGEX REPLACE "^g" "" HASH "${DESC}")
-                    set(BUILD_VERSION "${HASH}")
-                else()
-                    string(REGEX MATCH "(.+)-g" _ "${DESC}")
-                    set(TAG "${CMAKE_MATCH_1}")
-                    string(REGEX MATCH "g(.+)" _ "${DESC}")
-                    set(HASH "${CMAKE_MATCH_1}")
-                    string(REGEX REPLACE "^v" "" TAG "${TAG}")
-                    set(BUILD_VERSION "${TAG}-${HASH}")
-                endif()
-            else()
-                # Fallback to commit hash
-                set(BUILD_VERSION "dev-${COMMIT_HASH}")
-            endif()
-        endif()
-        execute_process(COMMAND git status --porcelain OUTPUT_VARIABLE GIT_STATUS)
+        execute_process(COMMAND git status --porcelain OUTPUT_VARIABLE GIT_STATUS WORKING_DIRECTORY ${WORKING_DIR})
         if(GIT_STATUS)
-            set(BUILD_VERSION "${BUILD_VERSION}-dirty")
+            set(BUILD_VERSION "1.0.0-dirty")
         endif()
     endif()
 
     set(${BUILD_VERSION_OUT} "${BUILD_VERSION}" PARENT_SCOPE)
-    message("BUILD_VERSION: ${BUILD_VERSION}")
+    message("Fallback BUILD_VERSION: ${BUILD_VERSION}")
 endfunction()
 
 # Function to build service executable
@@ -246,7 +244,7 @@ function(watch_build_app)
     set(SCRIPTS_PATH "${UNA_SDK}/Utilities/Scripts")
 
     # Set up version
-    watch_setup_version(BUILD_VERSION)
+    watch_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
 
     # Make BUILD_VERSION available globally
     set(BUILD_VERSION "${BUILD_VERSION}" PARENT_SCOPE)
