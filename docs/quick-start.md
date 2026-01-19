@@ -146,6 +146,42 @@ watch.py package
 5. **Shared SDK**: Common build logic centralized in SDK, reducing duplication
 6. **Maintainable**: Clear separation between SDK and app-specific code
 
+### Repository Structure Analysis: SDK-Centric vs App-Centric
+
+#### Current Structure (App-Centric)
+```
+repo/
+├── Apps/          # Individual app projects
+├── SDK/           # Framework (referenced via WATCH_SDK_PATH)
+└── .git/
+```
+
+#### Proposed Structure (SDK-Centric)
+```
+watch-sdk-repo/   # Main SDK repository
+├── Apps/          # Submodule with example apps
+├── cmake/         # SDK CMake modules
+├── tools/         # SDK tools
+├── Libs/          # SDK core libraries
+├── docs/          # SDK documentation
+└── .git/
+```
+
+#### SDK-Centric Advantages
+1. **Distribution**: Clone SDK → get working examples immediately
+2. **Version Management**: SDK versions include compatible app examples
+3. **Development Workflow**: Work on SDK and examples together
+4. **CI/CD**: Test SDK changes against example apps
+5. **Documentation**: Examples are part of SDK repository
+6. **ESP-IDF Alignment**: Mirrors ESP-IDF's structure with examples/
+
+#### Implementation for SDK-Centric Structure
+1. Move `SDK/` contents to repository root
+2. Convert `Apps/` to git submodule
+3. Update CMake paths (remove WATCH_SDK_PATH complexity)
+4. Modify `watch.py` to work within SDK repository
+5. Update documentation and examples
+
 ### Migration Path
 
 1. Extract common CMake logic from Running-CMake/CMakeLists.txt to SDK cmake modules
@@ -154,3 +190,4 @@ watch.py package
 4. Keep existing CubeIDE projects unchanged
 5. Update documentation with both workflows
 6. Test CMake workflow compatibility with existing app structures
+7. **Consider repository restructuring**: Make SDK the main repo with Apps as submodule
