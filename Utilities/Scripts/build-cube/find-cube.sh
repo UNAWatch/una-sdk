@@ -2,8 +2,6 @@
 
 set -e
 
-echo "Setting up STM32CubeIDE environment..."
-
 export DISPLAY=
 apt update && apt install -y python3 python3-bincopy python3-git python3-pil
 mkdir -p /tmp/bin && ln -s /usr/bin/python3 /tmp/bin/python && export PATH=/tmp/bin:$PATH
