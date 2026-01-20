@@ -19,8 +19,17 @@ echo "Building '$NAME' in '$DATA_DIR'"
 # Patch __BUILD_VERSION__ in the imported project's prefs (assumes project name matches basename of IMPORT_PATH)
 PREFS_FILE="$IMPORT_PATH/.settings/org.eclipse.cdt.core.prefs"
 if [ -f "$PREFS_FILE" ]; then
-  sed -i 's#/__BUILD_VERSION__/value=.*#/__BUILD_VERSION__/value='"$BUILD_VERSION"'#g' "$PREFS_FILE" || echo "Pattern __BUILD_VERSION__ not found in $PREFS_FILE"
-  echo "Overridden __BUILD_VERSION__ to '$BUILD_VERSION' in $PREFS_FILE"
+  if [ -n "$BUILD_VERSION" ]; then
+    sed -i 's#/__BUILD_VERSION__/value=.*#/__BUILD_VERSION__/value='"$BUILD_VERSION"'#g' "$PREFS_FILE" \
+        && echo "Overridden __BUILD_VERSION__ to '$BUILD_VERSION' in $PREFS_FILE" \
+        || echo "Pattern __BUILD_VERSION__ not found in $PREFS_FILE"
+  fi
+
+  if [ -n "$UNA_SDK" ]; then
+    sed -i 's#/PATH_SDK/value=.*#/PATH_SDK/value='"$UNA_SDK"'#g' "$PREFS_FILE" \
+        && echo "Overridden PATH_SDK to '$UNA_SDK' in $PREFS_FILE" \
+        || echo "Pattern PATH_SDK not found in $PREFS_FILE"
+  fi
 else
   echo "Warning: Prefs file not found at $PREFS_FILE"
 fi
