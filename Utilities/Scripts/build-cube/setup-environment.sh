@@ -1,9 +1,13 @@
 #!/bin/bash
 
+
+echo "Setting up STM32CubeIDE environment..."
+
 set -e
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Source the split scripts
-. "$(dirname "$0")/find-cube.sh"
-. "$(dirname "$0")/una-version.sh"
+. "$SCRIPT_DIR/find-cube.sh"
+. "$SCRIPT_DIR/una-version.sh"
 
 echo "Environment setup complete."
