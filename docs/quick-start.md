@@ -48,113 +48,166 @@ The current development process using CubeIDE and TouchGFX remains fully support
 
 The team goal is to achieve ESP-IDF-like confidence while maintaining compatibility with existing TouchGFX and CubeIDE workflows, we need to restructure the watch SDK build system.
 
-### Future Architecture
+## New CMake Workflow
 
-1. **Separate SDK/Framework Directory**: Like ESP-IDF, have a central SDK with:
-   - Core libraries (AppSystem, Kernel, etc.)
-   - Existed Apps as templates with TouchGFX integration
-   - Toolchain configurations tool
-   - Build tools and common CMake logic
+The UNA SDK now supports a modern CMake-based build system that provides ESP-IDF-like confidence while maintaining compatibility with existing TouchGFX and CubeIDE workflows.
 
-2. **Project Structure**: Apps reference SDK via environment variable (e.g., `UNA_SDK`)
+### Location Independence Features
 
-3. **Dual Build Workflows**:
-   - **CubeIDE Workflow**: Keep existing TouchGFX + CubeIDE projects unchanged, copy to start new one.
-   - **CMake Workflow**: New ESP-IDF-like build system using extracted common CMake logic
+The new CMake workflow provides complete location independence through:
 
-4. **Build Tool**: Create `una.py` (similar to idf.py) that:
-   - Sets up environment
-   - Handles CMake configuration for the new workflow
-   - Manages app packaging and merging
+1. **Environment Variable Reference**: Apps reference the SDK via the `UNA_SDK` environment variable, allowing apps to be placed anywhere on the filesystem
+2. **Relative Path Configuration**: All paths are configured relative to the app's CMake directory using a `.env` file
+3. **Flexible Project Placement**: Apps can be developed outside the SDK repository while still referencing SDK components
 
-### TouchGFX Integration (Maintained)
+### una.py Commands
 
-Keep existing TouchGFX framework:
+The `una.py` tool provides a unified interface for watch app development:
 
-- **Compatibility**: Existing TouchGFX projects remain functional
-- **Integration**: TouchGFX libraries and generated code stay in project structure
-- **Build process**: Maintains separate GUI/Service binaries with app_packer and app_merging
-
-### New SDK-Centric Project Structure
-
-```
-una-watch-sdk/        # Main SDK repository
-├── cmake/            # Common CMake modules
-│   ├── toolchain-arm-none-eabi.cmake
-│   ├── watch_project.cmake  # Common project setup
-│   └── watch_components.cmake  # Component definitions
-├── tools/
-│   └── una.py        # Build tool
-├── examples/         # Example apps (submodule)
-│   └── Apps/         # App examples
-│       ├── Running/
-│       ├── Alarm/
-│       └── ...
-├── Libs/            # SDK core libraries
-├── docs/            # SDK documentation
-└── .git/
-
-# External app development (outside SDK)
-my-apps-workspace/   # Your development workspace
-├── my_app/
-│   ├── CMakeLists.txt  # Minimal app-specific CMakeLists.txt
-│   ├── Libs/          # App-specific libraries
-│   │   ├── Sources/
-│   │   └── Header/
-│   ├── TouchGFX-GUI/  # Existing TouchGFX project
-│   ├── Resources/     # Icons, etc.
-│   └── Output/        # Build output
-└── another_app/      # Different structure possible
-    ├── CMakeLists.txt
-    └── src/
+#### `una.py export`
+Prints the export command for the UNA_SDK environment variable:
+```bash
+una.py export
+# Output: export UNA_SDK=/path/to/una-watch-sdk
 ```
 
-### CMakeLists.txt Example (App-Level)
+#### `una.py init`
+Interactive setup of the `.env` configuration file:
+```bash
+cd MyApp/Software/Apps/MyApp-CMake
+una.py init
+```
+
+#### `una.py create <name> <type>`
+Creates a new app from template with the specified type (`service-only` or `service-gui`):
+```bash
+una.py create MyServiceApp service-only
+una.py create MyGuiApp service-gui
+```
+
+### .env Configuration
+
+The `.env` file defines relative paths and app configuration:
+
+#### Required Variables
+- `LIBS_PATH`: Relative path to the shared libraries directory
+- `OUTPUT_PATH`: Relative path to the output directory
+- `RESOURCES_PATH`: Relative path to the resources directory
+- `APP_PATH`: Relative path to the app's root directory (usually `.`)
+- `APP_TYPE`: Type of app (`service-only` or `service+gui`)
+
+#### Optional Variables (Service+GUI apps)
+- `TOUCHGFX_GUI_PATH`: Relative path to the TouchGFX GUI project directory
+
+#### Example .env for service+gui app
+```
+LIBS_PATH=../../Libs
+TOUCHGFX_GUI_PATH=../TouchGFX-GUI
+OUTPUT_PATH=../../../Output
+RESOURCES_PATH=../../../Resources
+APP_PATH=.
+APP_TYPE=service+gui
+```
+
+#### Example .env for service-only app
+```
+LIBS_PATH=../../Libs
+OUTPUT_PATH=../../../Output
+RESOURCES_PATH=../../../Resources
+APP_PATH=.
+APP_TYPE=service-only
+```
+
+### CMake Templates
+
+Two CMake templates support different app types:
+
+#### Service-Only App Template
+
+For apps with only background service functionality:
 
 ```cmake
-# App-level CMakeLists.txt (minimal)
+# Watch App CMakeLists.txt - Service-Only Template
 cmake_minimum_required(VERSION 3.21)
-
-# For external apps (outside SDK)
 include($ENV{UNA_SDK}/cmake/watch_project.cmake)
 
-# For apps within SDK/examples (relative paths)
-#include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/watch_project.cmake)
+project(MyApp)
 
-project(my_app)
+# Load configuration from .env file
+file(READ .env ENV_CONTENT)
+string(REPLACE "\n" ";" ENV_LINES ${ENV_CONTENT})
+foreach(line ${ENV_LINES})
+    string(STRIP "${line}" line)
+    if(line MATCHES "^([^=]+)=(.*)$")
+        set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+    endif()
+endforeach()
 
 # App configuration
-set(APP_ID "A12E9F4C8B7D3A65")
-set(APP_NAME "MyApp")
-set(DEV_ID "UNA")
+set(APP_ID "your_app_id_here")  # Replace with actual app ID
+set(APP_NAME "MyApp")           # Replace with actual app name
+set(DEV_ID "UNA")               # Developer ID
 
-# Include common build logic
-watch_build_app()
+# Set up build version
+watch_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Build service executable
+watch_build_service(${APP_NAME}Service.elf ${LIBS_PATH} "${TOUCHGFX_GUI_PATH}")
 ```
 
-### una.py Tool (CMake Workflow)
+#### Service+GUI App Template
 
-Similar to idf.py, for the CMake-based workflow:
+For apps with both service and TouchGFX-based GUI components:
 
-```bash
-# Within SDK repository - no environment variables needed
-cd una-watch-sdk
+```cmake
+# Watch App CMakeLists.txt - Service+GUI Template
+cmake_minimum_required(VERSION 3.21)
+include($ENV{UNA_SDK}/cmake/watch_project.cmake)
 
-# Build example app directly
-una.py build-example Running
+project(MyApp)
 
-# Or work with external apps outside SDK
-export UNA_SDK=/path/to/una-watch-sdk
+# Load configuration from .env file
+file(READ .env ENV_CONTENT)
+string(REPLACE "\n" ";" ENV_LINES ${ENV_CONTENT})
+foreach(line ${ENV_LINES})
+    string(STRIP "${line}" line)
+    if(line MATCHES "^([^=]+)=(.*)$")
+        set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+    endif()
+endforeach()
 
-# Create new app template (copies from SDK examples)
-una.py create-app my_app
+# App configuration
+set(APP_ID "your_app_id_here")  # Replace with actual app ID
+set(APP_NAME "MyApp")           # Replace with actual app name
+set(DEV_ID "UNA")               # Developer ID
 
-# Build external app
-cd my_app
-una.py build
+# Set up build version
+watch_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Package and merge
-una.py package
+# Build service and GUI executables
+watch_build_service(${APP_NAME}Service.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
+watch_build_gui(${APP_NAME}GUI.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
+
+# Scripts path
+set(SCRIPTS_PATH "${UNA_SDK}/Utilities/Scripts")
+
+# Final app merging
+add_custom_target(${APP_NAME}App ALL
+    DEPENDS ${APP_NAME}Service.elf ${APP_NAME}GUI.elf
+    COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py
+        -normal_icon ${RESOURCES_PATH}/icon_60x60.png
+        -small_icon ${RESOURCES_PATH}/icon_30x30.png
+        -name ${APP_NAME}
+        -type Activity
+        -glance_capable
+        -out ${CMAKE_CURRENT_BINARY_DIR}
+        -appid ${APP_ID}
+        -appver ${BUILD_VERSION}
+        -scripts ${SCRIPTS_PATH}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/Tmp ${OUTPUT_PATH}/Tmp
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}_${BUILD_VERSION}.uapp ${OUTPUT_PATH}/
+    COMMENT "Merging ${APP_NAME} application"
+)
 ```
 
 ### Building Examples
@@ -173,57 +226,112 @@ cd una-sdk
 # examples/Apps/Running/Software/Apps/Running-CMake/build/
 ```
 
+### Creating New Apps
+
+Use the `una.py create` command to start new projects:
+
+```bash
+# Create a service-only app
+una.py create MyServiceApp service-only
+
+# Create a service+GUI app
+una.py create MyGuiApp service-gui
+```
+
+This creates the complete directory structure, CMakeLists.txt, .env file, and copies necessary build files.
+
+### Building Apps
+
+For external apps (outside the SDK repository):
+
+```bash
+# Set SDK path
+export UNA_SDK=/path/to/una-watch-sdk
+
+# Navigate to app CMake directory
+cd MyApp/Software/Apps/MyApp-CMake
+
+# Configure and build
+una.py build
+```
+
 ### Dual Workflow Benefits
 
 1. **Backward Compatibility**: Existing CubeIDE + TouchGFX projects remain fully functional
 2. **Choice of Tools**: Developers can use familiar CubeIDE or new CMake workflow
 3. **ESP-IDF-like Experience**: CMake workflow provides the same confidence as ESP-IDF
-4. **Environment-Based**: UNA_SDK enables flexible project placement
-5. **Shared SDK**: Common build logic centralized in SDK, reducing duplication
-6. **Maintainable**: Clear separation between SDK and app-specific code
+4. **Location Independence**: Apps can be placed anywhere via UNA_SDK environment variable
+5. **Relative Path Configuration**: .env files enable flexible project structures
+6. **Unified Tooling**: una.py provides consistent interface across all operations
+7. **Shared SDK**: Common build logic centralized in SDK, reducing duplication
+8. **Maintainable**: Clear separation between SDK and app-specific code
 
-### Repository Structure Analysis: SDK-Centric vs App-Centric
+### Implementation Details
 
-#### Current Structure (App-Centric)
+#### Project Structure for CMake Workflow
+
 ```
-repo/
-├── Apps/          # Individual app projects
-├── SDK/           # Framework (referenced via UNA_SDK)
+# SDK Repository
+una-watch-sdk/
+├── cmake/            # Common CMake modules
+│   ├── toolchain-arm-none-eabi.cmake
+│   ├── watch_project.cmake  # Common project setup
+│   └── watch_components.cmake  # Component definitions
+├── tools/
+│   └── una.py        # Build tool
+├── examples/         # Example apps
+│   └── Apps/         # App examples
+│       ├── Running/
+│       ├── Alarm/
+│       └── ...
+├── Libs/            # SDK core libraries
+├── docs/            # SDK documentation
 └── .git/
+
+# External App Development
+my-apps-workspace/
+├── MyServiceApp/
+│   ├── Software/
+│   │   ├── Apps/
+│   │   │   └── MyServiceApp-CMake/
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── .env
+│   │   │       ├── MyServiceAppService.ld
+│   │   │       └── syscalls.cpp
+│   │   └── Libs/
+│   │       ├── Header/
+│   │       └── Sources/
+│   ├── Resources/
+│   │   ├── icon_30x30.png
+│   │   └── icon_60x60.png
+│   └── Output/
+└── MyGuiApp/
+    ├── Software/
+    │   ├── Apps/
+    │   │   ├── MyGuiApp-CMake/
+    │   │   │   ├── CMakeLists.txt
+    │   │   │   ├── .env
+    │   │   │   ├── MyGuiAppService.ld
+    │   │   │   ├── MyGuiAppGUI.ld
+    │   │   │   ├── syscalls.cpp
+    │   │   │   └── PaintImpl.cpp
+    │   │   └── TouchGFX-GUI/
+    │   │       └── ... (TouchGFX project)
+    │   └── Libs/
+    │       ├── Header/
+    │       └── Sources/
+    ├── Resources/
+    │   ├── icon_30x30.png
+    │   └── icon_60x60.png
+    └── Output/
 ```
 
-#### Proposed Structure (SDK-Centric)
-```
-watch-sdk-repo/   # Main SDK repository
-├── Apps/          # Submodule with example apps
-├── cmake/         # SDK CMake modules
-├── tools/         # SDK tools
-├── Libs/          # SDK core libraries
-├── docs/          # SDK documentation
-└── .git/
-```
+#### Required Files for CMake Apps
 
-#### SDK-Centric Advantages
-1. **Distribution**: Clone SDK → get working examples immediately
-2. **Version Management**: SDK versions include compatible app examples
-3. **Development Workflow**: Work on SDK and examples together
-4. **CI/CD**: Test SDK changes against example apps
-5. **Documentation**: Examples are part of SDK repository
-6. **ESP-IDF Alignment**: Mirrors ESP-IDF's structure with examples/
-
-#### Implementation for SDK-Centric Structure
-1. Move `SDK/` contents to repository root
-2. Convert `Apps/` to git submodule
-3. Update CMake paths (remove UNA_SDK complexity)
-4. Modify `una.py` to work within SDK repository
-5. Update documentation and examples
-
-### Migration Path
-
-1. Extract common CMake logic from Running-CMake/CMakeLists.txt to SDK cmake modules
-2. Create UNA_SDK environment variable support
-3. Develop una.py build tool for CMake workflow
-4. Keep existing CubeIDE projects unchanged
-5. Update documentation with both workflows
-6. Test CMake workflow compatibility with existing app structures
-7. **Consider repository restructuring**: Make SDK the main repo with Apps as submodule
+- **CMakeLists.txt**: Project configuration and build logic
+- **.env**: Relative path configuration
+- **Linker scripts**: `AppNameService.ld` and `AppNameGUI.ld` (for GUI apps)
+- **System files**: `syscalls.cpp` and `PaintImpl.cpp` (for GUI apps)
+- **App logic**: Service implementation in `Libs/Header/` and `Libs/Sources/`
+- **Resources**: Icons in `Resources/` directory
+- **TouchGFX project**: GUI implementation (for service+GUI apps)

@@ -130,6 +130,32 @@ def create_app(app_name, app_type):
     cmake_file = cmake_dir / "CMakeLists.txt"
     shutil.copy(template_file, cmake_file)
 
+    # Copy common files
+    # Copy syscalls.cpp from SDK examples
+    syscalls_src = sdk_path / "examples" / "Apps" / "Running" / "Software" / "Apps" / "Running-CMake" / "syscalls.cpp"
+    if syscalls_src.exists():
+        shutil.copy(syscalls_src, cmake_dir / "syscalls.cpp")
+
+    # Copy linker scripts
+    if app_type == 'service-only':
+        linker_src = sdk_path / "examples" / "Apps" / "Running" / "Software" / "Apps" / "Running-CMake" / "RunningService.ld"
+        if linker_src.exists():
+            shutil.copy(linker_src, cmake_dir / f"{app_name}Service.ld")
+    else:
+        # For service-gui, copy both
+        service_linker_src = sdk_path / "examples" / "Apps" / "Running" / "Software" / "Apps" / "Running-CMake" / "RunningService.ld"
+        gui_linker_src = sdk_path / "examples" / "Apps" / "Running" / "Software" / "Apps" / "Running-CMake" / "RunningGUI.ld"
+        if service_linker_src.exists():
+            shutil.copy(service_linker_src, cmake_dir / f"{app_name}Service.ld")
+        if gui_linker_src.exists():
+            shutil.copy(gui_linker_src, cmake_dir / f"{app_name}GUI.ld")
+
+    # Copy PaintImpl.cpp for GUI apps
+    if app_type == 'service-gui':
+        paint_src = sdk_path / "examples" / "Apps" / "Running" / "Software" / "Apps" / "Running-CMake" / "PaintImpl.cpp"
+        if paint_src.exists():
+            shutil.copy(paint_src, cmake_dir / "PaintImpl.cpp")
+
     # Customize CMakeLists.txt
     content = cmake_file.read_text()
     content = content.replace('project(MyApp)', f'project({app_name})')
@@ -137,6 +163,10 @@ def create_app(app_name, app_type):
     # Generate a simple app ID based on name
     app_id = f"{hash(app_name) % 0xFFFFFFFFFFFFFFFF:016X}"[:16].upper()
     content = content.replace('set(APP_ID "your_app_id_here")', f'set(APP_ID "{app_id}")')
+    # Update linker script names
+    content = content.replace('RunningService.ld', f'{app_name}Service.ld')
+    if app_type == 'service-gui':
+        content = content.replace('RunningGUI.ld', f'{app_name}GUI.ld')
     cmake_file.write_text(content)
 
     # Create .env template

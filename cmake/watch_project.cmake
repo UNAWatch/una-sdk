@@ -150,7 +150,7 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
     )
 
     target_link_options(${TARGET_NAME} PRIVATE
-        -T "${CMAKE_CURRENT_SOURCE_DIR}/RunningService.ld"
+        -T "${CMAKE_CURRENT_SOURCE_DIR}/${APP_NAME}Service.ld"
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
         ${WATCH_COMMON_LINK_OPTIONS}
         -L${UNA_SDK}/libc++
@@ -221,7 +221,7 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
     target_link_options(${TARGET_NAME} PRIVATE
         -L${TOUCHGFX_GUI_PATH}/touchgfx/lib/core/cortex_m33/gcc
-        -T "${CMAKE_CURRENT_SOURCE_DIR}/RunningGUI.ld"
+        -T "${CMAKE_CURRENT_SOURCE_DIR}/${APP_NAME}GUI.ld"
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
         ${WATCH_COMMON_LINK_OPTIONS}
         -L${UNA_SDK}/libc++
