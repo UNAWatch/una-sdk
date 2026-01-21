@@ -9,8 +9,6 @@ export PATH=/tmp/bin:/opt/st/stm32cubeide_*/:`find /opt/st/stm32cubeide_* -name 
 # Ensure python is available for post-build scripts
 export PYTHONPATH=/usr/lib/python3/dist-packages:$PYTHONPATH
 
-git config --global --add safe.directory $GITHUB_WORKSPACE
-
 STM32CUBEIDE_DIR="$(ls -1d /opt/st/stm32cubeide_* 2>/dev/null | sort -V | tail -n 1)"
 if [ -z "$STM32CUBEIDE_DIR" ] || [ ! -x "$STM32CUBEIDE_DIR/stm32cubeide" ]; then
   echo "ERROR: STM32CubeIDE not found under /opt/st (expected /opt/st/stm32cubeide_*/stm32cubeide)" >&2

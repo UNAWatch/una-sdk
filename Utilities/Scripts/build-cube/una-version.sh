@@ -4,11 +4,14 @@ set -e
 
 # Set build version
 BUILD_VERSION="0.0.0-dev" # When version not recognized
-if $GITHUB_WORKSPACE; then
-  GITHUB_WORKSPACE=$(pwd)
+if [ -z "$UNA_WORKSPACE" ]; then
+  UNA_WORKSPACE=$(pwd)
 fi
-echo "Workspace: $GITHUB_WORKSPACE"
-cd "$GITHUB_WORKSPACE" || echo "Failed to cd to $GITHUB_WORKSPACE"
+
+git config --global --add safe.directory $UNA_WORKSPACE
+
+echo "Workspace: $UNA_WORKSPACE"
+cd "$UNA_WORKSPACE" || echo "Failed to cd to $UNA_WORKSPACE"
 if git rev-parse --git-dir > /dev/null 2>&1; then
   COMMIT_HASH=$(git rev-parse --short=7 HEAD)
   echo "COMMIT_HASH: $COMMIT_HASH"

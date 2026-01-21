@@ -13,11 +13,11 @@ if [ -z "$IMPORT_PATH" ]; then
 fi
 
 NAME="$(basename $IMPORT_PATH)"
-DATA_DIR="${GITHUB_WORKSPACE:-/workspace/}.vscode/workspace/$NAME"
+DATA_DIR="$UNA_WORKSPACE/.headless-build/$NAME"
 echo "Building '$NAME' in '$DATA_DIR'"
 
 # Patch __BUILD_VERSION__ in the imported project's prefs (assumes project name matches basename of IMPORT_PATH)
-PREFS_FILE="$IMPORT_PATH/.settings/org.eclipse.cdt.core.prefs"
+PREFS_FILE="$(dirname $IMPORT_PATH)/$NAME/.settings/org.eclipse.cdt.core.prefs"
 if [ -f "$PREFS_FILE" ]; then
   if [ -n "$BUILD_VERSION" ]; then
     sed -i 's#/__BUILD_VERSION__/value=.*#/__BUILD_VERSION__/value='"$BUILD_VERSION"'#g' "$PREFS_FILE" \
@@ -26,9 +26,9 @@ if [ -f "$PREFS_FILE" ]; then
   fi
 
   if [ -n "$UNA_SDK" ]; then
-    sed -i 's#/PATH_SDK/value=.*#/PATH_SDK/value='"$UNA_SDK"'#g' "$PREFS_FILE" \
-        && echo "Overridden PATH_SDK to '$UNA_SDK' in $PREFS_FILE" \
-        || echo "Pattern PATH_SDK not found in $PREFS_FILE"
+    sed -i 's#/UNA_SDK/value=.*#/UNA_SDK/value='"$UNA_SDK"'#g' "$PREFS_FILE" \
+        && echo "Overridden UNA_SDK to '$UNA_SDK' in $PREFS_FILE" \
+        || echo "Pattern UNA_SDK not found in $PREFS_FILE"
   fi
 else
   echo "Warning: Prefs file not found at $PREFS_FILE"
