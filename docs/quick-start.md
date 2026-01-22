@@ -70,6 +70,10 @@ Prints the export command for the UNA_SDK environment variable:
 una.py export
 # Output: export UNA_SDK=/path/to/una-watch-sdk
 ```
+Add this to your shell profile or run::
+```bash
+$(una.py export)
+```
 
 #### `una.py init`
 Interactive setup of the `.env` configuration file:

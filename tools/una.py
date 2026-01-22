@@ -12,23 +12,22 @@ import shutil
 from pathlib import Path
 
 def get_sdk_path():
-    """Get SDK path - either from environment or current directory detection"""
+    """Get SDK path - either from environment or script location detection"""
     # First check if UNA_SDK is set (for external apps)
     sdk_path = os.environ.get('UNA_SDK')
     if sdk_path:
         return Path(sdk_path)
 
-    # Check if we're within SDK repository - search upwards
-    current_dir = Path.cwd()
-    for search_dir in [current_dir] + list(current_dir.parents):
-        # Look for SDK structure
-        if (search_dir / "cmake" / "watch_project.cmake").exists():
-            return search_dir
-        elif (search_dir / "SDK" / "cmake" / "watch_project.cmake").exists():
-            return search_dir / "SDK"
+    # Use script location for SDK detection
+    script_path = Path(__file__).resolve().parent
+    # Check if script is in tools/ directory
+    if (script_path.parent / "cmake" / "watch_project.cmake").exists():
+        return script_path.parent
+    # elif (script_path / "cmake" / "watch_project.cmake").exists():
+    #     return script_path
 
     print("ERROR: Cannot determine SDK path.")
-    print("Either set UNA_SDK environment variable or run from within SDK repository")
+    print("Either set UNA_SDK environment variable or run una.py from within SDK repository")
     print("export UNA_SDK=/path/to/una-watch-sdk")
     sys.exit(1)
 
@@ -60,7 +59,8 @@ def export_sdk():
     """Export UNA_SDK environment variable"""
     sdk_path = get_sdk_path()
     print(f"export UNA_SDK={sdk_path}")
-    print("Add this to your shell profile or run it before building apps")
+    print(f"export PATH={os.environ.get('PATH')}:{sdk_path}/tools")
+    print("\n# Add this to your shell profile or run $(una.py export)")
 
 def init_env():
     """Interactive setup of .env file"""
