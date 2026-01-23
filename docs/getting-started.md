@@ -28,40 +28,90 @@ Una-Watch supports four app types:
 
 For our heart rate monitor, we'll use **Activity** type for continuous monitoring.
 
-#### Step 1.2: Create Project Structure
+#### Step 1.2: Export SDK Environment
+
+Expose the SDK root for tools and add `tools/` to your `PATH`.
 
 ```bash
-# Use the SDK's project generator
-./sdk-tools/create-activity.sh heart-monitor \
-  --name "Heart Rate Monitor" \
-  --autostart \
-  --capabilities "sensor.heart_rate,notification.display,storage.write"
+# From the SDK root
+./tools/una.py export
+```
 
-# Resulting structure:
+Add the printed `export` lines to your shell profile or run them in the current
+terminal session.
+
+#### Step 1.3: Initialize the Workspace
+
+Generate or update the `.env` file for app builds.
+
+```bash
+# From the SDK root
+./tools/una.py init
+```
+
+Update the `.env` entries to match your local paths:
+
+| Variable | Description |
+| --- | --- |
+| `LIBS_PATH` | Absolute path to the SDK libraries (headers + sources). |
+| `TOUCHGFX_GUI_PATH` | Absolute path to the TouchGFX GUI template used for GUI apps. |
+| `OUTPUT_PATH` | Destination directory for built `.uapp` artifacts. |
+| `RESOURCES_PATH` | Root directory for app resources (icons, assets, fonts). |
+| `APP_PATH` | Root directory where app source trees live. |
+
+#### Step 1.4: Create Project Structure
+
+Create a new app with the new workflow. Choose **service-only** (background logic only) or **service+gui** (full UI app).
+
+```bash
+# Service + GUI app (default for Activity/Utility apps)
+./tools/una.py create heart-monitor service+gui
+
+# Service-only app (no GUI process, ideal for Glance or background services)
+./tools/una.py create heart-monitor service-only
+```
+
+**Service + GUI structure (example):**
+
+```
 heart-monitor/
-├── Software/
-│   ├── App/
-│   │   └── HeartMonitor-CubeIDE/
-│   │       ├── Core/
-│   │       │   ├── Inc/
-│   │       │   └── Src/
-│   │       └── SDK/          # SDK headers
-│   └── Libs/
-│       ├── Header/
-│       │   ├── Service.hpp   # Background logic
-│       │   └── Gui.hpp       # UI logic
-│       └── Source/
-│           ├── Service.cpp
-│           └── Gui.cpp
+├── App/
+│   ├── Service/
+│   │   ├── Inc/
+│   │   └── Src/
+│   └── Gui/
+│       ├── Inc/
+│       └── Src/
+├── Libs/
+│   ├── Header/
+│   └── Source/
 ├── Resources/
 │   ├── icon_30x30.png
 │   ├── icon_60x60.png
-│   └── TouchGFX/            # UI assets
+│   └── TouchGFX/
 └── Output/
     └── Release/
 ```
 
-#### Step 1.3: Understand Dual-Process Architecture
+**Service-only structure (example):**
+
+```
+heart-monitor/
+├── App/
+│   └── Service/
+│       ├── Inc/
+│       └── Src/
+├── Libs/
+│   ├── Header/
+│   └── Source/
+├── Resources/
+│   ├── icon_30x30.png
+│   └── icon_60x60.png
+└── Output/
+    └── Release/
+```
+
+#### Step 1.5: Understand Dual-Process Architecture
 
 Una-Watch apps run as two separate processes:
 
@@ -352,33 +402,27 @@ void syncDataToPhone() {
 
 ### Phase 5: Testing and Deployment
 
-#### Step 5.1: Simulator Testing
+#### Step 5.1: Build and Simulator Testing
 
 ```bash
-# Build for simulator
-make simulator
+# From the app directory
+./tools/una.py build
 
-# Run in simulator with mock sensor data
-./simulator heart-monitor.uapp --mock-sensors
+# Optional: build a simulator target (if provided by the app CMake)
+./tools/una.py build --target simulator
 
-# Test different scenarios:
-# - Normal heart rate readings
-# - Abnormal readings (notifications)
-# - Sensor disconnection
-# - Low battery conditions
+# Run the resulting .uapp in your simulator tooling
+# (use the .uapp generated in OUTPUT_PATH/Release)
 ```
 
 #### Step 5.2: Hardware Testing
 
 ```bash
-# Build for device
-make release
+# Build a release artifact
+./tools/una.py build --target release
 
-# Flash to connected watch
-make flash
-
-# Monitor logs via serial
-make monitor
+# Install the .uapp onto the watch via USB or BLE tooling
+# (use the .uapp generated in OUTPUT_PATH/Release)
 ```
 
 #### Step 5.3: Performance Optimization
@@ -414,30 +458,14 @@ void optimizeForPower() {
 
 #### Step 6.1: App Packaging
 
-```bash
-# Package app with metadata
-./sdk-tools/package-app.sh \
-  --input heart-monitor.elf \
-  --output heart-monitor.uapp \
-  --name "Heart Rate Monitor" \
-  --version "1.0.0" \
-  --type activity \
-  --capabilities "sensor.heart_rate,notification.display,storage.write" \
-  --icons icon_30x30.png icon_60x60.png
-```
+Packaging is handled by the build pipeline. After a successful build, the `.uapp`
+artifact is written to `OUTPUT_PATH/Release`. Update your app metadata and icons
+in `Resources/` as needed before building.
 
 #### Step 6.2: OTA Deployment
 
-**Upload to App Store:**
-
-```bash
-# Submit to Una-Watch app store
-./sdk-tools/submit-app.sh \
-  --app heart-monitor.uapp \
-  --metadata app-metadata.json \
-  --screenshots screenshot1.png screenshot2.png \
-  --description "Professional heart rate monitoring with trend analysis"
-```
+Upload the `.uapp` from `OUTPUT_PATH/Release` using the companion app or your
+OTA tooling pipeline.
 
 ## Key Technical Concepts Learned
 

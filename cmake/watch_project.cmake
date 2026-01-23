@@ -97,12 +97,31 @@ endfunction()
 
 # Function to build service executable
 function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
+    if(NOT DEFINED WATCH_SERVICE_STACK_SIZE)
+        if(DEFINED SERVICE_STACK_SIZE)
+            set(WATCH_SERVICE_STACK_SIZE "${SERVICE_STACK_SIZE}")
+        else()
+            set(WATCH_SERVICE_STACK_SIZE "10*1024")
+        endif()
+    endif()
+    if(NOT DEFINED WATCH_SERVICE_RAM_LENGTH)
+        if(DEFINED SERVICE_RAM_LENGTH)
+            set(WATCH_SERVICE_RAM_LENGTH "${SERVICE_RAM_LENGTH}")
+        else()
+            set(WATCH_SERVICE_RAM_LENGTH "500K")
+        endif()
+    endif()
+
+    file(GLOB_RECURSE SERVICE_APP_SOURCES CONFIGURE_DEPENDS
+        "${LIBS_PATH}/Sources/*.c"
+        "${LIBS_PATH}/Sources/*.cpp"
+        "${LIBS_PATH}/Source/*.c"
+        "${LIBS_PATH}/Source/*.cpp"
+    )
+
     # Service sources - app-specific + common SDK sources
     set(SERVICE_SOURCES
-        "${LIBS_PATH}/Sources/ActivitySummarySerializer.cpp"
-        "${LIBS_PATH}/Sources/ActivityWriter.cpp"
-        "${LIBS_PATH}/Sources/Service.cpp"
-        "${LIBS_PATH}/Sources/SettingsSerializer.cpp"
+        ${SERVICE_APP_SOURCES}
 
         "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp"
 
@@ -128,13 +147,18 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
     add_executable(${TARGET_NAME} ${SERVICE_SOURCES})
 
-    target_include_directories(${TARGET_NAME} PRIVATE
+    set(SERVICE_INCLUDE_DIRS
         "${LIBS_PATH}/Header"
         "${UNA_SDK}/Libs/Header"
         "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c"
         "${UNA_SDK}/ThirdParty/coreJSON/source/include"
-        "${TOUCHGFX_GUI_PATH}/gui/include"
     )
+
+    if(EXISTS "${TOUCHGFX_GUI_PATH}/gui/include")
+        list(APPEND SERVICE_INCLUDE_DIRS "${TOUCHGFX_GUI_PATH}/gui/include")
+    endif()
+
+    target_include_directories(${TARGET_NAME} PRIVATE ${SERVICE_INCLUDE_DIRS})
 
     target_compile_definitions(${TARGET_NAME} PRIVATE
         BUILD_VERSION="${BUILD_VERSION}"
@@ -150,7 +174,9 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
     )
 
     target_link_options(${TARGET_NAME} PRIVATE
-        -T "${CMAKE_CURRENT_SOURCE_DIR}/${APP_NAME}Service.ld"
+        -T "${UNA_SDK}/Utilities/Scripts/linker/Main/Sections.ld"
+        -Wl,--defsym=STACK_SIZE=${WATCH_SERVICE_STACK_SIZE}
+        -Wl,--defsym=RAM_LENGTH=${WATCH_SERVICE_RAM_LENGTH}
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
         ${WATCH_COMMON_LINK_OPTIONS}
         -L${UNA_SDK}/libc++
@@ -164,6 +190,21 @@ endfunction()
 
 # Function to build GUI executable
 function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
+    if(NOT DEFINED WATCH_GUI_STACK_SIZE)
+        if(DEFINED GUI_STACK_SIZE)
+            set(WATCH_GUI_STACK_SIZE "${GUI_STACK_SIZE}")
+        else()
+            set(WATCH_GUI_STACK_SIZE "10*1024")
+        endif()
+    endif()
+    if(NOT DEFINED WATCH_GUI_RAM_LENGTH)
+        if(DEFINED GUI_RAM_LENGTH)
+            set(WATCH_GUI_RAM_LENGTH "${GUI_RAM_LENGTH}")
+        else()
+            set(WATCH_GUI_RAM_LENGTH "600K")
+        endif()
+    endif()
+
     file(GLOB_RECURSE GUI_SRC_SOURCES
         "${TOUCHGFX_GUI_PATH}/gui/src/*.cpp"
         "${TOUCHGFX_GUI_PATH}/generated/fonts/src/*.cpp"
@@ -221,7 +262,9 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
     target_link_options(${TARGET_NAME} PRIVATE
         -L${TOUCHGFX_GUI_PATH}/touchgfx/lib/core/cortex_m33/gcc
-        -T "${CMAKE_CURRENT_SOURCE_DIR}/${APP_NAME}GUI.ld"
+        -T "${UNA_SDK}/Utilities/Scripts/linker/Main/Sections.ld"
+        -Wl,--defsym=STACK_SIZE=${WATCH_GUI_STACK_SIZE}
+        -Wl,--defsym=RAM_LENGTH=${WATCH_GUI_RAM_LENGTH}
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
         ${WATCH_COMMON_LINK_OPTIONS}
         -L${UNA_SDK}/libc++
@@ -235,12 +278,43 @@ endfunction()
 
 # Main function to build a complete watch app
 function(watch_build_app)
-    # Set up paths relative to current source directory
-    set(LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../Libs")
-    set(TOUCHGFX_GUI_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")
-    set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Output")
-    set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Resources")
-    
+    if(DEFINED APP_PATH)
+        set(APP_ROOT "${APP_PATH}")
+    else()
+        get_filename_component(LEGACY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
+        if(EXISTS "${LEGACY_ROOT}/Software/Libs")
+            set(APP_ROOT "${LEGACY_ROOT}")
+        else()
+            set(APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+        endif()
+    endif()
+
+    if(NOT IS_ABSOLUTE "${APP_ROOT}")
+        get_filename_component(APP_ROOT "${APP_ROOT}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+
+    # Set up paths relative to app root unless overridden
+    if(NOT DEFINED LIBS_PATH)
+        if(EXISTS "${APP_ROOT}/Software/Libs")
+            set(LIBS_PATH "${APP_ROOT}/Software/Libs")
+        else()
+            set(LIBS_PATH "${APP_ROOT}/Libs")
+        endif()
+    endif()
+    if(NOT DEFINED TOUCHGFX_GUI_PATH)
+        if(EXISTS "${APP_ROOT}/Software/Apps/TouchGFX-GUI")
+            set(TOUCHGFX_GUI_PATH "${APP_ROOT}/Software/Apps/TouchGFX-GUI")
+        else()
+            set(TOUCHGFX_GUI_PATH "${APP_ROOT}/TouchGFX-GUI")
+        endif()
+    endif()
+    if(NOT DEFINED OUTPUT_PATH)
+        set(OUTPUT_PATH "${APP_ROOT}/Output")
+    endif()
+    if(NOT DEFINED RESOURCES_PATH)
+        set(RESOURCES_PATH "${APP_ROOT}/Resources")
+    endif()
+
     set(SCRIPTS_PATH "${UNA_SDK}/Utilities/Scripts")
 
     # Set up version
@@ -251,14 +325,41 @@ function(watch_build_app)
 
     # Build service and GUI
     watch_build_service(${APP_NAME}Service.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
+
+    set(OUTPUT_PATHS "")
+    foreach(path IN LISTS OUTPUT_PATH)
+        if(IS_ABSOLUTE "${path}")
+            list(APPEND OUTPUT_PATHS "${path}")
+        else()
+            list(APPEND OUTPUT_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/${path}")
+        endif()
+    endforeach()
+
+    if(DEFINED APP_TYPE AND APP_TYPE STREQUAL "service-only")
+        foreach(out_path IN LISTS OUTPUT_PATHS)
+            add_custom_command(TARGET ${APP_NAME}Service.elf POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/Tmp ${out_path}/Tmp
+                COMMENT "Copying service output"
+            )
+        endforeach()
+        return()
+    endif()
+
     watch_build_gui(${APP_NAME}GUI.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
+
+    set(OUTPUT_COPY_COMMANDS "")
+    foreach(out_path IN LISTS OUTPUT_PATHS)
+        list(APPEND OUTPUT_COPY_COMMANDS
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/Tmp ${out_path}/Tmp
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}_${BUILD_VERSION}.uapp ${out_path}/
+        )
+    endforeach()
 
     # Final app merging
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_NAME}Service.elf ${APP_NAME}GUI.elf
         COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type Activity -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts ${SCRIPTS_PATH}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/Tmp ${OUTPUT_PATH}/Tmp
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}_${BUILD_VERSION}.uapp ${OUTPUT_PATH}/
+        ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
 endfunction()
