@@ -1,4 +1,4 @@
-# Watch App CMakeLists.txt - Service-Only Template
+# Watch App CMakeLists.txt - Service+GUI Template
 cmake_minimum_required(VERSION 3.21)
 include($ENV{UNA_SDK}/cmake/watch_project.cmake)
 
