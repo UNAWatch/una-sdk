@@ -1,5 +1,5 @@
 API Reference
-=============
+===========================
 
 This section provides detailed documentation for the Una-Watch SDK core interfaces, message system, and sensor layer.
 

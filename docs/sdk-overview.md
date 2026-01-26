@@ -1,4 +1,4 @@
-# SDK Reference
+# SDK Overview
 
 The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. For platform architecture overview, see [Platform Overview](platform-overview.md).
 
@@ -12,9 +12,122 @@ The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interf
 - **Simulator**: Desktop-based environment for rapid prototyping and testing.
 
 ## SDK Setup and Build Reference
+
 To start using this SDK, see the [SDK Setup and Build Reference](sdk-setup.md)
 
 ## SDK Project Structure
+
+```
+SDK/
+├── Libs/
+│   ├── Header/SDK/           # SDK Interface Headers
+│   │   ├── Interfaces/       # Core API interfaces
+│   │   ├── Messages/         # Message type definitions
+│   │   ├── SensorLayer/      # Sensor data structures
+│   │   ├── Kernel/           # Kernel provider interfaces
+│   │   └── Wrappers/         # Standard library wrappers
+│   └── Source/SDK/           # SDK Implementation
+├── Port/
+│   └── TouchGFX/             # TouchGFX integration
+├── ThirdParty/               # External dependencies
+│   ├── coreJSON/            # JSON parsing library
+│   └── FitSDK/              # Fitness data format
+├── Utilities/Scripts/        # Build and packaging tools
+├── Simulator/                # Development simulator
+└── Visual Studio/            # Windows development support
+```
+
+### High-Level Utilities
+
+In addition to core interfaces, the SDK provides several high-level utilities to simplify common tasks:
+
+#### GSModel & GSBridge (GUI-Service Communication)
+
+The `GSModel` provides a type-safe, bidirectional bridge between the GUI and Service processes using `std::variant` and `std::visit`. This is the recommended way to handle application-level events between processes.
+
+```cpp
+// Define events in G2SEvents.hpp and S2GEvents.hpp
+// In Service:
+GSModel model(serviceHandler);
+model.process(); // Drain GUI->Service events
+
+// In GUI:
+IGUIModel* bridge = ...;
+bridge->post(G2SEvent::SomeEvent{data});
+```
+
+#### Glance UI System
+
+A lightweight UI framework for the 240x60 pixel notification area. It uses a `Form` to manage `GlanceControl` items like Text, Image, Line, and Rectangle. This system is optimized for low-power notification display.
+
+```cpp
+SDK::Glance::Form form(240, 60);
+auto text = form.createText();
+text.init({0, 0}, {240, 20}, "Notification", FONT_SMALL, COLOR_WHITE);
+```
+
+#### FitHelper (Fitness Data)
+
+Simplifies the generation of Garmin FIT files, allowing apps to export activity data in a standard format compatible with major fitness platforms.
+
+```cpp
+SDK::Component::FitHelper fit(msgID, msgDef);
+fit.writeMessage(data, &file);
+```
+
+#### TrackMapBuilder (GPS Visualization)
+
+Creates a simplified pixel-based map representation of GPS tracks. It handles coordinate scaling, rotation, and filtering to fit a track into a circular or rectangular display area.
+
+```cpp
+SDK::TrackMapBuilder builder;
+builder.addPoint({lat, lon});
+auto screenMap = builder.build(radiusPx);
+```
+
+#### Serialization (CBOR & JSON)
+
+The SDK includes stream-based readers and writers for both CBOR and JSON formats, optimized for memory-constrained environments. These are used for settings persistence and BLE data exchange.
+
+- **CBOR**: `CborStreamReader`, `CborStreamWriter` (efficient binary format)
+- **JSON**: `JsonStreamReader`, `JsonStreamWriter` (human-readable format)
+
+#### Signal Processing & Tools
+
+- **Filters**: Basic signal processing filters like `FilterSmooth` for noise reduction.
+- **FixedQueue**: A template-based fixed-capacity queue for efficient data buffering.
+- **CircularBuffer**: A thread-safe circular buffer implementation integrated with kernel synchronization primitives.
+- **SwTimer**: High-level software timers for application-level periodic tasks.
+
+```bash
+python app_packer/app_packer.py -e <elf_file> -o <output_dir> -v <version>
+```
+
+- **ELF Processing**: Parses compiled ELF files
+- **Package Creation**: Generates .uapp container files
+- **Metadata Injection**: Embeds version and configuration data
+
+### App Merging Script (app_merging.py)
+
+```bash
+python app_merging.py -name <name> -type <Activity|Utility|Glance|Clockface> \
+                     -autostart -header -normal_icon <60x60.png> \
+                     -small_icon <30x30.png> -appid <16hex> -appver <A.B.C> \
+                     -scripts <SDK/Utilities/Scripts>
+```
+
+- **App Metadata**: Defines app properties and capabilities
+- **Icon Processing**: Converts and embeds PNG icons
+- **Type Configuration**: Sets app behavior and permissions
+- **ID Assignment**: Unique application identifiers
+
+### Build Integration Scripts
+
+- **CubeIDE Integration**: Post-build scripts for automatic packaging
+- **Version Management**: Automatic version incrementing
+- **Dependency Checking**: Validates build prerequisites
+
+## SDK Interfaces
 
 The SDK provides a comprehensive set of interfaces that apps use to interact with the watch's kernel and hardware:
 
@@ -187,118 +300,6 @@ void Service::run() {
     }
 }
 ```
-
-## SDK Project Structure
-
-```
-SDK/
-├── Libs/
-│   ├── Header/SDK/           # SDK Interface Headers
-│   │   ├── Interfaces/       # Core API interfaces
-│   │   ├── Messages/         # Message type definitions
-│   │   ├── SensorLayer/      # Sensor data structures
-│   │   ├── Kernel/           # Kernel provider interfaces
-│   │   └── Wrappers/         # Standard library wrappers
-│   └── Source/SDK/           # SDK Implementation
-├── Port/
-│   └── TouchGFX/             # TouchGFX integration
-├── ThirdParty/               # External dependencies
-│   ├── coreJSON/            # JSON parsing library
-│   └── FitSDK/              # Fitness data format
-├── Utilities/Scripts/        # Build and packaging tools
-├── Simulator/                # Development simulator
-└── Visual Studio/            # Windows development support
-```
-
-### High-Level Utilities
-
-In addition to core interfaces, the SDK provides several high-level utilities to simplify common tasks:
-
-#### GSModel & GSBridge (GUI-Service Communication)
-
-The `GSModel` provides a type-safe, bidirectional bridge between the GUI and Service processes using `std::variant` and `std::visit`. This is the recommended way to handle application-level events between processes.
-
-```cpp
-// Define events in G2SEvents.hpp and S2GEvents.hpp
-// In Service:
-GSModel model(serviceHandler);
-model.process(); // Drain GUI->Service events
-
-// In GUI:
-IGUIModel* bridge = ...;
-bridge->post(G2SEvent::SomeEvent{data});
-```
-
-#### Glance UI System
-
-A lightweight UI framework for the 240x60 pixel notification area. It uses a `Form` to manage `GlanceControl` items like Text, Image, Line, and Rectangle. This system is optimized for low-power notification display.
-
-```cpp
-SDK::Glance::Form form(240, 60);
-auto text = form.createText();
-text.init({0, 0}, {240, 20}, "Notification", FONT_SMALL, COLOR_WHITE);
-```
-
-#### FitHelper (Fitness Data)
-
-Simplifies the generation of Garmin FIT files, allowing apps to export activity data in a standard format compatible with major fitness platforms.
-
-```cpp
-SDK::Component::FitHelper fit(msgID, msgDef);
-fit.writeMessage(data, &file);
-```
-
-#### TrackMapBuilder (GPS Visualization)
-
-Creates a simplified pixel-based map representation of GPS tracks. It handles coordinate scaling, rotation, and filtering to fit a track into a circular or rectangular display area.
-
-```cpp
-SDK::TrackMapBuilder builder;
-builder.addPoint({lat, lon});
-auto screenMap = builder.build(radiusPx);
-```
-
-#### Serialization (CBOR & JSON)
-
-The SDK includes stream-based readers and writers for both CBOR and JSON formats, optimized for memory-constrained environments. These are used for settings persistence and BLE data exchange.
-
-- **CBOR**: `CborStreamReader`, `CborStreamWriter` (efficient binary format)
-- **JSON**: `JsonStreamReader`, `JsonStreamWriter` (human-readable format)
-
-#### Signal Processing & Tools
-
-- **Filters**: Basic signal processing filters like `FilterSmooth` for noise reduction.
-- **FixedQueue**: A template-based fixed-capacity queue for efficient data buffering.
-- **CircularBuffer**: A thread-safe circular buffer implementation integrated with kernel synchronization primitives.
-- **SwTimer**: High-level software timers for application-level periodic tasks.
-
-```bash
-python app_packer/app_packer.py -e <elf_file> -o <output_dir> -v <version>
-```
-
-- **ELF Processing**: Parses compiled ELF files
-- **Package Creation**: Generates .uapp container files
-- **Metadata Injection**: Embeds version and configuration data
-
-### App Merging Script (app_merging.py)
-
-```bash
-python app_merging.py -name <name> -type <Activity|Utility|Glance|Clockface> \
-                     -autostart -header -normal_icon <60x60.png> \
-                     -small_icon <30x30.png> -appid <16hex> -appver <A.B.C> \
-                     -scripts <SDK/Utilities/Scripts>
-```
-
-- **App Metadata**: Defines app properties and capabilities
-- **Icon Processing**: Converts and embeds PNG icons
-- **Type Configuration**: Sets app behavior and permissions
-- **ID Assignment**: Unique application identifiers
-
-### Build Integration Scripts
-
-- **CubeIDE Integration**: Post-build scripts for automatic packaging
-- **Version Management**: Automatic version incrementing
-- **Dependency Checking**: Validates build prerequisites
 
 ## Simulator Environment
 

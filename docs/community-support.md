@@ -11,8 +11,8 @@ Join the Una-Watch developer community to share your apps, get help, and stay up
 ## Getting Help
 
 If you're stuck, follow these steps:
-1. Search the [Troubleshooting](troubleshooting.md) guide.
-2. Check the [Examples](examples-tutorials.md) to see if a similar feature is implemented.
+1. Search the guide and github repository.
+2. Check the SDK/Examples to see if a similar feature is implemented.
 3. Ask a question on the Forum or Discord.
 4. For critical product issues, contact our support team at `support@una-watch.dev`.
 
