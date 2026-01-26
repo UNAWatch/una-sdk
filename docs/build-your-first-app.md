@@ -1,10 +1,11 @@
-# Step-by-Step App Development Guide
+# First App
 
-This comprehensive guide walks through the complete Una-Watch app development process, from concept to deployment. We'll build a heart rate monitor app that demonstrates the platform's unique capabilities.
+This tutorial walks you through building process of an app. For SDK setup and build system reference, see [SDK Setup and Build Overview](sdk-setup.md).
 
 ## Overview: Heart Rate Monitor App
 
 Our app will:
+
 - Monitor heart rate using the watch's PPG sensor
 - Display real-time BPM on the screen
 - Store readings for trend analysis
@@ -507,12 +508,6 @@ With your heart rate monitor complete, explore:
 ## Resources
 
 - [API Reference](api-reference.rst) - Complete SDK documentation
-- [SDK Overview](sdk-overview.md) - Core concepts and tools
+- [SDK Overview](sdk-reference.md) - Core concepts and tools
 - [Development Workflow](development-workflow.md) - Framework details
 - [Architecture Deep Dive](architecture-deep-dive.md) - Internal details
-
----
-
-**Development Time**: 2-3 hours
-**Concepts Covered**: PIC execution, shared libc, dual-process architecture, sensor integration, IPC, UI development, BLE communication, power optimization
-**Skills Gained**: Full-stack Una-Watch development, performance tuning, cross-platform deployment
