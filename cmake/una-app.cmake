@@ -1,4 +1,4 @@
-# Watch SDK CMake Project Configuration
+# UNA App CMake Project Configuration
 # This file contains common CMake logic extracted from app CMakeLists.txt
 # to enable both relative (within SDK) and environment-variable based (external) SDK referencing
 
@@ -15,6 +15,8 @@ else()
     set(UNA_SDK "$ENV{UNA_SDK}")
     message("Using external SDK: ${UNA_SDK}")
 endif()
+
+include("${UNA_SDK}/cmake/una-sdk.cmake")
 
 # Common toolchain setup
 set(CMAKE_TOOLCHAIN_FILE "${UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake")
@@ -43,7 +45,7 @@ add_compile_options(
 )
 
 # Common linker options
-set(WATCH_COMMON_LINK_OPTIONS
+set(UNA_APP_COMMON_LINK_OPTIONS
     -Wl,--gc-sections
     -nostartfiles
     -nodefaultlibs
@@ -58,7 +60,7 @@ set(WATCH_COMMON_LINK_OPTIONS
 )
 
 # Function to set up build version
-function(watch_setup_version BUILD_VERSION_OUT WORKING_DIR)
+function(una_app_setup_version BUILD_VERSION_OUT WORKING_DIR)
     if(DEFINED BUILD_VERSION)
         set(${BUILD_VERSION_OUT} "${BUILD_VERSION}" PARENT_SCOPE)
         message("External BUILD_VERSION: ${BUILD_VERSION}")
@@ -96,62 +98,38 @@ function(watch_setup_version BUILD_VERSION_OUT WORKING_DIR)
 endfunction()
 
 # Function to build service executable
-function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
-    if(NOT DEFINED WATCH_SERVICE_STACK_SIZE)
-        if(DEFINED SERVICE_STACK_SIZE)
-            set(WATCH_SERVICE_STACK_SIZE "${SERVICE_STACK_SIZE}")
-        else()
-            set(WATCH_SERVICE_STACK_SIZE "10*1024")
-        endif()
-    endif()
-    if(NOT DEFINED WATCH_SERVICE_RAM_LENGTH)
-        if(DEFINED SERVICE_RAM_LENGTH)
-            set(WATCH_SERVICE_RAM_LENGTH "${SERVICE_RAM_LENGTH}")
-        else()
-            set(WATCH_SERVICE_RAM_LENGTH "500K")
-        endif()
-    endif()
+function(una_app_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
+    include("${LIBS_PATH}/libs.cmake")
 
-    file(GLOB_RECURSE SERVICE_APP_SOURCES CONFIGURE_DEPENDS
-        "${LIBS_PATH}/Sources/*.c"
-        "${LIBS_PATH}/Sources/*.cpp"
-        "${LIBS_PATH}/Source/*.c"
-        "${LIBS_PATH}/Source/*.cpp"
-    )
+    if(NOT DEFINED UNA_APP_SERVICE_STACK_SIZE)
+        if(DEFINED SERVICE_STACK_SIZE)
+            set(UNA_APP_SERVICE_STACK_SIZE "${SERVICE_STACK_SIZE}")
+        else()
+            set(UNA_APP_SERVICE_STACK_SIZE "10*1024")
+        endif()
+    endif()
+    if(NOT DEFINED UNA_APP_SERVICE_RAM_LENGTH)
+        if(DEFINED SERVICE_RAM_LENGTH)
+            set(UNA_APP_SERVICE_RAM_LENGTH "${SERVICE_RAM_LENGTH}")
+        else()
+            set(UNA_APP_SERVICE_RAM_LENGTH "500K")
+        endif()
+    endif()
 
     # Service sources - app-specific + common SDK sources
     set(SERVICE_SOURCES
-        ${SERVICE_APP_SOURCES}
-
+        ${LIBS_SOURCES}
         "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp"
-
-        "${UNA_SDK}/Libs/Source/AppSystem/AtExitImpl.cpp"
-        "${UNA_SDK}/Libs/Source/AppSystem/EntryPoint/Service/main.cpp"
-        "${UNA_SDK}/Libs/Source/AppSystem/startup_user_app.s"
-        "${UNA_SDK}/Libs/Source/AppSystem/system.cpp"
-        "${UNA_SDK}/Libs/Source/FitHelper/FitHelper.cpp"
-        "${UNA_SDK}/Libs/Source/JSON/JsonStreamReader.cpp"
-        "${UNA_SDK}/Libs/Source/JSON/JsonStreamWriter.cpp"
-        "${UNA_SDK}/Libs/Source/Kernel/KernelBuilder.cpp"
-        "${UNA_SDK}/Libs/Source/SensorLayer/SensorConnection.cpp"
-        "${UNA_SDK}/Libs/Source/TrackMap/TrackMapBuilder.cpp"
-        "${UNA_SDK}/Libs/Source/UnaLogger/Logger.cpp"
-
-        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit.c"
-        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit_convert.c"
-        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c"
-        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c"
-
-        "${UNA_SDK}/ThirdParty/coreJSON/source/core_json.c"
+        ${UNA_SDK_SOURCES_COMMON}
+        ${UNA_SDK_SOURCES_SERVICE}
     )
 
     add_executable(${TARGET_NAME} ${SERVICE_SOURCES})
 
     set(SERVICE_INCLUDE_DIRS
-        "${LIBS_PATH}/Header"
-        "${UNA_SDK}/Libs/Header"
-        "${UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00/c"
-        "${UNA_SDK}/ThirdParty/coreJSON/source/include"
+        ${LIBS_INCLUDE_DIRS}
+        ${UNA_SDK_INCLUDE_DIRS_COMMON}
+        ${UNA_SDK_INCLUDE_DIRS_SERVICE}
     )
 
     if(EXISTS "${TOUCHGFX_GUI_PATH}/gui/include")
@@ -175,10 +153,10 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 
     target_link_options(${TARGET_NAME} PRIVATE
         -T "${UNA_SDK}/Utilities/Scripts/linker/Main/Sections.ld"
-        -Wl,--defsym=STACK_SIZE=${WATCH_SERVICE_STACK_SIZE}
-        -Wl,--defsym=RAM_LENGTH=${WATCH_SERVICE_RAM_LENGTH}
+        -Wl,--defsym=STACK_SIZE=${UNA_APP_SERVICE_STACK_SIZE}
+        -Wl,--defsym=RAM_LENGTH=${UNA_APP_SERVICE_RAM_LENGTH}
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
-        ${WATCH_COMMON_LINK_OPTIONS}
+        ${UNA_APP_COMMON_LINK_OPTIONS}
         -L${UNA_SDK}/libc++
     )
 
@@ -189,68 +167,39 @@ function(watch_build_service TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 endfunction()
 
 # Function to build GUI executable
-function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
-    if(NOT DEFINED WATCH_GUI_STACK_SIZE)
-        if(DEFINED GUI_STACK_SIZE)
-            set(WATCH_GUI_STACK_SIZE "${GUI_STACK_SIZE}")
-        else()
-            set(WATCH_GUI_STACK_SIZE "10*1024")
-        endif()
-    endif()
-    if(NOT DEFINED WATCH_GUI_RAM_LENGTH)
-        if(DEFINED GUI_RAM_LENGTH)
-            set(WATCH_GUI_RAM_LENGTH "${GUI_RAM_LENGTH}")
-        else()
-            set(WATCH_GUI_RAM_LENGTH "600K")
-        endif()
-    endif()
+function(una_app_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
+    include("${TOUCHGFX_GUI_PATH}/touchgfx.cmake")
 
-    file(GLOB_RECURSE GUI_SRC_SOURCES
-        "${TOUCHGFX_GUI_PATH}/gui/src/*.cpp"
-        "${TOUCHGFX_GUI_PATH}/generated/fonts/src/*.cpp"
-        "${TOUCHGFX_GUI_PATH}/generated/gui_generated/src/*.cpp"
-        "${TOUCHGFX_GUI_PATH}/generated/images/src/*.cpp"
-        "${TOUCHGFX_GUI_PATH}/generated/texts/src/*.cpp"
-    )
+    if(NOT DEFINED UNA_APP_GUI_STACK_SIZE)
+        if(DEFINED GUI_STACK_SIZE)
+            set(UNA_APP_GUI_STACK_SIZE "${GUI_STACK_SIZE}")
+        else()
+            set(UNA_APP_GUI_STACK_SIZE "10*1024")
+        endif()
+    endif()
+    if(NOT DEFINED UNA_APP_GUI_RAM_LENGTH)
+        if(DEFINED GUI_RAM_LENGTH)
+            set(UNA_APP_GUI_RAM_LENGTH "${GUI_RAM_LENGTH}")
+        else()
+            set(UNA_APP_GUI_RAM_LENGTH "600K")
+        endif()
+    endif()
 
     set(GUI_SOURCES
-        ${GUI_SRC_SOURCES}
-
+        ${TOUCHGFX_SOURCES}
         "${CMAKE_CURRENT_SOURCE_DIR}/PaintImpl.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp"
-
-        "${UNA_SDK}/Libs/Source/AppSystem/AtExitImpl.cpp"
-        "${UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
-        "${UNA_SDK}/Libs/Source/AppSystem/startup_user_app.s"
-        "${UNA_SDK}/Libs/Source/AppSystem/system.cpp"
-        "${UNA_SDK}/Libs/Source/Kernel/KernelBuilder.cpp"
-        "${UNA_SDK}/Libs/Source/UnaLogger/Logger.cpp"
-
-        "${UNA_SDK}/Port/TouchGFX/STM32TouchController.cpp"
-        "${UNA_SDK}/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
-        "${UNA_SDK}/Port/TouchGFX/TouchGFXGPIO.cpp"
-        "${UNA_SDK}/Port/TouchGFX/TouchGFXHAL.cpp"
-
-        "${UNA_SDK}/Port/TouchGFX/generated/OSWrappers.cpp"
-        "${UNA_SDK}/Port/TouchGFX/generated/STM32DMA.cpp"
-        "${UNA_SDK}/Port/TouchGFX/generated/TouchGFXConfiguration.cpp"
-        "${UNA_SDK}/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp"
+        ${UNA_SDK_SOURCES_COMMON}
+        ${UNA_SDK_SOURCES_GUI}
     )
 
     add_executable(${TARGET_NAME} ${GUI_SOURCES})
 
     target_include_directories(${TARGET_NAME} PRIVATE
-        "${LIBS_PATH}/Header"
-        "${UNA_SDK}/Libs/Header"
-        "${UNA_SDK}/Port/TouchGFX"
-        "${UNA_SDK}/Port/TouchGFX/generated"
-        "${TOUCHGFX_GUI_PATH}/touchgfx/framework/include"
-        "${TOUCHGFX_GUI_PATH}/generated/fonts/include"
-        "${TOUCHGFX_GUI_PATH}/generated/gui_generated/include"
-        "${TOUCHGFX_GUI_PATH}/generated/images/include"
-        "${TOUCHGFX_GUI_PATH}/generated/texts/include"
-        "${TOUCHGFX_GUI_PATH}/generated/videos/include"
-        "${TOUCHGFX_GUI_PATH}/gui/include"
+        ${LIBS_INCLUDE_DIRS}
+        ${UNA_SDK_INCLUDE_DIRS_COMMON}
+        ${UNA_SDK_INCLUDE_DIRS_GUI}
+        ${TOUCHGFX_INCLUDE_DIRS}
     )
 
     target_link_libraries(${TARGET_NAME} PRIVATE
@@ -263,10 +212,10 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
     target_link_options(${TARGET_NAME} PRIVATE
         -L${TOUCHGFX_GUI_PATH}/touchgfx/lib/core/cortex_m33/gcc
         -T "${UNA_SDK}/Utilities/Scripts/linker/Main/Sections.ld"
-        -Wl,--defsym=STACK_SIZE=${WATCH_GUI_STACK_SIZE}
-        -Wl,--defsym=RAM_LENGTH=${WATCH_GUI_RAM_LENGTH}
+        -Wl,--defsym=STACK_SIZE=${UNA_APP_GUI_STACK_SIZE}
+        -Wl,--defsym=RAM_LENGTH=${UNA_APP_GUI_RAM_LENGTH}
         -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_NAME}.elf.map
-        ${WATCH_COMMON_LINK_OPTIONS}
+        ${UNA_APP_COMMON_LINK_OPTIONS}
         -L${UNA_SDK}/libc++
     )
 
@@ -277,7 +226,7 @@ function(watch_build_gui TARGET_NAME LIBS_PATH TOUCHGFX_GUI_PATH)
 endfunction()
 
 # Main function to build a complete watch app
-function(watch_build_app)
+function(una_app_build_app)
     if(DEFINED APP_PATH)
         set(APP_ROOT "${APP_PATH}")
     else()
@@ -318,13 +267,13 @@ function(watch_build_app)
     set(SCRIPTS_PATH "${UNA_SDK}/Utilities/Scripts")
 
     # Set up version
-    watch_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
+    una_app_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
 
     # Make BUILD_VERSION available globally
     set(BUILD_VERSION "${BUILD_VERSION}" PARENT_SCOPE)
 
     # Build service and GUI
-    watch_build_service(${APP_NAME}Service.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
+    una_app_build_service(${APP_NAME}Service.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
 
     set(OUTPUT_PATHS "")
     foreach(path IN LISTS OUTPUT_PATH)
@@ -345,7 +294,7 @@ function(watch_build_app)
         return()
     endif()
 
-    watch_build_gui(${APP_NAME}GUI.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
+    una_app_build_gui(${APP_NAME}GUI.elf ${LIBS_PATH} ${TOUCHGFX_GUI_PATH})
 
     set(OUTPUT_COPY_COMMANDS "")
     foreach(out_path IN LISTS OUTPUT_PATHS)
