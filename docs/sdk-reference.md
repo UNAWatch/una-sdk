@@ -1,6 +1,6 @@
-# SDK Overview
+# SDK Reference
 
-The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications.
+The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. For platform architecture overview, see [Platform Overview](platform-overview.md).
 
 ## Key Components
 
@@ -11,14 +11,8 @@ The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interf
 - **Build Tools**: Automated scripts for compilation and `.uapp` packaging.
 - **Simulator**: Desktop-based environment for rapid prototyping and testing.
 
-## Unique Architecture
-
-Una-Watch apps are unique in the wearable space:
-- **Pure Machine Code**: Compiled binaries running directly on the MCU.
-- **Position Independent**: Abstracted from kernel memory layout.
-- **Shared libc**: Memory-efficient standard library utilization.
-
-For a deeper look into how this works, see the [Architecture Deep Dive](architecture-deep-dive.md).
+## SDK Setup and Build Reference
+To start using this SDK, see the [SDK Setup and Build Reference](sdk-setup.md)
 
 ## SDK Project Structure
 
@@ -352,7 +346,7 @@ class MockSensorManager : public ISensorManager {
 - **FitSDK**: Official Garmin FitSDK for activity data format support.
 - **Shared libc++**: A memory-optimized standard C++ library shared across all applications to minimize binary size.
 - **FreeRTOS**: The underlying real-time operating system (kernel-side).
-- **TouchGFX**: High-performance UI framework for embedded systems.
+- **TouchGFX**: UI framework for embedded systems.
 
 ### Integration Points
 
@@ -395,9 +389,3 @@ class MockSensorManager : public ISensorManager {
 - **Major Version**: Breaking API changes
 - **Minor Version**: New features, backward compatible
 - **Patch Version**: Bug fixes and improvements
-
-### Migration Guide
-
-- **Deprecation Notices**: Advance warning of API changes
-- **Compatibility Layers**: Support for older app versions
-- **Upgrade Tools**: Automated migration scripts

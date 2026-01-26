@@ -1,14 +1,6 @@
-# Una-Watch SDK Quick Start
+# SDK Setup and Build Overview
 
-Welcome to Una-Watch development! This guide will get you running your first app in under 10 minutes. Una-Watch apps are unique - they run as pure machine code directly in the watch's MCU memory, using position-independent execution and shared libc libraries.
-
-## What Makes Una-Watch Special
-
-Unlike traditional smartwatch platforms, Una-Watch apps are:
-- **Pure Machine Code**: Compiled ELF binaries executing directly in MCU memory
-- **Position-Independent**: Apps abstracted from kernel using PIC (Position-Independent Code)
-- **Shared libc**: Memory-efficient library sharing across all apps
-- **Dual-Process**: Service (background) + GUI (interface) process architecture
+This reference guide covers SDK installation, environment setup, build workflows, and `una.py` tooling. For platform architecture overview, see [Platform Overview](platform-overview.md). For hands-on app development tutorials, see [Build Your First App](build-your-first-app.md).
 
 ## Prerequisites
 
