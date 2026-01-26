@@ -7,7 +7,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
 
 .. toctree::
    :maxdepth: 4
-   :caption: Getting Started
+   :caption: 🚀 Getting Started
 
    platform-overview
    sdk-setup
@@ -15,21 +15,21 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
 
 .. toctree::
    :maxdepth: 4
-   :caption: Architecture
+   :caption: 🏗️ Architecture
 
-   sdk-reference
+   sdk-overview
    architecture-deep-dive
    development-workflow
 
 .. toctree::
    :maxdepth: 4
-   :caption: API Reference
+   :caption: 📚 API Reference
 
    api-reference
 
 .. toctree::
    :maxdepth: 1
-   :caption: Community & Support
+   :caption: 🤝 Community & Support
 
    community-support
 
