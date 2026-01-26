@@ -2,7 +2,7 @@
 
 This document provides an overview of the Una-Watch platform's unique architecture and capabilities.
 
-## Uniqu architecture
+## Unique architecture
 
 Unlike traditional smartwatch platforms, Una-Watch apps are:
 - **Pure Machine Code**: Compiled ELF binaries executing directly in MCU memory
