@@ -1,4 +1,4 @@
-Una-Watch SDK Documentation
+UNA Watch Documentation
 ===========================
 
 Welcome to the official Una-Watch SDK documentation hub. This platform enables developers to create high-performance applications for the Una-Watch ecosystem.
@@ -6,59 +6,31 @@ Welcome to the official Una-Watch SDK documentation hub. This platform enables d
 The Una-Watch architecture is unique: apps run as pure machine code directly in the MCU memory, leveraging position-independent code (PIC) and a shared libc library for maximum efficiency and abstraction from the kernel.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: 🚀 Quick Start
+   :maxdepth: 4
+   :caption: Getting Started
 
    quick-start
-
-.. toctree::
-   :maxdepth: 2
-   :caption: 📖 Getting Started Guide
-
    getting-started
 
 .. toctree::
-   :maxdepth: 2
-   :caption: 🏗️ Architecture Deep Dive
+   :maxdepth: 4
+   :caption: Architecture
 
    architecture-deep-dive
+   development-workflow
    sdk-overview
 
 .. toctree::
-   :maxdepth: 2
-   :caption: 🔧 Development Workflow
-
-   development-workflow
-
-.. toctree::
-   :maxdepth: 2
-   :caption: 📚 API Reference
+   :maxdepth: 4
+   :caption: API Reference
 
    api-reference
 
 .. toctree::
-   :maxdepth: 2
-   :caption: 🧪 Examples & Tutorials
-
-   examples-tutorials
-
-.. toctree::
-   :maxdepth: 2
-   :caption: 🔍 Troubleshooting
-
-   troubleshooting
-
-.. toctree::
-   :maxdepth: 2
-   :caption: 🤝 Community & Support
+   :maxdepth: 1
+   :caption: Community & Support
 
    community-support
-
-.. toctree::
-   :maxdepth: 2
-   :caption: ⚙️ Advanced
-
-   advanced-topics
 
 Indices and tables
 ==================
