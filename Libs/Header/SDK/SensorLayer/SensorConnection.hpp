@@ -42,6 +42,8 @@ namespace SDK::Sensor {
         bool matchesDriver(uint16_t handle);
 
     protected:
+        bool subscribe();
+
         SDK::Kernel&      mKernel;
         SDK::Sensor::Type mID;
         uint8_t           mHandle;
