@@ -211,9 +211,13 @@ function(una_app_build_app)
     endforeach()
 
     # Final app merging
+    set(APP_DEPENDS ${APP_NAME}Service.elf)
+    if(DEFINED TOUCHGFX_PATH)
+        list(APPEND APP_DEPENDS ${APP_NAME}GUI.elf)
+    endif()
     add_custom_target(${APP_NAME}App ALL
-        DEPENDS ${APP_NAME}Service.elf ${APP_NAME}GUI.elf
-        COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type Activity -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts ${SCRIPTS_PATH}
+        DEPENDS ${APP_DEPENDS}
+        COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts ${SCRIPTS_PATH}
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
