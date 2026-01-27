@@ -27,14 +27,14 @@ add_compile_options(
     -Wall
     -ffunction-sections
     -fdata-sections
-    -fno-exceptions
-    -fno-rtti
-    -fno-use-cxa-atexit
     -fstack-usage
     -nodefaultlibs
     -nostdlib
     -mthumb
 )
+
+# C++ specific flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fno-use-cxa-atexit")
 
 # Common linker options
 set(UNA_APP_COMMON_LINK_OPTIONS
