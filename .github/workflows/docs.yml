@@ -4,10 +4,10 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'docs/**'
+      - 'Docs/**'
   pull_request:
     paths:
-      - 'docs/**'
+      - 'Docs/**'
 
 permissions:
   contents: read
@@ -33,18 +33,18 @@ jobs:
         python-version: '3.x'
 
     - name: Install dependencies
-      run: pip install -r docs/requirements.txt
+      run: pip install -r Docs/requirements.txt
 
     - name: Install Doxygen and Graphviz
       run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
-    - name: Generate API docs
+    - name: Generate API Docs
       run: |
-        mkdir -p docs/_build/doxygen
-        cd docs && doxygen Doxyfile
+        mkdir -p Docs/_build/doxygen
+        cd Docs && doxygen Doxyfile
 
     - name: Build documentation
-      run: sphinx-build docs _site
+      run: sphinx-build Docs _site
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
