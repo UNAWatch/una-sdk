@@ -1,513 +1,514 @@
-# First App
+# Overview: Alarm App
 
-This tutorial walks you through building process of an app. For SDK setup and build system reference, see [SDK Setup and Build Overview](sdk-setup.md).
+This tutorial walks you through building your first UNA Watch app using the Alarm example. For SDK setup and build system reference, see [SDK Setup and Build Overview](sdk-setup.md).
 
-## Overview: Heart Rate Monitor App
 
-Our app will:
+Our example app demonstrates a complete alarm clock application with the following features:
 
-- Monitor heart rate using the watch's PPG sensor
-- Display real-time BPM on the screen
-- Store readings for trend analysis
-- Show notifications for abnormal readings
-- Sync data to companion apps via BLE
+- Set multiple alarms with custom times
+- Configure repeat patterns (daily, weekdays, weekends, specific days)
+- Choose alarm effects (beep, vibration, or both)
+- Snooze functionality with configurable delay
+- Persistent storage of alarm settings
+- Touch-based navigation through alarm list
+- Time setting interface with wheel-based input
 
-## Development Phases
+The Alarm app showcases the dual-process architecture with a service component handling time monitoring and alarm triggering, and a GUI component providing the user interface.
 
-### Phase 1: Project Setup and Architecture
+## Prerequisites
 
-#### Step 1.1: Choose App Type
+Before starting, ensure you have:
+
+- UNA SDK cloned and set up (see [SDK Setup](sdk-setup.md))
+- CMake 3.21+ installed
+- ARM GCC toolchain or STM32CubeIDE
+- TouchGFX Designer (optional, for GUI modifications)
+- `UNA_SDK` environment variable set to your SDK root directory
+
+## Project Setup
+
+### Step 1: Set Environment Variables
+
+Export the UNA_SDK environment variable:
+
+```bash
+export UNA_SDK=/path/to/una-sdk
+```
+
+Add this to your shell profile for persistence.
+
+### Step 2: Copy the Alarm Template
+
+Create a new app directory and copy the Alarm example:
+
+```bash
+# Create your app directory
+mkdir -p MyAlarmApp
+cd MyAlarmApp
+
+# Copy the Alarm app structure
+cp -r $UNA_SDK/SDK/Examples/Apps/Alarm/* .
+```
+
+### Step 3: Customize CMakeLists.txt
+
+#### Edit `Software/Apps/Alarm-CMake/CMakeLists.txt` to match your app:
+
+```cmake
+# App configuration
+set(APP_NAME "MyAlarm")
+set(APP_TYPE "Activity")
+set(DEV_ID "UNA")
+set(APP_ID "YOUR_UNIQUE_APP_ID")  # Generate a unique 16-character hex ID
+set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Resources")
+set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Output")
+set(LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../Libs")
+set(TOUCHGFX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")
+```
+
+#### Generate a unique APP_ID using:
+```bash
+python3 -c "import hashlib; print(hashlib.md5(b'MyAlarm').hexdigest().upper()[:16])"
+```
+
+#### Choose App Type
 
 Una-Watch supports four app types:
 
-| Type | Use Case | Lifecycle | Memory |
+| Type | Use Case | Lifecycle | Note |
 |------|----------|-----------|---------|
-| **Activity** | Full-featured apps (fitness, games) | Always running | 256KB |
-| **Utility** | Tools (calculator, settings) | On-demand | 128KB |
-| **Glance** | Notifications (weather, alerts) | Background | 64KB |
-| **Clockface** | Watch faces | System-level | 192KB |
+| **Activity** | Full-featured apps (Running, Hiking) | Always running | Running Glance(background) + GUI |
+| **Utility** | Tools (calculator, settings) | On-demand | Not supported yet |
+| **Glance** | Notifications (weather, alerts) | Background | Background periodick tasks for statistics, etc. |
+| **Clockface** | System Interface | System-level | Not supported yet |
 
-For our heart rate monitor, we'll use **Activity** type for continuous monitoring.
+### Step 4: Build the App
 
-#### Step 1.2: Export SDK Environment
-
-Expose the SDK root for tools and add `tools/` to your `PATH`.
+Navigate to the CMake directory and build:
 
 ```bash
-# From the SDK root
-./tools/una.py export
+cd Software/Apps/Alarm-CMake
+
+# Configure
+cmake -S . -B build
+
+# Build
+cmake --build build
+
+# The .uapp file will be generated in ../../../Output/
 ```
 
-Add the printed `export` lines to your shell profile or run them in the current
-terminal session.
+## App Architecture Overview
 
-#### Step 1.3: Initialize the Workspace
+The Alarm app follows the UNA SDK's dual-process model:
 
-Generate or update the `.env` file for app builds.
+### Service Process (Background)
+- Monitors current time via system clock
+- Checks for active alarms every minute
+- Triggers alarm notifications (beep/vibration)
+- Manages snooze functionality
+- Persists alarm settings to flash storage
 
-```bash
-# From the SDK root
-./tools/una.py init
-```
+### GUI Process (User Interface)
+- Displays alarm list with navigation
+- Provides time setting interface
+- Shows alarm configuration options
+- Handles user input via touch and buttons
 
-Update the `.env` entries to match your local paths:
+### Key Components
 
-| Variable | Description |
-| --- | --- |
-| `LIBS_PATH` | Absolute path to the SDK libraries (headers + sources). |
-| `TOUCHGFX_GUI_PATH` | Absolute path to the TouchGFX GUI template used for GUI apps. |
-| `OUTPUT_PATH` | Destination directory for built `.uapp` artifacts. |
-| `RESOURCES_PATH` | Root directory for app resources (icons, assets, fonts). |
-| `APP_PATH` | Root directory where app source trees live. |
+- **AlarmManager**: Core business logic for alarm operations
+- **AppTypes**: Data structures for alarm configuration
+- **TouchGFX GUI**: Screens for user interaction
+- **Persistent Storage**: JSON-based alarm storage
 
-#### Step 1.4: Create Project Structure
+## Step-by-Step Implementation Analysis
 
-Create a new app with the new workflow. Choose **service-only** (background logic only) or **service+gui** (full UI app).
+### Phase 1: Understanding the Service Layer
 
-```bash
-# Service + GUI app (default for Activity/Utility apps)
-./tools/una.py create heart-monitor service+gui
+#### Alarm Data Structure
 
-# Service-only app (no GUI process, ideal for Glance or background services)
-./tools/una.py create heart-monitor service-only
-```
-
-**Service + GUI structure (example):**
-
-```
-heart-monitor/
-├── App/
-│   ├── Service/
-│   │   ├── Inc/
-│   │   └── Src/
-│   └── Gui/
-│       ├── Inc/
-│       └── Src/
-├── Libs/
-│   ├── Header/
-│   └── Source/
-├── Resources/
-│   ├── icon_30x30.png
-│   ├── icon_60x60.png
-│   └── TouchGFX/
-└── Output/
-    └── Release/
-```
-
-**Service-only structure (example):**
-
-```
-heart-monitor/
-├── App/
-│   └── Service/
-│       ├── Inc/
-│       └── Src/
-├── Libs/
-│   ├── Header/
-│   └── Source/
-├── Resources/
-│   ├── icon_30x30.png
-│   └── icon_60x60.png
-└── Output/
-    └── Release/
-```
-
-#### Step 1.5: Understand Dual-Process Architecture
-
-Una-Watch apps run as two separate processes:
-
-**Service Process** (Background):
-- Sensor data acquisition
-- Data processing and storage
-- BLE communication
-- Runs continuously with low priority
-
-**GUI Process** (Interface):
-- User interface rendering
-- Touch input handling
-- Visual feedback
-- Activated on user interaction
+The alarm configuration is defined in `Libs/Header/AppTypes.hpp`:
 
 ```cpp
-// Service process entry point
-void service_main() {
-    HeartRateService service;
-    service.run();  // Never returns - event loop
-}
+namespace AppType {
+struct Alarm {
+    bool on;                ///< Alarm active state
+    uint8_t timeHours;      ///< Alarm hour (0-23)
+    uint8_t timeMinutes;    ///< Alarm minute (0-59)
+    Repeat repeat;          ///< Repetition pattern
+    Effect effect;          ///< Notification effect
 
-// GUI process entry point
-void gui_main() {
-    HeartRateGui gui;
-    gui.run();     // TouchGFX application loop
-}
-```
+    enum Repeat {
+        REPEAT_NO,           // One-time alarm
+        REPEAT_EVERY_DAY,    // Daily
+        REPEAT_WEEK_DAYS,    // Monday-Friday
+        REPEAT_WEEKENDS,     // Saturday-Sunday
+        REPEAT_MONDAY, REPEAT_TUESDAY, REPEAT_WEDNESDAY,
+        REPEAT_THURSDAY, REPEAT_FRIDAY, REPEAT_SATURDAY, REPEAT_SUNDAY,
+        REPEAT_COUNT
+    };
 
-### Phase 2: Core Implementation
-
-#### Step 2.1: Sensor Integration (Service Process)
-
-**Initialize Kernel Interfaces:**
-
-```cpp
-class HeartRateService : public SDK::Interface::IApp::Callback {
-private:
-    SDK::Kernel& kernel;
-
-    // Core interfaces
-    SDK::Interface::IAppComm* comm;
-    SDK::Interface::ISystem* system;
-    SDK::Interface::IFileSystem* storage;
-    SDK::Interface::ILogger* logger;
-
-    // Sensor connection
-    SDK::Sensor::Connection hrSensor;
-
-public:
-    HeartRateService(SDK::Kernel& k)
-        : kernel(k)
-        , hrSensor(SDK::Sensor::Type::HEART_RATE, 1000.0f) { // 1000ms period
-
-        // Get interface pointers from kernel facade
-        comm = &kernel.comm;
-        system = &kernel.sys;
-        storage = &kernel.fs;
-        logger = &kernel.log;
-    }
+    enum Effect {
+        EFFECT_BEEP_AND_VIBRO,  // Both sound and vibration
+        EFFECT_VIBRO,           // Vibration only
+        EFFECT_BEEP,            // Sound only
+        EFFECT_COUNT
+    };
 };
+}
 ```
 
-**Request Heart Rate Sensor:**
+#### Alarm Manager Logic
 
+The `AlarmManager` class in `Libs/Header/AlarmManager.hpp` handles:
+
+**Time Monitoring:**
 ```cpp
-bool initializeSensor() {
-    // Connect to default heart rate sensor
-    if (!hrSensor.connect()) {
-        logger->printf("Failed to connect heart rate sensor\n");
-        return false;
-    }
+uint32_t execute(const std::tm& tmNow) {
+    checkAlarms(tmNow.tm_hour, tmNow.tm_min, tmNow.tm_wday, tmNow);
+    return 60000; // Check again in 1 minute
+}
+```
 
-    logger->printf("Heart rate sensor connected successfully\n");
+**Alarm Checking:**
+```cpp
+void checkAlarms(uint8_t currentHour, uint8_t currentMinute, uint8_t currentDay, const std::tm& tmNow) {
+    for (const auto& alarm : mAlarms) {
+        if (alarm.on && isAlarmDueToday(alarm, currentDay) &&
+            alarm.timeHours == currentHour && alarm.timeMinutes == currentMinute) {
+
+            // Trigger alarm
+            onAlarm(alarm);
+
+            // Handle snooze logic
+            if (shouldSnooze(alarm)) {
+                addSnoozedAlarm(alarm, tmNow);
+            }
+        }
+    }
+}
+```
+
+**Persistence:**
+```cpp
+bool saveAlarmList(const std::vector<AppType::Alarm>& list) {
+    // Serialize to JSON and save to file system
+    char buffer[1024];
+    uint32_t jsonSize = createJSON(list, buffer, sizeof(buffer));
+
+    auto file = mKernel.fs.file(skFilePath);
+    file->write(buffer, jsonSize);
     return true;
 }
 ```
 
-**Main Service Loop:**
+### Phase 2: GUI Implementation Analysis
+
+#### Screen Flow
+
+The app has several screens managed by TouchGFX:
+
+1. **Main Screen**: Alarm list with navigation
+2. **Set Time Screen**: Time configuration with hour/minute wheels
+3. **Action Screen**: Alarm settings (repeat, effect, on/off)
+4. **Alarm Screen**: Active alarm display with snooze/dismiss
+
+#### Main Screen Logic
+
+In `gui/src/main_screen/MainView.cpp`:
 
 ```cpp
-void run() {
-    if (!initializeSensor()) {
-        return;  // Fatal error
-    }
+void MainView::updateAlarmList(const std::vector<AppType::Alarm>& list) {
+    pList = &list;
+    mAlarmId = 0;
+    show();
+}
 
-    while (true) {
-        // Process messages from kernel
-        SDK::MessageBase* msg = nullptr;
-        if (comm->getMessage(msg, 100)) {
-            handleMessage(msg);
-            comm->releaseMessage(msg);
+void MainView::handleKeyEvent(uint8_t key) {
+    if (key == Gui::Config::Button::L1) {
+        // Next alarm
+        mAlarmId = (mAlarmId + 1) % (pList->size() + 1);
+        show();
+    }
+    if (key == Gui::Config::Button::R1) {
+        if (mAlarmId == pList->size()) {
+            // Create new alarm
+            application().gotoSetTimeScreenNoTransition();
+        } else {
+            // Edit existing alarm
+            application().gotoActionScreenNoTransition();
         }
     }
 }
+```
 
-void handleMessage(SDK::MessageBase* msg) {
-    if (msg->getType() == SDK::MessageType::EVENT_SENSOR_LAYER_DATA) {
-        auto* dataEvent = static_cast<SDK::Message::Sensor::EventData*>(msg);
-        if (hrSensor.matchesDriver(dataEvent->handle)) {
-            processHeartRateReading(dataEvent->data[0]);
-        }
+#### Time Setting Interface
+
+The time setting uses custom wheel containers for intuitive input:
+
+```cpp
+// In SetTimeView.cpp
+void SetTimeView::handleKeyEvent(uint8_t key) {
+    if (key == Gui::Config::Button::R1) {
+        // Save time and proceed to action screen
+        uint8_t hours = timeWheel.getHours();
+        uint8_t minutes = timeWheel.getMinutes();
+        presenter->setAlarmTime(hours, minutes);
+        application().gotoActionScreenNoTransition();
     }
 }
 ```
 
-#### Step 2.2: Data Processing
+### Phase 3: Inter-Process Communication
 
-**Heart Rate Algorithm:**
+#### Service to GUI Messages
+
+When an alarm triggers, the service sends a message to the GUI:
 
 ```cpp
-void processHeartRateReading(const SDK::Sensor::Data& rawData) {
-    // Extract heart rate value (assuming HEART_RATE type)
-    float bpm = rawData.value;
+// In AlarmManager
+void AlarmManager::onAlarm(const AppType::Alarm& alarm) {
+    // Notify GUI process
+    if (mObserver) {
+        mObserver->onAlarm(alarm);
+    }
 
-    // Store reading
-    storeReading(bpm);
+    // Send IPC message for GUI activation
+    // (Implementation depends on specific IPC mechanism)
 }
 ```
 
-#### Step 2.3: Data Persistence
+#### GUI to Service Commands
 
-**Store Readings in Flash:**
+The GUI sends commands to modify alarm settings:
 
 ```cpp
-bool storeReading(float bpm) {
-    // Create file object
-    auto file = storage->file("0:/heart-data.bin");
-
-    // Open for append
-    if (!file->open(true, false)) {
-        logger->printf("Failed to open heart rate data file\n");
-        return false;
-    }
-
-    // Move to end for append
-    file->seek(file->size());
-
-    // Write reading
-    size_t written;
-    bool result = file->write(reinterpret_cast<const char*>(&bpm), sizeof(bpm), written);
-
-    file->close();
-    return result && (written == sizeof(bpm));
+// In MainPresenter
+void MainPresenter::saveAlarm(size_t id, const AppType::Alarm& alarm) {
+    // Send message to service to update alarm list
+    model->saveAlarm(id, alarm);
 }
 ```
 
-#### Step 2.4: Inter-Process Communication
+## Feature Analysis
 
-**Send Updates to GUI Process:**
+### Alarm Scheduling Logic
 
-```cpp
-void sendUpdateToGui() {
-    // Allocate message using the modern make_msg helper
-    auto msg = SDK::make_msg<SDK::Message::HeartRateUpdate>(kernel);
+The app supports flexible scheduling:
 
-    if (!msg) {
-        logger->printf("Failed to allocate GUI update message\n");
-        return;
-    }
+- **One-time alarms**: Trigger once and disable automatically
+- **Daily alarms**: Repeat every day at the same time
+- **Weekly patterns**: Weekdays, weekends, or specific days
+- **Snooze functionality**: 5-minute delay with up to 5 snoozes
 
-    // Fill message data
-    msg->currentBPM = currentBPM;
-    msg->averageBPM = calculateAverage();
+### Notification Effects
 
-    // Send to GUI process with 100ms timeout
-    if (!msg.send(100)) {
-        logger->printf("Failed to send GUI update, queue full?\n");
-    }
-}
+Three effect options provide user choice:
+
+- **Beep + Vibration**: Full attention-grabbing alert
+- **Vibration only**: Silent but tactile notification
+- **Beep only**: Audio notification for noisy environments
+
+### Persistent Storage
+
+Alarms are stored as JSON for human-readable configuration:
+
+```json
+[
+  {
+    "on": true,
+    "timeHours": 7,
+    "timeMinutes": 30,
+    "repeat": "every_day",
+    "effect": "beep_vibro"
+  }
+]
 ```
 
-### Phase 3: User Interface Development
+## Modifying TouchGFX GUI
 
-#### Step 3.1: TouchGFX Integration
+### Using TouchGFX Designer
 
-**GUI Process Structure:**
+1. **Open the Project**:
+   ```
+   Open TouchGFX Designer
+   File > Open > Select AlarmGUI.touchgfx
+   ```
 
-```cpp
-class HeartRateGui : public TouchGFX::Application {
-private:
-    SDK::Kernel& kernel;
-    SDK::Interface::IAppComm* comm;
+2. **Visual Design**:
+   - Modify screen layouts in the Screens tab
+   - Add new widgets from the Widgets panel
+   - Configure interactions in the Interactions tab
+   - Import images and fonts in the Assets tab
 
-public:
-    HeartRateGui()
-        : kernel(SDK::KernelProviderGUI::GetInstance().getKernel()) {
-        comm = &kernel.comm;
-    }
-};
-```
+3. **Generate Code**:
+   ```
+   Click "Generate Code" button
+   This updates generated/ directory with new base classes
+   ```
 
-#### Step 3.2: Message Handling
+### Custom Code Implementation
 
-**Receive Updates from Service:**
+**Avoid editing generated files**. Instead, modify custom files:
 
-```cpp
-void handleMessages() {
-    SDK::MessageBase* msg = nullptr;
-    while (comm->getMessage(msg, 0)) { // Non-blocking
-        switch (msg->getType()) {
-            case SDK::MessageType::HEART_RATE_UPDATE: {
-                auto* update = static_cast<SDK::Message::HeartRateUpdate*>(msg);
-                updateDisplay(update);
-                break;
-            }
-        }
-        comm->releaseMessage(msg);
-    }
-}
-```
+- **View Classes** (`gui/src/screen_name/screenview.cpp`):
+  ```cpp
+  void AlarmView::handleKeyEvent(uint8_t key) {
+      // Custom button handling logic
+      if (key == CUSTOM_BUTTON) {
+          // Your custom action
+          presenter->customAction();
+      }
 
-#### Step 3.3: UI Updates
+      // Call base implementation for default behavior
+      AlarmViewBase::handleKeyEvent(key);
+  }
+  ```
 
-**Update Display with New Data:**
+- **Presenter Classes** (`gui/src/screen_name/screenpresenter.cpp`):
+  ```cpp
+  void AlarmPresenter::activate() {
+      // Custom activation logic
+      view.updateDisplay(model->getAlarmData());
+  }
+  ```
 
-```cpp
-void updateDisplay(const SDK::Message::HeartRateUpdate* update) {
-    // Update BPM text
-    char bpmStr[16];
-    sprintf(bpmStr, "%d BPM", update->currentBPM);
-    bpmText.setText(bpmStr);
+- **Model Updates** (`gui/src/model/model.cpp`):
+  ```cpp
+  void Model::saveAlarm(const AppType::Alarm& alarm) {
+      // Send to service process via IPC
+      // Update local state
+  }
+  ```
 
-    // Update confidence indicator
-    confidenceBar.setValue(update->confidence);
+### Adding New Screens
 
-    // Animate heart icon based on status
-    if (update->status == SDK::SensorStatus::ACTIVE) {
-        heartIcon.startAnimation();
-    } else {
-        heartIcon.stopAnimation();
-    }
+1. **Create in Designer**:
+   - Add new screen in TouchGFX Designer
+   - Configure transitions and interactions
 
-    // Trigger screen refresh
-    invalidate();
-}
-```
+2. **Implement Custom Logic**:
+   ```cpp
+   // In gui/include/gui/new_screen/NewView.hpp
+   class NewView : public NewViewBase {
+   public:
+       void setupScreen();
+       void handleKeyEvent(uint8_t key);
+   };
+   ```
 
-### Phase 4: Advanced Features
+3. **Update Application**:
+   ```cpp
+   // In FrontendApplication.cpp
+   void FrontendApplication::gotoNewScreen() {
+       transition<NewView>();
+   }
+   ```
 
-#### Step 4.1: Notification System
+## Building and Testing
 
-**Abnormal Reading Alerts:**
-
-```cpp
-void checkAbnormalReading(const HeartRateReading& reading) {
-    static const uint16_t MAX_NORMAL_BPM = 100;
-    static const uint16_t MIN_NORMAL_BPM = 50;
-
-    if (reading.bpm > MAX_NORMAL_BPM || reading.bpm < MIN_NORMAL_BPM) {
-        // Show glance notification
-        kernel.glance->showNotification(
-            "Heart Rate Alert",
-            reading.bpm > MAX_NORMAL_BPM ? "High heart rate detected" :
-                                         "Low heart rate detected",
-            5000  // 5 second display
-        );
-
-        // Vibrate for attention
-        kernel.vibro->vibrate(SDK::VibrationPattern::ALERT);
-    }
-}
-```
-
-#### Step 4.2: BLE Data Synchronization
-
-**Send Data to Companion App:**
-
-```cpp
-void syncDataToPhone() {
-    // Prepare data batch
-    std::vector<HeartRateReading> recentReadings = getRecentReadings();
-
-    // Create BLE message
-    SDK::Message::BLE::DataSync* msg = nullptr;
-    comm->allocateMessage(msg, SDK::Message::Type::BLE_DATA_SYNC);
-
-    if (msg) {
-        // Fill with heart rate data
-        msg->dataType = SDK::BLE::DataType::HEART_RATE;
-        msg->data = serializeReadings(recentReadings);
-        msg->size = msg->data.size();
-
-        comm->sendMessage(msg, 1000);
-    }
-}
-```
-
-### Phase 5: Testing and Deployment
-
-#### Step 5.1: Build and Simulator Testing
+### Build Process
 
 ```bash
-# From the app directory
-./tools/una.py build
+# Clean build
+rm -rf Apps/Alarm-CMake/build
+cmake -S Apps/Alarm-CMake -B Apps/Alarm-CMake/build
+cmake --build Apps/Alarm-CMake/build
 
-# Optional: build a simulator target (if provided by the app CMake)
-./tools/una.py build --target simulator
-
-# Run the resulting .uapp in your simulator tooling
-# (use the .uapp generated in OUTPUT_PATH/Release)
+# Check output
+ls -la Output/
+# Should contain MyAlarm.uapp
 ```
 
-#### Step 5.2: Hardware Testing
+### Simulator Testing
+
+The TouchGFX GUI includes a simulator for desktop testing:
 
 ```bash
-# Build a release artifact
-./tools/una.py build --target release
-
-# Install the .uapp onto the watch via USB or BLE tooling
-# (use the .uapp generated in OUTPUT_PATH/Release)
+# From TouchGFX-GUI directory
+cd Apps/TouchGFX-GUI/simulator/gcc
+make
+./simulator
 ```
 
-#### Step 5.3: Performance Optimization
+### Hardware Deployment
 
-**Memory Usage Analysis:**
+1. **Build Release**:
+   ```bash
+   cmake --build Apps/Alarm-CMake/build --config Release
+   ```
 
-```cpp
-// Check memory usage
-void logMemoryStats() {
-    auto heapUsed = kernel.system->getHeapUsed();
-    auto heapFree = kernel.system->getHeapFree();
+2. **Install via USB/BLE**:
+   - Connect watch to development machine
+   - Use companion app or SDK tools to install `MyAlarm.uapp`
 
-    logger->log(SDK::LogLevel::INFO,
-               "Memory: %d used, %d free (%d%%)",
-               heapUsed, heapFree,
-               (heapUsed * 100) / (heapUsed + heapFree));
-}
-```
+### Debugging
 
-**Power Consumption Optimization:**
+- **Service Logs**: Check kernel logs for service process output
+- **GUI Simulator**: Test UI interactions on desktop
+- **Hardware Testing**: Use debugger for real-time inspection
 
-```cpp
-// Use appropriate sensor sampling rates
-void optimizeForPower() {
-    if (kernel.power->isLowBattery()) {
-        // Reduce sampling frequency
-        sensors->connectSensor(sensorHandle, 5000, 0);  // 5Hz -> 1Hz
-    }
-}
-```
+## Troubleshooting
 
-### Phase 6: Packaging and Distribution
+### Common Issues
 
-#### Step 6.1: App Packaging
+**Build Failures**:
+- Verify `UNA_SDK` environment variable is set
+- Check CMake version (3.21+ required)
+- Ensure all dependencies are installed
 
-Packaging is handled by the build pipeline. After a successful build, the `.uapp`
-artifact is written to `OUTPUT_PATH/Release`. Update your app metadata and icons
-in `Resources/` as needed before building.
+**TouchGFX Issues**:
+- Regenerate code after Designer changes
+- Check TouchGFX installation and version compatibility
+- Verify assets are properly imported
 
-#### Step 6.2: OTA Deployment
+**Runtime Problems**:
+- Check memory usage doesn't exceed limits
+- Verify IPC messages are properly formatted
+- Test on hardware early in development
 
-Upload the `.uapp` from `OUTPUT_PATH/Release` using the companion app or your
-OTA tooling pipeline.
+### Performance Optimization
 
-## Key Technical Concepts Learned
+- **Memory**: Monitor heap usage in service and GUI processes
+- **Power**: Use efficient timing for background checks
+- **Storage**: Minimize JSON size for alarm persistence
 
-### Position-Independent Code (PIC)
-- Apps compiled without absolute memory addresses
-- Enables kernel abstraction and process isolation
-- Allows multiple apps to coexist safely
+## Key Technical Concepts
 
-### Shared libc Architecture
-- All apps share the same standard library implementation
-- Reduces memory footprint per app
-- Enables code reuse across applications
+### Dual-Process Architecture
+- Service handles time-critical operations
+- GUI provides responsive user interface
+- IPC enables safe communication between processes
 
-### Dual-Process Model
-- Service process: continuous background operation
-- GUI process: user interface and interaction
-- IPC via message passing for data exchange
+### MVP Pattern in TouchGFX
+- **Model**: Data management and business logic
+- **View**: UI rendering and user input
+- **Presenter**: Coordination between Model and View
 
 ### Memory-Constrained Development
-- 256KB total RAM for Activity apps
-- Pool-based memory allocation
-- Careful stack usage monitoring
+- 256KB RAM limit for Activity apps
+- Efficient data structures and algorithms
+- Careful resource management
 
-### Power-Aware Programming
-- Event-driven design over polling
-- Appropriate sensor sampling rates
-- Sleep mode utilization
+### Event-Driven Design
+- Timer-based alarm checking
+- Message-based inter-process communication
+- Touch event handling in GUI
 
 ## Next Steps
 
-With your heart rate monitor complete, explore:
+With the Alarm app as your foundation, explore:
 
-1. **Multi-Sensor Fusion**: Combine heart rate with accelerometer for activity detection
-2. **Advanced UI**: Custom animations and transitions with TouchGFX
-3. **Data Visualization**: Charts and graphs for historical data
-4. **BLE Integration**: Real-time sync with fitness apps
-5. **Cloud Connectivity**: Upload data to health platforms
+1. **Enhanced Features**: Add alarm labels, gradual volume increase, weather integration
+2. **UI Improvements**: Custom animations, themes, accessibility features
+3. **Advanced Scheduling**: Sunrise/sunset times, location-based alarms
+4. **Integration**: Calendar sync, smart home connectivity
+5. **New Apps**: Create stopwatch, timer, or reminder applications
 
 ## Resources
 
+- [SDK Setup](sdk-setup.md) - Environment and build system
 - [API Reference](api-reference.rst) - Complete SDK documentation
-- [SDK Overview](sdk-overview.md) - Core concepts and tools
-- [Development Workflow](development-workflow.md) - Framework details
-- [Architecture Deep Dive](architecture-deep-dive.md) - Internal details
+- [Platform Overview](platform-overview.md) - Hardware capabilities
+- [TouchGFX Documentation](https://support.touchgfx.com/) - GUI framework guide

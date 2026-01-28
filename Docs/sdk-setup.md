@@ -1,6 +1,6 @@
 # SDK Setup and Build Overview
 
-This guide covers SDK installation, manual environment setup, and primary workflows using CMake or STM32CubeIDE. The focus is on manual processes for better understanding and control, with the `una.py` tool limited to essential setup tasks (exporting `UNA_SDK` and basic environment configuration). For platform architecture, see [Platform Overview](platform-overview.md). For tutorials, see [Build Your First App](build-your-first-app.md).
+This guide covers SDK installation, manual environment setup, and primary workflows using CMake or STM32CubeIDE. The focus is on manual processes for better understanding and control, with the `una.py` tool limited to essential setup tasks (exporting `UNA_SDK` and basic environment configuration). For platform architecture, see [Platform Overview](platform-overview.md). For tutorials, see [Overview: Alarm App](build-your-first-app.md).
 
 ## Prerequisites
 

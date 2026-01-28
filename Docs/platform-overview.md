@@ -57,6 +57,6 @@ Communication between processes is handled via a high-performance message-passin
 
 For detailed SDK setup and build workflows, see [SDK Setup and Build Overview](sdk-setup.md).
 
-For hands-on app development tutorials, see [Build Your First App](build-your-first-app.md).
+For hands-on app development tutorials, see [Overview: Alarm App](build-your-first-app.md).
 
 For SDK APIs and interfaces, see [SDK Reference](sdk-overview.md) and [Architecture Deep Dive](architecture-deep-dive.md).
