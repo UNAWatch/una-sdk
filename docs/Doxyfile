@@ -5,7 +5,7 @@ PROJECT_NUMBER = "1.0"
 PROJECT_BRIEF = "Software Development Kit for Una-Watch"
 
 OUTPUT_DIRECTORY = _build/doxygen
-INPUT = ../Libs/Header/SDK ../Port/TouchGFX
+INPUT = ../Libs/Header
 RECURSIVE = YES
 
 GENERATE_HTML = NO

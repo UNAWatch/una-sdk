@@ -44,7 +44,7 @@ set(UNA_APP_COMMON_LINK_OPTIONS
     -nostdlib
     -static
     -Wl,--emit-relocs
-    -Wl,-L$ENV{UNA_SDK}/Utilities/Scripts/linker
+    -Wl,-L$ENV{UNA_SDK}/Libs/Source/AppSystem/linker
     -mcpu=cortex-m33
     -mfpu=fpv5-sp-d16
     -mfloat-abi=hard
@@ -126,17 +126,17 @@ function(una_app_build_service TARGET_NAME)
 
     target_link_libraries(${TARGET_NAME} PRIVATE
         -Wl,--start-group
-        $ENV{UNA_SDK}/libc++/libstdc++.a
+        $ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++/libstdc++.a
         -Wl,--end-group
     )
 
     target_link_options(${TARGET_NAME} PRIVATE
-        -T "$ENV{UNA_SDK}/Utilities/Scripts/linker/Main/Sections.ld"
+        -T "$ENV{UNA_SDK}/Libs/Source/AppSystem/linker/Main/Sections.ld"
         -Wl,--defsym=STACK_SIZE=${UNA_APP_SERVICE_STACK_SIZE}
         -Wl,--defsym=RAM_LENGTH=${UNA_APP_SERVICE_RAM_LENGTH}
         -Wl,-Map=${OUTPUT_PATH}/${TARGET_NAME}.elf.map
         ${UNA_APP_COMMON_LINK_OPTIONS}
-        -L$ENV{UNA_SDK}/libc++
+        -L$ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
@@ -179,19 +179,19 @@ function(una_app_build_gui TARGET_NAME)
 
     target_link_libraries(${TARGET_NAME} PRIVATE
         -Wl,--start-group
-        $ENV{UNA_SDK}/libc++/libstdc++.a
+        $ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++/libstdc++.a
         ${TOUCHGFX_LIBS}
         -Wl,--end-group
     )
 
     target_link_options(${TARGET_NAME} PRIVATE
         ${TOUCHGFX_LIBS_DIRS}
-        -T "$ENV{UNA_SDK}/Utilities/Scripts/linker/Main/Sections.ld"
+        -T "$ENV{UNA_SDK}/Libs/Source/AppSystem/linker/Main/Sections.ld"
         -Wl,--defsym=STACK_SIZE=${UNA_APP_GUI_STACK_SIZE}
         -Wl,--defsym=RAM_LENGTH=${UNA_APP_GUI_RAM_LENGTH}
         -Wl,-Map=${OUTPUT_PATH}/${TARGET_NAME}.elf.map
         ${UNA_APP_COMMON_LINK_OPTIONS}
-        -L$ENV{UNA_SDK}/libc++
+        -L$ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
@@ -217,7 +217,7 @@ function(una_app_build_app)
     endif()
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts ${SCRIPTS_PATH}
+        COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
