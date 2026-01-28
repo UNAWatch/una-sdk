@@ -13,9 +13,14 @@ endif()
 # Common toolchain setup
 set(CMAKE_TOOLCHAIN_FILE $ENV{UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake)
 
+# Enable assembler language
+enable_language(ASM)
+
 # Set standards
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Common compile options (match CubeIDE exactly)
 add_compile_options(
@@ -24,10 +29,10 @@ add_compile_options(
     -mfloat-abi=hard
     -Os
     -fPIC
-    -Wall
-    -ffunction-sections
-    -fdata-sections
-    -fstack-usage
+    $<$<COMPILE_LANGUAGE:C,CXX>:-Wall>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-ffunction-sections>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-fdata-sections>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-fstack-usage>
     -nodefaultlibs
     -nostdlib
     -mthumb
@@ -36,15 +41,18 @@ add_compile_options(
 # C++ specific flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fno-use-cxa-atexit")
 
+# ASM specific flags
+set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -x assembler-with-cpp")
+
 # Common linker options
 set(UNA_APP_COMMON_LINK_OPTIONS
-    -Wl,--gc-sections
+    -Wl,--gc-sections 
     -nostartfiles
     -nodefaultlibs
     -nostdlib
     -static
     -Wl,--emit-relocs
-    -Wl,-L$ENV{UNA_SDK}/Libs/Source/AppSystem/linker
+    -L "$ENV{UNA_SDK}/Libs/Source/AppSystem/linker"
     -mcpu=cortex-m33
     -mfpu=fpv5-sp-d16
     -mfloat-abi=hard
@@ -90,6 +98,16 @@ function(una_app_setup_version BUILD_VERSION_OUT WORKING_DIR)
 endfunction()
 
 # Function to build service executable
+# Needs:
+# - TARGET_NAME - arg
+# - UNA_APP_SERVICE_RAM_LENGTH - optional
+# - UNA_APP_SERVICE_STACK_SIZE - optional 
+# - BUILD_VERSION
+# - APP_NAME
+# - DEV_ID
+# - APP_ID
+# - SERVICE_INCLUDE_DIRS
+# - SERVICE_SOURCES
 function(una_app_build_service TARGET_NAME)
     if(NOT DEFINED UNA_APP_SERVICE_STACK_SIZE)
         if(DEFINED SERVICE_STACK_SIZE)
@@ -135,8 +153,8 @@ function(una_app_build_service TARGET_NAME)
         -Wl,--defsym=STACK_SIZE=${UNA_APP_SERVICE_STACK_SIZE}
         -Wl,--defsym=RAM_LENGTH=${UNA_APP_SERVICE_RAM_LENGTH}
         -Wl,-Map=${OUTPUT_PATH}/${TARGET_NAME}.elf.map
+        -Wl,-L "$ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++"
         ${UNA_APP_COMMON_LINK_OPTIONS}
-        -L$ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
@@ -146,6 +164,12 @@ function(una_app_build_service TARGET_NAME)
 endfunction()
 
 # Function to build GUI executable
+# Needs:
+# - TARGET_NAME - arg
+# - GUI_SOURCES
+# - GUI_INCLUDE_DIRS
+# - UNA_APP_SERVICE_RAM_LENGTH - optional
+# - UNA_APP_SERVICE_STACK_SIZE - optional 
 function(una_app_build_gui TARGET_NAME)
     if(NOT DEFINED UNA_APP_GUI_STACK_SIZE)
         if(DEFINED GUI_STACK_SIZE)
@@ -168,8 +192,8 @@ function(una_app_build_gui TARGET_NAME)
     # Compute library directories from TOUCHGFX_LIBS
     set(TOUCHGFX_LIBS_DIRS "")
     foreach(lib IN LISTS TOUCHGFX_LIBS)
-        get_filename_component(lib_dir "${lib}" DIRECTORY)
-        list(APPEND TOUCHGFX_LIBS_DIRS "-L${lib_dir}")
+    get_filename_component(lib_dir "${lib}" DIRECTORY)
+    list(APPEND TOUCHGFX_LIBS_DIRS "-L${lib_dir}")
     endforeach()
     list(REMOVE_DUPLICATES TOUCHGFX_LIBS_DIRS)
 
@@ -179,19 +203,19 @@ function(una_app_build_gui TARGET_NAME)
 
     target_link_libraries(${TARGET_NAME} PRIVATE
         -Wl,--start-group
-        $ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++/libstdc++.a
+        -l:libstdc++.a
         ${TOUCHGFX_LIBS}
         -Wl,--end-group
     )
 
     target_link_options(${TARGET_NAME} PRIVATE
         ${TOUCHGFX_LIBS_DIRS}
+        -Wl,-L "$ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++"
         -T "$ENV{UNA_SDK}/Libs/Source/AppSystem/linker/Main/Sections.ld"
         -Wl,--defsym=STACK_SIZE=${UNA_APP_GUI_STACK_SIZE}
         -Wl,--defsym=RAM_LENGTH=${UNA_APP_GUI_RAM_LENGTH}
         -Wl,-Map=${OUTPUT_PATH}/${TARGET_NAME}.elf.map
         ${UNA_APP_COMMON_LINK_OPTIONS}
-        -L$ENV{UNA_SDK}/Libs/Source/AppSystem/Libc++
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
