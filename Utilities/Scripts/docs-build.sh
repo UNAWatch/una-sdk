@@ -10,7 +10,7 @@ cd "$DOCS_DIR"
 # Install dependencies if not present
 pip install --user -r requirements.txt
 
-# Build HTML docs
+# Build HTML Docs
 make clean
 make html
 
@@ -20,4 +20,4 @@ echo "Documentation built successfully in $DOCS_DIR/_build/html"
 mkdir -p ../../Docs/html
 cp -r _build/html/* ../../Docs/html/
 
-echo "HTML docs copied to ../../Docs/html"
+echo "HTML Docs copied to ../../Docs/html"
