@@ -25,14 +25,14 @@ set(UNA_SDK_SOURCES_SERVICE
 
 set(UNA_SDK_SOURCES_GUI
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/STM32TouchController.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/TouchGFXGPIO.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/TouchGFXHAL.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/generated/OSWrappers.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/generated/STM32DMA.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/generated/TouchGFXConfiguration.cpp"
-    "$ENV{UNA_SDK}/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/STM32TouchController.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXGPIO.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/generated/STM32DMA.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/generated/TouchGFXConfiguration.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp"
 )
 
 set(UNA_SDK_INCLUDE_DIRS_COMMON
@@ -45,8 +45,8 @@ set(UNA_SDK_INCLUDE_DIRS_SERVICE
 )
 
 set(UNA_SDK_INCLUDE_DIRS_GUI
-    "$ENV{UNA_SDK}/Port/TouchGFX"
-    "$ENV{UNA_SDK}/Port/TouchGFX/generated"
+    "$ENV{UNA_SDK}/Libs/include/Port/TouchGFX"
+    "$ENV{UNA_SDK}/Libs/include/Port/TouchGFX/generated"
 )
 
 set(SCRIPTS_PATH "$ENV{UNA_SDK}/Utilities/Scripts")
