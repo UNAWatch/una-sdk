@@ -25,6 +25,8 @@ else
   toplevel=$(git rev-parse --show-toplevel)
 fi
 echo "toplevel: $toplevel"
+cd "$toplevel" || echo "Failed to cd to $toplevel"
+UNA_WORKSPACE=$toplevel
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   COMMIT_HASH=$(git rev-parse --short=7 HEAD)
