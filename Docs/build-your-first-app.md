@@ -19,23 +19,26 @@ The Alarm app showcases the dual-process architecture with a service component h
 
 Before starting, ensure you have:
 
-- UNA SDK cloned and set up (see [SDK Setup](sdk-setup.md))
-- CMake 3.21+ installed
-- ARM GCC toolchain or STM32CubeIDE
-- TouchGFX Designer (optional, for GUI modifications)
-- `UNA_SDK` environment variable set to your SDK root directory
+- UNA SDK cloned/set up ([SDK Setup](sdk-setup.md))
+- CMake 3.21+
+- **ST ARM GCC Toolchain (CRITICAL)**: CubeIDE/CubeCLT version only (system `gcc-arm-none-eabi` incompatible). See [sdk-setup.md#toolchain-setup](sdk-setup.md#toolchain-setup).
+- TouchGFX Designer (optional, GUI mods)
+- `UNA_SDK` env var set to SDK root
 
 ## Project Setup
 
 ### Step 1: Set Environment Variables
 
-Export the UNA_SDK environment variable:
+**CRITICAL: Verify ST ARM GCC** (see [sdk-setup.md#toolchain-setup]):
+```
+arm-none-eabi-gcc --version  # Must show ST version (e.g., 14.3.1+st.2), NOT system 13.2
+```
 
+Export `UNA_SDK`:
 ```bash
 export UNA_SDK=/path/to/una-sdk
 ```
-
-Add this to your shell profile for persistence.
+**Persist**: Add to `~/.zshrc` & `source ~/.zshrc` (Linux) or PowerShell profile (Win).
 
 ### Step 2: Copy the Alarm Template
 

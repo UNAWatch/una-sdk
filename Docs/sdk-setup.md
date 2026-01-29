@@ -6,7 +6,7 @@ This guide covers SDK installation, manual environment setup, and primary workfl
 
 - Linux/macOS/Windows development machine
 - CMake 3.21+ (for manual builds)
-- STM32CubeIDE (recommended for IDE-based development) or ARM GCC toolchain
+- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` incompatible (newlib `_write` undefined refs). See [Toolchain Setup](#toolchain-setup).
 - USB cable for device flashing
 - Git for cloning the SDK
 
@@ -27,6 +27,34 @@ cd una-sdk
       ```
       Reload your shell or run `source ~/.bashrc`.
   - CMake require the `UNA_SDK` environment variable to point to the SDK root directory. This enables location-independent app development.
+
+## Toolchain Setup
+
+**CRITICAL**: Use STMicroelectronics GNU Tools for STM32 (from CubeIDE/CubeCLT). System `gcc-arm-none-eabi` (GCC 13.2+) incompatible - full newlib requires syscall stubs (`_write`, `_close`, etc.) missing in bare-metal. CMake confirmed works with ST toolchain.
+
+### Linux (Ubuntu/Debian, zsh)
+
+1. Download/install [STM32CubeCLT](https://www.st.com/en/development-tools/stm32cubeclt.html):
+   ```
+   chmod +x ~/Downloads/STM32CubeCLT_Linux64_v1-*.run &amp;&amp; ./STM32CubeCLT_Linux64_v1-*.run
+   ```
+
+2. Add to `~/.zshrc`:
+   ```
+   export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:\$PATH"
+   ```
+   `source ~/.zshrc`
+
+3. Verify: `arm-none-eabi-gcc --version` (shows ~14.3+st, not 13.2)
+
+### Windows
+
+1. Install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
+
+2. Add to PATH:
+   `%USERPROFILE%\ST\STM32CubeIDE\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.*/tools\bin`
+
+3. Restart shell/IDE, verify version.
 
 ## CMake-Based Workflow Development
 
