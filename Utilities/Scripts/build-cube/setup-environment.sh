@@ -8,6 +8,5 @@ export PATH=$PATH:$UNA_SDK/Utilities/Scripts/build-cube
 
 # Source the split scripts
 . find-cube.sh
-. una-version.sh
-
+. una-version.sh "$1"
 echo "Environment setup complete."

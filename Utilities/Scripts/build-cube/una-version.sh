@@ -4,14 +4,28 @@ set -e
 
 # Set build version
 BUILD_VERSION="0.0.0-dev" # When version not recognized
-if [ -z "$UNA_WORKSPACE" ]; then
-  UNA_WORKSPACE=$(pwd)
+if [ -z "$1" ]; then
+  UNA_GIT_DIR=$(pwd)
+else
+  UNA_GIT_DIR="$1"
 fi
 
-git config --global --add safe.directory $UNA_WORKSPACE
+echo "Workspace: $UNA_GIT_DIR"
+cd "$UNA_GIT_DIR" || echo "Failed to cd to $UNA_GIT_DIR"
 
-echo "Workspace: $UNA_WORKSPACE"
-cd "$UNA_WORKSPACE" || echo "Failed to cd to $UNA_WORKSPACE"
+# Get top-level git dir for safe.directory (handles nested submodules)
+# Safe bootstrap for repo toplevel (Docker dubious ownership)
+toplevel=""
+git_dir=$(git rev-parse --git-dir 2>&1)
+if echo "$git_dir" | grep -q "dubious ownership\\|unsafe repository\\|fatal:" ; then
+  git config --global safe.directory '*'
+  toplevel=$(git rev-parse --show-toplevel)
+  git config --global safe.directory "$toplevel"
+else
+  toplevel=$(git rev-parse --show-toplevel)
+fi
+echo "toplevel: $toplevel"
+
 if git rev-parse --git-dir > /dev/null 2>&1; then
   COMMIT_HASH=$(git rev-parse --short=7 HEAD)
   echo "COMMIT_HASH: $COMMIT_HASH"
