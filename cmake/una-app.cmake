@@ -33,9 +33,14 @@ add_compile_options(
     $<$<COMPILE_LANGUAGE:C,CXX>:-ffunction-sections>
     $<$<COMPILE_LANGUAGE:C,CXX>:-fdata-sections>
     $<$<COMPILE_LANGUAGE:C,CXX>:-fstack-usage>
+    -Wl,--gc-sections 
+    -nostartfiles
     -nodefaultlibs
     -nostdlib
     -mthumb
+    -ffunction-sections
+    -fcyclomatic-complexity
+
 )
 
 # C++ specific flags
