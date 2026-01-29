@@ -24,13 +24,6 @@ if [ -f "$PREFS_FILE" ]; then
         && echo "Overridden __BUILD_VERSION__ to '$BUILD_VERSION' in $PREFS_FILE" \
         || echo "Pattern __BUILD_VERSION__ not found in $PREFS_FILE"
   fi
-
-  # Overriding SDK path with STM32CubeIDE for examples is not supported for this script
-  # if [ -n "$UNA_SDK" ]; then
-  #   sed -i 's#/UNA_SDK/value=.*#/UNA_SDK/value='"$UNA_SDK"'#g' "$PREFS_FILE" \
-  #       && echo "Overridden UNA_SDK to '$UNA_SDK' in $PREFS_FILE" \
-  #       || echo "Pattern UNA_SDK not found in $PREFS_FILE"
-  # fi
 else
   echo "Warning: Prefs file not found at $PREFS_FILE"
 fi
