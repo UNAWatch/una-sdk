@@ -163,7 +163,7 @@ function(una_app_build_service TARGET_NAME)
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND python3 $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext srv
+        COMMAND python $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext srv
         COMMENT "Packing ${TARGET_NAME}"
     )
 endfunction()
@@ -224,7 +224,7 @@ function(una_app_build_gui TARGET_NAME)
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND python3 $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext gui
+        COMMAND python $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext gui
         COMMENT "Packing ${TARGET_NAME}"
     )
 endfunction()
@@ -246,7 +246,7 @@ function(una_app_build_app)
     endif()
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND python3 ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
