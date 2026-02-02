@@ -51,8 +51,13 @@ cd una-sdk
 
 1. Install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
 
-2. Add to PATH:
-   `%USERPROFILE%\ST\STM32CubeIDE\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.*/tools\bin`
+2. Add make, cmake, arm-gnu-eabi-gcc, python and efitools from stm32 distribution to PATH:
+   ```shell
+   export PATH="$PATH:/e/ST/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.cmake.win32_1.1.0.202409170845/tools/bin"
+   export PATH="$PATH:/e/ST/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin"
+   ...
+   ```
+   Check your own installed path and avalability.
 
 3. Restart shell/IDE, verify version.
 
@@ -65,12 +70,12 @@ The CMake workflow is recommended for command-line control and is fully standalo
 MyApp/  # App root (can be anywhere)
 ├── Software/
 │   ├── Apps/
-│ |   │   ├── MyApp-Service-CubeIDE/ # CubeIDE project with Service
-│ |   │   ├── MyApp-GUI-CubeIDE/ # CubeIDE project with GUI
-│   │   └── MyApp-CMake/  # CMake project dir
-│   │       ├── CMakeLists.txt
-│   │       ├── MyAppService.ld  # Linker script
-│   │       └── syscalls.cpp
+│   │   ├── MyApp-Service-CubeIDE/ # CubeIDE project with Service
+│   │   ├── MyApp-GUI-CubeIDE/ # CubeIDE project with GUI
+│   │   ├── MyApp-CMake/  # CMake project dir
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── MyAppService.ld  # Linker script
+│   │   │   └── syscalls.cpp
 │   │   └── TouchGFX-GUI/  # For GUI apps
 │   └── Libs/
 │       ├── Header/  # Headers
@@ -121,49 +126,6 @@ MyApp/  # App root (can be anywhere)
 
 5. **Set Environment** (as in Step 3 above).
 
-#### CMake Template Examples
-Use these as starting points in `CMakeLists.txt`.
-
-**Service-Only**:
-```cmake
-cmake_minimum_required(VERSION 3.21)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
-
-# App config
-set(APP_NAME "MyApp")
-set(APP_ID "YOUR_UNIQUE_ID")
-set(DEV_ID "UNA")
-set(LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Libs") # Adjust for your sources tree
-set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Output") # Adjust for your sources tree
-set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Resources") # Adjust for your sources tree
-
-include($ENV{UNA_SDK}/cmake/una-app.cmake)
-include($ENV{UNA_SDK}/cmake/una-sdk.cmake)
-include(${LIBS_PATH}/libs.cmake)
-
-project(${APP_NAME})
-
-una_app_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(SERVICE_SOURCES ${LIBS_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp" ${UNA_SDK_SOURCES_COMMON} ${UNA_SDK_SOURCES_SERVICE})
-set(SERVICE_INCLUDE_DIRS ${LIBS_INCLUDE_DIRS} ${UNA_SDK_INCLUDE_DIRS_COMMON} ${UNA_SDK_INCLUDE_DIRS_SERVICE})
-
-una_app_build_service(${APP_NAME}Service.elf)
-
-una_app_build_app()
-```
-
-**Service+GUI** (add after service build):
-```cmake
-set(TOUCHGFX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")
-include(${TOUCHGFX_PATH}/touchgfx.cmake)
-
-set(GUI_SOURCES ${TOUCHGFX_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/PaintImpl.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/syscalls.cpp" ${UNA_SDK_SOURCES_COMMON} ${UNA_SDK_SOURCES_GUI})
-set(GUI_INCLUDE_DIRS ${LIBS_INCLUDE_DIRS} ${UNA_SDK_INCLUDE_DIRS_COMMON} ${UNA_SDK_INCLUDE_DIRS_GUI} ${TOUCHGFX_INCLUDE_DIRS})
-
-una_app_build_gui(${APP_NAME}GUI.elf)
-```
-
 ### Building Apps Manually
 Navigate to the app's CMake directory:
 ```bash
@@ -171,7 +133,7 @@ cd MyApp/Software/Apps/MyApp-CMake
 # Ensure UNA_SDK and other vars are exported
 
 # Configure (creates build dir)
-cmake -S . -B build
+cmake -G "Unix Makefiles" -S . -B build
 
 # Build
 cmake --build build
