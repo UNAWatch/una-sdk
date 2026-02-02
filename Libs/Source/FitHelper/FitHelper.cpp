@@ -20,12 +20,6 @@
 
 namespace SDK::Component {
 
-    /**
-     * @brief Construct a new FitHelper for a standard FIT message.
-     *
-     * @param msgID   Local message number (0–15) used in FIT header.
-     * @param msgDef  Pointer to the FIT message definition from fit_mesg_defs[].
-     */
     FitHelper::FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef)
 	    : mInited(false)
         , mMsgID(msgID)
@@ -40,18 +34,6 @@ namespace SDK::Component {
     {
     }
 
-    /**
-     * @brief Construct a new FitHelper for a developer field and attach it to a parent container.
-     *
-     * @details
-     * Initializes a FIELD_DESCRIPTION helper and automatically registers it
-     * in the specified parent container. Each developer field is associated
-     * with a fixed number of base-type elements (e.g., bytes for STRING fields).
-     *
-     * @param msgID      Local message number for this field.
-     * @param container  Parent FitHelpers list to which this field belongs.
-     * @param itemsCount Number of elements.
-     */
     FitHelper::FitHelper(uint8_t                           msgID,
                          std::initializer_list<FitHelper*> container,
                          FIT_UINT8                         itemsCount,
@@ -74,13 +56,6 @@ namespace SDK::Component {
         }
     }
 
-    /**
-     * @brief Initialize helper with a subset of fields from the base definition.
-     *
-     * @param fields  List of field numbers to include in the optimized message definition.
-     * @return true   Initialization successful.
-     * @return false  If already initialized, or if fields are invalid or duplicated.
-     */
     bool FitHelper::init(std::initializer_list<FIT_UINT8> fields)
     {
         if (mInited) {
@@ -106,12 +81,6 @@ namespace SDK::Component {
         return true;
     }
 
-    /**
-     * @brief Write the message definition (standard or with developer fields) to file.
-     *
-     * @param fp  Target file pointer.
-     * @return true  If definition successfully written.
-     */
     bool FitHelper::writeDef(SDK::Interface::IFile* fp)
     {
         if (!mInited) {
@@ -149,13 +118,6 @@ namespace SDK::Component {
         return true;
     }
 
-    /**
-     * @brief Write a data message instance to the FIT file.
-     *
-     * @param data  Pointer to the message data structure.
-     * @param fp    Target file pointer.
-     * @return true If message successfully written.
-     */
     bool FitHelper::writeMessage(void* data, SDK::Interface::IFile * fp)
     {
         if (!mInited) {
@@ -177,11 +139,6 @@ namespace SDK::Component {
 	    return true;
     }
 
-    /**
-     * @brief Print a FIT message definition for debugging.
-     *
-     * @param msgDef  Pointer to the message definition to print.
-     */
     void FitHelper::printMsgDef(const FIT_MESG_DEF* msgDef)
     {
 #if LOG_MODULE_LEVEL == LOG_LEVEL_DEBUG
@@ -201,11 +158,6 @@ namespace SDK::Component {
 #endif
     }
 
-    /**
-     * @brief Attach a developer field to the current container.
-     *
-     * @param field  Pointer to the developer field helper.
-     */
     void FitHelper::addField(FitHelper* field)
     {
         if (field == nullptr) {
@@ -219,13 +171,6 @@ namespace SDK::Component {
         mUserFields.push_back(field);
     }
 
-    /**
-     * @brief Write data for a single developer field to the FIT file.
-     *
-     * @param idx   Index of the developer field.
-     * @param data  Pointer to the field data.
-     * @param fp    Target file pointer.
-     */
     void FitHelper::writeFieldMessage(uint8_t idx, const void* data, SDK::Interface::IFile* fp)
     {
         if (idx >= mUserFields.size()) {
@@ -253,41 +198,26 @@ namespace SDK::Component {
         WriteData(data, fieldSize, fp);
     }
 
-    /**
-     * @brief Get declared developer field size.
-     */
     FIT_UINT8 FitHelper::getItemsCount()
     {
         return mDevelopItemsCount;
     }
 
-    /**
-     * @brief Get field size.
-     */
     FIT_UINT8 FitHelper::getFieldSize()
     {
         return getItemsCount() * getBaseTypeSize();
     }
 
-    /**
-     * @brief Get base type size for the current message or field.
-     */
     FIT_UINT8 FitHelper::getBaseTypeSize()
     {
         return getBaseTypeSize(mBaseType);
     }
 
-    /**
-     * @brief Get current base type.
-     */
     FIT_FIT_BASE_TYPE FitHelper::getBaseType()
     {
 	    return mBaseType;
     }
 
-    /**
-     * @brief Check if all provided field numbers are unique.
-     */
     bool FitHelper::isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
     {
         std::unordered_set<FIT_EVENT_FIELD_NUM> uniq;
@@ -303,9 +233,6 @@ namespace SDK::Component {
         return true;
     }
 
-    /**
-     * @brief Validate that provided fields exist in the original message definition.
-     */
     bool FitHelper::isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
     {
         for (auto f : fields) {
@@ -325,9 +252,6 @@ namespace SDK::Component {
         return true;
     }
 
-    /**
-     * @brief Build a reduced message definition based on selected fields.
-     */
     void FitHelper::makeMsgDef(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
     {
         if (fields.size() == 0) {
@@ -373,12 +297,6 @@ namespace SDK::Component {
         printMsgDef((const FIT_MESG_DEF*)mMsgDef);
     }
 
-    /**
-     * @brief Get size in bytes of a given base type.
-     *
-     * @param base_type  Base type identifier.
-     * @return FIT_UINT8 Size in bytes of the base type.
-	 */
     FIT_UINT8 FitHelper::getBaseTypeSize(FIT_FIT_BASE_TYPE base_type)
     {
         switch (base_type) {
@@ -408,9 +326,6 @@ namespace SDK::Component {
         }
     }
 
-    /**
-     * @brief Build message field offset and size information.
-	 */
     void FitHelper::makeMsgFields(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
     {
         if (fields.size() == 0) {
@@ -438,12 +353,6 @@ namespace SDK::Component {
         }
     }
 
-    /**
-     * @brief Get byte offset of a specific field within the message structure.
-     *
-     * @param field      Field number to locate.
-     * @return uint8_t  Byte offset of the field, or UINT8_MAX if not found.
-	 */
     uint8_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field)
     {
         uint8_t offset = 0;
@@ -464,12 +373,6 @@ namespace SDK::Component {
         return UINT8_MAX;
     }
 
-    /**
-     * @brief Get size in bytes of a specific field within the message structure.
-     *
-     * @param field    Field number to locate.
-	 * @return uint8_t Size in bytes of the field, or UINT8_MAX if not found.
-     */
     uint8_t FitHelper::getFieldSize(FIT_EVENT_FIELD_NUM field)
     {
         for (FIT_UINT8 idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
@@ -486,13 +389,6 @@ namespace SDK::Component {
         return UINT8_MAX;
     }
 
-    /**
-     * @brief Write raw data to the FIT file.
-     *
-     * @param data        Pointer to the data to write.
-     * @param data_size   Size of the data in bytes.
-     * @param fp          Target file pointer.
-	 */
     void FitHelper::WriteData(const void* data, FIT_UINT16 data_size, SDK::Interface::IFile* fp)
     {
         size_t bw;
@@ -500,13 +396,6 @@ namespace SDK::Component {
         fp->flush();
     }
 
-    /**
-     * @brief Write a data message to the FIT file.
-     *
-     * @param local_mesg_number  Local message number (0–15).
-     * @param mesg_pointer       Pointer to the message data structure.
-	 * @param mesg_size          Size of the message data in bytes.
-     */
     void FitHelper::WriteMessage(FIT_UINT8 local_mesg_number, const void* mesg_pointer, FIT_UINT16 mesg_size, SDK::Interface::IFile* fp)
     {
         WriteData(&local_mesg_number, FIT_HDR_SIZE, fp);
