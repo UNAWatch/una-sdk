@@ -67,11 +67,11 @@ public:
 
     /**
      * @brief   Get station pressure.
-     * @return  Pressure in Pa. Returns -1.0f if invalid.
+     * @return  Pressure in Pa. Returns NaN if invalid.
      */
     float getPressure() const
     {
-        return isDataValid() ? mData.f[Field::PRESS] : -1.0f;
+        return isDataValid() ? mData.f[Field::PRESS] : std::numeric_limits<float>::quiet_NaN();
     }
 
     /**
@@ -81,11 +81,11 @@ public:
      * QNH is the pressure reduced to mean sea level, used as a reference for
      * barometric altitude calculation.
      *
-     * @return  Pressure in Pa. Returns -1.0f if invalid.
+     * @return  Pressure in Pa. Returns NaN if invalid.
      */
     float getP0() const
     {
-        return isDataValid() ? mData.f[Field::PRESS_SEA_LEVEL] : -1.0f;
+        return isDataValid() ? mData.f[Field::PRESS_SEA_LEVEL] : std::numeric_limits<float>::quiet_NaN();
     }
 
     /**
@@ -166,7 +166,20 @@ public:
         return 44330.0f * (1.0f - std::pow(p / p0, inv_n));
     }
 
+    /**
+      * @brief Converts Pascals to mm hg
+      *
+      * @param pa Pressure value in Pascals
+      * @return   Pressure in mm hg
+      */
+    static float convPaToMmhg(float pa)
+    {
+        return pa / PA_PER_MMHG;
+    }
+
 private:
+    static constexpr float PA_PER_MMHG = 133.322387415f;
+
     /// Underlying sensor data view (non-owning).
     const SDK::Sensor::DataView mData;
 }; /* class Pressure */
