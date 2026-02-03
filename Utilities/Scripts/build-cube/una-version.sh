@@ -3,6 +3,13 @@
 set -e
 
 # Set build version
+if [ -n "$BUILD_VERSION" ]; then
+  echo "BUILD_VERSION already set: $BUILD_VERSION"
+  export BUILD_VERSION
+  echo "BUILD_VERSION=$BUILD_VERSION"
+  return 0
+fi
+
 BUILD_VERSION="0.0.0-dev" # When version not recognized
 if [ -z "$1" ]; then
   UNA_GIT_DIR=$(pwd)
