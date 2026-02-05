@@ -122,14 +122,15 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
         ;;
     esac
     fi
-  log "Checking for uncommitted changes"
-  git_status_output=$(git status --porcelain 2>&1 || echo "failed")
-  log "git status --porcelain output: '$git_status_output'"
-  if [ "$git_status_output" != "failed" ] && [ -n "$git_status_output" ]; then
-    log "Uncommitted changes detected, appending '-dirty'"
-    BUILD_VERSION="${BUILD_VERSION}-dirty"
-  else
-    log "No uncommitted changes"
+    log "Checking for uncommitted changes"
+    git_status_output=$(git status --porcelain 2>&1 || echo "failed")
+    log "git status --porcelain output: '$git_status_output'"
+    if [ "$git_status_output" != "failed" ] && [ -n "$git_status_output" ]; then
+      log "Uncommitted changes detected, appending '-dirty'"
+      BUILD_VERSION="${BUILD_VERSION}-dirty"
+    else
+      log "No uncommitted changes"
+    fi
   fi
 else
   log "No git directory found, using default version"
