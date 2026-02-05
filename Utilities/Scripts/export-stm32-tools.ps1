@@ -69,7 +69,7 @@ if ($DryRun) {
     if ($pathsToAdd.Count -gt 0) {
         $newPath = $currentPath + ";" + ($pathsToAdd -join ";")
         # Set the new PATH permanently for the user
-        setx PATH "$newPath"
+        [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
         $env:PATH = $newPath
         Write-Host "Updated user PATH with new tool directories."
     } else {
