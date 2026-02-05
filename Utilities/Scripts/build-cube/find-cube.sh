@@ -3,11 +3,11 @@
 set -e
 
 export DISPLAY=
-apt update && apt install -y python3 python3-bincopy python3-git python3-pil
-mkdir -p /tmp/bin && ln -s /usr/bin/python3 /tmp/bin/python && export PATH=/tmp/bin:$PATH
+apt update && apt install -y python3 python3-bincopy python3-git python3-pil python-is-python3
+
 export PATH=/tmp/bin:/opt/st/stm32cubeide_*/:`find /opt/st/stm32cubeide_* -name arm-none-eabi-objcopy | head -n 1 | xargs dirname`:$PATH
 # Ensure python is available for post-build scripts
-export PYTHONPATH=/usr/lib/python3/dist-packages:$PYTHONPATH
+# export PYTHONPATH=/usr/lib/python3/dist-packages:$PYTHONPATH
 
 STM32CUBEIDE_DIR="$(ls -1d /opt/st/stm32cubeide_* 2>/dev/null | sort -V | tail -n 1)"
 if [ -z "$STM32CUBEIDE_DIR" ] || [ ! -x "$STM32CUBEIDE_DIR/stm32cubeide" ]; then
