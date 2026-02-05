@@ -64,7 +64,8 @@ if ($DryRun) {
         $pathsToAdd | ForEach-Object { Write-Host "  $_" }
     }
     Write-Host "Current PATH would become: $currentPath;$($pathsToAdd -join ';')"
-    Write-Host "UNA_SDK would be set to: $sdkRoot"
+    $sdkRootForward = $sdkRoot -replace '\\', '/'
+    Write-Host "UNA_SDK would be set to: $sdkRootForward"
 } else {
     if ($pathsToAdd.Count -gt 0) {
         $newPath = $currentPath + ";" + ($pathsToAdd -join ";")
@@ -75,8 +76,9 @@ if ($DryRun) {
     } else {
         Write-Host "No new paths to add; PATH is already up to date."
     }
-    # Set UNA_SDK environment variable
-    [Environment]::SetEnvironmentVariable("UNA_SDK", $sdkRoot, "User")
-    $env:UNA_SDK = $sdkRoot
-    Write-Host "Set UNA_SDK to $sdkRoot"
+    # Set UNA_SDK environment variable with forward slashes
+    $sdkRootForward = $sdkRoot -replace '\\', '/'
+    [Environment]::SetEnvironmentVariable("UNA_SDK", $sdkRootForward, "User")
+    $env:UNA_SDK = $sdkRootForward
+    Write-Host "Set UNA_SDK to $sdkRootForward"
 }
