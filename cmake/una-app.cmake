@@ -11,7 +11,7 @@ if(NOT DEFINED RESOURCES_PATH)
 endif()
 
 # Common toolchain setup
-set(CMAKE_TOOLCHAIN_FILE $ENV{UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake)
+set(CMAKE_TOOLCHAIN_FILE "$ENV{UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake")
 
 # Enable assembler language
 enable_language(ASM)
