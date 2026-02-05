@@ -166,7 +166,21 @@ For IDE users, copy CubeIDE projects from Examples.
 
 This workflow integrates with TouchGFX Designer for GUI.
 
-## TouchGFX
+## Windows Setup
+
+### Get required software
+
+- [Git](https://git-scm.com/install/windows)
+- [Python 3](https://www.python.org/downloads/windows/)
+    Installation notes
+  > Enable "Add python.exe to PATH" checkmark
+  > Click "Disable path length limit" after installation
+- [CMake](https://cmake.org/download/)
+- [STM32CubeCLT](https://www.st.com/en/development-tools/stm32cubeclt.html)
+- [VS Code](https://code.visualstudio.com/download) - (Not Required)
+
+
+## TouchGFX (need Windos host)
 
 TouchGFX is a high-performance graphics framework designed for STM32 microcontrollers, enabling rich graphical user interfaces on embedded devices with limited resources.
 
