@@ -1,13 +1,21 @@
 #!/bin/bash
 
-set -e
-
 # Logging function
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2
 }
 
 log "Starting una-version.sh script"
+
+# Check if git is available
+if ! command -v git >/dev/null 2>&1; then
+  log "Git command not found, using default version"
+  BUILD_VERSION="0.0.0-dev"
+  export BUILD_VERSION
+  echo "BUILD_VERSION=$BUILD_VERSION"
+  log "Script completed with default version due to no git"
+  exit 0
+fi
 
 # Set build version
 if [ -n "$BUILD_VERSION" ]; then
@@ -41,21 +49,28 @@ fi
 # Safe bootstrap for repo toplevel (Docker dubious ownership)
 toplevel=""
 log "Attempting to get git directory"
-git_dir=$(git rev-parse --git-dir 2>&1)
+git_dir=$(git rev-parse --git-dir 2>&1 || echo "fatal: git rev-parse failed")
 log "git rev-parse --git-dir output: '$git_dir'"
 if echo "$git_dir" | grep -q "dubious ownership\\|unsafe repository\\|fatal:" ; then
   log "Detected dubious ownership or unsafe repository, configuring safe.directory"
   git config --global safe.directory '*'
   log "Set global safe.directory to '*' "
-  toplevel=$(git rev-parse --show-toplevel 2>&1)
+  toplevel=$(git rev-parse --show-toplevel 2>&1 || echo "fatal: git rev-parse failed")
   log "git rev-parse --show-toplevel output after config: '$toplevel'"
   git config --global safe.directory "$toplevel"
   log "Set global safe.directory to '$toplevel'"
 else
-  toplevel=$(git rev-parse --show-toplevel 2>&1)
+  toplevel=$(git rev-parse --show-toplevel 2>&1 || echo "fatal: git rev-parse failed")
   log "git rev-parse --show-toplevel output: '$toplevel'"
 fi
 log "toplevel: $toplevel"
+if echo "$toplevel" | grep -q "fatal:"; then
+  log "Not in a git repository, using default version"
+  export BUILD_VERSION
+  echo "BUILD_VERSION=$BUILD_VERSION"
+  log "Script completed with default version"
+  exit 0
+fi
 if cd "$toplevel"; then
   log "Successfully changed directory to toplevel: $toplevel"
 else
@@ -67,21 +82,24 @@ log "UNA_WORKSPACE set to: $UNA_WORKSPACE"
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   log "Git directory found, proceeding with version detection"
-  COMMIT_HASH=$(git rev-parse --short=7 HEAD 2>&1)
+  COMMIT_HASH=$(git rev-parse --short=7 HEAD 2>&1 || echo "failed")
   log "COMMIT_HASH: $COMMIT_HASH"
   if git describe --exact-match --tags HEAD >/dev/null 2>&1; then
     log "On exact tag"
-    TAG=$(git describe --exact-match --tags HEAD 2>&1)
+    TAG=$(git describe --exact-match --tags HEAD 2>&1 || echo "failed")
     log "TAG: $TAG"
-    TAG=${TAG#v}
-    log "TAG after removing 'v' prefix: $TAG"
-    BUILD_VERSION=$TAG
-    log "BUILD_VERSION set to TAG: $BUILD_VERSION"
+    if [ "$TAG" != "failed" ]; then
+      TAG=${TAG#v}
+      log "TAG after removing 'v' prefix: $TAG"
+      BUILD_VERSION=$TAG
+      log "BUILD_VERSION set to TAG: $BUILD_VERSION"
+    fi
   else
     log "Not on exact tag"
-    DESC=$(git describe --always --tags --abbrev=7 2>&1)
+    DESC=$(git describe --always --tags --abbrev=7 2>&1 || echo "failed")
     log "DESC: $DESC"
-    case "$DESC" in
+    if [ "$DESC" != "failed" ]; then
+      case "$DESC" in
       g*)
         log "No tags found, DESC starts with 'g'"
         # no tags, use hash
@@ -103,11 +121,11 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
         log "BUILD_VERSION set to TAG-HASH: $BUILD_VERSION"
         ;;
     esac
-  fi
+    fi
   log "Checking for uncommitted changes"
-  git_status_output=$(git status --porcelain 2>&1)
+  git_status_output=$(git status --porcelain 2>&1 || echo "failed")
   log "git status --porcelain output: '$git_status_output'"
-  if [ -n "$git_status_output" ]; then
+  if [ "$git_status_output" != "failed" ] && [ -n "$git_status_output" ]; then
     log "Uncommitted changes detected, appending '-dirty'"
     BUILD_VERSION="${BUILD_VERSION}-dirty"
   else
