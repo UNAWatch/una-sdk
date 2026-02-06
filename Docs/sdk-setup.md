@@ -171,14 +171,44 @@ This workflow integrates with TouchGFX Designer for GUI.
 ### Get required software
 
 - [Git](https://git-scm.com/install/windows)
-- [Python 3](https://www.python.org/downloads/windows/)
-    Installation notes
-  > Enable "Add python.exe to PATH" checkmark
-  > Click "Disable path length limit" after installation
-- [CMake](https://cmake.org/download/)
-- [STM32CubeCLT](https://www.st.com/en/development-tools/stm32cubeclt.html)
-- [VS Code](https://code.visualstudio.com/download) - (Not Required)
+- [Python 3](https://www.python.org/downloads/windows/) -  Notes:
+  - Enable "Add python.exe to PATH" checkmark
+  - Click "Disable path length limit" after installation
+- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities
+- [VS Code](https://code.visualstudio.com/download) - IDE
 
+### Prepare
+
+#### Clone and setup environment
+
+```powershell
+# Clone
+git clone --recursive git@github.com:UNAWatch/una-sdk.git
+
+# Export evironment(persistent)
+. ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1
+
+# Satisfiy python dependencies
+pip install -r ${env:UNA_SDK}\Utilities\Scripts\app_packer\requirements.txt
+```
+
+Reboot PC to apply environment variables
+
+### Copy example and build
+
+```powershell
+# Copy entire project for simplicity
+cp -r .\una-sdk\Examples\Apps\Alarm\* MyAlarm
+
+# Create build dir
+mkdir -p MyAlarm\build
+
+# Call CMake
+cmake -G "Unix Makefiles" -S MyAlarm\Software\Apps\Alarm-CMake -B MyAlarm\build
+
+# Build
+cmake --build MyAlarm\build
+```
 
 ## TouchGFX (need Windos host)
 
