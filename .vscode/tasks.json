@@ -1,6 +1,7 @@
 {
     "version": "2.0.0",
-    "options": {"env": {"gen" : "Unix Makefiles"}},
+    "options": {"env": {"gen": "Unix Makefiles"}},
+    "linux": {"options": {"env": {"UNA_SDK" : "${workspaceFolder}"}}},
     "tasks": [
         {
             "label": "All CubeIDE:Clean All Apps",
@@ -892,7 +893,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: Alarm Clean",
@@ -945,7 +945,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: Cycling Clean",
@@ -1050,7 +1049,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: GlanceActivity Clean",
@@ -1103,7 +1101,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: GlanceFloors Clean",
@@ -1156,7 +1153,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: GlanceHR Clean",
@@ -1261,7 +1257,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: Hiking Clean",
@@ -1314,7 +1309,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "CMake: GlanceStrain Clean",
@@ -1369,7 +1363,6 @@
                 "focus": true,
                 "panel": "dedicated"
             },
-            
         },
         {
             "label": "Apps CMake: Clean ALL",
