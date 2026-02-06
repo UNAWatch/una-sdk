@@ -6,7 +6,7 @@ This guide covers SDK installation, manual environment setup, and primary workfl
 
 - Linux/macOS/Windows development machine
 - CMake 3.21+ (for manual builds)
-- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` incompatible (newlib `_write` undefined refs). See [Toolchain Setup](#toolchain-setup).
+- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` incompatible (newlib `_write` undefined refs). See [Toolchain Setup](#toolchain-setup). STM32CubeCLT missing the make utility which is crucial for Windows-based workflow.
 - USB cable for device flashing
 - Git for cloning the SDK
 
@@ -47,19 +47,49 @@ cd una-sdk
 
 3. Verify: `arm-none-eabi-gcc --version` (shows ~14.3+st, not 13.2)
 
-### Windows
+### Windows Setup
 
-1. Install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
+#### Get required software
 
-2. Add make, cmake, arm-gnu-eabi-gcc, python and efitools from stm32 distribution to PATH:
-   ```shell
-   export PATH="$PATH:/e/ST/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.cmake.win32_1.1.0.202409170845/tools/bin"
-   export PATH="$PATH:/e/ST/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin"
-   ...
-   ```
-   Check your own installed path and avalability.
+- [Git](https://git-scm.com/install/windows)
+- [Python 3](https://www.python.org/downloads/windows/) -  Notes:
+  - Enable "Add python.exe to PATH" checkmark
+  - Click "Disable path length limit" after installation
+- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities
+- [VS Code](https://code.visualstudio.com/download) - IDE
 
-3. Restart shell/IDE, verify version.
+#### Prepare
+
+##### Clone and setup environment
+
+```powershell
+# Clone
+git clone --recursive git@github.com:UNAWatch/una-sdk.git
+
+# Export evironment(persistent)
+. ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1
+
+# Satisfiy python dependencies
+pip install -r ${env:UNA_SDK}/Utilities/Scripts/app_packer/requirements.txt
+```
+
+Reboot PC to apply environment variables
+
+#### Copy example and build
+
+```powershell
+# Copy entire project for simplicity
+cp -r ${env:UNA_SDK}/Examples/Apps/Alarm/* MyAlarm
+
+# Create build dir
+mkdir -p MyAlarm\build
+
+# Call CMake
+cmake -G "Unix Makefiles" -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
+
+# Build
+cmake --build MyAlarm/build
+```
 
 ## CMake-Based Workflow Development
 
@@ -166,51 +196,7 @@ For IDE users, copy CubeIDE projects from Examples.
 
 This workflow integrates with TouchGFX Designer for GUI.
 
-## Windows Setup
-
-### Get required software
-
-- [Git](https://git-scm.com/install/windows)
-- [Python 3](https://www.python.org/downloads/windows/) -  Notes:
-  - Enable "Add python.exe to PATH" checkmark
-  - Click "Disable path length limit" after installation
-- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities
-- [VS Code](https://code.visualstudio.com/download) - IDE
-
-### Prepare
-
-#### Clone and setup environment
-
-```powershell
-# Clone
-git clone --recursive git@github.com:UNAWatch/una-sdk.git
-
-# Export evironment(persistent)
-. ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1
-
-# Satisfiy python dependencies
-pip install -r ${env:UNA_SDK}\Utilities\Scripts\app_packer\requirements.txt
-```
-
-Reboot PC to apply environment variables
-
-### Copy example and build
-
-```powershell
-# Copy entire project for simplicity
-cp -r .\una-sdk\Examples\Apps\Alarm\* MyAlarm
-
-# Create build dir
-mkdir -p MyAlarm\build
-
-# Call CMake
-cmake -G "Unix Makefiles" -S MyAlarm\Software\Apps\Alarm-CMake -B MyAlarm\build
-
-# Build
-cmake --build MyAlarm\build
-```
-
-## TouchGFX (need Windos host)
+## TouchGFX (require a Windows host)
 
 TouchGFX is a high-performance graphics framework designed for STM32 microcontrollers, enabling rich graphical user interfaces on embedded devices with limited resources.
 
