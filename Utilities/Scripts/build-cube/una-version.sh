@@ -139,3 +139,4 @@ fi
 export BUILD_VERSION
 log "Final BUILD_VERSION=$BUILD_VERSION"
 log "Script completed successfully"
+echo "BUILD_VERSION=$BUILD_VERSION"
