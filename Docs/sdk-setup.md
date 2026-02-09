@@ -296,6 +296,10 @@ For IDE users, copy CubeIDE projects from Examples.
 
 TouchGFX is a high-performance graphics framework designed for STM32 microcontrollers, enabling rich graphical user interfaces on embedded devices with limited resources.
 
+For now this is single supported way to create graphical applications for UNAwatch platform.
+
+**Note**: Glances operates without TouchGFX framework, it uses embedded lightweight drawing API which allow to draw simple text and icons in glances menu.
+
 ### Installation
 
 1. **Download and Install TouchGFX Designer**:
