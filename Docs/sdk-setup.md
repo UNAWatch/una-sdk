@@ -1,51 +1,158 @@
 # SDK Setup and Build Overview
 
-This guide covers SDK installation, manual environment setup, and primary workflows using CMake or STM32CubeIDE. The focus is on manual processes for better understanding and control, with the `una.py` tool limited to essential setup tasks (exporting `UNA_SDK` and basic environment configuration). For platform architecture, see [Platform Overview](platform-overview.md). For tutorials, see [Overview: Alarm App](build-your-first-app.md).
+This guide covers SDK installation, manual environment setup, and primary workflows using CMake or STM32CubeIDE.
+
+The focus is on a **manual, transparent setup** (no helper scripts required on Linux) so you can see exactly which tools are used and which environment variables are expected.
+
+For platform architecture, see [Platform Overview](platform-overview.md). For tutorials, see [Overview: Alarm App](build-your-first-app.md).
 
 ## Prerequisites
 
 - Linux/macOS/Windows development machine
 - CMake 3.21+ (for manual builds)
-- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` incompatible (newlib `_write` undefined refs). See [Toolchain Setup](#toolchain-setup). STM32CubeCLT missing the make utility which is crucial for Windows-based workflow.
+- A build tool: `make` (Unix Makefiles) or `ninja`
+- Python 3 + pip (for packaging/build utilities)
+- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [Toolchain Setup](#toolchain-setup).
 - USB cable for device flashing
 - Git for cloning the SDK
 
-### Step 1: Clone the SDK
-```bash
-git clone --recursive https://github.com/UNAWatch/una-sdk.git
-cd una-sdk
-```
+The rest of this document provides OS-specific, end-to-end setup sections (Linux/Windows) that follow the same flow:
 
-### Step 2: Choose Build Environment
-- **CubeIDE**: Copy from `SDK/Examples/<app-name>` to `SDK/Examples/<your-app-name>` to avoid path dependencies issue out of the box.
-- **CMake**:
-  - Copy from `SDK/Examples/<app-name>` to whatever you want and adjust `CMakeLists.txt` accoringly.Make shure UNA_SDK environment variable is defined.
-  - Set UNA_SDK for CMake:
-      Manually add to your shell profile (e.g., `~/.bashrc` or `~/.zshrc`):
-      ```bash
-      export UNA_SDK=/path/to/una-sdk
-      ```
-      Reload your shell or run `source ~/.bashrc`.
-  - CMake require the `UNA_SDK` environment variable to point to the SDK root directory. This enables location-independent app development.
+**Get required software → Prepare → Clone and setup environment → Copy example and build**
 
 ## Toolchain Setup
 
-**CRITICAL**: Use STMicroelectronics GNU Tools for STM32 (from CubeIDE/CubeCLT). System `gcc-arm-none-eabi` (GCC 13.2+) incompatible - full newlib requires syscall stubs (`_write`, `_close`, etc.) missing in bare-metal. CMake confirmed works with ST toolchain.
+**CRITICAL**: Use STMicroelectronics GNU Tools for STM32 (from **STM32CubeIDE** or **STM32CubeCLT**).
 
-### Linux (Ubuntu/Debian, zsh)
+The system `gcc-arm-none-eabi` shipped by many distros (often GCC 13+) is frequently incompatible with this SDK's bare-metal/newlib expectations and may fail with undefined syscall stubs (`_write`, `_close`, etc.).
 
-1. Download/install [STM32CubeCLT](https://www.st.com/en/development-tools/stm32cubeclt.html):
-   ```
-   chmod +x ~/Downloads/STM32CubeCLT_Linux64_v1-*.run &amp;&amp; ./STM32CubeCLT_Linux64_v1-*.run
-   ```
+### Linux Setup
 
-2. Add to `~/.zshrc`:
-   ```
-   export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:\$PATH"
-   ```
-   `source ~/.zshrc`
+#### Get required software
 
-3. Verify: `arm-none-eabi-gcc --version` (shows ~14.3+st, not 13.2)
+- [Git](https://git-scm.com/) (clone)
+- Python 3 + pip (packaging/build utilities)
+- CMake 3.21+
+- `make` (or `ninja`)
+- **STM32CubeIDE** or **STM32CubeCLT** (provides the **ST** `arm-none-eabi-gcc` toolchain)
+
+Install hints (keep it minimal; equivalents work on other distros):
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install -y git python3 python3-pip cmake build-essential ninja-build
+```
+
+#### Prepare
+
+##### Toolchain (CubeIDE/CubeCLT) and PATH
+
+1) Install the ST toolchain (choose one):
+
+- **STM32CubeCLT** (CLI-first):
+  ```bash
+  chmod +x ~/Downloads/STM32CubeCLT_Linux64_v1-*.run
+  ~/Downloads/STM32CubeCLT_Linux64_v1-*.run
+  ```
+
+- **STM32CubeIDE** (IDE + toolchain):
+  Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html
+
+2) Ensure the ST toolchain is on your `PATH`.
+
+If you installed **CubeCLT**, the toolchain is typically under:
+
+```bash
+export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"
+```
+
+If `arm-none-eabi-gcc` is still not found and you installed **CubeIDE**, add the directory that contains `arm-none-eabi-gcc` to your `PATH` (it is usually a `.../plugins/...gnu-tools-for-stm32.../tools/bin` folder inside the CubeIDE installation).
+
+##### Clone and setup environment
+
+```bash
+# Clone
+git clone --recursive https://github.com/UNAWatch/una-sdk.git
+cd una-sdk
+
+# Export environment for the current shell
+export UNA_SDK="$PWD"
+
+# Satisfy python dependencies
+python3 -m pip install -r "$UNA_SDK/Utilities/Scripts/app_packer/requirements.txt"
+```
+
+##### Verify your environment
+
+This SDK expects the toolchain and build tools to be discoverable via `PATH`.
+
+```bash
+which arm-none-eabi-gcc
+which cmake
+which make || true
+which ninja || true
+which python3
+python3 -m pip --version
+
+arm-none-eabi-gcc --version
+cmake --version
+make --version || true
+ninja --version || true
+```
+
+If `which arm-none-eabi-gcc` prints nothing, your ST toolchain bin directory is not on `PATH` yet. Add it (see **Prepare** above) and re-open your terminal.
+
+#### Copy example and build
+
+This uses the same **Alarm CMake** example flow as Windows: **copy project → create build dir → configure → build**.
+
+```bash
+# Copy entire project for simplicity
+cp -r "$UNA_SDK/Examples/Apps/Alarm/"* MyAlarm
+
+# Create build dir
+mkdir -p MyAlarm/build
+
+# Configure
+cmake -G "Unix Makefiles" -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
+
+# Build
+cmake --build MyAlarm/build
+```
+
+#### Optional (Linux)
+
+##### Persist `UNA_SDK` and toolchain `PATH`
+
+If you don't want to export variables every time, add them to your shell profile.
+
+For bash:
+
+```bash
+echo 'export UNA_SDK="$HOME/path/to/una-sdk"' >> ~/.bashrc
+echo 'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+For zsh:
+
+```bash
+echo 'export UNA_SDK="$HOME/path/to/una-sdk"' >> ~/.zshrc
+echo 'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+##### Use Ninja instead of Makefiles
+
+```bash
+cmake -G Ninja -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
+cmake --build MyAlarm/build
+```
+
+##### Note about distro `gcc-arm-none-eabi`
+
+If you installed `gcc-arm-none-eabi` from your distro repositories and builds fail with missing syscall stubs, switch to the **ST** toolchain from CubeIDE/CubeCLT and ensure its `arm-none-eabi-gcc` is the one found first in `PATH`.
 
 ### Windows Setup
 
@@ -66,10 +173,10 @@ cd una-sdk
 # Clone
 git clone --recursive git@github.com:UNAWatch/una-sdk.git
 
-# Export evironment(persistent)
+# Export environment (persistent)
 . ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1
 
-# Satisfiy python dependencies
+# Satisfy python dependencies
 pip install -r ${env:UNA_SDK}/Utilities/Scripts/app_packer/requirements.txt
 ```
 
@@ -122,15 +229,15 @@ MyApp/  # App root (can be anywhere)
    ```bash
    # Create app dir
    mkdir -p MyApp
-   cp -r SDK/Examples/Apps/<app-name>/Software/<app-name>-CMake/* MyApp/
+    cp -r Examples/Apps/<app-name>/Software/Apps/<app-name>-CMake/* MyApp/
 
    # Copy libs
    mkdir -p MyApp/Libs
-   cp -r SDK/Examples/Apps/<app-name>/Software/Libs/* MyApp/Libs/
+    cp -r Examples/Apps/<app-name>/Software/Libs/* MyApp/Libs/
 
    # For GUI: Copy TouchGFX
    mkdir -p MyApp/TouchGFX-GUI
-   cp -r SDK/Examples/Apps/<app-name>/Software/Apps/TouchGFX-GUI/* MyApp/TouchGFX-GUI/
+    cp -r Examples/Apps/<app-name>/Software/Apps/TouchGFX-GUI/* MyApp/TouchGFX-GUI/
    ```
 
 2. **Customize CMakeLists.txt**:
@@ -179,7 +286,7 @@ For IDE users, copy CubeIDE projects from Examples.
 
 ### Creating New Apps in CubeIDE
 1. **Copy Projects**:
-   - Copy from `SDK/Examples/<app-name>` to `SDK/Examples/<your-app-name>`
+   - Copy from `Examples/Apps/<app-name>` to `Examples/Apps/<your-app-name>`
 
 2. **Customize**:
    - Edit `.project` and `.cproject`: Replace names/IDs.
@@ -208,7 +315,7 @@ TouchGFX is a high-performance graphics framework designed for STM32 microcontro
    - Install the TouchGFX Designer tool on your development machine (Windows, Linux, or macOS supported).
 
 2. **Framework Integration**:
-   - In the UNA SDK, TouchGFX is pre-integrated in example GUI projects (e.g., `SDK/Examples/Apps/<app>/Software/Apps/TouchGFX-GUI/`).
+    - In the UNA SDK, TouchGFX is pre-integrated in example GUI projects (e.g., `Examples/Apps/<app>/Software/Apps/TouchGFX-GUI/`).
    - For new projects, copy the TouchGFX-GUI directory from an example and ensure the framework libraries are available via the SDK paths.
    - No separate installation of the framework is needed if using the SDK's bundled version; otherwise, download the TouchGFX framework package from ST.
 
