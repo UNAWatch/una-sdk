@@ -29,8 +29,8 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          submodules: true
-          token: ${{ secrets.CROSS_REPO_PAT }}
+          submodules: false
+          token: ${{ github.token }}
 
       - id: create_release
         name: Release
@@ -38,13 +38,13 @@ jobs:
         with:
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          GITHUB_TOKEN: ${{ github.token}}
 
       - name: Make release immutable
         run: |
           gh release edit ${{ github.ref_name }} --draft=false
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          GITHUB_TOKEN: ${{ github.token}}
 
       - id: get_slack_params
         name: Get required parameters for slack notification
@@ -58,7 +58,7 @@ jobs:
           echo "name=$(echo \"$RELEASE_JSON\" | jq -r '.name')" >> $GITHUB_OUTPUT
           echo "url=$(echo \"$RELEASE_JSON\" | jq -r '.url')" >> $GITHUB_OUTPUT
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          GITHUB_TOKEN: ${{ github.token}}
 
       - id: prepare_slack_payload
         name: Prepare Slack payload
