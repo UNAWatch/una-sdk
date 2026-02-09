@@ -10,7 +10,7 @@ For platform architecture, see [Platform Overview](platform-overview.md). For tu
 
 - Linux/macOS/Windows development machine
 - CMake 3.21+ (for manual builds)
-- A build tool: `make` (Unix Makefiles) or `ninja`
+- A build tool: `make` (Unix Makefiles)
 - Python 3 + pip (for packaging/build utilities)
 - **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [Toolchain Setup](#toolchain-setup).
 - USB cable for device flashing
@@ -33,7 +33,7 @@ The system `gcc-arm-none-eabi` shipped by many distros (often GCC 13+) is freque
 - [Git](https://git-scm.com/) (clone)
 - Python 3 + pip (packaging/build utilities)
 - CMake 3.21+
-- `make` (or `ninja`)
+- `make`
 - **STM32CubeIDE** or **STM32CubeCLT** (provides the **ST** `arm-none-eabi-gcc` toolchain)
 
 Install hints (keep it minimal; equivalents work on other distros):
@@ -41,7 +41,7 @@ Install hints (keep it minimal; equivalents work on other distros):
 ```bash
 # Ubuntu/Debian
 sudo apt update
-sudo apt install -y git python3 python3-pip cmake build-essential ninja-build
+sudo apt install -y git python3 python3-pip cmake build-essential
 ```
 
 #### Prepare
@@ -88,17 +88,15 @@ python3 -m pip install -r "$UNA_SDK/Utilities/Scripts/app_packer/requirements.tx
 This SDK expects the toolchain and build tools to be discoverable via `PATH`.
 
 ```bash
-which arm-none-eabi-gcc
-which cmake
+which arm-none-eabi-gcc || true
+which cmake || true
 which make || true
-which ninja || true
-which python3
+which python3 || true
 python3 -m pip --version
 
-arm-none-eabi-gcc --version
-cmake --version
+arm-none-eabi-gcc --version || true
+cmake --version || true
 make --version || true
-ninja --version || true
 ```
 
 If `which arm-none-eabi-gcc` prints nothing, your ST toolchain bin directory is not on `PATH` yet. Add it (see **Prepare** above) and re-open your terminal.
