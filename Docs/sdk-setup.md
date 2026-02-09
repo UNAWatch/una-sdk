@@ -30,10 +30,10 @@ The system `gcc-arm-none-eabi` shipped by many distros (often GCC 13+) is freque
 
 #### Get required software
 
-- [Git](https://git-scm.com/) (clone)
-- Python 3 + pip (packaging/build utilities)
+- [Git](https://git-scm.com/) (clone + version string generation)
+- Python 3 + pip (packaging utilities)
 - CMake 3.21+
-- `make`
+- make
 - **STM32CubeIDE** or **STM32CubeCLT** (provides the **ST** `arm-none-eabi-gcc` toolchain)
 
 Install hints (keep it minimal; equivalents work on other distros):
@@ -141,13 +141,6 @@ echo 'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bi
 source ~/.zshrc
 ```
 
-##### Use Ninja instead of Makefiles
-
-```bash
-cmake -G Ninja -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
-cmake --build MyAlarm/build
-```
-
 ##### Note about distro `gcc-arm-none-eabi`
 
 If you installed `gcc-arm-none-eabi` from your distro repositories and builds fail with missing syscall stubs, switch to the **ST** toolchain from CubeIDE/CubeCLT and ensure its `arm-none-eabi-gcc` is the one found first in `PATH`.
@@ -160,7 +153,7 @@ If you installed `gcc-arm-none-eabi` from your distro repositories and builds fa
 - [Python 3](https://www.python.org/downloads/windows/) -  Notes:
   - Enable "Add python.exe to PATH" checkmark
   - Click "Disable path length limit" after installation
-- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities
+- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities (*note*: STM32CubeCLT does not includes `make` program, which is required)
 - [VS Code](https://code.visualstudio.com/download) - IDE
 
 #### Prepare
@@ -298,8 +291,6 @@ For IDE users, copy CubeIDE projects from Examples.
 4. **Build**:
    - Build service/GUI separately.
    - Manual merge: Use SDK scripts (e.g., `Utilities/Scripts/app_merging/app_merging.py`) with icons/resources.
-
-This workflow integrates with TouchGFX Designer for GUI.
 
 ## TouchGFX (require a Windows host)
 
