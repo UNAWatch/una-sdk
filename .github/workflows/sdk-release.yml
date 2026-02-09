@@ -1,0 +1,93 @@
+name: Release SDK
+
+on:
+  release:
+    types: [ published ]
+  push:
+    tags: [ '*' ]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y curl jq git zip
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          submodules: true
+          token: ${{ secrets.CROSS_REPO_PAT }}
+
+      - id: create_release
+        name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+
+      - name: Make release immutable
+        run: |
+          gh release edit ${{ github.ref_name }} --draft=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+
+      - id: get_slack_params
+        name: Get required parameters for slack notification
+        run: |
+          RELEASE_JSON=$(gh release view ${{ github.ref_name }} --json body,author,createdAt,name,url)
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "author=$(echo \"$RELEASE_JSON\" | jq -r '.author.login')" >> $GITHUB_OUTPUT
+          echo "created_at=$(echo \"$RELEASE_JSON\" | jq -r '.createdAt')" >> $GITHUB_OUTPUT
+          echo "name=$(echo \"$RELEASE_JSON\" | jq -r '.name')" >> $GITHUB_OUTPUT
+          echo "url=$(echo \"$RELEASE_JSON\" | jq -r '.url')" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+
+      - id: prepare_slack_payload
+        name: Prepare Slack payload
+        run: |
+          BODY="${{ steps.get_slack_params.outputs.body }}"
+          BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g')
+          BODY=$(echo "$BODY" | sed 's/^## \([^$]*\)$/*\1*/')
+          BODY=$(echo "$BODY" | sed 's/^* /- /')
+          BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/')
+          PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
+            text: (":books: *UNA SDK*: " + $name),
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: ("-------- :books: *UNA SDK* --------\n*" + $name + "* (tag: " + $tag + ")\n\n" + $body + "\n\n:bust_in_silhouette: *Author*: " + $author + "\n:date: *Created*: " + $created + "\n\n:link: *Download*: " + $url)
+                }
+              }
+            ]
+          }')
+          echo "payload<<EOF" >> $GITHUB_OUTPUT
+          echo "$PAYLOAD" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: ${{ steps.prepare_slack_payload.outputs.payload }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
