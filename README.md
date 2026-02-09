@@ -2,6 +2,8 @@
 
 The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. This SDK enables developers to create apps for the UNA watch platform with support for sensor data, GUI interfaces, file systems, and inter-process communication.
 
+For full setup instructions (Linux/Windows, toolchain, environment variables, and a buildable example), see [`Docs/sdk-setup.md`](Docs/sdk-setup.md).
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -49,61 +51,7 @@ The SDK includes several utilities for common tasks:
 
 ## Prerequisites
 
-### Required Tools
-
-- **Development Machine**: Linux, macOS, or Windows
-- **CMake**: Version 3.21+ (for manual builds)
-- **Python**: Version 3.6+ (for build scripts)
-- **Git**: For cloning the SDK
-- **USB Cable**: For device flashing
-
-### Toolchain Setup
-
-**CRITICAL**: Use STMicroelectronics GNU Tools for STM32 (from CubeIDE/CubeCLT). System `gcc-arm-none-eabi` (GCC 13.2+) is incompatible due to missing newlib syscall stubs.
-
-#### Linux (Ubuntu/Debian)
-
-1. Download and install [STM32CubeCLT](https://www.st.com/en/development-tools/stm32cubeclt.html):
-   ```bash
-   chmod +x ~/Downloads/STM32CubeCLT_Linux64_v1-*.run
-   ./STM32CubeCLT_Linux64_v1-*.run
-   ```
-
-2. Add to PATH in your shell profile (`~/.bashrc` or `~/.zshrc`):
-   ```bash
-   export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"
-   ```
-
-3. Reload your shell and verify:
-   ```bash
-   source ~/.bashrc
-   arm-none-eabi-gcc --version  # Should show ~14.3+st, not 13.2
-   ```
-
-#### Windows
-
-1. Install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
-
-2. Add the following to your PATH environment variable:
-   - `C:\ST\STM32CubeIDE_*\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344\tools\bin`
-   - `C:\ST\STM32CubeIDE_*\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.cmake.win32_1.1.0.202409170845\tools\bin`
-   - `C:\ST\STM32CubeIDE_*\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.make.win32_1.1.0.202409170845\tools\bin`
-
-3. Restart your command prompt/IDE and verify with `arm-none-eabi-gcc --version`
-
-### Environment Variables
-
-Set the `UNA_SDK` environment variable to point to the SDK root directory:
-
-**Linux/macOS** (add to `~/.bashrc` or `~/.zshrc`):
-```bash
-export UNA_SDK=/path/to/una-sdk
-```
-
-**Windows** (System Properties > Environment Variables):
-```
-UNA_SDK=C:\path\to\una-sdk
-```
+Keep this README high-level; detailed prerequisites, toolchain notes, and environment variables are documented in [`Docs/sdk-setup.md`](Docs/sdk-setup.md).
 
 ## Opening SDK in VSCode
 
@@ -121,9 +69,8 @@ The SDK supports multiple build systems for different development workflows.
 Recommended for command-line control and flexibility.
 
 #### Prerequisites
-- CMake 3.21+
-- ARM GCC toolchain in PATH
-- `UNA_SDK` environment variable set
+
+See [`Docs/sdk-setup.md`](Docs/sdk-setup.md) for the exact toolchain requirements and how to set `UNA_SDK`.
 
 #### Building a Project
 
@@ -213,21 +160,7 @@ The SDK includes several example applications demonstrating different features a
 
 ### Compiling Examples with CMake
 
-Each example supports CMake builds. Here's how to build the Cycling example:
-
-1. Set environment variables:
-   ```bash
-   export UNA_SDK=/path/to/sdk
-   cd SDK/Examples/Apps/Cycling/Software/Apps/Cycling-CMake
-   ```
-
-2. Configure and build:
-   ```bash
-   cmake -G "Unix Makefiles" -S . -B build
-   cmake --build build
-   ```
-
-3. Output: `.uapp` file in the `Output/` directory
+Each example supports CMake builds. For a complete, copy-and-build walkthrough, follow the **Alarm CMake** example in [`Docs/sdk-setup.md`](Docs/sdk-setup.md).
 
 ### Compiling Examples with CubeIDE
 
