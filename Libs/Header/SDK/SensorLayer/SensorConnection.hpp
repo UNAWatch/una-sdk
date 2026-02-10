@@ -104,8 +104,8 @@ namespace SDK::Sensor {
          * - If no valid handle is present, the function returns false.
          * - If already connected, parameter updates are rejected.
          *
-         * @param period   New sampling/update period.
-         * @param latency  New maximum reporting latency.
+         * @param period   New sampling/update period in ms.
+         * @param latency  New maximum reporting latency in ms.
          *
          * @return true  If the connection was successfully established.
          * @return false If the update or connection failed.
