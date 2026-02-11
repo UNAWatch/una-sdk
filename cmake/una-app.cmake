@@ -244,9 +244,16 @@ function(una_app_build_app)
     if(DEFINED TOUCHGFX_PATH)
         list(APPEND APP_DEPENDS ${APP_NAME}GUI.elf)
     endif()
+    set(APP_AUTOSTART_FLAG "")
+    if(${APP_AUTOSTART} STREQUAL On)
+        set(APP_AUTOSTART_FLAG "-autostart")
+        message("App autostart is ON")
+    else()
+        message("App autostart is OFF")
+    endif()
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
