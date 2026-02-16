@@ -1,4 +1,4 @@
-#include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRate.hpp"
+// #include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRate.hpp"  // Commented out: HR parser include
 #include "SDK/Messages/SensorLayerMessages.hpp"
 
 #include "Service.hpp"
@@ -11,24 +11,24 @@ Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mSender(mKernel)
     , mGUIStarted(false)
-    , mSensorHR(SDK::Sensor::Type::HEART_RATE, 1000, 2000)
-    , mHR(0)
-    , mHRTL(0)
-    , mActivityWriter(mKernel, "Activity")
+    // , mSensorHR(SDK::Sensor::Type::HEART_RATE, 1000, 2000)  // Commented out: HR sensor initialization
+    // , mHR(0)  // Commented out: Initialize HR to 0
+    // , mHRTL(0)  // Commented out: Initialize HR trust level to 0
+    // , mActivityWriter(mKernel, "Activity")  // Commented out: FIT writer initialization
 {}
 
 void Service::run()
 {
     LOG_INFO("thread started\n");
 
-    mSensorHR.connect();
+    // mSensorHR.connect();  // Commented out: Connect to HR sensor
 
-    ActivityWriter::AppInfo info{};
-    info.timestamp  = std::time(nullptr);
-    info.appVersion = ParseVersion(BUILD_VERSION);
-    info.devID      = DEV_ID;
-    info.appID      = APP_ID;
-    mActivityWriter.start(info);
+    // ActivityWriter::AppInfo info{};  // Commented out: FIT file info
+    // info.timestamp  = std::time(nullptr);
+    // info.appVersion = ParseVersion(BUILD_VERSION);
+    // info.devID      = DEV_ID;
+    // info.appID      = APP_ID;
+    // mActivityWriter.start(info);  // Commented out: Start FIT file writing
 
     time_t startTime    = time(nullptr);
     time_t utcTimestamp = 0;
@@ -47,7 +47,7 @@ void Service::run()
                 // Kernel messages
                 case SDK::MessageType::COMMAND_APP_STOP:
                     LOG_INFO("Force exit from the application\n");
-                    mSensorHR.disconnect();
+                    // mSensorHR.disconnect();  // Commented out: Disconnect HR sensor
                     // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -77,25 +77,25 @@ void Service::run()
             mKernel.comm.releaseMessage(msg);
         }
 
-        if (mGUIStarted) {
-            // Save record to the FIT file
-            time_t utc = time(nullptr);
-            if (utcTimestamp != utc) {
-                utcTimestamp = utc;
+        // if (mGUIStarted) {  // Commented out: FIT record logging
+        //     // Save record to the FIT file
+        //     time_t utc = time(nullptr);
+        //     if (utcTimestamp != utc) {
+        //         utcTimestamp = utc;
 
-                ActivityWriter::RecordData fitRecord {};
-                fitRecord.timestamp  = utc;
-                fitRecord.heartRate  = static_cast<uint8_t>(mHR);
-                fitRecord.trustLevel = static_cast<uint8_t>(mHRTL);
-                mActivityWriter.addRecord(fitRecord);
+        //         ActivityWriter::RecordData fitRecord {};
+        //         fitRecord.timestamp  = utc;
+        //         fitRecord.heartRate  = static_cast<uint8_t>(mHR);
+        //         fitRecord.trustLevel = static_cast<uint8_t>(mHRTL);
+        //         mActivityWriter.addRecord(fitRecord);
 
-                if (mHR > 1) {
-                    hrAvgSum += mHR;
-                    ++hrAvgCount;
-                    hrMax = std::max(hrMax, mHR);
-                }
-            }
-        } else {
+        //         if (mHR > 1) {
+        //             hrAvgSum += mHR;
+        //             ++hrAvgCount;
+        //             hrMax = std::max(hrMax, mHR);
+        //         }
+        //     }
+        // } else {
             // Just wait some time to see if GUI starts
             if (mKernel.sys.getTimeMs() - startTimeMs > 5000) {
                 LOG_DEBUG("start GUI timeout\n");
@@ -105,29 +105,29 @@ void Service::run()
         }
     }
 
-    time_t utc = time(nullptr);
+    // time_t utc = time(nullptr);  // Commented out: FIT finalization
 
-    // Save lap to the FIT file
-    ActivityWriter::LapData fitLap {};
-    fitLap.timeStart = utc - startTime;
-    fitLap.duration = utc - startTime;
-    fitLap.elapsed = utc - startTime;
-    fitLap.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);
-    fitLap.hrMax = static_cast<uint8_t>(hrMax);
-    mActivityWriter.addLap(fitLap);
+    // // Save lap to the FIT file  // Commented out
+    // ActivityWriter::LapData fitLap {};
+    // fitLap.timeStart = utc - startTime;
+    // fitLap.duration = utc - startTime;
+    // fitLap.elapsed = utc - startTime;
+    // fitLap.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);
+    // fitLap.hrMax = static_cast<uint8_t>(hrMax);
+    // mActivityWriter.addLap(fitLap);
 
-    // Create FIT file
+    // // Create FIT file  // Commented out
 
-    ActivityWriter::TrackData fitTrack{};
-    fitTrack.timeStart = utc;
-    fitTrack.duration = utc - startTime;
-    fitTrack.elapsed = utc - startTime;
-    fitTrack.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);
-    fitTrack.hrMax = static_cast<uint8_t>(hrMax);
+    // ActivityWriter::TrackData fitTrack{};
+    // fitTrack.timeStart = utc;
+    // fitTrack.duration = utc - startTime;
+    // fitTrack.elapsed = utc - startTime;
+    // fitTrack.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);
+    // fitTrack.hrMax = static_cast<uint8_t>(hrMax);
 
-    mActivityWriter.stop(fitTrack);
+    // mActivityWriter.stop(fitTrack);
 
-    mSensorHR.disconnect();
+    // mSensorHR.disconnect();  // Commented out: Disconnect sensor
 
     LOG_INFO("thread stopped\n");
 }
@@ -136,7 +136,7 @@ void Service::onStartGUI()
 {
     LOG_INFO("GUI started\n");
     mGUIStarted = true;
-    mSender.updateHeartRate(0.0f, 0.0f);
+    // mSender.updateHeartRate(0.0f, 0.0f);  // Commented out: Send initial HR values to GUI
 }
 
 void Service::onStopGUI()
@@ -147,17 +147,17 @@ void Service::onStopGUI()
 
 void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
 {
-    if (mSensorHR.matchesDriver(handle)) {
-        if (mGUIStarted) {
-            SDK::SensorDataParser::HeartRate parser(data[0]);
-            if (parser.isDataValid()) {
-                mHR   = parser.getBpm();
-                mHRTL = parser.getTrustLevel();
+    // if (mSensorHR.matchesDriver(handle)) {  // Commented out: HR sensor data handling
+    //     if (mGUIStarted) {
+    //         SDK::SensorDataParser::HeartRate parser(data[0]);
+    //         if (parser.isDataValid()) {
+    //             mHR   = parser.getBpm();
+    //             mHRTL = parser.getTrustLevel();
 
-                mSender.updateHeartRate(mHR, mHRTL);
-            }
-        }
-    }
+    //             mSender.updateHeartRate(mHR, mHRTL);
+    //         }
+    //     }
+    // }
 }
 
 uint32_t Service::ParseVersion(const char* str)

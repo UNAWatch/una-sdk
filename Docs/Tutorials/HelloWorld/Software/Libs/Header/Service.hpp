@@ -22,10 +22,10 @@ private:
     SDK::Kernel&             mKernel;
     CustomMessage::GUISender mSender;
     bool                     mGUIStarted;
-    SDK::Sensor::Connection  mSensorHR;
-    float                    mHR;
-    float                    mHRTL;
-    ActivityWriter           mActivityWriter;
+    // SDK::Sensor::Connection  mSensorHR;  // Commented out: HR sensor connection for hello world tutorial
+    // float                    mHR;         // Commented out: Heart rate value
+    // float                    mHRTL;       // Commented out: Heart rate trust level
+    // ActivityWriter           mActivityWriter;  // Commented out: FIT file writer
 
     void onStartGUI();
     void onStopGUI();
