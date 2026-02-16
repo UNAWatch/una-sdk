@@ -104,12 +104,20 @@ void Model::onSuspend()
 bool Model::customMessageHandler(SDK::MessageBase *msg)
 {
     switch (msg->getType()) {
-        // case CustomMessage::HR_VALUES:  {  // Commented out: HR values handling
+        /*
+         * HR_VALUES Message Handler:
+         * - Receives HR updates from service via SDK messaging
+         * - Extracts heartRate and trustLevel from message
+         * - Calls modelListener to update GUI display
+         * To enable: Uncomment case, ensure HRValues struct defined in Commands.hpp,
+         * and implement updateHR() in ModelListener/View
+         */
+        // case CustomMessage::HR_VALUES:  {
         //     LOG_DEBUG("Update HR_VALUES\n");
         //     auto* m = static_cast<CustomMessage::HRValues*>(msg);
 
         //     LOG_DEBUG("hr %.1f, tl %.1f\n", m->heartRate, m->trustLevel);
-        //     // modelListener->updateHR(m->heartRate, m->trustLevel);
+        //     // modelListener->updateHR(m->heartRate, m->trustLevel);  // Update GUI
         // } break;
 
         default:
