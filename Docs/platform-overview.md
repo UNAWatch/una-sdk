@@ -1,3 +1,4 @@
+(platform-overview)=
 # Platform Overview
 
 This document provides an overview of the Una-Watch platform's unique architecture and capabilities.
@@ -55,8 +56,8 @@ Communication between processes is handled via a high-performance message-passin
 
 ## Next Steps
 
-For detailed SDK setup and build workflows, see [SDK Setup and Build Overview](sdk-setup.md).
+For detailed SDK setup and build workflows, see [SDK setup](sdk-setup.md).
 
-For hands-on app development tutorials, see [Overview: Alarm App](build-your-first-app.md).
+For hands-on app development tutorials, see [HelloWorld tutorial](Tutorials/HelloWorld/ARCHITECTURE.md).
 
-For SDK APIs and interfaces, see [SDK Reference](sdk-overview.md) and [Architecture Deep Dive](architecture-deep-dive.md).
+For SDK APIs and interfaces, see [SDK overview](sdk-overview.md) and [architecture deep dive](architecture-deep-dive.md).

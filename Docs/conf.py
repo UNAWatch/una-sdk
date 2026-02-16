@@ -34,7 +34,9 @@ extensions = [
 myst_enable_extensions = [
     "colon_fence",
     "html_image",
+    "attrs_inline",
 ]
+myst_linkify_fuzzy_links = False
 myst_fence_as_directive = ["mermaid"]
 
 # Breathe configuration

@@ -1,3 +1,4 @@
+(tutorials/helloworld/architecture)=
 # HelloWorld Tutorial: Your First UNA Watch App
 
 Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
@@ -20,7 +21,7 @@ By starting simple, you'll understand the core patterns that all UNA apps use, m
 ## Getting Started
 
 ### Prerequisites
-Before building HelloWorld, you need to set up the UNA SDK environment. Follow the [SDK Setup Guide](../../sdk-setup.md) for complete installation instructions, including:
+Before building HelloWorld, you need to set up the UNA SDK environment. Follow the [toolchain setup](toolchain-setup) for complete installation instructions, including:
 
 - UNA SDK cloned with submodules (`git clone --recursive`)
 - ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)
@@ -33,11 +34,11 @@ Before building HelloWorld, you need to set up the UNA SDK environment. Follow t
 - CMake and build tools
 
 **For GUI development/modification:**
-- TouchGFX Designer installed (see [sdk-setup.md](../../sdk-setup.md#touchgfx-require-a-windows-host))
+- TouchGFX Designer installed (see [toolchain setup](toolchain-setup))
 
 ### Building and Running HelloWorld
 
-1. **Verify your environment setup** (see [sdk-setup.md](../../sdk-setup.md) for details):
+1. **Verify your environment setup** (see [toolchain setup](toolchain-setup) for details):
    ```bash
    echo $UNA_SDK                   # Should point to SDK root. 
                                    # Note for backward compatibility with linux path notation it uses '/'
@@ -64,7 +65,7 @@ The app will start and show a basic GUI demonstrating the UNA app framework. Thi
 
 If you want to explore or modify the GUI design:
 
-1. **Install TouchGFX Designer** (see [sdk-setup.md](../../sdk-setup.md#touchgfx-require-a-windows-host) for installation)
+1. **Install TouchGFX Designer** (see [toolchain setup](toolchain-setup) for installation)
 
 2. **Open the TouchGFX project:**
    ```
@@ -82,7 +83,7 @@ If you want to explore or modify the GUI design:
    make
    ```
 
-**Note**: HelloWorld has a minimal GUI. For learning GUI development, study the more complex examples like Cycling or HRMonitor apps, or see the [TouchGFX section in sdk-setup.md](../../sdk-setup.md#touchgfx-require-a-windows-host).
+**Note**: HelloWorld has a minimal GUI. For learning GUI development, study the more complex examples like Cycling or HRMonitor apps, or see the [toolchain setup](toolchain-setup).
 
 ## HelloWorld App Overview
 
