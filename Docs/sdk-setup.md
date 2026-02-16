@@ -13,6 +13,7 @@ For platform architecture, see [Platform Overview](platform-overview.md). For tu
 - A build tool: `make` (Unix Makefiles)
 - Python 3 + pip (for packaging/build utilities)
 - **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [Toolchain Setup](#toolchain-setup).
+- **TouchGFX (require a Windows host)**: For GUI development - TouchGFX Designer requires Windows. See [TouchGFX (require a Windows host)](#touchgfx-require-a-windows-host) below.
 - USB cable for device flashing
 - Git for cloning the SDK
 
