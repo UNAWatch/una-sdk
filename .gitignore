@@ -1,3 +1,4 @@
 Docs/_build
 Docs/_site
 Docs/Tutorials/*/Software/App*/*-CMake/build
+*.temp
