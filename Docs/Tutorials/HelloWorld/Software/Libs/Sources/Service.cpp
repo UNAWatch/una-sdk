@@ -11,24 +11,33 @@ Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mSender(mKernel)
     , mGUIStarted(false)
-    // , mSensorHR(SDK::Sensor::Type::HEART_RATE, 1000, 2000)  // Commented out: HR sensor initialization
-    // , mHR(0)  // Commented out: Initialize HR to 0
-    // , mHRTL(0)  // Commented out: Initialize HR trust level to 0
-    // , mActivityWriter(mKernel, "Activity")  // Commented out: FIT writer initialization
+    // Uncomment below to enable HR sensor and FIT logging:
+    // , mSensorHR(SDK::Sensor::Type::HEART_RATE, 1000, 2000)  // Initialize HR sensor (1s sample, 2s timeout)
+    // , mHR(0)  // Initialize HR value to 0
+    // , mHRTL(0)  // Initialize HR trust level to 0
+    // , mActivityWriter(mKernel, "Activity")  // Initialize FIT writer with "Activity" directory
 {}
 
 void Service::run()
 {
     LOG_INFO("thread started\n");
 
-    // mSensorHR.connect();  // Commented out: Connect to HR sensor
+    /*
+     * To enable HR sensor and FIT logging:
+     * 1. Uncomment sensor connection below
+     * 2. Uncomment FIT file initialization
+     * 3. Ensure member variables are uncommented in Service.hpp
+     * 4. Uncomment sensor disconnect in COMMAND_APP_STOP and final cleanup
+     */
+    // mSensorHR.connect();  // Connect to heart rate sensor
 
-    // ActivityWriter::AppInfo info{};  // Commented out: FIT file info
-    // info.timestamp  = std::time(nullptr);
-    // info.appVersion = ParseVersion(BUILD_VERSION);
-    // info.devID      = DEV_ID;
-    // info.appID      = APP_ID;
-    // mActivityWriter.start(info);  // Commented out: Start FIT file writing
+    // // Initialize FIT file with app metadata
+    // ActivityWriter::AppInfo info{};
+    // info.timestamp  = std::time(nullptr);  // Current UTC time
+    // info.appVersion = ParseVersion(BUILD_VERSION);  // Parsed version number
+    // info.devID      = DEV_ID;  // Developer ID string
+    // info.appID      = APP_ID;  // Application ID string
+    // mActivityWriter.start(info);  // Create and initialize FIT file
 
     time_t startTime    = time(nullptr);
     time_t utcTimestamp = 0;
@@ -77,18 +86,26 @@ void Service::run()
             mKernel.comm.releaseMessage(msg);
         }
 
-        // if (mGUIStarted) {  // Commented out: FIT record logging
-        //     // Save record to the FIT file
+        /*
+         * FIT Record Logging (every second while GUI is active):
+         * - Checks if GUI is started (mGUIStarted)
+         * - Logs HR data every second to FIT file
+         * - Maintains aggregates for lap/track summaries
+         * To enable: Uncomment the block below and ensure mActivityWriter is initialized
+         */
+        // if (mGUIStarted) {
+        //     // Save record to the FIT file every second
         //     time_t utc = time(nullptr);
-        //     if (utcTimestamp != utc) {
+        //     if (utcTimestamp != utc) {  // Check if a second has passed
         //         utcTimestamp = utc;
 
         //         ActivityWriter::RecordData fitRecord {};
-        //         fitRecord.timestamp  = utc;
-        //         fitRecord.heartRate  = static_cast<uint8_t>(mHR);
-        //         fitRecord.trustLevel = static_cast<uint8_t>(mHRTL);
-        //         mActivityWriter.addRecord(fitRecord);
+        //         fitRecord.timestamp  = utc;  // UTC timestamp
+        //         fitRecord.heartRate  = static_cast<uint8_t>(mHR);  // Current HR (BPM)
+        //         fitRecord.trustLevel = static_cast<uint8_t>(mHRTL);  // Trust level
+        //         mActivityWriter.addRecord(fitRecord);  // Add record to FIT file
 
+        //         // Update session aggregates (skip invalid readings)
         //         if (mHR > 1) {
         //             hrAvgSum += mHR;
         //             ++hrAvgCount;
@@ -105,29 +122,36 @@ void Service::run()
         }
     }
 
-    // time_t utc = time(nullptr);  // Commented out: FIT finalization
+    /*
+     * FIT File Finalization on App Exit:
+     * - Calculate session duration and aggregates
+     * - Add lap data (full session as one lap)
+     * - Add track summary with final stats
+     * - Close FIT file and save to storage
+     * To enable: Uncomment below and ensure ActivityWriter is initialized
+     */
+    // time_t utc = time(nullptr);  // Get final timestamp
 
-    // // Save lap to the FIT file  // Commented out
+    // // Add lap data for the entire session
     // ActivityWriter::LapData fitLap {};
-    // fitLap.timeStart = utc - startTime;
-    // fitLap.duration = utc - startTime;
-    // fitLap.elapsed = utc - startTime;
-    // fitLap.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);
-    // fitLap.hrMax = static_cast<uint8_t>(hrMax);
+    // fitLap.timeStart = utc - startTime;  // Session start time
+    // fitLap.duration = utc - startTime;   // Total duration
+    // fitLap.elapsed = utc - startTime;    // Elapsed time
+    // fitLap.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);  // Average HR
+    // fitLap.hrMax = static_cast<uint8_t>(hrMax);  // Max HR
     // mActivityWriter.addLap(fitLap);
 
-    // // Create FIT file  // Commented out
-
+    // // Add track summary
     // ActivityWriter::TrackData fitTrack{};
-    // fitTrack.timeStart = utc;
+    // fitTrack.timeStart = utc;  // Final timestamp
     // fitTrack.duration = utc - startTime;
     // fitTrack.elapsed = utc - startTime;
     // fitTrack.hrAvg = static_cast<uint8_t>(hrAvgSum / hrAvgCount);
     // fitTrack.hrMax = static_cast<uint8_t>(hrMax);
 
-    // mActivityWriter.stop(fitTrack);
+    // mActivityWriter.stop(fitTrack);  // Finalize and save FIT file
 
-    // mSensorHR.disconnect();  // Commented out: Disconnect sensor
+    // mSensorHR.disconnect();  // Disconnect HR sensor
 
     LOG_INFO("thread stopped\n");
 }
@@ -136,7 +160,12 @@ void Service::onStartGUI()
 {
     LOG_INFO("GUI started\n");
     mGUIStarted = true;
-    // mSender.updateHeartRate(0.0f, 0.0f);  // Commented out: Send initial HR values to GUI
+    /*
+     * Send initial HR values to GUI on startup.
+     * To enable: Uncomment below and ensure HR message types are defined in Commands.hpp
+     * This initializes the GUI display with default values before real sensor data arrives.
+     */
+    // mSender.updateHeartRate(0.0f, 0.0f);  // Send initial HR (0.0) and trust level (0.0) to GUI
 }
 
 void Service::onStopGUI()
@@ -147,14 +176,21 @@ void Service::onStopGUI()
 
 void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
 {
-    // if (mSensorHR.matchesDriver(handle)) {  // Commented out: HR sensor data handling
-    //     if (mGUIStarted) {
-    //         SDK::SensorDataParser::HeartRate parser(data[0]);
-    //         if (parser.isDataValid()) {
-    //             mHR   = parser.getBpm();
-    //             mHRTL = parser.getTrustLevel();
+    /*
+     * Handle incoming sensor data from kernel.
+     * - Check if handle matches our HR sensor
+     * - Parse HR data if GUI is active
+     * - Send updates to GUI via custom message
+     * To enable: Uncomment below, ensure sensor is connected, and message types defined
+     */
+    // if (mSensorHR.matchesDriver(handle)) {  // Verify data is from HR sensor
+    //     if (mGUIStarted) {  // Only process if GUI is running
+    //         SDK::SensorDataParser::HeartRate parser(data[0]);  // Parse first batch
+    //         if (parser.isDataValid()) {  // Check if data is valid
+    //             mHR   = parser.getBpm();  // Extract BPM
+    //             mHRTL = parser.getTrustLevel();  // Extract trust level
 
-    //             mSender.updateHeartRate(mHR, mHRTL);
+    //             mSender.updateHeartRate(mHR, mHRTL);  // Send to GUI
     //         }
     //     }
     // }

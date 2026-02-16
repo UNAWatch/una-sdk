@@ -19,14 +19,26 @@ namespace CustomMessage {
     ///////////////////////////////////////
 
     // Service --> GUI
-    // constexpr SDK::MessageType::Type HR_VALUES = 0x00000001;  // Commented out: HR values message type
+    /*
+     * HR_VALUES Message Type:
+     * - Unique identifier for heart rate update messages
+     * - Must be unique across all custom message types in the app
+     * - Used to route messages to correct handler in GUI
+     */
+    // constexpr SDK::MessageType::Type HR_VALUES = 0x00000001;
 
     ///////////////////////////////////////
     //// Application custom structures
     ///////////////////////////////////////
 
     // Service --> GUI
-    // struct HRValues : public SDK::MessageBase {  // Commented out: HR values message struct
+    /*
+     * HRValues Message Struct:
+     * - Inherits from SDK::MessageBase for SDK messaging
+     * - Constructor initializes message type to HR_VALUES
+     * - Contains HR data: heartRate (BPM) and trustLevel (0.0-1.0)
+     */
+    // struct HRValues : public SDK::MessageBase {
     //     float heartRate;
     //     float trustLevel;
 
@@ -50,13 +62,20 @@ namespace CustomMessage {
         virtual ~GUISender() = default;
 
         // Service --> GUI
-        // bool updateHeartRate(float value, float trustLevel)  // Commented out: Send HR update to GUI
+        /*
+         * updateHeartRate Method:
+         * - Creates and sends HR update message to GUI
+         * - Uses SDK::make_msg to allocate message from kernel pool
+         * - Returns true if message sent successfully
+         * - Automatically cleaned up by SDK after delivery
+         */
+        // bool updateHeartRate(float value, float trustLevel)
         // {
         //     if (auto req = SDK::make_msg<CustomMessage::HRValues>(mKernel)) {
         //         req->heartRate  = value;
         //         req->trustLevel = trustLevel;
 
-        //         return req.send();
+        //         return req.send();  // Send to GUI via SDK messaging
         //     }
 
         //     return false;
