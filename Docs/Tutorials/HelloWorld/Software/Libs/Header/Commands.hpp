@@ -19,23 +19,23 @@ namespace CustomMessage {
     ///////////////////////////////////////
 
     // Service --> GUI
-    constexpr SDK::MessageType::Type HR_VALUES = 0x00000001;
+    // constexpr SDK::MessageType::Type HR_VALUES = 0x00000001;  // Commented out: HR values message type
 
     ///////////////////////////////////////
     //// Application custom structures
     ///////////////////////////////////////
 
     // Service --> GUI
-    struct HRValues : public SDK::MessageBase {
-        float heartRate;
-        float trustLevel;
+    // struct HRValues : public SDK::MessageBase {  // Commented out: HR values message struct
+    //     float heartRate;
+    //     float trustLevel;
 
-        HRValues()
-            : SDK::MessageBase(HR_VALUES)
-            , heartRate()
-            , trustLevel()
-        {}
-    };
+    //     HRValues()
+    //         : SDK::MessageBase(HR_VALUES)
+    //         , heartRate()
+    //         , trustLevel()
+    //     {}
+    // };
 
 
     ///////////////////////////////////////
@@ -50,17 +50,17 @@ namespace CustomMessage {
         virtual ~GUISender() = default;
 
         // Service --> GUI
-        bool updateHeartRate(float value, float trustLevel)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::HRValues>(mKernel)) {
-                req->heartRate  = value;
-                req->trustLevel = trustLevel;
+        // bool updateHeartRate(float value, float trustLevel)  // Commented out: Send HR update to GUI
+        // {
+        //     if (auto req = SDK::make_msg<CustomMessage::HRValues>(mKernel)) {
+        //         req->heartRate  = value;
+        //         req->trustLevel = trustLevel;
 
-                return req.send();
-            }
+        //         return req.send();
+        //     }
 
-            return false;
-        }
+        //     return false;
+        // }
 
     private:
         const SDK::Kernel& mKernel;
