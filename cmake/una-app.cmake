@@ -232,9 +232,8 @@ endfunction()
 # Main function to build a complete watch app
 function(una_app_build_app)
     set(OUTPUT_COPY_COMMANDS "")
-    foreach(files IN LISTS OUTPUT_DIR)
+    foreach(files IN LISTS OUTPUT_PATH)
         list(APPEND OUTPUT_COPY_COMMANDS
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/Tmp ${files}/Tmp
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}_${BUILD_VERSION}.uapp ${files}/
         )
     endforeach()
