@@ -23,7 +23,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    :maxdepth: 4
    :caption: 📱 Example Apps
 
-   ../Examples/Apps/GlanceStrain/ARCHITECTURE.md
+   Examples/GlanceStrain-ARCHITECTURE.md
 
 .. toctree::
    :maxdepth: 4
