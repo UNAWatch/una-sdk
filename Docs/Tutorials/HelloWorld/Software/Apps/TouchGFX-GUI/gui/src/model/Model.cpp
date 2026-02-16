@@ -104,13 +104,13 @@ void Model::onSuspend()
 bool Model::customMessageHandler(SDK::MessageBase *msg)
 {
     switch (msg->getType()) {
-        case CustomMessage::HR_VALUES:  {
-            LOG_DEBUG("Update HR_VALUES\n");
-            auto* m = static_cast<CustomMessage::HRValues*>(msg);
+        // case CustomMessage::HR_VALUES:  {  // Commented out: HR values handling
+        //     LOG_DEBUG("Update HR_VALUES\n");
+        //     auto* m = static_cast<CustomMessage::HRValues*>(msg);
 
-            LOG_DEBUG("hr %.1f, tl %.1f\n", m->heartRate, m->trustLevel);
-            // modelListener->updateHR(m->heartRate, m->trustLevel);
-        } break;
+        //     LOG_DEBUG("hr %.1f, tl %.1f\n", m->heartRate, m->trustLevel);
+        //     // modelListener->updateHR(m->heartRate, m->trustLevel);
+        // } break;
 
         default:
             break;
