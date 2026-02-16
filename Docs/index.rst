@@ -16,14 +16,14 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    :maxdepth: 4
    :caption: 🧩 Tutorials
 
-   Tutorials/HelloWorld/ARCHITECTURE.md
+   Tutorials/HelloWorld/ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4
    :caption: 📱 Example Apps
 
-   Examples/Alarm-ARCHITECTURE.md
-   Examples/GlanceStrain-ARCHITECTURE.md
+   Examples/Alarm-ARCHITECTURE
+   Examples/GlanceStrain-ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4
@@ -32,6 +32,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    sdk-overview
    architecture-deep-dive
    development-workflow
+   Tutorials/HelloWorld/Software/Apps/TouchGFX-GUI/README
 
 .. toctree::
    :maxdepth: 4

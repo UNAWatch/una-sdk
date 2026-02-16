@@ -2,7 +2,7 @@
 
 The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. This SDK enables developers to create apps for the UNA watch platform with support for sensor data, GUI interfaces, file systems, and inter-process communication.
 
-For full setup instructions (Linux/Windows, toolchain, environment variables, and a buildable example), see [`Docs/sdk-setup.md`](Docs/sdk-setup.md).
+For full setup instructions (Linux/Windows, toolchain, environment variables, and a buildable example), see [Docs/sdk-setup.md](Docs/sdk-setup.md).
 
 ## Table of Contents
 
@@ -51,7 +51,7 @@ The SDK includes several utilities for common tasks:
 
 ## Prerequisites
 
-Keep this README high-level; detailed prerequisites, toolchain notes, and environment variables are documented in [`Docs/sdk-setup.md`](Docs/sdk-setup.md).
+Keep this README high-level; detailed prerequisites, toolchain notes, and environment variables are documented in [Docs/sdk-setup.md](Docs/sdk-setup.md).
 
 ## Opening SDK in VSCode
 
@@ -70,7 +70,7 @@ Recommended for command-line control and flexibility.
 
 #### Prerequisites
 
-See [`Docs/sdk-setup.md`](Docs/sdk-setup.md) for the exact toolchain requirements and how to set `UNA_SDK`.
+See [Docs/sdk-setup.md](Docs/sdk-setup.md) for the exact toolchain requirements and how to set `UNA_SDK`.
 
 #### Building a Project
 
@@ -160,7 +160,7 @@ The SDK includes several example applications demonstrating different features a
 
 ### Compiling Examples with CMake
 
-Each example supports CMake builds. For a complete, copy-and-build walkthrough, follow the **Alarm CMake** example in [`Docs/sdk-setup.md`](Docs/sdk-setup.md).
+Each example supports CMake builds. For a complete, copy-and-build walkthrough, follow the **Alarm CMake** example in [Docs/sdk-setup.md](Docs/sdk-setup.md).
 
 ### Compiling Examples with CubeIDE
 
@@ -223,7 +223,7 @@ For examples with GUI components like Hiking:
 
 - Explore the [SDK Setup Guide](Docs/sdk-setup.md) for detailed workflows
 - Read the [Platform Overview](Docs/platform-overview.md) for architecture details
-- Try building the [Alarm App Tutorial](Docs/build-your-first-app.md)
+- Try building the [Alarm App Tutorial](Docs/Examples/Alarm-ARCHITECTURE.md)
 - Join the community at [UNAWatch/una-sdk](https://github.com/UNAWatch/una-sdk)
 
 For additional support, see the [Community Support](Docs/community-support.md) guide.

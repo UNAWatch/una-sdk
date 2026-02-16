@@ -1,10 +1,11 @@
+(sdk-setup)=
 # SDK Setup and Build Overview
 
 This guide covers SDK installation, manual environment setup, and primary workflows using CMake or STM32CubeIDE.
 
 The focus is on a **manual, transparent setup** (no helper scripts required on Linux) so you can see exactly which tools are used and which environment variables are expected.
 
-For platform architecture, see [Platform Overview](platform-overview.md). For tutorials, see [Overview: Alarm App](build-your-first-app.md).
+For platform architecture, see [platform overview](platform-overview.md). For tutorials, see [HelloWorld tutorial](Tutorials/HelloWorld/ARCHITECTURE.md).
 
 ## Prerequisites
 
@@ -12,8 +13,8 @@ For platform architecture, see [Platform Overview](platform-overview.md). For tu
 - CMake 3.21+ (for manual builds)
 - A build tool: `make` (Unix Makefiles)
 - Python 3 + pip (for packaging/build utilities)
-- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [Toolchain Setup](#toolchain-setup).
-- **TouchGFX (require a Windows host)**: For GUI development - TouchGFX Designer requires Windows. See [TouchGFX (require a Windows host)](#touchgfx-require-a-windows-host) below.
+- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [toolchain setup](#toolchain-setup).
+- **TouchGFX (Windows-only for Designer)**: For GUI development - TouchGFX Designer requires Windows. See [TouchGFX](#touchgfx-require-a-windows-host) below.
 - USB cable for device flashing
 - Git for cloning the SDK
 
@@ -21,6 +22,7 @@ The rest of this document provides OS-specific, end-to-end setup sections (Linux
 
 **Get required software → Prepare → Clone and setup environment → Copy example and build**
 
+(toolchain-setup)=
 ## Toolchain Setup
 
 **CRITICAL**: Use STMicroelectronics GNU Tools for STM32 (from **STM32CubeIDE** or **STM32CubeCLT**).
@@ -178,7 +180,7 @@ Reboot PC to apply environment variables
 
 ```powershell
 # Copy entire project for simplicity
-cp -r ${env:UNA_SDK}/Examples/Apps/Alarm/* MyAlarm
+cp "${env:UNA_SDK}\Examples\Apps\Alarm\*" MyAlarm -Recurse -Force
 
 # Create build dir
 mkdir -p MyAlarm\build
@@ -234,7 +236,7 @@ MyApp/  # App root (can be anywhere)
 
 2. **Customize CMakeLists.txt**:
    - Update `set(APP_NAME "<app-name>")` to `set(APP_NAME "MyApp")`
-   - Set unique `APP_ID` (e.g., generate via `python -c 'import hashlib; print(hashlib.md5(b"MyApp").hexdigest().upper()[:8])'`)
+   - Set unique `APP_ID` (e.g., generate via `python -c 'import hashlib; print(hashlib5(b"MyApp").hexdigest().upper()[:8])'`)
    - Verify paths
      - `LIBS_PATH`: Path to shared libraries (example defaults: `../../Libs`)
      - `OUTPUT_PATH`: Path to output directory (example defaults: `../../../Output`)
@@ -293,7 +295,8 @@ For IDE users, copy CubeIDE projects from Examples.
    - Build service/GUI separately.
    - Manual merge: Use SDK scripts (e.g., `Utilities/Scripts/app_merging/app_merging.py`) with icons/resources.
 
-## TouchGFX (require a Windows host)
+(touchgfx-require-a-windows-host)=
+## TouchGFX (Windows-only for Designer)
 
 TouchGFX is a high-performance graphics framework designed for STM32 microcontrollers, enabling rich graphical user interfaces on embedded devices with limited resources.
 
@@ -306,7 +309,7 @@ For now this is single supported way to create graphical applications for UNAwat
 1. **Download and Install TouchGFX Designer**:
    - Create a free account on the [STMicroelectronics website](https://www.st.com).
    - Download the latest version of TouchGFX from the ST Developer Zone.
-   - Install the TouchGFX Designer tool on your development machine (Windows, Linux, or macOS supported).
+   - Install the TouchGFX Designer tool on your development machine (Windows only).
 
 2. **Framework Integration**:
     - In the UNA SDK, TouchGFX is pre-integrated in example GUI projects (e.g., `Examples/Apps/<app>/Software/Apps/TouchGFX-GUI/`).
