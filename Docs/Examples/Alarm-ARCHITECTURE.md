@@ -1,6 +1,6 @@
 # Overview: Alarm App
 
-This tutorial walks you through building your first UNA Watch app using the Alarm example. For SDK setup and build system reference, see [SDK Setup and Build Overview](sdk-setup.md).
+This tutorial walks you through building your first UNA Watch app using the Alarm example. For SDK setup and build system reference, see [SDK setup](sdk-setup).
 
 
 Our example app demonstrates a complete alarm clock application with the following features:
@@ -19,9 +19,9 @@ The Alarm app showcases the dual-process architecture with a service component h
 
 Before starting, ensure you have:
 
-- UNA SDK cloned/set up ([SDK Setup](sdk-setup.md))
+- UNA SDK cloned/set up ([SDK setup](sdk-setup))
 - CMake 3.21+
-- **ST ARM GCC Toolchain (CRITICAL)**: CubeIDE/CubeCLT version only (system `gcc-arm-none-eabi` incompatible). See [sdk-setup.md#toolchain-setup](sdk-setup.md#toolchain-setup).
+- **ST ARM GCC Toolchain (CRITICAL)**: CubeIDE/CubeCLT version only (system `gcc-arm-none-eabi` incompatible). See [toolchain setup](toolchain-setup).
 - TouchGFX Designer (optional, GUI mods)
 - `UNA_SDK` env var set to SDK root
 
@@ -29,7 +29,7 @@ Before starting, ensure you have:
 
 ### Step 1: Set Environment Variables
 
-**CRITICAL: Verify ST ARM GCC** (see [sdk-setup.md#toolchain-setup]):
+**CRITICAL: Verify ST ARM GCC** (see [toolchain setup](toolchain-setup)):
 ```
 arm-none-eabi-gcc --version  # Must show ST version (e.g., 14.3.1+st.2), NOT system 13.2
 ```
@@ -71,7 +71,7 @@ set(TOUCHGFX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")
 
 #### Generate a unique APP_ID using:
 ```bash
-python3 -c "import hashlib; print(hashlib.md5(b'MyAlarm').hexdigest().upper()[:16])"
+python3 -c "import hashlib; print(hashlib5(b'MyAlarm').hexdigest().upper()[:16])"
 ```
 
 #### Choose App Type
@@ -93,7 +93,7 @@ Navigate to the CMake directory and build:
 cd Software/Apps/Alarm-CMake
 
 # Configure
-cmake -S . -B build
+cmake -S . -B build -G "Unix Makefiles"
 
 # Build
 cmake --build build
@@ -511,7 +511,7 @@ With the Alarm app as your foundation, explore:
 
 ## Resources
 
-- [SDK Setup](sdk-setup.md) - Environment and build system
-- [API Reference](api-reference.rst) - Complete SDK documentation
-- [Platform Overview](platform-overview.md) - Hardware capabilities
-- [TouchGFX Documentation](https://support.touchgfx.com/) - GUI framework guide
+- [SDK setup](sdk-setup) - Environment and build system
+- [API reference](api-reference) - Complete SDK documentation
+- [Platform overview](platform-overview) - Hardware capabilities
+- https://support.touchgfx.com/ - GUI framework guide
