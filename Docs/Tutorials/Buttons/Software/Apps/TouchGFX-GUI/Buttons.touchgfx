@@ -14,20 +14,10 @@
             "CustomContainerDefinitionName": "ButtonsSet"
           },
           {
-            "Type": "TextArea",
-            "Name": "textArea1",
-            "X": 19,
-            "Y": 98,
-            "Width": 203,
-            "Height": 44,
-            "TextId": "__SingleUse_D48Y",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 255,
-              "Green": 255,
-              "Blue": 255
-            },
-            "AutoSize": true
+            "Type": "Box",
+            "Name": "box1",
+            "Width": 240,
+            "Height": 240
           }
         ],
         "Interactions": []
