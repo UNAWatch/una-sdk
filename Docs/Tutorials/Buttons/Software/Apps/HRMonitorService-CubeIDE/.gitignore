@@ -1,0 +1,18 @@
+# Builds
+/Debug/
+/Release/
+/MacOs/
+
+#Local settings
+/.settings/*
+
+# Contains firmware version
+!/.settings/org.eclipse.cdt.core.prefs
+
+# Launch configuration
+*.launch
+*.cfg
+
+# fw images
+*.hex
+*.bin
