@@ -1,30 +1,20 @@
 (tutorials/buttons/architecture)=
 
-# Buttons
+# Buttons Tutorial: Multi-Screen Navigation with Buttons
 
-Welcome to the UNA SDK tutorial series! Buttons is your first step in learning to build applications for the UNA watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
-
-**Tutorial Series Overview:**
-
-1. **Buttons** (this tutorial): Basic app structure and communication
-2. **Heart Rate App**: Adding sensor integration and real-time data
-3. **Advanced Features**: Custom screens, data persistence, and complex interactions
-
-By starting simple, you'll understand the core patterns that all UNA apps use, making advanced features much easier to learn.
+Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.
 
 ## What You'll Learn
 
-- How to set up your development environment for UNA apps
-- The basic structure of a UNA watch application
-- How service and GUI layers communicate
-- How to build and run apps on simulator and hardware
-- Understanding the UNA app framework fundamentals
+- How to implement GUI applications with TouchGFX
+- Handling hardware button events for navigation
+- Understanding the UNA app framework for interactive applications
 
 ## Getting Started
 
 ### Prerequisites
 
-Before building Buttons, you need to set up the UNA SDK environment. Follow the [toolchain setup](toolchain-setup) for complete installation instructions, including:
+Before building the Buttons app, you need to set up the UNA SDK environment. Follow the [toolchain setup](toolchain-setup) for complete installation instructions, including:
 
 - UNA SDK cloned with submodules (`git clone --recursive`)
 - ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)
@@ -33,12 +23,10 @@ Before building Buttons, you need to set up the UNA SDK environment. Follow the 
 
 **Minimum requirements for Buttons:**
 - `UNA_SDK` environment variable pointing to SDK root
-
 - ARM GCC toolchain in PATH
 - CMake and build tools
 
 **For GUI development/modification:**
-
 - TouchGFX Designer installed (see [toolchain setup](toolchain-setup))
 
 ### Building and Running Buttons
@@ -46,9 +34,9 @@ Before building Buttons, you need to set up the UNA SDK environment. Follow the 
 1. **Verify your environment setup** (see [toolchain setup](toolchain-setup) for details):
 
    ```bash
-   echo $UNA_SDK                   # Should point to SDK root. 
+   echo $UNA_SDK                   # Should point to SDK root.
                                    # Note for backward compatibility with linux path notation it uses '/'
-   
+
    which arm-none-eabi-gcc         # Should find ST toolchain
    which cmake                     # Should find CMake
    ```
@@ -65,31 +53,43 @@ Before building Buttons, you need to set up the UNA SDK environment. Follow the 
    make
    ```
 
-The app will start and show a basic GUI demonstrating the UNA app framework. This Buttons focuses on the core architecture - the service-GUI communication pattern that all UNA apps use.
+The app will start and display an initial black screen. Use the hardware buttons to navigate between different colored screens, demonstrating buttons navigation patterns.
 
-### Working with TouchGFX GUI (Optional)
+## Buttons App Overview
 
-If you want to explore or modify the GUI design:
+The Buttons app demonstrates a GUI application with navigation controlled by the watch's hardware buttons. The app consists of one screen which changing background color by pressing a distinct button:
 
-1. **Install TouchGFX Designer** (see [toolchain setup](toolchain-setup) for installation)
+- **Initial Screen**: Black background
+- **Screen 2**: Blue background (accessed via top right button)
+- **Screen 3**: Red background (accessed via left button)
+- **Screen 4**: Green background (accessed via bottom right button)
 
-2. **Open the TouchGFX project:**
-   ```
-   Buttons.touchgfx
-   ```
+### Navigation Flow
+- Start on the black screen
+- Press top right button (R1) → Blue screen
+- Press bottom right button (R2) → Green screen
+- Press left button (L1) → Red screen
+- Press top left button (L2) → Return to black screen
+- Double-press bottom right button (R2) → Exit the app
 
-3. **Make design changes** in TouchGFX Designer (add/modify screens, widgets, interactions)
+### Architecture Components
 
-4. **Generate code** after making changes:
-   - Click "Generate Code" button in TouchGFX Designer, OR
+#### The Service Layer (Backend)
+- Manages the application lifecycle
+- Handles communication with the GUI layer
+- Minimal implementation since no sensors are used
 
-5. **Rebuild the app** to include your GUI changes:
-   ```bash
-   cmake -G "Unix Makefiles" /path/to/Buttons-CMake # If artifacts has been changed
-   make
-   ```
+#### The GUI Layer (Frontend)
+- Built with TouchGFX framework
+- Handles button events and screen transitions
+- Updates the display based on user input
+- Manages screen state and visual elements
 
-**Note**: Buttons has a minimal GUI. For learning GUI development, study the more complex examples like Cycling or HRMonitor apps, or see the [toolchain setup](toolchain-setup).
+#### Button Event Handling
+The app responds to hardware button presses through the `handleKeyEvent` method in `MainView.cpp`. Each button press triggers a screen change by updating the background color and potentially displaying text.
+
+#### Screen Updates
+After changing screen properties (like color), the `invalidate()` method is called to refresh the display, ensuring changes are visible to the user.
 
 ## Buttons app creation process
 
@@ -147,7 +147,7 @@ If you want to explore or modify the GUI design:
          }
          lastKeyPressed = key;
       ```
-6. **Add Screen refresh**:
+6. **Add Screen refresh**: `box1.invalidate();`
    ```cpp
    if (key == Gui::Config::Button::R2) {
       box1.setColor(touchgfx::Color::getColorFromRGB(0, 0xff, 0));
@@ -384,94 +384,86 @@ Mode                 LastWriteTime         Length Name
 PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons>
 ```
 
-## Buttons App Overview
+## Understanding Button Event Handling
 
-Buttons demonstrates the essential UNA app architecture:
+The Buttons app demonstrates how to handle hardware button events in TouchGFX applications. Key concepts include:
 
-### The Service Layer (Backend)
-- Runs as the main application thread
-- Handles sensor connections and data processing
-- Manages app lifecycle (start/stop)
-- Communicates with the GUI through messages
+### Button Event Processing
+- Button presses are captured in the `handleKeyEvent(uint8_t key)` method
+- Each button has a unique identifier (L1, L2, R1, R2)
+- Events trigger immediate UI updates and state changes
 
-### The GUI Layer (Frontend)
-- Built with TouchGFX framework
-- Displays information to the user
-- Receives updates from the service
-- Handles user interactions
+### Screen State Management
+- The app maintains current screen state through color and content changes
+- Transitions are handled synchronously in the event handler
+- The `invalidate()` call ensures the display refreshes after changes
 
-### Communication Between Layers
-- Uses the UNA kernel messaging system
-- Service sends data to GUI via custom messages
-- GUI can send commands back to service
-
-## Understanding the Commented Code
-
-Buttons includes commented-out implementations of common UNA app features. These serve as reference examples for future tutorials:
-
-- **Heart Rate Sensor Integration**: Complete sensor connection, data parsing, and real-time GUI updates
-- **FIT File Logging**: Activity data recording with session summaries
-- **Custom Messaging**: Service-to-GUI communication patterns
-
-**Note**: The next tutorial will walk through enabling heart rate monitoring step-by-step. For now, focus on understanding the basic app structure and messaging framework.
-
-## Understanding UNA App Communication
-
-Buttons demonstrates the two main ways UNA apps communicate between service and GUI:
-
-### SDK Custom Messages (Service → GUI)
-Used for real-time data updates. The service creates messages using `SDK::make_msg<>()` and sends them via the kernel. The GUI receives them in `Model::customMessageHandler()`.
-
-### AppTypes Events (GUI → Service)
-Used for commands and configuration. The GUI sends events through the `IGuiBackend` interface, which the service implements to receive commands.
-
-These patterns form the foundation of all UNA app communication. Future tutorials will show how to implement specific features using these systems.
+### Exit Handling
+- Double-press detection for the R2 button implements app exit
+- State tracking with `lastKeyPressed` prevents accidental exits
 
 ## Common Patterns and Best Practices
 
-### Sensor Integration
-- Always check `matchesDriver(handle)` before processing sensor data
-- Validate data with `isDataValid()` before using
-- Handle sensor timeouts and disconnections gracefully
+### Button Handling
+- Map button IDs to meaningful actions consistently
+- Use state variables to track multi-press sequences
+- Always call `invalidate()` after visual changes
 
-### Message Design
-- Use unique message type IDs (increment from 0x00000001)
-- Keep messages small and focused on single purposes
-- Use descriptive names for message types and fields
+### UI Updates
+- Keep event handlers lightweight to maintain responsiveness
+- Use appropriate TouchGFX widgets for different content types
+- Consider user feedback for button presses (visual/audio)
 
-### GUI Updates
-- Only update GUI when necessary to avoid performance issues
-- Use appropriate data types (float for measurements, int for counts)
-- Handle invalid/missing data gracefully
+### Code Organization
+- Separate UI logic from business logic
+- Use clear naming for button actions and screen states
+- Document button mappings in comments
 
-### File Operations
-- Use the kernel's filesystem interface (`mKernel.fs`)
-- Handle file I/O errors appropriately
-- FIT files are Garmin's standard format for activity data
+### Performance Considerations
+- Minimize work in event handlers
+- Batch UI updates when possible
+- Avoid blocking operations that could delay response
+
+## Key Code Insights for New Developers
+
+### MainView.cpp Structure
+- `handleKeyEvent()` is the central point for user input
+- Color changes use `touchgfx::Color::getColorFromRGB()`
+- Screen refresh requires explicit `invalidate()` calls
+
+### Button Configuration
+- Buttons are configured in `setupScreen()` with initial states
+- The ButtonsSet widget manages hardware button integration
+- Button states can be NONE, PRESSED, or other states
+
+### State Tracking
+- Use member variables to maintain app state across events
+- Track sequences like double-presses for special actions
+- Reset state appropriately after actions complete
 
 ## Next Steps
 
-1. **Get Buttons running** - Follow the build steps above and confirm the app launches
-2. **Explore the code structure** - Look at Service.cpp and Model.cpp to understand the messaging flow
-3. **Check the commented examples** - Review the commented HR and FIT code to see what's available
-4. **Continue to the next tutorial** - Learn how to enable heart rate monitoring and data logging
-5. **Study other example apps** - Look at Alarm or Cycling apps for different patterns
+1. **Run the Buttons app** - Build and test the navigation flow
+2. **Modify button mappings** - Experiment with different screen transitions
+3. **Add new screens** - Extend the app with additional colored screens
+4. **Explore TouchGFX widgets** - Add text, images, or other elements
+5. **Study advanced examples** - Look at apps with more complex navigation
 
 ## Troubleshooting
 
 ### Build Issues
-- Ensure all SDK paths are correctly configured
-- Check that TouchGFX is properly installed
-- Verify CMake finds all required dependencies
+- Ensure TouchGFX Designer is properly installed
+- Check that all project files are generated correctly
+- Verify CMake configuration matches your environment
 
 ### Runtime Issues
-- Check log output for error messages
-- Verify sensor connections on real hardware
-- Use the simulator for initial testing
+- Confirm button mappings in the simulator match hardware
+- Check log output for event handling errors
+- Test on actual hardware for button responsiveness
 
 ### Common Mistakes
-- Forgetting to uncomment all related code sections
-- Using duplicate message type IDs
-- Not handling message memory management properly
+- Forgetting to call `invalidate()` after UI changes
+- Incorrect button ID constants
+- Not handling all button states appropriately
 
-Remember: Every complex app started as a simple Buttons. Take it step by step, and you'll be building amazing UNA watch applications in no time!
+The Buttons app provides a solid foundation for understanding user interaction on the UNA platform. Mastering these patterns will enable you to create engaging, responsive applications.
