@@ -23,18 +23,20 @@ void MainView::tearDownScreen()
 void MainView::handleKeyEvent(uint8_t key)
 {
     if (key == Gui::Config::Button::L1) {
-
+        box1.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     }
 
     if (key == Gui::Config::Button::L2) {
-
+        box1.setColor(touchgfx::Color::getColorFromRGB(0xff, 0, 0));
     }
 
     if (key == Gui::Config::Button::R1) {
-   
+        box1.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0xff));
     }
 
     if (key == Gui::Config::Button::R2) {
-        presenter->exit();
+        box1.setColor(touchgfx::Color::getColorFromRGB(0, 0xff, 0));
+        if (lastKeyPressed == key) presenter->exit();
     }
+    lastKeyPressed = key;
 }
