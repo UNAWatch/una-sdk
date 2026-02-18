@@ -147,7 +147,19 @@ If you want to explore or modify the GUI design:
          }
          lastKeyPressed = key;
       ```
-6. Compile code using [SDK setup](../../sdk-setup.md) instructions.
+6. **Add Screen refresh**:
+   ```cpp
+   if (key == Gui::Config::Button::R2) {
+      box1.setColor(touchgfx::Color::getColorFromRGB(0, 0xff, 0));
+      if (lastKeyPressed == key) presenter->exit();
+   }
+   lastKeyPressed = key;
+   box1.invalidate();
+   ```
+7. **Compile code** using [SDK setup](../../sdk-setup.md) instructions.
+   ``` bash
+   
+   ```
 
 ## Buttons App Overview
 
