@@ -157,9 +157,232 @@ If you want to explore or modify the GUI design:
    box1.invalidate();
    ```
 7. **Compile code** using [SDK setup](../../sdk-setup.md) instructions.
-   ``` bash
-   
-   ```
+``` bash
+PS C:\Users\sd\Desktop\una-dev\una-sdk> cd .\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake> mkdir build
+
+
+    Directory: C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         2/18/2026   9:37 PM                build
+
+
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake> cd .\build\
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build>  cmake -G 'Unix Makefiles'  ..
+-- The ASM compiler identification is GNU
+-- Found assembler: C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/arm-none-eabi-gcc.exe
+-- The C compiler identification is GNU 13.3.1
+-- The CXX compiler identification is GNU 13.3.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/arm-none-eabi-gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/arm-none-eabi-g++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+[2026-02-18 21:37:08] Starting una-version.sh script
+[2026-02-18 21:37:08] Default BUILD_VERSION set to: 0.0.0-dev
+[2026-02-18 21:37:08] No argument provided, using current directory as UNA_GIT_DIR: C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake
+[2026-02-18 21:37:08] Workspace: C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake
+[2026-02-18 21:37:08] Successfully changed directory to: C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake
+[2026-02-18 21:37:09] git rev-parse --git-dir output: 'C:/Users/sd/Desktop/una-dev/una-sdk/.git'
+[2026-02-18 21:37:09] git rev-parse --show-toplevel output: 'C:/Users/sd/Desktop/una-dev/una-sdk'
+[2026-02-18 21:37:09] toplevel: C:/Users/sd/Desktop/una-dev/una-sdk
+[2026-02-18 21:37:09] Successfully changed directory to toplevel: C:/Users/sd/Desktop/una-dev/una-sdk
+[2026-02-18 21:37:09] UNA_WORKSPACE set to: C:/Users/sd/Desktop/una-dev/una-sdk
+[2026-02-18 21:37:09] Git directory found, proceeding with version detection
+[2026-02-18 21:37:09] COMMIT_HASH: bf09e2b
+[2026-02-18 21:37:09] Not on exact tag
+[2026-02-18 21:37:09] DESC: v0.1.1-22-gbf09e2b
+[2026-02-18 21:37:09] Tags found, parsing TAG and HASH
+[2026-02-18 21:37:09] TAG before removing 'v': v0.1.1-22
+[2026-02-18 21:37:09] TAG after removing 'v': 0.1.1-22
+[2026-02-18 21:37:09] HASH: bf09e2b
+[2026-02-18 21:37:09] BUILD_VERSION set to TAG-HASH: 0.1.1-22-bf09e2b
+[2026-02-18 21:37:09] Checking for uncommitted changes
+[2026-02-18 21:37:09] git status --porcelain output: ''
+[2026-02-18 21:37:09] No uncommitted changes
+[2026-02-18 21:37:09] Final BUILD_VERSION=0.1.1-22-bf09e2b
+[2026-02-18 21:37:09] Script completed successfully
+Detected BUILD_VERSION: 0.1.1-22-bf09e2b
+UNA_APP_SERVICE_STACK_SIZE: 10*1024
+UNA_APP_SERVICE_RAM_LENGTH: 500K
+APP_ID: F1E2D3C448669782
+APP_NAME: Buttons
+DEV_ID: UNA
+UNA_APP_GUI_STACK_SIZE: 10*1024
+UNA_APP_GUI_RAM_LENGTH: 600K
+App autostart is OFF
+-- Configuring done (2.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake/build
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build> make
+[  0%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Libs/Sources/ActivityWriter.cpp.obj
+[  1%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Libs/Sources/Service.cpp.obj
+[  2%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/AtExitImpl.cpp.obj
+[  3%] Building ASM object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/startup_user_app.s.obj
+[  4%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/system.cpp.obj
+[  5%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Kernel/KernelBuilder.cpp.obj
+[  5%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/UnaLogger/Logger.cpp.obj
+[  6%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/EntryPoint/Service/main.cpp.obj
+[  7%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/FitHelper/FitHelper.cpp.obj
+[  8%] Building C object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/ThirdParty/FitSDKRelease_21.171.00/c/fit.c.obj
+[  9%] Building C object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/ThirdParty/FitSDKRelease_21.171.00/c/fit_convert.c.obj
+[ 10%] Building C object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c.obj
+[ 10%] Building C object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c.obj
+[ 11%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/JSON/JsonStreamReader.cpp.obj
+[ 12%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/JSON/JsonStreamWriter.cpp.obj
+[ 13%] Building C object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/ThirdParty/coreJSON/source/core_json.c.obj
+[ 14%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/SensorLayer/SensorConnection.cpp.obj
+[ 15%] Building CXX object CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/TrackMap/TrackMapBuilder.cpp.obj
+[ 16%] Linking CXX executable ButtonsService.elf
+Packing ButtonsService.elf
+INFO:root:ELF-file    : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\ButtonsService.elf
+INFO:root:Out         : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Tmp
+INFO:root:Version     : 1.0
+INFO:root:Output file : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Tmp\ButtonsService.srv
+
+[ 16%] Built target ButtonsService.elf
+[ 17%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/ApplicationFontProvider.cpp.obj
+[ 18%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/CachedFont.cpp.obj
+[ 19%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/CompressedFontCache.cpp.obj
+[ 20%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/CompressedUnmappedFontCache.cpp.obj
+[ 21%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/FontCache.cpp.obj
+[ 21%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Italic_18_2bpp_0.cpp.obj
+[ 22%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Italic_18_2bpp_4.cpp.obj
+[ 23%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Italic_20_2bpp_0.cpp.obj
+[ 24%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_LightItalic_18_2bpp_0.cpp.obj
+[ 25%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Light_60_2bpp_0.cpp.obj
+[ 26%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Medium_10_2bpp_0.cpp.obj
+[ 26%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Medium_18_2bpp_0.cpp.obj
+[ 27%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Medium_50_2bpp_0.cpp.obj
+[ 28%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Regular_18_2bpp_0.cpp.obj
+[ 29%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_18_2bpp_0.cpp.obj
+[ 30%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_18_2bpp_4.cpp.obj
+[ 31%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_20_2bpp_0.cpp.obj
+[ 31%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_25_2bpp_0.cpp.obj
+[ 32%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_30_2bpp_0.cpp.obj
+[ 33%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_35_2bpp_0.cpp.obj
+[ 34%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_40_2bpp_0.cpp.obj
+[ 35%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_60_2bpp_0.cpp.obj
+[ 36%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/GeneratedFont.cpp.obj
+[ 37%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Italic_18_2bpp.cpp.obj
+[ 37%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Italic_20_2bpp.cpp.obj
+[ 38%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_LightItalic_18_2bpp.cpp.obj
+[ 39%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Light_60_2bpp.cpp.obj
+[ 40%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Medium_10_2bpp.cpp.obj
+[ 41%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Medium_18_2bpp.cpp.obj
+[ 42%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Medium_50_2bpp.cpp.obj
+[ 42%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Regular_18_2bpp.cpp.obj
+[ 43%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_18_2bpp.cpp.obj
+[ 44%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_20_2bpp.cpp.obj
+[ 45%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_25_2bpp.cpp.obj
+[ 46%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_30_2bpp.cpp.obj
+[ 47%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_35_2bpp.cpp.obj
+[ 47%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_40_2bpp.cpp.obj
+[ 48%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_60_2bpp.cpp.obj
+[ 49%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Italic_18_2bpp.cpp.obj
+[ 50%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Italic_20_2bpp.cpp.obj
+[ 51%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_LightItalic_18_2bpp.cpp.obj
+[ 52%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Light_60_2bpp.cpp.obj
+[ 52%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Medium_10_2bpp.cpp.obj
+[ 53%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Medium_18_2bpp.cpp.obj
+[ 54%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Medium_50_2bpp.cpp.obj
+[ 55%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Regular_18_2bpp.cpp.obj
+[ 56%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_18_2bpp.cpp.obj
+[ 57%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_20_2bpp.cpp.obj
+[ 58%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_25_2bpp.cpp.obj
+[ 58%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_30_2bpp.cpp.obj
+[ 59%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_35_2bpp.cpp.obj
+[ 60%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_40_2bpp.cpp.obj
+[ 61%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_60_2bpp.cpp.obj
+[ 62%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/UnmappedDataFont.cpp.obj
+[ 63%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/VectorFontRendererBuffers.cpp.obj
+[ 63%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/gui_generated/src/common/FrontendApplicationBase.cpp.obj
+[ 64%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/gui_generated/src/containers/ButtonsSetBase.cpp.obj
+[ 65%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/gui_generated/src/main_screen/MainViewBase.cpp.obj
+[ 66%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/BitmapDatabase.cpp.obj
+[ 67%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/SVGDatabase.cpp.obj
+[ 68%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L1.cpp.obj
+[ 68%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L1A.cpp.obj
+[ 69%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L1R.cpp.obj
+[ 70%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L2.cpp.obj
+[ 71%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L2A.cpp.obj
+[ 72%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L2R_.cpp.obj
+[ 73%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R1.cpp.obj
+[ 73%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R1A.cpp.obj
+[ 74%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R1R.cpp.obj
+[ 75%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R2.cpp.obj
+[ 76%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R2A.cpp.obj
+[ 77%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R2R.cpp.obj
+[ 78%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Heart.cpp.obj
+[ 79%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_MenuAssets_Cross.cpp.obj
+[ 79%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_MenuAssets_CrossYellow.cpp.obj
+[ 80%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_MenuAssets_Tick.cpp.obj
+[ 81%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/texts/src/LanguageGb.cpp.obj
+[ 82%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/texts/src/Texts.cpp.obj
+[ 83%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/texts/src/TypedTextDatabase.cpp.obj
+[ 84%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/common/FrontendApplication.cpp.obj
+[ 84%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/containers/ButtonsSet.cpp.obj
+[ 85%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainPresenter.cpp.obj
+[ 86%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp.obj
+[ 87%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp.obj
+[ 88%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/AtExitImpl.cpp.obj
+[ 89%] Building ASM object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/startup_user_app.s.obj
+[ 89%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/system.cpp.obj
+[ 90%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Kernel/KernelBuilder.cpp.obj
+[ 93%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/STM32TouchController.cpp.obj
+[ 94%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp.obj
+[ 94%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/TouchGFXGPIO.cpp.obj
+[ 95%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp.obj
+[ 96%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp.obj
+[ 97%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/STM32DMA.cpp.obj
+[ 98%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/TouchGFXConfiguration.cpp.obj
+[ 99%] Building CXX object CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp.obj
+[100%] Linking CXX executable ButtonsGUI.elf
+Packing ButtonsGUI.elf
+INFO:root:ELF-file    : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\ButtonsGUI.elf
+INFO:root:Out         : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Tmp
+INFO:root:Version     : 1.0
+INFO:root:Output file : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Tmp\ButtonsGUI.gui
+[100%] Built target ButtonsGUI.elf
+[100%] Merging Buttons application
+INFO:root:Merge complete
+INFO:root:Service file   : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Tmp\ButtonsService.srv
+INFO:root:GUI file       : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Tmp\ButtonsGUI.gui
+INFO:root:Name           : Buttons
+INFO:root:ID             : F1E2D3C448669782
+INFO:root:App Version    : 0.1.1
+INFO:root:LibC Version   : 0.0.3
+INFO:root:Flags          : 0x00000020
+INFO:root:Glance-capable : yes
+INFO:root:CRC            : 0x4B064208
+INFO:root:Image          : C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build\Buttons_0.1.1-22-bf09e2b.uapp (225256 bytes)        
+
+[100%] Built target ButtonsApp
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Software\Apps\Buttons-CMake\build> cd ../../../../
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons> ls .\Output\
+
+
+    Directory: C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons\Output
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         2/17/2026   7:10 PM            165 .gitignore
+-a----         2/18/2026   9:37 PM         802019 ButtonsGUI.elf.elf.map
+-a----         2/18/2026   9:37 PM         321587 ButtonsService.elf.elf.map
+-a----         2/18/2026   9:37 PM         225256 Buttons_0.1.1-22-bf09e2b.uapp
+
+
+PS C:\Users\sd\Desktop\una-dev\una-sdk\Docs\Tutorials\Buttons>
+```
 
 ## Buttons App Overview
 
