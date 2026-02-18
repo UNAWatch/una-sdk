@@ -20,7 +20,8 @@ enable_language(ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# Add this to your CMakeLists.txt is you want verbose compiler log
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Common compile options (match CubeIDE exactly)
 add_compile_options(
