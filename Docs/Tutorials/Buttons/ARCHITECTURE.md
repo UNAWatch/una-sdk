@@ -96,7 +96,58 @@ If you want to explore or modify the GUI design:
 1. **Copy HelloWorld tutorial**
 2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else.
 3. **Commit initial changes**: it's a good practice to use version control system like git
-4. ***Edit TouchGFX*
+4. ***Edit TouchGFX**: 
+   - Rename `*.touchgfx` to `Buttons.touchgfx`
+   - Rename `Buttons.touchgfx:163` `"Name": "Buttons"`
+   - Add 240x240 a box `box1` at X:0 Y:0
+   - Click **Generate code**
+5. **Edit MainView.cpp**: 
+   - You can see `touchgfx::Box box1;` in `MainViewBase.cpp`
+   - Add box1 color set to `void MainView::handleKeyEvent(uint8_t key)`:
+      ```cpp
+      void MainView::handleKeyEvent(uint8_t key)
+      {
+         if (key == Gui::Config::Button::L1) {
+            box1.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+         }
+
+         if (key == Gui::Config::Button::L2) {
+            box1.setColor(touchgfx::Color::getColorFromRGB(0xff, 0, 0));
+         }
+
+         if (key == Gui::Config::Button::R1) {
+            box1.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0xff));
+         }
+
+         if (key == Gui::Config::Button::R2) {
+            box1.setColor(touchgfx::Color::getColorFromRGB(0, 0xff, 0));
+         }
+      }
+      ``` 
+   - Add `lastKeyPressed` state to exit on double **R2** clicks:
+      ```cpp
+      class MainView : public MainViewBase
+      {
+         uint8_t lastKeyPressed = {'\0'};
+      public:
+         MainView();
+         virtual ~MainView() {}
+         virtual void setupScreen();
+         virtual void tearDownScreen();
+
+      protected:
+         virtual void handleKeyEvent(uint8_t key) override;
+      };
+      ````
+      Exit:
+      ```cpp
+         if (key == Gui::Config::Button::R2) {
+            box1.setColor(touchgfx::Color::getColorFromRGB(0, 0xff, 0));
+            if (lastKeyPressed == key) presenter->exit();
+         }
+         lastKeyPressed = key;
+      ```
+6. Compile code using [SDK setup](../../sdk-setup.md) instructions.
 
 ## Buttons App Overview
 
