@@ -39,4 +39,5 @@ void MainView::handleKeyEvent(uint8_t key)
         if (lastKeyPressed == key) presenter->exit();
     }
     lastKeyPressed = key;
+    box1.invalidate();
 }
