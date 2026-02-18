@@ -39,14 +39,14 @@ void Service::run()
     // info.appID      = APP_ID;  // Application ID string
     // mActivityWriter.start(info);  // Create and initialize FIT file
 
-    time_t startTime    = time(nullptr);
-    time_t utcTimestamp = 0;
+    // time_t startTime    = time(nullptr);
+    // time_t utcTimestamp = 0;
 
-    float    hrAvgSum   = 0;
-    uint32_t hrAvgCount = 0;
-    float    hrMax      = 0;
+    // float    hrAvgSum   = 0;
+    // uint32_t hrAvgCount = 0;
+    // float    hrMax      = 0;
 
-    uint32_t startTimeMs = mKernel.sys.getTimeMs();
+    // uint32_t startTimeMs = mKernel.sys.getTimeMs();
 
     while (true) {
         SDK::MessageBase *msg;
@@ -113,13 +113,13 @@ void Service::run()
         //         }
         //     }
         // } else {
-            // Just wait some time to see if GUI starts
-            if (mKernel.sys.getTimeMs() - startTimeMs > 5000) {
-                LOG_DEBUG("start GUI timeout\n");
-                break;
-            }
-            mKernel.sys.delay(100);
-        }
+        // Just wait some time to see if GUI starts
+        // if (mKernel.sys.getTimeMs() - startTimeMs > 5000) {
+        //     LOG_DEBUG("start GUI timeout\n");
+        //     break;
+        // }
+            // mKernel.sys.delay(100);
+        // }
     }
 
     /*
