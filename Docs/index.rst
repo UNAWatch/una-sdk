@@ -33,6 +33,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    sdk-overview
    architecture-deep-dive
    development-workflow
+   Scripts
    Tutorials/HelloWorld/Software/Apps/TouchGFX-GUI/README
 
 .. toctree::
