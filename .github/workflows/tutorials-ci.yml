@@ -42,7 +42,9 @@ jobs:
         run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
