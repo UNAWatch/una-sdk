@@ -4,18 +4,21 @@ This document provides comprehensive analysis of the Python, Bash, and PowerShel
 
 ## Script Usage Overview
 
-| Script | Where/When/Who Calls It | Purpose |
-|--------|-------------------------|---------|
-| Utilities/Scripts/app_merging/app_merging.py | CMake post-build in una-app.cmake; manual developer use (Docs/sdk-setup.md, sdk-overview.md, app_merging/Readme.txt) | Merges app service/GUI binaries with icons/resources into a final app package during build or manually. |
-| Utilities/Scripts/app_packer/app_packer.py | CMake post-build in una-app.cmake for service and GUI targets; referenced in docs (sdk-overview.md, development-workflow.md) | Packages ELF binaries with assets and version into .uapp containers in post-build steps. |
-| Utilities/Scripts/png2abgr2222/png2abgr2222.py | No external callers found in searched files; self-documented examples for manual use | Converts input PNG images from RGBA to ABGR2222 byte arrays and generates C header files. |
-| Utilities/Scripts/export-stm32-tools.ps1 | Manual Windows SDK setup (Docs/sdk-setup.md) | Exports STM32 tools during manual Windows environment setup. |
-| Utilities/Scripts/build-cube/una-version.sh | Sourced by build-cube.sh, setup-environment.sh; called in cmake/una-app.cmake and GitHub Actions (tutorials-ci.yml, apps-ci.yml) | Initializes UNA version and build metadata environment variables for Cube builds. |
-| Utilities/Scripts/build-cube/find-cube.sh | Sourced by setup-environment.sh; called in GitHub Actions (tutorials-ci.yml, apps-ci.yml) | Locates STM32 CubeIDE installation and sets environment variables. |
-| Utilities/Scripts/build-cube/build-cube.sh | Called in GitHub Actions apps-ci.yml | Builds specified CubeIDE projects using prepared environment. |
-| Utilities/Scripts/build-cube/setup-environment.sh | Used in `.vscode/tasks.json` | Prepares environment for CubeIDE builds by sourcing dependency scripts. |
-| .github/scripts/generate-tutorials-app-list.py | GitHub Actions tutorials-ci.yml (runs to generate cmake_apps.json) | Generates list of tutorial apps in JSON format for CI workflows. |
-| Examples/.github/scripts/generate-app-list.py | GitHub Actions apps-ci.yml (runs to list projects and filter by app) | Generates list of example app projects for CI build matrix. |
+.. csv-table:: Script Usage Overview
+   :header: Script,Where/When/Who Calls It,Purpose
+   :widths: 30,40,30
+   :class: table-striped
+
+   "[`app_merging.py`](#script-utilities-scripts-app_merging-app_merging-py)","CMake post-build in [`una-app.cmake`](../cmake/una-app.cmake); manual developer use ([`sdk-setup.md`](sdk-setup.md), [`sdk-overview.md`](sdk-overview.md), [`Readme.txt`](../Utilities/Scripts/app_merging/Readme.txt))","Merges app service/GUI binaries with icons/resources into a final app package during build or manually."
+   "[`app_packer.py`](#script-utilities-scripts-app_packer-app_packer-py)","CMake post-build in [`una-app.cmake`](../cmake/una-app.cmake) for service and GUI targets; referenced in docs ([`sdk-overview.md`](sdk-overview.md), [`development-workflow.md`](development-workflow.md))","Packages ELF binaries with assets and version into .uapp containers in post-build steps."
+   "[`png2abgr2222.py`](#script-utilities-scripts-png2abgr2222-png2abgr2222-py)","No external callers found in searched files; self-documented examples for manual use","Converts input PNG images from RGBA to ABGR2222 byte arrays and generates C header files."
+   "[`export-stm32-tools.ps1`](#script-utilities-scripts-export-stm32-tools-ps1)","Manual Windows SDK setup ([`sdk-setup.md`](sdk-setup.md))","Exports STM32 tools during manual Windows environment setup."
+   "[`una-version.sh`](#script-utilities-scripts-build-cube-una-version-sh)","Sourced by [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh), [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in [`cmake/una-app.cmake`](../cmake/una-app.cmake) and GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml))","Initializes UNA version and build metadata environment variables for Cube builds."
+   "[`find-cube.sh`](#script-utilities-scripts-build-cube-find-cube-sh)","Sourced by [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml))","Locates STM32 CubeIDE installation and sets environment variables."
+   "[`build-cube.sh`](#script-utilities-scripts-build-cube-build-cube-sh)","Called in GitHub Actions [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml)","Builds specified CubeIDE projects using prepared environment."
+   "[`setup-environment.sh`](#script-utilities-scripts-build-cube-setup-environment-sh)","Used in `.vscode/tasks.json`","Prepares environment for CubeIDE builds by sourcing dependency scripts."
+   "[`generate-tutorials-app-list.py`](#script-github-scripts-generate-tutorials-app-list-py)","GitHub Actions [`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml) (runs to generate cmake_apps.json)","Generates list of tutorial apps in JSON format for CI workflows."
+   "[`generate-app-list.py`](#script-examples-github-scripts-generate-app-list-py)","GitHub Actions [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml) (runs to list projects and filter by app)","Generates list of example app projects for CI build matrix."
 
 ## Script: Utilities/Scripts/app_merging/app_merging.py
 
