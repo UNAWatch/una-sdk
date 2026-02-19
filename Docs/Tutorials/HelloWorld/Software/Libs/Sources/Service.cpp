@@ -30,7 +30,6 @@ void Service::run()
      * 4. Uncomment sensor disconnect in COMMAND_APP_STOP and final cleanup
      */
     // mSensorHR.connect();  // Connect to heart rate sensor
-
     // // Initialize FIT file with app metadata
     // ActivityWriter::AppInfo info{};
     // info.timestamp  = std::time(nullptr);  // Current UTC time
@@ -38,15 +37,12 @@ void Service::run()
     // info.devID      = DEV_ID;  // Developer ID string
     // info.appID      = APP_ID;  // Application ID string
     // mActivityWriter.start(info);  // Create and initialize FIT file
-
-    time_t startTime    = time(nullptr);
-    time_t utcTimestamp = 0;
-
-    float    hrAvgSum   = 0;
-    uint32_t hrAvgCount = 0;
-    float    hrMax      = 0;
-
-    uint32_t startTimeMs = mKernel.sys.getTimeMs();
+    // time_t startTime    = time(nullptr);
+    // time_t utcTimestamp = 0;
+    // float    hrAvgSum   = 0;
+    // uint32_t hrAvgCount = 0;
+    // float    hrMax      = 0;
+    // uint32_t startTimeMs = mKernel.sys.getTimeMs();
 
     while (true) {
         SDK::MessageBase *msg;
@@ -114,12 +110,12 @@ void Service::run()
         //     }
         // } else {
             // Just wait some time to see if GUI starts
-            if (mKernel.sys.getTimeMs() - startTimeMs > 5000) {
-                LOG_DEBUG("start GUI timeout\n");
-                break;
-            }
-            mKernel.sys.delay(100);
-        }
+        //     if (mKernel.sys.getTimeMs() - startTimeMs > 5000) {
+        //         LOG_DEBUG("start GUI timeout\n");
+        //         break;
+        //     }
+        //     mKernel.sys.delay(100);
+        // }
     }
 
     /*
