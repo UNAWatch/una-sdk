@@ -57,13 +57,6 @@ The app will start and display an initial black screen. Use the hardware buttons
 
 ## Buttons App Overview
 
-The Buttons app demonstrates a GUI application with navigation controlled by the watch's hardware buttons. The app consists of one screen which changing background color by pressing a distinct button:
-
-- **Initial Screen**: Black background
-- **Screen 2**: Blue background (accessed via top right button)
-- **Screen 3**: Red background (accessed via left button)
-- **Screen 4**: Green background (accessed via bottom right button)
-
 ### Navigation Flow
 - Start on the black screen
 - Press top right button (R1) → Blue screen
