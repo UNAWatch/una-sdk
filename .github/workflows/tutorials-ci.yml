@@ -32,6 +32,7 @@ jobs:
 
   cmake-build:
     runs-on: ubuntu-latest
+    container: xanderhendriks/stm32cubeide:16.0
     needs: prepare
     strategy:
       matrix:
@@ -40,19 +41,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y cmake make python3 python3-pip gcc-arm-none-eabi
-
-      - name: Set up UNA_SDK
-        run: echo "UNA_SDK=$PWD" >> $GITHUB_ENV
+      - name: Install scripts requirements
+        run: python3 -m pip install --break-system-packages -r SDK/Utilities/Scripts/app_packer/requirements.txt
 
       - name: Build ${{ matrix.app }}
         run: |
+          echo "Setup environment"
+          . ./Utilities/Scripts/build-cube/find-cube.sh
+          export UNA_SDK=$GITHUB_WORKSPACE
           cd Docs/Tutorials/${{ matrix.app }}/Software/Apps/${{ matrix.app }}-CMake
           mkdir -p build
           cd build
+          echo "Build"
           cmake ..
           make -j$(nproc)
 
