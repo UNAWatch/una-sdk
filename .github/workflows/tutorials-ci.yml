@@ -38,6 +38,9 @@ jobs:
       matrix:
         app: ${{ fromJson(needs.prepare.outputs.cmake_apps) }}
     steps:
+      - name: Setup GIT
+        run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
+
       - name: Checkout
         uses: actions/checkout@v4
 
