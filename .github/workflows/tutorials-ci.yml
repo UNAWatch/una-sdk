@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install scripts requirements
-        run: python3 -m pip install --break-system-packages -r SDK/Utilities/Scripts/app_packer/requirements.txt
+        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
 
       - name: Build ${{ matrix.app }}
         run: |
