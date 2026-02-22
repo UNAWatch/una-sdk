@@ -1,4 +1,4 @@
-# TrackFace2 Widget Documentation
+# TrackFace2
 
 ## Overview
 

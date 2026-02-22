@@ -1,4 +1,4 @@
-# TrackSummaryHR Widget Documentation
+# TrackSummaryHR
 
 ## Overview
 

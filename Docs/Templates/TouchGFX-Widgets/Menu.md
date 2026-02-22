@@ -1,4 +1,4 @@
-# Menu Widget Documentation
+# Menu
 
 ## Overview
 

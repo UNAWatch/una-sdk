@@ -1,4 +1,4 @@
-# BatteryBig Widget Documentation
+# BatteryBig
 
 ## Overview
 

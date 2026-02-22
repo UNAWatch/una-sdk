@@ -1,4 +1,4 @@
-# SideBarBig Widget Documentation
+# SideBarBig
 
 ## Overview
 
