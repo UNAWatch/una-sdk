@@ -1,4 +1,4 @@
-# TrackSummary Widget Documentation
+# TrackSummary
 
 ## Overview
 

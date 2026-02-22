@@ -1,4 +1,4 @@
-# MenuItemSelected Widget Documentation
+# MenuItemSelected
 
 ## Overview
 

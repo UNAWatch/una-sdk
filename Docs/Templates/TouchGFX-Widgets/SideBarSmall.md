@@ -1,4 +1,4 @@
-# SideBarSmall Widget Documentation
+# SideBarSmall
 
 ## Overview
 

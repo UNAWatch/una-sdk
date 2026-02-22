@@ -1,4 +1,4 @@
-# HrBar Widget Documentation
+# HrBar
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# TitleInfo Widget Documentation
+# TitleInfo
 
 ## Overview
 
