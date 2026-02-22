@@ -1,4 +1,4 @@
-# Toggle Widget Documentation
+# Toggle
 
 ## Overview
 

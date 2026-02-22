@@ -1,4 +1,4 @@
-# Title Widget Documentation
+# Title
 
 ## Overview
 
