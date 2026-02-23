@@ -1,5 +1,5 @@
 (architecture-deep-dive)=
-# Architecture Deep Dive
+# Platform Architecture
 
 This document explains the technical magic that enables the Una-Watch platform.
 

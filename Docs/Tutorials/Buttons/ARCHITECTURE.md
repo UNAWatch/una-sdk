@@ -1,6 +1,6 @@
 (tutorials/buttons/architecture)=
 
-# Buttons Tutorial: Multi-Screen Navigation with Buttons
+# Buttons Tutorial
 
 Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.
 

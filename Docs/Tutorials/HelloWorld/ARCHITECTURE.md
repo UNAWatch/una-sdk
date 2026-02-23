@@ -1,14 +1,7 @@
 (tutorials/helloworld/architecture)=
-# HelloWorld Tutorial: Your First UNA Watch App
+# HelloWorld Tutorial
 
 Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
-
-**Tutorial Series Overview:**
-1. **HelloWorld** (this tutorial): Basic app structure and communication
-2. **Heart Rate App**: Adding sensor integration and real-time data
-3. **Advanced Features**: Custom screens, data persistence, and complex interactions
-
-By starting simple, you'll understand the core patterns that all UNA apps use, making advanced features much easier to learn.
 
 ## What You'll Learn
 
