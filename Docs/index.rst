@@ -35,27 +35,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    development-workflow
    Scripts
    Tutorials/HelloWorld/Software/Apps/TouchGFX-GUI/README
-
-.. toctree::
-   :maxdepth: 4
-   :caption: 🎨 TouchGFX Widgets
-
-   Templates/TouchGFX-Widgets/BatteryBig
-   Templates/TouchGFX-Widgets/HrBar
-   Templates/TouchGFX-Widgets/Menu
-   Templates/TouchGFX-Widgets/MenuItemNotSelected
-   Templates/TouchGFX-Widgets/MenuItemSelected
-   Templates/TouchGFX-Widgets/SideBarBig
-   Templates/TouchGFX-Widgets/SideBarSmall
-   Templates/TouchGFX-Widgets/Title
-   Templates/TouchGFX-Widgets/TitleInfo
-   Templates/TouchGFX-Widgets/Toggle
-   Templates/TouchGFX-Widgets/TrackFace1
-   Templates/TouchGFX-Widgets/TrackFace2
-   Templates/TouchGFX-Widgets/TrackFace3
-   Templates/TouchGFX-Widgets/TrackSummary
-   Templates/TouchGFX-Widgets/TrackSummaryHR
-   Templates/TouchGFX-Widgets/UnaButtons
+   touchgfx-widgets
 
 .. toctree::
    :maxdepth: 4
