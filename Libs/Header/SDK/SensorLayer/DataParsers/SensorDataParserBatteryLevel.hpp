@@ -44,8 +44,9 @@ public:
      * @brief   SensorData parser for the Battery Level sensor
      *
      * @details
- * The parser only reads fields and provides type-safe accessors.
- * It does not own the underlying storage.*/
+     * The parser only reads fields and provides type-safe accessors.
+     * It does not own the underlying storage
+     * */
     bool isDataValid() const
     {
         return ((mData.getFieldCount() == Field::COUNT) &&
@@ -57,8 +58,9 @@ public:
      * @brief   SensorData parser for the Battery Level sensor
      *
      * @details
- * The parser only reads fields and provides type-safe accessors.
- * It does not own the underlying storage.*/
+     * The parser only reads fields and provides type-safe accessors.
+     * It does not own the underlying storage
+     */
     float getCharge() const
     {
         return isDataValid() ? mData.f[Field::LEVEL] : -1.0f;
