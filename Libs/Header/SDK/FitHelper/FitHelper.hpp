@@ -80,7 +80,7 @@ namespace SDK::Component {
          * @param fp    Target file pointer.
          * @return true If message successfully written.
          */
-        bool writeMessage(void* data, SDK::Interface::IFile* fp);
+        bool writeMessage(const void* data, SDK::Interface::IFile* fp);
 
         /**
          * @brief Print a FIT message definition for debugging.
@@ -108,25 +108,25 @@ namespace SDK::Component {
         /**
          * @brief Get declared developer field size.
          */
-        FIT_UINT8         getItemsCount();
+        FIT_UINT8         getItemsCount() const;
 
         /**
          * @brief Get field ID.
          */
-        uint8_t getFieldID();
+        uint8_t           getFieldID() const;
 
         /**
          * @brief Get field size.
          */
-        FIT_UINT8         getFieldSize();
+        FIT_UINT8         getFieldSize() const;
         /**
          * @brief Get base type size for the current message or field.
          */
-        FIT_UINT8         getBaseTypeSize();
+        FIT_UINT8         getBaseTypeSize() const;
         /**
          * @brief Get current base type.
          */
-        FIT_FIT_BASE_TYPE getBaseType();
+        FIT_FIT_BASE_TYPE getBaseType() const;
 
     private:
         FitHelper(const FitHelper&)            = delete;
@@ -141,16 +141,16 @@ namespace SDK::Component {
          * @param base_type  Base type identifier.
          * @return FIT_UINT8 Size in bytes of the base type.
          */
-        FIT_UINT8 getBaseTypeSize(FIT_FIT_BASE_TYPE base_type);
+        FIT_UINT8 getBaseTypeSize(FIT_FIT_BASE_TYPE base_type) const;
 
         /**
          * @brief Check if all provided field numbers are unique.
          */
-        bool isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
+        bool isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields) const;
         /**
          * @brief Validate that provided fields exist in the original message definition.
          */
-        bool isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields);
+        bool isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields) const;
         /**
          * @brief Build a reduced message definition based on selected fields.
          */
@@ -166,14 +166,14 @@ namespace SDK::Component {
          * @param field      Field number to locate.
          * @return uint8_t  Byte offset of the field, or UINT8_MAX if not found.
          */
-        uint8_t getFieldOffset(FIT_EVENT_FIELD_NUM field);
+        uint8_t getFieldOffset(FIT_EVENT_FIELD_NUM field)  const;
         /**
          * @brief Get size in bytes of a specific field within the message structure.
          *
          * @param field    Field number to locate.
          * @return uint8_t Size in bytes of the field, or UINT8_MAX if not found.
          */
-        uint8_t getFieldSize(FIT_EVENT_FIELD_NUM field);
+        uint8_t getFieldSize(FIT_EVENT_FIELD_NUM field) const;
 
         /**
          * @brief Write raw data to the FIT file.
@@ -208,7 +208,7 @@ namespace SDK::Component {
         const uint8_t              mDevelopItemsCount;
         const FIT_UINT8            mDevelopIndex;
 		std::vector<FitHelper*>    mUserFields;
-		FIT_UINT8                  mFieldID;
+		const FIT_UINT8            mFieldID;
     };
 
 }

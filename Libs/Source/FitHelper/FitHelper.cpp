@@ -121,7 +121,7 @@ namespace SDK::Component {
         return true;
     }
 
-    bool FitHelper::writeMessage(void* data, SDK::Interface::IFile * fp)
+    bool FitHelper::writeMessage(const void* data, SDK::Interface::IFile * fp)
     {
         if (!mInited) {
 		    return false;
@@ -201,32 +201,32 @@ namespace SDK::Component {
         WriteData(data, fieldSize, fp);
     }
 
-    FIT_UINT8 FitHelper::getItemsCount()
+    FIT_UINT8 FitHelper::getItemsCount() const
     {
         return mDevelopItemsCount;
     }
 
-    uint8_t FitHelper::getFieldID()
+    uint8_t FitHelper::getFieldID() const
     {
         return mFieldID;
     }
 
-    FIT_UINT8 FitHelper::getFieldSize()
+    FIT_UINT8 FitHelper::getFieldSize() const
     {
         return getItemsCount() * getBaseTypeSize();
     }
 
-    FIT_UINT8 FitHelper::getBaseTypeSize()
+    FIT_UINT8 FitHelper::getBaseTypeSize() const
     {
         return getBaseTypeSize(mBaseType);
     }
 
-    FIT_FIT_BASE_TYPE FitHelper::getBaseType()
+    FIT_FIT_BASE_TYPE FitHelper::getBaseType() const
     {
 	    return mBaseType;
     }
 
-    bool FitHelper::isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
+    bool FitHelper::isUnique(std::initializer_list<FIT_EVENT_FIELD_NUM> fields) const
     {
         std::unordered_set<FIT_EVENT_FIELD_NUM> uniq;
         uniq.reserve(fields.size());
@@ -241,7 +241,7 @@ namespace SDK::Component {
         return true;
     }
 
-    bool FitHelper::isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields)
+    bool FitHelper::isValid(std::initializer_list<FIT_EVENT_FIELD_NUM> fields) const
     {
         for (auto f : fields) {
 		    bool ok = false;
@@ -305,7 +305,7 @@ namespace SDK::Component {
         printMsgDef((const FIT_MESG_DEF*)mMsgDef);
     }
 
-    FIT_UINT8 FitHelper::getBaseTypeSize(FIT_FIT_BASE_TYPE base_type)
+    FIT_UINT8 FitHelper::getBaseTypeSize(FIT_FIT_BASE_TYPE base_type) const
     {
         switch (base_type) {
         case FIT_FIT_BASE_TYPE_ENUM:
@@ -361,7 +361,7 @@ namespace SDK::Component {
         }
     }
 
-    uint8_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field)
+    uint8_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field) const
     {
         uint8_t offset = 0;
         for (FIT_UINT8 idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
@@ -381,7 +381,7 @@ namespace SDK::Component {
         return UINT8_MAX;
     }
 
-    uint8_t FitHelper::getFieldSize(FIT_EVENT_FIELD_NUM field)
+    uint8_t FitHelper::getFieldSize(FIT_EVENT_FIELD_NUM field) const
     {
         for (FIT_UINT8 idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
             if (field == mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx)]) {
