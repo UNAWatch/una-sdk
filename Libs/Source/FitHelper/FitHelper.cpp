@@ -31,10 +31,12 @@ namespace SDK::Component {
 	    , mDevelopItemsCount(1)
 		, mDevelopIndex(0)
 		, mUserFields()
+		, mFieldID(0)
     {
     }
 
     FitHelper::FitHelper(uint8_t                           msgID,
+                         uint8_t                           fieldID,
                          std::initializer_list<FitHelper*> container,
                          FIT_UINT8                         itemsCount,
                          FIT_UINT8                         devIndex)
@@ -48,6 +50,7 @@ namespace SDK::Component {
         , mDevelopItemsCount(itemsCount == 0 ? 1 : itemsCount)
         , mDevelopIndex(devIndex)
         , mUserFields()
+        , mFieldID(fieldID)
     {
 		for (auto c : container) {
             if (c) {
@@ -100,7 +103,7 @@ namespace SDK::Component {
             for (FIT_UINT8 i = 0; i < numberFields; i++) {
                 FIT_DEV_FIELD_DEF dev_field_def{};
 
-                dev_field_def.def_num   = i;
+                dev_field_def.def_num   = mUserFields[i]->getFieldID();
                 dev_field_def.size      = mUserFields[i]->getFieldSize();
                 dev_field_def.dev_index = mDevelopIndex;
 
@@ -201,6 +204,11 @@ namespace SDK::Component {
     FIT_UINT8 FitHelper::getItemsCount()
     {
         return mDevelopItemsCount;
+    }
+
+    uint8_t FitHelper::getFieldID()
+    {
+        return mFieldID;
     }
 
     FIT_UINT8 FitHelper::getFieldSize()

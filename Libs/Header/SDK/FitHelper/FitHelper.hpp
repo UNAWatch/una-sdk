@@ -51,6 +51,7 @@ namespace SDK::Component {
          * @param devIndex   Developer index.
          */
         FitHelper(uint8_t                           msgID,
+                  uint8_t                           fieldID,
                   std::initializer_list<FitHelper*> container,
                   FIT_UINT8                         itemsCount = 1,
                   FIT_UINT8                         devIndex = 0);
@@ -108,6 +109,12 @@ namespace SDK::Component {
          * @brief Get declared developer field size.
          */
         FIT_UINT8         getItemsCount();
+
+        /**
+         * @brief Get field ID.
+         */
+        uint8_t getFieldID();
+
         /**
          * @brief Get field size.
          */
@@ -201,6 +208,7 @@ namespace SDK::Component {
         const uint8_t              mDevelopItemsCount;
         const FIT_UINT8            mDevelopIndex;
 		std::vector<FitHelper*>    mUserFields;
+		FIT_UINT8                  mFieldID;
     };
 
 }
