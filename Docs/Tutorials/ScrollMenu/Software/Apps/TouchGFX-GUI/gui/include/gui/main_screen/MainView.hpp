@@ -7,6 +7,7 @@
 class MainView : public MainViewBase
 {
     uint8_t lastKeyPressed = {'\0'};
+    int counter = 0;
 public:
     MainView();
     virtual ~MainView() {}
