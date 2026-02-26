@@ -14,6 +14,10 @@ on:
       - '.github/scripts/generate-tutorials-app-list.py'
       - '.github/workflows/tutorials-ci.yml'
 
+env:
+  APPS_EXCLUDED: |
+    ScrollMenu
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
