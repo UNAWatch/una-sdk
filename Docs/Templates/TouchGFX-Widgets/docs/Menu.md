@@ -109,6 +109,131 @@ MenuItemSelected *selectedItem = menu.getSelectedItem(0);
 MenuItemNotSelected *unselectedItem = menu.getNotSelectedItem(0);
 ```
 
+## Adding Actions and Event Handling
+
+To make the menu interactive and execute actions based on user selections, you need to handle button events and animation callbacks.
+
+### Handling Button Events
+
+The menu includes pre-configured buttons (L1, L2, R1, R2) that can be used to trigger actions. Typically, R1 can be used as a "select" or "confirm" button.
+
+```cpp
+// In your view or presenter, set up button callbacks
+void MyView::setupMenuActions() {
+    Buttons &buttons = menu.getButtons();
+
+    // Set R1 button to green (ready state)
+    buttons.setR1(Buttons::GREEN);
+
+    // Add callback for R1 button press
+    buttons.setR1Callback(touchgfx::Callback<MyView>(this, &MyView::handleMenuSelect));
+}
+
+// Callback function to handle menu selection
+void MyView::handleMenuSelect() {
+    uint16_t selectedItem = menu.getSelectedItem();
+
+    // Execute action based on selected item
+    switch (selectedItem) {
+        case 0:
+            // Action for first item
+            presenter->gotoScreen1();
+            break;
+        case 1:
+            // Action for second item
+            presenter->gotoScreen2();
+            break;
+        // Add cases for other items
+        default:
+            break;
+    }
+}
+```
+
+### Navigation Handling
+
+Navigation can be handled through button presses or other input methods:
+
+```cpp
+void MyView::handleL1Press() {
+    menu.selectPrev();
+}
+
+void MyView::handleL2Press() {
+    menu.selectNext();
+}
+```
+
+### Animation Callbacks
+
+The menu provides an animation end callback that can be overridden to perform actions after selection animations complete:
+
+```cpp
+// Override the animation end callback in your Menu class
+void Menu::scrollWheelAnimationEndCb() {
+    // Call base implementation if needed
+    MenuBase::scrollWheelAnimationEndCb();
+
+    // Perform actions after animation completes
+    uint16_t selectedItem = getSelectedItem();
+
+    // Optional: Update UI or trigger effects
+    updateInfoMessageForSelection(selectedItem);
+
+    // Note: For action execution, prefer button callbacks over animation callbacks
+    // to ensure user intent is clear
+}
+```
+
+### Complete Example
+
+Here's a complete example showing how to set up a functional menu with actions:
+
+```cpp
+class MyView : public MyViewBase {
+public:
+    void setupScreen() {
+        MyViewBase::setupScreen();
+
+        // Basic menu setup
+        menu.initialize();
+        add(menu);
+        menu.setNumberOfItems(3);
+        menu.setTitle(T_MENU_TITLE);
+
+        // Set up button callbacks
+        setupMenuActions();
+    }
+
+private:
+    void setupMenuActions() {
+        Buttons &buttons = menu.getButtons();
+        buttons.setR1(Buttons::GREEN);
+        buttons.setR1Callback(touchgfx::Callback<MyView>(this, &MyView::handleSelect));
+
+        buttons.setL1(Buttons::WHITE);
+        buttons.setL1Callback(touchgfx::Callback<MyView>(this, &MyView::handlePrev));
+
+        buttons.setL2(Buttons::WHITE);
+        buttons.setL2Callback(touchgfx::Callback<MyView>(this, &MyView::handleNext));
+    }
+
+    void handleSelect() {
+        uint16_t item = menu.getSelectedItem();
+        switch (item) {
+            case 0: presenter->showSettings(); break;
+            case 1: presenter->showProfile(); break;
+            case 2: presenter->showAbout(); break;
+        }
+    }
+
+    void handlePrev() { menu.selectPrev(); }
+    void handleNext() { menu.selectNext(); }
+};
+```
+
+This approach ensures the menu is fully interactive, with clear user feedback and proper action execution based on selections.
+
 ## Advanced Features and Hidden Gems
 
 - **Synchronized Animations**: Side bar and scroll wheel animate together using configurable animation steps from `Gui::Config::kMenuAnimationSteps`
