@@ -9,6 +9,7 @@
 #include <gui/main_screen/MainPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
 #include <gui/containers/ButtonsSet.hpp>
+#include <gui/containers/Menu.hpp>
 
 class MainViewBase : public touchgfx::View<MainPresenter>
 {
@@ -28,8 +29,15 @@ protected:
     touchgfx::Box __background;
     ButtonsSet buttons;
     touchgfx::Box box1;
+    Menu menu1;
 
 private:
+
+    /*
+     * Canvas Buffer Size
+     */
+    static const uint32_t CANVAS_BUFFER_SIZE = 3600;
+    uint8_t canvasBuffer[CANVAS_BUFFER_SIZE];
 
 };
 

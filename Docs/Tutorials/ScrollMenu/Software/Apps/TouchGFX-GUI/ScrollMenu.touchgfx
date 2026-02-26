@@ -3,6 +3,7 @@
     "Screens": [
       {
         "Name": "Main",
+        "CanvasBufferSize": 3600,
         "Components": [
           {
             "Type": "CustomContainerInstance",
@@ -18,6 +19,13 @@
             "Name": "box1",
             "Width": 240,
             "Height": 240
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menu1",
+            "Width": 240,
+            "Height": 240,
+            "CustomContainerDefinitionName": "Menu"
           }
         ],
         "Interactions": []
@@ -243,12 +251,7 @@
             }
           }
         ],
-        "Interactions": [],
-        "CustomActions": [
-          {
-            "Name": ""
-          }
-        ]
+        "Interactions": []
       },
       {
         "Name": "MenuItemNotSelected",
