@@ -51,6 +51,20 @@
     <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsSetBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\Buttons.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\Menu.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\MenuBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\MenuItemNotSelected.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\MenuItemNotSelectedBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\MenuItemSelected.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\MenuItemSelectedBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\SideBarBig.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\SideBarBigBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\Title.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\TitleBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\Toggle.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\ToggleBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -263,6 +277,20 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\Buttons.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\Menu.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MenuBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MenuItemNotSelected.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MenuItemNotSelectedBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MenuItemSelected.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MenuItemSelectedBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\SideBarBig.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\SideBarBigBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\Title.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TitleBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\Toggle.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ToggleBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

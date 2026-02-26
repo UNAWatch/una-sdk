@@ -6,6 +6,6 @@
 
 static unsigned short SIM_WIDTH = 240;
 static unsigned short SIM_HEIGHT = 240;
-#define SIM_TITLE "Buttons"
+#define SIM_TITLE "ScrollMenu"
 
 #endif // SIMCONSTANTS_HPP

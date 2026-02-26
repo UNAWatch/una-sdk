@@ -158,6 +158,485 @@
           }
         ],
         "Interactions": []
+      },
+      {
+        "Name": "Menu",
+        "Width": 240,
+        "Height": 240,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "backgroung",
+            "X": 16,
+            "Y": 87,
+            "Width": 220,
+            "Height": 66,
+            "LockPosition": true,
+            "RelativeFilename": "Background_TealDark.png"
+          },
+          {
+            "Type": "ScrollWheel",
+            "Name": "wheel",
+            "Y": 87,
+            "Width": 240,
+            "Height": 132,
+            "LockPosition": true,
+            "UseSelectedStyle": true,
+            "SelectedItemTemplateName": "MenuItemSelected",
+            "MarginAfter": 15,
+            "IsCircular": true,
+            "ItemTemplateName": "MenuItemNotSelected",
+            "NumberofItems": 10,
+            "Easing": "Linear",
+            "EasingOption": "Out",
+            "SwipeAcceleration": 1.0,
+            "DragAcceleration": 1.0,
+            "OverShootPercentage": 100
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "sideBar",
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "SideBarBig"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 147,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "info",
+            "X": 35,
+            "Y": 57,
+            "Width": 170,
+            "Height": 23,
+            "Visible": false,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "InitialText",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
+          }
+        ],
+        "Interactions": [],
+        "CustomActions": [
+          {
+            "Name": ""
+          }
+        ]
+      },
+      {
+        "Name": "MenuItemNotSelected",
+        "Width": 240,
+        "Height": 66,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "textTip",
+            "Y": 44,
+            "Width": 240,
+            "Height": 25,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "LineSpacing": -8,
+            "Wildcard1": {
+              "TextId": "InitialText",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "text",
+            "X": 41,
+            "Y": 20,
+            "Width": 158,
+            "Height": 42,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "LineSpacing": -6,
+            "Wildcard1": {
+              "TextId": "InitialText",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "MenuItemSelected",
+        "Width": 240,
+        "Height": 66,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "textTip",
+            "Y": 40,
+            "Width": 240,
+            "Height": 25,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "LineSpacing": -8,
+            "Wildcard1": {
+              "TextId": "InitialText",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "text",
+            "Y": 2,
+            "Width": 240,
+            "Height": 40,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_30",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "LineSpacing": -8,
+            "Wildcard1": {
+              "TextId": "InitialText",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "toggleSwitch",
+            "X": 151,
+            "Y": 18,
+            "Width": 60,
+            "Height": 30,
+            "Visible": false,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Toggle"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "Toggle",
+        "Width": 60,
+        "Height": 30,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "railOn",
+            "Width": 60,
+            "Height": 30,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Toggle_On.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "railOffGray",
+            "Width": 60,
+            "Height": 30,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Toggle_Def.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "railOff",
+            "Width": 60,
+            "Height": 30,
+            "LockPosition": true,
+            "RelativeFilename": "Toggle_Off.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "handle",
+            "Width": 30,
+            "Height": 30,
+            "LockPosition": true,
+            "RelativeFilename": "Toggle_Handle.png"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "Title",
+        "X": 50,
+        "Width": 140,
+        "Height": 41,
+        "Components": [
+          {
+            "Type": "Line",
+            "Name": "line",
+            "Y": 38,
+            "Width": 140,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "EndX": 140.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "text",
+            "X": 10,
+            "Y": 11,
+            "Width": 120,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "SideBarBig",
+        "Y": 47,
+        "Width": 36,
+        "Height": 146,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "rail",
+            "X": 4,
+            "Width": 32,
+            "Height": 146,
+            "LockPosition": true,
+            "RelativeFilename": "SideBarBig.png"
+          },
+          {
+            "Type": "Circle",
+            "Name": "handle",
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 290.0,
+            "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "handleOvf",
+            "Width": 36,
+            "Height": 146,
+            "Visible": false,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 290.0,
+            "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "Buttons",
+        "Y": 47,
+        "Width": 240,
+        "Height": 147,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "buttonR2",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR2a",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1a",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2a",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1a",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR2r",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2R.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1r",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1R.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2r",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2R .png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1r",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1R.png"
+          }
+        ],
+        "Interactions": []
       }
     ],
     "Name": "ScrollMenu",
