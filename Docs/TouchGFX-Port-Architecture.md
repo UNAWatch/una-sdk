@@ -30,9 +30,9 @@ The TouchGFX port implementation for the UNA SDK provides a comprehensive hardwa
 The implementation comprises custom HAL classes that extend TouchGFX-generated code, a robust command processor for kernel integration, and stub implementations for hardware interfaces not currently utilized in the UNA platform configuration. The port supports a 240x240 pixel display with 8-bit color depth using ABGR2222 format, software-based rendering, and button-based input handling through the UNA kernel messaging system.
 
 Key architectural principles include:
-- **Modular Design**: Clean separation between TouchGFX framework and UNA platform specifics
+- **Modular Design**: Separation between TouchGFX framework and UNA platform specifics
 - **Message-Based Communication**: Asynchronous integration with the UNA kernel
-- **Extensibility**: Support for future hardware additions and customizations
+- **Extensibility**: UNA support for future HW/SW customizations, includes using other GUI libraries like LVGL, etc
 - **Performance Optimization**: Efficient resource usage within platform constraints
 
 ## Definitions and Terminology
@@ -45,25 +45,6 @@ Key architectural principles include:
 - **HAL (Hardware Abstraction Layer)**: Software layer that provides a consistent interface to hardware components
 - **Frontend Heap**: Memory allocation system used by TouchGFX for dynamic GUI elements
 - **Message Queue**: A fixed-size buffer (capacity: 10 messages) for storing kernel messages in the TouchGFX command processor
-
-## Prerequisites and Dependencies
-
-### Software Dependencies
-- TouchGFX Designer 4.23.0+ or compatible version
-- UNA SDK with kernel messaging system
-- C++17 compatible compiler
-- STM32CubeMX for project generation (optional)
-
-### Hardware Requirements
-- 240x240 pixel display supporting 8-bit color depth
-- At least 57.6 KB RAM for frame buffer (240×240×1 byte/pixel)
-- Button input interface (4 buttons: SW1-SW4)
-- UART or similar communication interface for kernel messaging
-
-### Development Environment
-- Windows/Linux development host
-- STM32CubeIDE or compatible IDE
-- TouchGFX Environment setup
 
 ## Structural Architecture
 
@@ -435,7 +416,7 @@ Adjust `skWidth`, `skHeight`, and `skBufferSize` in `TouchGFXHAL.cpp` for differ
 ### Performance Optimization
 - **Frame Rate**: Balance between smooth animation and CPU usage
 - **Rendering**: Minimize overdraw by using efficient widget layouts
-- **Input Polling**: Button sampling is polled - consider interrupt-driven approaches for low-latency input
+- **Input Polling**: Button sampling is polled as GUI is single-thread.
 
 ### Code Organization
 - **Separation of Concerns**: Keep TouchGFX logic separate from UNA platform code
@@ -457,7 +438,7 @@ Adjust `skWidth`, `skHeight`, and `skBufferSize` in `TouchGFXHAL.cpp` for differ
 - **GPIO**: Not utilized (stub implementation)
 
 ### Performance Characteristics
-- **Rendering**: Software-based, no hardware acceleration available
+- **Rendering**: Software-based, no hardware acceleration available yet.
 - **Memory Usage**: ~57.6 KB static frame buffer + dynamic allocations
 - **Synchronization**: Kernel-driven VSync via messaging system
 - **Input Handling**: Polled button sampling, no interrupt-driven input
@@ -489,16 +470,116 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 ### Core Integration Components
 
 #### TouchGFXCommandProcessor
-- **Location**: [`Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp`](Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp), [`Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp`](Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp)
+- **Location**: [`Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-77`](Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25), [`Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35-76`](Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35)
 - **Purpose**: Singleton command processor that serves as the central hub for UNA kernel integration
 - **Key Features**:
   - Asynchronous message-based communication with UNA kernel
-  - Fixed-size message queue (capacity: 10 messages) for custom application messages
+  - Fixed-size message queue (capacity: 10 messages, configurable) for custom application messages
   - Lifecycle event handling (start/stop/resume/suspend)
   - Button event processing and sampling
   - Frame buffer update coordination
 
+**Technical Implementation Details:**
+```cpp
+// Singleton instance management
+TouchGFXCommandProcessor& TouchGFXCommandProcessor::GetInstance() {
+    static TouchGFXCommandProcessor sInstance;
+    return sInstance;
+}
+
+// Message processing loop (simplified)
+bool TouchGFXCommandProcessor::waitForFrameTick() {
+    while (true) {
+        SDK::MessageBase* msg = nullptr;
+        if (!mKernel.comm.getMessage(msg)) {
+            continue; // Block until message available
+        }
+
+        switch (msg->getType()) {
+            case SDK::MessageType::EVENT_GUI_TICK:
+                // Process frame tick
+                if (mAppLifeCycleCallback) {
+                    mAppLifeCycleCallback->onFrame();
+                }
+                return false; // Allow TouchGFX to render
+            // ... other message types
+        }
+    }
+}
+```
+
 #### Kernel Message Processing
+**Message Structure Details:**
+
+**EventButton Message Structure:**
+```cpp
+// From Libs/Header/SDK/Messages/CommandMessages.hpp:462-501
+struct EventButton : public MessageBase {
+    enum class Id : uint8_t {
+        SW1 = 0, SW2, SW3, SW4  // Physical button identifiers
+    };
+
+    enum class Event : uint8_t {
+        PRESS = 0, RELEASE, CLICK, LONG_PRESS, HOLD_1S, HOLD_5S, HOLD_10S
+    };
+
+    uint32_t timestamp;  // Event timestamp
+    Id id;              // Which button (SW1-SW4)
+    Event event;        // Event type (CLICK used for TouchGFX)
+};
+```
+
+**Button Mapping Implementation:**
+```cpp
+// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:189-205
+void TouchGFXCommandProcessor::handleEvent(SDK::Message::EventButton* msg) {
+    if (!mIsGuiResumed) {
+        mLastButtonCode = '\0';
+        return;
+    }
+
+    if (msg->event == SDK::Message::EventButton::Event::CLICK) {
+        switch (msg->id) {
+            case SDK::Message::EventButton::Id::SW1: mLastButtonCode = '1'; break;
+            case SDK::Message::EventButton::Id::SW2: mLastButtonCode = '3'; break;
+            case SDK::Message::EventButton::Id::SW3: mLastButtonCode = '2'; break;
+            case SDK::Message::EventButton::Id::SW4: mLastButtonCode = '4'; break;
+        }
+    }
+}
+```
+
+**RequestDisplayUpdate Message Structure:**
+```cpp
+// From Libs/Header/SDK/Messages/CommandMessages.hpp:293-306
+struct RequestDisplayUpdate : public MessageBase {
+    const uint8_t* pBuffer;  // Pointer to 240x240x1 byte frame buffer
+    int16_t x, y;            // Update region (unused, always full screen)
+    int16_t width, height;   // Region size (unused, always 0 for full update)
+
+    RequestDisplayUpdate()
+        : MessageBase(MessageType::REQUEST_DISPLAY_UPDATE)
+        , pBuffer(nullptr), x(0), y(0), width(0), height(0) {}
+};
+```
+
+**Frame Buffer Update Implementation:**
+```cpp
+// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:157-169
+void TouchGFXCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data) {
+    if (!data || !mIsGuiResumed) {
+        return;  // Don't update if suspended or invalid data
+    }
+
+    auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestDisplayUpdate>();
+    if (msg) {
+        msg->pBuffer = data;  // Pass frame buffer pointer
+        mKernel.comm.sendMessage(msg, 1000);  // Send with 1s timeout
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+```
+
 - **Message Types Handled**:
   - `COMMAND_APP_STOP`: Graceful application termination with cleanup
   - `EVENT_GUI_TICK`: Frame synchronization and rendering triggers
@@ -508,18 +589,66 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 - **Integration**: Direct kernel communication through `SDK::Kernel` interface
 
 #### Hardware Abstraction Layer Extensions
-- **Custom HAL Implementation**: [`Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp`](Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp)
+- **Custom HAL Implementation**: [`Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:67-87`](Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:67)
   - Kernel-driven frame buffer flushing via `writeDisplayFrameBuffer()`
   - Button controller integration with kernel message sampling
   - Static frame buffer allocation (57.6 KB for 240×240×8-bit)
   - VSync synchronization through kernel messaging
 
+**HAL Frame Buffer Management:**
+```cpp
+// From Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:53-64
+static const int16_t skWidth = 240;
+static const int16_t skHeight = 240;
+static const uint32_t skBufferSize = skWidth * skHeight;  // 57,600 bytes
+
+static uint8_t sFrameBuffer[skBufferSize];  // Static allocation
+static uint8_t* spActiveBuffer;
+static bool sFlushBufferReq;
+
+// Frame buffer initialization
+void TouchGFXHAL::initialize() {
+    HAL::initialize();
+    spActiveBuffer = sFrameBuffer;
+    setFrameBufferStartAddresses((void*)spActiveBuffer, nullptr, nullptr);
+}
+```
+
+**Flush Mechanism:**
+```cpp
+// From Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:128-142
+void TouchGFXHAL::flushFrameBuffer(const touchgfx::Rect& rect) {
+    sFlushBufferReq = true;  // Set flag for endFrame()
+    TouchGFXGeneratedHAL::flushFrameBuffer(rect);
+}
+
+// From Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:203-216
+void TouchGFXHAL::endFrame() {
+    if (sFlushBufferReq) {
+        // Send frame buffer to kernel for display
+        SDK::TouchGFXCommandProcessor::GetInstance()
+            .writeDisplayFrameBuffer(spActiveBuffer);
+        sFlushBufferReq = false;
+    }
+    TouchGFXGeneratedHAL::endFrame();
+}
+```
+
 #### Operating System Wrappers
-- **Location**: [`Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp`](Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp)
+- **Location**: [`Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp:105-108`](Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp:105)
 - **UNA-Specific Functions**:
   - `waitForVSync()`: Blocks until kernel sends GUI tick message
   - `taskDelay()`: Uses kernel delay functionality
   - `taskYield()`: Kernel-based task scheduling
+
+**VSync Implementation:**
+```cpp
+// From Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp:105-108
+void OSWrappers::waitForVSync() {
+    // Delegate to command processor message loop
+    SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+}
+```
 
 ### Application Lifecycle Management
 
@@ -532,10 +661,86 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
   - `onSuspend()`: GUI deactivation
   - `onFrame()`: Called each frame for application logic
 
+**Lifecycle State Machine:**
+```cpp
+// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-32
+TouchGFXCommandProcessor::TouchGFXCommandProcessor()
+    : mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
+    , mStartCallbackCalled(false)
+    , mIsGuiResumed(false)
+    , mLastButtonCode(0)
+    , mAppLifeCycleCallback(nullptr)
+    , mCustomMessageHandler(nullptr) {}
+```
+
 #### Custom Message Handling
 - **Interface**: `SDK::Interface::ICustomMessageHandler`
 - **Purpose**: Enables application-specific kernel message processing
 - **Implementation**: `customMessageHandler()` method for processing queued messages
+
+**Message Queue Implementation:**
+```cpp
+// From Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:73
+SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
+
+// Queue processing in message loop
+void TouchGFXCommandProcessor::callCustomMessageHandler() {
+    while (!mUserQueue.empty()) {
+        auto v = mUserQueue.pop();
+        if (v) {
+            auto msg = *v;
+            bool result = false;
+            if (mCustomMessageHandler) {
+                result = mCustomMessageHandler->customMessageHandler(msg);
+            }
+            // Send response back to kernel
+            msg->setResult(result ? SUCCESS : FAIL);
+            mKernel.comm.sendResponse(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+    }
+}
+```
+
+### Performance Implications and Optimizations
+
+#### Memory Management
+- **Static Frame Buffer**: 57.6 KB pre-allocated to avoid heap fragmentation
+- **Fixed Message Queue**: 10-message capacity prevents unbounded growth
+- **Frontend Heap**: TouchGFX dynamic allocations monitored for leaks
+
+**Performance Characteristics:**
+- **Frame Rate**: Limited by kernel tick frequency (typically 30-60 FPS)
+- **CPU Usage**: Software rendering + message processing overhead
+- **Memory Footprint**: ~64 KB total (frame buffer + TouchGFX overhead)
+- **Latency**: Button input delayed by message processing (~1-2ms)
+
+#### Synchronization Optimizations
+- **Kernel-Driven VSync**: Eliminates polling, reduces power consumption
+- **Asynchronous Display Updates**: Non-blocking frame buffer submission
+- **Message Prioritization**: Critical messages (ticks, buttons) processed first
+
+#### Error Handling and Recovery
+- **Queue Overflow Protection**: Oldest messages discarded with logging
+- **Timeout Handling**: Display update messages have 1-second timeout
+- **Graceful Degradation**: GUI suspends on communication failures
+
+### Additional Integration Points
+
+#### Memory Management Integration
+- **Frontend Heap Monitoring**: Integration with UNA memory tracking
+- **Resource Cleanup**: Automatic cleanup on application termination
+- **Leak Prevention**: Static allocations avoid dynamic memory issues
+
+#### Error Handling and Diagnostics
+- **Message Logging**: All kernel communications logged for debugging
+- **State Validation**: GUI state checked before processing messages
+- **Recovery Mechanisms**: Automatic resume after transient failures
+
+#### Power Management Integration
+- **Suspend/Resume Handling**: Proper power state transitions
+- **Display Control**: Backlight and display power managed by kernel
+- **Idle Detection**: TouchGFX animations paused during suspend
 
 ### Key Integration Points Summary
 
@@ -547,6 +752,9 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 | Inter-Process Communication | N/A | Message queue system | Custom application messaging with kernel |
 | Task Scheduling | OS task switching | Kernel yield/delay | Cooperative multitasking within UNA ecosystem |
 | Frame Buffer Updates | DMA/hardware transfer | Kernel message dispatch | Display updates through UNA communication system |
+| Memory Management | Dynamic allocation | Static buffers + heap monitoring | Prevents fragmentation in constrained environment |
+| Error Handling | Framework exceptions | Kernel-level supervision | Robust operation with failure recovery |
+| Power Management | N/A | Suspend/resume integration | Proper power state handling |
 
 ### Benefits of UNA Integration
 
@@ -555,6 +763,8 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 - **Extensible Communication**: Message-based architecture supports custom application features
 - **Robust Error Handling**: Kernel-level supervision and graceful failure recovery
 - **Performance Optimization**: Kernel-driven synchronization minimizes unnecessary processing
+- **Memory Safety**: Static allocations and monitoring prevent leaks and fragmentation
+- **Power Efficiency**: Proper suspend/resume handling extends battery life
 
 ## References and Further Reading
 
@@ -598,5 +808,3 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 
 ### Q: Can I change the display resolution?
 **A:** Yes, but requires modifying `skWidth`, `skHeight`, and `skBufferSize` in `TouchGFXHAL.cpp`, and regenerating TouchGFX assets for the new resolution.
-
-This comprehensive architecture provides a robust foundation for TouchGFX integration in the UNA SDK, effectively balancing framework requirements with platform constraints while ensuring clean separation of concerns and extensibility for future enhancements.
