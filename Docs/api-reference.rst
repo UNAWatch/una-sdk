@@ -85,6 +85,8 @@ UI Framework
 
 Interfaces for building user interfaces using TouchGFX or the lightweight Glance system.
 
+For detailed information on the TouchGFX port implementation, see :doc:`TouchGFX-Port-Architecture`.
+
 .. doxygenclass:: SDK::Interface::IApp
    :project: SDK
    :members:
