@@ -2031,7 +2031,7 @@ This architecture enables a **professional-grade modular smartwatch platform** s
 - Comprehensive sensor data processing
 - Persistent settings with JSON configuration
 - Thread-safe inter-process communication
-- TouchGFX-based user interface framework
+- TouchGFX-based user interface framework (see [TouchGFX Port Architecture](TouchGFX-Port-Architecture.md) for implementation details)
 
 ### Static Component Architecture
 

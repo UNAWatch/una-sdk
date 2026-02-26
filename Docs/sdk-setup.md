@@ -408,6 +408,8 @@ In UNA SDK projects, TouchGFX integrates seamlessly with CMake for building GUI 
   - For watch apps, design for small screens and battery life; use dark themes and efficient animations.
   - When merging service+GUI, verify stack sizes (`UNA_APP_GUI_STACK_SIZE`) are adequate for your UI complexity.
 
+For detailed information on the TouchGFX port implementation for UNA SDK, see the [TouchGFX Port Architecture](TouchGFX-Port-Architecture.md) document.
+
 With these practices, you can develop responsive, professional GUIs that integrate smoothly with the UNA platform's service architecture.
 
 ## **Troubleshooting**
