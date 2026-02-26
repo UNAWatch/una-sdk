@@ -19,8 +19,9 @@
 10. [Extensibility and Customization Guide](#extensibility-and-customization-guide)
 11. [Best Practices and Performance Tips](#best-practices-and-performance-tips)
 12. [Overall Architecture Characteristics](#overall-architecture-characteristics)
-13. [References and Further Reading](#references-and-further-reading)
-14. [FAQ](#faq)
+13. [UNA-Specific System Integration Points](#una-specific-system-integration-points)
+14. [References and Further Reading](#references-and-further-reading)
+15. [FAQ](#faq)
 
 ## Overview
 
@@ -480,6 +481,80 @@ Adjust `skWidth`, `skHeight`, and `skBufferSize` in `TouchGFXHAL.cpp` for differ
 - **No DMA**: Memory copies use CPU, potential bottleneck for large transfers
 - **Single Buffer**: No double buffering, may cause tearing if not synchronized properly
 - **Fixed Resolution**: Currently optimized for 240×240 displays only
+
+## UNA-Specific System Integration Points
+
+The UNA SDK extends standard TouchGFX with comprehensive system integration capabilities that enable seamless operation within the UNA platform ecosystem. These integration points provide the foundation for building sophisticated embedded applications with proper lifecycle management, inter-process communication, and resource coordination.
+
+### Core Integration Components
+
+#### TouchGFXCommandProcessor
+- **Location**: [`Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp`](Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp), [`Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp`](Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp)
+- **Purpose**: Singleton command processor that serves as the central hub for UNA kernel integration
+- **Key Features**:
+  - Asynchronous message-based communication with UNA kernel
+  - Fixed-size message queue (capacity: 10 messages) for custom application messages
+  - Lifecycle event handling (start/stop/resume/suspend)
+  - Button event processing and sampling
+  - Frame buffer update coordination
+
+#### Kernel Message Processing
+- **Message Types Handled**:
+  - `COMMAND_APP_STOP`: Graceful application termination with cleanup
+  - `EVENT_GUI_TICK`: Frame synchronization and rendering triggers
+  - `EVENT_BUTTON`: Physical button input processing (SW1-SW4 mapping)
+  - `COMMAND_APP_GUI_RESUME/SUSPEND`: GUI state management
+  - Custom application-specific messages via extensible queue system
+- **Integration**: Direct kernel communication through `SDK::Kernel` interface
+
+#### Hardware Abstraction Layer Extensions
+- **Custom HAL Implementation**: [`Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp`](Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp)
+  - Kernel-driven frame buffer flushing via `writeDisplayFrameBuffer()`
+  - Button controller integration with kernel message sampling
+  - Static frame buffer allocation (57.6 KB for 240×240×8-bit)
+  - VSync synchronization through kernel messaging
+
+#### Operating System Wrappers
+- **Location**: [`Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp`](Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp)
+- **UNA-Specific Functions**:
+  - `waitForVSync()`: Blocks until kernel sends GUI tick message
+  - `taskDelay()`: Uses kernel delay functionality
+  - `taskYield()`: Kernel-based task scheduling
+
+### Application Lifecycle Management
+
+#### Lifecycle Callbacks
+- **Interface**: `SDK::Interface::IGuiLifeCycleCallback`
+- **Events**:
+  - `onStart()`: Called once when GUI application begins
+  - `onStop()`: Called during application termination for cleanup
+  - `onResume()`: GUI reactivation after suspension
+  - `onSuspend()`: GUI deactivation
+  - `onFrame()`: Called each frame for application logic
+
+#### Custom Message Handling
+- **Interface**: `SDK::Interface::ICustomMessageHandler`
+- **Purpose**: Enables application-specific kernel message processing
+- **Implementation**: `customMessageHandler()` method for processing queued messages
+
+### Key Integration Points Summary
+
+| Integration Point | Standard TouchGFX | UNA Extension | Purpose |
+|-------------------|-------------------|---------------|---------|
+| Frame Synchronization | Hardware VSync | Kernel message-based | Ensures proper timing without hardware interrupts |
+| Input Handling | Touch/DMA controllers | Kernel button messages | Physical button integration via messaging |
+| Lifecycle Management | Application init/exit | Full lifecycle callbacks | Proper resource management and state transitions |
+| Inter-Process Communication | N/A | Message queue system | Custom application messaging with kernel |
+| Task Scheduling | OS task switching | Kernel yield/delay | Cooperative multitasking within UNA ecosystem |
+| Frame Buffer Updates | DMA/hardware transfer | Kernel message dispatch | Display updates through UNA communication system |
+
+### Benefits of UNA Integration
+
+- **Seamless Platform Integration**: TouchGFX applications operate as first-class citizens within the UNA ecosystem
+- **Resource Coordination**: Proper lifecycle management prevents resource conflicts
+- **Extensible Communication**: Message-based architecture supports custom application features
+- **Robust Error Handling**: Kernel-level supervision and graceful failure recovery
+- **Performance Optimization**: Kernel-driven synchronization minimizes unnecessary processing
 
 ## References and Further Reading
 
