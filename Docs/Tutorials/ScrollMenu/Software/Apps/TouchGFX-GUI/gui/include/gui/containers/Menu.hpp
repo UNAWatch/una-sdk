@@ -25,6 +25,8 @@ public:
     void showBackground(bool state);
 
     void setInfoMsg(TypedTextId msgId);
+    void setInfoMsg(const char* msg);
+    void setInfoMsgUnicode(const touchgfx::Unicode::UnicodeChar* msg);
     void setInfoMsgColor(touchgfx::colortype color);
 
     Buttons &getButtons();
