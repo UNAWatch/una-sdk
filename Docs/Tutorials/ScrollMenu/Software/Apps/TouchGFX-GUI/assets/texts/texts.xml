@@ -186,6 +186,9 @@
       <Text Id="Counter" Alignment="Center" TypographyId="Poppins_Medium_25">
         <Translation Language="GB" Alignment="Center">0</Translation>
       </Text>
+      <Text Id="InitialText" Alignment="Left" TypographyId="Poppins_Medium_60">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
     </TextGroup>
   </Texts>
   <Typographies>
