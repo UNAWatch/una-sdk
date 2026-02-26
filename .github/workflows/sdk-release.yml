@@ -49,7 +49,7 @@ jobs:
       - id: get_slack_params
         name: Get required parameters for slack notification
         run: |
-          RELEASE_JSON=$(gh release view ${{ github.ref_name }} --json body,author,createdAt,name,url)
+          RELEASE_JSON=$(gh api repos/UNAWatch/una-sdk/releases/tags/${{ github.ref_name }})
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -65,14 +65,14 @@ jobs:
         run: |
           BODY="${{ steps.get_slack_params.outputs.body }}"
           # Convert markdown to Slack mrkdwn
-          BODY=$(echo "$BODY" | sed 's/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g' || { echo "Error converting links"; exit 1; })  # Links
-          BODY=$(echo "$BODY" | sed 's/\*\*([^*]+)\*\*/\*\1\*/g' || { echo "Error converting bold"; exit 1; })  # Bold
-          BODY=$(echo "$BODY" | sed 's/\*([^*]+)\*/_\1_/g' || { echo "Error converting italic"; exit 1; })  # Italic
-          BODY=$(echo "$BODY" | sed 's/^-\s*/- /g; s/^\*\s*/- /g' || { echo "Error converting lists"; exit 1; })  # Lists
-          BODY=$(echo "$BODY" | sed 's/^#\+\s*\(.*\)$/*\1*/g' || { echo "Error converting headers"; exit 1; })  # Headers
-          BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g' || { echo "Error converting mentions"; exit 1; })  # Mentions
-          BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/' || { echo "Error adjusting changelog"; exit 1; })  # Changelog
-          BODY=$(echo "$BODY" | sed 's/"/\\"/g' || { echo "Error escaping quotes"; exit 1; })  # Escape double quotes
+          BODY=$(echo "$BODY" | sed -E 's/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g' || { echo "Error converting links"; exit 1; })  # Links
+          BODY=$(echo "$BODY" | sed -E 's/\*\*([^*]+)\*\*/\*\1\*/g' || { echo "Error converting bold"; exit 1; })  # Bold
+          BODY=$(echo "$BODY" | sed -E 's/\*([^*]+)\*/_\1_/g' || { echo "Error converting italic"; exit 1; })  # Italic
+          BODY=$(echo "$BODY" | sed -E 's/^-\s*/- /g; s/^\*\s*/- /g' || { echo "Error converting lists"; exit 1; })  # Lists
+          BODY=$(echo "$BODY" | sed -E 's/^#\+\s*\(.*\)$/*\1*/g' || { echo "Error converting headers"; exit 1; })  # Headers
+          BODY=$(echo "$BODY" | sed -E 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g' || { echo "Error converting mentions"; exit 1; })  # Mentions
+          BODY=$(echo "$BODY" | sed -E 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/' || { echo "Error adjusting changelog"; exit 1; })  # Changelog
+          BODY=$(echo "$BODY" | sed -E 's/"/\\"/g' || { echo "Error escaping quotes"; exit 1; })  # Escape double quotes
           PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
             text: (":books: *UNA SDK*: " + $name),
             blocks: [
