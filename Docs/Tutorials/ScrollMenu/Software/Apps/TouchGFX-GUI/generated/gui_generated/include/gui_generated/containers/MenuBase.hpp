@@ -32,15 +32,6 @@ public:
         // Override and implement this function in Menu
     }
 
-    /*
-     * Custom Actions
-     */
-    virtual void ()
-    {
-        // Override and implement this function in Screen1
-    }
-    
-
 protected:
     FrontendApplication& application() {
         return *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());
