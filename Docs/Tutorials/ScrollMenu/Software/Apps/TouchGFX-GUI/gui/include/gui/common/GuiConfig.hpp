@@ -26,6 +26,7 @@ namespace Config
 {
 
 constexpr uint32_t kFrameRate = 10;
+constexpr uint32_t kMenuAnimationSteps = 4;
 constexpr uint32_t kScreenTimeoutSteps = GUI_CONFIG_MS_2_TICKS(30000);     // 30s
 
 
