@@ -184,7 +184,13 @@
     </TextGroup>
     <TextGroup Id="Unsorted">
       <Text Id="Counter" Alignment="Center" TypographyId="Poppins_Medium_25">
-        <Translation Language="GB" Alignment="Center">0</Translation>
+        <Translation Language="GB">Counter</Translation>
+      </Text>
+      <Text Id="Increase" Alignment="Center" TypographyId="Poppins_Medium_25">
+        <Translation Language="GB">Increase</Translation>
+      </Text>
+      <Text Id="Decrease" Alignment="Center" TypographyId="Poppins_Medium_25">
+        <Translation Language="GB">Decrease</Translation>
       </Text>
       <Text Id="InitialText" Alignment="Left" TypographyId="Poppins_Medium_60">
         <Translation Language="GB">New Text</Translation>
