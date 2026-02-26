@@ -73,7 +73,29 @@ void Menu::setInfoMsg(TypedTextId msgId)
     if (msgId != TYPED_TEXT_INVALID) {
         Unicode::snprintf(infoBuffer, INFO_SIZE, "%s", touchgfx::TypedText(msgId).getText());
         info.setVisible(true);
-    } else { 
+    } else {
+        info.setVisible(false);
+    }
+    info.invalidate();
+}
+
+void Menu::setInfoMsg(const char* msg)
+{
+    if (msg != nullptr) {
+        Unicode::snprintf(infoBuffer, INFO_SIZE, "%s", msg);
+        info.setVisible(true);
+    } else {
+        info.setVisible(false);
+    }
+    info.invalidate();
+}
+
+void Menu::setInfoMsgUnicode(const touchgfx::Unicode::UnicodeChar* msg)
+{
+    if (msg != nullptr) {
+        info.setWildcard(msg);
+        info.setVisible(true);
+    } else {
         info.setVisible(false);
     }
     info.invalidate();
