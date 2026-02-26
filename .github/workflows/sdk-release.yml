@@ -64,10 +64,15 @@ jobs:
         name: Prepare Slack payload
         run: |
           BODY="${{ steps.get_slack_params.outputs.body }}"
-          BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g')
-          BODY=$(echo "$BODY" | sed 's/^## \([^$]*\)$/*\1*/')
-          BODY=$(echo "$BODY" | sed 's/^* /- /')
-          BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/')
+          # Convert markdown to Slack mrkdwn
+          BODY=$(echo "$BODY" | sed 's/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g' || { echo "Error converting links"; exit 1; })  # Links
+          BODY=$(echo "$BODY" | sed 's/\*\*([^*]+)\*\*/\*\1\*/g' || { echo "Error converting bold"; exit 1; })  # Bold
+          BODY=$(echo "$BODY" | sed 's/\*([^*]+)\*/_\1_/g' || { echo "Error converting italic"; exit 1; })  # Italic
+          BODY=$(echo "$BODY" | sed 's/^-\s*/- /g; s/^\*\s*/- /g' || { echo "Error converting lists"; exit 1; })  # Lists
+          BODY=$(echo "$BODY" | sed 's/^#\+\s*\(.*\)$/*\1*/g' || { echo "Error converting headers"; exit 1; })  # Headers
+          BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g' || { echo "Error converting mentions"; exit 1; })  # Mentions
+          BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/' || { echo "Error adjusting changelog"; exit 1; })  # Changelog
+          BODY=$(echo "$BODY" | sed 's/"/\\"/g' || { echo "Error escaping quotes"; exit 1; })  # Escape double quotes
           PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
             text: (":books: *UNA SDK*: " + $name),
             blocks: [
@@ -79,7 +84,7 @@ jobs:
                 }
               }
             ]
-          }')
+          }' || { echo "Error creating JSON payload"; exit 1; })
           echo "payload<<EOF" >> $GITHUB_OUTPUT
           echo "$PAYLOAD" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
