@@ -7,6 +7,7 @@ set(UNA_SDK_SOURCES_COMMON
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/system.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Kernel/KernelBuilder.cpp"
     "$ENV{UNA_SDK}/Libs/Source/UnaLogger/Logger.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Timer/Timer.cpp"
 )
 
 set(UNA_SDK_SOURCES_APPSYSTEM
