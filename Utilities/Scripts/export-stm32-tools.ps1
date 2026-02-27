@@ -16,7 +16,8 @@ $baseSearchDirs = @(
     "$env:USERPROFILE\AppData\Local\Programs",
     "C:\Program Files (x86)",
     "C:\Program Files",
-    "C:\ST"
+    "C:\ST",
+    "E:\ST"
 )
 
 $foundPaths = @{}
