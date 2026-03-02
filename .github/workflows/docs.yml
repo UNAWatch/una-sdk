@@ -45,6 +45,54 @@ jobs:
         mkdir -p Docs/_build/doxygen
         cd Docs && doxygen Doxyfile
 
+    - name: Generate version selector
+      run: |
+        TAGS_JSON=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${{ github.repository }}/tags)
+        TAGS=$(echo "$TAGS_JSON" | jq -r '.[].name' 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+        if [ -z "$TAGS" ]; then
+          TAGS='"v1.0","v2.0"'
+        fi
+        cat > Docs/_static/version-selector.js << EOF
+        // Version selector for Sphinx documentation
+        document.addEventListener('DOMContentLoaded', function() {
+            const baseUrl = window.location.origin + '/';
+            const versions = ['latest', $TAGS];
+            // Create the selector
+            const selector = document.createElement('select');
+            selector.id = 'version-selector';
+            selector.style.cssText = \`
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+                padding: 5px;
+                font-size: 14px;
+            \`;
+            // Add options
+            versions.forEach(version => {
+                const option = document.createElement('option');
+                option.textContent = version;
+                option.value = baseUrl + version + '/';
+                selector.appendChild(option);
+            });
+            // Insert
+            const nav = document.querySelector('.wy-nav-side') || document.querySelector('nav') || document.body;
+            nav.appendChild(selector);
+            // Set current
+            const currentPath = window.location.pathname;
+            const currentVersion = versions.find(v => currentPath.includes('/' + v + '/'));
+            if (currentVersion) {
+                selector.value = baseUrl + currentVersion + '/';
+            } else {
+                selector.value = baseUrl + 'latest/';
+            }
+            // Handle change
+            selector.addEventListener('change', function() {
+                window.location.href = this.value;
+            });
+        });
+        EOF
+
     - name: Set version
       run: |
         if [ "${{ github.ref }}" = "refs/heads/main" ]; then
