@@ -15,6 +15,9 @@ void MainView::setupScreen()
     menu1.getNotSelectedItem(0)->config(T_COUNTER);
     menu1.getNotSelectedItem(1)->config(T_INCREASE);
     menu1.getNotSelectedItem(2)->config(T_DECREASE);
+    menu1.getSelectedItem(0)->config(T_COUNTER);
+    menu1.getSelectedItem(1)->config(T_INCREASE);
+    menu1.getSelectedItem(2)->config(T_DECREASE);
     menu1.invalidate();
 
     buttons.setL1(ButtonsSet::NONE);
@@ -40,26 +43,36 @@ void MainView::handleKeyEvent(uint8_t key)
 
     if (key == Gui::Config::Button::R1) {
         int selected = menu1.getSelectedItem();
+        auto* counter_nosel_item = menu1.getNotSelectedItem(0);
+        auto* counter_sel_item = menu1.getSelectedItem(0);
+
         touchgfx::Unicode::UnicodeChar buffer[32];
         switch (selected) {
         case 0:
-            // Display counter
-            touchgfx::Unicode::snprintf(buffer, 32, "%d", counter);
-            menu1.setInfoMsgUnicode(buffer);
+            // Reset counter
+            counter = 0;
+            touchgfx::Unicode::snprintf(buffer, 32, "Counter: %d", counter);
+            counter_nosel_item->config(buffer);
+            counter_sel_item->config(buffer);
             break;
         case 1:
-            // Increment counter
             counter++;
-            touchgfx::Unicode::snprintf(buffer, 32, "%d", counter);
-            menu1.setInfoMsgUnicode(buffer);
+            touchgfx::Unicode::snprintf(buffer, 32, "Counter: %d", counter);
+            counter_nosel_item->config(buffer);
+            counter_sel_item->config(buffer);
+            // Increment counter
             break;
         case 2:
             // Decrement counter
             counter--;
-            touchgfx::Unicode::snprintf(buffer, 32, "%d", counter);
-            menu1.setInfoMsgUnicode(buffer);
+            touchgfx::Unicode::snprintf(buffer, 32, "Counter: %d", counter);
+            counter_nosel_item->config(buffer);
+            counter_sel_item->config(buffer);
             break;
         }
+        menu1.invalidate();
+        counter_nosel_item->invalidate();
+        counter_sel_item->invalidate();
     }
 
     if (key == Gui::Config::Button::R2) {
