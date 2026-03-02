@@ -46,7 +46,7 @@ jobs:
     - name: Set version
       run: |
         if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-          VERSION="latest"
+          VERSION=""
         elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
           VERSION="${{ github.ref_name }}"
         else
