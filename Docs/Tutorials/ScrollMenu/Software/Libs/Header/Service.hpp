@@ -7,8 +7,6 @@
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
 
-#include "ActivityWriter.hpp"
-
 class Service
 {
 public:
