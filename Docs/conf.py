@@ -28,6 +28,7 @@ extensions = [
     'myst_parser',
     'sphinxcontrib.mermaid',
     'breathe',
+    'sphinx_version_warning',
 ]
 
 # MyST configuration
@@ -55,6 +56,7 @@ language = 'en'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_js_files = ['version-selector.js']
 
 # -- Options for intersphinx extension ---------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
@@ -67,3 +69,21 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/extensions/todo.html#configuration
 
 todo_include_todos = True
+
+# -- Options for sphinx-version-warning extension ----------------------------
+# https://sphinx-version-warning.readthedocs.io/en/latest/
+
+versionwarning_messages = {
+    "latest": {
+        "message": "This is the latest version of the documentation.",
+        "warning_type": "info",
+    },
+    "1.0": {
+        "message": "This is version 1.0. Consider upgrading to the latest version.",
+        "warning_type": "warning",
+        "url": "https://una-watch.github.io/una-sdk/1.0/",
+    },
+    # Add more versions as needed
+}
+
+versionwarning_default_message = "This documentation is for an unsupported version. Please consider upgrading."
