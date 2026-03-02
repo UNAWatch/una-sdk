@@ -15,8 +15,8 @@ on:
       - '.github/workflows/tutorials-ci.yml'
 
 env:
-  APPS_EXCLUDED: |
-    ScrollMenu
+  # APPS_EXCLUDED: |
+  #   ScrollMenu
 
 jobs:
   prepare:
