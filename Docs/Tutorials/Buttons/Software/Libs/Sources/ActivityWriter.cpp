@@ -38,7 +38,7 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
    , mFHEvent(skEventMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_EVENT])
    , mFHActivity(skActivityMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_ACTIVITY])
    , mFHRecord(skRecordMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD])
-   , mFHTrustLevelField(skHrTrustLevelMsgNum, { &mFHRecord })
+    , mFHTrustLevelField(skHrTrustLevelMsgNum, 0, { &mFHRecord }, 0, 100)
 {
     assert(pathToDir != nullptr);
 
