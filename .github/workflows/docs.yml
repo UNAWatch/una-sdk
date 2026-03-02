@@ -48,7 +48,7 @@ jobs:
     - name: Set version
       run: |
         if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-          VERSION=""
+          VERSION="latest"
         elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
           VERSION="${{ github.ref_name }}"
         else
@@ -58,6 +58,11 @@ jobs:
 
     - name: Build documentation
       run: sphinx-build Docs _site/$VERSION
+
+    - name: Add redirect for main page
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo '<html><head><meta http-equiv="refresh" content="0; url=latest/" /></head><body></body></html>' > _site/index.html
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
