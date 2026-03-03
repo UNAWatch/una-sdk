@@ -46,9 +46,7 @@
     <ClCompile Include="..\..\gui\src\model\Model.cpp"/>
     <ClCompile Include="..\..\generated\simulator\src\video\SoftwareMJPEGDecoder.cpp"/>
     <ClCompile Include="..\..\gui\src\common\FrontendApplication.cpp"/>
-    <ClCompile Include="..\..\gui\src\main_screen\MainPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\main_screen\MainView.cpp"/>
-    <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsSetBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\Buttons.cpp"/>
@@ -65,6 +63,18 @@
     <ClCompile Include="..\..\generated\gui_generated\src\containers\TitleBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\Toggle.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\ToggleBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\imagelist_screen\ImageListPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\imagelist_screen\ImageListView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\imagelist_screen\ImageListViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\imagemenu_screen\ImageMenuPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\imagemenu_screen\ImageMenuView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\imagemenu_screen\ImageMenuViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\imageprop_screen\ImagePropPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\imageprop_screen\ImagePropView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\imageprop_screen\ImagePropViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\imageviewer_screen\ImageViewerPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\imageviewer_screen\ImageViewerView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\imageviewer_screen\ImageViewerViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -274,7 +284,6 @@
     <ClInclude Include="..\..\gui\include\gui\common\GuiConfig.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp"/>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\Buttons.hpp"/>
@@ -291,6 +300,18 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TitleBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\Toggle.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ToggleBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imagelist_screen\ImageListPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imagelist_screen\ImageListView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imagelist_screen\ImageListViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imagemenu_screen\ImageMenuPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imagemenu_screen\ImageMenuView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imagemenu_screen\ImageMenuViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imageprop_screen\ImagePropPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imageprop_screen\ImagePropView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imageprop_screen\ImagePropViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imageviewer_screen\ImageViewerPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\imageviewer_screen\ImageViewerView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imageviewer_screen\ImageViewerViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

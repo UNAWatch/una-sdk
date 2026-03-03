@@ -256,12 +256,6 @@
     <Filter Include="Header Files\gui\main_screen">
       <UniqueIdentifier>39AA48B4-F158-1CFD-CF74-CF36A778A8A8</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\generated\gui_generated\main_screen">
-      <UniqueIdentifier>6B4AE44E-59B7-B41C-EC83-290404F859F9</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\generated\gui_generated\main_screen">
-      <UniqueIdentifier>8C1DD42C-926D-64F4-103E-A41C57AC0ABC</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\gui\containers">
       <UniqueIdentifier>23C1C50B-546B-0B47-7773-A5F6555624A8</UniqueIdentifier>
     </Filter>
@@ -304,6 +298,54 @@
     <Filter Include="SDK\Libs\Source\Simulator\App">
       <UniqueIdentifier>{ef591842-02d1-4ac9-864c-a7c69aac5f3f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\gui\imageviewer_screen">
+      <UniqueIdentifier>B8851A76-AC28-9FD1-DBB3-0648FCE72348</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\imageviewer_screen">
+      <UniqueIdentifier>CB318E5F-A1CA-7349-9D91-54CA2C0F1CAD</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\imageprop_screen">
+      <UniqueIdentifier>BFE804F5-2306-6617-BD9C-55D910E0A0FB</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\imageprop_screen">
+      <UniqueIdentifier>A258BDFD-E7B6-C336-FCB9-DDF358E75AAB</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\imagemenu_screen">
+      <UniqueIdentifier>BF380049-0824-0AFD-56EB-D3D40C022BE3</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\imagemenu_screen">
+      <UniqueIdentifier>C2D2622F-F77D-0603-AD6D-61EE6A55E866</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\imagelist_screen">
+      <UniqueIdentifier>7BE47DA1-8BE4-6564-BFE9-0280AE1CD901</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\imagelist_screen">
+      <UniqueIdentifier>2792B5E9-D7E2-04DD-66D3-C9F068878F5F</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\imageviewer_screen">
+      <UniqueIdentifier>D4EF37AE-1F71-5689-10A7-6BBFD0CCB5FC</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\imageviewer_screen">
+      <UniqueIdentifier>B5777FED-2FB0-036F-7332-E554B7B0E220</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\imagelist_screen">
+      <UniqueIdentifier>F873D0DB-BBA5-5046-05E9-F6430DCFB43D</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\imagelist_screen">
+      <UniqueIdentifier>A59E755E-3CCB-362E-E419-E5607F6305AD</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\imageprop_screen">
+      <UniqueIdentifier>3A691CDE-2046-CB70-A36C-455309471877</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\imagemenu_screen">
+      <UniqueIdentifier>03B33FC7-E34D-5CB2-3606-FA560277F9B5</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\imagemenu_screen">
+      <UniqueIdentifier>AF1E51E6-412D-B826-8DC4-23972E981A00</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\imageprop_screen">
+      <UniqueIdentifier>173F8D94-CAFC-2E97-E85D-BA539242482B</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -336,14 +378,8 @@
     <ClCompile Include="..\..\gui\src\common\FrontendApplication.cpp">
       <Filter>Source Files\gui\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\main_screen\MainPresenter.cpp">
-      <Filter>Source Files\gui\main_screen</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\gui\src\main_screen\MainView.cpp">
       <Filter>Source Files\gui\main_screen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp">
-      <Filter>Source Files\generated\gui_generated\main_screen</Filter>
     </ClCompile>
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp">
       <Filter>Source Files\gui\containers</Filter>
@@ -467,6 +503,42 @@
     </ClCompile>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\ToggleBase.cpp">
       <Filter>Source Files\generated\gui_generated\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imagelist_screen\ImageListPresenter.cpp">
+      <Filter>Source Files\gui\imagelist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imagelist_screen\ImageListView.cpp">
+      <Filter>Source Files\gui\imagelist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\imagelist_screen\ImageListViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\imagelist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imagemenu_screen\ImageMenuPresenter.cpp">
+      <Filter>Source Files\gui\imagemenu_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imagemenu_screen\ImageMenuView.cpp">
+      <Filter>Source Files\gui\imagemenu_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\imagemenu_screen\ImageMenuViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\imagemenu_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imageprop_screen\ImagePropPresenter.cpp">
+      <Filter>Source Files\gui\imageprop_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imageprop_screen\ImagePropView.cpp">
+      <Filter>Source Files\gui\imageprop_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\imageprop_screen\ImagePropViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\imageprop_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imageviewer_screen\ImageViewerPresenter.cpp">
+      <Filter>Source Files\gui\imageviewer_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\imageviewer_screen\ImageViewerView.cpp">
+      <Filter>Source Files\gui\imageviewer_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\imageviewer_screen\ImageViewerViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\imageviewer_screen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -982,9 +1054,6 @@
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp">
       <Filter>Header Files\gui\main_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp">
-      <Filter>Header Files\generated\gui_generated\main_screen</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp">
       <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
@@ -1137,6 +1206,42 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ToggleBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imagelist_screen\ImageListPresenter.hpp">
+      <Filter>Header Files\gui\imagelist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imagelist_screen\ImageListView.hpp">
+      <Filter>Header Files\gui\imagelist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imagelist_screen\ImageListViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\imagelist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imagemenu_screen\ImageMenuPresenter.hpp">
+      <Filter>Header Files\gui\imagemenu_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imagemenu_screen\ImageMenuView.hpp">
+      <Filter>Header Files\gui\imagemenu_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imagemenu_screen\ImageMenuViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\imagemenu_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imageprop_screen\ImagePropPresenter.hpp">
+      <Filter>Header Files\gui\imageprop_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imageprop_screen\ImagePropView.hpp">
+      <Filter>Header Files\gui\imageprop_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imageprop_screen\ImagePropViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\imageprop_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imageviewer_screen\ImageViewerPresenter.hpp">
+      <Filter>Header Files\gui\imageviewer_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\imageviewer_screen\ImageViewerView.hpp">
+      <Filter>Header Files\gui\imageviewer_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\imageviewer_screen\ImageViewerViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\imageviewer_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

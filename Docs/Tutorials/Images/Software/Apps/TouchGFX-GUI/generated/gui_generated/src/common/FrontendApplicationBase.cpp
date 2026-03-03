@@ -9,8 +9,14 @@
 #include <touchgfx/Texts.hpp>
 #include <touchgfx/hal/HAL.hpp>
 #include <platform/driver/lcd/LCD8bpp_ABGR2222.hpp>
-#include <gui/main_screen/MainView.hpp>
-#include <gui/main_screen/MainPresenter.hpp>
+#include <gui/imagemenu_screen/ImageMenuView.hpp>
+#include <gui/imagemenu_screen/ImageMenuPresenter.hpp>
+#include <gui/imageviewer_screen/ImageViewerView.hpp>
+#include <gui/imageviewer_screen/ImageViewerPresenter.hpp>
+#include <gui/imagelist_screen/ImageListView.hpp>
+#include <gui/imagelist_screen/ImageListPresenter.hpp>
+#include <gui/imageprop_screen/ImagePropView.hpp>
+#include <gui/imageprop_screen/ImagePropPresenter.hpp>
 
 using namespace touchgfx;
 
@@ -29,15 +35,15 @@ FrontendApplicationBase::FrontendApplicationBase(Model& m, FrontendHeap& heap)
  * Screen Transition Declarations
  */
 
-// Main
+// ImageMenu
 
-void FrontendApplicationBase::gotoMainScreenNoTransition()
+void FrontendApplicationBase::gotoImageMenuScreenNoTransition()
 {
-    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMainScreenNoTransitionImpl);
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImageMenuScreenNoTransitionImpl);
     pendingScreenTransitionCallback = &transitionCallback;
 }
 
-void FrontendApplicationBase::gotoMainScreenNoTransitionImpl()
+void FrontendApplicationBase::gotoImageMenuScreenNoTransitionImpl()
 {
-    touchgfx::makeTransition<MainView, MainPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+    touchgfx::makeTransition<ImageMenuView, ImageMenuPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }

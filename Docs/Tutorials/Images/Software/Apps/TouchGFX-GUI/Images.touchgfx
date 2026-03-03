@@ -2,7 +2,7 @@
   "Application": {
     "Screens": [
       {
-        "Name": "Main",
+        "Name": "ImageMenu",
         "CanvasBufferSize": 3600,
         "Components": [
           {
@@ -11,6 +11,7 @@
             "Y": 47,
             "Width": 240,
             "Height": 147,
+            "Visible": false,
             "LockPosition": true,
             "CustomContainerDefinitionName": "ButtonsSet"
           },
@@ -28,6 +29,29 @@
             "CustomContainerDefinitionName": "Menu"
           }
         ],
+        "Interactions": []
+      },
+      {
+        "Name": "ImageViewer",
+        "Components": [
+          {
+            "Type": "ScalableImage",
+            "Name": "scalableImage1",
+            "Width": 240,
+            "Height": 240,
+            "ScalingAlgorithm": "Nearest-neighbor"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "ImageList",
+        "Components": [],
+        "Interactions": []
+      },
+      {
+        "Name": "ImageProp",
+        "Components": [],
         "Interactions": []
       }
     ],
@@ -648,7 +672,7 @@
       "Height": 240
     },
     "SelectedColorDepth": 8,
-    "StartupScreenName": "Main",
+    "StartupScreenName": "ImageMenu",
     "SelectedStartupLanguage": "GB",
     "TouchGfxPath": "touchgfx",
     "UIPath": ".",
