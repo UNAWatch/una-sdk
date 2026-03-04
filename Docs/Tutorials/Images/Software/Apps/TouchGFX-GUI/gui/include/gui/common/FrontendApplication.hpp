@@ -18,6 +18,10 @@ public:
     FrontendApplication(Model& m, FrontendHeap& heap);
     virtual ~FrontendApplication() { }
 
+    void gotoImageListScreenNoTransition();
+    void gotoImageViewerScreenNoTransition();
+    void gotoImagePropScreenNoTransition();
+
     virtual void handleTickEvent()
     {
 #if defined(SIMULATOR)
@@ -48,6 +52,9 @@ public:
     }
 
 private:
+    void gotoImageListScreenNoTransitionImpl();
+    void gotoImageViewerScreenNoTransitionImpl();
+    void gotoImagePropScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATION_HPP

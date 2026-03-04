@@ -28,8 +28,13 @@ protected:
     FrontendHeap& frontendHeap;
     Model& model;
 
+public:
     // ImageMenu
-    void gotoImageMenuScreenNoTransitionImpl();
+    virtual void gotoImageMenuScreenNoTransitionImpl();
+
+    virtual void gotoImageListScreenNoTransitionImpl();
+    virtual void gotoImageViewerScreenNoTransitionImpl();
+    virtual void gotoImagePropScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATIONBASE_HPP

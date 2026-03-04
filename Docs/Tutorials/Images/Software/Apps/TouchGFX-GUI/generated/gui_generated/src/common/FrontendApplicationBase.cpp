@@ -47,3 +47,18 @@ void FrontendApplicationBase::gotoImageMenuScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<ImageMenuView, ImageMenuPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
+
+void FrontendApplicationBase::gotoImageListScreenNoTransitionImpl()
+{
+    // Default implementation, should be overridden in derived class
+}
+
+void FrontendApplicationBase::gotoImageViewerScreenNoTransitionImpl()
+{
+    // Default implementation, should be overridden in derived class
+}
+
+void FrontendApplicationBase::gotoImagePropScreenNoTransitionImpl()
+{
+    // Default implementation, should be overridden in derived class
+}
