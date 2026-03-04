@@ -250,12 +250,6 @@
     <Filter Include="Libs\Header\GSModelEvents">
       <UniqueIdentifier>{c699e549-a11a-4c9c-87af-4b89866bd520}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\gui\main_screen">
-      <UniqueIdentifier>867E566B-C66F-989E-C8A4-EAA264E301EE</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\gui\main_screen">
-      <UniqueIdentifier>39AA48B4-F158-1CFD-CF74-CF36A778A8A8</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\gui\containers">
       <UniqueIdentifier>23C1C50B-546B-0B47-7773-A5F6555624A8</UniqueIdentifier>
     </Filter>
@@ -377,9 +371,6 @@
     </ClCompile>
     <ClCompile Include="..\..\gui\src\common\FrontendApplication.cpp">
       <Filter>Source Files\gui\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\gui\src\main_screen\MainView.cpp">
-      <Filter>Source Files\gui\main_screen</Filter>
     </ClCompile>
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp">
       <Filter>Source Files\gui\containers</Filter>
@@ -1047,12 +1038,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Libs\Header\Service.hpp">
       <Filter>Libs\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\main_screen\MainPresenter.hpp">
-      <Filter>Header Files\gui\main_screen</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp">
-      <Filter>Header Files\gui\main_screen</Filter>
     </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp">
       <Filter>Header Files\gui\containers</Filter>

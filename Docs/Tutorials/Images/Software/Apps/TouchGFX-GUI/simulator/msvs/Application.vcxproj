@@ -46,7 +46,6 @@
     <ClCompile Include="..\..\gui\src\model\Model.cpp"/>
     <ClCompile Include="..\..\generated\simulator\src\video\SoftwareMJPEGDecoder.cpp"/>
     <ClCompile Include="..\..\gui\src\common\FrontendApplication.cpp"/>
-    <ClCompile Include="..\..\gui\src\main_screen\MainView.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsSetBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\Buttons.cpp"/>
@@ -282,8 +281,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\common\SimConstants.hpp"/>
     <ClInclude Include="..\..\generated\simulator\include\simulator\video\SoftwareMJPEGDecoder.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\common\GuiConfig.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\main_screen\MainPresenter.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\Buttons.hpp"/>
