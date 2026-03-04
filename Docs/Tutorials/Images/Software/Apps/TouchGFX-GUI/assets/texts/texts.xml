@@ -195,6 +195,21 @@
       <Text Id="InitialText" Alignment="Left" TypographyId="Poppins_Medium_60">
         <Translation Language="GB">New Text</Translation>
       </Text>
+      <Text Id="MENU" Alignment="Center" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">Menu</Translation>
+      </Text>
+      <Text Id="LIST" Alignment="Center" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">List</Translation>
+      </Text>
+      <Text Id="VIEWER" Alignment="Center" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">Viewer</Translation>
+      </Text>
+      <Text Id="PROPS" Alignment="Center" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">Properties</Translation>
+      </Text>
+      <Text Id="BACK" Alignment="Center" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">Back</Translation>
+      </Text>
     </TextGroup>
   </Texts>
   <Typographies>

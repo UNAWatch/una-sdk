@@ -4,11 +4,24 @@
 #include <gui_generated/imagelist_screen/ImageListViewBase.hpp>
 #include <touchgfx/Color.hpp>
 
-ImageListViewBase::ImageListViewBase()
+ImageListViewBase::ImageListViewBase() :
+    updateItemCallback(this, &ImageListViewBase::updateItemCallbackHandler)
 {
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    scrollList1.setPosition(70, 0, 100, 240);
+    scrollList1.setHorizontal(false);
+    scrollList1.setCircular(false);
+    scrollList1.setEasingEquation(touchgfx::EasingEquations::backEaseOut);
+    scrollList1.setSwipeAcceleration(10);
+    scrollList1.setDragAcceleration(10);
+    scrollList1.setNumberOfItems(10);
+    scrollList1.setPadding(0, 0);
+    scrollList1.setSnapping(false);
+    scrollList1.setOvershootPercentage(75);
+    add(scrollList1);
 }
 
 ImageListViewBase::~ImageListViewBase()
@@ -17,6 +30,11 @@ ImageListViewBase::~ImageListViewBase()
 }
 
 void ImageListViewBase::setupScreen()
+{
+    scrollList1.initialize();
+}
+
+void ImageListViewBase::updateItemCallbackHandler(touchgfx::DrawableListItemsInterface* items, int16_t containerIndex, int16_t itemIndex)
 {
 
 }

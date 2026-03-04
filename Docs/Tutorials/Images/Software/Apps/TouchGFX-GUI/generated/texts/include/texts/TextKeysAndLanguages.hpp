@@ -74,6 +74,11 @@ enum TEXTS
     T_INCREASE,
     T_DECREASE,
     T_INITIALTEXT,
+    T_MENU,
+    T_LIST,
+    T_VIEWER,
+    T_PROPS,
+    T_BACK,
     NUMBER_OF_TEXT_KEYS
 };
 

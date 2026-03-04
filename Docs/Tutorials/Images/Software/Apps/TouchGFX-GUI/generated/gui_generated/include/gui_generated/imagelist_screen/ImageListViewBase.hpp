@@ -8,6 +8,7 @@
 #include <mvp/View.hpp>
 #include <gui/imagelist_screen/ImageListPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/containers/scrollers/ScrollList.hpp>
 
 class ImageListViewBase : public touchgfx::View<ImageListPresenter>
 {
@@ -25,8 +26,19 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::ScrollList scrollList1;
 
 private:
+
+    /*
+     * Callback Declarations
+     */
+    touchgfx::Callback<ImageListViewBase, touchgfx::DrawableListItemsInterface*, int16_t, int16_t> updateItemCallback;
+
+    /*
+     * Callback Handler Declarations
+     */
+    void updateItemCallbackHandler(touchgfx::DrawableListItemsInterface* items, int16_t containerIndex, int16_t itemIndex);
 
 };
 

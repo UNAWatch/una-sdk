@@ -46,7 +46,21 @@
       },
       {
         "Name": "ImageList",
-        "Components": [],
+        "Components": [
+          {
+            "Type": "ScrollList",
+            "Name": "scrollList1",
+            "X": 70,
+            "Width": 100,
+            "Height": 240,
+            "NumberofItems": 10,
+            "Easing": "Back",
+            "EasingOption": "Out",
+            "SwipeAcceleration": 1.0,
+            "DragAcceleration": 1.0,
+            "OverShootPercentage": 75
+          }
+        ],
         "Interactions": []
       },
       {
