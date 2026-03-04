@@ -18,6 +18,8 @@
 #include <variant>
 #include <memory>
 #include <ctime>
+#include <string>
+#include <vector>
 
 /**
  * @namespace AppType
@@ -40,6 +42,13 @@ struct BuzzLong {};
 struct Backlight {
     bool status;
 };
+struct RequestImageList {};
+struct SelectImage {
+    std::string filename;
+};
+struct RequestMetadata {
+    std::string filename;
+};
 
 // Define the data types that can be sent from GUI to Backend
 using Data = std::variant<
@@ -48,7 +57,10 @@ using Data = std::variant<
         VibroLong,
         BuzzShort,
         BuzzLong,
-        Backlight
+        Backlight,
+        RequestImageList,
+        SelectImage,
+        RequestMetadata
         >;
 };
 
@@ -69,13 +81,31 @@ struct BatteryCharge {
 struct Time {
     struct std::tm time;
 };
+struct ImageList {
+    std::vector<std::string> filenames;
+};
+struct ImageLoaded {
+    std::string filename;
+    bool success;
+};
+struct Metadata {
+    std::string filename;
+    uint32_t width;
+    uint32_t height;
+    uint32_t fileSize;
+    std::string lastModified;
+    uint32_t renderTimeMs;
+};
 
 // Define the data types that can be sent from Backend to GUI
 using Data = std::variant<
         Booted,
         BatteryLevel,
         BatteryCharge,
-        Time
+        Time,
+        ImageList,
+        ImageLoaded,
+        Metadata
         >;
 };
 

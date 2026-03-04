@@ -8,6 +8,7 @@
 #include "SDK/Interfaces/ICustomMessageHandler.hpp"
 
 #include "gui/common/GuiConfig.hpp"
+#include "gui/model/AppTypes.hpp"
 #include "Commands.hpp"
 
 #include <vector>
@@ -37,6 +38,10 @@ public:
      * any necessary cleanup before termination.
      */
     void exitApp();
+
+    // IGuiBackend implementation
+    virtual bool receiveGuiEvent(AppType::B2GEvent::Data &data);
+    virtual bool sendEventToBackend(const AppType::G2BEvent::Data &data);
 
 protected:
     ModelListener* modelListener;           ///< Pointer to model listener

@@ -120,9 +120,61 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
         //     // modelListener->updateHR(m->heartRate, m->trustLevel);  // Update GUI
         // } break;
 
+        case CustomMessage::IMAGE_LIST: {
+            LOG_DEBUG("Update IMAGE_LIST\n");
+            auto* m = static_cast<CustomMessage::ImageListMsg*>(msg);
+            modelListener->updateImageList(m->filenames);
+        } break;
+
+        case CustomMessage::IMAGE_LOADED: {
+            LOG_DEBUG("Update IMAGE_LOADED\n");
+            auto* m = static_cast<CustomMessage::ImageLoadedMsg*>(msg);
+            modelListener->updateImageLoaded(m->filename, m->success);
+        } break;
+
+        case CustomMessage::IMAGE_METADATA: {
+            LOG_DEBUG("Update IMAGE_METADATA\n");
+            auto* m = static_cast<CustomMessage::ImageMetadataMsg*>(msg);
+            modelListener->updateImageMetadata(m->filename, m->width, m->height, m->fileSize, m->lastModified, m->renderTimeMs);
+        } break;
+
         default:
             break;
     }
 
+    return true;
+}
+
+// IGuiBackend implementation
+bool Model::receiveGuiEvent(AppType::B2GEvent::Data &data)
+{
+    // Not used in this direction
+    return false;
+}
+
+bool Model::sendEventToBackend(const AppType::G2BEvent::Data &data)
+{
+    // Send event to backend via kernel message
+    std::visit([this](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, AppType::G2BEvent::RequestImageList>) {
+            // Send message to service to request image list
+            if (auto msg = mKernel.comm.allocateMessage<CustomMessage::RequestImageListMsg>()) {
+                mKernel.comm.sendMessage(msg);
+            }
+        } else if constexpr (std::is_same_v<T, AppType::G2BEvent::SelectImage>) {
+            // Send select image message
+            if (auto msg = mKernel.comm.allocateMessage<CustomMessage::SelectImageMsg>()) {
+                msg->filename = arg.filename;
+                mKernel.comm.sendMessage(msg);
+            }
+        } else if constexpr (std::is_same_v<T, AppType::G2BEvent::RequestMetadata>) {
+            // Send request metadata message
+            if (auto msg = mKernel.comm.allocateMessage<CustomMessage::RequestImageMetadataMsg>()) {
+                msg->filename = arg.filename;
+                mKernel.comm.sendMessage(msg);
+            }
+        }
+    }, data);
     return true;
 }
