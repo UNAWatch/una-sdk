@@ -25,6 +25,11 @@ public:
      */
     virtual void deactivate();
 
+    virtual void updateImageList(const std::vector<std::string>& filenames);
+
+    virtual void gotoImageMenu();
+    virtual void back();
+
     virtual ~ImageListPresenter() {}
 
 private:
