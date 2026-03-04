@@ -16,3 +16,13 @@ void ImagePropPresenter::deactivate()
 {
 
 }
+
+void ImagePropPresenter::gotoImageMenu()
+{
+    static_cast<FrontendApplication*>(Application::getInstance())->gotoImageMenuScreenNoTransition();
+}
+
+void ImagePropPresenter::back()
+{
+    static_cast<FrontendApplication*>(Application::getInstance())->gotoImageMenuScreenNoTransition();
+}

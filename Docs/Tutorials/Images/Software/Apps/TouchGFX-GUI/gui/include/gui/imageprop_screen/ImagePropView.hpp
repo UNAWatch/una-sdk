@@ -11,6 +11,7 @@ public:
     virtual ~ImagePropView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleKeyEvent(uint8_t key) override;
 protected:
 };
 

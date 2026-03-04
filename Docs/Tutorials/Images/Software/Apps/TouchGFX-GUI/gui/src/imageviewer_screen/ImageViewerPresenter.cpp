@@ -16,3 +16,13 @@ void ImageViewerPresenter::deactivate()
 {
 
 }
+
+void ImageViewerPresenter::gotoImageMenu()
+{
+    static_cast<FrontendApplication*>(Application::getInstance())->gotoImageMenuScreenNoTransition();
+}
+
+void ImageViewerPresenter::back()
+{
+    static_cast<FrontendApplication*>(Application::getInstance())->gotoImageMenuScreenNoTransition();
+}
