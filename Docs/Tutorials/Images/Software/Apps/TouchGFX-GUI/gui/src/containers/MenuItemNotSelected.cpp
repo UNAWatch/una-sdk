@@ -14,6 +14,8 @@ void MenuItemNotSelected::initialize()
     mMsgIdType = text.getTypedText().getId();
     mMsgIdTipType = textTip.getTypedText().getId();
     mTipColor = textTip.getColor();
+    mIcon.setVisible(false);
+    add(mIcon);
 }
 
 void MenuItemNotSelected::config(TypedTextId msgId)
@@ -72,6 +74,19 @@ void MenuItemNotSelected::setTipTypedTextId(TypedTextId msgIdType)
     }
 }
 
+void MenuItemNotSelected::setTipColor(touchgfx::colortype color)
+{
+    mTipColor = color;
+}
+
+void MenuItemNotSelected::setIcon(touchgfx::BitmapId id)
+{
+    mIcon.setBitmap(touchgfx::Bitmap(id));
+    mIcon.setVisible(true);
+    mIcon.setPosition(5, (getHeight() - 32) / 2, 32, 32);
+    invalidate();
+}
+
 void MenuItemNotSelected::reset()
 {
     mStyle = STYLE_SIMPLE;
@@ -83,11 +98,8 @@ void MenuItemNotSelected::reset()
     mMsgIdTip = TYPED_TEXT_INVALID;
     mMsgIdTipType = T_TMP_ITALIC_18;
     textTipBuffer[0] = 0;
-}
 
-void MenuItemNotSelected::setTipColor(touchgfx::colortype color)
-{
-    mTipColor = color;
+    mIcon.setVisible(false);
 }
 
 void MenuItemNotSelected::updStyle()
@@ -113,14 +125,14 @@ void MenuItemNotSelected::updStyle()
     switch (mStyle) {
         case STYLE_SIMPLE:
             text.setVisible(true);
-            text.setWidth(getWidth());
-            text.setX(0);
+            text.setWidth(getWidth() - 40);
+            text.setX(40);
             textTip.setVisible(false);
             break;
         case STYLE_TIP:
             text.setVisible(true);
-            text.setWidth(getWidth());
-            text.setX(0);
+            text.setWidth(getWidth() - 40);
+            text.setX(40);
             textTip.setVisible(true);
             break;
         default:
@@ -130,8 +142,6 @@ void MenuItemNotSelected::updStyle()
     text.invalidate();
     textTip.invalidate();
 }
-
-
 
 MenuItemNotSelected &MenuItemNotSelected::operator=(const MenuItemNotSelected &other)
 {
@@ -146,6 +156,10 @@ MenuItemNotSelected &MenuItemNotSelected::operator=(const MenuItemNotSelected &o
         mMsgIdTipType = other.mMsgIdTipType;
         Unicode::strncpy(textTipBuffer, other.textTipBuffer, TEXTTIP_SIZE);
         mTipColor = other.mTipColor;
+
+        mIcon.setBitmap(other.mIcon.getBitmap());
+        mIcon.setPosition(other.mIcon.getX(), other.mIcon.getY(), other.mIcon.getWidth(), other.mIcon.getHeight());
+        mIcon.setVisible(other.mIcon.isVisible());
 
         updStyle();
     }

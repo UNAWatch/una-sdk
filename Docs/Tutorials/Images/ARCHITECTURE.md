@@ -272,7 +272,121 @@ The Images app provides a complete JPEG viewer with:
    - Update FrontendApplication with new screen transition methods
    - Ensure proper cleanup and state management
 
-### Step 7: Testing and Debugging
+### **Step 7: Adding Static Graphics Images to TouchGFX GUI**
+
+This section demonstrates how to add static graphic images to menus in a TouchGFX GUI application. We focus on enhancing the property screen (PropScreen) to display image properties with associated 32x32 PNG icons in menu items. The process involves determining relevant properties, generating icons, modifying code to integrate images into menu containers, and setting up the view. This highlights the integration of static graphics into menu navigation for better user experience.
+
+#### Step 1: Determine Key Properties
+
+We selected the following key properties for static images to display in the PropScreen menu:
+
+- Bitmap (image source)
+- Position (x, y coordinates)
+- Size (width, height)
+- Opacity (alpha value)
+
+#### Step 2: Generate 32x32 PNG Icons
+
+Small PNG icons were generated for each property using a PowerShell script. The icons are saved in `Resources/icons/`:
+
+- `bitmap.png`: Represents the image source with a simple landscape.
+- `position.png`: Crosshair icon for position.
+- `size.png`: Rectangle with expansion arrows for size.
+- `opacity.png`: Overlapping squares with transparency for opacity.
+
+These icons were created programmatically to demonstrate asset generation.
+
+#### Step 3: Implement Code Changes
+
+##### Modify Menu Item Containers
+
+To support icons in menu items, we added an `Image` member and `setIcon` method to `MenuItemSelected` and `MenuItemNotSelected` classes.
+
+**Modified MenuItemSelected.hpp** (example additions):
+```cpp
+// Added include
+#include <touchgfx/widgets/Image.hpp>
+
+// Added member variable
+touchgfx::Image icon;
+
+// Added method declaration
+void setIcon(touchgfx::BitmapId bitmapId);
+```
+
+**Modified MenuItemSelected.cpp** (example implementation):
+```cpp
+void MenuItemSelected::setIcon(touchgfx::BitmapId bitmapId) {
+    icon.setBitmap(touchgfx::Bitmap(bitmapId));
+    icon.setPosition(5, 5, 32, 32); // Position icon within menu item
+    add(icon);
+}
+
+// In updStyle() method, adjusted text position to accommodate icon
+void MenuItemSelected::updStyle() {
+    // Existing code...
+    textArea.setPosition(42, 5, getWidth() - 47, getHeight() - 10); // Shifted right for icon
+    // Existing code...
+}
+```
+
+- Updated headers to include necessary includes and declarations.
+- Modified CPP files to implement `setIcon`, adjust positions in `updStyle`, and handle copying in assignment operator.
+
+This allows each menu item to display a static image icon alongside text, enhancing the menu's visual appeal and usability.
+
+##### Set Up ImagePropView
+
+In `ImagePropView.cpp`, we:
+
+- Added a `Menu` member to the view.
+- In `setupScreen()`, configured the menu with 4 items, setting text and icons for both selected and not selected states.
+- Updated `handleKeyEvent` to support navigation (L1/L2 for prev/next).
+
+**Modified ImagePropView.cpp** (example setupScreen):
+```cpp
+void ImagePropView::setupScreen() {
+    // Existing setup code...
+
+    // Configure menu with icons
+    menu1.setPosition(10, 10, 220, 220);
+    menu1.setNumberOfItems(4);
+
+    // Set text and icons for each item
+    menu1.item(0).setText(T_TEXT_BITMAP);
+    menu1.item(0).setIcon(BITMAP_BITMAP_ID);
+    menu1.item(1).setText(T_TEXT_POSITION);
+    menu1.item(1).setIcon(BITMAP_POSITION_ID);
+    menu1.item(2).setText(T_TEXT_SIZE);
+    menu1.item(2).setIcon(BITMAP_SIZE_ID);
+    menu1.item(3).setText(T_TEXT_OPACITY);
+    menu1.item(3).setIcon(BITMAP_OPACITY_ID);
+
+    add(menu1);
+}
+```
+
+Note: Text IDs (e.g., `T_TEXT_BITMAP`) and bitmap IDs (e.g., `BITMAP_BITMAP_ID`) are assumed to be defined in `texts.xml` and `BitmapDatabase.hpp`. Add the generated PNGs to TouchGFX assets to generate proper IDs.
+
+#### Step 4: How to Add Static Graphics Images to Menus
+
+1. **Include Image Widget**: Use `touchgfx::Image` in your menu item container or view.
+2. **Set Bitmap**: Call `setBitmap(touchgfx::Bitmap(BITMAP_ID))` with the appropriate ID from BitmapDatabase.
+3. **Position and Add**: Set position with `setPosition(x, y, width, height)` and add to parent with `add(image)`.
+4. **Other Properties**: Set alpha with `setAlpha(value)`, visibility with `setVisible(true/false)`.
+5. **Invalidate**: Call `invalidate()` to redraw.
+6. **Integrate with Menu Items**: Use the `setIcon` method on menu items to attach static graphics, ensuring proper layout adjustments.
+
+**Key Modifications Summary**:
+- Added `touchgfx::Image icon;` member to menu item classes.
+- Implemented `setIcon(BitmapId)` method to set and position icons.
+- Adjusted text positioning in `updStyle()` to prevent overlap with icons.
+- Configured menu items in `setupScreen()` to use both text and icons.
+- Ensured icons are 32x32 pixels for consistency in menu display.
+
+This completes the implementation for adding and displaying static images in menu items, significantly improving the GUI's visual feedback and user interaction.
+
+### Step 8: Testing and Debugging
 
 1. **Build the application**:
    ```bash

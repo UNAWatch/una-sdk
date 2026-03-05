@@ -2,6 +2,8 @@
 #define MENUITEMSELECTED_HPP
 
 #include <gui_generated/containers/MenuItemSelectedBase.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/Bitmap.hpp>
 #include <touchgfx/Unicode.hpp>
 
 class MenuItemSelected : public MenuItemSelectedBase
@@ -27,6 +29,8 @@ public:
     void setToggle(bool state);
     bool getToggle();
 
+    void setIcon(touchgfx::BitmapId id);
+
     MenuItemSelected &operator=(const MenuItemSelected &other);
 
 protected:
@@ -45,10 +49,11 @@ protected:
     TypedTextId mMsgIdTip = {TYPED_TEXT_INVALID};
     TypedTextId mMsgIdTipType = {TYPED_TEXT_INVALID};
 
+    touchgfx::Image mIcon;
+
     void reset();
     void alignTextY(TextArea &t) const;
     void updStyle();
-
 };
 
 #endif // MENUITEMSELECTED_HPP

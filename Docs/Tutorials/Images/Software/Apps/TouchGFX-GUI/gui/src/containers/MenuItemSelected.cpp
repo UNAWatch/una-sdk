@@ -13,6 +13,8 @@ void MenuItemSelected::initialize()
     reset();
     mMsgIdType = text.getTypedText().getId();
     mMsgIdTipType = textTip.getTypedText().getId();
+    mIcon.setVisible(false);
+    add(mIcon);
 }
 
 void MenuItemSelected::config(TypedTextId msgId)
@@ -99,6 +101,14 @@ bool MenuItemSelected::getToggle()
     return toggleSwitch.getState();
 }
 
+void MenuItemSelected::setIcon(touchgfx::BitmapId id)
+{
+    mIcon.setBitmap(touchgfx::Bitmap(id));
+    mIcon.setVisible(true);
+    mIcon.setPosition(5, (getHeight() - 32) / 2, 32, 32);
+    invalidate();
+}
+
 void MenuItemSelected::reset()
 {
     mStyle = STYLE_SIMPLE;
@@ -110,6 +120,8 @@ void MenuItemSelected::reset()
     mMsgIdTip = TYPED_TEXT_INVALID;
     mMsgIdTipType = T_TMP_ITALIC_18;
     textTipBuffer[0] = 0;
+
+    mIcon.setVisible(false);
 }
 
 void MenuItemSelected::alignTextY(TextArea &t) const
@@ -140,8 +152,8 @@ void MenuItemSelected::updStyle()
     switch (mStyle) {
         case STYLE_SIMPLE:
             text.setVisible(true);
-            text.setWidth(getWidth());
-            text.setX(0);
+            text.setWidth(getWidth() - 40);
+            text.setX(40);
             alignTextY(text);
 
             toggleSwitch.setVisible(false);
@@ -150,7 +162,7 @@ void MenuItemSelected::updStyle()
 
         case STYLE_TOGGLE:
             text.setWidth(130);
-            text.setX(21);
+            text.setX(40 + 21 - 40 + 40); // adjust accordingly, perhaps 61
             alignTextY(text);
 
             toggleSwitch.setVisible(true);
@@ -159,8 +171,8 @@ void MenuItemSelected::updStyle()
 
         case STYLE_TIP:
             text.setVisible(true);
-            text.setWidth(getWidth());
-            text.setX(0);
+            text.setWidth(getWidth() - 40);
+            text.setX(40);
             text.setY(2);
 
             toggleSwitch.setVisible(false);
@@ -190,6 +202,10 @@ MenuItemSelected &MenuItemSelected::operator=(const MenuItemSelected &other)
         Unicode::strncpy(textTipBuffer, other.textTipBuffer, TEXTTIP_SIZE);
 
         toggleSwitch.setState(other.toggleSwitch.getState());
+
+        mIcon.setBitmap(other.mIcon.getBitmap());
+        mIcon.setPosition(other.mIcon.getX(), other.mIcon.getY(), other.mIcon.getWidth(), other.mIcon.getHeight());
+        mIcon.setVisible(other.mIcon.isVisible());
 
         updStyle();
     }

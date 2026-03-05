@@ -2,6 +2,8 @@
 #define MENUITEMNOTSELECTED_HPP
 
 #include <gui_generated/containers/MenuItemNotSelectedBase.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/Bitmap.hpp>
 #include <touchgfx/Unicode.hpp>
 
 class MenuItemNotSelected : public MenuItemNotSelectedBase
@@ -22,10 +24,11 @@ public:
     void setTipTypedTextId(TypedTextId msgIdType);
     void setTipColor(touchgfx::colortype color);
 
+    void setIcon(touchgfx::BitmapId id);
+
     MenuItemNotSelected &operator=(const MenuItemNotSelected &other);
 
 protected:
-
     enum ActiveStyle
     {
         STYLE_SIMPLE = 0,   // Center
@@ -40,6 +43,8 @@ protected:
     TypedTextId mMsgIdTip = {TYPED_TEXT_INVALID};
     TypedTextId mMsgIdTipType = {TYPED_TEXT_INVALID};
     touchgfx::colortype mTipColor {};
+
+    touchgfx::Image mIcon;
 
     void reset();
     void updStyle();
