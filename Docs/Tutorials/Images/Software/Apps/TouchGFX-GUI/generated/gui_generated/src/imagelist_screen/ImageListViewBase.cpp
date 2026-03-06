@@ -34,6 +34,22 @@ void ImageListViewBase::setupScreen()
     scrollList1.initialize();
 }
 
+void ImageListViewBase::gotoImageListScreenNoTransition()
+{
+    //gotoImageListIt
+    //When gotoImageListScreenNoTransition is called change screen to ImageList
+    //Go to ImageList with no screen transition
+    application().gotoImageListScreenNoTransition();
+}
+
+void ImageListViewBase::gotoImageMenuScreenNoTransition()
+{
+    //gotoImageMenuIt
+    //When gotoImageMenuScreenNoTransition is called change screen to ImageMenu
+    //Go to ImageMenu with no screen transition
+    application().gotoImageMenuScreenNoTransition();
+}
+
 void ImageListViewBase::updateItemCallbackHandler(touchgfx::DrawableListItemsInterface* items, int16_t containerIndex, int16_t itemIndex)
 {
 

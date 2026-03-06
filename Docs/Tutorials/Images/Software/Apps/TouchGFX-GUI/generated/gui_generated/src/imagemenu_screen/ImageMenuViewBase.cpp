@@ -35,3 +35,27 @@ void ImageMenuViewBase::setupScreen()
     buttons.initialize();
     menu1.initialize();
 }
+
+void ImageMenuViewBase::gotoImageListScreenNoTransition()
+{
+    //gotoImageListIt
+    //When gotoImageListScreenNoTransition is called change screen to ImageList
+    //Go to ImageList with no screen transition
+    application().gotoImageListScreenNoTransition();
+}
+
+void ImageMenuViewBase::gotoImagePropScreenNoTransition()
+{
+    //gotoImagePropIt
+    //When gotoImagePropScreenNoTransition is called change screen to ImageProp
+    //Go to ImageProp with no screen transition
+    application().gotoImagePropScreenNoTransition();
+}
+
+void ImageMenuViewBase::gotoImageViewerScreenNoTransition()
+{
+    //gotoImageViewerIt
+    //When gotoImageViewerScreenNoTransition is called change screen to ImageViewer
+    //Go to ImageViewer with no screen transition
+    application().gotoImageViewerScreenNoTransition();
+}

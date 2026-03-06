@@ -13,36 +13,3 @@ FrontendApplication::FrontendApplication(Model& m, FrontendHeap& heap)
 {
 
 }
-
-void FrontendApplication::gotoImageListScreenNoTransition()
-{
-    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImageListScreenNoTransitionImpl);
-    pendingScreenTransitionCallback = &transitionCallback;
-}
-
-void FrontendApplication::gotoImageListScreenNoTransitionImpl()
-{
-    touchgfx::makeTransition<ImageListView, ImageListPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
-}
-
-void FrontendApplication::gotoImageViewerScreenNoTransition()
-{
-    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImageViewerScreenNoTransitionImpl);
-    pendingScreenTransitionCallback = &transitionCallback;
-}
-
-void FrontendApplication::gotoImageViewerScreenNoTransitionImpl()
-{
-    touchgfx::makeTransition<ImageViewerView, ImageViewerPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
-}
-
-void FrontendApplication::gotoImagePropScreenNoTransition()
-{
-    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImagePropScreenNoTransitionImpl);
-    pendingScreenTransitionCallback = &transitionCallback;
-}
-
-void FrontendApplication::gotoImagePropScreenNoTransitionImpl()
-{
-    touchgfx::makeTransition<ImagePropView, ImagePropPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
-}

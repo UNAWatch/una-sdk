@@ -20,3 +20,19 @@ void ImagePropViewBase::setupScreen()
 {
 
 }
+
+void ImagePropViewBase::gotoImageListScreenNoTransition()
+{
+    //gotoImageListIt
+    //When gotoImageListScreenNoTransition is called change screen to ImageList
+    //Go to ImageList with no screen transition
+    application().gotoImageListScreenNoTransition();
+}
+
+void ImagePropViewBase::gotoImageMenuScreenNoTransition()
+{
+    //gotoImageMenuIt
+    //When gotoImageMenuScreenNoTransition is called change screen to ImageMenu
+    //Go to ImageMenu with no screen transition
+    application().gotoImageMenuScreenNoTransition();
+}

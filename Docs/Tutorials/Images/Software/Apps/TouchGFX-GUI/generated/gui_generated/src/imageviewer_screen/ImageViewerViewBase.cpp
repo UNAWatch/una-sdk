@@ -25,3 +25,19 @@ void ImageViewerViewBase::setupScreen()
 {
 
 }
+
+void ImageViewerViewBase::gotoImageListScreenNoTransition()
+{
+    //gotoImageListIt
+    //When gotoImageListScreenNoTransition is called change screen to ImageList
+    //Go to ImageList with no screen transition
+    application().gotoImageListScreenNoTransition();
+}
+
+void ImageViewerViewBase::gotoImageMenuScreenNoTransition()
+{
+    //gotoImageMenuIt
+    //When gotoImageMenuScreenNoTransition is called change screen to ImageMenu
+    //Go to ImageMenu with no screen transition
+    application().gotoImageMenuScreenNoTransition();
+}

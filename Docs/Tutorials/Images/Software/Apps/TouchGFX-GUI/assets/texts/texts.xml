@@ -183,6 +183,18 @@
       </Text>
     </TextGroup>
     <TextGroup Id="Unsorted">
+      <Text Id="Bitmap" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
+      <Text Id="Opacity" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
+      <Text Id="Size" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
+      <Text Id="Position" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
       <Text Id="Counter" Alignment="Center" TypographyId="Poppins_Medium_25">
         <Translation Language="GB">Counter</Translation>
       </Text>

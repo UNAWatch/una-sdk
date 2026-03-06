@@ -3,6 +3,7 @@
 
 #include <gui_generated/imageprop_screen/ImagePropViewBase.hpp>
 #include <gui/imageprop_screen/ImagePropPresenter.hpp>
+#include <gui/containers/Menu.hpp>
 
 class ImagePropView : public ImagePropViewBase
 {
@@ -13,6 +14,7 @@ public:
     virtual void tearDownScreen();
     virtual void handleKeyEvent(uint8_t key) override;
 protected:
+    Menu menu;
 };
 
 #endif // IMAGEPROPVIEW_HPP

@@ -7,27 +7,31 @@
 #include <touchgfx/Bitmap.hpp>
 
 const uint16_t BITMAP_BACKGROUND_TEALDARK_ID = 0;
-const uint16_t BITMAP_BUTTON_L1_ID = 1;
-const uint16_t BITMAP_BUTTON_L1A_ID = 2;
-const uint16_t BITMAP_BUTTON_L1R_ID = 3;
-const uint16_t BITMAP_BUTTON_L2_ID = 4;
-const uint16_t BITMAP_BUTTON_L2A_ID = 5;
-const uint16_t BITMAP_BUTTON_L2R__ID = 6;
-const uint16_t BITMAP_BUTTON_R1_ID = 7;
-const uint16_t BITMAP_BUTTON_R1A_ID = 8;
-const uint16_t BITMAP_BUTTON_R1R_ID = 9;
-const uint16_t BITMAP_BUTTON_R2_ID = 10;
-const uint16_t BITMAP_BUTTON_R2A_ID = 11;
-const uint16_t BITMAP_BUTTON_R2R_ID = 12;
-const uint16_t BITMAP_HEART_ID = 13;
-const uint16_t BITMAP_MENUASSETS_CROSS_ID = 14;
-const uint16_t BITMAP_MENUASSETS_CROSSYELLOW_ID = 15;
-const uint16_t BITMAP_MENUASSETS_TICK_ID = 16;
-const uint16_t BITMAP_SIDEBARBIG_ID = 17;
-const uint16_t BITMAP_TOGGLE_DEF_ID = 18;
-const uint16_t BITMAP_TOGGLE_HANDLE_ID = 19;
-const uint16_t BITMAP_TOGGLE_OFF_ID = 20;
-const uint16_t BITMAP_TOGGLE_ON_ID = 21;
+const uint16_t BITMAP_BITMAP_ID = 1;
+const uint16_t BITMAP_BUTTON_L1_ID = 2;
+const uint16_t BITMAP_BUTTON_L1A_ID = 3;
+const uint16_t BITMAP_BUTTON_L1R_ID = 4;
+const uint16_t BITMAP_BUTTON_L2_ID = 5;
+const uint16_t BITMAP_BUTTON_L2A_ID = 6;
+const uint16_t BITMAP_BUTTON_L2R__ID = 7;
+const uint16_t BITMAP_BUTTON_R1_ID = 8;
+const uint16_t BITMAP_BUTTON_R1A_ID = 9;
+const uint16_t BITMAP_BUTTON_R1R_ID = 10;
+const uint16_t BITMAP_BUTTON_R2_ID = 11;
+const uint16_t BITMAP_BUTTON_R2A_ID = 12;
+const uint16_t BITMAP_BUTTON_R2R_ID = 13;
+const uint16_t BITMAP_HEART_ID = 14;
+const uint16_t BITMAP_MENUASSETS_CROSS_ID = 15;
+const uint16_t BITMAP_MENUASSETS_CROSSYELLOW_ID = 16;
+const uint16_t BITMAP_MENUASSETS_TICK_ID = 17;
+const uint16_t BITMAP_OPACITY_ID = 18;
+const uint16_t BITMAP_POSITION_ID = 19;
+const uint16_t BITMAP_SIDEBARBIG_ID = 20;
+const uint16_t BITMAP_SIZE_ID = 21;
+const uint16_t BITMAP_TOGGLE_DEF_ID = 22;
+const uint16_t BITMAP_TOGGLE_HANDLE_ID = 23;
+const uint16_t BITMAP_TOGGLE_OFF_ID = 24;
+const uint16_t BITMAP_TOGGLE_ON_ID = 25;
 
 namespace BitmapDatabase
 {

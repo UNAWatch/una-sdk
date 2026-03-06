@@ -23,18 +23,31 @@ public:
     // ImageMenu
     void gotoImageMenuScreenNoTransition();
 
+    // ImageViewer
+    void gotoImageViewerScreenNoTransition();
+
+    // ImageList
+    void gotoImageListScreenNoTransition();
+
+    // ImageProp
+    void gotoImagePropScreenNoTransition();
+
 protected:
     touchgfx::Callback<FrontendApplicationBase> transitionCallback;
     FrontendHeap& frontendHeap;
     Model& model;
 
-public:
     // ImageMenu
-    virtual void gotoImageMenuScreenNoTransitionImpl();
+    void gotoImageMenuScreenNoTransitionImpl();
 
-    virtual void gotoImageListScreenNoTransitionImpl();
-    virtual void gotoImageViewerScreenNoTransitionImpl();
-    virtual void gotoImagePropScreenNoTransitionImpl();
+    // ImageViewer
+    void gotoImageViewerScreenNoTransitionImpl();
+
+    // ImageList
+    void gotoImageListScreenNoTransitionImpl();
+
+    // ImageProp
+    void gotoImagePropScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATIONBASE_HPP

@@ -16,6 +16,12 @@ public:
     virtual ~ImagePropViewBase();
     virtual void setupScreen();
 
+    /*
+     * Custom Actions
+     */
+    virtual void gotoImageListScreenNoTransition();
+    virtual void gotoImageMenuScreenNoTransition();
+
 protected:
     FrontendApplication& application() {
         return *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());

@@ -48,17 +48,41 @@ void FrontendApplicationBase::gotoImageMenuScreenNoTransitionImpl()
     touchgfx::makeTransition<ImageMenuView, ImageMenuPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
-void FrontendApplicationBase::gotoImageListScreenNoTransitionImpl()
+// ImageViewer
+
+void FrontendApplicationBase::gotoImageViewerScreenNoTransition()
 {
-    // Default implementation, should be overridden in derived class
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImageViewerScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
 }
 
 void FrontendApplicationBase::gotoImageViewerScreenNoTransitionImpl()
 {
-    // Default implementation, should be overridden in derived class
+    touchgfx::makeTransition<ImageViewerView, ImageViewerPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// ImageList
+
+void FrontendApplicationBase::gotoImageListScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImageListScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoImageListScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<ImageListView, ImageListPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// ImageProp
+
+void FrontendApplicationBase::gotoImagePropScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoImagePropScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
 }
 
 void FrontendApplicationBase::gotoImagePropScreenNoTransitionImpl()
 {
-    // Default implementation, should be overridden in derived class
+    touchgfx::makeTransition<ImagePropView, ImagePropPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }

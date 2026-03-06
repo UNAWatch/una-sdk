@@ -29,7 +29,55 @@
             "CustomContainerDefinitionName": "Menu"
           }
         ],
-        "Interactions": []
+        "Interactions": [
+          {
+            "InteractionName": "gotoImageListIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageMenu gotoImageListScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageList"
+            }
+          },
+          {
+            "InteractionName": "gotoImagePropIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageMenu gotoImagePropScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageProp"
+            }
+          },
+          {
+            "InteractionName": "gotoImageViewerIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageMenu gotoImageViewerScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageViewer"
+            }
+          }
+        ],
+        "CustomActions": [
+          {
+            "Name": "gotoImageListScreenNoTransition"
+          },
+          {
+            "Name": "gotoImageViewerScreenNoTransition"
+          },
+          {
+            "Name": "gotoImagePropScreenNoTransition"
+          }
+        ]
       },
       {
         "Name": "ImageViewer",
@@ -42,7 +90,40 @@
             "ScalingAlgorithm": "Nearest-neighbor"
           }
         ],
-        "Interactions": []
+        "Interactions": [
+          {
+            "InteractionName": "gotoImageListIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageViewer gotoImageListScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageList"
+            }
+          },
+          {
+            "InteractionName": "gotoImageMenuIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageViewer gotoImageMenuScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageMenu"
+            }
+          }
+        ],
+        "CustomActions": [
+          {
+            "Name": "gotoImageListScreenNoTransition"
+          },
+          {
+            "Name": "gotoImageMenuScreenNoTransition"
+          }
+        ]
       },
       {
         "Name": "ImageList",
@@ -61,12 +142,78 @@
             "OverShootPercentage": 75
           }
         ],
-        "Interactions": []
+        "Interactions": [
+          {
+            "InteractionName": "gotoImageListIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageList gotoImageListScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageList"
+            }
+          },
+          {
+            "InteractionName": "gotoImageMenuIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageList gotoImageMenuScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageMenu"
+            }
+          }
+        ],
+        "CustomActions": [
+          {
+            "Name": "gotoImageListScreenNoTransition"
+          },
+          {
+            "Name": "gotoImageMenuScreenNoTransition"
+          }
+        ]
       },
       {
         "Name": "ImageProp",
         "Components": [],
-        "Interactions": []
+        "Interactions": [
+          {
+            "InteractionName": "gotoImageListIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageProp gotoImageListScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageList"
+            }
+          },
+          {
+            "InteractionName": "gotoImageMenuIt",
+            "Trigger": {
+              "Type": "TriggerWhen",
+              "ActionCustomTypeName": "Call ImageProp gotoImageMenuScreenNoTransition"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "ImageMenu"
+            }
+          }
+        ],
+        "CustomActions": [
+          {
+            "Name": "gotoImageListScreenNoTransition"
+          },
+          {
+            "Name": "gotoImageMenuScreenNoTransition"
+          }
+        ]
       }
     ],
     "CustomContainerDefinitions": [
