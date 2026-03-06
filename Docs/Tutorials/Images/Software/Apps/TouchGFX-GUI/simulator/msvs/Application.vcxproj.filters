@@ -348,9 +348,6 @@
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp">
       <Filter>Source Files\gui\containers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsSetBase.cpp">
-      <Filter>Source Files\generated\gui_generated\containers</Filter>
-    </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp">
       <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
     </ClCompile>
@@ -945,9 +942,6 @@
     </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp">
       <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp">
-      <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Libs\Header\ActivityWriter.hpp">
       <Filter>Libs\Header</Filter>

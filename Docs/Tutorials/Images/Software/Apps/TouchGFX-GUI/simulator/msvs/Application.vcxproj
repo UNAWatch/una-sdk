@@ -50,7 +50,6 @@
     <ClCompile Include="..\..\gui\src\main_screen\MainView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp"/>
-    <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsSetBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -262,7 +261,6 @@
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp"/>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>
