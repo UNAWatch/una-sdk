@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.21)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 # App configuration
-set(APP_NAME "HelloWorld")
+set(APP_NAME "Images")
 set(APP_TYPE "Activity")
 set(DEV_ID "UNA")
-set(APP_ID "F1E2D3C448669781")
+set(APP_ID "F1E2D3C448669784")
 set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Resources")
 set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Output")
 set(LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../Libs")
