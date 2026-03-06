@@ -8,11 +8,6 @@ MainView::MainView()
 void MainView::setupScreen()
 {
     MainViewBase::setupScreen();
-
-    buttons.setL1(ButtonsSet::NONE);
-    buttons.setL2(ButtonsSet::NONE);
-    buttons.setR1(ButtonsSet::NONE);
-    buttons.setR2(ButtonsSet::AMBER);
 }
 
 void MainView::tearDownScreen()
