@@ -8,8 +8,6 @@
 #include <mvp/View.hpp>
 #include <gui/main_screen/MainPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <gui/containers/ButtonsSet.hpp>
-#include <touchgfx/widgets/TextArea.hpp>
 
 class MainViewBase : public touchgfx::View<MainPresenter>
 {
@@ -27,8 +25,6 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    ButtonsSet buttons;
-    touchgfx::TextArea textArea1;
 
 private:
 
