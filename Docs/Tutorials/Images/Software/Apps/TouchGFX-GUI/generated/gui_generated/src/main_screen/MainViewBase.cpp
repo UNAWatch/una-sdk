@@ -3,22 +3,12 @@
 /*********************************************************************************/
 #include <gui_generated/main_screen/MainViewBase.hpp>
 #include <touchgfx/Color.hpp>
-#include <texts/TextKeysAndLanguages.hpp>
 
 MainViewBase::MainViewBase()
 {
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
-
-    buttons.setXY(0, 47);
-    add(buttons);
-
-    textArea1.setXY(19, 98);
-    textArea1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    textArea1.setLinespacing(0);
-    textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_D48Y));
-    add(textArea1);
 }
 
 MainViewBase::~MainViewBase()
@@ -28,5 +18,5 @@ MainViewBase::~MainViewBase()
 
 void MainViewBase::setupScreen()
 {
-    buttons.initialize();
+
 }

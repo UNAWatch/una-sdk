@@ -183,9 +183,6 @@
       </Text>
     </TextGroup>
     <TextGroup Id="Unsorted">
-      <Text Id="__SingleUse_D48Y" Alignment="Left" TypographyId="Poppins_SemiBold_35">
-        <Translation Language="GB">Hello World</Translation>
-      </Text>
       <Text Id="Counter" Alignment="Center" TypographyId="Poppins_Medium_25">
         <Translation Language="GB" Alignment="Center">0</Translation>
       </Text>
