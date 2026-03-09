@@ -9,6 +9,9 @@ Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you h
 - The process of importing images into TouchGFX Designer
 - How images are converted and stored in the UNA SDK
 - Using bitmap IDs to reference and display images in code
+- Programmatically adding images without using designer-generated backgrounds
+- Mode switching between [`Image`](touchgfx/widgets/Image.hpp) and [`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) using L1 button
+- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
 - Understanding the TouchGFX image pipeline in UNA applications
 - Best practices for image optimization and management
 
@@ -57,7 +60,12 @@ The app will start and display imported images on screen, demonstrating the comp
 
 ## Images App Overview
 
-The Import Images tutorial demonstrates how graphic assets are integrated into UNA watch applications:
+The Images tutorial demonstrates programmatic image display and interactivity in UNA watch apps:
+
+### Key Features Demonstrated
+- **No background**: Pure programmatic content - no designer-generated backgrounds or boxes
+- **Dual image modes**: L1 toggles between [`Image`](touchgfx/widgets/Image.hpp) (`guyImage`) and [`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) (`scaledGuyImage`)
+- **Jump animation**: R1 triggers sine-wave Y-offset animation on `guyImage` via tick events
 
 ### The Asset Pipeline
 - **Creation**: Images are created using external tools (Paint, GIMP, etc.)
@@ -68,13 +76,13 @@ The Import Images tutorial demonstrates how graphic assets are integrated into U
 
 ### The GUI Layer (Frontend)
 - Built with TouchGFX framework
-- Displays imported images using bitmap IDs
-- Handles image positioning and rendering
-- Manages image resources efficiently
+- Programmatically adds images in [`setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Handles L1/R1 buttons for mode switching and animation triggers in [`handleKeyEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Drives animation in [`handleTickEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
 
 ### Image Management in UNA SDK
 - Images are converted to TouchGFX bitmap format during build
-- Each image gets a unique ID in `BitmapDatabase.hpp`
+- Each image gets a unique ID in [`BitmapDatabase.hpp`](generated/images/include/images/BitmapDatabase.hpp)
 - Images are stored in flash memory for efficient access
 - TouchGFX handles image decompression and display
 
@@ -119,20 +127,25 @@ Follow these steps to import and display images in your UNA app:
 
 ### Step 3: Display the Image in Code
 
-After importing, TouchGFX generates a bitmap ID. For example, if you imported `guy-transparent.png`, it creates `BITMAP_GUY_TRANSPARENT_ID = 0`.
+After importing `guy-transparent.png`, TouchGFX generates [`BITMAP_GUY_TRANSPARENT_ID`](generated/images/include/images/BitmapDatabase.hpp).
 
-In your view code, display the image:
+Images are added programmatically in [`MainView::setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
 
 ```cpp
-// In MainViewBase.cpp or your custom view
-#include <images/BitmapDatabase.hpp>
+// Programmatic image setup - no background
+guyImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
+guyImage.setPosition(70, originalY, 100, 100);
+guyImage.setVisible(false);  // Initially hidden (scaled mode active)
+add(guyImage);
 
-// Create an image widget
-touchgfx::Image myImage;
-myImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
-myImage.setPosition(50, 50, 100, 100); // x, y, width, height
-add(myImage);
+scaledGuyImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
+scaledGuyImage.setPosition(70, originalY, 120, 120);
+scaledGuyImage.setScalingAlgorithm(touchgfx::ScalableImage::BILINEAR_INTERPOLATION);
+scaledGuyImage.setVisible(true);  // Initially shown
+add(scaledGuyImage);
 ```
+
+**Note**: Widgets declared as members in [`MainView.hpp`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp). Includes placed in header.
 
 ### Step 4: Build and Test
 
@@ -169,31 +182,23 @@ const uint16_t BITMAP_GUY_TRANSPARENT_ID = 0;
 
 TouchGFX provides several ways to display images:
 
-**Basic Image Widget:**
+**No Background:**
+The demo has no background image or box. All content is added programmatically in [`setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp).
+
+**[`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) (scaledGuyImage):**
 ```cpp
-touchgfx::Image backgroundImage;
-backgroundImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
-backgroundImage.setPosition(0, 0, 240, 240);
-add(backgroundImage);
+scaledGuyImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
+scaledGuyImage.setPosition(70, originalY, 120, 120);
+scaledGuyImage.setScalingAlgorithm(touchgfx::ScalableImage::BILINEAR_INTERPOLATION);
+scaledGuyImage.setVisible(true);
+add(scaledGuyImage);
 ```
 
-**Scaled Image:**
-```cpp
-touchgfx::ScaledImage scaledImage;
-scaledImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
-scaledImage.setPosition(50, 50, 100, 100);
-scaledImage.setScalingAlgorithm(touchgfx::ScalableImage::NEAREST_NEIGHBOR);
-add(scaledImage);
-```
-
-**Animated Image (for sequences):**
-```cpp
-touchgfx::AnimatedImage animatedImage;
-animatedImage.setBitmap(touchgfx::Bitmap(BITMAP_FIRST_FRAME_ID));
-animatedImage.setPosition(50, 50, 64, 64);
-animatedImage.setNumberOfFrames(10); // For animation sequences
-add(animatedImage);
-```
+**Custom Tick-Based Animation:**
+Demo uses `handleTickEvent()` for sine-wave jump on `guyImage`:
+- Triggered by R1 when Image mode active
+- 60 ticks (~6s at 10Hz), sin(phase)*30px offset
+(See [`MainView.cpp`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp:61))
 
 ### Image Memory Management
 
