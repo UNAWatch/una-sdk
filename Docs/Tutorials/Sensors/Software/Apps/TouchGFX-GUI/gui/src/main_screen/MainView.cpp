@@ -1,5 +1,9 @@
 #include <gui/main_screen/MainView.hpp>
 
+#define LOG_MODULE_PRX      "MainView"
+#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#include "SDK/UnaLogger/Logger.h"
+
 MainView::MainView()
     : verbosity(BASIC),
       hr(0), hrtl(0),
@@ -36,6 +40,7 @@ void MainView::updateHR(float hr, float tl)
 {
     this->hr = hr;
     this->hrtl = tl;
+    LOG_DEBUG("HR: %.0f BPM\n", hr);
     refreshDisplay();
 }
 
@@ -106,11 +111,13 @@ void MainView::handleKeyEvent(uint8_t key)
 {
     if (key == Gui::Config::Button::L1) {
         verbosity = static_cast<VerbosityLevel>((verbosity + 1) % 3);
+        LOG_DEBUG("Verbosity changed to %d\n", (int)verbosity);
         refreshDisplay();
     }
 
     if (key == Gui::Config::Button::L2) {
         verbosity = static_cast<VerbosityLevel>((verbosity - 1 + 3) % 3);
+        LOG_DEBUG("Verbosity changed to %d\n", (int)verbosity);
         refreshDisplay();
     }
 

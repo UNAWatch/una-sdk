@@ -148,6 +148,20 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
             modelListener->updateCompass(m->heading);
         } break;
 
+        case CustomMessage::STATS_VALUES:  {
+            LOG_DEBUG("Update STATS_VALUES\n");
+            auto* m = static_cast<CustomMessage::StatsValues*>(msg);
+            modelListener->updateStats(m->serviceCpuPct, m->guiCpuPct,
+                                       m->txMsgRate, m->rxMsgRate,
+                                       m->txByteRate, m->rxByteRate);
+        } break;
+
+        case CustomMessage::RTC_VALUES:  {
+            LOG_DEBUG("Update RTC_VALUES\n");
+            auto* m = static_cast<CustomMessage::RtcValues*>(msg);
+            modelListener->updateRTC(m->time);
+        } break;
+
         default:
             break;
     }
