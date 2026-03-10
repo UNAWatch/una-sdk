@@ -4,7 +4,9 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserAccelerometer.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserStepCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFloorCounter.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserMagneticField.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
+#include <cmath>
 
 #include "Service.hpp"
 
@@ -108,9 +110,22 @@ void Service::run()
                 mGuiCpuTimeMs = 0;
 
                 // Log stats
-                LOG_INFO("Stats: Service CPU %u ms, GUI CPU %u ms, TX: %u msg/s (%u B/s), RX: %u msg/s (%u B/s)\n",
-                         mServiceCpuTimeMs, mGuiCpuTimeMs,
-                         mTxMessages, mTxBytes, mRxMessages, mRxBytes);
+                // Calculate simplistic CPU % (ms per sec /10)
+                float serviceCpuPct = static_cast<float>(mServiceCpuTimeMs) / 10.0f;
+                float guiCpuPct = static_cast<float>(mGuiCpuTimeMs) / 10.0f;
+                mSender.updateStats(serviceCpuPct, guiCpuPct,
+                                    static_cast<float>(mTxMessages),
+                                    static_cast<float>(mRxMessages),
+                                    static_cast<float>(mTxBytes),
+                                    static_cast<float>(mRxBytes));
+                LOG_INFO("Stats sent: SCPU%.1f%% GCPU%.1f%% TX:%.0f msg/s (%.0f B/s) RX:%.0f msg/s (%.0f B/s)\n",
+                         serviceCpuPct, guiCpuPct,
+                         static_cast<float>(mTxMessages), static_cast<float>(mTxBytes),
+                         static_cast<float>(mRxMessages), static_cast<float>(mRxBytes));
+
+                // Send RTC time (seconds since boot)
+                uint32_t rtcTime = static_cast<uint32_t>(mKernel.sys.getTimeMs() / 1000ULL);
+                mSender.updateRtc(rtcTime);
 
                 // Reset counters
                 mTxMessages = 0;
@@ -165,6 +180,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 mHR   = parser.getBpm();
                 mHRTL = parser.getTrustLevel();
+                LOG_DEBUG("HR: %.0f BPM\n", mHR);
                 mSender.updateHeartRate(mHR, mHRTL);
                 mTxBytes += sizeof(CustomMessage::HRValues);
             }
@@ -175,6 +191,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float latitude = parser.getLatitude();
                 float longitude = parser.getLongitude();
                 float altitude = parser.getAltitude();
+                LOG_DEBUG("GPS: %.6f, %.6f, %.1f\n", latitude, longitude, altitude);
                 mSender.updateLocation(timestamp, latitude, longitude, altitude);
                 mTxBytes += sizeof(CustomMessage::LocationValues);
             }
@@ -183,6 +200,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 uint64_t timestamp = parser.getTimestamp();
                 float elevation = parser.getAltitude();
+                LOG_DEBUG("Elevation: %.1f m\n", elevation);
                 mSender.updateElevation(timestamp, elevation);
                 mTxBytes += sizeof(CustomMessage::ElevationValues);
             }
@@ -193,6 +211,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float x = parser.getX();
                 float y = parser.getY();
                 float z = parser.getZ();
+                LOG_DEBUG("Acc: %.2f, %.2f, %.2f\n", x, y, z);
                 mSender.updateAccelerometer(timestamp, x, y, z);
                 mTxBytes += sizeof(CustomMessage::AccelerometerValues);
             }
@@ -201,6 +220,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 uint64_t timestamp = parser.getTimestamp();
                 uint32_t steps = parser.getStepCount();
+                LOG_DEBUG("Steps: %u\n", steps);
                 mSender.updateStepCounter(timestamp, steps);
                 mTxBytes += sizeof(CustomMessage::StepCounterValues);
             }
@@ -209,13 +229,23 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 uint64_t timestamp = parser.getTimestamp();
                 uint32_t floors = static_cast<uint32_t>(parser.getFloorsUp());
+                LOG_DEBUG("Floors: %u\n", floors);
                 mSender.updateFloors(timestamp, floors);
                 mTxBytes += sizeof(CustomMessage::FloorsValues);
             }
         } else if (mSensorMagneticField.matchesDriver(handle)) {
-            // Note: No specific parser for magnetic field, assuming raw data or skip
-            // For now, just log that data was received
-            LOG_DEBUG("Magnetic field data received\n");
+            SDK::SensorDataParser::MagneticField parser(data[0]);
+            if (parser.isDataValid()) {
+                uint64_t timestamp = parser.getTimestamp();
+                float x = parser.getX();
+                float y = parser.getY();
+                float z = parser.getZ();
+                float heading = atan2f(y, x) * (180.0f / 3.14159265f);
+                if (heading < 0.0f) heading += 360.0f;
+                LOG_DEBUG("Mag: %.2f, %.2f, %.2f heading: %.1f\n", x, y, z, heading);
+                mSender.updateCompass(timestamp, heading);
+                mTxBytes += sizeof(CustomMessage::CompassValues);
+            }
         }
     }
 }
