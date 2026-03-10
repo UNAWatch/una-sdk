@@ -7,8 +7,6 @@
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
 
-#include "ActivityWriter.hpp"
-
 class Service
 {
 public:
@@ -23,9 +21,23 @@ private:
     CustomMessage::GUISender mSender;
     bool                     mGUIStarted;
     SDK::Sensor::Connection  mSensorHR;
+    SDK::Sensor::Connection  mSensorGPS;
+    SDK::Sensor::Connection  mSensorAltimeter;
+    SDK::Sensor::Connection  mSensorAccelerometer;
+    SDK::Sensor::Connection  mSensorStepCounter;
+    SDK::Sensor::Connection  mSensorFloorCounter;
+    SDK::Sensor::Connection  mSensorMagneticField;
     float                    mHR;
     float                    mHRTL;
-    ActivityWriter           mActivityWriter;
+    // CPU time tracking
+    uint32_t                 mServiceCpuTimeMs;
+    uint32_t                 mGuiCpuTimeMs;
+    // Message rate tracking
+    uint32_t                 mTxMessages;
+    uint32_t                 mRxMessages;
+    uint32_t                 mTxBytes;
+    uint32_t                 mRxBytes;
+    uint32_t                 mLastStatsTimeMs;
 
     void onStartGUI();
     void onStopGUI();

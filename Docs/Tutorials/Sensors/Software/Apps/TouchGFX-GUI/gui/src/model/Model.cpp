@@ -112,6 +112,42 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
             modelListener->updateHR(m->heartRate, m->trustLevel);
         } break;
 
+        case CustomMessage::LOCATION_VALUES:  {
+            LOG_DEBUG("Update LOCATION_VALUES\n");
+            auto* m = static_cast<CustomMessage::LocationValues*>(msg);
+            modelListener->updateGPS(m->latitude, m->longitude, m->altitude);
+        } break;
+
+        case CustomMessage::ELEVATION_VALUES:  {
+            LOG_DEBUG("Update ELEVATION_VALUES\n");
+            auto* m = static_cast<CustomMessage::ElevationValues*>(msg);
+            modelListener->updateElevation(m->elevation);
+        } break;
+
+        case CustomMessage::ACCELEROMETER_VALUES:  {
+            LOG_DEBUG("Update ACCELEROMETER_VALUES\n");
+            auto* m = static_cast<CustomMessage::AccelerometerValues*>(msg);
+            modelListener->updateAccelerometer(m->x, m->y, m->z);
+        } break;
+
+        case CustomMessage::STEP_COUNTER_VALUES:  {
+            LOG_DEBUG("Update STEP_COUNTER_VALUES\n");
+            auto* m = static_cast<CustomMessage::StepCounterValues*>(msg);
+            modelListener->updateStepCounter(m->steps);
+        } break;
+
+        case CustomMessage::FLOORS_VALUES:  {
+            LOG_DEBUG("Update FLOORS_VALUES\n");
+            auto* m = static_cast<CustomMessage::FloorsValues*>(msg);
+            modelListener->updateFloorCounter(m->floors);
+        } break;
+
+        case CustomMessage::COMPASS_VALUES:  {
+            LOG_DEBUG("Update COMPASS_VALUES\n");
+            auto* m = static_cast<CustomMessage::CompassValues*>(msg);
+            modelListener->updateCompass(m->heading);
+        } break;
+
         default:
             break;
     }
