@@ -125,6 +125,36 @@ namespace CustomMessage {
         {}
     };
 
+    struct StatsValues : public SDK::MessageBase {
+        float serviceCpuPct;
+        float guiCpuPct;
+        float txMsgRate;
+        float rxMsgRate;
+        float txByteRate;
+        float rxByteRate;
+
+        StatsValues()
+            : SDK::MessageBase(STATS_VALUES)
+            , serviceCpuPct(0)
+            , guiCpuPct(0)
+            , txMsgRate(0)
+            , rxMsgRate(0)
+            , txByteRate(0)
+            , rxByteRate(0)
+        {}
+    };
+
+    constexpr SDK::MessageType::Type RTC_VALUES = 0x00000009;
+
+    struct RtcValues : public SDK::MessageBase {
+        uint32_t time;  // ms since boot or unix sec
+
+        RtcValues()
+            : SDK::MessageBase(RTC_VALUES)
+            , time(0)
+        {}
+    };
+
 
     ///////////////////////////////////////
     //// Wrappers
@@ -220,20 +250,47 @@ namespace CustomMessage {
         }
 
         // Service --> GUI
-        bool updateCompass(uint64_t timestamp, float heading)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::CompassValues>(mKernel)) {
-                req->timestamp = timestamp;
-                req->heading = heading;
+    bool updateCompass(uint64_t timestamp, float heading)
+    {
+        if (auto req = SDK::make_msg<CustomMessage::CompassValues>(mKernel)) {
+            req->timestamp = timestamp;
+            req->heading = heading;
 
-                return req.send();
-            }
-
-            return false;
+            return req.send();
         }
 
-    private:
-        const SDK::Kernel& mKernel;
+        return false;
+    }
+
+    bool updateStats(float serviceCpuPct, float guiCpuPct, float txMsgRate, float rxMsgRate, float txByteRate, float rxByteRate)
+    {
+        if (auto req = SDK::make_msg<CustomMessage::StatsValues>(mKernel)) {
+            req->serviceCpuPct = serviceCpuPct;
+            req->guiCpuPct = guiCpuPct;
+            req->txMsgRate = txMsgRate;
+            req->rxMsgRate = rxMsgRate;
+            req->txByteRate = txByteRate;
+            req->rxByteRate = rxByteRate;
+
+            return req.send();
+        }
+
+        return false;
+    }
+
+    bool updateRtc(uint32_t time)
+    {
+        if (auto req = SDK::make_msg<CustomMessage::RtcValues>(mKernel)) {
+            req->time = time;
+
+            return req.send();
+        }
+
+        return false;
+    }
+
+private:
+    const SDK::Kernel& mKernel;
     };
 
 } // namespace CustomMessage
