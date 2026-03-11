@@ -184,16 +184,16 @@
     </TextGroup>
     <TextGroup Id="Unsorted">
       <Text Id="__SingleUse_1TOM" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">0</Translation>
+        <Translation Language="GB">-</Translation>
       </Text>
       <Text Id="__SingleUse_GOO3" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">0</Translation>
+        <Translation Language="GB">-</Translation>
       </Text>
       <Text Id="__SingleUse_JJ5T" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Trust level:</Translation>
       </Text>
       <Text Id="__SingleUse_XK5X" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">0</Translation>
+        <Translation Language="GB">-</Translation>
       </Text>
       <Text Id="Counter" Alignment="Center" TypographyId="Poppins_Medium_25">
         <Translation Language="GB" Alignment="Center">0</Translation>
