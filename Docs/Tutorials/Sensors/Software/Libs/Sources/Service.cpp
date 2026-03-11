@@ -42,7 +42,7 @@ void Service::run()
     mSensorHR.connect();
     mSensorGPS.connect();
     mSensorAltimeter.connect();
-    mSensorAccelerometer.connect();
+    mSensorAccelerometer.connect(10, 10);
     mSensorStepCounter.connect();
     mSensorFloorCounter.connect();
 
@@ -209,11 +209,11 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float y = parser.getY();
                 float z = parser.getZ();
                 uint64_t nowMs = mKernel.sys.getTimeMs();
-                if (nowMs - mLastAccTimeMs >= 1000) {
-                    LOG_DEBUG("Acc: %.2f, %.2f, %.2f\n", x, y, z);
+                if (nowMs - mLastAccTimeMs >= 100) {
+                    LOG_DEBUG("Acc: %.2f, %.2f, %.2f, now: %u, last: %u, timestamp: %llu\n", x, y, z, nowMs, mLastAccTimeMs, timestamp);
+                    mLastAccTimeMs = nowMs;
                     mSender.updateAccelerometer(timestamp, x, y, z);
                     mTxBytes += sizeof(CustomMessage::AccelerometerValues);
-                    mLastAccTimeMs = nowMs;
                 }
             }
         } else if (mSensorStepCounter.matchesDriver(handle)) {
