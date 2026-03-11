@@ -14,20 +14,20 @@ MainViewBase::MainViewBase()
     buttons.setXY(0, 47);
     add(buttons);
 
-    text_stats.setPosition(60, 200, 120, 40);
+    text_stats.setPosition(60, 169, 114, 71);
     text_stats.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     text_stats.setLinespacing(0);
     Unicode::snprintf(text_statsBuffer, TEXT_STATS_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_XK5X).getText());
     text_stats.setWildcard(text_statsBuffer);
-    text_stats.setTypedText(touchgfx::TypedText(T_TMP_REGULAR_18));
+    text_stats.setTypedText(touchgfx::TypedText(T___SINGLEUSE_GCZD));
     add(text_stats);
 
-    text_body.setPosition(0, 40, 240, 160);
+    text_body.setPosition(0, 40, 240, 129);
     text_body.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     text_body.setLinespacing(0);
     Unicode::snprintf(text_bodyBuffer, TEXT_BODY_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_GOO3).getText());
     text_body.setWildcard(text_bodyBuffer);
-    text_body.setTypedText(touchgfx::TypedText(T_TMP_REGULAR_18));
+    text_body.setTypedText(touchgfx::TypedText(T___SINGLEUSE_IQ58));
     add(text_body);
 
     text_header.setPosition(67, 0, 107, 40);
@@ -35,7 +35,7 @@ MainViewBase::MainViewBase()
     text_header.setLinespacing(0);
     Unicode::snprintf(text_headerBuffer, TEXT_HEADER_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_1TOM).getText());
     text_header.setWildcard(text_headerBuffer);
-    text_header.setTypedText(touchgfx::TypedText(T_TMP_REGULAR_18));
+    text_header.setTypedText(touchgfx::TypedText(T___SINGLEUSE_CVUV));
     add(text_header);
 
     text.setPosition(49, 155, 109, 23);
