@@ -5,7 +5,7 @@
 #include <fonts/GeneratedFont.hpp>
 #include <texts/TypedTextDatabase.hpp>
 
-extern touchgfx::GeneratedFont& getFont_Poppins_Regular_18_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Regular_9_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Medium_10_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Medium_18_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_25_2bpp();
@@ -22,7 +22,7 @@ extern touchgfx::GeneratedFont& getFont_Poppins_LightItalic_18_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Light_60_2bpp();
 
 const touchgfx::Font* touchgfx_fonts[] = {
-    &(getFont_Poppins_Regular_18_2bpp()),
+    &(getFont_Poppins_Regular_9_2bpp()),
     &(getFont_Poppins_Medium_10_2bpp()),
     &(getFont_Poppins_Medium_18_2bpp()),
     &(getFont_Poppins_SemiBold_25_2bpp()),
@@ -44,7 +44,7 @@ extern const touchgfx::TypedText::TypedTextData* const typedTextDatabaseArray[];
 
 TEXT_LOCATION_FLASH_PRAGMA
 const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCATION_FLASH_ATTRIBUTE = {
-    { 0, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 2, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 11, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
@@ -102,10 +102,13 @@ const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCAT
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 1, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 1, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 0, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 1, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 2, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 1, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 3, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR }
 };
 
@@ -142,7 +145,7 @@ void resetFont(touchgfx::FontId fontId)
     switch (fontId)
     {
     case 0:
-        touchgfx_fonts[0] = &(getFont_Poppins_Regular_18_2bpp());
+        touchgfx_fonts[0] = &(getFont_Poppins_Regular_9_2bpp());
         break;
     case 1:
         touchgfx_fonts[1] = &(getFont_Poppins_Medium_10_2bpp());

@@ -34,7 +34,7 @@ struct Typography
 
 struct TypographyFontIndex
 {
-    static const touchgfx::FontId POPPINS_REGULAR_18 = 0;     // Poppins_Regular_18_2bpp
+    static const touchgfx::FontId POPPINS_REGULAR_18 = 0;     // Poppins_Regular_9_2bpp
     static const touchgfx::FontId POPPINS_MEDIUM_10 = 1;      // Poppins_Medium_10_2bpp
     static const touchgfx::FontId POPPINS_MEDIUM_18 = 2;      // Poppins_Medium_18_2bpp
     static const touchgfx::FontId POPPINS_MEDIUM_25 = 3;      // Poppins_SemiBold_25_2bpp
