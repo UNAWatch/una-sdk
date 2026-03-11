@@ -4,7 +4,7 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserAccelerometer.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserStepCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFloorCounter.hpp"
-#include "SDK/SensorLayer/DataParsers/SensorDataParserMagneticField.hpp"
+// #include "SDK/SensorLayer/DataParsers/SensorDataParserMagneticField.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
 #include <cmath>
 
@@ -24,7 +24,6 @@ Service::Service(SDK::Kernel& kernel)
     , mSensorAccelerometer(SDK::Sensor::Type::ACCELEROMETER, 0, 0)
     , mSensorStepCounter(SDK::Sensor::Type::STEP_COUNTER, 0, 0)
     , mSensorFloorCounter(SDK::Sensor::Type::FLOOR_COUNTER, 0, 0)
-    , mSensorMagneticField(SDK::Sensor::Type::MAGNETIC_FIELD, 0, 0)
     , mHR(0)
     , mHRTL(0)
     , mServiceCpuTimeMs(0)
@@ -43,10 +42,10 @@ void Service::run()
     mSensorHR.connect();
     mSensorGPS.connect();
     mSensorAltimeter.connect();
-    mSensorAccelerometer.connect();
+    // mSensorAccelerometer.connect();
     mSensorStepCounter.connect();
     mSensorFloorCounter.connect();
-    mSensorMagneticField.connect();
+
 
     mLastStatsTimeMs = mKernel.sys.getTimeMs();
 
@@ -67,10 +66,9 @@ void Service::run()
                     mSensorHR.disconnect();
                     mSensorGPS.disconnect();
                     mSensorAltimeter.disconnect();
-                    mSensorAccelerometer.disconnect();
+                    // mSensorAccelerometer.disconnect();
                     mSensorStepCounter.disconnect();
                     mSensorFloorCounter.disconnect();
-                    mSensorMagneticField.disconnect();
                     // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -147,10 +145,9 @@ void Service::run()
     mSensorHR.disconnect();
     mSensorGPS.disconnect();
     mSensorAltimeter.disconnect();
-    mSensorAccelerometer.disconnect();
+    // mSensorAccelerometer.disconnect();
     mSensorStepCounter.disconnect();
     mSensorFloorCounter.disconnect();
-    mSensorMagneticField.disconnect();
 
     LOG_INFO("thread stopped\n");
 }
@@ -232,19 +229,6 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 LOG_DEBUG("Floors: %u\n", floors);
                 mSender.updateFloors(timestamp, floors);
                 mTxBytes += sizeof(CustomMessage::FloorsValues);
-            }
-        } else if (mSensorMagneticField.matchesDriver(handle)) {
-            SDK::SensorDataParser::MagneticField parser(data[0]);
-            if (parser.isDataValid()) {
-                uint64_t timestamp = parser.getTimestamp();
-                float x = parser.getX();
-                float y = parser.getY();
-                float z = parser.getZ();
-                float heading = atan2f(y, x) * (180.0f / 3.14159265f);
-                if (heading < 0.0f) heading += 360.0f;
-                LOG_DEBUG("Mag: %.2f, %.2f, %.2f heading: %.1f\n", x, y, z, heading);
-                mSender.updateCompass(timestamp, heading);
-                mTxBytes += sizeof(CustomMessage::CompassValues);
             }
         }
     }
