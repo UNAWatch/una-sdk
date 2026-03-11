@@ -26,6 +26,7 @@ public:
 
 protected:
     virtual void handleKeyEvent(uint8_t key) override;
+    virtual void handleTickEvent() override;
 
 private:
     enum VerbosityLevel { BASIC, DETAILED, FULL };
