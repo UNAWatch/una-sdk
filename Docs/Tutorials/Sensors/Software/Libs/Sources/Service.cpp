@@ -66,7 +66,7 @@ void Service::run()
                     mSensorHR.disconnect();
                     mSensorGPS.disconnect();
                     mSensorAltimeter.disconnect();
-                    // mSensorAccelerometer.disconnect();
+                    mSensorAccelerometer.disconnect();
                     mSensorStepCounter.disconnect();
                     mSensorFloorCounter.disconnect();
                     // We must release message because this is the last event.
@@ -208,9 +208,13 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float x = parser.getX();
                 float y = parser.getY();
                 float z = parser.getZ();
-                LOG_DEBUG("Acc: %.2f, %.2f, %.2f\n", x, y, z);
-                mSender.updateAccelerometer(timestamp, x, y, z);
-                mTxBytes += sizeof(CustomMessage::AccelerometerValues);
+                uint64_t nowMs = mKernel.sys.getTimeMs();
+                if (nowMs - mLastAccTimeMs >= 1000) {
+                    LOG_DEBUG("Acc: %.2f, %.2f, %.2f\n", x, y, z);
+                    mSender.updateAccelerometer(timestamp, x, y, z);
+                    mTxBytes += sizeof(CustomMessage::AccelerometerValues);
+                    mLastAccTimeMs = nowMs;
+                }
             }
         } else if (mSensorStepCounter.matchesDriver(handle)) {
             SDK::SensorDataParser::StepCounter parser(data[0]);

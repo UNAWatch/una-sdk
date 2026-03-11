@@ -41,13 +41,13 @@ void MainView::handleTickEvent()
     refreshDisplay();
     refreshStats();
     refreshBattery();
+    LOG_DEBUG("Display Refreshed!\n------------- END ------------\n\n");
 }
 
 void MainView::updateHR(float hr, float tl)
 {
     this->hr = hr;
     this->hrtl = tl;
-    LOG_DEBUG("HR: %f BPM\n", hr);
 }
 
 void MainView::updateGPS(float lat, float lon, float alt)

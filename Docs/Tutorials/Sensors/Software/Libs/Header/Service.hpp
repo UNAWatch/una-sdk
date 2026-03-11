@@ -37,6 +37,7 @@ private:
     uint32_t                 mTxBytes;
     uint32_t                 mRxBytes;
     uint32_t                 mLastStatsTimeMs;
+    uint32_t                 mLastAccTimeMs;
 
     void onStartGUI();
     void onStopGUI();
