@@ -8,15 +8,16 @@ MainView::MainView()
     : verbosity(BASIC),
       hr(0), hrtl(0),
       gpsLat(0), gpsLon(0), gpsAlt(0),
-        elevation(0),
-        altPressure(0), altAltitude(0),
-        magX(0), magY(0), magZ(0),
-       accX(0), accY(0), accZ(0),
+      elevation(0),
+      altPressure(0), altAltitude(0),
+      magX(0), magY(0), magZ(0),
+      accX(0), accY(0), accZ(0),
       steps(0), floors(0),
-       heading(0),
+      heading(0),
       rtcTime(0),
       serviceCpu(0), guiCpu(0), txMsgPerSec(0), rxMsgPerSec(0), txBytesPerSec(0), rxBytesPerSec(0),
-      batteryLevel(0)
+      batteryLevel(0),
+      mFrameCounter(0)
 {
 
 }
@@ -41,7 +42,7 @@ void MainView::handleTickEvent()
     refreshDisplay();
     refreshStats();
     refreshBattery();
-    LOG_DEBUG("Display Refreshed!\n------------- END ------------\n\n");
+    LOG_DEBUG("Display Refreshed!\nFrenme No: %u\n------------- END ------------\n", mFrameCounter++);
 }
 
 void MainView::updateHR(float hr, float tl)
@@ -132,7 +133,7 @@ void MainView::refreshDisplay()
     int len = 0;
 
     // Time
-    len += snprintf(buffer + len, sizeof(buffer) - len, "Time: %lu\n", rtcTime);
+    len += snprintf(buffer + len, sizeof(buffer) - len, "# %lu\nTime: %lu\n", mFrameCounter, rtcTime);
 
     if (verbosity >= BASIC) {
         len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\n", hr);
