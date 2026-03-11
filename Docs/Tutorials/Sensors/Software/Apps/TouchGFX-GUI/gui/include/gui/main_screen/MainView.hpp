@@ -44,6 +44,7 @@ private:
     uint32_t rtcTime;
     float serviceCpu, guiCpu, txMsgPerSec, rxMsgPerSec, txBytesPerSec, rxBytesPerSec;
     float batteryLevel;
+    uint32_t                 mFrameCounter;
 
     void refreshDisplay();
     void refreshStats();
