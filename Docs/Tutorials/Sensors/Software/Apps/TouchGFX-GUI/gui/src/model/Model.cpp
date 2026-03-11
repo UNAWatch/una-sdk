@@ -105,60 +105,61 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
 {
     switch (msg->getType()) {
         case CustomMessage::HR_VALUES:  {
-            LOG_DEBUG("Update HR_VALUES\n");
             auto* m = static_cast<CustomMessage::HRValues*>(msg);
-
             LOG_DEBUG("hr %.1f, tl %.1f\n", m->heartRate, m->trustLevel);
             modelListener->updateHR(m->heartRate, m->trustLevel);
         } break;
 
         case CustomMessage::LOCATION_VALUES:  {
-            LOG_DEBUG("Update LOCATION_VALUES\n");
             auto* m = static_cast<CustomMessage::LocationValues*>(msg);
+            LOG_DEBUG("GPS: %.6f, %.6f, %.1f\n", m->latitude, m->longitude, m->altitude);
             modelListener->updateGPS(m->latitude, m->longitude, m->altitude);
         } break;
 
         case CustomMessage::ELEVATION_VALUES:  {
-            LOG_DEBUG("Update ELEVATION_VALUES\n");
             auto* m = static_cast<CustomMessage::ElevationValues*>(msg);
+            LOG_DEBUG("Elevation: %.1f m\n", m->elevation);
             modelListener->updateElevation(m->elevation);
         } break;
 
         case CustomMessage::ACCELEROMETER_VALUES:  {
-            LOG_DEBUG("Update ACCELEROMETER_VALUES\n");
             auto* m = static_cast<CustomMessage::AccelerometerValues*>(msg);
+            LOG_DEBUG("Acc: %.2f, %.2f, %.2f\n", m->x, m->y, m->z);
             modelListener->updateAccelerometer(m->x, m->y, m->z);
         } break;
 
         case CustomMessage::STEP_COUNTER_VALUES:  {
-            LOG_DEBUG("Update STEP_COUNTER_VALUES\n");
             auto* m = static_cast<CustomMessage::StepCounterValues*>(msg);
+            LOG_DEBUG("Steps: %u\n", m->steps);
             modelListener->updateStepCounter(m->steps);
         } break;
 
         case CustomMessage::FLOORS_VALUES:  {
-            LOG_DEBUG("Update FLOORS_VALUES\n");
             auto* m = static_cast<CustomMessage::FloorsValues*>(msg);
+            LOG_DEBUG("Floors: %u\n", m->floors);
             modelListener->updateFloorCounter(m->floors);
         } break;
 
         case CustomMessage::COMPASS_VALUES:  {
-            LOG_DEBUG("Update COMPASS_VALUES\n");
             auto* m = static_cast<CustomMessage::CompassValues*>(msg);
+            LOG_DEBUG("Compass: %.1f\n", m->heading);
             modelListener->updateCompass(m->heading);
         } break;
 
         case CustomMessage::STATS_VALUES:  {
-            LOG_DEBUG("Update STATS_VALUES\n");
             auto* m = static_cast<CustomMessage::StatsValues*>(msg);
+            LOG_DEBUG("Stats: S%.1f%% G%.1f%% TX:%.0f msg/s (%.0f B/s) RX:%.0f msg/s (%.0f B/s)\n",
+                      m->serviceCpuPct, m->guiCpuPct,
+                      m->txMsgRate, m->txByteRate,
+                      m->rxMsgRate, m->rxByteRate);
             modelListener->updateStats(m->serviceCpuPct, m->guiCpuPct,
                                        m->txMsgRate, m->rxMsgRate,
                                        m->txByteRate, m->rxByteRate);
         } break;
 
         case CustomMessage::RTC_VALUES:  {
-            LOG_DEBUG("Update RTC_VALUES\n");
             auto* m = static_cast<CustomMessage::RtcValues*>(msg);
+            LOG_DEBUG("RTC: %u\n", m->time);
             modelListener->updateRTC(m->time);
         } break;
 
