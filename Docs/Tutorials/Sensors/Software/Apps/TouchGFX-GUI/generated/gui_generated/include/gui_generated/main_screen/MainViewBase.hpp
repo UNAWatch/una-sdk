@@ -36,11 +36,11 @@ protected:
     /*
      * Wildcard Buffers
      */
-    static const uint16_t TEXT_STATS_SIZE = 20;
+    static const uint16_t TEXT_STATS_SIZE = 128;
     touchgfx::Unicode::UnicodeChar text_statsBuffer[TEXT_STATS_SIZE];
-    static const uint16_t TEXT_BODY_SIZE = 20;
+    static const uint16_t TEXT_BODY_SIZE = 512;
     touchgfx::Unicode::UnicodeChar text_bodyBuffer[TEXT_BODY_SIZE];
-    static const uint16_t TEXT_HEADER_SIZE = 20;
+    static const uint16_t TEXT_HEADER_SIZE = 128;
     touchgfx::Unicode::UnicodeChar text_headerBuffer[TEXT_HEADER_SIZE];
 
 private:

@@ -30,7 +30,7 @@
             "Wildcard1": {
               "TextId": "__SingleUse_XK5X",
               "UseBuffer": true,
-              "BufferSize": 20
+              "BufferSize": 128
             }
           },
           {
@@ -49,7 +49,7 @@
             "Wildcard1": {
               "TextId": "__SingleUse_GOO3",
               "UseBuffer": true,
-              "BufferSize": 20
+              "BufferSize": 512
             }
           },
           {
@@ -68,7 +68,7 @@
             "Wildcard1": {
               "TextId": "__SingleUse_1TOM",
               "UseBuffer": true,
-              "BufferSize": 20
+              "BufferSize": 128
             }
           },
           {

@@ -88,7 +88,8 @@ KEEP extern const touchgfx::Unicode::UnicodeChar texts_all_languages[] TEXT_LOCA
     0x57, 0x65, 0x64, 0x0, // @141 "Wed"
     0x2, 0x0, // @145 "<>"
     0x25, 0x0, // @147 "%"
-    0x30, 0x0 // @149 "0"
+    0x2d, 0x0, // @149 "-"
+    0x30, 0x0 // @151 "0"
 };
 
 TEXT_LOCATION_FLASH_PRAGMA

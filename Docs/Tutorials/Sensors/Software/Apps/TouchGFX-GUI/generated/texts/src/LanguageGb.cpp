@@ -68,9 +68,9 @@ KEEP extern const uint32_t indicesGb[] TEXT_LOCATION_FLASH_ATTRIBUTE = {
     14,  // T_TEXT_LOW_BR_BATTERY: "Low\nBattery\n"
     0,   // T_TEXT_SHUTTING_BR_DOWN: "Shutting\ndown"
     49,  // T_TEXT_TURN_OFF: "Turn off"
-    149, // T___SINGLEUSE_1TOM: "0"
-    149, // T___SINGLEUSE_GOO3: "0"
+    149, // T___SINGLEUSE_1TOM: "-"
+    149, // T___SINGLEUSE_GOO3: "-"
     27,  // T___SINGLEUSE_JJ5T: "Trust level:"
-    149, // T___SINGLEUSE_XK5X: "0"
-    149  // T_COUNTER: "0"
+    149, // T___SINGLEUSE_XK5X: "-"
+    151  // T_COUNTER: "0"
 };

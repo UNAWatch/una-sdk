@@ -133,45 +133,39 @@ void MainView::handleKeyEvent(uint8_t key)
 void MainView::refreshDisplay()
 {
     // Format sensor data based on verbosity
-    char buffer[256];
-    int len = 0;
+    int pos = 0;
 
     // Time
-    len += snprintf(buffer + len, sizeof(buffer) - len, "Time: %lu\n", rtcTime);
+    pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Time: %lu\n", rtcTime));
 
     if (verbosity >= BASIC) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\n", hr);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", steps);
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "HR: %.0f BPM\n", hr));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Steps: %lu\n", steps));
     }
 
     if (verbosity >= DETAILED) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.2f, %.2f, %.0f\n", gpsLat, gpsLon, gpsAlt);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Alt: %.1f Pa, %.1f m\n", altPressure, altAltitude);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Acc: %.2f, %.2f, %.2f\n", accX, accY, accZ);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", floors);
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "GPS: %.2f, %.2f, %.0f\n", gpsLat, gpsLon, gpsAlt));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Alt: %.1f Pa, %.1f m\n", altPressure, altAltitude));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Acc: %.2f, %.2f, %.2f\n", accX, accY, accZ));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Floors: %lu\n", floors));
     }
 
     if (verbosity >= FULL) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Mag: %.2f, %.2f, %.2f\n", magX, magY, magZ);
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Mag: %.2f, %.2f, %.2f\n", magX, magY, magZ));
     }
 
-    Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE);
     text_body.invalidate();
 }
 
 void MainView::refreshStats()
 {
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer), "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f",
-             serviceCpu, guiCpu, txMsgPerSec, rxMsgPerSec, txBytesPerSec, rxBytesPerSec);
-    Unicode::strncpy(text_statsBuffer, buffer, TEXT_STATS_SIZE);
+    Unicode::snprintf(text_statsBuffer, TEXT_STATS_SIZE, "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f",
+                      serviceCpu, guiCpu, txMsgPerSec, rxMsgPerSec, txBytesPerSec, rxBytesPerSec);
     text_stats.invalidate();
 }
 
 void MainView::refreshBattery()
 {
-    char buffer[64];
-    snprintf(buffer, sizeof(buffer), "Battery: %.1f%%", batteryLevel);
-    Unicode::strncpy(text_headerBuffer, buffer, TEXT_HEADER_SIZE);
+    Unicode::snprintf(text_headerBuffer, TEXT_HEADER_SIZE, "Battery: %.1f%%", batteryLevel);
     text_header.invalidate();
 }
