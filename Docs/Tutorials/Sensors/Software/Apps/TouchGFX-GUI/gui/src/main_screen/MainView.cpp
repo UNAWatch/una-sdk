@@ -36,12 +36,18 @@ void MainView::tearDownScreen()
     MainViewBase::tearDownScreen();
 }
 
+void MainView::handleTickEvent()
+{
+    refreshDisplay();
+    refreshStats();
+    refreshBattery();
+}
+
 void MainView::updateHR(float hr, float tl)
 {
     this->hr = hr;
     this->hrtl = tl;
     LOG_DEBUG("HR: %f BPM\n", hr);
-    refreshDisplay();
 }
 
 void MainView::updateGPS(float lat, float lon, float alt)
@@ -49,13 +55,11 @@ void MainView::updateGPS(float lat, float lon, float alt)
     this->gpsLat = lat;
     this->gpsLon = lon;
     this->gpsAlt = alt;
-    refreshDisplay();
 }
 
 void MainView::updateElevation(float elevation)
 {
     this->elevation = elevation;
-    refreshDisplay();
 }
 
 void MainView::updateAccelerometer(float x, float y, float z)
@@ -63,31 +67,26 @@ void MainView::updateAccelerometer(float x, float y, float z)
     this->accX = x;
     this->accY = y;
     this->accZ = z;
-    refreshDisplay();
 }
 
 void MainView::updateStepCounter(uint32_t steps)
 {
     this->steps = steps;
-    refreshDisplay();
 }
 
 void MainView::updateFloorCounter(uint32_t floors)
 {
     this->floors = floors;
-    refreshDisplay();
 }
 
 void MainView::updateCompass(float heading)
 {
     this->heading = heading;
-    refreshDisplay();
 }
 
 void MainView::updateRTC(uint32_t time)
 {
     this->rtcTime = time;
-    refreshDisplay();
 }
 
 void MainView::updateStats(float serviceCpu, float guiCpu, float txMsgPerSec, float rxMsgPerSec, float txBytesPerSec, float rxBytesPerSec)
@@ -98,13 +97,11 @@ void MainView::updateStats(float serviceCpu, float guiCpu, float txMsgPerSec, fl
     this->rxMsgPerSec = rxMsgPerSec;
     this->txBytesPerSec = txBytesPerSec;
     this->rxBytesPerSec = rxBytesPerSec;
-    refreshStats();
 }
 
 void MainView::updateBattery(float level)
 {
     this->batteryLevel = level;
-    refreshBattery();
 }
 
 void MainView::handleKeyEvent(uint8_t key)
@@ -112,13 +109,11 @@ void MainView::handleKeyEvent(uint8_t key)
     if (key == Gui::Config::Button::L1) {
         verbosity = static_cast<VerbosityLevel>((verbosity + 1) % 3);
         LOG_DEBUG("Verbosity changed to %d\n", (int)verbosity);
-        refreshDisplay();
     }
 
     if (key == Gui::Config::Button::L2) {
         verbosity = static_cast<VerbosityLevel>((verbosity - 1 + 3) % 3);
         LOG_DEBUG("Verbosity changed to %d\n", (int)verbosity);
-        refreshDisplay();
     }
 
     if (key == Gui::Config::Button::R1) {
