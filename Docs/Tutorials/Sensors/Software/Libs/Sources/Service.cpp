@@ -42,7 +42,7 @@ void Service::run()
     mSensorHR.connect();
     mSensorGPS.connect();
     mSensorAltimeter.connect();
-    // mSensorAccelerometer.connect();
+    mSensorAccelerometer.connect();
     mSensorStepCounter.connect();
     mSensorFloorCounter.connect();
 
