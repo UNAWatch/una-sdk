@@ -40,7 +40,7 @@ void MainView::updateHR(float hr, float tl)
 {
     this->hr = hr;
     this->hrtl = tl;
-    LOG_DEBUG("HR: %.0f BPM\n", hr);
+    LOG_DEBUG("HR: %f BPM\n", hr);
     refreshDisplay();
 }
 
@@ -139,19 +139,19 @@ void MainView::refreshDisplay()
     pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Time: %lu\n", rtcTime));
 
     if (verbosity >= BASIC) {
-        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "HR: %.0f BPM\n", hr));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "HR: %f BPM\n", hr));
         pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Steps: %lu\n", steps));
     }
 
     if (verbosity >= DETAILED) {
-        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "GPS: %.2f, %.2f, %.0f\n", gpsLat, gpsLon, gpsAlt));
-        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Alt: %.1f Pa, %.1f m\n", altPressure, altAltitude));
-        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Acc: %.2f, %.2f, %.2f\n", accX, accY, accZ));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "GPS: %f, %f, %f\n", gpsLat, gpsLon, gpsAlt));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Alt: %f Pa, %f m\n", altPressure, altAltitude));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Acc: %f, %f, %f\n", accX, accY, accZ));
         pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Floors: %lu\n", floors));
     }
 
     if (verbosity >= FULL) {
-        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Mag: %.2f, %.2f, %.2f\n", magX, magY, magZ));
+        pos += Unicode::strlen(Unicode::snprintf(text_bodyBuffer + pos, TEXT_BODY_SIZE - pos, "Mag: %f, %f, %f\n", magX, magY, magZ));
     }
 
     text_body.invalidate();
@@ -159,13 +159,13 @@ void MainView::refreshDisplay()
 
 void MainView::refreshStats()
 {
-    Unicode::snprintf(text_statsBuffer, TEXT_STATS_SIZE, "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f",
+    Unicode::snprintf(text_statsBuffer, TEXT_STATS_SIZE, "CPU S: %f%% G: %f%%\nMsg Tx: %f Rx: %f\nBytes Tx: %f Rx: %f",
                       serviceCpu, guiCpu, txMsgPerSec, rxMsgPerSec, txBytesPerSec, rxBytesPerSec);
     text_stats.invalidate();
 }
 
 void MainView::refreshBattery()
 {
-    Unicode::snprintf(text_headerBuffer, TEXT_HEADER_SIZE, "Battery: %.1f%%", batteryLevel);
+    Unicode::snprintf(text_headerBuffer, TEXT_HEADER_SIZE, "Battery: %f%%", batteryLevel);
     text_header.invalidate();
 }
