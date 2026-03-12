@@ -177,10 +177,10 @@ void MainView::refreshDisplay()
 
     if (verbosity > FULL && verbosity < VERB_LEVEL_MAX) {
         // Smaller text size 50 for per-sensor
-        text_body.setTypedText(TypedText(T_TMP_REGULAR_9));
+        text_body.setTypedText(TypedText(T_TMP_REGULAR_18));
     } else {
         // Default size
-        text_body.setTypedText(TypedText(T_TMP_REGULAR_18)); // assume exists
+        text_body.setTypedText(TypedText(T_TMP_REGULAR_9)); // assume exists
     }
     LOG_DEBUG("Current verbosity: %d\\n", (int)verbosity);
     Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE);
