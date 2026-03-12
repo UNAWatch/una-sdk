@@ -5,7 +5,7 @@
 #include "SDK/UnaLogger/Logger.h"
 
 MainView::MainView()
-    : verbosity(BASIC),
+    : verbosity(FULL),
       hr(0), hrtl(0),
       gpsLat(0), gpsLon(0), gpsAlt(0),
       elevation(0),
@@ -108,12 +108,12 @@ void MainView::updateBattery(float level)
 void MainView::handleKeyEvent(uint8_t key)
 {
     if (key == Gui::Config::Button::L1) {
-        verbosity = static_cast<VerbosityLevel>((verbosity + 1) % 3);
+        verbosity = static_cast<VerbosityLevel>((verbosity + 1) % VERB_LEVEL_MAX);
         LOG_DEBUG("Verbosity changed to %d\n", (int)verbosity);
     }
 
     if (key == Gui::Config::Button::L2) {
-        verbosity = static_cast<VerbosityLevel>((verbosity - 1 + 3) % 3);
+        verbosity = static_cast<VerbosityLevel>((verbosity - 1 + VERB_LEVEL_MAX) % VERB_LEVEL_MAX);
         LOG_DEBUG("Verbosity changed to %d\n", (int)verbosity);
     }
 
@@ -135,22 +135,56 @@ void MainView::refreshDisplay()
     // Time
     len += snprintf(buffer + len, sizeof(buffer) - len, "# %lu\nTime: %lu\n", mFrameCounter, rtcTime);
 
-    if (verbosity >= BASIC) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\n", hr);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", steps);
+    if (verbosity <= FULL) {
+        // Group display
+        if (verbosity >= BASIC) {
+            len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\n", hr);
+            len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", steps);
+        }
+        if (verbosity >= DETAILED) {
+            len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.2f, %.2f, %.0f\n", gpsLat, gpsLon, gpsAlt);
+            len += snprintf(buffer + len, sizeof(buffer) - len, "Elev: %.1f m\n", elevation);
+            len += snprintf(buffer + len, sizeof(buffer) - len, "Acc: %.2f, %.2f, %.2f\n", accX, accY, accZ);
+            len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", floors);
+        }
+        if (verbosity >= FULL) {
+            len += snprintf(buffer + len, sizeof(buffer) - len, "Compass: %.0f°\n", heading);
+        }
+    } else if (verbosity < VERB_LEVEL_MAX) {
+        // Per-sensor detailed display
+        switch (verbosity) {
+            case HR:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\nTL: %.0f\n", hr, hrtl);
+                break;
+            case GPS:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.6f, %.6f\nAlt: %.1f m\n", gpsLat, gpsLon, gpsAlt);
+                break;
+            case ALT:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "Elevation: %.1f m\n", elevation);
+                break;
+            case ACC:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "Accelerometer:\nX: %.2f G\nY: %.2f G\nZ: %.2f G\n", accX, accY, accZ);
+                break;
+            case STEP:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", steps);
+                break;
+            case FLOOR:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", floors);
+                break;
+            case MAG:
+                len += snprintf(buffer + len, sizeof(buffer) - len, "Compass: %.0f°\n", heading);
+                break;
+        }
     }
 
-    if (verbosity >= DETAILED) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.2f, %.2f, %.0f\n", gpsLat, gpsLon, gpsAlt);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Elev: %.1f m\n", elevation);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Acc: %.2f, %.2f, %.2f\n", accX, accY, accZ);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", floors);
+    if (verbosity > FULL && verbosity < VERB_LEVEL_MAX) {
+        // Smaller text size 50 for per-sensor
+        text_body.setTypedText(TypedText(T_TMP_MEDIUM_50));
+    } else {
+        // Default size
+        text_body.setTypedText(TypedText(T_TMP_REGULAR_18)); // assume exists
     }
-
-    if (verbosity >= FULL) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Compass: %.0f°\n", heading);
-    }
-
+    LOG_DEBUG("Current verbosity: %d\\n", (int)verbosity);
     Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE);
     text_body.invalidate();
 }

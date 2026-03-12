@@ -245,10 +245,10 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             float y = view.f[1];
             float heading = atan2f(y, x) * (180.0f / M_PI);
             if (heading < 0.0f) heading += 360.0f;
-            uint32_t nowMs = static_cast<uint32_t>(mKernel.sys.getTimeMs());
+            auto nowMs = mKernel.sys.getTimeMs();
             if (nowMs - mLastMagTimeMs >= 100) {
                 LOG_DEBUG("Compass: %.1f deg (X:%.2f Y:%.2f)\n", heading, x, y);
-                mSender.updateCompass(heading);
+                mSender.updateCompass(nowMs, heading);
                 mTxBytes += sizeof(CustomMessage::CompassValues);
                 mLastMagTimeMs = nowMs;
             }
