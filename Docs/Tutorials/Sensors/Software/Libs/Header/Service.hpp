@@ -26,6 +26,7 @@ private:
     SDK::Sensor::Connection  mSensorAccelerometer;
     SDK::Sensor::Connection  mSensorStepCounter;
     SDK::Sensor::Connection  mSensorFloorCounter;
+    SDK::Sensor::Connection  mSensorMagneticField;
     float                    mHR;
     float                    mHRTL;
     // CPU time tracking
@@ -38,6 +39,7 @@ private:
     uint32_t                 mRxBytes;
     uint32_t                 mLastStatsTimeMs;
     uint32_t                 mLastAccTimeMs;
+    uint32_t                 mLastMagTimeMs;
 
     void onStartGUI();
     void onStopGUI();
