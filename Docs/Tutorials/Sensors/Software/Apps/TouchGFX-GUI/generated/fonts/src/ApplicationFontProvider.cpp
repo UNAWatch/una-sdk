@@ -9,7 +9,7 @@ touchgfx::Font* ApplicationFontProvider::getFont(touchgfx::FontId typography)
 {
     switch (typography)
     {
-    case Typography::POPPINS_REGULAR_18:
+    case Typography::POPPINS_REGULAR_9:
         // Poppins_Regular_9_2bpp
         return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[0]);
     case Typography::POPPINS_MEDIUM_10:
