@@ -96,6 +96,26 @@ def format_semver_u32(v: int) -> str:
     c =  v        & 0xFF
     return f"{a}.{b}.{c}"
 
+def make_file_safe_name(name: str, fallback: str = "app") -> str:
+    if not name:
+        return fallback
+
+    safe = name.strip()
+    safe = re.sub(r'\s+', '_', safe)
+    safe = re.sub(r'[^\w.-]', '_', safe, flags=re.UNICODE)
+    safe = re.sub(r'_+', '_', safe)
+    safe = safe.strip(' ._')
+
+    reserved = {
+        "CON", "PRN", "AUX", "NUL",
+        "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+    }
+    if safe.upper() in reserved:
+        safe = f"_{safe}"
+
+    return safe or fallback
+
 logging.basicConfig(level=logging.INFO)
 
 # ---------- args ----------
@@ -158,7 +178,9 @@ normal_icon  = convert_icon_to_abgr2222(args.normal_icon)
 small_icon   = convert_icon_to_abgr2222(args.small_icon)
 
 service_size       = len(service_data)
-name_bytes         = args.name.encode('utf-8')[:15].ljust(16, b'\0')
+display_name       = args.name
+file_name_base     = make_file_safe_name(display_name)
+name_bytes         = display_name.encode('utf-8')[:15].ljust(16, b'\0')
 normal_icon_size   = len(normal_icon)
 small_icon_size    = len(small_icon)
 
@@ -183,7 +205,7 @@ final_data = blob_without_crc + struct.pack("<I", crc)
 
 # ---------- output ----------
 out_dir.mkdir(parents=True, exist_ok=True)
-output_path = out_dir / f"{args.name}_{app_version}.uapp"
+output_path = out_dir / f"{file_name_base}_{app_version}.uapp"
 with open(output_path, "wb") as f:
     f.write(final_data)
 
@@ -204,7 +226,7 @@ logging.info(f"Image          : {output_path} ({len(final_data)} bytes)")
 
 # ---------- optional .h ----------
 if args.header:
-    header_filename = f"{args.name}_{app_version}.h"
+    header_filename = f"{file_name_base}_{app_version}.h"
     header_path = output_path.parent / header_filename
     macro_guard = '__' + header_path.stem.upper().replace('.', '_').replace('-', '_') + '_H__'
     array_name = f"{args.name}_merged".replace("-", "_")
