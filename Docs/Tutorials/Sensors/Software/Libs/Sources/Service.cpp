@@ -4,7 +4,7 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserAccelerometer.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserStepCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFloorCounter.hpp"
-// #include "SDK/SensorLayer/DataParsers/SensorDataParserMagneticField.hpp"
+#include "SDK/SensorLayer/SensorDataView.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
 #include <cmath>
 
@@ -24,6 +24,7 @@ Service::Service(SDK::Kernel& kernel)
     , mSensorAccelerometer(SDK::Sensor::Type::ACCELEROMETER, 0, 0)
     , mSensorStepCounter(SDK::Sensor::Type::STEP_COUNTER, 0, 0)
     , mSensorFloorCounter(SDK::Sensor::Type::FLOOR_COUNTER, 0, 0)
+    , mSensorMagneticField(SDK::Sensor::Type::MAGNETIC_FIELD, 0, 0)
     , mHR(0)
     , mHRTL(0)
     , mServiceCpuTimeMs(0)
@@ -42,9 +43,11 @@ void Service::run()
     mSensorHR.connect();
     mSensorGPS.connect();
     mSensorAltimeter.connect();
-    mSensorAccelerometer.connect(10, 10);
+    mSensorAccelerometer.connect(0.1f, 0);
     mSensorStepCounter.connect();
     mSensorFloorCounter.connect();
+    mSensorMagneticField.connect();
+    LOG_INFO("Note: No BLE calibration at the moment. BLE calibration is required for proper sensor operation, especially for HR.\n");
 
 
     mLastStatsTimeMs = mKernel.sys.getTimeMs();
@@ -69,6 +72,7 @@ void Service::run()
                     mSensorAccelerometer.disconnect();
                     mSensorStepCounter.disconnect();
                     mSensorFloorCounter.disconnect();
+                    mSensorMagneticField.disconnect();
                     // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -148,6 +152,7 @@ void Service::run()
     // mSensorAccelerometer.disconnect();
     mSensorStepCounter.disconnect();
     mSensorFloorCounter.disconnect();
+    mSensorMagneticField.disconnect();
 
     LOG_INFO("thread stopped\n");
 }
@@ -233,6 +238,19 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 LOG_DEBUG("Floors: %u\n", floors);
                 mSender.updateFloors(timestamp, floors);
                 mTxBytes += sizeof(CustomMessage::FloorsValues);
+            }
+        } else if (mSensorMagneticField.matchesDriver(handle)) {
+            SDK::Sensor::DataView view(data[0]);
+            float x = view.f[0];
+            float y = view.f[1];
+            float heading = atan2f(y, x) * (180.0f / M_PI);
+            if (heading < 0.0f) heading += 360.0f;
+            uint32_t nowMs = static_cast<uint32_t>(mKernel.sys.getTimeMs());
+            if (nowMs - mLastMagTimeMs >= 100) {
+                LOG_DEBUG("Compass: %.1f deg (X:%.2f Y:%.2f)\n", heading, x, y);
+                mSender.updateCompass(heading);
+                mTxBytes += sizeof(CustomMessage::CompassValues);
+                mLastMagTimeMs = nowMs;
             }
         }
     }

@@ -142,13 +142,13 @@ void MainView::refreshDisplay()
 
     if (verbosity >= DETAILED) {
         len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.2f, %.2f, %.0f\n", gpsLat, gpsLon, gpsAlt);
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Alt: %.1f Pa, %.1f m\n", altPressure, altAltitude);
+        len += snprintf(buffer + len, sizeof(buffer) - len, "Elev: %.1f m\n", elevation);
         len += snprintf(buffer + len, sizeof(buffer) - len, "Acc: %.2f, %.2f, %.2f\n", accX, accY, accZ);
         len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", floors);
     }
 
     if (verbosity >= FULL) {
-        len += snprintf(buffer + len, sizeof(buffer) - len, "Mag: %.2f, %.2f, %.2f\n", magX, magY, magZ);
+        len += snprintf(buffer + len, sizeof(buffer) - len, "Compass: %.0f°\n", heading);
     }
 
     Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE);
