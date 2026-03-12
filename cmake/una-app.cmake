@@ -235,7 +235,7 @@ function(una_app_build_app)
     set(OUTPUT_COPY_COMMANDS "")
     foreach(files IN LISTS OUTPUT_PATH)
         list(APPEND OUTPUT_COPY_COMMANDS
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}_${BUILD_VERSION}.uapp ${files}/
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/*.uapp ${files}/
         )
     endforeach()
 
@@ -254,9 +254,12 @@ function(una_app_build_app)
     else()
         message("App autostart is OFF")
     endif()
+    if(NOT DEFINED APP_USER_NAME)
+        set(APP_USER_NAME ${APP_NAME})
+    endif()
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_USER_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
