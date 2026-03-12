@@ -133,8 +133,6 @@ void MainView::refreshDisplay()
     int len = 0;
 
     // Time
-    len += snprintf(buffer + len, sizeof(buffer) - len, "# %lu\nTime: %lu\n", mFrameCounter, rtcTime);
-
     if (verbosity <= FULL) {
         // Group display
         if (verbosity >= BASIC) {
@@ -179,7 +177,7 @@ void MainView::refreshDisplay()
 
     if (verbosity > FULL && verbosity < VERB_LEVEL_MAX) {
         // Smaller text size 50 for per-sensor
-        text_body.setTypedText(TypedText(T_TMP_MEDIUM_50));
+        text_body.setTypedText(TypedText(T_TMP_SEMIBOLD_30));
     } else {
         // Default size
         text_body.setTypedText(TypedText(T_TMP_REGULAR_18)); // assume exists
@@ -201,7 +199,8 @@ void MainView::refreshStats()
 void MainView::refreshBattery()
 {
     char buffer[64];
-    snprintf(buffer, sizeof(buffer), "Battery: %.1f%%", batteryLevel);
+    auto len = snprintf(buffer, sizeof(buffer), "Battery: %.1f%%/", batteryLevel);
+    len += snprintf(buffer + len, sizeof(buffer) - len, "# %lu\nTime: %lu\n", mFrameCounter, rtcTime);
     Unicode::strncpy(text_headerBuffer, buffer, TEXT_HEADER_SIZE);
     text_header.invalidate();
 }
