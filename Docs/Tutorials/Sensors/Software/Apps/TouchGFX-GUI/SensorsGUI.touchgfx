@@ -17,9 +17,9 @@
             "Type": "TextArea",
             "Name": "text_stats",
             "X": 60,
-            "Y": 169,
+            "Y": 181,
             "Width": 114,
-            "Height": 71,
+            "Height": 59,
             "TextId": "__SingleUse_GCZD",
             "TextRotation": "0",
             "Color": {
@@ -36,9 +36,9 @@
           {
             "Type": "TextArea",
             "Name": "text_body",
-            "Y": 40,
+            "Y": 47,
             "Width": 240,
-            "Height": 129,
+            "Height": 134,
             "TextId": "__SingleUse_IQ58",
             "TextRotation": "0",
             "Color": {
@@ -56,8 +56,9 @@
             "Type": "TextArea",
             "Name": "text_header",
             "X": 67,
+            "Y": 6,
             "Width": 107,
-            "Height": 40,
+            "Height": 41,
             "TextId": "__SingleUse_CVUV",
             "TextRotation": "0",
             "Color": {
