@@ -29,7 +29,7 @@ protected:
     virtual void handleTickEvent() override;
 
 private:
-    enum VerbosityLevel { BASIC, DETAILED, FULL };
+    enum VerbosityLevel { BASIC, DETAILED, FULL, HR, GPS, ALT, ACC, STEP, FLOOR, MAG, VERB_LEVEL_MAX };
     VerbosityLevel verbosity;
 
     // Sensor data
