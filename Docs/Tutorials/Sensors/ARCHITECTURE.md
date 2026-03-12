@@ -5,20 +5,20 @@
 In this tutorial, we implement a sensors dashboard app that subscribes to available sensors at **maximum frequency** (period=0, count=0 except Accelerometer), processes new message structures with **timestamps** where available, and displays data on a **single GUI screen**:
 
 - **Top**: Battery level (TODO: implement)
-- **Middle multiline text**: Sensor data with **L1/L2 verbosity levels** (BASIC/DETAILED/FULL)
+- **Middle multiline text**: Sensor data with **L1/L2 verbosity levels** (BASIC/DETAILED/FULL and individual sensor views)
 - **Bottom**: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)
 
 ## List of Implemented Sensors
 
 | Sensor | Description | Notes |
 |--------|-------------|-------|
-| Heart Rate | Live BPM + Trust Level | BLE calibration TODO |
-| GPS Location | Lat/Long/Alt (float) | Always on; toggle TODO |
+| Heart Rate | Live BPM + Trust Level | |
+| GPS Location | Lat/Long/Alt (double) | Always on; toggle TODO |
 | Altimeter | Elevation (m) | Barometric pressure parsing TODO |
-| Accelerometer | X/Y/Z G-forces | connect(period=10, count=10); sender throttled ~100ms |
+| Accelerometer | X/Y/Z G-forces | connect(0.1f, 0); sender throttled ~100ms |
 | Step Counter | Total steps | Cumulative |
 | Floor Counter | Floors ascended | Cumulative; parser.getFloorsUp() |
-| Magnetometer | X/Y/Z fields (for compass) | Parsing & connection pending; heading computation TODO |
+| Magnetometer | X/Y/Z fields (for compass) | Connected as MAGNETIC_FIELD; heading computed from X/Y fields |
 | RTC | Time (sec since boot) | From kernel sys.getTimeMs()/1000; not sensor |
 
 ## Architecture Overview
@@ -48,7 +48,7 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type ACCELEROMETER_VALUES = 0x00000004;
     constexpr SDK::MessageType::Type STEP_COUNTER_VALUES = 0x00000005;
     constexpr SDK::MessageType::Type FLOORS_VALUES = 0x00000006;
-    constexpr SDK::MessageType::Type COMPASS_VALUES = 0x00000007; // pending
+    constexpr SDK::MessageType::Type COMPASS_VALUES = 0x00000007;
     constexpr SDK::MessageType::Type STATS_VALUES = 0x00000008;
     constexpr SDK::MessageType::Type RTC_VALUES = 0x00000009;
 
@@ -97,7 +97,7 @@ SDK::Sensor::Connection mSensorFloorCounter{SDK::Sensor::Type::FLOOR_COUNTER, 0,
 // CustomMessage::GUISender mSender;
 ```
 
-In `run()` [`Service.cpp`](Docs/Tutorials/Sensors/Software/Libs/Sources/Service.cpp): connect all (acc.connect(10,10)), loop getMessage:
+In `run()` [`Service.cpp`](Docs/Tutorials/Sensors/Software/Libs/Sources/Service.cpp): connect all (acc.connect(0.1f, 0)), loop getMessage:
 
 ```cpp
 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
@@ -116,11 +116,12 @@ if (mSensorHR.matchesDriver(handle)) {
         mSender.updateHeartRate(parser.getBpm(), parser.getTrustLevel());
     }
 }
-// Similar for GPS: parser.getLatitude() etc (float), updateLocation(ts, lat,lon,alt);
+// Similar for GPS: parser.getLatitude() etc (double), updateLocation(ts, lat,lon,alt);
 // Altimeter: updateElevation(ts, parser.getAltitude());
 // Accel: if (nowMs - mLastAccTimeMs >= 100) updateAccelerometer(ts, x,y,z);
 // Steps: updateStepCounter(ts, parser.getStepCount());
 // Floors: updateFloors(ts, parser.getFloorsUp());
+// Compass: compute heading from magnetic X/Y fields, updateCompass(ts, heading);
 ```
 
 Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec), `mSender.updateStats(...)`, `updateRtc(timeMs/1000)`.
@@ -144,25 +145,12 @@ In [`MainView.hpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/includ
 
 Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
-`handleKeyEvent`: L1: verbosity++ %3, L2: verbosity-- %3 (BASIC/DETAILED/FULL), R2: presenter->exit()
+`handleKeyEvent`: L1: verbosity++ % VERB_LEVEL_MAX, L2: verbosity-- % VERB_LEVEL_MAX (BASIC/DETAILED/FULL/HR/GPS/ALT/ACC/STEP/FLOOR/MAG), R1: TODO GPS toggle, R2: presenter->exit()
 
 `handleTickEvent()` every tick: `refreshDisplay()` `refreshStats()` `refreshBattery()`
 
-`refreshDisplay()`: format multiline in `text_body`:
+`refreshDisplay()`: format multiline in `text_body` based on verbosity level, with group display for BASIC/DETAILED/FULL and per-sensor detailed views for individual sensors.
 
-```
-# %lu
-Time: %lu
-HR: %.0f BPM
-Steps: %lu
-[DETAILED]
-GPS: %.2f, %.2f, %.0f
-Alt: %.1f Pa, %.1f m  // TODO pressure
-Acc: %.2f, %.2f, %.2f
-Floors: %lu
-[FULL]
-Mag: %.2f, %.2f, %.2f  // TODO
-```
 Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE); invalidate
 
 Header: `refreshBattery()` "Battery: %.1f%%" `text_header`  // TODO impl
@@ -171,11 +159,9 @@ Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes T
 
 ### Additional Notes
 
-- **BLE Calibration**: TODO send before HR subscription.
 - **GPS On/Off**: TODO R1 toggle, service connect/disconnect.
-- **Battery**: updateBattery() exists but not called; TODO from kernel BatteryLevel?
+- **Battery**: updateBattery() exists but not called; TODO implement battery level retrieval
 - **Altimeter Pressure**: TODO parser.getPressure()?
-- **Magnetometer/Compass**: TODO subscribe, parse fields, compute heading.
-- **Max Frequency**: period=0,count=0 except Accel connect(10,10); sender Accel throttle 100ms.
-- **RTC**: Kernel time, not SDK::Sensor::RTC.
+- **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
+- **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
 - Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).
