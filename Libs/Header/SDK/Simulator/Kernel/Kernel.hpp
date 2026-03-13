@@ -18,7 +18,6 @@
 #include "SDK/Simulator/Kernel/Mock/AppMemory.hpp"
 #include "SDK/Simulator/Kernel/Mock/FileSystem.hpp"
 #include "SDK/Simulator/Kernel/Mock/Logger.hpp"
-#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -42,11 +41,10 @@ public:
     /**
      * @brief   Constructor.
      * @param   serviceControl: Reference to the service control object.
-     * @param   sensoreCore: Pointer to the sensor core interface (optional).
      * @param   srvApp: Pointer to the Service App (only for GUI). 
      *          If not 'nullptr', the kernel will use mutexes for synchronization.
      */
-    Kernel(const char* name, SDK::Simulator::Sensors::ISensorCore* sensoreCore = nullptr);
+    Kernel(const char* name);
     ~Kernel() = default;
 
     SDK::Kernel& getKernel();
@@ -81,7 +79,6 @@ public:
     void setIFileSystem(SDK::Interface::IFileSystem* ifs);
 
 protected:
-    Sensors::ISensorCore* mSensoreCore;
     const bool            mIsServise;
 
 private:

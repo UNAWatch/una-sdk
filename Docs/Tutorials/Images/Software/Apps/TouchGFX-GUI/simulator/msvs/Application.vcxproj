@@ -18,7 +18,6 @@
     <ClCompile Include="$(ApplicationRoot)\simulator\main.cpp"/>
     <ClCompile Include="$(ApplicationRoot)\generated\simulator\src\mainBase.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Sensors\SensorCore.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit.c"/>
@@ -26,21 +25,20 @@
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_crc.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\FitHelper\FitHelper.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\SensorLayer\SensorConnection.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppComm.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppCore.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppMessageCore.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\KernelMessageDispatcher.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\MessageManager.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Kernel.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Backlight.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Buzzer.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\System.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Vibro.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\OS\OS.cpp"/>
-    <ClCompile Include="..\..\..\..\Libs\Sources\ActivityWriter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\SensorLayer\SensorConnection.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppComm.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppCore.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppMessageCore.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\KernelMessageDispatcher.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\MessageManager.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Kernel.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\Backlight.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\Buzzer.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\System.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\Vibro.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\OS\OS.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\common\FrontendApplicationBase.cpp"/>
     <ClCompile Include="..\..\gui\src\model\Model.cpp"/>
@@ -49,7 +47,6 @@
     <ClCompile Include="..\..\gui\src\main_screen\MainPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\main_screen\MainView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp"/>
-    <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -205,8 +202,6 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Interfaces\IVibro.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Interfaces\IApp.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Interfaces\IAppMemAllocator.hpp"/>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Sensors\ISensorCore.hpp"/>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Sensors\SensorCore.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Mock\App.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Mock\AppMemAllocator.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Mock\Backlight.hpp"/>
@@ -232,16 +227,15 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelBuilder.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderGUI.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\CommandMessages.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\MessageBase.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\MessageGuard.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\MessageTypes.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\SensorLayerMessages.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\Kernel\Kernel.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\Kernel\Mock\System.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\OS\OS.hpp"/>
-    <ClInclude Include="..\..\..\..\Libs\Header\ActivityWriter.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\CommandMessages.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageBase.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageGuard.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageTypes.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\SensorLayerMessages.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Kernel.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Mock\System.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\OS\OS.hpp"/>
     <ClInclude Include="..\..\..\..\Libs\Header\GSModelEvents\G2SEvents.hpp"/>
     <ClInclude Include="..\..\..\..\Libs\Header\GSModelEvents\S2GEvents.hpp"/>
     <ClInclude Include="..\..\..\..\Libs\Header\Service.hpp"/>
@@ -260,7 +254,6 @@
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>
