@@ -10,7 +10,6 @@
 
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/Simulator/Kernel/Kernel.hpp"
-#include "SDK/Simulator/Sensors/SensorCore.hpp"
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
@@ -53,6 +52,9 @@ static int runTouchGFX(SDK::App::Comm&         appComm,
                        int                     argc,
                        char**                  argv)
 {
+	// Initialize Logger with Service's kernel. In real app Service and GUI will have each its own kernel.
+    Logger_init(srvKernel.getKernel().log);
+	
     // Save Service's kernel for global access
     SDK::KernelProviderService::CreateInstance(&srvKernel.getKernel());
 
@@ -84,9 +86,6 @@ static int runTouchGFX(SDK::App::Comm&         appComm,
     //// to.
     touchgfx_enable_stdio();
 
-    // Initialize Logger with Service's kernel. In real app Service and GUI will have each its own kernel.
-    Logger_init(srvKernel.getKernel().log);
-
     // Start service thread
     std::thread serviceThread(serviceThreadFunction, &service);
     std::thread kernelThread(kernelThreadFunction, &appCore);
@@ -116,17 +115,15 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     char** argv = touchgfx::HALSDL2::getArgv(&argc);
 #endif
 
-    // Create kernel objects and service control
-    SDK::Simulator::Sensors::Core sensorCore;
     SDK::App::MessageCore         appMessageCore;
 
 	SDK::Simulator::Mock::SystemService serviceSystem;
-    SDK::Simulator::Kernel serviceKernel("service", nullptr);
+    SDK::Simulator::Kernel serviceKernel("service");
 	serviceKernel.setIAppComm(appMessageCore.getAppComm().getServiceComm());
 	serviceKernel.setISystem(&serviceSystem);
 
     SDK::Simulator::Mock::SystemGUI guiSystem;
-    SDK::Simulator::Kernel guiKernel("gui", &sensorCore);
+    SDK::Simulator::Kernel guiKernel("gui");
     guiKernel.setIAppComm(appMessageCore.getAppComm().getGuiComm());
     guiKernel.setISystem(&guiSystem);
 

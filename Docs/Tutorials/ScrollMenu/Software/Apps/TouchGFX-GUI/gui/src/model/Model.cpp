@@ -21,7 +21,6 @@ Model::Model()
     , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
-    SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
 
 #if defined(SIMULATOR)
     LOG_INFO("Application is running through simulator! \n");
@@ -31,13 +30,22 @@ Model::Model()
         "       [%s]\n", fileStoreDir.c_str());
 
     LOG_INFO("\n"
-        "       Keys:                       \n"
-        "       ----------------------------\n"
-        "       1   L1,                     \n"
-        "       2   L2,                     \n"
-        "       3   R1,                     \n"
-        "       4   R2,                     \n"
-        "       z   L1+R2                   \n"
+        "---------------------------------------------------\n"
+        "|   For Simulation Button use keybaord Keys.      |\n"
+        "|       Keys Keybaord:                            |\n"
+        "|       1   L1,                                   |\n"
+        "|       2   L2,                                   |\n"
+        "|       3   R1,                                   |\n"
+        "|       4   R2                                    |\n"
+        "|                  /---------\\                    |\n"
+        "|                 /           \\                   |\n"
+        "| BUTTON UP   L1 |             | R1 BUTTON SELECT |\n"
+        "|                |     UNA     |                  |\n"
+        "|                |    WATCH    |                  |\n"
+        "| BUTTON DOWN L2 |             | R2 BUTTON BACK   |\n"
+        "|                 \\           /                   |\n"
+        "|                  \\---------/                    |\n"
+        "---------------------------------------------------\n"
     );
 #endif
 }
@@ -63,7 +71,6 @@ void Model::exitApp()
     // Cleanup recourses
 
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(nullptr);
-    SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(nullptr);
 
     mKernel.sys.exit(); // No return for real app
 
@@ -99,30 +106,3 @@ void Model::onSuspend()
     LOG_INFO("called\n");
 }
 
-// Events from Service
-
-bool Model::customMessageHandler(SDK::MessageBase *msg)
-{
-    switch (msg->getType()) {
-        /*
-         * HR_VALUES Message Handler:
-         * - Receives HR updates from service via SDK messaging
-         * - Extracts heartRate and trustLevel from message
-         * - Calls modelListener to update GUI display
-         * To enable: Uncomment case, ensure HRValues struct defined in Commands.hpp,
-         * and implement updateHR() in ModelListener/View
-         */
-        // case CustomMessage::HR_VALUES:  {
-        //     LOG_DEBUG("Update HR_VALUES\n");
-        //     auto* m = static_cast<CustomMessage::HRValues*>(msg);
-
-        //     LOG_DEBUG("hr %.1f, tl %.1f\n", m->heartRate, m->trustLevel);
-        //     // modelListener->updateHR(m->heartRate, m->trustLevel);  // Update GUI
-        // } break;
-
-        default:
-            break;
-    }
-
-    return true;
-}

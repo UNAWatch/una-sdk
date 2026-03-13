@@ -5,10 +5,8 @@
 
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
-#include "SDK/Interfaces/ICustomMessageHandler.hpp"
 
 #include "gui/common/GuiConfig.hpp"
-#include "Commands.hpp"
 
 #include <vector>
 #include <memory>
@@ -17,8 +15,7 @@ class FrontendApplication;
 class ModelListener;
 
 class Model : public touchgfx::UIEventListener,
-              public SDK::Interface::IGuiLifeCycleCallback,
-              public SDK::Interface::ICustomMessageHandler
+              public SDK::Interface::IGuiLifeCycleCallback
 {
 public:
     Model();
@@ -51,9 +48,6 @@ protected:
     virtual void onResume()  override;
     virtual void onStop()    override;
     virtual void onSuspend() override;
-
-    // ICustomMessageHandler implementation
-    virtual bool customMessageHandler(SDK::MessageBase *msg) override;
 };
 
 #endif // MODEL_HPP

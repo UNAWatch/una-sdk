@@ -262,18 +262,6 @@
     <Filter Include="Source Files\generated\gui_generated\main_screen">
       <UniqueIdentifier>8C1DD42C-926D-64F4-103E-A41C57AC0ABC</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\gui\containers">
-      <UniqueIdentifier>23C1C50B-546B-0B47-7773-A5F6555624A8</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\gui\containers">
-      <UniqueIdentifier>21E12412-D27D-6807-3DFD-636DAF598A78</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\generated\gui_generated\containers">
-      <UniqueIdentifier>9EE7E661-23A1-5935-0016-19AB82903FA2</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\generated\gui_generated\containers">
-      <UniqueIdentifier>3807A5E5-E373-9580-7A0B-28797A038833</UniqueIdentifier>
-    </Filter>
     <Filter Include="SDK\Libs\Header\Kernel">
       <UniqueIdentifier>{92e3a54a-6784-4724-a054-8e8898fbb2cc}</UniqueIdentifier>
     </Filter>
@@ -344,9 +332,6 @@
     </ClCompile>
     <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp">
       <Filter>Source Files\generated\gui_generated\main_screen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp">
-      <Filter>Source Files\gui\containers</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp">
       <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
@@ -939,9 +924,6 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\main_screen</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp">
-      <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Libs\Header\ActivityWriter.hpp">
       <Filter>Libs\Header</Filter>
