@@ -378,9 +378,6 @@
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp">
       <Filter>Libs\Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Libs\Sources\ActivityWriter.cpp">
-      <Filter>Libs\Source</Filter>
-    </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp">
       <Filter>SDK\Libs\Source\Kernel</Filter>
     </ClCompile>
@@ -948,9 +945,6 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Libs\Header\ActivityWriter.hpp">
-      <Filter>Libs\Header</Filter>
     </ClInclude>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Mock\App.hpp">
       <Filter>SDK\Libs\Header\Simulator\Kernel\Mock</Filter>

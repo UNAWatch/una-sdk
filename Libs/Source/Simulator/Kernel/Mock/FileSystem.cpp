@@ -16,9 +16,10 @@
 #include "SDK/UnaLogger/Logger.h"
 
 #include "SDK/Wrappers/StdLibWrappers.h"
-
+#include <cstring>
 #include <vector>
 #include <filesystem>
+#include <sys/stat.h>
 
 namespace SDK::Simulator::Mock
 {

@@ -18,10 +18,6 @@ const uint16_t BITMAP_BUTTON_R1R_ID = 8;
 const uint16_t BITMAP_BUTTON_R2_ID = 9;
 const uint16_t BITMAP_BUTTON_R2A_ID = 10;
 const uint16_t BITMAP_BUTTON_R2R_ID = 11;
-const uint16_t BITMAP_HEART_ID = 12;
-const uint16_t BITMAP_MENUASSETS_CROSS_ID = 13;
-const uint16_t BITMAP_MENUASSETS_CROSSYELLOW_ID = 14;
-const uint16_t BITMAP_MENUASSETS_TICK_ID = 15;
 
 namespace BitmapDatabase
 {
