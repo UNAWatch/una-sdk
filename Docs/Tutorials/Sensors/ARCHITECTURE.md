@@ -13,12 +13,12 @@ In this tutorial, we implement a sensors dashboard app that subscribes to availa
 | Sensor | Description | Notes |
 |--------|-------------|-------|
 | Heart Rate | Live BPM + Trust Level | |
-| GPS Location | Lat/Long/Alt (double) | Always on; toggle TODO |
-| Altimeter | Elevation (m) | Barometric pressure parsing TODO |
+| GPS Location | Lat/Long/Alt (double) | Always on |
+| Altimeter | Elevation (m) | Barometric pressure based |
 | Accelerometer | X/Y/Z G-forces | connect(0.1f, 0); sender throttled ~100ms |
 | Step Counter | Total steps | Cumulative |
 | Floor Counter | Floors ascended | Cumulative; parser.getFloorsUp() |
-| Magnetometer | X/Y/Z fields (for compass) | Connected as MAGNETIC_FIELD; heading computed from X/Y fields |
+| Magnetometer | X/Y/Z fields (for compass) | Heading computed from X/Y fields |
 | RTC | Time (sec since boot) | From kernel sys.getTimeMs()/1000; not sensor |
 
 ## Architecture Overview
@@ -30,7 +30,10 @@ graph LR
     Service -->|Custom Msgs w/ timestamps| Kernel[(Kernel)]
     Kernel -->|Custom Msgs| Model[GUI Model]
     Model --> View[MainView]
-    View --> Display[Single Screen:<br/>Battery Top<br/>Multiline Data (L1/L2)<br/>Bottom Stats]
+    View --> Display["Single Screen:
+        Battery Top
+        Multiline Data (L1/L2)
+        Bottom Stats"]
     Buttons[L1/L2 Buttons] -.-> View
 ```
 
@@ -159,9 +162,8 @@ Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes T
 
 ### Additional Notes
 
-- **GPS On/Off**: TODO R1 toggle, service connect/disconnect.
 - **Battery**: updateBattery() exists but not called; TODO implement battery level retrieval
-- **Altimeter Pressure**: TODO parser.getPressure()?
+- **Altimeter Pressure**: TODO parser.getPressure()
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
 - Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).
