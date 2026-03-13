@@ -4,7 +4,7 @@
 
 In this tutorial, we implement a sensors dashboard app that subscribes to available sensors at **maximum frequency** (period=0, count=0 except Accelerometer), processes new message structures with **timestamps** where available, and displays data on a **single GUI screen**:
 
-- **Top**: Battery level (TODO: implement)
+- **Top**: Battery level
 - **Middle multiline text**: Sensor data with **L1/L2 verbosity levels** (BASIC/DETAILED/FULL and individual sensor views)
 - **Bottom**: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)
 
@@ -156,14 +156,14 @@ Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
 Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE); invalidate
 
-Header: `refreshBattery()` "Battery: %.1f%%" `text_header`  // TODO impl
+Header: `refreshBattery()` "Battery: %.1f%%" `text_header`
 
 Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f" `text_stats`
 
 ### Additional Notes
 
-- **Battery**: updateBattery() exists but not called; TODO implement battery level retrieval
-- **Altimeter Pressure**: TODO parser.getPressure()
+- **Battery**: Battery level retrieval implemented using SDK::Sensor::BATTERY_LEVEL
+- **Altimeter**: Uses altitude from barometric sensor; pressure not available in parser
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
 - Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).
