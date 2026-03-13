@@ -23,6 +23,7 @@ public:
     void updateRTC(uint32_t time);
     void updateStats(float serviceCpu, float guiCpu, float txMsgPerSec, float rxMsgPerSec, float txBytesPerSec, float rxBytesPerSec);
     void updateBattery(float level);
+    void updatePressure(float pressure);
 
 protected:
     virtual void handleKeyEvent(uint8_t key) override;

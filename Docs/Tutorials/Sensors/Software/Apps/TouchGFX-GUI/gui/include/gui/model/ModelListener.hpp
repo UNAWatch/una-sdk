@@ -29,6 +29,7 @@ public:
     virtual void updateRTC(uint32_t time) {}
     virtual void updateStats(float serviceCpu, float guiCpu, float txMsgPerSec, float rxMsgPerSec, float txBytesPerSec, float rxBytesPerSec) {}
     virtual void updateBattery(float level) {}
+    virtual void updatePressure(float pressure) {}
 
 protected:
     Model* model;

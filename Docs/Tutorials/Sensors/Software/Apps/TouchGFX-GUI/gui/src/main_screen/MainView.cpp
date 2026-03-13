@@ -105,6 +105,11 @@ void MainView::updateBattery(float level)
     this->batteryLevel = level;
 }
 
+void MainView::updatePressure(float pressure)
+{
+    this->altPressure = pressure;
+}
+
 void MainView::handleKeyEvent(uint8_t key)
 {
     if (key == Gui::Config::Button::L1) {
