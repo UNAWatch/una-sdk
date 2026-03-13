@@ -4,6 +4,7 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserAccelerometer.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserStepCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFloorCounter.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryLevel.hpp"
 #include "SDK/SensorLayer/SensorDataView.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
 #include <cmath>
@@ -25,6 +26,7 @@ Service::Service(SDK::Kernel& kernel)
     , mSensorStepCounter(SDK::Sensor::Type::STEP_COUNTER, 0, 0)
     , mSensorFloorCounter(SDK::Sensor::Type::FLOOR_COUNTER, 0, 0)
     , mSensorMagneticField(SDK::Sensor::Type::MAGNETIC_FIELD, 0, 0)
+    , mSensorBattery(SDK::Sensor::Type::BATTERY_LEVEL, 0, 0)
     , mHR(0)
     , mHRTL(0)
     , mServiceCpuTimeMs(0)
@@ -34,6 +36,8 @@ Service::Service(SDK::Kernel& kernel)
     , mTxBytes(0)
     , mRxBytes(0)
     , mLastStatsTimeMs(0)
+    , mLastAccTimeMs(0)
+    , mLastMagTimeMs(0)
 {}
 
 void Service::run()
@@ -47,6 +51,7 @@ void Service::run()
     mSensorStepCounter.connect();
     mSensorFloorCounter.connect();
     mSensorMagneticField.connect();
+    mSensorBattery.connect();
     LOG_INFO("Note: No BLE calibration at the moment. BLE calibration is required for proper sensor operation, especially for HR.\n");
 
 
@@ -73,6 +78,7 @@ void Service::run()
                     mSensorStepCounter.disconnect();
                     mSensorFloorCounter.disconnect();
                     mSensorMagneticField.disconnect();
+                    mSensorBattery.disconnect();
                     // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -153,6 +159,7 @@ void Service::run()
     mSensorStepCounter.disconnect();
     mSensorFloorCounter.disconnect();
     mSensorMagneticField.disconnect();
+    mSensorBattery.disconnect();
 
     LOG_INFO("thread stopped\n");
 }
@@ -251,6 +258,14 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 mSender.updateCompass(nowMs, heading);
                 mTxBytes += sizeof(CustomMessage::CompassValues);
                 mLastMagTimeMs = nowMs;
+            }
+        } else if (mSensorBattery.matchesDriver(handle)) {
+            SDK::SensorDataParser::BatteryLevel parser(data[0]);
+            if (parser.isDataValid()) {
+                float level = parser.getCharge();
+                LOG_DEBUG("Battery: %.1f%%\n", level);
+                mSender.updateBattery(level);
+                mTxBytes += sizeof(CustomMessage::BatteryValues);
             }
         }
     }

@@ -163,6 +163,18 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
             modelListener->updateRTC(m->time);
         } break;
 
+        case CustomMessage::BATTERY_VALUES:  {
+            auto* m = static_cast<CustomMessage::BatteryValues*>(msg);
+            LOG_DEBUG("Battery: %.1f%%\n", m->level);
+            modelListener->updateBattery(m->level);
+        } break;
+
+        case CustomMessage::PRESSURE_VALUES:  {
+            auto* m = static_cast<CustomMessage::PressureValues*>(msg);
+            LOG_DEBUG("Pressure: %.1f hPa\n", m->pressure);
+            modelListener->updatePressure(m->pressure);
+        } break;
+
         default:
             break;
     }

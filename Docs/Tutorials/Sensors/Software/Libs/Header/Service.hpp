@@ -27,6 +27,7 @@ private:
     SDK::Sensor::Connection  mSensorStepCounter;
     SDK::Sensor::Connection  mSensorFloorCounter;
     SDK::Sensor::Connection  mSensorMagneticField;
+    SDK::Sensor::Connection  mSensorBattery;
     float                    mHR;
     float                    mHRTL;
     // CPU time tracking
