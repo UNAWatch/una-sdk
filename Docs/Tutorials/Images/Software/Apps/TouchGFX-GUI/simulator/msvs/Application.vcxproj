@@ -256,8 +256,11 @@
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\main_screen\MainView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp"/>
+<<<<<<< HEAD
     <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp"/>
+=======
+>>>>>>> 6e5bc35 (Add simulator for Tutorial App)
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

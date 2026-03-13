@@ -42,6 +42,7 @@ asset_videos_output := $(asset_root_path)/videos
 include config/gcc/app.mk
 
 ### END OF USER SECTION. THE FOLLOWING SHOULD NOT BE MODIFIED ###
+
 ifeq ($(UNAME), Linux)
 library_path := $(touchgfx_path)/3rdparty/libjpeg/lib/linux $(touchgfx_path)/lib/linux $(ADDITIONAL_LIBRARY_PATHS)
 libraries := touchgfx SDL2 SDL2_image jpeg rt m pthread dl $(ADDITIONAL_LIBRARIES)
