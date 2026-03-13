@@ -31,6 +31,7 @@ Service::Service(SDK::Kernel& kernel)
     , mHRTL(0)
     , mServiceCpuTimeMs(0)
     , mGuiCpuTimeMs(0)
+    , mActiveTimeMs(0)
     , mTxMessages(0)
     , mRxMessages(0)
     , mTxBytes(0)
@@ -62,6 +63,7 @@ void Service::run()
     while (true) {
         SDK::MessageBase *msg;
         if (mKernel.comm.getMessage(msg, 1000)) {
+            uint32_t processStart = mKernel.sys.getTimeMs();
             // Track received messages
             mRxMessages++;
             // mRxBytes += msg->getSize(); // no getSize method
@@ -97,6 +99,7 @@ void Service::run()
                 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
                     auto event = static_cast<SDK::Message::Sensor::EventData*>(msg);
                     SDK::Sensor::DataBatch data(event->data, event->count, event->stride);
+                    mRxBytes += event->count * event->stride;
                     onSdlNewData(event->handle, data);
                 } break;
 
@@ -106,14 +109,16 @@ void Service::run()
 
             // Release message after processing
             mKernel.comm.releaseMessage(msg);
+            uint32_t processEnd = mKernel.sys.getTimeMs();
+            mActiveTimeMs += (processEnd - processStart);
         }
 
         if (mGUIStarted) {
             // Update CPU time and message rates every second
             uint32_t currentTimeMs = mKernel.sys.getTimeMs();
             if (currentTimeMs - mLastStatsTimeMs >= 1000) {
-                // Calculate service CPU time (simplified, just elapsed time)
-                mServiceCpuTimeMs += (currentTimeMs - mLastStatsTimeMs);
+                // Calculate service CPU time (active processing time, excluding wait time)
+                mServiceCpuTimeMs = mActiveTimeMs;
                 // GUI CPU time would need to be tracked separately, for now set to 0
                 mGuiCpuTimeMs = 0;
 
@@ -140,6 +145,7 @@ void Service::run()
                 mRxMessages = 0;
                 mTxBytes = 0;
                 mRxBytes = 0;
+                mActiveTimeMs = 0;
                 mLastStatsTimeMs = currentTimeMs;
             }
         } else {
@@ -180,16 +186,13 @@ void Service::onStopGUI()
 void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
 {
     if (mGUIStarted) {
-        // Track transmitted messages
-        mTxMessages++;
-        // Note: bytes will be tracked when sending
-
         if (mSensorHR.matchesDriver(handle)) {
             SDK::SensorDataParser::HeartRate parser(data[0]);
             if (parser.isDataValid()) {
                 mHR   = parser.getBpm();
                 mHRTL = parser.getTrustLevel();
                 LOG_DEBUG("HR: %.0f BPM\n", mHR);
+                mTxMessages++;
                 mSender.updateHeartRate(mHR, mHRTL);
                 mTxBytes += sizeof(CustomMessage::HRValues);
             }
@@ -201,6 +204,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float longitude = parser.getLongitude();
                 float altitude = parser.getAltitude();
                 LOG_DEBUG("GPS: %.6f, %.6f, %.1f\n", latitude, longitude, altitude);
+                mTxMessages++;
                 mSender.updateLocation(timestamp, latitude, longitude, altitude);
                 mTxBytes += sizeof(CustomMessage::LocationValues);
             }
@@ -210,6 +214,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 uint64_t timestamp = parser.getTimestamp();
                 float elevation = parser.getAltitude();
                 LOG_DEBUG("Elevation: %.1f m\n", elevation);
+                mTxMessages++;
                 mSender.updateElevation(timestamp, elevation);
                 mTxBytes += sizeof(CustomMessage::ElevationValues);
             }
@@ -224,6 +229,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 if (nowMs - mLastAccTimeMs >= 100) {
                     LOG_DEBUG("Acc: %.2f, %.2f, %.2f, now: %u, last: %u, timestamp: %llu\n", x, y, z, nowMs, mLastAccTimeMs, timestamp);
                     mLastAccTimeMs = nowMs;
+                    mTxMessages++;
                     mSender.updateAccelerometer(timestamp, x, y, z);
                     mTxBytes += sizeof(CustomMessage::AccelerometerValues);
                 }
@@ -234,6 +240,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 uint64_t timestamp = parser.getTimestamp();
                 uint32_t steps = parser.getStepCount();
                 LOG_DEBUG("Steps: %u\n", steps);
+                mTxMessages++;
                 mSender.updateStepCounter(timestamp, steps);
                 mTxBytes += sizeof(CustomMessage::StepCounterValues);
             }
@@ -243,6 +250,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 uint64_t timestamp = parser.getTimestamp();
                 uint32_t floors = static_cast<uint32_t>(parser.getFloorsUp());
                 LOG_DEBUG("Floors: %u\n", floors);
+                mTxMessages++;
                 mSender.updateFloors(timestamp, floors);
                 mTxBytes += sizeof(CustomMessage::FloorsValues);
             }
@@ -255,6 +263,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             auto nowMs = mKernel.sys.getTimeMs();
             if (nowMs - mLastMagTimeMs >= 100) {
                 LOG_DEBUG("Compass: %.1f deg (X:%.2f Y:%.2f)\n", heading, x, y);
+                mTxMessages++;
                 mSender.updateCompass(nowMs, heading);
                 mTxBytes += sizeof(CustomMessage::CompassValues);
                 mLastMagTimeMs = nowMs;
@@ -264,6 +273,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 float level = parser.getCharge();
                 LOG_DEBUG("Battery: %.1f%%\n", level);
+                mTxMessages++;
                 mSender.updateBattery(level);
                 mTxBytes += sizeof(CustomMessage::BatteryValues);
             }

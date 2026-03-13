@@ -33,6 +33,7 @@ private:
     // CPU time tracking
     uint32_t                 mServiceCpuTimeMs;
     uint32_t                 mGuiCpuTimeMs;
+    uint32_t                 mActiveTimeMs;
     // Message rate tracking
     uint32_t                 mTxMessages;
     uint32_t                 mRxMessages;
