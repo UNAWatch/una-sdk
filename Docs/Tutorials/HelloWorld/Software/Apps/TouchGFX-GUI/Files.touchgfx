@@ -1,0 +1,241 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Main",
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 147,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "ButtonsSet"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 19,
+            "Y": 98,
+            "Width": 203,
+            "Height": 44,
+            "TextId": "__SingleUse_D48Y",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "ButtonsSet",
+        "Y": 47,
+        "Width": 240,
+        "Height": 147,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "buttonR2",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR2a",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1a",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2a",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1a",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR2r",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2R.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1r",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1R.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2r",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2R .png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1r",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1R.png"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "Name": "Files",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Main",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Portrait",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.0"
+}
