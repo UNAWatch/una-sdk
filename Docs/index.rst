@@ -21,6 +21,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    Tutorials/ScrollMenu/ARCHITECTURE
    Tutorials/Images/ARCHITECTURE
    Tutorials/Sensors/ARCHITECTURE
+   Tutorials/Files/ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4
