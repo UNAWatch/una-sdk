@@ -24,15 +24,6 @@ private:
     CustomMessage::DisplayMode mDisplayMode;
     enum class StgType {STG1,STG2,STG3};
     StgType stgSel;
-
-    static const uint16_t SETTING1_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar setting1Buffer[SETTING1_SIZE];
-
-    static const uint16_t SETTING2_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar setting2Buffer[SETTING2_SIZE];
-
-    static const uint16_t SETTING3_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar setting3Buffer[SETTING3_SIZE];
 };
 
 #endif // MAINVIEW_HPP

@@ -14,7 +14,7 @@ MainViewBase::MainViewBase()
     buttons.setXY(0, 47);
     add(buttons);
 
-    setting1.setXY(74, 37);
+    setting1.setXY(74, 36);
     setting1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     setting1.setLinespacing(0);
     setting1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_D48Y));

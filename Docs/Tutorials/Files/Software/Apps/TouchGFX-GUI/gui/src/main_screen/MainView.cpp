@@ -19,10 +19,6 @@ void MainView::setupScreen()
     buttons.setR1(ButtonsSet::AMBER);
     buttons.setR2(ButtonsSet::WHITE);
 
-    setting1.setWildcard(setting1Buffer);
-    setting2.setWildcard(setting2Buffer);
-    setting3.setWildcard(setting3Buffer);
-
     // Request initial settings
     presenter->requestSettings();
 }
@@ -39,31 +35,37 @@ void MainView::updateSettingsDisplay(float decimalCounter, CustomMessage::Activi
     mDisplayMode = displayMode;
 
     // Update setting1: decimal counter
-    Unicode::snprintf(setting1Buffer, SETTING1_SIZE, "%.1f", decimalCounter);
+    touchgfx::Unicode::UnicodeChar buffer1[10];
+    Unicode::snprintf(buffer1, 10, "%.1f", decimalCounter);
     setting1.setColor(colortype(stgSel == StgType::STG1 ? 0xFF0000 : 0xFF00));
+    setting1.setWildcard(buffer1);
     setting1.invalidate();
-    
+
     // Update setting2: activity type
-    const char* activityStr = "";
+    const char* activityStr = "*";
     switch (activityType) {
         case CustomMessage::ActivityType::RUNNING: activityStr = "RUNNING"; break;
         case CustomMessage::ActivityType::CYCLING: activityStr = "CYCLING"; break;
         case CustomMessage::ActivityType::SWIMMING: activityStr = "SWIMMING"; break;
         case CustomMessage::ActivityType::WALKING: activityStr = "WALKING"; break;
     }
-    Unicode::strncpy(setting2Buffer, activityStr, SETTING2_SIZE);
+    touchgfx::Unicode::UnicodeChar buffer2[10];
+    Unicode::strncpy(buffer2, activityStr, 10);
     setting2.setColor(colortype(stgSel == StgType::STG2 ? 0xFF0000 : 0xFF00));
+    setting2.setWildcard(buffer2);
     setting2.invalidate();
-    
+
     // Update setting3: display mode
-    const char* displayStr = "";
+    const char* displayStr = "-";
     switch (displayMode) {
         case CustomMessage::DisplayMode::SIMPLE: displayStr = "SIMPLE"; break;
         case CustomMessage::DisplayMode::DETAILED: displayStr = "DETAILED"; break;
         case CustomMessage::DisplayMode::COMPACT: displayStr = "COMPACT"; break;
     }
-    Unicode::strncpy(setting3Buffer, displayStr, SETTING3_SIZE);
+    touchgfx::Unicode::UnicodeChar buffer3[10];
+    Unicode::strncpy(buffer3, displayStr, 10);
     setting3.setColor(colortype(stgSel == StgType::STG3 ? 0xFF0000 : 0xFF00));
+    setting3.setWildcard(buffer3);
     setting3.invalidate();
 }
 
