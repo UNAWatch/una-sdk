@@ -233,7 +233,7 @@ void Service::loadSettings()
         if (bytesRead > 0) {
             buffer[bytesRead] = '\0';
             SDK::JsonStreamReader reader(buffer, bytesRead);
-            if (reader.isValid()) {
+            if (reader.validate()) {
                 int32_t decimalCounter = mDecimalCounter;
                 int32_t activityType = static_cast<int32_t>(mActivityType);
                 int32_t displayMode = static_cast<int32_t>(mDisplayMode);
