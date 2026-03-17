@@ -15,12 +15,95 @@
           },
           {
             "Type": "TextArea",
-            "Name": "textArea1",
-            "X": 19,
-            "Y": 98,
-            "Width": 203,
+            "Name": "setting1",
+            "X": 74,
+            "Y": 37,
+            "Width": 40,
             "Height": 44,
             "TextId": "__SingleUse_D48Y",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true,
+            "Wildcard1": {}
+          },
+          {
+            "Type": "TextArea",
+            "Name": "setting2",
+            "X": 74,
+            "Y": 99,
+            "Width": 40,
+            "Height": 44,
+            "TextId": "__SingleUse_HZ98",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true,
+            "Wildcard1": {}
+          },
+          {
+            "Type": "TextArea",
+            "Name": "setting3",
+            "X": 74,
+            "Y": 161,
+            "Width": 40,
+            "Height": 44,
+            "TextId": "__SingleUse_3IKE",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true,
+            "Wildcard1": {}
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textStg1",
+            "X": 40,
+            "Y": 36,
+            "Width": 20,
+            "Height": 44,
+            "TextId": "__SingleUse_541A",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textStg2",
+            "X": 40,
+            "Y": 99,
+            "Width": 20,
+            "Height": 44,
+            "TextId": "__SingleUse_W25N",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textStg3",
+            "X": 40,
+            "Y": 161,
+            "Width": 20,
+            "Height": 44,
+            "TextId": "__SingleUse_RY1R",
             "TextRotation": "0",
             "Color": {
               "Red": 255,

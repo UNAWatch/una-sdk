@@ -14,11 +14,41 @@ MainViewBase::MainViewBase()
     buttons.setXY(0, 47);
     add(buttons);
 
-    textArea1.setXY(19, 98);
-    textArea1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    textArea1.setLinespacing(0);
-    textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_D48Y));
-    add(textArea1);
+    setting1.setXY(74, 37);
+    setting1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    setting1.setLinespacing(0);
+    setting1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_D48Y));
+    add(setting1);
+
+    setting2.setXY(74, 99);
+    setting2.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    setting2.setLinespacing(0);
+    setting2.setTypedText(touchgfx::TypedText(T___SINGLEUSE_HZ98));
+    add(setting2);
+
+    setting3.setXY(74, 161);
+    setting3.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    setting3.setLinespacing(0);
+    setting3.setTypedText(touchgfx::TypedText(T___SINGLEUSE_3IKE));
+    add(setting3);
+
+    textStg1.setXY(40, 36);
+    textStg1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textStg1.setLinespacing(0);
+    textStg1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_541A));
+    add(textStg1);
+
+    textStg2.setXY(40, 99);
+    textStg2.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textStg2.setLinespacing(0);
+    textStg2.setTypedText(touchgfx::TypedText(T___SINGLEUSE_W25N));
+    add(textStg2);
+
+    textStg3.setXY(40, 161);
+    textStg3.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textStg3.setLinespacing(0);
+    textStg3.setTypedText(touchgfx::TypedText(T___SINGLEUSE_RY1R));
+    add(textStg3);
 }
 
 MainViewBase::~MainViewBase()
