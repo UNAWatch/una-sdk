@@ -75,6 +75,23 @@ void Model::exitApp()
     // current screen will be called.
 }
 
+void Model::requestSettings()
+{
+    if (auto req = SDK::make_msg<CustomMessage::GetSettings>(mKernel)) {
+        req.send();
+    }
+}
+
+void Model::updateSettings(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode)
+{
+    if (auto req = SDK::make_msg<CustomMessage::SetSettings>(mKernel)) {
+        req->decimalCounter = static_cast<int>(decimalCounter * 10);
+        req->activityType = static_cast<int>(activityType);
+        req->displayMode = static_cast<int>(displayMode);
+        req.send();
+    }
+}
+
 // IUserApp implementation
 void Model::onStart()
 {
@@ -119,6 +136,16 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
         //     LOG_DEBUG("hr %.1f, tl %.1f\n", m->heartRate, m->trustLevel);
         //     // modelListener->updateHR(m->heartRate, m->trustLevel);  // Update GUI
         // } break;
+
+        case CustomMessage::SETTINGS_VALUES: {
+            LOG_DEBUG("Update SETTINGS_VALUES\n");
+            auto* m = static_cast<CustomMessage::SettingsValues*>(msg);
+
+            LOG_DEBUG("decimalCounter %.1f, activityType %d, displayMode %d\n", m->decimalCounter / 10.0f, m->activityType, m->displayMode);
+            modelListener->onSettingsUpdate(m->decimalCounter / 10.0f,
+                                           static_cast<CustomMessage::ActivityType>(m->activityType),
+                                           static_cast<CustomMessage::DisplayMode>(m->displayMode));
+        } break;
 
         default:
             break;

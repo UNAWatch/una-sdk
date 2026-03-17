@@ -31,6 +31,16 @@ public:
         model->exitApp();
     }
 
+    void requestSettings() {
+        model->requestSettings();
+    }
+
+    void saveSettings(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode) {
+        model->updateSettings(decimalCounter, activityType, displayMode);
+    }
+
+    virtual void onSettingsUpdate(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode) override;
+
 private:
     MainPresenter();
 

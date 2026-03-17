@@ -15,6 +15,23 @@
 namespace CustomMessage {
 
     ///////////////////////////////////////
+    //// Application custom types
+    ///////////////////////////////////////
+
+    enum class ActivityType {
+        RUNNING = 0,
+        CYCLING = 1,
+        SWIMMING = 2,
+        WALKING = 3
+    };
+
+    enum class DisplayMode {
+        SIMPLE = 0,
+        DETAILED = 1,
+        COMPACT = 2
+    };
+
+    ///////////////////////////////////////
     //// Application custom commands
     ///////////////////////////////////////
 
@@ -26,6 +43,11 @@ namespace CustomMessage {
      * - Used to route messages to correct handler in GUI
      */
     // constexpr SDK::MessageType::Type HR_VALUES = 0x00000001;
+
+    // Settings messages
+    constexpr SDK::MessageType::Type GET_SETTINGS = 0x00000002;
+    constexpr SDK::MessageType::Type SET_SETTINGS = 0x00000003;
+    constexpr SDK::MessageType::Type SETTINGS_VALUES = 0x00000004;
 
     ///////////////////////////////////////
     //// Application custom structures
@@ -48,6 +70,41 @@ namespace CustomMessage {
     //         , trustLevel()
     //     {}
     // };
+
+    // GUI --> Service
+    struct GetSettings : public SDK::MessageBase {
+        GetSettings()
+            : SDK::MessageBase(GET_SETTINGS)
+        {}
+    };
+
+    // GUI --> Service
+    struct SetSettings : public SDK::MessageBase {
+        int decimalCounter;
+        int activityType;
+        int displayMode;
+
+        SetSettings()
+            : SDK::MessageBase(SET_SETTINGS)
+            , decimalCounter(0)
+            , activityType(0)
+            , displayMode(0)
+        {}
+    };
+
+    // Service --> GUI
+    struct SettingsValues : public SDK::MessageBase {
+        int decimalCounter;
+        int activityType;
+        int displayMode;
+
+        SettingsValues()
+            : SDK::MessageBase(SETTINGS_VALUES)
+            , decimalCounter(0)
+            , activityType(0)
+            , displayMode(0)
+        {}
+    };
 
 
     ///////////////////////////////////////
@@ -80,6 +137,20 @@ namespace CustomMessage {
 
         //     return false;
         // }
+
+        // Service --> GUI
+        bool updateSettings(int decimalCounter, int activityType, int displayMode)
+        {
+            if (auto req = SDK::make_msg<CustomMessage::SettingsValues>(mKernel)) {
+                req->decimalCounter = decimalCounter;
+                req->activityType = activityType;
+                req->displayMode = displayMode;
+
+                return req.send();
+            }
+
+            return false;
+        }
 
     private:
         const SDK::Kernel& mKernel;

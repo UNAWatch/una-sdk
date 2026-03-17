@@ -9,6 +9,8 @@
 
 #include "ActivityWriter.hpp"
 
+
+
 class Service
 {
 public:
@@ -22,6 +24,10 @@ private:
     SDK::Kernel&             mKernel;
     CustomMessage::GUISender mSender;
     bool                     mGUIStarted;
+    // Settings
+    int32_t                  mDecimalCounter;
+    CustomMessage::ActivityType mActivityType;
+    CustomMessage::DisplayMode  mDisplayMode;
 
     /*
      * COMMENTED OUT: Heart Rate Sensor and FIT Logging Setup
@@ -51,6 +57,9 @@ private:
     void onStopGUI();
 
     void onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data);
+
+    void loadSettings();
+    void saveSettings();
 
     static uint32_t ParseVersion(const char* str);
 };
