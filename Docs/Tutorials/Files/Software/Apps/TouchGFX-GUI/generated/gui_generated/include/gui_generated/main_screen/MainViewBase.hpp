@@ -36,6 +36,16 @@ protected:
     touchgfx::TextArea textStg2;
     touchgfx::TextArea textStg3;
 
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t SETTING1_SIZE = 32;
+    touchgfx::Unicode::UnicodeChar setting1Buffer[SETTING1_SIZE];
+    static const uint16_t SETTING2_SIZE = 32;
+    touchgfx::Unicode::UnicodeChar setting2Buffer[SETTING2_SIZE];
+    static const uint16_t SETTING3_SIZE = 32;
+    touchgfx::Unicode::UnicodeChar setting3Buffer[SETTING3_SIZE];
+
 private:
 
 };

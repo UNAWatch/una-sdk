@@ -17,18 +17,27 @@ MainViewBase::MainViewBase()
     setting1.setXY(74, 36);
     setting1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     setting1.setLinespacing(0);
+    setting1Buffer[0] = 0;
+    setting1.setWildcard(setting1Buffer);
+    setting1.resizeToCurrentText();
     setting1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_D48Y));
     add(setting1);
 
     setting2.setXY(74, 99);
     setting2.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     setting2.setLinespacing(0);
+    setting2Buffer[0] = 0;
+    setting2.setWildcard(setting2Buffer);
+    setting2.resizeToCurrentText();
     setting2.setTypedText(touchgfx::TypedText(T___SINGLEUSE_HZ98));
     add(setting2);
 
     setting3.setXY(74, 161);
     setting3.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     setting3.setLinespacing(0);
+    setting3Buffer[0] = 0;
+    setting3.setWildcard(setting3Buffer);
+    setting3.resizeToCurrentText();
     setting3.setTypedText(touchgfx::TypedText(T___SINGLEUSE_3IKE));
     add(setting3);
 
