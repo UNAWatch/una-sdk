@@ -28,7 +28,10 @@
               "Blue": 255
             },
             "AutoSize": true,
-            "Wildcard1": {}
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
           },
           {
             "Type": "TextArea",
@@ -45,7 +48,10 @@
               "Blue": 255
             },
             "AutoSize": true,
-            "Wildcard1": {}
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
           },
           {
             "Type": "TextArea",
@@ -62,7 +68,10 @@
               "Blue": 255
             },
             "AutoSize": true,
-            "Wildcard1": {}
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
           },
           {
             "Type": "TextArea",
