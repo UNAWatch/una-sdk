@@ -16,3 +16,8 @@ void MainPresenter::deactivate()
 {
 
 }
+
+void MainPresenter::onSettingsUpdate(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode)
+{
+    view.updateSettingsDisplay(decimalCounter, activityType, displayMode);
+}

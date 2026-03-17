@@ -38,6 +38,19 @@ public:
      */
     void exitApp();
 
+    /**
+     * @brief Requests current settings from the service.
+     */
+    void requestSettings();
+
+    /**
+     * @brief Updates settings on the service.
+     * @param decimalCounter The decimal counter value.
+     * @param activityType The activity type.
+     * @param displayMode The display mode.
+     */
+    void updateSettings(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode);
+
 protected:
     ModelListener* modelListener;           ///< Pointer to model listener
 

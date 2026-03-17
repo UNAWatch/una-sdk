@@ -1,5 +1,7 @@
 // #include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRate.hpp"  // Commented out: HR parser include
 #include "SDK/Messages/SensorLayerMessages.hpp"
+#include "SDK/JSON/JsonStreamReader.hpp"
+#include "SDK/JSON/JsonStreamWriter.hpp"
 
 #include "Service.hpp"
 
@@ -11,6 +13,9 @@ Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mSender(mKernel)
     , mGUIStarted(false)
+    , mDecimalCounter(10)  // 1.0f * 10
+    , mActivityType(CustomMessage::ActivityType::RUNNING)
+    , mDisplayMode(CustomMessage::DisplayMode::SIMPLE)
     // Uncomment below to enable HR sensor and FIT logging:
     // , mSensorHR(SDK::Sensor::Type::HEART_RATE, 1000, 2000)  // Initialize HR sensor (1s sample, 2s timeout)
     // , mHR(0)  // Initialize HR value to 0
@@ -66,6 +71,31 @@ void Service::run()
                     LOG_INFO("GUI has stopped\n");
                     onStopGUI();
                     break;
+
+                // Settings messages
+                case CustomMessage::GET_SETTINGS: {
+                    LOG_INFO("Received GET_SETTINGS request\n");
+                    mSender.updateSettings(mDecimalCounter,
+                                           static_cast<int>(mActivityType),
+                                           static_cast<int>(mDisplayMode));
+                } break;
+
+                case CustomMessage::SET_SETTINGS: {
+                    auto setMsg = static_cast<CustomMessage::SetSettings*>(msg);
+                    LOG_INFO("Received SET_SETTINGS: dc=%d, at=%d, dm=%d\n",
+                             setMsg->decimalCounter, setMsg->activityType, setMsg->displayMode);
+                    // Validate and clamp values
+                    int dc = setMsg->decimalCounter;
+                    if (dc < 5 || dc > 20 || (dc % 5) != 0) dc = 10;
+                    mDecimalCounter = dc;
+                    int at = setMsg->activityType;
+                    if (at < 0 || at > 3) at = 0;
+                    mActivityType = static_cast<CustomMessage::ActivityType>(at);
+                    int dm = setMsg->displayMode;
+                    if (dm < 0 || dm > 2) dm = 0;
+                    mDisplayMode = static_cast<CustomMessage::DisplayMode>(dm);
+                    saveSettings();
+                } break;
 
                 // Sensors messages
                 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
@@ -156,6 +186,7 @@ void Service::onStartGUI()
 {
     LOG_INFO("GUI started\n");
     mGUIStarted = true;
+    loadSettings();
     /*
      * Send initial HR values to GUI on startup.
      * To enable: Uncomment below and ensure HR message types are defined in Commands.hpp
@@ -190,6 +221,58 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
     //         }
     //     }
     // }
+}
+
+void Service::loadSettings()
+{
+    auto file = mKernel.fs.file("settings.json");
+    if (file && file->open(0)) {
+        char buffer[1024];
+        size_t bytesRead = 0;
+        file->read(buffer, sizeof(buffer) - 1, bytesRead);
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0';
+            SDK::JsonStreamReader reader(buffer, bytesRead);
+            if (reader.isValid()) {
+                int32_t decimalCounter = mDecimalCounter;
+                int32_t activityType = static_cast<int32_t>(mActivityType);
+                int32_t displayMode = static_cast<int32_t>(mDisplayMode);
+                reader.get("decimalCounter", decimalCounter);
+                reader.get("activityType", activityType);
+                reader.get("displayMode", displayMode);
+                // Validate loaded values
+                if (decimalCounter < 5 || decimalCounter > 20 || (decimalCounter % 5) != 0) decimalCounter = 10;
+                mDecimalCounter = decimalCounter;
+                if (activityType < 0 || activityType > 3) activityType = 0;
+                mActivityType = static_cast<CustomMessage::ActivityType>(activityType);
+                if (displayMode < 0 || displayMode > 2) displayMode = 0;
+                mDisplayMode = static_cast<CustomMessage::DisplayMode>(displayMode);
+                LOG_INFO("Settings loaded from file\n");
+            } else {
+                LOG_WARNING("Invalid JSON in settings file, using defaults\n");
+            }
+        }
+        file->close();
+    } else {
+        LOG_INFO("Settings file not found, using defaults\n");
+    }
+}
+
+void Service::saveSettings()
+{
+    auto file = mKernel.fs.file("settings.json");
+    if (file && file->open(1)) {
+        SDK::JsonStreamWriter writer(file.get());
+        writer.startMap(3);
+        writer.add("decimalCounter", mDecimalCounter);
+        writer.add("activityType", static_cast<int32_t>(mActivityType));
+        writer.add("displayMode", static_cast<int32_t>(mDisplayMode));
+        writer.endMap();
+        file->close();
+        LOG_INFO("Settings saved to file\n");
+    } else {
+        LOG_ERROR("Failed to save settings\n");
+    }
 }
 
 uint32_t Service::ParseVersion(const char* str)

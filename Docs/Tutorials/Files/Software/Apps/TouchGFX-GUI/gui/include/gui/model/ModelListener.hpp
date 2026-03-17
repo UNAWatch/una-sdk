@@ -18,6 +18,8 @@ public:
 
     virtual void onIdleTimeout() {}
 
+    virtual void onSettingsUpdate(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode) {}
+
 protected:
     Model* model;
 
