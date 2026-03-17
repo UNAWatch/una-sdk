@@ -6,6 +6,6 @@
 
 static unsigned short SIM_WIDTH = 240;
 static unsigned short SIM_HEIGHT = 240;
-#define SIM_TITLE "HelloWorld"
+#define SIM_TITLE "Files"
 
 #endif // SIMCONSTANTS_HPP
