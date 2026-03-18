@@ -3,6 +3,8 @@
 
 Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
 
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/HelloWorld)
+
 ## What You'll Learn
 
 - How to set up your development environment for UNA apps

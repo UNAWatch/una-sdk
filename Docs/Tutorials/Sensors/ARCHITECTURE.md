@@ -8,6 +8,8 @@ In this tutorial, we implement a sensors dashboard app that subscribes to availa
 - **Middle multiline text**: Sensor data with **L1/L2 verbosity levels** (BASIC/DETAILED/FULL and individual sensor views)
 - **Bottom**: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)
 
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Sensors)
+
 ## List of Implemented Sensors
 
 | Sensor | Description | Notes |
