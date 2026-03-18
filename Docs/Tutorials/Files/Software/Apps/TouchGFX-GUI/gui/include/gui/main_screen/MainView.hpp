@@ -13,16 +13,16 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
-    void updateSettingsDisplay(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode);
+    void updateSettingsDisplay(int32_t decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode);
 
 protected:
     virtual void handleKeyEvent(uint8_t key) override;
 
 private:
-    float mDecimalCounter;
+    int32_t mDecimalCounter;
     CustomMessage::ActivityType mActivityType;
     CustomMessage::DisplayMode mDisplayMode;
-    enum class StgType {STG1,STG2,STG3};
+    enum StgType {STG1,STG2,STG3,_MAX_STG};
     StgType stgSel;
 };
 

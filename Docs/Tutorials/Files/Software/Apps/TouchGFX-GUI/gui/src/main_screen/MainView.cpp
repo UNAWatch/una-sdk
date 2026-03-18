@@ -31,14 +31,14 @@ void MainView::tearDownScreen()
     MainViewBase::tearDownScreen();
 }
 
-void MainView::updateSettingsDisplay(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode)
+void MainView::updateSettingsDisplay(int32_t decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode)
 {
     mDecimalCounter = decimalCounter;
     mActivityType = activityType;
     mDisplayMode = displayMode;
 
     // Update setting1: decimal counter
-    Unicode::snprintf(setting1Buffer, SETTING1_SIZE, "%.1f", decimalCounter);
+    Unicode::snprintf(setting1Buffer, SETTING1_SIZE, "%i", decimalCounter);
     setting1.setColor(touchgfx::Color::getColorFromRGB(stgSel == StgType::STG1 ? 255 : 255, stgSel == StgType::STG1 ? 0 : 255, stgSel == StgType::STG1 ? 0 : 255));
     setting1.resizeToCurrentText();
     setting1.invalidate();
@@ -75,72 +75,48 @@ void MainView::handleKeyEvent(uint8_t key)
         // Change value of selected setting
         switch (stgSel) {
             case StgType::STG1: {
-                // Cycle decimal counter: 0.5, 1.0, 1.5, 2.0
-                const float values[] = {0.5f, 1.0f, 1.5f, 2.0f};
-                int currentIndex = -1;
-                for (int i = 0; i < 4; ++i) {
-                    if (mDecimalCounter == values[i]) {
-                        currentIndex = i;
-                        break;
-                    }
-                }
-                if (currentIndex == -1) currentIndex = 0; // default
-                currentIndex = (currentIndex + 1) % 4;
-                mDecimalCounter = values[currentIndex];
+                mDecimalCounter++;
                 break;
             }
             case StgType::STG2: {
                 // Cycle activity type
                 int current = static_cast<int>(mActivityType);
-                current = (current + 1) % 4;
+                current = (current + 1) % CustomMessage::ActivityType::_MAX_ACTIVITY_TYPE;
                 mActivityType = static_cast<CustomMessage::ActivityType>(current);
                 break;
             }
             case StgType::STG3: {
                 // Cycle display mode
                 int current = static_cast<int>(mDisplayMode);
-                current = (current + 1) % 3;
+                current = (current + 1) % CustomMessage::DisplayMode::_MAX_DISPLAY_MODE;
                 mDisplayMode = static_cast<CustomMessage::DisplayMode>(current);
                 break;
             }
         }
-        updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode);
     }
 
     if (key == Gui::Config::Button::L2) {
-        // Change value of selected setting (same as L1 for now)
+        // Change value of selected setting (decrement)
         switch (stgSel) {
             case StgType::STG1: {
-                // Cycle decimal counter: 0.5, 1.0, 1.5, 2.0
-                const float values[] = {0.5f, 1.0f, 1.5f, 2.0f};
-                int currentIndex = -1;
-                for (int i = 0; i < 4; ++i) {
-                    if (mDecimalCounter == values[i]) {
-                        currentIndex = i;
-                        break;
-                    }
-                }
-                if (currentIndex == -1) currentIndex = 0; // default
-                currentIndex = (currentIndex - 1 + 4) % 4; // decrement
-                mDecimalCounter = values[currentIndex];
+                mDecimalCounter--;
                 break;
             }
             case StgType::STG2: {
                 // Cycle activity type
                 int current = static_cast<int>(mActivityType);
-                current = (current - 1 + 4) % 4; // decrement
+                current = (current - 1 + CustomMessage::ActivityType::_MAX_ACTIVITY_TYPE) % CustomMessage::ActivityType::_MAX_ACTIVITY_TYPE; // decrement
                 mActivityType = static_cast<CustomMessage::ActivityType>(current);
                 break;
             }
             case StgType::STG3: {
                 // Cycle display mode
                 int current = static_cast<int>(mDisplayMode);
-                current = (current - 1 + 3) % 3; // decrement
+                current = (current - 1 + CustomMessage::DisplayMode::_MAX_DISPLAY_MODE) % CustomMessage::DisplayMode::_MAX_DISPLAY_MODE; // decrement
                 mDisplayMode = static_cast<CustomMessage::DisplayMode>(current);
                 break;
             }
         }
-        updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode);
     }
 
     if (key == Gui::Config::Button::R1) {
@@ -149,12 +125,14 @@ void MainView::handleKeyEvent(uint8_t key)
 
         // Switch selection
         int current = static_cast<int>(stgSel);
-        current = (current + 1) % 3;
+        current = (current + 1) % StgType::_MAX_STG;
         stgSel = static_cast<StgType>(current);
-        updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode); // to update colors
     }
 
     if (key == Gui::Config::Button::R2) {
+        presenter->saveSettings(mDecimalCounter, mActivityType, mDisplayMode);
         presenter->exit();
     }
+
+    updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode);
 }

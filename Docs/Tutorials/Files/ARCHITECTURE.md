@@ -19,7 +19,7 @@ The system manages three distinct setting types:
 
 #### 1. Decimal Counter (Float-based Setting)
 - **Purpose**: Configurable numeric value for counting/display purposes
-- **Type**: `float` (GUI) / `enum DecimalCounter` (Service - implementation detail)
+- **Type**: `float` (GUI) / `int32_t` (Service - implementation detail)
 - **Valid Values**: 0.5, 1.0, 1.5, 2.0 (cycling through predefined values)
 - **Default**: 1.0
 - **Storage**: Multiplied by 10 for integer transmission (1.5 → 15)
@@ -141,9 +141,9 @@ public:
 
 private:
     // Settings storage
-    DecimalCounter mDecimalCounter;
-    ActivityType mActivityType;
-    DisplayMode mDisplayMode;
+    int32_t mDecimalCounter;
+    CustomMessage::ActivityType mActivityType;
+    CustomMessage::DisplayMode mDisplayMode;
 
     // Communication
     CustomMessage::GUISender mSender;
@@ -171,18 +171,18 @@ void Service::loadSettings() {
             SDK::JsonStreamReader reader(buffer, bytesRead);
             if (reader.isValid()) {
                 // Read integer values from JSON
-                int decimalCounter = static_cast<int>(mDecimalCounter);
-                int activityType = static_cast<int>(mActivityType);
-                int displayMode = static_cast<int>(mDisplayMode);
+                int32_t decimalCounter = mDecimalCounter;
+                int32_t activityType = static_cast<int32_t>(mActivityType);
+                int32_t displayMode = static_cast<int32_t>(mDisplayMode);
 
                 reader.getInt("decimalCounter", decimalCounter);
                 reader.getInt("activityType", activityType);
                 reader.getInt("displayMode", displayMode);
 
-                // Convert back to enum types
-                mDecimalCounter = static_cast<DecimalCounter>(decimalCounter);
-                mActivityType = static_cast<ActivityType>(activityType);
-                mDisplayMode = static_cast<DisplayMode>(displayMode);
+                // Validate and convert back to types
+                mDecimalCounter = decimalCounter;
+                mActivityType = static_cast<CustomMessage::ActivityType>(activityType);
+                mDisplayMode = static_cast<CustomMessage::DisplayMode>(displayMode);
 
                 LOG_INFO("Settings loaded from file\n");
             }
@@ -207,7 +207,7 @@ void Service::saveSettings() {
     if (file && file->open(SDK::Interface::IFile::Mode::WRITE)) {
         SDK::JsonStreamWriter writer(file.get());
         writer.startObject();
-        writer.add("decimalCounter", static_cast<int>(mDecimalCounter));
+        writer.add("decimalCounter", mDecimalCounter);
         writer.add("activityType", static_cast<int>(mActivityType));
         writer.add("displayMode", static_cast<int>(mDisplayMode));
         writer.endObject();
@@ -231,7 +231,7 @@ The Service's main loop processes custom messages:
 ```cpp
 case CustomMessage::GET_SETTINGS: {
     LOG_INFO("Received GET_SETTINGS request\n");
-    mSender.updateSettings(static_cast<int>(mDecimalCounter),
+    mSender.updateSettings(mDecimalCounter,
                           static_cast<int>(mActivityType),
                           static_cast<int>(mDisplayMode));
 } break;
@@ -242,9 +242,9 @@ case CustomMessage::SET_SETTINGS: {
              setMsg->decimalCounter, setMsg->activityType, setMsg->displayMode);
 
     // Update internal settings
-    mDecimalCounter = static_cast<DecimalCounter>(setMsg->decimalCounter);
-    mActivityType = static_cast<ActivityType>(setMsg->activityType);
-    mDisplayMode = static_cast<DisplayMode>(setMsg->displayMode);
+    mDecimalCounter = setMsg->decimalCounter;
+    mActivityType = static_cast<CustomMessage::ActivityType>(setMsg->activityType);
+    mDisplayMode = static_cast<CustomMessage::DisplayMode>(setMsg->displayMode);
 
     // Persist to file
     saveSettings();
@@ -472,6 +472,7 @@ void MainView::handleKeyEvent(uint8_t key) {
     }
 
     if (key == Gui::Config::Button::R2) {
+        presenter->saveSettings(mDecimalCounter, mActivityType, mDisplayMode);
         presenter->exit();
     }
 }
