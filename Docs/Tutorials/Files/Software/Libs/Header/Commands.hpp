@@ -18,17 +18,19 @@ namespace CustomMessage {
     //// Application custom types
     ///////////////////////////////////////
 
-    enum class ActivityType {
+    enum ActivityType {
         RUNNING = 0,
         CYCLING = 1,
         SWIMMING = 2,
-        WALKING = 3
+        WALKING = 3,
+        _MAX_ACTIVITY_TYPE
     };
-
-    enum class DisplayMode {
+    
+    enum DisplayMode {
         SIMPLE = 0,
         DETAILED = 1,
-        COMPACT = 2
+        COMPACT = 2,
+        _MAX_DISPLAY_MODE
     };
 
     ///////////////////////////////////////
@@ -94,7 +96,7 @@ namespace CustomMessage {
 
     // Service --> GUI
     struct SettingsValues : public SDK::MessageBase {
-        int decimalCounter;
+        int32_t decimalCounter;
         int activityType;
         int displayMode;
 
