@@ -192,13 +192,13 @@
       <Text Id="__SingleUse_RY1R" Alignment="Left" TypographyId="Poppins_SemiBold_35">
         <Translation Language="GB">-</Translation>
       </Text>
-      <Text Id="__SingleUse_3IKE" Alignment="Left" TypographyId="Poppins_SemiBold_35">
+      <Text Id="__SingleUse_3IKE" Alignment="Left" TypographyId="Poppins_Medium_25">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
-      <Text Id="__SingleUse_HZ98" Alignment="Left" TypographyId="Poppins_SemiBold_35">
+      <Text Id="__SingleUse_HZ98" Alignment="Left" TypographyId="Poppins_Medium_25">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
-      <Text Id="__SingleUse_D48Y" Alignment="Left" TypographyId="Poppins_SemiBold_35">
+      <Text Id="__SingleUse_D48Y" Alignment="Left" TypographyId="Poppins_Medium_25">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
       <Text Id="Counter" Alignment="Center" TypographyId="Poppins_Medium_25">
