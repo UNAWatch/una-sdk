@@ -1,6 +1,6 @@
-# Files Tutorial - Complete Settings Management Implementation
+# Files Tutorial - Selectable Settings Management Implementation
 
-This comprehensive tutorial demonstrates a complete settings management system for the UNA SDK, featuring persistent file-based storage, JSON serialization, and seamless GUI-Service communication. The tutorial implements three configurable settings with full CRUD operations, error handling, and user interaction through physical buttons.
+This comprehensive tutorial demonstrates a complete settings management system for the UNA SDK, featuring persistent file-based storage, JSON serialization, and seamless GUI-Service communication. The tutorial implements three configurable settings with full CRUD operations, error handling, and an intuitive selectable settings interface using physical buttons for navigation and value cycling.
 
 ## Overview
 
@@ -112,23 +112,19 @@ sequenceDiagram
     Model->>GUI: Call modelListener->onSettingsUpdate()
     GUI->>GUI: Update display with current values
 
-    Note over GUI: User Button Press (L1 - Cycle Counter)
-    GUI->>GUI: handleKeyEvent() - Update local counter value
-    GUI->>GUI: updateSettingsDisplay() - Refresh UI
-
-    Note over GUI: User Button Press (L2 - Cycle Display Mode)
-    GUI->>GUI: handleKeyEvent() - Update local display mode value
-    GUI->>GUI: updateSettingsDisplay() - Refresh UI
-
-    Note over GUI: User Button Press (R2 - Cycle Activity Type)
-    GUI->>GUI: handleKeyEvent() - Update local activity type value
-    GUI->>GUI: updateSettingsDisplay() - Refresh UI
-
-    Note over GUI: User Button Press (R1 - Save Settings)
-    GUI->>Model: presenter->saveSettings() - Send to Service
+    Note over GUI: User Button Press (R1 - Save & Select Next)
+    GUI->>Model: presenter->saveSettings() - Send current settings to Service
     Model->>Service: Send SetSettings message
     Service->>Service: Update internal settings
     Service->>FileSystem: saveSettings() - Write to JSON file
+    GUI->>GUI: Switch to next setting selection and update colors
+
+    Note over GUI: User Button Press (L1/L2 - Change Selected Setting)
+    GUI->>GUI: handleKeyEvent() - Increment/decrement selected setting value
+    GUI->>GUI: updateSettingsDisplay() - Refresh UI with new value and colors
+
+    Note over GUI: User Button Press (R2 - Exit)
+    GUI->>Model: presenter->exit() - Exit application
 ```
 
 ## Service Layer Implementation
@@ -334,19 +330,16 @@ void MainPresenter::onSettingsUpdate(float decimalCounter, CustomMessage::Activi
 void MainView::setupScreen() {
     MainViewBase::setupScreen();
 
-    // Configure button colors
     buttons.setL1(ButtonsSet::WHITE);
     buttons.setL2(ButtonsSet::WHITE);
     buttons.setR1(ButtonsSet::AMBER);
-    buttons.setR2(ButtonsSet::AMBER);
+    buttons.setR2(ButtonsSet::WHITE);
 
-    // Set up text buffers for settings display
-    setting1.setWildcard(setting1Buffer);
-    setting2.setWildcard(setting2Buffer);
-    setting3.setWildcard(setting3Buffer);
-
-    // Request initial settings from Service
+    // Request initial settings
     presenter->requestSettings();
+
+    // Initial display
+    updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode);
 }
 ```
 
@@ -358,29 +351,35 @@ void MainView::updateSettingsDisplay(float decimalCounter, CustomMessage::Activi
     mActivityType = activityType;
     mDisplayMode = displayMode;
 
-    // Update decimal counter display
+    // Update setting1: decimal counter
     Unicode::snprintf(setting1Buffer, SETTING1_SIZE, "%.1f", decimalCounter);
+    setting1.setColor(touchgfx::Color::getColorFromRGB(stgSel == StgType::STG1 ? 255 : 255, stgSel == StgType::STG1 ? 0 : 255, stgSel == StgType::STG1 ? 0 : 255));
+    setting1.resizeToCurrentText();
     setting1.invalidate();
 
-    // Update activity type display
-    const char* activityStr = "";
+    // Update setting2: activity type
+    const char* activityStr = "*";
     switch (activityType) {
         case CustomMessage::ActivityType::RUNNING: activityStr = "RUNNING"; break;
         case CustomMessage::ActivityType::CYCLING: activityStr = "CYCLING"; break;
         case CustomMessage::ActivityType::SWIMMING: activityStr = "SWIMMING"; break;
         case CustomMessage::ActivityType::WALKING: activityStr = "WALKING"; break;
     }
-    Unicode::strncpy(setting2Buffer, activityStr, SETTING2_SIZE);
+    Unicode::strncpy(setting2Buffer, activityStr, SETTING2_SIZE - 1);
+    setting2.setColor(touchgfx::Color::getColorFromRGB(stgSel == StgType::STG2 ? 255 : 255, stgSel == StgType::STG2 ? 0 : 255, stgSel == StgType::STG2 ? 0 : 255));
+    setting2.resizeToCurrentText();
     setting2.invalidate();
 
-    // Update display mode
-    const char* displayStr = "";
+    // Update setting3: display mode
+    const char* displayStr = "-";
     switch (displayMode) {
         case CustomMessage::DisplayMode::SIMPLE: displayStr = "SIMPLE"; break;
         case CustomMessage::DisplayMode::DETAILED: displayStr = "DETAILED"; break;
         case CustomMessage::DisplayMode::COMPACT: displayStr = "COMPACT"; break;
     }
-    Unicode::strncpy(setting3Buffer, displayStr, SETTING3_SIZE);
+    Unicode::strncpy(setting3Buffer, displayStr, SETTING3_SIZE - 1);
+    setting3.setColor(touchgfx::Color::getColorFromRGB(stgSel == StgType::STG3 ? 255 : 255, stgSel == StgType::STG3 ? 0 : 255, stgSel == StgType::STG3 ? 0 : 255));
+    setting3.resizeToCurrentText();
     setting3.invalidate();
 }
 ```
@@ -390,36 +389,89 @@ void MainView::updateSettingsDisplay(float decimalCounter, CustomMessage::Activi
 ```cpp
 void MainView::handleKeyEvent(uint8_t key) {
     if (key == Gui::Config::Button::L1) {
-        // Cycle decimal counter: 0.5, 1.0, 1.5, 2.0
-        const float values[] = {0.5f, 1.0f, 1.5f, 2.0f};
-        int currentIndex = -1;
-        for (int i = 0; i < 4; ++i) {
-            if (mDecimalCounter == values[i]) {
-                currentIndex = i;
+        // Change value of selected setting
+        switch (stgSel) {
+            case StgType::STG1: {
+                // Cycle decimal counter: 0.5, 1.0, 1.5, 2.0
+                const float values[] = {0.5f, 1.0f, 1.5f, 2.0f};
+                int currentIndex = -1;
+                for (int i = 0; i < 4; ++i) {
+                    if (mDecimalCounter == values[i]) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex == -1) currentIndex = 0; // default
+                currentIndex = (currentIndex + 1) % 4;
+                mDecimalCounter = values[currentIndex];
+                break;
+            }
+            case StgType::STG2: {
+                // Cycle activity type
+                int current = static_cast<int>(mActivityType);
+                current = (current + 1) % 4;
+                mActivityType = static_cast<CustomMessage::ActivityType>(current);
+                break;
+            }
+            case StgType::STG3: {
+                // Cycle display mode
+                int current = static_cast<int>(mDisplayMode);
+                current = (current + 1) % 3;
+                mDisplayMode = static_cast<CustomMessage::DisplayMode>(current);
                 break;
             }
         }
-        if (currentIndex == -1) currentIndex = 0; // default
-        currentIndex = (currentIndex + 1) % 4;
-        mDecimalCounter = values[currentIndex];
         updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode);
     }
 
     if (key == Gui::Config::Button::L2) {
-        // Cycle activity type
-        int current = static_cast<int>(mActivityType);
-        current = (current + 1) % 4;
-        mActivityType = static_cast<CustomMessage::ActivityType>(current);
+        // Change value of selected setting (decrement)
+        switch (stgSel) {
+            case StgType::STG1: {
+                // Cycle decimal counter: 0.5, 1.0, 1.5, 2.0
+                const float values[] = {0.5f, 1.0f, 1.5f, 2.0f};
+                int currentIndex = -1;
+                for (int i = 0; i < 4; ++i) {
+                    if (mDecimalCounter == values[i]) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex == -1) currentIndex = 0; // default
+                currentIndex = (currentIndex - 1 + 4) % 4; // decrement
+                mDecimalCounter = values[currentIndex];
+                break;
+            }
+            case StgType::STG2: {
+                // Cycle activity type
+                int current = static_cast<int>(mActivityType);
+                current = (current - 1 + 4) % 4; // decrement
+                mActivityType = static_cast<CustomMessage::ActivityType>(current);
+                break;
+            }
+            case StgType::STG3: {
+                // Cycle display mode
+                int current = static_cast<int>(mDisplayMode);
+                current = (current - 1 + 3) % 3; // decrement
+                mDisplayMode = static_cast<CustomMessage::DisplayMode>(current);
+                break;
+            }
+        }
         updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode);
     }
 
     if (key == Gui::Config::Button::R1) {
         // Save current settings
         presenter->saveSettings(mDecimalCounter, mActivityType, mDisplayMode);
+
+        // Switch selection
+        int current = static_cast<int>(stgSel);
+        current = (current + 1) % 3;
+        stgSel = static_cast<StgType>(current);
+        updateSettingsDisplay(mDecimalCounter, mActivityType, mDisplayMode); // to update colors
     }
 
     if (key == Gui::Config::Button::R2) {
-        // Exit application
         presenter->exit();
     }
 }
@@ -427,12 +479,22 @@ void MainView::handleKeyEvent(uint8_t key) {
 
 ## Button Control Scheme
 
-The tutorial uses physical buttons for user interaction:
+The tutorial uses physical buttons for user interaction with a selectable settings system:
 
-- **L1 Button**: Cycle decimal counter (0.5 → 1.0 → 1.5 → 2.0 → repeat)
-- **L2 Button**: Cycle display mode (SIMPLE → DETAILED → COMPACT → repeat)
-- **R1 Button**: Save current settings to file
-- **R2 Button**: Cycle activity type (RUNNING → CYCLING → SWIMMING → WALKING → repeat)
+- **L1 Button**: Increment the currently selected setting value
+- **L2 Button**: Decrement the currently selected setting value
+- **R1 Button**: Save current settings to file and switch to next setting selection
+- **R2 Button**: Exit the application
+
+### Setting Selection Flow
+
+The system cycles through three selectable settings:
+
+1. **Decimal Counter** (STG1): Cycles through 0.5, 1.0, 1.5, 2.0
+2. **Activity Type** (STG2): Cycles through RUNNING, CYCLING, SWIMMING, WALKING
+3. **Display Mode** (STG3): Cycles through SIMPLE, DETAILED, COMPACT
+
+The currently selected setting is highlighted with red text color, while unselected settings appear in green. After saving with R1, the selection automatically advances to the next setting.
 
 ## Build System Integration
 
