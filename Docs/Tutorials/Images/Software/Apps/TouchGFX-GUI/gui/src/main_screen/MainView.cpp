@@ -13,6 +13,10 @@ void MainView::setupScreen()
 {
     MainViewBase::setupScreen();
 
+    buttons.setL1(ButtonsSet::AMBER);
+    buttons.setR1(ButtonsSet::AMBER);
+    buttons.setR2(ButtonsSet::WHITE);
+
     // Removed background usage - no background image or box used
 
     guyImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));

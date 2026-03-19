@@ -7,7 +7,6 @@
 /simulator/msvs/.vs/*
 /simulator/msvs/screenshots/*
 /config/gcc/*
-/touchgfx/
 
 # GUI generated files
 /generated/*.config
