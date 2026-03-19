@@ -9,6 +9,9 @@ MainViewBase::MainViewBase()
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    buttons.setXY(0, 47);
+    add(buttons);
 }
 
 MainViewBase::~MainViewBase()
@@ -18,5 +21,5 @@ MainViewBase::~MainViewBase()
 
 void MainViewBase::setupScreen()
 {
-
+    buttons.initialize();
 }

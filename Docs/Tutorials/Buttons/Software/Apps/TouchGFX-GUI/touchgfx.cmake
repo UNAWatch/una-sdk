@@ -7,7 +7,7 @@ file(GLOB_RECURSE TOUCHGFX_SOURCES
 )
 
 set(TOUCHGFX_INCLUDE_DIRS
-    ${CMAKE_CURRENT_LIST_DIR}/touchgfx/framework/include
+    ${UNA_SDK}/touchgfx/framework/include
     ${CMAKE_CURRENT_LIST_DIR}/generated/fonts/include
     ${CMAKE_CURRENT_LIST_DIR}/generated/gui_generated/include
     ${CMAKE_CURRENT_LIST_DIR}/generated/images/include
@@ -17,5 +17,5 @@ set(TOUCHGFX_INCLUDE_DIRS
 )
 
 set(TOUCHGFX_LIBS
-    ${CMAKE_CURRENT_LIST_DIR}/touchgfx/lib/core/cortex_m33/gcc/libtouchgfx-float-abi-hard.a
+    ${UNA_SDK}/touchgfx/lib/core/cortex_m33/gcc/libtouchgfx-float-abi-hard.a
 )

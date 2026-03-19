@@ -12,12 +12,6 @@
             "Height": 147,
             "LockPosition": true,
             "CustomContainerDefinitionName": "ButtonsSet"
-          },
-          {
-            "Type": "Box",
-            "Name": "box1",
-            "Width": 240,
-            "Height": 240
           }
         ],
         "Interactions": []
@@ -168,7 +162,7 @@
     "SelectedColorDepth": 8,
     "StartupScreenName": "Main",
     "SelectedStartupLanguage": "GB",
-    "TouchGfxPath": "touchgfx",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
     "UIPath": ".",
     "AvailableColorDepths": [
       8

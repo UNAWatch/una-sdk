@@ -76,7 +76,6 @@ void MainView::handleKeyEvent(uint8_t key)
     }
 
     if (key == Gui::Config::Button::R2) {
-        if (lastKeyPressed == key) presenter->exit();
+        presenter->exit();
     }
-    lastKeyPressed = key;
 }

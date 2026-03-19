@@ -650,7 +650,7 @@
     "SelectedColorDepth": 8,
     "StartupScreenName": "Main",
     "SelectedStartupLanguage": "GB",
-    "TouchGfxPath": "touchgfx",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
     "UIPath": ".",
     "AvailableColorDepths": [
       8
