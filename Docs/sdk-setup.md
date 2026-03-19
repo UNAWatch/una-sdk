@@ -164,8 +164,10 @@ If you installed `gcc-arm-none-eabi` from your distro repositories and builds fa
 ##### Clone and setup environment
 
 ```powershell
-# Clone
+# Clone via SSH
 git clone --recursive git@github.com:UNAWatch/una-sdk.git
+# Or use HTTPS
+git clone --recursive https://github.com/UNAWatch/una-sdk.git
 
 # Export environment (persistent)
 . ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1
