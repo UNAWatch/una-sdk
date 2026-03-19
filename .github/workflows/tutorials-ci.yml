@@ -4,15 +4,7 @@ on:
   push:
     branches: [ main, develop ]
     tags: [ '*' ]
-    paths:
-      - 'Docs/Tutorials/**'
-      - '.github/scripts/generate-tutorials-app-list.py'
-      - '.github/workflows/tutorials-ci.yml'
   pull_request:
-    paths:
-      - 'Docs/Tutorials/**'
-      - '.github/scripts/generate-tutorials-app-list.py'
-      - '.github/workflows/tutorials-ci.yml'
 
 # env:
 #   APPS_EXCLUDED: |
