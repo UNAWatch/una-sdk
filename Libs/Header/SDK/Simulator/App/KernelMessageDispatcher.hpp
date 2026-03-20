@@ -263,7 +263,7 @@ private:
         }
     };
 
-    static constexpr WatchSettings mSettings{};
+    WatchSettings mSettings{};
     static constexpr uint32_t      GLANCE_WIDTH        = 240;
     static constexpr uint32_t      GLANCE_HEIGHT       = 60;
     static constexpr uint32_t      GLANCE_MAX_CONTROLS = 32;

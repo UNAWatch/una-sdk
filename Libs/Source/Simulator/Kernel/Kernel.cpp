@@ -10,7 +10,6 @@
  */
 
 #include "SDK/Simulator/Kernel/Kernel.hpp"
-#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 #include "SDK/Interfaces/IApp.hpp"
 
@@ -19,9 +18,8 @@ static constexpr char sFsPath[] = "../../../../../Output/";
 namespace SDK::Simulator
 {
 
-Kernel::Kernel(const char* name, Sensors::ISensorCore* sensoreCore)
-    : mSensoreCore(sensoreCore)
-    , mIsServise(mSensoreCore != nullptr)
+Kernel::Kernel(const char* name)
+    : mIsServise()
     , mName(name)
     , mLogger()
     , mAppMemory()
@@ -51,9 +49,6 @@ SDK::Kernel& Kernel::getKernel()
 
 void Kernel::tick()
 {
-    if (mSensoreCore) {
-        mSensoreCore->tick();
-    }
 }
 
 bool Kernel::keyFilter(uint8_t key)

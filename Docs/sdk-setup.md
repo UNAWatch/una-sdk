@@ -258,7 +258,9 @@ MyApp/  # App root (can be anywhere)
    - Place icons in `Resources/` (30x30 and 60x60 PNGs required).
 
 5. **Set Environment** (as in Step 3 above).
-
+6. **TouchGFX libraries**
+   - If you change the location of the application folder, you need to update the path to the TouchGFX libraries.
+   - To update the path to the TouchGFX libraries, open the <name_app>Software/Apps/TouchGFX-GUI/<name_project>.touchgfx file in a text editor, find the "TouchGfxPath:" line, and set a new relative path to una-sdk/ThirdParty/touchgfx folder.
 ### Building Apps Manually
 Navigate to the app's CMake directory:
 ```bash

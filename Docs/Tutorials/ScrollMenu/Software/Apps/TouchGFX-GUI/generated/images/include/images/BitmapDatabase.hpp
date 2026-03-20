@@ -19,15 +19,11 @@ const uint16_t BITMAP_BUTTON_R1R_ID = 9;
 const uint16_t BITMAP_BUTTON_R2_ID = 10;
 const uint16_t BITMAP_BUTTON_R2A_ID = 11;
 const uint16_t BITMAP_BUTTON_R2R_ID = 12;
-const uint16_t BITMAP_HEART_ID = 13;
-const uint16_t BITMAP_MENUASSETS_CROSS_ID = 14;
-const uint16_t BITMAP_MENUASSETS_CROSSYELLOW_ID = 15;
-const uint16_t BITMAP_MENUASSETS_TICK_ID = 16;
-const uint16_t BITMAP_SIDEBARBIG_ID = 17;
-const uint16_t BITMAP_TOGGLE_DEF_ID = 18;
-const uint16_t BITMAP_TOGGLE_HANDLE_ID = 19;
-const uint16_t BITMAP_TOGGLE_OFF_ID = 20;
-const uint16_t BITMAP_TOGGLE_ON_ID = 21;
+const uint16_t BITMAP_SIDEBARBIG_ID = 13;
+const uint16_t BITMAP_TOGGLE_DEF_ID = 14;
+const uint16_t BITMAP_TOGGLE_HANDLE_ID = 15;
+const uint16_t BITMAP_TOGGLE_OFF_ID = 16;
+const uint16_t BITMAP_TOGGLE_ON_ID = 17;
 
 namespace BitmapDatabase
 {

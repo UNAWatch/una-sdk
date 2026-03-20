@@ -8,6 +8,7 @@
 #include <mvp/View.hpp>
 #include <gui/main_screen/MainPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <gui/containers/ButtonsSet.hpp>
 
 class MainViewBase : public touchgfx::View<MainPresenter>
 {
@@ -25,6 +26,7 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    ButtonsSet buttons;
 
 private:
 

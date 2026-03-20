@@ -262,18 +262,6 @@
     <Filter Include="Source Files\generated\gui_generated\main_screen">
       <UniqueIdentifier>8C1DD42C-926D-64F4-103E-A41C57AC0ABC</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\gui\containers">
-      <UniqueIdentifier>23C1C50B-546B-0B47-7773-A5F6555624A8</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\gui\containers">
-      <UniqueIdentifier>21E12412-D27D-6807-3DFD-636DAF598A78</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\generated\gui_generated\containers">
-      <UniqueIdentifier>9EE7E661-23A1-5935-0016-19AB82903FA2</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\generated\gui_generated\containers">
-      <UniqueIdentifier>3807A5E5-E373-9580-7A0B-28797A038833</UniqueIdentifier>
-    </Filter>
     <Filter Include="SDK\Libs\Header\Kernel">
       <UniqueIdentifier>{92e3a54a-6784-4724-a054-8e8898fbb2cc}</UniqueIdentifier>
     </Filter>
@@ -303,6 +291,18 @@
     </Filter>
     <Filter Include="SDK\Libs\Source\Simulator\App">
       <UniqueIdentifier>{ef591842-02d1-4ac9-864c-a7c69aac5f3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\containers">
+      <UniqueIdentifier>BC87304D-07D2-ECD4-64F9-B34BD5D33A40</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\containers">
+      <UniqueIdentifier>45FABE98-7F58-FC8E-4B33-D7556002E767</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\containers">
+      <UniqueIdentifier>3A0BE172-8B0F-7599-4BFB-B02E769B000A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\containers">
+      <UniqueIdentifier>3F058304-DF53-189A-C626-BA05BE88B2AC</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -344,9 +344,6 @@
     </ClCompile>
     <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp">
       <Filter>Source Files\generated\gui_generated\main_screen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp">
-      <Filter>Source Files\gui\containers</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp">
       <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
@@ -422,6 +419,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\System.cpp">
       <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\containers\ButtonsSet.cpp">
+      <Filter>Source Files\gui\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\ButtonsSetBase.cpp">
+      <Filter>Source Files\generated\gui_generated\containers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -940,9 +943,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\main_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Libs\Header\ActivityWriter.hpp">
       <Filter>Libs\Header</Filter>
     </ClInclude>
@@ -1047,6 +1047,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\Kernel\Mock\System.hpp">
       <Filter>SDK\Libs\Header\Simulator\Kernel\Mock</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\containers\ButtonsSet.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ButtonsSetBase.hpp">
+      <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -27,7 +27,6 @@ protected:
      */
     touchgfx::Box __background;
     ButtonsSet buttons;
-    touchgfx::Box box1;
 
 private:
 
