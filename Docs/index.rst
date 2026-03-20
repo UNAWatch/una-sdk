@@ -44,6 +44,13 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
 
 .. toctree::
    :maxdepth: 4
+   :caption: 🎋 Apps Sharing
+
+   deploy
+   app-config-json
+
+.. toctree::
+   :maxdepth: 4
    :caption: 📚 API Reference
 
    api-reference
