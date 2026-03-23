@@ -37,11 +37,11 @@
 
   ![Add New App](assets/add-app.png)
 
-  App Page:
+- Copy **App ID** from app Page:
 
   ![New App Page](assets/app-page.png)
 
-- Copy **App ID** and paste it into your [`CMakeLists.txt`](CMakeLists.txt) into the `APP_ID` variable. **Note:** APP_ID is required to track the apps in the apps store and for the mobile app to match new `*.uapp` file versions in case the file name itself has been changed.
+- Paste it into your [`CMakeLists.txt`](CMakeLists.txt) into the `APP_ID` variable. **Note:** APP_ID is required to track the apps in the apps store and for the mobile app to match new `*.uapp` file versions in case the file name itself has been changed.
 
   ![App ID](assets/paste-id.png)
 
@@ -69,12 +69,11 @@
 
   ![Upload](assets/app-version-upload.png)
 
-- Upload must successed.
+- After upload successed, click **Release** to publish the app.
 
   ![Uploaded](assets/uploaded-app.png)
 
-
-- Click **RELEASE** to publish the app.
+- Confirm by clicking **Confirm and Publish**
 
   ![Publish](assets/publish.png)
 
