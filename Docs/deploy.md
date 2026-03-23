@@ -23,16 +23,62 @@
 
 ### Via https://apps.unawatch.com for Closed Source Apps
 
+**Disclaimer:** In these instructional steps, we use the __Files__ Tutorial **as an example**. Please apply the steps below to your own app!
+
 - Enter the [portal page](https://apps.unawatch.com) and sign up.
+
+  ![Login](assets/login.png)
+
 - After signing in, click **Add New**.
+
+  ![Main](assets/main-page.png)
+
 - Enter **App Name** and a brief description. Click the Generate button.
+
+  ![Add New App](assets/add-app.png)
+
+  App Page:
+
+  ![New App Page](assets/app-page.png)
+
 - Copy **App ID** and paste it into your [`CMakeLists.txt`](CMakeLists.txt) into the `APP_ID` variable. **Note:** APP_ID is required to track the apps in the apps store and for the mobile app to match new `*.uapp` file versions in case the file name itself has been changed.
+
+  ![App ID](assets/paste-id.png)
+
 - Compile the app with the generated **APP_ID**. Note: Call `cmake` to update the new APP_ID variable. Eventually, you should see the same APP_ID from the `app_merging.py` script output: `INFO:root:ID             : 03AD5A741E38A35F`
-- Create `config.json` file. Detailed instructions are [here](app-config-json.md).
+
+  ![Build output](assets/compiled-app.png)
+
+- Create `config.json` file. Detailed instructions are [here](app-config-json.md) 
+
+  ![Config](assets/config-json.png)
+
 - Pack the resulting `*.uapp`, `icon.png`, and `config.json` into a `*.zip` archive.
+
+  ![Archive](assets/archive.png)
+
 - At the app page, click the **Version** tab.
-- Click **Upload New** and upload the resulting `*.zip` file.
+
+  ![Version Tab](assets/app-version-tab.png)
+
+- Click **Upload New**.
+
+  ![Upload Dialog](assets/app-upload.png)
+
+- Upload the resulting `*.zip` file.
+
+  ![Upload](assets/app-version-upload.png)
+
+- Upload must successed.
+
+  ![Uploaded](assets/uploaded-app.png)
+
+
+- Click **RELEASE** to publish the app.
+
+  ![Publish](assets/publish.png)
 
 ### Via PR to https://github.com/UNAWatch/una-apps for Open Source Apps
 
 - Apply a PR to https://github.com/UNAWatch/una-apps.
+  
