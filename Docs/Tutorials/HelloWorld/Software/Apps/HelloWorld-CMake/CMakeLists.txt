@@ -59,6 +59,7 @@ if(DEFINED TOUCHGFX_PATH)
         ${UNA_SDK_INCLUDE_DIRS_GUI}
         ${TOUCHGFX_INCLUDE_DIRS}
     )
+		
     una_app_build_gui(${APP_NAME}GUI.elf)
 endif()
 
