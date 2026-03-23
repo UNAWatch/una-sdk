@@ -1,15 +1,15 @@
 /**
  ******************************************************************************
- * @file    SensorDataParserAccelerometerRaw.hpp
- * @date    02-August-2025
+ * @file    SensorDataParserGyroscopeRaw.hpp
+ * @date    23-March-2026
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   Sensor data parser for ACCELEROMETER_RAW sensor
+ * @brief   Sensor data parser for GYROSCOPE_RAW sensor
  *
  ******************************************************************************
  */
 
-#ifndef __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP
-#define __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP
+#ifndef __SENSOR_DATA_PARSER_GYROSCOPE_RAW_HPP
+#define __SENSOR_DATA_PARSER_GYROSCOPE_RAW_HPP
 
 #include "SDK/SensorLayer/SensorDataView.hpp"
 
@@ -20,18 +20,18 @@ namespace SDK
     namespace SensorDataParser
     {
         /**
-         * @brief Helper class for parsing raw accelerometer sensor data from DataView
+         * @brief Helper class for parsing raw gyroscope sensor data from DataView
          *
          * Expected data layout:
          * - [0] Raw X axis value
          * - [1] Raw Y axis value
          * - [2] Raw Z axis value
          */
-        class AccelerometerRaw
+        class GyroscopeRaw
         {
         public:
             /**
-             * @brief Indices of raw accelerometer data fields
+             * @brief Indices of raw gyroscope data fields
              */
             enum Field : uint8_t {
                 X = 0, ///< X axis
@@ -41,17 +41,17 @@ namespace SDK
             };
 
             /**
-             * @brief Construct a new AccelerometerRaw parser over the given sensor data
+             * @brief Construct a new GyroscopeRaw parser over the given sensor data
              * @param data Sensor data view containing 3 raw integer values
              */
-            AccelerometerRaw(const SDK::Sensor::DataView data) : mData(data) {}
+            GyroscopeRaw(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check whether the sensor data is structurally valid
              *
              * @details
              * Validity conditions:
-             * - The number of fields matches the expected raw accelerometer layout.
+             * - The number of fields matches the expected raw gyroscope layout.
              *
              * @return true if the data is valid, false otherwise
              */
@@ -126,7 +126,7 @@ namespace SDK
             }
 
             /**
-             * @brief Get the number of expected raw accelerometer fields
+             * @brief Get the number of expected raw gyroscope fields
              * @return Number of expected fields
              */
             static constexpr uint8_t getFieldsNumber()
@@ -139,9 +139,9 @@ namespace SDK
              * @brief Sensor data view
              */
             const SDK::Sensor::DataView mData;
-        }; /* class AccelerometerRaw */
+        }; /* class GyroscopeRaw */
     }; /* namespace SensorDataParser */
 
 } /* namespace SDK */
 
-#endif /* __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP */
+#endif /* __SENSOR_DATA_PARSER_GYROSCOPE_RAW_HPP */
