@@ -3,9 +3,7 @@
  * @file    SensorDataParserAccelerometer.hpp
  * @date    02-August-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   SensorData parser for ACCELEROMETER sensor
- * 
- ******************************************************************************
+ * @brief   Sensor data parser for ACCELEROMETER sensor
  *
  ******************************************************************************
  */
@@ -22,39 +20,40 @@ namespace SDK
     namespace SensorDataParser
     {
         /**
-         * @brief Helper class to parse accelerometer sensor data from ISensorData
+         * @brief Helper class for parsing accelerometer sensor data from DataView
          *
          * Expected data layout:
-         * - [0] float altitude in meters
+         * - [0] Acceleration on X axis
+         * - [1] Acceleration on Y axis
+         * - [2] Acceleration on Z axis
          */
         class Accelerometer
         {
         public:
             /**
-             * @brief Field layout indices
+             * @brief Indices of accelerometer data fields
              */
             enum Field : uint8_t {
-                X = 0, ///< Axis X
-                Y,     ///< Axis Y
-                Z,     ///< Axis Z
-                COUNT  ///< Number of fields
+                X = 0, ///< X axis
+                Y,     ///< Y axis
+                Z,     ///< Z axis
+                COUNT  ///< Total number of fields
             };
 
             /**
-             * @brief Construct a new Accelerometer parser over given ISensorData
-             * @param data Reference to sensor data containing 1 float value
+             * @brief Construct a new Accelerometer parser over the given sensor data
+             * @param data Sensor data view containing 3 float values
              */
             Accelerometer(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
-             * @brief Check if data is valid.
+             * @brief Check whether the sensor data is structurally valid
              *
              * @details
              * Validity conditions:
-             *  - Non-null pointer.
-             *  - Only needed fields present.
+             * - The number of fields matches the expected accelerometer layout.
              *
-             * @return true if the data passes basic structural checks.
+             * @return true if the data is valid, false otherwise
              */
             bool isDataValid() const
             {
@@ -63,7 +62,7 @@ namespace SDK
 
             /**
              * @brief Get acceleration on X axis
-             * @return Acceleration in g (if data is valid), otherwise 0.0f
+             * @return Acceleration on X axis if data is valid, otherwise 0.0f
              */
             float getX() const
             {
@@ -72,7 +71,7 @@ namespace SDK
 
             /**
              * @brief Get acceleration on Y axis
-             * @return Acceleration in g (if data is valid), otherwise 0.0f
+             * @return Acceleration on Y axis if data is valid, otherwise 0.0f
              */
             float getY() const
             {
@@ -81,7 +80,7 @@ namespace SDK
 
             /**
              * @brief Get acceleration on Z axis
-             * @return Acceleration in g (if data is valid), otherwise 0.0f
+             * @return Acceleration on Z axis if data is valid, otherwise 0.0f
              */
             float getZ() const
             {
@@ -89,8 +88,28 @@ namespace SDK
             }
 
             /**
-             * @brief Get data timestamp in ms
-             * @return Data timestamp in ms (0 if invalid)
+             * @brief Get acceleration values for all three axes
+             * @param x Output value for X axis
+             * @param y Output value for Y axis
+             * @param z Output value for Z axis
+             * @return true if data is valid, false otherwise
+             */
+            bool getXYZ(float& x, float& y, float& z) const
+            {
+                if (!isDataValid()) {
+                    return false;
+                }
+
+                x = mData.f[Field::X];
+                y = mData.f[Field::Y];
+                z = mData.f[Field::Z];
+
+                return true;
+            }
+
+            /**
+             * @brief Get data timestamp in milliseconds
+             * @return Data timestamp in milliseconds, or 0 if data is invalid
              */
             uint32_t getTimestamp() const
             {
@@ -98,8 +117,8 @@ namespace SDK
             }
 
             /**
-             * @brief Get data timestamp in us
-             * @return Data timestamp in us (0 if invalid)
+             * @brief Get data timestamp in microseconds
+             * @return Data timestamp in microseconds, or 0 if data is invalid
              */
             uint64_t getTimestampUs() const
             {
@@ -107,7 +126,8 @@ namespace SDK
             }
 
             /**
-             * @brief Get number of expected fields (always 1)
+             * @brief Get the number of expected accelerometer fields
+             * @return Number of expected fields
              */
             static constexpr uint8_t getFieldsNumber()
             {
@@ -116,7 +136,7 @@ namespace SDK
 
         private:
             /**
-             * @brief Reference to sensor data storage
+             * @brief Sensor data view
              */
             const SDK::Sensor::DataView mData;
         }; /* class Accelerometer */

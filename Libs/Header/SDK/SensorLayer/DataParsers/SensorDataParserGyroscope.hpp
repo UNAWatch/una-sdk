@@ -1,15 +1,15 @@
 /**
  ******************************************************************************
- * @file    SensorDataParserAccelerometerRaw.hpp
- * @date    02-August-2025
+ * @file    SensorDataParserAccelerometer.hpp
+ * @date    23-March-2026
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
- * @brief   Sensor data parser for ACCELEROMETER_RAW sensor
+ * @brief   Sensor data parser for GYROSCOPE sensor
  *
  ******************************************************************************
  */
 
-#ifndef __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP
-#define __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP
+#ifndef __SENSOR_DATA_PARSER_GYROSCOPE_HPP
+#define __SENSOR_DATA_PARSER_GYROSCOPE_HPP
 
 #include "SDK/SensorLayer/SensorDataView.hpp"
 
@@ -20,18 +20,18 @@ namespace SDK
     namespace SensorDataParser
     {
         /**
-         * @brief Helper class for parsing raw accelerometer sensor data from DataView
+         * @brief Helper class for parsing gyroscope sensor data from DataView
          *
          * Expected data layout:
-         * - [0] Raw X axis value
-         * - [1] Raw Y axis value
-         * - [2] Raw Z axis value
+         * - [0] Angular velocity around X axis
+         * - [1] Angular velocity around Y axis
+         * - [2] Angular velocity around Z axis
          */
-        class AccelerometerRaw
+        class Gyroscope
         {
         public:
             /**
-             * @brief Indices of raw accelerometer data fields
+             * @brief Indices of gyroscope data fields
              */
             enum Field : uint8_t {
                 X = 0, ///< X axis
@@ -41,17 +41,17 @@ namespace SDK
             };
 
             /**
-             * @brief Construct a new AccelerometerRaw parser over the given sensor data
-             * @param data Sensor data view containing 3 raw integer values
+             * @brief Construct a new Gyroscope parser over the given sensor data
+             * @param data Sensor data view containing 3 float values
              */
-            AccelerometerRaw(const SDK::Sensor::DataView data) : mData(data) {}
+            Gyroscope(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
              * @brief Check whether the sensor data is structurally valid
              *
              * @details
              * Validity conditions:
-             * - The number of fields matches the expected raw accelerometer layout.
+             * - The number of fields matches the expected gyroscope layout.
              *
              * @return true if the data is valid, false otherwise
              */
@@ -59,42 +59,42 @@ namespace SDK
             {
                 return (mData.getFieldCount() == Field::COUNT);
             }
-            
+
             /**
-             * @brief Get raw X axis value
-             * @return Raw X axis value if data is valid, otherwise 0
+             * @brief Get angular velocity around X axis
+             * @return Angular velocity around X axis if data is valid, otherwise 0.0f
              */
-            int16_t getX() const
+            float getX() const
             {
-                return isDataValid() ? mData.i[Field::X] : 0;
+                return isDataValid() ? mData.f[Field::X] : 0.0f;
             }
 
             /**
-             * @brief Get raw Y axis value
-             * @return Raw Y axis value if data is valid, otherwise 0
+             * @brief Get angular velocity around Y axis
+             * @return Angular velocity around Y axis if data is valid, otherwise 0.0f
              */
-            int16_t getY() const
+            float getY() const
             {
-                return isDataValid() ? mData.i[Field::Y] : 0;
+                return isDataValid() ? mData.f[Field::Y] : 0.0f;
             }
 
             /**
-             * @brief Get raw Z axis value
-             * @return Raw Z axis value if data is valid, otherwise 0
+             * @brief Get angular velocity around Z axis
+             * @return Angular velocity around Z axis if data is valid, otherwise 0.0f
              */
-            int16_t getZ() const
+            float getZ() const
             {
-                return isDataValid() ? mData.i[Field::Z] : 0;
+                return isDataValid() ? mData.f[Field::Z] : 0.0f;
             }
 
             /**
-             * @brief Get raw values for all three axes
+             * @brief Get angular velocity values for all three axes
              * @param x Output value for X axis
              * @param y Output value for Y axis
              * @param z Output value for Z axis
              * @return true if data is valid, false otherwise
              */
-            bool getXYZ(int16_t& x, int16_t& y, int16_t& z) const
+            bool getXYZ(float& x, float& y, float& z) const
             {
                 if (!isDataValid()) {
                     return false;
@@ -126,7 +126,7 @@ namespace SDK
             }
 
             /**
-             * @brief Get the number of expected raw accelerometer fields
+             * @brief Get the number of expected gyroscope fields
              * @return Number of expected fields
              */
             static constexpr uint8_t getFieldsNumber()
@@ -139,9 +139,9 @@ namespace SDK
              * @brief Sensor data view
              */
             const SDK::Sensor::DataView mData;
-        }; /* class AccelerometerRaw */
+        }; /* class Gyroscope */
     }; /* namespace SensorDataParser */
 
 } /* namespace SDK */
 
-#endif /* __SENSOR_DATA_PARSER_ACCELEROMETER_RAW_HPP */
+#endif /* __SENSOR_DATA_PARSER_GYROSCOPE_HPP */
