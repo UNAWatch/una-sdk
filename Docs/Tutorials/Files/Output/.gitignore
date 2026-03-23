@@ -1,6 +1,8 @@
 # Ignore everything
 *
 
+!*.json
+
 # But not .gitignore itself
 !.gitignore
 
