@@ -5,10 +5,11 @@
 | Revision | Date of Changes | Matter of Change | Note | Editor |
 |----------|-----------------|------------------|------|--------|
 | 1.00    | 7.08.2025      | Creating        |      | Denys Saienko |
+| 1.01    | 2024-08-10     | Removed mentions about signature file as it is not used |      | Denys Sobchuk (https://github.com/AvatarSD) |
 
 ## Output Package
 
-The watch application package is generated using the UNA SDK. It is provided as a ZIP archive accompanied by a GPG signature, which ensures the authenticity and integrity of the entire archive and its contents. This mechanism can be used for content validation and to verify the identity of the application provider — for example, to confirm whether an application is UNA-verified.
+The watch application package is generated using the UNA SDK. It is provided as a ZIP archive containing the app binary and metadata.
 
 ### Package Content
 
@@ -21,7 +22,6 @@ The package includes the following files:
 - A folder (`assets`) with subdirectories (`icons` and `previews`):
   - `assets/icons`: Icons of the application and widgets
   - `assets/previews`: Application preview images (several screenshots in PNG format)
-- A signature file (`SIGNATURE.asc`)
 
 ### Config File
 
