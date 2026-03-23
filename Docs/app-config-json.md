@@ -31,6 +31,32 @@ This file is intended solely for defining supported features and displaying them
 
 All information needed by the watch is also embedded in the `*.uapp` file.
 
+Simplest `config.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
+
+```json
+{
+  "type": [
+    "activity"
+  ],
+  "name": "Files Tutorial",
+  "icon": "Resources/icon_60x60.png",
+  "binary": "Files_0.1.3-16-ed77913-dirty.uapp",
+  "appVersion": "0.1.3",
+  "minSdkVersion": "0.1.3",
+  "requiredHardware": [],
+  "stravaExport" : false,
+  "id": "03AD5A741E38A35F",
+  "supportsLaps": false,
+  "supportsDistance": false,
+  "supportsTrack": false,
+  "supportsHeartbeat": false,
+  "supportsElevation": false,
+  "supportsStep": false,
+  "supportsSpeed": "none",
+  "customMeasures": []
+}
+```
+
 Watch application config example:
 
 ```json
