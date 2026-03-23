@@ -25,7 +25,7 @@ Una-Watch apps are not interpreted or virtualized. They are compiled ARM Cortex-
 To allow apps to be loaded at any memory address without re-linking, the SDK uses Position-Independent Code.
 - **Kernel Abstraction**: Apps are completely abstracted from the kernel's memory layout.
 - **Dynamic Loading**: The kernel can load, run, and unload apps on demand.
-- **Process Isolation**: Ensures that apps do not interfere with each other or the kernel.
+- **Process Isolation**: No MMU, so the app can read entire MCU memory and execute whatever it want. Developers need to ensure that apps do not interfere with each other or the kernel.
 
 #### Shared libc Integration
 Una-Watch implements a shared libc architecture to save memory.
@@ -51,8 +51,8 @@ Communication between processes is handled via a high-performance message-passin
 
 #### Power Management
 - **Deep Sleep**: The kernel automatically enters low-power modes when idle.
-- **Wake Sources**: Apps can define specific wake sources (timers, sensors, buttons).
-- **Battery Optimization**: Adaptive sampling rates and event-driven design.
+- **Wake Sources**: Apps uses common RTOS tehniques for manage cpu time: awating for messages from kernel or `sleep()`.
+- **Battery Optimization**: Ajustable sampling rates and batching sensors samples.
 
 ## Next Steps
 
