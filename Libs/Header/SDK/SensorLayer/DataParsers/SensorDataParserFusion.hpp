@@ -46,7 +46,7 @@ namespace SDK
                 COUNT        ///< Total number of fields
             };
 
-            struct Axes3f
+            struct Axes
             {
                 float x;
                 float y;
@@ -55,8 +55,8 @@ namespace SDK
 
             struct Data
             {
-                Axes3f accel;
-                Axes3f gyro;
+                Axes accel;
+                Axes gyro;
             };
 
             /**
@@ -84,7 +84,7 @@ namespace SDK
              * @param data Output accelerometer data
              * @return true if data is valid, false otherwise
              */
-            bool getAccelData(Axes3f& data) const
+            bool getAccelData(Axes& data) const
             {
                 if (!isDataValid()) {
                     return false;
@@ -102,7 +102,7 @@ namespace SDK
              * @param data Output gyroscope data
              * @return true if data is valid, false otherwise
              */
-            bool getGyroData(Axes3f& data) const
+            bool getGyroData(Axes& data) const
             {
                 if (!isDataValid()) {
                     return false;
