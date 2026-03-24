@@ -14,7 +14,7 @@ Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you h
 - Programmatically adding images without using designer-generated backgrounds
 - Mode switching between [`Image`](touchgfx/widgets/Image.hpp) and [`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) using L1 button
 - Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
-- Understanding the TouchGFX image pipeline in UNA applications
+- Understanding the TouchGFX image pipeline in UNA applications. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Best practices for image optimization and management
 
 ## Getting Started
@@ -77,7 +77,7 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 - **Display**: Images are referenced by ID and displayed on screen
 
 ### The GUI Layer (Frontend)
-- Built with TouchGFX framework
+- Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Programmatically adds images in [`setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
 - Handles L1/R1 buttons for mode switching and animation triggers in [`handleKeyEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
 - Drives animation in [`handleTickEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)

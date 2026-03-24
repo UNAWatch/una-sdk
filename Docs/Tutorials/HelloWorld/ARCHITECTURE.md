@@ -91,7 +91,7 @@ HelloWorld demonstrates the essential UNA app architecture:
 - Communicates with the GUI through messages
 
 ### The GUI Layer (Frontend)
-- Built with TouchGFX framework
+- Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Displays information to the user
 - Receives updates from the service
 - Handles user interactions
