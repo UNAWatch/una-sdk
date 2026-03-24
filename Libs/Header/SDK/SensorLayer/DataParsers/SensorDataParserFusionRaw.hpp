@@ -46,7 +46,7 @@ namespace SDK
                 COUNT        ///< Total number of fields
             };
 
-            struct Axes3f
+            struct Axes
             {
                 int16_t x;
                 int16_t y;
@@ -55,8 +55,8 @@ namespace SDK
 
             struct Data
             {
-                Axes3f accel;
-                Axes3f gyro;
+                Axes accel;
+                Axes gyro;
             };
 
             /**
@@ -84,15 +84,15 @@ namespace SDK
              * @param data Output accelerometer data
              * @return true if data is valid, false otherwise
              */
-            bool getAccelData(Axes3f& data) const
+            bool getAccelData(Axes& data) const
             {
                 if (!isDataValid()) {
                     return false;
                 }
 
-                data.x = mData.f[Field::ACCEL_X];
-                data.y = mData.f[Field::ACCEL_Y];
-                data.z = mData.f[Field::ACCEL_Z];
+                data.x = mData.i[Field::ACCEL_X];
+                data.y = mData.i[Field::ACCEL_Y];
+                data.z = mData.i[Field::ACCEL_Z];
 
                 return true;
             }
@@ -102,15 +102,15 @@ namespace SDK
              * @param data Output gyroscope data
              * @return true if data is valid, false otherwise
              */
-            bool getGyroData(Axes3f& data) const
+            bool getGyroData(Axes& data) const
             {
                 if (!isDataValid()) {
                     return false;
                 }
 
-                data.x = mData.f[Field::GYRO_X];
-                data.y = mData.f[Field::GYRO_Y];
-                data.z = mData.f[Field::GYRO_Z];
+                data.x = mData.i[Field::GYRO_X];
+                data.y = mData.i[Field::GYRO_Y];
+                data.z = mData.i[Field::GYRO_Z];
 
                 return true;
             }
@@ -126,13 +126,13 @@ namespace SDK
                     return false;
                 }
 
-                data.accel.x = mData.f[Field::ACCEL_X];
-                data.accel.y = mData.f[Field::ACCEL_Y];
-                data.accel.z = mData.f[Field::ACCEL_Z];
+                data.accel.x = mData.i[Field::ACCEL_X];
+                data.accel.y = mData.i[Field::ACCEL_Y];
+                data.accel.z = mData.i[Field::ACCEL_Z];
 
-                data.gyro.x = mData.f[Field::GYRO_X];
-                data.gyro.y = mData.f[Field::GYRO_Y];
-                data.gyro.z = mData.f[Field::GYRO_Z];
+                data.gyro.x = mData.i[Field::GYRO_X];
+                data.gyro.y = mData.i[Field::GYRO_Y];
+                data.gyro.z = mData.i[Field::GYRO_Z];
 
                 return true;
             }
