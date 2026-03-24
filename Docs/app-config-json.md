@@ -4,8 +4,8 @@
 
 | Revision | Date of Changes | Matter of Change | Note | Editor |
 |----------|-----------------|------------------|------|--------|
-| 1.00    | 7.08.2025      | Creating        |      | Denys Saienko |
-| 1.01    | 2024-08-10     | Removed mentions about signature file as it is not used |      | Denys Sobchuk (https://github.com/AvatarSD) |
+| 1.00    | 07.08.2025      | Creating        |      | [Denys Saienko](https://github.com/sdvsaienko) |
+| 1.01    | 23.03.2025     | Removed mentions about signature file as it is not used |      | [Denys Sobchuk](https://github.com/AvatarSD) |
 
 ## Output Package
 
