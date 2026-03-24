@@ -75,7 +75,7 @@ The app will start and display an initial black screen. Use the hardware buttons
 - Minimal implementation since no sensors are used
 
 #### The GUI Layer (Frontend)
-- Built with TouchGFX framework
+- Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Handles button events and screen transitions
 - Updates the display based on user input
 - Manages screen state and visual elements
