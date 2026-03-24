@@ -12,8 +12,6 @@ set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Output")
 set(LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../Libs")
 set(TOUCHGFX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")
 
-project(${APP_NAME})
-
 # Includes all build steps and required tools
 # Sets toolchain before project
 include($ENV{UNA_SDK}/cmake/una-app.cmake)
@@ -30,6 +28,8 @@ include(${LIBS_PATH}/libs.cmake)
 if(DEFINED TOUCHGFX_PATH)
     include(${TOUCHGFX_PATH}/touchgfx.cmake)
 endif()
+
+project(${APP_NAME})
 
 # Set up version
 una_app_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
@@ -59,7 +59,6 @@ if(DEFINED TOUCHGFX_PATH)
         ${UNA_SDK_INCLUDE_DIRS_GUI}
         ${TOUCHGFX_INCLUDE_DIRS}
     )
-		
     una_app_build_gui(${APP_NAME}GUI.elf)
 endif()
 
