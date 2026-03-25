@@ -8,6 +8,8 @@
 #include "SDK/SensorLayer/SensorDataView.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 
 #include "Service.hpp"
 
@@ -366,159 +368,269 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 mTxBytes += sizeof(CustomMessage::BatteryValues);
             }
         } else if (mSensorAccelerometerRaw.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: ACCELEROMETER_RAW, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: ACCELEROMETER_RAW, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorGyroscope.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: GYROSCOPE, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: GYROSCOPE, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorGyroscopeRaw.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: GYROSCOPE_RAW, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: GYROSCOPE_RAW, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorHeartBeat.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: HEART_BEAT, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: HEART_BEAT, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorHeartRateMetrics.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: HEART_RATE_METRICS, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: HEART_RATE_METRICS, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorStepDetector.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: STEP_DETECTOR, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: STEP_DETECTOR, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorAmbientTemperature.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: AMBIENT_TEMPERATURE, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: AMBIENT_TEMPERATURE, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorPressure.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: PRESSURE, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: PRESSURE, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorWristMotion.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: WRIST_MOTION, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: WRIST_MOTION, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorMotionDetect.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: MOTION_DETECT, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: MOTION_DETECT, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorActivityRecognition.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: ACTIVITY_RECOGNITION, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: ACTIVITY_RECOGNITION, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorGestureRecognition.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: GESTURE_RECOGNITION, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: GESTURE_RECOGNITION, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorActivity.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: ACTIVITY, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: ACTIVITY, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorPPG.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: PPG, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: PPG, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorECG.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: ECG, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: ECG, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorGPSSpeed.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: GPS_SPEED, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: GPS_SPEED, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorGPSDistance.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: GPS_DISTANCE, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: GPS_DISTANCE, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorBatteryCharging.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: BATTERY_CHARGING, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: BATTERY_CHARGING, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorBatteryMetrics.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: BATTERY_METRICS, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: BATTERY_METRICS, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorFusion.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: FUSION, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: FUSION, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorFusionRaw.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: FUSION_RAW, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: FUSION_RAW, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         } else if (mSensorTouchDetect.matchesDriver(handle)) {
-            LOG_DEBUG("Sensor: TOUCH_DETECT, Binary: ");
+            std::stringstream ss;
+            ss << "Sensor: TOUCH_DETECT, Binary: ";
             SDK::Sensor::DataView view(data[0]);
-            for (size_t i = 0; i < data.stride; ++i) {
-                LOG_DEBUG("%02x ", view.u8[i]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
             }
-            LOG_DEBUG("\n");
+            LOG_DEBUG("%s\n", ss.str().c_str());
         }
     }
 }
