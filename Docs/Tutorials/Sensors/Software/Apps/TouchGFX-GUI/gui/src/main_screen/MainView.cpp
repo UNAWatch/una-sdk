@@ -1,7 +1,7 @@
 #include <gui/main_screen/MainView.hpp>
 
 #define LOG_MODULE_PRX      "MainView"
-#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
 
 MainView::MainView()
