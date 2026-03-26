@@ -57,6 +57,23 @@ Before building the ScrollMenu app, you need to set up the UNA SDK environment. 
 
 The app will start and display an initial menu with three items. Use the hardware buttons to navigate the menu and perform actions, demonstrating menu navigation patterns.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `ScrollMenu.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `ScrollMenu\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to simulate hardware buttons:
+- **1** = L1 (Previous menu item)
+- **2** = L2 (Next menu item)
+- **3** = R1 (Perform action on selected item)
+- **4** = R2 (Double-press to exit)
+
+The simulator will display the scrollable menu with Counter, Increase, Decrease items. For detailed simulator setup and button mapping, see [Simulator](../Simulator.md).
+
 ## ScrollMenu App Overview
 
 ### Navigation Flow

@@ -57,6 +57,23 @@ Before building the Buttons app, you need to set up the UNA SDK environment. Fol
 
 The app will start and display an initial black screen. Use the hardware buttons to navigate between different colored screens, demonstrating buttons navigation patterns.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `Buttons.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `Buttons\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to simulate hardware buttons:
+- **1** = L1 (Red screen)
+- **2** = L2 (Black screen)
+- **3** = R1 (Blue screen)
+- **4** = R2 (Green screen, double-press to exit)
+
+The simulator will display color changes based on button presses. For detailed simulator setup and button mapping, see [Simulator](../Simulator.md).
+
 ## Buttons App Overview
 
 ### Navigation Flow

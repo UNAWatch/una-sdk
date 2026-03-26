@@ -13,6 +13,33 @@ The Files tutorial showcases advanced UNA SDK concepts including:
 - **File System Integration**: Using SDK's IFileSystem interface
 - **Error Recovery**: Graceful handling of corrupted files and I/O errors
 
+## Getting Started
+
+### Prerequisites
+
+Before building the Files app, you need to set up the UNA SDK environment. Follow the [toolchain setup](../../sdk-setup.md) for complete installation instructions, including:
+
+### Building and Running Files
+
+See [toolchain setup](../../sdk-setup.md) for details)
+
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `Files.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `Files\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to interact with the settings:
+- **1** = L1 (Increment selected setting value)
+- **2** = L2 (Decrement selected setting value)
+- **3** = R1 (Save settings and select next setting)
+- **4** = R2 (Save and exit)
+
+The simulator will display the settings interface with file persistence. Settings are saved to `settings.json` in the simulator's working directory. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
+
 ## Settings System Architecture
 
 ### Settings Data Model

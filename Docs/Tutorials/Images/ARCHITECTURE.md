@@ -60,6 +60,21 @@ Before starting the Import Images tutorial, you need to set up the UNA SDK envir
 
 The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `Images.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `Images\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to interact:
+- **1** = L1 (Toggle between Image and ScalableImage modes)
+- **3** = R1 (Trigger jump animation when in Image mode)
+
+The simulator will display the imported character image with scaling and animation capabilities. For detailed simulator setup and button mapping, see [Simulator](../Simulator.md).
+
 ## Images App Overview
 
 The Images tutorial demonstrates programmatic image display and interactivity in UNA Watch apps:
