@@ -27,6 +27,7 @@ The Una-Watch architecture is unique: apps run as pure machine code directly in 
    :maxdepth: 4
    :caption: 📱 Example Apps
 
+   Running-App-Architecture
    Examples/Alarm-ARCHITECTURE
    Examples/GlanceStrain-ARCHITECTURE
 
