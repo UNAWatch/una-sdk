@@ -10,9 +10,9 @@ The simulator application works only on Windows OS. The UNA Simulator works with
    - In the Installing window, where you select the required packages, go to **Workloads → Desktop & Mobile** and choose **Desktop development with C++**.
    - In **Installation Details**, for **Desktop development with C++** select **MSVC v143**, then click **Install**..
 ### Install UNA_SDK variable
-1. Run  **RunAddVariable.bat**, located in:  
-   `una-sdk\Utilities\Scripts\add-sdk-variable`
-2. Enter **1** to install/update the **UNA_SDK** environment variable.
+1. Run the PowerShell script **export-stm32-tools.ps1**, located in:  
+   `Utilities\Scripts\export-stm32-tools.ps1`
+2. This script sets the UNA_SDK environment variable and configures STM32 tools.
 ### Start Simulator
 #### TouchGFX Designer
 1. TouchGFX Designer does not support **Debug mode**. If you want to debug the project, use Visual Studio.
@@ -32,8 +32,8 @@ The simulator application works only on Windows OS. The UNA Simulator works with
 2. You can see the mapping in the **Terminal Log**, which shows which number keys correspond to the buttons on the UNA watch.
    ```cpp
    ---------------------------------------------------
-   |   For Simulation Button use keybaord Keys.      |
-   |       Keys Keybaord:                            |
+   |   For Simulation Button use keyboard Keys.      |
+   |       Keys Keyboard:                            |
    |       1   L1,                                   |
    |       2   L2,                                   |
    |       3   R1,                                   |
@@ -62,14 +62,14 @@ The simulator application works only on Windows OS. The UNA Simulator works with
 #### Backlight
 1. Backlight actions are printed in the terminal as log messages.
    ```cpp
-   I- Mock.Backlight::on::22              : on backlight, timeout = 5000
+   I- Mock.Backlight::on::22              : called, timeout = 5000
    I- Mock.Backlight::off::30             : off backlight
    ```
 2. There are two types of log messages:
    - turning the backlight on with a timeout in milliseconds
    - turning the backlight off
 #### Vibro
-1. ibro actions are printed in the terminal as log messages.
+1. Vibro actions are printed in the terminal as log messages.
    ```cpp
    I- Mock.Vibro::play::31                : play(melody[1])
    I- Mock.Vibro::play::34                :   [0] effect=1, loop=0, pause=0
@@ -81,7 +81,7 @@ The simulator application works only on Windows OS. The UNA Simulator works with
    - **pause** — pause between effects
 #### Sensors
 In the file **ConfigurationSimulator.hpp**, you can enable/disable sensor simulation and configure parameters.
-Location: 
+Location:
 `<app-name>\Software\Libs\Header`
 ##### GPS
 - Simulates **speed, altitude, and distance**.
@@ -89,18 +89,18 @@ Location:
 - Includes a timer for **satellite acquisition**.
 - Can simulate **GPS signal loss**.
 - Adds **noise to latitude/longitude**.
-     
+
 Configuration options:
    - enable/disable sensor
    - minimum and maximum speed
    - satellite search time
   ```cpp
    //GPS Sensor
-   #define GSP_SIM_ENABLE               1  // 0 - Disable
-   #define GSP_SIM_SPEED_MIN            20 // km/h
+   #define GPS_SIM_ENABLE               1  // 0 - Disable
+   #define GPS_SIM_SPEED_MIN            20 // km/h
    #define GPS_SIM_SPEED_BASE           25 // km/h
    #define GPS_SIM_SPEED_MAX            30 // km/h
-   #define GPS_SIM_TIME_SEACH_SATELLITE 7 // seconds
+   #define GPS_SIM_TIME_SEARCH_SATELLITE 7 // seconds
   ```
 ##### Heart Rate
 Simulates:
@@ -108,18 +108,17 @@ Simulates:
    - **AHR** (Average Heart Rate)
    - **RHR** (Resting Heart Rate)
    - **trust level**
-     
+
 Options:
    - enable/disable sensor
    - minimum and maximum heart rate
    - training type (**Cycling / Hiking / Running**)
   ```cpp
-   //HeatRate Sensor
-   #define HEAT_RATE_SIM_ENABLE        1 // 0 - Disable
-   #define HEAT_RATE_SIM_MIN_HR        50
-   #define HEAT_RATE_SIM_MAX_HR        140
-   #define HEAT_RATE_SIM_TYPE_TRAINING 0// 0 - Cycling, 1 - Hiking, 2 - Running
-
+   //HeartRate Sensor
+   #define HEART_RATE_SIM_ENABLE        1 // 0 - Disable
+   #define HEART_RATE_SIM_MIN_HR        50
+   #define HEART_RATE_SIM_MAX_HR        140
+   #define HEART_RATE_SIM_TYPE_TRAINING 0 // 0 - Cycling, 1 - Hiking, 2 - Running
   ```
 ##### Battery Level
 Simulates battery voltage drop.
@@ -132,7 +131,7 @@ Options:
    // Battery Level Sensor
    #define BATT_LEVEL_SIM_ENABLE      1 // 0 - Disable
    #define BATT_LEVEL_SIM_START_VALUE 100 // 10 - 100%
-   #define BATT_LEVEL_SIM_STEP_VALUE  0.1 //percent 
+   #define BATT_LEVEL_SIM_STEP_VALUE  0.1 //percent
   ```
 ##### IMU
 Simulates **wrist detection**.
@@ -147,19 +146,20 @@ To simulate a wrist detection event, press **key 5**.
   ```cpp
    // IMU Sensor
    #define IMU_SIM_ENABLE           1 // 0 - Disable
-   #define IMU_SIM_WRIST_DETECT_KEY 5 
+   #define IMU_SIM_WRIST_DETECT_KEY 5
   ```
+
 ### Include Header & Source file
-#### TouchGFX Designer
+#### MSVS
 1. Open **Application.vcxproj** in a text editor:
      `<app_name>\Software\Apps\TouchGFX-GUI\`
-2. Add header paths to **ADDITIONAL_INCLUDE_PATHS**.
-3. Add source file paths to **ADDITIONAL_SOURCES_UNA**.
-#### Visual Studio
-1. Open **MakeFile** in text editor:
-  `<app-name>\Software\Apps\TouchGFX-GUI\simulator\gcc`
 2. Add header paths to **ClInclude**.
 3. Add source file paths to **ClCompile**.
+#### GCC
+1. Open **MakeFile** in text editor:
+  `<app-name>\Software\Apps\TouchGFX-GUI\simulator\gcc`
+2. Add header paths to **ADDITIONAL_INCLUDE_PATHS**.
+3. Add source file paths to **ADDITIONAL_SOURCES_UNA**.
 ### Transfer Application
 If you move the application to another location, you need to update the **TouchGFX library path**.
 1. Open `<name>.touchgfx` in text editor:
@@ -169,8 +169,9 @@ If you move the application to another location, you need to update the **TouchG
 Example:
    ```cpp
     "SelectedStartupLanguage": "GB",
-    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "TouchGfxPath": "touchgfx",
     "UIPath": ".",
    ```
-4. If you move the **una_sdk** folder, you must update U**NA_SDK** environment variable.
-   See: [Install UNA_SDK variable](#install-una-sdk-varible) 
+
+4. If you move the **una_sdk** folder, you must update UNA_SDK environment variable.
+   See: [Install UNA_SDK variable](#install-una-sdk-variable) 
