@@ -83,6 +83,8 @@ The simulator application works only on Windows OS. The UNA Simulator works with
 In the file **ConfigurationSimulator.hpp**, you can enable/disable sensor simulation and configure parameters.
 Location:
 `<app-name>\Software\Libs\Header`
+
+For examples of sensor integration and data handling, see the [Sensors Tutorial](../Tutorials/Sensors/ARCHITECTURE.md).
 ##### GPS
 - Simulates **speed, altitude, and distance**.
 - The simulated user moves around a **stadium track**.
