@@ -169,3 +169,17 @@ Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes T
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
 - Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).
+
+### Running on Simulator
+
+To test the Sensors app on the simulator (Windows only):
+
+1. Build the app following the [SDK setup](../sdk-setup.md) instructions.
+2. Open `Sensors.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+3. Navigate to `Sensors\Software\Apps\TouchGFX-GUI\simulator\msvs`
+4. Open `Application.vcxproj` in Visual Studio
+5. Press **F5** to start debugging and run the simulator
+
+The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.
+
+For detailed sensor simulation configuration and features, see [Simulator](../Simulator.md).

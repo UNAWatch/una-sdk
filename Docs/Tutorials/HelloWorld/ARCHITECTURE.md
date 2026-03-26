@@ -56,6 +56,19 @@ Before building HelloWorld, you need to set up the UNA SDK environment. Follow t
 
 The app will start and show a basic GUI demonstrating the UNA app framework. This HelloWorld focuses on the core architecture - the service-GUI communication pattern that all UNA apps use.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `HelloWorld.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `HelloWorld\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+The simulator will display the HelloWorld GUI. Since HelloWorld has minimal interactive elements, it primarily demonstrates the app startup and basic framework.
+
+For detailed simulator setup and features, see [Simulator](../Simulator.md).
+
 ### Working with TouchGFX GUI (Optional)
 
 If you want to explore or modify the GUI design:
