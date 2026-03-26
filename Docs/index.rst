@@ -11,6 +11,7 @@ The UNA Watch architecture is unique: apps run as pure machine code directly in 
 
    platform-overview
    sdk-setup
+   Simulator
 
 .. toctree::
    :maxdepth: 4
