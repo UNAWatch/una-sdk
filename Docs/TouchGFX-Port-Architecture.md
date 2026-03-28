@@ -1435,7 +1435,7 @@ una-package \
         "id": "A1B2C3D4E5F67890",
         "name": "MyApp",
         "version": "1.0.0",
-        "supported_devices": ["UNA-WATCH-V1"]
+        "supported_devices": ["UNA Watch-V1"]
     },
     "update": {
         "url": "https://updates.example.com/myapp/1.0.0",
