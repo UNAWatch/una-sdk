@@ -17,6 +17,19 @@
 #include "SDK/Simulator/OS/OS.hpp"
 #include "touchgfx/Utils.hpp"
 
+// Fix: GetTickCount64() is Windows-only. Provide a portable wrapper.
+#ifndef _WIN32
+#include <cstdint>
+#include <time.h>
+static inline uint64_t GetTickCount64()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return static_cast<uint64_t>(ts.tv_sec) * 1000ULL +
+           static_cast<uint64_t>(ts.tv_nsec) / 1000000ULL;
+}
+#endif
+
 namespace SDK::Simulator::Mock
 {
 

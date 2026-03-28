@@ -40,7 +40,7 @@ void safe_strcpy(char* dest, const char* src, size_t destSize)
 #ifdef _WIN32
     strncpy_s(dest, destSize, src, _TRUNCATE);      // Windows
 #else
-    std::strncpy(dest, src, destSize - 1);          // Linux, POSIX
+    strncpy(dest, src, destSize - 1);          // Linux, POSIX (fix: std:: is C++ only)
     dest[destSize - 1] = '\0';
 #endif
 }
