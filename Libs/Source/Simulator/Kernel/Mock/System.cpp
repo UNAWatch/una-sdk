@@ -2,6 +2,24 @@
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
 #include <cstdint>
 
+// Fix: GetTickCount64() and Sleep() are Windows-only. Provide portable replacements.
+#ifndef _WIN32
+#include <cstdint>
+#include <time.h>
+#include <unistd.h>
+static inline uint64_t GetTickCount64()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return static_cast<uint64_t>(ts.tv_sec) * 1000ULL +
+           static_cast<uint64_t>(ts.tv_nsec) / 1000000ULL;
+}
+static inline void Sleep(uint32_t ms)
+{
+    usleep(ms * 1000U);
+}
+#endif
+
 #define LOG_MODULE_PRX      "Mock.System"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
