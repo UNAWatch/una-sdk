@@ -1,7 +1,7 @@
 (sdk-overview)=
 # SDK Overview
 
-The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. For platform architecture overview, see [platform overview](platform-overview.md).
+The UNA Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. For platform architecture overview, see [platform overview](platform-overview.md).
 
 ## Key Components
 

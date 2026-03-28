@@ -23,7 +23,7 @@ This document provides comprehensive analysis of the Python, Bash, and PowerShel
 This Python script merges service and GUI ELF binaries into a unified UAPP format, incorporating icon conversion, version management, and CRC integrity checks.
 
 ### Purpose
-To create deployable application packages for the Una-Watch platform by combining service and GUI components with metadata, icons, and integrity verification.
+To create deployable application packages for the UNA Watch platform by combining service and GUI components with metadata, icons, and integrity verification.
 
 ### Functionality
 The script performs comprehensive app packaging:
@@ -213,7 +213,7 @@ Essential for embedded GUI development, converting designer-provided PNG assets 
 This PowerShell script automates the detection and configuration of essential STM32 development tools on Windows systems. It locates common toolchains and utilities (arm-none-eabi-gcc, make, cmake, python), adds their directories to the user PATH permanently, and sets the UNA_SDK environment variable pointing to the SDK root directory.
 
 ### Purpose
-The primary purpose is to simplify environment setup for Una-Watch SDK development on Windows. By automatically discovering installed tools in standard locations and updating the PATH, it eliminates manual configuration steps required for building STM32-based applications using CMake, Make, and the ARM GCC toolchain.
+The primary purpose is to simplify environment setup for UNA Watch SDK development on Windows. By automatically discovering installed tools in standard locations and updating the PATH, it eliminates manual configuration steps required for building STM32-based applications using CMake, Make, and the ARM GCC toolchain.
 
 ### Functionality
 The script provides:
@@ -270,12 +270,12 @@ The script provides:
 - Silently handles inaccessible search directories with `-ErrorAction SilentlyContinue`
 
 ### Integration Context
-Designed as a one-time setup script for Windows developers working with the Una-Watch SDK. It prepares the environment for cross-platform build tools (CMake, Make) and STM32-specific toolchain, enabling seamless building of examples and applications. Typically run after tool installation (STM32CubeIDE, MSYS2, etc.) and before using CMake-based workflows or STM32CubeIDE projects.
+Designed as a one-time setup script for Windows developers working with the UNA Watch SDK. It prepares the environment for cross-platform build tools (CMake, Make) and STM32-specific toolchain, enabling seamless building of examples and applications. Typically run after tool installation (STM32CubeIDE, MSYS2, etc.) and before using CMake-based workflows or STM32CubeIDE projects.
 
 ## Script: Utilities/Scripts/build-cube/una-version.sh
 
 ### Overview
-This comprehensive Bash script determines the build version for Una-Watch projects based on Git repository state, supporting semantic versioning, tags, and dirty state detection.
+This comprehensive Bash script determines the build version for UNA Watch projects based on Git repository state, supporting semantic versioning, tags, and dirty state detection.
 
 ### Purpose
 To provide accurate version information for builds, enabling proper versioning of binaries and documentation of build provenance in CI/CD environments.

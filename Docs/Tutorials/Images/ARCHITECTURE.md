@@ -1,7 +1,7 @@
 (tutorials/images/architecture)=
 # Import Images Tutorial
 
-Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.
+Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA Watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Images)
 
@@ -62,7 +62,7 @@ The app will start and display imported images on screen, demonstrating the comp
 
 ## Images App Overview
 
-The Images tutorial demonstrates programmatic image display and interactivity in UNA watch apps:
+The Images tutorial demonstrates programmatic image display and interactivity in UNA Watch apps:
 
 ### Key Features Demonstrated
 - **No background**: Pure programmatic content - no designer-generated backgrounds or boxes
@@ -97,7 +97,7 @@ Follow these steps to import and display images in your UNA app:
 1. **Open your image editor** (Paint, GIMP, Photoshop, etc.)
 
 2. **Create a new image** with appropriate dimensions:
-    - Consider the UNA watch display (typically 240x240 pixels)
+    - Consider the UNA Watch display (typically 240x240 pixels)
     - Use power-of-2 dimensions when possible for better compression
     - Choose appropriate color depth (RGB565 for photos, indexed for icons)
 
@@ -272,4 +272,4 @@ Images in UNA apps are stored in flash memory and loaded into RAM as needed:
 - Limit number of simultaneous images
 - Profile with TouchGFX Performance Analyzer
 
-Remember: Images are a powerful way to make your UNA watch apps visually appealing. Start simple, optimize as needed, and you'll create engaging user interfaces that work great on the small screen!
+Remember: Images are a powerful way to make your UNA Watch apps visually appealing. Start simple, optimize as needed, and you'll create engaging user interfaces that work great on the small screen!
