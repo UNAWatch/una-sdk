@@ -1,14 +1,14 @@
 (tutorials/helloworld/architecture)=
 # HelloWorld Tutorial
 
-Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
+Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA Watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/HelloWorld)
 
 ## What You'll Learn
 
 - How to set up your development environment for UNA apps
-- The basic structure of a UNA watch application
+- The basic structure of a UNA Watch application
 - How service and GUI layers communicate
 - How to build and run apps on simulator and hardware
 - Understanding the UNA app framework fundamentals
@@ -170,4 +170,4 @@ These patterns form the foundation of all UNA app communication. Future tutorial
 - Using duplicate message type IDs
 - Not handling message memory management properly
 
-Remember: Every complex app started as a simple HelloWorld. Take it step by step, and you'll be building amazing UNA watch applications in no time!
+Remember: Every complex app started as a simple HelloWorld. Take it step by step, and you'll be building amazing UNA Watch applications in no time!

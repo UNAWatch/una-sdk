@@ -76,7 +76,7 @@ python3 -c "import hashlib; print(hashlib5(b'MyAlarm').hexdigest().upper()[:16])
 
 #### Choose App Type
 
-Una-Watch supports four app types:
+UNA Watch supports four app types:
 
 | Type | Use Case | Lifecycle | Note |
 |------|----------|-----------|---------|

@@ -1,6 +1,6 @@
-# UNA-Watch SDK
+# UNA Watch SDK
 
-The Una-Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. This SDK enables developers to create apps for the UNA watch platform with support for sensor data, GUI interfaces, file systems, and inter-process communication.
+The UNA Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. This SDK enables developers to create apps for the UNA Watch platform with support for sensor data, GUI interfaces, file systems, and inter-process communication.
 
 For full setup instructions (Linux/Windows, toolchain, environment variables, and a buildable example), see [Docs/sdk-setup.md](Docs/sdk-setup.md).
 

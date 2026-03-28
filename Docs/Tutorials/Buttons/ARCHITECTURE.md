@@ -2,7 +2,7 @@
 
 # Buttons Tutorial
 
-Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.
+Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA Watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Buttons)
 

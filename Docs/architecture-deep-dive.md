@@ -1,12 +1,12 @@
 (architecture-deep-dive)=
 # Platform Architecture
 
-This document explains the technical magic that enables the Una-Watch platform.
+This document explains the technical magic that enables the UNA Watch platform.
 
 ## Core Concepts
 
 ### Pure Machine Code Execution
-Una-Watch apps are not interpreted or virtualized. They are compiled ARM Cortex-M ELF binaries that execute directly in the MCU memory. This provides:
+UNA Watch apps are not interpreted or virtualized. They are compiled ARM Cortex-M ELF binaries that execute directly in the MCU memory. This provides:
 - **Native Performance**: Zero abstraction overhead.
 - **Direct Hardware Access**: Apps can interact with peripherals at MCU speeds.
 - **Efficiency**: Minimal memory and CPU footprint.
@@ -18,13 +18,13 @@ To allow apps to be loaded at any memory address without re-linking, the SDK use
 - **Process Isolation**: Ensures that apps do not interfere with each other or the kernel.
 
 ### Shared libc Integration
-Una-Watch implements a shared libc architecture to save memory.
+UNA Watch implements a shared libc architecture to save memory.
 - **Common Base**: All apps share the same standard library implementation provided by the kernel.
 - **Reduced Footprint**: Significant reduction in the size of each `.uapp` file.
 - **C++ Support**: Full support for modern C++ features (strings, vectors, etc.) via the shared library.
 
 ### Dual-Process Model
-Every Una-Watch app consists of two distinct components:
+Every UNA Watch app consists of two distinct components:
 1. **Service Process**: Handles background logic, sensors, and BLE.
 2. **GUI Process**: Handles user interface and interaction.
 

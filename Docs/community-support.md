@@ -1,7 +1,7 @@
 (community-support)=
 # Community & Support
 
-Join the Una-Watch developer community to share your apps, get help, and stay updated on the latest SDK features.
+Join the UNA Watch developer community to share your apps, get help, and stay updated on the latest SDK features.
 
 ## Developer Resources
 
@@ -16,7 +16,7 @@ Join the Una-Watch developer community to share your apps, get help, and stay up
 
 ## Contributing
 
-We welcome contributions to the Una-Watch SDK!
+We welcome contributions to the UNA Watch SDK!
 
 - **Documentation**: Submit a PR to improve these docs.
 - **Samples**: Share your app templates with the community.
@@ -24,4 +24,4 @@ We welcome contributions to the Una-Watch SDK!
 
 ---
 
-*Thank you for being part of the Una-Watch ecosystem!*
+*Thank you for being part of the UNA Watch ecosystem!*
