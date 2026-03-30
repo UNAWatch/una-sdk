@@ -1,4 +1,4 @@
-# Running App Architecture
+# Running - Fitness Tracking
 
 ## Overview
 
