@@ -1,14 +1,15 @@
 # UNA-Watch Simulator
 
-The simulator application works only on Windows OS. The UNA Simulator works with TouchGFX Designer and Visual Studio.
-
+The simulator application works only on Windows OS. The UNA Simulator works with TouchGFX Designer and Visual Studio.   
+Note: If you move the application to another location, you need to update the relative path to **TouchGFX library path**.
+      See: [Transfer Application](#transfer-application) 
 ## Getting Started
 ### Need Components
 1. Download and install [TouchGFX Designer](https://www.st.com/en/development-tools/touchgfxdesigner.html#get-software).
 2. If you want to work with UNA Simulator in Visual Studio, then:
    - Download and install [Visual Studio](https://visualstudio.microsoft.com).
    - In the Installing window, where you select the required packages, go to **Workloads → Desktop & Mobile** and choose **Desktop development with C++**.
-   - In **Installation Details**, for **Desktop development with C++** select **MSVC v143**, then click **Install**..
+   - In **Installation Details**, for **Desktop development with C++** select **MSVC v143**, then click **Install**.
 ### Install UNA_SDK variable
 1. Run the PowerShell script **export-stm32-tools.ps1**, located in:  
    `Utilities\Scripts\export-stm32-tools.ps1`
@@ -82,7 +83,7 @@ The simulator application works only on Windows OS. The UNA Simulator works with
 #### Sensors
 In the file **ConfigurationSimulator.hpp**, you can enable/disable sensor simulation and configure parameters.
 Location:
-`<app-name>\Software\Libs\Header`
+`<app-name>\Software\Apps\TouchGFX-GUI\simulator`
 
 For examples of sensor integration and data handling, see the [Sensors Tutorial](../Tutorials/Sensors/ARCHITECTURE.md).
 ##### GPS
@@ -135,7 +136,18 @@ Options:
    #define BATT_LEVEL_SIM_START_VALUE 100 // 10 - 100%
    #define BATT_LEVEL_SIM_STEP_VALUE  0.1 //percent
   ```
-##### IMU
+##### Pressure
+Simulates Presure value.
+
+Options:
+   - enable/disable sensor
+   - set value pressure, which changes in a small range
+  ```cpp
+   // Pressure Sensor
+   #define PRESSURE_SIM_ENABLE       1 // 0 - Disable
+   #define PRESSURE_SIM_PRESS_VALLUE 1020.2
+  ```
+##### IMU Wrist Detection
 Simulates **wrist detection**.
 
 A wrist detection event activates the **backlight for 5 seconds**.
@@ -146,15 +158,25 @@ Options:
 
 To simulate a wrist detection event, press **key 5**.
   ```cpp
-   // IMU Sensor
-   #define IMU_SIM_ENABLE           1 // 0 - Disable
-   #define IMU_SIM_WRIST_DETECT_KEY 5
+   // IMU Writs Sensor
+   #define IMU_WRIST_SIM_ENABLE           1 // 0 - Disable
+   #define IMU_WRIST_SIM_WRIST_DETECT_KEY 5 
+  ```
+##### IMU Step Counter
+Simulates **Step Counter**. Step Counter get Speed with the GPS Speed module and convert to steps.
+
+Options:
+   - enable/disable sensor
+
+  ```cpp
+   // IMU StepCounter Sensor
+   #define IMU_STEP_COUNTER_SIM_ENABLE    1 // 0 - Disable
   ```
 
 ### Include Header & Source file
 #### MSVS
 1. Open **Application.vcxproj** in a text editor:
-     `<app_name>\Software\Apps\TouchGFX-GUI\`
+     `<app_name>\Software\Apps\TouchGFX-GUI\simulator\msvs
 2. Add header paths to **ClInclude**.
 3. Add source file paths to **ClCompile**.
 #### GCC
