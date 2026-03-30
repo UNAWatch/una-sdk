@@ -1,6 +1,6 @@
 (tutorials/scrollmenu/architecture)=
 
-# ScrollMenu Tutorial
+# ScrollMenu - Creating Scrollable Lists and Menus
 
 Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamental concepts of menu navigation on the UNA Watch platform. This tutorial focuses on building an application with a scrollable menu using hardware buttons, providing a foundation for more complex user interfaces.
 
