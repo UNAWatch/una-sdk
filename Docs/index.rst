@@ -30,6 +30,7 @@ The UNA Watch architecture is unique: apps run as pure machine code directly in 
 
    Examples/Running-Architecture
    Examples/Alarm-ARCHITECTURE
+   Examples/Cycling-Architecture
 
 .. toctree::
    :maxdepth: 4
