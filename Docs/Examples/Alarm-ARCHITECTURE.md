@@ -570,19 +570,7 @@ una_app_build_app()
 
 ### Development Setup
 
-**Prerequisites**:
-- UNA SDK environment
-- CMake 3.21+
-- TouchGFX Designer
-- Cross-compilation toolchain
-
-**Build Commands**:
-```bash
-mkdir build
-cd build
-cmake -G "Unix Makefiles" ..
-make
-```
+See [SDK Setup and Build Overview](sdk-setup.md) for comprehensive development environment setup, build instructions, and toolchain requirements.
 
 ### Simulator Build
 
