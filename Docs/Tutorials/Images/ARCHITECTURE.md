@@ -1,5 +1,5 @@
 (tutorials/images/architecture)=
-# Import Images Tutorial
+# Images - Working with Graphics and Assets
 
 Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA Watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.
 

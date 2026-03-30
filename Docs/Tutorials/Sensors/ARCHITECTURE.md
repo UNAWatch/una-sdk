@@ -1,6 +1,6 @@
 (tutorials/images/architecture)=
 
-# Sensors Tutorial
+# Sensors - Integrating Hardware Sensors
 
 In this tutorial, we implement a sensors dashboard app that subscribes to available sensors at **maximum frequency** (period=0, count=0 except Accelerometer), processes new message structures with **timestamps** where available, and displays data on a **single GUI screen**:
 
