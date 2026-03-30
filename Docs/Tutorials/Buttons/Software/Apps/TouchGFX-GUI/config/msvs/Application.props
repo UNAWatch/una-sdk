@@ -3,11 +3,7 @@
   <ImportGroup Label="PropertySheets"/>
   <PropertyGroup Label="UserMacros">
     <UseBPP>8</UseBPP>
-<<<<<<< HEAD
     <TouchGFXReleasePath>..\..\..\..\..\..\..\..\ThirdParty\touchgfx</TouchGFXReleasePath>
-=======
-    <TouchGFXReleasePath>..\..\touchgfx</TouchGFXReleasePath>
->>>>>>> 6e5bc35 (Add simulator for Tutorial App)
     <TouchGFXEnvPath>..\..\..\..\..\..\..\..\..\..\..\TouchGFX\4.26.0\env</TouchGFXEnvPath>
     <ApplicationRoot>..\..</ApplicationRoot>
   </PropertyGroup>
