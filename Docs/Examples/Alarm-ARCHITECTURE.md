@@ -1,4 +1,4 @@
-# Alarm - Wearable Alarm Clock Application
+# Alarm - Alarm Clock
 
 ## Overview
 
