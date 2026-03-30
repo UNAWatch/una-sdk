@@ -32,6 +32,7 @@ The UNA Watch architecture is unique: apps run as pure machine code directly in 
    Examples/Alarm-ARCHITECTURE
    Examples/Cycling-Architecture
    Examples/Hiking-Architecture
+   Examples/HRMonitor-Architecture
    Examples/GlanceHR-Architecture
 
 .. toctree::
