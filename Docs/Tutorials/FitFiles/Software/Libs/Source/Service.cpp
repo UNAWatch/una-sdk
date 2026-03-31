@@ -72,7 +72,7 @@ static void writeFileHeader(SDK::Interface::IFile* fp) {
 }
 
 // Calculate and append CRC to FIT file
-static void writeCRC(SDK::Interface::IFile* fp) {
+static bool writeCRC(SDK::Interface::IFile* fp) {
     FIT_UINT8 buffer[512];
     fp->flush();
     size_t sizeBefore = fp->size();
@@ -90,8 +90,8 @@ static void writeCRC(SDK::Interface::IFile* fp) {
         size_t br;
         fp->read(reinterpret_cast<char*>(buffer), toRead, br);
         if (br == 0) {
-            LOG_ERROR("writeCRC read failed\n");
-            break;
+            LOG_ERROR("writeCRC read failed at position %zu\n", pos);
+            return false;
         }
         crc = FitCRC_Update16(crc, buffer, static_cast<FIT_UINT32>(br));
         pos += br;
@@ -100,7 +100,12 @@ static void writeCRC(SDK::Interface::IFile* fp) {
     fp->seek(sizeBefore);
     size_t bw;
     fp->write(reinterpret_cast<const char*>(&crc), sizeof(FIT_UINT16), bw);
+    if (bw != sizeof(FIT_UINT16)) {
+        LOG_ERROR("writeCRC write failed\n");
+        return false;
+    }
     fp->flush();
+    return true;
 }
 
 }  // namespace
@@ -262,6 +267,7 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
 
     std::time_t now = std::time(nullptr);
     SDK::Sensor::DataBatch batch(data, count, stride);
+    bool hasNewData = false;
 
     // Process step counter data
     if (mSensorSteps.matchesDriver(handle)) {
@@ -274,6 +280,7 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
                 mTotalSteps += delta;
                 mLastSteps = steps;
                 mSampleCount++;
+                hasNewData = true;
             }
         }
     }
@@ -282,12 +289,16 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
         for (uint16_t i = 0; i < count; ++i) {
             SDK::SensorDataParser::HeartRate p(batch[i]);
             if (!p.isDataValid()) continue;
-            mCurrentHR = static_cast<uint8_t>(p.getBpm());
+            uint8_t newHR = static_cast<uint8_t>(p.getBpm());
+            if (newHR > 0) {  // Only consider valid HR readings
+                mCurrentHR = newHR;
+                hasNewData = true;
+            }
         }
     }
 
-    // Accumulate records for FIT file if we have data
-    if (mSampleCount > 0 || mCurrentHR > 0) {
+    // Accumulate records for FIT file if we have new valid data
+    if (hasNewData) {
         mPendingRecords.push_back({now, mCurrentHR, mTotalSteps});
         LOG_DEBUG("Recorded data point: HR=%u, steps=%u\n", mCurrentHR, mTotalSteps);
     }
@@ -398,7 +409,9 @@ void Service::saveFit(bool finalize) {
     // Update header and write CRC
     file->flush();
     writeFileHeader(file.get());
-    writeCRC(file.get());
+    if (!writeCRC(file.get())) {
+        LOG_ERROR("Failed to write CRC to FIT file\n");
+    }
     file->close();
 
     LOG_INFO("FIT file saved: %s\n", skFitFileName);
