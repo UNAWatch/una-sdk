@@ -95,7 +95,7 @@ This diagram illustrates the core message-driven architecture of GlanceStrain, s
 - A daily FIT file is created with name `strain_YYYY-MM-DD.fit` in the app filesystem.
 - Records are written on each activity sensor event when on-hand (every 5 seconds).
 - Session summary is written on day rollover or app stop.
-- FIT file structure is built using `SDK::Component::FitHelper` definitions for file ID, developer data, events, records, sessions, and activity summaries. See [Docs/FitFiles-Structure.md](../../../Docs/FitFiles-Structure.md) for detailed FIT file structure and ActivityWriter usage.
+- FIT file structure is built using `SDK::Component::FitHelper` definitions for file ID, developer data, events, records, sessions, and activity summaries. See [Docs/FitFiles-Structure.md](../../Docs/FitFiles-Structure.md) for detailed FIT file structure and ActivityWriter usage.
 - The file header is rewritten after appends and CRC is recomputed on each save.
 - No recovery of previous state; accumulators reset daily.
 
@@ -153,13 +153,13 @@ This diagram illustrates the core message-driven architecture of GlanceStrain, s
 - Glance UI primitives: `SDK::Glance::Form`, `ControlText`, `RequestGlanceConfig`, `RequestGlanceUpdate`.
 - Sensor subscription via `SDK::Sensor::Connection` and `SDK::Interface::ISensorDataListener`.
 - File access via `SDK::Interface::IFileSystem` and `SDK::Interface::IFile`.
-- FIT helper/definitions via `SDK::Component::FitHelper`. See [Docs/FitFiles-Structure.md](../../../Docs/FitFiles-Structure.md) for FIT implementation details.
+- FIT helper/definitions via `SDK::Component::FitHelper`. See [Docs/FitFiles-Structure.md](../../Docs/FitFiles-Structure.md) for FIT implementation details.
 
 ### GlanceStrain-specific services and logic
 
 - Strain scoring formula and gating by valid HR range [50, 255].
 - Daily accumulator reset (no recovery from previous FIT data).
-- Developer fields for FIT (`strain` as float32 score and `active_min` as uint32 minutes) via `mFHStrainField` and `mFHActiveField`. See [Docs/FitFiles-Structure.md#developer-fields-implementation](../../../Docs/FitFiles-Structure.md#developer-fields-implementation) for developer field setup.
+- Developer fields for FIT (`strain` as float32 score and `active_min` as uint32 minutes) via `mFHStrainField` and `mFHActiveField`. See [Docs/FitFiles-Structure.md#developer-fields-implementation](../../Docs/FitFiles-Structure.md#developer-fields-implementation) for developer field setup.
 
 ## App ↔ Kernel Interaction / Execution Path
 
@@ -178,8 +178,8 @@ This diagram illustrates the core message-driven architecture of GlanceStrain, s
 - `SDK::SensorDataParser::*` → typed decoding of incoming sensor frames.
 - `SDK::Glance::Form` and `SDK::Glance::ControlText` → glance UI layout and updates.
 - `SDK::Interface::IFile` / `IFileSystem` → FIT persistence.
-- `SDK::Component::FitHelper` → FIT message definitions and writing. See [Docs/FitFiles-Structure.md#fithelper-component-deep-dive](../../../Docs/FitFiles-Structure.md#fithelper-component-deep-dive).
-- `ActivityWriter` → encapsulates FIT file creation and writing. See [Docs/FitFiles-Structure.md#activitywriter-class-overview](../../../Docs/FitFiles-Structure.md#activitywriter-class-overview).
+- `SDK::Component::FitHelper` → FIT message definitions and writing. See [Docs/FitFiles-Structure.md#fithelper-component-deep-dive](../../Docs/FitFiles-Structure.md#fithelper-component-deep-dive).
+- `ActivityWriter` → encapsulates FIT file creation and writing. See [Docs/FitFiles-Structure.md#activitywriter-class-overview](../../Docs/FitFiles-Structure.md#activitywriter-class-overview).
 
 ## Behavior Details
 
