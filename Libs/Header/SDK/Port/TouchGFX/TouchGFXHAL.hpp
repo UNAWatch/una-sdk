@@ -111,7 +111,7 @@ public:
     }
 
     /**
-     * @fn virtual void TouchGFXHAL::flushFrameBuffer(const Rect& rect);
+     * @fn virtual void TouchGFXHAL::flushFrameBuffer(const touchgfx::Rect& rect);
      *
      * @brief This function is called whenever the framework has performed a partial draw.
      *

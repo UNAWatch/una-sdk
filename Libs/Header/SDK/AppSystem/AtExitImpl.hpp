@@ -80,7 +80,7 @@ size_t atexit_registered_count();
  *            If null, all registered entries are invoked.
  *
  * @note  Each entry is cleared before invocation to prevent double calls,
- *        and @ref mCount is decremented for each consumed entry.
+ *        and the count is decremented for each consumed entry.
  * @note  Safe to call multiple times; already-invoked entries are ignored.
  * @warning Not thread-safe: ensure single-threaded finalization or guard with a lock.
  */
