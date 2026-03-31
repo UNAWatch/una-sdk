@@ -46,6 +46,7 @@ namespace SDK::Component {
          * with a fixed number of base-type elements (e.g., bytes for STRING fields).
          *
          * @param msgID      Local message number for this field.
+         * @param fieldID    Field ID for this developer field.
          * @param container  Parent FitHelpers list to which this field belongs.
          * @param itemsCount Number of elements.
          * @param devIndex   Developer index.
@@ -189,6 +190,7 @@ namespace SDK::Component {
          * @param local_mesg_number  Local message number (0–15).
          * @param mesg_pointer       Pointer to the message data structure.
          * @param mesg_size          Size of the message data in bytes.
+         * @param fp    Target file pointer.
          */
         void WriteMessage(FIT_UINT8 local_mesg_number, const void* mesg_pointer, FIT_UINT16 mesg_size, SDK::Interface::IFile* fp);
 

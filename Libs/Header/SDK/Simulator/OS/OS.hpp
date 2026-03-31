@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    Synch.hpp
+ * @file    OS.hpp
  * @date    21-June-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   A set of synchronization objects

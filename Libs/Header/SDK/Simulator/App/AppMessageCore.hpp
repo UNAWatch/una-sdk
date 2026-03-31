@@ -1,5 +1,5 @@
 /**
- * @file   MessageCore.hpp
+ * @file   AppMessageCore.hpp
  * @date   30-December-2025
  * @author Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief  Application communication (Service + GUI + Kernel)
