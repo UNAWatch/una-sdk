@@ -67,13 +67,13 @@ To test the app on the simulator (Windows only):
 
 The simulator will display the HelloWorld GUI. Since HelloWorld has minimal interactive elements, it primarily demonstrates the app startup and basic framework.
 
-For detailed simulator setup and features, see [Simulator](../Simulator.md).
+For detailed simulator setup and features, see [Simulator](../../Simulator.md).
 
 ### Working with TouchGFX GUI (Optional)
 
 If you want to explore or modify the GUI design:
 
-1. **Install TouchGFX Designer** (see [toolchain setup](toolchain-setup) for installation)
+1. **Install TouchGFX Designer** (see [toolchain setup](../../sdk-setup.md) for installation)
 
 2. **Open the TouchGFX project:**
    ```

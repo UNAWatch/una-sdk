@@ -72,7 +72,7 @@ In the simulator, use keyboard keys to simulate hardware buttons:
 - **3** = R1 (Perform action on selected item)
 - **4** = R2 (Double-press to exit)
 
-The simulator will display the scrollable menu with Counter, Increase, Decrease items. For detailed simulator setup and button mapping, see [Simulator](../Simulator.md).
+The simulator will display the scrollable menu with Counter, Increase, Decrease items. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
 
 ## ScrollMenu App Overview
 

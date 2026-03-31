@@ -5,13 +5,13 @@
 The SensorLayer provides a high-level C++ API for subscribing to and receiving data from various sensors via IPC messages through the SDK Kernel. It abstracts low-level driver interactions, allowing applications to connect to sensors by type, specify sampling periods and latency, and receive batched sensor data events.
 
 Key components:
-- [`SDK::Sensor::Connection`](Libs/Header/SDK/SensorLayer/SensorConnection.hpp): Manages subscription (RequestDefault) and connection (RequestConnect/Disconnect).
-- Sensor data delivery via [`SDK::Message::Sensor::EventData`](Libs/Header/SDK/Messages/SensorLayerMessages.hpp) messages.
-- Data processing with [`SDK::Sensor::DataBatch`](Libs/Header/SDK/SensorLayer/SensorDataBatch.hpp), [`SDK::Sensor::DataView`](Libs/Header/SDK/SensorLayer/SensorDataView.hpp), and type-specific parsers in DataParsers/.
+- [`SDK::Sensor::Connection`](../Libs/Header/SDK/SensorLayer/SensorConnection.hpp): Manages subscription (RequestDefault) and connection (RequestConnect/Disconnect).
+- Sensor data delivery via [`SDK::Message::Sensor::EventData`](../Libs/Header/SDK/Messages/SensorLayerMessages.hpp) messages.
+- Data processing with [`SDK::Sensor::DataBatch`](../Libs/Header/SDK/SensorLayer/SensorDataBatch.hpp), [`SDK::Sensor::DataView`](../Libs/Header/SDK/SensorLayer/SensorDataView.hpp), and type-specific parsers in DataParsers/.
 
 ## Sensor Types
 
-All available sensor types are defined in [`SDK::Sensor::Type`](Libs/Header/SDK/SensorLayer/SensorTypes.hpp):
+All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/SDK/SensorLayer/SensorTypes.hpp):
 
 | Category | Type | Hex Value | Description | Parser Available | Fields |
 |----------|------|-----------|-------------|------------------|--------|
@@ -48,7 +48,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](Libs/Header/SDK/
 
 ## Connection API
 
-Use [`SDK::Sensor::Connection`](Libs/Header/SDK/SensorLayer/SensorConnection.hpp):
+Use [`SDK::Sensor::Connection`](../Libs/Header/SDK/SensorLayer/SensorConnection.hpp):
 
 Constructors:
 - `Connection(Type id, float period = 0, uint32_t latency = 0)`: Lazy resolve handle on connect.
@@ -64,7 +64,7 @@ Methods:
 
 Destructor auto-disconnects.
 
-Implementation in [SensorConnection.cpp](Libs/Source/SensorLayer/SensorConnection.cpp).
+Implementation in [SensorConnection.cpp](../Libs/Source/SensorLayer/SensorConnection.cpp).
 
 ## Data Reception & Processing
 
@@ -87,7 +87,7 @@ while (kernel.comm.getMessage(msg, 1000)) {
 - `DataBatch`: Iterable views (`batch.size()`, `batch[i]`).
 - `DataView`: Timestamps (`getTimestamp()`, `getTimestampUs()`), fields (`f[0]`, `u[0]`, `i[0]` float/u32/i32).
 
-See [SensorData.hpp](Libs/Header/SDK/SensorLayer/SensorData.hpp), [DataView.hpp](Libs/Header/SDK/SensorLayer/SensorDataView.hpp).
+See [SensorData.hpp](../Libs/Header/SDK/SensorLayer/SensorData.hpp), [DataView.hpp](../Libs/Header/SDK/SensorLayer/SensorDataView.hpp).
 
 ## Sensors
 
@@ -287,7 +287,7 @@ graph TD
 
 ## Example: Multi-Sensor Service
 
-Adapted from tutorial [`Service.cpp`](Docs/Tutorials/Sensors/Software/Libs/Sources/Service.cpp):
+Adapted from tutorial [`Service.cpp`](Tutorials/Sensors/Software/Libs/Sources/Service.cpp):
 
 ```cpp
 // In app service loop
@@ -321,7 +321,7 @@ Full tutorial in Docs/Tutorials/Sensors/.
 - RequestList: List handles for type.
 - RequestGetDesc: Sensor descriptor string.
 
-See [`SensorLayerMessages.hpp`](Libs/Header/SDK/Messages/SensorLayerMessages.hpp).
+See [`SensorLayerMessages.hpp`](../Libs/Header/SDK/Messages/SensorLayerMessages.hpp).
 ## Full Example
 
-See tutorial [Service.hpp/cpp](Docs/Tutorials/Sensors/Software/Libs/Header/Service.hpp) for multi-sensor handling with GUI comm.
+See tutorial [Service.hpp/cpp](Tutorials/Sensors/Software/Libs/Header/Service.hpp) for multi-sensor handling with GUI comm.
