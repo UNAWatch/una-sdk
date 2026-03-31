@@ -7,6 +7,7 @@
 
 #include "SDK/Simulator/App/KernelMessageDispatcher.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
+#include "SDK/Messages/SensorLayerMessages.hpp"
 
 #include <cstring>
 #include <memory>
@@ -437,6 +438,25 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             //}
         }
 
+        mMessageManager.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+    } break;
+
+    // Sensor Layer mock: respond SUCCESS so SensorConnection::subscribe() succeeds.
+    // No real sensor driver exists in the simulator; Service.cpp injects mock data directly.
+    case SDK::MessageType::REQUEST_SENSOR_LAYER_GET_DEFAULT: {
+        LOG_DEBUG("Sensor: RequestDefault (mock)\n");
+        auto* req = static_cast<SDK::Message::Sensor::RequestDefault*>(msg);
+        req->handle = static_cast<uint32_t>(req->id); // use type ID as unique handle
+        mMessageManager.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+    } break;
+
+    case SDK::MessageType::REQUEST_SENSOR_LAYER_CONNECT: {
+        LOG_DEBUG("Sensor: RequestConnect (mock)\n");
+        mMessageManager.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+    } break;
+
+    case SDK::MessageType::REQUEST_SENSOR_LAYER_DISCONNECT: {
+        LOG_DEBUG("Sensor: RequestDisconnect (mock)\n");
         mMessageManager.signalCompletion(msg, SDK::MessageResult::SUCCESS);
     } break;
 
