@@ -25,6 +25,7 @@ public:
     void run();
 
 private:
+    // ===== SENSOR MANAGEMENT =====
     void connect();
     void disconnect();
 
@@ -34,16 +35,20 @@ private:
                       uint16_t                 count,
                       uint16_t                 stride) override;
 
+    // ===== GLANCE UI =====
     void onGlanceTick();
     bool configGui();
     void createGuiControls();
-    void saveFit(bool force, bool finalizeDay);
-    void checkDayRollover();
+
+    // ===== SESSION MANAGEMENT =====
+    void startSession();
+    void finalizeSession();
+
+    // ===== FIT FILE MANAGEMENT =====
+    void saveFit(bool finalize);
     void appendPendingRecords(SDK::Interface::IFile* fp);
     void writeFitDefinitions(SDK::Interface::IFile* fp, std::time_t timestamp);
     void writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t timestamp);
-    void startNewSession(SDK::Interface::IFile* fp, std::time_t timestamp);
-    void loadSessionIndex(SDK::Interface::IFile* fp);
 
     struct FitRecord {
         std::time_t timestamp;
@@ -63,22 +68,18 @@ private:
 
     bool mGlanceActive = false;
 
-    // Accumulators
+    // ===== SESSION STATE =====
+    // Accumulators for current session
     uint32_t mTotalSteps = 0;
     uint32_t mLastSteps = 0;
     uint32_t mSampleCount = 0;
     uint8_t mCurrentHR = 0;
     std::vector<FitRecord> mPendingRecords;
-    std::time_t mLastSaveTime = 0;
     bool mSessionOpen = false;
-    char mFitPath[64] = {};
-    char mCurrentDate[11] = {};
-    std::time_t mDayStart = 0;
+    std::time_t mSessionStart = 0;
     bool mFitFileInitialized = false;
-    bool mSessionIndexInitialized = false;
-    uint16_t mSessionIndex = 0;
-    bool mStepsLoaded = false;
 
+    // ===== FIT HELPERS =====
     SDK::Component::FitHelper mFitFileID;
     SDK::Component::FitHelper mFitDeveloper;
     SDK::Component::FitHelper mFitRecord;
@@ -87,6 +88,7 @@ private:
     SDK::Component::FitHelper mFitActivity;
     SDK::Component::FitHelper mFitStepsField;
 
+    // ===== CONSTANTS =====
     static constexpr uint8_t skFileMsgNum     = 1;
     static constexpr uint8_t skDevelopMsgNum  = 2;
     static constexpr uint8_t skRecordMsgNum   = 3;
@@ -96,7 +98,7 @@ private:
     static constexpr uint8_t skStepsMsgNum    = 7;
 
     static constexpr uint32_t skSamplePeriodSec = 5;
-    static constexpr uint32_t skSaveIntervalSec = 3600;
+    static constexpr const char* skFitFileName = "steps.fit";
 };
 
 #endif
