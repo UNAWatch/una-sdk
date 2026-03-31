@@ -424,12 +424,12 @@ void Service::writeFitDefinitions(SDK::Interface::IFile* fp, std::time_t timesta
     // Developer Data ID - registers developer for custom fields
     mFitDeveloper.writeDef(fp);
     FIT_DEVELOPER_DATA_ID_MESG developer{};
-    std::strncpy(reinterpret_cast<char*>(developer.developer_id), DEV_ID,
-                  FIT_DEVELOPER_DATA_ID_MESG_DEVELOPER_ID_COUNT - 1);
-    developer.developer_id[FIT_DEVELOPER_DATA_ID_MESG_DEVELOPER_ID_COUNT - 1] = '\0';
-    std::strncpy(reinterpret_cast<char*>(developer.application_id), APP_ID,
-                  FIT_DEVELOPER_DATA_ID_MESG_APPLICATION_ID_COUNT - 1);
-    developer.application_id[FIT_DEVELOPER_DATA_ID_MESG_APPLICATION_ID_COUNT - 1] = '\0';
+    size_t devIdLen = std::min(std::strlen(DEV_ID), static_cast<size_t>(FIT_DEVELOPER_DATA_ID_MESG_DEVELOPER_ID_COUNT - 1));
+    std::memcpy(developer.developer_id, DEV_ID, devIdLen);
+    developer.developer_id[devIdLen] = '\0';
+    size_t appIdLen = std::min(std::strlen(APP_ID), static_cast<size_t>(FIT_DEVELOPER_DATA_ID_MESG_APPLICATION_ID_COUNT - 1));
+    std::memcpy(developer.application_id, APP_ID, appIdLen);
+    developer.application_id[appIdLen] = '\0';
     developer.application_version = SDK::ParseVersion(BUILD_VERSION).u32;
     developer.manufacturer_id = FIT_MANUFACTURER_DEVELOPMENT;
     developer.developer_data_index = 0;
