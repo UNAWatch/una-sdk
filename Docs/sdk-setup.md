@@ -203,6 +203,18 @@ cmake -G "Unix Makefiles" -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
 cmake --build MyAlarm/build
 ```
 
+#### Troubleshooting Windows Setup
+
+If you encounter errors like "include could not find requested file: /cmake/una-app.cmake" or "/cmake/una-sdk.cmake", ensure the `UNA_SDK` environment variable is set. Run the export script with dot sourcing to apply it to the current shell: `. ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1`. Reboot your PC or restart PowerShell if issues persist, as environment variables may not apply immediately.
+
+If CMake reports "CMAKE_MAKE_PROGRAM is not set", "CMAKE_C_COMPILER not set", or "CMAKE_CXX_COMPILER not set", even after setting environment variables, add the following compiler flags to the CMake command:
+
+```powershell
+cmake -G "Unix Makefiles" -DCMAKE_SYSTEM_NAME=Generic -DCMAKE_C_COMPILER=arm-none-eabi-gcc -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
+```
+
+Then proceed with the build step: `cmake --build MyAlarm/build`.
+
 ## CMake-Based Workflow Development
 
 The CMake workflow is recommended for command-line control and is fully standalone. Apps reference the SDK via `UNA_SDK` and use relative paths for flexibility.
@@ -227,6 +239,18 @@ MyApp/  # App root (can be anywhere)
 │   └── icon_60x60.png
 └── Output/  # Built .uapp files
 ```
+
+### CMake Command Explanations
+
+The CMake build process is a two-step procedure:
+
+1. **Configuration/Generation**: `cmake -G "Unix Makefiles" -S <source-dir> -B <build-dir>` generates intermediate build files (e.g., Makefiles) in the specified build directory. This step configures the project, resolves dependencies, sets compilers and paths, and prepares the build environment. Run this for initial setup or when `CMakeLists.txt` changes.
+
+2. **Build/Compilation**: `cmake --build <build-dir>` (from any directory) or `make` (inside the build directory) compiles the source code using the generated build files. Run this to build or recompile after source file modifications.
+
+For a clean rebuild, remove the build directory and repeat both steps: `rm -rf build && cmake -S . -B build && cmake --build build`.
+
+If build files are generated in the wrong directory (e.g., root instead of build dir), navigate to the correct build directory and run `make` or `cmake --build .` from there.
 
 ### Creating New Apps
 
@@ -393,5 +417,6 @@ In UNA SDK projects, TouchGFX integrates seamlessly with CMake for building GUI 
 
 - **Missing Dependencies**: Ensure all required libraries are linked.
 - **Path Errors**: Verify `UNA_SDK` and other paths are correctly set.
-- **Toolchain Issues**: Confirm ARM GCC is properly installed and in PATH.
-- **Build Conflicts**: Clean build dirs if errors persist after changes.
+- **Toolchain Issues**: Confirm ARM GCC is properly installed and in PATH. On Windows, run the export script with dot sourcing and reboot if necessary.
+- **CMake Compiler Errors**: If CMake cannot find compilers (e.g., "CMAKE_C_COMPILER not set"), add `-DCMAKE_SYSTEM_NAME=Generic -DCMAKE_C_COMPILER=arm-none-eabi-gcc -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc` to the cmake command.
+- **Build Conflicts**: Clean build dirs if errors persist after changes. Use `rm -rf build` (Linux) or `Remove-Item -Recurse build` (PowerShell) and reconfigure.
