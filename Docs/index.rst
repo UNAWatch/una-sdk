@@ -47,6 +47,7 @@ The UNA Watch architecture is unique: apps run as pure machine code directly in 
    Scripts
    TouchGFX-Port-Architecture
    touchgfx-widgets
+   FitFiles-Structure
 
 .. toctree::
    :maxdepth: 4
