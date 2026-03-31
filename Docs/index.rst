@@ -36,7 +36,7 @@ The UNA Watch architecture is unique: apps run as pure machine code directly in 
    Examples/HRMonitor-Architecture
    Examples/GlanceHR-Architecture
    Examples/GlanceSteps-Architecture
-   Examples/GlanceStrain-Architecture
+   Examples/GlanceStrain-ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4
