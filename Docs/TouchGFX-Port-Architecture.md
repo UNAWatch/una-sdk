@@ -424,7 +424,7 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 #### TouchGFXCommandProcessor
 
 The TouchGFXCommandProcessor serves as a singleton command processor that acts as the central hub for UNA kernel integration, providing asynchronous message-based communication, lifecycle event handling, and frame buffer update coordination.
-- **Location**: [`Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-77`](../Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25), [`Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35-76`](../Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35)
+- **Location**: [`Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-77`](../Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp), [`Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35-76`](../Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp)
 - **Purpose**: Singleton command processor that serves as the central hub for UNA kernel integration
 - **Key Features**:
   - Asynchronous message-based communication with UNA kernel
@@ -547,7 +547,7 @@ void TouchGFXCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data) {
 #### Hardware Abstraction Layer Extensions
 
 The custom HAL implementation provides kernel-driven frame buffer management, button controller integration, and VSync synchronization to ensure proper display updates and input handling within the UNA platform.
-- **Custom HAL Implementation**: [`../Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:67-87`](Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:67)
+- **Custom HAL Implementation**: [`Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp:67-87`](../Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp)
   - Kernel-driven frame buffer flushing via `writeDisplayFrameBuffer()`
   - Button controller integration with kernel message sampling
   - Static frame buffer allocation (57.6 KB for 240×240×8-bit)
@@ -596,7 +596,7 @@ void TouchGFXHAL::endFrame() {
 #### Operating System Wrappers
 
 The OS wrappers provide the bridge between TouchGFX OS requirements and UNA kernel primitives, handling VSync synchronization, task scheduling, and timing operations.
-- **Location**: [`Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp:105-108`](../Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp:105)
+- **Location**: [`Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp:105-108`](../Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp)
 - **UNA-Specific Functions**:
   - `waitForVSync()`: Blocks until kernel sends GUI tick message
   - `taskDelay()`: Uses kernel delay functionality

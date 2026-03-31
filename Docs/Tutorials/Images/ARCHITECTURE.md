@@ -99,7 +99,7 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 
 ### Image Management in UNA SDK
 - Images are converted to TouchGFX bitmap format during build
-- Each image gets a unique ID in [`BitmapDatabase.hpp`](generated/images/include/images/BitmapDatabase.hpp)
+- Each image gets a unique ID in [`BitmapDatabase.hpp`](Software/Apps/TouchGFX-GUI/generated/images/include/images/BitmapDatabase.hpp)
 - Images are stored in flash memory for efficient access
 - TouchGFX handles image decompression and display
 
@@ -144,7 +144,7 @@ Follow these steps to import and display images in your UNA app:
 
 ### Step 3: Display the Image in Code
 
-After importing `guy-transparent.png`, TouchGFX generates [`BITMAP_GUY_TRANSPARENT_ID`](generated/images/include/images/BitmapDatabase.hpp).
+After importing `guy-transparent.png`, TouchGFX generates [`BITMAP_GUY_TRANSPARENT_ID`](Software/Apps/TouchGFX-GUI/generated/images/include/images/BitmapDatabase.hpp).
 
 Images are added programmatically in [`MainView::setupScreen()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
 
@@ -215,7 +215,7 @@ add(scaledGuyImage);
 Demo uses `handleTickEvent()` for sine-wave jump on `guyImage`:
 - Triggered by R1 when Image mode active
 - 60 ticks (~6s at 10Hz), sin(phase)*30px offset
-(See [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp:61))
+(See [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp))
 
 ### Image Memory Management
 
