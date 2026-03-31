@@ -37,6 +37,37 @@ The FitFiles app follows a service-only architecture pattern typical of glance a
 
 The service runs as a separate process/thread, processing sensor data only during active glance sessions and maintaining session-based activity data. The glance UI provides a simple display for the current heart rate and accumulated step data during the session.
 
+### App Workflow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Glance
+    participant S as Service
+    participant Sen as Sensors
+    participant F as FIT File
+
+    U->>G: Activate Glance
+    G->>S: EVENT_GLANCE_START
+    S->>S: startSession()
+    S->>Sen: connect() sensors
+
+    loop Every 5 seconds
+        Sen->>S: onSdlNewData()
+        S->>S: Process HR & Steps
+        S->>S: Accumulate data
+    end
+
+    G->>S: EVENT_GLANCE_TICK
+    S->>G: Update UI with current data
+
+    U->>G: Deactivate Glance
+    G->>S: EVENT_GLANCE_STOP
+    S->>S: finalizeSession()
+    S->>F: saveFit(true)
+    S->>Sen: disconnect() sensors
+```
+
 ## Service Backend
 
 The service backend is implemented in `Service.hpp` and `Service.cpp`, providing the core functionality for heart rate and step tracking during glance sessions and FIT file management.
@@ -116,6 +147,7 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
 
     std::time_t now = std::time(nullptr);
     SDK::Sensor::DataBatch batch(data, count, stride);
+    bool hasNewData = false;
 
     // Process step counter data
     if (mSensorSteps.matchesDriver(handle)) {
@@ -128,6 +160,7 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
                 mTotalSteps += delta;
                 mLastSteps = steps;
                 mSampleCount++;
+                hasNewData = true;
             }
         }
     }
@@ -136,12 +169,16 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
         for (uint16_t i = 0; i < count; ++i) {
             SDK::SensorDataParser::HeartRate p(batch[i]);
             if (!p.isDataValid()) continue;
-            mCurrentHR = static_cast<uint8_t>(p.getBpm());
+            uint8_t newHR = static_cast<uint8_t>(p.getBpm());
+            if (newHR > 0) {  // Only consider valid HR readings
+                mCurrentHR = newHR;
+                hasNewData = true;
+            }
         }
     }
 
-    // Accumulate records for FIT file if we have data
-    if (mSampleCount > 0 || mCurrentHR > 0) {
+    // Accumulate records for FIT file if we have new valid data
+    if (hasNewData) {
         mPendingRecords.push_back({now, mCurrentHR, mTotalSteps});
         LOG_DEBUG("Recorded data point: HR=%u, steps=%u\n", mCurrentHR, mTotalSteps);
     }
@@ -191,28 +228,30 @@ The app creates properly formatted FIT files with headers, definitions, and data
 
 **FIT Helper Components:**
 ```cpp
-SDK::Component::FitHelper mFitFileID;
-SDK::Component::FitHelper mFitDeveloper;
-SDK::Component::FitHelper mFitRecord;
-SDK::Component::FitHelper mFitEvent;
-SDK::Component::FitHelper mFitSession;
-SDK::Component::FitHelper mFitActivity;
-SDK::Component::FitHelper mFitStepsField;
+SDK::Component::FitHelper mFitFileID(skFileMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_FILE_ID]);
+SDK::Component::FitHelper mFitDeveloper(skDevelopMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_DEVELOPER_DATA_ID]);
+SDK::Component::FitHelper mFitRecord(skRecordMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD]);
+SDK::Component::FitHelper mFitEvent(skEventMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_EVENT]);
+SDK::Component::FitHelper mFitSession(skSessionMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_SESSION]);
+SDK::Component::FitHelper mFitActivity(skActivityMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_ACTIVITY]);
+SDK::Component::FitHelper mFitStepsField(skStepsMsgNum, 0, {&mFitRecord});
 ```
 
-Each FitHelper manages a specific FIT message type and handles serialization.
+Each FitHelper manages a specific FIT message type and handles serialization ([FitHelper Component Deep Dive](../../FitFiles-Structure.md#fithelper-component-deep-dive)).
 
 #### 4. Custom Developer Fields
 
 The app demonstrates custom developer fields for extended data types:
 
 ```cpp
+// Initialize developer field description
 mFitStepsField.init({FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
                     FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
                     FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
                     FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
                     FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID});
 
+// Write field description in writeFitDefinitions()
 FIT_FIELD_DESCRIPTION_MESG stepsField{};
 std::strncpy(stepsField.field_name, "steps", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT);
 std::strncpy(stepsField.units, "count", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT);
@@ -352,6 +391,21 @@ The FitFiles app integrates with the UNA SDK's sensor layer for heart rate and s
 - Sample Period: 5 seconds (300,000 ms)
 - Latency: 1,000 ms
 
+**Sensor Connection Code:**
+```cpp
+void Service::connect() {
+    const float samplePeriodMs = static_cast<float>(skSamplePeriodSec) * 1000.0f;
+    if (!mSensorSteps.isConnected()) {
+        LOG_DEBUG("Connecting to Steps sensor\n");
+        mSensorSteps.connect(samplePeriodMs);
+    }
+    if (!mSensorHR.isConnected()) {
+        LOG_DEBUG("Connecting to HR sensor\n");
+        mSensorHR.connect(samplePeriodMs);
+    }
+}
+```
+
 **Data Processing:**
 - Real-time heart rate measurements in BPM
 - Incremental step counts from hardware steps
@@ -372,25 +426,25 @@ Hardware Sensors -> Sensor Drivers -> SDK Parsers -> Service Accumulator -> FIT 
 
 FIT (Flexible and Interoperable Data Transfer) is Garmin's binary file format for fitness data. Key characteristics:
 
-- Binary format for efficient storage
-- Self-describing with message definitions
-- Extensible through developer fields
-- CRC validation for data integrity
-- Timestamp-based (seconds since FIT epoch: 1989-12-31 00:00:00 UTC)
+- Binary format for efficient storage ([Introduction to FIT](../../FitFiles-Structure.md#introduction-to-fit))
+- Self-describing with message definitions ([Message Encoding](../../FitFiles-Structure.md#message-encoding))
+- Extensible through developer fields ([Developer Fields Implementation](../../FitFiles-Structure.md#developer-fields-implementation))
+- CRC validation for data integrity ([CRC Calculation and Validation](../../FitFiles-Structure.md#crc-calculation-and-validation))
+- Timestamp-based (seconds since FIT epoch: 1989-12-31 00:00:00 UTC) ([FIT Timestamp Handling](../../FitFiles-Structure.md#fit-timestamp-handling))
 
 ### Message Types Used
 
-1. **File ID** (`FIT_MESG_FILE_ID`): File metadata
-2. **Developer Data ID** (`FIT_MESG_DEVELOPER_DATA_ID`): Developer identification
-3. **Field Description** (`FIT_MESG_FIELD_DESCRIPTION`): Custom field definitions
-4. **Record** (`FIT_MESG_RECORD`): Data points with timestamps
-5. **Event** (`FIT_MESG_EVENT`): Session start/stop markers
-6. **Session** (`FIT_MESG_SESSION`): Activity segment summaries
-7. **Activity** (`FIT_MESG_ACTIVITY`): Overall activity summary
+1. **File ID** (`FIT_MESG_FILE_ID`): File metadata ([File ID Message](../../FitFiles-Structure.md#file-id-message))
+2. **Developer Data ID** (`FIT_MESG_DEVELOPER_DATA_ID`): Developer identification ([Developer Data ID Message](../../FitFiles-Structure.md#developer-data-id-message))
+3. **Field Description** (`FIT_MESG_FIELD_DESCRIPTION`): Custom field definitions ([Field Description Messages](../../FitFiles-Structure.md#field-description-messages))
+4. **Record** (`FIT_MESG_RECORD`): Data points with timestamps ([Record Messages](../../FitFiles-Structure.md#record-messages))
+5. **Event** (`FIT_MESG_EVENT`): Session start/stop markers ([Event Messages](../../FitFiles-Structure.md#event-messages))
+6. **Session** (`FIT_MESG_SESSION`): Activity segment summaries ([Session Messages](../../FitFiles-Structure.md#session-messages))
+7. **Activity** (`FIT_MESG_ACTIVITY`): Overall activity summary ([Activity Messages](../../FitFiles-Structure.md#activity-messages))
 
 ### Custom Developer Fields
 
-The app demonstrates developer fields for heart rate and step data:
+The app demonstrates developer fields for heart rate and step data ([Developer Fields Implementation](../../FitFiles-Structure.md#developer-fields-implementation)):
 
 **Heart Rate Field (Standard FIT):**
 - Built-in FIT field: `FIT_RECORD_FIELD_NUM_HEART_RATE`
@@ -406,12 +460,17 @@ The app demonstrates developer fields for heart rate and step data:
 
 **Data Recording:**
 ```cpp
-FIT_RECORD_MESG record_mesg{};
-record_mesg.timestamp = unixToFitTimestamp(rec.timestamp);
-record_mesg.heart_rate = rec.heartRate;
-mFitRecord.writeMessage(&record_mesg, fp);
-uint32_t steps = rec.steps;
-mFitRecord.writeFieldMessage(0, &steps, fp);
+// In appendPendingRecords()
+for (const auto& rec : mPendingRecords) {
+    FIT_RECORD_MESG record_mesg{};
+    record_mesg.timestamp = unixToFitTimestamp(rec.timestamp);
+    record_mesg.heart_rate = rec.heartRate;
+    mFitRecord.writeMessage(&record_mesg, fp);
+
+    // Write developer field for steps
+    uint32_t steps = rec.steps;
+    mFitRecord.writeFieldMessage(0, &steps, fp);
+}
 ```
 
 ## Build and Setup
@@ -455,10 +514,10 @@ una_app_build_service(${APP_NAME}Service.elf)
 
 ### FIT File Creation
 
-1. **File Structure**: Proper FIT file format with headers, definitions, and data
-2. **Message Definitions**: Dynamic definition writing for message types
-3. **Developer Fields**: Custom field creation for extended data types
-4. **CRC Validation**: File integrity through cyclic redundancy checks
+1. **File Structure**: Proper FIT file format with headers, definitions, and data ([Visual Representations and Diagrams](../../FitFiles-Structure.md#visual-representations-and-diagrams))
+2. **Message Definitions**: Dynamic definition writing for message types ([Message Definition Structure](../../FitFiles-Structure.md#message-definition-structure))
+3. **Developer Fields**: Custom field creation for extended data types ([Developer Fields Implementation](../../FitFiles-Structure.md#developer-fields-implementation))
+4. **CRC Validation**: File integrity through cyclic redundancy checks ([Advanced Topics and Best Practices](../../FitFiles-Structure.md#advanced-topics-and-best-practices))
 
 ### Sensor Data Logging
 
