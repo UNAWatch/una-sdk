@@ -116,7 +116,6 @@ static bool writeCRC(SDK::Interface::IFile* fp) {
 // ===== CONSTRUCTOR =====
 Service::Service(SDK::Kernel& kernel)
     : mKernel(kernel),
-      mName("Steps"),
       mGlanceUI(),
       mGlanceTitle(),
       mGlanceValue(),
@@ -311,7 +310,7 @@ void Service::onGlanceTick() {
     if (mGlanceUI.isInvalid()) {
         auto* upd = mKernel.comm.allocateMessage<SDK::Message::RequestGlanceUpdate>();
         if (upd) {
-            upd->name = mName;
+            upd->name = "FitTutorial";
             upd->controls = mGlanceUI.data();
             upd->controlsNumber = static_cast<uint32_t>(mGlanceUI.size());
 

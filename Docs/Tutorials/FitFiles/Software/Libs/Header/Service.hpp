@@ -57,7 +57,6 @@ private:
     };
 
     const SDK::Kernel&       mKernel;
-    const char*              mName;
     SDK::Glance::Form        mGlanceUI;
     SDK::Glance::ControlText mGlanceTitle;
     SDK::Glance::ControlText mGlanceValue;
