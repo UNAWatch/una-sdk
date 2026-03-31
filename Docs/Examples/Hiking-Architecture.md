@@ -1251,7 +1251,7 @@ una_app_build_app()
 
 ### Development Setup
 
-See [SDK Setup and Build Overview](sdk-setup.md) for comprehensive development environment setup, build instructions, and toolchain requirements.
+See [SDK Setup and Build Overview](../sdk-setup.md) for comprehensive development environment setup, build instructions, and toolchain requirements.
 
 ### Simulator Build
 
