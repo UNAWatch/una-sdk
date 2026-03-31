@@ -41,11 +41,11 @@
 
   ![New App Page](assets/app-page.png)
 
-- Paste it into your [`CMakeLists.txt`](CMakeLists.txt) into the `APP_ID` variable. **Note:** APP_ID is required to track the apps in the apps store and for the mobile app to match new `*.uapp` file versions in case the file name itself has been changed.
+- Paste it into your `CMakeLists.txt` into the `APP_ID` variable. **Note:** APP_ID is required to track the apps in the apps store and for the mobile app to match new `*.uapp` file versions in case the file name itself has been changed.
 
   ![App ID](assets/paste-id.png)
 
-- Compile the app with the generated **APP_ID** (see [sdk-setup.md](sdk-setup.md#building-apps-manually) for detailed instructions). Note: Run `cmake` to apply the new APP_ID. Verify in the build output that the ID matches in the `app_merging.py` log: `INFO:root:ID             : 03AD5A741E38A35F`
+- Compile the app with the generated **APP_ID** (see [sdk-setup](../sdk-setup.md#building-apps-manually) for detailed instructions). Note: Run `cmake` to apply the new APP_ID. Verify in the build output that the ID matches in the `app_merging.py` log: `INFO:root:ID             : 03AD5A741E38A35F`
 
   ![Build output](assets/compiled-app.png)
 
