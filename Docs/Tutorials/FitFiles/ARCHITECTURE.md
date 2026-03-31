@@ -2,16 +2,16 @@
 
 ## Overview
 
-The FitFiles app is a comprehensive tutorial demonstrating FIT (Flexible and Interoperable Data Transfer) file creation and sensor data logging on wearable devices. This app showcases how to collect heart rate and step counter data during glance sessions, store it in the industry-standard FIT format, and manage activity sessions with proper file handling and data persistence.
+The FitFiles app is a focused tutorial demonstrating FIT (Flexible and Interoperable Data Transfer) file creation and sensor data logging on wearable devices. This app showcases how to collect heart rate and step counter data during glance sessions and store it in the industry-standard FIT format using the UNA SDK's FitHelper components.
 
-The application implements a glance-triggered recording service that monitors heart rate and steps data during active glance sessions, accumulates step counts, and writes them to FIT files with custom developer fields. It demonstrates advanced concepts like session-based recording, event-driven data collection, and FIT file structure creation using the UNA SDK's FitHelper components.
+The application implements a glance-triggered recording service that monitors heart rate and steps data during active glance sessions, accumulates step counts, and writes them to FIT files with custom developer fields. It demonstrates core concepts of session-based recording, event-driven data collection, and FIT file structure creation with a simplified, tutorial-friendly approach.
 
 Key features include:
 - Real-time heart rate and step counting during glance sessions
 - FIT file creation with proper headers, definitions, and CRC validation
 - Custom developer fields for extended data types
 - Activity session management triggered by glance start/stop events
-- Session-based file organization and data persistence
+- Session-based data persistence
 - Glance UI displaying both current heart rate and step count
 - Automatic data persistence on session completion
 
@@ -56,19 +56,27 @@ public:
     void run();
 
 private:
+    // ===== SENSOR MANAGEMENT =====
     void connect();
     void disconnect();
+
+    // ISensorDataListener implementation
     void onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint16_t count, uint16_t stride) override;
+
+    // ===== GLANCE UI =====
     void onGlanceTick();
     bool configGui();
     void createGuiControls();
-    void saveFit(bool force, bool finalizeDay);
-    void checkDayRollover();
+
+    // ===== FIT FILE MANAGEMENT =====
+    void saveFit(bool finalize);
     void appendPendingRecords(SDK::Interface::IFile* fp);
     void writeFitDefinitions(SDK::Interface::IFile* fp, std::time_t timestamp);
     void writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t timestamp);
-    void startNewSession(SDK::Interface::IFile* fp, std::time_t timestamp);
-    void loadSessionIndex(SDK::Interface::IFile* fp);
+
+    // ===== SESSION MANAGEMENT =====
+    void startSession();
+    void finalizeSession();
 
     // ... member variables
 };
@@ -104,11 +112,12 @@ Heart rate and step data arrive through the kernel's message system. The `onSdlN
 
 ```cpp
 void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint16_t count, uint16_t stride) {
-    std::time_t now = std::time(nullptr);
-    checkDayRollover();
+    if (!mSessionOpen) return;  // Only process data during active sessions
 
+    std::time_t now = std::time(nullptr);
     SDK::Sensor::DataBatch batch(data, count, stride);
 
+    // Process step counter data
     if (mSensorSteps.matchesDriver(handle)) {
         for (uint16_t i = 0; i < count; ++i) {
             SDK::SensorDataParser::StepCounter p(batch[i]);
@@ -121,7 +130,9 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
                 mSampleCount++;
             }
         }
-    } else if (mSensorHR.matchesDriver(handle)) {
+    }
+    // Process heart rate data
+    else if (mSensorHR.matchesDriver(handle)) {
         for (uint16_t i = 0; i < count; ++i) {
             SDK::SensorDataParser::HeartRate p(batch[i]);
             if (!p.isDataValid()) continue;
@@ -129,37 +140,37 @@ void Service::onSdlNewData(uint16_t handle, const SDK::Sensor::Data* data, uint1
         }
     }
 
-    // Record data periodically if we have valid data and session is active
-    if (mSessionOpen && mSampleCount > 0 && mCurrentHR > 0) {
+    // Accumulate records for FIT file if we have data
+    if (mSampleCount > 0 || mCurrentHR > 0) {
         mPendingRecords.push_back({now, mCurrentHR, mTotalSteps});
-    }
-
-    if ((now - mLastSaveTime) >= skSaveIntervalSec) {
-        saveFit(false, false);
+        LOG_DEBUG("Recorded data point: HR=%u, steps=%u\n", mCurrentHR, mTotalSteps);
     }
 }
 ```
 
-#### 2. Session and File Management
+#### 2. Session Management
 
-The app manages glance sessions and organizes FIT files by date for session-based recording:
+The app manages glance sessions with simple start/stop logic:
 
 ```cpp
-void Service::checkDayRollover() {
-    std::time_t t_now = std::time(nullptr);
-    std::tm tm_now;
-    localtime_r(&t_now, &tm_now);
-    char now_date[11];
-    std::strftime(now_date, sizeof(now_date), "%Y-%m-%d", &tm_now);
+void Service::startSession() {
+    std::time_t now = std::time(nullptr);
+    mSessionStart = now;
+    mSessionOpen = true;
+    mFitFileInitialized = false;  // Will initialize on first save
+    mTotalSteps = 0;
+    mLastSteps = 0;
+    mSampleCount = 0;
+    mCurrentHR = 0;
+    mPendingRecords.clear();
+    LOG_INFO("FIT session started at %ld\n", now);
+}
 
-    if (std::strlen(mCurrentDate) == 0 || std::strcmp(mCurrentDate, now_date) != 0) {
-        if (std::strlen(mCurrentDate) > 0) {
-            saveFit(true, true);  // Finalize previous session/day
-        }
-        // Reset counters and initialize new date for file organization
-        std::strncpy(mCurrentDate, now_date, 10);
-        std::snprintf(mFitPath, sizeof(mFitPath), "steps_%s.fit", mCurrentDate);
-        // ... reset all accumulators
+void Service::finalizeSession() {
+    if (mSessionOpen) {
+        saveFit(true);
+        mSessionOpen = false;
+        LOG_INFO("FIT session finalized\n");
     }
 }
 ```
@@ -211,26 +222,30 @@ stepsField.fit_base_type_id = FIT_BASE_TYPE_UINT32;
 mFitStepsField.writeMessage(&stepsField, fp);
 ```
 
-#### 5. Session and Activity Management
+#### 4. Session and Activity Management
 
 The app manages activity sessions with proper start/stop events and summaries:
 
 **Session Creation:**
 ```cpp
-void Service::startNewSession(SDK::Interface::IFile* fp, std::time_t timestamp) {
-    FIT_EVENT_MESG start_event{};
-    start_event.timestamp = unixToFitTimestamp(timestamp);
-    start_event.event = FIT_EVENT_TIMER;
-    start_event.event_type = FIT_EVENT_TYPE_START;
-    mFitEvent.writeMessage(&start_event, fp);
+void Service::startSession() {
+    std::time_t now = std::time(nullptr);
+    mSessionStart = now;
     mSessionOpen = true;
+    mFitFileInitialized = false;  // Will initialize on first save
+    mTotalSteps = 0;
+    mLastSteps = 0;
+    mSampleCount = 0;
+    mCurrentHR = 0;
+    mPendingRecords.clear();
+    LOG_INFO("FIT session started at %ld\n", now);
 }
 ```
 
 **Session Summary:**
 ```cpp
 void Service::writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t timestamp) {
-    // Stop event
+    // Stop session event
     FIT_EVENT_MESG stop_event{};
     stop_event.timestamp = unixToFitTimestamp(timestamp);
     stop_event.event = FIT_EVENT_TIMER;
@@ -239,15 +254,21 @@ void Service::writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t time
 
     // Session message with timing and sport data
     FIT_SESSION_MESG session_mesg{};
-    session_mesg.message_index = mSessionIndex;
+    session_mesg.message_index = 0;
     session_mesg.sport = FIT_SPORT_GENERIC;
     session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC;
-    // ... timing calculations
+    session_mesg.timestamp = unixToFitTimestamp(timestamp);
+    session_mesg.start_time = unixToFitTimestamp(mSessionStart);
+    session_mesg.total_elapsed_time = static_cast<FIT_UINT32>((timestamp - mSessionStart) * 1000);
+    session_mesg.total_timer_time = static_cast<FIT_UINT32>((timestamp - mSessionStart) * 1000);
     mFitSession.writeMessage(&session_mesg, fp);
 
     // Activity summary
     FIT_ACTIVITY_MESG activity_mesg{};
-    // ... activity totals
+    activity_mesg.timestamp = unixToFitTimestamp(timestamp);
+    activity_mesg.local_timestamp = unixToFitTimestamp(timestamp);  // Simplified
+    activity_mesg.total_timer_time = static_cast<FIT_UINT32>((timestamp - mSessionStart) * 1000);
+    activity_mesg.num_sessions = 1;
     mFitActivity.writeMessage(&activity_mesg, fp);
 }
 ```
@@ -265,25 +286,20 @@ void Service::writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t time
 
 #### Data Persistence Strategy
 
-The app saves data on session completion and periodically during active sessions:
+The app saves data on session completion:
 
 - **Session-based**: Automatic save when glance session ends
-- **Time-based**: Periodic saves during long sessions (configurable via `skSaveIntervalSec`)
-- **Event-based**: App termination or day transitions
-- **Force save**: Immediate persistence when required
+- **Event-based**: App termination triggers session finalization
+- **Simple approach**: One FIT file per session with complete data
 
-#### File Recovery and Loading
+#### FIT File Writing Process
 
-On app restart, the service can recover previous state:
-
-```cpp
-void Service::loadSessionIndex(SDK::Interface::IFile* fp) {
-    // Parse existing FIT file to extract:
-    // - Last session index
-    // - Previous step counts
-    // - Session count for activity summary
-}
-```
+1. **File Creation**: Create new FIT file on session start
+2. **Header Management**: Write placeholder header (updated with final size)
+3. **Definition Writing**: Write message definitions once
+4. **Data Append**: Add records during session
+5. **Session Finalization**: Write session summary on completion
+6. **CRC Calculation**: Compute and append file CRC
 
 ## Glance UI Implementation
 
@@ -457,7 +473,7 @@ una_app_build_service(${APP_NAME}Service.elf)
 1. **Glance Sessions**: Start/stop event handling based on user interaction
 2. **Session Boundaries**: Automatic session management with FIT file creation
 3. **Data Persistence**: Reliable storage with session completion
-4. **State Recovery**: Loading previous session data on restart
+4. **Simplified Approach**: Clean session lifecycle without complex state recovery
 
 ### File System Integration
 
@@ -468,7 +484,7 @@ una_app_build_service(${APP_NAME}Service.elf)
 
 ## Next Steps
 
-This tutorial provides a foundation for more advanced glance-based fitness applications:
+This tutorial provides a foundation for more advanced glance-based fitness applications. The simplified approach focuses on core FIT file creation concepts:
 
 1. **Additional Sensors**: Add GPS, altitude, or other biometric sensors
 2. **Advanced FIT Features**: Implement laps, events, and complex activities
@@ -477,5 +493,7 @@ This tutorial provides a foundation for more advanced glance-based fitness appli
 5. **Performance Optimization**: Implement data compression and efficient storage
 6. **Health Metrics**: Calculate calories, distance, and activity intensity
 7. **Session Analytics**: Add post-session summary and statistics
+
+The tutorial demonstrates essential FIT file creation using UNA SDK's FitHelper components with a clean, tutorial-friendly implementation.
 
 The FitFiles tutorial demonstrates essential concepts for building robust, data-persistent wearable applications using the UNA SDK's FIT file capabilities and sensor integration features.
