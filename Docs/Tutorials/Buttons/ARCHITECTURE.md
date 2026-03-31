@@ -72,7 +72,7 @@ In the simulator, use keyboard keys to simulate hardware buttons:
 - **3** = R1 (Blue screen)
 - **4** = R2 (Green screen, double-press to exit)
 
-The simulator will display color changes based on button presses. For detailed simulator setup and button mapping, see [Simulator](../Simulator.md).
+The simulator will display color changes based on button presses. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
 
 ## Buttons App Overview
 

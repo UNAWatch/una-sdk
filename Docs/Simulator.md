@@ -10,7 +10,7 @@ Note: If you move the application to another location, you need to update the re
    - Download and install [Visual Studio](https://visualstudio.microsoft.com).
    - In the Installing window, where you select the required packages, go to **Workloads → Desktop & Mobile** and choose **Desktop development with C++**.
    - In **Installation Details**, for **Desktop development with C++** select **MSVC v143**, then click **Install**.
-### Install UNA_SDK variable
+### Install UNA_SDK variable {#install-una-sdk-variable}
 1. Run the PowerShell script **export-stm32-tools.ps1**, located in:  
    `Utilities\Scripts\export-stm32-tools.ps1`
 2. This script sets the UNA_SDK environment variable and configures STM32 tools.
@@ -31,7 +31,7 @@ Note: If you move the application to another location, you need to update the re
 #### Buttons
 1. Mechanical buttons in the UNA Simulator are controlled using **keyboard keys**.
 2. You can see the mapping in the **Terminal Log**, which shows which number keys correspond to the buttons on the UNA watch.
-   ```cpp
+   ```
    ---------------------------------------------------
    |   For Simulation Button use keyboard Keys.      |
    |       Keys Keyboard:                            |
@@ -85,7 +85,7 @@ In the file **ConfigurationSimulator.hpp**, you can enable/disable sensor simula
 Location:
 `<app-name>\Software\Apps\TouchGFX-GUI\simulator`
 
-For examples of sensor integration and data handling, see the [Sensors Tutorial](../Tutorials/Sensors/ARCHITECTURE.md).
+For examples of sensor integration and data handling, see the [Sensors Tutorial](Tutorials/Sensors/ARCHITECTURE.md).
 ##### GPS
 - Simulates **speed, altitude, and distance**.
 - The simulated user moves around a **stadium track**.
@@ -184,7 +184,7 @@ Options:
   `<app-name>\Software\Apps\TouchGFX-GUI\simulator\gcc`
 2. Add header paths to **ADDITIONAL_INCLUDE_PATHS**.
 3. Add source file paths to **ADDITIONAL_SOURCES_UNA**.
-### Transfer Application
+### Transfer Application {#transfer-application}
 If you move the application to another location, you need to update the **TouchGFX library path**.
 1. Open `<name>.touchgfx` in text editor:
     `<app_name>\Software\Apps\TouchGFX-GUI`

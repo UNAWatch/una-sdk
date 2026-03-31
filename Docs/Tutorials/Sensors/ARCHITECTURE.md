@@ -1,4 +1,4 @@
-(tutorials/images/architecture)=
+(tutorials/sensors/architecture)=
 
 # Sensors - Integrating Hardware Sensors
 
@@ -43,7 +43,7 @@ graph LR
 
 ### Step 1: Define Custom Messages
 
-Create [`Commands.hpp`](Docs/Tutorials/Sensors/Software/Libs/Header/Commands.hpp) with message types and structs:
+Create [`Commands.hpp`](Software/Libs/Header/Commands.hpp) with message types and structs:
 
 ```cpp
 namespace CustomMessage {
@@ -90,7 +90,7 @@ public:
 
 ### Step 2: Service - Subscribe & Process Sensors
 
-In [`Service.hpp`](Docs/Tutorials/Sensors/Software/Libs/Header/Service.hpp):
+In [`Service.hpp`](Software/Libs/Header/Service.hpp):
 
 ```cpp
 SDK::Sensor::Connection mSensorHR{SDK::Sensor::Type::HEART_RATE, 0, 0};
@@ -102,7 +102,7 @@ SDK::Sensor::Connection mSensorFloorCounter{SDK::Sensor::Type::FLOOR_COUNTER, 0,
 // CustomMessage::GUISender mSender;
 ```
 
-In `run()` [`Service.cpp`](Docs/Tutorials/Sensors/Software/Libs/Sources/Service.cpp): connect all (acc.connect(0.1f, 0)), loop getMessage:
+In `run()` [`Service.cpp`](Software/Libs/Sources/Service.cpp): connect all (acc.connect(0.1f, 0)), loop getMessage:
 
 ```cpp
 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
@@ -133,7 +133,7 @@ Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec), `mSender.updat
 
 ### Step 3: GUI Model - Receive Messages
 
-In [`Model.cpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp), implement `customMessageHandler`:
+In [`Model.cpp`](Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp), implement `customMessageHandler`:
 
 ```cpp
 case CustomMessage::HR_VALUES: {
@@ -146,7 +146,7 @@ case CustomMessage::HR_VALUES: {
 
 ### Step 4: MainView - Display & Controls
 
-In [`MainView.hpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp)[`MainView.cpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
+In [`MainView.hpp`](Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp), [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
 
 Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
@@ -168,13 +168,13 @@ Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes T
 - **Altimeter**: Uses altitude from barometric sensor; pressure not available in parser
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
-- Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).
+- Build with [`CMakeLists.txt`](Software/Apps/Sensors-CMake/CMakeLists.txt).
 
 ### Running on Simulator
 
 To test the Sensors app on the simulator (Windows only):
 
-1. Build the app following the [SDK setup](../sdk-setup.md) instructions.
+1. Build the app following the [SDK setup](../../sdk-setup.md) instructions.
 2. Open `Sensors.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
 3. Navigate to `Sensors\Software\Apps\TouchGFX-GUI\simulator\msvs`
 4. Open `Application.vcxproj` in Visual Studio
@@ -182,4 +182,4 @@ To test the Sensors app on the simulator (Windows only):
 
 The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.
 
-For detailed sensor simulation configuration and features, see [Simulator](../Simulator.md).
+For detailed sensor simulation configuration and features, see [Simulator](../../Simulator.md).

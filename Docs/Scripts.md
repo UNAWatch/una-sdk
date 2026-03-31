@@ -6,18 +6,18 @@ This document provides comprehensive analysis of the Python, Bash, and PowerShel
 
 | Script | Where/When/Who Calls It | Purpose |
 |------------------------------------|--------------------------|----------|
-| [`app_merging.py`](#script-utilities-scripts-app_merging-app_merging-py) | CMake post-build in [`una-app.cmake`](../cmake/una-app.cmake); manual developer use ([`sdk-setup.md`](sdk-setup.md), [`sdk-overview.md`](sdk-overview.md), [`Readme.txt`](../Utilities/Scripts/app_merging/Readme.txt)) | Merges app service/GUI binaries with icons/resources into a final app package during build or manually. |
-| [`app_packer.py`](#script-utilities-scripts-app_packer-app_packer-py) | CMake post-build in [`una-app.cmake`](../cmake/una-app.cmake) for service and GUI targets; referenced in docs ([`sdk-overview.md`](sdk-overview.md), [`development-workflow.md`](development-workflow.md)) | Packages ELF binaries with assets and version into .uapp containers in post-build steps. |
-| [`png2abgr2222.py`](#script-utilities-scripts-png2abgr2222-png2abgr2222-py) | No external callers found in searched files; self-documented examples for manual use | Converts input PNG images from RGBA to ABGR2222 byte arrays and generates C header files. |
-| [`export-stm32-tools.ps1`](#script-utilities-scripts-export-stm32-tools-ps1) | Manual Windows SDK setup ([`sdk-setup.md`](sdk-setup.md)) | Exports STM32 tools during manual Windows environment setup. |
-| [`una-version.sh`](#script-utilities-scripts-build-cube-una-version-sh) | Sourced by [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh), [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in [`cmake/una-app.cmake`](../cmake/una-app.cmake) and GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml)) | Initializes UNA version and build metadata environment variables for Cube builds. |
-| [`find-cube.sh`](#script-utilities-scripts-build-cube-find-cube-sh) | Sourced by [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml)) | Locates STM32 CubeIDE installation and sets environment variables. |
-| [`build-cube.sh`](#script-utilities-scripts-build-cube-build-cube-sh) | Called in GitHub Actions [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml) | Builds specified CubeIDE projects using prepared environment. |
-| [`setup-environment.sh`](#script-utilities-scripts-build-cube-setup-environment-sh) | Used in `.vscode/tasks.json` | Prepares environment for CubeIDE builds by sourcing dependency scripts. |
-| [`generate-tutorials-app-list.py`](#script-github-scripts-generate-tutorials-app-list-py) | GitHub Actions [`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml) (runs to generate cmake_apps.json) | Generates list of tutorial apps in JSON format for CI workflows. |
-| [`generate-app-list.py`](#script-examples-github-scripts-generate-app-list-py) | GitHub Actions [`apps-ci.yml`](../Examples/.github/workflows/apps-ci.yml) (runs to list projects and filter by app) | Generates list of example app projects for CI build matrix. |
+| [`app_merging.py`](../Utilities/Scripts/app_merging/app_merging.py) | CMake post-build in [`una-app.cmake`](../cmake/una-app.cmake); manual developer use (`sdk-setup`, `sdk-overview.md`, `Readme.txt`) | Merges app service/GUI binaries with icons/resources into a final app package during build or manually. |
+| [`app_packer.py`](../Utilities/Scripts/app_packer/app_packer.py) | CMake post-build in [`una-app.cmake`](../cmake/una-app.cmake) for service and GUI targets; referenced in docs ([`sdk-overview.md`](sdk-overview.md), [`development-workflow.md`](development-workflow.md)) | Packages ELF binaries with assets and version into .uapp containers in post-build steps. |
+| [`png2abgr2222.py`](../Utilities/Scripts/png2abgr2222/png2abgr2222.py) | No external callers found in searched files; self-documented examples for manual use | Converts input PNG images from RGBA to ABGR2222 byte arrays and generates C header files. |
+| [`export-stm32-tools.ps1`](../Utilities/Scripts/export-stm32-tools.ps1) | Manual Windows SDK setup (`sdk-setup`) | Exports STM32 tools during manual Windows environment setup. |
+| [`una-version.sh`](../Utilities/Scripts/build-cube/una-version.sh) | Sourced by [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh), [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in [`cmake/una-app.cmake`](../cmake/una-app.cmake) and GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), apps-ci.yml) | Initializes UNA version and build metadata environment variables for Cube builds. |
+| [`find-cube.sh`](../Utilities/Scripts/build-cube/find-cube.sh) | Sourced by [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), apps-ci.yml) | Locates STM32 CubeIDE installation and sets environment variables. |
+| [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh) | Called in GitHub Actions apps-ci.yml | Builds specified CubeIDE projects using prepared environment. |
+| [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh) | Used in `.vscode/tasks.json` | Prepares environment for CubeIDE builds by sourcing dependency scripts. |
+| [`generate-tutorials-app-list.py`](../.github/scripts/generate-tutorials-app-list.py) | GitHub Actions [`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml) (runs to generate cmake_apps.json) | Generates list of tutorial apps in JSON format for CI workflows. |
+| generate-app-list.py | GitHub Actions apps-ci.yml (runs to list projects and filter by app) | Generates list of example app projects for CI build matrix. |
 
-## Script: Utilities/Scripts/app_merging/app_merging.py
+## Script: Utilities/Scripts/app_merging/app_merging.py {#script-utilities-scripts-app_merging-app_merging-py}
 
 ### Overview
 This Python script merges service and GUI ELF binaries into a unified UAPP format, incorporating icon conversion, version management, and CRC integrity checks.
@@ -85,7 +85,7 @@ The script performs comprehensive app packaging:
 ### Integration Context
 Core component of the app build pipeline, transforming compiled binaries into deployable packages. Used after separate service and GUI builds to create unified applications for the watch platform.
 
-## Script: Utilities/Scripts/app_packer/app_packer.py
+## Script: Utilities/Scripts/app_packer/app_packer.py {#script-utilities-scripts-app_packer-app_packer-py}
 
 ### Overview
 This Python script converts ELF binaries into custom UAPP format packages, incorporating relocation handling, section padding, and optional C header generation for embedded deployment.
@@ -147,7 +147,7 @@ The script provides comprehensive ELF processing:
 ### Integration Context
 Used in post-build processing to convert standard ELF outputs into custom embedded formats. Supports different deployment scenarios through flexible naming and header generation options.
 
-## Script: Utilities/Scripts/png2abgr2222/png2abgr2222.py
+## Script: Utilities/Scripts/png2abgr2222/png2abgr2222.py {#script-utilities-scripts-png2abgr2222-png2abgr2222-py}
 
 ### Overview
 This Python script converts RGBA PNG images to ABGR2222 compressed format, generating C headers with embedded byte arrays and metadata macros for embedded graphics.
@@ -207,7 +207,7 @@ The script offers comprehensive image conversion:
 ### Integration Context
 Essential for embedded GUI development, converting designer-provided PNG assets into compressed formats suitable for watch displays. Integrates with build systems to generate headers for static icon inclusion.
 
-## Script: Utilities/Scripts/export-stm32-tools.ps1
+## Script: Utilities/Scripts/export-stm32-tools.ps1 {#script-utilities-scripts-export-stm32-tools-ps1}
 
 ### Overview
 This PowerShell script automates the detection and configuration of essential STM32 development tools on Windows systems. It locates common toolchains and utilities (arm-none-eabi-gcc, make, cmake, python), adds their directories to the user PATH permanently, and sets the UNA_SDK environment variable pointing to the SDK root directory.
@@ -272,7 +272,7 @@ The script provides:
 ### Integration Context
 Designed as a one-time setup script for Windows developers working with the UNA Watch SDK. It prepares the environment for cross-platform build tools (CMake, Make) and STM32-specific toolchain, enabling seamless building of examples and applications. Typically run after tool installation (STM32CubeIDE, MSYS2, etc.) and before using CMake-based workflows or STM32CubeIDE projects.
 
-## Script: Utilities/Scripts/build-cube/una-version.sh
+## Script: Utilities/Scripts/build-cube/una-version.sh {#script-utilities-scripts-build-cube-una-version-sh}
 
 ### Overview
 This comprehensive Bash script determines the build version for UNA Watch projects based on Git repository state, supporting semantic versioning, tags, and dirty state detection.
@@ -325,7 +325,7 @@ The script implements sophisticated version detection:
 ### Integration Context
 Critical component of build systems, ensuring that all built artifacts include accurate version metadata. Supports CI/CD by providing consistent versioning across different build environments.
 
-## Script: Utilities/Scripts/build-cube/find-cube.sh
+## Script: Utilities/Scripts/build-cube/find-cube.sh {#script-utilities-scripts-build-cube-find-cube-sh}
 
 ### Overview
 This Bash script locates and configures the STM32CubeIDE environment, including setting up necessary paths and installing system dependencies for headless builds.
@@ -370,7 +370,7 @@ The script performs:
 ### Integration Context
 Used as part of the build setup process in CI/CD pipelines. The script ensures that all necessary tools are available and properly configured before attempting CubeIDE builds.
 
-## Script: Utilities/Scripts/build-cube/build-cube.sh
+## Script: Utilities/Scripts/build-cube/build-cube.sh {#script-utilities-scripts-build-cube-build-cube-sh}
 
 ### Overview
 This Bash script provides automated headless building of STM32CubeIDE projects with integrated version management and preference patching capabilities.
@@ -423,7 +423,7 @@ The script handles:
 ### Integration Context
 Designed for use in automated build environments. The version patching ensures that built binaries include proper version metadata, while the headless build capability allows integration with continuous integration systems that don't have graphical interfaces.
 
-## Script: Utilities/Scripts/build-cube/setup-environment.sh
+## Script: Utilities/Scripts/build-cube/setup-environment.sh {#script-utilities-scripts-build-cube-setup-environment-sh}
 
 ### Overview
 This Bash script serves as a high-level setup script that coordinates the environment preparation for STM32CubeIDE builds by sourcing dependent setup scripts.
@@ -469,7 +469,7 @@ The script orchestrates the setup process by:
 ### Integration Context
 Acts as a coordinator script in build pipelines, ensuring all prerequisites are met before proceeding with STM32CubeIDE builds. Commonly used in automated build environments.
 
-## Script: .github/scripts/generate-tutorials-app-list.py
+## Script: .github/scripts/generate-tutorials-app-list.py {#script-github-scripts-generate-tutorials-app-list-py}
 
 ### Overview
 This Python script is designed to generate a list of CMake-based application projects within the tutorials directory structure. It traverses the `Docs/Tutorials` directory to identify and catalog CMake projects, while providing flexibility to exclude certain applications and generate project-specific lists.
@@ -534,7 +534,7 @@ The script operates in two main modes:
 ### Integration Context
 This script appears to be part of a GitHub Actions workflow system, likely used in CI/CD pipelines to dynamically determine which tutorial projects need to be built or tested. The exclusion mechanism allows for flexible project management without code changes.
 
-## Script: Examples/.github/scripts/generate-app-list.py
+## Script: Examples/.github/scripts/generate-app-list.py {#script-examples-github-scripts-generate-app-list-py}
 
 ### Overview
 This Python script serves as a discovery tool for application projects in the examples directory, supporting both CMake and CubeIDE build systems. It provides comprehensive project enumeration capabilities with exclusion support, designed for automated build and deployment workflows.
