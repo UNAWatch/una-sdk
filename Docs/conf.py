@@ -6,9 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Una-Watch SDK'
-copyright = '2026, Una-Watch Team'
-author = 'Una-Watch Team'
+project = 'UNA Watch SDK'
+copyright = '2026, UNA Watch Team'
+author = 'UNA Watch Team'
 release = '1.0'
 
 # -- General configuration ---------------------------------------------------
@@ -46,7 +46,7 @@ breathe_projects = {
 breathe_default_project = "SDK"
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**/README.md', '**/readme.md']
 
 language = 'en'
 

@@ -1,8 +1,8 @@
-# Doxyfile for Una-Watch SDK
+# Doxyfile for UNA Watch SDK
 
-PROJECT_NAME = "Una-Watch SDK"
+PROJECT_NAME = "UNA Watch SDK"
 PROJECT_NUMBER = "1.0"
-PROJECT_BRIEF = "Software Development Kit for Una-Watch"
+PROJECT_BRIEF = "Software Development Kit for UNA Watch"
 
 OUTPUT_DIRECTORY = _build/doxygen
 INPUT = ../Libs/Header
