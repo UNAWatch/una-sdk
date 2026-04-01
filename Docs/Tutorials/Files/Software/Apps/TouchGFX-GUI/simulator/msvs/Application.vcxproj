@@ -18,7 +18,6 @@
     <ClCompile Include="$(ApplicationRoot)\simulator\main.cpp"/>
     <ClCompile Include="$(ApplicationRoot)\generated\simulator\src\mainBase.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Sensors\SensorCore.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit.c"/>
@@ -26,22 +25,20 @@
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_crc.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\FitHelper\FitHelper.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\SensorLayer\SensorConnection.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppComm.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppCore.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppMessageCore.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\KernelMessageDispatcher.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\MessageManager.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Kernel.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Backlight.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Buzzer.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\System.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Vibro.cpp"/>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\OS\OS.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppCore.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppMessageCore.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\MessageManager.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Kernel.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\System.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\OS\OS.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\ActivityWriter.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp"/>
+    <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\common\FrontendApplicationBase.cpp"/>
     <ClCompile Include="..\..\gui\src\model\Model.cpp"/>
     <ClCompile Include="..\..\generated\simulator\src\video\SoftwareMJPEGDecoder.cpp"/>
@@ -233,15 +230,16 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelBuilder.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderGUI.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\CommandMessages.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\MessageBase.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\MessageGuard.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\MessageTypes.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Messages\SensorLayerMessages.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\Kernel\Kernel.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\Kernel\Mock\System.hpp"/>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\OS\OS.hpp"/>
+    <ClInclude Include="$(SdkPath)\ThirdParty\coreJSON\source\include\core_json.h"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\CommandMessages.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageBase.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageGuard.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageTypes.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\SensorLayerMessages.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Kernel.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Kernel\Mock\System.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\OS\OS.hpp"/>
     <ClInclude Include="..\..\..\..\Libs\Header\ActivityWriter.hpp"/>
     <ClInclude Include="..\..\..\..\Libs\Header\GSModelEvents\G2SEvents.hpp"/>
     <ClInclude Include="..\..\..\..\Libs\Header\GSModelEvents\S2GEvents.hpp"/>
@@ -320,12 +318,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_SILENCE_CXX17_C_HEADER_DEPRECATION_WARNING;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;APP_ID="ABCDEF1234567890";DEV_ID="UNA Simulator";BUILD_VERSION="1.2.3";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4355</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/cpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

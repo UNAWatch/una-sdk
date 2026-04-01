@@ -46,7 +46,7 @@ static void serviceThreadFunction(Service* service)
     service->run();
 }
 
-static int runTouchGFX(SDK::App::Comm&         appComm,
+static int runTouchGFX(SDK::App::DualAppComm&         appComm,
                        SDK::Simulator::Kernel& srvKernel,
                        SDK::Simulator::Kernel& guiKernel,
                        int                     argc,

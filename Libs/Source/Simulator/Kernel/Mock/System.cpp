@@ -1,5 +1,6 @@
 
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
+#include <cstdint>
 
 #define LOG_MODULE_PRX      "Mock.System"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
@@ -7,11 +8,27 @@
 
 namespace SDK::Simulator::Mock
 {
+    bool SystemGUI::mAppRunning = true;
+
+    System::System()
+    {
+        GetTimeMs();
+
+    }
+
+    uint32_t System::GetTimeMs()
+    {
+        static auto start = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+
+        return static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count());
+    }
+
     ////////////////////////////////////
 	//// SystemGUI implementation
     ////////////////////////////////////
 
-    bool SystemGUI::isAppRunning() const
+    bool SystemGUI::isAppRunning()
     {
         return mAppRunning;
 	}
@@ -27,7 +44,7 @@ namespace SDK::Simulator::Mock
 
     uint32_t SystemGUI::getTimeMs()
     {
-        return static_cast<uint32_t>(GetTickCount64());
+        return System::GetTimeMs();
     }
 
     void SystemGUI::delay(uint32_t ms)
@@ -56,7 +73,7 @@ namespace SDK::Simulator::Mock
 
     uint32_t SystemService::getTimeMs()
     {
-        return static_cast<uint32_t>(GetTickCount64());
+        return System::GetTimeMs();
     }
 
     void SystemService::delay(uint32_t ms)

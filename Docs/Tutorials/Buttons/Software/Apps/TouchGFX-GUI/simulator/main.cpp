@@ -35,9 +35,15 @@
 using namespace touchgfx;
 
 // Kernel thread function
-static void kernelThreadFunction(App::Core* appCore)
+static void appThreadFunction(App::Core* appCore)
 {
     appCore->run();
+}
+
+// GUI communication thread 
+static void guiCommThreadFunction(App::Core* appCore)
+{
+    appCore->runGuiComm();
 }
 
 // Service thread function
@@ -46,7 +52,7 @@ static void serviceThreadFunction(Service* service)
     service->run();
 }
 
-static int runTouchGFX(SDK::App::Comm&         appComm,
+static int runTouchGFX(SDK::App::DualAppComm&  appComm,
                        SDK::Simulator::Kernel& srvKernel,
                        SDK::Simulator::Kernel& guiKernel,
                        int                     argc,
@@ -88,15 +94,16 @@ static int runTouchGFX(SDK::App::Comm&         appComm,
 
     // Start service thread
     std::thread serviceThread(serviceThreadFunction, &service);
-    std::thread kernelThread(kernelThreadFunction, &appCore);
-
+    std::thread appThread(appThreadFunction, &appCore);
+    std::thread guiCommThread(guiCommThreadFunction, &appCore);
     touchgfx::HAL::getInstance()->taskEntry();  // Main GUI loop
 	
     appCore.stopRequest();
 
     // Stop threads
     serviceThread.join();
-    kernelThread.join();
+    appThread.join();
+    guiCommThread.join();
 
     return EXIT_SUCCESS;
 }

@@ -4,9 +4,28 @@
 #include "SDK/Interfaces/ISystem.hpp"
 #include <platform/hal/simulator/sdl2/HALSDL2.hpp>
 #include "SDK/Simulator/OS/OS.hpp"
+#include <chrono>
 
 namespace SDK::Simulator::Mock
 {
+    class System {
+    public:
+        /**
+        * @brief   Get milliseconds form system start.
+        * @return  Timestamp in milliseconds.
+        */
+        static uint32_t GetTimeMs();
+    private:
+        /**
+         * @brief Constructor.
+         */
+        System();
+
+        /**
+         * @brief Destructor.
+         */
+        virtual ~System() = default;
+    };
 
     class SystemGUI : public SDK::Interface::ISystem {
     public:
@@ -14,7 +33,7 @@ namespace SDK::Simulator::Mock
         SystemGUI()          = default;
         virtual ~SystemGUI() = default;
 
-        bool isAppRunning() const;
+        static bool isAppRunning();
 
         void     exit(int status = 0) override;
         uint32_t getTimeMs()          override;
@@ -22,7 +41,7 @@ namespace SDK::Simulator::Mock
         void     yield()              override;
 
 	private:
-		bool mAppRunning = true;
+        static bool mAppRunning;
     };
 
     class SystemService : public SDK::Interface::ISystem

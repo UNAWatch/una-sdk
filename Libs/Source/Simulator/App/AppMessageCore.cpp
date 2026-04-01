@@ -20,20 +20,12 @@ namespace SDK::App
 
 	MessageCore::MessageCore()
 		: mMessageManager()
-		, mBacklight()
-		, mBuzzer()
-		, mVibro()
-		, mKernelMsgDispatcher(mMessageManager,
-							   mVibro,
-							   mBacklight,
-							   mBuzzer)
 		, mAppComm(1,
 				   2,
-				   mMessageManager,
-				   mKernelMsgDispatcher)
+				   mMessageManager)
 	{}
 
-	SDK::App::Comm& MessageCore::getAppComm()
+	SDK::App::DualAppComm& MessageCore::getAppComm()
 	{
 		return mAppComm;
 	}
