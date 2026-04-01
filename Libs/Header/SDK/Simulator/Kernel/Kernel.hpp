@@ -40,7 +40,9 @@ public:
 
     /**
      * @brief   Constructor.
-     * @param   name The name of the kernel.
+     * @param   serviceControl: Reference to the service control object.
+     * @param   srvApp: Pointer to the Service App (only for GUI). 
+     *          If not 'nullptr', the kernel will use mutexes for synchronization.
      */
     Kernel(const char* name);
     ~Kernel() = default;
@@ -75,9 +77,6 @@ public:
     void setIAppMemory(SDK::Interface::IAppMemory* imem);
     void setIAppComm(SDK::Interface::IAppComm* comm);
     void setIFileSystem(SDK::Interface::IFileSystem* ifs);
-
-protected:
-    const bool            mIsServise;
 
 private:
     void* queryInterface(SDK::Interface::IKIP::IntfID iid);

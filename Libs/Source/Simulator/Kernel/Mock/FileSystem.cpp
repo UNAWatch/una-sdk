@@ -16,9 +16,10 @@
 #include "SDK/UnaLogger/Logger.h"
 
 #include "SDK/Wrappers/StdLibWrappers.h"
-#include <cstring>
+
 #include <vector>
 #include <filesystem>
+#include <string.h>
 #include <sys/stat.h>
 
 namespace SDK::Simulator::Mock
@@ -33,7 +34,7 @@ static std::string AddPrefix(const char *prefix, const char *path)
 // Method to remove prefix from the path
 static std::string RemovePrefix(const char *prefix, std::string path)
 {
-    return path.substr(std::strlen(prefix));
+    return path.substr(strlen(prefix));
 }
 
 // Function to convert FILETIME to time_t (UTC)

@@ -384,47 +384,32 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp">
       <Filter>SDK\Libs\Source\Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\FitHelper\FitHelper.cpp">
-      <Filter>SDK\Libs\Source\FitHelper</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\OS\OS.cpp">
-      <Filter>SDK\Libs\Source\Simulator\OS</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\SensorLayer\SensorConnection.cpp">
-      <Filter>SDK\Libs\Source\SensorLayer</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Kernel.cpp">
-      <Filter>SDK\Libs\Source\Simulator\Kernel</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppCore.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp">
-      <Filter>SDK\Libs\Source\Port\TouchGFX</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppMessageCore.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppComm.cpp">
-      <Filter>SDK\Libs\Source\Simulator\App</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\MessageManager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\MessageManager.cpp">
-      <Filter>SDK\Libs\Source\Simulator\App</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Kernel.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\KernelMessageDispatcher.cpp">
-      <Filter>SDK\Libs\Source\Simulator\App</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\System.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Backlight.cpp">
-      <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Buzzer.cpp">
-      <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\Vibro.cpp">
-      <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppCore.cpp">
-      <Filter>SDK\Libs\Source\Simulator\App</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\App\AppMessageCore.cpp">
-      <Filter>SDK\Libs\Source\Simulator\App</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\Kernel\Mock\System.cpp">
-      <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\OS\OS.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

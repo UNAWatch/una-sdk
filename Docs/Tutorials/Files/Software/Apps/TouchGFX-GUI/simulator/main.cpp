@@ -10,7 +10,6 @@
 
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/Simulator/Kernel/Kernel.hpp"
-#include "SDK/Simulator/Sensors/SensorCore.hpp"
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
@@ -47,7 +46,7 @@ static void serviceThreadFunction(Service* service)
     service->run();
 }
 
-static int runTouchGFX(SDK::App::Comm&         appComm,
+static int runTouchGFX(SDK::App::DualAppComm&  appComm,
                        SDK::Simulator::Kernel& srvKernel,
                        SDK::Simulator::Kernel& guiKernel,
                        int                     argc,
@@ -117,16 +116,15 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #endif
 
     // Create kernel objects and service control
-    SDK::Simulator::Sensors::Core sensorCore;
     SDK::App::MessageCore         appMessageCore;
 
 	SDK::Simulator::Mock::SystemService serviceSystem;
-    SDK::Simulator::Kernel serviceKernel("service", nullptr);
+    SDK::Simulator::Kernel serviceKernel("service");
 	serviceKernel.setIAppComm(appMessageCore.getAppComm().getServiceComm());
 	serviceKernel.setISystem(&serviceSystem);
 
     SDK::Simulator::Mock::SystemGUI guiSystem;
-    SDK::Simulator::Kernel guiKernel("gui", &sensorCore);
+    SDK::Simulator::Kernel guiKernel("gui");
     guiKernel.setIAppComm(appMessageCore.getAppComm().getGuiComm());
     guiKernel.setISystem(&guiSystem);
 

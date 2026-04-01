@@ -10,33 +10,36 @@
 
 #include <cstdint>
 
-#include "SDK/Simulator/App/AppComm.hpp"
+#include "SDK/Simulator/App/DualAppComm.hpp"
 #include "SDK/Simulator/App/MessageManager.hpp"
 #include "SDK/Interfaces/IVibro.hpp"
 #include "SDK/Interfaces/IBacklight.hpp"
 #include "SDK/Interfaces/IBuzzer.hpp"
+#include "SDK/Simulator/Components/SensorListener.hpp"
 
 namespace SDK::App
 {
 
-class KernelMessageDispatcher : public SDK::App::Comm::IDispatch
+class KernelMessageDispatcher //: public SDK::App::DualAppComm::IDispatch
 {
 public:
     /**
      * @brief Construct message manager
      */
-    KernelMessageDispatcher(::App::MessageManager&      messageManager,
-                            SDK::Interface::IVibro&     vibro,
+    KernelMessageDispatcher(SDK::App::DualAppComm& appComm, 
+                            ::App::MessageManager& messageManager,
+                            SDK::Interface::IVibro& vibro,
                             SDK::Interface::IBacklight& backlight,
-                            SDK::Interface::IBuzzer&    buzzer);
-    
+                            SDK::Interface::IBuzzer& buzzer);
 
     /**
      * @brief Destructor
      */
     ~KernelMessageDispatcher() = default;
+
+    void run();
     
-    bool dispatchMessage(SDK::MessageBase* msg) override;
+    //bool dispatchMessage(SDK::MessageBase* msg) override;
 
 private:
     struct HeartRateZones
@@ -270,16 +273,19 @@ private:
 
     void appLifeCycleHandler(SDK::MessageBase* msg);
     void appMsgHandler(SDK::MessageBase* msg);
+    void slMsgHandler(SDK::MessageBase* msg);
 
     // Prevent copying
     KernelMessageDispatcher(const KernelMessageDispatcher&)            = delete;
     KernelMessageDispatcher& operator=(const KernelMessageDispatcher&) = delete;
 
-    ::App::MessageManager&      mMessageManager;
+    ::App::MessageManager&      mMessageMgr;
+    SDK::App::DualAppComm&      mAppComm;
     SDK::Interface::IVibro&     mVibro;
 	SDK::Interface::IBacklight& mBacklight;
 	SDK::Interface::IBuzzer&    mBuzzer;
 	WatchSettingsLocal          mLocalSettings;
+    ::App::SensorListener         mSrvSensorListener;
 };
 
 } // namespace App
