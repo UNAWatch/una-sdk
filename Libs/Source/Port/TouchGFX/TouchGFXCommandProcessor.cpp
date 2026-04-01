@@ -50,11 +50,13 @@ bool TouchGFXCommandProcessor::waitForFrameTick()
         SDK::MessageBase *msg = nullptr;
         bool messageQueued = false;
 
-        // Wait for command (blocks until available)
-        if(!mKernel.comm.getMessage(msg)) {
+
 #if defined(SIMULATOR)
+        if(!mKernel.comm.getMessage(msg,50)) {
             return false;
 #else
+         // Wait for command (blocks until available)
+        if(!mKernel.comm.getMessage(msg)) {
             continue;
 #endif
         }

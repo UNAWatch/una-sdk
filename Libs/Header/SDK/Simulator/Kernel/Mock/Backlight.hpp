@@ -13,6 +13,7 @@
 #pragma once
 
 #include "SDK/Interfaces/IBacklight.hpp"
+#include "SDK/Simulator/OS/OneShotTimer.hpp"
 
 namespace SDK::Simulator::Mock
 {
@@ -27,7 +28,11 @@ public:
     bool off()                    override;
     bool isOn()                   override;
 private:
+    void timerCallback();
+
     bool m_isOn = false;
+    OS::OneShotTimer&  mTimer = OS::OneShotTimer::getInstance();
+    OS::OneShotTimer::TimerId mTimerId = 0;
 };
 
 } // namespace SDK::Simulator::Mock

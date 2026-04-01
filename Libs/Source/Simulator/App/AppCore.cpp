@@ -10,6 +10,7 @@
 #include "SDK/Messages/MessageTypes.hpp"
 
 #include <gui/common/FrontendApplication.hpp>
+#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
 #include <cstring>
 
@@ -19,7 +20,7 @@
 
 namespace App {
 
-	Core::Core(SDK::App::Comm&         appComm,
+	Core::Core(SDK::App::DualAppComm&  appComm,
 			   SDK::Simulator::Kernel& srvKernel,
 			   SDK::Simulator::Kernel& guiKernel)
 		: mAppComm(appComm)
@@ -37,6 +38,16 @@ namespace App {
 		mStopRequested = true;
 	}
 	
+	void Core::runGuiComm()
+	{
+		while (true) {
+			if (!SDK::Simulator::Mock::SystemGUI::isAppRunning()) {
+				return;
+			}
+			SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+		}
+	}
+
 	void Core::run()
 	{
 		LOG_INFO("Application core is running...\n");

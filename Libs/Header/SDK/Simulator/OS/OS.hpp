@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    OS.hpp
+ * @file    Synch.hpp
  * @date    21-June-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   A set of synchronization objects
@@ -52,6 +52,9 @@ namespace OS {
         void unLock()  override;
         bool tryLock() override;
 
+        //For condition_variable
+        std::mutex& native();
+
     private:
         std::mutex mMutex;
     };
@@ -99,7 +102,7 @@ namespace OS {
 
         bool init(const char* /*name*/ = nullptr)
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
             mInited = true;
             mHead = mTail = mCount = 0;
             return true;
@@ -107,7 +110,7 @@ namespace OS {
 
         void deinit()
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
             mInited = false;
             mHead = mTail = mCount = 0;
         }
@@ -119,7 +122,7 @@ namespace OS {
 
         bool push(const T& item)
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
 
             if (!mInited || mCount == N) {
                 return false;
@@ -129,14 +132,27 @@ namespace OS {
             mTail = (mTail + 1) % N;
             ++mCount;
 
+            mCondVar.notify_one();
             return true;
         }
 
         bool pop(T& item, uint32_t timeoutMs = 0)
         {
-            OS::Delay(timeoutMs);
+            std::unique_lock<std::mutex> lock(mMutex.native());
 
-            OS::MutexCS lock(mMutex);
+            if (!mInited)
+                return false;
+
+            if (timeoutMs == UINT32_MAX)
+            {
+                mCondVar.wait(lock, [&] {return mCount > 0 || !mInited;});
+            }
+            else
+            {
+                if (!mCondVar.wait_for(lock,std::chrono::milliseconds(timeoutMs),[&] { return mCount > 0 || !mInited; })){
+                    return false; // timeout
+                }
+            }
 
             if (!mInited || mCount == 0) {
                 return false;
@@ -151,30 +167,31 @@ namespace OS {
 
         bool empty() const
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
             return mCount == 0;
         }
 
         uint32_t size() const
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
             return static_cast<uint32_t>(mCount);
         }
 
         uint32_t available() const
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
             return static_cast<uint32_t>(N - mCount);
         }
 
         void clear()
         {
-            OS::MutexCS lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex.native());
             mHead = mTail = mCount = 0;
         }
 
     private:
         mutable OS::Mutex mMutex;
+        std::condition_variable mCondVar;
         std::array<T, N>  mBuffer{};
         size_t            mHead{0};
         size_t            mTail{0};

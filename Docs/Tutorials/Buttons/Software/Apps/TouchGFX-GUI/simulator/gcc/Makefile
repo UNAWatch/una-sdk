@@ -34,21 +34,17 @@ VPATH := $(SDK)\
 #If you want to add a source file from UNA-SDK, just write the path starting with the internal UNA-SDK folder
 ADDITIONAL_SOURCES_UNA :=\
 ../../Libs/Sources/Service.cpp\
-Libs/Source/Simulator/Kernel/Mock/Buzzer.cpp\
-Libs/Source/Simulator/Kernel/Mock/FileSystem.cpp\
-Libs/Source/Simulator/Kernel/Mock/Vibro.cpp\
 Libs/Source/Simulator/OS/OS.cpp\
 Libs/Source/UnaLogger/Logger.cpp\
-Libs/Source/Simulator/Kernel/Mock/Backlight.cpp\
 Libs/Source/Wrappers/StdLibWrappers.c\
 Libs/Source/Kernel/KernelBuilder.cpp\
 Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp\
-Libs/Source/Simulator/App/AppComm.cpp\
+Libs/Source/Simulator/App/DualAppComm.cpp\
 Libs/Source/Simulator/App/AppCore.cpp\
 Libs/Source/Simulator/App/AppMessageCore.cpp\
-Libs/Source/Simulator/App/KernelMessageDispatcher.cpp\
 Libs/Source/Simulator/App/MessageManager.cpp\
 Libs/Source/Simulator/Kernel/Kernel.cpp\
+Libs/Source/Simulator/Kernel/Mock/FileSystem.cpp \
 Libs/Source/Simulator/Kernel/Mock/System.cpp
 ADDITIONAL_SOURCES :=
 ADDITIONAL_INCLUDE_PATHS := $(SDK)/Libs/Header\

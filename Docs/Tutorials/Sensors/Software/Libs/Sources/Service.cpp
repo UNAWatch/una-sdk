@@ -17,6 +17,10 @@
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
 
+#ifndef M_PI
+#define M_PI    3.14159265358979323846264338327950288   /* pi */
+#endif
+
 Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mSender(mKernel)
