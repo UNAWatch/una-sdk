@@ -114,8 +114,9 @@ After changing screen properties (like color), the `invalidate()` method is call
    - Add 240x240 a box `box1` at X:0 Y:0
    - Click **Generate code**
 5. **Edit MainView.cpp**: 
-   - You can see `touchgfx::Box box1;` in `MainViewBase.cpp`
-   - Add box1 color set to `void MainView::handleKeyEvent(uint8_t key)`:
+   - MainView.cpp is located at '...\Software\Apps\TouchGFX-GUI\gui\src\main_screen'
+   - You can see `touchgfx::Box box1;` in `MainViewBase.cpp` ('...\Software\Apps\TouchGFX-GUI\generated\gui_generated\src\main_screen') 
+   - Add box1 color set to `void MainView::handleKeyEvent(uint8_t key)` :
       ```cpp
       void MainView::handleKeyEvent(uint8_t key)
       {
@@ -136,6 +137,7 @@ After changing screen properties (like color), the `invalidate()` method is call
          }
       }
       ``` 
+   - In MainView.hpp ('...\Software\Apps\TouchGFX-GUI\gui\include\gui\main_screen')
    - Add `lastKeyPressed` state to exit on double **R2** clicks:
       ```cpp
       class MainView : public MainViewBase
