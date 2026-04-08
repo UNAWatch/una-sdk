@@ -131,7 +131,9 @@ Follow these steps to import and display images in your UNA app:
 
 2. **Navigate to the Images tab** in TouchGFX Designer
 
-3. **Click "Import Images"** and select your `my_image.png` file\n\n   ![Add Image Button](doc-assets/add-image-button.png)
+3. **Click "Import Images"** and select your `my_image.png` file   
+
+![Add Image Button](doc-assets/add-image-button.png)
 
 4. **Configure image settings**:
     - Choose appropriate color format (RGB565, ARGB8888, etc.)
@@ -139,7 +141,10 @@ Follow these steps to import and display images in your UNA app:
     - Set compression options
 
 5. **Generate code** after importing:
-    - Click "Generate Code" in TouchGFX Designer\n\n   ![Generated Image Asset](doc-assets/generated-image-asset.png)
+    - Click "Generate Code" in TouchGFX Designer
+
+![Generated Image Asset](doc-assets/generated-image-asset.png)
+
     - This creates bitmap IDs and conversion code
 
 ### Step 3: Display the Image in Code
