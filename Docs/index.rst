@@ -16,3 +16,80 @@ First, please follow the [SDK Setup and Build Overview](https://www.developers.u
 [Tutorials](https://www.developers.unawatch.com/latest/Tutorials/HelloWorld/ARCHITECTURE.html) - For step-by-step guides for building different watch apps, increasing in complexity. 
 
 [Running - Fitness Tracking](https://www.developers.unawatch.com/latest/Examples/Running-Architecture.html) to dive right into the code of pre-made watch Apps.
+
+.. toctree::
+   :maxdepth: 4
+   :caption: 🚀 Getting Started
+   :hidden:
+
+   platform-overview
+   sdk-setup
+   Simulator
+
+.. toctree::
+   :maxdepth: 4
+   :caption: 🧩 Tutorials
+   :hidden:
+
+   Tutorials/HelloWorld/ARCHITECTURE
+   Tutorials/Buttons/ARCHITECTURE
+   Tutorials/ScrollMenu/ARCHITECTURE
+   Tutorials/Images/ARCHITECTURE
+   Tutorials/Sensors/ARCHITECTURE
+   Tutorials/Files/ARCHITECTURE
+   Tutorials/FitFiles/ARCHITECTURE
+
+.. toctree::
+   :maxdepth: 4
+   :caption: 📱 Example Apps
+   :hidden:
+
+   Examples/Running-Architecture
+   Examples/Alarm-ARCHITECTURE
+   Examples/Cycling-Architecture
+   Examples/Hiking-Architecture
+   Examples/HRMonitor-Architecture
+   Examples/GlanceHR-Architecture
+   Examples/GlanceSteps-Architecture
+   Examples/GlanceStrain-ARCHITECTURE
+
+.. toctree::
+   :maxdepth: 4
+   :caption: 🏗️ Architecture
+   :hidden:
+
+   sdk-overview
+   SensorsLayer
+   architecture-deep-dive
+   development-workflow
+   Scripts
+   TouchGFX-Port-Architecture
+   touchgfx-widgets
+   FitFiles-Structure
+
+.. toctree::
+   :maxdepth: 4
+   :caption: 🎋 Apps Sharing
+   :hidden:
+
+   deploy
+   app-config-json
+
+.. toctree::
+   :maxdepth: 4
+   :caption: 📚 API Reference
+   :hidden:
+
+   api-reference
+
+.. toctree::
+   :maxdepth: 1
+   :caption: 🤝 Community & Support
+   :hidden:
+
+   community-support
+
+Indices and tables
+==================
+
+* :ref:`genindex`
