@@ -5,7 +5,11 @@ This document provides an overview of the UNA Watch platform's unique architectu
 
 ## Unique architecture
 
-Unlike traditional smartwatch platforms, UNA Watch apps are:
+The UNA Watch architecture is unique: apps run as pure machine code directly in the MCU
+memory, leveraging position-independent code (PIC) and a shared libc library for maximum
+efficiency and abstraction from the kernel.
+
+UNA Watch apps are:
 - **Pure Machine Code**: Compiled ELF binaries executing directly in MCU memory
 - **Position-Independent**: Apps abstracted from kernel using PIC (Position-Independent Code)
 - **Shared libc**: Memory-efficient library sharing across all apps
