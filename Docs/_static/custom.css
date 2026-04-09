@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* -- Brand palette --------------------------------------------------------- */
+
+:root {
+  --primary-lighter: #c3e5e9;
+  --primary-light: #76b7c1;
+  --primary-main: #358d98;
+  --primary-dark: #256a6f;
+  --primary-darker: #174146;
+
+  --secondary-lighter: #ffe3cc;
+  --secondary-light: #f6ad74;
+  --secondary-main: #ed8835;
+  --secondary-dark: #b65b1a;
+  --secondary-darker: #7c3b0d;
+
+  --success-lighter: #d3fcd2;
+  --success-main: #22c55e;
+
+  --warning-lighter: #fff5cc;
+  --warning-main: #ffab00;
+
+  --error-lighter: #ffe9d5;
+  --error-main: #ff5630;
+
+  --neutral-50: #f5f5f5;
+  --neutral-300: #d1d1d1;
+  --neutral-800: #2a2a2a;
+  --neutral-900: #1b1b1b;
+
+  --white: #fff;
+}
+
+/* -- Font ------------------------------------------------------------------ */
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.rst-content .toctree-wrapper p.caption {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* -- Sidebar / Navigation -------------------------------------------------- */
+
+.wy-side-nav-search {
+  background-color: var(--primary-main);
+}
+
+.wy-side-nav-search input[type='text'] {
+  border: 1px solid #e0e0e0;
+}
+
+.wy-nav-side {
+  background: var(--white);
+  border-right: 1px solid #eee;
+}
+
+.wy-menu-vertical header,
+.wy-menu-vertical p.caption {
+  color: var(--primary-main);
+  font-weight: 600;
+}
+
+.wy-menu-vertical a {
+  color: #555;
+}
+
+.wy-menu-vertical a:hover {
+  background-color: var(--neutral-50);
+  color: var(--primary-main);
+}
+
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.toctree-l2.current > a,
+.wy-menu-vertical li.toctree-l3.current > a {
+  background-color: var(--primary-lighter);
+  color: var(--primary-darker);
+  border: none;
+  font-weight: 500;
+}
+
+.wy-menu-vertical li.current a:hover {
+  background-color: var(--primary-lighter);
+  color: var(--primary-dark);
+}
+
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3 > a {
+  background-color: var(--white);
+}
+
+/* -- Links ----------------------------------------------------------------- */
+
+a {
+  color: var(--primary-main);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+.wy-side-nav-search a {
+  color: var(--white);
+}
+
+/* -- Content accents ------------------------------------------------------- */
+
+.rst-content .admonition-title {
+  background-color: var(--primary-main);
+}
+
+.rst-content .note {
+  background-color: var(--primary-lighter);
+}
+
+.rst-content .warning .admonition-title {
+  background-color: var(--warning-main);
+}
+
+.rst-content .warning {
+  background-color: var(--warning-lighter);
+}
+
+.rst-content .danger .admonition-title,
+.rst-content .error .admonition-title {
+  background-color: var(--error-main);
+}
+
+.rst-content .danger,
+.rst-content .error {
+  background-color: var(--error-lighter);
+}
+
+.rst-content .tip .admonition-title,
+.rst-content .hint .admonition-title {
+  background-color: var(--success-main);
+}
+
+.rst-content .tip,
+.rst-content .hint {
+  background-color: var(--success-lighter);
+}
+
+/* -- Code blocks ----------------------------------------------------------- */
+
+.highlight {
+  background: var(--neutral-50);
+}
+
+/* -- Buttons & Navigation bar ---------------------------------------------- */
+
+.btn-neutral {
+  background-color: var(--neutral-50) !important;
+  color: var(--primary-main) !important;
+}
+
+.btn-neutral:hover {
+  background-color: var(--primary-lighter) !important;
+  color: var(--primary-darker) !important;
+}
+
+.rst-versions {
+  background: var(--white);
+  border-top: 1px solid #eee;
+  color: #555;
+}
+
+.rst-versions .rst-current-version {
+  background: var(--primary-main);
+  color: var(--white);
+}
