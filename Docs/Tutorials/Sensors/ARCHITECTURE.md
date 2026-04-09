@@ -41,6 +41,19 @@ graph LR
 
 ## Implementation Steps
 
+
+### Optional step: copy the Sensor tutorial code to edit
+1. **Copy sensors tutorial**
+2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else, Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own app ID programatically from the name. 
+3. **Commit initial changes**: it's a good practice to use version control system like git
+4. ***Edit TouchGFX if you changed the name**: 
+   - Rename `*.touchgfx` to `<MY_APP>.touchgfx`
+   - Rename `*.touchgfx:163` `"Name": "MY_APP"`
+   - Click **Generate code**
+
+
+
+
 ### Step 1: Define Custom Messages
 
 Create [`Commands.hpp`](Software/Libs/Header/Commands.hpp) with message types and structs:

@@ -106,11 +106,11 @@ After changing screen properties (like color), the `invalidate()` method is call
 ## Buttons app creation process
 
 1. **Copy HelloWorld tutorial**
-2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else.
+2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own APP ID programatically from the name. 
 3. **Commit initial changes**: it's a good practice to use version control system like git
 4. ***Edit TouchGFX**: 
-   - Rename `*.touchgfx` to `Buttons.touchgfx`
-   - Rename `Buttons.touchgfx:163` `"Name": "Buttons"`
+   - Rename `*.touchgfx` to `<MY_APP>.touchgfx`
+   - Rename the 'Name' field in Buttons.touchgfx at line 163: `Buttons.touchgfx:163` `"Name": "Buttons"` to `"Name": "<MY_APP>"`
    - Add 240x240 a box `box1` at X:0 Y:0
    - Click **Generate code**
 5. **Edit MainView.cpp**: 
