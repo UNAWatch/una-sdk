@@ -91,7 +91,9 @@ Next steps:
 
    community-support
 
-Indices and tables
-==================
+.. toctree::
+   :maxdepth: 1
+   :caption: Index
+   :hidden:
 
-* :ref:`genindex`
+   Index <genindex>
