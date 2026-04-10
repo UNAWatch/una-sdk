@@ -76,6 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Failed to load versions:', error);
-            selector.innerHTML = '<option>error loading versions</option>';
+            selector.innerHTML = '<option>Error loading versions</option>';
         });
 });
