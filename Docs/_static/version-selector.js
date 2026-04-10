@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Insert below the header title in the sidebar search area
     const searchArea = document.querySelector('.wy-side-nav-search');
-    const searchInput = searchArea ? searchArea.querySelector('[role="search"]') : null;
-    if (searchArea && searchInput) {
-        searchArea.insertBefore(selector, searchInput);
+    const searchContainer = searchArea ? searchArea.querySelector('[role="search"]') : null;
+    if (searchArea && searchContainer) {
+        searchArea.insertBefore(selector, searchContainer);
     } else if (searchArea) {
         searchArea.appendChild(selector);
     } else {
