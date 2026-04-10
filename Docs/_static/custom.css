@@ -287,3 +287,22 @@ a:hover {
   background: var(--primary-main);
   color: var(--white);
 }
+
+/* -- Version selector ------------------------------------------------------ */
+
+#version-selector {
+  display: block !important;
+  position: relative !important;
+  float: none !important;
+  width: auto;
+  max-width: 200px;
+  margin: 8px auto 12px !important;
+  padding: 5px 10px !important;
+  font-size: 14px;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: var(--white) !important;
+  color: #333 !important;
+  cursor: pointer;
+  text-align: center;
+}
