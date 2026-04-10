@@ -10,6 +10,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create the selector element
     const selector = document.createElement('select');
     selector.id = 'version-selector';
+    selector.style.cssText = `
+    display: block;
+    margin: 8px auto 12px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--white, #fff);
+    color: #333;
+    cursor: pointer;
+    `;
+
 
     // Add loading option
     const loadingOption = document.createElement('option');
