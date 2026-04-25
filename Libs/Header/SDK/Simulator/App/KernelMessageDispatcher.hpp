@@ -46,18 +46,13 @@ private:
     {
 
         /// Maximum number of zones.
-        static constexpr uint8_t kMaxNum = 5;
+        static constexpr uint8_t kMaxNum = 7;
 
         /// Maximum number of threshold.
         static constexpr uint8_t kMaxThreshold = kMaxNum - 1;
 
-        /**
-         * @brief   Heart rate thresholds array in beats per minute (BPM).
-         * @note    Array contains (kMaxNum - 1) threshold values that define zone boundaries.
-         *          Zone 1: < thresholds[0], Zone 2: thresholds[0] to thresholds[1], etc.
-         *          Default values: 120, 140, 160, 170 BPM.
-         */
-        uint8_t thresholds[kMaxThreshold]{ 120, 140, 160, 170 };
+        // Heart rate thresholds array in beats per minute (BPM).
+        uint8_t thresholds[kMaxThreshold]{ 95, 114, 133, 152, 171, 190 };
 
         /**
          * @brief Equality operator to compare two heart rate zones configurations.

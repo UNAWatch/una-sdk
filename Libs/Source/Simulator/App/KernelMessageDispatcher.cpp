@@ -122,14 +122,16 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 
             settings->imperialUnits = mSettings.unitsImperial;
 
-            settings->heartRateCount = 0;
-            for (uint32_t i = 0; i < SDK::Message::RequestSystemSettings::skMaxHearRateTh; i++) {
+            const uint32_t limit = std::min(
+                SDK::Message::RequestSystemSettings::skMaxHearRateTh,
+                static_cast<const uint32_t>(HeartRateZones::kMaxThreshold)
+            );
+
+            for (uint32_t i = 0; i < limit; i++) {
                 settings->heartRateTh[i] = mSettings.heartRateZones.thresholds[i];
-                settings->heartRateCount++;
-                if (i == HeartRateZones::kMaxThreshold) {
-                    break;
-                }
             }
+
+            settings->heartRateCount = limit;
 
             settings->activityMin = mSettings.dailyGoals.activityMinutes;
             settings->steps = mSettings.dailyGoals.steps;
