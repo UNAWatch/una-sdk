@@ -1,8 +1,8 @@
 /******************************************************************************
-* Copyright (c) 2018(-2025) STMicroelectronics.
+* Copyright (c) 2018(-2026) STMicroelectronics.
 * All rights reserved.
 *
-* This file is part of the TouchGFX 4.26.0 distribution.
+* This file is part of the TouchGFX 4.26.1 distribution.
 *
 * This software is licensed under terms that can be found in the LICENSE file in
 * the root directory of this software component.
@@ -105,9 +105,10 @@ public:
             {
                 clSlope = transformedlinedy / transformedlinedx;
 
-                // If the slope of the colorline is zero, the gradient is vertical
-                if (clSlope == 0.0f)
+                // If the slope of the colorline is (close to) zero, the gradient is vertical
+                if (clSlope <= 0.0001f && clSlope >= -0.0001f)
                 {
+                    clSlope = 0.0f;
                     isVertical = true;
                 }
                 else
