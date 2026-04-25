@@ -1,8 +1,8 @@
 /******************************************************************************
-* Copyright (c) 2018(-2025) STMicroelectronics.
+* Copyright (c) 2018(-2026) STMicroelectronics.
 * All rights reserved.
 *
-* This file is part of the TouchGFX 4.26.0 distribution.
+* This file is part of the TouchGFX 4.26.1 distribution.
 *
 * This software is licensed under terms that can be found in the LICENSE file in
 * the root directory of this software component.
@@ -218,20 +218,20 @@ public:
 
             const uint32_t srcW = HAL::DISPLAY_ROTATION == rotate90 ? bitmap.getHeight() : bitmap.getWidth();
             const uint32_t srcH = HAL::DISPLAY_ROTATION == rotate90 ? bitmap.getWidth() : bitmap.getHeight();
-            const uint16_t* sourceData = (const uint16_t*)bitmap.getData();
+            const uint8_t* sourceData = bitmap.getData();
             uint8_t* dst = clientFrameBuffer + (transformedInvalidatedArea.x + transformedBlitRect.x + HAL::FRAME_BUFFER_WIDTH * (transformedBlitRect.y + transformedInvalidatedArea.y)) * BYTES_PR_PIXEL;
 
             switch (renderVariant)
             {
             case (((int)Bitmap::RGB565 << RenderingVariant_FormatShift) | RenderingVariant_NoAlpha | RenderingVariant_NearestNeighbor):
-                DMA2DV3::addBlitFitRGB565CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, bitmap.getData(), transformedBlitRect, srcW, srcH, transformedInvalidatedArea, alpha);
+                DMA2DV3::addBlitFitRGB565CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, sourceData, transformedBlitRect, srcW, srcH, transformedInvalidatedArea, alpha);
                 return;
             case (((int)Bitmap::RGB888 << RenderingVariant_FormatShift) | RenderingVariant_NoAlpha | RenderingVariant_NearestNeighbor):
-                DMA2DV3::addBlitFitRGB888CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, bitmap.getData(), transformedBlitRect, srcW, srcH, transformedInvalidatedArea, alpha);
+                DMA2DV3::addBlitFitRGB888CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, sourceData, transformedBlitRect, srcW, srcH, transformedInvalidatedArea, alpha);
                 return;
             case (((int)Bitmap::ARGB8888 << RenderingVariant_FormatShift) | RenderingVariant_NoAlpha | RenderingVariant_NearestNeighbor):
             case (((int)Bitmap::ARGB8888 << RenderingVariant_FormatShift) | RenderingVariant_Alpha | RenderingVariant_NearestNeighbor):
-                DMA2DV3::addBlitFitARGB8888CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, bitmap.getData(), transformedBlitRect, srcW, srcH, transformedInvalidatedArea, alpha);
+                DMA2DV3::addBlitFitARGB8888CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, sourceData, transformedBlitRect, srcW, srcH, transformedInvalidatedArea, alpha);
                 return;
             case (((int)Bitmap::L8 << RenderingVariant_FormatShift) | RenderingVariant_NoAlpha | RenderingVariant_NearestNeighbor):
             case (((int)Bitmap::L8 << RenderingVariant_FormatShift) | RenderingVariant_Alpha | RenderingVariant_NearestNeighbor):
@@ -249,7 +249,7 @@ public:
                     DMA2DV3::addLoadCLUTCmdList(palette->data, palette->size, static_cast<Bitmap::ClutFormat>(palette->format));
 
                     // Draw Image
-                    DMA2DV3::addBlitFitL8CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, bitmap.getData(), transformedBlitRect, srcW, srcH, transformedInvalidatedArea, static_cast<Bitmap::ClutFormat>(palette->format), alpha);
+                    DMA2DV3::addBlitFitL8CmdList((uint8_t*)dst, HAL::FRAME_BUFFER_WIDTH, FORMAT, sourceData, transformedBlitRect, srcW, srcH, transformedInvalidatedArea, static_cast<Bitmap::ClutFormat>(palette->format), alpha);
 
                     return;
                 }
