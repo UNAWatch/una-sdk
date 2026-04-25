@@ -1,0 +1,271 @@
+/* -- Poppins (vendored, latin-ext + latin) --------------------------------- */
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/poppins-400-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/poppins-400-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/poppins-500-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/poppins-500-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/poppins-600-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/poppins-600-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/poppins-700-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/poppins-700-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* -- Brand palette --------------------------------------------------------- */
+
+:root {
+  --primary-lighter: #c3e5e9;
+  --primary-light: #76b7c1;
+  --primary-main: #358d98;
+  --primary-dark: #256a6f;
+  --primary-darker: #174146;
+
+  --secondary-lighter: #ffe3cc;
+  --secondary-light: #f6ad74;
+  --secondary-main: #ed8835;
+  --secondary-dark: #b65b1a;
+  --secondary-darker: #7c3b0d;
+
+  --success-lighter: #d3fcd2;
+  --success-main: #22c55e;
+
+  --warning-lighter: #fff5cc;
+  --warning-main: #ffab00;
+
+  --error-lighter: #ffe9d5;
+  --error-main: #ff5630;
+
+  --neutral-50: #f5f5f5;
+  --neutral-300: #d1d1d1;
+  --neutral-800: #2a2a2a;
+  --neutral-900: #1b1b1b;
+
+  --white: #fff;
+}
+
+/* -- Font ------------------------------------------------------------------ */
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.rst-content .toctree-wrapper p.caption {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* -- Sidebar / Navigation -------------------------------------------------- */
+
+.wy-side-nav-search {
+  background-color: var(--primary-main);
+}
+
+.wy-side-nav-search input[type='text'] {
+  border: 1px solid #e0e0e0;
+}
+
+.wy-nav-side {
+  background: var(--white);
+  border-right: 1px solid #eee;
+}
+
+.wy-menu-vertical header,
+.wy-menu-vertical p.caption {
+  color: var(--primary-main);
+  font-weight: 600;
+}
+
+.wy-menu-vertical a {
+  color: #555;
+}
+
+.wy-menu-vertical a:hover {
+  background-color: var(--neutral-50);
+  color: var(--primary-main);
+}
+
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.toctree-l2.current > a,
+.wy-menu-vertical li.toctree-l3.current > a {
+  background-color: var(--primary-lighter);
+  color: var(--primary-darker);
+  border: none;
+  font-weight: 500;
+}
+
+.wy-menu-vertical li.current a:hover {
+  background-color: var(--primary-lighter);
+  color: var(--primary-dark);
+}
+
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3 > a {
+  background-color: var(--white);
+}
+
+/* -- Links ----------------------------------------------------------------- */
+
+a {
+  color: var(--primary-main);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+.wy-side-nav-search a {
+  color: var(--white);
+}
+
+/* -- Content accents ------------------------------------------------------- */
+
+.rst-content .admonition-title {
+  background-color: var(--primary-main);
+}
+
+.rst-content .note {
+  background-color: var(--primary-lighter);
+}
+
+.rst-content .warning .admonition-title {
+  background-color: var(--warning-main);
+}
+
+.rst-content .warning {
+  background-color: var(--warning-lighter);
+}
+
+.rst-content .danger .admonition-title,
+.rst-content .error .admonition-title {
+  background-color: var(--error-main);
+}
+
+.rst-content .danger,
+.rst-content .error {
+  background-color: var(--error-lighter);
+}
+
+.rst-content .tip .admonition-title,
+.rst-content .hint .admonition-title {
+  background-color: var(--success-main);
+}
+
+.rst-content .tip,
+.rst-content .hint {
+  background-color: var(--success-lighter);
+}
+
+/* -- Code blocks ----------------------------------------------------------- */
+
+.highlight {
+  background: var(--neutral-50);
+}
+
+/* -- Buttons & Navigation bar ---------------------------------------------- */
+
+.btn-neutral {
+  background-color: var(--neutral-50) !important;
+  color: var(--primary-main) !important;
+}
+
+.btn-neutral:hover {
+  background-color: var(--primary-lighter) !important;
+  color: var(--primary-darker) !important;
+}
+
+.rst-versions {
+  background: var(--white);
+  border-top: 1px solid #eee;
+  color: #555;
+}
+
+.rst-versions .rst-current-version {
+  background: var(--primary-main);
+  color: var(--white);
+}

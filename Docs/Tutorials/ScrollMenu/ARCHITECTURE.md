@@ -114,7 +114,7 @@ After performing actions that change the menu display (such as updating the coun
 ## ScrollMenu app creation process
 
 1. **Copy HelloWorld tutorial**
-2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else.
+2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own APP ID programatically from the name. 
 3. **Commit initial changes**: it's a good practice to use version control system like git
 4. ***Add text keys using TouchGFX Designer**:
     - In TouchGFX Designer, go to the **Texts** tab
@@ -125,8 +125,8 @@ After performing actions that change the menu display (such as updating the coun
       - **Text Id**: "Decrease", **Alignment**: Center, **Typography**: Poppins_Medium_25, **Translation (GB)**: "Decrease"
     - These will generate the text keys T_COUNTER, T_INCREASE, T_DECREASE used in the code
 5. ***Edit TouchGFX**: 
-   - Rename `*.touchgfx` to `ScrollMenu.touchgfx`
-   - Rename `ScrollMenu.touchgfx:163` `"Name": "ScrollMenu"`
+   - Rename `*.touchgfx` to `MY_APP.touchgfx`
+   - Rename `ScrollMenu.touchgfx:163` `"Name": "MY_APP"`
    - Open the main screen in the designer
    - From the widget palette, locate and drag a **Menu** widget onto the main screen canvas
    - Name the menu widget `menu1` in the properties panel
