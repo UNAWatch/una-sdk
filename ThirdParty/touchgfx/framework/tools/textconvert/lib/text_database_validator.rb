@@ -1,7 +1,7 @@
-# Copyright (c) 2018(-2025) STMicroelectronics.
+# Copyright (c) 2018(-2026) STMicroelectronics.
 # All rights reserved.
 #
-# This file is part of the TouchGFX 4.26.0 distribution.
+# This file is part of the TouchGFX 4.26.1 distribution.
 #
 # This software is licensed under terms that can be found in the LICENSE file in
 # the root directory of this software component.
@@ -29,7 +29,7 @@ class TextDatabaseValidator
         case version
         when '4.18.0', '4.18.1'
           @typographies, @text_entries = TextDatabaseParser_4_18.new(xml_doc).run
-        when '4.19.0', '4.19.1', '4.20.0', '4.21.0', '4.21.1', '4.21.2', '4.21.3', '4.21.4', '4.22.0', '4.22.1', '4.23.0', '4.23.1', '4.23.2', '4.24.0', '4.24.1', '4.24.2', '4.25.0', '4.26.0'
+        when '4.19.0', '4.19.1', '4.20.0', '4.21.0', '4.21.1', '4.21.2', '4.21.3', '4.21.4', '4.22.0', '4.22.1', '4.23.0', '4.23.1', '4.23.2', '4.24.0', '4.24.1', '4.24.2', '4.25.0', '4.26.0', '4.26.1'
           @languages, @typographies, @text_entries = TextDatabaseParser.new(xml_doc).run
         else
           fail "ERROR: Unknown text database version: #{version}"

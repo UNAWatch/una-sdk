@@ -1,7 +1,7 @@
-# Copyright (c) 2018(-2025) STMicroelectronics.
+# Copyright (c) 2018(-2026) STMicroelectronics.
 # All rights reserved.
 #
-# This file is part of the TouchGFX 4.26.0 distribution.
+# This file is part of the TouchGFX 4.26.1 distribution.
 #
 # This software is licensed under terms that can be found in the LICENSE file in
 # the root directory of this software component.
@@ -58,6 +58,7 @@ class TypedTextDatabaseCpp < Template
     @cache["database_list"]=language_db_list
     @cache["fonts"] = fontmap
     @cache["generate_font_format"] = @generate_font_format
+    @cache["generate_binary_translations"] = @generate_binary_translations
     @cache["copy_translations_to_ram"] = @copy_translations_to_ram
 
     new_cache_file = false
