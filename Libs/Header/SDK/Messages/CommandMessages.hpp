@@ -207,6 +207,9 @@ struct RequestSystemSettings : public MessageBase {
         , timeFormat(false)
         , heartRateCount(0)
         , heartRateTh {}
+        , activityMin(0)
+        , steps(0)
+        , floors(0)
     {}
 };
 static_assert(sizeof(RequestSystemSettings) == 56, "RequestSystemSettings size must be 56 bytes");
@@ -334,7 +337,7 @@ struct RequestBuzzerPlay : public MessageBase {
 
     struct Note {
         uint32_t time = 100;    // Duration in ms
-        uint8_t volume;         // 0-100%, 0 - no sound. (Currently supported only 4 levels (0, 33, 66, 100))
+        uint8_t volume = 100;   // 0-100%, 0 - no sound. (Currently supported only 4 levels (0, 33, 66, 100))
     };
 
     uint32_t notesCount;
