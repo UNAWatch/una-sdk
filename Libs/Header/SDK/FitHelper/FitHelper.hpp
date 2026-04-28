@@ -36,7 +36,7 @@ namespace SDK::Component {
          * @param msgID   Local message number (0–15) used in FIT header.
          * @param msgDef  Pointer to the FIT message definition from fit_mesg_defs[].
          */
-        FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef);
+        FitHelper(uint8_t msgID, const FIT_MESG_DEF* msgDef);
         /**
          * @brief Construct a new FitHelper for a developer field and attach it to a parent container.
          *
@@ -201,9 +201,9 @@ namespace SDK::Component {
 
         bool                       mInited;
         const uint8_t              mMsgID;
-        FIT_MESG_DEF*              mMsgDefOrigin;
+        const FIT_MESG_DEF*        mMsgDefOrigin;
         std::unique_ptr<uint8_t[]> mMsgDefBuffer;
-        FIT_MESG_DEF*              mMsgDef;
+        const FIT_MESG_DEF*        mMsgDef;
         std::vector<MsgField>      mMsgFields;
         const bool                 mIsField;
         FIT_FIT_BASE_TYPE          mBaseType;

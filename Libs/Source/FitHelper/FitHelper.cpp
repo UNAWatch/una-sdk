@@ -20,7 +20,7 @@
 
 namespace SDK::Component {
 
-    FitHelper::FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef)
+    FitHelper::FitHelper(uint8_t msgID, const FIT_MESG_DEF* msgDef)
 	    : mInited(false)
         , mMsgID(msgID)
         , mMsgDefOrigin(msgDef)
@@ -42,7 +42,7 @@ namespace SDK::Component {
                          FIT_UINT8                         devIndex)
         : mInited(false)
         , mMsgID(msgID)
-        , mMsgDefOrigin((FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION])
+        , mMsgDefOrigin(fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION])
         , mMsgDefBuffer()
         , mMsgDef()
         , mIsField(true)
@@ -128,7 +128,7 @@ namespace SDK::Component {
 	    }
 
         if (mIsField) {
-            FIT_FIELD_DESCRIPTION_MESG* msg = (FIT_FIELD_DESCRIPTION_MESG*)data;
+            const FIT_FIELD_DESCRIPTION_MESG* msg = static_cast<const FIT_FIELD_DESCRIPTION_MESG*>(data);
             mBaseType = (FIT_FIT_BASE_TYPE)msg->fit_base_type_id;
         }
 
@@ -270,12 +270,13 @@ namespace SDK::Component {
 
         mMsgDefBuffer = std::make_unique<uint8_t[]>(sizeof(FIT_MESG_DEF) - FIT_FLEX_ARRAY + fields.size() * FIT_FIELD_DEF_SIZE);
 
-        mMsgDef = (FIT_MESG_DEF*) mMsgDefBuffer.get();
+        FIT_MESG_DEF* writable = reinterpret_cast<FIT_MESG_DEF*>(mMsgDefBuffer.get());
+        mMsgDef = writable;
 
-        mMsgDef->reserved_1      = mMsgDefOrigin->reserved_1;
-        mMsgDef->arch            = mMsgDefOrigin->arch;
-        mMsgDef->global_mesg_num = mMsgDefOrigin->global_mesg_num;
-        mMsgDef->num_fields      = static_cast<FIT_UINT8>(fields.size());
+        writable->reserved_1      = mMsgDefOrigin->reserved_1;
+        writable->arch            = mMsgDefOrigin->arch;
+        writable->global_mesg_num = mMsgDefOrigin->global_mesg_num;
+        writable->num_fields      = static_cast<FIT_UINT8>(fields.size());
 
 	    uint8_t offset = 0;
 
@@ -290,9 +291,9 @@ namespace SDK::Component {
                     uint8_t size_src          = FIT_MESG_DEF_FIELD_OFFSET(size, idx);
                     uint8_t base_type_src     = FIT_MESG_DEF_FIELD_OFFSET(base_type, idx);
 
-                    mMsgDef->fields[field_def_num_dst] = mMsgDefOrigin->fields[field_def_num_src];
-                    mMsgDef->fields[size_dst]          = mMsgDefOrigin->fields[size_src];
-                    mMsgDef->fields[base_type_dst]     = mMsgDefOrigin->fields[base_type_src];
+                    writable->fields[field_def_num_dst] = mMsgDefOrigin->fields[field_def_num_src];
+                    writable->fields[size_dst]          = mMsgDefOrigin->fields[size_src];
+                    writable->fields[base_type_dst]     = mMsgDefOrigin->fields[base_type_src];
 
                     ++offset;
 
