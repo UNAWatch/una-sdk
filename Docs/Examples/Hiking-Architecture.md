@@ -11,12 +11,11 @@ Key features include:
 - Heart rate monitoring with trust level assessment
 - Elevation tracking using barometric pressure
 - Step counting for distance validation
-- Floor climbing detection for elevation changes
 - Automatic and manual lap recording
 - Multiple watch face layouts
-- Activity summary and history
+- Activity summary
 - Battery level monitoring
-- Settings for units, alerts, and notifications
+- Settings for alerts, and notifications
 
 ## Architecture
 
@@ -70,107 +69,44 @@ private:
 
 #### Key Data Structures
 
-**GPS Data Structure:**
-```cpp
-struct {
-    bool     fix;           // Actual GPS fix
-    float    latitude;      // degrees
-    float    longitude;     // degrees
-    float    altitude;      // meters
-    uint32_t timestamp;     // ms
-
-    void reset()
-    {
-        fix       = false;
-        latitude  = 0.0f;
-        longitude = 0.0f;
-        altitude  = 0.0f;
-        timestamp = 0;
-    }
-} mGps{};
-```
-
-**Track Data Structure:**
-```cpp
-struct Track::Data {
-    // Pace in s/m
-    float pace;
-    float avgPace;
-    float lapPace;
-
-    // Distance in m
-    float distance;
-    float lapDistance;
-
-    // Time in seconds
-    time_t totalTime;
-    time_t lapTime;
-
-    uint32_t lapNum;
-
-    float HR;
-    float hrTrustLevel;
-    float avgHR;
-    float maxHR;
-    float avgLapHR;
-    float maxLapHR;
-
-    // Speed in m/s
-    float speed;
-    float avgSpeed;
-    float maxSpeed;
-    float avgLapSpeed;
-    float maxLapSpeed;
-
-    // Elevation in m
-    float elevation;
-    float lapElevation;
-
-    // Steps and floors
-    uint32_t steps;
-    uint32_t lapSteps;
-    uint32_t floors;
-    uint32_t lapFloors;
-};
-```
-
-**Battery Management:**
-```cpp
-struct {
-    SDK::Timer timer;
-    float soc, voltage;
-    bool isLevelValid, isVoltageValid;
-    bool saveRequest;
-    void setLevel(float v);
-    void setVoltage(float v);
-    bool readyToSave();
-    void reset();
-} mBatteryLevel;
-```
+**Track Data (`Track::Data`)** — real-time metrics snapshot sent to the GUI every second. Contains pace, distance, time, lap counters, HR (current/avg/max/lap), speed (current/avg/max/lap), elevation, ascent (total and lap), steps, and floors — all in SI units (m, m/s, s/m, bpm). Defined in `Libs/Header/Track.hpp`.
 
 ### Sensor Integration
 
-The service manages multiple sensor connections:
+Each sensor is represented by an `SDK::Sensor::Connection` object. Polled sensors are configured with a period and latency; event-based sensors fire when the hardware generates an event and ignore those parameters.
 
-- **GPS Location**: For position and altitude data
-- **GPS Speed**: For instantaneous speed measurements
-- **GPS Distance**: For distance calculations
-- **Pressure**: For barometric altitude
-- **Heart Rate**: For cardiac monitoring
-- **Step Counter**: For step-based distance and activity tracking
-- **Floor Counter**: For detecting floors climbed/descended
-- **Battery Level/Metrics**: For power management
-- **Wrist Motion**: For backlight activation
+**Polled sensors** (1000 ms period / 1000 ms latency):
 
-Each sensor is represented by an `SDK::Sensor::Connection` object with specific sampling periods and latencies.
+| Sensor | Type constant | Purpose |
+|--------|--------------|---------|
+| GPS Location | `GPS_LOCATION` | Coordinates, altitude, fix state; used for map building |
+| GPS Speed | `GPS_SPEED` | Instantaneous speed → `mSpeedCounter` |
+| GPS Distance | `GPS_DISTANCE` | Incremental distance → `mDistanceCounter` |
+| Heart Rate | `HEART_RATE` | BPM + trust level (1–3) → `mHrCounter` |
+| Pressure | `PRESSURE` | Barometric altitude (filtered) → `mAltitudeCounter` |
+
+**Event-based sensors** (period/latency ignored):
+
+| Sensor | Type constant | Purpose |
+|--------|--------------|---------|
+| Step Counter | `STEP_COUNTER` | Steps → `mStepCounter` |
+| Floor Counter | `FLOOR_COUNTER` | Floors up + down → `mFloorCounter` |
+| Battery Level | `BATTERY_LEVEL` | State of charge → `mBatterySoc` |
+| Wrist Motion | `WRIST_MOTION` | Wrist raise → backlight activation |
+
+#### Sensor Connection Management
+
+- GPS and Wrist Motion connected on GUI start (for fix acquisition before tracking begins)
+- All remaining sensors connected when tracking starts
+- All sensors disconnected when tracking stops
 
 ### Data Processing Pipeline
 
-The data processing pipeline is the heart of the service backend, transforming raw sensor data into meaningful fitness metrics.
+The data processing pipeline transforms raw sensor data into meaningful fitness metrics.
 
 #### 1. Sensor Data Reception
 
-Sensor data arrives through the kernel's message system. The `handleSensorsData()` method processes each sensor type:
+Sensor data arrives through the kernel's message system. The `handleSensorsData()` method identifies the source via `matchesDriver()`, constructs the appropriate parser, and forwards the value:
 
 ```cpp
 void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data) {
@@ -189,51 +125,40 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data) {
 }
 ```
 
-Each sensor connection has a `matchesDriver()` method to identify the source of the data batch.
+#### 2. Data Capture Infrastructure
 
-#### 2. Data Filtering and Validation
+GPS coordinates, battery level, and sensor metrics are collected through three complementary mechanisms that together ensure accurate, pause-aware data:
 
-Raw sensor data undergoes filtering to reduce noise and improve accuracy:
+**GPS state (`mGps`)** — a simple struct updated on every GPS location event: fix flag, latitude/longitude, altitude (m), and timestamp. Used both for map building and for flagging whether coordinate/speed data is valid before writing to FIT.
 
-**Altitude Filtering**:
+**Battery samplers** — two `SDK::Metric::ThrottledSample` instances (`mBatterySoc`, `mBatteryVoltage`) that periodically write state-of-charge (%) and voltage (V) into the FIT file without flooding it with redundant records.
+
+**SDK Metric counters** — all sensor values that feed into `Track::Data` pass through one of three SDK counter types from `SDK::Metric`. Counters are the central reason accurate per-lap and per-activity statistics are possible with minimal service logic: each counter automatically excludes time spent in the paused state from active totals, separates per-lap values from session totals via `resetLap()`, and silently rejects sensor anomalies (rollbacks, out-of-range spikes) before they corrupt averages.
+
+| Counter | Suitable for | Used for |
+|---------|-------------|---------|
+| `MonotonicCounter<T>` | Cumulative values that only increase; ignores decreasing sensor readings | `mTimeCounter`, `mDistanceCounter`, `mStepCounter` |
+| `VariableCounter` | Fluctuating values; filters readings outside a valid range; tracks avg/min/max per lap | `mSpeedCounter`, `mHrCounter` |
+| `DeltaCounter` | Bidirectional changes; accumulates ascent and descent separately with a noise threshold | `mAltitudeCounter` |
+
+Raw barometric altitude is pre-filtered through a `SimpleLPF` (α = 0.8) before being passed to `mAltitudeCounter`, because `DeltaCounter` does not perform any filtering itself.
+
+#### 3. Parser Classes
+
+Each sensor has a corresponding `SDK::SensorDataParser::*` class. The pattern is always the same: construct the parser from `data[0]`, check `isDataValid()`, then extract the value and feed it into the appropriate counter or struct field. The pressure sensor is slightly more complex because it requires a sea-level calibration on the first reading:
+
 ```cpp
 SDK::SensorDataParser::Pressure parser(data[0]);
 if (parser.isDataValid()) {
     if (!mAltitudeCounter.isValid()) {
-        mSeaLevelPressure = parser.getP0();  // Initial calibration
+        mSeaLevelPressure = parser.getP0();  // calibrate on first reading
     }
     float altitude = parser.getAltitude(parser.getPressure(), mSeaLevelPressure);
-    float filtered = mAltitudeFilter.execute(altitude);  // Low-pass filter
-    mAltitudeCounter.add(filtered);
+    mAltitudeCounter.add(mAltitudeFilter.execute(altitude));  // pre-filter before DeltaCounter
 }
 ```
 
-The `SimpleLPF` uses a configurable alpha value (0.8f) for smoothing altitude changes.
-
-#### 3. Counter System Architecture
-
-The app uses specialized counter classes for different types of measurements:
-
-**MonotonicCounter**: For continuously increasing values (distance, time, steps, floors)
-```cpp
-SDK::MonotonicCounter<std::time_t> mTimeCounter;
-SDK::MonotonicCounter<float> mDistanceCounter;
-SDK::MonotonicCounter<uint32_t> mStepCounter;
-SDK::MonotonicCounter<uint32_t> mFloorCounter;
-```
-
-**VariableCounter**: For values that can vary with min/max tracking
-```cpp
-SDK::VariableCounter mSpeedCounter;  // Tracks current, average, maximum
-SDK::VariableCounter mHrCounter;
-```
-
-**DeltaCounter**: For elevation changes with ascent/descent calculation
-```cpp
-SDK::DeltaCounter mAltitudeCounter;
-```
-
-Each counter provides methods like `add()`, `getCurrent()`, `getAverage()`, `getMaximum()`, and lap-specific variants.
+All other parsers (`GpsLocation`, `GpsSpeed`, `GpsDistance`, `HeartRate`, `StepCounter`, `FloorCounter`) follow the simpler `isDataValid()` → `counter.add(value)` pattern.
 
 #### 4. Track Processing Logic
 
@@ -267,35 +192,48 @@ void Service::processTrack() {
 
 #### 5. FIT File Recording
 
-Activity data is recorded in FIT (Flexible and Interoperable Data Transfer) format, the standard for fitness devices:
+Activity data is recorded in FIT (Flexible and Interoperable Data Transfer) format, the standard for fitness devices.
+
+Each record is assembled from the current counter values and GPS state. Fields are optional — each is only written to the FIT file when marked valid via `RecordData::set(Field, bool)`. Fields include: coordinates, speed, altitude, heart rate, and battery state of charge.
+
+#### 6. Error Handling and Data Validation
+
+**GPS Fix State Management**:
+
+Fix state changes are tracked via `mPreviousGpsFixState`. On every change the GUI is notified via `mGuiSender.fix()`. The very first acquired fix also triggers `notifyFirstFix()` — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:
 
 ```cpp
-ActivityWriter::RecordData Service::prepareRecordData() {
-    ActivityWriter::RecordData fitRecord{};
-
-    fitRecord.timestamp = mTimeCounter.getCurrent();
-    fitRecord.set(ActivityWriter::RecordData::Field::COORDS, mGps.fix);
-    fitRecord.latitude = mGps.latitude;
-    fitRecord.longitude = mGps.longitude;
-
-    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
-    fitRecord.speed = mSpeedCounter.getCurrent();
-
-    fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
-    fitRecord.altitude = mAltitudeCounter.getCurrent();
-
-    bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
-    fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
-    fitRecord.heartRate = mHrCounter.getCurrent();
-
-    fitRecord.set(ActivityWriter::RecordData::Field::BATTERY, mBatteryLevel.readyToSave());
-    fitRecord.batteryLevel = static_cast<uint8_t>(mBatteryLevel.getLevel());
-
-    return fitRecord;
+if (mPreviousGpsFixState != mGps.fix) {
+    mPreviousGpsFixState = mGps.fix;
+    if (!firstFix) {
+        notifyFirstFix();
+        firstFix = true;
+    }
+    mGuiSender.fix(mGps.fix);
 }
 ```
 
-FIT records include optional fields that are only written when valid data is available.
+**Heart Rate Trust Level Filtering**:
+
+HR readings are only written to the FIT file when the value is above 20 bpm and the sensor trust level is in the valid range 1–3 (0 means no signal):
+
+```cpp
+bool hasHeartRate = (mHrCounter.getCurrent() > 20 &&
+                    mTrackData.hrTrustLevel >= 1 &&
+                    mTrackData.hrTrustLevel <= 3);
+fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
+```
+
+**Wrist Motion Backlight Activation**:
+
+```cpp
+SDK::SensorDataParser::WristMotion parser(data[0]);
+if (parser.isDataValid()) {
+    backlightOn();  // brightness 100%, auto-off after skBacklightTimeout (5000 ms)
+}
+```
+
+`backlightOn()` is a shared helper used across the service (first GPS fix, lap end, wrist motion). It sends a `RequestBacklightSet` message with brightness 100% and the default 5-second auto-off timeout.
 
 ### Activity State Management
 
@@ -309,19 +247,18 @@ State transitions are handled by methods like `startTrack()`, `stopTrack()`, `pa
 ### Lap Management
 
 Laps can be triggered automatically based on configurable thresholds:
-- **Distance-based**: Configurable distance thresholds (e.g., every 1km)
-- **Time-based**: Configurable time intervals (e.g., every 10 minutes)
-- **Step-based**: Configurable step count thresholds (e.g., every 1000 steps)
-- **Manual**: User-initiated via GUI
+- **Distance-based**: Configurable via `MenuDistanceView` (`Settings::Alerts::Distance::Id`)
+- **Time-based**: Configurable via `MenuTimeView` (`Settings::Alerts::Time::Id`)
+- **Manual**: User-initiated via R2 button during tracking
 
-Lap data includes timing, distance, speed averages, elevation changes, steps, and floors climbed.
+Lap data includes timing, distance, elevation changes, steps, and floors climbed.
 
 ### Settings and Persistence
 
 Settings are stored in JSON format and include:
-- Unit preferences (imperial/metric)
-- Alert configurations (distance/time/step thresholds)
-- Notification settings
+- Alert distance threshold (`Settings::Alerts::Distance::Id`)
+- Alert time threshold (`Settings::Alerts::Time::Id`)
+- Auto-pause on/off
 - Phone notification enablement
 
 Activity summaries are persisted for historical data.
@@ -332,132 +269,48 @@ The Hiking app implements comprehensive data persistence using multiple storage 
 
 #### FIT File Format Implementation
 
-**ActivityWriter Class**:
-```cpp
-class ActivityWriter {
-public:
-    ActivityWriter(const SDK::Kernel& kernel, const char* activityDir);
-
-    void start(const AppInfo& info);
-    void addRecord(const RecordData& record);
-    void addLap(const LapData& lap);
-    void pause(std::time_t timestamp);
-    void resume(std::time_t timestamp);
-    void stop(const TrackData& track);
-    void discard();
-
-private:
-    // FIT file writing implementation
-};
-```
-
-**Record Data Structure**:
-```cpp
-struct RecordData {
-    enum class Field {
-        COORDS = 0,
-        SPEED,
-        ALTITUDE,
-        HEART_RATE,
-        BATTERY,
-        // ... additional fields
-    };
-
-    std::time_t timestamp;
-    double latitude, longitude;
-    float speed, altitude;
-    uint8_t heartRate, batteryLevel;
-    uint16_t batteryVoltage;
-
-    void set(Field field, bool enabled) {
-        mFields |= (1 << static_cast<uint8_t>(field));
-    }
-
-    bool isSet(Field field) const {
-        return mFields & (1 << static_cast<uint8_t>(field));
-    }
-
-private:
-    uint32_t mFields = 0;
-};
-```
+**ActivityWriter** — writes activity data to a FIT file during tracking. Key methods: `start()`, `addRecord()` (called every second), `addLap()`, `pause()`, `resume()`, `stop()`, `discard()`. Each `RecordData` carries an optional-field bitmask so only valid sensor readings are written.
 
 #### Activity Summary Persistence
 
-**ActivitySummarySerializer** handles JSON-based summary storage:
-
-```cpp
-class ActivitySummarySerializer {
-public:
-    ActivitySummarySerializer(const SDK::Kernel& kernel, const char* filename);
-
-    bool load(ActivitySummary& summary);
-    bool save(const ActivitySummary& summary);
-
-private:
-    const SDK::Kernel& mKernel;
-    std::string mFilename;
-};
-```
+**ActivitySummarySerializer** — loads and saves `ActivitySummary` as JSON. Used at activity end (`save`) and on next app launch (`load`) to restore the last session for display in the summary screens.
 
 **ActivitySummary Structure**:
 ```cpp
+struct LapSummary {
+    time_t   duration;   // Lap duration in seconds
+    float    distance;   // Lap distance in m
+    uint32_t steps;      // Steps count per lap
+};
+
 struct ActivitySummary {
-    std::time_t utc = 0;
-    std::time_t time = 0;        // Active time in seconds
-    float distance = 0.0f;       // Total distance in meters
-    float speedAvg = 0.0f;       // Average speed m/s
-    float elevation = 0.0f;      // Current elevation
-    float paceAvg = 0.0f;        // Average pace
-    uint8_t hrMax = 0;           // Maximum heart rate
-    float hrAvg = 0.0f;          // Average heart rate
-    uint32_t steps = 0;          // Total steps taken
-    std::vector<uint8_t> map;    // Track map data
+    time_t   utc;        // Last activity UTC time
+    time_t   time;       // Total track time in seconds
+    float    distance;   // Total track distance in m
+    float    speedAvg;   // Average speed in m/s
+    uint32_t steps;      // Total steps count
+    float    elevation;  // Elevation in m
+    float    paceAvg;    // Average pace in s/m
+    float    hrMax;      // Maximum heart rate in bpm
+    float    hrAvg;      // Average heart rate in bpm
+    SDK::TrackMapScreen map;           // Track map
+    std::vector<LapSummary> laps;      // Per-lap summary data
 };
 ```
 
 #### Settings Persistence
 
-**SettingsSerializer** manages application configuration:
-
-```cpp
-class SettingsSerializer {
-public:
-    SettingsSerializer(const SDK::Kernel& kernel, const char* filename);
-
-    bool load(Settings& settings);
-    bool save(const Settings& settings);
-
-private:
-    // JSON serialization implementation
-};
-```
+**SettingsSerializer** — loads and saves `Settings` as JSON. Called on startup (`load`) and whenever the user changes a setting (`save`).
 
 **Settings Structure**:
 ```cpp
 struct Settings {
-    bool phoneNotifEn = true;        // Phone notifications
-    float alertDistance = 1.0f;      // Lap distance in km
-    uint8_t alertTime = 10;          // Lap time in minutes
-    uint32_t alertSteps = 1000;      // Lap steps threshold
-    // ... additional settings
+    bool phoneNotifEn = true;
+    bool autoPause = false;
+    Alerts::Distance::Id alertDistance = Alerts::Distance::Id::KM_1;
+    Alerts::Time::Id     alertTime     = Alerts::Time::Id::MIN_10;
 };
 ```
-
-#### File System Integration
-
-The app uses the UNA SDK's file system abstraction:
-
-```cpp
-// File operations through kernel
-auto file = mKernel.fs.open("Activity/summary.json", SDK::FS::Mode::READ);
-if (file) {
-    // Read JSON data
-    file.close();
-}
-```
-
-Files are stored in app-specific directories with automatic cleanup and space management.
 
 #### Data Synchronization
 
@@ -472,568 +325,11 @@ Files are stored in app-specific directories with automatic cleanup and space ma
 - Summary updated on activity completion
 - Settings saved on change
 
-## GUI Implementation
+## GUI
 
-The GUI is built using TouchGFX framework, providing a rich, animated interface for the hiking app.
+The GUI is built using the TouchGFX framework and follows the Model-View-Presenter pattern.
 
-### Model-View-Presenter Pattern
-
-The GUI follows MVP architecture:
-
-- **Model**: `Model.hpp/cpp` - Data management and service communication
-- **View**: Various view classes (TrackView, etc.) - UI rendering
-- **Presenter**: Presenter classes - Logic binding model and view
-
-### Key GUI Components
-
-#### Model Class
-
-The Model class (`gui/model/Model.hpp`) serves as the central data hub:
-
-```cpp
-class Model : public touchgfx::UIEventListener,
-              public SDK::Interface::IGuiLifeCycleCallback,
-              public SDK::Interface::ICustomMessageHandler {
-public:
-    void bind(ModelListener *listener);
-    void tick();
-    void handleKeyEvent(uint8_t c);
-    // Track management methods
-    void trackStart();
-    bool trackIsActive();
-    // ... additional methods
-};
-```
-
-Key responsibilities:
-- Lifecycle management (onStart, onResume, onSuspend, onStop)
-- Message handling from service
-- Idle timeout management
-- Menu position tracking
-
-#### View Classes
-
-**TrackView**: Main tracking screen with multiple faces
-- TrackFace1: Pace, distance, total time
-- TrackFace2: HR, average pace, elevation
-- TrackFace3: Lap pace, lap distance, lap time
-- TrackFace4: Time, battery level
-
-**Other Screens**:
-- EnterMenu: App entry point
-- TrackAction: Pause/resume/stop controls
-- TrackSummary: Activity summary display
-- Settings screens for configuration
-
-### Message Handling System
-
-The Model implements `ICustomMessageHandler` to receive asynchronous updates from the service:
-
-```cpp
-bool Model::customMessageHandler(SDK::MessageBase *msg) {
-    switch (msg->getType()) {
-        case CustomMessage::SETTINGS_UPDATE: {
-            LOG_DEBUG("SETTINGS_UPDATE\n");
-            auto *cmsg = static_cast<CustomMessage::SettingsUpd*>(msg);
-            mSettings = cmsg->settings;
-            mUnitsImperial = cmsg->unitsImperial;
-            mHrThresholds = cmsg->hrThresholds;
-            modelListener->onSettingsChanged();
-        } break;
-
-        case CustomMessage::LOCAL_TIME: {
-            auto *cmsg = static_cast<CustomMessage::Time*>(msg);
-            std::tm newTime = cmsg->localTime;
-            bool dateChanged = (newTime.tm_mday != mTime.tm_mday);
-            bool timeChanged = (newTime.tm_hour != mTime.tm_hour ||
-                               newTime.tm_min != mTime.tm_min ||
-                               newTime.tm_sec != mTime.tm_sec);
-            mTime = newTime;
-            if (dateChanged) {
-                modelListener->onDate(mTime.tm_year + 1900, mTime.tm_mon + 1, mTime.tm_mday, mTime.tm_wday);
-            }
-            if (timeChanged) {
-                modelListener->onTime(mTime.tm_hour, mTime.tm_min, mTime.tm_sec);
-            }
-        } break;
-
-        case CustomMessage::BATTERY: {
-            auto *cmsg = static_cast<CustomMessage::Battery*>(msg);
-            if (mBatteryLevel != cmsg->level) {
-                mBatteryLevel = cmsg->level;
-                modelListener->onBatteryLevel(mBatteryLevel);
-            }
-        } break;
-
-        case CustomMessage::GPS_FIX: {
-            auto *cmsg = static_cast<CustomMessage::GpsFix*>(msg);
-            if (mGpsFix != cmsg->state) {
-                mGpsFix = cmsg->state;
-                modelListener->onGpsFix(mGpsFix);
-            }
-        } break;
-
-        case CustomMessage::TRACK_STATE_UPDATE: {
-            auto *cmsg = static_cast<CustomMessage::TrackStateUpd*>(msg);
-            if (mTrackState != cmsg->state) {
-                mTrackState = cmsg->state;
-                modelListener->onTrackState(mTrackState);
-            }
-        } break;
-
-        case CustomMessage::TRACK_DATA_UPDATE: {
-            auto *cmsg = static_cast<CustomMessage::TrackDataUpd*>(msg);
-            mTrackData = cmsg->data;
-            modelListener->onTrackData(mTrackData);
-        } break;
-
-        case CustomMessage::LAP_END: {
-            auto *cmsg = static_cast<CustomMessage::LapEnded*>(msg);
-            modelListener->onLapChanged(cmsg->lapNum);
-        } break;
-
-        case CustomMessage::SUMMARY: {
-            auto *cmsg = static_cast<CustomMessage::Summary*>(msg);
-            mpActivitySummary = cmsg->summary;
-            modelListener->onActivitySummary(*mpActivitySummary);
-        } break;
-
-        default:
-            break;
-    }
-    return true;
-}
-```
-
-Each message type triggers specific UI updates through the ModelListener interface.
-
-### Screen Navigation and State Management
-
-The app uses TouchGFX's screen management system with custom transitions:
-
-**Screen Flow**:
-```
-EnterMenu -> TrackView (tracking screens)
-    ↓
-TrackAction -> TrackSummary
-    ↓
-Settings screens
-```
-
-**Transition Types**:
-- **Slide transitions**: Smooth animated screen changes
-- **No-transition calls**: Instant updates for data refreshes
-- **Modal screens**: Overlays for confirmations and actions
-
-### Custom Containers Implementation
-
-The app uses custom containers for reusable UI components:
-
-**TrackFace1 Container**:
-```cpp
-// Displays pace, distance, total time
-void TrackFace1::setPace(float pace, bool imperial, bool gpsFix);
-void TrackFace1::setDistance(float distance, bool imperial, bool gpsFix);
-void TrackFace1::setTimer(std::time_t time);
-```
-
-**TrackFace2 Container**:
-```cpp
-// Displays HR, average pace, elevation
-void TrackFace2::setHR(float hr, uint8_t trustLevel, const std::array<uint8_t, 4>& thresholds);
-void TrackFace2::setAvgPace(float pace, bool imperial, bool gpsFix);
-void TrackFace2::setElevation(float elevation, bool imperial);
-```
-
-**TrackFace3 Container**:
-```cpp
-// Displays lap metrics
-void TrackFace3::setLapPace(float pace, bool imperial, bool gpsFix);
-void TrackFace3::setLapDistance(float distance, bool imperial, bool gpsFix);
-void TrackFace3::setLapTimer(std::time_t time);
-```
-
-**TrackFace4 Container**:
-```cpp
-// Displays time and battery
-void TrackFace4::setTime(uint8_t h, uint8_t m);
-void TrackFace4::setBatteryLevel(uint8_t level);
-```
-
-### Input Handling Architecture
-
-User input is processed through a hierarchical system:
-
-1. **Hardware Events**: Button presses detected by TouchGFX HAL
-2. **Key Event Processing**: Model::handleKeyEvent() for global actions
-3. **Screen-Specific Handling**: View classes handle context-specific input
-4. **Gesture Recognition**: TouchGFX handles swipe gestures for navigation
-
-**Button Mapping**:
-- **L1**: Previous item/navigation left
-- **L2**: Next item/navigation right
-- **R1**: Primary action (menu access)
-- **R2**: Secondary action (lap/manual trigger)
-
-### Data Formatting and Units
-
-The GUI handles unit conversions and formatting:
-
-**Distance Units**:
-```cpp
-if (isImperial) {
-    // Convert meters to miles/feet
-    float miles = distance * 0.000621371f;
-    // Format display string
-} else {
-    // Display in kilometers
-    float km = distance / 1000.0f;
-}
-```
-
-**Speed/Pace Calculations**:
-```cpp
-float pace = (speed > 0.1f) ? (1.0f / speed) : 0.0f;  // min per unit
-// Convert to appropriate units based on system setting
-```
-
-**Time Formatting**:
-```cpp
-// Convert seconds to HH:MM:SS or MM:SS
-std::string formatTime(std::time_t seconds) {
-    int hours = seconds / 3600;
-    int minutes = (seconds % 3600) / 60;
-    int secs = seconds % 60;
-
-    if (hours > 0) {
-        return std::format("{}:{:02d}:{:02d}", hours, minutes, secs);
-    } else {
-        return std::format("{}:{:02d}", minutes, secs);
-    }
-}
-```
-
-### Idle Timeout Management
-
-The app implements automatic screen timeout to conserve battery:
-
-```cpp
-void Model::decIdleTimer() {
-    if (mIdleTimer > 0) {
-        mIdleTimer--;
-        if (mIdleTimer == 0) {
-            modelListener->onIdleTimeout();
-            // Trigger screen off or return to home
-        }
-    }
-}
-
-void Model::resetIdleTimer() {
-    mIdleTimer = Gui::Config::kScreenTimeoutSteps;  // Configurable timeout
-}
-```
-
-Idle timer resets on any user interaction, preventing accidental timeouts during active use.
-
-### User Interaction
-
-- **L1/L2 buttons**: Navigate between watch faces or menu items
-- **R1 button**: Access action menus
-- **R2 button**: Manual lap recording
-- **Wrist motion**: Backlight activation
-
-### Data Display
-
-The GUI displays real-time data with appropriate formatting:
-- Speed/pace in current units
-- Distance with GPS fix indicators
-- Heart rate with trust level visualization
-- Battery level with color coding
-- Steps and floors climbed counters
-
-## Sensor Integration
-
-The Hiking app integrates multiple sensors through the UNA SDK's sensor layer.
-
-### GPS Integration
-
-**Location Sensor** (`SDK::Sensor::Type::GPS_LOCATION`):
-- Provides latitude, longitude, altitude
-- Used for position tracking and map building
-- Altitude data filtered for stability
-
-**Speed Sensor** (`SDK::Sensor::Type::GPS_SPEED`):
-- Instantaneous speed measurements
-- Fed into VariableCounter for averaging
-
-**Distance Sensor** (`SDK::Sensor::Type::GPS_DISTANCE`):
-- Incremental distance measurements
-- Accumulated in MonotonicCounter
-
-### Physiological Sensors
-
-**Heart Rate Sensor** (`SDK::Sensor::Type::HEART_RATE`):
-- BPM measurements with trust levels
-- Trust levels: 1-3 (higher is better)
-- Only valid data (>20 BPM) used for calculations
-
-**Pressure Sensor** (`SDK::Sensor::Type::PRESSURE`):
-- Barometric pressure for altitude calculation
-- Sea-level pressure calibration
-- Filtered altitude data
-
-### Activity Sensors
-
-**Step Counter Sensor** (`SDK::Sensor::Type::STEP_COUNTER`):
-- Counts steps taken during activity
-- Used for distance validation and lap triggering
-- Accumulated in MonotonicCounter
-
-**Floor Counter Sensor** (`SDK::Sensor::Type::FLOOR_COUNTER`):
-- Detects floors climbed and descended
-- Combines up and down movements
-- Used for elevation tracking validation
-
-### System Sensors
-
-**Battery Sensors**:
-- Level: State of charge percentage
-- Metrics: Voltage measurements
-- Periodic logging to FIT files
-
-**Wrist Motion Sensor**:
-- Detects movement for backlight activation
-- 300ms sampling period
-
-### Sensor Data Processing Architecture
-
-The sensor data processing system is built around specialized parsers and filtering chains.
-
-#### Parser Classes
-
-Each sensor type has a corresponding parser class that handles data extraction and validation:
-
-**GPS Location Parser**:
-```cpp
-SDK::SensorDataParser::GpsLocation parser(data[0]);
-if (parser.isDataValid()) {
-    mGps.timestamp = parser.getTimestamp();
-    mGps.fix = parser.isCoordinatesValid();
-    if (mGps.fix) {
-        parser.getCoordinates(mGps.latitude, mGps.longitude, mGps.altitude);
-    }
-}
-```
-
-**GPS Speed Parser**:
-```cpp
-SDK::SensorDataParser::GpsSpeed parser(data[0]);
-if (parser.isDataValid()) {
-    mSpeedCounter.add(parser.getSpeed());
-}
-```
-
-**Pressure Parser with Altitude Calculation**:
-```cpp
-SDK::SensorDataParser::Pressure parser(data[0]);
-if (parser.isDataValid()) {
-    if (!mAltitudeCounter.isValid()) {
-        mSeaLevelPressure = parser.getP0();  // Initial pressure at sea level
-    }
-    float pressure = parser.getPressure();
-    float altitude = parser.getAltitude(pressure, mSeaLevelPressure);
-    float filteredAltitude = mAltitudeFilter.execute(altitude);
-    mAltitudeCounter.add(filteredAltitude);
-}
-```
-
-**Step Counter Parser**:
-```cpp
-SDK::SensorDataParser::StepCounter parser(data[0]);
-if (parser.isDataValid()) {
-    mStepCounter.add(parser.getStepCount());
-}
-```
-
-**Floor Counter Parser**:
-```cpp
-SDK::SensorDataParser::FloorCounter parser(data[0]);
-if (parser.isDataValid()) {
-    uint32_t newValue = parser.getFloorsUp() + parser.getFloorsDown();
-    mFloorCounter.add(newValue);
-}
-```
-
-**Heart Rate Parser**:
-```cpp
-SDK::SensorDataParser::HeartRate parser(data[0]);
-if (parser.isDataValid()) {
-    mHrCounter.add(parser.getBpm());
-    mTrackData.hrTrustLevel = parser.getTrustLevel();  // 1-3 scale
-}
-```
-
-#### Advanced Filtering Techniques
-
-**Low-Pass Filtering for Altitude**:
-```cpp
-class SimpleLPF {
-public:
-    SimpleLPF(float alpha) : mAlpha(alpha), mFilteredValue(0.0f), mInitialized(false) {}
-
-    float execute(float input) {
-        if (!mInitialized) {
-            mFilteredValue = input;
-            mInitialized = true;
-            return input;
-        }
-        mFilteredValue = mAlpha * input + (1.0f - mAlpha) * mFilteredValue;
-        return mFilteredValue;
-    }
-
-    void reset() {
-        mInitialized = false;
-    }
-
-private:
-    float mAlpha;
-    float mFilteredValue;
-    bool mInitialized;
-};
-```
-
-The altitude filter uses α = 0.8, providing significant smoothing while maintaining responsiveness to actual elevation changes.
-
-#### Counter System Implementation
-
-**MonotonicCounter Template**:
-```cpp
-template<typename T>
-class MonotonicCounter {
-public:
-    void init() { /* initialization */ }
-    void add(T value) { mTotal += value; }
-    T getValueActive() const { return mActive; }
-    T getValueTotal() const { return mTotal; }
-    T getLapValueActive() const { return mLapActive; }
-
-    void resetLap() {
-        mLapStart = mTotal;
-        mLapActive = 0;
-    }
-
-private:
-    T mTotal = 0;
-    T mActive = 0;
-    T mLapStart = 0;
-    T mLapActive = 0;
-};
-```
-
-**VariableCounter for Statistical Tracking**:
-```cpp
-class VariableCounter {
-public:
-    void init(float minValid, float maxValid) {
-        mMinValid = minValid;
-        mMaxValid = maxValid;
-    }
-
-    void add(float value) {
-        if (value >= mMinValid && value <= mMaxValid) {
-            mCurrent = value;
-            mSum += value;
-            mCount++;
-            if (value > mMaximum) mMaximum = value;
-            if (value < mMinimum || mMinimum == 0) mMinimum = value;
-        }
-    }
-
-    float getCurrent() const { return mCurrent; }
-    float getAverage() const { return (mCount > 0) ? mSum / mCount : 0; }
-    float getMaximum() const { return mMaximum; }
-
-private:
-    float mMinValid, mMaxValid;
-    float mCurrent = 0;
-    float mSum = 0;
-    int mCount = 0;
-    float mMaximum = 0;
-    float mMinimum = 0;
-};
-```
-
-#### Sensor Sampling Strategy
-
-**Adaptive Sampling Rates**:
-- **GPS Sensors**: 1 Hz sampling for real-time tracking
-- **Heart Rate**: 1 Hz for continuous monitoring
-- **Pressure**: 1 Hz for altitude tracking
-- **Step Counter**: 1 Hz for step tracking
-- **Floor Counter**: 1 Hz for floor detection
-- **Battery**: 1 Hz with periodic FIT logging
-- **Wrist Motion**: 3.33 Hz (300ms intervals) for gesture detection
-
-**Sampling Latency**:
-- All sensors use 1000ms latency to balance power consumption and responsiveness
-- Lower latency (300ms) for wrist motion to ensure immediate backlight activation
-
-#### Error Handling and Data Validation
-
-**GPS Fix State Management**:
-```cpp
-bool previousFixState = mGps.fix;
-mGps.fix = parser.isCoordinatesValid();
-
-if (mPreviousGpsFixState != mGps.fix) {
-    mPreviousGpsFixState = mGps.fix;
-    if (!firstFix) {
-        notifyFirstFix();  // Buzzer, vibration, backlight
-        firstFix = true;
-    }
-    mGuiSender.fix(mGps.fix);
-}
-```
-
-**Heart Rate Trust Level Filtering**:
-```cpp
-bool hasHeartRate = (mHrCounter.getCurrent() > 20 &&
-                    mTrackData.hrTrustLevel >= 1 &&
-                    mTrackData.hrTrustLevel <= 3);
-fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
-```
-
-Only heart rate data with trust levels 1-3 (best to good) are considered valid for recording.
-
-#### Power Management Integration
-
-**Wrist Motion Backlight Activation**:
-```cpp
-SDK::SensorDataParser::WristMotion parser(data[0]);
-if (parser.isDataValid()) {
-    auto bl = SDK::make_msg<SDK::Message::RequestBacklightSet>(mKernel);
-    if (bl) {
-        bl->brightness = 100;
-        bl->autoOffTimeoutMs = 5000;
-        bl.send();
-    }
-}
-```
-
-Motion detection immediately activates the display with 5-second timeout.
-
-### Sensor Connection Management
-
-Sensors are connected/disconnected based on app state:
-- GPS connected on GUI start for fix acquisition
-- All sensors connected when tracking starts
-- Sensors disconnected when tracking stops
-
-## TouchGFX Port
-
-The Hiking app uses TouchGFX for its graphical user interface, providing smooth animations and professional UI design.
-
-### TouchGFX Project Structure
+### Project Structure
 
 ```
 Hiking/Software/Apps/TouchGFX-GUI/
@@ -1047,118 +343,378 @@ Hiking/Software/Apps/TouchGFX-GUI/
 └── simulator/            # Simulator builds
 ```
 
-### GUI Architecture
+### Model-View-Presenter Pattern
 
-**Screens and Transitions**:
-- Multiple screens for different app states
-- Smooth transitions between screens
-- No-transition calls for quick updates
+The GUI follows MVP architecture:
 
-**Custom Containers**:
-- TrackFace1, TrackFace2, TrackFace3: Different watch layouts
-- BatteryBig: Battery indicator
-- HrBar: Heart rate visualization
-- Menu components for navigation
+- **Model**: `Model.hpp/cpp` — Data management and service communication
+- **View**: Various view classes (`TrackView`, etc.) — UI rendering
+- **Presenter**: Presenter classes — Logic binding model and view
+
+### Model
+
+The Model class (`gui/model/Model.hpp`) serves as the central data hub:
+
+```cpp
+class Model : public touchgfx::UIEventListener,
+              public SDK::Interface::IGuiLifeCycleCallback,
+              public SDK::Interface::ICustomMessageHandler {
+public:
+    void bind(ModelListener* listener);
+    void tick();
+    void handleKeyEvent(uint8_t key);
+    void resetIdleTimer();
+    void exitApp();
+
+    // Time / date
+    void getDate(uint8_t& month, uint8_t& day, uint8_t& weekday);
+    void getTime(uint8_t& h, uint8_t& m, uint8_t& s);
+
+    // Sensors & settings
+    uint8_t getBatteryLevel() const;
+    bool isUnitsImperial() const;
+    const uint8_t* getHrThresholds() const;
+    uint8_t getHrThresholdsCount() const;
+    const Settings& getSettings() const;
+    void saveSettings(const Settings& sett);
+    bool hasGpsFix() const;
+
+    // Track lifecycle
+    void trackStart();
+    bool isTrackActive() const;
+    void trackPause();
+    void trackResume();
+    bool isTrackPaused() const;
+    const Track::Data& getTrackData() const;
+    void saveLap();
+    void saveTrack();
+    void discardTrack();
+
+    // Summary
+    bool isTrackSummaryAvailable() const;
+    const ActivitySummary& getTrackSummary() const;
+};
+```
+
+Key responsibilities:
+- Lifecycle management (`onStart`, `onResume`, `onSuspend`, `onStop`)
+- Message handling from service (`ICustomMessageHandler`)
+- Idle timeout management
+- Menu position tracking
+
+### Screens (15 total)
+
+**Entry & Main Menu**:
+- `MainView` — App entry point; scroll-wheel menu (Start, Settings); GPS acquisition
+
+**Tracking** (all face cycling happens inside `TrackView` via swipeable containers):
+- `TrackView` — Active tracking screen; hosts `TrackFaceTotal`, `TrackFaceOverview`, `TrackFaceElevation`, `TrackFaceStatus` (swipe L1/L2)
+- `TrackActionView` — Pause menu: Resume / Summary / Save / Discard
+- `TrackLapView` — Lap-saved notification (auto-dismisses after 3 s)
+
+**Confirmations**:
+- `TrackStartConfirmationView` — Prompt to start without GPS fix; idle timeout → exits app
+- `TrackDiscardConfirmationView` — Confirm discard activity; idle timeout → `TrackActionView`
+- `TrackDiscardedView` — Discard feedback (auto-dismisses after 3 s → exits app)
+- `TrackSavedView` — Save feedback (auto-dismisses after 3 s → `TrackSummaryView`)
+
+**Summary** (all face cycling happens inside `TrackSummaryView`):
+- `TrackSummaryView` — Post-activity summary; hosts `SummaryFaceMap`, `SummaryFaceOverview`, `SummaryFaceHeartRate` (swipe L1/L2)
+  - `SummaryFaceMap` — route map + total distance
+  - `SummaryFaceOverview` — total distance, elevation, elapsed time
+  - `SummaryFaceHeartRate` — max HR, average HR
+
+**Settings**:
+- `MenuSettingsView` — Root settings wheel (Alerts, Auto-Pause, Phone Notifications)
+- `MenuAlertsView` — Alert type selection (Distance, Time)
+- `MenuDistanceView` — Distance alert value picker
+- `MenuDistanceSavedView` — Save confirmation (auto-dismisses after 3 s → `MenuAlertsView`)
+- `MenuTimeView` — Time alert value picker
+- `MenuTimeSavedView` — Save confirmation (auto-dismisses after 3 s → `MenuAlertsView`)
+
+### Message Handling System
+
+The Model implements `ICustomMessageHandler` to receive asynchronous updates from the service. Each message is cast to its concrete type, stored in a Model field, and forwarded to the active presenter via `ModelListener`:
+
+```cpp
+bool Model::customMessageHandler(SDK::MessageBase *msg) {
+    switch (msg->getType()) {
+        case CustomMessage::TRACK_DATA_UPDATE: {
+            auto *cmsg = static_cast<CustomMessage::TrackDataUpd*>(msg);
+            mTrackData = cmsg->data;                      // store
+            modelListener->onTrackData(mTrackData);       // notify presenter
+        } break;
+
+        // ... other message types follow the same pattern
+        default: break;
+    }
+    return true;
+}
+```
+
+Messages handled: `SETTINGS_UPDATE`, `LOCAL_TIME`, `BATTERY`, `GPS_FIX`, `TRACK_STATE_UPDATE`, `TRACK_DATA_UPDATE`, `LAP_END`, `SUMMARY`.
+
+### Screen Navigation
+
+All screen changes use `gotoXxxScreenNoTransition()` — there are no slide or animated screen transitions. Animations exist only within containers: `MainMenu` scroll-wheel and `ScrollIndicator` arc movement.
+
+**Screen Flow**:
+```
+MainView ──[Start, GPS ok]──► TrackView (faces: Total ◄──► Overview ◄──► Elevation ◄──► Status)
+    │              │                         │
+    │    [Start, no GPS fix]                [R1]
+    │              │                    TrackActionView
+    │    TrackStartConfirmationView       │    │    │
+    │         │           │           Resume  Save  Discard
+    │      [R1:start]  [idle/R2]        │      │      │
+    │      TrackView   exitApp       TrackView │   TrackDiscardConfirmationView
+    │                                          │      │ [idle] → TrackActionView
+    │                                    TrackSavedView [R1:confirm]     [R2:cancel]
+    │                                    (3s auto)          │          TrackActionView
+    │                                          │      TrackDiscardedView
+    │                                   TrackSummaryView  (3s auto → exitApp)
+    │                                   (faces: Map ◄──► Overview ◄──► HeartRate)
+    │                                          │
+    │                             [R2:back to track] ──► TrackView
+    │
+    └──[Settings]──► MenuSettingsView
+                     (items: Alerts, Auto-Pause toggle, Phone Notifications toggle)
+                          │[Alerts]
+                     MenuAlertsView
+                       │             │
+                  [Distance]       [Time]
+                      │               │
+              MenuDistanceView   MenuTimeView
+                  │ [R1:save]        │ [R1:save]
+          MenuDistanceSavedView  MenuTimeSavedView
+              │ (3s auto)            │ (3s auto)
+          MenuAlertsView         MenuAlertsView
+```
+
+### Custom Containers
+
+The app uses two categories of containers: ready-made **SDK widgets** from `Templates/TouchGFX-Widgets` (imported as `.tpkg` packages) and **app-specific containers** built for this app's data and layout.
+
+#### SDK Widget Containers
+
+Imported from `Templates/TouchGFX-Widgets` and used without modification:
+
+- `Battery` — 4-segment battery level indicator
+- `Buttons` — button arc indicators (L1/L2/R1/R2)
+- `GpsIndicator` — blinking GPS fix status dot
+- `HeartRateZone` — 5-zone HR bar visualization
+- `ScrollIndicator` — arc position indicator for face and menu navigation
+- `MainMenu` — scroll-wheel menu with bundled `ScrollIndicator` and `Toggle`
+- `Map` — route map with start/end markers
+- `PauseIndicator` — full-width pause overlay with elapsed pause time
+- `Title` — screen title with underline
+- `InfoCarousel` — auto-cycling multi-value info panel
+
+#### App-Specific Containers
+
+Built specifically for this app and found in `gui/include/gui/containers/`:
+
+**Track watch faces** (swipeable inside `TrackView`):
+```cpp
+void TrackFaceTotal::setSteps(uint32_t steps);
+void TrackFaceTotal::setDistance(float dist, bool isImperial);
+void TrackFaceTotal::setTimer(std::time_t sec);
+
+void TrackFaceOverview::setHR(float hr, const uint8_t* thresholds, uint8_t thresholdCount);
+void TrackFaceOverview::setPace(float pace);
+void TrackFaceOverview::setElevation(float elevation, bool isImperial);
+
+void TrackFaceElevation::setLapAscent(float ascent, bool isImperial);
+void TrackFaceElevation::setTotalAscent(float ascent, bool isImperial);
+void TrackFaceElevation::setElevation(float elevation, bool isImperial);
+
+void TrackFaceStatus::setTime(uint8_t h, uint8_t m);
+void TrackFaceStatus::setBatteryLevel(uint8_t level);
+```
+
+**Summary faces** (swipeable inside `TrackSummaryView`):
+```cpp
+void SummaryFaceMap::setDistance(float dist, bool isImperial);
+void SummaryFaceMap::setMap(const SDK::TrackMapScreen& map);
+
+void SummaryFaceOverview::setDistance(float dist, bool isImperial);
+void SummaryFaceOverview::setElevation(float elevation, bool isImperial);
+void SummaryFaceOverview::setTimer(std::time_t sec);
+
+void SummaryFaceHeartRate::setMaxHR(float hr);
+void SummaryFaceHeartRate::setAvgHR(float hr);
+```
+
+**Utility**:
+- `CountdownTimer` — self-registering countdown used by auto-dismiss screens (`TrackLapView`, `TrackSavedView`, `TrackDiscardedView`, `MenuDistanceSavedView`, `MenuTimeSavedView`)
+
+### Input Handling
+
+User input is processed through a hierarchical system:
+
+1. **Hardware Events**: Button presses detected by TouchGFX HAL
+2. **Key Event Processing**: `Model::handleKeyEvent()` for global actions
+3. **Screen-Specific Handling**: View classes handle context-specific input
+
+**Button Mapping**:
+- **L1**: Previous item/navigation left
+- **L2**: Next item/navigation right
+- **R1**: Primary action (menu access)
+- **R2**: Secondary action (lap/manual trigger)
+
+### Data Formatting and Units
+
+The GUI handles unit conversions and formatting before passing values to containers:
+
+- **Distance**: meters → km (metric) or miles (imperial)
+- **Pace**: seconds-per-metre → min/km or min/mile depending on unit setting
+- **Elevation / ascent**: metres → feet in imperial mode
+- **Time**: `std::time_t` seconds passed directly to containers; formatted as `MM:SS` or `H:MM:SS` by the container
+- **Steps / floors**: raw `uint32_t` counts, no conversion required
+
+### Idle Timeout
+
+The app implements automatic screen timeout to conserve battery:
+
+```cpp
+void Model::decIdleTimer() {
+    if (mIdleTimer > 0) {
+        mIdleTimer--;
+        if (mIdleTimer == 0) {
+            modelListener->onIdleTimeout();
+        }
+    }
+}
+
+void Model::resetIdleTimer() {
+    mIdleTimer = App::Config::kScreenTimeoutSteps;
+}
+```
+
+Idle timer resets on any user interaction, preventing accidental timeouts during active use.
 
 ### TouchGFX Integration with UNA SDK
 
-The integration between TouchGFX and UNA SDK is handled through several key components:
+The integration between TouchGFX and UNA SDK is handled through several key components.
 
 #### TouchGFXCommandProcessor
 
-This singleton class bridges TouchGFX and the SDK messaging system:
+`SDK::TouchGFXCommandProcessor` is a singleton that bridges the SDK kernel and the TouchGFX event loop. It holds a `const SDK::Kernel&` reference internally and manages GUI lifecycle and incoming custom messages.
 
 ```cpp
+namespace SDK {
+
 class TouchGFXCommandProcessor {
 public:
     static TouchGFXCommandProcessor& GetInstance();
 
-    void setAppLifeCycleCallback(SDK::Interface::IGuiLifeCycleCallback* callback);
-    void setCustomMessageHandler(SDK::Interface::ICustomMessageHandler* handler);
+    void setAppLifeCycleCallback(SDK::Interface::IGuiLifeCycleCallback* cb);
+    void setCustomMessageHandler(SDK::Interface::ICustomMessageHandler* h);
 
-    // Message processing
-    void processMessage(SDK::MessageBase* msg);
+    bool waitForFrameTick();
+    bool getKeySample(uint8_t& key);
+    void writeDisplayFrameBuffer(const uint8_t* data);
 
-private:
-    SDK::Interface::IGuiLifeCycleCallback* mLifeCycleCallback = nullptr;
-    SDK::Interface::ICustomMessageHandler* mCustomHandler = nullptr;
+    // Called before Model::tick() on every frame
+    void callCustomMessageHandler();
 };
+
+} // namespace SDK
 ```
 
-The processor receives messages from the SDK kernel and forwards them to the appropriate GUI components.
+`FrontendApplication::handleTickEvent()` calls `callCustomMessageHandler()` first, then `model.tick()`, ensuring pending service messages are dispatched to `ModelListener` before the presenter updates the view.
 
 #### Kernel Provider Architecture
 
-**KernelProviderGUI** provides GUI-specific kernel access:
+`SDK::KernelProviderGUI` is a singleton that stores a pointer to the `SDK::Kernel` object. It is initialised early in the program (before the GUI starts) and later retrieved by the `Model`:
 
 ```cpp
+namespace SDK {
+
 class KernelProviderGUI {
 public:
+    static KernelProviderGUI& CreateInstance(const SDK::Kernel* kernel);
     static KernelProviderGUI& GetInstance();
-    const SDK::Kernel& getKernel() const;
 
-private:
-    SDK::Kernel mKernel;
+    const SDK::Kernel& getKernel();
 };
+
+} // namespace SDK
 ```
 
-This ensures the GUI has controlled access to kernel services without direct coupling.
+The `Model` constructor retrieves the kernel via `SDK::KernelProviderGUI::GetInstance().getKernel()`, ensuring the GUI has access to the same kernel instance used by the service.
 
 #### Custom Message System
 
-The app defines custom message types for service-GUI communication:
+All service↔GUI messages are declared in `Commands.hpp` as plain `constexpr SDK::MessageType::Type` constants (not an enum) with fixed hex IDs. Every message struct inherits from `SDK::MessageBase`:
 
 ```cpp
 namespace CustomMessage {
-    enum Type {
-        SETTINGS_UPDATE = SDK::MessageType::CUSTOM_GUI_MESSAGE_START,
-        LOCAL_TIME,
-        BATTERY,
-        GPS_FIX,
-        TRACK_STATE_UPDATE,
-        TRACK_DATA_UPDATE,
-        LAP_END,
-        SUMMARY,
-        // ... additional types
-    };
 
-    // Message structures
-    struct SettingsUpd : SDK::Message::CustomMessageBase {
-        Settings settings;
-        bool unitsImperial;
-        std::array<uint8_t, 4> hrThresholds;
-    };
+// Service --> GUI
+constexpr SDK::MessageType::Type SETTINGS_UPDATE    = 0x00000001;
+constexpr SDK::MessageType::Type LOCAL_TIME         = 0x00000002;
+constexpr SDK::MessageType::Type BATTERY            = 0x00000003;
+constexpr SDK::MessageType::Type GPS_FIX            = 0x00000004;
+constexpr SDK::MessageType::Type TRACK_STATE_UPDATE = 0x00000005;
+constexpr SDK::MessageType::Type TRACK_DATA_UPDATE  = 0x00000006;
+constexpr SDK::MessageType::Type LAP_END            = 0x00000007;
+constexpr SDK::MessageType::Type SUMMARY            = 0x00000008;
 
-    struct TrackDataUpd : SDK::Message::CustomMessageBase {
-        Track::Data data;
-    };
-}
+// GUI --> Service
+constexpr SDK::MessageType::Type SETTINGS_SAVE  = 0x0000000A;
+constexpr SDK::MessageType::Type TRACK_START    = 0x0000000B;
+constexpr SDK::MessageType::Type TRACK_STOP     = 0x0000000C;
+constexpr SDK::MessageType::Type TRACK_PAUSE    = 0x0000000D;
+constexpr SDK::MessageType::Type TRACK_RESUME   = 0x0000000E;
+constexpr SDK::MessageType::Type MANUAL_LAP     = 0x0000000F;
+
+struct SettingsUpd : public SDK::MessageBase {
+    Settings settings;
+    bool     unitsImperial;
+    uint8_t  hrThresholds[kHrThresholdsCount];  // C-array of 6
+    uint8_t  hrThresholdsCount;
+};
+
+struct TrackDataUpd : public SDK::MessageBase {
+    Track::Data data;
+};
+
+// ... other structs follow the same pattern
+
+} // namespace CustomMessage
 ```
 
-#### Message Sender Classes
+#### Message Sender
 
-**CustomMessage::Sender** provides type-safe message sending:
+**`CustomMessage::Sender`** provides type-safe message sending from the service to the GUI. Each method allocates a typed message via `mKernel.comm.allocateMessage<>()`, fills its fields, sends it, and releases it, returning `bool`:
 
 ```cpp
-class CustomMessage::Sender {
+class Sender {
 public:
-    Sender(const SDK::Kernel& kernel) : mKernel(kernel) {}
+    Sender(const SDK::Kernel& kernel);
 
-    void settingsUpd(const Settings& s, bool imperial, const std::array<uint8_t, 4>& thresholds) {
-        auto msg = SDK::make_msg<SettingsUpd>(mKernel);
-        if (msg) {
-            msg->settings = s;
-            msg->unitsImperial = imperial;
-            msg->hrThresholds = thresholds;
-            msg.send();
-        }
-    }
+    // Service --> GUI
+    bool settingsUpd(Settings settings, bool units,
+                     const uint8_t (&thresholds)[kHrThresholdsCount],
+                     uint8_t thresholdCount);
+    bool time(std::tm localTime);
+    bool battery(uint8_t level);
+    bool fix(bool state);
+    bool trackState(Track::State state);
+    bool trackData(const Track::Data& data);
+    bool lapEnd(uint32_t lapNum);
+    bool summary(const ActivitySummary* summaryPtr);
 
-    // ... additional sender methods
+    // GUI --> Service
+    bool settingsSave(Settings settings);
+    bool trackStart();
+    bool trackStop(bool discard);
+    bool trackPause();
+    bool trackResume();
+    bool manualLap();
 };
 ```
-
-This abstraction ensures proper message allocation and sending.
 
 ### Asset Management
 
@@ -1169,7 +725,7 @@ This abstraction ensures proper message allocation and sending.
 ### Code Generation
 
 TouchGFX Designer generates:
-- Screen base classes (TrackViewBase)
+- Screen base classes (`TrackViewBase`, etc.)
 - Container implementations
 - Bitmap databases
 - Font and text resources
@@ -1270,7 +826,3 @@ Key architectural strengths include:
 - **Extensible Sensor Framework**: Easy addition of new sensors
 - **Rich UI Framework**: TouchGFX provides professional user experience
 - **Data Persistence**: FIT file format ensures interoperability
-
-The implementation showcases advanced C++ patterns, real-time systems programming, and embedded GUI development. The app successfully integrates multiple sensor types including GPS, heart rate, pressure, step counter, and floor counter to provide comprehensive hiking metrics, manages complex state transitions, and provides a user-friendly interface for hiking activity tracking.
-
-Future enhancements could include additional activity types, enhanced sensor fusion algorithms, trail mapping features, and expanded social features while maintaining the core architectural principles established in this implementation.</content>
