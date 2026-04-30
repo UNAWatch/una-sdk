@@ -12,10 +12,6 @@ MainViewBase::MainViewBase()
 
     buttons.setXY(0, 47);
     add(buttons);
-
-    box1.setPosition(0, 0, 240, 240);
-    box1.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    add(box1);
 }
 
 MainViewBase::~MainViewBase()

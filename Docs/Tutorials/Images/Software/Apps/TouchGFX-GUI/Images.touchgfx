@@ -3,11 +3,156 @@
     "Screens": [
       {
         "Name": "Main",
-        "Components": [],
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 147,
+            "CustomContainerDefinitionName": "ButtonsSet"
+          }
+        ],
         "Interactions": []
       }
     ],
-    "CustomContainerDefinitions": [],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "ButtonsSet",
+        "Y": 47,
+        "Width": 240,
+        "Height": 147,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "buttonR2",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR2a",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1a",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2a",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1a",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1A.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR2r",
+            "X": 206,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R2R.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonR1r",
+            "X": 206,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_R1R.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL2r",
+            "X": 12,
+            "Y": 112,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L2R .png"
+          },
+          {
+            "Type": "Image",
+            "Name": "buttonL1r",
+            "X": 12,
+            "Width": 23,
+            "Height": 35,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "Button_L1R.png"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
     "Name": "Images",
     "Resolution": {
       "Width": 240,
@@ -16,7 +161,7 @@
     "SelectedColorDepth": 8,
     "StartupScreenName": "Main",
     "SelectedStartupLanguage": "GB",
-    "TouchGfxPath": "touchgfx",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
     "UIPath": ".",
     "AvailableColorDepths": [
       8

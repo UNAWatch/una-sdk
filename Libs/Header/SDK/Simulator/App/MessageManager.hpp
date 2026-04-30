@@ -46,6 +46,14 @@ public:
     // =========================================================================
 
     /**
+     * @brief Initialize completion semaphore for message
+     * @param msg Message to initialize semaphore for
+     * @retval true if semaphore created successfully
+     * @retval false if creation failed
+     */
+    bool initCompletionSemaphore(SDK::MessageBase* msg);
+
+    /**
      * @brief Allocate raw memory from pool
      * @param size Required message size in bytes
      * @retval Pointer to allocated raw memory on success
@@ -92,7 +100,36 @@ public:
      */
     void retainMessage(SDK::MessageBase* msg);
 
+    /**
+     * @brief Signal message completion with processing result
+     * @param msg Message to signal
+     * @param result Result status
+     * @note Equivalent to msg->setResult() + signalCompletion()
+     */
     void signalCompletion(SDK::MessageBase* msg, SDK::MessageResult result);
+
+    /**
+     * @brief Signal message completion
+     * @param msg Message to signal
+     * @note Sets completed flag and releases semaphore
+     */
+    void signalCompletion(SDK::MessageBase* msg);
+
+    /**
+     * @brief Wait for message completion
+     * @param msg Message to wait for
+     * @param timeoutMs Timeout in milliseconds
+     * @retval true if completed before timeout
+     * @retval false if timeout occurred
+     */
+    bool waitCompletion(SDK::MessageBase* msg, uint32_t timeoutMs);
+
+    /**
+     * @brief Cleanup completion semaphore
+     * @param msg Message to cleanup semaphore for
+     * @note Deletes semaphore if it exists
+     */
+    void cleanupCompletionSemaphore(SDK::MessageBase* msg);
 
 private:
     // Prevent copying

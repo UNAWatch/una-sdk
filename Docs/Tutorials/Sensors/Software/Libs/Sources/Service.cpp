@@ -4,15 +4,22 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserAccelerometer.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserStepCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFloorCounter.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryLevel.hpp"
 #include "SDK/SensorLayer/SensorDataView.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 
 #include "Service.hpp"
 
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
+
+#ifndef M_PI
+#define M_PI    3.14159265358979323846264338327950288   /* pi */
+#endif
 
 Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
@@ -25,15 +32,41 @@ Service::Service(SDK::Kernel& kernel)
     , mSensorStepCounter(SDK::Sensor::Type::STEP_COUNTER, 0, 0)
     , mSensorFloorCounter(SDK::Sensor::Type::FLOOR_COUNTER, 0, 0)
     , mSensorMagneticField(SDK::Sensor::Type::MAGNETIC_FIELD, 0, 0)
+    , mSensorBattery(SDK::Sensor::Type::BATTERY_LEVEL, 0, 0)
+    , mSensorAccelerometerRaw(SDK::Sensor::Type::ACCELEROMETER_RAW, 0, 0)
+    , mSensorGyroscope(SDK::Sensor::Type::GYROSCOPE, 0, 0)
+    , mSensorGyroscopeRaw(SDK::Sensor::Type::GYROSCOPE_RAW, 0, 0)
+    , mSensorHeartBeat(SDK::Sensor::Type::HEART_BEAT, 0, 0)
+    , mSensorHeartRateMetrics(SDK::Sensor::Type::HEART_RATE_METRICS, 0, 0)
+    , mSensorStepDetector(SDK::Sensor::Type::STEP_DETECTOR, 0, 0)
+    , mSensorAmbientTemperature(SDK::Sensor::Type::AMBIENT_TEMPERATURE, 0, 0)
+    , mSensorPressure(SDK::Sensor::Type::PRESSURE, 0, 0)
+    , mSensorWristMotion(SDK::Sensor::Type::WRIST_MOTION, 0, 0)
+    , mSensorMotionDetect(SDK::Sensor::Type::MOTION_DETECT, 0, 0)
+    , mSensorActivityRecognition(SDK::Sensor::Type::ACTIVITY_RECOGNITION, 0, 0)
+    , mSensorGestureRecognition(SDK::Sensor::Type::GESTURE_RECOGNITION, 0, 0)
+    , mSensorActivity(SDK::Sensor::Type::ACTIVITY, 0, 0)
+    , mSensorPPG(SDK::Sensor::Type::PPG, 0, 0)
+    , mSensorECG(SDK::Sensor::Type::ECG, 0, 0)
+    , mSensorGPSSpeed(SDK::Sensor::Type::GPS_SPEED, 0, 0)
+    , mSensorGPSDistance(SDK::Sensor::Type::GPS_DISTANCE, 0, 0)
+    , mSensorBatteryCharging(SDK::Sensor::Type::BATTERY_CHARGING, 0, 0)
+    , mSensorBatteryMetrics(SDK::Sensor::Type::BATTERY_METRICS, 0, 0)
+    , mSensorFusion(SDK::Sensor::Type::FUSION, 0, 0)
+    , mSensorFusionRaw(SDK::Sensor::Type::FUSION_RAW, 0, 0)
+    , mSensorTouchDetect(SDK::Sensor::Type::TOUCH_DETECT, 0, 0)
     , mHR(0)
     , mHRTL(0)
     , mServiceCpuTimeMs(0)
     , mGuiCpuTimeMs(0)
+    , mActiveTimeMs(0)
     , mTxMessages(0)
     , mRxMessages(0)
     , mTxBytes(0)
     , mRxBytes(0)
     , mLastStatsTimeMs(0)
+    , mLastAccTimeMs(0)
+    , mLastMagTimeMs(0)
 {}
 
 void Service::run()
@@ -43,10 +76,33 @@ void Service::run()
     mSensorHR.connect();
     mSensorGPS.connect();
     mSensorAltimeter.connect();
-    mSensorAccelerometer.connect(0.1f, 0);
+    mSensorAccelerometer.connect();
     mSensorStepCounter.connect();
     mSensorFloorCounter.connect();
     mSensorMagneticField.connect();
+    mSensorBattery.connect();
+    mSensorAccelerometerRaw.connect();
+    mSensorGyroscope.connect();
+    mSensorGyroscopeRaw.connect();
+    mSensorHeartBeat.connect();
+    mSensorHeartRateMetrics.connect();
+    mSensorStepDetector.connect();
+    mSensorAmbientTemperature.connect();
+    mSensorPressure.connect();
+    mSensorWristMotion.connect();
+    mSensorMotionDetect.connect();
+    mSensorActivityRecognition.connect();
+    mSensorGestureRecognition.connect();
+    mSensorActivity.connect();
+    mSensorPPG.connect();
+    mSensorECG.connect();
+    mSensorGPSSpeed.connect();
+    mSensorGPSDistance.connect();
+    mSensorBatteryCharging.connect();
+    mSensorBatteryMetrics.connect();
+    mSensorFusion.connect();
+    mSensorFusionRaw.connect();
+    mSensorTouchDetect.connect();
     LOG_INFO("Note: No BLE calibration at the moment. BLE calibration is required for proper sensor operation, especially for HR.\n");
 
 
@@ -57,6 +113,7 @@ void Service::run()
     while (true) {
         SDK::MessageBase *msg;
         if (mKernel.comm.getMessage(msg, 1000)) {
+            uint32_t processStart = mKernel.sys.getTimeMs();
             // Track received messages
             mRxMessages++;
             // mRxBytes += msg->getSize(); // no getSize method
@@ -73,6 +130,29 @@ void Service::run()
                     mSensorStepCounter.disconnect();
                     mSensorFloorCounter.disconnect();
                     mSensorMagneticField.disconnect();
+                    mSensorBattery.disconnect();
+                    mSensorAccelerometerRaw.disconnect();
+                    mSensorGyroscope.disconnect();
+                    mSensorGyroscopeRaw.disconnect();
+                    mSensorHeartBeat.disconnect();
+                    mSensorHeartRateMetrics.disconnect();
+                    mSensorStepDetector.disconnect();
+                    mSensorAmbientTemperature.disconnect();
+                    mSensorPressure.disconnect();
+                    mSensorWristMotion.disconnect();
+                    mSensorMotionDetect.disconnect();
+                    mSensorActivityRecognition.disconnect();
+                    mSensorGestureRecognition.disconnect();
+                    mSensorActivity.disconnect();
+                    mSensorPPG.disconnect();
+                    mSensorECG.disconnect();
+                    mSensorGPSSpeed.disconnect();
+                    mSensorGPSDistance.disconnect();
+                    mSensorBatteryCharging.disconnect();
+                    mSensorBatteryMetrics.disconnect();
+                    mSensorFusion.disconnect();
+                    mSensorFusionRaw.disconnect();
+                    mSensorTouchDetect.disconnect();
                     // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -91,6 +171,7 @@ void Service::run()
                 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
                     auto event = static_cast<SDK::Message::Sensor::EventData*>(msg);
                     SDK::Sensor::DataBatch data(event->data, event->count, event->stride);
+                    mRxBytes += event->count * event->stride;
                     onSdlNewData(event->handle, data);
                 } break;
 
@@ -100,14 +181,16 @@ void Service::run()
 
             // Release message after processing
             mKernel.comm.releaseMessage(msg);
+            uint32_t processEnd = mKernel.sys.getTimeMs();
+            mActiveTimeMs += (processEnd - processStart);
         }
 
         if (mGUIStarted) {
             // Update CPU time and message rates every second
             uint32_t currentTimeMs = mKernel.sys.getTimeMs();
             if (currentTimeMs - mLastStatsTimeMs >= 1000) {
-                // Calculate service CPU time (simplified, just elapsed time)
-                mServiceCpuTimeMs += (currentTimeMs - mLastStatsTimeMs);
+                // Calculate service CPU time (active processing time, excluding wait time)
+                mServiceCpuTimeMs = mActiveTimeMs;
                 // GUI CPU time would need to be tracked separately, for now set to 0
                 mGuiCpuTimeMs = 0;
 
@@ -134,6 +217,7 @@ void Service::run()
                 mRxMessages = 0;
                 mTxBytes = 0;
                 mRxBytes = 0;
+                mActiveTimeMs = 0;
                 mLastStatsTimeMs = currentTimeMs;
             }
         } else {
@@ -153,6 +237,29 @@ void Service::run()
     mSensorStepCounter.disconnect();
     mSensorFloorCounter.disconnect();
     mSensorMagneticField.disconnect();
+    mSensorBattery.disconnect();
+    mSensorAccelerometerRaw.disconnect();
+    mSensorGyroscope.disconnect();
+    mSensorGyroscopeRaw.disconnect();
+    mSensorHeartBeat.disconnect();
+    mSensorHeartRateMetrics.disconnect();
+    mSensorStepDetector.disconnect();
+    mSensorAmbientTemperature.disconnect();
+    mSensorPressure.disconnect();
+    mSensorWristMotion.disconnect();
+    mSensorMotionDetect.disconnect();
+    mSensorActivityRecognition.disconnect();
+    mSensorGestureRecognition.disconnect();
+    mSensorActivity.disconnect();
+    mSensorPPG.disconnect();
+    mSensorECG.disconnect();
+    mSensorGPSSpeed.disconnect();
+    mSensorGPSDistance.disconnect();
+    mSensorBatteryCharging.disconnect();
+    mSensorBatteryMetrics.disconnect();
+    mSensorFusion.disconnect();
+    mSensorFusionRaw.disconnect();
+    mSensorTouchDetect.disconnect();
 
     LOG_INFO("thread stopped\n");
 }
@@ -173,16 +280,13 @@ void Service::onStopGUI()
 void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
 {
     if (mGUIStarted) {
-        // Track transmitted messages
-        mTxMessages++;
-        // Note: bytes will be tracked when sending
-
         if (mSensorHR.matchesDriver(handle)) {
             SDK::SensorDataParser::HeartRate parser(data[0]);
             if (parser.isDataValid()) {
                 mHR   = parser.getBpm();
                 mHRTL = parser.getTrustLevel();
-                LOG_DEBUG("HR: %.0f BPM\n", mHR);
+                // LOG_DEBUG("HR: %.0f BPM\n", mHR);
+                mTxMessages++;
                 mSender.updateHeartRate(mHR, mHRTL);
                 mTxBytes += sizeof(CustomMessage::HRValues);
             }
@@ -193,7 +297,8 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float latitude = parser.getLatitude();
                 float longitude = parser.getLongitude();
                 float altitude = parser.getAltitude();
-                LOG_DEBUG("GPS: %.6f, %.6f, %.1f\n", latitude, longitude, altitude);
+                // LOG_DEBUG("GPS: %.6f, %.6f, %.1f\n", latitude, longitude, altitude);
+                mTxMessages++;
                 mSender.updateLocation(timestamp, latitude, longitude, altitude);
                 mTxBytes += sizeof(CustomMessage::LocationValues);
             }
@@ -202,7 +307,8 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 uint64_t timestamp = parser.getTimestamp();
                 float elevation = parser.getAltitude();
-                LOG_DEBUG("Elevation: %.1f m\n", elevation);
+                // LOG_DEBUG("Elevation: %.1f m\n", elevation);
+                mTxMessages++;
                 mSender.updateElevation(timestamp, elevation);
                 mTxBytes += sizeof(CustomMessage::ElevationValues);
             }
@@ -215,8 +321,9 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 float z = parser.getZ();
                 uint64_t nowMs = mKernel.sys.getTimeMs();
                 if (nowMs - mLastAccTimeMs >= 100) {
-                    LOG_DEBUG("Acc: %.2f, %.2f, %.2f, now: %u, last: %u, timestamp: %llu\n", x, y, z, nowMs, mLastAccTimeMs, timestamp);
+                    // LOG_DEBUG("Acc: %.2f, %.2f, %.2f, now: %u, last: %u, timestamp: %llu\n", x, y, z, nowMs, mLastAccTimeMs, timestamp);
                     mLastAccTimeMs = nowMs;
+                    mTxMessages++;
                     mSender.updateAccelerometer(timestamp, x, y, z);
                     mTxBytes += sizeof(CustomMessage::AccelerometerValues);
                 }
@@ -226,7 +333,8 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 uint64_t timestamp = parser.getTimestamp();
                 uint32_t steps = parser.getStepCount();
-                LOG_DEBUG("Steps: %u\n", steps);
+                // LOG_DEBUG("Steps: %u\n", steps);
+                mTxMessages++;
                 mSender.updateStepCounter(timestamp, steps);
                 mTxBytes += sizeof(CustomMessage::StepCounterValues);
             }
@@ -235,7 +343,8 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 uint64_t timestamp = parser.getTimestamp();
                 uint32_t floors = static_cast<uint32_t>(parser.getFloorsUp());
-                LOG_DEBUG("Floors: %u\n", floors);
+                // LOG_DEBUG("Floors: %u\n", floors);
+                mTxMessages++;
                 mSender.updateFloors(timestamp, floors);
                 mTxBytes += sizeof(CustomMessage::FloorsValues);
             }
@@ -247,11 +356,285 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (heading < 0.0f) heading += 360.0f;
             auto nowMs = mKernel.sys.getTimeMs();
             if (nowMs - mLastMagTimeMs >= 100) {
-                LOG_DEBUG("Compass: %.1f deg (X:%.2f Y:%.2f)\n", heading, x, y);
+                // LOG_DEBUG("Compass: %.1f deg (X:%.2f Y:%.2f)\n", heading, x, y);
+                mTxMessages++;
                 mSender.updateCompass(nowMs, heading);
                 mTxBytes += sizeof(CustomMessage::CompassValues);
                 mLastMagTimeMs = nowMs;
             }
+        } else if (mSensorBattery.matchesDriver(handle)) {
+            SDK::SensorDataParser::BatteryLevel parser(data[0]);
+            if (parser.isDataValid()) {
+                float level = parser.getCharge();
+                // LOG_DEBUG("Battery: %.1f%%\n", level);
+                mTxMessages++;
+                mSender.updateBattery(level);
+                mTxBytes += sizeof(CustomMessage::BatteryValues);
+            }
+        } else if (mSensorAccelerometerRaw.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: ACCELEROMETER_RAW, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorGyroscope.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: GYROSCOPE, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorGyroscopeRaw.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: GYROSCOPE_RAW, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorHeartBeat.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: HEART_BEAT, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorHeartRateMetrics.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: HEART_RATE_METRICS, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorStepDetector.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: STEP_DETECTOR, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorAmbientTemperature.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: AMBIENT_TEMPERATURE, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorPressure.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: PRESSURE, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorWristMotion.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: WRIST_MOTION, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorMotionDetect.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: MOTION_DETECT, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorActivityRecognition.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: ACTIVITY_RECOGNITION, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorGestureRecognition.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: GESTURE_RECOGNITION, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorActivity.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: ACTIVITY, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorPPG.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: PPG, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorECG.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: ECG, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorGPSSpeed.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: GPS_SPEED, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorGPSDistance.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: GPS_DISTANCE, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorBatteryCharging.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: BATTERY_CHARGING, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorBatteryMetrics.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: BATTERY_METRICS, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorFusion.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: FUSION, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorFusionRaw.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: FUSION_RAW, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
+        } else if (mSensorTouchDetect.matchesDriver(handle)) {
+            std::stringstream ss;
+            ss << "Sensor: TOUCH_DETECT, Binary: ";
+            SDK::Sensor::DataView view(data[0]);
+            for (size_t i = 0; i < view.getFieldCount(); ++i) {
+                uint32_t val = view.u[i];
+                const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&val);
+                for (int j = 0; j < 4; ++j) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[j]) << " ";
+                }
+            }
+            LOG_DEBUG("%s\n", ss.str().c_str());
         }
     }
 }

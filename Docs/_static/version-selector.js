@@ -11,22 +11,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const selector = document.createElement('select');
     selector.id = 'version-selector';
     selector.style.cssText = `
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 1000;
-        padding: 5px;
-        font-size: 14px;
+    display: block;
+    margin: 8px auto 12px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--white, #fff);
+    color: #333;
+    cursor: pointer;
     `;
+
 
     // Add loading option
     const loadingOption = document.createElement('option');
     loadingOption.textContent = 'Loading versions...';
     selector.appendChild(loadingOption);
 
-    // Insert into the page (assuming RTD theme structure)
-    const nav = document.querySelector('.wy-nav-side') || document.querySelector('nav') || document.body;
-    nav.appendChild(selector);
+    // Insert below the header title in the sidebar search area
+    const searchArea = document.querySelector('.wy-side-nav-search');
+    const searchContainer = searchArea ? searchArea.querySelector('[role="search"]') : null;
+    if (searchArea && searchContainer) {
+        searchArea.insertBefore(selector, searchContainer);
+    } else if (searchArea) {
+        searchArea.appendChild(selector);
+    } else {
+        const nav = document.querySelector('.wy-nav-side') || document.querySelector('nav') || document.body;
+        nav.appendChild(selector);
+    }
 
     // Fetch tags from GitHub API
     fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/tags`)

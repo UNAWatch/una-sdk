@@ -1,24 +1,26 @@
-(tutorials/images/architecture)=
+(tutorials/sensors/architecture)=
 
-# Sensors Tutorial
+# Sensors - Integrating Hardware Sensors
 
 In this tutorial, we implement a sensors dashboard app that subscribes to available sensors at **maximum frequency** (period=0, count=0 except Accelerometer), processes new message structures with **timestamps** where available, and displays data on a **single GUI screen**:
 
-- **Top**: Battery level (TODO: implement)
+- **Top**: Battery level
 - **Middle multiline text**: Sensor data with **L1/L2 verbosity levels** (BASIC/DETAILED/FULL and individual sensor views)
 - **Bottom**: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)
+
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Sensors)
 
 ## List of Implemented Sensors
 
 | Sensor | Description | Notes |
 |--------|-------------|-------|
 | Heart Rate | Live BPM + Trust Level | |
-| GPS Location | Lat/Long/Alt (double) | Always on; toggle TODO |
-| Altimeter | Elevation (m) | Barometric pressure parsing TODO |
+| GPS Location | Lat/Long/Alt (double) | Always on |
+| Altimeter | Elevation (m) | Barometric pressure based |
 | Accelerometer | X/Y/Z G-forces | connect(0.1f, 0); sender throttled ~100ms |
 | Step Counter | Total steps | Cumulative |
 | Floor Counter | Floors ascended | Cumulative; parser.getFloorsUp() |
-| Magnetometer | X/Y/Z fields (for compass) | Connected as MAGNETIC_FIELD; heading computed from X/Y fields |
+| Magnetometer | X/Y/Z fields (for compass) | Heading computed from X/Y fields |
 | RTC | Time (sec since boot) | From kernel sys.getTimeMs()/1000; not sensor |
 
 ## Architecture Overview
@@ -30,15 +32,31 @@ graph LR
     Service -->|Custom Msgs w/ timestamps| Kernel[(Kernel)]
     Kernel -->|Custom Msgs| Model[GUI Model]
     Model --> View[MainView]
-    View --> Display[Single Screen:<br/>Battery Top<br/>Multiline Data (L1/L2)<br/>Bottom Stats]
+    View --> Display["Single Screen:
+        Battery Top
+        Multiline Data (L1/L2)
+        Bottom Stats"]
     Buttons[L1/L2 Buttons] -.-> View
 ```
 
 ## Implementation Steps
 
+
+### Optional step: copy the Sensor tutorial code to edit
+1. **Copy sensors tutorial**
+2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else, Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own app ID programatically from the name. 
+3. **Commit initial changes**: it's a good practice to use version control system like git
+4. ***Edit TouchGFX if you changed the name**: 
+   - Rename `*.touchgfx` to `<MY_APP>.touchgfx`
+   - Rename `*.touchgfx:163` `"Name": "MY_APP"`
+   - Click **Generate code**
+
+
+
+
 ### Step 1: Define Custom Messages
 
-Create [`Commands.hpp`](Docs/Tutorials/Sensors/Software/Libs/Header/Commands.hpp) with message types and structs:
+Create [`Commands.hpp`](Software/Libs/Header/Commands.hpp) with message types and structs:
 
 ```cpp
 namespace CustomMessage {
@@ -85,7 +103,7 @@ public:
 
 ### Step 2: Service - Subscribe & Process Sensors
 
-In [`Service.hpp`](Docs/Tutorials/Sensors/Software/Libs/Header/Service.hpp):
+In [`Service.hpp`](Software/Libs/Header/Service.hpp):
 
 ```cpp
 SDK::Sensor::Connection mSensorHR{SDK::Sensor::Type::HEART_RATE, 0, 0};
@@ -97,7 +115,7 @@ SDK::Sensor::Connection mSensorFloorCounter{SDK::Sensor::Type::FLOOR_COUNTER, 0,
 // CustomMessage::GUISender mSender;
 ```
 
-In `run()` [`Service.cpp`](Docs/Tutorials/Sensors/Software/Libs/Sources/Service.cpp): connect all (acc.connect(0.1f, 0)), loop getMessage:
+In `run()` [`Service.cpp`](Software/Libs/Sources/Service.cpp): connect all (acc.connect(0.1f, 0)), loop getMessage:
 
 ```cpp
 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
@@ -128,7 +146,7 @@ Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec), `mSender.updat
 
 ### Step 3: GUI Model - Receive Messages
 
-In [`Model.cpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp), implement `customMessageHandler`:
+In [`Model.cpp`](Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp), implement `customMessageHandler`:
 
 ```cpp
 case CustomMessage::HR_VALUES: {
@@ -141,7 +159,7 @@ case CustomMessage::HR_VALUES: {
 
 ### Step 4: MainView - Display & Controls
 
-In [`MainView.hpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp)[`MainView.cpp`](Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
+In [`MainView.hpp`](Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp), [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
 
 Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
@@ -153,15 +171,28 @@ Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
 Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE); invalidate
 
-Header: `refreshBattery()` "Battery: %.1f%%" `text_header`  // TODO impl
+Header: `refreshBattery()` "Battery: %.1f%%" `text_header`
 
 Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f" `text_stats`
 
 ### Additional Notes
 
-- **GPS On/Off**: TODO R1 toggle, service connect/disconnect.
-- **Battery**: updateBattery() exists but not called; TODO implement battery level retrieval
-- **Altimeter Pressure**: TODO parser.getPressure()?
+- **Battery**: Battery level retrieval implemented using SDK::Sensor::BATTERY_LEVEL
+- **Altimeter**: Uses altitude from barometric sensor; pressure not available in parser
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
-- Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).
+- Build with [`CMakeLists.txt`](Software/Apps/Sensors-CMake/CMakeLists.txt).
+
+### Running on Simulator
+
+To test the Sensors app on the simulator (Windows only):
+
+1. Build the app following the [SDK setup](../../sdk-setup.md) instructions.
+2. Open `Sensors.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+3. Navigate to `Sensors\Software\Apps\TouchGFX-GUI\simulator\msvs`
+4. Open `Application.vcxproj` in Visual Studio
+5. Press **F5** to start debugging and run the simulator
+
+The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.
+
+For detailed sensor simulation configuration and features, see [Simulator](../../Simulator.md).

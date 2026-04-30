@@ -4,15 +4,7 @@ on:
   push:
     branches: [ main, develop ]
     tags: [ '*' ]
-    paths:
-      - 'Docs/Tutorials/**'
-      - '.github/scripts/generate-tutorials-app-list.py'
-      - '.github/workflows/tutorials-ci.yml'
   pull_request:
-    paths:
-      - 'Docs/Tutorials/**'
-      - '.github/scripts/generate-tutorials-app-list.py'
-      - '.github/workflows/tutorials-ci.yml'
 
 # env:
 #   APPS_EXCLUDED: |
@@ -58,7 +50,13 @@ jobs:
           echo "Setup environment"
           . ./Utilities/Scripts/build-cube/find-cube.sh
           export UNA_SDK=$GITHUB_WORKSPACE
-          cd Docs/Tutorials/${{ matrix.app }}/Software/Apps/${{ matrix.app }}-CMake
+          CMAKE_PATH="Docs/Tutorials/${{ matrix.app }}"
+          CMAKE_ROOT=$(find "$CMAKE_PATH" -type f -name "CMakeLists.txt" | head -1 | xargs dirname)
+          if [ -z "$CMAKE_ROOT" ] || [ ! -d "$CMAKE_ROOT" ]; then
+            echo "No CMakeLists.txt found under $CMAKE_PATH"
+            exit 1
+          fi
+          cd "$CMAKE_ROOT"
           mkdir -p build
           cd build
           echo "Build"

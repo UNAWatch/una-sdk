@@ -1,7 +1,7 @@
 (development-workflow)=
 # Development Workflow
 
-This document outlines the complete development lifecycle for Una-Watch applications.
+This document outlines the complete development lifecycle for UNA Watch applications.
 
 ## Workflow Stages
 

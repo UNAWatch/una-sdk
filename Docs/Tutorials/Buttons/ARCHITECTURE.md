@@ -1,8 +1,10 @@
 (tutorials/buttons/architecture)=
 
-# Buttons Tutorial
+# Buttons - Handling User Input and Navigation
 
-Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.
+Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA Watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.
+
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Buttons)
 
 ## What You'll Learn
 
@@ -55,6 +57,23 @@ Before building the Buttons app, you need to set up the UNA SDK environment. Fol
 
 The app will start and display an initial black screen. Use the hardware buttons to navigate between different colored screens, demonstrating buttons navigation patterns.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `Buttons.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `Buttons\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to simulate hardware buttons:
+- **1** = L1 (Red screen)
+- **2** = L2 (Black screen)
+- **3** = R1 (Blue screen)
+- **4** = R2 (Green screen, double-press to exit)
+
+The simulator will display color changes based on button presses. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
+
 ## Buttons App Overview
 
 ### Navigation Flow
@@ -73,7 +92,7 @@ The app will start and display an initial black screen. Use the hardware buttons
 - Minimal implementation since no sensors are used
 
 #### The GUI Layer (Frontend)
-- Built with TouchGFX framework
+- Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Handles button events and screen transitions
 - Updates the display based on user input
 - Manages screen state and visual elements
@@ -87,16 +106,17 @@ After changing screen properties (like color), the `invalidate()` method is call
 ## Buttons app creation process
 
 1. **Copy HelloWorld tutorial**
-2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else.
+2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own APP ID programatically from the name. 
 3. **Commit initial changes**: it's a good practice to use version control system like git
 4. ***Edit TouchGFX**: 
-   - Rename `*.touchgfx` to `Buttons.touchgfx`
-   - Rename `Buttons.touchgfx:163` `"Name": "Buttons"`
+   - Rename `*.touchgfx` to `<MY_APP>.touchgfx`
+   - Rename the 'Name' field in Buttons.touchgfx at line 163: `Buttons.touchgfx:163` `"Name": "Buttons"` to `"Name": "<MY_APP>"`
    - Add 240x240 a box `box1` at X:0 Y:0
    - Click **Generate code**
 5. **Edit MainView.cpp**: 
-   - You can see `touchgfx::Box box1;` in `MainViewBase.cpp`
-   - Add box1 color set to `void MainView::handleKeyEvent(uint8_t key)`:
+   - MainView.cpp is located at '...\Software\Apps\TouchGFX-GUI\gui\src\main_screen'
+   - You can see `touchgfx::Box box1;` in `MainViewBase.cpp` ('...\Software\Apps\TouchGFX-GUI\generated\gui_generated\src\main_screen') 
+   - Add box1 color set to `void MainView::handleKeyEvent(uint8_t key)` :
       ```cpp
       void MainView::handleKeyEvent(uint8_t key)
       {
@@ -117,6 +137,7 @@ After changing screen properties (like color), the `invalidate()` method is call
          }
       }
       ``` 
+   - In MainView.hpp ('...\Software\Apps\TouchGFX-GUI\gui\include\gui\main_screen')
    - Add `lastKeyPressed` state to exit on double **R2** clicks:
       ```cpp
       class MainView : public MainViewBase

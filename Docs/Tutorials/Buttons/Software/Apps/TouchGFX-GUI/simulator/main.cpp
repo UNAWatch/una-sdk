@@ -10,7 +10,6 @@
 
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/Simulator/Kernel/Kernel.hpp"
-#include "SDK/Simulator/Sensors/SensorCore.hpp"
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
@@ -36,9 +35,15 @@
 using namespace touchgfx;
 
 // Kernel thread function
-static void kernelThreadFunction(App::Core* appCore)
+static void appThreadFunction(App::Core* appCore)
 {
     appCore->run();
+}
+
+// GUI communication thread 
+static void guiCommThreadFunction(App::Core* appCore)
+{
+    appCore->runGuiComm();
 }
 
 // Service thread function
@@ -47,12 +52,15 @@ static void serviceThreadFunction(Service* service)
     service->run();
 }
 
-static int runTouchGFX(SDK::App::Comm&         appComm,
+static int runTouchGFX(SDK::App::DualAppComm&  appComm,
                        SDK::Simulator::Kernel& srvKernel,
                        SDK::Simulator::Kernel& guiKernel,
                        int                     argc,
                        char**                  argv)
 {
+    // Initialize Logger with Service's kernel. In real app Service and GUI will have each its own kernel.
+    Logger_init(srvKernel.getKernel().log);
+
     // Save Service's kernel for global access
     SDK::KernelProviderService::CreateInstance(&srvKernel.getKernel());
 
@@ -84,20 +92,18 @@ static int runTouchGFX(SDK::App::Comm&         appComm,
     //// to.
     touchgfx_enable_stdio();
 
-    // Initialize Logger with Service's kernel. In real app Service and GUI will have each its own kernel.
-    Logger_init(srvKernel.getKernel().log);
-
     // Start service thread
     std::thread serviceThread(serviceThreadFunction, &service);
-    std::thread kernelThread(kernelThreadFunction, &appCore);
-
+    std::thread appThread(appThreadFunction, &appCore);
+    std::thread guiCommThread(guiCommThreadFunction, &appCore);
     touchgfx::HAL::getInstance()->taskEntry();  // Main GUI loop
 	
     appCore.stopRequest();
 
     // Stop threads
     serviceThread.join();
-    kernelThread.join();
+    appThread.join();
+    guiCommThread.join();
 
     return EXIT_SUCCESS;
 }
@@ -117,16 +123,15 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #endif
 
     // Create kernel objects and service control
-    SDK::Simulator::Sensors::Core sensorCore;
     SDK::App::MessageCore         appMessageCore;
 
 	SDK::Simulator::Mock::SystemService serviceSystem;
-    SDK::Simulator::Kernel serviceKernel("service", nullptr);
+    SDK::Simulator::Kernel serviceKernel("service");
 	serviceKernel.setIAppComm(appMessageCore.getAppComm().getServiceComm());
 	serviceKernel.setISystem(&serviceSystem);
 
     SDK::Simulator::Mock::SystemGUI guiSystem;
-    SDK::Simulator::Kernel guiKernel("gui", &sensorCore);
+    SDK::Simulator::Kernel guiKernel("gui");
     guiKernel.setIAppComm(appMessageCore.getAppComm().getGuiComm());
     guiKernel.setISystem(&guiSystem);
 

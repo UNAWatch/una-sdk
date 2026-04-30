@@ -1,8 +1,10 @@
 (tutorials/scrollmenu/architecture)=
 
-# ScrollMenu Tutorial
+# ScrollMenu - Creating Scrollable Lists and Menus
 
-Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamental concepts of menu navigation on the UNA watch platform. This tutorial focuses on building an application with a scrollable menu using hardware buttons, providing a foundation for more complex user interfaces.
+Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamental concepts of menu navigation on the UNA Watch platform. This tutorial focuses on building an application with a scrollable menu using hardware buttons, providing a foundation for more complex user interfaces.
+
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/ScrollMenu)
 
 ## What You'll Learn
 
@@ -55,6 +57,23 @@ Before building the ScrollMenu app, you need to set up the UNA SDK environment. 
 
 The app will start and display an initial menu with three items. Use the hardware buttons to navigate the menu and perform actions, demonstrating menu navigation patterns.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `ScrollMenu.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `ScrollMenu\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to simulate hardware buttons:
+- **1** = L1 (Previous menu item)
+- **2** = L2 (Next menu item)
+- **3** = R1 (Perform action on selected item)
+- **4** = R2 (Double-press to exit)
+
+The simulator will display the scrollable menu with Counter, Increase, Decrease items. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
+
 ## ScrollMenu App Overview
 
 ### Navigation Flow
@@ -95,7 +114,7 @@ After performing actions that change the menu display (such as updating the coun
 ## ScrollMenu app creation process
 
 1. **Copy HelloWorld tutorial**
-2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else.
+2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own APP ID programatically from the name. 
 3. **Commit initial changes**: it's a good practice to use version control system like git
 4. ***Add text keys using TouchGFX Designer**:
     - In TouchGFX Designer, go to the **Texts** tab
@@ -106,8 +125,8 @@ After performing actions that change the menu display (such as updating the coun
       - **Text Id**: "Decrease", **Alignment**: Center, **Typography**: Poppins_Medium_25, **Translation (GB)**: "Decrease"
     - These will generate the text keys T_COUNTER, T_INCREASE, T_DECREASE used in the code
 5. ***Edit TouchGFX**: 
-   - Rename `*.touchgfx` to `ScrollMenu.touchgfx`
-   - Rename `ScrollMenu.touchgfx:163` `"Name": "ScrollMenu"`
+   - Rename `*.touchgfx` to `MY_APP.touchgfx`
+   - Rename `ScrollMenu.touchgfx:163` `"Name": "MY_APP"`
    - Open the main screen in the designer
    - From the widget palette, locate and drag a **Menu** widget onto the main screen canvas
    - Name the menu widget `menu1` in the properties panel

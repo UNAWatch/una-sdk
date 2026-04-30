@@ -6,11 +6,13 @@
  */
 
 #include "SDK/Simulator/App/MessageManager.hpp"
-
+#include "SDK/Simulator/OS/OS.hpp"
+#include <semaphore>
+#include <chrono>
 #include <cstring>
 
 #define LOG_MODULE_PRX      "App.MessageManager"
-#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
 
 namespace App
@@ -18,6 +20,22 @@ namespace App
 
 MessageManager::MessageManager()
 {
+}
+
+bool MessageManager::initCompletionSemaphore(SDK::MessageBase* msg)
+{
+    if (msg == nullptr) {
+        return false;
+    }
+
+    auto* sem = new OS::Semaphore(1, 0); // max=1, init=0
+
+    msg->mCompletionSemaphore = static_cast<void*>(sem);
+
+    msg->mNeedsResponse = true;
+    msg->mCompleted.store(false);
+
+    return true;
 }
 
 void* MessageManager::allocateRawMemory(size_t size)
@@ -49,6 +67,8 @@ void MessageManager::releaseMessage(SDK::MessageBase* msg)
 
     // Check if last reference
     if (oldCount == 1) {
+        // Cleanup completion semaphore if exists
+        cleanupCompletionSemaphore(msg);
         // Call virtual destructor
         msg->~MessageBase();
 
@@ -65,13 +85,45 @@ void MessageManager::retainMessage(SDK::MessageBase* msg)
     msg->mRefCount.fetch_add(1);
 }
 
+bool MessageManager::waitCompletion(SDK::MessageBase* msg, uint32_t timeoutMs)
+{
+    if (!msg || !msg->mCompletionSemaphore)
+        return false;
+
+    auto* sem = static_cast<OS::Semaphore*>(msg->mCompletionSemaphore);
+    return sem->take(timeoutMs);
+}
+
+void MessageManager::signalCompletion(SDK::MessageBase* msg)
+{
+    if (msg == nullptr || msg->mCompletionSemaphore == nullptr) {
+        return;
+    }
+
+    msg->mCompleted.store(true, std::memory_order_release);
+
+    auto* sem = static_cast<OS::Semaphore*>(msg->mCompletionSemaphore);
+    sem->give();
+}
+
 void MessageManager::signalCompletion(SDK::MessageBase* msg, SDK::MessageResult result)
 {
     if (msg == nullptr) {
         return;
     }
     msg->setResult(result);
-    msg->mCompleted.store(true);
+    signalCompletion(msg);
+}
+
+void MessageManager::cleanupCompletionSemaphore(SDK::MessageBase* msg)
+{
+    if (msg == nullptr)
+        return;
+
+    auto* sem = static_cast<OS::Semaphore*>(msg->mCompletionSemaphore);
+    delete sem;
+
+    msg->mCompletionSemaphore = nullptr;
 }
 
 } // namespace App

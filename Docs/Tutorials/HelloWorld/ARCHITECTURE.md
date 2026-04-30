@@ -1,12 +1,14 @@
 (tutorials/helloworld/architecture)=
-# HelloWorld Tutorial
+# HelloWorld - Introduction to UNA App Architecture
 
-Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
+Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA Watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.
+
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/HelloWorld)
 
 ## What You'll Learn
 
 - How to set up your development environment for UNA apps
-- The basic structure of a UNA watch application
+- The basic structure of a UNA Watch application
 - How service and GUI layers communicate
 - How to build and run apps on simulator and hardware
 - Understanding the UNA app framework fundamentals
@@ -54,11 +56,24 @@ Before building HelloWorld, you need to set up the UNA SDK environment. Follow t
 
 The app will start and show a basic GUI demonstrating the UNA app framework. This HelloWorld focuses on the core architecture - the service-GUI communication pattern that all UNA apps use.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `HelloWorld.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `HelloWorld\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+The simulator will display the HelloWorld GUI. Since HelloWorld has minimal interactive elements, it primarily demonstrates the app startup and basic framework.
+
+For detailed simulator setup and features, see [Simulator](../../Simulator.md).
+
 ### Working with TouchGFX GUI (Optional)
 
 If you want to explore or modify the GUI design:
 
-1. **Install TouchGFX Designer** (see [toolchain setup](toolchain-setup) for installation)
+1. **Install TouchGFX Designer** (see [toolchain setup](../../sdk-setup.md) for installation)
 
 2. **Open the TouchGFX project:**
    ```
@@ -89,7 +104,7 @@ HelloWorld demonstrates the essential UNA app architecture:
 - Communicates with the GUI through messages
 
 ### The GUI Layer (Frontend)
-- Built with TouchGFX framework
+- Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Displays information to the user
 - Receives updates from the service
 - Handles user interactions
@@ -168,4 +183,4 @@ These patterns form the foundation of all UNA app communication. Future tutorial
 - Using duplicate message type IDs
 - Not handling message memory management properly
 
-Remember: Every complex app started as a simple HelloWorld. Take it step by step, and you'll be building amazing UNA watch applications in no time!
+Remember: Every complex app started as a simple HelloWorld. Take it step by step, and you'll be building amazing UNA Watch applications in no time!

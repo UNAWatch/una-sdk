@@ -104,7 +104,9 @@ make --version || true
 
 If `which arm-none-eabi-gcc` prints nothing, your ST toolchain bin directory is not on `PATH` yet. Add it (see **Prepare** above) and re-open your terminal.
 
-#### Copy example and build
+#### Copy and Build an Existing Example
+
+This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see "Creating New Apps" below.
 
 This uses the same **Alarm CMake** example flow as Windows: **copy project → create build dir → configure → build**.
 
@@ -164,22 +166,31 @@ If you installed `gcc-arm-none-eabi` from your distro repositories and builds fa
 ##### Clone and setup environment
 
 ```powershell
-# Clone
+# Clone via SSH
 git clone --recursive git@github.com:UNAWatch/una-sdk.git
+# Or use HTTPS
+git clone --recursive https://github.com/UNAWatch/una-sdk.git
 
 # Export environment (persistent)
+# If you encounter a security error (e.g., running scripts is disabled), run this first:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 . ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1
 
 # Satisfy python dependencies
 pip install -r ${env:UNA_SDK}/Utilities/Scripts/app_packer/requirements.txt
+# If pip fails or dependencies are not found, verify Python is in PATH and restart PowerShell.
 ```
 
-Reboot PC to apply environment variables
+Reboot your PC or restart PowerShell to apply the environment variables. This ensures all changes take effect and may resolve issues like copy errors in later steps.
 
-#### Copy example and build
+#### Copy and Build an Existing Example
+
+This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see "Creating New Apps" below.
 
 ```powershell
 # Copy entire project for simplicity
+# Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).
+# If you get "Container cannot be copied onto existing leaf item" error, restart PowerShell and try again.
 cp "${env:UNA_SDK}\Examples\Apps\Alarm\*" MyAlarm -Recurse -Force
 
 # Create build dir
@@ -191,6 +202,18 @@ cmake -G "Unix Makefiles" -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
 # Build
 cmake --build MyAlarm/build
 ```
+
+#### Troubleshooting Windows Setup
+
+If you encounter errors like "include could not find requested file: /cmake/una-app.cmake" or "/cmake/una-sdk.cmake", ensure the `UNA_SDK` environment variable is set. Run the export script with dot sourcing to apply it to the current shell: `. ./una-sdk/Utilities/Scripts/export-stm32-tools.ps1`. Reboot your PC or restart PowerShell if issues persist, as environment variables may not apply immediately.
+
+If CMake reports "CMAKE_MAKE_PROGRAM is not set", "CMAKE_C_COMPILER not set", or "CMAKE_CXX_COMPILER not set", even after setting environment variables, add the following compiler flags to the CMake command:
+
+```powershell
+cmake -G "Unix Makefiles" -DCMAKE_SYSTEM_NAME=Generic -DCMAKE_C_COMPILER=arm-none-eabi-gcc -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
+```
+
+Then proceed with the build step: `cmake --build MyAlarm/build`.
 
 ## CMake-Based Workflow Development
 
@@ -217,45 +240,101 @@ MyApp/  # App root (can be anywhere)
 └── Output/  # Built .uapp files
 ```
 
+### CMake Command Explanations
+
+The CMake build process is a two-step procedure:
+
+1. **Configuration/Generation**: `cmake -G "Unix Makefiles" -S <source-dir> -B <build-dir>` generates intermediate build files (e.g., Makefiles) in the specified build directory. This step configures the project, resolves dependencies, sets compilers and paths, and prepares the build environment. Run this for initial setup or when `CMakeLists.txt` changes.
+
+2. **Build/Compilation**: `cmake --build <build-dir>` (from any directory) or `make` (inside the build directory) compiles the source code using the generated build files. Run this to build or recompile after source file modifications.
+
+For a clean rebuild, remove the build directory and repeat both steps: `rm -rf build && cmake -S . -B build && cmake --build build`.
+
+If build files are generated in the wrong directory (e.g., root instead of build dir), navigate to the correct build directory and run `make` or `cmake --build .` from there.
+
 ### Creating New Apps
 
 1. **Copy CMake Template**:
-   ```bash
-   # Create app dir
-   mkdir -p MyApp
-    cp -r Examples/Apps/<app-name>/Software/Apps/<app-name>-CMake/* MyApp/
+    To create a new app, copy an existing one from Examples/Apps (replace <app-name> with e.g., "Alarm" or "HRMonitor"). There are two ways: an easy way without renaming (no path changes needed) and an optional way to fully rename and reorganize.
 
-   # Copy libs
-   mkdir -p MyApp/Libs
-    cp -r Examples/Apps/<app-name>/Software/Libs/* MyApp/Libs/
+    **Easy Way (No Renaming, Minimal Changes):**
+    ```bash
+    # Copy the entire app folder
+    cp -r "${UNA_SDK}/Examples/Apps/<app-name>" MyApp
 
-   # For GUI: Copy TouchGFX
-   mkdir -p MyApp/TouchGFX-GUI
-    cp -r Examples/Apps/<app-name>/Software/Apps/TouchGFX-GUI/* MyApp/TouchGFX-GUI/
-   ```
+    # Copy or create icons in MyApp/Resources/ if needed (required: icon_30x30.png, icon_60x60.png)
+    ```
 
-2. **Customize CMakeLists.txt**:
-   - Update `set(APP_NAME "<app-name>")` to `set(APP_NAME "MyApp")`
-   - Set unique `APP_ID` (e.g., generate via `python -c 'import hashlib; print(hashlib5(b"MyApp").hexdigest().upper()[:8])'`)
-   - Verify paths
-     - `LIBS_PATH`: Path to shared libraries (example defaults: `../../Libs`)
-     - `OUTPUT_PATH`: Path to output directory (example defaults: `../../../Output`)
-     - `RESOURCES_PATH`: Path to resources (example defaults: `../../../Resources`)
-   - Optional Variables
-      - `TOUCHGFX_PATH`: Path to TouchGFX GUI directory (e.g., `../TouchGFX-GUI`) – for GUI apps only
-      - `UNA_APP_SERVICE_STACK_SIZE`: Service stack size (e.g., `10*1024`)
-      - `UNA_APP_SERVICE_RAM_LENGTH`: Service RAM length (e.g., `500K`)
-      - `UNA_APP_GUI_STACK_SIZE`: GUI stack size (e.g., `10*1024`)
-      - `UNA_APP_GUI_RAM_LENGTH`: GUI RAM length (e.g., `600K`)
+    This keeps all original folder and file names. When building, use the original <app-name>-CMake in commands (e.g., cmake -S MyApp/Software/Apps/<app-name>-CMake -B MyApp/build).
+
+    To adapt for your app:
+    - Update APP_NAME and APP_ID in MyApp/Software/Apps/<app-name>-CMake/CMakeLists.txt (see step 2).
+    - For GUI apps: Open MyApp/Software/Apps/TouchGFX-GUI/<app-name>GUI.touchgfx in TouchGFX Designer, update project name if desired, and save as MyAppGUI.touchgfx.
+
+    Other references remain the same.
+
+    **Optional: Full Rename and Reorganization (Customize Structure):**
+    If you want to match your app name or change folder structure:
+    ```bash
+    # Create custom structure
+    mkdir -p MyApp/Software/Apps/MyApp-CMake MyApp/Software/Libs MyApp/Software/Apps/TouchGFX-GUI MyApp/Resources MyApp/Output
+
+    # Copy and rename CMake folder contents
+    cp -r "${UNA_SDK}/Examples/Apps/<app-name>/Software/Apps/<app-name>-CMake/*" MyApp/Software/Apps/MyApp-CMake/
+    # Rename internal files, e.g.:
+    mv MyApp/Software/Apps/MyApp-CMake/<app-name>Service.ld MyApp/Software/Apps/MyApp-CMake/MyAppService.ld
+
+    # Copy libs (or move to custom path and update LIBS_PATH in CMakeLists.txt)
+    cp -r "${UNA_SDK}/Examples/Apps/<app-name>/Software/Libs/*" MyApp/Software/Libs/
+
+    # Copy TouchGFX (skip if not GUI; adjust TOUCHGFX_PATH if moved)
+    cp -r "${UNA_SDK}/Examples/Apps/<app-name>/Software/Apps/TouchGFX-GUI/*" MyApp/Software/Apps/TouchGFX-GUI/
+    # Rename TouchGFX project if desired:
+    mv MyApp/Software/Apps/TouchGFX-GUI/<app-name>GUI.touchgfx MyApp/Software/Apps/TouchGFX-GUI/MyAppGUI.touchgfx
+
+    # Copy or create icons in MyApp/Resources/ (adjust RESOURCES_PATH if changed)
+    ```
+
+    Note: A clean template is planned for future releases. If reorganizing, update paths in CMakeLists.txt accordingly (see step 2).
+
+2. **Customize CMakeLists.txt** (located at MyApp/Software/Apps/MyApp-CMake/CMakeLists.txt):
+    Update the following variables to customize your app. These are defined in the CMakeLists.txt and control build parameters, paths, and app metadata. Defaults are provided where applicable.
+
+    - `APP_NAME`: Set to your app's name, e.g., "MyApp". This is used for output filenames and internal references.
+    - `APP_ID`: A unique 16-character uppercase hexadecimal string identifying your app.
+      - Generate locally: 
+        - Bash/Linux: python -c 'import hashlib; print(hashlib.md5(b"MyApp").hexdigest().upper()[:16])'
+        - PowerShell/Windows: python -c "import hashlib; print(hashlib.md5(b'MyApp').hexdigest().upper()[:16])"
+      - Alternatively, acquire from the developer portal for published apps as described in [deploy.md](deploy.md).
+      Replace "MyApp" with your app name. See [API reference](api-reference.rst) for details.
+    - `DEV_ID`: Device identifier, typically "UNAWatch".
+    - `APP_TYPE`: App type, e.g., "app".
+    - `APP_AUTOSTART`: "On" or "Off" (default "Off") to enable autostart.
+    - Paths (adjust if reorganizing file structure):
+      - `LIBS_PATH`: Path to libraries, default "../../Libs".
+      - `OUTPUT_PATH`: Path for built files, default "../../../Output".
+      - `RESOURCES_PATH`: Path to resources like icons, default "../../../Resources".
+      - `TOUCHGFX_PATH`: Path to TouchGFX directory for GUI apps, e.g., "../TouchGFX-GUI".
+    - Memory settings (optional, adjust for app needs; defaults in una-app.cmake):
+      - `UNA_APP_SERVICE_STACK_SIZE`: Service stack, default 10*1024.
+      - `UNA_APP_SERVICE_RAM_LENGTH`: Service RAM, default 500K.
+      - `UNA_APP_GUI_STACK_SIZE`: GUI stack, default 10*1024.
+      - `UNA_APP_GUI_RAM_LENGTH`: GUI RAM, default 600K.
+    - Other optional: `BUILD_VERSION` (auto-detected from git or script), `APP_USER_NAME` (defaults to APP_NAME).
+
+    After updating APP_NAME, rename files like the linker script (e.g., from AlarmService.ld to MyAppService.ld) to match, as CMakeLists.txt references "${APP_NAME}Service.ld".
+
+    Note: Paths are relative to CMakeLists.txt. You can reorganize folders by updating these paths accordingly. For example, if libs are in a different location, change LIBS_PATH.
 
 3. **Implement Logic**:
    - Edit `Libs/Sources/` for service code.
    - For GUI, configure TouchGFX in `TouchGFX-GUI/` (e.g., update `application.config`, generate code via TouchGFX Designer).
 
 4. **Add Resources**:
-   - Place icons in `Resources/` (30x30 and 60x60 PNGs required).
+    - Place icons in `MyApp/Resources/` (30x30 and 60x60 PNGs required; copy from the original app or create new ones).
 
-5. **Set Environment** (as in Step 3 above).
+5. **Set Environment**:
+    Ensure the `UNA_SDK` environment variable is set, as described in the Linux or Windows setup sections above (e.g., run the export script or export command). If you've just set it, restart your terminal or PowerShell for the changes to take effect.
 
 ### Building Apps Manually
 Navigate to the app's CMake directory:
@@ -319,102 +398,25 @@ For now this is single supported way to create graphical applications for UNAwat
 ### Using TouchGFX Designer for Visual Editing
 
 - **Launch Designer**: Open TouchGFX Designer and create a new project or open an existing `.touchgfx` configuration file (e.g., `MyAppGUI.touchgfx`).
+- **Visual Design**: Define display settings, add widgets, organize screens, import assets, and configure interactions.
+- **Preview and Simulate**: Use the built-in simulator to test the UI before generating code.
 
-- **Visual Design**:
-  - Define the display resolution and color depth in the project settings (e.g., 240x240 for typical watch displays).
-  - Use the drag-and-drop interface to add widgets such as buttons, sliders, text fields, images, graphs, and animations.
-  - Organize screens (e.g., main menu, settings, data views) and define transitions between them.
-  - Import assets: Add fonts, images, and videos to the `assets/` directory.
-  - Configure interactions: Link button presses to actions, animations to timers, and data bindings to model updates.
-
-- **Preview and Simulate**: Use the built-in simulator to test the UI on your development machine before generating code.
-
-### Code Generation
-
-- After completing the design, click **Generate Code** in TouchGFX Designer.
-- This automatically creates C++ source files in the `generated/` directory:
-  - `gui_generated/`: Base classes for screens (Views), presenters, and the frontend application.
-  - `images/`: Bitmap and image handling code.
-  - `fonts/`: Font rendering and caching.
-  - `texts/`: Multilingual text resources.
-  - Simulator files for desktop testing.
-- The generated code is optimized for the target hardware and includes hardware abstraction for touch input and display drivers.
+For comprehensive guidance on TouchGFX Designer usage, code generation, project structure, CMake integration, build configuration, code organization, MVP pattern implementation, and custom GUI development, see the [TouchGFX Port Architecture](TouchGFX-Port-Architecture.md) document.
 
 ### Integration with CMake
 
-In UNA SDK projects, TouchGFX integrates seamlessly with CMake for building GUI applications:
-
-1. **Set Paths**:
-   - In `CMakeLists.txt`, define `TOUCHGFX_PATH` pointing to your TouchGFX project directory (e.g., `set(TOUCHGFX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")`).
-   - Optionally, set the environment variable `TOUCHGFX_GUI_PATH` to the same path for global reference across builds.
-
-2. **Include TouchGFX Build**:
-   ```cmake
-   include(${TOUCHGFX_PATH}/touchgfx.cmake)
-   
-   set(GUI_SOURCES ${TOUCHGFX_SOURCES} "PaintImpl.cpp" "syscalls.cpp" ${UNA_SDK_SOURCES_COMMON} ${UNA_SDK_SOURCES_GUI})
-   set(GUI_INCLUDE_DIRS ${TOUCHGFX_INCLUDE_DIRS} ${UNA_SDK_INCLUDE_DIRS_GUI})
-   
-   una_app_build_gui(${APP_NAME}GUI.elf)
-   ```
-
-3. **For Service+GUI Apps**:
-   - Build the service executable first (as in the service-only template).
-   - Then build the GUI executable, which links against TouchGFX.
-   - Use SDK tools to merge the service, GUI, and resources into a single `.uapp` file for deployment.
-
-4. **Dependencies**:
-   - Ensure `UNA_SDK` is set, as it provides STM32 HAL and CMSIS integrations.
-   - For custom hardware, adjust display and touch drivers in `touchgfx/hal/`.
+In UNA SDK projects, TouchGFX integrates seamlessly with CMake for building GUI applications. Set `TOUCHGFX_PATH` in `CMakeLists.txt`, include `touchgfx.cmake`, and configure GUI sources.
 
 ### Modifying Generated Code Safely
 
-- **Avoid Editing Generated Files**: Files in `generated/` are automatically overwritten during code generation. Any manual changes will be lost.
-
-- **Custom Code Locations**:
-  - Place custom implementations in `gui/src/`:
-    - `gui/src/<screen>_view.cpp`: Override view logic, handle user interactions, and update UI elements.
-    - `gui/src/<screen>_presenter.cpp`: Manage data flow between view and model.
-    - `gui/src/model/model.cpp`: Handle backend data and service communication.
-    - `gui/src/common/frontend_application.cpp`: App-wide initialization, screen transitions, and tick handling.
-  - For reusable components, create custom containers in `gui/src/containers/`.
-
-- **Regeneration Workflow**:
-  - Design in Designer → Generate Code → Implement custom logic in `gui/src/` → Rebuild.
-
-- **Version Control Tip**: Commit the `.touchgfx` file, assets, and custom `gui/src/` code, but exclude or .gitignore the `generated/` directory.
-
-### Best Practices for Custom GUI Development in Service+GUI Apps
-
-- **Separation of Concerns**: Keep the service layer focused on business logic (e.g., sensor data processing, file I/O) and the GUI layer on presentation. Use inter-process communication (e.g., via queues, events, or shared memory) to pass data between service and GUI threads.
-
-- **Leverage MVP Pattern**: TouchGFX's Model-View-Presenter architecture promotes clean code: Model for data, View for UI, Presenter for logic.
-
-- **Performance Optimization**:
-  - Use vector fonts and compressed images to minimize flash usage.
-  - Limit frame rates (e.g., 30 FPS) and use partial frame buffer updates for power efficiency.
-  - Profile memory usage with TouchGFX's built-in tools.
-
-- **Touch and Input Handling**: Calibrate touch sensitivity and handle multi-touch if supported. Integrate with the SDK's input HAL.
-
-- **Testing**:
-  - Use the TouchGFX Simulator for rapid iteration.
-  - Test on hardware early, especially for touch responsiveness and power draw.
-  - Unit test custom presenters and models.
-
-- **UNA-Specific Tips**:
-  - Ensure app icons (30x30 and 60x60 PNGs) are in `Resources/` for launcher integration.
-  - Set unique `APP_ID` in CMake to avoid conflicts.
-  - For watch apps, design for small screens and battery life; use dark themes and efficient animations.
-  - When merging service+GUI, verify stack sizes (`UNA_APP_GUI_STACK_SIZE`) are adequate for your UI complexity.
-
-For detailed information on the TouchGFX port implementation for UNA SDK, see the [TouchGFX Port Architecture](TouchGFX-Port-Architecture.md) document.
-
-With these practices, you can develop responsive, professional GUIs that integrate smoothly with the UNA platform's service architecture.
+- **Avoid Editing Generated Files**: Files in `generated/` are automatically overwritten during code generation.
+- **Custom Code Locations**: Place custom implementations in `gui/src/` (views, presenters, model).
+- **Regeneration Workflow**: Design → Generate Code → Implement custom logic in `gui/src/` → Rebuild.
 
 ## **Troubleshooting**
 
 - **Missing Dependencies**: Ensure all required libraries are linked.
 - **Path Errors**: Verify `UNA_SDK` and other paths are correctly set.
-- **Toolchain Issues**: Confirm ARM GCC is properly installed and in PATH.
-- **Build Conflicts**: Clean build dirs if errors persist after changes.
+- **Toolchain Issues**: Confirm ARM GCC is properly installed and in PATH. On Windows, run the export script with dot sourcing and reboot if necessary.
+- **CMake Compiler Errors**: If CMake cannot find compilers (e.g., "CMAKE_C_COMPILER not set"), add `-DCMAKE_SYSTEM_NAME=Generic -DCMAKE_C_COMPILER=arm-none-eabi-gcc -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc` to the cmake command.
+- **Build Conflicts**: Clean build dirs if errors persist after changes. Use `rm -rf build` (Linux) or `Remove-Item -Recurse build` (PowerShell) and reconfigure.

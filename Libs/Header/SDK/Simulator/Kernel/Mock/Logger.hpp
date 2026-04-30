@@ -58,7 +58,7 @@ private:
         uint32_t time = static_cast<uint32_t>(GetTickCount64());
 
         char timeBuff[16] = { 0 };
-        sprintf(timeBuff, "%10lu ", time);
+        sprintf(timeBuff, "%10u ", time);
 
         static char levelBuff[10]{};
         if (level) {

@@ -1,7 +1,9 @@
 (tutorials/images/architecture)=
-# Import Images Tutorial
+# Images - Working with Graphics and Assets
 
-Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.
+Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA Watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.
+
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Images)
 
 ## What You'll Learn
 
@@ -10,9 +12,9 @@ Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you h
 - How images are converted and stored in the UNA SDK
 - Using bitmap IDs to reference and display images in code
 - Programmatically adding images without using designer-generated backgrounds
-- Mode switching between [`Image`](touchgfx/widgets/Image.hpp) and [`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) using L1 button
-- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
-- Understanding the TouchGFX image pipeline in UNA applications
+- Mode switching between Image and ScalableImage using L1 button
+- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Understanding the TouchGFX image pipeline in UNA applications. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Best practices for image optimization and management
 
 ## Getting Started
@@ -58,13 +60,28 @@ Before starting the Import Images tutorial, you need to set up the UNA SDK envir
 
 The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps.
 
+### Running on Simulator
+
+To test the app on the simulator (Windows only):
+
+1. Open `Images.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
+2. Navigate to `Images\Software\Apps\TouchGFX-GUI\simulator\msvs`
+3. Open `Application.vcxproj` in Visual Studio
+4. Press **F5** to start debugging and run the simulator
+
+In the simulator, use keyboard keys to interact:
+- **1** = L1 (Toggle between Image and ScalableImage modes)
+- **3** = R1 (Trigger jump animation when in Image mode)
+
+The simulator will display the imported character image with scaling and animation capabilities. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
+
 ## Images App Overview
 
-The Images tutorial demonstrates programmatic image display and interactivity in UNA watch apps:
+The Images tutorial demonstrates programmatic image display and interactivity in UNA Watch apps:
 
 ### Key Features Demonstrated
 - **No background**: Pure programmatic content - no designer-generated backgrounds or boxes
-- **Dual image modes**: L1 toggles between [`Image`](touchgfx/widgets/Image.hpp) (`guyImage`) and [`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) (`scaledGuyImage`)
+- **Dual image modes**: L1 toggles between Image (`guyImage`) and ScalableImage (`scaledGuyImage`)
 - **Jump animation**: R1 triggers sine-wave Y-offset animation on `guyImage` via tick events
 
 ### The Asset Pipeline
@@ -75,14 +92,14 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 - **Display**: Images are referenced by ID and displayed on screen
 
 ### The GUI Layer (Frontend)
-- Built with TouchGFX framework
-- Programmatically adds images in [`setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
-- Handles L1/R1 buttons for mode switching and animation triggers in [`handleKeyEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
-- Drives animation in [`handleTickEvent()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
+- Programmatically adds images in [`setupScreen()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Handles L1/R1 buttons for mode switching and animation triggers in [`handleKeyEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Drives animation in [`handleTickEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
 
 ### Image Management in UNA SDK
 - Images are converted to TouchGFX bitmap format during build
-- Each image gets a unique ID in [`BitmapDatabase.hpp`](generated/images/include/images/BitmapDatabase.hpp)
+- Each image gets a unique ID in [`BitmapDatabase.hpp`](Software/Apps/TouchGFX-GUI/generated/images/include/images/BitmapDatabase.hpp)
 - Images are stored in flash memory for efficient access
 - TouchGFX handles image decompression and display
 
@@ -95,7 +112,7 @@ Follow these steps to import and display images in your UNA app:
 1. **Open your image editor** (Paint, GIMP, Photoshop, etc.)
 
 2. **Create a new image** with appropriate dimensions:
-    - Consider the UNA watch display (typically 240x240 pixels)
+    - Consider the UNA Watch display (typically 240x240 pixels)
     - Use power-of-2 dimensions when possible for better compression
     - Choose appropriate color depth (RGB565 for photos, indexed for icons)
 
@@ -114,7 +131,9 @@ Follow these steps to import and display images in your UNA app:
 
 2. **Navigate to the Images tab** in TouchGFX Designer
 
-3. **Click "Import Images"** and select your `my_image.png` file\n\n   ![Add Image Button](doc-assets/add-image-button.png)
+3. **Click "Import Images"** and select your `my_image.png` file   
+
+![Add Image Button](doc-assets/add-image-button.png)
 
 4. **Configure image settings**:
     - Choose appropriate color format (RGB565, ARGB8888, etc.)
@@ -122,14 +141,17 @@ Follow these steps to import and display images in your UNA app:
     - Set compression options
 
 5. **Generate code** after importing:
-    - Click "Generate Code" in TouchGFX Designer\n\n   ![Generated Image Asset](doc-assets/generated-image-asset.png)
+    - Click "Generate Code" in TouchGFX Designer
+
+![Generated Image Asset](doc-assets/generated-image-asset.png)
+
     - This creates bitmap IDs and conversion code
 
 ### Step 3: Display the Image in Code
 
-After importing `guy-transparent.png`, TouchGFX generates [`BITMAP_GUY_TRANSPARENT_ID`](generated/images/include/images/BitmapDatabase.hpp).
+After importing `guy-transparent.png`, TouchGFX generates [`BITMAP_GUY_TRANSPARENT_ID`](Software/Apps/TouchGFX-GUI/generated/images/include/images/BitmapDatabase.hpp).
 
-Images are added programmatically in [`MainView::setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
+Images are added programmatically in [`MainView::setupScreen()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
 
 ```cpp
 // Programmatic image setup - no background
@@ -145,7 +167,7 @@ scaledGuyImage.setVisible(true);  // Initially shown
 add(scaledGuyImage);
 ```
 
-**Note**: Widgets declared as members in [`MainView.hpp`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp). Includes placed in header.
+**Note**: Widgets declared as members in [`MainView.hpp`](Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp). Includes placed in header.
 
 ### Step 4: Build and Test
 
@@ -183,9 +205,9 @@ const uint16_t BITMAP_GUY_TRANSPARENT_ID = 0;
 TouchGFX provides several ways to display images:
 
 **No Background:**
-The demo has no background image or box. All content is added programmatically in [`setupScreen()`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp).
+The demo has no background image or box. All content is added programmatically in [`setupScreen()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp).
 
-**[`ScalableImage`](touchgfx/widgets/ScalableImage.hpp) (scaledGuyImage):**
+**ScalableImage (scaledGuyImage):**
 ```cpp
 scaledGuyImage.setBitmap(touchgfx::Bitmap(BITMAP_GUY_TRANSPARENT_ID));
 scaledGuyImage.setPosition(70, originalY, 120, 120);
@@ -198,7 +220,7 @@ add(scaledGuyImage);
 Demo uses `handleTickEvent()` for sine-wave jump on `guyImage`:
 - Triggered by R1 when Image mode active
 - 60 ticks (~6s at 10Hz), sin(phase)*30px offset
-(See [`MainView.cpp`](Docs/Tutorials/Images/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp:61))
+(See [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp))
 
 ### Image Memory Management
 
@@ -270,4 +292,4 @@ Images in UNA apps are stored in flash memory and loaded into RAM as needed:
 - Limit number of simultaneous images
 - Profile with TouchGFX Performance Analyzer
 
-Remember: Images are a powerful way to make your UNA watch apps visually appealing. Start simple, optimize as needed, and you'll create engaging user interfaces that work great on the small screen!
+Remember: Images are a powerful way to make your UNA Watch apps visually appealing. Start simple, optimize as needed, and you'll create engaging user interfaces that work great on the small screen!

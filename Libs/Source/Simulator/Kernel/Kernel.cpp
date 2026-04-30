@@ -10,19 +10,17 @@
  */
 
 #include "SDK/Simulator/Kernel/Kernel.hpp"
-#include "SDK/Simulator/Sensors/ISensorCore.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 #include "SDK/Interfaces/IApp.hpp"
+#include <SDK/Messages/MessageGuard.hpp>
 
 static constexpr char sFsPath[] = "../../../../../Output/";
 
 namespace SDK::Simulator
 {
 
-Kernel::Kernel(const char* name, Sensors::ISensorCore* sensoreCore)
-    : mSensoreCore(sensoreCore)
-    , mIsServise(mSensoreCore != nullptr)
-    , mName(name)
+Kernel::Kernel(const char* name)
+    : mName(name)
     , mLogger()
     , mAppMemory()
     , mFilesystem(sFsPath)
@@ -51,9 +49,6 @@ SDK::Kernel& Kernel::getKernel()
 
 void Kernel::tick()
 {
-    if (mSensoreCore) {
-        mSensoreCore->tick();
-    }
 }
 
 bool Kernel::keyFilter(uint8_t key)
@@ -61,13 +56,12 @@ bool Kernel::keyFilter(uint8_t key)
      if (mKernelIsStopped){
         return false;
      }
-     
-    return (!mIsServise && //iappmock->getState() == Mock::App::State::RESUMED &&
-            (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
-             SDK::Interface::IApp::Button::BUTTON_L2 == key ||
-             SDK::Interface::IApp::Button::BUTTON_R1 == key ||
-             SDK::Interface::IApp::Button::BUTTON_R2 == key ||
-             SDK::Interface::IApp::Button::BUTTON_L1R2 == key));
+
+    return (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
+            SDK::Interface::IApp::Button::BUTTON_L2 == key ||
+            SDK::Interface::IApp::Button::BUTTON_R1 == key ||
+            SDK::Interface::IApp::Button::BUTTON_R2 == key ||
+            SDK::Interface::IApp::Button::BUTTON_L1R2 == key);
 }
 
 std::string Kernel::getFsPath()

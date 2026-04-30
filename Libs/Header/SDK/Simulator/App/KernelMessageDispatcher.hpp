@@ -10,51 +10,49 @@
 
 #include <cstdint>
 
-#include "SDK/Simulator/App/AppComm.hpp"
+#include "SDK/Simulator/App/DualAppComm.hpp"
 #include "SDK/Simulator/App/MessageManager.hpp"
 #include "SDK/Interfaces/IVibro.hpp"
 #include "SDK/Interfaces/IBacklight.hpp"
 #include "SDK/Interfaces/IBuzzer.hpp"
+#include "SDK/Simulator/Components/SensorListener.hpp"
 
 namespace SDK::App
 {
 
-class KernelMessageDispatcher : public SDK::App::Comm::IDispatch
+class KernelMessageDispatcher //: public SDK::App::DualAppComm::IDispatch
 {
 public:
     /**
      * @brief Construct message manager
      */
-    KernelMessageDispatcher(::App::MessageManager&      messageManager,
-                            SDK::Interface::IVibro&     vibro,
+    KernelMessageDispatcher(SDK::App::DualAppComm& appComm, 
+                            ::App::MessageManager& messageManager,
+                            SDK::Interface::IVibro& vibro,
                             SDK::Interface::IBacklight& backlight,
-                            SDK::Interface::IBuzzer&    buzzer);
-    
+                            SDK::Interface::IBuzzer& buzzer);
 
     /**
      * @brief Destructor
      */
     ~KernelMessageDispatcher() = default;
+
+    void run();
     
-    bool dispatchMessage(SDK::MessageBase* msg) override;
+    //bool dispatchMessage(SDK::MessageBase* msg) override;
 
 private:
     struct HeartRateZones
     {
 
         /// Maximum number of zones.
-        static constexpr uint8_t kMaxNum = 5;
+        static constexpr uint8_t kMaxNum = 7;
 
         /// Maximum number of threshold.
         static constexpr uint8_t kMaxThreshold = kMaxNum - 1;
 
-        /**
-         * @brief   Heart rate thresholds array in beats per minute (BPM).
-         * @note    Array contains (kMaxNum - 1) threshold values that define zone boundaries.
-         *          Zone 1: < thresholds[0], Zone 2: thresholds[0] to thresholds[1], etc.
-         *          Default values: 120, 140, 160, 170 BPM.
-         */
-        uint8_t thresholds[kMaxThreshold]{ 120, 140, 160, 170 };
+        // Heart rate thresholds array in beats per minute (BPM).
+        uint8_t thresholds[kMaxThreshold]{ 95, 114, 133, 152, 171, 190 };
 
         /**
          * @brief Equality operator to compare two heart rate zones configurations.
@@ -263,23 +261,26 @@ private:
         }
     };
 
-    static constexpr WatchSettings mSettings{};
+    WatchSettings mSettings{};
     static constexpr uint32_t      GLANCE_WIDTH        = 240;
     static constexpr uint32_t      GLANCE_HEIGHT       = 60;
     static constexpr uint32_t      GLANCE_MAX_CONTROLS = 32;
 
     void appLifeCycleHandler(SDK::MessageBase* msg);
     void appMsgHandler(SDK::MessageBase* msg);
+    void slMsgHandler(SDK::MessageBase* msg);
 
     // Prevent copying
     KernelMessageDispatcher(const KernelMessageDispatcher&)            = delete;
     KernelMessageDispatcher& operator=(const KernelMessageDispatcher&) = delete;
 
-    ::App::MessageManager&      mMessageManager;
+    ::App::MessageManager&      mMessageMgr;
+    SDK::App::DualAppComm&      mAppComm;
     SDK::Interface::IVibro&     mVibro;
 	SDK::Interface::IBacklight& mBacklight;
 	SDK::Interface::IBuzzer&    mBuzzer;
 	WatchSettingsLocal          mLocalSettings;
+    ::App::SensorListener         mSrvSensorListener;
 };
 
 } // namespace App

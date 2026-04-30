@@ -27,11 +27,35 @@ private:
     SDK::Sensor::Connection  mSensorStepCounter;
     SDK::Sensor::Connection  mSensorFloorCounter;
     SDK::Sensor::Connection  mSensorMagneticField;
+    SDK::Sensor::Connection  mSensorBattery;
+    SDK::Sensor::Connection  mSensorAccelerometerRaw;
+    SDK::Sensor::Connection  mSensorGyroscope;
+    SDK::Sensor::Connection  mSensorGyroscopeRaw;
+    SDK::Sensor::Connection  mSensorHeartBeat;
+    SDK::Sensor::Connection  mSensorHeartRateMetrics;
+    SDK::Sensor::Connection  mSensorStepDetector;
+    SDK::Sensor::Connection  mSensorAmbientTemperature;
+    SDK::Sensor::Connection  mSensorPressure;
+    SDK::Sensor::Connection  mSensorWristMotion;
+    SDK::Sensor::Connection  mSensorMotionDetect;
+    SDK::Sensor::Connection  mSensorActivityRecognition;
+    SDK::Sensor::Connection  mSensorGestureRecognition;
+    SDK::Sensor::Connection  mSensorActivity;
+    SDK::Sensor::Connection  mSensorPPG;
+    SDK::Sensor::Connection  mSensorECG;
+    SDK::Sensor::Connection  mSensorGPSSpeed;
+    SDK::Sensor::Connection  mSensorGPSDistance;
+    SDK::Sensor::Connection  mSensorBatteryCharging;
+    SDK::Sensor::Connection  mSensorBatteryMetrics;
+    SDK::Sensor::Connection  mSensorFusion;
+    SDK::Sensor::Connection  mSensorFusionRaw;
+    SDK::Sensor::Connection  mSensorTouchDetect;
     float                    mHR;
     float                    mHRTL;
     // CPU time tracking
     uint32_t                 mServiceCpuTimeMs;
     uint32_t                 mGuiCpuTimeMs;
+    uint32_t                 mActiveTimeMs;
     // Message rate tracking
     uint32_t                 mTxMessages;
     uint32_t                 mRxMessages;
