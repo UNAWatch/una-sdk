@@ -75,7 +75,7 @@ namespace SDK::Sensor {
          * @return true  If the internal handle is non-zero.
          * @return false If no handle has been resolved yet.
          */
-        bool isValid();
+        bool isValid() const;
 
         /**
          * @brief Connect to the sensor using the stored parameters.
@@ -137,7 +137,9 @@ namespace SDK::Sensor {
          * @return true  If the handles match and are valid.
          * @return false Otherwise.
          */
-        bool matchesDriver(uint16_t handle);
+        bool matchesDriver(uint16_t handle) const;
+
+        SDK::Sensor::Type getID() const;
 
     protected:
         /**

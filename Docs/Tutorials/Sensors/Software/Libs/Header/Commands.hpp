@@ -28,6 +28,8 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type FLOORS_VALUES = 0x00000006;
     constexpr SDK::MessageType::Type COMPASS_VALUES = 0x00000007;
     constexpr SDK::MessageType::Type STATS_VALUES = 0x00000008;
+    constexpr SDK::MessageType::Type BATTERY_VALUES = 0x0000000A;
+    constexpr SDK::MessageType::Type PRESSURE_VALUES = 0x0000000B;
 
     ///////////////////////////////////////
     //// Application custom structures
@@ -152,6 +154,28 @@ namespace CustomMessage {
         RtcValues()
             : SDK::MessageBase(RTC_VALUES)
             , time(0)
+        {}
+    };
+
+    // Service --> GUI
+    struct BatteryValues : public SDK::MessageBase {
+        float level;
+
+        BatteryValues()
+            : SDK::MessageBase(BATTERY_VALUES)
+            , level(0.0f)
+        {}
+    };
+
+    // Service --> GUI
+    struct PressureValues : public SDK::MessageBase {
+        uint64_t timestamp;
+        float pressure;
+
+        PressureValues()
+            : SDK::MessageBase(PRESSURE_VALUES)
+            , timestamp(0)
+            , pressure(0.0f)
         {}
     };
 
@@ -282,6 +306,31 @@ namespace CustomMessage {
     {
         if (auto req = SDK::make_msg<CustomMessage::RtcValues>(mKernel)) {
             req->time = time;
+
+            return req.send();
+        }
+
+        return false;
+    }
+
+    // Service --> GUI
+    bool updateBattery(float level)
+    {
+        if (auto req = SDK::make_msg<CustomMessage::BatteryValues>(mKernel)) {
+            req->level = level;
+
+            return req.send();
+        }
+
+        return false;
+    }
+
+    // Service --> GUI
+    bool updatePressure(uint64_t timestamp, float pressure)
+    {
+        if (auto req = SDK::make_msg<CustomMessage::PressureValues>(mKernel)) {
+            req->timestamp = timestamp;
+            req->pressure = pressure;
 
             return req.send();
         }

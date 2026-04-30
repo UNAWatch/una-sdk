@@ -38,7 +38,7 @@ Connection::~Connection()
     disconnect();
 }
 
-bool Connection::isValid()
+bool Connection::isValid()  const
 {
     return (mHandle != 0);
 }
@@ -106,7 +106,7 @@ void Connection::disconnect()
     }
 }
 
-bool Connection::matchesDriver(uint16_t handle)
+bool Connection::matchesDriver(uint16_t handle) const
 {
     if (!isValid()) {
         return false;
@@ -117,6 +117,11 @@ bool Connection::matchesDriver(uint16_t handle)
     }
 
     return mHandle == handle;
+}
+
+SDK::Sensor::Type Connection::getID() const
+{
+    return mID;
 }
 
 bool Connection::subscribe()

@@ -4,21 +4,23 @@
 
 In this tutorial, we implement a sensors dashboard app that subscribes to available sensors at **maximum frequency** (period=0, count=0 except Accelerometer), processes new message structures with **timestamps** where available, and displays data on a **single GUI screen**:
 
-- **Top**: Battery level (TODO: implement)
+- **Top**: Battery level
 - **Middle multiline text**: Sensor data with **L1/L2 verbosity levels** (BASIC/DETAILED/FULL and individual sensor views)
 - **Bottom**: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)
+
+[Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Sensors)
 
 ## List of Implemented Sensors
 
 | Sensor | Description | Notes |
 |--------|-------------|-------|
 | Heart Rate | Live BPM + Trust Level | |
-| GPS Location | Lat/Long/Alt (double) | Always on; toggle TODO |
-| Altimeter | Elevation (m) | Barometric pressure parsing TODO |
+| GPS Location | Lat/Long/Alt (double) | Always on |
+| Altimeter | Elevation (m) | Barometric pressure based |
 | Accelerometer | X/Y/Z G-forces | connect(0.1f, 0); sender throttled ~100ms |
 | Step Counter | Total steps | Cumulative |
 | Floor Counter | Floors ascended | Cumulative; parser.getFloorsUp() |
-| Magnetometer | X/Y/Z fields (for compass) | Connected as MAGNETIC_FIELD; heading computed from X/Y fields |
+| Magnetometer | X/Y/Z fields (for compass) | Heading computed from X/Y fields |
 | RTC | Time (sec since boot) | From kernel sys.getTimeMs()/1000; not sensor |
 
 ## Architecture Overview
@@ -30,7 +32,10 @@ graph LR
     Service -->|Custom Msgs w/ timestamps| Kernel[(Kernel)]
     Kernel -->|Custom Msgs| Model[GUI Model]
     Model --> View[MainView]
-    View --> Display[Single Screen:<br/>Battery Top<br/>Multiline Data (L1/L2)<br/>Bottom Stats]
+    View --> Display["Single Screen:
+        Battery Top
+        Multiline Data (L1/L2)
+        Bottom Stats"]
     Buttons[L1/L2 Buttons] -.-> View
 ```
 
@@ -153,15 +158,14 @@ Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
 Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE); invalidate
 
-Header: `refreshBattery()` "Battery: %.1f%%" `text_header`  // TODO impl
+Header: `refreshBattery()` "Battery: %.1f%%" `text_header`
 
 Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f" `text_stats`
 
 ### Additional Notes
 
-- **GPS On/Off**: TODO R1 toggle, service connect/disconnect.
-- **Battery**: updateBattery() exists but not called; TODO implement battery level retrieval
-- **Altimeter Pressure**: TODO parser.getPressure()?
+- **Battery**: Battery level retrieval implemented using SDK::Sensor::BATTERY_LEVEL
+- **Altimeter**: Uses altitude from barometric sensor; pressure not available in parser
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
 - Build with [`CMakeLists.txt`](Docs/Tutorials/Sensors/Software/Apps/Sensors-CMake/CMakeLists.txt).

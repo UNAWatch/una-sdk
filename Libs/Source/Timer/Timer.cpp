@@ -30,7 +30,7 @@ Timer::Timer()
 
 Timer::Timer(uint32_t interval)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
-    , mActive(false)
+    , mActive(true)
     , mInterval(interval)
     , mPrevTimestamp(0u)
 {}
