@@ -43,12 +43,13 @@ jobs:
       - id: get_slack_params
         name: Get required parameters for slack notification
         env:
-          RELEASE_BODY: ${{ github.event.release.body }}
           RELEASE_AUTHOR: ${{ github.event.release.author.login }}
           RELEASE_CREATED: ${{ github.event.release.created_at }}
           RELEASE_NAME: ${{ github.event.release.name }}
           RELEASE_URL: ${{ github.event.release.html_url }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
+          RELEASE_BODY=$(gh release view ${{ github.ref_name }} --json body --jq '.body')
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
