@@ -48,9 +48,9 @@ namespace SDK
 
             struct Axes
             {
-                float x;
-                float y;
-                float z;
+                float x{};
+                float y{};
+                float z{};
             };
 
             struct Data
