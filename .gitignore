@@ -2,3 +2,5 @@ Docs/_build
 Docs/_site
 Docs/Tutorials/*/Software/App*/*-CMake/build
 Docs/Templates/TouchGFX-Widgets/Unpacked
+
+.claude/
