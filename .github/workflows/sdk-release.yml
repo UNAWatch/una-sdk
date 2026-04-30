@@ -46,7 +46,7 @@ jobs:
       - id: get_slack_params
         name: Get required parameters for slack notification
         run: |
-          RELEASE_JSON=$(gh api repos/UNAWatch/una-sdk/releases/tags/${{ github.ref_name }})
+          RELEASE_JSON=$(gh release view ${{ github.ref_name }} --json name,body,author,createdAt,url)
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
