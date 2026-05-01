@@ -137,6 +137,10 @@ namespace SDK::Glance {
             return *this;
         }
 
+        /**
+         * @brief Gets the current size of the image.
+         * @return Current size.
+         */
         GlanceSize_t size()
         {
             return getImage().size;
