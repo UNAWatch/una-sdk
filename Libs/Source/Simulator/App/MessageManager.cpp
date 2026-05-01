@@ -69,10 +69,8 @@ void MessageManager::releaseMessage(SDK::MessageBase* msg)
     if (oldCount == 1) {
         // Cleanup completion semaphore if exists
         cleanupCompletionSemaphore(msg);
-        // Call virtual destructor
-        msg->~MessageBase();
-
-		delete msg;
+        // operator delete is a no-op (pool allocator); this calls the virtual dtor once
+        delete msg;
     }
 }
 
