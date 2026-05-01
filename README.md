@@ -26,16 +26,15 @@ For full setup instructions (Linux/Windows, toolchain, environment variables, an
 ### SDK Project Structure
 
 ```
-SDK/
-├── Libs/                    # SDK Interface Headers and Implementation
-│   ├── Header/SDK/         # Core API interfaces
-│   └── Source/SDK/         # SDK Implementation
-├── Port/                   # Platform-specific integrations
-├── ThirdParty/             # External dependencies (coreJSON, FitSDK)
-├── Utilities/Scripts/      # Build and packaging tools
-├── Examples/              # Sample applications
-├── cmake/                 # CMake build system files
-└── Simulator/             # Development simulator
+una-sdk/
+├── Libs/
+│   ├── Header/SDK/         # Public SDK headers (Interfaces, Messages, Kernel, Simulator, Port, ...)
+│   └── Source/             # SDK implementation (incl. Port/TouchGFX and Simulator)
+├── ThirdParty/             # Vendored dependencies (TouchGFX, coreJSON, FitSDK, tinycbor)
+├── Utilities/Scripts/      # Build, packaging, and tooling scripts
+├── Examples/               # Sample applications (git submodule -> UNAWatch/una-apps)
+├── cmake/                  # CMake toolchain and helpers
+└── Docs/                   # Documentation and tutorials
 ```
 
 ### High-Level Utilities

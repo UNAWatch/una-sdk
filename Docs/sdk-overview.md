@@ -19,23 +19,28 @@ To start using this SDK, see the [SDK setup](sdk-setup.md)
 ## SDK Project Structure
 
 ```
-SDK/
+una-sdk/
 ├── Libs/
-│   ├── Header/SDK/           # SDK Interface Headers
+│   ├── Header/SDK/           # Public SDK headers
 │   │   ├── Interfaces/       # Core API interfaces
 │   │   ├── Messages/         # Message type definitions
 │   │   ├── SensorLayer/      # Sensor data structures
 │   │   ├── Kernel/           # Kernel provider interfaces
+│   │   ├── Port/             # Platform port headers (TouchGFX)
+│   │   ├── Simulator/        # Simulator headers (mocks, sim sensors)
 │   │   └── Wrappers/         # Standard library wrappers
-│   └── Source/SDK/           # SDK Implementation
-├── Port/
-│   └── TouchGFX/             # TouchGFX integration
-├── ThirdParty/               # External dependencies
-│   ├── coreJSON/            # JSON parsing library
-│   └── FitSDK/              # Fitness data format
+│   └── Source/               # SDK implementation
+│       ├── Port/TouchGFX/    # TouchGFX integration
+│       └── Simulator/        # Mock kernel and desktop simulator runtime
+├── ThirdParty/               # Vendored dependencies
+│   ├── coreJSON/             # JSON parsing library
+│   ├── FitSDKRelease_21.171.00/  # Garmin FIT format
+│   ├── tinycbor_version/     # CBOR encoder/decoder
+│   └── touchgfx/             # TouchGFX framework (sources + prebuilt libs)
 ├── Utilities/Scripts/        # Build and packaging tools
-├── Simulator/                # Development simulator
-└── Visual Studio/            # Windows development support
+├── Examples/                 # Sample applications (git submodule -> UNAWatch/una-apps)
+├── cmake/                    # CMake toolchain and helpers
+└── Docs/                     # Documentation and tutorials
 ```
 
 ### High-Level Utilities
