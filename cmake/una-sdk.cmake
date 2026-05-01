@@ -78,8 +78,8 @@ set(UNA_SDK_INCLUDE_DIRS_JSON
 )
 
 set(UNA_SDK_INCLUDE_DIRS_GUI
-    "$ENV{UNA_SDK}/Libs/include/Port/TouchGFX"
-    "$ENV{UNA_SDK}/Libs/include/Port/TouchGFX/generated"
+    "$ENV{UNA_SDK}/Libs/Header/SDK/Port/TouchGFX"
+    "$ENV{UNA_SDK}/Libs/Header/SDK/Port/TouchGFX/generated"
 )
 
 # Combined service includes for backward compatibility
