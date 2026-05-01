@@ -2,8 +2,8 @@
 """
 png2abgr2222.py - Convert RGBA PNG(s) to ABGR2222 byte arrays in a C header.
 
-- Rotates each image 90.
-- Requires square PNGs (width == height).
+- Rotates each image 90 degrees by default.
+- Supports both square and rectangular PNGs.
 - Emits one header with arrays + WIDTH/HEIGHT/SIZE macros for each icon.
 
 Usage:
@@ -33,10 +33,13 @@ def sanitize_symbol(s: str) -> str:
 
 
 def convert_icon_to_abgr2222(png_path: Path) -> Tuple[bytes, int, int]:
-    """Convert RGBA PNG to ABGR2222 (rotate 90, pack 2 bits per channel)."""
+    """Convert RGBA PNG to ABGR2222 (rotate 90 degrees, pack 2 bits per channel).
+
+    Rectangular images are supported. If an image is rotated, width and height
+    in the generated header describe the rotated pixel buffer.
+    Example: 33x28 input -> 28x33 output after 90-degree rotation.
+    """
     img = Image.open(png_path).convert("RGBA")
-    if img.width != img.height:
-        raise ValueError(f"{png_path}: image must be square (got {img.width}x{img.height})")
     img = img.rotate(90, expand=True)
     w, h = img.width, img.height
 
