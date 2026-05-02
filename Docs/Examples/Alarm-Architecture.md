@@ -178,7 +178,7 @@ Alarms are stored in `alarms.json` in the application's file system. The JSON sc
 }
 ```
 
-The internal serialisation buffer is 1024 bytes. If the file exceeds this limit, loading fails gracefully with an error log.
+The internal serialisation buffer is 2048 bytes. A worst-case file with 20 alarms (all using the longest field values: `false`, `23:59`, `"wednesday"`, `"beep_vibro"`) produces ~1612 bytes of compact JSON, which fits comfortably within this limit. If the file exceeds the buffer, loading fails gracefully with an error log.
 
 ### Service Lifecycle and App Startup
 
@@ -208,7 +208,7 @@ The service's `run()` method handles two startup scenarios:
 
 When the GUI sends `ACTIVATED_EFFECT`, the service plays the configured pattern:
 
-**Backlight**: always on (brightness 100%, auto-off after `skBacklightTimeout` = 5000 ms).
+**Backlight**: always on (brightness 100%, auto-off after 4000 ms).
 
 **Vibration pattern** (for `EFFECT_VIBRO` and `EFFECT_BEEP_AND_VIBRO`):
 ```
