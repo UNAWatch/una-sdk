@@ -53,27 +53,31 @@ namespace App {
 		LOG_INFO("Application core is running...\n");
 
 		mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_NOTIF_GUI_RUN).release());
+		mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_GUI_RESUME).release());
 
 		while (true) {
 			OS::Delay(100);
 
 			if (isStopRequest()) {
 				LOG_INFO("Stop requested, exiting application core loop...\n");
-				FrontendApplication& app = *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());
-
-				mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_GUI_SUSPEND).release());
-				
-				app.handleTickEvent();
-				
-				mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP).release());
-				mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
-				
-				app.handleTickEvent();
-				
-				mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
 				break;
 			}
 		}
+
+		FrontendApplication& app = *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());
+
+		mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_GUI_SUSPEND).release());
+		SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+		OS::Delay(10);
+
+		mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP).release());
+		OS::Delay(10);
+
+		mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
+		SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+		OS::Delay(10);
+
+		mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
 	}
 
 	bool Core::isStopRequest()
