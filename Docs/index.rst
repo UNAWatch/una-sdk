@@ -47,7 +47,7 @@ Next steps:
    :hidden:
 
    Examples/Running-Architecture
-   Examples/Alarm-ARCHITECTURE
+   Examples/Alarm-Architecture
    Examples/Cycling-Architecture
    Examples/Hiking-Architecture
    Examples/HRMonitor-Architecture
