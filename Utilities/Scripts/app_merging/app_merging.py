@@ -34,7 +34,7 @@ def convert_icon_to_abgr2222(png_path: Path) -> bytes:
     img = Image.open(png_path).convert("RGBA")
     if img.width != img.height:
         raise ValueError("Image must be square")
-    img = img.rotate(90, expand=True)
+    # img = img.rotate(90, expand=True)
     bmp_data = bytearray()
     for y in range(img.height):
         for x in range(img.width):
