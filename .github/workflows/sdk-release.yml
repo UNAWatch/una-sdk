@@ -3,8 +3,6 @@ name: Release SDK
 on:
   release:
     types: [ published ]
-  push:
-    tags: [ '*' ]
 
 permissions:
   contents: write
@@ -13,7 +11,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Install dependencies
         run: |
@@ -30,34 +27,36 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
-          token: ${{ secrets.CROSS_REPO_PAT }}
 
       - id: create_release
         name: Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          token: ${{ secrets.CROSS_REPO_PAT }}
 
       - name: Make release immutable
         run: |
           gh release edit ${{ github.ref_name }} --draft=false
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - id: get_slack_params
         name: Get required parameters for slack notification
-        run: |
-          RELEASE_JSON=$(gh api repos/UNAWatch/una-sdk/releases/tags/${{ github.ref_name }})
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "author=$(echo \"$RELEASE_JSON\" | jq -r '.author.login')" >> $GITHUB_OUTPUT
-          echo "created_at=$(echo \"$RELEASE_JSON\" | jq -r '.createdAt')" >> $GITHUB_OUTPUT
-          echo "name=$(echo \"$RELEASE_JSON\" | jq -r '.name')" >> $GITHUB_OUTPUT
-          echo "url=$(echo \"$RELEASE_JSON\" | jq -r '.url')" >> $GITHUB_OUTPUT
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          RELEASE_AUTHOR: ${{ github.event.release.author.login }}
+          RELEASE_CREATED: ${{ github.event.release.created_at }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          RELEASE_BODY=$(gh release view ${{ github.ref_name }} --json body --jq '.body')
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "author=$RELEASE_AUTHOR" >> $GITHUB_OUTPUT
+          echo "created_at=$RELEASE_CREATED" >> $GITHUB_OUTPUT
+          echo "name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+          echo "url=$RELEASE_URL" >> $GITHUB_OUTPUT
 
       - id: prepare_slack_payload
         name: Prepare Slack payload
@@ -72,6 +71,7 @@ jobs:
           BODY=$(echo "$BODY" | perl -pe 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/$1|@$1>/g' || { echo "Error converting mentions"; exit 1; })  # Mentions
           BODY=$(echo "$BODY" | perl -pe 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/' || { echo "Error adjusting changelog"; exit 1; })  # Changelog
           BODY=$(echo "$BODY" | perl -pe 's/"/\\"/g' || { echo "Error escaping quotes"; exit 1; })  # Escape double quotes
+          if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
           PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
             text: (":books: *UNA SDK*: " + $name),
             blocks: [
