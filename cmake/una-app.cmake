@@ -257,9 +257,25 @@ function(una_app_build_app)
     if(NOT DEFINED APP_USER_NAME)
         set(APP_USER_NAME ${APP_NAME})
     endif()
+
+    set(APP_ICON_ARGS "")
+    if(NOT DEFINED APP_USE_ICONS)
+        set(APP_USE_ICONS On)
+    endif()
+
+    if(${APP_USE_ICONS} STREQUAL On)
+        list(APPEND APP_ICON_ARGS
+            -normal_icon ${RESOURCES_PATH}/icon_60x60.png
+            -small_icon ${RESOURCES_PATH}/icon_30x30.png
+        )
+        message("App icons are ON")
+    else()
+        message("App icons are OFF")
+    endif()
+
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} -normal_icon ${RESOURCES_PATH}/icon_60x60.png -small_icon ${RESOURCES_PATH}/icon_30x30.png -name ${APP_USER_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
