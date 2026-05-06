@@ -40,7 +40,6 @@ def convert_icon_to_abgr2222(png_path: Path) -> Tuple[bytes, int, int]:
     Example: 33x28 input -> 28x33 output after 90-degree rotation.
     """
     img = Image.open(png_path).convert("RGBA")
-    img = img.rotate(90, expand=True)
     w, h = img.width, img.height
 
     out = bytearray()
