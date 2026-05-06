@@ -103,6 +103,16 @@ bool Timer::expired(void) const
     return (elapsed(getTimestamp(), mPrevTimestamp) >= mInterval);
 }
 
+bool Timer::oneshot(void)
+{
+    if (expired()) {
+        stop();
+        return true;
+    }
+
+    return false;
+}
+
 uint32_t Timer::left(void) const
 {
     if (!mActive) {
