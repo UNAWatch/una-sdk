@@ -134,6 +134,17 @@ public:
     bool expired(void) const;
 
     /**
+     * @brief Check whether the timer has elapsed and stop it.
+     *
+     * This method works as a one-shot timer check. If the timer has expired,
+     * it stops the timer and returns true. Otherwise, it leaves the timer
+     * unchanged and returns false.
+     *
+     * @return true if the timer expired and was stopped, otherwise false.
+     */
+    bool oneshot(void);
+
+    /**
      * @brief Get remaining time until expiration.
      *
      * @return Remaining time in milliseconds.

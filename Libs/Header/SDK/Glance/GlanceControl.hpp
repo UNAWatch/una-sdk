@@ -217,8 +217,9 @@ namespace SDK::Glance {
         std::size_t append(GlanceType_t t)
         {
             GlanceControl_t c{};
-            c.id = mControls.size();    // id is a position in vector
-            c.type = t;
+            c.id      = mControls.size();    // id is a position in vector
+            c.type    = t;
+            c.visible = true;
             
             mControls.push_back(c);
             
