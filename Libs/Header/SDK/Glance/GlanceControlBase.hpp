@@ -39,6 +39,26 @@ namespace SDK::Glance {
             control().valid = false;
         }
 
+        void hide()
+        {
+            control().visible = false;
+        }
+
+        void show()
+        {
+            control().visible = true;
+        }
+
+        void setVisible(bool status)
+        {
+            control().visible = status;
+        }
+
+        bool isVisible()
+        {
+            return control().visible;
+        }
+
     protected:
         GlanceControl_t& control() noexcept
         {
