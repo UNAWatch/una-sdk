@@ -283,13 +283,17 @@ namespace SDK::Component {
         for (auto f : fields) {
             for (uint8_t idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
                 if (f == mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx)]) {
-                    uint8_t field_def_num_dst = FIT_MESG_DEF_FIELD_OFFSET(field_def_num, offset);
-                    uint8_t size_dst          = FIT_MESG_DEF_FIELD_OFFSET(size, offset);
-                    uint8_t base_type_dst     = FIT_MESG_DEF_FIELD_OFFSET(base_type, offset);
+                    // 16-bit byte offsets into the def buffer.  Profiles like
+                    // RELEASE have lap/session defs with >85 fields, so 3*idx
+                    // overflows uint8_t for high-index fields (e.g. avg_heart_rate
+                    // sits at idx 88 in the release lap def -> 264 bytes).
+                    uint16_t field_def_num_dst = FIT_MESG_DEF_FIELD_OFFSET(field_def_num, offset);
+                    uint16_t size_dst          = FIT_MESG_DEF_FIELD_OFFSET(size, offset);
+                    uint16_t base_type_dst     = FIT_MESG_DEF_FIELD_OFFSET(base_type, offset);
 
-                    uint8_t field_def_num_src = FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx);
-                    uint8_t size_src          = FIT_MESG_DEF_FIELD_OFFSET(size, idx);
-                    uint8_t base_type_src     = FIT_MESG_DEF_FIELD_OFFSET(base_type, idx);
+                    uint16_t field_def_num_src = FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx);
+                    uint16_t size_src          = FIT_MESG_DEF_FIELD_OFFSET(size, idx);
+                    uint16_t base_type_src     = FIT_MESG_DEF_FIELD_OFFSET(base_type, idx);
 
                     writable->fields[field_def_num_dst] = mMsgDefOrigin->fields[field_def_num_src];
                     writable->fields[size_dst]          = mMsgDefOrigin->fields[size_src];
@@ -340,7 +344,9 @@ namespace SDK::Component {
         if (fields.size() == 0) {
 		    mMsgFields.clear();
 
-            uint8_t size = 0;
+            // 16-bit accumulator: full message structs in newer profiles can
+            // exceed 255 bytes (e.g. FIT_SESSION_MESG = 340 bytes).
+            uint16_t size = 0;
             for (uint8_t idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
                 size += mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
             }
@@ -362,9 +368,13 @@ namespace SDK::Component {
         }
     }
 
-    uint8_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field) const
+    uint16_t FitHelper::getFieldOffset(FIT_EVENT_FIELD_NUM field) const
     {
-        uint8_t offset = 0;
+        // 16-bit accumulator -- C message structs in newer profiles can be
+        // >255 bytes (e.g. FIT_SESSION_MESG = 340 bytes), so summing per-field
+        // sizes overflows uint8_t and produces wildly wrong byte offsets when
+        // the writer later reads field data out of the caller's struct.
+        uint16_t offset = 0;
         for (FIT_UINT8 idx = 0; idx < mMsgDefOrigin->num_fields; ++idx) {
             if (field == mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(field_def_num, idx)]) {
                 return offset;
@@ -372,14 +382,14 @@ namespace SDK::Component {
         
             FIT_UINT8 base_type_num = mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(base_type, idx)] & FIT_BASE_TYPE_NUM_MASK;
             if (base_type_num >= FIT_BASE_TYPES) {
-                return UINT8_MAX;
+                return UINT16_MAX;
             }
 
             FIT_UINT8 fieldSize = mMsgDefOrigin->fields[FIT_MESG_DEF_FIELD_OFFSET(size, idx)];
             offset += fieldSize;
         }
 	
-        return UINT8_MAX;
+        return UINT16_MAX;
     }
 
     uint8_t FitHelper::getFieldSize(FIT_EVENT_FIELD_NUM field) const
