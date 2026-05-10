@@ -200,6 +200,9 @@ struct RequestSystemSettings : public MessageBase {
     uint32_t steps;         // target number of steps per day
     uint32_t floors;        // target number of floors climbed per day
 
+    uint32_t heightCm;      // User height in centimeters
+    uint32_t weightGrams;   // User weight in grams
+
     RequestSystemSettings()
         : MessageBase(MessageType::REQUEST_SYSTEM_SETTINGS)
         , languageId(0)
@@ -210,9 +213,11 @@ struct RequestSystemSettings : public MessageBase {
         , activityMin(0)
         , steps(0)
         , floors(0)
+        , heightCm(0)
+        , weightGrams(0)
     {}
 };
-static_assert(sizeof(RequestSystemSettings) == 56, "RequestSystemSettings size must be 56 bytes");
+static_assert(sizeof(RequestSystemSettings) == 64, "RequestSystemSettings size must be 64 bytes");
 
 /**
  * @brief System information request
