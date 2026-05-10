@@ -42,6 +42,10 @@ namespace SDK::Glance {
      */
     class ControlImage : public Control {
     public:
+        ControlImage()
+            : Control(nullptr, 0)
+        {}
+
         /**
          * @brief Binds this view to an existing control record.
          *
@@ -131,6 +135,15 @@ namespace SDK::Glance {
             invalidate();
 
             return *this;
+        }
+
+        /**
+         * @brief Gets the current size of the image.
+         * @return Current size.
+         */
+        GlanceSize_t size()
+        {
+            return getImage().size;
         }
 
     private:

@@ -125,6 +125,7 @@ typedef union {
 typedef struct {
     uint32_t        id;
     bool            valid;
+    bool            visible;
     GlanceType_t    type;
     GlancePayload_t payload;
 } GlanceControl_t;

@@ -34,7 +34,7 @@ def convert_icon_to_abgr2222(png_path: Path) -> bytes:
     img = Image.open(png_path).convert("RGBA")
     if img.width != img.height:
         raise ValueError("Image must be square")
-    img = img.rotate(90, expand=True)
+    # img = img.rotate(90, expand=True)
     bmp_data = bytearray()
     for y in range(img.height):
         for x in range(img.width):
@@ -127,18 +127,50 @@ parser.add_argument("-glance_capable", action="store_true",
 parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()), help="Application type")
 parser.add_argument("-out", type=str, help="Custom output directory (also the place where Tmp/*.srv and Tmp/*.gui are searched)")
 parser.add_argument("-header", action="store_true", help="Generate .h file with merged binary as C array")
-parser.add_argument("-normal_icon", type=Path, required=True, help="Path to normal 60x60 icon PNG")
-parser.add_argument("-small_icon", type=Path, required=True, help="Path to small 30x30 icon PNG")
+parser.add_argument("-normal_icon", type=Path, required=False, default=None, help="Path to normal 60x60 icon PNG")
+parser.add_argument("-small_icon", type=Path, required=False, default=None, help="Path to small 30x30 icon PNG")
 parser.add_argument("-appid", type=parse_appid_64, required=True, help="16-hex AppID (e.g., 0123ABCD89EF4560)")
 parser.add_argument("-appver", type=parse_semver_u32, required=True, help="App version A.B.C (e.g., 1.2.3)")
 parser.add_argument("-scripts", type=Path, required=True, help="Path to SDK Utilities/Scripts (PATH_SCRIPTS)")
 args = parser.parse_args()
 
-# Validate icon sizes
-if Image.open(args.normal_icon).size != (60, 60):
-    raise ValueError(f"Normal icon must be 60x60, got {Image.open(args.normal_icon).size}")
-if Image.open(args.small_icon).size != (30, 30):
-    raise ValueError(f"Small icon must be 30x30, got {Image.open(args.small_icon).size}")
+# Icon presence rule:
+# - normal_icon and small_icon are required for all app types except Glance.
+# - for Glance, missing icons are replaced with zero-filled icon fields.
+NORMAL_ICON_SIZE = 60 * 60  # ABGR2222: 1 byte per pixel
+SMALL_ICON_SIZE  = 30 * 30  # ABGR2222: 1 byte per pixel
+
+icons_optional = (args.type == "Glance")
+
+if not icons_optional:
+    if args.normal_icon is None:
+        parser.error("-normal_icon is required for non-Glance apps")
+    if args.small_icon is None:
+        parser.error("-small_icon is required for non-Glance apps")
+
+def validate_icon_size(icon_path: Path, expected_size: tuple[int, int], label: str):
+    """Validate PNG dimensions."""
+    with Image.open(icon_path) as img:
+        actual_size = img.size
+    if actual_size != expected_size:
+        raise ValueError(f"{label} icon must be {expected_size[0]}x{expected_size[1]}, got {actual_size}")
+
+if args.normal_icon is not None:
+    validate_icon_size(args.normal_icon, (60, 60), "Normal")
+if args.small_icon is not None:
+    validate_icon_size(args.small_icon, (30, 30), "Small")
+
+def log_field(label: str, value):
+    logging.info(f"{label:<15}: {value}")
+
+def convert_icon_or_zeros(icon_path: Path | None, zero_size: int, label: str) -> bytes:
+    """Convert icon if provided, otherwise return a zero-filled icon field."""
+    if icon_path is None:
+        log_field(f"{label} icon", "(absent, filled with zeros)")
+        return bytes(zero_size)
+
+    log_field(f"{label} icon", icon_path)
+    return convert_icon_to_abgr2222(icon_path)
 
 # Flags
 flags = APP_TYPES[args.type]
@@ -174,8 +206,8 @@ if not gui_path and not gui_optional:
 
 service_data = verify_uapp_crc(srv_path)
 gui_data     = verify_uapp_crc(gui_path) if gui_path else b""
-normal_icon  = convert_icon_to_abgr2222(args.normal_icon)
-small_icon   = convert_icon_to_abgr2222(args.small_icon)
+normal_icon  = convert_icon_or_zeros(args.normal_icon, NORMAL_ICON_SIZE, "Normal")
+small_icon   = convert_icon_or_zeros(args.small_icon, SMALL_ICON_SIZE, "Small")
 
 service_size       = len(service_data)
 display_name       = args.name
@@ -209,20 +241,17 @@ output_path = out_dir / f"{file_name_base}_{app_version}.uapp"
 with open(output_path, "wb") as f:
     f.write(final_data)
 
-logging.info("Merge complete")
-logging.info(f"Service file   : {srv_path}")
-if gui_path:
-    logging.info(f"GUI file       : {gui_path}")
-else:
-    logging.info("GUI file       : (absent, allowed for type Glance)")
-logging.info(f"Name           : {args.name}")
-logging.info("ID             : %016X", app_id_u64)
-logging.info("App Version    : %s", format_semver_u32(app_version_u32))
-logging.info("LibC Version   : %s", format_semver_u32(libc_version_u32))
-logging.info(f"Flags          : 0x{flags:08X}")
-logging.info(f"Glance-capable : {'yes' if args.glance_capable else 'no'}")
-logging.info(f"CRC            : 0x{crc:08X}")
-logging.info(f"Image          : {output_path} ({len(final_data)} bytes)")
+log_field("Merge", "complete")
+log_field("Service file", srv_path)
+log_field("GUI file", gui_path if gui_path else "(absent, allowed for type Glance)")
+log_field("Name", args.name)
+log_field("ID", f"{app_id_u64:016X}")
+log_field("App Version", format_semver_u32(app_version_u32))
+log_field("LibC Version", format_semver_u32(libc_version_u32))
+log_field("Flags", f"0x{flags:08X}")
+log_field("Glance-capable", "yes" if args.glance_capable else "no")
+log_field("CRC", f"0x{crc:08X}")
+log_field("Image", f"{output_path} ({len(final_data)} bytes)")
 
 # ---------- optional .h ----------
 if args.header:
