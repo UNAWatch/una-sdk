@@ -214,7 +214,7 @@ struct RequestSystemSettings : public MessageBase {
         , steps(0)
         , floors(0)
         , heightCm(0)
-        , weightKg(0)
+        , weightKg(0.0f)
     {}
 };
 static_assert(sizeof(RequestSystemSettings) == 64, "RequestSystemSettings size must be 64 bytes");
