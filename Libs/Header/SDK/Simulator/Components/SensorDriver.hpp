@@ -15,7 +15,7 @@
 
 #include "SDK/Simulator/Components/SensorDataSample.hpp"
 #include "SDK/Simulator/Components/SensorDataQueue.hpp"
-#include "SDk/Simulator/Components/Sensors/ISensor.hpp"
+#include "SDK/Simulator/Components/Sensors/ISensor.hpp"
 #include "SDK/SensorLayer/SensorTypes.hpp"
 #include "SDK/Interfaces/ISensorDataListener.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
