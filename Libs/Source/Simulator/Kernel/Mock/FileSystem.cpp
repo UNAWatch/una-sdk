@@ -161,6 +161,7 @@ bool File::seek(size_t offset)
 {
     if (!isOpenFlag) return false;
     file.seekg(offset);
+    file.seekp(offset);
     return !file.fail();
 }
 
