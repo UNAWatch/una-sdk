@@ -165,9 +165,12 @@ namespace SDK::Component {
          * @brief Get byte offset of a specific field within the message structure.
          *
          * @param field      Field number to locate.
-         * @return uint8_t  Byte offset of the field, or UINT8_MAX if not found.
+         * @return uint16_t  Byte offset of the field, or UINT16_MAX if not found.
+         *                   Must be 16-bit because larger profiles (e.g. RELEASE)
+         *                   produce C message structs >255 bytes (FIT_SESSION_MESG
+         *                   is 340 bytes) so byte offsets can exceed uint8_t range.
          */
-        uint8_t getFieldOffset(FIT_EVENT_FIELD_NUM field)  const;
+        uint16_t getFieldOffset(FIT_EVENT_FIELD_NUM field) const;
         /**
          * @brief Get size in bytes of a specific field within the message structure.
          *
@@ -195,8 +198,10 @@ namespace SDK::Component {
         void WriteMessage(FIT_UINT8 local_mesg_number, const void* mesg_pointer, FIT_UINT16 mesg_size, SDK::Interface::IFile* fp);
 
         struct MsgField {
-            uint8_t offset;
-            uint8_t size;
+            // 16-bit because RELEASE-profile message structs (e.g. FIT_SESSION_MESG
+            // at 340 bytes) and full-message dumps both exceed the uint8_t range.
+            uint16_t offset;
+            uint16_t size;
         };
 
         bool                       mInited;
