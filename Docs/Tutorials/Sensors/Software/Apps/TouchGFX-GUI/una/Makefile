@@ -55,7 +55,7 @@ resource_file :=
 imageconvert_executable := $(touchgfx_path)/framework/tools/imageconvert/build/linux/imageconvert.out
 fontconvert_executable := $(touchgfx_path)/framework/tools/fontconvert/build/linux/fontconvert.out
 simulator_executable := simulator.out
-linker_options += -static-libgcc -Xlinker --no-as-needed
+linker_options += -static-libgcc -Xlinker --no-as-needed -no-pie
 else
 sdl_library_path := $(touchgfx_path)/lib/sdl2/win32
 jpeg_library_path := $(touchgfx_path)/3rdparty/libjpeg/lib/win32
