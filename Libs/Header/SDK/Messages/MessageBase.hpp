@@ -293,8 +293,7 @@ private:
 };
 
 // Verify memory layout assumptions
-// Note: Size includes vtable pointer (4 bytes on 32-bit systems)
-// Fix: Size checks are architecture-specific. MessageBase contains a void* field
+// Note: Size checks are architecture-specific. MessageBase contains a void* field
 // and a vtable pointer, both of which are 8 bytes on 64-bit Linux, making the
 // struct 40 bytes instead of 32. The checks are skipped on 64-bit targets;
 // they remain active for the 32-bit ARM embedded build where layout matters.
