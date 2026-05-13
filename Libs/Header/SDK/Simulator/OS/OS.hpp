@@ -26,7 +26,7 @@
     #include <semaphore.h>
     #include <ctime>
     #include <atomic>
-    #include <array>  // Fix: <array> was missing in Linux build (std::array used by Queue<T,N>)
+    #include <array>
 #endif
 
 namespace OS {

@@ -2,7 +2,7 @@
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
 #include <cstdint>
 
-// Fix: GetTickCount64() and Sleep() are Windows-only. Provide portable replacements.
+// GetTickCount64() and Sleep() are Windows-only. Provide portable replacements.
 #ifndef _WIN32
 #include <cstdint>
 #include <time.h>
