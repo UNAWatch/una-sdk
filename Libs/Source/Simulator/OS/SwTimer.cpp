@@ -1,5 +1,4 @@
 #include "SDK/Simulator/OS/SwTimer.hpp"
-#include <windows.h>
 #include <cstdint>
 #include <chrono>
 
