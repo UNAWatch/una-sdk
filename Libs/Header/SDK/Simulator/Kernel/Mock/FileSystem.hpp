@@ -97,6 +97,7 @@ private:
     HANDLE handle;
     WIN32_FIND_DATAA findData;
     bool isOpenFlag = false;
+    bool hasEntry = false; // 'true' when findData holds an entry not yet returned by readNext
     char pathBuffer[SDK::Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;

@@ -258,6 +258,7 @@ bool Directory::open()
     std::string searchPath = path + "/*";
     handle = FindFirstFileA(searchPath.c_str(), &findData);
     isOpenFlag = (handle != INVALID_HANDLE_VALUE);
+    hasEntry = isOpenFlag;
     return isOpenFlag;
 }
 
@@ -272,17 +273,19 @@ bool Directory::readNext(SDK::Interface::IFileSystem::ObjectInfo &item, bool res
 
     if (reset) {
         FindClose(handle);
-        open();
+        return open();
     }
 
-    do {
-        safe_strcpy(item.name, findData.cFileName, sizeof(item.name));
-        item.isDir = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-        item.isHidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0;
-        item.isSystem = (findData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM) != 0;
-        item.size = findData.nFileSizeLow;
-        item.utc = FileTimeToUnixTime(findData.ftCreationTime);
-    } while (FindNextFileA(handle, &findData));
+    if (!hasEntry) return false;
+
+    safe_strcpy(item.name, findData.cFileName, sizeof(item.name));
+    item.isDir = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    item.isHidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0;
+    item.isSystem = (findData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM) != 0;
+    item.size = findData.nFileSizeLow;
+    item.utc = FileTimeToUnixTime(findData.ftCreationTime);
+
+    hasEntry = (FindNextFileA(handle, &findData) != 0);
 
     return true;
 }
@@ -292,6 +295,7 @@ bool Directory::close()
     if (isOpenFlag) {
         FindClose(handle);
         isOpenFlag = false;
+        hasEntry = false;
         return true;
     }
     return false;
