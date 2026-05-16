@@ -37,16 +37,19 @@ namespace SDK::Sensor
          */
         HEART_BEAT           = 0x00000040, ///< Beat peak event.
         HEART_RATE           = 0x00000041, ///< Current heart rate (bpm).
-        HEART_RATE_METRICS   = 0x00000042, ///< Aggregated metrics (e.g., AHR, RHR).
+        HEART_RATE_METRICS_DAILY = 0x00000042, ///< Aggregated metrics for the current day (e.g., AHR, RHR).
+        HEART_RATE_METRICS   = HEART_RATE_METRICS_DAILY, /// Legacy alias of HEART_RATE_METRICS_DAILY.
         /** @} */
 
         /** @name Pedometer
          *  @{
          */
         STEP_DETECTOR        = 0x00000050, ///< Step event.
-        STEP_COUNTER         = 0x00000051, ///< Step count since last reboot.
+        STEP_COUNTER         = 0x00000051, ///< Step count since boot (monotonic).
+        STEP_COUNTER_DAILY   = 0x00000052, ///< Step count for the current day.
 
-        FLOOR_COUNTER        = 0x00000060, ///< Floor counter.
+        FLOOR_COUNTER        = 0x00000060, ///< Floor counter since boot (monotonic).
+        FLOOR_COUNTER_DAILY  = 0x00000061, ///< Floor counter for the current day.
         /** @} */
 
 
@@ -76,7 +79,9 @@ namespace SDK::Sensor
         /** @name Daily activity
          *  @{
          */
-        ACTIVITY             = 0x000000E0, ///< Active minutes for the current day (minutes).
+        ACTIVITY_TIME        = 0x000000E0, ///< Active minutes since boot (monotonic).
+        ACTIVITY_TIME_DAILY  = 0x000000E1, ///< Active minutes for the current day.
+        ACTIVITY             = ACTIVITY_TIME_DAILY, ///< Active minutes for the current day (minutes). Legacy alias of ACTIVITY_TIME_DAILY.
         /** @} */
 
 
