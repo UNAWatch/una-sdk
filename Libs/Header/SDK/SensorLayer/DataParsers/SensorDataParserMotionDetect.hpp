@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    SensorDataParserAltimeter.hpp
+ * @file    SensorDataParserMotionDetect.hpp
  * @date    11-September-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   SensorData parser for MOTION_DETECT sensor
@@ -24,7 +24,7 @@ namespace SDK::SensorDataParser {
  *
  * @details
  * Expected data layout (index-based fields):
- * - [0] uint32_t ID — motion identifier (see @ref Motion)
+ * - [0] uint32_t ID - motion identifier (see @ref Motion)
  *
  * The parser only reads the fields and provides type-safe accessors.
  * It does not own the underlying storage.
@@ -61,7 +61,6 @@ public:
      *
      * @details
      * Validity conditions:
-     *  - Non-null pointer.
      *  - Exactly 1 field present.
      *  - ID is within [NO_MOTION..UNKNOWN].
      *

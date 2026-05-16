@@ -29,8 +29,8 @@ namespace SDK
          * It does not own the underlying storage.
          *
          * Expected data layout (index-based fields):
-         * - [0] float AHR — Average Heart Rate in beats per minute (bpm)
-         * - [1] float RHR — Resting Heart Rate in beats per minute (bpm)
+         * - [0] float AHR - Average Heart Rate in beats per minute (bpm)
+         * - [1] float RHR - Resting Heart Rate in beats per minute (bpm)
          */
         class HeartRateMetrics
         {

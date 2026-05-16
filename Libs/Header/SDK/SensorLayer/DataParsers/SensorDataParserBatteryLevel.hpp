@@ -4,7 +4,7 @@
  * @date    23-October-2025
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   SensorData parser for the Battery Level sensor
- * 
+ *
  ******************************************************************************
  *
  ******************************************************************************
@@ -21,45 +21,39 @@ namespace SDK {
 namespace SensorDataParser {
 
 /**
- * @brief   SensorData parser for the Battery Level sensor
+ * @brief Helper class to parse battery level sensor data from ISensorData
  *
- * @details
- * The parser only reads fields and provides type-safe accessors.
- * It does not own the underlying storage.*/
+ * Expected data layout:
+ * - [0] float battery charge level in percent (0..100)
+ */
 class BatteryLevel
 {
 public:
     enum Field : uint8_t {
-        LEVEL = 0,    ///< Raw charge value (units are device-specific)
-        COUNT          ///< Number of fields (must be last)
+        LEVEL = 0,  ///< Battery charge level in percent (float, 0..100)
+        COUNT       ///< Number of fields (must be last)
     };
 
     /**
-     * @brief   SensorData parser for the Battery Level sensor
-     * @param data Reference to sensor data
+     * @brief Construct a new BatteryLevel parser over the given ISensorData
+     * @param data Reference to sensor data containing 1 float field
      */
     explicit BatteryLevel(const SDK::Sensor::DataView data) : mData(data) {}
 
     /**
-     * @brief   SensorData parser for the Battery Level sensor
-     *
-     * @details
-     * The parser only reads fields and provides type-safe accessors.
-     * It does not own the underlying storage
-     * */
+     * @brief Check if data is valid (1 field, level within 0..100)
+     * @return true if valid
+     */
     bool isDataValid() const
     {
         return ((mData.getFieldCount() == Field::COUNT) &&
-                (mData.f[Field::LEVEL] >= 0.0) &&
-                (mData.f[Field::LEVEL] <= 100.0));
+                (mData.f[Field::LEVEL] >= 0.0f) &&
+                (mData.f[Field::LEVEL] <= 100.0f));
     }
 
     /**
-     * @brief   SensorData parser for the Battery Level sensor
-     *
-     * @details
-     * The parser only reads fields and provides type-safe accessors.
-     * It does not own the underlying storage
+     * @brief Get battery charge level in percent
+     * @return Charge level 0..100 (-1.0 if invalid)
      */
     float getCharge() const
     {
@@ -67,8 +61,8 @@ public:
     }
 
     /**
-     * @brief  Get timestamp of the data
-     * @return Data timestamp in ms (0 if data pointer is null).
+     * @brief Get data timestamp in ms
+     * @return Data timestamp in ms (0 if invalid)
      */
     uint32_t getTimestamp() const
     {
@@ -85,8 +79,7 @@ public:
     }
 
     /**
-     * @brief  Returns the number of fields
-     * @return The number of fields
+     * @brief Get number of expected fields (always 1)
      */
     static constexpr uint8_t getFieldsNumber()
     {
@@ -95,11 +88,9 @@ public:
 
 private:
     const SDK::Sensor::DataView mData;
-}; /* class Power */
+}; /* class BatteryLevel */
 
 } /* namespace SensorDataParser */
 } /* namespace SDK */
 
 #endif /* __SENSOR_DATA_PARSER_BATTERY_LEVEL_HPP */
-
-
