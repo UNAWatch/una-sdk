@@ -25,25 +25,26 @@ namespace SDK
          * @brief Helper class to parse floor counter sensor data from ISensorData
          *
          * Expected data layout:
-         * - [0] int32_t floor count (positive = up, negative = down)
+         * - [0] int32_t floorsUp count
+         * - [1] int32_t floorsDown count
          */
         class FloorCounter
         {
         public:
             enum Field : uint8_t {
-                FLOORS_UP = 0,  ///< Signed floorsUp counter (int32_t)
-                FLOORS_DOWN,    ///< Signed floorsDown counter (int32_t)
-                COUNT          ///< Total number of fields
+                FLOORS_UP = 0,  ///< Floors up counter (int32_t)
+                FLOORS_DOWN,    ///< Floors down counter (int32_t)
+                COUNT           ///< Total number of fields
             };
 
             /**
              * @brief Construct a new FloorCounter parser over given ISensorData
-             * @param data Reference to sensor data containing 2 int32_t field
+             * @param data Reference to sensor data containing 2 int32_t fields
              */
             FloorCounter(const SDK::Sensor::DataView data) : mData(data) {}
 
             /**
-             * @brief Check if data is valid (should contain exactly 1 field)
+             * @brief Check if data is valid (should contain exactly 2 fields)
              * @return true if valid
              */
             bool isDataValid() const
@@ -52,8 +53,8 @@ namespace SDK
             }
 
             /**
-             * @brief Get floorsUp count (signed)
-             * @return FloorsUp count as int32_t (0 if invalid)
+             * @brief Get floorsUp count
+             * @return Floors up count as int32_t (0 if invalid)
              */
             int32_t getFloorsUp() const
             {
@@ -61,7 +62,7 @@ namespace SDK
             }
 
             /**
-             * @brief Get floorsDown count (signed)
+             * @brief Get floorsDown count
              * @return Floors down count as int32_t (0 if invalid)
              */
             int32_t getFloorsDown() const
@@ -78,17 +79,17 @@ namespace SDK
                 return isDataValid() ? mData.getTimestamp() : 0;
             }
 
-	    /**
-	     * @brief Get data timestamp in us
-	     * @return Data timestamp in us (0 if invalid)
-	     */
-	    uint64_t getTimestampUs() const
-	    {
-        	return isDataValid() ? mData.getTimestampUs() : 0;
-	    }
-            
             /**
-             * @brief Get number of expected fields (always 1)
+             * @brief Get data timestamp in us
+             * @return Data timestamp in us (0 if invalid)
+             */
+            uint64_t getTimestampUs() const
+            {
+                return isDataValid() ? mData.getTimestampUs() : 0;
+            }
+
+            /**
+             * @brief Get number of expected fields (always 2)
              */
             static constexpr uint8_t getFieldsNumber()
             {

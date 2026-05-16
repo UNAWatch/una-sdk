@@ -26,24 +26,25 @@ namespace SDK
          *
          * Expected data layout:
          * - [0] float heart rate (bpm)
+         * - [1] float trust level
          */
         class HeartRate
         {
         public:
             enum Field : uint8_t {
                 BPM = 0,       ///< Heart rate in bpm (float)
-                TRUST_LEVEL,    ///< Trust level (uint32_t)
+                TRUST_LEVEL,   ///< Trust level (float)
                 COUNT          ///< Total number of fields
             };
 
             /**
              * @brief Construct a new HeartRate parser over given ISensorData
-             * @param view Reference to sensor data containing 1 float field
+             * @param view Reference to sensor data containing 2 fields
              */
             HeartRate(const SDK::Sensor::DataView view) : mData(view) {}
 
             /**
-             * @brief Check if data is valid (should contain exactly 1 field)
+             * @brief Check if data is valid (should contain exactly 2 fields)
              * @return true if valid
              */
             bool isDataValid() const
@@ -88,7 +89,7 @@ namespace SDK
             }
 
             /**
-             * @brief Get number of expected fields (always 1)
+             * @brief Get number of expected fields (always 2)
              */
             static constexpr uint8_t getFieldsNumber()
             {
