@@ -1,6 +1,6 @@
 # Scripts
 
-This document provides comprehensive analysis of the Python, Bash, and PowerShell scripts found in the directories .github/, Examples/.github/, Utilities/Scripts/ including environment tools.
+This document provides comprehensive analysis of the Python, Bash, and PowerShell scripts found in the directories .github/, Utilities/Scripts/ including environment tools.
 
 ## Script Usage Overview
 
@@ -534,7 +534,7 @@ The script operates in two main modes:
 ### Integration Context
 This script appears to be part of a GitHub Actions workflow system, likely used in CI/CD pipelines to dynamically determine which tutorial projects need to be built or tested. The exclusion mechanism allows for flexible project management without code changes.
 
-## Script: Examples/.github/scripts/generate-app-list.py {#script-examples-github-scripts-generate-app-list-py}
+## Script: .github/scripts/generate-app-list.py {#script-github-scripts-generate-app-list-py}
 
 ### Overview
 This Python script serves as a discovery tool for application projects in the examples directory, supporting both CMake and CubeIDE build systems. It provides comprehensive project enumeration capabilities with exclusion support, designed for automated build and deployment workflows.
@@ -571,7 +571,7 @@ The script operates in two primary modes:
 ### Usage Examples
 1. **Generate complete categorized app list**:
    ```bash
-   python3 Examples/.github/scripts/generate-app-list.py
+   python3 .github/scripts/generate-app-list.py
    ```
    Output:
    ```json
@@ -583,7 +583,7 @@ The script operates in two primary modes:
 
 2. **List projects for specific application**:
    ```bash
-   python3 Examples/.github/scripts/generate-app-list.py --app Alarm
+   python3 .github/scripts/generate-app-list.py --app Alarm
    ```
    Output:
    ```
@@ -595,7 +595,7 @@ The script operates in two primary modes:
 3. **Exclude applications during processing**:
    ```bash
    APPS_EXCLUDED="BetaApp
-   Prototype" python3 Examples/.github/scripts/generate-app-list.py
+   Prototype" python3 .github/scripts/generate-app-list.py
    ```
 
 ### Error Handling

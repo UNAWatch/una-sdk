@@ -22,7 +22,7 @@ Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you h
 ### Prerequisites
 Before starting the Import Images tutorial, you need to set up the UNA SDK environment. Follow the [Windows Setup section of sdk-setup.md](../../sdk-setup.md#windows-setup) for complete installation instructions, including:
 
-- UNA SDK cloned with submodules (`git clone --recursive`)
+- UNA SDK cloned (`git clone https://github.com/UNAWatch/una-sdk.git`)
 - ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)
 - CMake 3.21+ and make
 - Python 3 with pip packages installed

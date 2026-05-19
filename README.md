@@ -32,7 +32,7 @@ una-sdk/
 │   └── Source/             # SDK implementation (incl. Port/TouchGFX and Simulator)
 ├── ThirdParty/             # Vendored dependencies (TouchGFX, coreJSON, FitSDK, tinycbor)
 ├── Utilities/Scripts/      # Build, packaging, and tooling scripts
-├── Examples/               # Sample applications (git submodule -> UNAWatch/una-apps)
+├── Examples/               # Sample reference applications
 ├── cmake/                  # CMake toolchain and helpers
 └── Docs/                   # Documentation and tutorials
 ```

@@ -1,0 +1,7 @@
+#include <touchgfx/hal/Types.hpp>
+
+FONT_GLYPH_LOCATION_FLASH_PRAGMA
+KEEP extern const uint8_t unicodes_Poppins_Medium_25_2bpp_4[] FONT_GLYPH_LOCATION_FLASH_ATTRIBUTE = {
+    // Unicode: [0x2026, ellipsis]
+    0x28, 0xA0, 0x40, 0xE2, 0x8B, 0x2F, 0xBE, 0xBE, 0xF8, 0xE2, 0xDF, 0x47, 0x1F, 0x7D
+};

@@ -38,7 +38,7 @@ una-sdk/
 │   ├── tinycbor_version/     # CBOR encoder/decoder
 │   └── touchgfx/             # TouchGFX framework (sources + prebuilt libs)
 ├── Utilities/Scripts/        # Build and packaging tools
-├── Examples/                 # Sample applications (git submodule -> UNAWatch/una-apps)
+├── Examples/                 # Sample reference applications
 ├── cmake/                    # CMake toolchain and helpers
 └── Docs/                     # Documentation and tutorials
 ```

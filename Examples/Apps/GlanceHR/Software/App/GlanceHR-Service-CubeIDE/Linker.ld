@@ -1,0 +1,4 @@
+STACK_SIZE = 3*1024;
+RAM_LENGTH = 500K;
+
+INCLUDE "Main/Sections.ld"

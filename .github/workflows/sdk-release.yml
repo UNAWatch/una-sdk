@@ -11,6 +11,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.release.tag_name, 'sdk-v')
     steps:
       - name: Install dependencies
         run: |

@@ -73,9 +73,9 @@ function(una_app_setup_version BUILD_VERSION_OUT WORKING_DIR)
         return()
     endif()
 
-    # Set version using una-version.sh script
+    # Set version using una-version.sh script (apps-v* tags in merged una-sdk)
     execute_process(
-        COMMAND bash $ENV{UNA_SDK}/Utilities/Scripts/build-cube/una-version.sh
+        COMMAND bash $ENV{UNA_SDK}/Utilities/Scripts/build-cube/una-version.sh ${WORKING_DIR} apps-
         WORKING_DIRECTORY ${WORKING_DIR}
         OUTPUT_VARIABLE SCRIPT_OUTPUT
         OUTPUT_STRIP_TRAILING_WHITESPACE

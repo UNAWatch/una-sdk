@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="texts.xsd" Version="4.26.1">
+  <Languages>
+    <Language Id="GB" />
+  </Languages>
+  <Texts>
+    <TextGroup Id="Template">
+      <Text Id="TMP_REGULAR_14" Alignment="Center" TypographyId="Poppins_Regular_14">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_14_L" Alignment="Left" TypographyId="Poppins_Regular_14">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_14_R" Alignment="Right" TypographyId="Poppins_Regular_14">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_16" Alignment="Center" TypographyId="Poppins_Regular_16">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_16_L" Alignment="Left" TypographyId="Poppins_Regular_16">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_16_R" Alignment="Right" TypographyId="Poppins_Regular_16">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_18" Alignment="Center" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_18_L" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_REGULAR_18_R" Alignment="Right" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_10" Alignment="Center" TypographyId="Poppins_Medium_10">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_10_L" Alignment="Left" TypographyId="Poppins_Medium_10">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_10_R" Alignment="Right" TypographyId="Poppins_Medium_10">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_18" Alignment="Center" TypographyId="Poppins_Medium_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_18_L" Alignment="Left" TypographyId="Poppins_Medium_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_18_R" Alignment="Right" TypographyId="Poppins_Medium_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_25" Alignment="Center" TypographyId="Poppins_Medium_25">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_25_L" Alignment="Left" TypographyId="Poppins_Medium_25">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_25_R" Alignment="Right" TypographyId="Poppins_Medium_25">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_50" Alignment="Center" TypographyId="Poppins_Medium_50">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_50_L" Alignment="Left" TypographyId="Poppins_Medium_50">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_50_R" Alignment="Right" TypographyId="Poppins_Medium_50">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_18_L" Alignment="Left" TypographyId="Poppins_SemiBold_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_18_R" Alignment="Right" TypographyId="Poppins_SemiBold_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_18" Alignment="Center" TypographyId="Poppins_SemiBold_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_20" Alignment="Center" TypographyId="Poppins_SemiBold_20">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_20_L" Alignment="Left" TypographyId="Poppins_SemiBold_20">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_20_R" Alignment="Right" TypographyId="Poppins_SemiBold_20">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_25" Alignment="Center" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_25_L" Alignment="Left" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_25_R" Alignment="Right" TypographyId="Poppins_SemiBold_25">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_30" Alignment="Center" TypographyId="Poppins_SemiBold_30">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_30_L" Alignment="Left" TypographyId="Poppins_SemiBold_30">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_30_R" Alignment="Right" TypographyId="Poppins_SemiBold_30">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_35" Alignment="Center" TypographyId="Poppins_SemiBold_35">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_35_L" Alignment="Left" TypographyId="Poppins_SemiBold_35">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_35_R" Alignment="Right" TypographyId="Poppins_SemiBold_35">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_40" Alignment="Center" TypographyId="Poppins_SemiBold_40">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_40_L" Alignment="Left" TypographyId="Poppins_SemiBold_40">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_40_R" Alignment="Right" TypographyId="Poppins_SemiBold_40">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_60" Alignment="Center" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_60_L" Alignment="Left" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_SEMIBOLD_60_R" Alignment="Right" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_ITALIC_18" Alignment="Center" TypographyId="Poppins_Italic_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_ITALIC_18_L" Alignment="Left" TypographyId="Poppins_Italic_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_ITALIC_18_R" Alignment="Right" TypographyId="Poppins_Italic_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_ITALIC_20" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_ITALIC_20_L" Alignment="Left" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_ITALIC_20_R" Alignment="Right" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Text">
+      <Text Id="TEXT_AVG_DOT_SPEED_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">AVG. SPEED</Translation>
+      </Text>
+      <Text Id="TEXT_ELEV_DOT_GAIN_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">ELEV. GAIN</Translation>
+      </Text>
+      <Text Id="TEXT_SPEED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Speed</Translation>
+      </Text>
+      <Text Id="TEXT_SUMMARY" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Summary</Translation>
+      </Text>
+      <Text Id="TEXT_DISTANCE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Distance</Translation>
+      </Text>
+      <Text Id="TEXT_DIST_DOT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Dist.</Translation>
+      </Text>
+      <Text Id="TEXT_DISTANCE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">DISTANCE</Translation>
+      </Text>
+      <Text Id="TEXT_TIME" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Time</Translation>
+      </Text>
+      <Text Id="TEXT_TIMER" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Timer</Translation>
+      </Text>
+      <Text Id="TEXT_TIME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">TIME</Translation>
+      </Text>
+      <Text Id="TEXT_SAVED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Saved</Translation>
+      </Text>
+      <Text Id="TEXT_SAVE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Save &amp; End</Translation>
+      </Text>
+      <Text Id="TEXT_SIGNAL_ACQUIRED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Signal Acquired</Translation>
+      </Text>
+      <Text Id="TEXT_ACQUIRING_SIGNAL" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Acquiring signal</Translation>
+      </Text>
+      <Text Id="TEXT_SETTINGS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Settings</Translation>
+      </Text>
+      <Text Id="TEXT_SETTINGS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">SETTINGS</Translation>
+      </Text>
+      <Text Id="TEXT_START" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Start</Translation>
+      </Text>
+      <Text Id="TEXT_LAP_ALERTS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Lap Alerts</Translation>
+      </Text>
+      <Text Id="TEXT_LAP_ALERTS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">LAP ALERTS</Translation>
+      </Text>
+      <Text Id="TEXT_AUTO_PAUSE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Auto Pause</Translation>
+      </Text>
+      <Text Id="TEXT_AUTO_BR_PAUSE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Auto&#10;Pause</Translation>
+      </Text>
+      <Text Id="TEXT_PHONE_NOTIF_DOT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Phone Notif.</Translation>
+      </Text>
+      <Text Id="TEXT_PHONE_BR_NOTIF_DOT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Phone&#10;Notif.</Translation>
+      </Text>
+      <Text Id="TEXT_MINUTES_LC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">minutes</Translation>
+      </Text>
+      <Text Id="TEXT_MINUTE_LC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">minute</Translation>
+      </Text>
+      <Text Id="TEXT_KM_PER_H" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">km/h</Translation>
+      </Text>
+      <Text Id="TEXT_MI_PER_H" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">mi./h</Translation>
+      </Text>
+      <Text Id="TEXT_MIN" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">min</Translation>
+      </Text>
+      <Text Id="TEXT_MILE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">mile</Translation>
+      </Text>
+      <Text Id="TEXT_MILES" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">miles</Translation>
+      </Text>
+      <Text Id="TEXT_KM" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">km</Translation>
+      </Text>
+      <Text Id="TEXT_FT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">ft</Translation>
+      </Text>
+      <Text Id="TEXT_M" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">m</Translation>
+      </Text>
+      <Text Id="TEXT_ON_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">ON</Translation>
+      </Text>
+      <Text Id="TEXT_OFF_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">OFF</Translation>
+      </Text>
+      <Text Id="TEXT_TIMER_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">TIMER</Translation>
+      </Text>
+      <Text Id="TEXT_ELEVATION" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Elevation</Translation>
+      </Text>
+      <Text Id="TEXT_ELEVATION_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">ELEVATION</Translation>
+      </Text>
+      <Text Id="TEXT_AVG_SPEED_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">AVG SPEED</Translation>
+      </Text>
+      <Text Id="TEXT_MAX_HR_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">MAX HR</Translation>
+      </Text>
+      <Text Id="TEXT_AVG_HR" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">AVG HR</Translation>
+      </Text>
+      <Text Id="TEXT_AVG_DOT_SPEED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Avg. Speed</Translation>
+      </Text>
+      <Text Id="TEXT_HR_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">HR</Translation>
+      </Text>
+      <Text Id="TEXT_LAP_DISTANCE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Lap Distance</Translation>
+      </Text>
+      <Text Id="TEXT_LAP_SPEED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Lap Speed</Translation>
+      </Text>
+      <Text Id="TEXT_PERCENT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">%</Translation>
+      </Text>
+      <Text Id="TEXT_DO_YOU_WANT_ACTIVITY" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Do you want&#10;to discard&#10;the activity?</Translation>
+      </Text>
+      <Text Id="TEXT_START_BEFORE_GPS_FIX" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Start before&#10;signal acquired?</Translation>
+      </Text>
+      <Text Id="TEXT_ACTIVITY_UPLOADED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Activity has&#10;been uploaded</Translation>
+      </Text>
+      <Text Id="TEXT_ACTIVITY_DELETED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Activity has&#10;been deleted</Translation>
+      </Text>
+      <Text Id="TEXT_DISCARTED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Discarded</Translation>
+      </Text>
+      <Text Id="TEXT_DISCARD" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Discard</Translation>
+      </Text>
+      <Text Id="TEXT_RESUME" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Resume</Translation>
+      </Text>
+      <Text Id="TEXT_LAP" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Lap</Translation>
+      </Text>
+      <Text Id="TEXT_AVG_DOT_PACE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">AVG. PACE</Translation>
+      </Text>
+      <Text Id="TEXT_AVG_DOT_HR" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">AVG. HR</Translation>
+      </Text>
+      <Text Id="TEXT_APP_NAME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">CYCLING</Translation>
+      </Text>
+      <Text Id="TEXT_LAPS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">LAPS</Translation>
+      </Text>
+      <Text Id="TEXT_TOTAL" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Total</Translation>
+      </Text>
+      <Text Id="TEXT_MI" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">mi</Translation>
+      </Text>
+      <Text Id="TEXT_MAP_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">MAP</Translation>
+      </Text>
+      <Text Id="TEXT_HEART_RATE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">HEART RATE</Translation>
+      </Text>
+      <Text Id="TEXT_SUMMARY_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">SUMMARY</Translation>
+      </Text>
+      <Text Id="TEXT_NEW_TEXT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_87L9" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">96%</Translation>
+      </Text>
+      <Text Id="__SingleUse_EC3G" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">17:35</Translation>
+      </Text>
+      <Text Id="__SingleUse_UWY0" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">99.9</Translation>
+      </Text>
+      <Text Id="__SingleUse_Q3KS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">0:05:49</Translation>
+      </Text>
+      <Text Id="__SingleUse_9361" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">14.27</Translation>
+      </Text>
+      <Text Id="__SingleUse_Y45I" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">99.9</Translation>
+      </Text>
+      <Text Id="__SingleUse_GAMW" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">735</Translation>
+      </Text>
+      <Text Id="__SingleUse_0CJZ" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">15:37</Translation>
+      </Text>
+      <Text Id="__SingleUse_Z0WD" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">2.33</Translation>
+      </Text>
+      <Text Id="__SingleUse_3KKT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">6.9</Translation>
+      </Text>
+      <Text Id="__SingleUse_HFND" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">115</Translation>
+      </Text>
+      <Text Id="__SingleUse_OTQI" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">99.9</Translation>
+      </Text>
+      <Text Id="__SingleUse_8WSQ" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">99.9</Translation>
+      </Text>
+      <Text Id="__SingleUse_4SCV" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">44.44</Translation>
+      </Text>
+      <Text Id="__SingleUse_KERT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">0:05:49</Translation>
+      </Text>
+      <Text Id="__SingleUse_ACJE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">16.02</Translation>
+      </Text>
+      <Text Id="__SingleUse_BOEQ" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">53:02</Translation>
+      </Text>
+      <Text Id="__SingleUse_NOCF" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">99.00</Translation>
+      </Text>
+      <Text Id="__SingleUse_U3YM" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">24.</Translation>
+      </Text>
+      <Text Id="__SingleUse_QXRZ" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">23.98</Translation>
+      </Text>
+      <Text Id="__SingleUse_CMV2" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">165</Translation>
+      </Text>
+      <Text Id="__SingleUse_FMCS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">117</Translation>
+      </Text>
+      <Text Id="__SingleUse_XTK2" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">2:03:44</Translation>
+      </Text>
+      <Text Id="__SingleUse_ZJSJ" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">735</Translation>
+      </Text>
+      <Text Id="__SingleUse_5T2E" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">23.98</Translation>
+      </Text>
+    </TextGroup>
+  </Texts>
+  <Typographies>
+    <Typography Id="Poppins_Regular_18" Font="Poppins-Regular.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Regular_14" Font="Poppins-Regular.ttf" Size="14" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Regular_16" Font="Poppins-Regular.ttf" Size="16" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_10" Font="Poppins-Medium.ttf" Size="10" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_18" Font="Poppins-Medium.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_25" Font="Poppins-Medium.ttf" Size="25" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_50" Font="Poppins-Medium.ttf" Size="50" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_18" Font="Poppins-SemiBold.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_20" Font="Poppins-SemiBold.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_25" Font="Poppins-SemiBold.ttf" Size="25" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_30" Font="Poppins-SemiBold.ttf" Size="30" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_35" Font="Poppins-SemiBold.ttf" Size="35" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_40" Font="Poppins-SemiBold.ttf" Size="40" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_60" Font="Poppins-SemiBold.ttf" Size="60" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Italic_18" Font="Poppins-Italic.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Italic_20" Font="Poppins-Italic.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+  </Typographies>
+</TextDatabase>
