@@ -18,7 +18,7 @@ Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental
 
 Before building the Buttons app, you need to set up the UNA SDK environment. Follow the [toolchain setup](toolchain-setup) for complete installation instructions, including:
 
-- UNA SDK cloned with submodules (`git clone --recursive`)
+- UNA SDK cloned (`git clone https://github.com/UNAWatch/una-sdk.git`)
 - ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)
 - CMake 3.21+ and make
 - Python 3 with pip packages installed

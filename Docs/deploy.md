@@ -77,7 +77,7 @@
 
   ![Publish](assets/publish.png)
 
-### Via PR to https://github.com/UNAWatch/una-apps for Open Source Apps
+### Via PR to https://github.com/UNAWatch/una-sdk for Open Source Apps
 
-- Apply a PR to https://github.com/UNAWatch/una-apps.
+- Apply a PR to https://github.com/UNAWatch/una-sdk with changes under `Examples/Apps/`.
   

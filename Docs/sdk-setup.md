@@ -16,7 +16,7 @@ For platform architecture, see [platform overview](platform-overview.md). For tu
 - **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [toolchain setup](#toolchain-setup).
 - **TouchGFX (Windows-only for Designer)**: For GUI development - TouchGFX Designer requires Windows. See [TouchGFX](#touchgfx-require-a-windows-host) below.
 - USB cable for device flashing
-- Git for cloning the SDK
+- Git for cloning the SDK (release tags use `sdk-v*` for the SDK and `apps-v*` for reference apps in `Examples/`)
 
 The rest of this document provides OS-specific, end-to-end setup sections (Linux/Windows) that follow the same flow:
 
@@ -75,8 +75,8 @@ If `arm-none-eabi-gcc` is still not found and you installed **CubeIDE**, add the
 ##### Clone and setup environment
 
 ```bash
-# Clone
-git clone --recursive https://github.com/UNAWatch/una-sdk.git
+# Clone (Examples/ reference apps are included in the repo)
+git clone https://github.com/UNAWatch/una-sdk.git
 cd una-sdk
 
 # Export environment for the current shell
@@ -167,9 +167,9 @@ If you installed `gcc-arm-none-eabi` from your distro repositories and builds fa
 
 ```powershell
 # Clone via SSH
-git clone --recursive git@github.com:UNAWatch/una-sdk.git
+git clone git@github.com:UNAWatch/una-sdk.git
 # Or use HTTPS
-git clone --recursive https://github.com/UNAWatch/una-sdk.git
+git clone https://github.com/UNAWatch/una-sdk.git
 
 # Export environment (persistent)
 # If you encounter a security error (e.g., running scripts is disabled), run this first:

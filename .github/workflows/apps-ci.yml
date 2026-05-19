@@ -1,0 +1,247 @@
+name: CI Apps
+
+on:
+  push:
+    branches: [ develop, main ]
+    tags: [ 'apps-v*' ]
+  pull_request:
+
+env:
+  UNA_WORKSPACE: ${{ github.env.GITHUB_WORKSPACE }}
+  DOCKER_DRIVER: overlay2
+  APPS_EXCLUDED: |
+    Utility1
+    Utility2
+    Utility3
+    Utility4
+    Glance1
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    container: python:3.11-slim
+    outputs:
+      cmake_apps: ${{ steps.generate.outputs.cmake_apps }}
+      cubeide_apps: ${{ steps.generate.outputs.cubeide_apps }}
+    steps:
+      - name: Setup GIT
+        run: apt update && apt install -y git jq
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Generate app list
+        id: generate
+        run: |
+          output=$(python3 .github/scripts/generate-app-list.py)
+          echo "cmake_apps=$(echo "$output" | jq -c .cmake_apps)" >> $GITHUB_OUTPUT
+          echo "cubeide_apps=$(echo "$output" | jq -c .cubeide_apps)" >> $GITHUB_OUTPUT
+
+  cmake-build:
+    runs-on: ubuntu-latest
+    container: xanderhendriks/stm32cubeide:16.0
+    needs: prepare
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.prepare.outputs.cmake_apps) }}
+    steps:
+      - name: Setup GIT
+        run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install scripts requirements
+        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
+
+      - name: Build app ${{ matrix.app }} with CMake
+        run: |
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-objcopy | head -n 1 | xargs dirname`:$PATH
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name make | head -n 1 | xargs dirname`:$PATH
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name make | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-gcc | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-g++ | head -n 1)
+          cd Examples/Apps/${{ matrix.app }}/Software/App*/*-CMake
+          export UNA_SDK=$GITHUB_WORKSPACE
+          mkdir -p build
+          cd build
+          cmake ..
+          make -j$(nproc)
+
+      - name: Upload CMake app artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmake-app-${{ matrix.app }}
+          path: Examples/Apps/${{ matrix.app }}/Software/App*/*-CMake/build/*.uapp
+
+  cubeide-build:
+    runs-on: ubuntu-latest
+    container: xanderhendriks/stm32cubeide:16.0
+    needs: prepare
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.prepare.outputs.cubeide_apps) }}
+    steps:
+      - name: Setup GIT
+        run: apt update && apt install -y git python3-full python3-pip python-is-python3
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install scripts requirements
+        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
+
+      - name: Build app ${{ matrix.app }} with CubeIDE
+        run: |
+          echo "Setup environment"
+          export UNA_SDK=$GITHUB_WORKSPACE
+          . Utilities/Scripts/build-cube/find-cube.sh
+          echo "Building app: ${{ matrix.app }}"
+          CUBEIDE_PROJECTS=`python3 .github/scripts/generate-app-list.py --app ${{ matrix.app }}`
+          if [ -z "$CUBEIDE_PROJECTS" ]; then
+            echo "ERROR: No CubeIDE projects found for app ${{ matrix.app }}" >&2
+            exit 1
+          fi
+          echo "Projects:"
+          echo "$CUBEIDE_PROJECTS"
+          temp_non="/tmp/non_service_$"
+          temp_svc="/tmp/service_$"
+          touch "$temp_non" "$temp_svc"
+          for p in $CUBEIDE_PROJECTS; do
+            if echo "$p" | grep -q Service; then
+              echo "$p" >> "$temp_svc"
+            else
+              echo "$p" >> "$temp_non"
+            fi
+          done
+          cat "$temp_non" "$temp_svc" | while IFS= read -r p; do
+            [ -z "$p" ] && continue
+            echo "Building project: $p"
+            . Utilities/Scripts/build-cube/una-version.sh "$p" apps-
+            Utilities/Scripts/build-cube/build-cube.sh "$p"
+          done
+          rm -f "$temp_non" "$temp_svc"
+          echo "App build complete: ${{ matrix.app }}"
+
+      - name: Upload CubeIDE app artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cubeide-app-${{ matrix.app }}
+          path: Examples/Apps/${{ matrix.app }}/Output/*.uapp
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [cmake-build, cubeide-build]
+    if: startsWith(github.ref, 'refs/tags/apps-v')
+    permissions:
+      contents: write
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y curl jq git
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare cmake zip
+        run: |
+          mkdir -p temp/cmake
+          for dir in artifacts/cmake-app-*; do
+            app=$(basename "$dir" | sed 's/^cmake-app-//')
+            mkdir -p "temp/cmake/$app"
+            find "$dir" -name "*.uapp" -exec cp {} "temp/cmake/$app/" \;
+          done
+          cd temp/cmake
+          zip -r ../../una-apps-cmake-${{ github.ref_name }}.zip .
+
+      - name: Prepare cubeide zip
+        run: |
+          mkdir -p temp/cubeide
+          for dir in artifacts/cubeide-app-*; do
+            app=$(basename "$dir" | sed 's/^cubeide-app-//')
+            mkdir -p "temp/cubeide/$app"
+            find "$dir" -name "*.uapp" -exec cp {} "temp/cubeide/$app/" \;
+          done
+          cd temp/cubeide
+          zip -r ../../una-apps-cubeide-${{ github.ref_name }}.zip .
+
+      - id: create_release
+        name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            una-apps-cmake-${{ github.ref_name }}.zip
+            una-apps-cubeide-${{ github.ref_name }}.zip
+          generate_release_notes: true
+
+      - name: Make release immutable
+        run: |
+          gh release edit ${{ github.ref_name }} --draft=false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - id: get_slack_params
+        name: Get required parameters for slack notification
+        run: |
+          RELEASE_JSON=$(gh release view ${{ github.ref_name }} --json body,author,createdAt,name,url)
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "author=$(echo "$RELEASE_JSON" | jq -r '.author.login')" >> $GITHUB_OUTPUT
+          echo "created_at=$(echo "$RELEASE_JSON" | jq -r '.createdAt')" >> $GITHUB_OUTPUT
+          echo "name=$(echo "$RELEASE_JSON" | jq -r '.name')" >> $GITHUB_OUTPUT
+          echo "url=$(echo "$RELEASE_JSON" | jq -r '.url')" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - id: prepare_slack_payload
+        name: Prepare Slack payload
+        run: |
+          BODY="${{ steps.get_slack_params.outputs.body }}"
+          BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g')
+          BODY=$(echo "$BODY" | sed 's/^## \([^$]*\)$/*\1*/')
+          BODY=$(echo "$BODY" | sed 's/^* /- /')
+          BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/')
+          if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
+          PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
+            text: (":roller_coaster: *UNA Apps*: " + $name),
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: ("-------- :roller_coaster: *UNA Apps* --------\n*" + $name + "* (tag: " + $tag + ")\n\n" + $body + "\n\n:bust_in_silhouette: *Author*: " + $author + "\n:date: *Created*: " + $created + "\n\n:link: *Download*: " + $url)
+                }
+              }
+            ]
+          }')
+          echo "payload<<EOF" >> $GITHUB_OUTPUT
+          echo "$PAYLOAD" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: ${{ steps.prepare_slack_payload.outputs.payload }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

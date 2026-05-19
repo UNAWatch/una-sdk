@@ -1,0 +1,14 @@
+# Folder for creating files by user programs in the simulator
+**/UserAppFS/
+
+# Visual Studio files
+**/Visual Studio 2022/
+**/.vs/
+.vscode/workspace
+Apps/**/Software/Apps/RunningService-CMake/build
+Apps/**/Software/Apps/RunningGUI-CMake/build
+Apps/**/Software/Output
+Apps/**/Software/Apps/Running-CMake/build
+.headless-build
+
+.claude/
