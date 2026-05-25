@@ -95,8 +95,6 @@ my_custom_message,,,"d=compact_version,super_compact_version"
 ,field2,,"1 d=1,1"
 ,field3,,"1 d=1,1"
 ,name,,"64 d=32,0"
-,custom_options,,"1 d=1,1"
-,bitmask_options,,"1 d=1,1"
 ,position_lat,,"1 d=1,1"
 ,position_long,,"1 d=1,1"
 ,enhanced_altitude,,"1 d=1,1"
@@ -135,13 +133,11 @@ typedef struct
    FIT_LOCAL_DATE_TIME local_timestamp; // 1 * s + 0, Local time of message
    FIT_UINT32 field2; // uint32 field
    FIT_FLOAT32 field3; // float32 field
-   FIT_MY_CUSTOM_BITFIELD_OPTIONS bitmask_options; // custom bitfields field
    FIT_SINT32 position_lat; // 1 * semicircles + 0, latitude field
    FIT_SINT32 position_long; // 1 * semicircles + 0, longitude field
    FIT_UINT32 enhanced_altitude; // 5 * m + 500, enhanced altitude field
    FIT_UINT16 field1; // uint16 field
    FIT_UINT8 field0; // uint8 field
-   FIT_MY_CUSTOM_OPTIONS custom_options; // custom options field
 } FIT_MY_CUSTOM_MESSAGE_SUPER_COMPACT_VERSION_MESG;
 ```
 
@@ -326,27 +322,15 @@ messages.csv and types.csv should be saved to /path/to/fit/sdk. This should be t
 
 ### Example Custom Message
 
-Copy and paste the following text into a text editor and save it as /path/to/fit/sdk/types.csv.  The example types.csv file contains an entry in the mesg_num enum for the "my_custom_message" message, and definitions for two custom types that show how to define enums and bitfields.
+Copy and paste the following text into a text editor and save it as /path/to/fit/sdk/types.csv.  The example types.csv file contains an entry in the mesg_num enum for the "my_custom_message" message.
 
 ```
 Type Name,Base Type,Value Name,Value,Comment
 mesg_num,uint16,,,
 ,,my_custom_message,0xFF01,"Message number for my custom message"
-,,,,,,,,
-my_custom_options,enum,,,"Custom Options"
-,,option_a,0,"Option A"
-,,option_b,1,"Option B"
-,,option_c,2,"Option C"
-,,,,,,,,
-my_custom_bitfield_options,uint32z,,,"Custom Bitfield Options"
-,,bit1,0x00000001,"Bit 0"
-,,bit2,0x00000002,"Bit 1"
-,,bit3,0x00000004,"Bit 2"
-,,bit4,0x00000008,"Bit 3"
-,,bit5,0x00000010,"Bit 4"
 ```
 
-Copy and paste the following text into a text editor and save it as /path/to/fit/sdk/messages.csv. The example messages.csv file provides an example message definition with fields that use both the standard data types defined in the [FIT Protocol](/fit/protocol/) and the custom types defined in types.csv.
+Copy and paste the following text into a text editor and save it as /path/to/fit/sdk/messages.csv. The example messages.csv file provides an example message definition with fields that use the standard data types defined in the [FIT Protocol](/fit/protocol/).
 
 ```
 Message Name,Field Def #,Field Name,Field Type,Array,Components,Scale,Offset,Units,Bits,Accumulate,Ref Field Name,Ref Field Value,Comment,Products:,EXAMPLE
@@ -358,8 +342,6 @@ my_custom_message,,,,,,,,,,,,,,,
 ,3,field2,uint32,,,,,,,,,,"uint32 field",,
 ,4,field3,float32,,,,,,,,,,"float32 field",,
 ,5,name,string,,,,,,,,,,"name field",,
-,6,custom_options,my_custom_options,,,,,,,,,,"custom options field",,
-,7,bitmask_options,my_custom_bitfield_options,,,,,,,,,,"custom bitfields field",,
 ,8,position_lat,sint32,,,,,semicircles,,,,,"latitude field",,
 ,9,position_long,sint32,,,,,semicircles,,,,,"longitude field",,
 ,10,enhanced_altitude,uint32,,,5,500,m,,,,,"enhanced altitude field",,
@@ -387,8 +369,6 @@ my_custom_message,,,""
 ,field2,,"0"
 ,field3,,"0"
 ,name,,"0"
-,custom_options,,"0"
-,bitmask_options,,"0"
 ,position_lat,,"0"
 ,position_long,,"0"
 ,enhanced_altitude,,"0"
@@ -406,8 +386,6 @@ my_custom_message,,,""
 ,field2,,"1"
 ,field3,,"1"
 ,name,,"64"
-,custom_options,,"1"
-,bitmask_options,,"1"
 ,position_lat,,"1"
 ,position_long,,"1"
 ,enhanced_altitude,,"1"
@@ -437,14 +415,12 @@ typedef struct
    FIT_UINT32 field2; // uint32 field
    FIT_FLOAT32 field3; // float32 field
    FIT_STRING name[FIT_MY_CUSTOM_MESSAGE_MESG_NAME_COUNT]; // name field
-   FIT_MY_CUSTOM_BITFIELD_OPTIONS bitmask_options; // custom bitfields field
    FIT_SINT32 position_lat; // 1 * semicircles + 0, latitude field
    FIT_SINT32 position_long; // 1 * semicircles + 0, longitude field
    FIT_UINT32 enhanced_altitude; // 5 * m + 500, enhanced altitude field
    FIT_UINT32 array_of_values[FIT_MY_CUSTOM_MESSAGE_MESG_ARRAY_OF_VALUES_COUNT]; // array field
    FIT_UINT16 field1; // uint16 field
    FIT_UINT8 field0; // uint8 field
-   FIT_MY_CUSTOM_OPTIONS custom_options; // custom options field
 } FIT_MY_CUSTOM_MESSAGE_MESG;
 
 typedef FIT_UINT8 FIT_MY_CUSTOM_MESSAGE_FIELD_NUM;
@@ -454,14 +430,12 @@ typedef FIT_UINT8 FIT_MY_CUSTOM_MESSAGE_FIELD_NUM;
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_FIELD2 ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)3)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_FIELD3 ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)4)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_NAME ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)5)
-#define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_BITMASK_OPTIONS ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)7)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_POSITION_LAT ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)8)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_POSITION_LONG ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)9)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_ENHANCED_ALTITUDE ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)10)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_ARRAY_OF_VALUES ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)11)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_FIELD1 ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)2)
 #define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_FIELD0 ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)1)
-#define FIT_MY_CUSTOM_MESSAGE_FIELD_NUM_CUSTOM_OPTIONS ((FIT_MY_CUSTOM_MESSAGE_FIELD_NUM)6)
 ```
 
 Refer to Profile.xlsx for examples of how messages and types in the FIT Profile are defined. If needed, the "Messages" worksheet may be exported as messages.csv and the "Types" worksheet may be exported as types.csv. These files can be used as templates for creating custom messages and types.

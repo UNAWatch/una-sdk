@@ -19,11 +19,12 @@ set(UNA_SDK_SOURCES_APPSYSTEM
 # release without affecting the rest of the tree, e.g.
 #     set(UNA_FIT_SDK_DIR "$ENV{UNA_SDK}/ThirdParty/FitSDKRelease_21.202.00")
 if(NOT DEFINED UNA_FIT_SDK_DIR)
-    set(UNA_FIT_SDK_DIR "$ENV{UNA_SDK}/ThirdParty/FitSDKRelease_21.171.00")
+    set(UNA_FIT_SDK_DIR "$ENV{UNA_SDK}/ThirdParty/FitSDKRelease_21.202.00")
 endif()
 
 set(UNA_SDK_SOURCES_FIT
     "$ENV{UNA_SDK}/Libs/Source/FitHelper/FitHelper.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/FitHelper/FitRecordCadence.cpp"
     "${UNA_FIT_SDK_DIR}/c/fit.c"
     "${UNA_FIT_SDK_DIR}/c/fit_convert.c"
     "${UNA_FIT_SDK_DIR}/c/fit_crc.c"

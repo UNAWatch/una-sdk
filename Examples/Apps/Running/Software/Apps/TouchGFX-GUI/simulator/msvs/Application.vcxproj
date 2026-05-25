@@ -24,16 +24,17 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_convert.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_crc.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_product.c"/>
+    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit.c"/>
+    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_convert.c"/>
+    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_crc.c"/>
+    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitRecordCadence.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\SensorLayer\SensorConnection.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp"/>
@@ -61,6 +62,7 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\SensorPressure.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuWristMotion.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuStepCounter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuRunningCadence.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\ComponentSimulator.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Simulator\GpsStepCounterSimulator.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\SensorListener.cpp"/>
@@ -391,6 +393,9 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderGUI.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitRecordCadence.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\SensorLayer\DataParsers\SensorDataParserRunningCadence.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Components\Sensors\IMU\ImuRunningCadence.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Filters\SimpleLPF.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\GUI\Button.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\GUI\Color.hpp"/>
@@ -621,7 +626,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\simulator;../../gui/include;../../../../Libs/Header;$(LibsPath)\Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -643,7 +648,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ApplicationRoot)\simulator;(ApplicationRoot)\gui\include;$(ApplicationRoot)\generated\images\include;$(ApplicationRoot)\generated\bitmaps\include;$(ApplicationRoot)\generated\fonts\include;$(ApplicationRoot)\generated\texts\include;$(ApplicationRoot)\generated\videos\include;$(ApplicationRoot)\generated\gui_generated\include;$(ApplicationRoot)\generated\simulator\include;$(TouchGFXReleasePath)\framework\common\include;$(TouchGFXReleasePath)\framework\mvp\include;$(TouchGFXReleasePath)\framework\include\platform\hal\simulator\sdl2\vendor;$(TouchGFXReleasePath)\3rdparty\libjpeg\include;$(TouchGFXReleasePath)\framework\include;../../gui/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\simulator;../../gui/include;../../../../Libs/Header;$(LibsPath)\Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

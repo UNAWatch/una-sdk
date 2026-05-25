@@ -41,8 +41,10 @@ public:
             COORDS     = 1u << 0, // lat/long valid as a group
             SPEED      = 1u << 1,
             ALTITUDE   = 1u << 2,
-            HEART_RATE = 1u << 3,
-            BATTERY    = 1u << 4,
+            HEART_RATE   = 1u << 3,
+            BATTERY      = 1u << 4,
+            CADENCE      = 1u << 5,
+            STEP_LENGTH  = 1u << 6,
         };
 
         void set(Field f)                 { mFlags |= mask(f); }
@@ -59,6 +61,8 @@ public:
         float       heartRate      = 0.0f;  // bpm
         uint8_t     batteryLevel   = 0;     // %
         uint16_t    batteryVoltage = 0;     // mV
+        float       cadenceSpm     = 0.0f;  // steps/min
+        float       stepLengthM    = 0.0f;  // single-step distance, m
 
     private:
         static constexpr uint8_t mask(Field f)

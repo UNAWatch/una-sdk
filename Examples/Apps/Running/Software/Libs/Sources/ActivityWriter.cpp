@@ -11,6 +11,7 @@
 
 #include "ActivityWriter.hpp"
 
+#include "SDK/FitHelper/FitRecordCadence.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
 #include "SDK/JSON/JsonStreamWriter.hpp"
 
@@ -88,26 +89,38 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     mFHRecord.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
                      FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
                      FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                     FIT_RECORD_FIELD_NUM_HEART_RATE });
+                     FIT_RECORD_FIELD_NUM_HEART_RATE,
+                     FIT_RECORD_FIELD_NUM_CADENCE,
+                     FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
+                     FIT_RECORD_FIELD_NUM_STEP_LENGTH });
 
     mFHRecordG.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
                       FIT_RECORD_FIELD_NUM_POSITION_LAT,
                       FIT_RECORD_FIELD_NUM_POSITION_LONG,
                       FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
                       FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                      FIT_RECORD_FIELD_NUM_HEART_RATE });
+                      FIT_RECORD_FIELD_NUM_HEART_RATE,
+                      FIT_RECORD_FIELD_NUM_CADENCE,
+                      FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
+                      FIT_RECORD_FIELD_NUM_STEP_LENGTH });
 
     mFHRecordB.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
                       FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
                       FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                      FIT_RECORD_FIELD_NUM_HEART_RATE });
+                      FIT_RECORD_FIELD_NUM_HEART_RATE,
+                      FIT_RECORD_FIELD_NUM_CADENCE,
+                      FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
+                      FIT_RECORD_FIELD_NUM_STEP_LENGTH });
 
     mFHRecordGB.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
                        FIT_RECORD_FIELD_NUM_POSITION_LAT,
                        FIT_RECORD_FIELD_NUM_POSITION_LONG,
                        FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
                        FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                       FIT_RECORD_FIELD_NUM_HEART_RATE });
+                       FIT_RECORD_FIELD_NUM_HEART_RATE,
+                       FIT_RECORD_FIELD_NUM_CADENCE,
+                       FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
+                       FIT_RECORD_FIELD_NUM_STEP_LENGTH });
 
     mFHBatteryLevelField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
                                 FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
@@ -250,6 +263,16 @@ FIT_RECORD_MESG ActivityWriter::prepareRecordMsg(const RecordData& record)
 
     if (record.has(RecordData::Field::HEART_RATE)) {
         msg.heart_rate = static_cast<FIT_UINT8>(record.heartRate);
+    }
+
+    if (record.has(RecordData::Field::CADENCE)) {
+        const auto cadenceFit = SDK::FitRecordCadence::encodeCadenceSpm(record.cadenceSpm);
+        msg.cadence            = cadenceFit.cadence;
+        msg.fractional_cadence = cadenceFit.fractionalCadence;
+    }
+
+    if (record.has(RecordData::Field::STEP_LENGTH)) {
+        msg.step_length = SDK::FitRecordCadence::encodeStepLengthM(record.stepLengthM);
     }
 
     return msg;

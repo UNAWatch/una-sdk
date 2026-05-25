@@ -67,7 +67,15 @@ private:
     SDK::Sensor::Connection mSensorBatteryMetrics;
     SDK::Sensor::Connection mSensorWristMotion;
     SDK::Sensor::Connection mSensorFusion;
+    SDK::Sensor::Connection mSensorRunningCadence;
     bool                    mIsSensorsConnected = false;
+
+    struct {
+        float cadenceSpm      = 0.0f;
+        bool  cadenceValid    = false;
+        float stepLengthM     = 0.0f;
+        bool  stepLengthValid = false;
+    } mRunningCadence{};
 
     // -- Metrics --------------------------------------------------------------
 
