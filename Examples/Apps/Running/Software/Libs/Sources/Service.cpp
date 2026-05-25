@@ -24,6 +24,7 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryMetrics.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserWristMotion.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFusionRaw.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserRunningCadence.hpp"
 
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -58,6 +59,7 @@ Service::Service(SDK::Kernel &kernel)
         , mSensorBatteryMetrics(SDK::Sensor::Type::BATTERY_METRICS, skSamplePeriod, skSampleLatency)
         , mSensorWristMotion(SDK::Sensor::Type::WRIST_MOTION)
         , mSensorFusion(SDK::Sensor::Type::FUSION_RAW, 1000.0f / skFusionSampleRateHz, 100)
+        , mSensorRunningCadence(SDK::Sensor::Type::RUNNING_CADENCE, skSamplePeriod, skSampleLatency)
         , mTimeTracker(kernel.sys)
         , mAltitudeFilter(0.8f)
         , mAltitudeCounter()
@@ -246,6 +248,7 @@ void Service::connectSensors()
         mSensorPressure.connect();
         mSensorHr.connect();
         mSensorFusion.connect();
+        mSensorRunningCadence.connect();
 
         mIsSensorsConnected = true;
     }
@@ -257,6 +260,7 @@ void Service::disconnect()
         LOG_DEBUG("Disconnect from sensors...\n");
 
         mSensorFusion.disconnect();
+        mSensorRunningCadence.disconnect();
         mSensorHr.disconnect();
         mSensorPressure.disconnect();
         mSensorGpsSpeed.disconnect();
@@ -335,6 +339,14 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         if (parser.isDataValid()) {
             LOG_DEBUG("Wrist Motion detected\n");
             backlightOn();
+        }
+    } else if (mSensorRunningCadence.matchesDriver(handle)) {
+        SDK::SensorDataParser::RunningCadence parser(data[0]);
+        if (parser.isDataValid()) {
+            mRunningCadence.cadenceSpm      = parser.getCadenceSpm();
+            mRunningCadence.cadenceValid    = parser.isCadenceValid();
+            mRunningCadence.stepLengthM     = parser.getStepLengthM();
+            mRunningCadence.stepLengthValid = parser.isStepLengthValid();
         }
     } else if (mSensorFusion.matchesDriver(handle)) {
         static constexpr uint16_t kBatchSize = 10u;
@@ -574,6 +586,12 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.batteryLevel   = static_cast<uint8_t>(mBatterySoc.get());
     fitRecord.batteryVoltage = static_cast<uint16_t>(mBatteryVoltage.get() * 1000);
 
+    fitRecord.set(ActivityWriter::RecordData::Field::CADENCE, mRunningCadence.cadenceValid);
+    fitRecord.cadenceSpm = mRunningCadence.cadenceSpm;
+
+    fitRecord.set(ActivityWriter::RecordData::Field::STEP_LENGTH, mRunningCadence.stepLengthValid);
+    fitRecord.stepLengthM = mRunningCadence.stepLengthM;
+
     return fitRecord;
 }
 
@@ -631,6 +649,7 @@ void Service::startTrack(std::time_t utc)
     mBatterySoc.reset(skBatteryLogPeriodMs);
     mBatteryVoltage.reset(skBatteryLogPeriodMs);
     mGps.reset();
+    mRunningCadence = {};
 
     mSessionNotEmpty = false;
     mLapNotEmpty = false;

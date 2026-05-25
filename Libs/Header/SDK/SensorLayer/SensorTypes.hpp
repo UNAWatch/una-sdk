@@ -47,6 +47,7 @@ namespace SDK::Sensor
         STEP_DETECTOR        = 0x00000050, ///< Step event.
         STEP_COUNTER         = 0x00000051, ///< Step count since boot (monotonic).
         STEP_COUNTER_DAILY   = 0x00000052, ///< Step count for the current day.
+        RUNNING_CADENCE      = 0x00000053, ///< Running cadence + optional GNSS step length.
 
         FLOOR_COUNTER        = 0x00000060, ///< Floor counter since boot (monotonic).
         FLOOR_COUNTER_DAILY  = 0x00000061, ///< Floor counter for the current day.

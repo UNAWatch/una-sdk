@@ -53,6 +53,10 @@ namespace Instance {
         sm.regDriver(&mSensorImuStepCounter.getDriver());
 #endif //IMU_STEP_COUNTER_SIM_ENABLE
 
+#if defined(IMU_RUNNING_CADENCE_SIM_ENABLE) && (IMU_RUNNING_CADENCE_SIM_ENABLE == 1)
+        sm.regDriver(&mSensorImuRunningCadence.getDriver());
+#endif //IMU_RUNNING_CADENCE_SIM_ENABLE
+
     }
 
     void SensorLayer::handlerButtons(uint8_t key)
@@ -73,6 +77,7 @@ namespace Instance {
         , mSensorHRMetrics()
         , mSensorPressure()
         , mSensorImuStepCounter()
+        , mSensorImuRunningCadence()
     {
         ComponentSimulator& mComponent = ComponentSimulator::GetInstance();
 

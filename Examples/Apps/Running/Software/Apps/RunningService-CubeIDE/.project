@@ -251,22 +251,22 @@
 		<link>
 			<name>SDK/ThirdParty/FitSDK/fit.c</name>
 			<type>1</type>
-			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.171.00/c/fit.c</locationURI>
+			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.202.00/c/fit.c</locationURI>
 		</link>
 		<link>
 			<name>SDK/ThirdParty/FitSDK/fit_convert.c</name>
 			<type>1</type>
-			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.171.00/c/fit_convert.c</locationURI>
+			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.202.00/c/fit_convert.c</locationURI>
 		</link>
 		<link>
 			<name>SDK/ThirdParty/FitSDK/fit_crc.c</name>
 			<type>1</type>
-			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c</locationURI>
+			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.202.00/c/fit_crc.c</locationURI>
 		</link>
 		<link>
 			<name>SDK/ThirdParty/FitSDK/fit_product.c</name>
 			<type>1</type>
-			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c</locationURI>
+			<locationURI>SDK_LOC/ThirdParty/FitSDKRelease_21.202.00/c/fit_product.c</locationURI>
 		</link>
 		<link>
 			<name>SDK/ThirdParty/coreJSON/source</name>
@@ -282,6 +282,11 @@
 			<name>SDK/Libs/Header/FitHelper/FitHelper.hpp</name>
 			<type>1</type>
 			<locationURI>SDK_LOC/Libs/Header/SDK/FitHelper/FitHelper.hpp</locationURI>
+		</link>
+		<link>
+			<name>SDK/Libs/Header/FitHelper/FitRecordCadence.hpp</name>
+			<type>1</type>
+			<locationURI>SDK_LOC/Libs/Header/SDK/FitHelper/FitRecordCadence.hpp</locationURI>
 		</link>
 		<link>
 			<name>SDK/Libs/Header/Interfaces/IKernel.hpp</name>
@@ -437,6 +442,11 @@
 			<name>SDK/Libs/Source/FitHelper/FitHelper.cpp</name>
 			<type>1</type>
 			<locationURI>SDK_LOC/Libs/Source/FitHelper/FitHelper.cpp</locationURI>
+		</link>
+		<link>
+			<name>SDK/Libs/Source/FitHelper/FitRecordCadence.cpp</name>
+			<type>1</type>
+			<locationURI>SDK_LOC/Libs/Source/FitHelper/FitRecordCadence.cpp</locationURI>
 		</link>
 		<link>
 			<name>SDK/Libs/Source/JSON/JsonStreamReader.cpp</name>
