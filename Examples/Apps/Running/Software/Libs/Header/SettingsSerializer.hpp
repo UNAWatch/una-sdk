@@ -11,7 +11,7 @@
  * @code{.json}
  * {
  *     "version":1,
- *     "auto_pause_en":false,
+ *     "auto_pause_en":false,  // persisted; no GUI toggle until feature is implemented
  *     "phone_notif_en":true,
  *     "alert_distance_id":0,
  *     "alert_time_id":0,

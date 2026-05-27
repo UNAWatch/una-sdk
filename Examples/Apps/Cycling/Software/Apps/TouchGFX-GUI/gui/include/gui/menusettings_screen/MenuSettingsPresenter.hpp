@@ -30,7 +30,6 @@ public:
     virtual void onIdleTimeout() override { model->exitApp(); }
     virtual void onGpsFix(bool acquired) override;
 
-    void saveAutoPause(bool state);
     void savePhoneNotif(bool state);
 
 private:
