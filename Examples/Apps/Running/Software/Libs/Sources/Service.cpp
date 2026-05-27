@@ -359,6 +359,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 SDK::SensorDataParser::FusionRaw::Data sample{};
                 parser.getData(sample);
                 batch[batchLen].ayLsb = sample.accel.y;
+                batch[batchLen].azLsb = sample.accel.z;
                 batch[batchLen].gxLsb = sample.gyro.x;
                 batch[batchLen].timestampMs = parser.getTimestamp();
                 //LOG_DEBUG("AY: %d, GX: %d\n", sample.accel.y, sample.gyro.x);
