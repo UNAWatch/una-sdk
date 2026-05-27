@@ -92,28 +92,6 @@ See [Docs/sdk-setup.md](Docs/sdk-setup.md) for the exact toolchain requirements 
    cmake --build build
    ```
 
-### STM32CubeIDE Builds
-
-For IDE-based development with integrated debugging.
-
-#### Setting Up a Project
-
-1. Copy a CubeIDE project from `SDK/Examples/Apps/<app-name>/Software/Apps/<app-name>CubeIDE/`
-
-2. Import into CubeIDE:
-   - `File > Import > Existing Projects into Workspace`
-   - Select the copied project directories
-
-3. Update project properties:
-   - Right-click project > `Properties > C/C++ Build > Settings`
-   - Verify toolchain paths and include directories
-
-#### Building in CubeIDE
-
-1. Select the project in Project Explorer
-2. `Project > Build Project` or press Ctrl+B
-3. For service+GUI apps, build both service and GUI projects separately
-
 ### TouchGFX GUI Builds
 
 For applications with graphical user interfaces.
@@ -144,7 +122,7 @@ For applications with graphical user interfaces.
 
 ## Compiling Examples
 
-The SDK includes several example applications demonstrating different features and build systems.
+The SDK includes several example applications demonstrating different features, all built with CMake.
 
 ### Available Examples
 
@@ -159,33 +137,7 @@ The SDK includes several example applications demonstrating different features a
 
 ### Compiling Examples with CMake
 
-Each example supports CMake builds. For a complete, copy-and-build walkthrough, follow the **Alarm CMake** example in [Docs/sdk-setup.md](Docs/sdk-setup.md).
-
-### Compiling Examples with CubeIDE
-
-For IDE-based compilation:
-
-1. Copy the example to avoid modifying originals:
-   ```bash
-   cp -r SDK/Examples/Apps/Cycling/Software/Apps/CyclingService-CubeIDE SDK/Examples/Apps/MyCyclingService
-   cp -r SDK/Examples/Apps/Cycling/Software/Apps/CyclingGUI-CubeIDE SDK/Examples/Apps/MyCyclingGUI
-   ```
-
-2. Import projects into CubeIDE
-
-3. Build each project separately
-
-4. Merge using SDK scripts:
-   ```bash
-   python3 SDK/Utilities/Scripts/app_merging/app_merging.py \
-     -name Cycling \
-     -type Activity \
-     -normal_icon SDK/Examples/Apps/Cycling/Resources/icon_60x60.png \
-     -small_icon SDK/Examples/Apps/Cycling/Resources/icon_30x30.png \
-     -appid <unique_id> \
-     -appver 1.0.0 \
-     -scripts SDK/Libs/Source/AppSystem
-   ```
+Each example is built from its `*-CMake` directory. For a complete walkthrough, follow the **Alarm CMake** example in [Docs/sdk-setup.md](Docs/sdk-setup.md).
 
 ### Compiling TouchGFX Examples
 
@@ -199,16 +151,14 @@ For examples with GUI components like Hiking:
 
 2. Generate code in TouchGFX Designer
 
-3. Build service component:
+3. Build the complete app (service + GUI) with CMake:
    ```bash
    cd SDK/Examples/Apps/Hiking/Software/Apps/Hiking-CMake
    cmake -G "Unix Makefiles" -S . -B build
    cmake --build build
    ```
 
-4. Merge service and GUI:
-   - Use the app merging script as shown above
-   - Include both service and GUI ELF files
+   The `.uapp` package is produced automatically via post-build scripts.
 
 ### Common Build Issues
 

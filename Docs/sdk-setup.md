@@ -1,7 +1,7 @@
 (sdk-setup)=
 # SDK Setup and Build Overview
 
-This guide covers SDK installation, manual environment setup, and primary workflows using CMake or STM32CubeIDE.
+This guide covers SDK installation, manual environment setup, and the CMake workflow for building example apps.
 
 The focus is on a **manual, transparent setup** (no helper scripts required on Linux) so you can see exactly which tools are used and which environment variables are expected.
 
@@ -224,9 +224,7 @@ The CMake workflow is recommended for command-line control and is fully standalo
 MyApp/  # App root (can be anywhere)
 ├── Software/
 │   ├── Apps/
-│   │   ├── MyApp-Service-CubeIDE/ # CubeIDE project with Service
-│   │   ├── MyApp-GUI-CubeIDE/ # CubeIDE project with GUI
-│   │   ├── MyApp-CMake/  # CMake project dir
+│   │   ├── MyApp-CMake/  # CMake project (builds service, GUI, and .uapp)
 │   │   │   ├── CMakeLists.txt
 │   │   │   ├── MyAppService.ld  # Linker script
 │   │   │   └── syscalls.cpp
@@ -352,27 +350,6 @@ cmake --build build
 ```
 
 For clean rebuild: `rm -rf build && cmake -S . -B build && cmake --build build`.
-
-## Alternative Workflow: STM32CubeIDE
-
-For IDE users, copy CubeIDE projects from Examples.
-
-### Creating New Apps in CubeIDE
-1. **Copy Projects**:
-   - Copy from `Examples/Apps/<app-name>` to `Examples/Apps/<your-app-name>`
-
-2. **Customize**:
-   - Edit `.project` and `.cproject`: Replace names/IDs.
-   - Update `Linker.ld`: App name, paths.
-   - Modify `Core/Src/` and `Core/Inc/` for logic.
-
-3. **Import to CubeIDE**:
-   - File > Import > Existing Projects into Workspace > Select copied dirs.
-   - Fix paths in Project Properties > C/C++ Build > Settings.
-
-4. **Build**:
-   - Build service/GUI separately.
-   - Manual merge: Use SDK scripts (e.g., `Utilities/Scripts/app_merging/app_merging.py`) with icons/resources.
 
 (touchgfx-require-a-windows-host)=
 ## TouchGFX (Windows-only for Designer)

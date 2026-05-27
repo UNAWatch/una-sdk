@@ -12,10 +12,10 @@ This document provides comprehensive analysis of the Python, Bash, and PowerShel
 | [`export-stm32-tools.ps1`](../Utilities/Scripts/export-stm32-tools.ps1) | Manual Windows SDK setup (`sdk-setup`) | Exports STM32 tools during manual Windows environment setup. |
 | [`una-version.sh`](../Utilities/Scripts/build-cube/una-version.sh) | Sourced by [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh), [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in [`cmake/una-app.cmake`](../cmake/una-app.cmake) and GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), apps-ci.yml) | Initializes UNA version and build metadata environment variables for Cube builds. |
 | [`find-cube.sh`](../Utilities/Scripts/build-cube/find-cube.sh) | Sourced by [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh); called in GitHub Actions ([`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml), apps-ci.yml) | Locates STM32 CubeIDE installation and sets environment variables. |
-| [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh) | Called in GitHub Actions apps-ci.yml | Builds specified CubeIDE projects using prepared environment. |
-| [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh) | Used in `.vscode/tasks.json` | Prepares environment for CubeIDE builds by sourcing dependency scripts. |
+| [`build-cube.sh`](../Utilities/Scripts/build-cube/build-cube.sh) | Kernel firmware CI (una-kernel) | Headless STM32CubeIDE build for kernel CubeIDE projects. |
+| [`setup-environment.sh`](../Utilities/Scripts/build-cube/setup-environment.sh) | Used in `.vscode/tasks.json` | Prepares ST toolchain environment for CMake/Docker builds. |
 | [`generate-tutorials-app-list.py`](../.github/scripts/generate-tutorials-app-list.py) | GitHub Actions [`tutorials-ci.yml`](../.github/workflows/tutorials-ci.yml) (runs to generate cmake_apps.json) | Generates list of tutorial apps in JSON format for CI workflows. |
-| generate-app-list.py | GitHub Actions apps-ci.yml (runs to list projects and filter by app) | Generates list of example app projects for CI build matrix. |
+| [`generate-app-list.py`](../.github/scripts/generate-app-list.py) | GitHub Actions [`apps-ci.yml`](../.github/workflows/apps-ci.yml) | Discovers example apps with `*-CMake` projects for the CI build matrix. |
 
 ## Script: Utilities/Scripts/app_merging/app_merging.py {#script-utilities-scripts-app_merging-app_merging-py}
 
@@ -411,7 +411,8 @@ The script handles:
 2. **Integration in CI/CD**:
    ```bash
    export UNA_WORKSPACE=/path/to/sdk
-   ./build-cube.sh $UNA_WORKSPACE/Examples/Apps/MyApp/Software/Apps/MyApp-CubeIDE
+   # Example apps use CMake; build-cube.sh is for kernel CubeIDE projects.
+   ./build-cube.sh /path/to/kernel/Software/App/UnaWatch-CubeIDE
    ```
 
 ### Error Handling
@@ -537,71 +538,25 @@ This script appears to be part of a GitHub Actions workflow system, likely used 
 ## Script: .github/scripts/generate-app-list.py {#script-github-scripts-generate-app-list-py}
 
 ### Overview
-This Python script serves as a discovery tool for application projects in the examples directory, supporting both CMake and CubeIDE build systems. It provides comprehensive project enumeration capabilities with exclusion support, designed for automated build and deployment workflows.
+Discovers example applications under `Examples/Apps` that contain a `*-CMake` project directory.
 
 ### Purpose
-The script facilitates automated discovery and categorization of example applications across different IDE and build system configurations. It enables CI/CD systems to programmatically identify buildable projects while maintaining flexibility through exclusion mechanisms.
-
-### Functionality
-The script operates in two primary modes:
-1. **General mode**: Performs a comprehensive scan of the examples directory, categorizing applications by build system (CMake vs CubeIDE)
-2. **App-specific mode**: Generates a list of project directories for a specific application across all supported build systems
+Feeds the [`apps-ci.yml`](../.github/workflows/apps-ci.yml) build matrix with the list of apps to compile.
 
 ### How It Works
-1. **Directory Scanning**: Recursively walks through the `Examples/Apps` directory using `os.walk()`
-2. **Exclusion Filtering**: Applies predefined rules to skip irrelevant directories (hidden, generated, build artifacts)
-3. **Project Classification**: Identifies project directories by examining naming patterns:
-   - `-CMake` suffix indicates CMake-based projects
-   - `-CubeIDE` suffix indicates STM32CubeIDE projects
-4. **Application Grouping**: Extracts application names from the directory hierarchy relative to the Apps base path
-5. **Exclusion Processing**: Filters applications based on the `APPS_EXCLUDED` environment variable
-6. **Output Formatting**: Produces either newline-separated project paths (app-specific mode) or structured JSON (general mode)
-
-### Key Parameters
-- `--app <app_name>`: Command-line flag to generate project list for a specific application
-- `APPS_EXCLUDED`: Environment variable with newline-separated application names to exclude from processing
-
-### Dependencies
-- **Python 3**: Requires Python 3 runtime environment
-- **Standard Library Modules**:
-  - `os`: Handles file system navigation and path operations
-  - `json`: Enables JSON output generation for structured data
-  - `sys`: Manages command-line arguments and error reporting
+1. Walks `Examples/Apps` with standard exclusions (`.git`, `build`, `Output`, `generated`, etc.).
+2. Treats any `*-CMake` directory as a buildable app; groups by top-level app folder name.
+3. Skips app names listed in the `APPS_EXCLUDED` environment variable.
+4. Prints JSON: `{"apps": ["Alarm", "Cycling", ...]}`.
 
 ### Usage Examples
-1. **Generate complete categorized app list**:
-   ```bash
-   python3 .github/scripts/generate-app-list.py
-   ```
-   Output:
-   ```json
-   {
-     "cmake_apps": ["Alarm", "Cycling", "Fitness"],
-     "cubeide_apps": ["Alarm", "Cycling"]
-   }
-   ```
+```bash
+python3 .github/scripts/generate-app-list.py
+```
 
-2. **List projects for specific application**:
-   ```bash
-   python3 .github/scripts/generate-app-list.py --app Alarm
-   ```
-   Output:
-   ```
-   /path/to/Examples/Apps/Alarm/Software/Apps/Alarm-CMake
-   /path/to/Examples/Apps/Alarm/Software/Apps/AlarmGUI-CubeIDE
-   /path/to/Examples/Apps/Alarm/Software/Apps/AlarmService-CubeIDE
-   ```
-
-3. **Exclude applications during processing**:
-   ```bash
-   APPS_EXCLUDED="BetaApp
-   Prototype" python3 .github/scripts/generate-app-list.py
-   ```
-
-### Error Handling
-- Enforces required app name argument when using `--app` flag
-- Silently handles requests for excluded applications by producing no output
-- Directs error messages to standard error stream
+```bash
+APPS_EXCLUDED="BetaApp" python3 .github/scripts/generate-app-list.py
+```
 
 ### Integration Context
-This script is likely a component of GitHub Actions workflows for example project CI/CD. It supports multi-platform build automation by distinguishing between CMake (cross-platform) and CubeIDE (STM32-specific) projects, enabling targeted build strategies for different development environments.
+Used by GitHub Actions `apps-ci.yml` on push/PR to `main`/`develop` and on `apps-v*` release tags.

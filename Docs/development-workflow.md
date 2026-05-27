@@ -483,11 +483,8 @@ graph TD
 AppName/
 ├── Software/
 │   ├── App/
-│   │   └── AppName-CubeIDE/          # STM32CubeIDE project
-│   │       ├── Core/
-│   │       │   ├── Inc/main.h
-│   │       │   └── Src/main.cpp      # App entry point
-│   │       └── SDK/                  # SDK headers
+│   │   └── AppName-CMake/            # CMake project (service + GUI + .uapp)
+│   │       └── CMakeLists.txt
 │   └── Libs/
 │       ├── Header/Service.hpp        # Service class
 │       └── Source/Service.cpp        # Service implementation
@@ -565,7 +562,7 @@ graph LR
     subgraph "App Development"
         DEV[Developer<br/>Writes Code]
         SDK[SDK Headers<br/>Interfaces]
-        BUILD[STM32CubeIDE<br/>Build Process]
+        BUILD[CMake<br/>Build Process]
         PACK[Post-build Scripts<br/>app_packer.py]
     end
 
@@ -621,11 +618,14 @@ This framework enables **independent app development** with clean SDK interfaces
 
 ### Building Individual Apps
 
-1. Open STM32CubeIDE
-2. Import the CubeIDE project: `File > Import > Existing Projects into Workspace`
-3. Select the `.cproject` file in `Apps/<AppName>/Software/App/<AppName>-CubeIDE/`
-4. Build the project (Project > Build All)
-5. The post-build script will automatically generate a `.uapp` file in `Output/Release/`
+1. Set `UNA_SDK` to the SDK root (see [sdk-setup.md](sdk-setup.md)).
+2. Configure and build from the app's `*-CMake` directory:
+   ```bash
+   cd Examples/Apps/<AppName>/Software/Apps/<AppName>-CMake   # or Software/App/ for Glance apps
+   cmake -S . -B build
+   cmake --build build
+   ```
+3. The `.uapp` file is written under `build/` and copied to `Output/` by the CMake post-build steps.
 
 ### App Installation
 

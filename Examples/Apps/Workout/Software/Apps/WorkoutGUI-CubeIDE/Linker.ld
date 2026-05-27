@@ -1,4 +1,0 @@
-STACK_SIZE = 10K;
-RAM_LENGTH = 500K;
-
-INCLUDE "Main/Sections.ld"
