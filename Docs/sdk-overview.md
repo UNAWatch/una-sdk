@@ -129,7 +129,7 @@ python app_merging.py -name <name> -type <Activity|Utility|Glance|Clockface> \
 
 ### Build Integration Scripts
 
-- **CubeIDE Integration**: Post-build scripts for automatic packaging
+- **CMake Integration**: Post-build scripts for automatic `.uapp` packaging
 - **Version Management**: Automatic version incrementing
 - **Dependency Checking**: Validates build prerequisites
 

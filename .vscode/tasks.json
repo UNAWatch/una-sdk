@@ -4,511 +4,6 @@
     "linux": {"options": {"env": {"UNA_SDK" : "${workspaceFolder}"}}},
     "tasks": [
         {
-            "label": "All CubeIDE:Clean All Apps",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}/:/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                "rm -rf /workspace/Examples/.headless-build"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            }
-        },
-        {
-            "label": "CubeIDE: Build Cycling (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Cycling/Software/Apps/CyclingGUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Cycling/Software/Apps/CyclingGUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Cycling (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Cycling/Software/Apps/CyclingService-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Cycling/Software/Apps/CyclingService-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Glance1 (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Glance1/Software/App/Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Glance1/Software/App/Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build GlanceARHR (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/GlanceARHR/Software/App/GlanceARHR-Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/GlanceARHR/Software/App/GlanceARHR-Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Hiking (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Hiking/Software/Apps/HikingGUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Hiking/Software/Apps/HikingGUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Hiking (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Hiking/Software/Apps/HikingService-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Hiking/Software/Apps/HikingService-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Alarm (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Alarm/Software/Apps/AlarmGUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Alarm/Software/Apps/AlarmGUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Alarm (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Alarm/Software/Apps/AlarmService-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Alarm/Software/Apps/AlarmService-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build GlanceActivity (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/GlanceActivity/Software/App/GlanceActivity-Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/GlanceActivity/Software/App/GlanceActivity-Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build GlanceFloors (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/GlanceFloors/Software/App/GlanceFloors-Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/GlanceFloors/Software/App/GlanceFloors-Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build GlanceHR (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/GlanceHR/Software/App/GlanceHR-Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/GlanceHR/Software/App/GlanceHR-Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build GlanceSteps (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/GlanceSteps/Software/App/GlanceSteps-Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/GlanceSteps/Software/App/GlanceSteps-Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build HRMonitor (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/HRMonitor/Software/Apps/HRMonitorGUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/HRMonitor/Software/Apps/HRMonitorGUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build HRMonitor (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/HRMonitor/Software/Apps/HRMonitorService-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/HRMonitor/Software/Apps/HRMonitorService-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Running (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Running/Software/Apps/RunningGUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Running/Software/Apps/RunningGUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Running (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Running/Software/Apps/RunningService-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Running/Software/Apps/RunningService-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
             "label": "Build Running CMake in Docker",
             "type": "shell",
             "command": "docker",
@@ -526,10 +21,7 @@
                 "-c",
                 ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh && apt-get install -y cmake && cd /workspace/Examples/Apps/Running/Software/Apps/Running-CMake && mkdir -p build && cd build && cmake .. && make"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "presentation": {
                 "echo": true,
                 "reveal": "silent",
@@ -537,284 +29,6 @@
                 "panel": "dedicated"
             },
             "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility1 (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility1/Software/App/Utility1GUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility1/Software/App/Utility1GUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility1 (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility1/Software/App/Utility1Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility1/Software/App/Utility1Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility2 (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility2/Software/Apps/Utility2Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility2/Software/Apps/Utility2Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility2 (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility2/Software/Apps/Utility2GUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility2/Software/Apps/Utility2GUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility3 (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility3/Software/App/Service-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility3/Software/App/Service-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility3 (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility3/Software/App/GUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility3/Software/App/GUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility4 (GUI)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility4/Software/App/Utility4GUI-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility4/Software/App/Utility4GUI-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "CubeIDE: Build Utility4 (Service)",
-            "type": "shell",
-            "command": "docker",
-            "args": [
-                "run",
-                "--rm",
-                "-v",
-                "${workspaceFolder}:/workspace",
-                "-e",
-                "UNA_WORKSPACE=/workspace/Examples",
-                "-e",
-                "UNA_SDK=/workspace",
-                "xanderhendriks/stm32cubeide:16.0",
-                "bash",
-                "-c",
-                ". /workspace/Utilities/Scripts/build-cube/setup-environment.sh /workspace/Examples/Apps/Utility4/Software/App/Utility4SRV-CubeIDE/ && /workspace/Utilities/Scripts/build-cube/build-cube.sh /workspace/Examples/Apps/Utility4/Software/App/Utility4SRV-CubeIDE/"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "Apps CubeIDE: Build ALL",
-            "runOptions": {
-                "instancePolicy": "terminateOldest"
-            },
-            "dependsOn": [
-                "CubeIDE: Build Cycling (GUI)",
-                "CubeIDE: Build Cycling (Service)",
-                "CubeIDE: Build GlanceARHR (Service)",
-                "CubeIDE: Build GlanceActivity (Service)",
-                "CubeIDE: Build GlanceFloors (Service)",
-                "CubeIDE: Build GlanceHR (Service)",
-                "CubeIDE: Build GlanceSteps (Service)",
-                "CubeIDE: Build Hiking (GUI)",
-                "CubeIDE: Build Hiking (Service)",
-                "CubeIDE: Build Alarm (GUI)",
-                "CubeIDE: Build Alarm (Service)",
-                "CubeIDE: Build Running (GUI)",
-                "CubeIDE: Build Running (Service)",
-                // "Build Running CMake in Docker",
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$gcc",
-            "options": {
-                "env": {
-                    "EXCLUDE_PRODTEST": "true"
-                }
-            }
         },
         {
             "label": "CMake: Running Build",
@@ -1233,6 +447,144 @@
             }
         },
         {
+            "label": "CMake: GlanceBattery Build",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/Examples/Apps/GlanceBattery/Software/App/GlanceBattery-CMake && mkdir -p build && cd build && cmake .. && make"
+            ],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cd ${workspaceFolder}\\Examples\\Apps\\GlanceBattery\\Software\\App\\GlanceBattery-CMake ; if (!(Test-Path build)) { New-Item -ItemType Directory -Force build } ; cmake -G \"${ENV:gen}\" -S . -B build ; cmake --build build"
+                ]
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "CMake: GlanceBattery Clean",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/Examples/Apps/GlanceBattery/Software/App/GlanceBattery-CMake && rm -rf build"
+            ],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cd ${workspaceFolder}\\Examples\\Apps\\GlanceBattery\\Software\\App\\GlanceBattery-CMake ; if (Test-Path build) { Remove-Item -Recurse -Force build }"
+                ]
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "CMake: HRMonitor Build",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/Examples/Apps/HRMonitor/Software/Apps/HRMonitor-CMake && mkdir -p build && cd build && cmake .. && make"
+            ],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cd ${workspaceFolder}\\Examples\\Apps\\HRMonitor\\Software\\Apps\\HRMonitor-CMake ; if (!(Test-Path build)) { New-Item -ItemType Directory -Force build } ; cmake -G \"${ENV:gen}\" -S . -B build ; cmake --build build"
+                ]
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "CMake: HRMonitor Clean",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/Examples/Apps/HRMonitor/Software/Apps/HRMonitor-CMake && rm -rf build"
+            ],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cd ${workspaceFolder}\\Examples\\Apps\\HRMonitor\\Software\\Apps\\HRMonitor-CMake ; if (Test-Path build) { Remove-Item -Recurse -Force build }"
+                ]
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "CMake: Workout Build",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/Examples/Apps/Workout/Software/Apps/Workout-CMake && mkdir -p build && cd build && cmake .. && make"
+            ],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cd ${workspaceFolder}\\Examples\\Apps\\Workout\\Software\\Apps\\Workout-CMake ; if (!(Test-Path build)) { New-Item -ItemType Directory -Force build } ; cmake -G \"${ENV:gen}\" -S . -B build ; cmake --build build"
+                ]
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "CMake: Workout Clean",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/Examples/Apps/Workout/Software/Apps/Workout-CMake && rm -rf build"
+            ],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cd ${workspaceFolder}\\Examples\\Apps\\Workout\\Software\\Apps\\Workout-CMake ; if (Test-Path build) { Remove-Item -Recurse -Force build }"
+                ]
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
             "label": "CMake: Hiking Build",
             "type": "shell",
             "command": "bash",
@@ -1344,14 +696,17 @@
             "dependsOn": [
                 "CMake: Alarm Build",
                 "CMake: Cycling Build",
-                "CMake: Hiking Build",
-                "CMake: Running Build",
-                "CMake: GlanceARHR Build",
                 "CMake: GlanceActivity Build",
+                "CMake: GlanceARHR Build",
+                "CMake: GlanceBattery Build",
                 "CMake: GlanceFloors Build",
                 "CMake: GlanceHR Build",
                 "CMake: GlanceSteps Build",
                 "CMake: GlanceStrain Build",
+                "CMake: Hiking Build",
+                "CMake: HRMonitor Build",
+                "CMake: Running Build",
+                "CMake: Workout Build"
             ],
             "group": {
                 "kind": "build",
@@ -1372,14 +727,17 @@
             "dependsOn": [
                 "CMake: Alarm Clean",
                 "CMake: Cycling Clean",
-                "CMake: Hiking Clean",
-                "CMake: Running Clean",
-                "CMake: GlanceARHR Clean",
                 "CMake: GlanceActivity Clean",
+                "CMake: GlanceARHR Clean",
+                "CMake: GlanceBattery Clean",
                 "CMake: GlanceFloors Clean",
                 "CMake: GlanceHR Clean",
                 "CMake: GlanceSteps Clean",
                 "CMake: GlanceStrain Clean",
+                "CMake: Hiking Clean",
+                "CMake: HRMonitor Clean",
+                "CMake: Running Clean",
+                "CMake: Workout Clean"
             ],
             "group": {
                 "kind": "build",

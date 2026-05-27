@@ -9,20 +9,13 @@ on:
 env:
   UNA_WORKSPACE: ${{ github.env.GITHUB_WORKSPACE }}
   DOCKER_DRIVER: overlay2
-  APPS_EXCLUDED: |
-    Utility1
-    Utility2
-    Utility3
-    Utility4
-    Glance1
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     container: python:3.11-slim
     outputs:
-      cmake_apps: ${{ steps.generate.outputs.cmake_apps }}
-      cubeide_apps: ${{ steps.generate.outputs.cubeide_apps }}
+      apps: ${{ steps.generate.outputs.apps }}
     steps:
       - name: Setup GIT
         run: apt update && apt install -y git jq
@@ -36,8 +29,7 @@ jobs:
         id: generate
         run: |
           output=$(python3 .github/scripts/generate-app-list.py)
-          echo "cmake_apps=$(echo "$output" | jq -c .cmake_apps)" >> $GITHUB_OUTPUT
-          echo "cubeide_apps=$(echo "$output" | jq -c .cubeide_apps)" >> $GITHUB_OUTPUT
+          echo "apps=$(echo "$output" | jq -c .apps)" >> $GITHUB_OUTPUT
 
   cmake-build:
     runs-on: ubuntu-latest
@@ -45,7 +37,7 @@ jobs:
     needs: prepare
     strategy:
       matrix:
-        app: ${{ fromJson(needs.prepare.outputs.cmake_apps) }}
+        app: ${{ fromJson(needs.prepare.outputs.apps) }}
     steps:
       - name: Setup GIT
         run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
@@ -72,72 +64,15 @@ jobs:
           cmake ..
           make -j$(nproc)
 
-      - name: Upload CMake app artifacts
+      - name: Upload app artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cmake-app-${{ matrix.app }}
+          name: app-${{ matrix.app }}
           path: Examples/Apps/${{ matrix.app }}/Software/App*/*-CMake/build/*.uapp
-
-  cubeide-build:
-    runs-on: ubuntu-latest
-    container: xanderhendriks/stm32cubeide:16.0
-    needs: prepare
-    strategy:
-      matrix:
-        app: ${{ fromJson(needs.prepare.outputs.cubeide_apps) }}
-    steps:
-      - name: Setup GIT
-        run: apt update && apt install -y git python3-full python3-pip python-is-python3
-
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Install scripts requirements
-        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
-
-      - name: Build app ${{ matrix.app }} with CubeIDE
-        run: |
-          echo "Setup environment"
-          export UNA_SDK=$GITHUB_WORKSPACE
-          . Utilities/Scripts/build-cube/find-cube.sh
-          echo "Building app: ${{ matrix.app }}"
-          CUBEIDE_PROJECTS=`python3 .github/scripts/generate-app-list.py --app ${{ matrix.app }}`
-          if [ -z "$CUBEIDE_PROJECTS" ]; then
-            echo "ERROR: No CubeIDE projects found for app ${{ matrix.app }}" >&2
-            exit 1
-          fi
-          echo "Projects:"
-          echo "$CUBEIDE_PROJECTS"
-          temp_non="/tmp/non_service_$"
-          temp_svc="/tmp/service_$"
-          touch "$temp_non" "$temp_svc"
-          for p in $CUBEIDE_PROJECTS; do
-            if echo "$p" | grep -q Service; then
-              echo "$p" >> "$temp_svc"
-            else
-              echo "$p" >> "$temp_non"
-            fi
-          done
-          cat "$temp_non" "$temp_svc" | while IFS= read -r p; do
-            [ -z "$p" ] && continue
-            echo "Building project: $p"
-            . Utilities/Scripts/build-cube/una-version.sh "$p" apps-
-            Utilities/Scripts/build-cube/build-cube.sh "$p"
-          done
-          rm -f "$temp_non" "$temp_svc"
-          echo "App build complete: ${{ matrix.app }}"
-
-      - name: Upload CubeIDE app artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: cubeide-app-${{ matrix.app }}
-          path: Examples/Apps/${{ matrix.app }}/Output/*.uapp
 
   release:
     runs-on: ubuntu-latest
-    needs: [cmake-build, cubeide-build]
+    needs: [cmake-build]
     if: startsWith(github.ref, 'refs/tags/apps-v')
     permissions:
       contents: write
@@ -162,35 +97,23 @@ jobs:
         with:
           path: artifacts
 
-      - name: Prepare cmake zip
+      - name: Prepare release zip
         run: |
-          mkdir -p temp/cmake
-          for dir in artifacts/cmake-app-*; do
-            app=$(basename "$dir" | sed 's/^cmake-app-//')
-            mkdir -p "temp/cmake/$app"
-            find "$dir" -name "*.uapp" -exec cp {} "temp/cmake/$app/" \;
+          mkdir -p temp/apps
+          for dir in artifacts/app-*; do
+            app=$(basename "$dir" | sed 's/^app-//')
+            mkdir -p "temp/apps/$app"
+            find "$dir" -name "*.uapp" -exec cp {} "temp/apps/$app/" \;
           done
-          cd temp/cmake
-          zip -r ../../una-apps-cmake-${{ github.ref_name }}.zip .
-
-      - name: Prepare cubeide zip
-        run: |
-          mkdir -p temp/cubeide
-          for dir in artifacts/cubeide-app-*; do
-            app=$(basename "$dir" | sed 's/^cubeide-app-//')
-            mkdir -p "temp/cubeide/$app"
-            find "$dir" -name "*.uapp" -exec cp {} "temp/cubeide/$app/" \;
-          done
-          cd temp/cubeide
-          zip -r ../../una-apps-cubeide-${{ github.ref_name }}.zip .
+          cd temp/apps
+          zip -r ../../una-apps-${{ github.ref_name }}.zip .
 
       - id: create_release
         name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            una-apps-cmake-${{ github.ref_name }}.zip
-            una-apps-cubeide-${{ github.ref_name }}.zip
+            una-apps-${{ github.ref_name }}.zip
           generate_release_notes: true
 
       - name: Make release immutable
