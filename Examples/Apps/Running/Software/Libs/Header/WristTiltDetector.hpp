@@ -2,7 +2,12 @@
  * @file   WristTiltDetector.hpp
  * @date   22-04-2025
  * @author Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief  Wrist-tilt (watch-look) gesture detector for walking and running.
+ * @brief  Wrist-tilt (watch-look) gesture detector for the Running app.
+ *
+ *         The software detector only emits a gesture while the wearer is
+ *         RUNNING.  In the STATIONARY and WALKING states the physical
+ *         WRIST_MOTION sensor handles the watch-look gesture, so this
+ *         detector stays idle and fires nothing.
  *
  *         Algorithm overview:
  *           1. MOTION CLASSIFICATION  (5 s sliding window on AY delta)
@@ -13,32 +18,38 @@
  *              crossed; the STATIONARY class has a dedicated lower bound so
  *              that noise near zero does not flip the state back and forth.
  *
- *           2. DYNAMIC GX THRESHOLD
- *              Each motion class has its own peak-GX detection threshold
- *              (raw int16 LSB from the sensor register).  Higher thresholds
- *              for more vigorous activities prevent running arm-swing from
- *              flooding the gesture output.
+ *           2. PITCH ESTIMATE
+ *              A low-pass filter (gravityAlpha) tracks the gravity vector on
+ *              the AY/AZ axes; the wrist pitch is conceptually
+ *              atan2(grav_y, grav_z).  The filter runs on every sample so
+ *              the estimate is settled when the RUNNING state is entered.
+ *              The trigger only needs the sign of (pitch - threshold),
+ *              which is evaluated algebraically with no trigonometry.
  *
  *           3. TILT STATE MACHINE
- *              IDLE   -> if |GX| exceeds the dynamic threshold -> ACTIVE
+ *              The machine runs in every motion class so a hold or cooldown
+ *              already in progress always completes its timed transitions.
+ *              Only the IDLE -> ACTIVE trigger is gated to RUNNING.
+ *              IDLE   -> while RUNNING, if |GX| exceeds gxThreshRunning OR
+ *                        pitch exceeds pitchThresholdDeg -> ACTIVE
  *              ACTIVE -> held for holdDurationS seconds, listener notified
  *                        once on entry -> COOLDOWN
  *              COOLDOWN -> held for cooldownDurationS seconds -> IDLE
  *
- *         Raw LSB units (not converted to physical units) are used throughout
- *         for efficiency and to avoid floating-point on resource-limited MCUs.
+ *         Raw int16 LSB units (sensor register values) are used for the
+ *         accelerometer and gyroscope inputs; only the pitch estimate uses
+ *         floating point.
  *
- *         Default tuning values are taken directly from wrist_tilt11.py and
- *         validated on three BMI270 datasets (running, walking, stationary):
- *           motionWindowS     = 5.0   s
- *           avgSwingStationary= 50    LSB
- *           avgSwingWalking   = 60    LSB
- *           avgSwingRunning   = 400   LSB
- *           gxThreshStationary= 3000  LSB
- *           gxThreshWalking   = 5100  LSB
- *           gxThreshRunning   = 5300  LSB
- *           holdDurationS     = 3.0   s
- *           cooldownDurationS = 0.5   s
+ *         Default tuning values are taken from wrist_tilt17.py:
+ *           motionWindowS     = 5.0    s
+ *           avgSwingStationary= 50     LSB
+ *           avgSwingWalking   = 60     LSB
+ *           avgSwingRunning   = 400    LSB
+ *           gxThreshRunning   = 10000  LSB
+ *           gravityAlpha      = 0.97
+ *           pitchThresholdDeg = -10.0  deg
+ *           holdDurationS     = 3.0    s
+ *           cooldownDurationS = 0.5    s
  *
  *         Sample rate assumption: 100 Hz (10 ms / sample).
  *         Adjustable via Config::sampleRateHz.
@@ -57,7 +68,8 @@
   *        FIFO — no scaling or unit conversion applied.
   ******************************************************************************/
 struct TiltImuSample {
-    int16_t  ayLsb; /**< Accelerometer Y axis, raw LSB (motion classification) */
+    int16_t  ayLsb; /**< Accelerometer Y axis, raw LSB (motion + pitch)        */
+    int16_t  azLsb; /**< Accelerometer Z axis, raw LSB (pitch)                 */
     int16_t  gxLsb; /**< Gyroscope    X axis, raw LSB (gesture trigger)        */
     uint32_t timestampMs; /**< Absolute timestamp of this sample, ms           */
 };
@@ -121,16 +133,24 @@ public:
         /** @} */
 
         /**
-         * @defgroup GxThresholds  Peak |GX| thresholds per motion class (raw LSB)
-         *
-         * A single sample must exceed this threshold to trigger the state
-         * machine transition IDLE -> ACTIVE.
-         * @{
+         * Peak |GX| threshold for the IDLE -> ACTIVE transition, raw LSB.
+         * Consulted only while RUNNING; one sample must exceed it.
          */
-        int32_t gxThreshStationary = 3000; /**< LSB — stationary wrist tilt  */
-        int32_t gxThreshWalking = 5100; /**< LSB — walking  wrist tilt    */
-        int32_t gxThreshRunning = 5300; /**< LSB — running  wrist tilt    */
-        /** @} */
+        int32_t gxThreshRunning = 10000;
+
+        /**
+         * Gravity low-pass filter coefficient for the pitch estimate.
+         * Higher values track the gravity vector more slowly (more smoothing).
+         */
+        float gravityAlpha = 0.97f;
+
+        /**
+         * Pitch threshold for the IDLE -> ACTIVE transition, degrees.
+         * Consulted only while RUNNING; pitch above this value triggers.
+         * Must lie in the range (-90, 0) so the trigger can be evaluated
+         * without trigonometry (see isPitchAboveThreshold()).
+         */
+        float pitchThresholdDeg = -10.0f;
 
         /**
          * Duration to hold the ACTIVE state after a gesture is detected, s.
@@ -263,10 +283,24 @@ private:
     void  updateMotionClass(float avgSwing, uint32_t tsMs) noexcept;
 
     /**
-     * @brief Return the GX detection threshold for the current motion class.
-     * @retval Threshold in raw LSB.
+     * @brief Update the gravity low-pass filter with one sample.
+     * @param ay AY value of the current sample.
+     * @param az AZ value of the current sample.
      */
-    int32_t dynamicGxThreshold() const noexcept;
+    void updateGravity(int16_t ay, int16_t az) noexcept;
+
+    /**
+     * @brief Test whether the current wrist pitch exceeds pitchThresholdDeg.
+     *
+     *        Equivalent to atan2(grav_y, grav_z) > pitchThresholdDeg, but
+     *        evaluated without trigonometry.  The threshold is non-positive
+     *        (range (-90, 0]), so the whole grav_y >= 0 half-plane is above
+     *        it; for grav_y < 0 the pitch clears the threshold only inside
+     *        a wedge of the grav_z > 0 quadrant.
+     *
+     * @retval true if pitch is above the threshold.
+     */
+    bool isPitchAboveThreshold() const noexcept;
 
     /**
      * @brief Process one sample through the tilt state machine.
@@ -291,6 +325,13 @@ private:
 
     int16_t  mPrevAy = 0;  /**< Previous AY for delta calc  */
     bool     mHasPrevAy = false;
+
+    /*--------------------------------------------------------------------------
+     * Pitch estimate (gravity low-pass filter)
+     *------------------------------------------------------------------------*/
+    float mGravY = 0.0f; /**< Filtered gravity component on AY axis     */
+    float mGravZ = 0.0f; /**< Filtered gravity component on AZ axis     */
+    float mNegPitchTan = 0.0f; /**< tan(-pitchThresholdDeg), precomputed */
 
     /*--------------------------------------------------------------------------
      * Tilt state machine

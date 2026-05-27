@@ -30,6 +30,10 @@ WristTiltDetector::WristTiltDetector(const Config& cfg) noexcept
     mHoldSamples = static_cast<uint32_t>(cfg.holdDurationS * sr + 0.5f);
     mCooldownSamples = static_cast<uint32_t>(cfg.cooldownDurationS * sr + 0.5f);
 
+    /* Precompute tan(|pitchThresholdDeg|) for the trig-free pitch test. */
+    constexpr float kDegToRad = 0.0174532925199433f;
+    mNegPitchTan = std::tan(-cfg.pitchThresholdDeg * kDegToRad);
+
     reset();
 }
 
@@ -45,6 +49,9 @@ void WristTiltDetector::reset() noexcept
     mDeltaSum = 0.0f;
     mPrevAy = 0;
     mHasPrevAy = false;
+
+    mGravY = 0.0f;
+    mGravZ = 0.0f;
 
     mTiltState = TiltState::IDLE;
     mStateDeadline = 0u;
@@ -73,6 +80,10 @@ void WristTiltDetector::setConfig(const Config& cfg) noexcept
 
     mHoldSamples = static_cast<uint32_t>(cfg.holdDurationS * sr + 0.5f);
     mCooldownSamples = static_cast<uint32_t>(cfg.cooldownDurationS * sr + 0.5f);
+
+    /* Precompute tan(|pitchThresholdDeg|) for the trig-free pitch test. */
+    constexpr float kDegToRad = 0.0174532925199433f;
+    mNegPitchTan = std::tan(-cfg.pitchThresholdDeg * kDegToRad);
 
     reset();
 }
@@ -123,11 +134,11 @@ void WristTiltDetector::pushMotionSample(int16_t ay, int16_t prevAy) noexcept
 
 float WristTiltDetector::computeAvgSwing() const noexcept
 {
-    if (mMotionFilled < 2u) {
+    if (mMotionFilled < 1u) {
         return 0.0f;
     }
-    /* mMotionFilled - 1 because we store N deltas for N+1 samples. */
-    return mDeltaSum / static_cast<float>(mMotionFilled - 1u);
+    /* mMotionFilled is the count of stored deltas. */
+    return mDeltaSum / static_cast<float>(mMotionFilled);
 }
 
 void WristTiltDetector::updateMotionClass(float    avgSwing,
@@ -152,14 +163,26 @@ void WristTiltDetector::updateMotionClass(float    avgSwing,
     }
 }
 
-int32_t WristTiltDetector::dynamicGxThreshold() const noexcept
+void WristTiltDetector::updateGravity(int16_t ay, int16_t az) noexcept
 {
-    switch (mMotionClass) {
-    case MotionClass::RUNNING:    return mCfg.gxThreshRunning;
-    case MotionClass::WALKING:    return mCfg.gxThreshWalking;
-    case MotionClass::STATIONARY: return mCfg.gxThreshStationary;
-    default:                      return mCfg.gxThreshStationary;
+    /* Per-axis low-pass filter isolating the gravity vector. */
+    const float alpha = mCfg.gravityAlpha;
+    mGravY = alpha * mGravY + (1.0f - alpha) * static_cast<float>(ay);
+    mGravZ = alpha * mGravZ + (1.0f - alpha) * static_cast<float>(az);
+}
+
+bool WristTiltDetector::isPitchAboveThreshold() const noexcept
+{
+    /* pitch = atan2(grav_y, grav_z) > pitchThresholdDeg, without trig.
+       The threshold is non-positive, so the whole grav_y >= 0 half-plane
+       (pitch in [0, 180] deg) clears it.  For grav_y < 0 the pitch is
+       negative and exceeds the threshold only in the grav_z > 0 quadrant
+       and within the wedge |pitch| < |threshold|, i.e.
+           -grav_y < grav_z * tan(|threshold|). */
+    if (mGravY >= 0.0f) {
+        return true;
     }
+    return (mGravZ > 0.0f) && (mGravZ * mNegPitchTan > -mGravY);
 }
 
 bool WristTiltDetector::processSample(const TiltImuSample& sample) noexcept
@@ -179,18 +202,27 @@ bool WristTiltDetector::processSample(const TiltImuSample& sample) noexcept
     mLastAvgSwing = avgSwing;
     updateMotionClass(avgSwing, sample.timestampMs);
 
-    /* --- 2. Tilt state machine -------------------------------------------- */
+    /* --- 2. Gravity filter (updated every sample, all motion classes) ----- */
+    updateGravity(sample.ayLsb, sample.azLsb);
+
+    /* --- 3. Tilt state machine -------------------------------------------- */
+    /* The machine stays alive in every motion class so a hold or cooldown
+       in progress completes its timed transitions.  Only the IDLE -> ACTIVE
+       trigger is gated to RUNNING: in STATIONARY / WALKING the physical
+       WRIST_MOTION sensor owns the gesture. */
     const int32_t gxMag = (sample.gxLsb >= 0)
         ? static_cast<int32_t>(sample.gxLsb)
         : -static_cast<int32_t>(sample.gxLsb);
-    const int32_t gxThresh = dynamicGxThreshold();
-    const bool    gxAbove = (gxMag > gxThresh);
+    const bool gxAbove = (gxMag > mCfg.gxThreshRunning);
+    const bool pitchAbove = isPitchAboveThreshold();
+    const bool canTrigger = (mMotionClass == MotionClass::RUNNING)
+                            && (gxAbove || pitchAbove);
 
     bool fired = false;
 
     switch (mTiltState) {
     case TiltState::IDLE:
-        if (gxAbove) {
+        if (canTrigger) {
             mTiltState = TiltState::ACTIVE;
             mStateDeadline = now + mHoldSamples;
             ++mTotalEvents;
