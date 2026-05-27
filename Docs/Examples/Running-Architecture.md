@@ -353,9 +353,17 @@ The `SENSOR_FUSION` connection is only active during tracking. Outside tracking 
 Settings are stored in JSON format and include:
 - Alert distance threshold (`Settings::Alerts::Distance::Id`)
 - Alert time threshold (`Settings::Alerts::Time::Id`)
-- Auto-pause on/off
+- Auto-pause enable flag (`auto_pause_en`; persisted only — see below)
 - Phone notification enablement
 - Interval workout configuration (`Settings::Intervals`)
+
+#### Auto-pause (hidden in UI)
+
+- **UI:** Auto Pause is not shown on the settings wheel (`ID_AUTO_PAUSE` is removed from `App::MenuNav::Root::Settings::Id`, and `MenuSettingsView` no longer contains auto-pause menu switch cases).
+- **Persisted:** `Settings::autoPauseEn` and JSON key `auto_pause_en` are still loaded and saved by `SettingsSerializer`.
+- **Runtime:** No service logic reads `autoPauseEn` today; only manual pause/resume (`TRACK_PAUSE` / `pauseTrack()`) is implemented.
+- **Rationale:** Auto-pause was never fully implemented; showing the toggle caused confusion. The feature is deferred while other work is prioritized.
+- **Re-enabling:** Re-add `ID_AUTO_PAUSE` to `AppMenu.hpp`, restore auto-pause branches in `MenuSettingsView`/`MenuSettingsPresenter`, then implement detection in `Service` gated on `mSettings.autoPauseEn`.
 
 ### Activity Data Management and Persistence
 
@@ -396,7 +404,7 @@ struct ActivitySummary {
 **Settings Structure**:
 ```cpp
 struct Settings {
-    bool autoPauseEn  = false;
+    bool autoPauseEn  = false;  // persisted; not on settings wheel until feature is implemented
     bool phoneNotifEn = true;
     Alerts::Distance::Id alertDistanceId = Alerts::Distance::ID_OFF;
     Alerts::Time::Id     alertTimeId     = Alerts::Time::ID_OFF;
@@ -527,7 +535,7 @@ Key responsibilities:
   - `SummaryFaceLaps` — paginated lap list (5 rows visible, paged by 3 per L1/L2)
 
 **Settings**:
-- `MenuSettingsView` — Root settings wheel (Alerts, Auto-Pause, Phone Notifications)
+- `MenuSettingsView` — Root settings wheel (Alerts, Phone Notifications; auto-pause hidden — see Auto-pause above)
 - `MenuAlertsView` — Alert type selection (Distance, Time)
 - `MenuDistanceView` — Distance alert value picker
 - `MenuDistanceSavedView` — Save confirmation (auto-dismisses after 3 s → `MenuAlertsView`)
@@ -608,7 +616,7 @@ MainView ──[Start, GPS ok]──► TrackView (faces: Intervals ◄──►
     │                                            → MenuIntervalsRestDistanceView
     │
     └──[Settings]──► MenuSettingsView
-                     (items: Alerts, Auto-Pause toggle, Phone Notifications toggle)
+                     (items: Alerts, Phone Notifications toggle)
                           │[Alerts]
                      MenuAlertsView
                        │             │
