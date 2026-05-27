@@ -147,7 +147,7 @@ public:
         /**
          * Pitch threshold for the IDLE -> ACTIVE transition, degrees.
          * Consulted only while RUNNING; pitch above this value triggers.
-         * Must lie in the range (-90, 0] so the trigger can be evaluated
+         * Must lie in the range (-90, 0) so the trigger can be evaluated
          * without trigonometry (see isPitchAboveThreshold()).
          */
         float pitchThresholdDeg = -10.0f;
