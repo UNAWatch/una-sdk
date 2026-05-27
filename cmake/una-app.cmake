@@ -10,6 +10,15 @@ if(NOT DEFINED RESOURCES_PATH)
     set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
 endif()
 
+# Python interpreter for pack/merge scripts.
+# Prefer python3 on Windows because the python launcher shim can be broken.
+if(NOT DEFINED UNA_PYTHON_EXECUTABLE)
+    find_program(UNA_PYTHON_EXECUTABLE NAMES python3 python)
+    if(NOT UNA_PYTHON_EXECUTABLE)
+        message(FATAL_ERROR "Python interpreter not found. Install python3 or set UNA_PYTHON_EXECUTABLE.")
+    endif()
+endif()
+
 # Common toolchain setup
 set(CMAKE_TOOLCHAIN_FILE "$ENV{UNA_SDK}/cmake/toolchain-arm-none-eabi.cmake")
 
@@ -164,7 +173,7 @@ function(una_app_build_service TARGET_NAME)
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND python $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext srv
+        COMMAND ${UNA_PYTHON_EXECUTABLE} $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext srv
         COMMENT "Packing ${TARGET_NAME}"
     )
 endfunction()
@@ -225,7 +234,7 @@ function(una_app_build_gui TARGET_NAME)
     )
 
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND python $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext gui
+        COMMAND ${UNA_PYTHON_EXECUTABLE} $ENV{UNA_SDK}/Utilities/Scripts/app_packer/app_packer.py -e $<TARGET_FILE:${TARGET_NAME}> -o ${CMAKE_CURRENT_BINARY_DIR}/Tmp -ext gui
         COMMENT "Packing ${TARGET_NAME}"
     )
 endfunction()
@@ -275,7 +284,7 @@ function(una_app_build_app)
 
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND python ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )
