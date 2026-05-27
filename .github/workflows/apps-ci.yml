@@ -21,7 +21,7 @@ jobs:
         run: apt update && apt install -y git jq
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
 
@@ -43,7 +43,7 @@ jobs:
         run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
 
@@ -65,7 +65,7 @@ jobs:
           make -j$(nproc)
 
       - name: Upload app artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: app-${{ matrix.app }}
           path: Examples/Apps/${{ matrix.app }}/Software/App*/*-CMake/build/*.uapp
@@ -88,16 +88,18 @@ jobs:
           sudo apt install gh -y
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: artifacts
 
       - name: Prepare release zip
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           mkdir -p temp/apps
           for dir in artifacts/app-*; do
@@ -106,11 +108,11 @@ jobs:
             find "$dir" -name "*.uapp" -exec cp {} "temp/apps/$app/" \;
           done
           cd temp/apps
-          zip -r ../../una-apps-${{ github.ref_name }}.zip .
+          zip -r "../../una-apps-${REF_NAME}.zip" .
 
       - id: create_release
         name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           files: |
             una-apps-${{ github.ref_name }}.zip
@@ -162,7 +164,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Notify Slack
-        uses: slackapi/slack-github-action@v1.27.0
+        uses: slackapi/slack-github-action@37ebaef184d7626c5f204ab8d3baff4262dd30f0 # v1.27.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           payload: ${{ steps.prepare_slack_payload.outputs.payload }}
