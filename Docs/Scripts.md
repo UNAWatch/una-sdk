@@ -544,10 +544,11 @@ Discovers example applications under `Examples/Apps` that contain a `*-CMake` pr
 Feeds the [`apps-ci.yml`](../.github/workflows/apps-ci.yml) build matrix with the list of apps to compile.
 
 ### How It Works
-1. Walks `Examples/Apps` with standard exclusions (`.git`, `build`, `Output`, `generated`, etc.).
-2. Treats any `*-CMake` directory as a buildable app; groups by top-level app folder name.
-3. Skips app names listed in the `APPS_EXCLUDED` environment variable.
-4. Prints JSON: `{"apps": ["Alarm", "Cycling", ...]}`.
+1. Walks `Examples/Apps`, skipping hidden directories and: `.git`, `generated`, `Output`, `build`, `simulator`, `node_modules`, `.vscode`, `.github`.
+2. Treats any directory ending with `-CMake` as a buildable app trigger.
+3. Derives app names from the top-level folder under `Examples/Apps` (`parts[0]`).
+4. Skips app names listed in `APPS_EXCLUDED` (newline-separated values).
+5. Prints sorted JSON output in the form `{"apps": ["Alarm", "Cycling", ...]}`.
 
 ### Usage Examples
 ```bash
