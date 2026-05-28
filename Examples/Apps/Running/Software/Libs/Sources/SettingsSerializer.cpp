@@ -154,13 +154,13 @@ bool SettingsSerializer::load(Settings &settings)
     reader.get("version",        settings.version);
     reader.get("auto_pause_en",  settings.autoPauseEn);
     reader.get("phone_notif_en", settings.phoneNotifEn);
-    uint8_t distId = static_cast<uint8_t>(Settings::Alerts::Distance::ID_OFF);
+    uint8_t distId = static_cast<uint8_t>(Settings::Alerts::Distance::ID_DEFAULT);
     uint8_t timeId = static_cast<uint8_t>(Settings::Alerts::Time::ID_OFF);
     reader.get("alert_distance_id", distId);
     reader.get("alert_time_id",     timeId);
     settings.alertDistanceId = distId < Settings::Alerts::Distance::ID_COUNT
         ? static_cast<Settings::Alerts::Distance::Id>(distId)
-        : Settings::Alerts::Distance::ID_OFF;
+        : Settings::Alerts::Distance::ID_DEFAULT;
     settings.alertTimeId = timeId < Settings::Alerts::Time::ID_COUNT
         ? static_cast<Settings::Alerts::Time::Id>(timeId)
         : Settings::Alerts::Time::ID_OFF;

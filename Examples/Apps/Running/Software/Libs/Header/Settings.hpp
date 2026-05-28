@@ -88,7 +88,7 @@ struct Settings {
 
     bool autoPauseEn = false; ///< Serialized only; not on settings wheel until auto-pause is implemented.
     bool     phoneNotifEn  = true;  ///< Flag to enable receiving phone notification when app is run.
-    Alerts::Distance::Id alertDistanceId = Alerts::Distance::ID_OFF; ///< Distance alert option.
+    Alerts::Distance::Id alertDistanceId = Alerts::Distance::ID_DEFAULT; ///< Distance alert option.
     Alerts::Time::Id     alertTimeId     = Alerts::Time::ID_OFF;     ///< Time alert option.
 
     Intervals intervals {};  ///< Interval training settings.
