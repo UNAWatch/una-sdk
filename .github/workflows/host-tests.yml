@@ -13,14 +13,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Cache host test dependencies
         uses: actions/cache@v4
         with:
           path: build-host/_deps
           key: ${{ runner.os }}-sdk-host-tests-${{ hashFiles('Tests/Host/CMakeLists.txt', 'Tests/Host/cmake/FetchGoogleTest.cmake') }}
-          restore-keys: |
-            ${{ runner.os }}-sdk-host-tests-
 
       - name: Configure host tests
         run: cmake -S Tests/Host -B build-host -DCMAKE_BUILD_TYPE=Debug

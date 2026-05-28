@@ -126,7 +126,11 @@ bool InMemoryFileSystem::InMemoryFile::rename(const char* newPath)
     if (newPath == nullptr) {
         return false;
     }
-    return mFs.rename(mPath.c_str(), newPath);
+    if (!mFs.rename(mPath.c_str(), newPath)) {
+        return false;
+    }
+    mPath = newPath;
+    return true;
 }
 
 bool InMemoryFileSystem::InMemoryFile::remove()
@@ -146,15 +150,18 @@ size_t InMemoryFileSystem::InMemoryFile::size() const
 bool InMemoryFileSystem::InMemoryFile::open(bool wMode, bool override)
 {
     mWriteMode = wMode;
-    auto& entry = mFs.files[mPath];
 
     if (wMode) {
+        auto& entry = mFs.files[mPath];
         entry.exists = true;
         if (override) {
             entry.content.clear();
         }
-    } else if (!entry.exists) {
-        return false;
+    } else {
+        auto it = mFs.files.find(mPath);
+        if (it == mFs.files.end() || !it->second.exists) {
+            return false;
+        }
     }
 
     mOpen = true;
