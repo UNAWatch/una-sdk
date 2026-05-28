@@ -351,6 +351,27 @@ cmake --build build
 
 For clean rebuild: `rm -rf build && cmake -S . -B build && cmake --build build`.
 
+(host-unit-tests)=
+## Host Unit Tests
+
+The SDK provides a reusable GoogleTest-based host test harness under `Tests/Host`.
+
+From the SDK root:
+
+```bash
+cmake -S Tests/Host -B build-host -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-host
+ctest --test-dir build-host --output-on-failure
+```
+
+On Windows multi-config generators use:
+
+```powershell
+ctest --test-dir build-host -C Debug --output-on-failure
+```
+
+For test layout and guidance on adding tests for app examples, see [Host Unit Testing](unit-testing.md).
+
 (touchgfx-require-a-windows-host)=
 ## TouchGFX (Windows-only for Designer)
 
