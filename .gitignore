@@ -4,3 +4,4 @@ Docs/Tutorials/*/Software/App*/*-CMake/build
 Docs/Templates/TouchGFX-Widgets/Unpacked
 
 .claude/
+build-host/
