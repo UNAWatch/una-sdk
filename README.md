@@ -173,6 +173,7 @@ For examples with GUI components like Hiking:
 - Explore the [SDK Setup Guide](Docs/sdk-setup.md) for detailed workflows
 - Read the [Platform Overview](Docs/platform-overview.md) for architecture details
 - Try building the [Alarm App Tutorial](Docs/Examples/Alarm-ARCHITECTURE.md)
+- Read [Host Unit Testing](Docs/unit-testing.md) for SDK/app host-side tests
 - Join the community at [UNAWatch/una-sdk](https://github.com/UNAWatch/una-sdk)
 
 For additional support, see the [Community Support](Docs/community-support.md) guide.
