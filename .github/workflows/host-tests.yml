@@ -1,0 +1,40 @@
+name: SDK Host Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'sdk-v*' ]
+  pull_request:
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Cache host test dependencies
+        uses: actions/cache@v4
+        with:
+          path: build-host/_deps
+          key: ${{ runner.os }}-sdk-host-tests-${{ hashFiles('Tests/Host/CMakeLists.txt', 'Tests/Host/cmake/FetchGoogleTest.cmake') }}
+          restore-keys: |
+            ${{ runner.os }}-sdk-host-tests-
+
+      - name: Configure host tests
+        run: cmake -S Tests/Host -B build-host -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build host tests
+        run: cmake --build build-host
+
+      - name: Run host tests
+        run: ctest --test-dir build-host --output-on-failure
+
+      - name: Upload host test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: host-tests-logs
+          path: build-host/Testing/Temporary/**
+          if-no-files-found: ignore
