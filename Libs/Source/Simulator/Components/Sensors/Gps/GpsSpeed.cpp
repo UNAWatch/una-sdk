@@ -90,6 +90,12 @@ void GpsSpeed::sensorRefresh()
         auto& sample = mDriver.getDataSample();
         sample.setTimestamp(SDK::Simulator::Mock::System::GetTimeMs());
         sample.f[SDK::SensorDataParser::GpsSpeed::Field::SPEED] = mGps.getSpeed();
+        // SPEED_VALID = reliable current fix (not dead-reckoning); see §3.5.
+        const bool deadReckoning = mGps.isDeadReckoning();
+        sample.u[SDK::SensorDataParser::GpsSpeed::Field::SPEED_VALID] =
+            (mGps.hasFix() && !deadReckoning) ? 1u : 0u;
+        sample.u[SDK::SensorDataParser::GpsSpeed::Field::DEAD_RECKONING] =
+            deadReckoning ? 1u : 0u;
         mDriver.pushDataSample();
 
         LOG_DEBUG("EXIT\n");

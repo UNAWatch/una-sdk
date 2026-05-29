@@ -1,6 +1,8 @@
 #ifndef SERVICE_HPP
 #define SERVICE_HPP
 
+#include <ctime>   // std::time_t (mLastCalibUtc, startTrack, ...)
+
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
@@ -11,6 +13,8 @@
 #include "SDK/Metrics/DeltaCounter.hpp"
 #include "SDK/Metrics/ThrottledSample.hpp"
 #include "SDK/Filters/SimpleLPF.hpp"
+
+#include "SDK/Calibration/OutdoorStrideCalibrator.hpp"
 
 #include "SettingsSerializer.hpp"
 #include "ActivitySummarySerializer.hpp"
@@ -68,14 +72,22 @@ private:
     SDK::Sensor::Connection mSensorWristMotion;
     SDK::Sensor::Connection mSensorFusion;
     SDK::Sensor::Connection mSensorRunningCadence;
+    SDK::Sensor::Connection mSensorGrade;
     bool                    mIsSensorsConnected = false;
 
     struct {
         float cadenceSpm      = 0.0f;
         bool  cadenceValid    = false;
-        float stepLengthM     = 0.0f;
-        bool  stepLengthValid = false;
     } mRunningCadence{};
+
+    // -- Outdoor stride calibration inputs (latched per stream, §2.3) ---------
+    struct {
+        float gradePct        = 0.0f;
+        bool  gradeValid      = false;
+    } mGradeData{};
+    bool        mGpsSpeedValid    = false;
+    bool        mGpsDeadReckoning = false;
+    std::time_t mLastCalibUtc     = 0;   ///< For per-tick delta_t (§4.4).
 
     // -- Metrics --------------------------------------------------------------
 
@@ -138,6 +150,10 @@ private:
     // -- Wrist tilt -----------------------------------------------------------
 
     WristTiltDetector mWristTiltDetector;
+
+    // -- Outdoor stride calibrator (§2) ---------------------------------------
+
+    SDK::Calibration::OutdoorStrideCalibrator mCalibrator;
 
     // -- Lifecycle ------------------------------------------------------------
 

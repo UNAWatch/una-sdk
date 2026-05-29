@@ -18,11 +18,13 @@ namespace SDK::SensorDataParser
 class RunningCadence
 {
 public:
+    // Step length is no longer published by the kernel cadence sensor; it is
+    // derived SDK-side at FIT record-write time via SDK::Calibration::StrideMath
+    // (Outdoor-Data-Collection.md §3.6). This is a breaking wire-format change:
+    // Field::COUNT shrank from 4 to 2.
     enum Field : uint8_t {
         CADENCE_SPM        = 0,
         CADENCE_VALID      = 1,
-        STEP_LENGTH_M      = 2,
-        STEP_LENGTH_VALID  = 3,
         COUNT
     };
 
@@ -41,16 +43,6 @@ public:
     bool isCadenceValid() const
     {
         return isDataValid() && (mData.u[Field::CADENCE_VALID] != 0);
-    }
-
-    float getStepLengthM() const
-    {
-        return isDataValid() ? mData.f[Field::STEP_LENGTH_M] : 0.0f;
-    }
-
-    bool isStepLengthValid() const
-    {
-        return isDataValid() && (mData.u[Field::STEP_LENGTH_VALID] != 0);
     }
 
     uint32_t getTimestamp() const

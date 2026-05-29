@@ -26,6 +26,8 @@ namespace SDK
          *
          * Expected data layout:
          * - [0] float speed (m/s)
+         * - [1] uint  speed valid (1 = current fix, 0 = acquiring / fix lost)
+         * - [2] uint  dead reckoning (1 = estimated fix, speed unreliable)
          *
          * Validity of each field is checked via corresponding mask bit.
          */
@@ -33,8 +35,10 @@ namespace SDK
         {
         public:
             enum Field : uint8_t {
-                SPEED = 0,  ///< Speed, m/s (float)
-                COUNT       ///< Total number of fields
+                SPEED          = 0,  ///< Speed, m/s (float)
+                SPEED_VALID    = 1,  ///< 1 when the fix is current (uint)
+                DEAD_RECKONING = 2,  ///< 1 when the fix is estimated / DR (uint, §3.5)
+                COUNT                ///< Total number of fields
             };
 
             /**
@@ -62,6 +66,24 @@ namespace SDK
             }
 
             /**
+             * @brief Whether the current speed comes from a live fix.
+             * @return true if valid (false during acquisition / fix loss)
+             */
+            bool isSpeedValid() const
+            {
+                return isDataValid() && (mData.u[Field::SPEED_VALID] != 0);
+            }
+
+            /**
+             * @brief Whether the receiver is dead-reckoning (estimated fix).
+             * @return true if the speed is extrapolated and unreliable (§3.5)
+             */
+            bool isDeadReckoning() const
+            {
+                return isDataValid() && (mData.u[Field::DEAD_RECKONING] != 0);
+            }
+
+            /**
              * @brief Get data timestamp in ms
              * @return Data timestamp in ms (0 if invalid)
              */
@@ -81,7 +103,7 @@ namespace SDK
 
             /**
              * @brief Get total number of expected fields
-             * @return Field count (6)
+             * @return Field count (Field::COUNT = 3: SPEED, SPEED_VALID, DEAD_RECKONING)
              */
             static constexpr uint8_t getFieldsNumber()
             {
