@@ -44,6 +44,7 @@ ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c\
 ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c\
 Libs/Source/JSON/JsonStreamReader.cpp\
 Libs/Source/JSON/JsonStreamWriter.cpp\
+Libs/Source/Calibration/OutdoorStrideCalibrator.cpp\
 Libs/Source/TrackMap/TrackMapBuilder.cpp\
 Libs/Source/Kernel/KernelBuilder.cpp\
 Libs/Source/FitHelper/FitHelper.cpp\

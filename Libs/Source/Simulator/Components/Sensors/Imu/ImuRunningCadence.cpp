@@ -12,14 +12,12 @@
 #include "SDK/Simulator/Components/Sensors/IMU/ImuRunningCadence.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserRunningCadence.hpp"
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
-#include "SDK/Simulator/Components/ComponentSimulator.hpp"
 
 namespace Sensor
 {
 
 ImuRunningCadence::ImuRunningCadence()
-    : mGps(ComponentSimulator::GetInstance().getGps())
-    , mDriver(*this,
+    : mDriver(*this,
               SDK::Sensor::Type::RUNNING_CADENCE,
               SDK::SensorDataParser::RunningCadence::getFieldsNumber(),
               *this)
@@ -37,7 +35,6 @@ float ImuRunningCadence::sdcStart(Sensor::Driver* driver, float period)
     (void)driver;
 
     LOG_INFO("start\n");
-    mGps.enable();
     mTimer.start(mMinPeriodMs);
     return static_cast<float>(mMinPeriodMs);
 }
@@ -48,7 +45,6 @@ void ImuRunningCadence::sdcStop(Sensor::Driver* driver)
 
     LOG_INFO("stop\n");
     mTimer.stop();
-    mGps.disable();
 }
 
 float ImuRunningCadence::sdcUpdatePeriod(Sensor::Driver* driver, float period)
@@ -93,15 +89,9 @@ void ImuRunningCadence::publishSample()
     sample.f[Field::CADENCE_SPM] = mSimCadenceSpm;
     sample.u[Field::CADENCE_VALID] = cadenceValid ? 1u : 0u;
 
-    const float speed = mGps.getSpeed();
-    if (cadenceValid && mGps.hasFix() && speed >= 0.5f && speed <= 8.0f) {
-        const float stepLengthM = speed / (mSimCadenceSpm / 60.0f);
-        sample.f[Field::STEP_LENGTH_M] = stepLengthM;
-        sample.u[Field::STEP_LENGTH_VALID] = 1;
-    } else {
-        sample.f[Field::STEP_LENGTH_M] = 0.0f;
-        sample.u[Field::STEP_LENGTH_VALID] = 0;
-    }
+    // Step length is derived SDK-side from GPS speed + cadence at record-write
+    // time (Outdoor-Data-Collection.md §3.6); the cadence sensor emits cadence
+    // only, so it is no longer published here.
 
     mDriver.pushDataSample();
 }

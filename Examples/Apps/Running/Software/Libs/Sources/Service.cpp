@@ -25,6 +25,9 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserWristMotion.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFusionRaw.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserRunningCadence.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserGrade.hpp"
+
+#include "SDK/Calibration/StrideMath.hpp"
 
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -60,12 +63,14 @@ Service::Service(SDK::Kernel &kernel)
         , mSensorWristMotion(SDK::Sensor::Type::WRIST_MOTION)
         , mSensorFusion(SDK::Sensor::Type::FUSION_RAW, 1000.0f / skFusionSampleRateHz, 100)
         , mSensorRunningCadence(SDK::Sensor::Type::RUNNING_CADENCE, skSamplePeriod, skSampleLatency)
+        , mSensorGrade(SDK::Sensor::Type::GRADE, skSamplePeriod, skSampleLatency)
         , mTimeTracker(kernel.sys)
         , mAltitudeFilter(0.8f)
         , mAltitudeCounter()
         , mBatterySoc(kernel.sys)
         , mBatteryVoltage(kernel.sys)
         , mWristTiltDetector()
+        , mCalibrator(mKernel.fs)
 
 {
     mTimeCounter.init();
@@ -249,6 +254,7 @@ void Service::connectSensors()
         mSensorHr.connect();
         mSensorFusion.connect();
         mSensorRunningCadence.connect();
+        mSensorGrade.connect();
 
         mIsSensorsConnected = true;
     }
@@ -259,6 +265,7 @@ void Service::disconnect()
     if (mIsSensorsConnected) {
         LOG_DEBUG("Disconnect from sensors...\n");
 
+        mSensorGrade.disconnect();
         mSensorFusion.disconnect();
         mSensorRunningCadence.disconnect();
         mSensorHr.disconnect();
@@ -294,8 +301,24 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
     } else if (mSensorGpsSpeed.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsSpeed parser(data[0]);
         if (parser.isDataValid()) {
-            mSpeedCounter.add(parser.getSpeed());
-            LOG_DEBUG("Speed:    %.2f m/s\n", parser.getSpeed());
+            mGpsSpeedMs       = parser.getSpeed();  // raw instantaneous speed
+            mGpsSpeedValid    = parser.isSpeedValid();
+            mGpsDeadReckoning = parser.isDeadReckoning();
+            // Only feed a current (valid-fix) speed into the aggregated metrics
+            // so acquisition/fix-loss readings don't pollute avg/max/distance.
+            if (mGpsSpeedValid) {
+                mSpeedCounter.add(parser.getSpeed());
+            }
+            LOG_DEBUG("Speed:    %.2f m/s (valid %u, dr %u)\n",
+                      parser.getSpeed(), mGpsSpeedValid, mGpsDeadReckoning);
+        }
+    } else if (mSensorGrade.matchesDriver(handle)) {
+        SDK::SensorDataParser::Grade parser(data[0]);
+        if (parser.isDataValid()) {
+            mGradeData.gradePct   = parser.getGradePct();
+            mGradeData.gradeValid = parser.isGradeValid();
+            LOG_DEBUG("Grade:    %.2f %% (valid %u)\n",
+                      mGradeData.gradePct, mGradeData.gradeValid);
         }
     } else if (mSensorGpsDistance.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsDistance parser(data[0]);
@@ -343,10 +366,8 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
     } else if (mSensorRunningCadence.matchesDriver(handle)) {
         SDK::SensorDataParser::RunningCadence parser(data[0]);
         if (parser.isDataValid()) {
-            mRunningCadence.cadenceSpm      = parser.getCadenceSpm();
-            mRunningCadence.cadenceValid    = parser.isCadenceValid();
-            mRunningCadence.stepLengthM     = parser.getStepLengthM();
-            mRunningCadence.stepLengthValid = parser.isStepLengthValid();
+            mRunningCadence.cadenceSpm   = parser.getCadenceSpm();
+            mRunningCadence.cadenceValid = parser.isCadenceValid();
         }
     } else if (mSensorFusion.matchesDriver(handle)) {
         static constexpr uint16_t kBatchSize = 10u;
@@ -590,8 +611,15 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.set(ActivityWriter::RecordData::Field::CADENCE, mRunningCadence.cadenceValid);
     fitRecord.cadenceSpm = mRunningCadence.cadenceSpm;
 
-    fitRecord.set(ActivityWriter::RecordData::Field::STEP_LENGTH, mRunningCadence.stepLengthValid);
-    fitRecord.stepLengthM = mRunningCadence.stepLengthM;
+    // Implied step length is derived SDK-side from GPS speed + cadence (the
+    // kernel no longer emits it). Gated to 0.15-2.50 m, preserving the prior
+    // record.step_length values. See Outdoor-Data-Collection.md §3.6.
+    const SDK::Calibration::StrideMath::StepLength stepLen =
+        SDK::Calibration::StrideMath::impliedStepLengthM(
+            mGpsSpeedMs, mGpsSpeedValid && !mGpsDeadReckoning,
+            mRunningCadence.cadenceSpm, mRunningCadence.cadenceValid);
+    fitRecord.set(ActivityWriter::RecordData::Field::STEP_LENGTH, stepLen.valid);
+    fitRecord.stepLengthM = stepLen.meters;
 
     return fitRecord;
 }
@@ -651,6 +679,18 @@ void Service::startTrack(std::time_t utc)
     mBatteryVoltage.reset(skBatteryLogPeriodMs);
     mGps.reset();
     mRunningCadence = {};
+
+    // Outdoor stride calibrator: reset latched inputs and load the stored LUT
+    // for this session (§6.3).
+    mGradeData = {};
+    mGpsSpeedValid    = false;
+    mGpsDeadReckoning = false;
+    mLastCalibUtc     = 0;
+    mCalibrator.load();
+    if (mSettings.calibTraceEn) {
+        // Debug: per-tick CSV trace pulled over USB mass storage (§9.2).
+        mCalibrator.enableTrace("../SharedData/stride_trace.csv");
+    }
 
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
@@ -755,6 +795,27 @@ void Service::processTrack()
 
 
     if (mTrackState == Track::State::ACTIVE) {
+        // Feed the outdoor stride calibrator from the latest latched values,
+        // inline at the 1 Hz record-write point and before the FIT write (§2.1).
+        {
+            SDK::Calibration::CalibratorSample cs;
+            cs.gps_speed_ms           = mGpsSpeedMs;
+            cs.gps_speed_valid        = mGpsSpeedValid;
+            cs.gps_fix_dead_reckoning = mGpsDeadReckoning;
+            cs.cadence_spm            = mRunningCadence.cadenceSpm;
+            cs.cadence_valid          = mRunningCadence.cadenceValid;
+            cs.grade_pct              = mGradeData.gradePct;
+            cs.grade_valid            = mGradeData.gradeValid;
+
+            const std::time_t nowUtc = mTimeCounter.getCurrent();
+            cs.delta_t_s = (mLastCalibUtc == 0)
+                ? 1.0f
+                : static_cast<float>(nowUtc - mLastCalibUtc);
+            mLastCalibUtc = nowUtc;
+
+            mCalibrator.ingestSample(cs);
+        }
+
         // Save record to the FIT file
         ActivityWriter::RecordData fitRecord = prepareRecordData();
         mActivityWriter.addRecord(fitRecord);
@@ -921,6 +982,10 @@ void Service::stopTrack(bool discard)
 
     mGuiSender.trackState(mTrackState);
 
+    // Persist the outdoor stride LUT synchronously before the task tears down
+    // (only writes if >= 1 sample was accepted this session, §6.4).
+    mCalibrator.finalise();
+
     disconnect();
 }
 
@@ -939,6 +1004,8 @@ void Service::pauseTrack(bool pause)
 
         mActivityWriter.pause(mTimeCounter.getCurrent());
 
+        mCalibrator.pause();   // §4.4: stop ingesting, reset steady-state counter
+
         mTrackState = Track::State::PAUSED;
         LOG_INFO("Track paused. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
         mGuiSender.trackState(mTrackState);
@@ -953,6 +1020,9 @@ void Service::pauseTrack(bool pause)
         mAltitudeCounter.resume();
 
         mActivityWriter.resume(mTimeCounter.getCurrent());
+
+        mCalibrator.resume();  // restart steady-state counter from zero (§4.4)
+        mLastCalibUtc = 0;     // avoid a spurious cross-pause delta_t
 
         mTrackState = Track::State::ACTIVE;
         LOG_INFO("Track resumed. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));

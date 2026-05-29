@@ -88,6 +88,7 @@ struct Settings {
 
     bool autoPauseEn = false; ///< Serialized only; not on settings wheel until auto-pause is implemented.
     bool     phoneNotifEn  = true;  ///< Flag to enable receiving phone notification when app is run.
+    bool     calibTraceEn  = false; ///< Debug: write per-tick outdoor-stride calibrator CSV trace (§9.2).
     Alerts::Distance::Id alertDistanceId = Alerts::Distance::ID_DEFAULT; ///< Distance alert option.
     Alerts::Time::Id     alertTimeId     = Alerts::Time::ID_OFF;     ///< Time alert option.
 

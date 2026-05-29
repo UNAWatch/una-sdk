@@ -9,7 +9,6 @@
 #define __IMU_RUNNING_CADENCE_HPP
 
 #include "SDK/Simulator/OS/SwTimer.hpp"
-#include "SDK/Simulator/Components/ISensorsSim/IGps.hpp"
 #include <SDK/Simulator/Components/SensorDriver.hpp>
 #include <cstdint>
 
@@ -38,7 +37,6 @@ private:
 
     void publishSample();
 
-    Interface::IGps& mGps;
     Sensor::Driver   mDriver;
     ::Driver::SwTimer mTimer;
 };
