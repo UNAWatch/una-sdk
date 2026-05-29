@@ -1,0 +1,87 @@
+/**
+ ******************************************************************************
+ * @file    OutdoorStrideCalibConfig.hpp
+ * @brief   Tunable constants and bin layout for the outdoor stride calibrator.
+ *
+ * Mirrors Docs/Treadmill/Outdoor-Data-Collection.md §8 (tunable constants) and
+ * §5.1 (bin layout). These values are not user-configurable but are
+ * firmware-tunable for field adjustment.
+ ******************************************************************************
+ */
+
+#ifndef __OUTDOOR_STRIDE_CALIB_CONFIG_HPP
+#define __OUTDOOR_STRIDE_CALIB_CONFIG_HPP
+
+#include <cstddef>
+#include <cstdint>
+
+namespace SDK::Calibration
+{
+
+/**
+ * @brief Outdoor stride calibrator tunables (spec §8) and bin layout (spec §5.1).
+ */
+namespace Config
+{
+
+// --- Acceptance state machine (spec §4, §8) ---------------------------------
+
+/// Consecutive qualifying seconds before samples are accepted.
+constexpr float kSteadyStateMinSeconds = 15.0f;
+
+/// Max delta_t between ticks before a stream gap resets the counter (§4.4).
+constexpr float kMaxTickGapS = 1.5f;
+
+/// Fractional +/- band for speed and cadence steady-state (5%).
+constexpr float kSteadyBandFrac = 0.05f;
+
+/// GPS speed acceptance window, m/s.
+constexpr float kGpsSpeedMinMs = 0.5f;
+constexpr float kGpsSpeedMaxMs = 8.0f;
+
+/// Cadence acceptance window, SPM (matches the LUT range).
+constexpr float kCadenceMinSpm = 80.0f;
+constexpr float kCadenceMaxSpm = 220.0f;
+
+/// Maximum absolute terrain grade for acceptance, percent.
+constexpr float kGradeMaxPct = 3.0f;
+
+/// Rolling window for barometric grade computation, seconds (kernel).
+constexpr float kGradeWindowS = 10.0f;
+
+/// Implied stride-length plausibility bounds (post-gate sanity check), metres.
+constexpr float kStrideMinM = 0.3f;
+constexpr float kStrideMaxM = 5.0f;
+
+// --- Bin aggregation (spec §5) ----------------------------------------------
+
+/// Per-bin distance cap before aging kicks in, metres.
+constexpr float kDistanceCapM = 20000.0f;
+
+/// Minimum accumulated steps for a bin to be considered valid (~100 strides).
+constexpr float kBinValidMinSteps = 200.0f;
+
+// --- Phase-2 gate (spec §7) -------------------------------------------------
+
+/// Valid bins required for the phase-2 gate.
+constexpr size_t kOutdoorLutMinValidBins = 8;
+
+/// Total LUT distance required for the phase-2 gate, metres.
+constexpr float kOutdoorLutMinCalibrationDistanceM = 5000.0f;
+
+// --- Bin layout (spec §5.1) -------------------------------------------------
+
+/// Cadence bin width, SPM.
+constexpr float kBinWidthSpm = 4.0f;
+
+/// Lowest bin lower-edge cadence, SPM (bin 0 covers [80, 84)).
+constexpr float kBinBaseSpm = 80.0f;
+
+/// Number of cadence bins: centres 82, 86, ..., 218.
+constexpr size_t kBinCount = 35;
+
+} // namespace Config
+
+} // namespace SDK::Calibration
+
+#endif /* __OUTDOOR_STRIDE_CALIB_CONFIG_HPP */

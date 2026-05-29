@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+reviews:
+  auto_review:
+    enabled: true
+    # Review draft PRs too (CodeRabbit skips drafts by default).
+    drafts: true
+    # Do not pause/skip the auto review when a PR looks like work-in-progress
+    # (no title keywords such as "WIP" suppress reviewing).
+    ignore_title_keywords: []
+  path_filters:
+    # TouchGFX Designer output / generator glue (generated, "do not edit").
+    - "!Docs/Tutorials/*/Software/Apps/TouchGFX-GUI/generated/**"
+    - "!Examples/Apps/*/Software/Apps/TouchGFX-GUI/generated/**"
+    - "!Libs/Header/SDK/Port/TouchGFX/generated/**"
+    - "!Libs/Source/Port/TouchGFX/generated/**"

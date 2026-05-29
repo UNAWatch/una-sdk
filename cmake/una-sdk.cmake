@@ -45,6 +45,10 @@ set(UNA_SDK_SOURCES_TRACKMAP
     "$ENV{UNA_SDK}/Libs/Source/TrackMap/TrackMapBuilder.cpp"
 )
 
+set(UNA_SDK_SOURCES_CALIBRATION
+    "$ENV{UNA_SDK}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
+)
+
 # Combined service sources for backward compatibility
 set(UNA_SDK_SOURCES_SERVICE
     "${UNA_SDK_SOURCES_APPSYSTEM}"
@@ -52,6 +56,7 @@ set(UNA_SDK_SOURCES_SERVICE
     "${UNA_SDK_SOURCES_JSON}"
     "${UNA_SDK_SOURCES_SENSOR}"
     "${UNA_SDK_SOURCES_TRACKMAP}"
+    "${UNA_SDK_SOURCES_CALIBRATION}"
 )
 
 set(UNA_SDK_SOURCES_GUI
