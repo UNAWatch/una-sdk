@@ -421,6 +421,9 @@
     <Filter Include="SDK\Libs\Source\JSON">
       <UniqueIdentifier>{681f519e-2619-415d-b28b-2f31e2279e24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDK\Libs\Source\Calibration">
+      <UniqueIdentifier>{7c1a5e90-3d24-4b6e-9a11-0c2f8e7b4a01}</UniqueIdentifier>
+    </Filter>
     <Filter Include="SDK\Libs\Header\TrackMap">
       <UniqueIdentifier>{d3f5dab6-09b9-4f3a-a091-e23f8bbbf5ea}</UniqueIdentifier>
     </Filter>
@@ -872,6 +875,9 @@
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp">
       <Filter>SDK\Libs\Source\JSON</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\OutdoorStrideCalibrator.cpp">
+      <Filter>SDK\Libs\Source\Calibration</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp">
       <Filter>SDK\Libs\Source\TrackMap</Filter>
