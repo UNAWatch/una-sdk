@@ -30,6 +30,7 @@
     <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\OutdoorStrideCalibrator.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>

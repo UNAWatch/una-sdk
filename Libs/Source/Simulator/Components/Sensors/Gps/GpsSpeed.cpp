@@ -90,6 +90,11 @@ void GpsSpeed::sensorRefresh()
         auto& sample = mDriver.getDataSample();
         sample.setTimestamp(SDK::Simulator::Mock::System::GetTimeMs());
         sample.f[SDK::SensorDataParser::GpsSpeed::Field::SPEED] = mGps.getSpeed();
+        // The simulator's IGps has no fix-mode/dead-reckoning concept, so a fix
+        // is always a reliable (non-DR) fix here.
+        sample.u[SDK::SensorDataParser::GpsSpeed::Field::SPEED_VALID] =
+            mGps.hasFix() ? 1u : 0u;
+        sample.u[SDK::SensorDataParser::GpsSpeed::Field::DEAD_RECKONING] = 0u;
         mDriver.pushDataSample();
 
         LOG_DEBUG("EXIT\n");
