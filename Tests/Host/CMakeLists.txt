@@ -15,6 +15,24 @@ set(UNA_SDK_ROOT "${CMAKE_CURRENT_LIST_DIR}/../..")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/FetchGoogleTest.cmake)
 
+# coreJSON backs the SDK JSON reader/writer (Running settings + calibrator store).
+set(COREJSON_DIR "${UNA_SDK_ROOT}/ThirdParty/coreJSON/source")
+if(NOT IS_DIRECTORY "${COREJSON_DIR}/include")
+    message(FATAL_ERROR
+        "coreJSON sources not found at ${COREJSON_DIR}. "
+        "Initialize submodules: git submodule update --init --recursive"
+    )
+endif()
+
+# Garmin FIT SDK backs the FitHelper cadence-encode test.
+set(UNA_FIT_SDK_DIR "${UNA_SDK_ROOT}/ThirdParty/FitSDKRelease_21.202.00" CACHE PATH "Path to the Garmin FIT SDK release")
+if(NOT IS_DIRECTORY "${UNA_FIT_SDK_DIR}/c")
+    message(FATAL_ERROR
+        "UNA_FIT_SDK_DIR must point to a Garmin FIT SDK release with a c/ include directory. "
+        "Missing: ${UNA_FIT_SDK_DIR}/c. Override with -DUNA_FIT_SDK_DIR=/path/to/FitSDKRelease_21.202.00"
+    )
+endif()
+
 add_library(sdk_host_test_support STATIC
     support/KernelTestDoubles.cpp
     "${UNA_SDK_ROOT}/Libs/Source/UnaLogger/Logger.cpp"
@@ -28,15 +46,21 @@ target_include_directories(sdk_host_test_support PUBLIC
 add_executable(una-sdk-host-tests
     apps/Running/Settings_test.cpp
     apps/Running/SettingsSerializer_test.cpp
+    calibration/OutdoorStrideCalibrator_test.cpp
+    calibration/StrideMath_test.cpp
+    fithelper/FitCadenceEncode_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/FitHelper/FitRecordCadence.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
-    "${UNA_SDK_ROOT}/ThirdParty/coreJSON/source/core_json.c"
+    "${COREJSON_DIR}/core_json.c"
 )
 
 target_include_directories(una-sdk-host-tests PRIVATE
     "${UNA_SDK_ROOT}/Libs/Header"
-    "${UNA_SDK_ROOT}/ThirdParty/coreJSON/source/include"
+    "${COREJSON_DIR}/include"
+    "${UNA_FIT_SDK_DIR}/c"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Header"
 )
 
