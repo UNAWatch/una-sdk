@@ -26,7 +26,6 @@ void TrackActionPresenter::deactivate()
 void TrackActionPresenter::onTrackData(const Track::Data& data)
 {
     view.setTimer(data.totalTime);
-    view.setAvgPace(data.avgPace);
     view.setAvgSpeed(data.avgSpeed);
     view.setDistance(data.distance);
     view.setAvgHR(data.avgHR);

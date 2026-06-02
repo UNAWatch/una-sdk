@@ -37,7 +37,6 @@ struct Data {
 
     // Pace, s/m
     float pace        = 0.0f;
-    float avgPace     = 0.0f;
     float lapPace     = 0.0f;
 
     // Distance, m

@@ -629,7 +629,6 @@ void Service::processTrack()
     // Pace, s/m
     const float kMinSpeed = mSpeedCounter.getMinValid();
     mTrackData.pace    = getPace(mTrackData.speed, kMinSpeed);
-    mTrackData.avgPace = getPace(mTrackData.avgSpeed, kMinSpeed);
     mTrackData.lapPace = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
     // HR
