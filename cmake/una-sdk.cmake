@@ -83,6 +83,65 @@ set(UNA_SDK_INCLUDE_DIRS_GUI
     "$ENV{UNA_SDK}/Libs/Header/SDK/Port/TouchGFX/generated"
 )
 
+# ---------------------------------------------------------------------------
+# LVGL v9 GUI wiring (kernel GUI migration — see Docs/LVGL-Migration/Design.md)
+#
+# These variables are PARALLEL to UNA_SDK_SOURCES_GUI / UNA_SDK_INCLUDE_DIRS_GUI
+# (the TouchGFX wiring above). The TouchGFX variables are intentionally left
+# intact so the out-of-scope SDK example apps keep building unchanged. A build
+# selects ONE GUI backend by referencing either the *_GUI or the *_GUI_LVGL
+# variables — never both (they provide competing GUI entry points / main.cpp).
+#
+# LVGL itself is expected as a git submodule at the REPO-ROOT ThirdParty/lvgl
+# (same prefix the firmware already uses for ST/FatFs/BlueNRG via the CubeIDE
+# project's ../../../ThirdParty). This is distinct from SDK/ThirdParty. The
+# `git submodule add` step is MANUAL — see Docs/LVGL-Migration/Build-Changes.md.
+#
+# UNA_LVGL_DIR may be overridden by the caller before include(una-sdk.cmake)
+# to point at a non-default LVGL checkout.
+if(NOT DEFINED UNA_LVGL_DIR)
+    # Repo root = two levels up from this file's SDK/cmake/ directory.
+    get_filename_component(_UNA_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+    set(UNA_LVGL_DIR "${_UNA_REPO_ROOT}/ThirdParty/lvgl")
+endif()
+
+# LVGL core C sources. Globbed because the upstream v9 source tree is large and
+# churns between releases; examples/demos/tests are excluded (not built here).
+# NOTE: a CMake re-configure is required after the submodule is first added or
+# updated so the glob picks up the new files.
+file(GLOB_RECURSE UNA_LVGL_CORE_SOURCES
+    "${UNA_LVGL_DIR}/src/*.c"
+)
+list(FILTER UNA_LVGL_CORE_SOURCES EXCLUDE REGEX "/(examples|demos|tests)/")
+
+set(UNA_SDK_SOURCES_GUI_LVGL
+    # GUI entry point (replaces the TouchGFX EntryPoint/TouchGFX/main.cpp)
+    "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
+    # SDK LVGL port layer (init, display flush, keypad indev, lifecycle)
+    "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/app_lvgl.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/lv_port_disp.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/lv_port_indev.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/lv_port_lifecycle.cpp"
+    # LVGL upstream core (submodule glob)
+    "${UNA_LVGL_CORE_SOURCES}"
+)
+
+set(UNA_SDK_INCLUDE_DIRS_GUI_LVGL
+    # SDK LVGL port headers (app_lvgl.h, lv_port_disp.h, lv_port_indev.h,
+    # lv_port_lifecycle.h, lv_conf.h)
+    "$ENV{UNA_SDK}/Libs/Header/SDK/Port/LVGL"
+    # LVGL upstream headers
+    "${UNA_LVGL_DIR}"
+    "${UNA_LVGL_DIR}/src"
+)
+
+# LV_CONF_PATH points LVGL at the canonical kernel lv_conf.h. The contract
+# keeps the canonical copy in the SDK port dir; the kernel GUI tree's
+# Software/App/LVGL-GUI/lv_conf.h is the editor/IntelliSense mirror.
+# Consumers add this to their target_compile_definitions, e.g.
+#   target_compile_definitions(<tgt> PRIVATE LV_CONF_PATH="${UNA_LV_CONF_PATH}")
+set(UNA_LV_CONF_PATH "$ENV{UNA_SDK}/Libs/Header/SDK/Port/LVGL/lv_conf.h")
+
 # Combined service includes for backward compatibility
 set(UNA_SDK_INCLUDE_DIRS_SERVICE
     "${UNA_SDK_INCLUDE_DIRS_FIT}"
