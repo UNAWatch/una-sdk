@@ -3,7 +3,7 @@ name: Documentation
 on:
   push:
     branches: [ main, develop ]
-    tags: [ '*' ]
+    tags: [ 'sdk-v*' ]
     paths:
       - 'Docs/**'
       - '.github/workflows/docs.yml'
