@@ -29,7 +29,7 @@ void TrackActionView::setupScreen()
 
     infoCarousel.setPeriod(kTrackTitleInfoSwitchPeriod);
     infoCarousel.setUpdateCallback(mCarouselCb);
-    infoCarousel.setCount(5);   // fires onCarouselUpdate(0) immediately
+    infoCarousel.setCount(4);   // fires onCarouselUpdate(0) immediately
 
     menuLayout.invalidate();
 }
@@ -60,18 +60,6 @@ void TrackActionView::setUnitsImperial(bool isImperial)
 void TrackActionView::setTimer(std::time_t sec)
 {
     pauseIndicator.setTime(sec);
-}
-
-void TrackActionView::setAvgPace(float secPerM)
-{
-    auto paceConv = [this](float s) -> float {
-        if (s < 1e-6f) return 0.0f;
-        const float secPerKm = s * 1000.0f;
-        return mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm;
-    };
-
-    mAvgPaceConv = paceConv(secPerM);
-    infoCarousel.refresh();
 }
 
 void TrackActionView::setDistance(float metres)
@@ -152,22 +140,6 @@ void TrackActionView::onCarouselUpdate(int16_t index)
     switch (index) {
 
     case 0:
-        infoCarousel.setTitle(T_TEXT_AVG_DOT_PACE_UC);
-        {
-            if (mAvgPaceConv < App::Display::kMinPace) {
-                Unicode::snprintf(buf, kBufSize, "---");
-            } else {
-                auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(mAvgPaceConv));
-                if (hms.h > 0) {
-                    Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.h, hms.m);
-                } else {
-                    Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.m, hms.s);
-                }
-            }
-        }
-        break;
-
-    case 1:
         infoCarousel.setTitle(T_TEXT_AVG_DOT_SPEED_UC);
         {
             if (mSpeedConv < App::Display::kMinSpeed) {
@@ -182,7 +154,7 @@ void TrackActionView::onCarouselUpdate(int16_t index)
         }
         break;
 
-    case 2:
+    case 1:
         infoCarousel.setTitle(T_TEXT_DISTANCE_UC);
         {
             if (mDistanceConv < App::Display::kMinDist) {
@@ -195,12 +167,12 @@ void TrackActionView::onCarouselUpdate(int16_t index)
         }
         break;
 
-    case 3:
+    case 2:
         infoCarousel.setTitle(T_TEXT_ELEVATION_UC);
         Unicode::snprintf(buf, kBufSize, "%d", static_cast<int16_t>(mElevationConv));
         break;
 
-    case 4:
+    case 3:
         infoCarousel.setTitle(T_TEXT_AVG_DOT_HR);
         if (mAvgHr < App::Display::kMinHR) {
             Unicode::snprintf(buf, kBufSize, "---");

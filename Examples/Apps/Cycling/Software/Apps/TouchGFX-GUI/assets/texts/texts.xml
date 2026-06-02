@@ -313,9 +313,6 @@
       <Text Id="TEXT_LAP" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Lap</Translation>
       </Text>
-      <Text Id="TEXT_AVG_DOT_PACE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">AVG. PACE</Translation>
-      </Text>
       <Text Id="TEXT_AVG_DOT_HR" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">AVG. HR</Translation>
       </Text>
