@@ -18,13 +18,12 @@ public:
 
 protected:
     enum Face : uint8_t {
-        FACE_MAP       = 0,
-        FACE_OVERVIEW  = 1,
-        FACE_HEARTRATE = 2,
-        FACE_LAPS      = 3,
+        FACE_OVERVIEW  = 0,
+        FACE_HEARTRATE = 1,
+        FACE_LAPS      = 2,
     };
 
-    uint8_t mCurrentFace    = FACE_MAP;
+    uint8_t mCurrentFace    = FACE_OVERVIEW;
     bool    mIsImperial     = false;
     bool    mTrackIsPaused  = false;
     uint8_t mLapsPageCount  = 0;

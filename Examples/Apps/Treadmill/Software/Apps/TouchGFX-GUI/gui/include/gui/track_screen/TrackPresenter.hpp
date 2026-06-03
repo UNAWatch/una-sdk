@@ -33,7 +33,6 @@ public:
     virtual void onLapChanged(uint8_t lapEnd) override;
     virtual void onIntervalsPhaseAlert() override;
     virtual void onIntervalsWorkoutCompleted() override;
-    virtual void onGpsFix(bool acquired) override;
 
     void saveLap();
     void intervalsNextPhase();

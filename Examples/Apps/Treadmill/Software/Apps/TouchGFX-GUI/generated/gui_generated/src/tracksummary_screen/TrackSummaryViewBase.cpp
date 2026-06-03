@@ -30,9 +30,6 @@ TrackSummaryViewBase::TrackSummaryViewBase()
     summaryFaceOverview.setXY(0, 0);
     summaryFaceOverview.setVisible(false);
     add(summaryFaceOverview);
-
-    summaryFaceMap.setXY(0, 0);
-    add(summaryFaceMap);
 }
 
 TrackSummaryViewBase::~TrackSummaryViewBase()
@@ -47,7 +44,6 @@ void TrackSummaryViewBase::setupScreen()
     summaryFaceLaps.initialize();
     summaryFaceHeartRate.initialize();
     summaryFaceOverview.initialize();
-    summaryFaceMap.initialize();
     transitionBegins();
 }
 

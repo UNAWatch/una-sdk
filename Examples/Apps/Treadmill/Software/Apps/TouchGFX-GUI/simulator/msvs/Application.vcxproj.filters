@@ -819,9 +819,6 @@
     <ClCompile Include="..\..\generated\gui_generated\src\track_screen\TrackViewBase.cpp">
       <Filter>Source Files\generated\gui_generated\track_screen</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\containers\PolyLine.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\Backlight.cpp">
       <Filter>SDK\Libs\Source\Simulator\Kernel\Mock</Filter>
     </ClCompile>
@@ -968,9 +965,6 @@
     </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\model\ModelListener.hpp">
       <Filter>Header Files\gui\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\containers\PolyLine.hpp">
-      <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\common\SimConstants.hpp">
       <Filter>Header Files\generated\gui_generated\common</Filter>
@@ -1551,20 +1545,8 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp">
       <Filter>SDK\Libs\Source\Port\TouchGFX</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\containers\GpsIndicator.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\generated\gui_generated\src\containers\GpsIndicatorBase.cpp">
-      <Filter>Source Files\generated\gui_generated\containers</Filter>
-    </ClCompile>
     <ClInclude Include="..\..\gui\include\gui\model\AppMenu.hpp">
       <Filter>Header Files\gui\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\containers\GpsIndicator.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\GpsIndicatorBase.hpp">
-      <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
     <ClCompile Include="..\..\gui\src\containers\PauseIndicator.cpp">
       <Filter>Source Files\gui\containers</Filter>
@@ -1578,12 +1560,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\PauseIndicatorBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\gui\src\containers\Map.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\generated\gui_generated\src\containers\MapBase.cpp">
-      <Filter>Source Files\generated\gui_generated\containers</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\gui\src\containers\SummaryFaceHeartRate.cpp">
       <Filter>Source Files\gui\containers</Filter>
     </ClCompile>
@@ -1596,24 +1572,12 @@
     <ClCompile Include="..\..\generated\gui_generated\src\containers\SummaryFaceLapsBase.cpp">
       <Filter>Source Files\generated\gui_generated\containers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\containers\SummaryFaceMap.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\generated\gui_generated\src\containers\SummaryFaceMapBase.cpp">
-      <Filter>Source Files\generated\gui_generated\containers</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\gui\src\containers\SummaryFaceOverview.cpp">
       <Filter>Source Files\gui\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\SummaryFaceOverviewBase.cpp">
       <Filter>Source Files\generated\gui_generated\containers</Filter>
     </ClCompile>
-    <ClInclude Include="..\..\gui\include\gui\containers\Map.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MapBase.hpp">
-      <Filter>Header Files\generated\gui_generated\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceHeartRate.hpp">
       <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
@@ -1624,12 +1588,6 @@
       <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\SummaryFaceLapsBase.hpp">
-      <Filter>Header Files\generated\gui_generated\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceMap.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\SummaryFaceMapBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceOverview.hpp">
@@ -2259,9 +2217,6 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\track_screen\TrackViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\track_screen</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\containers\PolyLine.hpp">
-      <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Platform\OS\OS.hpp">
       <Filter>SDK\Libs\Header\Platform\OS</Filter>

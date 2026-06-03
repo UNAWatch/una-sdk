@@ -21,7 +21,6 @@ public:
 
     void setTime(uint8_t h, uint8_t m);
     void setBatteryLevel(uint8_t level);
-    void setGpsFix(bool state);
 
 protected:
 
