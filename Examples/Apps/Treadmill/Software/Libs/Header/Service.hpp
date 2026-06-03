@@ -131,7 +131,6 @@ private:
 
     LapDivSource mLapDivSource        = LapDivSource::OFF;
     Track::State mTrackState          = Track::State::INACTIVE;
-    bool         mPreviousGpsFixState = false;
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
     Track::Data  mTrackData{};
@@ -209,7 +208,6 @@ private:
     // -- Notifications --------------------------------------------------------
 
     void setCapabilities();
-    void notifyFirstFix();
     void notifyLapEnd();
     void notifyNewActivity();
     void backlightOn(uint32_t timeoutMs = skBacklightTimeout);

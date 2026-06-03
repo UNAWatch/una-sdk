@@ -89,9 +89,6 @@ public:
     const Settings& getSettings() const;
     void saveSettings(const Settings& sett);
 
-    // GPS
-    bool hasGpsFix() const;
-
     // Track
     void setPendingIntervalsMode(bool mode);
     bool isPendingIntervalsMode() const;
@@ -145,7 +142,6 @@ private:
     Settings mSettings {};
 
     // Kernel state
-    bool    mGpsFix       = false;
     uint8_t mBatteryLevel = 0;
 
     // Track

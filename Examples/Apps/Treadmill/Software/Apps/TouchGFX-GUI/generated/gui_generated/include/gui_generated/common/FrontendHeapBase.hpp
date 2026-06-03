@@ -42,8 +42,6 @@
 #include <gui/menuintervalsresttime_screen/MenuIntervalsRestTimePresenter.hpp>
 #include <gui/menuintervalsrestdistance_screen/MenuIntervalsRestDistanceView.hpp>
 #include <gui/menuintervalsrestdistance_screen/MenuIntervalsRestDistancePresenter.hpp>
-#include <gui/trackstartconfirmation_screen/TrackStartConfirmationView.hpp>
-#include <gui/trackstartconfirmation_screen/TrackStartConfirmationPresenter.hpp>
 #include <gui/track_screen/TrackView.hpp>
 #include <gui/track_screen/TrackPresenter.hpp>
 #include <gui/tracklap_screen/TrackLapView.hpp>
@@ -103,7 +101,6 @@ public:
             touchgfx::meta::TypeList< MenuIntervalsRunTimeView,
             touchgfx::meta::TypeList< MenuIntervalsRestTimeView,
             touchgfx::meta::TypeList< MenuIntervalsRestDistanceView,
-            touchgfx::meta::TypeList< TrackStartConfirmationView,
             touchgfx::meta::TypeList< TrackView,
             touchgfx::meta::TypeList< TrackLapView,
             touchgfx::meta::TypeList< TrackActionView,
@@ -115,7 +112,7 @@ public:
             touchgfx::meta::TypeList< TrackIntervalsCountdownView,
             touchgfx::meta::TypeList< TrackIntervalsAlertView,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedView,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedViewTypes;
 
     /**
@@ -142,7 +139,6 @@ public:
             touchgfx::meta::TypeList< MenuIntervalsRunTimePresenter,
             touchgfx::meta::TypeList< MenuIntervalsRestTimePresenter,
             touchgfx::meta::TypeList< MenuIntervalsRestDistancePresenter,
-            touchgfx::meta::TypeList< TrackStartConfirmationPresenter,
             touchgfx::meta::TypeList< TrackPresenter,
             touchgfx::meta::TypeList< TrackLapPresenter,
             touchgfx::meta::TypeList< TrackActionPresenter,
@@ -154,7 +150,7 @@ public:
             touchgfx::meta::TypeList< TrackIntervalsCountdownPresenter,
             touchgfx::meta::TypeList< TrackIntervalsAlertPresenter,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedPresenter,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedPresenterTypes;
 
     /**

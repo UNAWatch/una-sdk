@@ -107,8 +107,6 @@ void Service::run()
     SDK::Timer guiInitTimeout(TIMER_SECONDS(5));
     guiInitTimeout.start();
 
-    bool firstFix = false;
-
     std::time_t processedUtc = 0;
 
     while (true) {
@@ -212,17 +210,6 @@ void Service::run()
                 mGuiSender.time(tmNow);
 
                 mGuiSender.battery(static_cast<uint8_t>(mBatterySoc.get()));
-
-                // Update GPS fix
-                if (mPreviousGpsFixState != mGps.fix) {
-                    mPreviousGpsFixState = mGps.fix;
-
-                    if (!firstFix) {
-                        notifyFirstFix();
-                        firstFix = true;
-                    }
-                    mGuiSender.fix(mGps.fix);
-                }
 
                 if (mTrackState != Track::State::INACTIVE) {
                     mTimeCounter.add(utc);
@@ -446,13 +433,6 @@ void Service::setCapabilities()
     }
 }
 
-
-void Service::notifyFirstFix()
-{
-    backlightOn();
-    playBuzzerPattern(150, 3);
-    playVibroPattern(SDK::Message::RequestVibroPlay::Effect::STRONG_CLICK_100);
-}
 
 void Service::notifyLapEnd()
 {

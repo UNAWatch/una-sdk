@@ -13,18 +13,12 @@ void MenuSettingsPresenter::activate()
     model->menu().settings.resetChildren();
     model->resetIdleTimer();
 
-    view.setGpsFix(model->hasGpsFix());
     view.setPhoneNotif(model->getSettings().phoneNotifEn);
 }
 
 void MenuSettingsPresenter::deactivate()
 {
     model->menu().settings.set(view.getPositionId());
-}
-
-void MenuSettingsPresenter::onGpsFix(bool acquired)
-{
-    view.setGpsFix(acquired);
 }
 
 void MenuSettingsPresenter::savePhoneNotif(bool state)
