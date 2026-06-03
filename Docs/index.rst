@@ -53,7 +53,6 @@ Next steps:
    Examples/HRMonitor-Architecture
    Examples/GlanceHR-Architecture
    Examples/GlanceSteps-Architecture
-   Examples/GlanceStrain-ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4
