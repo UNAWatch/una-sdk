@@ -350,7 +350,7 @@
         <Translation Language="GB">Lap Dist.</Translation>
       </Text>
       <Text Id="TEXT_LAP_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">Lap Speed</Translation>
+        <Translation Language="GB">Lap Spd.</Translation>
       </Text>
       <Text Id="TEXT_PERCENT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">%</Translation>
