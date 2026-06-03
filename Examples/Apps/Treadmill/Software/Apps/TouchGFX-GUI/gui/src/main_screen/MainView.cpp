@@ -20,6 +20,8 @@ void MainView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setAnimationMiddleCallback(mpAnimationMiddleCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
+    // Treadmill has no GPS: no acquisition status line under the title.
+    menuLayout.setInfoMsg(TYPED_TEXT_INVALID);
     menuLayout.invalidate();
 
     updateBackground(menuLayout.getSelectedItem());
@@ -28,19 +30,6 @@ void MainView::setupScreen()
 void MainView::tearDownScreen()
 {
     MainViewBase::tearDownScreen();
-}
-
-void MainView::setGpsFix(bool state)
-{
-    mGpsFix = state;
-
-    if (mGpsFix) {
-        menuLayout.setInfoMsg(T_TEXT_SIGNAL_ACQUIRED);
-    } else {
-        menuLayout.setInfoMsg(T_TEXT_ACQUIRING_SIGNAL);
-    }
-
-    updateBackground(menuLayout.getSelectedItem());
 }
 
 void MainView::setPositionId(uint16_t id)
@@ -148,22 +137,13 @@ void MainView::onConfirm()
 
     switch (idx) {
     case Menu::ID_START:
-        if (mGpsFix == true) {
-            presenter->startTrack();
-            application().gotoTrackScreenNoTransition();
-        } else {
-            presenter->setPendingIntervalsMode(false);
-            application().gotoTrackStartConfirmationScreenNoTransition();
-        }
+        // No GPS to wait for on a treadmill: start the activity immediately.
+        presenter->startTrack();
+        application().gotoTrackScreenNoTransition();
         break;
 
     case Menu::ID_INTERVALS:
-        if (mGpsFix == true) {
-            application().gotoMenuIntervalsScreenNoTransition();
-        } else {
-            presenter->setPendingIntervalsMode(true);
-            application().gotoTrackStartConfirmationScreenNoTransition();
-        }
+        application().gotoMenuIntervalsScreenNoTransition();
         break;
 
     case Menu::ID_SETTINGS:
@@ -175,23 +155,9 @@ void MainView::onConfirm()
     };
 }
 
-void MainView::updateBackground(int16_t index)
+void MainView::updateBackground(int16_t /*index*/)
 {
-    switch (index) {
-        case Menu::ID_START:
-        case Menu::ID_INTERVALS:
-            if (mGpsFix == true) {
-                menuLayout.setBackground(SDK::GUI::Color::TEAL_DARK);
-                menuLayout.getButtons().setR1(Buttons::AMBER);
-            } else {
-                menuLayout.setBackground(SDK::GUI::Color::GRAY_DARK);
-                menuLayout.getButtons().setR1(Buttons::NONE);
-            }
-            break;
-
-        default:
-            menuLayout.setBackground(SDK::GUI::Color::TEAL_DARK);
-            menuLayout.getButtons().setR1(Buttons::AMBER);
-            break;
-    }
+    // Every entry is always actionable on a treadmill (no GPS gating).
+    menuLayout.setBackground(SDK::GUI::Color::TEAL_DARK);
+    menuLayout.getButtons().setR1(Buttons::AMBER);
 }
