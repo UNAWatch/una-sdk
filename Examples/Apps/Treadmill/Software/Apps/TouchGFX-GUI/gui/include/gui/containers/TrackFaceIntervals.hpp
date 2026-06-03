@@ -49,11 +49,11 @@ public:
     // -------------------------------------------------------------------------
 
     /**
-     * @brief Update pace -- visible only during RUN phase.
-     * @param pace Already-converted value in sec/km or sec/mi (view's responsibility).
-     *             Pass a value < App::Display::kMinPace to show "---" (no GPS / no data).
+     * @brief Update speed -- visible only during RUN phase.
+     * @param speed Already-converted value in km/h or mph (view's responsibility).
+     *              Pass a value < App::Display::kMinSpeed to show "---" (not moving).
      */
-    void setPace(float pace);
+    void setPace(float speed);
 
     /**
      * @brief Update heart rate -- visible during REST phase.

@@ -28,17 +28,13 @@ void SummaryFaceOverview::setDistance(float dist, bool isImperial)
     distanceUnits.invalidate();
 }
 
-void SummaryFaceOverview::setAvgPace(float pace)
+void SummaryFaceOverview::setAvgPace(float speed)
 {
-    if (pace < App::Display::kMinPace) {
+    // @param speed Already-converted average speed in km/h or mph (view's responsibility).
+    if (speed < App::Display::kMinSpeed) {
         Unicode::snprintf(avgPaceValueBuffer, AVGPACEVALUE_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace));
-        if (hms.h > 0) {
-            Unicode::snprintf(avgPaceValueBuffer, AVGPACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
-        } else {
-            Unicode::snprintf(avgPaceValueBuffer, AVGPACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
-        }
+        Unicode::snprintfFloat(avgPaceValueBuffer, AVGPACEVALUE_SIZE, "%.1f", speed);
     }
     avgPaceValue.invalidate();
 }

@@ -44,25 +44,14 @@ void TrackLapView::setLapNum(uint32_t n)
     title.set(buffer);
 }
 
-void TrackLapView::setPace(float secPerM)
+void TrackLapView::setPace(float speedMps)
 {
-    auto paceConv = [this](float s) -> float {
-        if (s < 1e-6f) return 0.0f;
-        const float secPerKm = s * 1000.0f;
-        return mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm;
-    };
+    const float value = App::Display::speedToDisplay(speedMps, mIsImperial);
 
-    float value = paceConv(secPerM);
-
-    if (value < App::Display::kMinPace) {
+    if (value < App::Display::kMinSpeed) {
         Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(value));
-        if (hms.h > 0) {
-            Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
-        } else {
-            Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
-        }
+        Unicode::snprintfFloat(paceValueBuffer, PACEVALUE_SIZE, "%.1f", value);
     }
     paceValue.invalidate();
 }

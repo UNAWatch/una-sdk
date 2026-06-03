@@ -27,11 +27,11 @@ public:
     void setHR(float hr, const uint8_t* thresholds, uint8_t thresholdCount);
 
     /**
-     * @brief Display current lap pace.
-     * @param pace Already-converted value in sec/km or sec/mi (view's responsibility).
-     *             Pass a value < App::Display::kMinPace to show "---" (no GPS / no data).
+     * @brief Display current lap speed.
+     * @param speed Already-converted value in km/h or mph (view's responsibility).
+     *              Pass a value < App::Display::kMinSpeed to show "---" (not moving).
      */
-    void setPace(float pace);
+    void setPace(float speed);
 
     /**
      * @brief Display current lap distance.

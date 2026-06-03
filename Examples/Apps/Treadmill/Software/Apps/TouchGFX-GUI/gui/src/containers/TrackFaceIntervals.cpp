@@ -90,17 +90,13 @@ void TrackFaceIntervals::setPhaseDistance(float dist, bool isImperial)
 // Bottom row
 // =============================================================================
 
-void TrackFaceIntervals::setPace(float pace)
+void TrackFaceIntervals::setPace(float speed)
 {
-    if (pace < App::Display::kMinPace) {
+    // @param speed Already-converted speed in km/h or mph (view's responsibility).
+    if (speed < App::Display::kMinSpeed) {
         Unicode::snprintf(paceTextBuffer, PACETEXT_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace));
-        if (hms.h > 0) {
-            Unicode::snprintf(paceTextBuffer, PACETEXT_SIZE, "%u:%02u", hms.h, hms.m);
-        } else {
-            Unicode::snprintf(paceTextBuffer, PACETEXT_SIZE, "%u:%02u", hms.m, hms.s);
-        }
+        Unicode::snprintfFloat(paceTextBuffer, PACETEXT_SIZE, "%.1f", speed);
     }
     paceText.invalidate();
 }

@@ -43,8 +43,14 @@ constexpr uint8_t kHrThresholdsCount = CustomMessage::kHrThresholdsCount;
 namespace App::Display
 {
 constexpr float kMinDist = 0.0f;   ///< km or mi  -- negative = no data
-constexpr float kMinPace = 30.0f;  ///< sec/km or sec/mi -- below any human running pace
+constexpr float kMinSpeed = 0.1f;  ///< km/h or mph -- below this show "---" (not moving)
 constexpr float kMinHR = 20.0f;    ///< bpm -- below physiological minimum
+
+/// Convert speed in m/s to display units (km/h or mph).
+inline float speedToDisplay(float speedMps, bool isImperial)
+{
+    return isImperial ? speedMps * 2.2369363f : speedMps * 3.6f;
+}
 } // namespace App::Display
 
 

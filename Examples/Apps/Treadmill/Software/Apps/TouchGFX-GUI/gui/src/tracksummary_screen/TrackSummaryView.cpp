@@ -38,15 +38,9 @@ void TrackSummaryView::setSummary(const ActivitySummary& s, bool isImperial, boo
         return isImperial ? SDK::Utils::kmToMiles(km) : km;
     };
 
-    auto paceConv = [isImperial](float secPerM) -> float {
-        if (secPerM < 1e-6f) return 0.0f;
-        const float secPerKm = secPerM * 1000.0f;
-        return isImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm;
-    };
-
     const float dist = distConv(s.distance);
     summaryFaceOverview.setDistance(dist, isImperial);
-    summaryFaceOverview.setAvgPace(paceConv(s.paceAvg));
+    summaryFaceOverview.setAvgPace(App::Display::speedToDisplay(s.speedAvg, isImperial));
     summaryFaceOverview.setTimer(s.time);
     summaryFaceHeartRate.setMaxHR(s.hrMax);
     summaryFaceHeartRate.setAvgHR(s.hrAvg);
