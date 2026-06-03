@@ -700,9 +700,11 @@ void Service::processTrack()
 
         mEstimator.tick(mRunningCadence.cadenceSpm, mRunningCadence.cadenceValid, dt);
         mDistanceCounter.add(mEstimator.distanceM());   // cumulative, monotonic
-        if (mEstimator.speedValid()) {
-            mSpeedCounter.add(mEstimator.speedMps());
-        }
+        // Feed speed every tick. speedMps() is 0 once the cadence hold-forward
+        // window expires, so the current speed drops to 0 (display + FIT record)
+        // instead of latching the last held value. add(0) is below minValid, so
+        // it updates "current" only and never pollutes avg/max.
+        mSpeedCounter.add(mEstimator.speedMps());
     }
 
     // Creating map
