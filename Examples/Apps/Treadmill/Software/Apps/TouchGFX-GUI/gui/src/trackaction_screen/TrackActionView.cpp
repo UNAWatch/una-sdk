@@ -30,7 +30,7 @@ void TrackActionView::setupScreen()
 
     infoCarousel.setPeriod(kTrackTitleInfoSwitchPeriod);
     infoCarousel.setUpdateCallback(mCarouselCb);
-    infoCarousel.setCount(4);   // fires onCarouselUpdate(0) immediately
+    infoCarousel.setCount(3);   // fires onCarouselUpdate(0) immediately
 
     menuLayout.invalidate();
 }
@@ -84,12 +84,6 @@ void TrackActionView::setDistance(float metres)
 void TrackActionView::setAvgHR(float hr)
 {
     mAvgHr = hr;
-    infoCarousel.refresh();
-}
-
-void TrackActionView::setElevation(float metres)
-{
-    mElevationConv = mIsImperial ? SDK::Utils::metersToFeet(metres) : metres;
     infoCarousel.refresh();
 }
 
@@ -165,11 +159,6 @@ void TrackActionView::onCarouselUpdate(int16_t index)
         } else {
             Unicode::snprintfFloat(buf, kBufSize, "%.0f", mAvgHr);
         }
-        break;
-
-    case 3:
-        infoCarousel.setTitle(T_TEXT_ELEVATION_UC);
-        Unicode::snprintf(buf, kBufSize, "%d", static_cast<int16_t>(mElevationConv));
         break;
 
     default:

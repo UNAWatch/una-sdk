@@ -20,17 +20,15 @@ public:
     void setAvgPace(float secPerM);
     void setDistance(float metres);
     void setAvgHR(float hr);
-    void setElevation(float metres);
 
 protected:
     using Menu = App::MenuNav::TrackView::Action;
 
     bool mIsImperial = false;
 
-    float mAvgPaceConv   = 0.0f; 
+    float mAvgPaceConv   = 0.0f;
     float mDistanceConv  = 0.0f;
     float mAvgHr         = 0.0f;
-    float mElevationConv = 0.0f;
 
     ItemLayout mItemLayout {};
 
