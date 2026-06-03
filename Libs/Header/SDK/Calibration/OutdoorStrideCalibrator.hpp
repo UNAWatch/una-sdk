@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "SDK/Calibration/OutdoorStrideCalibConfig.hpp"
+#include "SDK/Calibration/StrideLut.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
 
 namespace SDK::Calibration
@@ -41,27 +42,7 @@ struct CalibratorSample {
     float delta_t_s             = 1.0f;   ///< Seconds since previous tick (~1.0).
 };
 
-/**
- * @brief One cadence bin's accumulated data.
- */
-struct StrideBin {
-    float total_distance_m = 0.0f;  ///< Cumulative GPS distance from accepted samples.
-    float total_steps      = 0.0f;  ///< Cumulative step count (float).
-    float sample_count     = 0.0f;  ///< Accepted-sample count (erodes during aging).
-
-    /// Bin is valid once enough steps are accumulated.
-    bool isValid() const { return total_steps >= Config::kBinValidMinSteps; }
-
-    /// Has any accepted data been added.
-    bool hasData() const { return total_steps > 0.0f; }
-
-    /// Stride length lookup, metres: total_distance_m / (total_steps / 2).
-    /// Returns 0 for an empty bin.
-    float strideLengthM() const
-    {
-        return total_steps > 0.0f ? total_distance_m / (total_steps / 2.0f) : 0.0f;
-    }
-};
+// StrideBin now lives in StrideLut.hpp (shared with the read-side model).
 
 /**
  * @brief Outdoor stride calibrator.
@@ -77,13 +58,13 @@ public:
     /// Default calibration store path, relative to the app root.
     static constexpr const char *kDefaultPath = "../SharedData/stride.json";
 
-    /// Current persisted-schema version.
-    static constexpr int32_t kCurrentVersion = 1;
+    /// Current persisted-schema version (shared with StrideLut's parser).
+    static constexpr int32_t kCurrentVersion = StrideLut::kStoreVersion;
 
     /// Maximum accepted store-file size. The store holds 35 small bins (a few
     /// KB); larger files are treated as corrupt to bound transient heap
     /// allocation on embedded targets.
-    static constexpr size_t kMaxStoreBytes = 16u * 1024u;
+    static constexpr size_t kMaxStoreBytes = StrideLut::kMaxStoreBytes;
 
     /**
      * @brief Construct over a filesystem.
@@ -135,7 +116,7 @@ public:
     static constexpr size_t binCount() { return Config::kBinCount; }
 
     /// Read one bin (no bounds check; index must be < binCount()).
-    const StrideBin &bin(size_t index) const { return mBins[index]; }
+    const StrideBin &bin(size_t index) const { return mLut.bin(index); }
 
     /// Centre cadence (SPM) of a bin: 82, 86, ..., 218.
     static float binCentreSpm(size_t index);
@@ -167,12 +148,6 @@ private:
     /// Add an accepted sample to its bin, applying distance-cap aging.
     void accumulate(const CalibratorSample &sample);
 
-    /// Zero all bins (fresh start).
-    void clearBins();
-
-    /// Parse a previously read JSON buffer into mBins. @return false on failure.
-    bool parseBuffer(const char *data, size_t len);
-
     /// Back up the current store file to "<path>.bak".
     void backupCorruptFile();
 
@@ -201,7 +176,8 @@ private:
     /// Copy of the store path (the calibrator outlives the ctor argument).
     char mPath[SDK::Interface::IFileSystem::skMaxPathLen] {};
 
-    StrideBin mBins[Config::kBinCount] {};
+    /// Shared 35-bin LUT storage + stride.json parser (read/write owner here).
+    StrideLut mLut;
 
     // Steady-state machine.
     float  mSteadySeconds = 0.0f;   ///< Accumulated qualifying seconds.

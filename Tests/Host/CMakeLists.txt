@@ -47,10 +47,16 @@ add_executable(una-sdk-host-tests
     apps/Running/Settings_test.cpp
     apps/Running/SettingsSerializer_test.cpp
     calibration/OutdoorStrideCalibrator_test.cpp
+    calibration/StrideLut_test.cpp
     calibration/StrideMath_test.cpp
+    calibration/CadenceStrideModel_test.cpp
+    calibration/TreadmillSpeedEstimator_test.cpp
     fithelper/FitCadenceEncode_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Calibration/StrideLut.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Calibration/CadenceStrideModel.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Calibration/TreadmillSpeedEstimator.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/FitHelper/FitRecordCadence.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"

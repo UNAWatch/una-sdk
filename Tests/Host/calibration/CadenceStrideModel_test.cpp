@@ -1,0 +1,524 @@
+#include <gtest/gtest.h>
+
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "FakeFileSystem.hpp"
+
+#include "SDK/Calibration/CadenceStrideModel.hpp"
+#include "SDK/Calibration/CadenceStrideModelConfig.hpp"
+#include "SDK/Calibration/StrideLut.hpp"
+
+using SDK::Calibration::CadenceStrideModel;
+using SDK::Calibration::Phase;
+using SDK::Calibration::StrideLut;
+namespace Cfg = SDK::Calibration::Config;
+
+namespace
+{
+
+constexpr const char *kOutPath   = "../SharedData/stride.json";
+constexpr const char *kDeltaPath  = "treadmill_delta.json";
+constexpr const char *kDeltaBak   = "treadmill_delta.json.bak";
+
+struct SeedBin {
+    float centre;
+    float distance;
+    float steps;
+    float count;
+};
+
+std::string makeStoreJson(int version, const std::vector<SeedBin> &bins)
+{
+    std::ostringstream os;
+    os << "{\"version\":" << version << ",\"bins\":[";
+    for (size_t i = 0; i < bins.size(); ++i) {
+        if (i != 0) {
+            os << ",";
+        }
+        os << "{\"centre_spm\":" << bins[i].centre
+           << ",\"total_distance_m\":" << bins[i].distance
+           << ",\"total_steps\":" << bins[i].steps
+           << ",\"sample_count\":" << bins[i].count << "}";
+    }
+    os << "]}";
+    return os.str();
+}
+
+std::string makeDeltaJson(int version, const std::vector<float> &deltas,
+                          bool withUnknown = false)
+{
+    std::ostringstream os;
+    os << "{\"version\":" << version;
+    if (withUnknown) {
+        os << ",\"future_key\":42";
+    }
+    os << ",\"deltas_m\":[";
+    for (size_t i = 0; i < deltas.size(); ++i) {
+        if (i != 0) {
+            os << ",";
+        }
+        os << deltas[i];
+    }
+    os << "]}";
+    return os.str();
+}
+
+// Build an outdoor LUT seed with `nValid` valid bins (centres 82, 86, ...),
+// each given `distEach` metres and a fixed valid step count. SL of each bin is
+// distEach / (steps/2).
+std::vector<SeedBin> phase2Bins(int nValid, float distEach, float steps = 1000.0f)
+{
+    std::vector<SeedBin> bins;
+    for (int i = 0; i < nValid; ++i) {
+        bins.push_back({82.0f + 4.0f * static_cast<float>(i), distEach, steps, 50.0f});
+    }
+    return bins;
+}
+
+} // namespace
+
+// --- Phase gate --------------------------------------------------------------
+
+TEST(CadenceStrideModel, PhaseUncalibratedWhenNoLut)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
+    EXPECT_FALSE(m.outdoorLutReady());
+}
+
+TEST(CadenceStrideModel, PhaseCalibratedAtThreshold)
+{
+    SDK::Test::FakeFileSystem fs;
+    // 8 valid bins, 625 m each → 5000 m total (== threshold).
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 625.0f)));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+    EXPECT_TRUE(m.outdoorLutReady());
+}
+
+TEST(CadenceStrideModel, PhaseUncalibratedBelowBinCount)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(7, 1000.0f)));  // 7000 m, 7 bins
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
+}
+
+TEST(CadenceStrideModel, PhaseUncalibratedBelowDistance)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 500.0f)));  // 4000 m, 8 bins
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
+}
+
+TEST(CadenceStrideModel, PhaseFrozenAfterStartSession)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::UNCALIBRATED);
+
+    // Underlying file becomes phase-2-ready AFTER startSession; phase must not
+    // change without a fresh startSession.
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 700.0f)));
+    EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
+
+    // A new session re-reads and re-freezes.
+    m.startSession(1.75f);
+    EXPECT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+}
+
+// --- Demographic SL (phase 1) ------------------------------------------------
+
+TEST(CadenceStrideModel, DemographicStride)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_FLOAT_EQ(m.heightM(), 1.75f);
+    EXPECT_NEAR(m.demographicStrideLengthM(), 0.685f * 1.75f, 1e-5f);
+}
+
+TEST(CadenceStrideModel, HeightFallbackOnImplausible)
+{
+    SDK::Test::FakeFileSystem fs;
+    const float def = Cfg::kDefaultHeightM;
+    for (float h : {0.0f, 1.0f, 2.5f, std::nanf(""),
+                    std::numeric_limits<float>::infinity()}) {
+        CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+        m.startSession(h);
+        EXPECT_FLOAT_EQ(m.heightM(), def);
+        EXPECT_NEAR(m.demographicStrideLengthM(), 0.685f * def, 1e-5f);
+    }
+}
+
+TEST(CadenceStrideModel, Phase1StrideConstantAndIgnoresDelta)
+{
+    SDK::Test::FakeFileSystem fs;
+    // Seed a delta file; phase 1 must NOT apply it.
+    std::vector<float> deltas(StrideLut::kBinCount, 0.0f);
+    deltas[10] = 0.5f;
+    fs.seedFile(kDeltaPath, makeDeltaJson(1, deltas));
+
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.80f);
+    ASSERT_EQ(m.phase(), Phase::UNCALIBRATED);
+
+    const float expected = 0.685f * 1.80f;
+    EXPECT_NEAR(m.treadmillStrideLengthM(80.0f), expected, 1e-5f);
+    EXPECT_NEAR(m.treadmillStrideLengthM(122.0f), expected, 1e-5f);  // delta bin
+    EXPECT_NEAR(m.treadmillStrideLengthM(200.0f), expected, 1e-5f);
+}
+
+TEST(CadenceStrideModel, DemographicStrideClampedToBounds)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(2.10f);  // max plausible height
+    const float sl = m.demographicStrideLengthM();
+    EXPECT_GE(sl, Cfg::kStrideMinM);
+    EXPECT_LE(sl, Cfg::kStrideMaxM);
+}
+
+// --- Outdoor SL(c) interpolation & shelves -----------------------------------
+
+TEST(CadenceStrideModel, OutdoorStrideInterpolationAndShelves)
+{
+    SDK::Test::FakeFileSystem fs;
+    // Valid bin 4 (centre 98) SL=1.0; valid bin 9 (centre 118) SL=1.5; an
+    // invalid bin 6 (centre 106, <200 steps) sits between them and is skipped.
+    fs.seedFile(kOutPath, makeStoreJson(1, {
+        {98.0f, 200.0f, 400.0f, 50.0f},   // SL = 200/200 = 1.0
+        {106.0f, 50.0f, 100.0f, 50.0f},   // invalid (100 steps)
+        {118.0f, 300.0f, 400.0f, 50.0f},  // SL = 300/200 = 1.5
+    }));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+
+    EXPECT_NEAR(m.outdoorStrideLengthM(98.0f), 1.0f, 1e-4f);   // exact centre
+    EXPECT_NEAR(m.outdoorStrideLengthM(118.0f), 1.5f, 1e-4f);  // exact centre
+    EXPECT_NEAR(m.outdoorStrideLengthM(108.0f), 1.25f, 1e-4f); // midpoint interp
+    EXPECT_NEAR(m.outdoorStrideLengthM(82.0f), 1.0f, 1e-4f);   // shelf below lowest
+    EXPECT_NEAR(m.outdoorStrideLengthM(218.0f), 1.5f, 1e-4f);  // shelf above highest
+}
+
+TEST(CadenceStrideModel, OutdoorStrideFallsBackToDemographicWhenNoValidBin)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);  // empty LUT
+    EXPECT_NEAR(m.outdoorStrideLengthM(160.0f), m.demographicStrideLengthM(), 1e-5f);
+}
+
+// --- Delta Δ(c) dense interpolation ------------------------------------------
+
+TEST(CadenceStrideModel, Phase2StrideIsPureSlWhenDeltaZero)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));  // SL = 1.3
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+
+    // No delta file → Δ == 0 everywhere → stride == SL(c).
+    EXPECT_NEAR(m.deltaAt(100.0f), 0.0f, 1e-6f);
+    EXPECT_NEAR(m.treadmillStrideLengthM(100.0f), m.outdoorStrideLengthM(100.0f),
+                1e-5f);
+}
+
+TEST(CadenceStrideModel, DeltaDenseInterpolationWithShelves)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    std::vector<float> deltas(StrideLut::kBinCount, 0.0f);
+    deltas[10] = 0.2f;  // centre 122
+    fs.seedFile(kDeltaPath, makeDeltaJson(1, deltas));
+
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+
+    EXPECT_NEAR(m.deltaAt(122.0f), 0.2f, 1e-5f);   // exact bin 10
+    EXPECT_NEAR(m.deltaAt(118.0f), 0.0f, 1e-5f);   // bin 9
+    EXPECT_NEAR(m.deltaAt(120.0f), 0.1f, 1e-5f);   // midway 9↔10
+    EXPECT_NEAR(m.deltaAt(124.0f), 0.1f, 1e-5f);   // midway 10↔11
+    EXPECT_NEAR(m.deltaAt(82.0f), 0.0f, 1e-5f);    // bin 0
+    EXPECT_NEAR(m.deltaAt(70.0f), 0.0f, 1e-5f);    // shelf below bin 0
+    EXPECT_NEAR(m.deltaAt(260.0f), 0.0f, 1e-5f);   // shelf above bin 34
+}
+
+// --- Post-run, phase 1 -------------------------------------------------------
+
+TEST(CadenceStrideModel, PostRunPhase1NeverWritesDelta)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::UNCALIBRATED);
+
+    float steps[StrideLut::kBinCount] {};
+    steps[20] = 400.0f;
+    // D_actual within sane bounds → accepted, but phase 1 must not persist.
+    auto r = m.applyPostRunCalibration(steps, /*D_estimated=*/500.0f,
+                                       /*D_actual=*/520.0f);
+    EXPECT_TRUE(r.dActualAccepted);
+    EXPECT_FALSE(r.deltaLutUpdated);
+    EXPECT_FLOAT_EQ(r.distanceForFitM, 520.0f);
+    EXPECT_FALSE(fs.hasFile(kDeltaPath));
+}
+
+TEST(CadenceStrideModel, PostRunPhase1RejectedReturnsEstimate)
+{
+    SDK::Test::FakeFileSystem fs;
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+
+    float steps[StrideLut::kBinCount] {};
+    steps[20] = 400.0f;
+    // D_actual = 5x D_estimated → ratio gate rejects.
+    auto r = m.applyPostRunCalibration(steps, 500.0f, 2500.0f);
+    EXPECT_FALSE(r.dActualAccepted);
+    EXPECT_FALSE(r.deltaLutUpdated);
+    EXPECT_FLOAT_EQ(r.distanceForFitM, 500.0f);
+    EXPECT_FALSE(fs.hasFile(kDeltaPath));
+}
+
+// --- Post-run, phase 2 happy path --------------------------------------------
+
+TEST(CadenceStrideModel, PostRunPhase2WeightedUpdateIdentityAndPersist)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));  // SL = 1.3
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+
+    // Used bins 0 (centre 82) and 7 (centre 110).
+    float steps[StrideLut::kBinCount] {};
+    steps[0] = 300.0f;
+    steps[7] = 500.0f;
+
+    const float dEst = 1000.0f;
+    const float dAct = 1100.0f;  // ratio 1.1, implied mean stride 2.75 → accepted
+    auto r = m.applyPostRunCalibration(steps, dEst, dAct);
+
+    EXPECT_TRUE(r.dActualAccepted);
+    EXPECT_TRUE(r.deltaLutUpdated);
+    EXPECT_FLOAT_EQ(r.distanceForFitM, dAct);
+
+    // Per-bin deltas (deltaAt at exact centre == mDelta[i]).
+    const float d0 = m.deltaAt(82.0f);
+    const float d7 = m.deltaAt(110.0f);
+    EXPECT_GT(d0, 0.0f);
+    EXPECT_GT(d7, 0.0f);
+    EXPECT_GT(d7, d0);  // bin 7 has more steps → larger correction
+
+    // Verification identity (pre-clamp; here no clamp triggers):
+    //   Σ (S_i / 2) · Δδ_i = η · ΔD
+    const float lhs = (steps[0] / 2.0f) * d0 + (steps[7] / 2.0f) * d7;
+    const float rhs = Cfg::kLearningRateEta * (dAct - dEst);
+    EXPECT_NEAR(lhs, rhs, 1e-2f);
+
+    // Only used bins changed.
+    EXPECT_NEAR(m.deltaAt(86.0f), 0.0f, 1e-6f);   // bin 1, unused
+    EXPECT_NEAR(m.deltaAt(106.0f), 0.0f, 1e-6f);  // bin 6, unused
+
+    // Persisted and reload reproduces.
+    ASSERT_TRUE(fs.hasFile(kDeltaPath));
+    CadenceStrideModel reloaded(fs, kOutPath, kDeltaPath);
+    reloaded.startSession(1.75f);
+    EXPECT_NEAR(reloaded.deltaAt(82.0f), d0, 1e-5f);
+    EXPECT_NEAR(reloaded.deltaAt(110.0f), d7, 1e-5f);
+}
+
+// --- Post-run gates ----------------------------------------------------------
+
+TEST(CadenceStrideModel, PostRunPhase2GatesReject)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+
+    // Helper: fresh model + a single used bin.
+    auto run = [&](float dEst, float dAct, float binSteps) {
+        CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+        m.startSession(1.75f);
+        float steps[StrideLut::kBinCount] {};
+        steps[0] = binSteps;
+        return m.applyPostRunCalibration(steps, dEst, dAct);
+    };
+
+    // Ratio gate: D_actual far above 2x D_estimated.
+    {
+        auto r = run(1000.0f, 3000.0f, 400.0f);
+        EXPECT_FALSE(r.dActualAccepted);
+        EXPECT_FALSE(r.deltaLutUpdated);
+        EXPECT_FLOAT_EQ(r.distanceForFitM, 1000.0f);
+    }
+    // Implied-stride gate: tiny step count makes mean stride absurd.
+    {
+        auto r = run(1000.0f, 1100.0f, 2.0f);  // mean stride 1100/(1)=1100 m
+        EXPECT_FALSE(r.dActualAccepted);
+        EXPECT_FLOAT_EQ(r.distanceForFitM, 1000.0f);
+    }
+    // S_total == 0.
+    {
+        CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+        m.startSession(1.75f);
+        float steps[StrideLut::kBinCount] {};  // all zero
+        auto r = m.applyPostRunCalibration(steps, 1000.0f, 1000.0f);
+        EXPECT_FALSE(r.dActualAccepted);
+        EXPECT_FLOAT_EQ(r.distanceForFitM, 1000.0f);
+    }
+    // D_estimated <= 0: rejected by the ratio gate; phase-2 rejection keeps the
+    // (zero) estimate, never substituting D_actual.
+    {
+        auto r = run(0.0f, 100.0f, 400.0f);
+        EXPECT_FALSE(r.dActualAccepted);
+        EXPECT_FLOAT_EQ(r.distanceForFitM, 0.0f);
+    }
+
+    // No delta file written by any rejection.
+    EXPECT_FALSE(fs.hasFile(kDeltaPath));
+}
+
+// --- Per-bin clamp -----------------------------------------------------------
+
+TEST(CadenceStrideModel, PostRunPhase2PerBinClamp)
+{
+    SDK::Test::FakeFileSystem fs;
+    // Bin 0 (centre 82) has a high SL of 4.8; the rest are normal valid bins.
+    std::vector<SeedBin> bins = phase2Bins(8, 650.0f);  // SL 1.3 each
+    bins[0] = {82.0f, 2400.0f, 1000.0f, 50.0f};         // SL = 2400/500 = 4.8
+    fs.seedFile(kOutPath, makeStoreJson(1, bins));
+
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+    ASSERT_NEAR(m.outdoorStrideLengthM(82.0f), 4.8f, 1e-3f);
+
+    // Single used bin 0, S = 200. D_actual = 500 (implied mean stride 5.0 == max,
+    // ratio 500/300 = 1.67 → accepted). Raw δ = 0.8 would push SL→5.6; clamp to
+    // 5.0 back-solves δ = 0.2.
+    float steps[StrideLut::kBinCount] {};
+    steps[0] = 200.0f;
+    auto r = m.applyPostRunCalibration(steps, /*D_estimated=*/300.0f,
+                                       /*D_actual=*/500.0f);
+    ASSERT_TRUE(r.dActualAccepted);
+    ASSERT_TRUE(r.deltaLutUpdated);
+
+    EXPECT_NEAR(m.deltaAt(82.0f), 0.2f, 1e-3f);                  // clamped δ
+    EXPECT_NEAR(m.treadmillStrideLengthM(82.0f), Cfg::kStrideMaxM, 1e-3f);
+
+    // Persisted deltas reflect the clamped value.
+    CadenceStrideModel reloaded(fs, kOutPath, kDeltaPath);
+    reloaded.startSession(1.75f);
+    EXPECT_NEAR(reloaded.deltaAt(82.0f), 0.2f, 1e-3f);
+}
+
+// --- Delta file policy -------------------------------------------------------
+
+TEST(CadenceStrideModel, DeltaFileMissingLoadsZeros)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_NEAR(m.deltaAt(122.0f), 0.0f, 1e-6f);
+    EXPECT_FALSE(fs.hasFile(kDeltaBak));
+}
+
+TEST(CadenceStrideModel, DeltaFileMalformedLoadsZerosNoBackup)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    fs.seedFile(kDeltaPath, "{ not valid json");
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_NEAR(m.deltaAt(122.0f), 0.0f, 1e-6f);
+    EXPECT_FALSE(fs.hasFile(kDeltaBak));  // model never writes .bak
+}
+
+TEST(CadenceStrideModel, DeltaFileWrongLengthLoadsZeros)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    std::vector<float> shortDeltas(StrideLut::kBinCount - 1, 0.3f);  // wrong length
+    fs.seedFile(kDeltaPath, makeDeltaJson(1, shortDeltas));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_NEAR(m.deltaAt(122.0f), 0.0f, 1e-6f);
+}
+
+TEST(CadenceStrideModel, DeltaFileNonFiniteLoadsZeros)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    std::vector<float> deltas(StrideLut::kBinCount, 0.0f);
+    deltas[5] = 0.3f;
+    // Inject a NaN literal into the array by hand.
+    std::string json = makeDeltaJson(1, deltas);
+    // Replace the first "0.3" value with NaN to simulate a corrupt entry.
+    const std::string nanJson =
+        "{\"version\":1,\"deltas_m\":[NaN,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+        "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}";
+    fs.seedFile(kDeltaPath, nanJson);
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    // Either the JSON is rejected as malformed or the non-finite entry zeroes
+    // the whole LUT; in both cases all deltas are zero.
+    for (size_t i = 0; i < StrideLut::kBinCount; ++i) {
+        EXPECT_NEAR(m.deltaAt(StrideLut::binCentreSpm(i)), 0.0f, 1e-6f);
+    }
+}
+
+TEST(CadenceStrideModel, DeltaFileOlderVersionLoadsZeros)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    std::vector<float> deltas(StrideLut::kBinCount, 0.0f);
+    deltas[10] = 0.4f;
+    fs.seedFile(kDeltaPath, makeDeltaJson(0, deltas));  // version 0 < 1
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_NEAR(m.deltaAt(122.0f), 0.0f, 1e-6f);
+    EXPECT_FALSE(fs.hasFile(kDeltaBak));
+}
+
+TEST(CadenceStrideModel, DeltaFileNewerVersionLoadsKnownFields)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    std::vector<float> deltas(StrideLut::kBinCount, 0.0f);
+    deltas[10] = 0.25f;
+    fs.seedFile(kDeltaPath, makeDeltaJson(99, deltas, /*withUnknown=*/true));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    EXPECT_NEAR(m.deltaAt(122.0f), 0.25f, 1e-5f);
+}
+
+TEST(CadenceStrideModel, DeltaFileRoundTrip)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));
+    std::vector<float> deltas(StrideLut::kBinCount, 0.0f);
+    deltas[3]  = 0.1f;
+    deltas[15] = -0.05f;
+    deltas[30] = 0.2f;
+    fs.seedFile(kDeltaPath, makeDeltaJson(1, deltas));
+
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    for (size_t i = 0; i < StrideLut::kBinCount; ++i) {
+        EXPECT_NEAR(m.deltaAt(StrideLut::binCentreSpm(i)), deltas[i], 1e-5f);
+    }
+}
