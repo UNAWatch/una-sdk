@@ -652,6 +652,18 @@
     <Filter Include="SDK\Libs\Header\Filters">
       <UniqueIdentifier>{7df059d7-271d-4b32-8096-de7b34e3376c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gui\trackcalibrate_screen">
+      <UniqueIdentifier>0065ACA1-1882-0DC0-6E8A-EA780C90BEE4</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\trackcalibrate_screen">
+      <UniqueIdentifier>84C317B4-E223-1889-49AD-B6256DEA8E26</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\trackcalibrate_screen">
+      <UniqueIdentifier>3FEB891E-A058-C339-5FFA-49ADF8487FA5</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\trackcalibrate_screen">
+      <UniqueIdentifier>D7ED5797-F365-F829-64CE-B9A9730B662E</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -1641,6 +1653,24 @@
     <ClCompile Include="..\..\..\..\Libs\Sources\WristTiltDetector.cpp">
       <Filter>Libs\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\gui\src\trackcalibrate_screen\TrackCalibratePresenter.cpp">
+      <Filter>Source Files\gui\trackcalibrate_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\trackcalibrate_screen\TrackCalibrateView.cpp">
+      <Filter>Source Files\gui\trackcalibrate_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackcalibrate_screen\TrackCalibrateViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\trackcalibrate_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrate_screen\TrackCalibratePresenter.hpp">
+      <Filter>Header Files\gui\trackcalibrate_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrate_screen\TrackCalibrateView.hpp">
+      <Filter>Header Files\gui\trackcalibrate_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackcalibrate_screen\TrackCalibrateViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\trackcalibrate_screen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml">

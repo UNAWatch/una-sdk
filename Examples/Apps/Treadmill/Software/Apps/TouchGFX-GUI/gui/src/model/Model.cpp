@@ -264,6 +264,11 @@ void Model::discardTrack()
     mSrvSender.trackStop(true);
 }
 
+void Model::trackCalibrate(float distanceActualM)
+{
+    mSrvSender.trackCalibrate(distanceActualM);
+}
+
 bool Model::isTrackSummaryAvailable() const
 {
     return mActivitySummary != nullptr && mActivitySummary->time != 0;

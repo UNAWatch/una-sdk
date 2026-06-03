@@ -1127,6 +1127,32 @@
         ]
       },
       {
+        "Name": "TrackCalibrate",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "TrackCalibrate"
+            }
+          }
+        ]
+      },
+      {
         "Name": "TrackSummary",
         "CanvasBufferSize": 3600,
         "Components": [

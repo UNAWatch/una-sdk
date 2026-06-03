@@ -53,6 +53,8 @@
 #include <gui/trackdiscarded_screen/TrackDiscardedPresenter.hpp>
 #include <gui/tracksaved_screen/TrackSavedView.hpp>
 #include <gui/tracksaved_screen/TrackSavedPresenter.hpp>
+#include <gui/trackcalibrate_screen/TrackCalibrateView.hpp>
+#include <gui/trackcalibrate_screen/TrackCalibratePresenter.hpp>
 #include <gui/tracksummary_screen/TrackSummaryView.hpp>
 #include <gui/tracksummary_screen/TrackSummaryPresenter.hpp>
 #include <gui/trackintervalscountdown_screen/TrackIntervalsCountdownView.hpp>
@@ -363,6 +365,19 @@ void FrontendApplicationBase::gotoTrackSavedScreenNoTransition()
 void FrontendApplicationBase::gotoTrackSavedScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<TrackSavedView, TrackSavedPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// TrackCalibrate
+
+void FrontendApplicationBase::gotoTrackCalibrateScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoTrackCalibrateScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoTrackCalibrateScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<TrackCalibrateView, TrackCalibratePresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
 // TrackSummary

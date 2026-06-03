@@ -86,6 +86,9 @@ public:
     // TrackSaved
     void gotoTrackSavedScreenNoTransition();
 
+    // TrackCalibrate
+    void gotoTrackCalibrateScreenNoTransition();
+
     // TrackSummary
     void gotoTrackSummaryScreenNoTransition();
 
@@ -168,6 +171,9 @@ protected:
 
     // TrackSaved
     void gotoTrackSavedScreenNoTransitionImpl();
+
+    // TrackCalibrate
+    void gotoTrackCalibrateScreenNoTransitionImpl();
 
     // TrackSummary
     void gotoTrackSummaryScreenNoTransitionImpl();

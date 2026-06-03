@@ -100,6 +100,9 @@ public:
     void saveLap();
     void saveTrack();
     void discardTrack();
+    /// Post-run Calibrate & Save (§5): send the actual treadmill distance in
+    /// metres (<= 0 means "skip" — finalise with the estimate).
+    void trackCalibrate(float distanceActualM);
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
 

@@ -124,6 +124,11 @@ void Service::run()
                     if (mTrackState != Track::State::INACTIVE) {
                         stopTrack(false);
                     }
+                    // App is closing while a Calibrate & Save decision is pending:
+                    // finalise with the estimated distance so the FIT file is closed.
+                    if (mAwaitingCalibration) {
+                        finalizeActivity(0.0f);
+                    }
                     // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -172,6 +177,11 @@ void Service::run()
                 case CustomMessage::INTERVALS_NEXT_PHASE:  {
                     LOG_DEBUG("INTERVALS_NEXT_PHASE\n");
                     handleEvent(*static_cast<CustomMessage::IntervalsNextPhase*>(msg));
+                } break;
+
+                case CustomMessage::TRACK_CALIBRATE:  {
+                    LOG_DEBUG("TRACK_CALIBRATE\n");
+                    handleEvent(*static_cast<CustomMessage::TrackCalibrate*>(msg));
                 } break;
 
                 // Sensors messages
@@ -377,8 +387,13 @@ void Service::onStopGUI()
 
 void Service::handleEvent(const CustomMessage::TrackStart& event)
 {
-    // We can synchronize the time because we haven't started the track yet,
-    // and the GPS could have already updated the current time.
+    // If a previous activity is still awaiting a Calibrate & Save decision,
+    // finalise it with the estimate before starting a new session.
+    if (mAwaitingCalibration) {
+        finalizeActivity(0.0f);
+    }
+
+    // We can synchronize the time because we haven't started the track yet.
     mTimeTracker.init();
 
     mIntervalsMode = event.intervalsMode;
@@ -875,70 +890,111 @@ void Service::stopTrack(bool discard)
         return;
     }
 
-    if (!discard && mSessionNotEmpty) {
-
-        if (mTrackState != Track::State::PAUSED) {
-            mActivityWriter.pause(mTimeCounter.getCurrent());
-        }
-
-        if (mLapNotEmpty) {
-            saveLap();
-        }
-
-        mBatterySoc.request();
-        mBatteryVoltage.request();
-        ActivityWriter::RecordData fitRecord = prepareRecordData();
-        mActivityWriter.addRecord(fitRecord);
-
-        buildPartialSummary();
-
-        // Save summary
-        if (!mActivitySummarySerializer.save(mSummary)) {
-            LOG_ERROR("Can't save activity summary\n");
-        }
-        mGuiSender.summary(&mSummary);
-
-        // Save FIT file
-        ActivityWriter::TrackData fitTrack{};
-
-        fitTrack.timestamp = mTimeCounter.getCurrent();
-        fitTrack.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getValueTotal();
-        fitTrack.duration  = mTimeCounter.getValueActive();
-        fitTrack.elapsed   = mTimeCounter.getValueTotal();
-
-        fitTrack.distance  = mDistanceCounter.getValueActive();
-
-        fitTrack.speedAvg  = mSpeedCounter.getAverage();
-        fitTrack.speedMax  = mSpeedCounter.getMaximum();
-
-        fitTrack.hrAvg     = mHrCounter.getAverage();
-        fitTrack.hrMax     = mHrCounter.getMaximum();
-
-        fitTrack.ascent    = mAltitudeCounter.getAscent();
-        fitTrack.descent   = mAltitudeCounter.getDescent();
-
-        mActivityWriter.stop(fitTrack);
-
-        notifyNewActivity();
-    } else {
+    if (discard || !mSessionNotEmpty) {
         mActivityWriter.discard();
+        mAwaitingCalibration = false;
+        mTrackState = Track::State::INACTIVE;
+        mGuiSender.trackState(mTrackState);
+        disconnect();
+        LOG_INFO("Track discarded.\n");
+        return;
     }
 
+    // Stop recording: flush the final lap + record and build the summary at the
+    // ESTIMATED distance. FIT session finalisation is deferred until the
+    // post-run Calibrate & Save decision (§5) so D_actual can be folded in.
+    if (mTrackState != Track::State::PAUSED) {
+        mActivityWriter.pause(mTimeCounter.getCurrent());
+    }
+    if (mLapNotEmpty) {
+        saveLap();
+    }
+
+    mBatterySoc.request();
+    mBatteryVoltage.request();
+    ActivityWriter::RecordData fitRecord = prepareRecordData();
+    mActivityWriter.addRecord(fitRecord);
+
+    buildPartialSummary();
+    if (!mActivitySummarySerializer.save(mSummary)) {
+        LOG_ERROR("Can't save activity summary\n");
+    }
+    mGuiSender.summary(&mSummary);
+
+    // Snapshot the FIT session message and the inputs for the §5.3 delta update.
+    mPendingFitTrack = ActivityWriter::TrackData{};
+    mPendingFitTrack.timestamp = mTimeCounter.getCurrent();
+    mPendingFitTrack.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getValueTotal();
+    mPendingFitTrack.duration  = mTimeCounter.getValueActive();
+    mPendingFitTrack.elapsed   = mTimeCounter.getValueTotal();
+    mPendingFitTrack.distance  = mDistanceCounter.getValueActive();
+    mPendingFitTrack.speedAvg  = mSpeedCounter.getAverage();
+    mPendingFitTrack.speedMax  = mSpeedCounter.getMaximum();
+    mPendingFitTrack.hrAvg     = mHrCounter.getAverage();
+    mPendingFitTrack.hrMax     = mHrCounter.getMaximum();
+    mPendingFitTrack.ascent    = mAltitudeCounter.getAscent();
+    mPendingFitTrack.descent   = mAltitudeCounter.getDescent();
+
+    {
+        const float *hist = mEstimator.stepHistogram();
+        for (size_t i = 0; i < SDK::Calibration::StrideLut::kBinCount; ++i) {
+            mCalibSteps[i] = hist[i];
+        }
+    }
+    mCalibDEstimatedM = mDistanceCounter.getValueActive();
+
     mTrackState = Track::State::INACTIVE;
-    LOG_INFO("Track stopped. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-    LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getValueActive()), static_cast<uint32_t>(mTimeCounter.getValueTotal()));
-    LOG_INFO("Distance: %.3f m\n", mDistanceCounter.getValueActive());
-    LOG_INFO("Speed: %.3f / %.3f m/s\n", mSpeedCounter.getAverage(), mSpeedCounter.getMaximum());
-    LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getAverage(), mHrCounter.getMaximum());
-    LOG_INFO("Ascent/Descent: %.1f / %.1f m\n", mAltitudeCounter.getAscent(), mAltitudeCounter.getDescent());
-
     mGuiSender.trackState(mTrackState);
-
-    // Post-run delta calibration ("Calibrate & Save", §5) is driven from the
-    // GUI after stop and handled separately; the treadmill app does not write
-    // the outdoor LUT.
-
     disconnect();
+
+    LOG_INFO("Track stopped. Time %u/%u s, Dist %.1f m\n",
+             static_cast<uint32_t>(mTimeCounter.getValueActive()),
+             static_cast<uint32_t>(mTimeCounter.getValueTotal()),
+             static_cast<double>(mCalibDEstimatedM));
+
+    // Sessions >= 2 km wait for the GUI's Calibrate & Save decision; shorter
+    // ones finalise immediately with the estimated distance.
+    if (mCalibDEstimatedM >= skCalibrateMinDistanceM) {
+        mAwaitingCalibration = true;
+        LOG_INFO("Awaiting Calibrate & Save (D_est %.1f m)\n",
+                 static_cast<double>(mCalibDEstimatedM));
+    } else {
+        finalizeActivity(0.0f);
+    }
+}
+
+void Service::finalizeActivity(float distanceActualM)
+{
+    // distanceActualM <= 0 => skip calibration (keep the estimate). In phase 2
+    // an accepted value also nudges the delta LUT (§5.3); in phase 1 it only
+    // rewrites the recorded distance.
+    const SDK::Calibration::CadenceStrideModel::CalibrationResult res =
+        mModel.applyPostRunCalibration(mCalibSteps, mCalibDEstimatedM, distanceActualM);
+
+    mPendingFitTrack.distance = res.distanceForFitM;
+
+    // Reflect the (possibly corrected) distance in the saved + published summary.
+    mSummary.distance = res.distanceForFitM;
+    if (!mActivitySummarySerializer.save(mSummary)) {
+        LOG_ERROR("Can't save activity summary\n");
+    }
+    mGuiSender.summary(&mSummary);
+
+    mActivityWriter.stop(mPendingFitTrack);
+    notifyNewActivity();
+
+    mAwaitingCalibration = false;
+    LOG_INFO("Activity finalised: dist %.1f m (calibrated=%d, deltaUpdated=%d)\n",
+             static_cast<double>(res.distanceForFitM),
+             res.dActualAccepted ? 1 : 0, res.deltaLutUpdated ? 1 : 0);
+}
+
+void Service::handleEvent(const CustomMessage::TrackCalibrate& event)
+{
+    if (!mAwaitingCalibration) {
+        return;   // no pending session (e.g. a short run finalised on stop)
+    }
+    finalizeActivity(event.distanceActualM);
 }
 
 void Service::pauseTrack(bool pause)

@@ -45,6 +45,7 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type TRACK_RESUME          = 0x0000000E;
     constexpr SDK::MessageType::Type MANUAL_LAP            = 0x0000000F;
     constexpr SDK::MessageType::Type INTERVALS_NEXT_PHASE  = 0x00000011;
+    constexpr SDK::MessageType::Type TRACK_CALIBRATE       = 0x00000012;
 
     // Service <-> GUI
     struct SettingsUpd : public SDK::MessageBase {
@@ -167,6 +168,17 @@ namespace CustomMessage {
 
     struct ManualLap : public SDK::MessageBase {
         ManualLap() : SDK::MessageBase(MANUAL_LAP) {}
+    };
+
+    // Post-run "Calibrate & Save" (§5): the user-entered actual treadmill
+    // distance, in metres (the GUI converts from display units). A value <= 0
+    // means "skip" — finalise with the estimated distance.
+    struct TrackCalibrate : public SDK::MessageBase {
+        float distanceActualM;
+        TrackCalibrate()
+            : SDK::MessageBase(TRACK_CALIBRATE)
+            , distanceActualM(0.0f)
+        {}
     };
 
 
@@ -376,6 +388,18 @@ public:
         bool status = false;
         auto *msg = mKernel.comm.allocateMessage<CustomMessage::ManualLap>();
         if (msg) {
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
+    }
+
+    bool trackCalibrate(float distanceActualM)
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackCalibrate>();
+        if (msg) {
+            msg->distanceActualM = distanceActualM;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

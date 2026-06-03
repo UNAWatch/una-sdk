@@ -30,6 +30,9 @@ public:
     virtual void onTrackData(const Track::Data& data) override;
 
     void resumeTrack();
+    /// Stop recording and route to Calibrate & Save (eligible) or straight to
+    /// the saved screen (§5.1: offer calibration only for sessions >= 2 km).
+    void saveRequested();
 
 private:
     TrackActionPresenter();
