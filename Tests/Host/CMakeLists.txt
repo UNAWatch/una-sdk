@@ -51,6 +51,7 @@ add_executable(una-sdk-host-tests
     calibration/StrideMath_test.cpp
     calibration/CadenceStrideModel_test.cpp
     calibration/TreadmillSpeedEstimator_test.cpp
+    calibration/CadenceSpikeFilter_test.cpp
     fithelper/FitCadenceEncode_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
