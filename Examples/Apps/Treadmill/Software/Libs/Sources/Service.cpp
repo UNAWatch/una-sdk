@@ -531,15 +531,9 @@ ActivityWriter::RecordData Service::prepareRecordData()
 
     fitRecord.timestamp    = mTimeCounter.getCurrent();
 
-    fitRecord.set(ActivityWriter::RecordData::Field::COORDS, mGps.fix);
-    fitRecord.latitude     = mGps.latitude;
-    fitRecord.longitude    = mGps.longitude;
-
+    // No position/altitude on a treadmill (§7.4.1): speed is cadence-derived.
     fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
     fitRecord.speed        = mSpeedCounter.getCurrent();
-
-    fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
-    fitRecord.altitude     = mAltitudeCounter.getCurrent();
 
     bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);

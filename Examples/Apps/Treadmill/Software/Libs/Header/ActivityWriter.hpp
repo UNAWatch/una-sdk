@@ -37,10 +37,9 @@ public:
     };
 
     struct RecordData {
+        // Treadmill records carry no position/altitude (§7.4.1).
         enum class Field : uint8_t {
-            COORDS     = 1u << 0, // lat/long valid as a group
-            SPEED      = 1u << 1,
-            ALTITUDE   = 1u << 2,
+            SPEED        = 1u << 1,
             HEART_RATE   = 1u << 3,
             BATTERY      = 1u << 4,
             CADENCE      = 1u << 5,
@@ -54,10 +53,7 @@ public:
         void clearAll()                   { mFlags = 0; }
 
         std::time_t timestamp      = 0;     // UTC
-        float       latitude       = 0.0f;  // degrees
-        float       longitude      = 0.0f;  // degrees
         float       speed          = 0.0f;  // m/s
-        float       altitude       = 0.0f;  // m
         float       heartRate      = 0.0f;  // bpm
         uint8_t     batteryLevel   = 0;     // %
         uint16_t    batteryVoltage = 0;     // mV
@@ -130,9 +126,7 @@ private:
     SDK::Component::FitHelper mFHEvent;
     SDK::Component::FitHelper mFHActivity;
     SDK::Component::FitHelper mFHRecord;    // Record
-    SDK::Component::FitHelper mFHRecordG;   // Record + GPS
     SDK::Component::FitHelper mFHRecordB;   // Record + Battery
-    SDK::Component::FitHelper mFHRecordGB;  // Record + GPS + Battery
 
     SDK::Component::FitHelper mFHBatteryLevelField;
     SDK::Component::FitHelper mFHBatteryVoltageField;
@@ -142,9 +136,7 @@ private:
         FILE = 1,
         DEVELOP,
         RECORD,
-        RECORD_G,
         RECORD_B,
-        RECORD_GB,
         LAP,
         SESSION,
         ACTIVITY,
@@ -166,7 +158,6 @@ private:
     static time_t tm2epoch(const struct tm* tm);
     static time_t epochToLocal(time_t utc);
     static FIT_DATE_TIME unixToFitTimestamp(std::time_t unixTimestamp);
-    static FIT_SINT32 ConvertDegreesToSemicircles(float degrees);
 
     void WriteFileHeader(SDK::Interface::IFile* fp);
     void WriteCRC(SDK::Interface::IFile* fp);
