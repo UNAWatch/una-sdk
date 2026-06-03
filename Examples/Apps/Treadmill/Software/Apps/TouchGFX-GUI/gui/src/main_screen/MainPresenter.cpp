@@ -12,8 +12,6 @@ void MainPresenter::activate()
     view.setPositionId(model->menu().get());
     model->menu().resetChildren();
     model->resetIdleTimer();
-
-    view.setGpsFix(model->hasGpsFix());
 }
 
 void MainPresenter::deactivate()
@@ -26,11 +24,6 @@ void MainPresenter::onIdleTimeout()
     if (view.getPositionId() != App::MenuNav::Root::ID_START) {
         model->exitApp();
     }
-}
-
-void MainPresenter::onGpsFix(bool acquired)
-{
-    view.setGpsFix(acquired);
 }
 
 void MainPresenter::startTrack()

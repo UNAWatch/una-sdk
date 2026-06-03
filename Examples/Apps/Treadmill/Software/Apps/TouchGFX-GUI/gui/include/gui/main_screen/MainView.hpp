@@ -12,15 +12,11 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
-    void setGpsFix(bool state);
-
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
 protected:
     using Menu = App::MenuNav::Root;
-
-    bool mGpsFix = false;
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};
     MenuItemConfig mCenterItems[Menu::ID_COUNT] {};
