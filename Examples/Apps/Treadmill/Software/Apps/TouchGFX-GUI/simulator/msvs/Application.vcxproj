@@ -202,6 +202,9 @@
     <ClCompile Include="..\..\gui\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackcalibrate_screen\TrackCalibratePresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackcalibrate_screen\TrackCalibrateView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackcalibrate_screen\TrackCalibrateViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -551,6 +554,9 @@
     <ClInclude Include="..\..\gui\include\gui\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrate_screen\TrackCalibratePresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrate_screen\TrackCalibrateView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackcalibrate_screen\TrackCalibrateViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

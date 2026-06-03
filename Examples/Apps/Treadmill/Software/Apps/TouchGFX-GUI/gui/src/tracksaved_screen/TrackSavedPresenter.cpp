@@ -9,7 +9,8 @@ TrackSavedPresenter::TrackSavedPresenter(TrackSavedView& v)
 
 void TrackSavedPresenter::activate()
 {
-    model->saveTrack();
+    // The stop (and any Calibrate & Save) was already triggered from the track
+    // action / calibrate screens; this screen only shows the confirmation.
 }
 
 void TrackSavedPresenter::deactivate()

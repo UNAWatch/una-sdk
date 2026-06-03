@@ -56,6 +56,8 @@
 #include <gui/trackdiscarded_screen/TrackDiscardedPresenter.hpp>
 #include <gui/tracksaved_screen/TrackSavedView.hpp>
 #include <gui/tracksaved_screen/TrackSavedPresenter.hpp>
+#include <gui/trackcalibrate_screen/TrackCalibrateView.hpp>
+#include <gui/trackcalibrate_screen/TrackCalibratePresenter.hpp>
 #include <gui/tracksummary_screen/TrackSummaryView.hpp>
 #include <gui/tracksummary_screen/TrackSummaryPresenter.hpp>
 #include <gui/trackintervalscountdown_screen/TrackIntervalsCountdownView.hpp>
@@ -108,11 +110,12 @@ public:
             touchgfx::meta::TypeList< TrackDiscardConfirmationView,
             touchgfx::meta::TypeList< TrackDiscardedView,
             touchgfx::meta::TypeList< TrackSavedView,
+            touchgfx::meta::TypeList< TrackCalibrateView,
             touchgfx::meta::TypeList< TrackSummaryView,
             touchgfx::meta::TypeList< TrackIntervalsCountdownView,
             touchgfx::meta::TypeList< TrackIntervalsAlertView,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedView,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedViewTypes;
 
     /**
@@ -146,11 +149,12 @@ public:
             touchgfx::meta::TypeList< TrackDiscardConfirmationPresenter,
             touchgfx::meta::TypeList< TrackDiscardedPresenter,
             touchgfx::meta::TypeList< TrackSavedPresenter,
+            touchgfx::meta::TypeList< TrackCalibratePresenter,
             touchgfx::meta::TypeList< TrackSummaryPresenter,
             touchgfx::meta::TypeList< TrackIntervalsCountdownPresenter,
             touchgfx::meta::TypeList< TrackIntervalsAlertPresenter,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedPresenter,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedPresenterTypes;
 
     /**

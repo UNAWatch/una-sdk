@@ -37,3 +37,18 @@ void TrackActionPresenter::resumeTrack()
 {
     model->trackResume();
 }
+
+void TrackActionPresenter::saveRequested()
+{
+    // Stop recording. The Service builds the summary at the estimated distance
+    // and, for eligible sessions, waits for the Calibrate & Save decision.
+    model->saveTrack();
+
+    // Offer Calibrate & Save only for sessions of at least 2 km (§5.1); shorter
+    // ones are finalised immediately by the Service with the estimate.
+    if (model->getTrackData().distance >= 2000.0f) {
+        model->application().gotoTrackCalibrateScreenNoTransition();
+    } else {
+        model->application().gotoTrackSavedScreenNoTransition();
+    }
+}

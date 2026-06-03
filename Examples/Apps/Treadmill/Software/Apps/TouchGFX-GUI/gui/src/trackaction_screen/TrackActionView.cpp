@@ -215,7 +215,7 @@ void TrackActionView::handleKeyEvent(uint8_t key)
             application().gotoTrackSummaryScreenNoTransition();
             break;
         case Menu::ID_SAVE:
-            application().gotoTrackSavedScreenNoTransition();
+            presenter->saveRequested();
             break;
         case Menu::ID_DISCARD:
             application().gotoTrackDiscardConfirmationScreenNoTransition();

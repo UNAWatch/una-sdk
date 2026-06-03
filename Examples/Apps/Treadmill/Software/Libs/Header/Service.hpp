@@ -153,6 +153,16 @@ private:
     SDK::Calibration::CadenceStrideModel      mModel;
     SDK::Calibration::TreadmillSpeedEstimator mEstimator;
 
+    // -- Post-run Calibrate & Save (§5) -----------------------------------
+    /// Offer Calibrate & Save only for sessions of at least this distance.
+    static constexpr float skCalibrateMinDistanceM = 2000.0f;
+    /// True between "stop recording" and the GUI's calibrate/skip decision;
+    /// the FIT session is finalised only once this resolves.
+    bool  mAwaitingCalibration = false;
+    float mCalibSteps[SDK::Calibration::StrideLut::kBinCount] = {}; ///< S_i snapshot.
+    float mCalibDEstimatedM = 0.0f;                                 ///< Pre-correction distance.
+    ActivityWriter::TrackData mPendingFitTrack{};                   ///< Session msg, finalised on calibrate.
+
     // -- Lifecycle ------------------------------------------------------------
 
     void connectGps();
@@ -174,6 +184,7 @@ private:
     void handleEvent(const CustomMessage::TrackResume& event);
     void handleEvent(const CustomMessage::ManualLap& event);
     void handleEvent(const CustomMessage::IntervalsNextPhase& event);
+    void handleEvent(const CustomMessage::TrackCalibrate& event);
 
     // -- Track control --------------------------------------------------------
 
@@ -182,6 +193,7 @@ private:
     void processTrack();
     void saveLap();
     void stopTrack(bool discard);
+    void finalizeActivity(float distanceActualM); ///< Apply §5 calibration (<=0 = skip) + write FIT session.
     void pauseTrack(bool pause);
     void buildPartialSummary();
     ActivityWriter::RecordData prepareRecordData();
