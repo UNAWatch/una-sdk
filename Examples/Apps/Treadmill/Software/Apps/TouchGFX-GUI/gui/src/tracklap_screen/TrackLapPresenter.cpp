@@ -18,7 +18,7 @@ void TrackLapPresenter::activate()
     view.setLapNum(data.lapNum);
     view.setDistance(data.lapDistance);
     view.setTimer(data.lapTime);
-    view.setPace(data.lapPace);
+    view.setPace(data.avgLapSpeed);
 }
 
 void TrackLapPresenter::deactivate()

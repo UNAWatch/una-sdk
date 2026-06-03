@@ -4,7 +4,7 @@
 #include <gui_generated/containers/TrackFaceTotalBase.hpp>
 
 /**
- * @brief Track face showing overall session metrics: pace, total distance and elapsed time.
+ * @brief Track face showing overall session metrics: speed, total distance and elapsed time.
  *
  * All values are display-ready -- unit conversion is the view's responsibility.
  */
@@ -17,11 +17,11 @@ public:
     virtual void initialize();
 
     /**
-     * @brief Display current pace.
-     * @param pace Already-converted value in sec/km or sec/mi (view's responsibility).
-     *             Pass a value < App::Display::kMinPace to show "---" (no GPS / no data).
+     * @brief Display current speed.
+     * @param speed Already-converted value in km/h or mph (view's responsibility).
+     *              Pass a value < App::Display::kMinSpeed to show "---" (not moving).
      */
-    void setPace(float pace);
+    void setPace(float speed);
 
     /**
      * @brief Display total distance with unit label.

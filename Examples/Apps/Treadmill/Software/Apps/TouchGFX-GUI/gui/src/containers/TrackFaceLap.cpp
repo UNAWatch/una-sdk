@@ -24,17 +24,13 @@ void TrackFaceLap::setHR(float hr, const uint8_t* thresholds, uint8_t thresholdC
     hrZone.setHR(static_cast<uint8_t>(hr), thresholds, thresholdCount);
 }
 
-void TrackFaceLap::setPace(float pace)
+void TrackFaceLap::setPace(float speed)
 {
-    if (pace < App::Display::kMinPace) {
+    // @param speed Already-converted lap speed in km/h or mph (view's responsibility).
+    if (speed < App::Display::kMinSpeed) {
         Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace));
-        if (hms.h > 0) {
-            Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
-        } else {
-            Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
-        }
+        Unicode::snprintfFloat(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%.1f", speed);
     }
     lapPaceValue.invalidate();
 }

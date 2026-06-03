@@ -94,10 +94,9 @@ void SummaryFaceLaps::scrollListUpdateItem(LapListItem& item, int16_t itemIndex)
     const float km   = lap.distance / 1000.0f;
     const float dist = mIsImperial ? SDK::Utils::kmToMiles(km) : km;
 
-    const float   secPerKm = (lap.paceAvg > 1e-6f) ? lap.paceAvg * 1000.0f : 0.0f;
-    const time_t  pace     = (secPerKm > 0.0f)
-        ? static_cast<time_t>(mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm)
-        : 0;
+    // Lap speed (km/h or mph) derived from the lap's average pace (s/m).
+    const float speedMps = (lap.paceAvg > 1e-6f) ? (1.0f / lap.paceAvg) : 0.0f;
+    const float lapSpeed = App::Display::speedToDisplay(speedMps, mIsImperial);
 
     touchgfx::Unicode::UnicodeChar buf[32];
 
@@ -121,15 +120,10 @@ void SummaryFaceLaps::scrollListUpdateItem(LapListItem& item, int16_t itemIndex)
     }
     item.setTime(buf);
 
-    if (pace < static_cast<time_t>(App::Display::kMinPace)) {
+    if (lapSpeed < App::Display::kMinSpeed) {
         Unicode::snprintf(buf, 32, "---");
     } else {
-        auto pac = SDK::Utils::toHMS(pace);
-        if (pac.h > 0) {
-            Unicode::snprintf(buf, 32, "%u:%02u", pac.h, pac.m);
-        } else {
-            Unicode::snprintf(buf, 32, "%u:%02u", pac.m, pac.s);
-        }
+        Unicode::snprintfFloat(buf, 32, "%.1f", lapSpeed);
     }
     item.setPace(buf);
 }

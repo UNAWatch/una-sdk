@@ -63,15 +63,10 @@ void TrackActionView::setTimer(std::time_t sec)
     pauseIndicator.setTime(sec);
 }
 
-void TrackActionView::setAvgPace(float secPerM)
+void TrackActionView::setAvgPace(float speedMps)
 {
-    auto paceConv = [this](float s) -> float {
-        if (s < 1e-6f) return 0.0f;
-        const float secPerKm = s * 1000.0f;
-        return mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm;
-    };
-
-    mAvgPaceConv = paceConv(secPerM);
+    // Average speed in display units (km/h or mph) replaces avg pace.
+    mAvgPaceConv = App::Display::speedToDisplay(speedMps, mIsImperial);
     infoCarousel.refresh();
 }
 
@@ -142,18 +137,11 @@ void TrackActionView::onCarouselUpdate(int16_t index)
     switch (index) {
 
     case 0:
-        infoCarousel.setTitle(T_TEXT_AVG_DOT_PACE_UC);
-        {
-            if (mAvgPaceConv < App::Display::kMinPace) {
-                Unicode::snprintf(buf, kBufSize, "---");
-            } else {
-                auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(mAvgPaceConv));
-                if (hms.h > 0) {
-                    Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.h, hms.m);
-                } else {
-                    Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.m, hms.s);
-                }
-            }
+        infoCarousel.setTitle(T_TEXT_AVG_DOT_PACE_UC);   // renders "AVG. SPEED"
+        if (mAvgPaceConv < App::Display::kMinSpeed) {
+            Unicode::snprintf(buf, kBufSize, "---");
+        } else {
+            Unicode::snprintfFloat(buf, kBufSize, "%.1f", mAvgPaceConv);
         }
         break;
 

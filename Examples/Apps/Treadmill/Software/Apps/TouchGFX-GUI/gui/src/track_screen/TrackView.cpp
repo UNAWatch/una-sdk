@@ -83,22 +83,17 @@ void TrackView::setConfig(bool isImperial, const uint8_t* thresholds, uint8_t th
 
 void TrackView::setTrackData(const Track::Data& data)
 {
-    auto paceConv = [this](float secPerM) -> float {
-        if (secPerM < 1e-6f) return 0.0f;
-        const float secPerKm = secPerM * 1000.0f;
-        return mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm;
-    };
-
     auto distConv = [this](float metres) -> float {
         const float km = metres / 1000.0f;
         return mIsImperial ? SDK::Utils::kmToMiles(km) : km;
     };
 
-    trackFaceTotal.setPace(paceConv(data.pace));
+    // Speed (km/h or mph) replaces pace on every face.
+    trackFaceTotal.setPace(App::Display::speedToDisplay(data.speed, mIsImperial));
     trackFaceTotal.setDistance(distConv(data.distance), mIsImperial);
     trackFaceTotal.setTimer(data.totalTime);
 
-    trackFaceLap.setPace(paceConv(data.lapPace));
+    trackFaceLap.setPace(App::Display::speedToDisplay(data.avgLapSpeed, mIsImperial));
     trackFaceLap.setDistance(distConv(data.lapDistance));
     trackFaceLap.setTimer(data.lapTime);
     trackFaceLap.setHR(data.hr, mHrThresholds, mHrThresholdCount);
@@ -114,7 +109,7 @@ void TrackView::setTrackData(const Track::Data& data)
             trackFaceIntervals.setPhaseTime(iv.phaseTimerSec, iv.metric);
         }
 
-        trackFaceIntervals.setPace(paceConv(data.pace));
+        trackFaceIntervals.setPace(App::Display::speedToDisplay(data.speed, mIsImperial));
         trackFaceIntervals.setHR(data.hr);
     }
 }

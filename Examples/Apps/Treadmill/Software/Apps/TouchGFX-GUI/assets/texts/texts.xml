@@ -185,7 +185,7 @@
         <Translation Language="GB">Elapsed</Translation>
       </Text>
       <Text Id="TEXT_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">Pace</Translation>
+        <Translation Language="GB">Speed</Translation>
       </Text>
       <Text Id="TEXT_DISTANCE" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Distance</Translation>
@@ -323,7 +323,7 @@
         <Translation Language="GB">OFF</Translation>
       </Text>
       <Text Id="TEXT_AVG_PACE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">AVG PACE</Translation>
+        <Translation Language="GB">AVG SPEED</Translation>
       </Text>
       <Text Id="TEXT_TIMER_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">TIMER</Translation>
@@ -338,7 +338,7 @@
         <Translation Language="GB">AVG HR</Translation>
       </Text>
       <Text Id="TEXT_AVG_DOT_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">Avg. Pace</Translation>
+        <Translation Language="GB">Avg. Speed</Translation>
       </Text>
       <Text Id="TEXT_HR_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">HR</Translation>
@@ -350,7 +350,7 @@
         <Translation Language="GB">Lap Dist.</Translation>
       </Text>
       <Text Id="TEXT_LAP_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">Lap Pace</Translation>
+        <Translation Language="GB">Lap Speed</Translation>
       </Text>
       <Text Id="TEXT_PERCENT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">%</Translation>
@@ -383,7 +383,7 @@
         <Translation Language="GB">Lap</Translation>
       </Text>
       <Text Id="TEXT_AVG_DOT_PACE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">AVG. PACE</Translation>
+        <Translation Language="GB">AVG. SPEED</Translation>
       </Text>
       <Text Id="TEXT_AVG_DOT_HR" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">AVG. HR</Translation>
