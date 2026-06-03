@@ -36,11 +36,9 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     , mFHEvent(static_cast<uint8_t>(MsgNumber::EVENT), fit_mesg_defs[FIT_MESG_EVENT])
     , mFHActivity(static_cast<uint8_t>(MsgNumber::ACTIVITY), fit_mesg_defs[FIT_MESG_ACTIVITY])
     , mFHRecord(static_cast<uint8_t>(MsgNumber::RECORD), fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHRecordG(static_cast<uint8_t>(MsgNumber::RECORD_G), fit_mesg_defs[FIT_MESG_RECORD])
     , mFHRecordB(static_cast<uint8_t>(MsgNumber::RECORD_B), fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHRecordGB(static_cast<uint8_t>(MsgNumber::RECORD_GB), fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB, &mFHRecordGB })
-    , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB, &mFHRecordGB })
+    , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB })
+    , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB })
     , mFHDistancePreCalField(static_cast<uint8_t>(MsgNumber::DISTANCE_PRECAL), 0, { &mFHSession })
 {
     assert(pathToDir != nullptr);
@@ -87,41 +85,21 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
                        FIT_ACTIVITY_FIELD_NUM_LOCAL_TIMESTAMP,
                        FIT_ACTIVITY_FIELD_NUM_NUM_SESSIONS });
 
+    // Treadmill records carry no position or altitude (§7.4.1): cadence-driven
+    // speed, HR, cadence and model step length only.
     mFHRecord.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                     FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
                      FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
                      FIT_RECORD_FIELD_NUM_HEART_RATE,
                      FIT_RECORD_FIELD_NUM_CADENCE,
                      FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
                      FIT_RECORD_FIELD_NUM_STEP_LENGTH });
 
-    mFHRecordG.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                      FIT_RECORD_FIELD_NUM_POSITION_LAT,
-                      FIT_RECORD_FIELD_NUM_POSITION_LONG,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                      FIT_RECORD_FIELD_NUM_HEART_RATE,
-                      FIT_RECORD_FIELD_NUM_CADENCE,
-                      FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
-                      FIT_RECORD_FIELD_NUM_STEP_LENGTH });
-
     mFHRecordB.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
                       FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
                       FIT_RECORD_FIELD_NUM_HEART_RATE,
                       FIT_RECORD_FIELD_NUM_CADENCE,
                       FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
                       FIT_RECORD_FIELD_NUM_STEP_LENGTH });
-
-    mFHRecordGB.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                       FIT_RECORD_FIELD_NUM_POSITION_LAT,
-                       FIT_RECORD_FIELD_NUM_POSITION_LONG,
-                       FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
-                       FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                       FIT_RECORD_FIELD_NUM_HEART_RATE,
-                       FIT_RECORD_FIELD_NUM_CADENCE,
-                       FIT_RECORD_FIELD_NUM_FRACTIONAL_CADENCE,
-                       FIT_RECORD_FIELD_NUM_STEP_LENGTH });
 
     mFHBatteryLevelField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
                                 FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
@@ -226,9 +204,7 @@ void ActivityWriter::start(const AppInfo& info)
     mFHActivity.writeDef(fp);
 
     mFHRecord.writeDef(fp);
-    mFHRecordG.writeDef(fp);
     mFHRecordB.writeDef(fp);
-    mFHRecordGB.writeDef(fp);
 
     mFHLap.writeDef(fp);
     mFHSession.writeDef(fp);
@@ -265,17 +241,8 @@ FIT_RECORD_MESG ActivityWriter::prepareRecordMsg(const RecordData& record)
 
     msg.timestamp = unixToFitTimestamp(record.timestamp);
 
-    if (record.has(RecordData::Field::COORDS)) {
-        msg.position_lat   = ConvertDegreesToSemicircles(record.latitude);
-        msg.position_long  = ConvertDegreesToSemicircles(record.longitude);
-    }
-
     if (record.has(RecordData::Field::SPEED)) {
         msg.enhanced_speed = static_cast<FIT_UINT32>(record.speed * 1000); // 1000 * m/s + 0
-    }
-
-    if (record.has(RecordData::Field::ALTITUDE)) {
-        msg.enhanced_altitude = static_cast<FIT_UINT32>((record.altitude + 500) * 5);   // 5 * m + 500
     }
 
     if (record.has(RecordData::Field::HEART_RATE)) {
@@ -306,21 +273,11 @@ void ActivityWriter::addRecord(const RecordData& record)
     if (record.has(RecordData::Field::BATTERY)) {
         const FIT_UINT8  soc     = record.batteryLevel;
         const FIT_UINT16 voltage = record.batteryVoltage;
-        if (record.has(RecordData::Field::COORDS)) {
-            mFHRecordGB.writeMessage(&msg, mFile.get());
-            mFHRecordGB.writeFieldMessage(0, &soc, mFile.get());
-            mFHRecordGB.writeFieldMessage(1, &voltage, mFile.get());
-        } else {
-            mFHRecordB.writeMessage(&msg, mFile.get());
-            mFHRecordB.writeFieldMessage(0, &soc, mFile.get());
-            mFHRecordGB.writeFieldMessage(1, &voltage, mFile.get());
-        }
+        mFHRecordB.writeMessage(&msg, mFile.get());
+        mFHRecordB.writeFieldMessage(0, &soc, mFile.get());
+        mFHRecordB.writeFieldMessage(1, &voltage, mFile.get());
     } else {
-        if (record.has(RecordData::Field::COORDS)) {
-            mFHRecordG.writeMessage(&msg, mFile.get());
-        } else {
-            mFHRecord.writeMessage(&msg, mFile.get());
-        }
+        mFHRecord.writeMessage(&msg, mFile.get());
     }
 }
 
@@ -564,12 +521,6 @@ FIT_DATE_TIME ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
 {
     const std::time_t FIT_EPOCH_OFFSET = 631065600;
     return static_cast<FIT_DATE_TIME>(unixTimestamp - FIT_EPOCH_OFFSET);
-}
-
-// Convert degrees to semicircles
-FIT_SINT32 ActivityWriter::ConvertDegreesToSemicircles(float degrees)
-{
-    return (FIT_SINT32)(degrees * (2147483648.0 / 180.0));
 }
 
 
