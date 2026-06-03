@@ -952,6 +952,8 @@ void Service::finalizeActivity(float distanceActualM)
         mModel.applyPostRunCalibration(mCalibSteps, mCalibDEstimatedM, distanceActualM);
 
     mPendingFitTrack.distance = res.distanceForFitM;
+    // Always record the pre-correction estimate as a developer field (§5.4).
+    mPendingFitTrack.distancePreCalibrationM = mCalibDEstimatedM;
 
     // Reflect the (possibly corrected) distance in the saved + published summary.
     mSummary.distance = res.distanceForFitM;
