@@ -8,6 +8,11 @@ TrackFaceTotal::TrackFaceTotal()
 void TrackFaceTotal::initialize()
 {
     TrackFaceTotalBase::initialize();
+
+    // The base auto-sizes the heading label and left-anchors it at the X chosen
+    // for the original (narrower) "Pace" text, so the wider "Speed" ends up
+    // off-centre. Re-centre it horizontally within the container.
+    paceText.setX((getWidth() - paceText.getWidth()) / 2);
 }
 
 void TrackFaceTotal::setPace(float speed)
