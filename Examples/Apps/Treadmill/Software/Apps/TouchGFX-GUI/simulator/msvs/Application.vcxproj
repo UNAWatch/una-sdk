@@ -31,6 +31,9 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\OutdoorStrideCalibrator.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\StrideLut.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\CadenceStrideModel.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\TreadmillSpeedEstimator.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
