@@ -45,4 +45,7 @@
 #define IMU_STEP_COUNTER_SIM_ENABLE         1 // 0 - Disable
 #define IMU_STEP_COUNTER_SIM_STRIDE_LENGTH  1 //meters per step. Walking 0.65–0.75 m, hiking 0.55–0.70 m, running 1.0–1.4 m
 
+// IMU Running-cadence sensor (drives the treadmill speed/distance estimator).
+#define IMU_RUNNING_CADENCE_SIM_ENABLE      1 // 0 - Disable
+
 #endif /* __CONFIG_SIMULATOR_HPP */
