@@ -41,6 +41,7 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     , mFHRecordGB(static_cast<uint8_t>(MsgNumber::RECORD_GB), fit_mesg_defs[FIT_MESG_RECORD])
     , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB, &mFHRecordGB })
     , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB, &mFHRecordGB })
+    , mFHDistancePreCalField(static_cast<uint8_t>(MsgNumber::DISTANCE_PRECAL), 0, { &mFHSession })
 {
     assert(pathToDir != nullptr);
 
@@ -133,6 +134,12 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHDistancePreCalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
 }
 
 void ActivityWriter::start(const AppInfo& info)
@@ -203,6 +210,16 @@ void ActivityWriter::start(const AppInfo& info)
         battVoltage.field_definition_number = mFHBatteryVoltageField.getFieldID();
         battVoltage.fit_base_type_id        = FIT_BASE_TYPE_UINT16;
         mFHBatteryVoltageField.writeMessage(&battVoltage, fp);
+
+        // Session field: pre-calibration (estimated) distance, 100 * m (§5.4).
+        mFHDistancePreCalField.writeDef(fp);
+        FIT_FIELD_DESCRIPTION_MESG distPreCal{};
+        strncpy(distPreCal.field_name, "distance_pre_calibration", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
+        strncpy(distPreCal.units, "m", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
+        distPreCal.developer_data_index    = 0;
+        distPreCal.field_definition_number = mFHDistancePreCalField.getFieldID();
+        distPreCal.fit_base_type_id        = FIT_BASE_TYPE_UINT32;
+        mFHDistancePreCalField.writeMessage(&distPreCal, fp);
     }
 
     mFHEvent.writeDef(fp);
@@ -376,6 +393,11 @@ void ActivityWriter::stop(const TrackData& track)
         session_mesg.num_laps = mLapCounter;
 
         mFHSession.writeMessage(&session_mesg, fp);
+
+        // Developer field: estimated distance before Calibrate & Save (100 * m).
+        const FIT_UINT32 distPreCal =
+            static_cast<FIT_UINT32>(track.distancePreCalibrationM * 100.0f);
+        mFHSession.writeFieldMessage(0, &distPreCal, fp);
     }
 
     // Write Activity message.

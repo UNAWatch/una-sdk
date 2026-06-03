@@ -99,6 +99,7 @@ public:
         float       hrMax     = 0.0f;   // bpm
         float       ascent    = 0.0f;   // m
         float       descent   = 0.0f;   // m
+        float       distancePreCalibrationM = 0.0f; // D_estimated before Calibrate & Save (§5.4)
     };
 
     ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir);
@@ -135,6 +136,7 @@ private:
 
     SDK::Component::FitHelper mFHBatteryLevelField;
     SDK::Component::FitHelper mFHBatteryVoltageField;
+    SDK::Component::FitHelper mFHDistancePreCalField; // session developer field (§5.4)
 
     enum class MsgNumber {
         FILE = 1,
@@ -147,7 +149,8 @@ private:
         SESSION,
         ACTIVITY,
         EVENT,
-        BATTERY
+        BATTERY,
+        DISTANCE_PRECAL
     };
 
     FIT_RECORD_MESG prepareRecordMsg(const RecordData& record);
