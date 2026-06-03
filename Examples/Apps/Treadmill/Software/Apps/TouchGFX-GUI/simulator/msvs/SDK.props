@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Bundled SDK submodule (una-kernel/SDK), 8 levels up from simulator/msvs. -->
+  <PropertyGroup Label="UserMacros">
+    <UNA_SDK>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\..\..\..\..\..\..\'))</UNA_SDK>
+    <SdkPath>$(UNA_SDK)</SdkPath>
+    <LibsPath>$(SdkPath)\Libs</LibsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>SDK</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(LibsPath)\Header</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>
