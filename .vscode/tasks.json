@@ -637,58 +637,6 @@
             }
         },
         {
-            "label": "CMake: GlanceStrain Build",
-            "type": "shell",
-            "command": "bash",
-            "args": [
-                "-c",
-                "cd ${workspaceFolder}/Examples/Apps/GlanceStrain/Software/App/GlanceStrain-CMake && mkdir -p build && cd build && cmake .. && make"
-            ],
-            "windows": {
-                "command": "powershell",
-                "args": [
-                    "-Command",
-                    "cd ${workspaceFolder}\\Examples\\Apps\\GlanceStrain\\Software\\App\\GlanceStrain-CMake ; if (!(Test-Path build)) { New-Item -ItemType Directory -Force build } ; cmake -G \"${ENV:gen}\" -S . -B build ; cmake --build build"
-                ]
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "dedicated"
-            },
-        },
-        {
-            "label": "CMake: GlanceStrain Clean",
-            "type": "shell",
-            "command": "bash",
-            "args": [
-                "-c",
-                "cd ${workspaceFolder}/Examples/Apps/GlanceStrain/Software/App/GlanceStrain-CMake && rm -rf build"
-            ],
-            "windows": {
-                "command": "powershell",
-                "args": [
-                    "-Command",
-                    "cd ${workspaceFolder}\\Examples\\Apps\\GlanceStrain\\Software\\App\\GlanceStrain-CMake ; if (Test-Path build) { Remove-Item -Recurse -Force build }"
-                ]
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "dedicated"
-            }
-        },
-        {
             "label": "Apps CMake: Build ALL",
             "runOptions": {
                 "instancePolicy": "terminateOldest"
@@ -702,7 +650,6 @@
                 "CMake: GlanceFloors Build",
                 "CMake: GlanceHR Build",
                 "CMake: GlanceSteps Build",
-                "CMake: GlanceStrain Build",
                 "CMake: Hiking Build",
                 "CMake: HRMonitor Build",
                 "CMake: Running Build",
@@ -733,7 +680,6 @@
                 "CMake: GlanceFloors Clean",
                 "CMake: GlanceHR Clean",
                 "CMake: GlanceSteps Clean",
-                "CMake: GlanceStrain Clean",
                 "CMake: Hiking Clean",
                 "CMake: HRMonitor Clean",
                 "CMake: Running Clean",

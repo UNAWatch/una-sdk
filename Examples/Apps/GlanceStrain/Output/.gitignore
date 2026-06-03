@@ -1,9 +1,0 @@
-# Ignore everything
-*
-
-# But not .gitignore itself
-!.gitignore
-
-# Don't ignore the Release folder and allow everything inside Release
-!/Release/
-!/Release/**
