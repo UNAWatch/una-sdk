@@ -47,6 +47,9 @@ set(UNA_SDK_SOURCES_TRACKMAP
 
 set(UNA_SDK_SOURCES_CALIBRATION
     "$ENV{UNA_SDK}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Calibration/StrideLut.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Calibration/CadenceStrideModel.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Calibration/TreadmillSpeedEstimator.cpp"
 )
 
 # Combined service sources for backward compatibility
