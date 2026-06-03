@@ -42,7 +42,6 @@ void TrackPresenter::activate()
     view.setTime(hour, minute);
 
     view.setBatteryLevel(model->getBatteryLevel());
-    view.setGpsFix(model->hasGpsFix());
 }
 
 void TrackPresenter::deactivate()
@@ -78,11 +77,6 @@ void TrackPresenter::onIntervalsPhaseAlert()
 void TrackPresenter::onIntervalsWorkoutCompleted()
 {
     model->application().gotoTrackIntervalsWorkoutCompletedScreenNoTransition();
-}
-
-void TrackPresenter::onGpsFix(bool acquired)
-{
-    view.setGpsFix(acquired);
 }
 
 void TrackPresenter::saveLap()

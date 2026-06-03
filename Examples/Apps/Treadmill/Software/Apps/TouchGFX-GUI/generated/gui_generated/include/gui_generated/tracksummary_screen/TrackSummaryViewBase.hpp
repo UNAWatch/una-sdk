@@ -13,7 +13,6 @@
 #include <gui/containers/SummaryFaceLaps.hpp>
 #include <gui/containers/SummaryFaceHeartRate.hpp>
 #include <gui/containers/SummaryFaceOverview.hpp>
-#include <gui/containers/SummaryFaceMap.hpp>
 
 class TrackSummaryViewBase : public touchgfx::View<TrackSummaryPresenter>
 {
@@ -37,7 +36,6 @@ protected:
     SummaryFaceLaps summaryFaceLaps;
     SummaryFaceHeartRate summaryFaceHeartRate;
     SummaryFaceOverview summaryFaceOverview;
-    SummaryFaceMap summaryFaceMap;
 
 private:
 

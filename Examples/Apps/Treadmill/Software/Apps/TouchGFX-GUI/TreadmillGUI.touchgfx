@@ -645,16 +645,6 @@
             "Visible": false,
             "LockPosition": true,
             "CustomContainerDefinitionName": "TrackFaceIntervals"
-          },
-          {
-            "Type": "CustomContainerInstance",
-            "Name": "gpsIndicator",
-            "X": 116,
-            "Y": 227,
-            "Width": 8,
-            "Height": 8,
-            "LockPosition": true,
-            "CustomContainerDefinitionName": "GpsIndicator"
           }
         ],
         "Interactions": [
@@ -1184,14 +1174,6 @@
             "Visible": false,
             "LockPosition": true,
             "CustomContainerDefinitionName": "SummaryFaceOverview"
-          },
-          {
-            "Type": "CustomContainerInstance",
-            "Name": "summaryFaceMap",
-            "Width": 240,
-            "Height": 240,
-            "LockPosition": true,
-            "CustomContainerDefinitionName": "SummaryFaceMap"
           }
         ],
         "Interactions": [
@@ -1838,30 +1820,6 @@
         "Interactions": []
       },
       {
-        "Name": "GpsIndicator",
-        "Width": 8,
-        "Height": 8,
-        "Components": [
-          {
-            "Type": "Circle",
-            "Name": "dot",
-            "Width": 8,
-            "Height": 8,
-            "LockPosition": true,
-            "Color": {
-              "Red": 64,
-              "Green": 192
-            },
-            "CenterX": 4.0,
-            "CenterY": 4.0,
-            "Radius": 4.0,
-            "EndAngle": 360.0,
-            "CapPrecision": "Butt"
-          }
-        ],
-        "Interactions": []
-      },
-      {
         "Name": "HeartRateZone",
         "X": 15,
         "Width": 210,
@@ -1992,49 +1950,6 @@
               "UseBuffer": true,
               "BufferSize": 15
             }
-          }
-        ],
-        "Interactions": []
-      },
-      {
-        "Name": "Map",
-        "Width": 150,
-        "Height": 150,
-        "Components": [
-          {
-            "Type": "Circle",
-            "Name": "dotEnd",
-            "X": 76,
-            "Y": 75,
-            "Width": 8,
-            "Height": 8,
-            "LockPosition": true,
-            "Color": {
-              "Red": 192
-            },
-            "CenterX": 4.0,
-            "CenterY": 4.0,
-            "Radius": 4.0,
-            "EndAngle": 360.0,
-            "CapPrecision": "Butt"
-          },
-          {
-            "Type": "Circle",
-            "Name": "dotStart",
-            "X": 74,
-            "Y": 75,
-            "Width": 8,
-            "Height": 8,
-            "LockPosition": true,
-            "Color": {
-              "Red": 64,
-              "Green": 192
-            },
-            "CenterX": 4.0,
-            "CenterY": 4.0,
-            "Radius": 4.0,
-            "EndAngle": 360.0,
-            "CapPrecision": "Butt"
           }
         ],
         "Interactions": []
@@ -3223,85 +3138,6 @@
               "UseBuffer": true,
               "BufferSize": 10
             }
-          }
-        ],
-        "Interactions": []
-      },
-      {
-        "Name": "SummaryFaceMap",
-        "Width": 240,
-        "Height": 240,
-        "Components": [
-          {
-            "Type": "TextArea",
-            "Name": "distanceUnits",
-            "X": 178,
-            "Y": 73,
-            "Width": 45,
-            "Height": 23,
-            "LockPosition": true,
-            "TextId": "TMP_MEDIUM_18_L",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 192,
-              "Green": 192,
-              "Blue": 192
-            },
-            "Wildcard1": {
-              "TextId": "TEXT_KM",
-              "UseBuffer": true,
-              "BufferSize": 5
-            }
-          },
-          {
-            "Type": "TextArea",
-            "Name": "distanceValue",
-            "X": 60,
-            "Y": 51,
-            "Width": 120,
-            "Height": 41,
-            "LockPosition": true,
-            "TextId": "TMP_SEMIBOLD_40",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 192,
-              "Green": 192,
-              "Blue": 192
-            },
-            "Wildcard1": {
-              "TextId": "__SingleUse_QXRZ",
-              "UseBuffer": true,
-              "BufferSize": 10
-            }
-          },
-          {
-            "Type": "Image",
-            "Name": "runningManIcon",
-            "X": 33,
-            "Y": 62,
-            "Width": 30,
-            "Height": 30,
-            "LockPosition": true,
-            "RelativeFilename": "RunningMan_30x30.png"
-          },
-          {
-            "Type": "CustomContainerInstance",
-            "Name": "map",
-            "X": 45,
-            "Y": 90,
-            "Width": 150,
-            "Height": 150,
-            "LockPosition": true,
-            "CustomContainerDefinitionName": "Map"
-          },
-          {
-            "Type": "CustomContainerInstance",
-            "Name": "title",
-            "X": 50,
-            "Width": 140,
-            "Height": 41,
-            "LockPosition": true,
-            "CustomContainerDefinitionName": "Title"
           }
         ],
         "Interactions": []

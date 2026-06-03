@@ -16,10 +16,10 @@ void TrackSummaryView::setupScreen()
     buttons.setR2(Buttons::NONE);
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
-    scrollIndicator.setCount(3);
-    scrollIndicator.setActiveId(FACE_MAP);
+    scrollIndicator.setCount(2);
+    scrollIndicator.setActiveId(FACE_OVERVIEW);
 
-    mCurrentFace = FACE_MAP;
+    mCurrentFace = FACE_OVERVIEW;
     updateFace();
 }
 
@@ -45,17 +45,15 @@ void TrackSummaryView::setSummary(const ActivitySummary& s, bool isImperial, boo
     };
 
     const float dist = distConv(s.distance);
-    summaryFaceMap.setDistance(dist, isImperial);
     summaryFaceOverview.setDistance(dist, isImperial);
     summaryFaceOverview.setAvgPace(paceConv(s.paceAvg));
     summaryFaceOverview.setTimer(s.time);
     summaryFaceHeartRate.setMaxHR(s.hrMax);
     summaryFaceHeartRate.setAvgHR(s.hrAvg);
-    summaryFaceMap.setMap(s.map);
 
     summaryFaceLaps.setLaps(s.laps, isImperial);
     mLapsPageCount = summaryFaceLaps.getPageCount();
-    scrollIndicator.setCount(3 + mLapsPageCount);
+    scrollIndicator.setCount(2 + mLapsPageCount);
 
     if (isPaused) {
         buttons.setR1(Buttons::NONE);
@@ -68,12 +66,10 @@ void TrackSummaryView::setSummary(const ActivitySummary& s, bool isImperial, boo
 
 void TrackSummaryView::updateFace()
 {
-    summaryFaceMap.setVisible(mCurrentFace == FACE_MAP);
     summaryFaceOverview.setVisible(mCurrentFace == FACE_OVERVIEW);
     summaryFaceHeartRate.setVisible(mCurrentFace == FACE_HEARTRATE);
     summaryFaceLaps.setVisible(mCurrentFace == FACE_LAPS);
 
-    summaryFaceMap.invalidate();
     summaryFaceOverview.invalidate();
     summaryFaceHeartRate.invalidate();
     summaryFaceLaps.invalidate();
@@ -113,7 +109,7 @@ void TrackSummaryView::handleKeyEvent(uint8_t key)
                 mCurrentFace--;
                 updateFace();
             }
-        } else if (mCurrentFace > FACE_MAP) {
+        } else if (mCurrentFace > FACE_OVERVIEW) {
             mCurrentFace--;
             updateFace();
         }

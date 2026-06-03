@@ -19,7 +19,6 @@ void TrackView::setupScreen()
     buttons.setR2(Buttons::AMBER);
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
-    gpsIndicator.setPeriod(SDK::Utils::msToTicks(500, App::Config::kFrameRate));
 }
 
 void TrackView::tearDownScreen()
@@ -165,9 +164,4 @@ void TrackView::handleKeyEvent(uint8_t key)
             application().gotoTrackLapScreenNoTransition();
         }
     }
-}
-
-void TrackView::setGpsFix(bool state)
-{
-    gpsIndicator.setAcquired(state);
 }
