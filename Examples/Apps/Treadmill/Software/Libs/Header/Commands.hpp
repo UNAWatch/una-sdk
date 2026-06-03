@@ -29,7 +29,6 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type SETTINGS_UPDATE    = 0x00000001;
     constexpr SDK::MessageType::Type LOCAL_TIME         = 0x00000002;
     constexpr SDK::MessageType::Type BATTERY            = 0x00000003;
-    constexpr SDK::MessageType::Type GPS_FIX            = 0x00000004;
     constexpr SDK::MessageType::Type TRACK_STATE_UPDATE = 0x00000005;
     constexpr SDK::MessageType::Type TRACK_DATA_UPDATE  = 0x00000006;
     constexpr SDK::MessageType::Type LAP_END                  = 0x00000007;
@@ -79,14 +78,6 @@ namespace CustomMessage {
         Battery()
             : SDK::MessageBase(BATTERY)
             , level(0)
-        {}
-    };
-
-    struct GpsFix : public SDK::MessageBase {
-        bool state;
-        GpsFix()
-            : SDK::MessageBase(GPS_FIX)
-            , state(false)
         {}
     };
 
@@ -224,18 +215,6 @@ public:
         auto *msg = mKernel.comm.allocateMessage<CustomMessage::Battery>();
         if (msg) {
             msg->level = level;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool fix(bool state)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::GpsFix>();
-        if (msg) {
-            msg->state = state;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

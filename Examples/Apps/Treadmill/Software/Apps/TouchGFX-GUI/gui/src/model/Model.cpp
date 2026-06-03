@@ -136,13 +136,6 @@ void Model::saveSettings(const Settings& sett)
 }
 
 
-// GPS
-
-bool Model::hasGpsFix() const
-{
-    return mGpsFix;
-}
-
 
 // Track
 
@@ -370,15 +363,6 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             if (mBatteryLevel != msg->level) {
                 mBatteryLevel = msg->level;
                 modelListener->onBatteryLevel(mBatteryLevel);
-            }
-        } break;
-
-        case CustomMessage::GPS_FIX: {
-            auto* msg = static_cast<CustomMessage::GpsFix*>(message);
-            LOG_DEBUG("GPS_FIX %u\n", msg->state);
-            if (mGpsFix != msg->state) {
-                mGpsFix = msg->state;
-                modelListener->onGpsFix(mGpsFix);
             }
         } break;
 

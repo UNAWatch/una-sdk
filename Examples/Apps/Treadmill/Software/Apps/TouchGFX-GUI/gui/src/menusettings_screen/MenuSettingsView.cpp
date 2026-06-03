@@ -16,7 +16,8 @@ void MenuSettingsView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
 
-    setGpsFix(mGpsFix);
+    // Treadmill has no GPS: no acquisition status line.
+    menuLayout.setInfoMsg(TYPED_TEXT_INVALID);
 
     menuLayout.invalidate();
 }
@@ -24,12 +25,6 @@ void MenuSettingsView::setupScreen()
 void MenuSettingsView::tearDownScreen()
 {
     MenuSettingsViewBase::tearDownScreen();
-}
-
-void MenuSettingsView::setGpsFix(bool state)
-{
-    mGpsFix = state;
-    menuLayout.setInfoMsg(state ? T_TEXT_SIGNAL_ACQUIRED : T_TEXT_ACQUIRING_SIGNAL);
 }
 
 void MenuSettingsView::setPhoneNotif(bool state)

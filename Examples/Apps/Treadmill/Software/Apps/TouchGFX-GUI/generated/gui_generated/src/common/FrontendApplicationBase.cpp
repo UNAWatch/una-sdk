@@ -39,8 +39,6 @@
 #include <gui/menuintervalsresttime_screen/MenuIntervalsRestTimePresenter.hpp>
 #include <gui/menuintervalsrestdistance_screen/MenuIntervalsRestDistanceView.hpp>
 #include <gui/menuintervalsrestdistance_screen/MenuIntervalsRestDistancePresenter.hpp>
-#include <gui/trackstartconfirmation_screen/TrackStartConfirmationView.hpp>
-#include <gui/trackstartconfirmation_screen/TrackStartConfirmationPresenter.hpp>
 #include <gui/track_screen/TrackView.hpp>
 #include <gui/track_screen/TrackPresenter.hpp>
 #include <gui/tracklap_screen/TrackLapView.hpp>
@@ -274,19 +272,6 @@ void FrontendApplicationBase::gotoMenuIntervalsRestDistanceScreenNoTransition()
 void FrontendApplicationBase::gotoMenuIntervalsRestDistanceScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<MenuIntervalsRestDistanceView, MenuIntervalsRestDistancePresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
-}
-
-// TrackStartConfirmation
-
-void FrontendApplicationBase::gotoTrackStartConfirmationScreenNoTransition()
-{
-    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoTrackStartConfirmationScreenNoTransitionImpl);
-    pendingScreenTransitionCallback = &transitionCallback;
-}
-
-void FrontendApplicationBase::gotoTrackStartConfirmationScreenNoTransitionImpl()
-{
-    touchgfx::makeTransition<TrackStartConfirmationView, TrackStartConfirmationPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
 // Track

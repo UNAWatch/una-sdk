@@ -65,9 +65,6 @@ public:
     // MenuIntervalsRestDistance
     void gotoMenuIntervalsRestDistanceScreenNoTransition();
 
-    // TrackStartConfirmation
-    void gotoTrackStartConfirmationScreenNoTransition();
-
     // Track
     void gotoTrackScreenNoTransition();
 
@@ -150,9 +147,6 @@ protected:
 
     // MenuIntervalsRestDistance
     void gotoMenuIntervalsRestDistanceScreenNoTransitionImpl();
-
-    // TrackStartConfirmation
-    void gotoTrackStartConfirmationScreenNoTransitionImpl();
 
     // Track
     void gotoTrackScreenNoTransitionImpl();
