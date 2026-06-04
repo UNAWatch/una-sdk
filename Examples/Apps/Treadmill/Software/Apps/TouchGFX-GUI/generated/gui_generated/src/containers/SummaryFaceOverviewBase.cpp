@@ -77,7 +77,7 @@ SummaryFaceOverviewBase::SummaryFaceOverviewBase()
     add(distanceValue);
 
     runningManIcon.setXY(33, 62);
-    runningManIcon.setBitmap(touchgfx::Bitmap(BITMAP_RUNNINGMAN_30X30_ID));
+    runningManIcon.setBitmap(touchgfx::Bitmap(BITMAP_TREADMILL_30X30_ID));
     add(runningManIcon);
 
     title.setXY(50, 0);

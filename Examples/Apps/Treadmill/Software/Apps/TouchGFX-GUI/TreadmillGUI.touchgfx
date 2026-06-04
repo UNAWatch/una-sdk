@@ -3272,7 +3272,7 @@
             "Width": 30,
             "Height": 30,
             "LockPosition": true,
-            "RelativeFilename": "RunningMan_30x30.png"
+            "RelativeFilename": "Treadmill_30x30.png"
           },
           {
             "Type": "CustomContainerInstance",

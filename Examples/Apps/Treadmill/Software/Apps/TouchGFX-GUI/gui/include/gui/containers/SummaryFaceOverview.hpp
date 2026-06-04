@@ -26,11 +26,12 @@ public:
     void setDistance(float dist, bool isImperial);
 
     /**
-     * @brief Display average pace.
-     * @param pace Already-converted value in sec/km or sec/mi (view's responsibility).
-     *             Pass a value < 1.0 to show "---" (no data).
+     * @brief Display average speed (no unit label — the unit is implied by the
+     *        user's units setting, per the design).
+     * @param speed Already-converted average speed in km/h or mph (view's responsibility).
+     *              Pass a value below kMinSpeed to show "---" (no data).
      */
-    void setAvgPace(float pace);
+    void setAvgPace(float speed);
 
     /** @brief Display total elapsed active time as "H:MM:SS". */
     void setTimer(std::time_t sec);
