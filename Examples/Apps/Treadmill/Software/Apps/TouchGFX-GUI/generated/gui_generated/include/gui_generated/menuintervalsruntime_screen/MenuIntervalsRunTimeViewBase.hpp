@@ -8,7 +8,7 @@
 #include <mvp/View.hpp>
 #include <gui/menuintervalsruntime_screen/MenuIntervalsRunTimePresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <gui/containers/MainMenuLayout.hpp>
+#include <gui/containers/TwoTonePicker.hpp>
 
 class MenuIntervalsRunTimeViewBase : public touchgfx::View<MenuIntervalsRunTimePresenter>
 {
@@ -27,7 +27,7 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    MainMenuLayout menuLayout;
+    TwoTonePicker picker;
 
 private:
 
