@@ -73,6 +73,11 @@ bool StrideLut::readyForPhase2() const
            totalCalibrationDistanceM() >= Config::kOutdoorLutMinCalibrationDistanceM;
 }
 
+bool StrideLut::readyForOutdoorEstimate() const
+{
+    return validBinCount() >= Config::kOutdoorLutMinValidBinsEstimate;
+}
+
 // --- Persistence -------------------------------------------------------------
 
 bool StrideLut::parseBuffer(const char *data, size_t len)

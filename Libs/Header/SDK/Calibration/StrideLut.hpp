@@ -127,7 +127,13 @@ public:
     float totalCalibrationDistanceM() const;
 
     /// True when both phase-2 conditions hold (>=8 valid bins and >=5000 m).
+    /// At this point the delta LUT may begin learning.
     bool readyForPhase2() const;
+
+    /// True once there is enough outdoor data to use the LUT for live
+    /// estimation (>= kOutdoorLutMinValidBinsEstimate valid bins) while the
+    /// delta LUT stays frozen. Weaker than (and implied by) readyForPhase2().
+    bool readyForOutdoorEstimate() const;
 
 private:
     StrideBin mBins[kBinCount] {};

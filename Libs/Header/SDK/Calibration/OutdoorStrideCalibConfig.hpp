@@ -68,6 +68,16 @@ constexpr size_t kOutdoorLutMinValidBins = 8;
 /// Total LUT distance required for the phase-2 gate, metres.
 constexpr float kOutdoorLutMinCalibrationDistanceM = 5000.0f;
 
+// --- Intermediate (outdoor-estimate) gate -------------------------
+
+/// Valid bins required to START using the outdoor LUT for live estimation
+/// while the delta LUT stays frozen (the delta only begins learning at the
+/// full phase-2 gate above). A single valid bin already yields a personalised
+/// constant stride, which is no worse than the cadence-independent demographic
+/// default -- so one valid bin is enough to switch over. There is deliberately
+/// no distance floor (a valid bin already implies one bin's worth of steps).
+constexpr size_t kOutdoorLutMinValidBinsEstimate = 1;
+
 // --- Bin layout -------------------------------------------------
 
 /// Cadence bin width, SPM.

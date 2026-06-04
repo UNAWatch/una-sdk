@@ -30,12 +30,18 @@ namespace SDK::Calibration
 /**
  * @brief Calibration phase, frozen at session start.
  *
- * Numeric values match the parent spec (1 = uncalibrated demographic fallback,
- * 2 = outdoor-calibrated LUT in use).
+ * Three increasing tiers of personalisation:
+ *   1 UNCALIBRATED       — too little outdoor data; constant demographic stride.
+ *   2 OUTDOOR_ESTIMATE   — enough data to interpolate SL(c) from the outdoor LUT
+ *                          for live estimation, but the delta LUT is NOT yet
+ *                          learning (it stays frozen / zero).
+ *   3 OUTDOOR_CALIBRATED — full gate met; SL(c) + learned Δ(c), and the delta
+ *                          LUT updates after each run.
  */
 enum class Phase : uint8_t {
-    UNCALIBRATED       = 1,  ///< Outdoor LUT not yet ready — demographic stride.
-    OUTDOOR_CALIBRATED = 2,  ///< Outdoor LUT ready — SL(c) + Δ(c).
+    UNCALIBRATED       = 1,  ///< Outdoor LUT not ready — demographic stride.
+    OUTDOOR_ESTIMATE   = 2,  ///< Outdoor SL(c) used; delta frozen (no learning).
+    OUTDOOR_CALIBRATED = 3,  ///< Outdoor SL(c) + Δ(c); delta learns post-run.
 };
 
 /**
@@ -69,8 +75,15 @@ public:
     /// Frozen phase resolved at startSession().
     Phase phase() const { return mPhase; }
 
-    /// Convenience: true iff phase() == OUTDOOR_CALIBRATED.
+    /// True iff phase() == OUTDOOR_CALIBRATED (full gate: SL(c)+Δ, delta learns).
     bool outdoorLutReady() const { return mPhase == Phase::OUTDOOR_CALIBRATED; }
+
+    /// True once the outdoor LUT drives live stride (estimate OR full tier) —
+    /// i.e. we have left the demographic fallback.
+    bool usingOutdoorStride() const { return mPhase != Phase::UNCALIBRATED; }
+
+    /// True only when the delta LUT is actively learning (full tier).
+    bool deltaLearningActive() const { return mPhase == Phase::OUTDOOR_CALIBRATED; }
 
     /// Clamped height used for the demographic stride, metres (diagnostic/test).
     float heightM() const { return mHeightM; }
