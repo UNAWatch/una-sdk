@@ -79,9 +79,16 @@ void CadenceStrideModel::startSession(float heightMeters)
     // 3. Clamp the height for the demographic stride.
     mHeightM = clampHeight(heightMeters);
 
-    // 4. Evaluate and FREEZE the phase for the whole session.
-    mPhase = mOutdoor.readyForPhase2() ? Phase::OUTDOOR_CALIBRATED
-                                       : Phase::UNCALIBRATED;
+    // 4. Evaluate and FREEZE the phase for the whole session. Highest tier the
+    //    data qualifies for: full (delta learns) > estimate (outdoor SL, delta
+    //    frozen) > uncalibrated (demographic).
+    if (mOutdoor.readyForPhase2()) {
+        mPhase = Phase::OUTDOOR_CALIBRATED;
+    } else if (mOutdoor.readyForOutdoorEstimate()) {
+        mPhase = Phase::OUTDOOR_ESTIMATE;
+    } else {
+        mPhase = Phase::UNCALIBRATED;
+    }
 }
 
 // --- Stride lookups ----------------------------------------------------------
@@ -162,13 +169,19 @@ float CadenceStrideModel::deltaAt(float cadenceSpm) const
 
 float CadenceStrideModel::treadmillStrideLengthM(float cadenceSpm) const
 {
-    if (mPhase != Phase::OUTDOOR_CALIBRATED) {
-        // Phase 1: constant demographic stride (already clamped); no Δ.
+    if (mPhase == Phase::UNCALIBRATED) {
+        // Tier 1: constant demographic stride (already clamped); no LUT, no Δ.
         return demographicStrideLengthM();
     }
-    // Phase 2: combined SL(c) + Δ(c), clamped to plausible bounds.
-    return clampf(outdoorStrideLengthM(cadenceSpm) + deltaAt(cadenceSpm),
-                  Config::kStrideMinM, Config::kStrideMaxM);
+    // Tier 2 (estimate) and tier 3 (full) both use the outdoor SL(c). The
+    // learned Δ(c) is added ONLY in the full tier; in the estimate tier the
+    // delta is frozen at zero, but gating it explicitly keeps the estimate
+    // tier independent of any delta file that might exist.
+    float sl = outdoorStrideLengthM(cadenceSpm);
+    if (mPhase == Phase::OUTDOOR_CALIBRATED) {
+        sl += deltaAt(cadenceSpm);
+    }
+    return clampf(sl, Config::kStrideMinM, Config::kStrideMaxM);
 }
 
 // --- Post-run calibration ----------------------------------------------------
@@ -213,7 +226,9 @@ CadenceStrideModel::CalibrationResult CadenceStrideModel::applyPostRunCalibratio
     CalibrationResult result;
     result.dActualAccepted = accepted;
 
-    // Phase 1: never touch the delta LUT; only choose the FIT/summary distance.
+    // Below the full tier (UNCALIBRATED or OUTDOOR_ESTIMATE): never touch the
+    // delta LUT. Calibrate & Save still corrects the recorded distance (use
+    // D_actual when accepted) — only the delta learning is withheld.
     if (mPhase != Phase::OUTDOOR_CALIBRATED) {
         result.distanceForFitM = accepted ? D_actual : D_estimated;
         result.deltaLutUpdated = false;

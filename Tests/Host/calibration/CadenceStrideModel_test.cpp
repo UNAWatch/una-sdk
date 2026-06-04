@@ -103,22 +103,61 @@ TEST(CadenceStrideModel, PhaseCalibratedAtThreshold)
     EXPECT_TRUE(m.outdoorLutReady());
 }
 
-TEST(CadenceStrideModel, PhaseUncalibratedBelowBinCount)
+TEST(CadenceStrideModel, PhaseEstimateBelowFullBinCount)
 {
     SDK::Test::FakeFileSystem fs;
     fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(7, 1000.0f)));  // 7000 m, 7 bins
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
     m.startSession(1.75f);
-    EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
+    // >=1 valid bin but <8 → outdoor estimate (delta frozen), not the full tier.
+    EXPECT_EQ(m.phase(), Phase::OUTDOOR_ESTIMATE);
+    EXPECT_TRUE(m.usingOutdoorStride());
+    EXPECT_FALSE(m.deltaLearningActive());
+    EXPECT_FALSE(m.outdoorLutReady());
 }
 
-TEST(CadenceStrideModel, PhaseUncalibratedBelowDistance)
+TEST(CadenceStrideModel, PhaseEstimateBelowFullDistance)
 {
     SDK::Test::FakeFileSystem fs;
     fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 500.0f)));  // 4000 m, 8 bins
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
     m.startSession(1.75f);
+    // 8 valid bins but <5000 m total → estimate, not full.
+    EXPECT_EQ(m.phase(), Phase::OUTDOOR_ESTIMATE);
+    EXPECT_FALSE(m.deltaLearningActive());
+}
+
+TEST(CadenceStrideModel, PhaseEstimateAtOneValidBin)
+{
+    SDK::Test::FakeFileSystem fs;
+    // A single valid bin (centre 82, SL = 750/(1000/2) = 1.5 m).
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(1, 750.0f)));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_ESTIMATE);
+    EXPECT_TRUE(m.usingOutdoorStride());
+    EXPECT_FALSE(m.deltaLearningActive());
+
+    // The personalised outdoor stride is used, NOT the demographic constant.
+    const float demo = m.demographicStrideLengthM();
+    EXPECT_NEAR(m.treadmillStrideLengthM(160.0f), 1.5f, 1e-4f);
+    EXPECT_GT(std::fabs(m.treadmillStrideLengthM(160.0f) - demo), 0.1f);
+    // One bin → flat across all cadences (single-point personalisation).
+    EXPECT_NEAR(m.treadmillStrideLengthM(100.0f),
+                m.treadmillStrideLengthM(200.0f), 1e-4f);
+}
+
+TEST(CadenceStrideModel, PhaseUncalibratedWhenNoValidBin)
+{
+    SDK::Test::FakeFileSystem fs;
+    // A bin exists but is below the 200-step validity floor → no valid bins.
+    fs.seedFile(kOutPath, makeStoreJson(1, {{82.0f, 50.0f, 100.0f, 5.0f}}));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
     EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
+    EXPECT_FALSE(m.usingOutdoorStride());
+    EXPECT_NEAR(m.treadmillStrideLengthM(160.0f), m.demographicStrideLengthM(),
+                1e-5f);
 }
 
 TEST(CadenceStrideModel, PhaseFrozenAfterStartSession)
@@ -290,6 +329,26 @@ TEST(CadenceStrideModel, PostRunPhase1RejectedReturnsEstimate)
     EXPECT_FALSE(r.dActualAccepted);
     EXPECT_FALSE(r.deltaLutUpdated);
     EXPECT_FLOAT_EQ(r.distanceForFitM, 500.0f);
+    EXPECT_FALSE(fs.hasFile(kDeltaPath));
+}
+
+TEST(CadenceStrideModel, PostRunEstimateTierDoesNotLearnDelta)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(1, 750.0f)));  // estimate tier
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_ESTIMATE);
+
+    float steps[StrideLut::kBinCount] {};
+    steps[0] = 400.0f;
+    // Accepted D_actual still corrects the recorded distance, but the delta LUT
+    // must NOT learn or persist while in the estimate tier.
+    auto r = m.applyPostRunCalibration(steps, /*D_estimated=*/500.0f,
+                                       /*D_actual=*/520.0f);
+    EXPECT_TRUE(r.dActualAccepted);
+    EXPECT_FALSE(r.deltaLutUpdated);
+    EXPECT_FLOAT_EQ(r.distanceForFitM, 520.0f);
     EXPECT_FALSE(fs.hasFile(kDeltaPath));
 }
 

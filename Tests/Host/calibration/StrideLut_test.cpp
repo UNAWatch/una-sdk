@@ -210,3 +210,42 @@ TEST(StrideLut, Phase2GateNotReadyOnBinCount)
     EXPECT_EQ(lut.validBinCount(), 7u);
     EXPECT_FALSE(lut.readyForPhase2());
 }
+
+// --- Outdoor-estimate gate (intermediate tier) -------------------------------
+
+TEST(StrideLut, OutdoorEstimateGateReadyAtOneValidBin)
+{
+    SDK::Test::FakeFileSystem fs;
+    // One valid bin (>=200 steps); far below the phase-2 gate.
+    fs.seedFile(kPath, makeStoreJson(1, {{82.0f, 300.0f, 300.0f, 100.0f}}));
+    StrideLut lut;
+    ASSERT_TRUE(lut.loadFromFile(fs, kPath));
+    EXPECT_EQ(lut.validBinCount(), 1u);
+    EXPECT_TRUE(lut.readyForOutdoorEstimate());
+    EXPECT_FALSE(lut.readyForPhase2());
+}
+
+TEST(StrideLut, OutdoorEstimateGateNotReadyWithNoValidBin)
+{
+    SDK::Test::FakeFileSystem fs;
+    // A bin exists but is below the 200-step validity floor.
+    fs.seedFile(kPath, makeStoreJson(1, {{82.0f, 50.0f, 100.0f, 50.0f}}));
+    StrideLut lut;
+    ASSERT_TRUE(lut.loadFromFile(fs, kPath));
+    EXPECT_EQ(lut.validBinCount(), 0u);
+    EXPECT_FALSE(lut.readyForOutdoorEstimate());
+}
+
+TEST(StrideLut, Phase2ImpliesOutdoorEstimate)
+{
+    SDK::Test::FakeFileSystem fs;
+    std::vector<SeedBin> bins;
+    for (int i = 0; i < 8; ++i) {
+        bins.push_back({82.0f + 4.0f * i, 700.0f, 300.0f, 100.0f});
+    }
+    fs.seedFile(kPath, makeStoreJson(1, bins));
+    StrideLut lut;
+    ASSERT_TRUE(lut.loadFromFile(fs, kPath));
+    EXPECT_TRUE(lut.readyForPhase2());
+    EXPECT_TRUE(lut.readyForOutdoorEstimate());  // full implies estimate
+}
