@@ -76,7 +76,7 @@ void TrackCalibrateView::enterStage(Stage stage)
 void TrackCalibrateView::formatValue(
     touchgfx::Unicode::UnicodeChar* buf, uint16_t whole, uint16_t fracIdx)
 {
-    Unicode::snprintf(buf, kBuffSize, "%02u.%02u", whole, fracIdx * 5u);
+    Unicode::snprintf(buf, kBuffSize, "%02u.%02u", whole, fracIdx);
 }
 
 void TrackCalibrateView::updateItem(MainMenuItem& item, int16_t index)
