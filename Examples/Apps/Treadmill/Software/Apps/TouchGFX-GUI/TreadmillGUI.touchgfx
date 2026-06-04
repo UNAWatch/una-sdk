@@ -3438,7 +3438,7 @@
             "Name": "paceText",
             "X": 169,
             "Y": 104,
-            "Width": 44,
+            "Width": 56,
             "Height": 23,
             "LockPosition": true,
             "TextId": "TMP_REGULAR_16_L",

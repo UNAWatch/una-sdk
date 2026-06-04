@@ -25,7 +25,7 @@ SummaryFaceLapsBase::SummaryFaceLapsBase() :
     scrollList.setDrawables(scrollListListItems, updateItemCallback);
     add(scrollList);
 
-    paceText.setPosition(169, 104, 44, 23);
+    paceText.setPosition(169, 104, 56, 23);
     paceText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     paceText.setLinespacing(0);
     paceText.setWildcard(touchgfx::TypedText(T_TEXT_PACE).getText());
