@@ -13,8 +13,8 @@ MenuIntervalsRunDistanceViewBase::MenuIntervalsRunDistanceViewBase()
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
-    menuLayout.setXY(0, 0);
-    add(menuLayout);
+    picker.setXY(0, 0);
+    add(picker);
 }
 
 MenuIntervalsRunDistanceViewBase::~MenuIntervalsRunDistanceViewBase()
@@ -24,7 +24,7 @@ MenuIntervalsRunDistanceViewBase::~MenuIntervalsRunDistanceViewBase()
 
 void MenuIntervalsRunDistanceViewBase::setupScreen()
 {
-    menuLayout.initialize();
+    picker.initialize();
     transitionBegins();
 }
 

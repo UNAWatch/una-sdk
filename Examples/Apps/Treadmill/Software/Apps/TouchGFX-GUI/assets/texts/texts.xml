@@ -131,6 +131,24 @@
       <Text Id="TMP_SEMIBOLD_60_R" Alignment="Right" TypographyId="Poppins_SemiBold_60">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
+      <Text Id="TMP_LIGHT_60" Alignment="Center" TypographyId="Poppins_Light_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_LIGHT_60_L" Alignment="Left" TypographyId="Poppins_Light_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_LIGHT_60_R" Alignment="Right" TypographyId="Poppins_Light_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_40" Alignment="Center" TypographyId="Poppins_Medium_40">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_40_L" Alignment="Left" TypographyId="Poppins_Medium_40">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_MEDIUM_40_R" Alignment="Right" TypographyId="Poppins_Medium_40">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
       <Text Id="TMP_ITALIC_18" Alignment="Center" TypographyId="Poppins_Italic_18">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
@@ -309,6 +327,18 @@
       </Text>
       <Text Id="TEXT_KM" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">km</Translation>
+      </Text>
+      <Text Id="TEXT_KILOMETERS" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Kilometers</Translation>
+      </Text>
+      <Text Id="TEXT_MILES_SUB" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Miles</Translation>
+      </Text>
+      <Text Id="TEXT_MINS" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Mins.</Translation>
+      </Text>
+      <Text Id="TEXT_SECS" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Secs.</Translation>
       </Text>
       <Text Id="TEXT_M" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">m</Translation>
@@ -494,6 +524,8 @@
     <Typography Id="Poppins_SemiBold_35" Font="Poppins-SemiBold.ttf" Size="35" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
     <Typography Id="Poppins_SemiBold_40" Font="Poppins-SemiBold.ttf" Size="40" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
     <Typography Id="Poppins_SemiBold_60" Font="Poppins-SemiBold.ttf" Size="60" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Light_60" Font="Poppins-Light.ttf" Size="60" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_40" Font="Poppins-Medium.ttf" Size="40" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
     <Typography Id="Poppins_Italic_18" Font="Poppins-Italic.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
     <Typography Id="Poppins_Italic_20" Font="Poppins-Italic.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />
   </Typographies>
