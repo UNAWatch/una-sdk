@@ -44,9 +44,10 @@ void TrackActionPresenter::saveRequested()
     model->saveTrack();
 
     // Offer Calibrate & Save only for sessions of at least 2 km (§5.1); shorter
-    // ones are finalised immediately by the Service with the estimate.
+    // ones are finalised immediately by the Service with the estimate. The intro
+    // screen explains the calibration step, then advances to the distance picker.
     if (model->getTrackData().distance >= 2000.0f) {
-        model->application().gotoTrackCalibrateScreenNoTransition();
+        model->application().gotoTrackCalibrateIntroScreenNoTransition();
     } else {
         model->application().gotoTrackSavedScreenNoTransition();
     }

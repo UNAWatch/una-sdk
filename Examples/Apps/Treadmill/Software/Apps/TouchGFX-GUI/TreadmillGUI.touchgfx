@@ -1068,6 +1068,94 @@
         ]
       },
       {
+        "Name": "TrackCalibrateIntro",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "headingText",
+            "X": 40,
+            "Y": 52,
+            "Width": 160,
+            "Height": 42,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_30",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 0,
+              "Green": 128,
+              "Blue": 128
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_DISTANCE",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 97,
+            "Width": 50,
+            "Height": 45,
+            "LockPosition": true,
+            "RelativeFilename": "TreadmillCalibrate_50x45.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "captionText",
+            "X": 36,
+            "Y": 160,
+            "Width": 168,
+            "Height": 57,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_CALIBRATE_PROMPT",
+              "UseBuffer": true,
+              "BufferSize": 40
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "TrackCalibrateIntro"
+            }
+          }
+        ]
+      },
+      {
         "Name": "TrackCalibrate",
         "CanvasBufferSize": 3600,
         "Components": [
