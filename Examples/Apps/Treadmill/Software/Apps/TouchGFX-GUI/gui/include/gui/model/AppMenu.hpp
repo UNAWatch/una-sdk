@@ -104,6 +104,20 @@ struct Root {
             static constexpr float    kFracStep  = 0.05f;  ///< Units (km or mi) per index step
             static constexpr uint16_t kCountFrac = 20;     ///< 0.00..0.95 in 0.05 steps
         };
+
+        // Calibrate & Save "actual distance" picker (Treadmill, §5). Same whole
+        // ranges as the interval picker, but a finer 0.01-unit fraction step
+        // (0.00..0.99 -> 100 items) so the user can match the treadmill console
+        // distance precisely.
+        struct CalibratePicker {
+            static constexpr uint16_t kMaxWholeKm   = 10;
+            static constexpr uint16_t kMaxWholeMi   = 6;
+            static constexpr uint16_t kCountWholeKm = kMaxWholeKm + 1;  ///< 0..10 -> 11 items
+            static constexpr uint16_t kCountWholeMi = kMaxWholeMi + 1;  ///< 0..6  -> 7 items
+
+            static constexpr float    kFracStep  = 0.01f;  ///< Units (km or mi) per index step
+            static constexpr uint16_t kCountFrac = 100;    ///< 0.00..0.99 in 0.01 steps
+        };
     };
 
     struct Settings {

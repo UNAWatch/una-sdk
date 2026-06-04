@@ -22,7 +22,7 @@ public:
     void setDistance(float meters, bool isImperial);
 
 protected:
-    using Menu = App::MenuNav::Root::Intervals::DistancePicker;
+    using Menu = App::MenuNav::Root::Intervals::CalibratePicker;
 
     enum Stage { STAGE_WHOLE = 0, STAGE_FRAC };
 
@@ -31,7 +31,7 @@ protected:
     Stage    mStage      = STAGE_WHOLE;
     bool     mIsImperial = false;
     uint16_t mWhole      = 0;   ///< Whole km or mi
-    uint16_t mFracIdx    = 0;   ///< Fraction index (0..19), value = fracIdx * 0.05 units
+    uint16_t mFracIdx    = 0;   ///< Fraction index (0..99), value = fracIdx * 0.01 units
 
     touchgfx::Unicode::UnicodeChar mMainBuff[kBuffSize] {};
     touchgfx::Unicode::UnicodeChar mItemBuff[kBuffSize] {};
