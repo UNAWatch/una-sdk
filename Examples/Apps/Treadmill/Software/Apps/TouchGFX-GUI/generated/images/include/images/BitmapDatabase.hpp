@@ -26,6 +26,7 @@ const uint16_t BITMAP_PAUSE_14X14_ID = 16;
 const uint16_t BITMAP_RUNNINGMAN_30X30_ID = 17;
 const uint16_t BITMAP_RUNNINGMAN_46X46_ID = 18;
 const uint16_t BITMAP_TICKAMBER_22X17_ID = 19;
+const uint16_t BITMAP_TREADMILL_30X30_ID = 20;
 
 namespace BitmapDatabase
 {
