@@ -207,6 +207,9 @@
     <ClCompile Include="..\..\generated\gui_generated\src\trackcalibrate_screen\TrackCalibrateViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\TwoTonePicker.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\TwoTonePickerBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackcalibrateintro_screen\TrackCalibrateIntroPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackcalibrateintro_screen\TrackCalibrateIntroView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -559,6 +562,9 @@
     <ClInclude Include="..\..\gui\include\gui\containers\PickerLogic.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\TwoTonePicker.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TwoTonePickerBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrateintro_screen\TrackCalibrateIntroPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrateintro_screen\TrackCalibrateIntroView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

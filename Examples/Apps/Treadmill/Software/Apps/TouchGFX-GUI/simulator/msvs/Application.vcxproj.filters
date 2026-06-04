@@ -652,6 +652,18 @@
     <Filter Include="Source Files\generated\gui_generated\trackcalibrate_screen">
       <UniqueIdentifier>D7ED5797-F365-F829-64CE-B9A9730B662E</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gui\trackcalibrateintro_screen">
+      <UniqueIdentifier>F8955143-EC1C-B559-7884-41456FECEDC7</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\trackcalibrateintro_screen">
+      <UniqueIdentifier>D96FE9D4-AEE2-DD1B-C8D5-52E2FD102167</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\trackcalibrateintro_screen">
+      <UniqueIdentifier>7E368E09-491F-64ED-E954-D54C74F1285F</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\trackcalibrateintro_screen">
+      <UniqueIdentifier>D3C2212E-5C07-C8D1-5211-BEF508D97858</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -1655,6 +1667,24 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TwoTonePickerBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\trackcalibrateintro_screen\TrackCalibrateIntroPresenter.cpp">
+      <Filter>Source Files\gui\trackcalibrateintro_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\trackcalibrateintro_screen\TrackCalibrateIntroView.cpp">
+      <Filter>Source Files\gui\trackcalibrateintro_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\trackcalibrateintro_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrateintro_screen\TrackCalibrateIntroPresenter.hpp">
+      <Filter>Header Files\gui\trackcalibrateintro_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\trackcalibrateintro_screen\TrackCalibrateIntroView.hpp">
+      <Filter>Header Files\gui\trackcalibrateintro_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\trackcalibrateintro_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
