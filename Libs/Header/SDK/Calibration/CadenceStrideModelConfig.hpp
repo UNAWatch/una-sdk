@@ -22,10 +22,19 @@ namespace Config
 
 // --- Phase-1 demographic stride ----------------------------------------------
 
-/// Unisex demographic stride multiplier: SL_demographic = kDemographicK * h.
-/// Gender refinement is deliberately deferred; only this constant changes when
-/// gender is later added.
-constexpr float kDemographicK = 0.685f;
+// The Phase-1 (uncalibrated) demographic stride is CADENCE-DEPENDENT: stride
+// length grows with cadence, so a single static value badly underestimates
+// running speed (a constant ~walking stride reports ~half speed at run
+// cadences). Treadmill stride length grows roughly linearly with cadence (no
+// overground plateau, per the speed-research doc), so SL(c) is modelled as a
+// straight line through two population anchors at a reference height, then
+// scaled by the user's height: SL(c,h) = (h / kDemoRefHeightM) * line(c).
+// Anchors are firmware-tunable; gender refinement is still deferred.
+constexpr float kDemoRefHeightM   = 1.75f;    ///< Reference height for the anchors
+constexpr float kDemoCadenceLoSpm = 110.0f;   ///< Walk anchor cadence
+constexpr float kDemoStrideLoM    = 1.51f;    ///<   stride there (~5.0 km/h @ 110 SPM)
+constexpr float kDemoCadenceHiSpm = 170.0f;   ///< Run anchor cadence
+constexpr float kDemoStrideHiM    = 2.35f;    ///<   stride there (~12.0 km/h @ 170 SPM)
 
 /// Fallback height (m) when the profile height is missing/implausible.
 constexpr float kDefaultHeightM = 1.70f;

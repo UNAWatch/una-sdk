@@ -79,6 +79,19 @@ std::vector<SeedBin> phase2Bins(int nValid, float distEach, float steps = 1000.0
     return bins;
 }
 
+// Expected Phase-1 demographic SL(c): mirrors CadenceStrideModel — a line through
+// the two cadence anchors at the reference height, scaled by height, clamped.
+float demoSL(float cadenceSpm, float heightM)
+{
+    const float slope = (Cfg::kDemoStrideHiM - Cfg::kDemoStrideLoM)
+                      / (Cfg::kDemoCadenceHiSpm - Cfg::kDemoCadenceLoSpm);
+    const float slRef = Cfg::kDemoStrideLoM + slope * (cadenceSpm - Cfg::kDemoCadenceLoSpm);
+    float sl = (heightM / Cfg::kDemoRefHeightM) * slRef;
+    if (sl < Cfg::kStrideMinM) sl = Cfg::kStrideMinM;
+    if (sl > Cfg::kStrideMaxM) sl = Cfg::kStrideMaxM;
+    return sl;
+}
+
 } // namespace
 
 // --- Phase gate --------------------------------------------------------------
@@ -140,8 +153,8 @@ TEST(CadenceStrideModel, PhaseEstimateAtOneValidBin)
     EXPECT_TRUE(m.usingOutdoorStride());
     EXPECT_FALSE(m.deltaLearningActive());
 
-    // The personalised outdoor stride is used, NOT the demographic constant.
-    const float demo = m.demographicStrideLengthM();
+    // The personalised outdoor stride is used, NOT the demographic fallback.
+    const float demo = m.demographicStrideLengthM(160.0f);
     EXPECT_NEAR(m.treadmillStrideLengthM(160.0f), 1.5f, 1e-4f);
     EXPECT_GT(std::fabs(m.treadmillStrideLengthM(160.0f) - demo), 0.1f);
     // One bin → flat across all cadences (single-point personalisation).
@@ -158,7 +171,7 @@ TEST(CadenceStrideModel, PhaseUncalibratedWhenNoValidBin)
     m.startSession(1.75f);
     EXPECT_EQ(m.phase(), Phase::UNCALIBRATED);
     EXPECT_FALSE(m.usingOutdoorStride());
-    EXPECT_NEAR(m.treadmillStrideLengthM(160.0f), m.demographicStrideLengthM(),
+    EXPECT_NEAR(m.treadmillStrideLengthM(160.0f), m.demographicStrideLengthM(160.0f),
                 1e-5f);
 }
 
@@ -181,13 +194,17 @@ TEST(CadenceStrideModel, PhaseFrozenAfterStartSession)
 
 // --- Demographic SL (phase 1) ------------------------------------------------
 
-TEST(CadenceStrideModel, DemographicStride)
+TEST(CadenceStrideModel, DemographicStrideCadenceDependent)
 {
     SDK::Test::FakeFileSystem fs;
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
-    m.startSession(1.75f);
+    m.startSession(1.75f);  // == reference height
     EXPECT_FLOAT_EQ(m.heightM(), 1.75f);
-    EXPECT_NEAR(m.demographicStrideLengthM(), 0.685f * 1.75f, 1e-5f);
+    // At the reference height the curve passes through the two anchors...
+    EXPECT_NEAR(m.demographicStrideLengthM(Cfg::kDemoCadenceLoSpm), Cfg::kDemoStrideLoM, 1e-4f);
+    EXPECT_NEAR(m.demographicStrideLengthM(Cfg::kDemoCadenceHiSpm), Cfg::kDemoStrideHiM, 1e-4f);
+    // ...and stride grows with cadence (the whole point — not static).
+    EXPECT_GT(m.demographicStrideLengthM(180.0f), m.demographicStrideLengthM(110.0f));
 }
 
 TEST(CadenceStrideModel, HeightFallbackOnImplausible)
@@ -199,11 +216,11 @@ TEST(CadenceStrideModel, HeightFallbackOnImplausible)
         CadenceStrideModel m(fs, kOutPath, kDeltaPath);
         m.startSession(h);
         EXPECT_FLOAT_EQ(m.heightM(), def);
-        EXPECT_NEAR(m.demographicStrideLengthM(), 0.685f * def, 1e-5f);
+        EXPECT_NEAR(m.demographicStrideLengthM(160.0f), demoSL(160.0f, def), 1e-5f);
     }
 }
 
-TEST(CadenceStrideModel, Phase1StrideConstantAndIgnoresDelta)
+TEST(CadenceStrideModel, Phase1StrideCadenceDependentIgnoresDelta)
 {
     SDK::Test::FakeFileSystem fs;
     // Seed a delta file; phase 1 must NOT apply it.
@@ -215,10 +232,12 @@ TEST(CadenceStrideModel, Phase1StrideConstantAndIgnoresDelta)
     m.startSession(1.80f);
     ASSERT_EQ(m.phase(), Phase::UNCALIBRATED);
 
-    const float expected = 0.685f * 1.80f;
-    EXPECT_NEAR(m.treadmillStrideLengthM(80.0f), expected, 1e-5f);
-    EXPECT_NEAR(m.treadmillStrideLengthM(122.0f), expected, 1e-5f);  // delta bin
-    EXPECT_NEAR(m.treadmillStrideLengthM(200.0f), expected, 1e-5f);
+    // Phase 1 uses the cadence-dependent demographic SL and ignores Δ.
+    EXPECT_NEAR(m.treadmillStrideLengthM(80.0f),  demoSL(80.0f, 1.80f),  1e-5f);
+    EXPECT_NEAR(m.treadmillStrideLengthM(122.0f), demoSL(122.0f, 1.80f), 1e-5f);  // delta bin ignored
+    EXPECT_NEAR(m.treadmillStrideLengthM(200.0f), demoSL(200.0f, 1.80f), 1e-5f);
+    // Not static: longer stride at higher cadence.
+    EXPECT_GT(m.treadmillStrideLengthM(200.0f), m.treadmillStrideLengthM(80.0f));
 }
 
 TEST(CadenceStrideModel, DemographicStrideClampedToBounds)
@@ -226,7 +245,7 @@ TEST(CadenceStrideModel, DemographicStrideClampedToBounds)
     SDK::Test::FakeFileSystem fs;
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
     m.startSession(2.10f);  // max plausible height
-    const float sl = m.demographicStrideLengthM();
+    const float sl = m.demographicStrideLengthM(200.0f);
     EXPECT_GE(sl, Cfg::kStrideMinM);
     EXPECT_LE(sl, Cfg::kStrideMaxM);
 }
@@ -258,7 +277,7 @@ TEST(CadenceStrideModel, OutdoorStrideFallsBackToDemographicWhenNoValidBin)
     SDK::Test::FakeFileSystem fs;
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
     m.startSession(1.75f);  // empty LUT
-    EXPECT_NEAR(m.outdoorStrideLengthM(160.0f), m.demographicStrideLengthM(), 1e-5f);
+    EXPECT_NEAR(m.outdoorStrideLengthM(160.0f), m.demographicStrideLengthM(160.0f), 1e-5f);
 }
 
 // --- Delta Δ(c) dense interpolation ------------------------------------------

@@ -93,10 +93,18 @@ void CadenceStrideModel::startSession(float heightMeters)
 
 // --- Stride lookups ----------------------------------------------------------
 
-float CadenceStrideModel::demographicStrideLengthM() const
+float CadenceStrideModel::demographicStrideLengthM(float cadenceSpm) const
 {
-    return clampf(Config::kDemographicK * mHeightM, Config::kStrideMinM,
-                  Config::kStrideMaxM);
+    // Line through the two population anchors at the reference height, then
+    // scaled by the user's height. Cadence is NOT clamped to the anchor range:
+    // the line extrapolates to slow walks / fast runs, and the final value is
+    // clamped to the plausible stride window.
+    const float slope = (Config::kDemoStrideHiM - Config::kDemoStrideLoM)
+                      / (Config::kDemoCadenceHiSpm - Config::kDemoCadenceLoSpm);
+    const float slRef = Config::kDemoStrideLoM
+                      + slope * (cadenceSpm - Config::kDemoCadenceLoSpm);
+    const float sl = (mHeightM / Config::kDemoRefHeightM) * slRef;
+    return clampf(sl, Config::kStrideMinM, Config::kStrideMaxM);
 }
 
 float CadenceStrideModel::outdoorStrideLengthM(float cadenceSpm) const
@@ -142,7 +150,7 @@ float CadenceStrideModel::outdoorStrideLengthM(float cadenceSpm) const
     }
     // No valid bin: cannot happen in phase 2 (gate guarantees >=8). Defensive
     // fallback to the demographic stride.
-    return demographicStrideLengthM();
+    return demographicStrideLengthM(cadenceSpm);
 }
 
 float CadenceStrideModel::deltaAt(float cadenceSpm) const
@@ -170,8 +178,8 @@ float CadenceStrideModel::deltaAt(float cadenceSpm) const
 float CadenceStrideModel::treadmillStrideLengthM(float cadenceSpm) const
 {
     if (mPhase == Phase::UNCALIBRATED) {
-        // Tier 1: constant demographic stride (already clamped); no LUT, no Δ.
-        return demographicStrideLengthM();
+        // Tier 1: cadence-dependent demographic stride (clamped); no LUT, no Δ.
+        return demographicStrideLengthM(cadenceSpm);
     }
     // Tier 2 (estimate) and tier 3 (full) both use the outdoor SL(c). The
     // learned Δ(c) is added ONLY in the full tier; in the estimate tier the

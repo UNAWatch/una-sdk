@@ -127,8 +127,9 @@ public:
     /// Δ(c): dense interpolation across all 35 bin centres (flat shelves).
     float deltaAt(float cadenceSpm) const;
 
-    /// Demographic SL = clamp(kDemographicK * height).
-    float demographicStrideLengthM() const;
+    /// Phase-1 demographic SL(c): height-scaled line through the cadence anchors
+    /// (see CadenceStrideModelConfig), clamped to the plausible stride window.
+    float demographicStrideLengthM(float cadenceSpm) const;
 
 private:
     /// Clamp a height to the plausible window, falling back to the default.
