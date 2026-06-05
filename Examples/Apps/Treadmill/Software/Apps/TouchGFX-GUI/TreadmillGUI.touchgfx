@@ -56,6 +56,310 @@
         ]
       },
       {
+        "Name": "MenuCalibration",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuCalibration"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "CalibrationData",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "cadenceText",
+            "X": 20,
+            "Y": 40,
+            "Width": 200,
+            "Height": 38,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_30",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_CADENCE"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "binsText",
+            "X": 20,
+            "Y": 72,
+            "Width": 200,
+            "Height": 24,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_BNSR",
+              "UseBuffer": true,
+              "BufferSize": 24
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "binHeader",
+            "X": 31,
+            "Y": 104,
+            "Width": 70,
+            "Height": 18,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_16_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_BIN"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dataHeader",
+            "X": 165,
+            "Y": 104,
+            "Width": 50,
+            "Height": 18,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_16_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_DATA"
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "line",
+            "X": 25,
+            "Y": 100,
+            "Width": 190,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "EndX": 190.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "ScrollList",
+            "Name": "scrollList",
+            "X": 25,
+            "Y": 126,
+            "Width": 190,
+            "Height": 90,
+            "LockPosition": true,
+            "ItemTemplateName": "BinListItem",
+            "NumberofItems": 35,
+            "Easing": "Linear",
+            "EasingOption": "Out",
+            "SwipeAcceleration": 1.0,
+            "DragAcceleration": 1.0,
+            "OverShootPercentage": 100
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "CalibrationData"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "CalibrationClearConfirm",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "headingText",
+            "X": 20,
+            "Y": 60,
+            "Width": 200,
+            "Height": 42,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_30",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_CLEAR_DATA_Q"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "captionText",
+            "X": 20,
+            "Y": 150,
+            "Width": 200,
+            "Height": 40,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_CLEAR_DATA_CAP"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "CalibrationClearConfirm"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "CalibrationCleared",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "headingText",
+            "X": 41,
+            "Y": 47,
+            "Width": 159,
+            "Height": 42,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_30",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_CLEARED"
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 95,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CircleTick_50x50.png"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "CalibrationCleared"
+            }
+          }
+        ]
+      },
+      {
         "Name": "MenuAlerts",
         "CanvasBufferSize": 3600,
         "Components": [
@@ -3934,6 +4238,56 @@
             "Width": 140,
             "Height": 41,
             "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "BinListItem",
+        "Width": 190,
+        "Height": 18,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "binLabel",
+            "X": 6,
+            "Y": 0,
+            "Width": 120,
+            "Height": 18,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_16_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_BNLB",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dataPct",
+            "X": 140,
+            "Y": 0,
+            "Width": 50,
+            "Height": 18,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_16_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_BNPC",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
           }
         ],
         "Interactions": []

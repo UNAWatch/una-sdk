@@ -196,6 +196,8 @@ private:
     void handleEvent(const CustomMessage::ManualLap& event);
     void handleEvent(const CustomMessage::IntervalsNextPhase& event);
     void handleEvent(const CustomMessage::TrackCalibrate& event);
+    void handleEvent(const CustomMessage::CalibDataRequest& event);
+    void handleEvent(const CustomMessage::CalibClear& event);
 
     // -- Track control --------------------------------------------------------
 

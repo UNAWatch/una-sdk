@@ -220,6 +220,42 @@
       <Text Id="TEXT_CALIBRATE_PROMPT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Adjust to match&#10;your treadmill</Translation>
       </Text>
+      <Text Id="TEXT_CALIBRATION" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Calibration</Translation>
+      </Text>
+      <Text Id="TEXT_CALIBRATION_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">CALIBRATION</Translation>
+      </Text>
+      <Text Id="TEXT_VIEW_DATA" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">View Data</Translation>
+      </Text>
+      <Text Id="TEXT_CLEAR_DATA" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Clear Data</Translation>
+      </Text>
+      <Text Id="TEXT_DATA_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">DATA</Translation>
+      </Text>
+      <Text Id="TEXT_CADENCE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Cadence</Translation>
+      </Text>
+      <Text Id="TEXT_BINS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Bins</Translation>
+      </Text>
+      <Text Id="TEXT_BIN" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Bin</Translation>
+      </Text>
+      <Text Id="TEXT_DATA" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Data</Translation>
+      </Text>
+      <Text Id="TEXT_CLEAR_DATA_Q" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Clear data?</Translation>
+      </Text>
+      <Text Id="TEXT_CLEAR_DATA_CAP" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">A backup is kept</Translation>
+      </Text>
+      <Text Id="TEXT_CLEARED" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Cleared</Translation>
+      </Text>
       <Text Id="TEXT_TIME" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Time</Translation>
       </Text>

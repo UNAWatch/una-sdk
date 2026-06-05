@@ -28,6 +28,7 @@ public:
     virtual void onIntervalsPhaseAlert() {}
     virtual void onIntervalsWorkoutCompleted() {}
     virtual void onActivitySummary(const ActivitySummary& summary) {}
+    virtual void onCalibrationData(const Model::CalibrationView& data) {}
 
 
 protected:

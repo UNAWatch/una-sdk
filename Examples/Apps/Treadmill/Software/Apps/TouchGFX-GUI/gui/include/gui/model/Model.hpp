@@ -9,6 +9,7 @@
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
 #include "SDK/Interfaces/ICustomMessageHandler.hpp"
+#include "SDK/Calibration/OutdoorStrideCalibConfig.hpp"  // bin layout constants (header-only)
 #include <SDK/Utils/Utils.hpp>
 #include <SDK/GUI/Config.hpp>
 #include <SDK/GUI/Color.hpp>
@@ -109,6 +110,34 @@ public:
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
 
+    // Calibration (Settings -> Calibration). All on-disk access lives in the
+    // Service; the GUI only requests a snapshot and issues a clear command.
+    /// Snapshot of the calibration state for the View Data screen.
+    struct CalibrationView {
+        enum Status : uint8_t { UNCALIBRATED = 0, ESTIMATING, CALIBRATED };
+        struct Bin {
+            uint16_t loSpm = 0;   ///< Bin lower-edge cadence (SPM)
+            uint16_t hiSpm = 0;   ///< Bin upper-edge cadence (SPM)
+            uint8_t  pct   = 0;   ///< Fill toward validity: steps/kBinValidMinSteps, 0..100
+            bool     valid = false;
+        };
+        Status   status         = UNCALIBRATED;
+        uint16_t validBins      = 0;
+        float    totalDistanceM = 0.0f;
+        uint16_t binCount       = 0;
+        Bin      bins[SDK::Calibration::Config::kBinCount] {};
+    };
+
+    /// Ask the Service for a fresh calibration snapshot; the reply arrives
+    /// asynchronously via ModelListener::onCalibrationData().
+    void requestCalibrationData();
+
+    /// Ask the Service to back up + clear the calibration stores.
+    void clearCalibrationData();
+
+    /// Last calibration snapshot received from the Service.
+    const CalibrationView& getCalibrationView() const { return mCalibView; }
+
 private:
     // Fields required for GUI <-> Service communication
     ModelListener*           modelListener;
@@ -150,6 +179,9 @@ private:
     Track::State           mTrackState            {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData             {};
+
+    // Calibration snapshot (mirrored from the Service on request).
+    CalibrationView        mCalibView             {};
 };
 
 #endif // MODEL_HPP
