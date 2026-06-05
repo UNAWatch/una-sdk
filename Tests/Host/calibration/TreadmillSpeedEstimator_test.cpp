@@ -47,10 +47,6 @@ std::string makeStoreJson(int version, const std::vector<SeedBin> &bins)
     return os.str();
 }
 
-// A phase-1 model: demographic stride is constant, so the estimator math is
-// easy to check by hand. height 1.75 → SL = 0.685 * 1.75 = 1.19875 m.
-constexpr float kDemoStride = 0.685f * 1.75f;
-
 } // namespace
 
 // --- Tick integration --------------------------------------------------------
@@ -66,7 +62,7 @@ TEST(TreadmillSpeedEstimator, SteadyCadenceIntegratesDistanceAndHistogram)
     est.startSession();
 
     const float cadence = 160.0f;
-    const float stride  = m.treadmillStrideLengthM(cadence);  // == kDemoStride
+    const float stride  = m.treadmillStrideLengthM(cadence);  // cadence-dependent demographic SL
     const float speed   = (cadence / 120.0f) * stride;
 
     for (int i = 0; i < 10; ++i) {
@@ -93,7 +89,7 @@ TEST(TreadmillSpeedEstimator, SpeedEqualsCadenceOver120TimesStride)
     est.startSession();
 
     est.tick(180.0f, true, 1.0f);
-    EXPECT_NEAR(est.speedMps(), (180.0f / 120.0f) * kDemoStride, 1e-4f);
+    EXPECT_NEAR(est.speedMps(), (180.0f / 120.0f) * m.treadmillStrideLengthM(180.0f), 1e-4f);
 }
 
 // --- Hold-forward ------------------------------------------------------------
@@ -107,7 +103,7 @@ TEST(TreadmillSpeedEstimator, HoldForwardWithinWindowKeepsIntegrating)
     est.startSession();
 
     const float cadence = 160.0f;
-    const float speed   = (cadence / 120.0f) * kDemoStride;
+    const float speed   = (cadence / 120.0f) * m.treadmillStrideLengthM(cadence);
 
     est.tick(cadence, true, 1.0f);  // 1 valid tick latches the held value
     const float distAfterValid = est.distanceM();
@@ -150,7 +146,7 @@ TEST(TreadmillSpeedEstimator, RevalidationReLatchesAndResumes)
     // Re-acquire at a new cadence → re-latches and resumes.
     est.tick(180.0f, true, 1.0f);
     EXPECT_TRUE(est.speedValid());
-    EXPECT_NEAR(est.speedMps(), (180.0f / 120.0f) * kDemoStride, 1e-4f);
+    EXPECT_NEAR(est.speedMps(), (180.0f / 120.0f) * m.treadmillStrideLengthM(180.0f), 1e-4f);
 }
 
 TEST(TreadmillSpeedEstimator, NoHeldSampleMeansNoIntegration)
@@ -227,7 +223,7 @@ TEST(TreadmillSpeedEstimator, AnomalousDtClampedToMaxTickGap)
     est.startSession();
 
     const float cadence = 160.0f;
-    const float speed   = (cadence / 120.0f) * kDemoStride;
+    const float speed   = (cadence / 120.0f) * m.treadmillStrideLengthM(cadence);
 
     est.tick(cadence, true, 100.0f);  // huge dt → clamped to kMaxTickGapS
     EXPECT_NEAR(est.distanceM(), speed * Cfg::kMaxTickGapS, 1e-3f);
