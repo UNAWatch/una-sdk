@@ -14,6 +14,7 @@
 #include "Settings.hpp"
 #include "Track.hpp"
 #include "ActivitySummary.hpp"
+#include "SDK/Calibration/OutdoorStrideCalibConfig.hpp"  // Config::kBinCount
 
 // Force 4-byte alignment for all message structures
 #pragma pack(push, 4)
@@ -35,6 +36,7 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type SUMMARY                  = 0x00000008;
     constexpr SDK::MessageType::Type INTERVALS_PHASE_ALERT      = 0x00000009;
     constexpr SDK::MessageType::Type INTERVALS_WORKOUT_COMPLETED = 0x00000010;
+    constexpr SDK::MessageType::Type CALIB_DATA                 = 0x00000013;
 
     // GUI --> Service
     constexpr SDK::MessageType::Type SETTINGS_SAVE         = 0x0000000A;
@@ -45,6 +47,8 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type MANUAL_LAP            = 0x0000000F;
     constexpr SDK::MessageType::Type INTERVALS_NEXT_PHASE  = 0x00000011;
     constexpr SDK::MessageType::Type TRACK_CALIBRATE       = 0x00000012;
+    constexpr SDK::MessageType::Type CALIB_DATA_REQUEST    = 0x00000014;
+    constexpr SDK::MessageType::Type CALIB_CLEAR           = 0x00000015;
 
     // Service <-> GUI
     struct SettingsUpd : public SDK::MessageBase {
@@ -122,6 +126,20 @@ namespace CustomMessage {
         IntervalsWorkoutCompleted() : SDK::MessageBase(INTERVALS_WORKOUT_COMPLETED) {}
     };
 
+    // Calibration snapshot for Settings > Calibration > View Data. The Service
+    // owns all access to the on-disk stride LUT; this is its read-only summary.
+    struct CalibData : public SDK::MessageBase {
+        uint8_t  status;          ///< 0 uncalibrated / 1 estimating / 2 calibrated
+        uint16_t validBins;
+        uint16_t binCount;
+        float    totalDistanceM;
+        uint8_t  pct[SDK::Calibration::Config::kBinCount];  ///< per-bin fill toward validity, 0..100
+        CalibData()
+            : SDK::MessageBase(CALIB_DATA)
+            , status(0), validBins(0), binCount(0), totalDistanceM(0.0f), pct{}
+        {}
+    };
+
     // GUI --> Service
     struct SettingsSave : public SDK::MessageBase {
         // Application settings
@@ -170,6 +188,16 @@ namespace CustomMessage {
             : SDK::MessageBase(TRACK_CALIBRATE)
             , distanceActualM(0.0f)
         {}
+    };
+
+    // Ask the Service for a fresh calibration snapshot (-> CalibData).
+    struct CalibDataRequest : public SDK::MessageBase {
+        CalibDataRequest() : SDK::MessageBase(CALIB_DATA_REQUEST) {}
+    };
+
+    // Ask the Service to back up and clear the calibration stores.
+    struct CalibClear : public SDK::MessageBase {
+        CalibClear() : SDK::MessageBase(CALIB_CLEAR) {}
     };
 
 
@@ -292,6 +320,25 @@ public:
         return status;
     }
 
+    bool calibData(uint8_t status, uint16_t validBins, uint16_t binCount,
+                   float totalDistanceM, const uint8_t* pct, uint16_t pctCount)
+    {
+        bool status_ = false;
+        auto *msg = mKernel.comm.allocateMessage<CustomMessage::CalibData>();
+        if (msg) {
+            msg->status         = status;
+            msg->validBins      = validBins;
+            msg->binCount       = binCount;
+            msg->totalDistanceM = totalDistanceM;
+            const uint16_t n = (pctCount < SDK::Calibration::Config::kBinCount)
+                ? pctCount : SDK::Calibration::Config::kBinCount;
+            memcpy(msg->pct, pct, n);
+            status_ = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status_;
+    }
+
     // GUI --> Service
     bool settingsSave(Settings settings)
     {
@@ -379,6 +426,28 @@ public:
         auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackCalibrate>();
         if (msg) {
             msg->distanceActualM = distanceActualM;
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
+    }
+
+    bool calibDataRequest()
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<CustomMessage::CalibDataRequest>();
+        if (msg) {
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
+    }
+
+    bool calibClear()
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<CustomMessage::CalibClear>();
+        if (msg) {
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

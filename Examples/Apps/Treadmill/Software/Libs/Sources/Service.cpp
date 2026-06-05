@@ -181,6 +181,14 @@ void Service::run()
                     LOG_DEBUG("TRACK_CALIBRATE\n");
                     handleEvent(*static_cast<CustomMessage::TrackCalibrate*>(msg));
                 } break;
+                case CustomMessage::CALIB_DATA_REQUEST:  {
+                    LOG_DEBUG("CALIB_DATA_REQUEST\n");
+                    handleEvent(*static_cast<CustomMessage::CalibDataRequest*>(msg));
+                } break;
+                case CustomMessage::CALIB_CLEAR:  {
+                    LOG_DEBUG("CALIB_CLEAR\n");
+                    handleEvent(*static_cast<CustomMessage::CalibClear*>(msg));
+                } break;
 
                 // Sensors messages
                 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
@@ -985,6 +993,55 @@ void Service::handleEvent(const CustomMessage::TrackCalibrate& event)
         return;   // no pending session (e.g. a short run finalised on stop)
     }
     finalizeActivity(event.distanceActualM);
+}
+
+void Service::handleEvent(const CustomMessage::CalibDataRequest& /*event*/)
+{
+    using namespace SDK::Calibration;
+
+    // Read the shared outdoor LUT fresh from disk (the on-disk state is the
+    // source of truth for the View Data screen) and summarise it for the GUI.
+    StrideLut lut;
+    lut.loadFromFile(mKernel.fs, StrideLut::kDefaultPath);  // absent -> all-zero
+
+    constexpr uint16_t kN = StrideLut::kBinCount;
+    uint8_t pct[kN] = {};
+    for (uint16_t i = 0; i < kN; ++i) {
+        float p = (Config::kBinValidMinSteps > 0.0f)
+            ? (lut.bin(i).total_steps / Config::kBinValidMinSteps) * 100.0f
+            : 0.0f;
+        if (p > 100.0f) p = 100.0f;
+        pct[i] = static_cast<uint8_t>(p + 0.5f);
+    }
+    const uint8_t status = lut.readyForPhase2()          ? 2
+                         : lut.readyForOutdoorEstimate()  ? 1
+                                                          : 0;
+    mGuiSender.calibData(status, static_cast<uint16_t>(lut.validBinCount()), kN,
+                         lut.totalCalibrationDistanceM(), pct, kN);
+}
+
+void Service::handleEvent(const CustomMessage::CalibClear& /*event*/)
+{
+    using namespace SDK::Calibration;
+    SDK::Interface::IFileSystem& fs = mKernel.fs;
+
+    // Back up then drop a store so the next session starts uncalibrated. Only
+    // remove the live file once the backup copy has succeeded, so a copy
+    // failure never destroys data without a recoverable backup.
+    auto backupAndRemove = [&fs](const char* live, const char* backup) {
+        if (!fs.exist(live)) {
+            return;
+        }
+        if (fs.copy(live, backup)) {
+            fs.remove(live);
+            LOG_INFO("Calib clear: %s -> %s\n", live, backup);
+        } else {
+            LOG_WARNING("Calib clear: backup of %s failed; live file kept\n", live);
+        }
+    };
+
+    backupAndRemove(StrideLut::kDefaultPath, "../SharedData/stride_deleted.json");
+    backupAndRemove(Config::kDeltaLutPath,   "treadmill_delta_deleted.json");
 }
 
 void Service::pauseTrack(bool pause)

@@ -16,6 +16,14 @@
 #include <gui/main_screen/MainPresenter.hpp>
 #include <gui/menusettings_screen/MenuSettingsView.hpp>
 #include <gui/menusettings_screen/MenuSettingsPresenter.hpp>
+#include <gui/menucalibration_screen/MenuCalibrationView.hpp>
+#include <gui/menucalibration_screen/MenuCalibrationPresenter.hpp>
+#include <gui/calibrationdata_screen/CalibrationDataView.hpp>
+#include <gui/calibrationdata_screen/CalibrationDataPresenter.hpp>
+#include <gui/calibrationclearconfirm_screen/CalibrationClearConfirmView.hpp>
+#include <gui/calibrationclearconfirm_screen/CalibrationClearConfirmPresenter.hpp>
+#include <gui/calibrationcleared_screen/CalibrationClearedView.hpp>
+#include <gui/calibrationcleared_screen/CalibrationClearedPresenter.hpp>
 #include <gui/menualerts_screen/MenuAlertsView.hpp>
 #include <gui/menualerts_screen/MenuAlertsPresenter.hpp>
 #include <gui/menudistance_screen/MenuDistanceView.hpp>
@@ -90,6 +98,10 @@ public:
      */
     typedef touchgfx::meta::TypeList< MainView,
             touchgfx::meta::TypeList< MenuSettingsView,
+            touchgfx::meta::TypeList< MenuCalibrationView,
+            touchgfx::meta::TypeList< CalibrationDataView,
+            touchgfx::meta::TypeList< CalibrationClearConfirmView,
+            touchgfx::meta::TypeList< CalibrationClearedView,
             touchgfx::meta::TypeList< MenuAlertsView,
             touchgfx::meta::TypeList< MenuDistanceView,
             touchgfx::meta::TypeList< MenuDistanceSavedView,
@@ -115,7 +127,7 @@ public:
             touchgfx::meta::TypeList< TrackIntervalsCountdownView,
             touchgfx::meta::TypeList< TrackIntervalsAlertView,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedView,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedViewTypes;
 
     /**
@@ -129,6 +141,10 @@ public:
      */
     typedef touchgfx::meta::TypeList< MainPresenter,
             touchgfx::meta::TypeList< MenuSettingsPresenter,
+            touchgfx::meta::TypeList< MenuCalibrationPresenter,
+            touchgfx::meta::TypeList< CalibrationDataPresenter,
+            touchgfx::meta::TypeList< CalibrationClearConfirmPresenter,
+            touchgfx::meta::TypeList< CalibrationClearedPresenter,
             touchgfx::meta::TypeList< MenuAlertsPresenter,
             touchgfx::meta::TypeList< MenuDistancePresenter,
             touchgfx::meta::TypeList< MenuDistanceSavedPresenter,
@@ -154,7 +170,7 @@ public:
             touchgfx::meta::TypeList< TrackIntervalsCountdownPresenter,
             touchgfx::meta::TypeList< TrackIntervalsAlertPresenter,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedPresenter,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedPresenterTypes;
 
     /**

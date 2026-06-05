@@ -26,6 +26,18 @@ public:
     // MenuSettings
     void gotoMenuSettingsScreenNoTransition();
 
+    // MenuCalibration
+    void gotoMenuCalibrationScreenNoTransition();
+
+    // CalibrationData
+    void gotoCalibrationDataScreenNoTransition();
+
+    // CalibrationClearConfirm
+    void gotoCalibrationClearConfirmScreenNoTransition();
+
+    // CalibrationCleared
+    void gotoCalibrationClearedScreenNoTransition();
+
     // MenuAlerts
     void gotoMenuAlertsScreenNoTransition();
 
@@ -111,6 +123,18 @@ protected:
 
     // MenuSettings
     void gotoMenuSettingsScreenNoTransitionImpl();
+
+    // MenuCalibration
+    void gotoMenuCalibrationScreenNoTransitionImpl();
+
+    // CalibrationData
+    void gotoCalibrationDataScreenNoTransitionImpl();
+
+    // CalibrationClearConfirm
+    void gotoCalibrationClearConfirmScreenNoTransitionImpl();
+
+    // CalibrationCleared
+    void gotoCalibrationClearedScreenNoTransitionImpl();
 
     // MenuAlerts
     void gotoMenuAlertsScreenNoTransitionImpl();

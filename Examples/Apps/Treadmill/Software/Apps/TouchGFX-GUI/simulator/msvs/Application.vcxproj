@@ -210,6 +210,20 @@
     <ClCompile Include="..\..\gui\src\trackcalibrateintro_screen\TrackCalibrateIntroPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\trackcalibrateintro_screen\TrackCalibrateIntroView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\BinListItem.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\BinListItemBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\calibrationclearconfirm_screen\CalibrationClearConfirmPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\calibrationclearconfirm_screen\CalibrationClearConfirmView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\calibrationclearconfirm_screen\CalibrationClearConfirmViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\calibrationcleared_screen\CalibrationClearedPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\calibrationcleared_screen\CalibrationClearedView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\calibrationcleared_screen\CalibrationClearedViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\calibrationdata_screen\CalibrationDataPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\calibrationdata_screen\CalibrationDataView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\calibrationdata_screen\CalibrationDataViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menucalibration_screen\MenuCalibrationPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menucalibration_screen\MenuCalibrationView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menucalibration_screen\MenuCalibrationViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -565,6 +579,20 @@
     <ClInclude Include="..\..\gui\include\gui\trackcalibrateintro_screen\TrackCalibrateIntroPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\trackcalibrateintro_screen\TrackCalibrateIntroView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\BinListItem.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\BinListItemBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\calibrationclearconfirm_screen\CalibrationClearConfirmPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\calibrationclearconfirm_screen\CalibrationClearConfirmView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\calibrationclearconfirm_screen\CalibrationClearConfirmViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\calibrationcleared_screen\CalibrationClearedPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\calibrationcleared_screen\CalibrationClearedView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\calibrationcleared_screen\CalibrationClearedViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\calibrationdata_screen\CalibrationDataPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\calibrationdata_screen\CalibrationDataView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\calibrationdata_screen\CalibrationDataViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menucalibration_screen\MenuCalibrationPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menucalibration_screen\MenuCalibrationView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menucalibration_screen\MenuCalibrationViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

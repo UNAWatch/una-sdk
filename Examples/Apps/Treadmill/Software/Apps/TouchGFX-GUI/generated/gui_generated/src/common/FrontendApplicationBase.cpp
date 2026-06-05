@@ -13,6 +13,14 @@
 #include <gui/main_screen/MainPresenter.hpp>
 #include <gui/menusettings_screen/MenuSettingsView.hpp>
 #include <gui/menusettings_screen/MenuSettingsPresenter.hpp>
+#include <gui/menucalibration_screen/MenuCalibrationView.hpp>
+#include <gui/menucalibration_screen/MenuCalibrationPresenter.hpp>
+#include <gui/calibrationdata_screen/CalibrationDataView.hpp>
+#include <gui/calibrationdata_screen/CalibrationDataPresenter.hpp>
+#include <gui/calibrationclearconfirm_screen/CalibrationClearConfirmView.hpp>
+#include <gui/calibrationclearconfirm_screen/CalibrationClearConfirmPresenter.hpp>
+#include <gui/calibrationcleared_screen/CalibrationClearedView.hpp>
+#include <gui/calibrationcleared_screen/CalibrationClearedPresenter.hpp>
 #include <gui/menualerts_screen/MenuAlertsView.hpp>
 #include <gui/menualerts_screen/MenuAlertsPresenter.hpp>
 #include <gui/menudistance_screen/MenuDistanceView.hpp>
@@ -105,6 +113,58 @@ void FrontendApplicationBase::gotoMenuSettingsScreenNoTransition()
 void FrontendApplicationBase::gotoMenuSettingsScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<MenuSettingsView, MenuSettingsPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuCalibration
+
+void FrontendApplicationBase::gotoMenuCalibrationScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuCalibrationScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuCalibrationScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuCalibrationView, MenuCalibrationPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// CalibrationData
+
+void FrontendApplicationBase::gotoCalibrationDataScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoCalibrationDataScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoCalibrationDataScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<CalibrationDataView, CalibrationDataPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// CalibrationClearConfirm
+
+void FrontendApplicationBase::gotoCalibrationClearConfirmScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoCalibrationClearConfirmScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoCalibrationClearConfirmScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<CalibrationClearConfirmView, CalibrationClearConfirmPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// CalibrationCleared
+
+void FrontendApplicationBase::gotoCalibrationClearedScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoCalibrationClearedScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoCalibrationClearedScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<CalibrationClearedView, CalibrationClearedPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
 // MenuAlerts

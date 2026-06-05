@@ -273,6 +273,19 @@ const ActivitySummary& Model::getTrackSummary() const
 }
 
 
+// Calibration — the Service owns all stride-store access; the GUI only asks.
+
+void Model::requestCalibrationData()
+{
+    mSrvSender.calibDataRequest();
+}
+
+void Model::clearCalibrationData()
+{
+    mSrvSender.calibClear();
+}
+
+
 // Private
 
 void Model::decIdleTimer()
@@ -407,6 +420,25 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
                 mActivitySummary = msg->summary;
                 modelListener->onActivitySummary(*mActivitySummary);
             }
+        } break;
+
+        case CustomMessage::CALIB_DATA: {
+            LOG_DEBUG("CALIB_DATA\n");
+            auto* msg = static_cast<CustomMessage::CalibData*>(message);
+            namespace Cfg = SDK::Calibration::Config;
+            mCalibView.status         = static_cast<CalibrationView::Status>(msg->status);
+            mCalibView.validBins      = msg->validBins;
+            mCalibView.totalDistanceM = msg->totalDistanceM;
+            uint16_t n = (msg->binCount < Cfg::kBinCount) ? msg->binCount : Cfg::kBinCount;
+            mCalibView.binCount = n;
+            for (uint16_t i = 0; i < n; ++i) {
+                const uint16_t lo = static_cast<uint16_t>(Cfg::kBinBaseSpm + i * Cfg::kBinWidthSpm);
+                mCalibView.bins[i].loSpm = lo;
+                mCalibView.bins[i].hiSpm = static_cast<uint16_t>(lo + Cfg::kBinWidthSpm);
+                mCalibView.bins[i].pct   = msg->pct[i];
+                mCalibView.bins[i].valid = (msg->pct[i] >= 100);
+            }
+            modelListener->onCalibrationData(mCalibView);
         } break;
 
         default:

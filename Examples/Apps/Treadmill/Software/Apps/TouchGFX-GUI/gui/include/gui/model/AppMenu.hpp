@@ -122,7 +122,7 @@ struct Root {
 
     struct Settings {
         enum Id {
-            ID_ALERTS = 0, ID_PHONE_NOTIF,
+            ID_ALERTS = 0, ID_CALIBRATION, ID_PHONE_NOTIF,
             ID_COUNT, ID_DEFAULT = ID_ALERTS
         };
 
@@ -134,6 +134,15 @@ struct Root {
 
             using Distance = ::Settings::Alerts::Distance;
             using Time     = ::Settings::Alerts::Time;
+        };
+
+        // Calibration submenu (Treadmill): inspect / reset the cadence-stride
+        // calibration stores.
+        struct Calibration {
+            enum Id {
+                ID_VIEW_DATA = 0, ID_CLEAR_DATA,
+                ID_COUNT, ID_DEFAULT = ID_VIEW_DATA
+            };
         };
     };
 };
@@ -183,11 +192,12 @@ struct Nav : Position<Root> {
         void reset()         { Position<Root::Intervals>::reset(); resetChildren(); }
     };
 
-    // Settings node -- alerts picker is a child
+    // Settings node -- alerts picker and calibration submenu are children
     struct SettingsNav : Position<Root::Settings> {
-        Position<Root::Settings::Alerts> alerts;
+        Position<Root::Settings::Alerts>      alerts;
+        Position<Root::Settings::Calibration> calibration;
 
-        void resetChildren() { alerts.reset(); }
+        void resetChildren() { alerts.reset(); calibration.reset(); }
         void reset()         { Position<Root::Settings>::reset(); resetChildren(); }
     };
 

@@ -664,6 +664,54 @@
     <Filter Include="Source Files\generated\gui_generated\trackcalibrateintro_screen">
       <UniqueIdentifier>D3C2212E-5C07-C8D1-5211-BEF508D97858</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\gui\calibrationdata_screen">
+      <UniqueIdentifier>5662A389-1883-B220-DA09-94BCC3A10FD8</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\calibrationdata_screen">
+      <UniqueIdentifier>1ECB10F3-907A-60E5-531B-3A8FA7378783</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\calibrationcleared_screen">
+      <UniqueIdentifier>6B0580FA-737D-10A9-691F-847D1A8A97FD</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\calibrationcleared_screen">
+      <UniqueIdentifier>DBF725B9-5F96-1E9D-BD82-0C789E54D744</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\calibrationclearconfirm_screen">
+      <UniqueIdentifier>2E64CE6A-D35E-2667-0517-E5B5BE65B02A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\calibrationclearconfirm_screen">
+      <UniqueIdentifier>93E3A2AE-5F8B-A87D-0445-3D40EC75D0A8</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menucalibration_screen">
+      <UniqueIdentifier>E8E996FC-2BDB-B07F-0D81-3D1387540371</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menucalibration_screen">
+      <UniqueIdentifier>48D4819C-87B3-CE94-17B5-F0F39ED34A47</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menucalibration_screen">
+      <UniqueIdentifier>17153466-2E0E-3A33-7BDB-578F9D5CFB6C</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menucalibration_screen">
+      <UniqueIdentifier>AADB5BD8-62F3-01FD-124E-D0A421A8D2C6</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\calibrationdata_screen">
+      <UniqueIdentifier>78B838D5-FEEB-A2B9-D330-4887F70AC775</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\calibrationdata_screen">
+      <UniqueIdentifier>187BD011-CCAC-B03D-1E3B-FDC92A60892B</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\calibrationcleared_screen">
+      <UniqueIdentifier>78772F20-27F8-B1CB-0784-68E15999ED7B</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\calibrationcleared_screen">
+      <UniqueIdentifier>A55EFE23-B553-DC99-3608-4441E03F7EF9</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\calibrationclearconfirm_screen">
+      <UniqueIdentifier>DD6A7884-F8C2-E109-ED9E-DFC05348D910</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\calibrationclearconfirm_screen">
+      <UniqueIdentifier>C668798F-D7CF-FEAA-83AC-097101B622F2</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -1685,6 +1733,90 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackcalibrateintro_screen\TrackCalibrateIntroViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\trackcalibrateintro_screen</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\containers\BinListItem.cpp">
+      <Filter>Source Files\gui\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\BinListItemBase.cpp">
+      <Filter>Source Files\generated\gui_generated\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\calibrationclearconfirm_screen\CalibrationClearConfirmPresenter.cpp">
+      <Filter>Source Files\gui\calibrationclearconfirm_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\calibrationclearconfirm_screen\CalibrationClearConfirmView.cpp">
+      <Filter>Source Files\gui\calibrationclearconfirm_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\calibrationclearconfirm_screen\CalibrationClearConfirmViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\calibrationclearconfirm_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\calibrationcleared_screen\CalibrationClearedPresenter.cpp">
+      <Filter>Source Files\gui\calibrationcleared_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\calibrationcleared_screen\CalibrationClearedView.cpp">
+      <Filter>Source Files\gui\calibrationcleared_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\calibrationcleared_screen\CalibrationClearedViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\calibrationcleared_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\calibrationdata_screen\CalibrationDataPresenter.cpp">
+      <Filter>Source Files\gui\calibrationdata_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\calibrationdata_screen\CalibrationDataView.cpp">
+      <Filter>Source Files\gui\calibrationdata_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\calibrationdata_screen\CalibrationDataViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\calibrationdata_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menucalibration_screen\MenuCalibrationPresenter.cpp">
+      <Filter>Source Files\gui\menucalibration_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menucalibration_screen\MenuCalibrationView.cpp">
+      <Filter>Source Files\gui\menucalibration_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menucalibration_screen\MenuCalibrationViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menucalibration_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\containers\BinListItem.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\BinListItemBase.hpp">
+      <Filter>Header Files\generated\gui_generated\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\calibrationclearconfirm_screen\CalibrationClearConfirmPresenter.hpp">
+      <Filter>Header Files\gui\calibrationclearconfirm_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\calibrationclearconfirm_screen\CalibrationClearConfirmView.hpp">
+      <Filter>Header Files\gui\calibrationclearconfirm_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\calibrationclearconfirm_screen\CalibrationClearConfirmViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\calibrationclearconfirm_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\calibrationcleared_screen\CalibrationClearedPresenter.hpp">
+      <Filter>Header Files\gui\calibrationcleared_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\calibrationcleared_screen\CalibrationClearedView.hpp">
+      <Filter>Header Files\gui\calibrationcleared_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\calibrationcleared_screen\CalibrationClearedViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\calibrationcleared_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\calibrationdata_screen\CalibrationDataPresenter.hpp">
+      <Filter>Header Files\gui\calibrationdata_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\calibrationdata_screen\CalibrationDataView.hpp">
+      <Filter>Header Files\gui\calibrationdata_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\calibrationdata_screen\CalibrationDataViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\calibrationdata_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menucalibration_screen\MenuCalibrationPresenter.hpp">
+      <Filter>Header Files\gui\menucalibration_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menucalibration_screen\MenuCalibrationView.hpp">
+      <Filter>Header Files\gui\menucalibration_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menucalibration_screen\MenuCalibrationViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menucalibration_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
