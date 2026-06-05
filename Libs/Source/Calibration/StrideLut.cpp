@@ -69,8 +69,7 @@ float StrideLut::totalCalibrationDistanceM() const
 
 bool StrideLut::readyForPhase2() const
 {
-    return validBinCount() >= Config::kOutdoorLutMinValidBins &&
-           totalCalibrationDistanceM() >= Config::kOutdoorLutMinCalibrationDistanceM;
+    return validBinCount() >= Config::kOutdoorLutMinValidBins;
 }
 
 bool StrideLut::readyForOutdoorEstimate() const

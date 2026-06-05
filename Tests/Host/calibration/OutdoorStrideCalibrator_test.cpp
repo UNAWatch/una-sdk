@@ -419,7 +419,7 @@ TEST(OutdoorStrideCalibrator, Phase2GateReady)
     EXPECT_TRUE(c.readyForPhase2());
 }
 
-TEST(OutdoorStrideCalibrator, Phase2GateNotReadyOnDistance)
+TEST(OutdoorStrideCalibrator, Phase2GateReadyAtLowDistance)
 {
     SDK::Test::FakeFileSystem fs;
     std::vector<SeedBin> bins;
@@ -430,8 +430,9 @@ TEST(OutdoorStrideCalibrator, Phase2GateNotReadyOnDistance)
 
     OutdoorStrideCalibrator c(fs, kPath);
     c.load();
+    // 8 valid bins is the sole gate; no distance floor, so 4000 m is ready.
     EXPECT_EQ(c.validBinCount(), 8u);
-    EXPECT_FALSE(c.readyForPhase2());
+    EXPECT_TRUE(c.readyForPhase2());
 }
 
 TEST(OutdoorStrideCalibrator, Phase2GateNotReadyOnBinCount)

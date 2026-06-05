@@ -62,11 +62,15 @@ constexpr float kBinValidMinSteps = 200.0f;
 
 // --- Phase-2 gate -------------------------------------------------
 
-/// Valid bins required for the phase-2 gate.
+/// Valid bins required for the phase-2 (fully-calibrated) gate. This is the sole
+/// condition: 8 distinct valid bins, each already requiring kBinValidMinSteps
+/// accepted steps, give both cadence-coverage breadth and per-bin confidence.
+/// There is deliberately no total-distance floor -- it was a weak proxy that, in
+/// practice, almost never bound (a typical cadence range piles far more than the
+/// old 5 km floor into a few bins long before 8 distinct bins validate), and
+/// phase 2 only *starts* the delta LUT learning (it keeps refining afterward),
+/// so the floor added cost without meaningfully protecting calibration quality.
 constexpr size_t kOutdoorLutMinValidBins = 8;
-
-/// Total LUT distance required for the phase-2 gate, metres.
-constexpr float kOutdoorLutMinCalibrationDistanceM = 5000.0f;
 
 // --- Intermediate (outdoor-estimate) gate -------------------------
 

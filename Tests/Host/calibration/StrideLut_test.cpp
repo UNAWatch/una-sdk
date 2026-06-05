@@ -183,7 +183,7 @@ TEST(StrideLut, Phase2GateReady)
     EXPECT_TRUE(lut.readyForPhase2());
 }
 
-TEST(StrideLut, Phase2GateNotReadyOnDistance)
+TEST(StrideLut, Phase2GateReadyAtLowDistance)
 {
     SDK::Test::FakeFileSystem fs;
     std::vector<SeedBin> bins;
@@ -193,8 +193,10 @@ TEST(StrideLut, Phase2GateNotReadyOnDistance)
     fs.seedFile(kPath, makeStoreJson(1, bins));
     StrideLut lut;
     ASSERT_TRUE(lut.loadFromFile(fs, kPath));
+    // 8 valid bins is the sole gate; there is no distance floor, so 4000 m total
+    // is still ready for phase 2.
     EXPECT_EQ(lut.validBinCount(), 8u);
-    EXPECT_FALSE(lut.readyForPhase2());
+    EXPECT_TRUE(lut.readyForPhase2());
 }
 
 TEST(StrideLut, Phase2GateNotReadyOnBinCount)

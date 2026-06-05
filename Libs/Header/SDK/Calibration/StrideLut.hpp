@@ -126,8 +126,8 @@ public:
     /// Total accumulated calibration distance across all bins, metres.
     float totalCalibrationDistanceM() const;
 
-    /// True when both phase-2 conditions hold (>=8 valid bins and >=5000 m).
-    /// At this point the delta LUT may begin learning.
+    /// True when the phase-2 condition holds (>= kOutdoorLutMinValidBins valid
+    /// bins; no distance floor). At this point the delta LUT may begin learning.
     bool readyForPhase2() const;
 
     /// True once there is enough outdoor data to use the LUT for live
