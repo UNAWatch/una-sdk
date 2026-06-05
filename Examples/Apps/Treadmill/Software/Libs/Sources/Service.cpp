@@ -967,12 +967,31 @@ void Service::finalizeActivity(float distanceActualM)
     const SDK::Calibration::CadenceStrideModel::CalibrationResult res =
         mModel.applyPostRunCalibration(mCalibSteps, mCalibDEstimatedM, distanceActualM);
 
+    // Keep the SESSION-level totals mutually consistent after the (possibly
+    // corrected) distance is known. avg_speed is defined as
+    // total_distance / total_timer_time, so derive it from the final distance --
+    // distance, duration and pace then always agree, on every run. max_speed has
+    // no "total" to derive from, so it takes the uniform stride-correction factor
+    // k (= D_actual / D_estimated; 1.0 when calibration was skipped). Per-record
+    // and per-lap data are intentionally left as recorded (industry convention).
+    const float kCalib = (mCalibDEstimatedM > 1e-3f)
+        ? (res.distanceForFitM / mCalibDEstimatedM)
+        : 1.0f;
+
     mPendingFitTrack.distance = res.distanceForFitM;
+    mPendingFitTrack.speedMax *= kCalib;
+    mPendingFitTrack.speedAvg = (mPendingFitTrack.duration > 1e-3f)
+        ? (res.distanceForFitM / mPendingFitTrack.duration)
+        : 0.0f;
     // Always record the pre-correction estimate as a developer field (§5.4).
     mPendingFitTrack.distancePreCalibrationM = mCalibDEstimatedM;
 
-    // Reflect the (possibly corrected) distance in the saved + published summary.
+    // Reflect the same derived totals in the saved + published summary.
     mSummary.distance = res.distanceForFitM;
+    mSummary.speedAvg = (mSummary.time > 1e-3f)
+        ? (res.distanceForFitM / mSummary.time)
+        : 0.0f;
+    mSummary.paceAvg = getPace(mSummary.speedAvg, mSpeedCounter.getMinValid());
     if (!mActivitySummarySerializer.save(mSummary)) {
         LOG_ERROR("Can't save activity summary\n");
     }
