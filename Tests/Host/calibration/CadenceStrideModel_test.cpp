@@ -92,10 +92,10 @@ TEST(CadenceStrideModel, PhaseUncalibratedWhenNoLut)
     EXPECT_FALSE(m.outdoorLutReady());
 }
 
-TEST(CadenceStrideModel, PhaseCalibratedAtThreshold)
+TEST(CadenceStrideModel, PhaseCalibratedAtFullBinCount)
 {
     SDK::Test::FakeFileSystem fs;
-    // 8 valid bins, 625 m each → 5000 m total (== threshold).
+    // 8 valid bins → full tier (bin count is the sole condition).
     fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 625.0f)));
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
     m.startSession(1.75f);
@@ -116,15 +116,17 @@ TEST(CadenceStrideModel, PhaseEstimateBelowFullBinCount)
     EXPECT_FALSE(m.outdoorLutReady());
 }
 
-TEST(CadenceStrideModel, PhaseEstimateBelowFullDistance)
+TEST(CadenceStrideModel, PhaseCalibratedAtFullBinsRegardlessOfDistance)
 {
     SDK::Test::FakeFileSystem fs;
     fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 500.0f)));  // 4000 m, 8 bins
     CadenceStrideModel m(fs, kOutPath, kDeltaPath);
     m.startSession(1.75f);
-    // 8 valid bins but <5000 m total → estimate, not full.
-    EXPECT_EQ(m.phase(), Phase::OUTDOOR_ESTIMATE);
-    EXPECT_FALSE(m.deltaLearningActive());
+    // 8 valid bins is the sole full-tier condition (no distance floor): even at
+    // 4000 m total this is OUTDOOR_CALIBRATED with the delta LUT learning.
+    EXPECT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+    EXPECT_TRUE(m.outdoorLutReady());
+    EXPECT_TRUE(m.deltaLearningActive());
 }
 
 TEST(CadenceStrideModel, PhaseEstimateAtOneValidBin)
