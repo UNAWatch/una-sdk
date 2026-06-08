@@ -153,13 +153,15 @@ TEST(CadenceStrideModel, PhaseEstimateAtOneValidBin)
     EXPECT_TRUE(m.usingOutdoorStride());
     EXPECT_FALSE(m.deltaLearningActive());
 
-    // The personalised outdoor stride is used, NOT the demographic fallback.
-    const float demo = m.demographicStrideLengthM(160.0f);
-    EXPECT_NEAR(m.treadmillStrideLengthM(160.0f), 1.5f, 1e-4f);
-    EXPECT_GT(std::fabs(m.treadmillStrideLengthM(160.0f) - demo), 0.1f);
-    // One bin → flat across all cadences (single-point personalisation).
-    EXPECT_NEAR(m.treadmillStrideLengthM(100.0f),
-                m.treadmillStrideLengthM(200.0f), 1e-4f);
+    // The personalised outdoor stride is used: exact at the bin centre, and
+    // shifted from the pure demographic curve elsewhere (measured 1.5 m at the
+    // centre is above the demographic value there → a positive shift).
+    EXPECT_NEAR(m.treadmillStrideLengthM(82.0f), 1.5f, 1e-4f);
+    EXPECT_GT(m.treadmillStrideLengthM(160.0f), m.demographicStrideLengthM(160.0f));
+    // One bin no longer collapses to a flat stride: it rides the demographic
+    // cadence slope, so it stays cadence-dependent (detail in
+    // OutdoorEstimateSingleBinRidesDemographicSlope).
+    EXPECT_GT(m.treadmillStrideLengthM(200.0f), m.treadmillStrideLengthM(100.0f));
 }
 
 TEST(CadenceStrideModel, PhaseUncalibratedWhenNoValidBin)
@@ -267,9 +269,51 @@ TEST(CadenceStrideModel, OutdoorStrideInterpolationAndShelves)
 
     EXPECT_NEAR(m.outdoorStrideLengthM(98.0f), 1.0f, 1e-4f);   // exact centre
     EXPECT_NEAR(m.outdoorStrideLengthM(118.0f), 1.5f, 1e-4f);  // exact centre
-    EXPECT_NEAR(m.outdoorStrideLengthM(108.0f), 1.25f, 1e-4f); // midpoint interp
-    EXPECT_NEAR(m.outdoorStrideLengthM(82.0f), 1.0f, 1e-4f);   // shelf below lowest
-    EXPECT_NEAR(m.outdoorStrideLengthM(218.0f), 1.5f, 1e-4f);  // shelf above highest
+    EXPECT_NEAR(m.outdoorStrideLengthM(108.0f), 1.25f, 1e-4f); // midpoint interp (interior unchanged)
+
+    // Outside the valid span the estimate is no longer a flat shelf: it rides the
+    // demographic cadence slope, shifted to pass through the nearest valid bin.
+    EXPECT_NEAR(m.outdoorStrideLengthM(82.0f),
+                m.demographicStrideLengthM(82.0f)
+                    + (1.0f - m.demographicStrideLengthM(98.0f)),
+                1e-4f);
+    EXPECT_NEAR(m.outdoorStrideLengthM(218.0f),
+                m.demographicStrideLengthM(218.0f)
+                    + (1.5f - m.demographicStrideLengthM(118.0f)),
+                1e-4f);
+    // Cadence-dependent (lower cadence below the lowest bin → shorter stride),
+    // not the old flat 1.0.
+    EXPECT_LT(m.outdoorStrideLengthM(82.0f), 1.0f);
+}
+
+// A single valid bin must NOT collapse to a flat (cadence-independent) stride:
+// that would be a downgrade from the cadence-dependent demographic tier. The
+// estimate tier rides the demographic slope shifted through the one measured bin.
+TEST(CadenceStrideModel, OutdoorEstimateSingleBinRidesDemographicSlope)
+{
+    SDK::Test::FakeFileSystem fs;
+    // One valid bin at centre 130 (>= 200 steps), SL = 300 / (400/2) = 1.5.
+    fs.seedFile(kOutPath, makeStoreJson(1, {{130.0f, 300.0f, 400.0f, 50.0f}}));
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_ESTIMATE);
+
+    // Exactly the measured stride at the bin centre.
+    EXPECT_NEAR(m.outdoorStrideLengthM(130.0f), 1.5f, 1e-4f);
+
+    // Cadence-dependent away from the bin: lower → shorter, higher → longer.
+    const float slLo = m.outdoorStrideLengthM(100.0f);
+    const float slHi = m.outdoorStrideLengthM(160.0f);
+    EXPECT_LT(slLo, 1.5f);
+    EXPECT_GT(slHi, 1.5f);
+
+    // It is the demographic curve shifted to pass through the bin (parallel shift).
+    const float shift = 1.5f - m.demographicStrideLengthM(130.0f);
+    EXPECT_NEAR(slLo, m.demographicStrideLengthM(100.0f) + shift, 1e-4f);
+    EXPECT_NEAR(slHi, m.demographicStrideLengthM(160.0f) + shift, 1e-4f);
+    const float dDemo =
+        m.demographicStrideLengthM(160.0f) - m.demographicStrideLengthM(100.0f);
+    EXPECT_NEAR(slHi - slLo, dDemo, 1e-4f);
 }
 
 TEST(CadenceStrideModel, OutdoorStrideFallsBackToDemographicWhenNoValidBin)
