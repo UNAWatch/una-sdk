@@ -32,6 +32,13 @@ public:
     void saveWarmUp(bool enable);
     void saveCoolDown(bool enable);
 
+    /**
+     * Start the intervals workout from the menu. With a GPS fix this proceeds
+     * directly to the countdown; without one it shows the start-confirmation
+     * warning first (deferred from the main-menu intervals entry).
+     */
+    void startIntervals();
+
 private:
     MenuIntervalsPresenter();
 

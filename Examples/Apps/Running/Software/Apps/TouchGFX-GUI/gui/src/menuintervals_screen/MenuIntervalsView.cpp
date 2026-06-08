@@ -291,7 +291,9 @@ void MenuIntervalsView::onConfirm()
 
     switch (idx) {
     case Menu::ID_START:
-        application().gotoTrackIntervalsCountdownScreenNoTransition();
+        // The presenter checks for a GPS fix: with a fix it proceeds straight to
+        // the countdown; without one it routes via the start-confirmation warning.
+        presenter->startIntervals();
         break;
 
     case Menu::ID_REPEATS:

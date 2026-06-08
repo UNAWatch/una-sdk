@@ -26,7 +26,9 @@ void TrackStartConfirmationPresenter::onIdleTimeout()
 void TrackStartConfirmationPresenter::startTrack()
 {
     if (model->isPendingIntervalsMode()) {
-        model->application().gotoMenuIntervalsScreenNoTransition();
+        // The user already configured intervals in the menu and chose Start
+        // without a GPS fix; confirming proceeds straight to the countdown.
+        model->application().gotoTrackIntervalsCountdownScreenNoTransition();
     } else {
         model->trackStart(false);
         model->application().gotoTrackScreenNoTransition();

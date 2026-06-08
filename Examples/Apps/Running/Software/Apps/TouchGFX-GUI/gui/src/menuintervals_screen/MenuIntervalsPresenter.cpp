@@ -41,3 +41,13 @@ void MenuIntervalsPresenter::saveCoolDown(bool enable)
     sett.intervals.coolDown = enable;
     model->saveSettings(sett);
 }
+
+void MenuIntervalsPresenter::startIntervals()
+{
+    if (model->hasGpsFix()) {
+        model->application().gotoTrackIntervalsCountdownScreenNoTransition();
+    } else {
+        model->setPendingIntervalsMode(true);
+        model->application().gotoTrackStartConfirmationScreenNoTransition();
+    }
+}
