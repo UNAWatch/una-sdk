@@ -93,6 +93,12 @@ void TrackIntervalsAlertView::setPhaseDistance(float distDisplay, bool isImperia
     intervalsTimer.setDescriptionVisible(false);
 }
 
+void TrackIntervalsAlertView::setPhaseOpen()
+{
+    intervalsTimer.setOpen();
+    intervalsTimer.setDescriptionVisible(false);
+}
+
 // =============================================================================
 // Private
 // =============================================================================

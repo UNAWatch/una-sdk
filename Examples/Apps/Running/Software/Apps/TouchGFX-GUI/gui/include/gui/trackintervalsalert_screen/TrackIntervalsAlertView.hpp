@@ -42,6 +42,11 @@ public:
      */
     void setPhaseDistance(float distDisplay, bool isImperial);
 
+    /**
+     * @brief Update the timer for an open-ended phase -- shows "Open" instead of 00:00.
+     */
+    void setPhaseOpen();
+
 private:
     void onDismissTimerFired();
 

@@ -39,6 +39,14 @@ public:
      */
     void setRemainingTime(std::time_t sec);
 
+    /**
+     * @brief Show "Open" as the main readout (alert screens) -- no numeric value.
+     *
+     * Used for open-ended phases that have no time/distance target, so the alert
+     * shows "Open" rather than a meaningless 00:00. Description widget is hidden.
+     */
+    void setOpen();
+
     /** @brief Change the accent color (line + timer text + description). */
     void setColor(touchgfx::colortype color);
 
