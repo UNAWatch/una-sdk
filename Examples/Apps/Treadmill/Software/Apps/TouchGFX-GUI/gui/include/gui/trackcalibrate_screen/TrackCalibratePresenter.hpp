@@ -28,9 +28,6 @@ public:
     /// Keep the estimated distance (no correction).
     void skipCalibration();
 
-    /// On idle, finalise with the estimate by letting the app stop.
-    virtual void onIdleTimeout() override { model->exitApp(); }
-
 private:
     TrackCalibratePresenter();
 
