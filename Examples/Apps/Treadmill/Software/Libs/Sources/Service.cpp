@@ -694,6 +694,10 @@ void Service::startTrack(std::time_t utc)
     info.appID = APP_ID;
     mActivityWriter.start(info);
 
+    if (mIntervalsMode) {
+        emitIntervalsWorkout();
+    }
+
     mTrackState = Track::State::ACTIVE;
 
     mGuiSender.trackState(mTrackState);
@@ -842,6 +846,11 @@ void Service::saveLap()
 
     fitLap.ascent    = mAltitudeCounter.getLapAscent();
     fitLap.descent   = mAltitudeCounter.getLapDescent();
+
+    // Link this lap to its workout_step (intervals only; left INVALID otherwise).
+    if (mIntervalsMode && mIntervalsStepMap.valid) {
+        fitLap.wktStepIndex = intervalsWktStepIndex();
+    }
 
     mActivityWriter.addLap(fitLap);
     mTrackData.lapNum++;
@@ -1137,6 +1146,131 @@ void Service::handleEvent(const CustomMessage::IntervalsNextPhase& event)
     if (mIntervalsMode && mTrackState == Track::State::ACTIVE) {
         advanceIntervalsPhase(true);
     }
+}
+
+void Service::emitIntervalsWorkout()
+{
+    const Settings::Intervals& cfg = mSettings.intervals;
+
+    auto runDuration = [&](ActivityWriter::WorkoutStepData& s) {
+        if (cfg.runMetric == Settings::Intervals::TIME && cfg.runTime > 0) {
+            s.durationType = FIT_WKT_STEP_DURATION_TIME;
+            s.durationValue = static_cast<FIT_UINT32>(cfg.runTime) * 1000u;        // ms
+        } else if (cfg.runMetric == Settings::Intervals::DISTANCE && cfg.runDistance > 0.0f) {
+            s.durationType = FIT_WKT_STEP_DURATION_DISTANCE;
+            s.durationValue = static_cast<FIT_UINT32>(cfg.runDistance * 100.0f);   // cm
+        } else {
+            s.durationType = FIT_WKT_STEP_DURATION_OPEN;
+            s.durationValue = 0;
+        }
+    };
+    auto restDuration = [&](ActivityWriter::WorkoutStepData& s) {
+        if (cfg.restMetric == Settings::Intervals::TIME && cfg.restTime > 0) {
+            s.durationType = FIT_WKT_STEP_DURATION_TIME;
+            s.durationValue = static_cast<FIT_UINT32>(cfg.restTime) * 1000u;        // ms
+        } else if (cfg.restMetric == Settings::Intervals::DISTANCE && cfg.restDistance > 0.0f) {
+            s.durationType = FIT_WKT_STEP_DURATION_DISTANCE;
+            s.durationValue = static_cast<FIT_UINT32>(cfg.restDistance * 100.0f);   // cm
+        } else {
+            s.durationType = FIT_WKT_STEP_DURATION_OPEN;
+            s.durationValue = 0;
+        }
+    };
+
+    ActivityWriter::WorkoutStepData steps[8];
+    uint8_t n = 0;
+    IntervalsStepMap map{};
+
+    // Warm up
+    if (cfg.warmUp) {
+        steps[n].intensity = FIT_INTENSITY_WARMUP;
+        steps[n].durationType = FIT_WKT_STEP_DURATION_OPEN;
+        map.warmUpIdx = n;
+        n++;
+    }
+
+    // Run (first / repeated run)
+    map.runIdx = n;
+    steps[n].intensity = FIT_INTENSITY_ACTIVE;
+    runDuration(steps[n]);
+    n++;
+
+    if (cfg.repeatsNum == 0) {
+        // 'Open' (unlimited): describe a single run + rest pair, no terminating repeat.
+        map.restIdx = n;
+        steps[n].intensity = FIT_INTENSITY_REST;
+        restDuration(steps[n]);
+        n++;
+        map.finalRunIdx = map.runIdx;
+    } else if (cfg.lastRest) {
+        // Every rep has a rest: repeat the run+rest pair repeatsNum times.
+        map.restIdx = n;
+        steps[n].intensity = FIT_INTENSITY_REST;
+        restDuration(steps[n]);
+        n++;
+        if (cfg.repeatsNum >= 2) {
+            steps[n].durationType = FIT_WKT_STEP_DURATION_REPEAT_UNTIL_STEPS_CMPLT;
+            steps[n].durationValue = map.runIdx;            // loop back to the run step
+            steps[n].repeatCount = cfg.repeatsNum;          // total iterations
+            n++;
+        }
+        map.finalRunIdx = map.runIdx;
+    } else {
+        // Skip the final rest: repeat run+rest (repeatsNum - 1) times, then a final run.
+        if (cfg.repeatsNum >= 2) {
+            map.restIdx = n;
+            steps[n].intensity = FIT_INTENSITY_REST;
+            restDuration(steps[n]);
+            n++;
+            steps[n].durationType = FIT_WKT_STEP_DURATION_REPEAT_UNTIL_STEPS_CMPLT;
+            steps[n].durationValue = map.runIdx;
+            steps[n].repeatCount = static_cast<FIT_UINT32>(cfg.repeatsNum - 1);
+            n++;
+            map.finalRunIdx = n;
+            steps[n].intensity = FIT_INTENSITY_ACTIVE;
+            runDuration(steps[n]);
+            n++;
+        } else {
+            // repeatsNum == 1 with the rest skipped: a single run, no rest.
+            map.finalRunIdx = map.runIdx;
+        }
+    }
+
+    // Cool down
+    if (cfg.coolDown) {
+        steps[n].intensity = FIT_INTENSITY_COOLDOWN;
+        steps[n].durationType = FIT_WKT_STEP_DURATION_OPEN;
+        map.coolDownIdx = n;
+        n++;
+    }
+
+    map.valid = true;
+    mIntervalsStepMap = map;
+
+    mActivityWriter.addWorkout("Intervals", steps, n);
+}
+
+uint16_t Service::intervalsWktStepIndex() const
+{
+    if (!mIntervalsStepMap.valid) {
+        return 0xFFFF;
+    }
+
+    const Track::IntervalsData& iv = mTrackData.intervals;
+    const Settings::Intervals& cfg = mSettings.intervals;
+
+    switch (iv.phase) {
+    case Track::IntervalsPhase::WARM_UP:   return mIntervalsStepMap.warmUpIdx;
+    case Track::IntervalsPhase::COOL_DOWN: return mIntervalsStepMap.coolDownIdx;
+    case Track::IntervalsPhase::REST:      return mIntervalsStepMap.restIdx;
+    case Track::IntervalsPhase::RUN:
+        // The final run uses a standalone step only when the last rest is skipped.
+        if (!cfg.lastRest && cfg.repeatsNum >= 2 && iv.repeat >= cfg.repeatsNum) {
+            return mIntervalsStepMap.finalRunIdx;
+        }
+        return mIntervalsStepMap.runIdx;
+    }
+    return 0xFFFF;
 }
 
 void Service::startIntervalsPhase(Track::IntervalsPhase phase)

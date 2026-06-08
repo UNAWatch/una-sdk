@@ -85,6 +85,21 @@ public:
         float       hrMax     = 0.0f;   // bpm
         float       ascent    = 0.0f;   // m
         float       descent   = 0.0f;   // m
+        FIT_MESSAGE_INDEX wktStepIndex = FIT_MESSAGE_INDEX_INVALID; // workout_step this lap belongs to (INVALID = none)
+    };
+
+    /**
+     * @brief One step of a structured (interval) workout description.
+     *
+     * Encoded into a workout_step message. For a REPEAT step, durationValue is the
+     * message_index of the first step to loop back to and repeatCount the number of
+     * iterations; intensity is left unset.
+     */
+    struct WorkoutStepData {
+        FIT_INTENSITY         intensity     = FIT_INTENSITY_INVALID;
+        FIT_WKT_STEP_DURATION durationType  = FIT_WKT_STEP_DURATION_OPEN;
+        FIT_UINT32            durationValue = 0;  // TIME: ms; DISTANCE: cm; OPEN: 0; REPEAT: first-step index
+        FIT_UINT32            repeatCount   = 0;  // REPEAT only -> target_value (iterations)
     };
 
     struct TrackData {
@@ -108,6 +123,8 @@ public:
     void resume(std::time_t timestamp);
     void addRecord(const RecordData& record);
     void addLap(const LapData& lap);
+    /// Emit the workout + workout_step messages describing a structured workout.
+    void addWorkout(const char* name, const WorkoutStepData* steps, uint8_t count);
     void stop(const TrackData& track);
     void discard();
 
@@ -136,6 +153,9 @@ private:
     SDK::Component::FitHelper mFHBatteryLevelField;
     SDK::Component::FitHelper mFHBatteryVoltageField;
 
+    SDK::Component::FitHelper mFHWorkout;
+    SDK::Component::FitHelper mFHWorkoutStep;
+
     enum class MsgNumber {
         FILE = 1,
         DEVELOP,
@@ -147,7 +167,9 @@ private:
         SESSION,
         ACTIVITY,
         EVENT,
-        BATTERY
+        BATTERY,
+        WORKOUT,
+        WORKOUT_STEP
     };
 
     FIT_RECORD_MESG prepareRecordMsg(const RecordData& record);

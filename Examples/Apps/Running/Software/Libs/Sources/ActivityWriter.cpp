@@ -41,6 +41,8 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     , mFHRecordGB(static_cast<uint8_t>(MsgNumber::RECORD_GB), fit_mesg_defs[FIT_MESG_RECORD])
     , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB, &mFHRecordGB })
     , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB, &mFHRecordGB })
+    , mFHWorkout(static_cast<uint8_t>(MsgNumber::WORKOUT), fit_mesg_defs[FIT_MESG_WORKOUT])
+    , mFHWorkoutStep(static_cast<uint8_t>(MsgNumber::WORKOUT_STEP), fit_mesg_defs[FIT_MESG_WORKOUT_STEP])
 {
     assert(pathToDir != nullptr);
 
@@ -59,7 +61,8 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
                   FIT_LAP_FIELD_NUM_TOTAL_ASCENT,
                   FIT_LAP_FIELD_NUM_TOTAL_DESCENT,
                   FIT_LAP_FIELD_NUM_AVG_HEART_RATE,
-                  FIT_LAP_FIELD_NUM_MAX_HEART_RATE });
+                  FIT_LAP_FIELD_NUM_MAX_HEART_RATE,
+                  FIT_LAP_FIELD_NUM_WKT_STEP_INDEX });
 
     mFHSession.init({ FIT_SESSION_FIELD_NUM_TIMESTAMP,
                       FIT_SESSION_FIELD_NUM_START_TIME,
@@ -133,6 +136,18 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHWorkout.init({ FIT_WORKOUT_FIELD_NUM_MESSAGE_INDEX,
+                      FIT_WORKOUT_FIELD_NUM_WKT_NAME,
+                      FIT_WORKOUT_FIELD_NUM_NUM_VALID_STEPS,
+                      FIT_WORKOUT_FIELD_NUM_SPORT });
+
+    mFHWorkoutStep.init({ FIT_WORKOUT_STEP_FIELD_NUM_MESSAGE_INDEX,
+                          FIT_WORKOUT_STEP_FIELD_NUM_DURATION_TYPE,
+                          FIT_WORKOUT_STEP_FIELD_NUM_DURATION_VALUE,
+                          FIT_WORKOUT_STEP_FIELD_NUM_TARGET_TYPE,
+                          FIT_WORKOUT_STEP_FIELD_NUM_TARGET_VALUE,
+                          FIT_WORKOUT_STEP_FIELD_NUM_INTENSITY });
 }
 
 void ActivityWriter::start(const AppInfo& info)
@@ -335,9 +350,57 @@ void ActivityWriter::addLap(const LapData& lap)
     lap_mesg.total_ascent = static_cast<FIT_UINT16>(lap.ascent); // 1 * m + 0
     lap_mesg.total_descent = static_cast<FIT_UINT16>(lap.descent); // 1 * m + 0
 
+    lap_mesg.wkt_step_index = lap.wktStepIndex; // links lap to its workout_step (INVALID = none)
+
     mFHLap.writeMessage(&lap_mesg, fp);
 
     mLapCounter++;
+}
+
+void ActivityWriter::addWorkout(const char* name, const WorkoutStepData* steps, uint8_t count)
+{
+    if (!mFile || steps == nullptr || count == 0) {
+        return;
+    }
+    SDK::Interface::IFile* fp = mFile.get();
+
+    // Definitions must precede their data messages.
+    mFHWorkout.writeDef(fp);
+    mFHWorkoutStep.writeDef(fp);
+
+    // Workout message
+    {
+        FIT_WORKOUT_MESG wkt{};
+        Fit_InitMesg(fit_mesg_defs[FIT_MESG_WORKOUT], &wkt);
+        wkt.message_index   = 0;
+        wkt.num_valid_steps = count;
+        wkt.sport           = FIT_SPORT_RUNNING;
+        if (name != nullptr) {
+            strncpy(wkt.wkt_name, name, FIT_WORKOUT_MESG_WKT_NAME_COUNT - 1);
+        }
+        mFHWorkout.writeMessage(&wkt, fp);
+    }
+
+    // Workout step messages (message_index == position in the list)
+    for (uint8_t i = 0; i < count; ++i) {
+        FIT_WORKOUT_STEP_MESG step{};
+        Fit_InitMesg(fit_mesg_defs[FIT_MESG_WORKOUT_STEP], &step);
+
+        step.message_index  = i;
+        step.duration_type  = steps[i].durationType;
+        step.duration_value = steps[i].durationValue;
+
+        if (steps[i].durationType == FIT_WKT_STEP_DURATION_REPEAT_UNTIL_STEPS_CMPLT) {
+            // Repeat: duration_value is the first step to loop back to (set by caller),
+            // target_value is the iteration count. Intensity/target_type stay invalid.
+            step.target_value = steps[i].repeatCount;
+        } else {
+            step.intensity   = steps[i].intensity;
+            step.target_type = FIT_WKT_STEP_TARGET_OPEN; // no HR/speed target
+        }
+
+        mFHWorkoutStep.writeMessage(&step, fp);
+    }
 }
 
 void ActivityWriter::stop(const TrackData& track)

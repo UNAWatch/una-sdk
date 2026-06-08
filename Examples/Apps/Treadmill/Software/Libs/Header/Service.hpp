@@ -154,6 +154,18 @@ private:
     std::time_t mPhaseStartActiveSec  = 0;     ///< mTimeCounter.getValueActive() at phase start
     float       mPhaseStartActiveDist = 0.0f;  ///< mDistanceCounter.getValueActive() at phase start
 
+    /// Maps interval phases to workout_step message_index values for the FIT
+    /// workout description (0xFFFF = no associated step).
+    struct IntervalsStepMap {
+        bool     valid       = false;
+        uint16_t warmUpIdx   = 0xFFFF;
+        uint16_t runIdx      = 0xFFFF;
+        uint16_t restIdx     = 0xFFFF;
+        uint16_t finalRunIdx = 0xFFFF; ///< last RUN step when the final rest is skipped
+        uint16_t coolDownIdx = 0xFFFF;
+    };
+    IntervalsStepMap mIntervalsStepMap;
+
     // -- Wrist tilt -----------------------------------------------------------
 
     WristTiltDetector mWristTiltDetector;
@@ -218,6 +230,12 @@ private:
     void advanceIntervalsPhase(bool manual = false);
     void processIntervals();
     void onIntervalsPhaseChange(bool alert, bool manual);
+
+    /// Build the workout_step list from the intervals config, emit the workout /
+    /// workout_step messages, and populate mIntervalsStepMap for lap referencing.
+    void emitIntervalsWorkout();
+    /// workout_step message_index for the current interval phase (0xFFFF = none).
+    uint16_t intervalsWktStepIndex() const;
 
     // -- Notifications --------------------------------------------------------
 
