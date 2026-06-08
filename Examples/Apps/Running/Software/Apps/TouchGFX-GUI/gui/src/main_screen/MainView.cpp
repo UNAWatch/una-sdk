@@ -158,12 +158,10 @@ void MainView::onConfirm()
         break;
 
     case Menu::ID_INTERVALS:
-        if (mGpsFix == true) {
-            application().gotoMenuIntervalsScreenNoTransition();
-        } else {
-            presenter->setPendingIntervalsMode(true);
-            application().gotoTrackStartConfirmationScreenNoTransition();
-        }
+        // No GPS-fix check here: the intervals menu is always accessible so the
+        // user can configure their workout before heading outside. The fix check
+        // and warning happen when Start is selected inside the intervals menu.
+        application().gotoMenuIntervalsScreenNoTransition();
         break;
 
     case Menu::ID_SETTINGS:
@@ -179,7 +177,6 @@ void MainView::updateBackground(int16_t index)
 {
     switch (index) {
         case Menu::ID_START:
-        case Menu::ID_INTERVALS:
             if (mGpsFix == true) {
                 menuLayout.setBackground(SDK::GUI::Color::TEAL_DARK);
                 menuLayout.getButtons().setR1(Buttons::AMBER);
@@ -189,6 +186,9 @@ void MainView::updateBackground(int16_t index)
             }
             break;
 
+        // Intervals is always selectable regardless of GPS fix: the fix check is
+        // deferred to the Start action inside the intervals menu.
+        case Menu::ID_INTERVALS:
         default:
             menuLayout.setBackground(SDK::GUI::Color::TEAL_DARK);
             menuLayout.getButtons().setR1(Buttons::AMBER);
