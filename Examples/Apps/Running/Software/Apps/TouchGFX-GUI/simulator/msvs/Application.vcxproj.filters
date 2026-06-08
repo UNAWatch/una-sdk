@@ -879,6 +879,9 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\OutdoorStrideCalibrator.cpp">
       <Filter>SDK\Libs\Source\Calibration</Filter>
     </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\StrideLut.cpp">
+      <Filter>SDK\Libs\Source\Calibration</Filter>
+    </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp">
       <Filter>SDK\Libs\Source\TrackMap</Filter>
     </ClCompile>
