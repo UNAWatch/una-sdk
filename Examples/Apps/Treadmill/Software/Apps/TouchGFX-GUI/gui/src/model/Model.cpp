@@ -177,9 +177,9 @@ void Model::trackStart(bool intervalsMode)
         Track::IntervalsData& iv       = mTrackData.intervals;
 
         iv = Track::IntervalsData{};
-        // totalRepeats = repeatsNum + 1 (base cycle + N additional repeats)
+        // totalRepeats is the literal repeat count chosen by the user; 0 == 'Open'.
         // Must mirror the calculation in Service::startTrack().
-        iv.totalRepeats = cfg.repeatsNum + 1;
+        iv.totalRepeats = cfg.repeatsNum;
 
         if (cfg.warmUp) {
             iv.phase  = Track::IntervalsPhase::WARM_UP;
