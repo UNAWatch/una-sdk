@@ -704,8 +704,10 @@ void Service::startTrack(std::time_t utc)
     if (mIntervalsMode) {
         const Settings::Intervals& cfg = mSettings.intervals;
         mTrackData.intervals = Track::IntervalsData{};
-        // totalRepeats = repeatsNum + 1 (base cycle + N additional repeats)
-        mTrackData.intervals.totalRepeats = cfg.repeatsNum + 1;
+        // totalRepeats is the literal number of RUN-REST cycles the user selected.
+        // repeatsNum == 0 means 'Open' (unlimited): totalRepeats stays 0 and the GUI
+        // shows just the current repeat with no total.
+        mTrackData.intervals.totalRepeats = cfg.repeatsNum;
 
         if (cfg.warmUp) {
             startIntervalsPhase(Track::IntervalsPhase::WARM_UP);
@@ -1198,12 +1200,11 @@ void Service::advanceIntervalsPhase(bool manual)
         break;
 
     case Track::IntervalsPhase::REST:
-        // Semantics: repeatsNum = number of ADDITIONAL repeats beyond the base cycle.
-        //   repeatsNum=0  ->  1 total cycle  (base only)
-        //   repeatsNum=1  ->  2 total cycles (base + 1 extra)
-        //   repeatsNum=N  ->  N+1 total cycles
-        // Check BEFORE incrementing so that repeat==1 is compared against repeatsNum==0 correctly.
-        if (iv.repeat <= cfg.repeatsNum) {
+        // Semantics: repeatsNum = number of RUN-REST cycles the user selected.
+        //   repeatsNum=N (N>=1)  ->  exactly N cycles
+        //   repeatsNum=0         ->  'Open': cycle indefinitely until the user ends
+        //                            the workout manually (never auto-completes here)
+        if (cfg.repeatsNum == 0 || iv.repeat < cfg.repeatsNum) {
             iv.repeat++;
             nextPhase = Track::IntervalsPhase::RUN;
         } else {

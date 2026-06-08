@@ -62,8 +62,13 @@ void TrackFaceIntervals::setPhase(Track::IntervalsPhase phase, uint8_t repeat, u
     const bool showRepeats = (phase == Track::IntervalsPhase::RUN || phase == Track::IntervalsPhase::REST);
     repeatsText.setVisible(showRepeats);
     if (showRepeats) {
-        Unicode::snprintf(repeatsTextBuffer, REPEATSTEXT_SIZE,
-            "%u/%u", repeat, totalRepeats);
+        if (totalRepeats == 0) {
+            // 'Open' (unlimited) repeats: show just the current repeat, no total.
+            Unicode::snprintf(repeatsTextBuffer, REPEATSTEXT_SIZE, "%u", repeat);
+        } else {
+            Unicode::snprintf(repeatsTextBuffer, REPEATSTEXT_SIZE,
+                "%u/%u", repeat, totalRepeats);
+        }
     }
     repeatsText.invalidate();
     paceText.invalidate();
