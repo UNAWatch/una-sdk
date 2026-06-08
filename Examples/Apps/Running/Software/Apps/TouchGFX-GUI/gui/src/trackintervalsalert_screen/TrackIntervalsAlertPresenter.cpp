@@ -19,6 +19,9 @@ void TrackIntervalsAlertPresenter::activate()
         const float distMetres  = iv.distRemaining;
         const float distDisplay = imperial ? distMetres / 1609.344f : distMetres / 1000.0f;
         view.setPhaseDistance(distDisplay, imperial);
+    } else if (iv.metric == Track::IntervalsMetric::TIME_OPEN) {
+        // Open-ended phase has no target -- show "Open" rather than 00:00.
+        view.setPhaseOpen();
     } else {
         view.setPhaseTime(iv.phaseTimerSec);
     }

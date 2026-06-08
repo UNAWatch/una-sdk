@@ -53,6 +53,14 @@ void IntervalsTimer::setRemainingTime(std::time_t sec)
     setDescriptionId(TYPED_TEXT_INVALID); // hide description
 }
 
+void IntervalsTimer::setOpen()
+{
+    Unicode::snprintf(timerTextBuffer, TIMERTEXT_SIZE, "%s",
+        touchgfx::TypedText(T_TEXT_OPEN).getText());
+    timerText.invalidate();
+    setDescriptionId(TYPED_TEXT_INVALID); // hide description
+}
+
 void IntervalsTimer::setColor(touchgfx::colortype color)
 {
     timerText.setColor(color);
