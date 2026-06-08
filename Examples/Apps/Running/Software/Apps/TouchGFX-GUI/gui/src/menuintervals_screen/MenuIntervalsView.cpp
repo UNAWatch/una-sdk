@@ -90,6 +90,9 @@ void MenuIntervalsView::setIntervals(const Settings::Intervals& inervals, bool i
     // Cool Down
     updateToggle(Menu::ID_COOL_DOWN, inervals.coolDown);
 
+    // Last Rest (ON = keep the rest after the final interval)
+    updateToggle(Menu::ID_LAST_REST, inervals.lastRest);
+
     menuLayout.invalidate();
 }
 
@@ -245,6 +248,17 @@ void MenuIntervalsView::setupItems()
     mItems[Menu::ID_COOL_DOWN].tipColor = SDK::GUI::Color::TEAL;
     mItems[Menu::ID_COOL_DOWN].tipId = T_TEXT_OFF_UC;
 
+    // LAST_REST
+    mCenterItems[Menu::ID_LAST_REST].style = MenuItemConfig::TOGGLE;
+    mCenterItems[Menu::ID_LAST_REST].msgIdType = T_TMP_SEMIBOLD_25;
+    mCenterItems[Menu::ID_LAST_REST].msgId = T_TEXT_LAST_BR_REST;
+    mCenterItems[Menu::ID_LAST_REST].toggleState = false;
+
+    mItems[Menu::ID_LAST_REST].style = MenuItemConfig::TIP;
+    mItems[Menu::ID_LAST_REST].msgId = T_TEXT_LAST_REST;
+    mItems[Menu::ID_LAST_REST].tipColor = SDK::GUI::Color::TEAL;
+    mItems[Menu::ID_LAST_REST].tipId = T_TEXT_OFF_UC;
+
 }
 
 void MenuIntervalsView::updateItem(MainMenuItem& item, int16_t index)
@@ -309,7 +323,8 @@ void MenuIntervalsView::onConfirm()
         break;
 
     case Menu::ID_WARM_UP:
-    case Menu::ID_COOL_DOWN: {
+    case Menu::ID_COOL_DOWN:
+    case Menu::ID_LAST_REST: {
         bool newState = !mCenterItems[idx].toggleState;
         updateToggle(idx, newState);
         menuLayout.invalidate();
@@ -317,8 +332,10 @@ void MenuIntervalsView::onConfirm()
         // Save settings
         if (idx == Menu::ID_WARM_UP) {
             presenter->saveWarmUp(newState);
-        } else {
+        } else if (idx == Menu::ID_COOL_DOWN) {
             presenter->saveCoolDown(newState);
+        } else {
+            presenter->saveLastRest(newState);
         }
     } break;
 

@@ -31,6 +31,7 @@ public:
 
     void saveWarmUp(bool enable);
     void saveCoolDown(bool enable);
+    void saveLastRest(bool enable);
 
 private:
     MenuIntervalsPresenter();

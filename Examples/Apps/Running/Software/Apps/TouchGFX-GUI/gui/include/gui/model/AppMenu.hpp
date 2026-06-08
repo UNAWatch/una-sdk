@@ -61,7 +61,7 @@ struct Root {
     struct Intervals {
         enum Id {
             ID_START = 0, ID_REPEATS, ID_RUN, ID_REST,
-            ID_WARM_UP, ID_COOL_DOWN,
+            ID_WARM_UP, ID_COOL_DOWN, ID_LAST_REST,
             ID_COUNT, ID_DEFAULT = ID_START
         };
 
