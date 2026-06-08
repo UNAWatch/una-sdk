@@ -126,10 +126,12 @@ float CadenceStrideModel::outdoorStrideLengthM(float cadenceSpm) const
         }
     }
 
-    if (loIdx >= 0 && hiIdx >= 0) {
-        if (loIdx == hiIdx) {
-            return mOutdoor.bin(static_cast<size_t>(loIdx)).strideLengthM();
-        }
+    // Two distinct valid bins bracket c: linear interpolation between their
+    // measured strides. (This is exactly equivalent to the demographic-carrier
+    // form below: SL_demographic is linear in cadence over the interior, so its
+    // contribution cancels between the two endpoints. Kept explicit for clarity
+    // and to keep the well-trodden interior path byte-identical.)
+    if (loIdx >= 0 && hiIdx >= 0 && loIdx != hiIdx) {
         const float cLo = StrideLut::binCentreSpm(static_cast<size_t>(loIdx));
         const float cHi = StrideLut::binCentreSpm(static_cast<size_t>(hiIdx));
         const float slLo = mOutdoor.bin(static_cast<size_t>(loIdx)).strideLengthM();
@@ -140,14 +142,26 @@ float CadenceStrideModel::outdoorStrideLengthM(float cadenceSpm) const
         }
         return slLo + (slHi - slLo) * (cadenceSpm - cLo) / span;
     }
-    if (loIdx >= 0) {
-        // c above the highest valid bin → flat shelf.
-        return mOutdoor.bin(static_cast<size_t>(loIdx)).strideLengthM();
+
+    // At or beyond the valid-bin span — including the single-valid-bin case,
+    // where every cadence is "outside" the (degenerate) span. Instead of a flat
+    // shelf (which would make the estimate cadence-independent, a downgrade from
+    // the demographic tier), ride the demographic cadence slope shifted to pass
+    // through the nearest valid bin:
+    //
+    //   SL(c) = SL_demographic(c) + (SL_anchor − SL_demographic(c_anchor))
+    //
+    // At c == c_anchor this returns SL_anchor exactly; elsewhere it parallels the
+    // demographic slope. The residual is derived per-session from the (frozen)
+    // user height; nothing about it is persisted to the LUT.
+    const int anchorIdx = (loIdx >= 0) ? loIdx : hiIdx;
+    if (anchorIdx >= 0) {
+        const float cAnchor  = StrideLut::binCentreSpm(static_cast<size_t>(anchorIdx));
+        const float slAnchor = mOutdoor.bin(static_cast<size_t>(anchorIdx)).strideLengthM();
+        return demographicStrideLengthM(cadenceSpm)
+             + (slAnchor - demographicStrideLengthM(cAnchor));
     }
-    if (hiIdx >= 0) {
-        // c below the lowest valid bin → flat shelf.
-        return mOutdoor.bin(static_cast<size_t>(hiIdx)).strideLengthM();
-    }
+
     // No valid bin: cannot happen in phase 2 (gate guarantees >=8). Defensive
     // fallback to the demographic stride.
     return demographicStrideLengthM(cadenceSpm);
