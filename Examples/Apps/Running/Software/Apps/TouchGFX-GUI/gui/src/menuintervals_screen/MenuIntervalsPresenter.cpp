@@ -42,6 +42,13 @@ void MenuIntervalsPresenter::saveCoolDown(bool enable)
     model->saveSettings(sett);
 }
 
+void MenuIntervalsPresenter::saveLastRest(bool enable)
+{
+    Settings sett = model->getSettings();
+    sett.intervals.lastRest = enable;
+    model->saveSettings(sett);
+}
+
 void MenuIntervalsPresenter::startIntervals()
 {
     if (model->hasGpsFix()) {

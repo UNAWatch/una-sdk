@@ -80,6 +80,7 @@ struct Settings {
 
         bool     warmUp        = true;  ///< Enable WARM_UP phase.
         bool     coolDown      = true;  ///< Enable COOL_DOWN phase.
+        bool     lastRest      = true;  ///< Include the REST after the final interval; false -> skip straight to COOL_DOWN.
     };
 
 

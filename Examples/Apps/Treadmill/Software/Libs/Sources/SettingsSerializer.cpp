@@ -91,6 +91,7 @@ bool SettingsSerializer::save(const Settings &settings)
     writer.add("rest_distance", settings.intervals.restDistance);
     writer.add("warm_up",       settings.intervals.warmUp);
     writer.add("cool_down",     settings.intervals.coolDown);
+    writer.add("last_rest",     settings.intervals.lastRest);
     writer.endMap();
 
     writer.endMap();
@@ -175,6 +176,7 @@ bool SettingsSerializer::load(Settings &settings)
     reader.get("intervals.rest_distance", settings.intervals.restDistance);
     reader.get("intervals.warm_up",       settings.intervals.warmUp);
     reader.get("intervals.cool_down",     settings.intervals.coolDown);
+    reader.get("intervals.last_rest",     settings.intervals.lastRest);
 
     std::string_view metric;
     if (reader.get("intervals.run_metric", metric)) {

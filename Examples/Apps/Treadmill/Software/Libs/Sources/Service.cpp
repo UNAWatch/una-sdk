@@ -1265,8 +1265,19 @@ void Service::advanceIntervalsPhase(bool manual)
         break;
 
     case Track::IntervalsPhase::RUN:
-        // Always go to REST; REST decides whether to cycle again or finish.
-        nextPhase = Track::IntervalsPhase::REST;
+        if (!cfg.lastRest && cfg.repeatsNum != 0 && iv.repeat >= cfg.repeatsNum) {
+            // User chose to skip the rest after the final interval: go straight
+            // to cool down (or finish if cool down is disabled). Not applicable
+            // to 'Open' repeats (repeatsNum == 0), which have no final interval.
+            if (cfg.coolDown) {
+                nextPhase = Track::IntervalsPhase::COOL_DOWN;
+            } else {
+                completed = true;
+            }
+        } else {
+            // Go to REST; REST decides whether to cycle again or finish.
+            nextPhase = Track::IntervalsPhase::REST;
+        }
         break;
 
     case Track::IntervalsPhase::REST:

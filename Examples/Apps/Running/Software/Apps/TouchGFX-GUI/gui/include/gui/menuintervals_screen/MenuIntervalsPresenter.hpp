@@ -31,6 +31,7 @@ public:
 
     void saveWarmUp(bool enable);
     void saveCoolDown(bool enable);
+    void saveLastRest(bool enable);
 
     /**
      * Start the intervals workout from the menu. With a GPS fix this proceeds

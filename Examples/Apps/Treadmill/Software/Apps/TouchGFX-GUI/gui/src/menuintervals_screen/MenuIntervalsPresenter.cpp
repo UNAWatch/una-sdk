@@ -41,3 +41,10 @@ void MenuIntervalsPresenter::saveCoolDown(bool enable)
     sett.intervals.coolDown = enable;
     model->saveSettings(sett);
 }
+
+void MenuIntervalsPresenter::saveLastRest(bool enable)
+{
+    Settings sett = model->getSettings();
+    sett.intervals.lastRest = enable;
+    model->saveSettings(sett);
+}
