@@ -1293,7 +1293,18 @@ void Service::advanceIntervalsPhase(bool manual)
 
     if (completed) {
         LOG_INFO("Intervals: workout completed\n");
+
+        // The programmed workout is done, but the session keeps running so the
+        // user can record additional manual laps and end it themselves. Close the
+        // final phase as a lap, then drop out of intervals mode so the track
+        // screen reverts to normal faces and R2 records a lap (not a phase advance).
+        if (mLapNotEmpty) {
+            saveLap();
+        }
         mIntervalsCompleted = true;
+        mIntervalsMode = false;
+        mTrackData.intervalsMode = false;
+
         // alert=true: user needs notification when workout ends automatically (REST->END).
         // COOL_DOWN->END is always manual, so alert&&!manual stays false -> no vibro.
         onIntervalsPhaseChange(true, manual);

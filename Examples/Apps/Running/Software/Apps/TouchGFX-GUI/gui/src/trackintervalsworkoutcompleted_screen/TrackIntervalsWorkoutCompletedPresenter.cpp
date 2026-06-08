@@ -9,7 +9,10 @@ TrackIntervalsWorkoutCompletedPresenter::TrackIntervalsWorkoutCompletedPresenter
 
 void TrackIntervalsWorkoutCompletedPresenter::activate()
 {
-    model->saveTrack();
+    // This screen is only a notification that the programmed workout finished.
+    // The session keeps running (the Service dropped out of intervals mode and
+    // started a fresh lap); the view returns to the track screen so the user can
+    // record additional laps and end the session manually. Do NOT save/stop here.
 }
 
 void TrackIntervalsWorkoutCompletedPresenter::deactivate()
