@@ -722,8 +722,10 @@ void Service::startTrack(std::time_t utc)
     SDK::TrackMapBuilder::GpsPoint startGpsPoint{ mGps.latitude, mGps.longitude };
     mTrackMapBuilder.setDistanceThreshold(startGpsPoint, skMapDistanceThreshold);
 
-    // Determine lap split source
-    mLapDivSource = getLapDivSource();
+    // Determine lap split source. In intervals mode each phase (warm up / run /
+    // rest / cool down) is recorded as its own lap, so the alert-based auto-lap
+    // is disabled to avoid splitting a phase across multiple laps.
+    mLapDivSource = mIntervalsMode ? LapDivSource::OFF : getLapDivSource();
 
     mWristTiltDetector.reset();
 
@@ -1229,6 +1231,12 @@ void Service::advanceIntervalsPhase(bool manual)
         onIntervalsPhaseChange(true, manual);
         mGuiSender.intervalsWorkoutCompleted();
         return;
+    }
+
+    // Record the phase that just finished as its own lap before the next one
+    // begins. The final phase is captured by stopTrack() when the workout ends.
+    if (mLapNotEmpty) {
+        saveLap();
     }
 
     startIntervalsPhase(nextPhase);
