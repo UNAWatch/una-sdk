@@ -40,15 +40,13 @@ void TrackActionPresenter::resumeTrack()
 void TrackActionPresenter::saveRequested()
 {
     // Stop recording. The Service builds the summary at the estimated distance
-    // and, for eligible sessions, waits for the Calibrate & Save decision.
+    // and waits for the Calibrate & Save decision.
     model->saveTrack();
 
-    // Offer Calibrate & Save only for sessions of at least 2 km (§5.1); shorter
-    // ones are finalised immediately by the Service with the estimate. The intro
-    // screen explains the calibration step, then advances to the distance picker.
-    if (model->getTrackData().distance >= 2000.0f) {
-        model->application().gotoTrackCalibrateIntroScreenNoTransition();
-    } else {
-        model->application().gotoTrackSavedScreenNoTransition();
-    }
+    // Always offer Calibrate & Save so the user can correct the recorded
+    // distance (and the avg speed derived from it) on any run. The intro screen
+    // explains the step, then advances to the distance picker; the user can skip
+    // to keep the estimate. Whether the entered distance also updates the delta
+    // LUT is gated Service-side (outdoor-calibrated tier + a minimum distance).
+    model->application().gotoTrackCalibrateIntroScreenNoTransition();
 }

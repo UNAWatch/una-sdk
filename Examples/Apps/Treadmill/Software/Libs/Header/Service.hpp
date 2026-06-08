@@ -165,10 +165,10 @@ private:
     SDK::Calibration::TreadmillSpeedEstimator mEstimator;
 
     // -- Post-run Calibrate & Save (§5) -----------------------------------
-    /// Offer Calibrate & Save only for sessions of at least this distance.
-    static constexpr float skCalibrateMinDistanceM = 2000.0f;
     /// True between "stop recording" and the GUI's calibrate/skip decision;
-    /// the FIT session is finalised only once this resolves.
+    /// the FIT session is finalised only once this resolves. Calibrate & Save is
+    /// offered on every run; the delta-LUT learning gate (tier + minimum
+    /// distance) lives in CadenceStrideModel::applyPostRunCalibration.
     bool  mAwaitingCalibration = false;
     float mCalibSteps[SDK::Calibration::StrideLut::kBinCount] = {}; ///< S_i snapshot.
     float mCalibDEstimatedM = 0.0f;                                 ///< Pre-correction distance.

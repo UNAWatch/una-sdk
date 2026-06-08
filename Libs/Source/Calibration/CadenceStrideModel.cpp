@@ -234,23 +234,28 @@ CadenceStrideModel::CalibrationResult CadenceStrideModel::applyPostRunCalibratio
     CalibrationResult result;
     result.dActualAccepted = accepted;
 
-    // Below the full tier (UNCALIBRATED or OUTDOOR_ESTIMATE): never touch the
-    // delta LUT. Calibrate & Save still corrects the recorded distance (use
-    // D_actual when accepted) — only the delta learning is withheld.
-    if (mPhase != Phase::OUTDOOR_CALIBRATED) {
-        result.distanceForFitM = accepted ? D_actual : D_estimated;
+    // FIT distance is always corrected to D_actual when it passes the sanity
+    // gates, on every run and in every tier — Calibrate & Save lets the user fix
+    // the recorded distance (and the avg speed derived from it) regardless of
+    // calibration state. When rejected/skipped, keep the estimate.
+    result.distanceForFitM = accepted ? D_actual : D_estimated;
+
+    // Delta LUT *learning* is gated more tightly than the distance correction:
+    // it requires an accepted D_actual, the outdoor-calibrated tier, AND at
+    // least kDeltaLearnMinDistanceM of estimated distance. Short runs (or lower
+    // tiers) correct the FIT file but never nudge the LUT — they lack the
+    // cadence-bin coverage to attribute the correction reliably.
+    const bool deltaEligible =
+        accepted && mPhase == Phase::OUTDOOR_CALIBRATED &&
+        std::isfinite(D_estimated) &&
+        D_estimated >= Config::kDeltaLearnMinDistanceM;
+    if (!deltaEligible) {
         result.deltaLutUpdated = false;
         return result;
     }
 
-    // Phase 2, rejected: keep the estimate; leave the delta LUT untouched.
-    if (!accepted) {
-        result.distanceForFitM = D_estimated;
-        result.deltaLutUpdated = false;
-        return result;
-    }
-
-    // Phase 2, accepted: §5.3 weighted update over the used bins.
+    // Outdoor-calibrated, accepted, long enough: §5.3 weighted update over the
+    // used bins.
     const float deltaD = D_actual - D_estimated;
     float q = 0.0f;
     for (size_t i = 0; i < StrideLut::kBinCount; ++i) {
@@ -284,8 +289,7 @@ CadenceStrideModel::CalibrationResult CadenceStrideModel::applyPostRunCalibratio
 
     saveDeltaLut();  // app logs a persist failure; learning already applied.
 
-    result.distanceForFitM = D_actual;
-    result.deltaLutUpdated = true;
+    result.deltaLutUpdated = true;  // distanceForFitM already set to D_actual above
     return result;
 }
 

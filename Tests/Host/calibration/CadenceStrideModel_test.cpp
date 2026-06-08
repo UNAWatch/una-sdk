@@ -383,13 +383,14 @@ TEST(CadenceStrideModel, PostRunPhase2WeightedUpdateIdentityAndPersist)
     m.startSession(1.75f);
     ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
 
-    // Used bins 0 (centre 82) and 7 (centre 110).
+    // Used bins 0 (centre 82) and 7 (centre 110). Distances are >= the delta
+    // learning floor (kDeltaLearnMinDistanceM = 2000 m) so the LUT actually learns.
     float steps[StrideLut::kBinCount] {};
-    steps[0] = 300.0f;
-    steps[7] = 500.0f;
+    steps[0] = 600.0f;
+    steps[7] = 1000.0f;
 
-    const float dEst = 1000.0f;
-    const float dAct = 1100.0f;  // ratio 1.1, implied mean stride 2.75 → accepted
+    const float dEst = 2000.0f;
+    const float dAct = 2200.0f;  // ratio 1.1, implied mean stride 2.75 → accepted
     auto r = m.applyPostRunCalibration(steps, dEst, dAct);
 
     EXPECT_TRUE(r.dActualAccepted);
@@ -419,6 +420,35 @@ TEST(CadenceStrideModel, PostRunPhase2WeightedUpdateIdentityAndPersist)
     reloaded.startSession(1.75f);
     EXPECT_NEAR(reloaded.deltaAt(82.0f), d0, 1e-5f);
     EXPECT_NEAR(reloaded.deltaAt(110.0f), d7, 1e-5f);
+}
+
+// Outdoor-calibrated tier, accepted D_actual, but the session is shorter than
+// the delta-learning distance floor: the recorded distance is still corrected,
+// but the delta LUT must NOT learn or persist.
+TEST(CadenceStrideModel, PostRunCalibratedBelowMinDistanceCorrectsFitButNoDelta)
+{
+    SDK::Test::FakeFileSystem fs;
+    fs.seedFile(kOutPath, makeStoreJson(1, phase2Bins(8, 650.0f)));  // SL = 1.3
+    CadenceStrideModel m(fs, kOutPath, kDeltaPath);
+    m.startSession(1.75f);
+    ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
+
+    float steps[StrideLut::kBinCount] {};
+    steps[0] = 300.0f;
+    steps[7] = 500.0f;
+
+    // D_estimated below kDeltaLearnMinDistanceM (2000 m). D_actual ratio 1.1,
+    // implied mean stride 2.75 → would be accepted and would normally learn.
+    const float dEst = 1000.0f;
+    const float dAct = 1100.0f;
+    auto r = m.applyPostRunCalibration(steps, dEst, dAct);
+
+    EXPECT_TRUE(r.dActualAccepted);
+    EXPECT_FALSE(r.deltaLutUpdated);
+    EXPECT_FLOAT_EQ(r.distanceForFitM, dAct);   // FIT distance still corrected
+    EXPECT_NEAR(m.deltaAt(82.0f), 0.0f, 1e-6f); // LUT untouched
+    EXPECT_NEAR(m.deltaAt(110.0f), 0.0f, 1e-6f);
+    EXPECT_FALSE(fs.hasFile(kDeltaPath));        // nothing persisted
 }
 
 // --- Post-run gates ----------------------------------------------------------
@@ -486,13 +516,14 @@ TEST(CadenceStrideModel, PostRunPhase2PerBinClamp)
     ASSERT_EQ(m.phase(), Phase::OUTDOOR_CALIBRATED);
     ASSERT_NEAR(m.outdoorStrideLengthM(82.0f), 4.8f, 1e-3f);
 
-    // Single used bin 0, S = 200. D_actual = 500 (implied mean stride 5.0 == max,
-    // ratio 500/300 = 1.67 → accepted). Raw δ = 0.8 would push SL→5.6; clamp to
-    // 5.0 back-solves δ = 0.2.
+    // Single used bin 0, S = 2000. D_estimated = 2500 (>= the 2000 m delta floor),
+    // D_actual = 4500 (implied mean stride 4500/1000 = 4.5 ≤ max, ratio 1.8 →
+    // accepted). Raw δ = 2·η·ΔD/S = 0.8 would push SL→5.6; clamp to 5.0
+    // back-solves δ = 0.2.
     float steps[StrideLut::kBinCount] {};
-    steps[0] = 200.0f;
-    auto r = m.applyPostRunCalibration(steps, /*D_estimated=*/300.0f,
-                                       /*D_actual=*/500.0f);
+    steps[0] = 2000.0f;
+    auto r = m.applyPostRunCalibration(steps, /*D_estimated=*/2500.0f,
+                                       /*D_actual=*/4500.0f);
     ASSERT_TRUE(r.dActualAccepted);
     ASSERT_TRUE(r.deltaLutUpdated);
 

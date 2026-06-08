@@ -262,15 +262,17 @@ TEST(TreadmillSpeedEstimator, EndToEndDeltaConvergesTowardActual)
     TreadmillSpeedEstimator est(m);
     est.startSession();
 
-    // Drive a steady cadence trace (within the valid bins, e.g. 100 spm).
+    // Drive a steady cadence trace (within the valid bins, e.g. 100 spm) long
+    // enough to clear the delta-learning distance floor (kDeltaLearnMinDistanceM
+    // = 2000 m; ~1.08 m/s here → ~2166 m over 2000 s).
     const float cadence = 100.0f;
-    for (int i = 0; i < 600; ++i) {
+    for (int i = 0; i < 2000; ++i) {
         est.tick(cadence, true, 1.0f);
     }
     const float dEst = est.distanceM();
-    ASSERT_GT(dEst, 0.0f);
+    ASSERT_GT(dEst, 2000.0f);
 
-    // Console says we actually went 10% further. Within both gates → accepted.
+    // Console says we actually went 10% further. Within all gates → accepted.
     const float dActual = dEst * 1.10f;
     auto r = m.applyPostRunCalibration(est.stepHistogram(), dEst, dActual);
     ASSERT_TRUE(r.dActualAccepted);
@@ -281,7 +283,7 @@ TEST(TreadmillSpeedEstimator, EndToEndDeltaConvergesTowardActual)
     // stride upward), converging toward the actual.
     TreadmillSpeedEstimator est2(m);
     est2.startSession();
-    for (int i = 0; i < 600; ++i) {
+    for (int i = 0; i < 2000; ++i) {
         est2.tick(cadence, true, 1.0f);
     }
     EXPECT_GT(est2.distanceM(), dEst);
