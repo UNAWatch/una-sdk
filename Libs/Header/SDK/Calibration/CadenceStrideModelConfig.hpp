@@ -29,7 +29,9 @@ namespace Config
 // overground plateau, per the speed-research doc), so SL(c) is modelled as a
 // straight line through two population anchors at a reference height, then
 // scaled by the user's height: SL(c,h) = (h / kDemoRefHeightM) * line(c).
-// Anchors are firmware-tunable; gender refinement is still deferred.
+// Anchors are firmware-tunable. The model is unisex by design — a
+// gender-specific stride model is not planned (no robust sex effect at matched
+// running speeds).
 constexpr float kDemoRefHeightM   = 1.75f;    ///< Reference height for the anchors
 constexpr float kDemoCadenceLoSpm = 110.0f;   ///< Walk anchor cadence
 constexpr float kDemoStrideLoM    = 1.51f;    ///<   stride there (~5.0 km/h @ 110 SPM)
@@ -51,6 +53,14 @@ constexpr float kLearningRateEta = 0.4f;
 /// D_actual sanity band as a fraction of D_estimated.
 constexpr float kDActualRatioMin = 0.5f;
 constexpr float kDActualRatioMax = 2.0f;
+
+/// Minimum estimated (pre-correction) session distance, metres, before a
+/// post-run correction may *learn* the delta LUT. The Calibrate & Save screen
+/// is always offered (the user can correct the recorded distance / avg speed on
+/// any run), but delta learning additionally requires the outdoor-calibrated
+/// tier AND this much integrated distance — short runs lack the cadence-bin
+/// coverage to attribute a correction reliably.
+constexpr float kDeltaLearnMinDistanceM = 2000.0f;
 
 // --- Live estimator ----------------------------------------------------------
 

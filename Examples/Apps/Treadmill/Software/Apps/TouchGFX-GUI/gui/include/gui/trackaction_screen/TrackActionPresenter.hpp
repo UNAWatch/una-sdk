@@ -30,8 +30,10 @@ public:
     virtual void onTrackData(const Track::Data& data) override;
 
     void resumeTrack();
-    /// Stop recording and route to Calibrate & Save (eligible) or straight to
-    /// the saved screen (§5.1: offer calibration only for sessions >= 2 km).
+    /// Stop recording and always route to Calibrate & Save (every run, any
+    /// tier); the user corrects the recorded distance/avg speed there, or skips.
+    /// Whether an entered distance also updates the delta LUT is gated
+    /// Service-side (outdoor-calibrated tier + a minimum distance), not here.
     void saveRequested();
 
 private:

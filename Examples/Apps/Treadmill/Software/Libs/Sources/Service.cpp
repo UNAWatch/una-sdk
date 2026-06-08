@@ -948,22 +948,22 @@ void Service::stopTrack(bool discard)
              static_cast<uint32_t>(mTimeCounter.getValueTotal()),
              static_cast<double>(mCalibDEstimatedM));
 
-    // Sessions >= 2 km wait for the GUI's Calibrate & Save decision; shorter
-    // ones finalise immediately with the estimated distance.
-    if (mCalibDEstimatedM >= skCalibrateMinDistanceM) {
-        mAwaitingCalibration = true;
-        LOG_INFO("Awaiting Calibrate & Save (D_est %.1f m)\n",
-                 static_cast<double>(mCalibDEstimatedM));
-    } else {
-        finalizeActivity(0.0f);
-    }
+    // Every session waits for the GUI's Calibrate & Save decision so the user
+    // can correct the recorded distance (and the avg speed derived from it) on
+    // any run. The delta-LUT *learning* is gated separately inside
+    // CadenceStrideModel::applyPostRunCalibration (outdoor-calibrated tier + a
+    // minimum distance); correcting the FIT file is not.
+    mAwaitingCalibration = true;
+    LOG_INFO("Awaiting Calibrate & Save (D_est %.1f m)\n",
+             static_cast<double>(mCalibDEstimatedM));
 }
 
 void Service::finalizeActivity(float distanceActualM)
 {
-    // distanceActualM <= 0 => skip calibration (keep the estimate). In phase 2
-    // an accepted value also nudges the delta LUT (§5.3); in phase 1 it only
-    // rewrites the recorded distance.
+    // distanceActualM <= 0 => skip calibration (keep the estimate). An accepted
+    // value always rewrites the recorded distance; it additionally nudges the
+    // delta LUT only in the outdoor-calibrated tier and above the minimum
+    // distance (§5.3) — applyPostRunCalibration owns that gate.
     const SDK::Calibration::CadenceStrideModel::CalibrationResult res =
         mModel.applyPostRunCalibration(mCalibSteps, mCalibDEstimatedM, distanceActualM);
 
