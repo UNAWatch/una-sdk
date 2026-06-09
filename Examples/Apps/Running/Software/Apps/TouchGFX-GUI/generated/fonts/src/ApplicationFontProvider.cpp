@@ -57,6 +57,12 @@ touchgfx::Font* ApplicationFontProvider::getFont(touchgfx::FontId typography)
     case Typography::POPPINS_ITALIC_20:
         // Poppins_Italic_20_2bpp
         return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[15]);
+    case Typography::POPPINS_LIGHT_60:
+        // Poppins_Light_60_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[16]);
+    case Typography::POPPINS_MEDIUM_40:
+        // Poppins_Medium_40_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[17]);
     default:
         return 0;
     }

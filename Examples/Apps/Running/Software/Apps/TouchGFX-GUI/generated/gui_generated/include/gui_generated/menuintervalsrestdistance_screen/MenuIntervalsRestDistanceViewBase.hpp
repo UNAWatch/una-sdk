@@ -8,7 +8,7 @@
 #include <mvp/View.hpp>
 #include <gui/menuintervalsrestdistance_screen/MenuIntervalsRestDistancePresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <gui/containers/MainMenuLayout.hpp>
+#include <gui/containers/TwoTonePicker.hpp>
 
 class MenuIntervalsRestDistanceViewBase : public touchgfx::View<MenuIntervalsRestDistancePresenter>
 {
@@ -27,7 +27,7 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    MainMenuLayout menuLayout;
+    TwoTonePicker picker;
 
 private:
 

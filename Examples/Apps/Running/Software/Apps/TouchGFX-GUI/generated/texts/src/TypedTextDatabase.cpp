@@ -21,6 +21,8 @@ extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_40_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_60_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Italic_18_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Italic_20_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Light_60_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Medium_40_2bpp();
 
 const touchgfx::Font* touchgfx_fonts[] = {
     &(getFont_Poppins_Regular_18_2bpp()),
@@ -38,7 +40,9 @@ const touchgfx::Font* touchgfx_fonts[] = {
     &(getFont_Poppins_SemiBold_40_2bpp()),
     &(getFont_Poppins_SemiBold_60_2bpp()),
     &(getFont_Poppins_Italic_18_2bpp()),
-    &(getFont_Poppins_Italic_20_2bpp())
+    &(getFont_Poppins_Italic_20_2bpp()),
+    &(getFont_Poppins_Light_60_2bpp()),
+    &(getFont_Poppins_Medium_40_2bpp())
 };
 
 extern const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[];
@@ -94,6 +98,12 @@ const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCAT
     { 15, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
     { 15, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 15, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 16, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 16, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 16, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
@@ -150,6 +160,10 @@ const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCAT
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
@@ -285,6 +299,12 @@ void resetFont(touchgfx::FontId fontId)
         break;
     case 15:
         touchgfx_fonts[15] = &(getFont_Poppins_Italic_20_2bpp());
+        break;
+    case 16:
+        touchgfx_fonts[16] = &(getFont_Poppins_Light_60_2bpp());
+        break;
+    case 17:
+        touchgfx_fonts[17] = &(getFont_Poppins_Medium_40_2bpp());
         break;
     }
 }

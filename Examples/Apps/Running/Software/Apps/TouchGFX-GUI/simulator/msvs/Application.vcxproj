@@ -210,6 +210,8 @@
     <ClCompile Include="..\..\gui\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\TwoTonePicker.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\TwoTonePickerBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -566,6 +568,9 @@
     <ClInclude Include="..\..\gui\include\gui\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\PickerLogic.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\TwoTonePicker.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TwoTonePickerBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>
