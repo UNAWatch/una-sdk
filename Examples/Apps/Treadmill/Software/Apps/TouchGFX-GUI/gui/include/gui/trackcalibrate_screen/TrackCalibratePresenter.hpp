@@ -23,10 +23,8 @@ public:
 
     virtual ~TrackCalibratePresenter() {}
 
-    /// Apply the user-entered actual distance (metres).
+    /// Stop the activity and apply the user-entered actual distance (metres).
     void applyCalibration(float meters);
-    /// Keep the estimated distance (no correction).
-    void skipCalibration();
 
 private:
     TrackCalibratePresenter();

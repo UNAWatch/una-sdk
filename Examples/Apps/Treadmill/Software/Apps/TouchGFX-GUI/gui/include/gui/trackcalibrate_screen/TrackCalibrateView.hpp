@@ -8,7 +8,8 @@
 /**
  * Post-run "Calibrate & Save" distance entry (§5). Uses the shared TwoTonePicker:
  * stage 1 edits the whole part, stage 2 the 0.01-unit fraction. R1 confirms /
- * advances, R2 skips / steps back.
+ * advances; R2 steps back a stage, or (from stage 1) backs out to the pause menu
+ * without saving (the activity stays paused until R1 confirms).
  */
 class TrackCalibrateView : public TrackCalibrateViewBase
 {
