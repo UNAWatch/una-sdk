@@ -29,10 +29,11 @@ void TrackCalibrateView::handleKeyEvent(uint8_t key)
             presenter->applyCalibration(mLogic.meters());
             application().gotoTrackSavedScreenNoTransition();
         }
-    } else if (key == SDK::GUI::Button::R2) {     // skip / step back
+    } else if (key == SDK::GUI::Button::R2) {     // back / step back
         if (!mLogic.atFrac()) {
-            presenter->skipCalibration();
-            application().gotoTrackSavedScreenNoTransition();
+            // Back out to the pause menu (Resume / Discard / Save) without
+            // saving — the activity is still only paused, not stopped.
+            application().gotoTrackActionScreenNoTransition();
         } else {
             mLogic.toWhole();
             mLogic.render(picker);

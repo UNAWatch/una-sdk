@@ -39,14 +39,12 @@ void TrackActionPresenter::resumeTrack()
 
 void TrackActionPresenter::saveRequested()
 {
-    // Stop recording. The Service builds the summary at the estimated distance
-    // and waits for the Calibrate & Save decision.
-    model->saveTrack();
-
-    // Always offer Calibrate & Save so the user can correct the recorded
-    // distance (and the avg speed derived from it) on any run. The intro screen
-    // explains the step, then advances to the distance picker; the user can skip
-    // to keep the estimate. Whether the entered distance also updates the delta
-    // LUT is gated Service-side (outdoor-calibrated tier + a minimum distance).
+    // Do NOT stop the activity yet: keep it paused through the Calibrate & Save
+    // intro + distance picker, so R2 (back) on the picker can return to this
+    // pause menu with Resume/Discard still available. The stop + finalise happens
+    // only when the user confirms a distance on the picker
+    // (TrackCalibratePresenter::applyCalibration). Confirming the seeded estimate
+    // keeps the estimate; whether the entered distance also updates the delta LUT
+    // is gated Service-side (outdoor-calibrated tier + a minimum distance).
     model->application().gotoTrackCalibrateIntroScreenNoTransition();
 }
