@@ -398,10 +398,12 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
-            "Name": "menuLayout",
+            "Name": "picker",
+            "X": 0,
+            "Y": 0,
             "Width": 240,
             "Height": 240,
-            "CustomContainerDefinitionName": "MainMenuLayout"
+            "CustomContainerDefinitionName": "TwoTonePicker"
           }
         ],
         "Interactions": [
@@ -450,10 +452,12 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
-            "Name": "menuLayout",
+            "Name": "picker",
+            "X": 0,
+            "Y": 0,
             "Width": 240,
             "Height": 240,
-            "CustomContainerDefinitionName": "MainMenuLayout"
+            "CustomContainerDefinitionName": "TwoTonePicker"
           }
         ],
         "Interactions": [
@@ -476,10 +480,12 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
-            "Name": "menuLayout",
+            "Name": "picker",
+            "X": 0,
+            "Y": 0,
             "Width": 240,
             "Height": 240,
-            "CustomContainerDefinitionName": "MainMenuLayout"
+            "CustomContainerDefinitionName": "TwoTonePicker"
           }
         ],
         "Interactions": [
@@ -502,10 +508,12 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
-            "Name": "menuLayout",
+            "Name": "picker",
+            "X": 0,
+            "Y": 0,
             "Width": 240,
             "Height": 240,
-            "CustomContainerDefinitionName": "MainMenuLayout"
+            "CustomContainerDefinitionName": "TwoTonePicker"
           }
         ],
         "Interactions": [
@@ -1521,6 +1529,170 @@
       }
     ],
     "CustomContainerDefinitions": [
+      {
+        "Name": "TwoTonePicker",
+        "Width": 240,
+        "Height": 240,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "subLeft",
+            "X": 5,
+            "Y": 58,
+            "Width": 110,
+            "Height": 28,
+            "TextId": "TMP_ITALIC_20",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 0,
+              "Green": 128,
+              "Blue": 128
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_SBL1",
+              "UseBuffer": true,
+              "BufferSize": 12
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "subRight",
+            "X": 127,
+            "Y": 58,
+            "Width": 108,
+            "Height": 28,
+            "TextId": "TMP_ITALIC_20",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_SBR1",
+              "UseBuffer": true,
+              "BufferSize": 12
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "valLeft",
+            "X": 5,
+            "Y": 92,
+            "Width": 110,
+            "Height": 80,
+            "TextId": "TMP_SEMIBOLD_60_R",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 0,
+              "Green": 128,
+              "Blue": 128
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_VLF1",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "valSep",
+            "X": 110,
+            "Y": 92,
+            "Width": 22,
+            "Height": 80,
+            "TextId": "TMP_LIGHT_60",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_VSP1",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "valRight",
+            "X": 127,
+            "Y": 92,
+            "Width": 108,
+            "Height": 80,
+            "TextId": "TMP_LIGHT_60_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_VRT1",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "nextVal",
+            "X": 5,
+            "Y": 151,
+            "Width": 110,
+            "Height": 50,
+            "TextId": "TMP_MEDIUM_40",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_NV11",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "nextVal2",
+            "X": 5,
+            "Y": 193,
+            "Width": 110,
+            "Height": 36,
+            "TextId": "TMP_MEDIUM_25",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_NV21",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": []
+      },
       {
         "Name": "Battery",
         "Width": 90,
