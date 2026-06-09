@@ -728,8 +728,8 @@ void Service::saveLap()
 
     // Accumulate lap into summary
     mSummary.laps.push_back({
-        mTimeCounter.getLapValueActive(),
-        mDistanceCounter.getLapValueActive(),
+        lapTime,
+        lapDistance,
         mStepCounter.getLapValueActive()
     });
 
@@ -756,12 +756,6 @@ void Service::saveLap()
     fitLap.descent   = mAltitudeCounter.getLapDescent();
 
     mActivityWriter.addLap(fitLap);
-
-    LapSummary lapSummary{};
-    lapSummary.duration = mTimeCounter.getLapValueActive();
-    lapSummary.distance = mDistanceCounter.getLapValueActive();
-    lapSummary.steps    = mStepCounter.getLapValueActive();
-    mSummary.laps.push_back(lapSummary);
 
     mTrackData.lapNum++;
 
