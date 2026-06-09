@@ -152,7 +152,12 @@ void TrackView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::R2) {
-        if (mCurrentFaceId == FaceId::ID_INTERVALS) {
+        // In an intervals workout the lap button advances to the next phase, on
+        // ANY face — laps are phase-driven, not manual. Gate on the workout mode,
+        // not the currently shown face (which the user can scroll away from). When
+        // the workout completes the Service drops intervalsMode, so R2 then records
+        // a manual lap. A free (non-intervals) run always records a manual lap.
+        if (mIntervalsMode) {
             presenter->intervalsNextPhase();
         } else {
             presenter->saveLap();
