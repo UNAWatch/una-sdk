@@ -36,6 +36,18 @@ static float getPace(float speed, float threshold)
     return (speed > threshold) ? (1.0f / speed) : 0.0f;
 }
 
+// Average speed per the FIT definition: total distance / active timer time.
+// This is NOT the mean of the instantaneous speed samples -- a sample mean
+// drifts away from distance/time because sub-threshold samples are dropped
+// from the average while their seconds still count toward the duration. Using
+// the totals keeps distance, duration and the reported average pace mutually
+// consistent on every lap and session. (finalizeActivity() already derives the
+// session avg_speed this way; this matches the per-lap and live values to it.)
+static float speedFromTotals(float distanceM, float activeTimeS)
+{
+    return (activeTimeS > 0.0f) ? (distanceM / activeTimeS) : 0.0f;
+}
+
 } // namespace
 
 Service::Service(SDK::Kernel &kernel)
@@ -753,9 +765,9 @@ void Service::processTrack()
     // Speed, m/s
     mTrackData.speed = mSpeedCounter.getCurrent();
 
-    mTrackData.avgSpeed    = mSpeedCounter.getAverage();
+    mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed    = mSpeedCounter.getMaximum();
-    mTrackData.avgLapSpeed = mSpeedCounter.getLapAverage();
+    mTrackData.avgLapSpeed = speedFromTotals(mTrackData.lapDistance, mTrackData.lapTime);
     mTrackData.maxLapSpeed = mSpeedCounter.getLapMaximum();
 
 
@@ -821,11 +833,15 @@ void Service::processTrack()
 
 void Service::saveLap()
 {
+    const auto  lapTime     = mTimeCounter.getLapValueActive();
+    const float lapDistance = mDistanceCounter.getLapValueActive();
+    const float lapSpeed    = speedFromTotals(lapDistance, static_cast<float>(lapTime));
+
     // Accumulate lap into summary
     mSummary.laps.push_back({
-        mTimeCounter.getLapValueActive(),
-        mDistanceCounter.getLapValueActive(),
-        getPace(mSpeedCounter.getLapAverage(), mSpeedCounter.getMinValid())
+        lapTime,
+        lapDistance,
+        getPace(lapSpeed, mSpeedCounter.getMinValid())
     });
 
     // Save lap to the FIT file
@@ -833,12 +849,12 @@ void Service::saveLap()
 
     fitLap.timestamp = mTimeCounter.getCurrent();
     fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
-    fitLap.duration  = mTimeCounter.getLapValueActive();
+    fitLap.duration  = lapTime;
     fitLap.elapsed   = mTimeCounter.getLapValueTotal();
 
-    fitLap.distance  = mDistanceCounter.getLapValueActive();
+    fitLap.distance  = lapDistance;
 
-    fitLap.speedAvg  = mSpeedCounter.getLapAverage();
+    fitLap.speedAvg  = lapSpeed;
     fitLap.speedMax  = mSpeedCounter.getLapMaximum();
 
     fitLap.hrAvg     = mHrCounter.getLapAverage();
@@ -857,8 +873,8 @@ void Service::saveLap()
 
     LOG_INFO("Lap_%u saved. UTC: %u\n", mTrackData.lapNum, static_cast<uint32_t>(mTimeCounter.getCurrent()));
     LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getLapValueActive()), static_cast<uint32_t>(mTimeCounter.getLapValueTotal()));
-    LOG_INFO("Distance: %.3f m\n", mDistanceCounter.getLapValueActive());
-    LOG_INFO("Speed: %.3f / %.3f m/s\n", mSpeedCounter.getLapAverage(), mSpeedCounter.getLapMaximum());
+    LOG_INFO("Distance: %.3f m\n", lapDistance);
+    LOG_INFO("Speed: %.3f / %.3f m/s\n", lapSpeed, mSpeedCounter.getLapMaximum());
     LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getLapAverage(), mHrCounter.getLapMaximum());
     LOG_INFO("Ascent/Descent: %.1f / %.1f m\n", mAltitudeCounter.getLapAscent(), mAltitudeCounter.getLapDescent());
 
@@ -885,9 +901,9 @@ void Service::buildPartialSummary()
     mSummary.utc       = mTimeCounter.getCurrent();
     mSummary.time      = mTimeCounter.getValueActive();
     mSummary.distance  = mDistanceCounter.getValueActive();
-    mSummary.speedAvg  = mSpeedCounter.getAverage();
+    mSummary.speedAvg  = speedFromTotals(mSummary.distance, mSummary.time);
     mSummary.elevation = mAltitudeCounter.getCurrent();
-    mSummary.paceAvg   = getPace(mSpeedCounter.getAverage(), mSpeedCounter.getMinValid());
+    mSummary.paceAvg   = getPace(mSummary.speedAvg, mSpeedCounter.getMinValid());
     mSummary.hrMax     = mHrCounter.getMaximum();
     mSummary.hrAvg     = mHrCounter.getAverage();
     mSummary.map       = mTrackMapBuilder.build(skMapMaxPoints);
