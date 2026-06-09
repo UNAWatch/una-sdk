@@ -975,6 +975,9 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuStepCounter.cpp">
       <Filter>SDK\Libs\Source\Simulator\Components\Sensors\Imu</Filter>
     </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuRunningCadence.cpp">
+      <Filter>SDK\Libs\Source\Simulator\Components\Sensors\Imu</Filter>
+    </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuWristMotion.cpp">
       <Filter>SDK\Libs\Source\Simulator\Components\Sensors\Imu</Filter>
     </ClCompile>
