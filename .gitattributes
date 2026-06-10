@@ -1,0 +1,3 @@
+# Shell scripts must keep LF line endings so they run on Linux/macOS
+# regardless of a contributor's core.autocrlf setting (a CRLF shebang breaks).
+*.sh text eol=lf
