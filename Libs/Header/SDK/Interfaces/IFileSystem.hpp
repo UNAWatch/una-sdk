@@ -286,10 +286,29 @@ public:
     virtual bool isOpen() const = 0;
 
     /**
-     * @brief   Reads the next item in the directory.
-     * @param   item: Reference to store the directory item information.
-     * @param   reset: Reset the read position if true.
-     * @retval  'true' if the item was successfully read, 'false' otherwise.
+     * @brief   Reads the next directory entry, advancing the read cursor.
+     *
+     * @details
+     * Cursor-style enumeration: each call returns one entry and advances, so a
+     * caller can iterate the directory with:
+     * @code
+     *     while (dir.readNext(item)) { ... }
+     * @endcode
+     * The loop terminates when the directory is exhausted (return 'false').
+     *
+     * When @p reset is 'true', the cursor is first rewound to the start of the
+     * directory. A reset call does NOT read an entry: @p item is left
+     * unmodified and the return value only reflects whether the rewind
+     * succeeded. The next call with @p reset 'false' returns the first entry.
+     *
+     * @param   item: On a non-reset call, receives the entry. Left unmodified
+     *          on a reset call or when the directory is exhausted.
+     * @param   reset: Rewind the cursor to the first entry before reading.
+     *          Note that a reset call rewinds only and returns without reading.
+     * @retval  'true'  a non-reset call read an entry into @p item, or a reset
+     *          call rewound successfully.
+     * @retval  'false' the directory is exhausted, not open, or the rewind
+     *          failed. @p item is unchanged.
      */
     virtual bool readNext(IFileSystem::ObjectInfo& item, bool reset = false) = 0;
 
