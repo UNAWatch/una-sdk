@@ -389,6 +389,8 @@ bool FileSystem::objectInfo(const char *path, FileSystem::ObjectInfo &item) cons
     if (hFind == INVALID_HANDLE_VALUE) return false;
     safe_strcpy(item.name, findData.cFileName, sizeof(item.name));
     item.isDir = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    item.isHidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0;
+    item.isSystem = (findData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM) != 0;
     item.size = findData.nFileSizeLow;
     item.utc = FileTimeToUnixTime(findData.ftCreationTime);
     FindClose(hFind);
