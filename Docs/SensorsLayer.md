@@ -229,6 +229,7 @@ As above, `float bpm = p.getBpm(); float trust = p.getTrustLevel();`
 Blood-oxygen saturation derived from the optical PPG path. Delivered as a processed scalar with a trust level, mirroring HEART_RATE.
 
 **Fields**:
+
 | Index | Name | Type | Unit |
 |-------|------|------|------|
 | 0 | SATURATION | float | % |
