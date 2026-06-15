@@ -17,6 +17,9 @@
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
 
+#include "BeatProbe.hpp"
+static BeatProbe gBeatProbe;
+
 #ifndef M_PI
 #define M_PI    3.14159265358979323846264338327950288   /* pi */
 #endif
@@ -123,6 +126,7 @@ void Service::run()
                 // Kernel messages
                 case SDK::MessageType::COMMAND_APP_STOP:
                     LOG_INFO("Force exit from the application\n");
+                    gBeatProbe.flushFinal(mKernel.sys.getTimeMs());
                     mSensorHR.disconnect();
                     mSensorGPS.disconnect();
                     mSensorAltimeter.disconnect();
@@ -184,6 +188,8 @@ void Service::run()
             uint32_t processEnd = mKernel.sys.getTimeMs();
             mActiveTimeMs += (processEnd - processStart);
         }
+
+        gBeatProbe.tick(mKernel.sys.getTimeMs());
 
         if (mGUIStarted) {
             // Update CPU time and message rates every second
@@ -279,6 +285,13 @@ void Service::onStopGUI()
 
 void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
 {
+    // --- BeatProbe taps: observe cardio streams regardless of GUI state ---
+    if (mSensorHeartBeat.matchesDriver(handle))   { gBeatProbe.onBeat(data); return; }
+    if (mSensorPPG.matchesDriver(handle))         { gBeatProbe.onPpg(data);  return; }
+    if (mSensorHR.matchesDriver(handle))            gBeatProbe.onHr(data);
+    if (mSensorTouchDetect.matchesDriver(handle))   gBeatProbe.onTouch(data);
+    // --- end BeatProbe taps ---
+
     if (mGUIStarted) {
         if (mSensorHR.matchesDriver(handle)) {
             SDK::SensorDataParser::HeartRate parser(data[0]);
