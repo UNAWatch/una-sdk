@@ -35,6 +35,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | Motion | GESTURE_RECOGNITION | 0xD0 | Discrete gesture events | No | - |
 | Daily | ACTIVITY | 0xE0 | Active minutes (minutes) | Yes | DURATION (u32 ms) - 1 |
 | Optical | PPG | 0xF0 | Photoplethysmogram | No | - |
+| Optical | SPO2 | 0xF1 | Blood-oxygen saturation (SpO2) | Yes | SATURATION (float %), TRUST_LEVEL (float) - 2 |
 | Optical | ECG | 0x100 | Electrocardiogram | No | - |
 | GPS | GPS_LOCATION | 0x110 | GNSS location | Yes | PRECISION (f m), COORDS_VALID (bool), LAT (f deg), LON (f deg), ALT (f m) - 5 |
 | GPS | GPS_SPEED | 0x111 | GNSS speed | Yes | SPEED (f m/s) - 1 |
@@ -220,6 +221,20 @@ As above, `float bpm = p.getBpm(); float trust = p.getTrustLevel();`
 **Parser**: `SDK::SensorDataParser::Activity`
 
 **Fields**: DURATION (u32 ms)
+
+### SPO2 (0xF1)
+
+**Parser**: `SDK::SensorDataParser::Spo2`
+
+Blood-oxygen saturation derived from the optical PPG path. Delivered as a processed scalar with a trust level, mirroring HEART_RATE.
+
+**Fields**:
+| Index | Name | Type | Unit |
+|-------|------|------|------|
+| 0 | SATURATION | float | % |
+| 1 | TRUST_LEVEL | float | - |
+
+`float spo2 = p.getSaturation(); float trust = p.getTrustLevel();`
 
 ### GPS_LOCATION (0x110)
 
