@@ -31,7 +31,7 @@ grep -E "PROBE|BEAT-EVENT|^beat|^ppg" <uart-capture.log>
 From launch it logs an `armed` banner, a raw `beat #...` line per beat (timestamp + inter-beat `dt` in ms) or
 a `ppg ...` line each second, then a summary block every 15 s, at 90 s, and on exit:
 
-```
+```text
 ==== UNA BEAT-EVENT PROBE armed: window=90s, report every 15s, watching 0x40/0xF0/0x41/0x140 ====
 beat #1   t=10240 ms (+512 us)  dt=0 ms     fields=1  f0=0x00000000
 beat #2   t=11051 ms (+128 us)  dt=811 ms   fields=1  f0=0x00000000
