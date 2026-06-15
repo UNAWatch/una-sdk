@@ -91,6 +91,7 @@ namespace SDK::Sensor
          *  @{
          */
         PPG                  = 0x000000F0, ///< Photoplethysmogram data.
+        SPO2                 = 0x000000F1, ///< Blood-oxygen saturation (SpO2), derived from the optical PPG path (%).
         ECG                  = 0x00000100, ///< Electrocardiogram data.
         /** @} */
 
