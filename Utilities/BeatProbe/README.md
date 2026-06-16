@@ -25,23 +25,23 @@ Connect by USB, copy the `.uapp` into an `Apps/Sensors/` folder on the watch, ej
 Wear the watch (worn and reasonably still) for ~90 s after launch, then read the debug UART:
 
 ```bash
-grep -E "PROBE|BEAT-EVENT|^beat|^ppg" <uart-capture.log>
+grep -E "PROBE|BEAT-EVENT" <uart-capture.log>
 ```
 
 From launch it logs an `armed` banner, a raw `beat #...` line per beat (timestamp + inter-beat `dt` in ms) or
-a `ppg ...` line each second, then a summary block every 15 s, at 90 s, and on exit:
+a `ppg ...` line each second, then a summary block every 15 s and one at 90 s (or on earlier exit):
 
 ```text
-==== UNA BEAT-EVENT PROBE armed: window=90s, report every 15s, watching 0x40/0xF0/0x41/0x140 ====
-beat #1   t=10240 ms (+512 us)  dt=0 ms     fields=1  f0=0x00000000
-beat #2   t=11051 ms (+128 us)  dt=811 ms   fields=1  f0=0x00000000
+-I- PROBE::tick::129: ==== UNA BEAT-EVENT PROBE armed: window=90s, report every 15s, watching 0x40/0xF0/0x41/0x140 ====
+-I- PROBE::onBeat::76: beat #1   t=10240 ms (+512 us)  dt=0 ms     fields=1  f0=0x00000000
+-I- PROBE::onBeat::76: beat #2   t=11051 ms (+128 us)  dt=811 ms   fields=1  f0=0x00000000
 ...
-==== UNA BEAT-EVENT PROBE [FINAL ] t=90s ==========================
-  HEART_BEAT 0x40 : events=92  rate=61/min  fields=1  field0=0x00000000
-  RR intervals    : n=90  min/mean/max=812/986/1170 ms  last=995 ms  RMSSD~34 ms  rejected=1  subMs_ts=88/92
-  PPG 0xF0        : events=0  samples=0  est_rate=0 Hz  channels=0
-  cross-check     : HEART_RATE 0x41 present (bpm=60 trust=98)  impliedHR(fromRR)=60  TOUCH worn=yes
-  VERDICT A : ...
+-I- PROBE::report::182: ==== UNA BEAT-EVENT PROBE [FINAL ] t=90s ==========================
+-I- PROBE::report::183:   HEART_BEAT 0x40 : events=92  rate=61/min  fields=1  field0=0x00000000
+-I- PROBE::report::185:   RR intervals    : n=90  min/mean/max=812/986/1170 ms  last=995 ms  RMSSD~34 ms  rejected=1  subMs_ts=88/92
+-I- PROBE::report::187:   PPG 0xF0        : events=0  samples=0  est_rate=0 Hz  channels=0
+-I- PROBE::report::189:   cross-check     : HEART_RATE 0x41 present (bpm=60 trust=98)  impliedHR(fromRR)=60  TOUCH worn=yes
+-I- PROBE::report::199:   VERDICT A : ...
 ```
 
 `VERDICT A` = beats give RR directly; `B` = only PPG (RR needs peak detection); `C` = no cardio data (check
