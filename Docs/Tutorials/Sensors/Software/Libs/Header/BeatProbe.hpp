@@ -14,7 +14,7 @@
  *
  * No GUI, no filesystem, no FIT. Output is log-only and self-interpreting. It logs a
  * raw line per beat (timestamp + inter-beat interval) and ~1 PPG line/s as it goes, plus
- * a summary block every 15 s, one at 90 s, and one on exit, each ending in VERDICT A/B/C.
+ * a summary block every 15 s and a final one at 90 s (or on earlier exit), each ending in VERDICT A/B/C.
  * Even a truncated or early-terminated log is conclusive. Grep for "PROBE" or "BEAT-EVENT".
  *
  * Integer math only (no <cmath>, no float printf) so it is robust on the
@@ -143,7 +143,7 @@ public:
     /// accumulated is captured even if the 90 s window was never reached.
     void flushFinal(uint32_t nowMs)
     {
-        if (!mStarted) return;
+        if (!mStarted || mPrintedFinal) return;
         report(nowMs - mStartMs, true);
         mPrintedFinal = true;
     }
