@@ -104,7 +104,7 @@ The HWButtonController provides button input handling for TouchGFX, sampling but
 - **Frame Buffer**: Static `uint8_t sFrameBuffer[57600]` (240×240×1 byte/pixel)
 - **Active Buffer Pointer**: `uint8_t* spActiveBuffer`
 - **Flush Request Flag**: `bool sFlushBufferReq`
-- **Button State**: `uint8_t mLastButtonCode`
+- **Button Queue**: `FixedQueue<uint8_t, 16> mButtonCodes` (one physical press expands to press/click/release, several of which can arrive between two GUI ticks)
 - **Message Queue**: `FixedQueue<MessageBase*, 10> mUserQueue` for custom messages
 - **Kernel Reference**: Direct access to UNA kernel for messaging
 
@@ -261,24 +261,29 @@ sequenceDiagram
     participant ButtonCtrl
     participant TouchGFX
 
-    HW->>Kernel: Button press event
+    HW->>Kernel: Button press/click/release event
     Kernel->>CmdProc: EVENT_BUTTON message
-    CmdProc->>CmdProc: Map button ID to key code
-    CmdProc->>CmdProc: Store mLastButtonCode
-    TouchGFX->>ButtonCtrl: sample() call
+    CmdProc->>CmdProc: Map (button id, event) to key code
+    CmdProc->>CmdProc: Enqueue into mButtonCodes
+    TouchGFX->>ButtonCtrl: sample() call (once per frame)
     ButtonCtrl->>CmdProc: getKeySample()
-    CmdProc->>ButtonCtrl: Return key code
+    CmdProc->>ButtonCtrl: Pop and return next key code
     ButtonCtrl->>TouchGFX: Key event
 ```
 
-1. **Button Events**: Hardware button presses generate kernel `EVENT_BUTTON` messages
+1. **Button Events**: Hardware button press/click/release generate kernel `EVENT_BUTTON` messages
 2. **Event Processing**: Command processor receives and processes button events
-3. **Key Mapping**: Button IDs are translated to TouchGFX key codes:
-   - SW1 → '1'
-   - SW2 → '3'
-   - SW3 → '2'
-   - SW4 → '4'
-4. **Sampling**: `HWButtonController::sample()` retrieves the last button code via `getKeySample()`
+3. **Key Mapping**: `(button id, event)` is translated to a printable TouchGFX key code (see `SDK/GUI/Button.hpp`):
+
+   | button | click | press | release |
+   |--------|-------|-------|---------|
+   | SW1 (L1) | '1' | 'q' | 'a' |
+   | SW2 (R1) | '3' | 'e' | 'd' |
+   | SW3 (L2) | '2' | 'w' | 's' |
+   | SW4 (R2) | '4' | 'r' | 'f' |
+
+   Codes are printable ASCII so the simulator can inject them from the keyboard. `LONG_PRESS`/`HOLD_*` are not forwarded: a screen derives long press from the press/release pair with its own timing.
+4. **Sampling**: `HWButtonController::sample()` pops the next queued code via `getKeySample()`; the queue avoids losing codes when several arrive in one frame
 
 ### Lifecycle Management
 
@@ -306,7 +311,7 @@ TouchGFX Widgets → Frame Buffer (uint8_t[57600]) → flushFrameBuffer() → Di
 
 #### Input Data Flow
 ```
-Hardware Buttons → Kernel → EVENT_BUTTON Message → TouchGFXCommandProcessor.mLastButtonCode → HWButtonController → TouchGFX Key Events
+Hardware Buttons → Kernel → EVENT_BUTTON Message → TouchGFXCommandProcessor.mButtonCodes (queue) → HWButtonController → TouchGFX Key Events
 ```
 
 #### Lifecycle Data Flow
@@ -487,20 +492,30 @@ struct EventButton : public MessageBase {
 
 **Button Mapping Implementation:**
 ```cpp
-// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:189-205
+// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp
 void TouchGFXCommandProcessor::handleEvent(SDK::Message::EventButton* msg) {
     if (!mIsGuiResumed) {
-        mLastButtonCode = '\0';
         return;
     }
 
-    if (msg->event == SDK::Message::EventButton::Event::CLICK) {
-        switch (msg->id) {
-            case SDK::Message::EventButton::Id::SW1: mLastButtonCode = '1'; break;
-            case SDK::Message::EventButton::Id::SW2: mLastButtonCode = '3'; break;
-            case SDK::Message::EventButton::Id::SW3: mLastButtonCode = '2'; break;
-            case SDK::Message::EventButton::Id::SW4: mLastButtonCode = '4'; break;
-        }
+    using Event = SDK::Message::EventButton::Event;
+
+    ButtonCodes codes;                       // click/press/release for this button
+    if (!getButtonCodes(msg->id, codes)) {
+        return;
+    }
+
+    uint8_t code = 0;
+    switch (msg->event) {
+        case Event::CLICK:   code = codes.click;   break;
+        case Event::PRESS:   code = codes.press;   break;
+        case Event::RELEASE: code = codes.release; break;
+        default: return;                     // LONG_PRESS/HOLD_* not forwarded
+    }
+
+    if (!mButtonCodes.push(code)) {          // drop oldest if the queue is full
+        mButtonCodes.pop();
+        mButtonCodes.push(code);
     }
 }
 ```
@@ -631,7 +646,6 @@ TouchGFXCommandProcessor::TouchGFXCommandProcessor()
     : mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
     , mStartCallbackCalled(false)
     , mIsGuiResumed(false)
-    , mLastButtonCode(0)
     , mAppLifeCycleCallback(nullptr)
     , mCustomMessageHandler(nullptr) {}
 ```

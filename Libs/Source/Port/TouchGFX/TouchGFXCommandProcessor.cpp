@@ -17,6 +17,7 @@
 
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
+#include "SDK/GUI/Button.hpp"
 
 
 namespace SDK
@@ -26,7 +27,6 @@ TouchGFXCommandProcessor::TouchGFXCommandProcessor()
           : mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
           , mStartCallbackCalled(false)
           , mIsGuiResumed(false)
-          , mLastButtonCode(0)
           , mAppLifeCycleCallback(nullptr)
           , mCustomMessageHandler(nullptr)
 {
@@ -38,8 +38,6 @@ TouchGFXCommandProcessor::~TouchGFXCommandProcessor()
 
 bool TouchGFXCommandProcessor::waitForFrameTick()
 {
-    mLastButtonCode = 0;
-
     // Called once
     if (mAppLifeCycleCallback && !mStartCallbackCalled) {
         mStartCallbackCalled = true;
@@ -105,6 +103,9 @@ bool TouchGFXCommandProcessor::waitForFrameTick()
             case SDK::MessageType::COMMAND_APP_GUI_SUSPEND: {
                 msg->setResult(SDK::MessageResult::SUCCESS);
                 mIsGuiResumed = false;
+                // Drop any pending codes so a half-finished press does not leak
+                // into the next screen when the GUI resumes.
+                mButtonCodes = {};
                 if (mAppLifeCycleCallback) {
                     mAppLifeCycleCallback->onSuspend();
                 }
@@ -152,8 +153,13 @@ bool TouchGFXCommandProcessor::waitForFrameTick()
 
 bool TouchGFXCommandProcessor::getKeySample(uint8_t &key)
 {
-    key = mLastButtonCode;
-    return mLastButtonCode != '\0';
+    // TouchGFX samples one key per frame; drain the queue one code at a time.
+    auto code = mButtonCodes.pop();
+    if (!code) {
+        return false;
+    }
+    key = *code;
+    return true;
 }
 
 void TouchGFXCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data)
@@ -188,21 +194,61 @@ void TouchGFXCommandProcessor::callCustomMessageHandler()
     };
 }
 
+namespace
+{
+
+// Click/press/release codes for one logical button, in kernel-id order.
+struct ButtonCodes {
+    uint8_t click;
+    uint8_t press;
+    uint8_t release;
+};
+
+// Map a kernel button id to its GUI codes. The id->position mapping is the same
+// one the click path has always used: SW1->L1, SW2->R1, SW3->L2, SW4->R2.
+bool getButtonCodes(SDK::Message::EventButton::Id id, ButtonCodes &out)
+{
+    namespace Btn = SDK::GUI::Button;
+    using Id = SDK::Message::EventButton::Id;
+
+    switch (id) {
+        case Id::SW1: out = { Btn::L1, Btn::L1_PRESS, Btn::L1_RELEASE }; return true;
+        case Id::SW2: out = { Btn::R1, Btn::R1_PRESS, Btn::R1_RELEASE }; return true;
+        case Id::SW3: out = { Btn::L2, Btn::L2_PRESS, Btn::L2_RELEASE }; return true;
+        case Id::SW4: out = { Btn::R2, Btn::R2_PRESS, Btn::R2_RELEASE }; return true;
+        default: return false;
+    }
+}
+
+} // namespace
+
 void TouchGFXCommandProcessor::handleEvent(SDK::Message::EventButton* msg)
 {
     if (!mIsGuiResumed) {
-        mLastButtonCode = '\0';
         return;
     }
 
-    if (msg->event == SDK::Message::EventButton::Event::CLICK) {
-        switch (msg->id) {
-            case SDK::Message::EventButton::Id::SW1: mLastButtonCode = '1'; break;
-            case SDK::Message::EventButton::Id::SW2: mLastButtonCode = '3'; break;
-            case SDK::Message::EventButton::Id::SW3: mLastButtonCode = '2'; break;
-            case SDK::Message::EventButton::Id::SW4: mLastButtonCode = '4'; break;
-            default: break;
-        }
+    using Event = SDK::Message::EventButton::Event;
+
+    ButtonCodes codes;
+    if (!getButtonCodes(msg->id, codes)) {
+        return;
+    }
+
+    uint8_t code = 0;
+    switch (msg->event) {
+        case Event::CLICK:   code = codes.click;   break;
+        case Event::PRESS:   code = codes.press;   break;
+        case Event::RELEASE: code = codes.release; break;
+        // LONG_PRESS / HOLD_* are intentionally not forwarded: a screen derives
+        // long press from the press/release pair using its own timing.
+        default: return;
+    }
+
+    if (!mButtonCodes.push(code)) {
+        // Queue full: drop the oldest so the most recent input stays responsive.
+        mButtonCodes.pop();
+        mButtonCodes.push(code);
     }
 }
 

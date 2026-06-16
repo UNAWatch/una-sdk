@@ -11,7 +11,7 @@
 
 #include "SDK/Simulator/Kernel/Kernel.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
-#include "SDK/Interfaces/IApp.hpp"
+#include "SDK/GUI/Button.hpp"
 #include <SDK/Messages/MessageGuard.hpp>
 
 static constexpr char sFsPath[] = "../../../../../Output/";
@@ -53,15 +53,11 @@ void Kernel::tick()
 
 bool Kernel::keyFilter(uint8_t key)
 {
-     if (mKernelIsStopped){
+    if (mKernelIsStopped) {
         return false;
-     }
+    }
 
-    return (SDK::Interface::IApp::Button::BUTTON_L1 == key ||
-            SDK::Interface::IApp::Button::BUTTON_L2 == key ||
-            SDK::Interface::IApp::Button::BUTTON_R1 == key ||
-            SDK::Interface::IApp::Button::BUTTON_R2 == key ||
-            SDK::Interface::IApp::Button::BUTTON_L1R2 == key);
+    return SDK::GUI::Button::isButtonCode(key);
 }
 
 std::string Kernel::getFsPath()

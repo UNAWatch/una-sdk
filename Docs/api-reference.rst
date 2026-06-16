@@ -87,10 +87,6 @@ Interfaces for building user interfaces using TouchGFX or the lightweight Glance
 
 For detailed information on the TouchGFX port implementation, see :doc:`TouchGFX-Port-Architecture`.
 
-.. doxygenclass:: SDK::Interface::IApp
-   :project: SDK
-   :members:
-
 .. doxygenclass:: SDK::Interface::IGlance
    :project: SDK
    :members:
