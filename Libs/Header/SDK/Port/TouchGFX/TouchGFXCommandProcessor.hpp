@@ -67,10 +67,12 @@ private:
     const SDK::Kernel&                            mKernel;
     bool                                          mStartCallbackCalled;
     bool                                          mIsGuiResumed;
-    uint8_t                                       mLastButtonCode;
     SDK::Interface::IGuiLifeCycleCallback*        mAppLifeCycleCallback;
     SDK::Interface::ICustomMessageHandler*        mCustomMessageHandler;
     SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
+    // Button codes are queued, not latched: a single physical press expands to
+    // press/click/release, several of which can arrive between two GUI ticks.
+    SDK::Tools::FixedQueue<uint8_t, 16>           mButtonCodes {};
 };
 
 } // namespace SDK
