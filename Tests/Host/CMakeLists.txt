@@ -53,6 +53,7 @@ add_executable(una-sdk-host-tests
     calibration/TreadmillSpeedEstimator_test.cpp
     calibration/CadenceSpikeFilter_test.cpp
     fithelper/FitCadenceEncode_test.cpp
+    sensorlayer/HeartRateParser_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/StrideLut.cpp"

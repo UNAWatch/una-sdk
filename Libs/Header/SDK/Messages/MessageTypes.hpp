@@ -101,6 +101,13 @@ namespace MessageType {
     // Sensor Layer data
     constexpr Type EVENT_SENSOR_LAYER_DATA             = 0x03180000;
 
+    // External accessories (Service only): opt-in acquisition of external BLE
+    // sensors (e.g. a heart-rate strap). HR data still flows through the normal
+    // HEART_RATE sensor type; these only drive acquisition + status.
+    constexpr Type REQUEST_ACCESSORY_PREPARE           = 0x03200000;
+    constexpr Type REQUEST_ACCESSORY_RELEASE           = 0x03210000;
+    constexpr Type EVENT_ACCESSORY_STATUS              = 0x03220000;
+
     // Application-specific custom messages (Service <-> GUI direct, used by DualAppComm)
     constexpr Type RANGE_APP_SPECIFIC_MIN       = 0x00000000;
     constexpr Type RANGE_APP_SPECIFIC_MAX       = 0x0000FFFF;

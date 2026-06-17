@@ -36,9 +36,10 @@ namespace SDK::Sensor
          *  @{
          */
         HEART_BEAT           = 0x00000040, ///< Beat peak event.
-        HEART_RATE           = 0x00000041, ///< Current heart rate (bpm).
+        HEART_RATE           = 0x00000041, ///< Current (arbitrated) heart rate (bpm) + trust. 2 fields.
         HEART_RATE_METRICS_DAILY = 0x00000042, ///< Aggregated metrics for the current day (e.g., AHR, RHR).
         HEART_RATE_METRICS   = HEART_RATE_METRICS_DAILY, /// Legacy alias of HEART_RATE_METRICS_DAILY.
+        HEART_RATE_EX        = 0x00000043, ///< Opt-in multi-source HR: arbitrated + source + raw optical + raw external. 7 fields.
         /** @} */
 
         /** @name Pedometer
