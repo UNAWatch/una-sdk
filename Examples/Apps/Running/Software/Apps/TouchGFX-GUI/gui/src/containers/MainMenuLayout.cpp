@@ -96,6 +96,12 @@ void MainMenuLayout::setTitle(TypedTextId msgId)
     title.set(msgId);
 }
 
+void MainMenuLayout::setTitle(const char* text)
+{
+    title.set(text);
+    title.invalidate();
+}
+
 void MainMenuLayout::showTitle(bool state)
 {
     title.setVisible(state);

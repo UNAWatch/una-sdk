@@ -60,6 +60,7 @@ public:
 
     // ---- Chrome ------------------------------------------------------------
     void setTitle(TypedTextId msgId);
+    void setTitle(const char* text);   ///< raw string (e.g. live status placeholder)
     void showTitle(bool state);
 
     void setBackground(touchgfx::colortype color);
