@@ -209,16 +209,10 @@ void Service::connectSensors()
         mSensorHr.connect();
         mSensorFusion.connect();
 
-        // Ask the kernel to acquire an external HR accessory (chest strap) for
-        // this session. No-op unless the feature is enabled in Settings >
-        // Sensors; strap readings still arrive via the normal HEART_RATE sensor
-        // (the kernel arbitrates external vs optical), so no extra wiring here.
-        if (auto *msg = mKernel.comm.allocateMessage<
-                SDK::Message::Accessory::RequestPrepare>()) {
-            msg->kinds = SDK::Accessory::Kind::HRM;
-            mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
+        // External HR strap is pre-acquired at the pre-activity screen via the
+        // accessoryKinds capability (WP-S4), not here — so it is already
+        // connecting before the workout starts. Its readings arrive through the
+        // normal HEART_RATE sensor (the kernel arbitrates external vs optical).
 
         mIsSensorsConnected = true;
     }
@@ -235,14 +229,8 @@ void Service::disconnect()
         mSensorBatteryLevel.disconnect();
         mSensorBatteryMetrics.disconnect();
 
-        // Release the external HR accessory acquired for the session (kinds = 0
-        // releases everything). Paired with the prepare in connectSensors().
-        if (auto *msg = mKernel.comm.allocateMessage<
-                SDK::Message::Accessory::RequestRelease>()) {
-            msg->kinds = 0;
-            mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
+        // External HR accessory is released automatically by the kernel when the
+        // app stops (AccessoryManager::onAppStopped), so no explicit release here.
 
         mIsSensorsConnected = false;
     }
@@ -385,6 +373,10 @@ void Service::setCapabilities()
         msg->enPhoneNotification = mSettings.phoneNotifEn;
         msg->enUsbChargingScreen = false;
         msg->enMusicControl = true;
+        // Pre-acquire an external HR strap at the pre-activity screen (WP-S4).
+        // setCapabilities() runs in onStartGUI, so the kernel starts scanning/
+        // connecting while the user gets ready; released automatically on app stop.
+        msg->accessoryKinds = SDK::Accessory::Kind::HRM;
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
     }

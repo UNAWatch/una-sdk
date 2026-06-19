@@ -161,6 +161,9 @@ struct RequestSetCapabilities : public MessageBase {
 #if __SIZEOF_POINTER__ == 4
 static_assert(sizeof(RequestSetCapabilities) == 36, "RequestSetCapabilities size must be 36 bytes");
 #endif
+// External-HR acquisition is opt-in via REQUEST_ACCESSORY_PREPARE / _RELEASE
+// (AccessoryMessages.hpp) — a new message type, so it carries no ABI risk for
+// apps built against an older capabilities layout.
 
 /**
  * @brief Battery status request
