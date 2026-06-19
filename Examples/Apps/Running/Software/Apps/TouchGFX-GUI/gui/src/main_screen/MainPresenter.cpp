@@ -33,6 +33,11 @@ void MainPresenter::onGpsFix(bool acquired)
     view.setGpsFix(acquired);
 }
 
+void MainPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
+}
+
 void MainPresenter::startTrack()
 {
     model->trackStart(false);

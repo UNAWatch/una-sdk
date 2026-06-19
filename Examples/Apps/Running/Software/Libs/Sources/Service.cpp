@@ -11,6 +11,7 @@
 #include "Track.hpp"
 #include "SDK/Tools/FirmwareVersion.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
+#include "SDK/Messages/AccessoryMessages.hpp"
 #include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Utils/Utils.hpp"
 #include "SDK/Timer/Timer.hpp"
@@ -194,6 +195,15 @@ void Service::run()
                     auto event = static_cast<SDK::Message::Sensor::EventData*>(msg);
                     SDK::Sensor::DataBatch batch(event->data, event->count, event->stride);
                     handleSensorsData(event->handle, batch);
+                } break;
+
+                // External accessory link status (WP-S4) -> forward to GUI for
+                // the pre-activity HR indicator.
+                case SDK::MessageType::EVENT_ACCESSORY_STATUS: {
+                    auto* evt = static_cast<SDK::Message::Accessory::EventStatus*>(msg);
+                    LOG_INFO("Accessory status: state %u name '%s'\n",
+                            evt->state, evt->name);
+                    mGuiSender.accessoryStatus(evt->state, evt->name);
                 } break;
 
                 default:
@@ -483,6 +493,10 @@ void Service::setCapabilities()
         msg->enPhoneNotification = mSettings.phoneNotifEn;
         msg->enUsbChargingScreen = false;
         msg->enMusicControl = true;
+        // Pre-acquire an external HR strap at the pre-activity screen (WP-S4).
+        // setCapabilities() runs in onStartGUI, so the kernel starts scanning/
+        // connecting while the user gets ready; released automatically on app stop.
+        msg->accessoryKinds = SDK::Accessory::Kind::HRM;
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
     }
