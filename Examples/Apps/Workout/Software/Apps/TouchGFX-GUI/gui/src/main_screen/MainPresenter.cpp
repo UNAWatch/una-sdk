@@ -26,6 +26,11 @@ void MainPresenter::onIdleTimeout()
     }
 }
 
+void MainPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
+}
+
 void MainPresenter::startTrack()
 {
     model->trackStart();
