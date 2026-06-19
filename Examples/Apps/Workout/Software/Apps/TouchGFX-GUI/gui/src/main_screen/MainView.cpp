@@ -32,15 +32,17 @@ void MainView::tearDownScreen()
 
 void MainView::setAccessoryStatus(uint8_t state, const char* name)
 {
-    (void)name;
     // Placeholder: repurpose the menu title to surface external-HR link status
-    // (SDK::Accessory::State values). The real visual is a dedicated indicator
+    // (SDK::Accessory::State values). On CONNECTED show the device name so the
+    // user can tell which strap linked. The real visual is a dedicated indicator
     // widget once the Designer's UX lands — kept code-only here, no texts regen.
     const char* label = nullptr;
     switch (state) {
         case 2: label = "HR: Searching";  break;  // SEARCHING
         case 3: label = "HR: Connecting"; break;  // CONNECTING
-        case 4: label = "HR: Connected";  break;  // CONNECTED
+        case 4:                                    // CONNECTED -> show device name
+            label = (name != nullptr && name[0] != '\0') ? name : "HR: Connected";
+            break;
         case 5: label = "HR: Lost";       break;  // LOST
         default: break;                            // UNAVAILABLE / IDLE
     }
