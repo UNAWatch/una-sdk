@@ -33,6 +33,7 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type TRACK_DATA_UPDATE  = 0x00000006;
     constexpr SDK::MessageType::Type LAP_END                  = 0x00000007;
     constexpr SDK::MessageType::Type SUMMARY                  = 0x00000008;
+    constexpr SDK::MessageType::Type ACCESSORY_STATUS         = 0x00000009;
 
     // GUI --> Service
     constexpr SDK::MessageType::Type SETTINGS_SAVE         = 0x0000000A;
@@ -106,6 +107,18 @@ namespace CustomMessage {
         Summary()
             : SDK::MessageBase(SUMMARY)
             , summary(nullptr)
+        {}
+    };
+
+    // External-accessory link status forwarded from the kernel's
+    // EVENT_ACCESSORY_STATUS, for the pre-activity HR indicator (WP-S4).
+    struct AccessoryStatusUpd : public SDK::MessageBase {
+        uint8_t state;     ///< SDK::Accessory::State
+        char    name[24];  ///< device name (may be empty)
+        AccessoryStatusUpd()
+            : SDK::MessageBase(ACCESSORY_STATUS)
+            , state(0)
+            , name{}
         {}
     };
 
@@ -234,6 +247,21 @@ public:
         auto *msg = mKernel.comm.allocateMessage<CustomMessage::Summary>();
         if (msg) {
             msg->summary = summaryPtr;
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
+    }
+
+    bool accessoryStatus(uint8_t state, const char* name)
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AccessoryStatusUpd>();
+        if (msg) {
+            msg->state = state;
+            if (name) {
+                strncpy(msg->name, name, sizeof(msg->name) - 1);
+            }
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

@@ -161,6 +161,15 @@ void Service::run()
                     handleSensorsData(event->handle, batch);
                 } break;
 
+                // External accessory link status (WP-S4) -> forward to GUI for
+                // the pre-activity HR indicator.
+                case SDK::MessageType::EVENT_ACCESSORY_STATUS: {
+                    auto* evt = static_cast<SDK::Message::Accessory::EventStatus*>(msg);
+                    LOG_INFO("Accessory status: state %u name '%s'\n",
+                            evt->state, evt->name);
+                    mGuiSender.accessoryStatus(evt->state, evt->name);
+                } break;
+
                 default:
                     break;
             }

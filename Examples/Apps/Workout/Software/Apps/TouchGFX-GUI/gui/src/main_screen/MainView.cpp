@@ -30,6 +30,27 @@ void MainView::tearDownScreen()
     MainViewBase::tearDownScreen();
 }
 
+void MainView::setAccessoryStatus(uint8_t state, const char* name)
+{
+    (void)name;
+    // Placeholder: repurpose the menu title to surface external-HR link status
+    // (SDK::Accessory::State values). The real visual is a dedicated indicator
+    // widget once the Designer's UX lands — kept code-only here, no texts regen.
+    const char* label = nullptr;
+    switch (state) {
+        case 2: label = "HR: Searching";  break;  // SEARCHING
+        case 3: label = "HR: Connecting"; break;  // CONNECTING
+        case 4: label = "HR: Connected";  break;  // CONNECTED
+        case 5: label = "HR: Lost";       break;  // LOST
+        default: break;                            // UNAVAILABLE / IDLE
+    }
+    if (label != nullptr) {
+        menuLayout.setTitle(label);
+    } else {
+        menuLayout.setTitle(T_TEXT_APP_NAME_UC);
+    }
+}
+
 void MainView::setPositionId(uint16_t id)
 {
     menuLayout.selectItem(id);

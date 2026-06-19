@@ -15,6 +15,10 @@ public:
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
+    // WP-S4 placeholder: show external-HR link status on the pre-activity screen
+    // (final visual is a dedicated indicator widget, pending Designer input).
+    void setAccessoryStatus(uint8_t state, const char* name);
+
 protected:
     using Menu = App::MenuNav::Root;
 

@@ -26,6 +26,7 @@ public:
     virtual void onTrackData(const Track::Data& data) {}
     virtual void onLapChanged(uint8_t lapEnd) {}
     virtual void onActivitySummary(const ActivitySummary& summary) {}
+    virtual void onAccessoryStatus(uint8_t state, const char* name) {}  // WP-S4
 
 
 protected:
