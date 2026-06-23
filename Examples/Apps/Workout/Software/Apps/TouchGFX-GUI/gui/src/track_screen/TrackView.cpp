@@ -77,6 +77,8 @@ void TrackView::setTrackData(const Track::Data& data)
     trackFaceLap.setLapNumber(data.lapNum);
     trackFaceLap.setTimer(data.lapTime);
 
+    mHrSource = data.hrSource;
+    updateHrIcon();
 }
 
 void TrackView::setTime(uint8_t h, uint8_t m)
@@ -91,7 +93,15 @@ void TrackView::setBatteryLevel(uint8_t level)
 
 void TrackView::setAccessoryStatus(uint8_t state)
 {
-    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrState(state));
+    mAccessoryState = state;
+    updateHrIcon();
+}
+
+void TrackView::updateHrIcon()
+{
+    // In-activity: icon follows the live HR source, not the raw link state.
+    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrStateFromSource(
+            mAccessoryState, mHrSource));
 }
 
 void TrackView::handleKeyEvent(uint8_t key)

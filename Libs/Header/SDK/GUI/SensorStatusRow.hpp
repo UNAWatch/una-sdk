@@ -33,6 +33,8 @@
 #include <touchgfx/containers/Container.hpp>
 #include <touchgfx/widgets/Image.hpp>
 
+#include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRateEx.hpp"  // HeartRateEx::Source
+
 namespace SDK
 {
 namespace Gui
@@ -60,6 +62,29 @@ public:
             case 4:                 return State::Connected;
             default:                return State::Absent;
         }
+    }
+
+    // In-activity variant: the heart icon reflects which source is actually
+    // feeding HR right now (SDK::SensorDataParser::HeartRate::Source), not the
+    // raw BLE link. Shown only while external HR is engaged (per the accessory
+    // link state). Steady ("connected") requires BOTH the link to be CONNECTED
+    // and the strap to be the live source; anything else — LOST/SEARCHING/
+    // CONNECTING, or an optical/none source, or a stale EXTERNAL source while
+    // the link is LOST — animates as searching. This tracks the arbiter's
+    // freshness, so it updates within ~seconds of a dropout rather than waiting
+    // out the BLE supervision timeout. (Pre-start screens keep using hrState()
+    // to show acquisition progress.)
+    static State hrStateFromSource(uint8_t accessoryState, uint8_t hrSource)
+    {
+        if (hrState(accessoryState) == State::Absent) {
+            return State::Absent;   // external HR not engaged
+        }
+        constexpr uint8_t kAccessoryConnected = 4;  // SDK::Accessory::State::CONNECTED
+        const bool live =
+            accessoryState == kAccessoryConnected &&
+            hrSource == static_cast<uint8_t>(
+                    SDK::SensorDataParser::HeartRateEx::Source::EXTERNAL);
+        return live ? State::Connected : State::Searching;
     }
 
     SensorStatusRow() = default;

@@ -40,6 +40,8 @@ struct Data {
     // Heart rate, bpm
     float hr            = 0.0f;
     float hrTrustLevel  = 0.0f;
+    uint8_t hrSource    = 0;     // SDK HeartRate::Source: 0 none/unknown, 1 optical, 2 external
+
     float avgHR         = 0.0f;
     float maxHR         = 0.0f;
     float avgLapHR      = 0.0f;
