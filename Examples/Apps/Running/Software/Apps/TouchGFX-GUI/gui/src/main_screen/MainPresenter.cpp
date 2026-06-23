@@ -14,6 +14,7 @@ void MainPresenter::activate()
     model->resetIdleTimer();
 
     view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState(), "");
 }
 
 void MainPresenter::deactivate()

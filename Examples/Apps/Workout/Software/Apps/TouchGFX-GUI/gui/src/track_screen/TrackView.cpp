@@ -89,6 +89,11 @@ void TrackView::setBatteryLevel(uint8_t level)
     trackFaceStatus.setBatteryLevel(level);
 }
 
+void TrackView::setAccessoryStatus(uint8_t state)
+{
+    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrState(state));
+}
+
 void TrackView::handleKeyEvent(uint8_t key)
 {
     if (key == SDK::GUI::Button::L1) {

@@ -76,6 +76,10 @@ public:
     // Power
     uint8_t getBatteryLevel() const;
 
+    // Latest external-HR link status (SDK::Accessory::State); the kernel only
+    // sends on change, so screens read this on activate to show the current icon.
+    uint8_t getAccessoryState() const;
+
     // Settings
     bool isUnitsImperial() const;
     const uint8_t* getHrThresholds() const;
@@ -130,6 +134,7 @@ private:
 
     // Kernel state
     uint8_t mBatteryLevel = 0;
+    uint8_t mAccessoryState = 0;   // SDK::Accessory::State (0 = UNAVAILABLE)
 
     // Track
     Track::State           mTrackState            {};

@@ -143,6 +143,11 @@ bool Model::hasGpsFix() const
     return mGpsFix;
 }
 
+uint8_t Model::getAccessoryState() const
+{
+    return mAccessoryState;
+}
+
 
 // Track
 
@@ -422,6 +427,7 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
 
         case CustomMessage::ACCESSORY_STATUS: {
             auto* msg = static_cast<CustomMessage::AccessoryStatusUpd*>(message);
+            mAccessoryState = msg->state;
             modelListener->onAccessoryStatus(msg->state, msg->name);
         } break;
 

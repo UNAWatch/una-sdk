@@ -1,4 +1,5 @@
 #include <gui/containers/TrackFaceStatus.hpp>
+#include <images/BitmapDatabase.hpp>
 
 TrackFaceStatus::TrackFaceStatus()
 {
@@ -7,6 +8,12 @@ TrackFaceStatus::TrackFaceStatus()
 void TrackFaceStatus::initialize()
 {
     TrackFaceStatusBase::initialize();
+
+    // External-HR status icon above the time of day (HR-only app: no GPS icon).
+    add(mSensorRow);
+    mSensorRow.setPosition(0, 20, 240, 24);
+    mSensorRow.setIcons(touchgfx::BITMAP_INVALID, touchgfx::BITMAP_INVALID,
+                        BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
 }
 
 void TrackFaceStatus::setTime(uint8_t h, uint8_t m)

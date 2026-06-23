@@ -3,6 +3,7 @@
 
 #include <gui_generated/main_screen/MainViewBase.hpp>
 #include <gui/main_screen/MainPresenter.hpp>
+#include <SDK/GUI/SensorStatusRow.hpp>
 
 class MainView : public MainViewBase
 {
@@ -14,8 +15,7 @@ public:
 
     void setGpsFix(bool state);
 
-    // WP-S4 placeholder: show external-HR link status on the pre-activity screen
-    // (final visual is a dedicated indicator widget, pending Designer input).
+    // External-HR link status -> the heart icon in the sensor-status row.
     void setAccessoryStatus(uint8_t state, const char* name);
 
     void setPositionId(uint16_t id);
@@ -25,6 +25,7 @@ protected:
     using Menu = App::MenuNav::Root;
 
     bool mGpsFix = false;
+    SDK::Gui::SensorStatusRow mSensorRow;
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};
     MenuItemConfig mCenterItems[Menu::ID_COUNT] {};

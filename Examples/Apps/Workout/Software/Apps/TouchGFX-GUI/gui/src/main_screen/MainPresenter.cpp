@@ -12,6 +12,8 @@ void MainPresenter::activate()
     view.setPositionId(model->menu().get());
     model->menu().resetChildren();
     model->resetIdleTimer();
+
+    view.setAccessoryStatus(model->getAccessoryState(), "");
 }
 
 void MainPresenter::deactivate()
