@@ -38,6 +38,9 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY_LEVEL), 2, { &mFHRecord })
     , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY_VOLTAGE), 3, { &mFHRecord })
     , mFHLapRestingCaloriesField(static_cast<uint8_t>(MsgNumber::LAP_RESTING_CALORIES), 4, { &mFHLap })
+    , mFHHrSourceField(static_cast<uint8_t>(MsgNumber::HR_SOURCE), 5, { &mFHRecord })
+    , mFHHrOpticalField(static_cast<uint8_t>(MsgNumber::HR_OPTICAL), 6, { &mFHRecord })
+    , mFHHrExternalField(static_cast<uint8_t>(MsgNumber::HR_EXTERNAL), 7, { &mFHRecord })
 {
     assert(pathToDir != nullptr);
 
@@ -96,6 +99,24 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
                                       FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
                                       FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
                                       FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHHrSourceField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHHrOpticalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHHrExternalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
 }
 
 void ActivityWriter::start(const AppInfo& info)
@@ -179,6 +200,37 @@ void ActivityWriter::start(const AppInfo& info)
         lapRestingCalories.field_definition_number = mFHLapRestingCaloriesField.getFieldID();
         lapRestingCalories.fit_base_type_id        = FIT_BASE_TYPE_UINT16;
         mFHLapRestingCaloriesField.writeMessage(&lapRestingCalories, fp);
+
+        // Field 3 (record): "hr_source" -- which sensor produced each HR sample
+        // (0 unknown/none, 1 wrist optical, 2 external strap). Matches the
+        // kernel HR arbiter + SDK HeartRate::Source enum.
+        mFHHrSourceField.writeDef(fp);
+        FIT_FIELD_DESCRIPTION_MESG hrSource{};
+        strncpy(hrSource.field_name, "hr_source", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
+        hrSource.developer_data_index    = 0;
+        hrSource.field_definition_number = mFHHrSourceField.getFieldID();
+        hrSource.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
+        mFHHrSourceField.writeMessage(&hrSource, fp);
+
+        // Fields 4/5 (record): raw per-source HR (bpm), so internal (PPG) and
+        // external (strap) HR are logged alongside the arbitrated heart_rate.
+        mFHHrOpticalField.writeDef(fp);
+        FIT_FIELD_DESCRIPTION_MESG hrOptical{};
+        strncpy(hrOptical.field_name, "hr_optical", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
+        strncpy(hrOptical.units, "bpm", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
+        hrOptical.developer_data_index    = 0;
+        hrOptical.field_definition_number = mFHHrOpticalField.getFieldID();
+        hrOptical.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
+        mFHHrOpticalField.writeMessage(&hrOptical, fp);
+
+        mFHHrExternalField.writeDef(fp);
+        FIT_FIELD_DESCRIPTION_MESG hrExternal{};
+        strncpy(hrExternal.field_name, "hr_external", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
+        strncpy(hrExternal.units, "bpm", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
+        hrExternal.developer_data_index    = 0;
+        hrExternal.field_definition_number = mFHHrExternalField.getFieldID();
+        hrExternal.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
+        mFHHrExternalField.writeMessage(&hrExternal, fp);
     }
 
     mFHEvent.writeDef(fp);
@@ -251,6 +303,15 @@ void ActivityWriter::addRecord(const RecordData& record)
 
     mFHRecord.writeFieldMessage(0, &soc, mFile.get());
     mFHRecord.writeFieldMessage(1, &voltage, mFile.get());
+
+    // hr_source / hr_optical / hr_external are always declared on the record
+    // definition, so emit them every tick (0 = none for that source).
+    const FIT_UINT8 hrSrc = record.hrSource;
+    const FIT_UINT8 hrOpt = record.hrOpticalBpm;
+    const FIT_UINT8 hrExt = record.hrExternalBpm;
+    mFHRecord.writeFieldMessage(2, &hrSrc, mFile.get());
+    mFHRecord.writeFieldMessage(3, &hrOpt, mFile.get());
+    mFHRecord.writeFieldMessage(4, &hrExt, mFile.get());
 }
 
 void ActivityWriter::addLap(const LapData& lap)

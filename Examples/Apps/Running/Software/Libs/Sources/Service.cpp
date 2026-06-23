@@ -364,7 +364,9 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         if (parser.isDataValid()) {
             mHrCounter.add(parser.getBpm());
             mTrackData.hrTrustLevel = parser.getTrustLevel();
-            LOG_DEBUG("HR %.1f, TrustLevel %.1f\n", parser.getBpm(), parser.getTrustLevel());
+            mHrSource = static_cast<uint8_t>(parser.getSource());
+            LOG_DEBUG("HR %.1f, TrustLevel %.1f, Source %u\n",
+                      parser.getBpm(), parser.getTrustLevel(), mHrSource);
         }
     } else if (mSensorBatteryLevel.matchesDriver(handle)) {
         SDK::SensorDataParser::BatteryLevel parser(data[0]);
@@ -620,6 +622,8 @@ ActivityWriter::RecordData Service::prepareRecordData()
     bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
     fitRecord.heartRate    = mHrCounter.getCurrent();
+    // Tag each record with where the HR came from (none when no valid HR).
+    fitRecord.hrSource     = hasHeartRate ? mHrSource : 0;
 
     // Both samples must be checked every call; evaluate separately to avoid short-circuit.
     const bool socReady     = mBatterySoc.isDue();
