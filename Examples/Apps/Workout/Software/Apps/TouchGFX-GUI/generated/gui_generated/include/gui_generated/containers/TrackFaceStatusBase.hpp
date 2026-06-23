@@ -28,6 +28,8 @@ protected:
      */
     touchgfx::TextAreaWithOneWildcard percentValue;
     Battery battery;
+    touchgfx::Line lineTop;
+    touchgfx::PainterABGR2222 lineTopPainter;
     touchgfx::Line line;
     touchgfx::PainterABGR2222 linePainter;
     touchgfx::TextAreaWithOneWildcard dayTimeValue;

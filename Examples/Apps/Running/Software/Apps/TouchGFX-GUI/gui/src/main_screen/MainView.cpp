@@ -16,11 +16,19 @@ void MainView::setupScreen()
     setupItems();
     menuLayout.setAnimationSteps(App::Config::kMenuAnimationSteps);
     menuLayout.setTitle(T_TEXT_APP_NAME_UC);
+    menuLayout.setInfoMsg(TYPED_TEXT_INVALID);   // GPS status now shown by the icon row
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setAnimationMiddleCallback(mpAnimationMiddleCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
     menuLayout.invalidate();
+
+    // Sensor-status row (GPS + external HR) below the title.
+    add(mSensorRow);
+    mSensorRow.setPosition(0, 52, 240, 24);
+    mSensorRow.setIcons(BITMAP_SENSORGPSDARK_ID, BITMAP_SENSORGPSLIGHT_ID,
+                        BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
+    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(mGpsFix));
 
     updateBackground(menuLayout.getSelectedItem());
 }
@@ -33,37 +41,13 @@ void MainView::tearDownScreen()
 void MainView::setGpsFix(bool state)
 {
     mGpsFix = state;
-
-    if (mGpsFix) {
-        menuLayout.setInfoMsg(T_TEXT_SIGNAL_ACQUIRED);
-    } else {
-        menuLayout.setInfoMsg(T_TEXT_ACQUIRING_SIGNAL);
-    }
-
+    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(state));
     updateBackground(menuLayout.getSelectedItem());
 }
 
-void MainView::setAccessoryStatus(uint8_t state, const char* name)
+void MainView::setAccessoryStatus(uint8_t state, const char* /*name*/)
 {
-    // Placeholder: repurpose the menu title to surface external-HR link status
-    // (SDK::Accessory::State values). On CONNECTED show the device name so the
-    // user can tell which strap linked. The real visual is a dedicated indicator
-    // widget once the Designer's UX lands — kept code-only here, no texts regen.
-    const char* label = nullptr;
-    switch (state) {
-        case 2: label = "HR: Searching";  break;  // SEARCHING
-        case 3: label = "HR: Connecting"; break;  // CONNECTING
-        case 4:                                    // CONNECTED -> show device name
-            label = (name != nullptr && name[0] != '\0') ? name : "HR: Connected";
-            break;
-        case 5: label = "HR: Lost";       break;  // LOST
-        default: break;                            // UNAVAILABLE / IDLE
-    }
-    if (label != nullptr) {
-        menuLayout.setTitle(label);
-    } else {
-        menuLayout.setTitle(T_TEXT_APP_NAME_UC);
-    }
+    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(state));
 }
 
 void MainView::setPositionId(uint16_t id)

@@ -14,7 +14,6 @@
 #include <gui/containers/TrackFaceLap.hpp>
 #include <gui/containers/TrackFaceTotal.hpp>
 #include <gui/containers/TrackFaceIntervals.hpp>
-#include <gui/containers/GpsIndicator.hpp>
 
 class TrackViewBase : public touchgfx::View<TrackPresenter>
 {
@@ -39,7 +38,6 @@ protected:
     TrackFaceLap trackFaceLap;
     TrackFaceTotal trackFaceTotal;
     TrackFaceIntervals trackFaceIntervals;
-    GpsIndicator gpsIndicator;
 
 private:
 

@@ -20,6 +20,7 @@ public:
 
     void setTime(uint8_t h, uint8_t m);
     void setBatteryLevel(uint8_t level);
+    void setAccessoryStatus(uint8_t state);
 
 protected:
 

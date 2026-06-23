@@ -106,6 +106,11 @@ uint8_t Model::getBatteryLevel() const
     return mBatteryLevel;
 }
 
+uint8_t Model::getAccessoryState() const
+{
+    return mAccessoryState;
+}
+
 
 // Settings
 
@@ -320,6 +325,7 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
 
         case CustomMessage::ACCESSORY_STATUS: {
             auto* msg = static_cast<CustomMessage::AccessoryStatusUpd*>(message);
+            mAccessoryState = msg->state;
             modelListener->onAccessoryStatus(msg->state, msg->name);
         } break;
 

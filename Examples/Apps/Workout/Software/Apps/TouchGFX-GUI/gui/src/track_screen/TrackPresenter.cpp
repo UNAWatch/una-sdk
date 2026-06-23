@@ -25,6 +25,7 @@ void TrackPresenter::activate()
     view.setTime(hour, minute);
 
     view.setBatteryLevel(model->getBatteryLevel());
+    view.setAccessoryStatus(model->getAccessoryState());
 }
 
 void TrackPresenter::deactivate()
@@ -45,6 +46,11 @@ void TrackPresenter::onBatteryLevel(uint8_t lvl)
 void TrackPresenter::onTime(uint8_t hour, uint8_t minute, uint8_t sec)
 {
     view.setTime(hour, minute);
+}
+
+void TrackPresenter::onAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    view.setAccessoryStatus(state);
 }
 
 void TrackPresenter::onLapChanged(uint8_t lapEnd)

@@ -34,6 +34,7 @@ public:
     virtual void onIntervalsPhaseAlert() override;
     virtual void onIntervalsWorkoutCompleted() override;
     virtual void onGpsFix(bool acquired) override;
+    virtual void onAccessoryStatus(uint8_t state, const char* name) override;
 
     void saveLap();
     void intervalsNextPhase();
