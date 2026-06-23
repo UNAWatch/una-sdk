@@ -606,6 +606,7 @@ void Service::processTrack()
 
     // HR
     mTrackData.hr = mHrCounter.getCurrent();
+    mTrackData.hrSource = mHrSource;  // for the in-activity source-driven HR icon
     mTrackData.avgHR = mHrCounter.getAverage();
     mTrackData.maxHR = mHrCounter.getMaximum();
     mTrackData.avgLapHR = mHrCounter.getLapAverage();

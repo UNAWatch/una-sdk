@@ -117,6 +117,9 @@ void TrackView::setTrackData(const Track::Data& data)
         trackFaceIntervals.setPace(paceConv(data.pace));
         trackFaceIntervals.setHR(data.hr);
     }
+
+    mHrSource = data.hrSource;
+    updateHrIcon();
 }
 
 void TrackView::setTime(uint8_t h, uint8_t m)
@@ -178,5 +181,13 @@ void TrackView::setGpsFix(bool state)
 
 void TrackView::setAccessoryStatus(uint8_t state)
 {
-    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrState(state));
+    mAccessoryState = state;
+    updateHrIcon();
+}
+
+void TrackView::updateHrIcon()
+{
+    // In-activity: icon follows the live HR source, not the raw link state.
+    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrStateFromSource(
+            mAccessoryState, mHrSource));
 }
