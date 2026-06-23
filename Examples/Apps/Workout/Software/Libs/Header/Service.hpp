@@ -82,6 +82,9 @@ private:
     float mWeightKg = skDefaultWeightKg;  ///< From system profile; falls back to skDefaultWeightKg.
     std::array<uint8_t, CustomMessage::kHrThresholdsCount> mHrThresholds = {};
     uint8_t mHrThresholdCount = 0;
+    uint8_t mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
+    uint8_t mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.
+    uint8_t mHrExternalBpm = 0; ///< Latest raw external (strap) bpm, for the FIT hr_external series.
 
     // -- Track state ----------------------------------------------------------
 
@@ -138,6 +141,8 @@ private:
     // -- Notifications --------------------------------------------------------
 
     void setCapabilities();
+    void requestAccessoryPrepare();   // opt in to external HR (pre-warm at GUI start)
+    void requestAccessoryRelease();
     void notifyLapEnd();
     void notifyNewActivity();
     void backlightOn(uint32_t timeoutMs = skBacklightTimeout);
