@@ -142,6 +142,82 @@ namespace SDK::Component {
 	    return true;
     }
 
+    bool FitHelper::writeFieldDescription(const char* name, const char* units,
+                                          FIT_UINT8 baseType, SDK::Interface::IFile* fp)
+    {
+        if (name == nullptr) {
+            name = "";
+        }
+
+        // String field byte counts, including the trailing NUL. Capped at the
+        // FIT example-profile buffer sizes (field_name 64, units 16).
+        auto cappedLen = [](const char* s, FIT_UINT8 cap) -> FIT_UINT8 {
+            FIT_UINT8 n = 0;
+            while (n < cap && s[n] != '\0') {
+                ++n;
+            }
+            return n;
+        };
+        const FIT_UINT8 nameChars  = cappedLen(name, 63);
+        const bool      hasUnits   = (units != nullptr && units[0] != '\0');
+        const FIT_UINT8 unitsChars = hasUnits ? cappedLen(units, 15) : 0;
+        const FIT_UINT8 nameSize   = static_cast<FIT_UINT8>(nameChars + 1);
+        const FIT_UINT8 unitsSize  = static_cast<FIT_UINT8>(unitsChars + 1);
+        const FIT_UINT8 numFields  = hasUnits ? 5 : 4;
+
+        // Record the developer field's base type so the parent record's
+        // developer-field definition (getFieldSize) is sized correctly — this
+        // is what writeMessage() would normally set.
+        mBaseType = static_cast<FIT_FIT_BASE_TYPE>(baseType);
+
+        // --- definition record ---
+        const FIT_UINT8 defHeader = static_cast<FIT_UINT8>(mMsgID | FIT_HDR_TYPE_DEF_BIT);
+        WriteData(&defHeader, FIT_HDR_SIZE, fp);
+
+        const FIT_UINT8 defFixed[] = {
+            0,                                                                    // reserved
+            FIT_ARCH_ENDIAN_LITTLE,                                               // arch
+            static_cast<FIT_UINT8>(FIT_MESG_NUM_FIELD_DESCRIPTION & 0xFF),        // global mesg num (LE)
+            static_cast<FIT_UINT8>((FIT_MESG_NUM_FIELD_DESCRIPTION >> 8) & 0xFF),
+            numFields,
+            // field defs: { field_def_num, size, base_type }
+            FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,    1,        FIT_BASE_TYPE_UINT8,
+            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER, 1,        FIT_BASE_TYPE_UINT8,
+            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID,        1,        FIT_BASE_TYPE_UINT8,
+            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,             nameSize,  FIT_BASE_TYPE_STRING,
+        };
+        WriteData(defFixed, sizeof(defFixed), fp);
+        if (hasUnits) {
+            const FIT_UINT8 unitsDef[] = {
+                FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS, unitsSize, FIT_BASE_TYPE_STRING,
+            };
+            WriteData(unitsDef, sizeof(unitsDef), fp);
+        }
+
+        // --- data record ---
+        const FIT_UINT8 dataHeader = mMsgID;
+        WriteData(&dataHeader, FIT_HDR_SIZE, fp);
+
+        const FIT_UINT8 vals[] = { mDevelopIndex, mFieldID, baseType };
+        WriteData(vals, sizeof(vals), fp);
+
+        char nameBuf[64] = {};
+        for (FIT_UINT8 i = 0; i < nameChars; ++i) {
+            nameBuf[i] = name[i];
+        }
+        WriteData(nameBuf, nameSize, fp);
+
+        if (hasUnits) {
+            char unitsBuf[16] = {};
+            for (FIT_UINT8 i = 0; i < unitsChars; ++i) {
+                unitsBuf[i] = units[i];
+            }
+            WriteData(unitsBuf, unitsSize, fp);
+        }
+
+        return true;
+    }
+
     void FitHelper::printMsgDef(const FIT_MESG_DEF* msgDef)
     {
 #if LOG_MODULE_LEVEL == LOG_LEVEL_DEBUG

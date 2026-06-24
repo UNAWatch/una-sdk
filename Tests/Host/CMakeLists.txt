@@ -53,6 +53,7 @@ add_executable(una-sdk-host-tests
     calibration/TreadmillSpeedEstimator_test.cpp
     calibration/CadenceSpikeFilter_test.cpp
     fithelper/FitCadenceEncode_test.cpp
+    fithelper/FitFieldDescription_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
@@ -61,6 +62,8 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/CadenceStrideModel.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/TreadmillSpeedEstimator.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/FitHelper/FitRecordCadence.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/FitHelper/FitHelper.cpp"
+    "${UNA_FIT_SDK_DIR}/c/fit_product.c"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
@@ -72,6 +75,11 @@ target_include_directories(una-sdk-host-tests PRIVATE
     "${UNA_FIT_SDK_DIR}/c"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Header"
 )
+
+# Build against the same FIT profile as the device apps (Workout/Running define
+# FIT_PRODUCT_RELEASE), so the FitHelper tests exercise the release message
+# definitions the firmware actually emits.
+target_compile_definitions(una-sdk-host-tests PRIVATE FIT_PRODUCT_RELEASE)
 
 target_link_libraries(una-sdk-host-tests PRIVATE
     sdk_host_test_support

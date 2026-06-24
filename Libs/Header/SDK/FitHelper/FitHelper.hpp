@@ -84,6 +84,29 @@ namespace SDK::Component {
         bool writeMessage(const void* data, SDK::Interface::IFile* fp);
 
         /**
+         * @brief Write this developer field's FIELD_DESCRIPTION (definition +
+         *        data) with a human-readable name and optional units.
+         *
+         * @details
+         * Self-contained: emits the field_description definition and data with
+         * the string fields sized to the strings being written, independent of
+         * the active FIT profile. The release profile (FIT_PRODUCT_RELEASE)
+         * strips FIELD_DESCRIPTION string fields to 1 byte, so the normal
+         * writeDef()/writeMessage() path drops the name/units entirely; this
+         * preserves them. Uses this helper's local message id, developer index
+         * and field id, and records the base type so the parent record's
+         * developer-field definition is sized correctly.
+         *
+         * @param name      Developer field name (e.g. "hr_optical"). Required.
+         * @param units     Units (e.g. "bpm"), or nullptr / "" for none.
+         * @param baseType  FIT base type of the developer field's record values.
+         * @param fp        Target file.
+         * @return true on success.
+         */
+        bool writeFieldDescription(const char* name, const char* units,
+                                   FIT_UINT8 baseType, SDK::Interface::IFile* fp);
+
+        /**
          * @brief Print a FIT message definition for debugging.
          *
          * @param msgDef  Pointer to the message definition to print.
