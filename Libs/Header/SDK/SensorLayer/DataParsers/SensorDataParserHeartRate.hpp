@@ -27,7 +27,11 @@ namespace SDK
          * Expected data layout:
          * - [0] float heart rate (bpm)
          * - [1] float trust level
-         * - [2] float source (optional; SOURCE, present only on newer kernels)
+         *
+         * This is the stable 2-field layout. HR provenance (optical vs external
+         * strap) and the raw per-source readings are exposed separately via the
+         * opt-in HEART_RATE_EX sensor type (SensorDataParserHeartRateEx), so this
+         * frame stays ABI-compatible for every existing consumer.
          */
         class HeartRate
         {
@@ -35,42 +39,21 @@ namespace SDK
             enum Field : uint8_t {
                 BPM = 0,       ///< Heart rate in bpm (float)
                 TRUST_LEVEL,   ///< Trust level (float)
-                COUNT          ///< Base field count (BPM + TRUST_LEVEL)
-            };
-
-            // Optional field index for the HR source, emitted by newer kernels
-            // in addition to the base fields. Kept out of the COUNT sequence so
-            // getFieldsNumber() (the base layout) is unchanged.
-            static constexpr uint8_t SOURCE = Field::COUNT;  // index 2
-
-            /**
-             * @brief Where a heart-rate sample came from.
-             * @note  Values match the kernel HR source arbiter (None/Optical/
-             *        External). UNKNOWN covers older kernels that emit no source
-             *        field.
-             */
-            enum class Source : uint8_t {
-                UNKNOWN  = 0,
-                OPTICAL  = 1,
-                EXTERNAL = 2,
+                COUNT          ///< Field count (BPM + TRUST_LEVEL)
             };
 
             /**
              * @brief Construct a new HeartRate parser over given ISensorData
-             * @param view Reference to sensor data (2 base fields, optional 3rd)
+             * @param view Reference to sensor data (2 fields)
              */
             HeartRate(const SDK::Sensor::DataView view) : mData(view) {}
 
             /**
-             * @brief Check if data is valid.
-             * @return true if at least the base BPM + TRUST_LEVEL fields are
-             *         present. Tolerates an optional extra source field so new
-             *         apps stay compatible with older two-field firmware and
-             *         vice versa.
+             * @brief Check if data is valid (has the BPM + TRUST_LEVEL fields).
              */
             bool isDataValid() const
             {
-                return (mData.getFieldCount() >= Field::COUNT);
+                return (mData.getFieldCount() == Field::COUNT);
             }
 
             /**
@@ -89,20 +72,6 @@ namespace SDK
             float getTrustLevel() const
             {
                 return isDataValid() ? mData.f[Field::TRUST_LEVEL] : 0.f;
-            }
-
-            /**
-             * @brief Get the source of this reading.
-             * @return OPTICAL / EXTERNAL when the kernel reports it; UNKNOWN for
-             *         older two-field frames that carry no source field.
-             */
-            Source getSource() const
-            {
-                if (mData.getFieldCount() > SOURCE) {
-                    return static_cast<Source>(
-                            static_cast<uint8_t>(mData.f[SOURCE]));
-                }
-                return Source::UNKNOWN;
             }
 
             /**

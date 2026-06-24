@@ -56,10 +56,22 @@ drops; the kernel falls back to the optical sensor and tries to re-acquire.
 
 ## Reading the HR source (optional)
 
-`SensorDataParserHeartRate` exposes `getSource()` →
-`Source::{UNKNOWN, OPTICAL, EXTERNAL}`. Newer kernels tag each `HEART_RATE`
-sample with its source; older kernels emit only BPM + trust, for which
-`getSource()` returns `UNKNOWN`. The parser tolerates both layouts, so an app
-built against this SDK works on older firmware and vice versa. Use the source to
-label records (e.g. a FIT `hr_source` developer field) — do not gate HR display
-on it.
+`HEART_RATE` is unchanged — it stays the stable 2-field (BPM, trust) frame, and
+`SensorDataParserHeartRate` reads it exactly as before. Source provenance is
+exposed separately, opt-in, via the `HEART_RATE_EX` sensor type so existing
+consumers keep working untouched.
+
+Subscribe to `HEART_RATE_EX` and parse it with `SensorDataParserHeartRateEx`,
+which exposes:
+
+- `getSource()` → `Source::{UNKNOWN, OPTICAL, EXTERNAL}` — which source produced
+  the arbitrated reading;
+- `getBpm()` / `getTrustLevel()` — the arbitrated value (same as `HEART_RATE`);
+- `getOpticalBpm()` / `getOpticalTrust()` and `getExternalBpm()` /
+  `getExternalTrust()` — the raw per-source readings (0 when absent/stale).
+
+Validation is lenient (a future kernel may append fields), so an app built
+against this SDK keeps working as the frame grows. Use this to label records or
+log separate FIT series (e.g. `hr_source`, internal-PPG, and external-strap HR)
+— do not gate HR display on it. Apps that only need BPM should stay on
+`HEART_RATE` and ignore `HEART_RATE_EX` entirely.

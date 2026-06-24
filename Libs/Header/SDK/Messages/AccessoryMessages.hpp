@@ -96,6 +96,15 @@ struct EventStatus : public MessageBase {
     char     name[24]; ///< device name (empty until known), NUL-terminated
 };
 
+// ABI guards: these structs cross the kernel/app boundary, so catch any packing
+// or field drift at compile time (mirrors CommandMessages.hpp). Sizes assume a
+// 32-bit target (MessageBase is 32 bytes there); skipped on 64-bit host builds.
+#if __SIZEOF_POINTER__ == 4
+static_assert(sizeof(RequestPrepare) == 36, "RequestPrepare size must be 36 bytes");
+static_assert(sizeof(RequestRelease) == 36, "RequestRelease size must be 36 bytes");
+static_assert(sizeof(EventStatus)    == 64, "EventStatus size must be 64 bytes");
+#endif
+
 } // namespace SDK::Message::Accessory
 
 #pragma pack(pop)

@@ -17,7 +17,7 @@
 #include "SDK/Timer/Timer.hpp"
 
 #include "SDK/SensorLayer/DataParsers/SensorDataParserPressure.hpp"
-#include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRate.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRateEx.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryLevel.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryMetrics.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserWristMotion.hpp"
@@ -42,7 +42,7 @@ Service::Service(SDK::Kernel &kernel)
         , mActivitySummarySerializer(mKernel, "Activity/summary.json")
         , mActivityWriter(mKernel, "Activity")
         , mSensorPressure(SDK::Sensor::Type::PRESSURE, skSamplePeriod, skSampleLatency)
-        , mSensorHr(SDK::Sensor::Type::HEART_RATE, skSamplePeriod, skSampleLatency)
+        , mSensorHr(SDK::Sensor::Type::HEART_RATE_EX, skSamplePeriod, skSampleLatency)
         , mSensorBatteryLevel(SDK::Sensor::Type::BATTERY_LEVEL)
         , mSensorBatteryMetrics(SDK::Sensor::Type::BATTERY_METRICS, skSamplePeriod, skSampleLatency)
         , mSensorWristMotion(SDK::Sensor::Type::WRIST_MOTION)
@@ -261,13 +261,16 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             LOG_DEBUG("Altitude %.2f (Filtered %.2f) (P0 %f, Pa %f)\n", altitude, filtered, mSeaLevelPressure, parser.getPressure());
         }
     } else if (mSensorHr.matchesDriver(handle)) {
-        SDK::SensorDataParser::HeartRate parser(data[0]);
+        SDK::SensorDataParser::HeartRateEx parser(data[0]);
         if (parser.isDataValid()) {
-            mHrCounter.add(parser.getBpm());
+            mHrCounter.add(parser.getBpm());           // arbitrated (kernel's choice)
             mTrackData.hrTrustLevel = parser.getTrustLevel();
-            mHrSource = static_cast<uint8_t>(parser.getSource());
-            LOG_DEBUG("HR %.1f, TrustLevel %.1f, Source %u\n",
-                      parser.getBpm(), parser.getTrustLevel(), mHrSource);
+            mHrSource     = static_cast<uint8_t>(parser.getSource());
+            mHrOpticalBpm = static_cast<uint8_t>(parser.getOpticalBpm());
+            mHrExternalBpm= static_cast<uint8_t>(parser.getExternalBpm());
+            LOG_DEBUG("HR %.1f trust %.1f src %u (opt %u ext %u)\n",
+                      parser.getBpm(), parser.getTrustLevel(), mHrSource,
+                      mHrOpticalBpm, mHrExternalBpm);
         }
     } else if (mSensorBatteryLevel.matchesDriver(handle)) {
         SDK::SensorDataParser::BatteryLevel parser(data[0]);
@@ -322,6 +325,7 @@ void Service::onStartGUI()
     mGuiStarted = true;
 
     setCapabilities();
+    requestAccessoryPrepare();   // pre-warm external HR while on the pre-activity screen
 
     mSensorWristMotion.connect();
 
@@ -332,6 +336,7 @@ void Service::onStopGUI()
 {
     mGuiStarted = false;
 
+    requestAccessoryRelease();
     mSensorWristMotion.disconnect();
 }
 
@@ -384,10 +389,29 @@ void Service::setCapabilities()
         msg->enPhoneNotification = mSettings.phoneNotifEn;
         msg->enUsbChargingScreen = false;
         msg->enMusicControl = true;
-        // Pre-acquire an external HR strap at the pre-activity screen (WP-S4).
-        // setCapabilities() runs in onStartGUI, so the kernel starts scanning/
-        // connecting while the user gets ready; released automatically on app stop.
-        msg->accessoryKinds = SDK::Accessory::Kind::HRM;
+        mKernel.comm.sendMessage(msg);
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+
+void Service::requestAccessoryPrepare()
+{
+    // Pre-acquire an external HR strap at the pre-activity screen. Sent at
+    // onStartGUI so the kernel starts scanning/connecting while the user gets
+    // ready. No-op kernel-side unless external HR is enabled in Settings.
+    auto *msg = mKernel.comm.allocateMessage<SDK::Message::Accessory::RequestPrepare>();
+    if (msg) {
+        msg->kinds = SDK::Accessory::Kind::HRM;
+        mKernel.comm.sendMessage(msg);
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+
+void Service::requestAccessoryRelease()
+{
+    auto *msg = mKernel.comm.allocateMessage<SDK::Message::Accessory::RequestRelease>();
+    if (msg) {
+        msg->kinds = 0;   // release everything we acquired
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
     }
@@ -494,8 +518,11 @@ ActivityWriter::RecordData Service::prepareRecordData()
     bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
     fitRecord.heartRate    = mHrCounter.getCurrent();
-    // Tag each record with where the HR came from (none when no valid HR).
+    // Tag each record with where the HR came from (none when no valid HR), and
+    // log the raw per-source readings (0 when that source has none this tick).
     fitRecord.hrSource     = hasHeartRate ? mHrSource : 0;
+    fitRecord.hrOpticalBpm = mHrOpticalBpm;
+    fitRecord.hrExternalBpm= mHrExternalBpm;
 
     // Both samples must be checked every call; evaluate separately to avoid short-circuit.
     const bool socReady     = mBatterySoc.isDue();
@@ -567,6 +594,9 @@ void Service::startTrack(std::time_t utc)
     mDistanceCounter.reset();
     mSpeedCounter.reset();
     mHrCounter.reset();
+    mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
+    mHrOpticalBpm = 0;
+    mHrExternalBpm = 0;
     mAltitudeFilter.reset();
     mAltitudeCounter.reset();
     mBatterySoc.reset(skBatteryLogPeriodMs);
