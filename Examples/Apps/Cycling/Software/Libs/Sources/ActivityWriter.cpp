@@ -40,6 +40,18 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     , mFHRecordGB(static_cast<uint8_t>(MsgNumber::RECORD_GB), fit_mesg_defs[FIT_MESG_RECORD])
     , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB, &mFHRecordGB })
     , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB, &mFHRecordGB })
+    // hr_source applies to every record variant (HR is present regardless of
+    // GPS/battery), so attach it to all four record definitions. Declared after
+    // the battery fields so its write index is 0 on the plain/GPS records and 2
+    // on the battery-bearing records (after battLevel=0, battVoltage=1).
+    , mFHHrSourceField(static_cast<uint8_t>(MsgNumber::HR_SOURCE), 4,
+                       { &mFHRecord, &mFHRecordG, &mFHRecordB, &mFHRecordGB })
+    // Raw per-source HR (bpm), also on every record variant (declared after
+    // hr_source so its write index follows it).
+    , mFHHrOpticalField(static_cast<uint8_t>(MsgNumber::HR_OPTICAL), 5,
+                        { &mFHRecord, &mFHRecordG, &mFHRecordB, &mFHRecordGB })
+    , mFHHrExternalField(static_cast<uint8_t>(MsgNumber::HR_EXTERNAL), 6,
+                         { &mFHRecord, &mFHRecordG, &mFHRecordB, &mFHRecordGB })
 {
     assert(pathToDir != nullptr);
 
@@ -120,6 +132,24 @@ ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
                                   FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHHrSourceField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHHrOpticalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                             FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
+
+    mFHHrExternalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
+                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
 }
 
 void ActivityWriter::start(const AppInfo& info)
@@ -171,25 +201,20 @@ void ActivityWriter::start(const AppInfo& info)
 
     // Additional fields
     {
-        // Field 0: "battery level in percents"
-        mFHBatteryLevelField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG battLevel{};
-        strncpy(battLevel.field_name, "batteryLevel", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(battLevel.units, "%", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        battLevel.developer_data_index    = 0;
-        battLevel.field_definition_number = mFHBatteryLevelField.getFieldID();
-        battLevel.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
-        mFHBatteryLevelField.writeMessage(&battLevel, fp);
+        // Developer field descriptions. Written via writeFieldDescription so the
+        // field_name/units survive the active FIT profile: the release profile
+        // (FIT_PRODUCT_RELEASE) strips FIELD_DESCRIPTION string fields to 1 byte,
+        // which would drop every label on the writeDef()/writeMessage() path.
+        mFHBatteryLevelField.writeFieldDescription("batteryLevel", "%", FIT_BASE_TYPE_UINT8, fp);
+        mFHBatteryVoltageField.writeFieldDescription("battVoltage", "mV", FIT_BASE_TYPE_UINT16, fp);
 
-        // Field 1: "battery voltage in mV"
-        mFHBatteryVoltageField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG battVoltage{};
-        strncpy(battVoltage.field_name, "battVoltage", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(battVoltage.units, "mV", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        battVoltage.developer_data_index    = 0;
-        battVoltage.field_definition_number = mFHBatteryVoltageField.getFieldID();
-        battVoltage.fit_base_type_id        = FIT_BASE_TYPE_UINT16;
-        mFHBatteryVoltageField.writeMessage(&battVoltage, fp);
+        // "hr_source": which sensor produced each HR sample (0 unknown/none,
+        // 1 wrist optical, 2 external strap) — matches the kernel HR arbiter +
+        // SDK HeartRateEx::Source. hr_optical/hr_external are the raw per-source
+        // readings (bpm) logged alongside the arbitrated heart_rate.
+        mFHHrSourceField.writeFieldDescription("hr_source", nullptr, FIT_BASE_TYPE_UINT8, fp);
+        mFHHrOpticalField.writeFieldDescription("hr_optical", "bpm", FIT_BASE_TYPE_UINT8, fp);
+        mFHHrExternalField.writeFieldDescription("hr_external", "bpm", FIT_BASE_TYPE_UINT8, fp);
     }
 
     mFHEvent.writeDef(fp);
@@ -263,6 +288,13 @@ void ActivityWriter::addRecord(const RecordData& record)
 
     const FIT_RECORD_MESG msg = prepareRecordMsg(record);
 
+    // hr_source / hr_optical / hr_external are declared on every record variant;
+    // emit them each tick. Their write indices follow the battery fields, so
+    // 2/3/4 on battery records and 0/1/2 on the others.
+    const FIT_UINT8 hrSrc = record.hrSource;
+    const FIT_UINT8 hrOpt = record.hrOpticalBpm;
+    const FIT_UINT8 hrExt = record.hrExternalBpm;
+
     if (record.has(RecordData::Field::BATTERY)) {
         const FIT_UINT8  soc     = record.batteryLevel;
         const FIT_UINT16 voltage = record.batteryVoltage;
@@ -270,16 +302,28 @@ void ActivityWriter::addRecord(const RecordData& record)
             mFHRecordGB.writeMessage(&msg, mFile.get());
             mFHRecordGB.writeFieldMessage(0, &soc, mFile.get());
             mFHRecordGB.writeFieldMessage(1, &voltage, mFile.get());
+            mFHRecordGB.writeFieldMessage(2, &hrSrc, mFile.get());
+            mFHRecordGB.writeFieldMessage(3, &hrOpt, mFile.get());
+            mFHRecordGB.writeFieldMessage(4, &hrExt, mFile.get());
         } else {
             mFHRecordB.writeMessage(&msg, mFile.get());
             mFHRecordB.writeFieldMessage(0, &soc, mFile.get());
-            mFHRecordGB.writeFieldMessage(1, &voltage, mFile.get());
+            mFHRecordB.writeFieldMessage(1, &voltage, mFile.get());
+            mFHRecordB.writeFieldMessage(2, &hrSrc, mFile.get());
+            mFHRecordB.writeFieldMessage(3, &hrOpt, mFile.get());
+            mFHRecordB.writeFieldMessage(4, &hrExt, mFile.get());
         }
     } else {
         if (record.has(RecordData::Field::COORDS)) {
             mFHRecordG.writeMessage(&msg, mFile.get());
+            mFHRecordG.writeFieldMessage(0, &hrSrc, mFile.get());
+            mFHRecordG.writeFieldMessage(1, &hrOpt, mFile.get());
+            mFHRecordG.writeFieldMessage(2, &hrExt, mFile.get());
         } else {
             mFHRecord.writeMessage(&msg, mFile.get());
+            mFHRecord.writeFieldMessage(0, &hrSrc, mFile.get());
+            mFHRecord.writeFieldMessage(1, &hrOpt, mFile.get());
+            mFHRecord.writeFieldMessage(2, &hrExt, mFile.get());
         }
     }
 }

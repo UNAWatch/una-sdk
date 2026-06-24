@@ -54,7 +54,10 @@ public:
 
         std::time_t timestamp      = 0;     // UTC
         float       speed          = 0.0f;  // m/s
-        float       heartRate      = 0.0f;  // bpm
+        float       heartRate      = 0.0f;  // bpm (arbitrated)
+        uint8_t     hrSource       = 0;     // HeartRateEx::Source (0=none,1=optical,2=external)
+        uint8_t     hrOpticalBpm   = 0;     // raw wrist-optical (PPG) bpm (0 = none)
+        uint8_t     hrExternalBpm  = 0;     // raw external strap bpm (0 = none)
         uint8_t     batteryLevel   = 0;     // %
         uint16_t    batteryVoltage = 0;     // mV
         float       cadenceSpm     = 0.0f;  // steps/min
@@ -147,6 +150,9 @@ private:
 
     SDK::Component::FitHelper mFHBatteryLevelField;
     SDK::Component::FitHelper mFHBatteryVoltageField;
+    SDK::Component::FitHelper mFHHrSourceField;
+    SDK::Component::FitHelper mFHHrOpticalField;
+    SDK::Component::FitHelper mFHHrExternalField;
     SDK::Component::FitHelper mFHDistancePreCalField; // session developer field (§5.4)
 
     SDK::Component::FitHelper mFHWorkout;
@@ -164,7 +170,10 @@ private:
         BATTERY,
         DISTANCE_PRECAL,
         WORKOUT,
-        WORKOUT_STEP
+        WORKOUT_STEP,
+        HR_SOURCE,
+        HR_OPTICAL,
+        HR_EXTERNAL,
     };
 
     FIT_RECORD_MESG prepareRecordMsg(const RecordData& record);

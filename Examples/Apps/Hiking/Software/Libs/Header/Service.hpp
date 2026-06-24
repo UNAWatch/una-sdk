@@ -74,6 +74,9 @@ private:
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
     SDK::Metric::VariableCounter                        mHrCounter;
+    uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
+    uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.
+    uint8_t                                             mHrExternalBpm = 0; ///< Latest raw external (strap) bpm, for the FIT hr_external series.
     SDK::Filter::SimpleLPF                              mAltitudeFilter;
     SDK::Metric::DeltaCounter                           mAltitudeCounter;
     SDK::Metric::MonotonicCounter<uint32_t>             mStepCounter;
@@ -154,6 +157,8 @@ private:
     // -- Notifications --------------------------------------------------------
 
     void setCapabilities();
+    void requestAccessoryPrepare();   // opt in to external HR (pre-warm at GUI start)
+    void requestAccessoryRelease();
     void notifyFirstFix();
     void notifyLapEnd();
     void notifyNewActivity();

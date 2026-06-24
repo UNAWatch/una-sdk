@@ -56,7 +56,10 @@ public:
         float       longitude      = 0.0f;  // degrees
         float       speed          = 0.0f;  // m/s
         float       altitude       = 0.0f;  // m
-        float       heartRate      = 0.0f;  // bpm
+        float       heartRate      = 0.0f;  // bpm (arbitrated)
+        uint8_t     hrSource       = 0;     // HeartRateEx::Source (0=none,1=optical,2=external)
+        uint8_t     hrOpticalBpm   = 0;     // raw wrist-optical (PPG) bpm (0 = none)
+        uint8_t     hrExternalBpm  = 0;     // raw external strap bpm (0 = none)
         uint8_t     batteryLevel   = 0;     // %
         uint16_t    batteryVoltage = 0;     // mV
 
@@ -137,6 +140,9 @@ private:
     SDK::Component::FitHelper mFHFloorField;
     SDK::Component::FitHelper mFHBatteryLevelField;
     SDK::Component::FitHelper mFHBatteryVoltageField;
+    SDK::Component::FitHelper mFHHrSourceField;
+    SDK::Component::FitHelper mFHHrOpticalField;
+    SDK::Component::FitHelper mFHHrExternalField;
 
     enum class MsgNumber {
         FILE = 1,
@@ -151,7 +157,10 @@ private:
         EVENT,
         STEPS,
         FLOORS,
-        BATTERY
+        BATTERY,
+        HR_SOURCE,
+        HR_OPTICAL,
+        HR_EXTERNAL,
     };
 
     FIT_RECORD_MESG prepareRecordMsg(const RecordData& record);

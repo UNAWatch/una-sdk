@@ -37,6 +37,9 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type INTERVALS_PHASE_ALERT      = 0x00000009;
     constexpr SDK::MessageType::Type INTERVALS_WORKOUT_COMPLETED = 0x00000010;
     constexpr SDK::MessageType::Type CALIB_DATA                 = 0x00000013;
+    // 0x12 is TRACK_CALIBRATE here (Running used 0x12 for ACCESSORY_STATUS); the
+    // first free Service-->GUI id past Treadmill's existing 0x12..0x15 is 0x16.
+    constexpr SDK::MessageType::Type ACCESSORY_STATUS          = 0x00000016;
 
     // GUI --> Service
     constexpr SDK::MessageType::Type SETTINGS_SAVE         = 0x0000000A;
@@ -124,6 +127,18 @@ namespace CustomMessage {
 
     struct IntervalsWorkoutCompleted : public SDK::MessageBase {
         IntervalsWorkoutCompleted() : SDK::MessageBase(INTERVALS_WORKOUT_COMPLETED) {}
+    };
+
+    // External-accessory link status forwarded from the kernel's
+    // EVENT_ACCESSORY_STATUS, for the pre-activity HR indicator (WP-S4).
+    struct AccessoryStatusUpd : public SDK::MessageBase {
+        uint8_t state;     ///< SDK::Accessory::State
+        char    name[24];  ///< device name (may be empty)
+        AccessoryStatusUpd()
+            : SDK::MessageBase(ACCESSORY_STATUS)
+            , state(0)
+            , name{}
+        {}
     };
 
     // Calibration snapshot for Settings > Calibration > View Data. The Service
@@ -337,6 +352,21 @@ public:
             mKernel.comm.releaseMessage(msg);
         }
         return status_;
+    }
+
+    bool accessoryStatus(uint8_t state, const char* name)
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AccessoryStatusUpd>();
+        if (msg) {
+            msg->state = state;
+            if (name) {
+                strncpy(msg->name, name, sizeof(msg->name) - 1);
+            }
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
     }
 
     // GUI --> Service
