@@ -168,69 +168,25 @@ void ActivityWriter::start(const AppInfo& info)
 
     // Additional fields
     {
-        // Field 0: "battery level in percents"
-        mFHBatteryLevelField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG battLevel{};
-        strncpy(battLevel.field_name, "batteryLevel", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(battLevel.units, "%", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        battLevel.developer_data_index    = 0;
-        battLevel.field_definition_number = mFHBatteryLevelField.getFieldID();
-        battLevel.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
-        mFHBatteryLevelField.writeMessage(&battLevel, fp);
+        // Developer field descriptions. Written via writeFieldDescription so the
+        // field_name/units survive the active FIT profile: the release profile
+        // (FIT_PRODUCT_RELEASE) strips FIELD_DESCRIPTION string fields to 1 byte,
+        // which would drop every label on the writeDef()/writeMessage() path.
+        mFHBatteryLevelField.writeFieldDescription("batteryLevel", "%", FIT_BASE_TYPE_UINT8, fp);
+        mFHBatteryVoltageField.writeFieldDescription("battVoltage", "mV", FIT_BASE_TYPE_UINT16, fp);
 
-        // Field 1: "battery voltage in mV"
-        mFHBatteryVoltageField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG battVoltage{};
-        strncpy(battVoltage.field_name, "battVoltage", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(battVoltage.units, "mV", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        battVoltage.developer_data_index    = 0;
-        battVoltage.field_definition_number = mFHBatteryVoltageField.getFieldID();
-        battVoltage.fit_base_type_id        = FIT_BASE_TYPE_UINT16;
-        mFHBatteryVoltageField.writeMessage(&battVoltage, fp);
+        // Lap-level "resting calories" (BMR over the lap, kcal). Kept as a
+        // developer field because resting_calories is not part of the public FIT
+        // Profile (session metabolic_calories is a native field instead).
+        mFHLapRestingCaloriesField.writeFieldDescription("resting_calories", "kcal", FIT_BASE_TYPE_UINT16, fp);
 
-        // Field 2: lap-level "resting calories" (BMR over the lap, kcal).
-        // Kept as a developer field because resting_calories is not part of the
-        // public FIT Profile (session metabolic_calories below is, and lives on
-        // the session message as a native field instead).
-        mFHLapRestingCaloriesField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG lapRestingCalories{};
-        strncpy(lapRestingCalories.field_name, "resting_calories", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(lapRestingCalories.units, "kcal", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        lapRestingCalories.developer_data_index    = 0;
-        lapRestingCalories.field_definition_number = mFHLapRestingCaloriesField.getFieldID();
-        lapRestingCalories.fit_base_type_id        = FIT_BASE_TYPE_UINT16;
-        mFHLapRestingCaloriesField.writeMessage(&lapRestingCalories, fp);
-
-        // Field 3 (record): "hr_source" -- which sensor produced each HR sample
-        // (0 unknown/none, 1 wrist optical, 2 external strap). Matches the
-        // kernel HR arbiter + SDK HeartRate::Source enum.
-        mFHHrSourceField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG hrSource{};
-        strncpy(hrSource.field_name, "hr_source", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        hrSource.developer_data_index    = 0;
-        hrSource.field_definition_number = mFHHrSourceField.getFieldID();
-        hrSource.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
-        mFHHrSourceField.writeMessage(&hrSource, fp);
-
-        // Fields 4/5 (record): raw per-source HR (bpm), so internal (PPG) and
-        // external (strap) HR are logged alongside the arbitrated heart_rate.
-        mFHHrOpticalField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG hrOptical{};
-        strncpy(hrOptical.field_name, "hr_optical", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(hrOptical.units, "bpm", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        hrOptical.developer_data_index    = 0;
-        hrOptical.field_definition_number = mFHHrOpticalField.getFieldID();
-        hrOptical.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
-        mFHHrOpticalField.writeMessage(&hrOptical, fp);
-
-        mFHHrExternalField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG hrExternal{};
-        strncpy(hrExternal.field_name, "hr_external", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(hrExternal.units, "bpm", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        hrExternal.developer_data_index    = 0;
-        hrExternal.field_definition_number = mFHHrExternalField.getFieldID();
-        hrExternal.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
-        mFHHrExternalField.writeMessage(&hrExternal, fp);
+        // "hr_source": which sensor produced each HR sample (0 unknown/none,
+        // 1 wrist optical, 2 external strap) — matches the kernel HR arbiter +
+        // SDK HeartRateEx::Source. hr_optical/hr_external are the raw per-source
+        // readings (bpm) logged alongside the arbitrated heart_rate.
+        mFHHrSourceField.writeFieldDescription("hr_source", nullptr, FIT_BASE_TYPE_UINT8, fp);
+        mFHHrOpticalField.writeFieldDescription("hr_optical", "bpm", FIT_BASE_TYPE_UINT8, fp);
+        mFHHrExternalField.writeFieldDescription("hr_external", "bpm", FIT_BASE_TYPE_UINT8, fp);
     }
 
     mFHEvent.writeDef(fp);
