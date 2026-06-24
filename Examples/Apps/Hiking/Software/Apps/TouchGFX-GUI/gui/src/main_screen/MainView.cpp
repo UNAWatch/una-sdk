@@ -16,11 +16,19 @@ void MainView::setupScreen()
     setupItems();
     menuLayout.setAnimationSteps(App::Config::kMenuAnimationSteps);
     menuLayout.setTitle(T_TEXT_APP_NAME_UC);
+    menuLayout.setInfoMsg(TYPED_TEXT_INVALID);   // GPS status now shown by the icon row
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setAnimationMiddleCallback(mpAnimationMiddleCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
     menuLayout.invalidate();
+
+    // Sensor-status row (GPS + external HR) below the title.
+    add(mSensorRow);
+    mSensorRow.setPosition(0, 52, 240, 24);
+    mSensorRow.setIcons(BITMAP_SENSORGPSDARK_ID, BITMAP_SENSORGPSLIGHT_ID,
+                        BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
+    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(mGpsFix));
 
     updateBackground(menuLayout.getSelectedItem());
 }
@@ -33,14 +41,13 @@ void MainView::tearDownScreen()
 void MainView::setGpsFix(bool state)
 {
     mGpsFix = state;
-
-    if (mGpsFix) {
-        menuLayout.setInfoMsg(T_TEXT_SIGNAL_ACQUIRED);
-    } else {
-        menuLayout.setInfoMsg(T_TEXT_ACQUIRING_SIGNAL);
-    }
-
+    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(state));
     updateBackground(menuLayout.getSelectedItem());
+}
+
+void MainView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(state));
 }
 
 void MainView::setPositionId(uint16_t id)

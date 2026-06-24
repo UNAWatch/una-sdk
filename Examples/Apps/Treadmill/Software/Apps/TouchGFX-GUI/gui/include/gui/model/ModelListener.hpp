@@ -29,6 +29,7 @@ public:
     virtual void onIntervalsWorkoutCompleted() {}
     virtual void onActivitySummary(const ActivitySummary& summary) {}
     virtual void onCalibrationData(const Model::CalibrationView& data) {}
+    virtual void onAccessoryStatus(uint8_t state, const char* name) {}  // WP-S4
 
 
 protected:

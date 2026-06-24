@@ -14,6 +14,7 @@ void MainPresenter::activate()
     model->resetIdleTimer();
 
     view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState(), "");
 }
 
 void MainPresenter::deactivate()
@@ -31,6 +32,11 @@ void MainPresenter::onIdleTimeout()
 void MainPresenter::onGpsFix(bool acquired)
 {
     view.setGpsFix(acquired);
+}
+
+void MainPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MainPresenter::startTrack()

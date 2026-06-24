@@ -29,6 +29,7 @@ public:
 
     virtual void onIdleTimeout() override;
     virtual void onGpsFix(bool acquired) override;
+    virtual void onAccessoryStatus(uint8_t state, const char* name) override;  // WP-S4
 
     void startTrack();
     void exitApp();
