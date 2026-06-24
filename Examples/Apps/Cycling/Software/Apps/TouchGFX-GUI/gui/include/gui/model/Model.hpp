@@ -87,6 +87,10 @@ public:
     // GPS
     bool hasGpsFix() const;
 
+    // Latest external-HR link status (SDK::Accessory::State); the kernel only
+    // sends on change, so screens read this on activate to show the current icon.
+    uint8_t getAccessoryState() const;
+
     // Track
     void trackStart();
     bool isTrackActive() const;
@@ -132,8 +136,9 @@ private:
     Settings mSettings {};
 
     // Kernel state
-    bool    mGpsFix       = false;
-    uint8_t mBatteryLevel = 0;
+    bool    mGpsFix         = false;
+    uint8_t mBatteryLevel   = 0;
+    uint8_t mAccessoryState = 0;   // SDK::Accessory::State (0 = UNAVAILABLE)
 
     // Track
     Track::State           mTrackState      {};

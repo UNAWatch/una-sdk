@@ -4,6 +4,7 @@
 #include <gui_generated/main_screen/MainViewBase.hpp>
 #include <gui/main_screen/MainPresenter.hpp>
 #include <gui/containers/MenuItemConfig.hpp>
+#include <SDK/GUI/SensorStatusRow.hpp>
 
 class MainView : public MainViewBase
 {
@@ -14,6 +15,10 @@ public:
     virtual void tearDownScreen();
 
     void setGpsFix(bool state);
+
+    // External-HR link status -> the heart icon in the sensor-status row.
+    void setAccessoryStatus(uint8_t state, const char* name);
+
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
@@ -21,6 +26,7 @@ protected:
     using Menu = App::MenuNav::Root;
 
     bool mGpsFix = false;
+    SDK::Gui::SensorStatusRow mSensorRow;
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};
     MenuItemConfig mCenterItems[Menu::ID_COUNT] {};
