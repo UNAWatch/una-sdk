@@ -24,7 +24,20 @@ void MainView::setupScreen()
     menuLayout.setInfoMsg(TYPED_TEXT_INVALID);
     menuLayout.invalidate();
 
+    // Sensor-status row (external HR only -- no GPS on a treadmill) below the
+    // title. Pass BITMAP_INVALID for the two GPS icon slots so the row shows
+    // just the heart icon, and never call setGps().
+    add(mSensorRow);
+    mSensorRow.setPosition(0, 52, 240, 24);
+    mSensorRow.setIcons(touchgfx::BITMAP_INVALID, touchgfx::BITMAP_INVALID,
+                        BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
+
     updateBackground(menuLayout.getSelectedItem());
+}
+
+void MainView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(state));
 }
 
 void MainView::tearDownScreen()
