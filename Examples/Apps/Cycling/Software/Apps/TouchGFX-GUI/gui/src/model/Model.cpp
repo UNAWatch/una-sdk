@@ -343,8 +343,11 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
 
         case CustomMessage::ACCESSORY_STATUS: {
             auto* msg = static_cast<CustomMessage::AccessoryStatusUpd*>(message);
-            mAccessoryState = msg->state;
-            modelListener->onAccessoryStatus(msg->state, msg->name);
+            LOG_DEBUG("ACCESSORY_STATUS %u\n", msg->state);
+            if (mAccessoryState != msg->state) {
+                mAccessoryState = msg->state;
+                modelListener->onAccessoryStatus(msg->state, msg->name);
+            }
         } break;
 
         default:
