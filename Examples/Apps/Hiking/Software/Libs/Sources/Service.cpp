@@ -182,8 +182,7 @@ void Service::run()
                 // the pre-activity HR indicator.
                 case SDK::MessageType::EVENT_ACCESSORY_STATUS: {
                     auto* evt = static_cast<SDK::Message::Accessory::EventStatus*>(msg);
-                    LOG_INFO("Accessory status: state %u name '%s'\n",
-                            evt->state, evt->name);
+                    LOG_INFO("Accessory status: state %u\n", evt->state);
                     mGuiSender.accessoryStatus(evt->state, evt->name);
                 } break;
 
