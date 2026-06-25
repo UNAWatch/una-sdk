@@ -20,8 +20,6 @@ void TrackView::setupScreen()
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
     scrollIndicator.setCount(FaceId::ID_COUNT);
-
-    gpsIndicator.setPeriod(SDK::Utils::msToTicks(500, App::Config::kFrameRate));
 }
 
 void TrackView::tearDownScreen()
@@ -99,6 +97,9 @@ void TrackView::setTrackData(const Track::Data& data)
     trackFaceElevation.setLapAscent(elevationConv(data.lapAscent), mIsImperial);
     trackFaceElevation.setTotalAscent(elevationConv(data.ascent), mIsImperial);
     trackFaceElevation.setElevation(elevationConv(data.elevation), mIsImperial);
+
+    mHrSource = data.hrSource;
+    updateHrIcon();
 }
 
 void TrackView::setTime(uint8_t h, uint8_t m)
@@ -145,5 +146,18 @@ void TrackView::handleKeyEvent(uint8_t key)
 
 void TrackView::setGpsFix(bool state)
 {
-    gpsIndicator.setAcquired(state);
+    trackFaceStatus.setGps(SDK::Gui::SensorStatusRow::gpsState(state));
+}
+
+void TrackView::setAccessoryStatus(uint8_t state)
+{
+    mAccessoryState = state;
+    updateHrIcon();
+}
+
+void TrackView::updateHrIcon()
+{
+    // In-activity: icon follows the live HR source, not the raw link state.
+    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrStateFromSource(
+            mAccessoryState, mHrSource));
 }

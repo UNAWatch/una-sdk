@@ -42,6 +42,7 @@ void TrackPresenter::activate()
     view.setTime(hour, minute);
 
     view.setBatteryLevel(model->getBatteryLevel());
+    view.setAccessoryStatus(model->getAccessoryState());
 }
 
 void TrackPresenter::deactivate()
@@ -77,6 +78,11 @@ void TrackPresenter::onIntervalsPhaseAlert()
 void TrackPresenter::onIntervalsWorkoutCompleted()
 {
     model->application().gotoTrackIntervalsWorkoutCompletedScreenNoTransition();
+}
+
+void TrackPresenter::onAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    view.setAccessoryStatus(state);
 }
 
 void TrackPresenter::saveLap()

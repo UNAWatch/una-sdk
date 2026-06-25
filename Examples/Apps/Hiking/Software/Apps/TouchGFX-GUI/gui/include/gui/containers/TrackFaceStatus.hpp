@@ -2,6 +2,7 @@
 #define TRACKFACESTATUS_HPP
 
 #include <gui_generated/containers/TrackFaceStatusBase.hpp>
+#include <SDK/GUI/SensorStatusRow.hpp>
 
 /**
  * @brief Track face showing device status: current time of day and battery level.
@@ -29,7 +30,12 @@ public:
      */
     void setBatteryLevel(uint8_t level);
 
+    /** @brief Set the GPS / external-HR icon states (see SensorStatusRow). */
+    void setGps(SDK::Gui::SensorStatusRow::State state) { mSensorRow.setGps(state); }
+    void setHr(SDK::Gui::SensorStatusRow::State state)  { mSensorRow.setHr(state); }
+
 protected:
+    SDK::Gui::SensorStatusRow mSensorRow;
 };
 
 #endif // TRACKFACESTATUS_HPP

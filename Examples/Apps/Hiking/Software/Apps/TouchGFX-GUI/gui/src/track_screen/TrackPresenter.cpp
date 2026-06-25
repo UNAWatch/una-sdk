@@ -26,6 +26,7 @@ void TrackPresenter::activate()
 
     view.setBatteryLevel(model->getBatteryLevel());
     view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState());
 }
 
 void TrackPresenter::deactivate()
@@ -56,6 +57,11 @@ void TrackPresenter::onLapChanged(uint8_t lapEnd)
 void TrackPresenter::onGpsFix(bool acquired)
 {
     view.setGpsFix(acquired);
+}
+
+void TrackPresenter::onAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    view.setAccessoryStatus(state);
 }
 
 void TrackPresenter::saveLap()

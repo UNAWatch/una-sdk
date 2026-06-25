@@ -33,9 +33,6 @@ TrackViewBase::TrackViewBase()
 
     trackFaceTotal.setXY(0, 0);
     add(trackFaceTotal);
-
-    gpsIndicator.setXY(116, 227);
-    add(gpsIndicator);
 }
 
 TrackViewBase::~TrackViewBase()
@@ -51,7 +48,6 @@ void TrackViewBase::setupScreen()
     trackFaceOverview.initialize();
     trackFaceStatus.initialize();
     trackFaceTotal.initialize();
-    gpsIndicator.initialize();
     transitionBegins();
 }
 
