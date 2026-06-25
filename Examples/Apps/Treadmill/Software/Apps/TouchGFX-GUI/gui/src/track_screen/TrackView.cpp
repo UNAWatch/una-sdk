@@ -112,6 +112,9 @@ void TrackView::setTrackData(const Track::Data& data)
         trackFaceIntervals.setPace(App::Display::speedToDisplay(data.speed, mIsImperial));
         trackFaceIntervals.setHR(data.hr);
     }
+
+    mHrSource = data.hrSource;
+    updateHrIcon();
 }
 
 void TrackView::setTime(uint8_t h, uint8_t m)
@@ -122,6 +125,20 @@ void TrackView::setTime(uint8_t h, uint8_t m)
 void TrackView::setBatteryLevel(uint8_t level)
 {
     trackFaceStatus.setBatteryLevel(level);
+}
+
+void TrackView::setAccessoryStatus(uint8_t state)
+{
+    mAccessoryState = state;
+    updateHrIcon();
+}
+
+void TrackView::updateHrIcon()
+{
+    // In-activity: icon follows the live HR source, not the raw link state.
+    // Treadmill is HR-only — no GPS icon to update.
+    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrStateFromSource(
+            mAccessoryState, mHrSource));
 }
 
 void TrackView::handleKeyEvent(uint8_t key)

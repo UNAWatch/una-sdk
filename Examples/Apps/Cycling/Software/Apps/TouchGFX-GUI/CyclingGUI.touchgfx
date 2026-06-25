@@ -439,16 +439,6 @@
             "Height": 240,
             "LockPosition": true,
             "CustomContainerDefinitionName": "TrackFaceTotal"
-          },
-          {
-            "Type": "CustomContainerInstance",
-            "Name": "gpsIndicator",
-            "X": 116,
-            "Y": 227,
-            "Width": 8,
-            "Height": 8,
-            "LockPosition": true,
-            "CustomContainerDefinitionName": "GpsIndicator"
           }
         ],
         "Interactions": [
@@ -2634,10 +2624,10 @@
           {
             "Type": "TextArea",
             "Name": "percentValue",
-            "X": 85,
-            "Y": 172,
-            "Width": 70,
-            "Height": 32,
+            "X": 42,
+            "Y": 187,
+            "Width": 157,
+            "Height": 48,
             "LockPosition": true,
             "TextId": "TMP_MEDIUM_25",
             "TextRotation": "0",
@@ -2655,8 +2645,8 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "battery",
-            "X": 75,
-            "Y": 138,
+            "X": 76,
+            "Y": 153,
             "Width": 90,
             "Height": 28,
             "LockPosition": true,
@@ -2664,9 +2654,25 @@
           },
           {
             "Type": "Line",
+            "Name": "lineTop",
+            "X": 35,
+            "Y": 62,
+            "Width": 170,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "StartX": 170.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
             "Name": "line",
             "X": 35,
-            "Y": 120,
+            "Y": 136,
             "Width": 170,
             "Height": 3,
             "LockPosition": true,
@@ -2681,9 +2687,9 @@
           {
             "Type": "TextArea",
             "Name": "dayTimeValue",
-            "X": 35,
-            "Y": 43,
-            "Width": 170,
+            "X": 31,
+            "Y": 63,
+            "Width": 179,
             "Height": 77,
             "LockPosition": true,
             "TextId": "TMP_SEMIBOLD_60",

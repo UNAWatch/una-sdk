@@ -1,4 +1,5 @@
 #include <gui/containers/TrackFaceStatus.hpp>
+#include <images/BitmapDatabase.hpp>
 
 TrackFaceStatus::TrackFaceStatus()
 {}
@@ -6,6 +7,12 @@ TrackFaceStatus::TrackFaceStatus()
 void TrackFaceStatus::initialize()
 {
     TrackFaceStatusBase::initialize();
+
+    // Sensor-status row (GPS + external HR) above the time of day.
+    add(mSensorRow);
+    mSensorRow.setPosition(0, 20, 240, 24);
+    mSensorRow.setIcons(BITMAP_SENSORGPSDARK_ID, BITMAP_SENSORGPSLIGHT_ID,
+                        BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
 }
 
 void TrackFaceStatus::setTime(uint8_t h, uint8_t m)

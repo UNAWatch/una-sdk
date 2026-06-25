@@ -14,7 +14,6 @@
 #include <gui/containers/TrackFaceElevation.hpp>
 #include <gui/containers/TrackFaceOverview.hpp>
 #include <gui/containers/TrackFaceTotal.hpp>
-#include <gui/containers/GpsIndicator.hpp>
 
 class TrackViewBase : public touchgfx::View<TrackPresenter>
 {
@@ -39,7 +38,6 @@ protected:
     TrackFaceElevation trackFaceElevation;
     TrackFaceOverview trackFaceOverview;
     TrackFaceTotal trackFaceTotal;
-    GpsIndicator gpsIndicator;
 
 private:
 

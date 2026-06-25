@@ -9,7 +9,7 @@ TrackFaceStatusBase::TrackFaceStatusBase()
 {
     setWidth(240);
     setHeight(240);
-    percentValue.setPosition(85, 172, 70, 32);
+    percentValue.setPosition(42, 187, 157, 48);
     percentValue.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     percentValue.setLinespacing(0);
     Unicode::snprintf(percentValueBuffer, PERCENTVALUE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_MYFL).getText());
@@ -17,10 +17,19 @@ TrackFaceStatusBase::TrackFaceStatusBase()
     percentValue.setTypedText(touchgfx::TypedText(T_TMP_MEDIUM_25));
     add(percentValue);
 
-    battery.setXY(75, 138);
+    battery.setXY(76, 153);
     add(battery);
 
-    line.setPosition(35, 120, 170, 3);
+    lineTop.setPosition(35, 62, 170, 3);
+    lineTopPainter.setColor(touchgfx::Color::getColorFromRGB(0, 128, 128));
+    lineTop.setPainter(lineTopPainter);
+    lineTop.setStart(170, 0);
+    lineTop.setEnd(0, 0);
+    lineTop.setLineWidth(10);
+    lineTop.setLineEndingStyle(touchgfx::Line::ROUND_CAP_ENDING);
+    add(lineTop);
+
+    line.setPosition(35, 136, 170, 3);
     linePainter.setColor(touchgfx::Color::getColorFromRGB(0, 128, 128));
     line.setPainter(linePainter);
     line.setStart(170, 0);
@@ -29,7 +38,7 @@ TrackFaceStatusBase::TrackFaceStatusBase()
     line.setLineEndingStyle(touchgfx::Line::ROUND_CAP_ENDING);
     add(line);
 
-    dayTimeValue.setPosition(35, 43, 170, 77);
+    dayTimeValue.setPosition(31, 63, 179, 77);
     dayTimeValue.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     dayTimeValue.setLinespacing(0);
     Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_ZUA6).getText());
