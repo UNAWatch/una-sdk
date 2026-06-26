@@ -1,11 +1,7 @@
 /**
  ******************************************************************************
  * @file    ActivityWriter.hpp
- * @date    31-08-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Serializes activity data to a FIT file.
- ******************************************************************************
- *
+ * @brief   Serializes activity data to a FIT file (native SDK::Fit encoder).
  ******************************************************************************
  */
 
@@ -13,15 +9,13 @@
 #define ACTIVITY_WRITER_HPP
 
 #include <cstdint>
-#include <cstdbool>
+#include <ctime>
+#include <memory>
 #include <string>
 
 #include "SDK/Kernel/Kernel.hpp"
-#include "SDK/FitHelper/FitHelper.hpp"
-
-extern "C" {
-#include "fit_product.h"
-}
+#include "SDK/Fit/FitProfile.hpp"
+#include "SDK/Fit/FitWriter.hpp"
 
 /**
  * @class ActivityWriter
@@ -98,63 +92,47 @@ public:
     void discard();
 
 private:
-    /// A constant reference to an Kernel object.
-    const SDK::Kernel& mKernel;
-
-    /// Path to FIT file
-    const char* mPath = nullptr;
-
-    std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
-    uint16_t mLapCounter = 0;
-    FIT_UINT16 mDataCRC = 0;
-
-    SDK::Component::FitHelper mFHFileID;
-    SDK::Component::FitHelper mFHDeveloper;
-    SDK::Component::FitHelper mFHLap;
-    SDK::Component::FitHelper mFHSession;
-    SDK::Component::FitHelper mFHEvent;
-    SDK::Component::FitHelper mFHActivity;
-    SDK::Component::FitHelper mFHRecord;
-
-    SDK::Component::FitHelper mFHBatteryLevelField;
-    SDK::Component::FitHelper mFHBatteryVoltageField;
-    SDK::Component::FitHelper mFHLapRestingCaloriesField;
-    SDK::Component::FitHelper mFHHrSourceField;
-    SDK::Component::FitHelper mFHHrOpticalField;
-    SDK::Component::FitHelper mFHHrExternalField;
-
-    enum class MsgNumber {
-        FILE = 1,
-        DEVELOP,
-        RECORD,
-        LAP,
-        SESSION,
-        ACTIVITY,
-        EVENT,
-        BATTERY_LEVEL,
-        BATTERY_VOLTAGE,
-        LAP_RESTING_CALORIES,
-        HR_SOURCE,
-        HR_OPTICAL,
-        HR_EXTERNAL,
+    /// Local message types (FIT record header, 0-15).
+    enum Local : uint8_t {
+        L_FILE_ID = 0,
+        L_DEV_ID,
+        L_FIELD_DESC,   // reused for each field_description (redefined per string size)
+        L_EVENT,
+        L_RECORD,       // no battery
+        L_RECORD_B,     // + battery
+        L_LAP,
+        L_SESSION,
+        L_ACTIVITY,
     };
 
-    FIT_RECORD_MESG prepareRecordMsg(const RecordData& record);
+    /// Developer field definition numbers (UNA-assigned).
+    enum DevField : uint8_t {
+        DF_BATTERY_LEVEL    = 2,
+        DF_BATTERY_VOLTAGE  = 3,
+        DF_LAP_RESTING_CAL  = 4,
+        DF_HR_SOURCE        = 5,
+        DF_HR_OPTICAL       = 6,
+        DF_HR_EXTERNAL      = 7,
+    };
 
-    void AddMessageEvent(std::time_t t, FIT_EVENT_TYPE type);
+    const SDK::Kernel& mKernel;
+    const char*        mPath = nullptr;
+
+    std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
+    std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;
+    uint16_t mLapCounter = 0;
+
+    void defineRecordMessages();
+    void writeFieldDescription(uint8_t devFieldNum, const char* name,
+                               const char* units, SDK::Fit::BaseType baseType);
+    void addMessageEvent(std::time_t t, SDK::Fit::EventType type);
 
     bool createAndOpenFile(std::time_t utc);
-    void saveFile();
-    void deleteFile();
-
     void saveSummary(const TrackData& track);
 
-    static time_t tm2epoch(const struct tm* tm);
-    static time_t epochToLocal(time_t utc);
-    static FIT_DATE_TIME unixToFitTimestamp(std::time_t unixTimestamp);
-
-    void WriteFileHeader(SDK::Interface::IFile* fp);
-    void WriteCRC(SDK::Interface::IFile* fp);
+    static std::time_t tm2epoch(const struct tm* tm);
+    static std::time_t epochToLocal(std::time_t utc);
+    static uint32_t unixToFitTimestamp(std::time_t unixTimestamp);
 };
 
 #endif // ACTIVITY_WRITER_HPP
