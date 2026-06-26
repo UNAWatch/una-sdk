@@ -5,6 +5,7 @@
 #include <ctime>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <inttypes.h>
 
 #include "SDK/Kernel/Kernel.hpp"
@@ -12,7 +13,8 @@
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/Interfaces/ISensorDataListener.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserActivity.hpp"
-#include "SDK/FitHelper/FitHelper.hpp"
+#include "SDK/Fit/FitWriter.hpp"
+#include "SDK/Fit/FitProfile.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
 
 class Service : public SDK::Interface::ISensorDataListener
@@ -46,9 +48,10 @@ private:
 
     // ===== FIT FILE MANAGEMENT =====
     void saveFit(bool finalize);
-    void appendPendingRecords(SDK::Interface::IFile* fp);
-    void writeFitDefinitions(SDK::Interface::IFile* fp, std::time_t timestamp);
-    void writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t timestamp);
+    void appendPendingRecords();
+    void writeFitDefinitions(std::time_t timestamp);
+    void writeFitSessionSummary(std::time_t timestamp);
+    void writeStepsFieldDescription();
 
     struct FitRecord {
         std::time_t timestamp;
@@ -76,25 +79,26 @@ private:
     std::vector<FitRecord> mPendingRecords;
     bool mSessionOpen = false;
     std::time_t mSessionStart = 0;
-    bool mFitFileInitialized = false;
 
-    // ===== FIT HELPERS =====
-    SDK::Component::FitHelper mFitFileID;
-    SDK::Component::FitHelper mFitDeveloper;
-    SDK::Component::FitHelper mFitRecord;
-    SDK::Component::FitHelper mFitEvent;
-    SDK::Component::FitHelper mFitSession;
-    SDK::Component::FitHelper mFitActivity;
-    SDK::Component::FitHelper mFitStepsField;
+    // ===== FIT ENCODER =====
+    // Native SDK::Fit streaming encoder. Constructed in saveFit() over the open
+    // file; emits definition/data records directly and is reset after finish().
+    std::unique_ptr<SDK::Fit::FitWriter> mFit;
+
+    // Local message types (0-15) associated with each FIT message definition.
+    enum Local : uint8_t {
+        L_FILE_ID    = 0,
+        L_DEV_ID     = 1,
+        L_FIELD_DESC = 2,
+        L_EVENT      = 3,
+        L_RECORD     = 4,
+        L_SESSION    = 5,
+        L_ACTIVITY   = 6,
+    };
 
     // ===== CONSTANTS =====
-    static constexpr uint8_t skFileMsgNum     = 1;
-    static constexpr uint8_t skDevelopMsgNum  = 2;
-    static constexpr uint8_t skRecordMsgNum   = 3;
-    static constexpr uint8_t skEventMsgNum    = 4;
-    static constexpr uint8_t skSessionMsgNum  = 5;
-    static constexpr uint8_t skActivityMsgNum = 6;
-    static constexpr uint8_t skStepsMsgNum    = 7;
+    // Developer field number for the "steps" custom field on the record message.
+    static constexpr uint8_t skStepsDevFieldNum = 0;
 
     static constexpr uint32_t skSamplePeriodSec = 5;
     static constexpr const char* skFitFileName = "steps.fit";

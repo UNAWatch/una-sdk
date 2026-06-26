@@ -47,18 +47,13 @@ Libs/Source/Simulator/App/AppMessageCore.cpp\
 Libs/Source/Simulator/App/MessageManager.cpp\
 Libs/Source/Simulator/Kernel/Kernel.cpp\
 Libs/Source/Simulator/Kernel/Mock/System.cpp\
-Libs/Source/FitHelper/FitHelper.cpp\
 ThirdParty/coreJSON/source/core_json.c\
 Libs/Source/JSON/JsonStreamReader.cpp\
 Libs/Source/JSON/JsonStreamWriter.cpp\
-ThirdParty/FitSDKRelease_21.171.00/c/fit.c\
-ThirdParty/FitSDKRelease_21.171.00/c/fit_convert.c\
-ThirdParty/FitSDKRelease_21.171.00/c/fit_crc.c\
-ThirdParty/FitSDKRelease_21.171.00/c/fit_product.c\
 ADDITIONAL_SOURCES :=
 ADDITIONAL_INCLUDE_PATHS := $(SDK)/Libs/Header\
 ../../Libs/Header\
-$(SDK)/ThirdParty/FitSDKRelease_21.171.00/c\
+\
 $(SDK)/ThirdParty/coreJSON/source/include\
 ADDITIONAL_LIBRARY_PATHS := 
 ADDITIONAL_LIBRARIES :=

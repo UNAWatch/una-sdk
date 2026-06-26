@@ -14,21 +14,11 @@ set(UNA_SDK_SOURCES_APPSYSTEM
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/Service/main.cpp"
 )
 
-# Selects which vendored FIT SDK release the build links against.
-# Apps can override this before include(una-sdk.cmake) to opt in to a newer
-# release without affecting the rest of the tree, e.g.
-#     set(UNA_FIT_SDK_DIR "$ENV{UNA_SDK}/ThirdParty/FitSDKRelease_21.202.00")
-if(NOT DEFINED UNA_FIT_SDK_DIR)
-    set(UNA_FIT_SDK_DIR "$ENV{UNA_SDK}/ThirdParty/FitSDKRelease_21.202.00")
-endif()
-
+# Native FIT-format encoder (SDK::Fit). No external dependency.
 set(UNA_SDK_SOURCES_FIT
-    "$ENV{UNA_SDK}/Libs/Source/FitHelper/FitHelper.cpp"
-    "$ENV{UNA_SDK}/Libs/Source/FitHelper/FitRecordCadence.cpp"
-    "${UNA_FIT_SDK_DIR}/c/fit.c"
-    "${UNA_FIT_SDK_DIR}/c/fit_convert.c"
-    "${UNA_FIT_SDK_DIR}/c/fit_crc.c"
-    "${UNA_FIT_SDK_DIR}/c/fit_product.c"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/FitCrc.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/FitWriter.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/FitRecordCadence.cpp"
 )
 
 set(UNA_SDK_SOURCES_JSON
@@ -78,9 +68,9 @@ set(UNA_SDK_INCLUDE_DIRS_COMMON
     "$ENV{UNA_SDK}/Libs/Header"
 )
 
-set(UNA_SDK_INCLUDE_DIRS_FIT
-    "${UNA_FIT_SDK_DIR}/c"
-)
+# SDK::Fit headers live under Libs/Header (UNA_SDK_INCLUDE_DIRS_COMMON);
+# no separate FIT include directory is required.
+set(UNA_SDK_INCLUDE_DIRS_FIT)
 
 set(UNA_SDK_INCLUDE_DIRS_JSON
     "$ENV{UNA_SDK}/ThirdParty/coreJSON/source/include"

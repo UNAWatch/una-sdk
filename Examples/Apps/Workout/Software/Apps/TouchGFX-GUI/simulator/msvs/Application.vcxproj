@@ -11,6 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp" />
+
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp" />
+
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp" />
+
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2_icon.cpp"/>
@@ -24,16 +30,11 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_convert.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_crc.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\SensorLayer\SensorConnection.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp"/>
@@ -345,7 +346,6 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelBuilder.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderGUI.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp"/>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Filters\SimpleLPF.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\GUI\Button.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\GUI\Color.hpp"/>
@@ -524,13 +524,13 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_SILENCE_CXX17_C_HEADER_DEPRECATION_WARNING;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;APP_ID="ABCDEF1234567890";DEV_ID="UNA Simulator";BUILD_VERSION="1.2.3";NOMINMAX;FIT_PRODUCT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_SILENCE_CXX17_C_HEADER_DEPRECATION_WARNING;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;APP_ID="ABCDEF1234567890";DEV_ID="UNA Simulator";BUILD_VERSION="1.2.3";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4355</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/c;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -548,7 +548,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_SILENCE_CXX17_C_HEADER_DEPRECATION_WARNING;NDEBUG;_CONSOLE;FIT_PRODUCT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_SILENCE_CXX17_C_HEADER_DEPRECATION_WARNING;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>

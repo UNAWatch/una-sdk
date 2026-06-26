@@ -11,6 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp" />
+
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp" />
+
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp" />
+
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2_icon.cpp"/>
@@ -24,10 +30,6 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_convert.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_crc.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.202.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Calibration\OutdoorStrideCalibrator.cpp"/>
@@ -35,8 +37,6 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitRecordCadence.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\SensorLayer\SensorConnection.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp"/>
@@ -396,8 +396,7 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelBuilder.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderGUI.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp"/>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitRecordCadence.hpp"/>
+    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Fit\FitRecordCadence.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\SensorLayer\DataParsers\SensorDataParserRunningCadence.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Simulator\Components\Sensors\IMU\ImuRunningCadence.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Filters\SimpleLPF.hpp"/>
@@ -633,7 +632,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\simulator;../../gui/include;../../../../Libs/Header;$(LibsPath)\Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\simulator;../../gui/include;../../../../Libs/Header;$(LibsPath)\Header;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -655,7 +654,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\simulator;../../gui/include;../../../../Libs/Header;$(LibsPath)\Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.202.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\simulator;../../gui/include;../../../../Libs/Header;$(LibsPath)\Header;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -1,9 +1,7 @@
 /**
  ******************************************************************************
  * @file    ActivityWriter.hpp
- * @date    31-08-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Serializes activity data to a FIT file.
+ * @brief   Serializes activity data to a FIT file (native SDK::Fit encoder).
  ******************************************************************************
  *
  ******************************************************************************
@@ -14,14 +12,13 @@
 
 #include <cstdint>
 #include <cstdbool>
+#include <ctime>
+#include <memory>
 #include <string>
 
 #include "SDK/Kernel/Kernel.hpp"
-#include "SDK/FitHelper/FitHelper.hpp"
-
-extern "C" {
-#include "fit_example.h"
-}
+#include "SDK/Fit/FitProfile.hpp"
+#include "SDK/Fit/FitWriter.hpp"
 
 /**
  * @class ActivityWriter
@@ -71,8 +68,25 @@ public:
     void addLap(const LapData& lap);
     void stop(const TrackData& track);
     void discard();
-    
+
 private:
+    /// Local message types (FIT record header, 0-15).
+    enum Local : uint8_t {
+        L_FILE_ID = 0,
+        L_DEV_ID,
+        L_FIELD_DESC,
+        L_EVENT,
+        L_RECORD,
+        L_LAP,
+        L_SESSION,
+        L_ACTIVITY,
+    };
+
+    /// Developer field definition number (UNA-assigned).
+    enum DevField : uint8_t {
+        DF_HR_TRUST_LEVEL = 0,
+    };
+
     /// A constant reference to a Kernel object.
     const SDK::Kernel& mKernel;
 
@@ -80,42 +94,21 @@ private:
     const char* mPath = nullptr;
 
     std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
+    std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;
     uint16_t mLapCounter = 0;
-    FIT_UINT16 mDataCRC = 0;
 
-    SDK::Component::FitHelper mFHFileID;
-    SDK::Component::FitHelper mFHDeveloper;
-    SDK::Component::FitHelper mFHLap;
-    SDK::Component::FitHelper mFHSession;
-    SDK::Component::FitHelper mFHEvent;
-    SDK::Component::FitHelper mFHActivity;
-    SDK::Component::FitHelper mFHRecord;
-    SDK::Component::FitHelper mFHTrustLevelField;
-
-    static constexpr uint8_t skFileMsgNum         = 1;
-    static constexpr uint8_t skDevelopMsgNum      = 2;
-    static constexpr uint8_t skRecordMsgNum       = 3;
-    static constexpr uint8_t skLapMsgNum          = 4;
-    static constexpr uint8_t skSessionMsgNum      = 5;
-    static constexpr uint8_t skActivityMsgNum     = 6;
-    static constexpr uint8_t skEventMsgNum        = 7;
-    static constexpr uint8_t skHrTrustLevelMsgNum = 8;
-
-    void AddMessageEvent(std::time_t t, FIT_EVENT_TYPE type);
+    void writeFieldDescription(uint8_t devFieldNum, const char* name,
+                               const char* units, SDK::Fit::BaseType baseType);
+    void addMessageEvent(std::time_t t, SDK::Fit::EventType type);
 
     bool createAndOpenFile(std::time_t utc);
     void saveFile();
     void deleteFile();
 
-    void testFitHelper(const AppInfo& info);
-
-    static time_t tm2epoch(const struct tm* tm);
-    static time_t epochToLocal(time_t utc);
-    static FIT_DATE_TIME unixToFitTimestamp(std::time_t unixTimestamp);
-    static FIT_SINT32 ConvertDegreesToSemicircles(float degrees);
-
-    void WriteFileHeader(SDK::Interface::IFile* fp);
-    void WriteCRC(SDK::Interface::IFile* fp);
+    static std::time_t tm2epoch(const struct tm* tm);
+    static std::time_t epochToLocal(std::time_t utc);
+    static uint32_t unixToFitTimestamp(std::time_t unixTimestamp);
+    static int32_t  degreesToSemicircles(float degrees);
 };
 
 #endif /* __ACTIVITY_WRITER_HPP */

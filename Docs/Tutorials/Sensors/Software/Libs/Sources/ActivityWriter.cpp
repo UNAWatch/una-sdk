@@ -7,7 +7,6 @@
  ******************************************************************************
  */
 
-
 #include "ActivityWriter.hpp"
 
 #include <cassert>
@@ -20,17 +19,16 @@
 #include "SDK/UnaLogger/Logger.h"
 
 namespace fit = SDK::Fit;
-
+using DevFieldDef = fit::FitWriter::DevField;
 
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
-   : mKernel(kernel), mPath(pathToDir)
+    : mKernel(kernel), mPath(pathToDir)
 {
     assert(pathToDir != nullptr);
 }
 
 void ActivityWriter::start(const AppInfo& info)
 {
-    // Reset counter
     mLapCounter = 0;
 
     if (!createAndOpenFile(info.timestamp)) {
@@ -71,10 +69,13 @@ void ActivityWriter::start(const AppInfo& info)
         {fit::field::Event::Timestamp, fit::field::Event::EventField,
          fit::field::Event::EventType});
 
-    // record (timestamp + heart_rate) + 1 HR-trust developer field
-    mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
-        {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
-        {{DF_HR_TRUST_LEVEL, 1, 0}});
+    // record (heart_rate + hr_trust_level developer field)
+    {
+        const DevFieldDef trust[] = {{DF_HR_TRUST_LEVEL, 1, 0}};
+        mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+            {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+            {trust[0]});
+    }
 
     // lap / session / activity
     mFit->defineMessage(L_LAP, fit::mesgNum(fit::MesgNum::Lap),
@@ -120,7 +121,6 @@ void ActivityWriter::writeFieldDescription(uint8_t devFieldNum, const char* name
 void ActivityWriter::pause()
 {
     if (mFit) {
-        // Write Event message - STOP Event
         addMessageEvent(std::time(nullptr), fit::EventType::Stop);
     }
 }
@@ -128,7 +128,6 @@ void ActivityWriter::pause()
 void ActivityWriter::resume()
 {
     if (mFit) {
-        // Write Event message - START Event
         addMessageEvent(std::time(nullptr), fit::EventType::Start);
     }
 }
@@ -142,8 +141,7 @@ void ActivityWriter::addRecord(const RecordData& record)
     mFit->data(L_RECORD)
         .u32(unixToFitTimestamp(record.timestamp))
         .u8(record.heartRate)
-        // Developer field, in definition order.
-        .u8(record.trustLevel)
+        .u8(record.trustLevel)  // developer field: hr_trust_level
         .write();
 }
 
@@ -159,8 +157,8 @@ void ActivityWriter::addLap(const LapData& lap)
         .u32(static_cast<uint32_t>(lap.elapsed * 1000))
         .u32(static_cast<uint32_t>(lap.duration * 1000))
         .u16(0)  // message_index
-        .u8(lap.hrAvg)
-        .u8(lap.hrMax)
+        .u8(static_cast<uint8_t>(lap.hrAvg))
+        .u8(static_cast<uint8_t>(lap.hrMax))
         .write();
 
     mLapCounter++;
@@ -175,6 +173,7 @@ void ActivityWriter::stop(const TrackData& track)
     // Write Event message - STOP Event
     addMessageEvent(std::time(nullptr), fit::EventType::Stop);
 
+    // Write Session message.
     mFit->data(L_SESSION)
         .u32(unixToFitTimestamp(track.timeStart))
         .u32(unixToFitTimestamp(track.timeStart))
@@ -183,11 +182,12 @@ void ActivityWriter::stop(const TrackData& track)
         .u16(0)  // message_index
         .u8(static_cast<uint8_t>(fit::Sport::Generic))
         .u8(static_cast<uint8_t>(fit::SubSport::Generic))
-        .u8(track.hrAvg)
-        .u8(track.hrMax)
+        .u8(static_cast<uint8_t>(track.hrAvg))
+        .u8(static_cast<uint8_t>(track.hrMax))
         .u16(0)  // num_laps
         .write();
 
+    // Write Activity message.
     mFit->data(L_ACTIVITY)
         .u32(unixToFitTimestamp(track.timeStart))
         .u32(static_cast<uint32_t>(track.duration * 1000))
@@ -226,7 +226,8 @@ bool ActivityWriter::createAndOpenFile(std::time_t utc)
 #endif
 
     // Create directory
-    int len = snprintf(buff, sizeof(buff), "%s/%04u%02u/", mPath, localTime.tm_year + 1900, localTime.tm_mon + 1);
+    int len = snprintf(buff, sizeof(buff), "%s/%04u%02u/", mPath,
+                       localTime.tm_year + 1900, localTime.tm_mon + 1);
     if (len <= 0 || !mKernel.fs.mkdir(buff)) {
         LOG_ERROR("Failed to create dir [%s]\n", buff);
         return false;
@@ -272,7 +273,6 @@ void ActivityWriter::deleteFile()
     mFile->remove();
     mFile.reset();
 }
-
 
 std::time_t ActivityWriter::tm2epoch(const struct tm* tm)
 {
