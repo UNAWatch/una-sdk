@@ -94,9 +94,16 @@ bool FitWriter::defineMessage(uint8_t localType, uint16_t globalMesgNum,
 
     size_t payload = 0;
     for (const Field& f : fields) {
-        const uint8_t fieldBytes = static_cast<uint8_t>(baseTypeSize(f.baseType) * f.count);
+        // A field's size is one byte on the wire, so an array field cannot
+        // exceed 255 bytes; reject rather than silently truncate (which would
+        // desync the data-message payload and corrupt the file).
+        const size_t fieldBytes = static_cast<size_t>(baseTypeSize(f.baseType)) * f.count;
+        if (fieldBytes > 255) {
+            mOk = false;
+            return false;
+        }
         rec.push_back(f.fieldDefNum);
-        rec.push_back(fieldBytes);
+        rec.push_back(static_cast<uint8_t>(fieldBytes));
         rec.push_back(baseTypeId(f.baseType));
         payload += fieldBytes;
     }
@@ -171,6 +178,10 @@ bool FitWriter::finish()
         crc = fitCrcUpdate(crc, buf, got);
         remaining -= got;
     }
+    // Reopen for write WITHOUT truncating (override=false must map to a
+    // non-truncating open, e.g. FatFs FA_OPEN_ALWAYS — NOT FA_CREATE_ALWAYS),
+    // then append the CRC at the end. A truncating backend would zero the
+    // activity here.
     if (!mFile.close() || !mFile.open(/*wMode=*/true, /*override=*/false)) {
         mOk = false;
         return false;

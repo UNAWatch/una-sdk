@@ -17,7 +17,7 @@ If you're new to FIT files and the UNA SDK, follow this reading path to build yo
 4. **[Data Structures in ActivityWriter](#data-structures-in-activitywriter)** - Understand the data you work with
 
 #### **Phase 2: Implementation (Core Development)**
-5. **[FitHelper Component Deep Dive](#fithelper-component-deep-dive)** - Learn the helper class that does the work
+5. **[SDK::Fit Encoder Deep Dive](#sdkfit-encoder-deep-dive)** - Learn the encoder that does the work
 6. **[Step-by-Step FIT File Creation](#step-by-step-fit-file-creation)** - Follow the file creation process
 7. **[Code Usage Examples and Walkthroughs](#code-usage-examples-and-walkthroughs)** - Study real code examples
 
@@ -51,8 +51,11 @@ When working with FIT files in UNA SDK, include these headers in your source fil
 // Main ActivityWriter class
 #include "ActivityWriter.hpp"
 
-// FitHelper for low-level FIT operations
-#include "SDK/FitHelper/FitHelper.hpp"
+// Native SDK::Fit streaming encoder
+#include "SDK/Fit/FitWriter.hpp"
+
+// FIT profile constants (message/field numbers, enums)
+#include "SDK/Fit/FitProfile.hpp"
 
 // Kernel for file system access
 #include "SDK/Kernel/Kernel.hpp"
@@ -61,14 +64,16 @@ When working with FIT files in UNA SDK, include these headers in your source fil
 #include "SDK/Interfaces/IFileSystem.hpp"
 ```
 
-#### **FIT SDK Headers (C-based)**
+#### **Optional SDK::Fit Helpers**
 ```cpp
-// External C includes for FIT protocol
-extern "C" {
-#include "fit_product.h"    // FIT product definitions
-#include "fit_crc.h"        // CRC calculation functions
-#include "fit_example.h"    // Example structures (may vary)
-}
+// Base-type identifiers, sizes and invalid sentinels
+#include "SDK/Fit/FitBaseType.hpp"
+
+// FIT CRC-16 (used internally by FitWriter; rarely needed directly)
+#include "SDK/Fit/FitCrc.hpp"
+
+// Cadence / step_length record-field encoders (running/treadmill)
+#include "SDK/Fit/FitRecordCadence.hpp"
 ```
 
 #### **Standard Library Headers**
@@ -179,7 +184,7 @@ writer.stop(trackData);
     - [Key Sections for Different Tasks](#key-sections-for-different-tasks)
     - [Essential Headers and Includes](#essential-headers-and-includes)
       - [**Core FIT Functionality**](#core-fit-functionality)
-      - [**FIT SDK Headers (C-based)**](#fit-sdk-headers-c-based)
+      - [**Optional SDK::Fit Helpers**](#optional-sdkfit-helpers)
       - [**Standard Library Headers**](#standard-library-headers)
       - [**UNA SDK Logger (Optional but Recommended)**](#una-sdk-logger-optional-but-recommended)
     - [Quick Start Checklist](#quick-start-checklist)
@@ -211,11 +216,12 @@ writer.stop(trackData);
       - [AppInfo Struct](#appinfo-struct)
       - [RecordData Struct](#recorddata-struct)
       - [LapData and TrackData Structs](#lapdata-and-trackdata-structs)
-  - [FitHelper Component Deep Dive](#fithelper-component-deep-dive)
-    - [What is FitHelper?](#what-is-fithelper)
-    - [Constructor Variants](#constructor-variants)
-    - [Initialization Process](#initialization-process)
-    - [Writing Messages](#writing-messages)
+  - [SDK::Fit Encoder Deep Dive](#sdkfit-encoder-deep-dive)
+    - [What is SDK::Fit?](#what-is-sdkfit)
+    - [FitWriter Lifecycle](#fitwriter-lifecycle)
+    - [Defining Messages](#defining-messages)
+    - [Writing Data Records](#writing-data-records)
+    - [FitProfile Constants](#fitprofile-constants)
     - [Internal Mechanics](#internal-mechanics)
   - [Step-by-Step FIT File Creation](#step-by-step-fit-file-creation)
     - [1. Initialization Phase](#1-initialization-phase)
@@ -251,7 +257,7 @@ writer.stop(trackData);
   - [Developer Fields Implementation](#developer-fields-implementation)
     - [Overview](#overview)
     - [Battery Fields (Running, Cycling, Hiking)](#battery-fields-running-cycling-hiking)
-    - [Steps and Floors (Hiking)](#steps-and-floors-hiking)
+    - [Developer Fields on Lap / Session](#developer-fields-on-lap--session)
     - [Trust Level (HRMonitor)](#trust-level-hrmonitor)
     - [Best Practices for Developer Fields](#best-practices-for-developer-fields)
   - [Visual Representations and Diagrams](#visual-representations-and-diagrams)
@@ -262,8 +268,8 @@ writer.stop(trackData);
   - [Code Usage Examples and Walkthroughs](#code-usage-examples-and-walkthroughs)
     - [Constructor Deep Dive](#constructor-deep-dive)
     - [start() Method Walkthrough](#start-method-walkthrough)
-    - [prepareRecordMsg() - Data Conversion](#preparerecordmsg---data-conversion)
-    - [addRecord() - Variant Selection Logic](#addrecord---variant-selection-logic)
+    - [defineRecordMessages() - Record Variants](#definerecordmessages---record-variants)
+    - [addRecord() - Variant Selection and Data Write](#addrecord---variant-selection-and-data-write)
     - [stop() Method - Finalization](#stop-method---finalization)
   - [Advanced Topics and Best Practices](#advanced-topics-and-best-practices)
     - [FIT Timestamp Handling](#fit-timestamp-handling)
@@ -277,6 +283,7 @@ writer.stop(trackData);
     - [Invalid FIT Files](#invalid-fit-files)
     - [Data Scaling Errors](#data-scaling-errors)
     - [Developer Field Problems](#developer-field-problems)
+    - [Payload / Definition Mismatch](#payload--definition-mismatch)
     - [Memory Issues](#memory-issues)
   - [Extending ActivityWriter for New Activities](#extending-activitywriter-for-new-activities)
     - [Adding a New Sport Type](#adding-a-new-sport-type)
@@ -323,8 +330,8 @@ Understanding FIT requires grasping a few core concepts:
 ### FIT Protocol Versions
 The UNA SDK uses specific FIT versions to ensure compatibility:
 
-- **Protocol Version**: 2.0 (`FIT_PROTOCOL_VERSION_20`) - Defines the basic file structure and message encoding.
-- **Profile Version**: As defined in `FIT_PROFILE_VERSION` - Specifies the available message types and fields. This is typically the latest version supported by the FIT SDK.
+- **Protocol Version**: 2.0 (`SDK::Fit::kProtocolVersion20`, the byte `0x20`) - Defines the basic file structure and message encoding.
+- **Profile Version**: Passed to `FitWriter::begin(profileVersion)`. The UNA apps pass `0` (profile-agnostic) because the native encoder supplies the message/field numbers itself; the value is only advisory metadata in the header.
 
 These versions are set in the file header and ensure that FIT parsers can correctly interpret the file.
 
@@ -363,20 +370,29 @@ Messages are encoded as:
 Each message starts with a header byte indicating the message type and local message number.
 
 ### Data Types in FIT
-FIT defines several base types:
-- `FIT_BASE_TYPE_UINT8` (1 byte)
-- `FIT_BASE_TYPE_SINT8` (1 byte)
-- `FIT_BASE_TYPE_UINT16` (2 bytes)
-- `FIT_BASE_TYPE_SINT16` (2 bytes)
-- `FIT_BASE_TYPE_UINT32` (4 bytes)
-- `FIT_BASE_TYPE_SINT32` (4 bytes)
-- `FIT_BASE_TYPE_STRING` (variable)
-- `FIT_BASE_TYPE_FLOAT32` (4 bytes)
-- `FIT_BASE_TYPE_FLOAT64` (8 bytes)
-- `FIT_BASE_TYPE_UINT8Z` (1 byte, unsigned with invalid value)
-- `FIT_BASE_TYPE_UINT16Z` (2 bytes)
-- `FIT_BASE_TYPE_UINT32Z` (4 bytes)
-- `FIT_BASE_TYPE_BYTE` (1 byte array)
+FIT defines several base types. The native encoder models them with the
+`SDK::Fit::BaseType` enum (`SDK/Fit/FitBaseType.hpp`); each value is the
+on-wire base-type identifier byte (bit 7 marks multi-byte / endian-sensitive
+types):
+- `BaseType::UInt8` (1 byte)
+- `BaseType::SInt8` (1 byte)
+- `BaseType::UInt16` (2 bytes)
+- `BaseType::SInt16` (2 bytes)
+- `BaseType::UInt32` (4 bytes)
+- `BaseType::SInt32` (4 bytes)
+- `BaseType::String` (variable)
+- `BaseType::Float32` (4 bytes)
+- `BaseType::Float64` (8 bytes)
+- `BaseType::UInt8z` (1 byte, unsigned with invalid value)
+- `BaseType::UInt16z` (2 bytes)
+- `BaseType::UInt32z` (4 bytes)
+- `BaseType::Byte` (1 byte array)
+- `BaseType::Enum` (1 byte enumeration)
+- `BaseType::SInt64` / `BaseType::UInt64` / `BaseType::UInt64z` (8 bytes)
+
+Three free helpers operate on these: `baseTypeId(t)` (the identifier byte),
+`baseTypeSize(t)` (element size in bytes) and `baseTypeInvalid(t)` (the
+canonical "invalid" sentinel to write for an absent value).
 
 ### Scaling and Units
 Many FIT fields use scaled integers to represent floating-point values efficiently:
@@ -393,35 +409,59 @@ Always refer to the FIT profile documentation for exact scaling factors.
 The `ActivityWriter` class is responsible for serializing activity data into FIT files. It encapsulates the complexity of FIT message creation, ensuring proper sequencing and data integrity.
 
 Key responsibilities:
-- Initialize FIT message handlers
+- Own a single `SDK::Fit::FitWriter` encoder over the activity file
 - Create and manage FIT files
-- Write message definitions and data
+- Emit message definitions and data records
 - Handle developer fields
-- Calculate and append CRC
+- Stream data to disk; back-patch the header and append the CRC on `finish()`
 
 ### Constructor and Initialization
 ```cpp
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
+    : mKernel(kernel), mPath(pathToDir)
+{
+    assert(pathToDir != nullptr);
+}
 ```
 - Takes a reference to the UNA Kernel for file system access
 - Stores the base path for FIT file storage
-- Initializes multiple `FitHelper` objects for different message types
+- Does **no** FIT work itself: the encoder is profile-agnostic, so there are no
+  per-message handler objects to set up. The `FitWriter` is constructed in
+  `start()` once the file is open.
 
-The constructor sets up message handlers with specific local message numbers and field subsets:
+Instead of constructing many helper objects, the class declares a small set of
+**local message types** (FIT record-header values, 0-15) and the **developer
+field numbers** it uses, then writes the definitions in `start()`:
 
 ```cpp
-mFHFileID(static_cast<uint8_t>(MsgNumber::FILE), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_FILE_ID])
-mFHLap(static_cast<uint8_t>(MsgNumber::LAP), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_LAP])
-// ... more initializations
+// In ActivityWriter.hpp
+enum Local : uint8_t {
+    L_FILE_ID = 0, L_DEV_ID, L_FIELD_DESC, L_EVENT,
+    L_RECORD, L_RECORD_G, L_RECORD_B, L_RECORD_GB,
+    L_LAP, L_SESSION, L_ACTIVITY, L_WORKOUT, L_WORKOUT_STEP,
+};
+
+enum DevField : uint8_t {
+    DF_BATTERY_LEVEL = 2, DF_BATTERY_VOLTAGE = 3,
+    DF_HR_SOURCE = 4, DF_HR_OPTICAL = 5, DF_HR_EXTERNAL = 6,
+};
+
+std::unique_ptr<SDK::Interface::IFile> mFile;
+std::unique_ptr<SDK::Fit::FitWriter>   mFit;   // constructed in start()
 ```
 
-Each `FitHelper` is initialized with a subset of fields relevant to the activity:
+In `start()`, each message type is associated with a global message number and
+an ordered field list via `defineMessage(...)` -- for example the Lap message:
 
 ```cpp
-mFHLap.init({ FIT_LAP_FIELD_NUM_TIMESTAMP,
-              FIT_LAP_FIELD_NUM_START_TIME,
-              // ... other fields
-            });
+mFit->defineMessage(L_LAP, fit::mesgNum(fit::MesgNum::Lap),
+    {fit::field::Lap::Timestamp, fit::field::Lap::StartTime,
+     fit::field::Lap::TotalElapsedTime, fit::field::Lap::TotalTimerTime,
+     fit::field::Lap::TotalDistance, fit::field::Lap::MessageIndex,
+     fit::field::Lap::AvgSpeed, fit::field::Lap::MaxSpeed,
+     fit::field::Lap::TotalAscent, fit::field::Lap::TotalDescent,
+     fit::field::Lap::AvgHeartRate, fit::field::Lap::MaxHeartRate,
+     fit::field::Lap::WktStepIndex});
 ```
 
 ### Public Interface Methods
@@ -478,50 +518,110 @@ Uses bit flags for efficient field presence checking.
 #### LapData and TrackData Structs
 Similar structures for lap and session data, containing timing, distance, speed, and physiological metrics.
 
-## FitHelper Component Deep Dive
+## SDK::Fit Encoder Deep Dive
 
-### What is FitHelper?
-`FitHelper` is a wrapper class that simplifies FIT message creation. It handles:
-- Message definition generation
-- Data serialization
-- Developer field management
-- File I/O operations
+### What is SDK::Fit?
+`SDK::Fit` is the SDK's native, dependency-free FIT-format encoder. It lives in
+`Libs/Header/SDK/Fit/` and has two parts:
 
-### Constructor Variants
-1. **Standard Messages**:
-   ```cpp
-   FitHelper(uint8_t msgID, FIT_MESG_DEF* msgDef);
-   ```
-   For predefined FIT messages like File ID, Record, etc.
+- **`FitWriter`** (`SDK/Fit/FitWriter.hpp`) -- the streaming engine. It writes
+  the 14-byte header, a sequence of definition and data records keyed by *local
+  message type*, and the trailing little-endian file CRC. The engine is
+  *profile-agnostic*: the caller supplies global message numbers,
+  field-definition numbers and base types, so one engine serves every message.
+- **`FitProfile`** (`SDK/Fit/FitProfile.hpp`) -- the data dictionary. It maps
+  message/field names to the public FIT interoperability constants
+  (`MesgNum`, the `field::<Message>::<Field>` definitions, and the enum value
+  sets such as `Sport`, `Event`, `EventType`).
 
-2. **Developer Fields**:
-   ```cpp
-   FitHelper(uint8_t msgID, uint8_t fieldID,
-             std::initializer_list<FitHelper*> container,
-             FIT_UINT8 itemsCount = 1, FIT_UINT8 devIndex = 0);
-   ```
-   For custom fields attached to parent messages.
+Records are written as they are produced, so RAM use is constant and a
+partially recorded activity survives on disk if recording is interrupted.
 
-### Initialization Process
+### FitWriter Lifecycle
+A `FitWriter` wraps an already-open `IFile` and is driven through three phases:
+
 ```cpp
-bool init(std::initializer_list<FIT_UINT8> fields = {});
-```
-- Validates field numbers against the base definition
-- Creates optimized message definition with only specified fields
-- Builds internal field offset/size mappings
+SDK::Fit::FitWriter writer(file);   // file is an open IFile&
 
-### Writing Messages
-```cpp
-bool writeDef(SDK::Interface::IFile* fp);  // Write definition
-bool writeMessage(const void* data, SDK::Interface::IFile* fp);  // Write data
-void writeFieldMessage(uint8_t idx, const void* data, SDK::Interface::IFile* fp);  // Write developer field
+writer.begin(/*profileVersion=*/0); // 1. write header placeholder
+// ... defineMessage(...) / data(...).write() ...
+writer.finish();                    // 3. back-patch size + append CRC
 ```
+
+- `begin(profileVersion, protocolVersion = kProtocolVersion20)` writes the
+  header placeholder (header CRC left 0x0000, data size back-patched later).
+- `finish()` back-patches the header data size, sets the header CRC, and
+  appends the trailing file CRC (computed by reopening the file read-only).
+- `ok()` reports whether all IO and size checks have succeeded so far.
+
+### Defining Messages
+Before any data record you must declare its layout. `defineMessage` associates a
+*local type* (0-15) with a global message number and an ordered field list,
+optionally followed by developer fields:
+
+```cpp
+bool defineMessage(uint8_t localType, uint16_t globalMesgNum,
+                   std::initializer_list<Field>    fields,
+                   std::initializer_list<DevField> devFields = {});
+```
+
+- `Field` is `{ uint8_t fieldDefNum; BaseType baseType; uint8_t count = 1; }`.
+  The `field::*` constants in `FitProfile.hpp` are ready-made `Field` values.
+  For variable-length string/array fields the profile exposes the field number
+  only (e.g. `field::FieldDescription::kFieldNameNum`) so the caller can size
+  the field at encode time: `{kFieldNameNum, BaseType::String, nameLen}`.
+- `DevField` is `{ uint8_t fieldNum; uint8_t sizeBytes; uint8_t devDataIndex; }`.
+  Supplying any developer fields sets the developer-data flag in the record
+  header.
+
+A local type may be **redefined** later (e.g. the `field_description` slot is
+redefined for each developer field so the name/units strings are sized exactly).
+
+### Writing Data Records
+`data(localType)` returns a `FitWriter::Data` builder. Chain typed appenders in
+**definition order**, then call `write()`:
+
+```cpp
+mFit->data(L_RECORD)
+    .u32(unixToFitTimestamp(rec.timestamp))  // timestamp
+    .u8(rec.heartRate)                        // heart_rate
+    .u32(rec.steps)                           // steps (developer field)
+    .write();
+```
+
+Available appenders: `.u8/.i8/.u16/.i16/.u32/.i32/.u64/.i64/.f32/.f64`,
+`.str(s, fieldBytes)` (null-padded to exactly `fieldBytes`), `.bytes(p, n)`
+(raw byte array), and `.invalid(BaseType, count = 1)` (the canonical sentinel
+for a declared-but-absent value). `write()` fails if the assembled payload size
+does not match the active definition for that local type, which catches
+field/value mismatches early.
+
+For an absent scalar you can also write the sentinel explicitly, e.g.
+`.u8(static_cast<uint8_t>(fit::baseTypeInvalid(fit::BaseType::UInt8)))`.
+
+### FitProfile Constants
+`FitProfile.hpp` provides everything needed to address messages and fields:
+
+- `enum class MesgNum` and `mesgNum(MesgNum)` -- global message numbers
+  (FileId, Session, Lap, Record, Event, Workout, WorkoutStep, Activity,
+  FieldDescription, DeveloperDataId).
+- `namespace field::<Message>` -- per-field `FitWriter::Field` constants (e.g.
+  `field::Record::HeartRate`, `field::Session::Sport`).
+- Enum value sets for enum fields: `File`, `Sport`, `SubSport`, `Event`,
+  `EventType`, `ActivityType`, `Intensity`, `Manufacturer`, `WktStepDuration`,
+  `WktStepTarget`, plus the `kMessageIndexInvalid` sentinel.
+
+Only the messages/fields the UNA apps actually write are included; add new ones
+to `FitProfile.hpp` rather than hard-coding numbers at the call site.
 
 ### Internal Mechanics
-- Maintains a reduced `FIT_MESG_DEF` structure
-- Tracks field offsets and sizes for efficient data extraction
-- Handles endianness conversion
-- Manages developer field associations
+- Tracks, per local type, the expected payload size and whether it is defined,
+  validating each `write()` against it.
+- Writes all multi-byte values little-endian.
+- Computes the FIT CRC-16 (`SDK/Fit/FitCrc.hpp`) over the whole file in
+  `finish()`.
+- Holds only the current record's payload in a small buffer -- no whole-file
+  buffering.
 
 ## Step-by-Step FIT File Creation
 
@@ -535,13 +635,13 @@ ActivityWriter writer(kernel, "/path/to/fit/files");
 AppInfo info = {timestamp, version, devID, appID};
 writer.start(info);
 ```
-- Creates/opens FIT file with timestamp-based name
-- Writes file header (placeholder)
-- Writes File ID message
-- Writes Developer Data ID message
-- Writes Field Description messages for developer fields
-- Writes definition messages for all used message types
-- Writes initial Event (START) message
+- Creates/opens the FIT file with a timestamp-based name
+- Constructs the `FitWriter` and calls `begin()` (writes the header placeholder)
+- Defines + writes the File ID message
+- Defines + writes the Developer Data ID message
+- Defines + writes the Field Description messages for developer fields
+- Defines all remaining message types (Event, Record variants, Lap, Session, Activity)
+- Writes the initial Event (START) data record
 
 ### 3. Record Data Points
 ```cpp
@@ -551,18 +651,16 @@ record.set(RecordData::Field::HEART_RATE);
 // ...
 writer.addRecord(record);
 ```
-- Prepares `FIT_RECORD_MESG` with scaled/converted data
-- Selects appropriate FitHelper based on available fields (GPS, battery, etc.)
-- Writes record message and any developer fields
+- Selects the appropriate record local type based on available fields (GPS, battery, etc.)
+- Scales/converts the data and writes it field-by-field with `data(local).uXX(...).write()`
+- Appends any developer fields (battery, HR source) in definition order
 
 ### 4. Add Laps
 ```cpp
 LapData lap = {/* lap summary data */};
 writer.addLap(lap);
 ```
-- Populates `FIT_LAP_MESG` with scaled data
-- Writes lap message
-- Attaches developer fields (steps, floors for Hiking)
+- Writes the Lap data record with scaled values via `data(L_LAP)...write()`
 
 ### 5. Handle Pauses/Resumes
 ```cpp
@@ -577,12 +675,11 @@ writer.resume(timestamp);
 TrackData track = {/* final summary */};
 writer.stop(track);
 ```
-- Writes final Event (STOP)
-- Writes Session message with developer fields
-- Writes Activity message
-- Updates file header with correct data size
-- Calculates and appends CRC
-- Saves JSON summary file
+- Writes the final Event (STOP) data record (where applicable)
+- Writes the Session message (with any developer fields)
+- Writes the Activity message
+- Calls `mFit->finish()`, which back-patches the header data size + CRC and appends the file CRC
+- Closes the file and saves a JSON summary file
 
 ### File Naming Convention
 Files are named: `activity_YYYYMMDDTHHMMSS.fit`
@@ -594,55 +691,53 @@ Files are named: `activity_YYYYMMDDTHHMMSS.fit`
 ### File ID Message
 **Purpose**: Identifies the file and creator device/app.
 
-**Fields**:
-- `type`: `FIT_FILE_ACTIVITY` (4)
-- `manufacturer`: `FIT_MANUFACTURER_DEVELOPMENT` (255)
+**Fields** (`field::FileId::*`, `MesgNum::FileId`):
+- `type`: `Sport`/`File::Activity` (4)
+- `manufacturer`: `Manufacturer::Development` (255)
 - `product`: 0 (development product)
 - `serial_number`: 0
 - `time_created`: FIT timestamp of activity start
-- `product_name`: "UNA Watch" (truncated to 20 chars)
 
 ### Developer Data ID Message
 **Purpose**: Registers developer and app for custom fields.
 
-**Fields**:
-- `developer_id`: Developer identifier string
-- `application_id`: Application identifier string
-- `application_version`: Version number
-- `manufacturer_id`: `FIT_MANUFACTURER_DEVELOPMENT`
+**Fields** (`field::DeveloperDataId::*`, `MesgNum::DeveloperDataId`):
+- `application_id`: Application identifier byte array (16 bytes, from `APP_ID`)
 - `developer_data_index`: 0
 
 ### Field Description Messages
 **Purpose**: Define custom developer fields.
 
-**Common Structure**:
-- `field_name`: Field name string (e.g., "batteryLevel")
-- `units`: Units string (e.g., "%", "mV")
+**Common Structure** (`field::FieldDescription::*`, `MesgNum::FieldDescription`):
 - `developer_data_index`: 0
 - `field_definition_number`: Unique field ID
-- `fit_base_type_id`: Data type (e.g., `FIT_BASE_TYPE_UINT8`)
+- `fit_base_type_id`: Base-type id, e.g. `baseTypeId(BaseType::UInt8)`
+- `field_name` (`kFieldNameNum`): Field name string (e.g., "batteryLevel"), sized at encode time
+- `units` (`kUnitsNum`): Units string (e.g., "%", "mV"), sized at encode time
 
 ### Record Messages
 **Purpose**: Individual data points during activity.
 
-**Base Fields** (always included):
+**Base Fields** (`field::Record::*`, the common tail every variant shares):
 - `timestamp`: FIT timestamp
-- `enhanced_altitude`: Altitude in mm (scaled)
-- `enhanced_speed`: Speed in mm/s (scaled)
+- `enhanced_altitude`: Altitude, scale 5 + offset 500, m
+- `enhanced_speed`: Speed, scale 1000, m/s
 - `heart_rate`: BPM
+- `cadence` / `fractional_cadence`: rpm (encoded by `FitRecordCadence`)
+- `step_length`: scale 10, mm
 
-**Optional Fields**:
+**Optional Fields** (GPS variants):
 - `position_lat`: Latitude in semicircles
 - `position_long`: Longitude in semicircles
 
-**Developer Fields** (conditional):
-- Battery level (%)
-- Battery voltage (mV)
+**Developer Fields** (conditional, attached to the chosen variant):
+- HR source / optical bpm / external bpm
+- Battery level (%) and voltage (mV) on the battery variants
 
 ### Lap Messages
 **Purpose**: Summarize data for each lap segment.
 
-**Fields**:
+**Fields** (`field::Lap::*`, `MesgNum::Lap`):
 - `message_index`: Always 0
 - `timestamp`: Lap end time (FIT timestamp)
 - `start_time`: Lap start time (FIT timestamp)
@@ -656,27 +751,25 @@ Files are named: `activity_YYYYMMDDTHHMMSS.fit`
 - `total_ascent`: Ascent (m)
 - `total_descent`: Descent (m)
 
-**Developer Fields** (Hiking):
-- `steps`: Step count (uint32)
-- `floors`: Floor count (uint32)
+**Developer Fields**: Defined per-app via `defineMessage(...)` developer fields
+(e.g. the Running writer attaches `hr_source`/`hr_optical`/`hr_external`, and
+battery level/voltage on the battery record variants).
 
 ### Session Messages
 **Purpose**: Overall activity summary.
 
-**Fields**: Similar to Lap, plus:
-- `sport`: Activity type (e.g., `FIT_SPORT_RUNNING`)
-- `sub_sport`: Sub-type (e.g., `FIT_SUB_SPORT_GENERIC`)
+**Fields** (`field::Session::*`, `MesgNum::Session`): Similar to Lap, plus:
+- `sport`: Activity type (e.g., `Sport::Running`)
+- `sub_sport`: Sub-type (e.g., `SubSport::Generic`)
 - `num_laps`: Number of laps
-
-**Developer Fields**: Same as Lap (steps, floors for Hiking)
 
 ### Event Messages
 **Purpose**: Mark activity state changes.
 
-**Fields**:
+**Fields** (`field::Event::*`, `MesgNum::Event`):
 - `timestamp`: Event time (FIT timestamp)
-- `event`: `FIT_EVENT_TIMER` (0)
-- `event_type`: `FIT_EVENT_TYPE_START` (0) or `FIT_EVENT_TYPE_STOP` (1)
+- `event`: `Event::Timer` (0)
+- `event_type`: `EventType::Start` (0) or `EventType::Stop` (1)
 
 ### Activity Messages
 **Purpose**: Top-level activity metadata.
@@ -691,45 +784,41 @@ Files are named: `activity_YYYYMMDDTHHMMSS.fit`
 
 ### File ID Message
 - **Purpose**: Identifies the file type and creator.
-- **Fields**:
-  - `product_name`: "UNA Watch"
+- **Fields** (`field::FileId::*`):
+  - `type`: `File::Activity`
+  - `manufacturer`: `Manufacturer::Development`
+  - `product`: 0
   - `serial_number`: 0
   - `time_created`: Unix timestamp converted to FIT time
-  - `manufacturer`: `FIT_MANUFACTURER_DEVELOPMENT`
-  - `product`: 0
-  - `number`: 0
-  - `type`: `FIT_FILE_ACTIVITY`
 
 ### Developer Data ID Message
 - **Purpose**: Registers the developer and app for custom fields.
-- **Fields**:
-  - `developer_id`: App-specific developer ID
-  - `application_id`: App-specific application ID
-  - `application_version`: App version
-  - `manufacturer_id`: `FIT_MANUFACTURER_DEVELOPMENT`
+- **Fields** (`field::DeveloperDataId::*`):
+  - `application_id`: 16-byte application identifier (from `APP_ID`)
   - `developer_data_index`: 0
 
 ### Field Description Messages
 - **Purpose**: Describe custom developer fields.
-- **Fields** (per field):
-  - `field_name`: e.g., "batteryLevel", "steps"
-  - `units`: e.g., "%", "mV"
+- **Fields** (per field, `field::FieldDescription::*`):
   - `developer_data_index`: 0
   - `field_definition_number`: Unique ID for the field
-  - `fit_base_type_id`: Data type (e.g., `FIT_BASE_TYPE_UINT8`)
+  - `fit_base_type_id`: Base-type id (e.g. `baseTypeId(BaseType::UInt8)`)
+  - `field_name` (`kFieldNameNum`): e.g., "batteryLevel", "steps"
+  - `units` (`kUnitsNum`): e.g., "%", "mV"
 
 ### Record Messages
 - **Purpose**: Individual data points during the activity (e.g., every second).
-- **Base Fields** (always present):
+- **Base Fields** (`field::Record::*`, the common tail):
   - `timestamp`: FIT timestamp
-  - `enhanced_altitude`: Altitude in mm (scaled)
-  - `enhanced_speed`: Speed in mm/s (scaled)
+  - `enhanced_altitude`: Altitude, scale 5 + offset 500, m
+  - `enhanced_speed`: Speed, scale 1000, m/s
   - `heart_rate`: BPM
-- **Variants**:
-  - Basic Record: No GPS or battery
-  - Record with GPS: Adds `position_lat`, `position_long` (semicircles)
-  - Record with Battery: Adds developer fields for battery level and voltage
-  - Combined: GPS + Battery
+  - `cadence` / `fractional_cadence`, `step_length`
+- **Variants** (selected by available data; one local type each):
+  - Basic Record (`L_RECORD`): No GPS or battery
+  - Record with GPS (`L_RECORD_G`): Adds `position_lat`, `position_long` (semicircles)
+  - Record with Battery (`L_RECORD_B`): Adds developer fields for battery level and voltage
+  - Combined (`L_RECORD_GB`): GPS + Battery
 
 ### Lap Messages
 - **Purpose**: Summarize data for each lap.
@@ -746,20 +835,19 @@ Files are named: `activity_YYYYMMDDTHHMMSS.fit`
   - `max_heart_rate`: Max HR
   - `total_ascent`: Ascent (m)
   - `total_descent`: Descent (m)
-- **Developer Fields**: Steps and floors (Hiking only)
+- **Developer Fields**: Defined per app via `defineMessage(...)` developer fields
 
 ### Session Messages
 - **Purpose**: Overall activity summary.
 - **Fields**: Similar to Lap, but for the entire session.
-- **Additional**: `sport`, `sub_sport`, `num_laps`
-- **Developer Fields**: Steps and floors (Hiking only)
+- **Additional**: `sport` (`Sport::*`), `sub_sport` (`SubSport::*`), `num_laps`
 
 ### Event Messages
 - **Purpose**: Mark start/stop/pause/resume events.
-- **Fields**:
+- **Fields** (`field::Event::*`):
   - `timestamp`: Event time
-  - `event`: `FIT_EVENT_TIMER`
-  - `event_type`: START or STOP
+  - `event`: `Event::Timer`
+  - `event_type`: `EventType::Start` or `EventType::Stop`
 
 ### Activity Messages
 - **Purpose**: Top-level activity info.
@@ -772,93 +860,83 @@ Files are named: `activity_YYYYMMDDTHHMMSS.fit`
 ## Activity-Specific Variations
 
 ### Running (Examples/Apps/Running/)
-**Sport Type**: `FIT_SPORT_RUNNING`
+**Sport Type**: `Sport::Running`
 
-**Message Numbers** (enum class MsgNumber):
-- FILE = 1, DEVELOP, RECORD, RECORD_G, RECORD_B, RECORD_GB, LAP, SESSION, ACTIVITY, EVENT, BATTERY
+**Local Message Types** (`enum Local`):
+- `L_FILE_ID`, `L_DEV_ID`, `L_FIELD_DESC`, `L_EVENT`, `L_RECORD`, `L_RECORD_G`,
+  `L_RECORD_B`, `L_RECORD_GB`, `L_LAP`, `L_SESSION`, `L_ACTIVITY`,
+  `L_WORKOUT`, `L_WORKOUT_STEP`
 
-**Record Variants**:
-- Basic: timestamp, altitude, speed, HR
-- With GPS: + lat/long
-- With Battery: + battery level, voltage
-- Combined: GPS + Battery
+**Record Variants** (each a separate local type sharing the global Record number):
+- Basic (`L_RECORD`): timestamp, altitude, speed, HR, cadence, step_length
+- With GPS (`L_RECORD_G`): + lat/long
+- With Battery (`L_RECORD_B`): + battery level/voltage developer fields
+- Combined (`L_RECORD_GB`): GPS + Battery
 
 **Session Fields**: Full set (distance, speed, elevation, HR)
 
-**Developer Fields**:
-- Battery level (field 2, uint8, %)
-- Battery voltage (field 3, uint16, mV)
+**Developer Fields** (`enum DevField`):
+- `DF_BATTERY_LEVEL` (2, uint8, %), `DF_BATTERY_VOLTAGE` (3, uint16, mV)
+- `DF_HR_SOURCE` (4), `DF_HR_OPTICAL` (5), `DF_HR_EXTERNAL` (6) -- all uint8
 
 **Code Example**:
 ```cpp
-session_mesg.sport = FIT_SPORT_RUNNING;
-session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC;
+mFit->data(L_SESSION)
+    // ... preceding fields ...
+    .u8(static_cast<uint8_t>(fit::Sport::Running))
+    .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+    // ...
+    .write();
 ```
 
 ### Cycling (Examples/Apps/Cycling/)
-**Sport Type**: `FIT_SPORT_CYCLING`
+**Sport Type**: `Sport::Cycling`
 
 **Identical to Running** except sport type. All record variants, battery fields, and session fields are the same.
 
 **Code Difference**:
 ```cpp
-session_mesg.sport = FIT_SPORT_CYCLING;
+.u8(static_cast<uint8_t>(fit::Sport::Cycling))
 ```
 
 ### Hiking (Examples/Apps/Hiking/)
-**Sport Type**: `FIT_SPORT_HIKING`
+**Sport Type**: `Sport::Hiking`
 
-**Additional Message Numbers**:
-- STEPS, FLOORS (for developer fields)
+Structurally the same as Running -- it shares the Record variants and the same
+developer-field approach. Any extra metrics are added as additional developer
+fields on the Lap/Session definitions (see "Developer Fields Implementation"),
+declared in the `defineMessage(...)` developer-field list and written in
+definition order at the tail of the `data(...)` builder.
 
-**Extra FitHelper Initializations**:
 ```cpp
-mFHStepsField(static_cast<uint8_t>(MsgNumber::STEPS), 0, { &mFHLap, &mFHSession })
-mFHFloorField(static_cast<uint8_t>(MsgNumber::FLOORS), 1, { &mFHLap, &mFHSession })
+.u8(static_cast<uint8_t>(fit::Sport::Hiking))
 ```
-
-**Field Descriptions**:
-- Steps: uint32, no units
-- Floors: uint32, no units
-
-**Lap/Session Enhancement**:
-```cpp
-FIT_UINT32 steps = lap.steps;
-mFHLap.writeFieldMessage(0, &steps, fp);
-
-FIT_UINT32 floors = lap.floors;
-mFHLap.writeFieldMessage(1, &floors, fp);
-```
-
-**Session Enhancement**: Same field writes for track.steps and track.floors.
 
 ### HRMonitor (Examples/Apps/HRMonitor/)
-**Sport Type**: `FIT_SPORT_GENERIC`
+**Sport Type**: `Sport::Generic`
 
 **Simplified Structure**:
-- Uses constants: skFileMsgNum = 1, skDevelopMsgNum = 2, etc.
-- Minimal record fields: only timestamp and heart_rate
+- Minimal record: only `timestamp` and `heart_rate`
 - No GPS, speed, altitude, distance fields
-- Custom developer field: hr_trust_level
+- One custom developer field: `hr_trust_level` (`DF_HR_TRUST_LEVEL`, uint8, "percents")
 
-**Record Message**:
+**Record Definition** (with the trust-level developer field):
 ```cpp
-mFHRecord.init({FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                FIT_RECORD_FIELD_NUM_HEART_RATE});
+mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+    {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+    {{DF_HR_TRUST_LEVEL, 1, 0}});
 ```
 
-**Trust Level Field**:
+**Field Description + data write**:
 ```cpp
-mFHTrustLevelField(skHrTrustLevelMsgNum, { &mFHRecord })
+writeFieldDescription(DF_HR_TRUST_LEVEL, "hr_trust_level", "percents",
+                      fit::BaseType::UInt8);
 
-// Field description
-strncpy(trustLevel.field_name, "hr_trust_level", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT);
-strncpy(trustLevel.units, "percents", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT);
-trustLevel.fit_base_type_id = FIT_BASE_TYPE_UINT8;
-
-// Writing
-FIT_UINT8 trustLevel = record.trustLevel;
-mFHRecord.writeFieldMessage(0, &trustLevel, fp);
+mFit->data(L_RECORD)
+    .u32(unixToFitTimestamp(record.timestamp))
+    .u8(record.heartRate)
+    .u8(record.trustLevel)   // developer field hr_trust_level
+    .write();
 ```
 
 **Session Fields**: Reduced set, no distance/speed/elevation.
@@ -866,103 +944,83 @@ mFHRecord.writeFieldMessage(0, &trustLevel, fp);
 ## Developer Fields Implementation
 
 ### Overview
-Developer fields allow adding custom data to standard FIT messages while maintaining compatibility. The process involves:
+Developer fields allow adding custom data to standard FIT messages while maintaining compatibility. With the native encoder the process involves:
 
-1. **Developer Data ID**: Registers the developer/app
-2. **Field Descriptions**: Define each custom field
-3. **Field Attachments**: Associate fields with message types
-4. **Data Writing**: Include field values in data messages
+1. **Developer Data ID**: Register the developer/app (`MesgNum::DeveloperDataId`)
+2. **Field Descriptions**: Define each custom field (`MesgNum::FieldDescription`)
+3. **Declare the developer fields**: Pass a `DevField` list (field number, size in bytes, developer-data index) as the third argument to `defineMessage(...)` on the message that carries them. This sets the developer-data flag in that record's header.
+4. **Data Writing**: Append the developer-field values, in declared order, at the **tail** of the same `data(...)` builder, after the standard fields.
+
+The `DevField` is `{ uint8_t fieldNum; uint8_t sizeBytes; uint8_t devDataIndex; }`.
 
 ### Battery Fields (Running, Cycling, Hiking)
-**Field Definitions**:
+**Field Descriptions** (one redefine of the field_description slot per field):
 ```cpp
-// Field 2: Battery Level
-mFHBatteryLevelField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-FIT_FIELD_DESCRIPTION_MESG battLevel{};
-strncpy(battLevel.field_name, "batteryLevel", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-strncpy(battLevel.units, "%", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-battLevel.developer_data_index = 0;
-battLevel.field_definition_number = mFHBatteryLevelField.getFieldID();  // 2
-battLevel.fit_base_type_id = FIT_BASE_TYPE_UINT8;
-mFHBatteryLevelField.writeMessage(&battLevel, fp);
-
-// Field 3: Battery Voltage
-// Similar setup with "battVoltage", "mV", FIT_BASE_TYPE_UINT16
+writeFieldDescription(DF_BATTERY_LEVEL,   "batteryLevel", "%",  fit::BaseType::UInt8);
+writeFieldDescription(DF_BATTERY_VOLTAGE, "battVoltage",  "mV", fit::BaseType::UInt16);
+```
+where `writeFieldDescription` redefines `L_FIELD_DESC` to size the name/units
+strings exactly, then writes the data record:
+```cpp
+mFit->defineMessage(L_FIELD_DESC, fit::mesgNum(fit::MesgNum::FieldDescription),
+    {fit::field::FieldDescription::DeveloperDataIndex,
+     fit::field::FieldDescription::FieldDefinitionNumber,
+     fit::field::FieldDescription::FitBaseTypeId,
+     {fit::field::FieldDescription::kFieldNameNum, fit::BaseType::String, nameLen},
+     {fit::field::FieldDescription::kUnitsNum,     fit::BaseType::String, unitsLen}});
+mFit->data(L_FIELD_DESC)
+    .u8(0)                              // developer_data_index
+    .u8(devFieldNum)                    // field_definition_number
+    .u8(fit::baseTypeId(baseType))      // fit_base_type_id
+    .str(name, nameLen)
+    .str(units, unitsLen)
+    .write();
 ```
 
-**Attachment to Records**:
+**Declaration on the battery record variants** (third `defineMessage` argument):
 ```cpp
-mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB, &mFHRecordGB })
-mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB, &mFHRecordGB })
+const DevFieldDef batt5[] = {
+    {DF_BATTERY_LEVEL, 1, 0}, {DF_BATTERY_VOLTAGE, 2, 0},
+    {DF_HR_SOURCE, 1, 0}, {DF_HR_OPTICAL, 1, 0}, {DF_HR_EXTERNAL, 1, 0},
+};
+mFit->defineMessage(L_RECORD_B, fit::mesgNum(fit::MesgNum::Record),
+    { /* standard record fields */ }, {batt5[0], batt5[1], batt5[2], batt5[3], batt5[4]});
 ```
 
-**Writing Data**:
+**Writing Data** (developer fields at the tail, in declared order):
 ```cpp
-if (record.has(RecordData::Field::BATTERY)) {
-    const FIT_UINT8 soc = record.batteryLevel;
-    const FIT_UINT16 voltage = record.batteryVoltage;
-    if (record.has(RecordData::Field::COORDS)) {
-        mFHRecordGB.writeMessage(&msg, mFile.get());
-        mFHRecordGB.writeFieldMessage(0, &soc, mFile.get());      // Battery level
-        mFHRecordGB.writeFieldMessage(1, &voltage, mFile.get());  // Battery voltage
-    } else {
-        mFHRecordB.writeMessage(&msg, mFile.get());
-        mFHRecordB.writeFieldMessage(0, &soc, mFile.get());
-        mFHRecordB.writeFieldMessage(1, &voltage, mFile.get());
-    }
+const uint8_t local = batt ? (gps ? L_RECORD_GB : L_RECORD_B)
+                           : (gps ? L_RECORD_G  : L_RECORD);
+fit::FitWriter::Data d = mFit->data(local);
+// ... standard record fields appended first ...
+if (batt) {
+    d.u8(record.batteryLevel).u16(record.batteryVoltage);
 }
+d.u8(record.hrSource).u8(record.hrOpticalBpm).u8(record.hrExternalBpm);
+d.write();
 ```
 
-### Steps and Floors (Hiking)
-**Field Definitions**:
-```cpp
-// Field 0: Steps
-mFHStepsField.init({/* field description fields */});
-FIT_FIELD_DESCRIPTION_MESG steps{};
-strncpy(steps.field_name, "steps", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-steps.fit_base_type_id = FIT_BASE_TYPE_UINT32;
-mFHStepsField.writeMessage(&steps, fp);
-
-// Field 1: Floors (similar)
-```
-
-**Attachment**:
-```cpp
-mFHStepsField(static_cast<uint8_t>(MsgNumber::STEPS), 0, { &mFHLap, &mFHSession })
-mFHFloorField(static_cast<uint8_t>(MsgNumber::FLOORS), 1, { &mFHLap, &mFHSession })
-```
-
-**Writing to Lap/Session**:
-```cpp
-// In addLap()
-FIT_UINT32 steps = lap.steps;
-mFHLap.writeFieldMessage(0, &steps, fp);
-
-FIT_UINT32 floors = lap.floors;
-mFHLap.writeFieldMessage(1, &floors, fp);
-
-// Similar in stop() for session
-```
+### Developer Fields on Lap / Session
+Lap- and session-level custom metrics follow the same pattern: declare the
+`DevField` list on the `L_LAP` / `L_SESSION` definition, write a field
+description for each, then append the values at the tail of the corresponding
+`data(L_LAP)` / `data(L_SESSION)` builder before `write()`.
 
 ### Trust Level (HRMonitor)
-**Simplified Setup**:
+**Setup** -- a single uint8 developer field on the record:
 ```cpp
-mFHTrustLevelField(skHrTrustLevelMsgNum, { &mFHRecord })
+writeFieldDescription(DF_HR_TRUST_LEVEL, "hr_trust_level", "percents",
+                      fit::BaseType::UInt8);
 
-// Field description
-FIT_FIELD_DESCRIPTION_MESG trustLevel{};
-strncpy(trustLevel.field_name, "hr_trust_level", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT);
-strncpy(trustLevel.units, "percents", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT);
-trustLevel.fit_base_type_id = FIT_BASE_TYPE_UINT8;
+mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+    {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+    {{DF_HR_TRUST_LEVEL, 1, 0}});
 
-// Writing
-FIT_UINT8 trustLevel = record.trustLevel;
-mFHRecord.writeFieldMessage(0, &trustLevel, fp);
+mFit->data(L_RECORD)
+    .u32(unixToFitTimestamp(record.timestamp))
+    .u8(record.heartRate)
+    .u8(record.trustLevel)   // developer field, written last
+    .write();
 ```
 
 ### Best Practices for Developer Fields
@@ -996,7 +1054,7 @@ FIT File Binary Layout:
 │ │ Dev Data ID │ │
 │ └─────────────┘ │
 │ ┌─────────────┐ │
-│ │ Field Desc  │ │ (battery, steps, etc.)
+│ │ Field Desc  │ │ (battery, hr_source, etc.)
 │ │ Messages    │ │
 │ └─────────────┘ │
 │ ┌─────────────┐ │
@@ -1055,24 +1113,25 @@ Definition Message:
 
 ### Record Message Variants Tree
 ```
-Record Messages
-├── Basic Record (mFHRecord)
+Record Messages  (each a distinct local type; same global Record number 20)
+├── Basic Record (L_RECORD)
 │   ├── timestamp (uint32)
 │   ├── enhanced_altitude (uint32, scaled)
 │   ├── enhanced_speed (uint32, scaled)
-│   └── heart_rate (uint8)
-├── Record + GPS (mFHRecordG)
+│   ├── heart_rate (uint8)
+│   ├── cadence / fractional_cadence (uint8)
+│   ├── step_length (uint16, scaled)
+│   └── + dev fields: hr_source, hr_optical, hr_external (uint8)
+├── Record + GPS (L_RECORD_G)
 │   ├── (Basic fields)
-│   ├── position_lat (sint32, semicircles)
-│   └── position_long (sint32, semicircles)
-├── Record + Battery (mFHRecordB)
+│   └── position_lat / position_long (sint32, semicircles)
+├── Record + Battery (L_RECORD_B)
 │   ├── (Basic fields)
-│   ├── batteryLevel (uint8, dev field 2)
-│   └── battVoltage (uint16, dev field 3)
-└── Record + GPS + Battery (mFHRecordGB)
+│   └── + dev fields: batteryLevel (uint8, #2), battVoltage (uint16, #3),
+│                      hr_source/optical/external
+└── Record + GPS + Battery (L_RECORD_GB)
     ├── (Basic + GPS fields)
-    ├── batteryLevel (uint8, dev field 2)
-    └── battVoltage (uint16, dev field 3)
+    └── + battery + hr dev fields
 ```
 
 ### ActivityWriter Method Flow
@@ -1080,278 +1139,181 @@ Record Messages
 ActivityWriter Lifecycle:
 
 Constructor
-├── Initialize FitHelper objects
-├── Set message numbers and definitions
-└── Configure field subsets
+└── Store kernel + path (no FIT work yet)
 
 start(AppInfo)
 ├── createAndOpenFile()
-├── WriteFileHeader() [placeholder]
-├── Write File ID message
-├── Write Developer Data ID message
-├── Write Field Description messages
-├── Write Definition messages for all types
-└── Write Event (START)
+├── construct FitWriter over the open file
+├── mFit->begin()  [header placeholder]
+├── defineMessage + data().write() for File ID
+├── defineMessage + data().write() for Developer Data ID
+├── writeFieldDescription() for each developer field
+├── defineMessage for Event / Record variants / Lap / Session / Activity
+└── addMessageEvent(START)
 
 addRecord(RecordData)
-├── prepareRecordMsg() - scale/convert data
-├── Select appropriate FitHelper variant
-├── Write record message
-└── Write developer fields (battery if present)
+├── Select record local type (GPS/battery)
+├── Append standard fields (scaled/converted) to data(local)
+└── Append developer fields at the tail, then write()
 
 addLap(LapData)
-├── Populate FIT_LAP_MESG with scaled data
-├── Write lap message
-└── Write developer fields (steps/floors for Hiking)
+└── data(L_LAP) with scaled values, then write()
 
 pause/resume(time_t)
-└── Write Event (STOP/START)
+└── addMessageEvent(STOP/START)
 
 stop(TrackData)
-├── Write Event (STOP)
-├── Write Session message + dev fields
-├── Write Activity message
-├── Update file header with data size
-├── WriteCRC()
-├── saveFile()
+├── data(L_SESSION).write()  (+ dev fields if any)
+├── data(L_ACTIVITY).write()
+├── mFit->finish()  [back-patch size + header CRC, append file CRC]
+├── close file
 └── saveSummary() - create JSON file
 
 discard()
-└── deleteFile()
+├── mFit.reset()
+└── close + remove the file
 ```
 
 ## Code Usage Examples and Walkthroughs
 
 ### Constructor Deep Dive
+The constructor is trivial: it stores the kernel reference and base path. All
+FIT work happens once the file is open, in `start()`.
 ```cpp
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     : mKernel(kernel), mPath(pathToDir)
-    // Initialize all FitHelper objects with message numbers and definitions
-    , mFHFileID(static_cast<uint8_t>(MsgNumber::FILE), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_FILE_ID])
-    , mFHDeveloper(static_cast<uint8_t>(MsgNumber::DEVELOP), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_DEVELOPER_DATA_ID])
-    , mFHLap(static_cast<uint8_t>(MsgNumber::LAP), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_LAP])
-    , mFHSession(static_cast<uint8_t>(MsgNumber::SESSION), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_SESSION])
-    , mFHEvent(static_cast<uint8_t>(MsgNumber::EVENT), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_EVENT])
-    , mFHActivity(static_cast<uint8_t>(MsgNumber::ACTIVITY), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_ACTIVITY])
-    // Record variants for different field combinations
-    , mFHRecord(static_cast<uint8_t>(MsgNumber::RECORD), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHRecordG(static_cast<uint8_t>(MsgNumber::RECORD_G), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHRecordB(static_cast<uint8_t>(MsgNumber::RECORD_B), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHRecordGB(static_cast<uint8_t>(MsgNumber::RECORD_GB), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD])
-    // Developer fields for battery (attached to battery-enabled records)
-    , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY), 2, { &mFHRecordB, &mFHRecordGB })
-    , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY), 3, { &mFHRecordB, &mFHRecordGB })
 {
     assert(pathToDir != nullptr);
-
-    // Initialize standard messages
-    mFHFileID.init();
-    mFHDeveloper.init();
-
-    // Initialize Lap with specific fields
-    mFHLap.init({ FIT_LAP_FIELD_NUM_TIMESTAMP,
-                  FIT_LAP_FIELD_NUM_START_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_ELAPSED_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_TIMER_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_DISTANCE,
-                  FIT_LAP_FIELD_NUM_MESSAGE_INDEX,
-                  FIT_LAP_FIELD_NUM_AVG_SPEED,
-                  FIT_LAP_FIELD_NUM_MAX_SPEED,
-                  FIT_LAP_FIELD_NUM_TOTAL_ASCENT,
-                  FIT_LAP_FIELD_NUM_TOTAL_DESCENT,
-                  FIT_LAP_FIELD_NUM_AVG_HEART_RATE,
-                  FIT_LAP_FIELD_NUM_MAX_HEART_RATE });
-
-    // Similar for Session, Event, Activity...
-
-    // Initialize Record variants with different field sets
-    mFHRecord.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                     FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
-                     FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                     FIT_RECORD_FIELD_NUM_HEART_RATE });
-
-    mFHRecordG.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                      FIT_RECORD_FIELD_NUM_POSITION_LAT,
-                      FIT_RECORD_FIELD_NUM_POSITION_LONG,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                      FIT_RECORD_FIELD_NUM_HEART_RATE });
-
-    // Battery variants (same fields as basic/GPS but with dev fields attached)
-    mFHRecordB.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
-                      FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                      FIT_RECORD_FIELD_NUM_HEART_RATE });
-
-    mFHRecordGB.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                       FIT_RECORD_FIELD_NUM_POSITION_LAT,
-                       FIT_RECORD_FIELD_NUM_POSITION_LONG,
-                       FIT_RECORD_FIELD_NUM_ENHANCED_ALTITUDE,
-                       FIT_RECORD_FIELD_NUM_ENHANCED_SPEED,
-                       FIT_RECORD_FIELD_NUM_HEART_RATE });
-
-    // Initialize developer field descriptions
-    mFHBatteryLevelField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-    mFHBatteryVoltageField.init({/* same fields */});
 }
 ```
+The message layout lives in two places instead: the `Local` / `DevField`
+enums in the header (see "Constructor and Initialization"), and the
+`defineMessage(...)` calls in `start()`.
 
 ### start() Method Walkthrough
 ```cpp
+namespace fit = SDK::Fit;
+
 void ActivityWriter::start(const AppInfo& info)
 {
-    // Reset counters
     mLapCounter = 0;
-    mDataCRC = 0;
 
-    // Create and open the FIT file
-    createAndOpenFile(info.timestamp);
-    if (!mFile) return;
-
-    SDK::Interface::IFile* fp = mFile.get();
-
-    // Write placeholder header (will be updated in stop())
-    WriteFileHeader(fp);
-
-    // 1. File ID Message - identifies the file
-    {
-        mFHFileID.writeDef(fp);  // Write definition first
-
-        FIT_FILE_ID_MESG file_id_mesg{};
-        strncpy(file_id_mesg.product_name, "UNA Watch", FIT_FILE_ID_MESG_PRODUCT_NAME_COUNT);
-        file_id_mesg.serial_number = 0;
-        file_id_mesg.time_created = unixToFitTimestamp(info.timestamp);
-        file_id_mesg.manufacturer = FIT_MANUFACTURER_DEVELOPMENT;
-        file_id_mesg.product = 0;
-        file_id_mesg.number = 0;
-        file_id_mesg.type = FIT_FILE_ACTIVITY;
-
-        mFHFileID.writeMessage(&file_id_mesg, fp);
+    if (!createAndOpenFile(info.timestamp)) {
+        return;
     }
 
-    // 2. Developer Data ID - registers custom fields
+    // 1. Construct the encoder over the open file and write the header placeholder.
+    mFit = std::make_unique<fit::FitWriter>(*mFile);
+    mFit->begin(/*profileVersion=*/0);
+
+    // 2. file_id: define, then write one data record.
+    mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
+        {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
+         fit::field::FileId::Product, fit::field::FileId::SerialNumber,
+         fit::field::FileId::TimeCreated});
+    mFit->data(L_FILE_ID)
+        .u8(static_cast<uint8_t>(fit::File::Activity))
+        .u16(static_cast<uint16_t>(fit::Manufacturer::Development))
+        .u16(0)  // product
+        .u32(0)  // serial_number
+        .u32(unixToFitTimestamp(info.timestamp))
+        .write();
+
+    // 3. developer_data_id: registers the app for custom fields.
+    mFit->defineMessage(L_DEV_ID, fit::mesgNum(fit::MesgNum::DeveloperDataId),
+        {fit::field::DeveloperDataId::ApplicationId,
+         fit::field::DeveloperDataId::DeveloperDataIndex});
     {
-        mFHDeveloper.writeDef(fp);
-
-        FIT_DEVELOPER_DATA_ID_MESG developer{};
-        strncpy(reinterpret_cast<char*>(developer.developer_id), info.devID.c_str(),
-                FIT_DEVELOPER_DATA_ID_MESG_DEVELOPER_ID_COUNT);
-        strncpy(reinterpret_cast<char*>(developer.application_id), info.appID.c_str(),
-                FIT_DEVELOPER_DATA_ID_MESG_APPLICATION_ID_COUNT);
-        developer.application_version = info.appVersion;
-        developer.manufacturer_id = FIT_MANUFACTURER_DEVELOPMENT;
-        developer.developer_data_index = 0;
-
-        mFHDeveloper.writeMessage(&developer, fp);
+        uint8_t appId[16] = {};
+        std::strncpy(reinterpret_cast<char*>(appId), info.appID.c_str(), sizeof(appId));
+        mFit->data(L_DEV_ID).bytes(appId, sizeof(appId)).u8(0).write();
     }
 
-    // 3. Field Descriptions for developer fields
-    {
-        // Battery Level
-        mFHBatteryLevelField.writeDef(fp);
-        FIT_FIELD_DESCRIPTION_MESG battLevel{};
-        strncpy(battLevel.field_name, "batteryLevel", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(battLevel.units, "%", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        battLevel.developer_data_index = 0;
-        battLevel.field_definition_number = mFHBatteryLevelField.getFieldID();
-        battLevel.fit_base_type_id = FIT_BASE_TYPE_UINT8;
-        mFHBatteryLevelField.writeMessage(&battLevel, fp);
+    // 4. field_description for each developer field (label/units survive any profile).
+    writeFieldDescription(DF_BATTERY_LEVEL,   "batteryLevel", "%",   fit::BaseType::UInt8);
+    writeFieldDescription(DF_BATTERY_VOLTAGE, "battVoltage",  "mV",  fit::BaseType::UInt16);
+    writeFieldDescription(DF_HR_SOURCE,       "hr_source",    nullptr, fit::BaseType::UInt8);
+    writeFieldDescription(DF_HR_OPTICAL,      "hr_optical",   "bpm", fit::BaseType::UInt8);
+    writeFieldDescription(DF_HR_EXTERNAL,     "hr_external",  "bpm", fit::BaseType::UInt8);
 
-        // Battery Voltage (similar)
-        // ... 
-    }
+    // 5. Define the remaining message types up front.
+    mFit->defineMessage(L_EVENT, fit::mesgNum(fit::MesgNum::Event),
+        {fit::field::Event::Timestamp, fit::field::Event::EventField,
+         fit::field::Event::EventType});
+    defineRecordMessages();   // L_RECORD / _G / _B / _GB (see below)
+    // ... L_LAP, L_SESSION, L_ACTIVITY defined here too ...
 
-    // 4. Write definitions for all message types that will be used
-    mFHEvent.writeDef(fp);
-    mFHActivity.writeDef(fp);
-    mFHRecord.writeDef(fp);
-    mFHRecordG.writeDef(fp);
-    mFHRecordB.writeDef(fp);
-    mFHRecordGB.writeDef(fp);
-    mFHLap.writeDef(fp);
-    mFHSession.writeDef(fp);
-
-    // 5. Start the activity with an Event message
-    AddMessageEvent(info.timestamp, FIT_EVENT_TYPE_START);
+    // 6. Start the activity with an Event (START) data record.
+    addMessageEvent(info.timestamp, fit::EventType::Start);
 }
 ```
 
-### prepareRecordMsg() - Data Conversion
+### defineRecordMessages() - Record Variants
+Each variant is a distinct local type that reuses the global Record message
+number; the differences are the field list and the attached developer fields.
 ```cpp
-FIT_RECORD_MESG ActivityWriter::prepareRecordMsg(const RecordData& record)
+void ActivityWriter::defineRecordMessages()
 {
-    FIT_RECORD_MESG msg;
+    const DevFieldDef hr3[] = {
+        {DF_HR_SOURCE, 1, 0}, {DF_HR_OPTICAL, 1, 0}, {DF_HR_EXTERNAL, 1, 0},
+    };
+    const DevFieldDef batt5[] = {
+        {DF_BATTERY_LEVEL, 1, 0}, {DF_BATTERY_VOLTAGE, 2, 0},
+        {DF_HR_SOURCE, 1, 0}, {DF_HR_OPTICAL, 1, 0}, {DF_HR_EXTERNAL, 1, 0},
+    };
 
-    // Initialize with base definition
-    Fit_InitMesg(fit_mesg_defs[FIT_MESG_RECORD], &msg);
+    // Plain record (HR/cadence) + 3 HR developer fields.
+    mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+        {fit::field::Record::Timestamp, fit::field::Record::EnhancedAltitude,
+         fit::field::Record::EnhancedSpeed, fit::field::Record::HeartRate,
+         fit::field::Record::Cadence, fit::field::Record::FractionalCadence,
+         fit::field::Record::StepLength},
+        {hr3[0], hr3[1], hr3[2]});
 
-    // Convert Unix timestamp to FIT timestamp
-    msg.timestamp = unixToFitTimestamp(record.timestamp);
-
-    // GPS coordinates (if available)
-    if (record.has(RecordData::Field::COORDS)) {
-        msg.position_lat = ConvertDegreesToSemicircles(record.latitude);
-        msg.position_long = ConvertDegreesToSemicircles(record.longitude);
-    }
-
-    // Speed scaling: float m/s -> uint32 mm/s
-    if (record.has(RecordData::Field::SPEED)) {
-        msg.enhanced_speed = static_cast<FIT_UINT32>(record.speed * 1000);
-    }
-
-    // Altitude scaling: float m -> uint32 mm with offset
-    if (record.has(RecordData::Field::ALTITUDE)) {
-        msg.enhanced_altitude = static_cast<FIT_UINT32>((record.altitude + 500) * 5);
-    }
-
-    // Heart rate (direct mapping)
-    if (record.has(RecordData::Field::HEART_RATE)) {
-        msg.heart_rate = static_cast<FIT_UINT8>(record.heartRate);
-    }
-
-    return msg;
+    // + GPS (adds position_lat/long), + battery (5 dev fields), + GPS + battery
+    // are defined the same way with L_RECORD_G / L_RECORD_B / L_RECORD_GB.
 }
 ```
 
-### addRecord() - Variant Selection Logic
+### addRecord() - Variant Selection and Data Write
 ```cpp
 void ActivityWriter::addRecord(const RecordData& record)
 {
-    if (!mFile) return;
+    if (!mFit) return;
 
-    const FIT_RECORD_MESG msg = prepareRecordMsg(record);
+    const bool gps  = record.has(RecordData::Field::COORDS);
+    const bool batt = record.has(RecordData::Field::BATTERY);
+    const uint8_t local = batt ? (gps ? L_RECORD_GB : L_RECORD_B)
+                               : (gps ? L_RECORD_G  : L_RECORD);
 
-    // Select FitHelper variant based on available data
-    if (record.has(RecordData::Field::BATTERY)) {
-        const FIT_UINT8 soc = record.batteryLevel;
-        const FIT_UINT16 voltage = record.batteryVoltage;
+    fit::FitWriter::Data d = mFit->data(local);
 
-        if (record.has(RecordData::Field::COORDS)) {
-            // GPS + Battery variant
-            mFHRecordGB.writeMessage(&msg, mFile.get());
-            mFHRecordGB.writeFieldMessage(0, &soc, mFile.get());      // Battery level
-            mFHRecordGB.writeFieldMessage(1, &voltage, mFile.get());  // Battery voltage
-        } else {
-            // Battery only variant
-            mFHRecordB.writeMessage(&msg, mFile.get());
-            mFHRecordB.writeFieldMessage(0, &soc, mFile.get());
-            mFHRecordB.writeFieldMessage(1, &voltage, mFile.get());
-        }
-    } else {
-        // No battery data
-        if (record.has(RecordData::Field::COORDS)) {
-            // GPS variant
-            mFHRecordG.writeMessage(&msg, mFile.get());
-        } else {
-            // Basic variant
-            mFHRecord.writeMessage(&msg, mFile.get());
-        }
+    d.u32(unixToFitTimestamp(record.timestamp));
+    if (gps) {
+        d.i32(degreesToSemicircles(record.latitude))
+         .i32(degreesToSemicircles(record.longitude));
     }
+    // enhanced_altitude (5 * m + 500), enhanced_speed (1000 * m/s); write the
+    // canonical invalid sentinel when a field is absent.
+    d.u32(record.has(RecordData::Field::ALTITUDE)
+              ? static_cast<uint32_t>((record.altitude + 500.0f) * 5.0f)
+              : static_cast<uint32_t>(fit::baseTypeInvalid(fit::BaseType::UInt32)));
+    d.u32(record.has(RecordData::Field::SPEED)
+              ? static_cast<uint32_t>(record.speed * 1000.0f)
+              : static_cast<uint32_t>(fit::baseTypeInvalid(fit::BaseType::UInt32)));
+    d.u8(record.has(RecordData::Field::HEART_RATE)
+             ? static_cast<uint8_t>(record.heartRate)
+             : static_cast<uint8_t>(fit::baseTypeInvalid(fit::BaseType::UInt8)));
+
+    // cadence / fractional_cadence, step_length (see FitRecordCadence) ...
+
+    // Developer fields, in definition order (battery first if present, then HR).
+    if (batt) {
+        d.u8(record.batteryLevel).u16(record.batteryVoltage);
+    }
+    d.u8(record.hrSource).u8(record.hrOpticalBpm).u8(record.hrExternalBpm);
+
+    d.write();
 }
 ```
 
@@ -1359,73 +1321,45 @@ void ActivityWriter::addRecord(const RecordData& record)
 ```cpp
 void ActivityWriter::stop(const TrackData& track)
 {
-    if (!mFile) return;
+    if (!mFit) return;
 
-    SDK::Interface::IFile* fp = mFile.get();
+    // Session summary.
+    mFit->data(L_SESSION)
+        .u32(unixToFitTimestamp(track.timestamp))
+        .u32(unixToFitTimestamp(track.timeStart))
+        .u32(static_cast<uint32_t>(track.elapsed * 1000))   // total_elapsed_time
+        .u32(static_cast<uint32_t>(track.duration * 1000))  // total_timer_time
+        .u32(static_cast<uint32_t>(track.distance * 100))   // total_distance
+        .u16(0)                                             // message_index
+        .u16(static_cast<uint16_t>(track.speedAvg * 1000))
+        .u16(static_cast<uint16_t>(track.speedMax * 1000))
+        .u16(static_cast<uint16_t>(track.ascent))
+        .u16(static_cast<uint16_t>(track.descent))
+        .u16(mLapCounter)                                   // num_laps
+        .u8(static_cast<uint8_t>(fit::Sport::Running))      // Activity-specific
+        .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+        .u8(static_cast<uint8_t>(track.hrAvg))
+        .u8(static_cast<uint8_t>(track.hrMax))
+        .write();
 
-    // Write final STOP event
-    AddMessageEvent(std::time(nullptr), FIT_EVENT_TYPE_STOP);
+    // Activity summary.
+    mFit->data(L_ACTIVITY)
+        .u32(unixToFitTimestamp(track.timestamp))
+        .u32(static_cast<uint32_t>(track.duration * 1000))
+        .u32(unixToFitTimestamp(epochToLocal(track.timestamp)))
+        .u16(1)  // num_sessions
+        .write();
 
-    // Session message
-    {
-        FIT_SESSION_MESG session_mesg{};
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session_mesg);
+    // Back-patch header data size + CRC and append the trailing file CRC.
+    mFit->finish();
+    mFit.reset();
 
-        session_mesg.message_index = 0;
-        session_mesg.sport = FIT_SPORT_RUNNING;  // Activity-specific
-        session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC;
-
-        session_mesg.timestamp = unixToFitTimestamp(track.timestamp);
-        session_mesg.start_time = unixToFitTimestamp(track.timeStart);
-
-        // Scaled timing data
-        session_mesg.total_elapsed_time = static_cast<FIT_UINT32>(track.elapsed * 1000);
-        session_mesg.total_timer_time = static_cast<FIT_UINT32>(track.duration * 1000);
-
-        // Scaled distance, speed, etc.
-        session_mesg.total_distance = static_cast<FIT_UINT32>(track.distance * 100);
-        session_mesg.avg_speed = static_cast<FIT_UINT16>(track.speedAvg * 1000);
-        session_mesg.max_speed = static_cast<FIT_UINT16>(track.speedMax * 1000);
-
-        session_mesg.avg_heart_rate = static_cast<FIT_UINT8>(track.hrAvg);
-        session_mesg.max_heart_rate = static_cast<FIT_UINT8>(track.hrMax);
-
-        session_mesg.total_ascent = static_cast<FIT_UINT16>(track.ascent);
-        session_mesg.total_descent = static_cast<FIT_UINT16>(track.descent);
-
-        session_mesg.num_laps = mLapCounter;
-
-        mFHSession.writeMessage(&session_mesg, fp);
-
-        // Add developer fields for Hiking
-        // FIT_UINT32 steps = track.steps;
-        // mFHSession.writeFieldMessage(0, &steps, fp);
-        // etc.
+    if (mFile) {
+        mFile->flush();
+        mFile->close();
     }
 
-    // Activity message
-    {
-        FIT_ACTIVITY_MESG activity_mesg{};
-        activity_mesg.timestamp = unixToFitTimestamp(track.timestamp);
-        activity_mesg.local_timestamp = unixToFitTimestamp(epochToLocal(track.timestamp));
-        activity_mesg.total_timer_time = static_cast<FIT_UINT32>(track.duration * 1000);
-        activity_mesg.num_sessions = 1;
-
-        mFHActivity.writeMessage(&activity_mesg, fp);
-    }
-
-    // Update header with actual data size
-    fp->seek(0);
-    WriteFileHeader(fp);
-
-    // Calculate and append CRC
-    WriteCRC(fp);
-
-    // Close file
-    saveFile();
-
-    // Create summary JSON
-    saveSummary(track);
+    saveSummary(track);  // create JSON summary file
 }
 ```
 
@@ -1436,10 +1370,10 @@ FIT uses a different epoch than Unix. The FIT epoch starts on December 31, 1989,
 
 **Conversion Function**:
 ```cpp
-FIT_DATE_TIME ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
+uint32_t ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
 {
     const std::time_t FIT_EPOCH_OFFSET = 631065600;  // 1989-12-31 00:00:00 UTC
-    return static_cast<FIT_DATE_TIME>(unixTimestamp - FIT_EPOCH_OFFSET);
+    return static_cast<uint32_t>(unixTimestamp - FIT_EPOCH_OFFSET);
 }
 ```
 
@@ -1460,7 +1394,7 @@ uint32_t scaled_speed = static_cast<uint32_t>(speed_mps * 1000);
 // Distance: float m -> uint32 cm (100 * m + 0)
 uint32_t scaled_distance = static_cast<uint32_t>(distance_m * 100);
 
-// Altitude: float m -> uint32 mm with offset (5 * m + 500)
+// Altitude: float m -> uint32, scale 5 + offset 500: (m + 500) * 5
 uint32_t scaled_altitude = static_cast<uint32_t>((altitude_m + 500) * 5);
 
 // Time: float s -> uint32 ms (1000 * s + 0)
@@ -1480,9 +1414,9 @@ GPS coordinates are stored as semicircles (1/2^31 degrees) for precision.
 
 **Conversion Function**:
 ```cpp
-FIT_SINT32 ActivityWriter::ConvertDegreesToSemicircles(float degrees)
+int32_t ActivityWriter::degreesToSemicircles(float degrees)
 {
-    return static_cast<FIT_SINT32>(degrees * (2147483648.0 / 180.0));
+    return static_cast<int32_t>(degrees * (2147483648.0 / 180.0));
 }
 ```
 
@@ -1492,98 +1426,51 @@ FIT_SINT32 ActivityWriter::ConvertDegreesToSemicircles(float degrees)
 - Precision: ~1 cm at equator
 
 ### CRC Calculation and Validation
-FIT files include a 16-bit CRC for data integrity.
+FIT files include a 16-bit CRC for data integrity. **You don't write it
+yourself** -- `FitWriter::finish()` computes and appends it. Internally it uses
+the standard FIT nibble-table CRC-16 from `SDK/Fit/FitCrc.hpp`:
 
-**CRC Implementation**:
 ```cpp
-void ActivityWriter::WriteCRC(SDK::Interface::IFile* fp)
-{
-    fp->close();
-    fp->open(false);  // Read mode
-
-    FIT_UINT8 buffer[512];
-    size_t size = fp->size();
-    size_t pos = 0;
-    uint16_t crc = 0;
-
-    while (pos < size) {
-        size_t toRead = std::min(size - pos, sizeof(buffer));
-        size_t br;
-        fp->read(reinterpret_cast<char*>(buffer), toRead, br);
-        crc = FitCRC_Update16(crc, buffer, static_cast<FIT_UINT32>(br));
-        pos += br;
-    }
-
-    fp->close();
-    fp->open(true, false);  // Write mode, append
-    fp->seek(fp->size());
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&crc), sizeof(FIT_UINT16), bw);
-    fp->flush();
-}
+uint16_t fitCrcByte(uint16_t crc, uint8_t byte);          // fold one byte
+uint16_t fitCrcUpdate(uint16_t crc, const void* d, size_t n);  // fold a buffer
 ```
 
+In `finish()` the encoder reopens the file read-only, folds every byte through
+`fitCrcUpdate` (seeded with 0), and appends the resulting CRC little-endian as
+the final two bytes.
+
 **CRC Properties**:
-- Calculated over header + data (excluding the CRC field itself)
-- Uses CRC-16-CCITT polynomial
+- Calculated over the entire file (header + data), excluding the trailing CRC bytes
+- Standard FIT CRC-16
 - Ensures data integrity during transfer/storage
 
 ### File Header Management
-The file header contains metadata and must be updated with final data size.
+The 14-byte header is also managed by `FitWriter`, not by the app:
 
-**Header Structure**:
-```cpp
-void ActivityWriter::WriteFileHeader(SDK::Interface::IFile* fp)
-{
-    FIT_FILE_HDR file_header{};
+- `begin(profileVersion, protocolVersion)` writes a header *placeholder*: the
+  data size is left at 0 and the header CRC at `0x0000` (permitted by the spec).
+- `finish()` back-patches the header with the actual data size (file size minus
+  the 14-byte header) and recomputes the header CRC.
 
-    file_header.header_size = FIT_FILE_HDR_SIZE;  // 14
-    file_header.profile_version = FIT_PROFILE_VERSION;
-    file_header.protocol_version = FIT_PROTOCOL_VERSION_20;
-    memcpy(file_header.data_type, ".FIT", 4);
-
-    // Calculate data size (file size - header size)
-    fp->flush();
-    size_t fileSize = fp->size();
-    if (fileSize > FIT_FILE_HDR_SIZE) {
-        file_header.data_size = static_cast<FIT_UINT32>(fileSize - FIT_FILE_HDR_SIZE);
-    } else {
-        file_header.data_size = 0;
-    }
-
-    // Calculate header CRC
-    file_header.crc = FitCRC_Calc16(&file_header, FIT_STRUCT_OFFSET(crc, FIT_FILE_HDR));
-
-    // Write header at file start
-    fp->seek(0);
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&file_header), FIT_FILE_HDR_SIZE, bw);
-    fp->flush();
-
-    // Seek back to end for data writing
-    if (fileSize > 0) {
-        fp->seek(fileSize);
-    }
-}
-```
+This streaming approach keeps RAM use constant and means a partially recorded
+activity is still a valid prefix on disk if recording is interrupted before
+`finish()` runs (only the final size/CRC patch is missing).
 
 ### Memory Management and Performance
-**FitHelper Memory Usage**:
-- Each FitHelper maintains optimized message definitions
-- Reduced field sets minimize memory and processing
-- Developer fields add minimal overhead
+**FitWriter Memory Usage**:
+- One small per-record payload buffer; no whole-file buffering
+- Records are streamed to the `IFile` as they are produced
+- Per local type, only an expected-size value and a "defined" flag are tracked
 
 **File I/O Optimization**:
-- Messages written sequentially
-- Buffered writes for efficiency
-- File flushed at appropriate intervals
+- Messages written sequentially as definition/data records
+- The only re-read of the file is the single read-only CRC pass in `finish()`
 
 **Best Practices**:
-- Initialize FitHelpers once in constructor
-- Reuse message structures where possible
-- Handle file errors gracefully
-- Validate data before writing
+- Construct one `FitWriter` per file, after the file is open
+- Define each local type once (redefine only for variable-size fields like strings)
+- Append fields in definition order; `write()` validates the payload size
+- Handle file errors gracefully (`FitWriter::ok()` reports IO failures)
 
 ## Troubleshooting Common Issues
 
@@ -1653,94 +1540,98 @@ assert(abs(original_speed - restored) < 0.001f);
 - Base types match data types
 - Fields attached to correct message types
 
+### Payload / Definition Mismatch
+**Symptom**: `data(local).write()` returns false; the field count or sizes in a
+data record do not match its definition.
+
+**Check**:
+- Append values in the **same order** as the field list passed to `defineMessage`.
+- Use the typed appender that matches each field's base type/size
+  (`.u8` for `UInt8`, `.i32` for `SInt32`, `.u16` for `UInt16`, etc.).
+- Append all declared developer fields too, at the tail, in declared order.
+- For string fields, `.str(s, fieldBytes)` must use the same `fieldBytes` the
+  definition declared.
+
 ### Memory Issues
 **Symptom**: Crashes or undefined behavior
 
 **Check Bounds**:
 ```cpp
-// String copies with bounds checking
-strncpy(file_id_mesg.product_name, "UNA Watch", FIT_FILE_ID_MESG_PRODUCT_NAME_COUNT);
-
-// Array size validation
-static_assert(FIT_FILE_ID_MESG_PRODUCT_NAME_COUNT >= sizeof("UNA Watch"));
+// Size fixed byte-array fields exactly; strncpy null-pads the buffer.
+uint8_t appId[16] = {};
+strncpy(reinterpret_cast<char*>(appId), info.appID.c_str(), sizeof(appId));
+mFit->data(L_DEV_ID).bytes(appId, sizeof(appId)).u8(0).write();
 ```
 
 ## Extending ActivityWriter for New Activities
 
 ### Adding a New Sport Type
-1. **Define Sport Constants**:
+1. **Use the desired `Sport` enum value** when writing the Session message. If
+   the value you need isn't yet in `FitProfile.hpp`, add it to
+   `enum class Sport` / `enum class SubSport` there (use the public FIT
+   profile number -- don't invent one):
    ```cpp
-   // In your app's ActivityWriter.hpp
-   enum class MsgNumber {
-       // ... existing
-       NEW_SPORT = 10
-   };
+   // In SDK/Fit/FitProfile.hpp
+   enum class Sport : uint8_t { Generic = 0, Running = 1, Cycling = 2, Hiking = 17 };
    ```
 
-2. **Modify Session Message**:
+2. **Write it in the Session data record**:
    ```cpp
-   session_mesg.sport = FIT_SPORT_YOUR_SPORT;
-   session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC;
-   ```
-
-3. **Add Sport-Specific Fields**:
-   ```cpp
-   // If needed, add developer fields
-   mFHSportSpecificField(static_cast<uint8_t>(MsgNumber::NEW_SPORT), 4, { &mFHSession });
+   mFit->data(L_SESSION)
+       // ... preceding fields ...
+       .u8(static_cast<uint8_t>(fit::Sport::Hiking))
+       .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+       // ...
+       .write();
    ```
 
 ### Adding New Developer Fields
-1. **Define Field in Constructor**:
+1. **Assign a developer field number** (in your app's `enum DevField`):
    ```cpp
-   , mFHNewField(static_cast<uint8_t>(MsgNumber::NEW_FIELD), field_id, { &mFHRecord })
+   enum DevField : uint8_t { /* ... */ DF_NEW_FIELD = 7 };
    ```
 
-2. **Initialize Field Description**:
+2. **Write a field_description** in `start()` (sizes name/units exactly):
    ```cpp
-   mFHNewField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                      FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                      /* ... */ });
+   writeFieldDescription(DF_NEW_FIELD, "newField", "units", fit::BaseType::UInt16);
    ```
 
-3. **Write Field Description in start()**:
+3. **Declare it on the carrying message** in its `defineMessage(...)` developer-field list:
    ```cpp
-   FIT_FIELD_DESCRIPTION_MESG newFieldDesc{};
-   strncpy(newFieldDesc.field_name, "newField", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT);
-   // Set units, type, etc.
-   mFHNewField.writeMessage(&newFieldDesc, fp);
+   mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+       { /* standard fields */ },
+       {{DF_NEW_FIELD, fit::baseTypeSize(fit::BaseType::UInt16), 0}});
    ```
 
-4. **Write Data in Appropriate Methods**:
+4. **Append the value** at the tail of the matching `data(...)` builder, in declared order:
    ```cpp
-   // In addRecord() or wherever applicable
-   FIT_UINT16 newValue = calculateNewValue();
-   mFHNewField.writeFieldMessage(0, &newValue, fp);
+   mFit->data(L_RECORD)
+       // ... standard fields ...
+       .u16(calculateNewValue())
+       .write();
    ```
 
 ### Creating New Record Variants
-1. **Add FitHelper for New Variant**:
+1. **Add a local message type** to your `enum Local` (must be 0-15):
    ```cpp
-   , mFHRecordNew(static_cast<uint8_t>(MsgNumber::RECORD_NEW), (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD])
+   enum Local : uint8_t { /* ... */ L_RECORD_NEW = 14 };
    ```
 
-2. **Initialize with Custom Fields**:
+2. **Define it in start()** (reuse the global Record number, choose its fields):
    ```cpp
-   mFHRecordNew.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                       FIT_RECORD_FIELD_NUM_HEART_RATE,
-                       // Add your custom fields
-                       });
+   mFit->defineMessage(L_RECORD_NEW, fit::mesgNum(fit::MesgNum::Record),
+       {fit::field::Record::Timestamp, fit::field::Record::HeartRate,
+        /* add your fields */});
    ```
 
-3. **Write Definition in start()**:
-   ```cpp
-   mFHRecordNew.writeDef(fp);
-   ```
-
-4. **Use in addRecord()**:
+3. **Select and write it in addRecord()**:
    ```cpp
    if (hasNewCondition()) {
-       mFHRecordNew.writeMessage(&msg, fp);
-       // Write developer fields
+       mFit->data(L_RECORD_NEW)
+           .u32(unixToFitTimestamp(record.timestamp))
+           .u8(static_cast<uint8_t>(record.heartRate))
+           /* ... your fields, then any developer fields ... */
+           .write();
    }
    ```
 
@@ -1832,8 +1723,10 @@ decode.Read(file);
 
 ### UNA SDK Specific
 - SDK Documentation: `Docs/` directory
-- Example Apps: `Examples/Apps/`
-- FitHelper Implementation: `Libs/Header/SDK/FitHelper/`
+- Example Apps: `Examples/Apps/` (Running, Cycling, Hiking, HRMonitor, ...)
+- Native FIT encoder: `Libs/Header/SDK/Fit/` (`FitWriter.hpp`, `FitProfile.hpp`,
+  `FitBaseType.hpp`, `FitCrc.hpp`, `FitRecordCadence.hpp`)
+- Worked tutorial: `Docs/Tutorials/FitFiles/` (Service.cpp / Service.hpp)
 
 ### Books and Tutorials
 - "FIT Protocol Guide" (Garmin documentation)

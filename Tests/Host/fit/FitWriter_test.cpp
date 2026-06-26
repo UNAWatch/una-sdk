@@ -99,6 +99,38 @@ TEST(FitWriter, RejectsPayloadSizeMismatch)
     EXPECT_FALSE(w.ok());
 }
 
+TEST(FitWriter, RejectsOversizeArrayField)
+{
+    SDK::Test::FakeFileSystem fs;
+    auto file = fs.file("big.fit");
+    ASSERT_TRUE(file->open(true, true));
+
+    FitWriter w(*file);
+    ASSERT_TRUE(w.begin(1));
+    // 64 * 4 bytes = 256 > 255: a field size cannot fit in one byte.
+    EXPECT_FALSE(w.defineMessage(0, 20, {{253, BaseType::UInt32, 64}}));
+    EXPECT_FALSE(w.ok());
+}
+
+// finish() reopens the file for write (override=false) to append the CRC after
+// reading it back. That must NOT truncate the streamed data.
+TEST(FitWriter, ReopenForAppendPreservesContent)
+{
+    SDK::Test::FakeFileSystem fs;
+    auto file = fs.file("a.fit");
+    ASSERT_TRUE(file->open(true, true));
+    size_t bw = 0;
+    ASSERT_TRUE(file->write("ABCDEF", 6, bw));
+    ASSERT_TRUE(file->close());
+
+    ASSERT_TRUE(file->open(/*wMode=*/true, /*override=*/false));
+    EXPECT_EQ(file->size(), 6u) << "override=false must not truncate existing content";
+    ASSERT_TRUE(file->seek(6));
+    ASSERT_TRUE(file->write("GH", 2, bw));
+    file->close();
+    EXPECT_EQ(fs.fileContents("a.fit"), "ABCDEFGH");
+}
+
 TEST(FitWriter, EmitsDeveloperFieldDefinition)
 {
     SDK::Test::FakeFileSystem fs;
