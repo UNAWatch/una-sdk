@@ -62,9 +62,8 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
 )
-# NOTE: the FitHelper cadence-encode / field-description tests are dropped here
-# while the FIT encode path is reimplemented natively (SDK::Fit). They will be
-# replaced by native equivalents once FitHelper is ported onto FitWriter.
+# FIT encoding is covered by the SDK::Fit tests (fit/*) and the Running
+# ActivityWriter smoke test (apps/Running/ActivityWriter_test.cpp).
 
 target_include_directories(una-sdk-host-tests PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}"

@@ -439,12 +439,6 @@
     <Filter Include="SDK\Libs\Source\Kernel">
       <UniqueIdentifier>{deab211e-4017-4b58-a20d-097abc115779}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\Libs\Source\FitHelper">
-      <UniqueIdentifier>{8cdf5567-1961-475a-a78c-f7765128285c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\Libs\Header\FitHelper">
-      <UniqueIdentifier>{9f9e93f4-b708-49c3-abb9-6fe1d40588dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SDK\Libs\Source\SensorLayer">
       <UniqueIdentifier>{50a5fe9a-94d8-447f-97e7-9c8fab22b452}</UniqueIdentifier>
     </Filter>
@@ -504,6 +498,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp">
+
+      <Filter>Source Files</Filter>
+
+    </ClCompile>
+
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp">
+
+      <Filter>Source Files</Filter>
+
+    </ClCompile>
+
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp">
+
+      <Filter>Source Files</Filter>
+
+    </ClCompile>
+
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
       <Filter>Source Files\TouchGFX\platform\driver\touch</Filter>
     </ClCompile>
@@ -707,18 +719,6 @@
     </ClInclude>
     <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c">
       <Filter>SDK\ThirdParty\coreJSON</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_convert.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_crc.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_product.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp">
       <Filter>SDK\Libs\Source\JSON</Filter>
@@ -1011,14 +1011,8 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\SensorBatteryLevel.cpp">
       <Filter>SDK\Libs\Source\Simulator\Components\Sensors</Filter>
     </ClCompile>
-    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp">
-      <Filter>SDK\Libs\Source\FitHelper</Filter>
-    </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp">
       <Filter>SDK\Libs\Source\JSON</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp">
-      <Filter>SDK\Libs\Source\FitHelper</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp">
       <Filter>SDK\Libs\Source\Timer</Filter>
@@ -2070,9 +2064,6 @@
     </ClInclude>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp">
       <Filter>SDK\Libs\Header\Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp">
-      <Filter>SDK\Libs\Header\FitHelper</Filter>
     </ClInclude>
     <ClInclude Include="$(ApplicationRoot)\simulator\ConfigurationSimulator.hpp">
       <Filter>Source Files\simulator</Filter>

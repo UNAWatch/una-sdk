@@ -18,8 +18,6 @@ include($ENV{UNA_SDK}/cmake/una-app.cmake)
 
 # Workout uses the newer FIT SDK release so it can emit native FIT fields
 # (e.g. session.metabolic_calories) that the older bundled SDK doesn't expose.
-set(UNA_FIT_SDK_DIR "$ENV{UNA_SDK}/ThirdParty/FitSDKRelease_21.202.00")
-add_compile_definitions(FIT_PRODUCT_RELEASE)
 
 # Includes sets: SCRIPTS_PATH,
 # UNA_SDK_SOURCES_COMMON, UNA_SDK_SOURCES_SERVICE, UNA_SDK_SOURCES_GUI,

@@ -20,12 +20,7 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_convert.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_crc.c"/>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_product.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\FitHelper\FitHelper.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppCore.cpp"/>
@@ -231,7 +226,6 @@
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderGUI.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp"/>
     <ClInclude Include="$(SdkPath)\ThirdParty\coreJSON\source\include\core_json.h"/>
-    <ClInclude Include="$(SdkPath)\Libs\Header\SDK\FitHelper\FitHelper.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\CommandMessages.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageBase.hpp"/>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Messages\MessageGuard.hpp"/>
@@ -323,7 +317,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/c;$(SdkPath)/ThirdParty/FitSDKRelease_21.171.00/cpp;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

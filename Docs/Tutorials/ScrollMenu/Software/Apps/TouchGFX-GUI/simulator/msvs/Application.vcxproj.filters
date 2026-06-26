@@ -280,12 +280,6 @@
     <Filter Include="SDK\Libs\Source\Kernel">
       <UniqueIdentifier>{2f861fcc-bfea-4e3a-a34f-f8a170add9d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\Libs\Header\FitHelper">
-      <UniqueIdentifier>{0042d757-c0af-489f-8eca-21e29ca3e1bb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\Libs\Source\FitHelper">
-      <UniqueIdentifier>{f16d3529-9d58-4f99-a8f6-90a9ffe31594}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SDK\Libs\Source\Simulator\OS">
       <UniqueIdentifier>{3ede9f1b-089b-4e59-b311-bb9fa33f7e37}</UniqueIdentifier>
     </Filter>
@@ -363,18 +357,6 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c">
       <Filter>SDK\Libs\Source\Wrappers</Filter>
     </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_convert.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_crc.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
-    <ClCompile Include="$(SdkPath)\ThirdParty\FitSDKRelease_21.171.00\c\fit_product.c">
-      <Filter>SDK\ThirdParty\FIT</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp">
       <Filter>Libs\Source</Filter>
     </ClCompile>
@@ -383,9 +365,6 @@
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp">
       <Filter>SDK\Libs\Source\Kernel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\FitHelper\FitHelper.cpp">
-      <Filter>SDK\Libs\Source\FitHelper</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\..\SDK\Libs\Source\Simulator\OS\OS.cpp">
       <Filter>SDK\Libs\Source\Simulator\OS</Filter>
@@ -1068,9 +1047,6 @@
     </ClInclude>
     <ClInclude Include="$(SdkPath)\Libs\Header\SDK\Kernel\KernelProviderService.hpp">
       <Filter>SDK\Libs\Header\Kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\FitHelper\FitHelper.hpp">
-      <Filter>SDK\Libs\Header\FitHelper</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\..\SDK\Libs\Header\SDK\Simulator\OS\OS.hpp">
       <Filter>SDK\Libs\Header\Simulator\OS</Filter>

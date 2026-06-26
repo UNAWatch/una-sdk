@@ -174,9 +174,6 @@ VPATH_dirs := $(sort $(VPATH_dirs))
 $(eval VPATH := $(VPATH):$(VPATH_dirs))
 override user_cflags += -Wno-error
 override user_cflags += -DBUILD_VERSION=\"1.2.3\" -DAPP_ID=\"ABCDEF1234567890\" -DDEV_ID=\"UNA_Simulator\"
-# Workout uses FitSDKRelease_21.202.00 with the RELEASE product profile so it
-# can emit native session.metabolic_calories. Other apps stay on EXAMPLE.
-override user_cflags += -DFIT_PRODUCT_RELEASE
 #------------------------------------------------------------------------------
 
 textconvert_script_path := $(touchgfx_path)/framework/tools/textconvert
