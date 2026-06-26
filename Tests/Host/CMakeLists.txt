@@ -24,15 +24,6 @@ if(NOT IS_DIRECTORY "${COREJSON_DIR}/include")
     )
 endif()
 
-# Garmin FIT SDK backs the FitHelper cadence-encode test.
-set(UNA_FIT_SDK_DIR "${UNA_SDK_ROOT}/ThirdParty/FitSDKRelease_21.202.00" CACHE PATH "Path to the Garmin FIT SDK release")
-if(NOT IS_DIRECTORY "${UNA_FIT_SDK_DIR}/c")
-    message(FATAL_ERROR
-        "UNA_FIT_SDK_DIR must point to a Garmin FIT SDK release with a c/ include directory. "
-        "Missing: ${UNA_FIT_SDK_DIR}/c. Override with -DUNA_FIT_SDK_DIR=/path/to/FitSDKRelease_21.202.00"
-    )
-endif()
-
 add_library(sdk_host_test_support STATIC
     support/KernelTestDoubles.cpp
     "${UNA_SDK_ROOT}/Libs/Source/UnaLogger/Logger.cpp"
@@ -52,8 +43,7 @@ add_executable(una-sdk-host-tests
     calibration/CadenceStrideModel_test.cpp
     calibration/TreadmillSpeedEstimator_test.cpp
     calibration/CadenceSpikeFilter_test.cpp
-    fithelper/FitCadenceEncode_test.cpp
-    fithelper/FitFieldDescription_test.cpp
+    fit/FitWriter_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
@@ -61,25 +51,21 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/StrideLut.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/CadenceStrideModel.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/TreadmillSpeedEstimator.cpp"
-    "${UNA_SDK_ROOT}/Libs/Source/FitHelper/FitRecordCadence.cpp"
-    "${UNA_SDK_ROOT}/Libs/Source/FitHelper/FitHelper.cpp"
-    "${UNA_FIT_SDK_DIR}/c/fit_product.c"
+    "${UNA_SDK_ROOT}/Libs/Source/Fit/FitCrc.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Fit/FitWriter.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
 )
+# NOTE: the FitHelper cadence-encode / field-description tests are dropped here
+# while the FIT encode path is reimplemented natively (SDK::Fit). They will be
+# replaced by native equivalents once FitHelper is ported onto FitWriter.
 
 target_include_directories(una-sdk-host-tests PRIVATE
     "${UNA_SDK_ROOT}/Libs/Header"
     "${COREJSON_DIR}/include"
-    "${UNA_FIT_SDK_DIR}/c"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Header"
 )
-
-# Build against the same FIT profile as the device apps (Workout/Running define
-# FIT_PRODUCT_RELEASE), so the FitHelper tests exercise the release message
-# definitions the firmware actually emits.
-target_compile_definitions(una-sdk-host-tests PRIVATE FIT_PRODUCT_RELEASE)
 
 target_link_libraries(una-sdk-host-tests PRIVATE
     sdk_host_test_support
