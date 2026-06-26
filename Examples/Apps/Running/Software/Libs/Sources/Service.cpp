@@ -1147,25 +1147,25 @@ void Service::emitIntervalsWorkout()
 
     auto runDuration = [&](ActivityWriter::WorkoutStepData& s) {
         if (cfg.runMetric == Settings::Intervals::TIME && cfg.runTime > 0) {
-            s.durationType = FIT_WKT_STEP_DURATION_TIME;
+            s.durationType = SDK::Fit::WktStepDuration::Time;
             s.durationValue = static_cast<FIT_UINT32>(cfg.runTime) * 1000u;        // ms
         } else if (cfg.runMetric == Settings::Intervals::DISTANCE && cfg.runDistance > 0.0f) {
-            s.durationType = FIT_WKT_STEP_DURATION_DISTANCE;
+            s.durationType = SDK::Fit::WktStepDuration::Distance;
             s.durationValue = static_cast<FIT_UINT32>(cfg.runDistance * 100.0f);   // cm
         } else {
-            s.durationType = FIT_WKT_STEP_DURATION_OPEN;
+            s.durationType = SDK::Fit::WktStepDuration::Open;
             s.durationValue = 0;
         }
     };
     auto restDuration = [&](ActivityWriter::WorkoutStepData& s) {
         if (cfg.restMetric == Settings::Intervals::TIME && cfg.restTime > 0) {
-            s.durationType = FIT_WKT_STEP_DURATION_TIME;
+            s.durationType = SDK::Fit::WktStepDuration::Time;
             s.durationValue = static_cast<FIT_UINT32>(cfg.restTime) * 1000u;        // ms
         } else if (cfg.restMetric == Settings::Intervals::DISTANCE && cfg.restDistance > 0.0f) {
-            s.durationType = FIT_WKT_STEP_DURATION_DISTANCE;
+            s.durationType = SDK::Fit::WktStepDuration::Distance;
             s.durationValue = static_cast<FIT_UINT32>(cfg.restDistance * 100.0f);   // cm
         } else {
-            s.durationType = FIT_WKT_STEP_DURATION_OPEN;
+            s.durationType = SDK::Fit::WktStepDuration::Open;
             s.durationValue = 0;
         }
     };
@@ -1176,33 +1176,33 @@ void Service::emitIntervalsWorkout()
 
     // Warm up
     if (cfg.warmUp) {
-        steps[n].intensity = FIT_INTENSITY_WARMUP;
-        steps[n].durationType = FIT_WKT_STEP_DURATION_OPEN;
+        steps[n].intensity = SDK::Fit::Intensity::Warmup;
+        steps[n].durationType = SDK::Fit::WktStepDuration::Open;
         map.warmUpIdx = n;
         n++;
     }
 
     // Run (first / repeated run)
     map.runIdx = n;
-    steps[n].intensity = FIT_INTENSITY_ACTIVE;
+    steps[n].intensity = SDK::Fit::Intensity::Active;
     runDuration(steps[n]);
     n++;
 
     if (cfg.repeatsNum == 0) {
         // 'Open' (unlimited): describe a single run + rest pair, no terminating repeat.
         map.restIdx = n;
-        steps[n].intensity = FIT_INTENSITY_REST;
+        steps[n].intensity = SDK::Fit::Intensity::Rest;
         restDuration(steps[n]);
         n++;
         map.finalRunIdx = map.runIdx;
     } else if (cfg.lastRest) {
         // Every rep has a rest: repeat the run+rest pair repeatsNum times.
         map.restIdx = n;
-        steps[n].intensity = FIT_INTENSITY_REST;
+        steps[n].intensity = SDK::Fit::Intensity::Rest;
         restDuration(steps[n]);
         n++;
         if (cfg.repeatsNum >= 2) {
-            steps[n].durationType = FIT_WKT_STEP_DURATION_REPEAT_UNTIL_STEPS_CMPLT;
+            steps[n].durationType = SDK::Fit::WktStepDuration::RepeatUntilStepsComplete;
             steps[n].durationValue = map.runIdx;            // loop back to the run step
             steps[n].repeatCount = cfg.repeatsNum;          // total iterations
             n++;
@@ -1212,15 +1212,15 @@ void Service::emitIntervalsWorkout()
         // Skip the final rest: repeat run+rest (repeatsNum - 1) times, then a final run.
         if (cfg.repeatsNum >= 2) {
             map.restIdx = n;
-            steps[n].intensity = FIT_INTENSITY_REST;
+            steps[n].intensity = SDK::Fit::Intensity::Rest;
             restDuration(steps[n]);
             n++;
-            steps[n].durationType = FIT_WKT_STEP_DURATION_REPEAT_UNTIL_STEPS_CMPLT;
+            steps[n].durationType = SDK::Fit::WktStepDuration::RepeatUntilStepsComplete;
             steps[n].durationValue = map.runIdx;
             steps[n].repeatCount = static_cast<FIT_UINT32>(cfg.repeatsNum - 1);
             n++;
             map.finalRunIdx = n;
-            steps[n].intensity = FIT_INTENSITY_ACTIVE;
+            steps[n].intensity = SDK::Fit::Intensity::Active;
             runDuration(steps[n]);
             n++;
         } else {
@@ -1231,8 +1231,8 @@ void Service::emitIntervalsWorkout()
 
     // Cool down
     if (cfg.coolDown) {
-        steps[n].intensity = FIT_INTENSITY_COOLDOWN;
-        steps[n].durationType = FIT_WKT_STEP_DURATION_OPEN;
+        steps[n].intensity = SDK::Fit::Intensity::Cooldown;
+        steps[n].durationType = SDK::Fit::WktStepDuration::Open;
         map.coolDownIdx = n;
         n++;
     }

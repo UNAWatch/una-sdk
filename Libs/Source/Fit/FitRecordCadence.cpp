@@ -5,7 +5,7 @@
  ******************************************************************************
  */
 
-#include "SDK/FitHelper/FitRecordCadence.hpp"
+#include "SDK/Fit/FitRecordCadence.hpp"
 
 #include <algorithm>
 #include <cmath>
