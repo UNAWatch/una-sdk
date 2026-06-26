@@ -30,21 +30,47 @@ namespace {
     }
 }  // namespace
 
+bool FitWriter::writeBytes(const void* p, size_t n)
+{
+    if (!mOk) {
+        return false;
+    }
+    size_t bw = 0;
+    if (!mFile.write(static_cast<const char*>(p), n, bw) || bw != n) {
+        mOk = false;
+    }
+    return mOk;
+}
+
+namespace {
+    void buildHeader(uint8_t hdr[14], uint8_t protocolVersion, uint16_t profileVersion,
+                     uint32_t dataSize, bool withCrc)
+    {
+        hdr[0] = 14;  // header size
+        hdr[1] = protocolVersion;
+        hdr[2] = static_cast<uint8_t>(profileVersion & 0xFFu);
+        hdr[3] = static_cast<uint8_t>((profileVersion >> 8) & 0xFFu);
+        hdr[4] = static_cast<uint8_t>(dataSize & 0xFFu);
+        hdr[5] = static_cast<uint8_t>((dataSize >> 8) & 0xFFu);
+        hdr[6] = static_cast<uint8_t>((dataSize >> 16) & 0xFFu);
+        hdr[7] = static_cast<uint8_t>((dataSize >> 24) & 0xFFu);
+        hdr[8]  = '.';
+        hdr[9]  = 'F';
+        hdr[10] = 'I';
+        hdr[11] = 'T';
+        const uint16_t crc = withCrc ? SDK::Fit::fitCrcUpdate(0, hdr, 12) : 0;
+        hdr[12] = static_cast<uint8_t>(crc & 0xFFu);
+        hdr[13] = static_cast<uint8_t>((crc >> 8) & 0xFFu);
+    }
+}  // namespace
+
 bool FitWriter::begin(uint16_t profileVersion, uint8_t protocolVersion)
 {
-    mBuf.clear();
-    mBuf.resize(kHeaderSize, 0);
-    mBuf[0] = kHeaderSize;
-    mBuf[1] = protocolVersion;
-    mBuf[2] = static_cast<uint8_t>(profileVersion & 0xFFu);
-    mBuf[3] = static_cast<uint8_t>((profileVersion >> 8) & 0xFFu);
-    // mBuf[4..7] data size: filled in by finish().
-    mBuf[8]  = '.';
-    mBuf[9]  = 'F';
-    mBuf[10] = 'I';
-    mBuf[11] = 'T';
-    // mBuf[12..13] header CRC: left 0x0000 (permitted by the spec).
-    mBegun = true;
+    mProtocolVersion = protocolVersion;
+    mProfileVersion  = profileVersion;
+    uint8_t hdr[14];
+    buildHeader(hdr, protocolVersion, profileVersion, /*dataSize=*/0, /*withCrc=*/false);
+    mBegun = writeBytes(hdr, sizeof(hdr));
     return mBegun;
 }
 
@@ -57,36 +83,37 @@ bool FitWriter::defineMessage(uint8_t localType, uint16_t globalMesgNum,
         return false;
     }
 
+    std::vector<uint8_t> rec;
     const uint8_t hdr = static_cast<uint8_t>(
         kDefinitionFlag | (devFields.size() ? kDeveloperFlag : 0) | (localType & 0x0Fu));
-    mBuf.push_back(hdr);
-    mBuf.push_back(0x00);                 // reserved
-    mBuf.push_back(kArchLittleEndian);    // architecture
-    appendLE(mBuf, globalMesgNum, 2);
-    mBuf.push_back(static_cast<uint8_t>(fields.size()));
+    rec.push_back(hdr);
+    rec.push_back(0x00);                 // reserved
+    rec.push_back(kArchLittleEndian);    // architecture
+    appendLE(rec, globalMesgNum, 2);
+    rec.push_back(static_cast<uint8_t>(fields.size()));
 
     size_t payload = 0;
     for (const Field& f : fields) {
         const uint8_t fieldBytes = static_cast<uint8_t>(baseTypeSize(f.baseType) * f.count);
-        mBuf.push_back(f.fieldDefNum);
-        mBuf.push_back(fieldBytes);
-        mBuf.push_back(baseTypeId(f.baseType));
+        rec.push_back(f.fieldDefNum);
+        rec.push_back(fieldBytes);
+        rec.push_back(baseTypeId(f.baseType));
         payload += fieldBytes;
     }
 
     if (devFields.size()) {
-        mBuf.push_back(static_cast<uint8_t>(devFields.size()));
+        rec.push_back(static_cast<uint8_t>(devFields.size()));
         for (const DevField& d : devFields) {
-            mBuf.push_back(d.fieldNum);
-            mBuf.push_back(d.sizeBytes);
-            mBuf.push_back(d.devDataIndex);
+            rec.push_back(d.fieldNum);
+            rec.push_back(d.sizeBytes);
+            rec.push_back(d.devDataIndex);
             payload += d.sizeBytes;
         }
     }
 
     mExpected[localType] = payload;
     mDefined[localType]  = true;
-    return true;
+    return writeBytes(rec.data(), rec.size());
 }
 
 bool FitWriter::emitData(uint8_t localType, const std::vector<uint8_t>& payload)
@@ -96,31 +123,61 @@ bool FitWriter::emitData(uint8_t localType, const std::vector<uint8_t>& payload)
         mOk = false;
         return false;
     }
-    mBuf.push_back(static_cast<uint8_t>(localType & 0x0Fu));   // normal data header
-    mBuf.insert(mBuf.end(), payload.begin(), payload.end());
-    return true;
+    std::vector<uint8_t> rec;
+    rec.push_back(static_cast<uint8_t>(localType & 0x0Fu));   // normal data header
+    rec.insert(rec.end(), payload.begin(), payload.end());
+    return writeBytes(rec.data(), rec.size());
 }
 
 bool FitWriter::finish()
 {
-    if (!mOk || !mBegun || mBuf.size() < kHeaderSize) {
+    if (!mOk || !mBegun) {
         return false;
     }
+    mFile.flush();
 
-    // Fill in the data-size field (bytes 4..7, little-endian).
-    const uint32_t dataSize = static_cast<uint32_t>(mBuf.size() - kHeaderSize);
-    mBuf[4] = static_cast<uint8_t>(dataSize & 0xFFu);
-    mBuf[5] = static_cast<uint8_t>((dataSize >> 8) & 0xFFu);
-    mBuf[6] = static_cast<uint8_t>((dataSize >> 16) & 0xFFu);
-    mBuf[7] = static_cast<uint8_t>((dataSize >> 24) & 0xFFu);
+    const size_t end = mFile.getPosition();
+    if (end < kHeaderSize) {
+        mOk = false;
+        return false;
+    }
+    const uint32_t dataSize = static_cast<uint32_t>(end - kHeaderSize);
 
-    // Trailing file CRC over header + data, little-endian.
-    const uint16_t crc = fitCrcUpdate(0, mBuf.data(), mBuf.size());
-    appendLE(mBuf, crc, 2);
+    // Back-patch the header in place (data size + header CRC over bytes 0..11).
+    uint8_t hdr[14];
+    buildHeader(hdr, mProtocolVersion, mProfileVersion, dataSize, /*withCrc=*/true);
+    if (!mFile.seek(0) || !writeBytes(hdr, sizeof(hdr))) {
+        mOk = false;
+        return false;
+    }
+    mFile.flush();
 
-    size_t bw = 0;
-    if (!mFile.write(reinterpret_cast<const char*>(mBuf.data()), mBuf.size(), bw)
-        || bw != mBuf.size()) {
+    // Compute the file CRC over header + data by reading the file back (a
+    // write-mode handle cannot read, so reopen read-only), then append it.
+    if (!mFile.close() || !mFile.open(/*wMode=*/false)) {
+        mOk = false;
+        return false;
+    }
+    uint16_t crc = 0;
+    size_t   remaining = end;
+    char     buf[256];
+    while (remaining > 0) {
+        const size_t want = remaining < sizeof(buf) ? remaining : sizeof(buf);
+        size_t got = 0;
+        if (!mFile.read(buf, want, got) || got == 0) {
+            mOk = false;
+            return false;
+        }
+        crc = fitCrcUpdate(crc, buf, got);
+        remaining -= got;
+    }
+    if (!mFile.close() || !mFile.open(/*wMode=*/true, /*override=*/false)) {
+        mOk = false;
+        return false;
+    }
+    uint8_t crcLE[2] = {static_cast<uint8_t>(crc & 0xFFu),
+                        static_cast<uint8_t>((crc >> 8) & 0xFFu)};
+    if (!mFile.seek(end) || !writeBytes(crcLE, sizeof(crcLE))) {
         mOk = false;
         return false;
     }

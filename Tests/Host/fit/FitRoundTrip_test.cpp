@@ -265,5 +265,5 @@ TEST(FitRoundTrip, FullActivityDecodesAndVerifies)
     // trailing file CRC are fixed. Guards against accidental output changes.
     const uint16_t fileCrc = SDK::Fit::fitCrcUpdate(0, bytes.data(), bytes.size() - 2);
     EXPECT_EQ(bytes.size(), 369u);
-    EXPECT_EQ(fileCrc, 0xD93Bu);
+    EXPECT_EQ(fileCrc, 0x96C0u);
 }
