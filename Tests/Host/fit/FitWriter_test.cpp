@@ -49,14 +49,14 @@ TEST(FitWriter, EncodesMinimalFileByteExact)
     // Header(14) + definition(12) + data(6) + CRC(2) = 34 bytes.
     ASSERT_EQ(b.size(), 34u);
 
-    const std::vector<uint8_t> expectedNoCrc = {
+    std::vector<uint8_t> expectedNoCrc = {
         // --- 14-byte header ---
         14,            // header size
         0x20,          // protocol version (default 2.0)
         0x34, 0x12,    // profile version 0x1234, little-endian
         0x12, 0x00, 0x00, 0x00,  // data size = 18, little-endian
         '.', 'F', 'I', 'T',
-        0x00, 0x00,    // header CRC (left 0)
+        0x00, 0x00,    // header CRC: computed below
         // --- definition record (local 0) ---
         0x40,          // definition, no dev data, local 0
         0x00,          // reserved
@@ -71,6 +71,10 @@ TEST(FitWriter, EncodesMinimalFileByteExact)
         0x3C,                    // heart_rate = 60
     };
     ASSERT_EQ(expectedNoCrc.size(), 32u);
+    // Header CRC (bytes 12-13) is computed over header bytes 0-11.
+    const uint16_t hdrCrc = SDK::Fit::fitCrcUpdate(0, expectedNoCrc.data(), 12);
+    expectedNoCrc[12] = static_cast<uint8_t>(hdrCrc & 0xFF);
+    expectedNoCrc[13] = static_cast<uint8_t>((hdrCrc >> 8) & 0xFF);
     for (size_t i = 0; i < expectedNoCrc.size(); ++i) {
         EXPECT_EQ(b[i], expectedNoCrc[i]) << "byte " << i;
     }

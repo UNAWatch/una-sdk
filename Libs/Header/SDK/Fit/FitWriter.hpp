@@ -3,13 +3,13 @@
  * @file    FitWriter.hpp
  * @brief   Native FIT-format encoder engine.
  *
- * Encodes a FIT file into an in-memory buffer -- a 14-byte header, a sequence
- * of definition and data records keyed by local message type, and a trailing
- * little-endian file CRC -- and writes the whole buffer to an IFile on
- * finish(). Buffering keeps the encoder dependent only on IFile::write (no
- * seek/read-back, which write-mode file handles may not support) at the cost
- * of holding the file in RAM; activity files are modest but long recordings
- * are not free, so this trade-off is worth revisiting if RAM becomes tight.
+ * Streams a FIT file to an IFile -- a 14-byte header, a sequence of definition
+ * and data records keyed by local message type, and a trailing little-endian
+ * file CRC. Records are written as they are produced (constant RAM, and the
+ * activity survives on disk if recording is interrupted). begin() writes a
+ * header placeholder; finish() back-patches the data size + header CRC and
+ * appends the file CRC, computed by reopening the file read-only -- the same
+ * approach the platform's file API supports for write-mode handles.
  *
  * The encoder is profile-agnostic -- callers supply global message numbers,
  * field-definition numbers and base types, so the same engine serves every
@@ -114,9 +114,11 @@ public:
 
 private:
     bool emitData(uint8_t localType, const std::vector<uint8_t>& payload);
+    bool writeBytes(const void* p, size_t n);
 
     SDK::Interface::IFile& mFile;
-    std::vector<uint8_t>   mBuf;                  ///< full file (header + records)
+    uint8_t                mProtocolVersion = 0;
+    uint16_t               mProfileVersion  = 0;
     bool                   mOk            = true;
     bool                   mBegun         = false;
     size_t                 mExpected[16]  = {};   ///< payload size per local type
