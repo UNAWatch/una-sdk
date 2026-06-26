@@ -1,11 +1,7 @@
-﻿/**
+/**
  ******************************************************************************
- * @file    ActivityWriter.hpp
- * @date    08-04-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Serializes activity data to a file.
- ******************************************************************************
- *
+ * @file    ActivityWriter.cpp
+ * @brief   Serializes activity data to a FIT file (native SDK::Fit encoder).
  ******************************************************************************
  */
 
@@ -14,11 +10,6 @@
 #include "SDK/Interfaces/IFileSystem.hpp"
 #include "SDK/JSON/JsonStreamWriter.hpp"
 
-extern "C" {
-#include "fit_product.h"
-#include "fit_crc.h"
-}
-
 #include <cassert>
 #include <cstring>
 
@@ -26,349 +17,250 @@ extern "C" {
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
 
+namespace fit = SDK::Fit;
+using Field = fit::FitWriter::Field;
+using DevFieldDef = fit::FitWriter::DevField;
+
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
     : mKernel(kernel), mPath(pathToDir)
-    , mFHFileID(static_cast<uint8_t>(MsgNumber::FILE), fit_mesg_defs[FIT_MESG_FILE_ID])
-    , mFHDeveloper(static_cast<uint8_t>(MsgNumber::DEVELOP), fit_mesg_defs[FIT_MESG_DEVELOPER_DATA_ID])
-    , mFHLap(static_cast<uint8_t>(MsgNumber::LAP), fit_mesg_defs[FIT_MESG_LAP])
-    , mFHSession(static_cast<uint8_t>(MsgNumber::SESSION), fit_mesg_defs[FIT_MESG_SESSION])
-    , mFHEvent(static_cast<uint8_t>(MsgNumber::EVENT), fit_mesg_defs[FIT_MESG_EVENT])
-    , mFHActivity(static_cast<uint8_t>(MsgNumber::ACTIVITY), fit_mesg_defs[FIT_MESG_ACTIVITY])
-    , mFHRecord(static_cast<uint8_t>(MsgNumber::RECORD), fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHBatteryLevelField(static_cast<uint8_t>(MsgNumber::BATTERY_LEVEL), 2, { &mFHRecord })
-    , mFHBatteryVoltageField(static_cast<uint8_t>(MsgNumber::BATTERY_VOLTAGE), 3, { &mFHRecord })
-    , mFHLapRestingCaloriesField(static_cast<uint8_t>(MsgNumber::LAP_RESTING_CALORIES), 4, { &mFHLap })
-    , mFHHrSourceField(static_cast<uint8_t>(MsgNumber::HR_SOURCE), 5, { &mFHRecord })
-    , mFHHrOpticalField(static_cast<uint8_t>(MsgNumber::HR_OPTICAL), 6, { &mFHRecord })
-    , mFHHrExternalField(static_cast<uint8_t>(MsgNumber::HR_EXTERNAL), 7, { &mFHRecord })
 {
     assert(pathToDir != nullptr);
-
-    mFHFileID.init();
-
-    mFHDeveloper.init();
-
-    mFHLap.init({ FIT_LAP_FIELD_NUM_TIMESTAMP,
-                  FIT_LAP_FIELD_NUM_START_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_ELAPSED_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_TIMER_TIME,
-                  FIT_LAP_FIELD_NUM_MESSAGE_INDEX,
-                  FIT_LAP_FIELD_NUM_AVG_HEART_RATE,
-                  FIT_LAP_FIELD_NUM_MAX_HEART_RATE,
-                  FIT_LAP_FIELD_NUM_TOTAL_CALORIES });
-
-    mFHSession.init({ FIT_SESSION_FIELD_NUM_TIMESTAMP,
-                      FIT_SESSION_FIELD_NUM_START_TIME,
-                      FIT_SESSION_FIELD_NUM_TOTAL_ELAPSED_TIME,
-                      FIT_SESSION_FIELD_NUM_TOTAL_TIMER_TIME,
-                      FIT_SESSION_FIELD_NUM_MESSAGE_INDEX,
-                      FIT_SESSION_FIELD_NUM_NUM_LAPS,
-                      FIT_SESSION_FIELD_NUM_SPORT,
-                      FIT_SESSION_FIELD_NUM_SUB_SPORT,
-                      FIT_SESSION_FIELD_NUM_AVG_HEART_RATE,
-                      FIT_SESSION_FIELD_NUM_MAX_HEART_RATE,
-                      FIT_SESSION_FIELD_NUM_TOTAL_CALORIES,
-                      FIT_SESSION_FIELD_NUM_METABOLIC_CALORIES });
-
-    mFHEvent.init({ FIT_EVENT_FIELD_NUM_TIMESTAMP,
-                    FIT_EVENT_FIELD_NUM_EVENT,
-                    FIT_EVENT_FIELD_NUM_EVENT_TYPE });
-
-    mFHActivity.init({ FIT_ACTIVITY_FIELD_NUM_TIMESTAMP,
-                       FIT_ACTIVITY_FIELD_NUM_TOTAL_TIMER_TIME,
-                       FIT_ACTIVITY_FIELD_NUM_LOCAL_TIMESTAMP,
-                       FIT_ACTIVITY_FIELD_NUM_NUM_SESSIONS });
-
-    mFHRecord.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                     FIT_RECORD_FIELD_NUM_HEART_RATE });
-
-    mFHBatteryLevelField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                                FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-    mFHBatteryVoltageField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                                  FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-    mFHLapRestingCaloriesField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                                      FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                                      FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                                      FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                                      FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-    mFHHrSourceField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                            FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-    mFHHrOpticalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                             FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                             FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                             FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                             FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
-
-    mFHHrExternalField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
 }
 
 void ActivityWriter::start(const AppInfo& info)
 {
-    // Reset counter
     mLapCounter = 0;
-    mDataCRC = 0;
 
-    createAndOpenFile(info.timestamp);
-
-    if (!mFile) {
+    if (!createAndOpenFile(info.timestamp)) {
         return;
     }
 
-    SDK::Interface::IFile* fp = mFile.get();
+    mFit = std::make_unique<fit::FitWriter>(*mFile);
+    mFit->begin(/*profileVersion=*/0);
 
-    // Add empty header
-    WriteFileHeader(fp);
+    // file_id
+    mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
+        {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
+         fit::field::FileId::Product, fit::field::FileId::SerialNumber,
+         fit::field::FileId::TimeCreated});
+    mFit->data(L_FILE_ID)
+        .u8(static_cast<uint8_t>(fit::File::Activity))
+        .u16(static_cast<uint16_t>(fit::Manufacturer::Development))
+        .u16(0)
+        .u32(0)
+        .u32(unixToFitTimestamp(info.timestamp))
+        .write();
 
-    // Write file id message.
+    // developer_data_id
+    mFit->defineMessage(L_DEV_ID, fit::mesgNum(fit::MesgNum::DeveloperDataId),
+        {fit::field::DeveloperDataId::ApplicationId,
+         fit::field::DeveloperDataId::DeveloperDataIndex});
     {
-        mFHFileID.writeDef(fp);
-
-        FIT_FILE_ID_MESG file_id_mesg{};
-        strncpy(file_id_mesg.product_name, "UNA Watch", FIT_FILE_ID_MESG_PRODUCT_NAME_COUNT);
-        file_id_mesg.serial_number = 0;
-        file_id_mesg.time_created = unixToFitTimestamp(info.timestamp);
-        file_id_mesg.manufacturer = FIT_MANUFACTURER_DEVELOPMENT;
-        file_id_mesg.product = 0;
-        file_id_mesg.number = 0;
-        file_id_mesg.type = FIT_FILE_ACTIVITY;
-
-        mFHFileID.writeMessage(&file_id_mesg, fp);
+        uint8_t appId[16] = {};
+        std::strncpy(reinterpret_cast<char*>(appId), info.appID.c_str(), sizeof(appId));
+        mFit->data(L_DEV_ID).bytes(appId, sizeof(appId)).u8(0).write();
     }
 
-    // Developer Data ID Message 
-    {
-        mFHDeveloper.writeDef(fp);
+    // Developer field descriptions (label/units survive any profile).
+    writeFieldDescription(DF_BATTERY_LEVEL, "batteryLevel", "%", fit::BaseType::UInt8);
+    writeFieldDescription(DF_BATTERY_VOLTAGE, "battVoltage", "mV", fit::BaseType::UInt16);
+    // Lap-level "resting calories" (BMR over the lap, kcal). Kept as a developer
+    // field because resting_calories is not part of the public FIT Profile
+    // (session metabolic_calories is a native field instead).
+    writeFieldDescription(DF_LAP_RESTING_CAL, "resting_calories", "kcal", fit::BaseType::UInt16);
+    writeFieldDescription(DF_HR_SOURCE, "hr_source", nullptr, fit::BaseType::UInt8);
+    writeFieldDescription(DF_HR_OPTICAL, "hr_optical", "bpm", fit::BaseType::UInt8);
+    writeFieldDescription(DF_HR_EXTERNAL, "hr_external", "bpm", fit::BaseType::UInt8);
 
-        FIT_DEVELOPER_DATA_ID_MESG developer{};
-        strncpy(reinterpret_cast<char*>(developer.developer_id), info.devID.c_str(), FIT_DEVELOPER_DATA_ID_MESG_DEVELOPER_ID_COUNT);
-        strncpy(reinterpret_cast<char*>(developer.application_id), info.appID.c_str(), FIT_DEVELOPER_DATA_ID_MESG_APPLICATION_ID_COUNT);
-        developer.application_version  = info.appVersion;
-        developer.manufacturer_id      = FIT_MANUFACTURER_DEVELOPMENT;
-        developer.developer_data_index = 0;
+    // event
+    mFit->defineMessage(L_EVENT, fit::mesgNum(fit::MesgNum::Event),
+        {fit::field::Event::Timestamp, fit::field::Event::EventField,
+         fit::field::Event::EventType});
 
-        mFHDeveloper.writeMessage(&developer, fp);
-    }
+    defineRecordMessages();
 
-    // Additional fields
-    {
-        // Developer field descriptions. Written via writeFieldDescription so the
-        // field_name/units survive the active FIT profile: the release profile
-        // (FIT_PRODUCT_RELEASE) strips FIELD_DESCRIPTION string fields to 1 byte,
-        // which would drop every label on the writeDef()/writeMessage() path.
-        mFHBatteryLevelField.writeFieldDescription("batteryLevel", "%", FIT_BASE_TYPE_UINT8, fp);
-        mFHBatteryVoltageField.writeFieldDescription("battVoltage", "mV", FIT_BASE_TYPE_UINT16, fp);
+    // lap / session / activity
+    mFit->defineMessage(L_LAP, fit::mesgNum(fit::MesgNum::Lap),
+        {fit::field::Lap::Timestamp, fit::field::Lap::StartTime,
+         fit::field::Lap::TotalElapsedTime, fit::field::Lap::TotalTimerTime,
+         fit::field::Lap::MessageIndex, fit::field::Lap::AvgHeartRate,
+         fit::field::Lap::MaxHeartRate, fit::field::Lap::TotalCalories},
+        {{DF_LAP_RESTING_CAL, 2, 0}});
+    mFit->defineMessage(L_SESSION, fit::mesgNum(fit::MesgNum::Session),
+        {fit::field::Session::Timestamp, fit::field::Session::StartTime,
+         fit::field::Session::TotalElapsedTime, fit::field::Session::TotalTimerTime,
+         fit::field::Session::MessageIndex, fit::field::Session::NumLaps,
+         fit::field::Session::Sport, fit::field::Session::SubSport,
+         fit::field::Session::AvgHeartRate, fit::field::Session::MaxHeartRate,
+         fit::field::Session::TotalCalories, fit::field::Session::MetabolicCalories});
+    mFit->defineMessage(L_ACTIVITY, fit::mesgNum(fit::MesgNum::Activity),
+        {fit::field::Activity::Timestamp, fit::field::Activity::TotalTimerTime,
+         fit::field::Activity::LocalTimestamp, fit::field::Activity::NumSessions});
 
-        // Lap-level "resting calories" (BMR over the lap, kcal). Kept as a
-        // developer field because resting_calories is not part of the public FIT
-        // Profile (session metabolic_calories is a native field instead).
-        mFHLapRestingCaloriesField.writeFieldDescription("resting_calories", "kcal", FIT_BASE_TYPE_UINT16, fp);
+    addMessageEvent(info.timestamp, fit::EventType::Start);
+}
 
-        // "hr_source": which sensor produced each HR sample (0 unknown/none,
-        // 1 wrist optical, 2 external strap) — matches the kernel HR arbiter +
-        // SDK HeartRateEx::Source. hr_optical/hr_external are the raw per-source
-        // readings (bpm) logged alongside the arbitrated heart_rate.
-        mFHHrSourceField.writeFieldDescription("hr_source", nullptr, FIT_BASE_TYPE_UINT8, fp);
-        mFHHrOpticalField.writeFieldDescription("hr_optical", "bpm", FIT_BASE_TYPE_UINT8, fp);
-        mFHHrExternalField.writeFieldDescription("hr_external", "bpm", FIT_BASE_TYPE_UINT8, fp);
-    }
+void ActivityWriter::defineRecordMessages()
+{
+    const DevFieldDef hr3[] = {
+        {DF_HR_SOURCE, 1, 0}, {DF_HR_OPTICAL, 1, 0}, {DF_HR_EXTERNAL, 1, 0},
+    };
+    const DevFieldDef batt5[] = {
+        {DF_BATTERY_LEVEL, 1, 0}, {DF_BATTERY_VOLTAGE, 2, 0},
+        {DF_HR_SOURCE, 1, 0}, {DF_HR_OPTICAL, 1, 0}, {DF_HR_EXTERNAL, 1, 0},
+    };
 
-    mFHEvent.writeDef(fp);
-    mFHActivity.writeDef(fp);
+    // Plain record (HR only) + 3 HR developer fields.
+    mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+        {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+        {hr3[0], hr3[1], hr3[2]});
 
-    mFHRecord.writeDef(fp);
+    // + battery (5 developer fields).
+    mFit->defineMessage(L_RECORD_B, fit::mesgNum(fit::MesgNum::Record),
+        {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+        {batt5[0], batt5[1], batt5[2], batt5[3], batt5[4]});
+}
 
-    mFHLap.writeDef(fp);
-    mFHSession.writeDef(fp);
+void ActivityWriter::writeFieldDescription(uint8_t devFieldNum, const char* name,
+                                           const char* units, fit::BaseType baseType)
+{
+    const uint8_t nameLen  = name ? static_cast<uint8_t>(std::strlen(name) + 1) : 1;
+    const uint8_t unitsLen = units ? static_cast<uint8_t>(std::strlen(units) + 1) : 1;
 
-    // Write Event message - START Event
-    AddMessageEvent(info.timestamp, FIT_EVENT_TYPE_START);
+    // Redefine the field_description slot to size the name/units strings exactly.
+    mFit->defineMessage(L_FIELD_DESC, fit::mesgNum(fit::MesgNum::FieldDescription),
+        {fit::field::FieldDescription::DeveloperDataIndex,
+         fit::field::FieldDescription::FieldDefinitionNumber,
+         fit::field::FieldDescription::FitBaseTypeId,
+         {fit::field::FieldDescription::kFieldNameNum, fit::BaseType::String, nameLen},
+         {fit::field::FieldDescription::kUnitsNum, fit::BaseType::String, unitsLen}});
+    mFit->data(L_FIELD_DESC)
+        .u8(0)
+        .u8(devFieldNum)
+        .u8(fit::baseTypeId(baseType))
+        .str(name ? name : "", nameLen)
+        .str(units ? units : "", unitsLen)
+        .write();
 }
 
 void ActivityWriter::pause(std::time_t timestamp)
 {
-    if (!mFile) {
-        return;
+    if (mFit) {
+        addMessageEvent(timestamp, fit::EventType::Stop);
     }
-
-    // Write Event message - STOP Event
-    AddMessageEvent(timestamp, FIT_EVENT_TYPE_STOP);
 }
 
 void ActivityWriter::resume(std::time_t timestamp)
 {
-    if (!mFile) {
-        return;
+    if (mFit) {
+        addMessageEvent(timestamp, fit::EventType::Start);
     }
-
-    // Write Event message - START Event
-    AddMessageEvent(timestamp, FIT_EVENT_TYPE_START);
-}
-
-FIT_RECORD_MESG ActivityWriter::prepareRecordMsg(const RecordData& record)
-{
-    FIT_RECORD_MESG msg;
-
-    Fit_InitMesg(fit_mesg_defs[FIT_MESG_RECORD], &msg);
-
-    msg.timestamp = unixToFitTimestamp(record.timestamp);
-
-    if (record.has(RecordData::Field::HEART_RATE)) {
-        msg.heart_rate = static_cast<FIT_UINT8>(record.heartRate);
-    }
-
-    return msg;
 }
 
 void ActivityWriter::addRecord(const RecordData& record)
 {
-    if (!mFile) {
+    if (!mFit) {
         return;
     }
 
-    const FIT_RECORD_MESG msg = prepareRecordMsg(record);
+    const bool batt  = record.has(RecordData::Field::BATTERY);
+    const uint8_t local = batt ? L_RECORD_B : L_RECORD;
 
-    mFHRecord.writeMessage(&msg, mFile.get());
+    fit::FitWriter::Data d = mFit->data(local);
 
-    // The record definition always declares the battery developer fields,
-    // so every data message must carry them.  When no fresh battery sample
-    // is available this tick, emit FIT invalid sentinels instead of skipping
-    // them -- otherwise the file goes short and downstream parsers lose sync.
-    const FIT_UINT8  soc     = record.has(RecordData::Field::BATTERY)
-                                   ? record.batteryLevel
-                                   : FIT_UINT8_INVALID;
-    const FIT_UINT16 voltage = record.has(RecordData::Field::BATTERY)
-                                   ? record.batteryVoltage
-                                   : FIT_UINT16_INVALID;
+    d.u32(unixToFitTimestamp(record.timestamp));
+    d.u8(record.has(RecordData::Field::HEART_RATE)
+             ? static_cast<uint8_t>(record.heartRate)
+             : static_cast<uint8_t>(fit::baseTypeInvalid(fit::BaseType::UInt8)));
 
-    mFHRecord.writeFieldMessage(0, &soc, mFile.get());
-    mFHRecord.writeFieldMessage(1, &voltage, mFile.get());
+    // Developer fields, in definition order.
+    if (batt) {
+        d.u8(record.batteryLevel).u16(record.batteryVoltage);
+    }
+    d.u8(record.hrSource).u8(record.hrOpticalBpm).u8(record.hrExternalBpm);
 
-    // hr_source / hr_optical / hr_external are always declared on the record
-    // definition, so emit them every tick (0 = none for that source).
-    const FIT_UINT8 hrSrc = record.hrSource;
-    const FIT_UINT8 hrOpt = record.hrOpticalBpm;
-    const FIT_UINT8 hrExt = record.hrExternalBpm;
-    mFHRecord.writeFieldMessage(2, &hrSrc, mFile.get());
-    mFHRecord.writeFieldMessage(3, &hrOpt, mFile.get());
-    mFHRecord.writeFieldMessage(4, &hrExt, mFile.get());
+    d.write();
 }
 
 void ActivityWriter::addLap(const LapData& lap)
 {
-    if (!mFile) {
+    if (!mFit) {
         return;
     }
-    SDK::Interface::IFile* fp = mFile.get();
-
-    FIT_LAP_MESG lap_mesg{};
-    Fit_InitMesg(fit_mesg_defs[FIT_MESG_LAP], &lap_mesg);
-
-    lap_mesg.message_index = 0;
-
-    lap_mesg.timestamp = unixToFitTimestamp(lap.timestamp); // 1 * s + 0, Lap end time
-    lap_mesg.start_time = unixToFitTimestamp(lap.timeStart);
-    lap_mesg.total_elapsed_time = static_cast<FIT_UINT32>((lap.elapsed) * 1000); // 1000 * s + 0, Time (includes pauses)
-    lap_mesg.total_timer_time = static_cast<FIT_UINT32>((lap.duration) * 1000); // 1000 * s + 0, Timer Time (excludes pauses)
-
-    lap_mesg.avg_heart_rate = static_cast<FIT_UINT8>(lap.hrAvg);// 1 * bpm + 0, average heart rate (excludes pause time)
-    lap_mesg.max_heart_rate = static_cast<FIT_UINT8>(lap.hrMax); // 1 * bpm + 0,
-    lap_mesg.total_calories = static_cast<FIT_UINT16>(lap.calories + 0.5f); // 1 * kcal + 0
-
-    mFHLap.writeMessage(&lap_mesg, fp);
-
-    // Developer field: lap resting (BMR) calories, kcal.
-    const FIT_UINT16 restingCalories = static_cast<FIT_UINT16>(lap.restingCalories + 0.5f);
-    mFHLap.writeFieldMessage(0, &restingCalories, fp);
-
+    mFit->data(L_LAP)
+        .u32(unixToFitTimestamp(lap.timestamp))
+        .u32(unixToFitTimestamp(lap.timeStart))
+        .u32(static_cast<uint32_t>(lap.elapsed * 1000))
+        .u32(static_cast<uint32_t>(lap.duration * 1000))
+        .u16(0)  // message_index
+        .u8(static_cast<uint8_t>(lap.hrAvg))
+        .u8(static_cast<uint8_t>(lap.hrMax))
+        .u16(static_cast<uint16_t>(lap.calories + 0.5f))
+        // Developer field: lap resting (BMR) calories, kcal.
+        .u16(static_cast<uint16_t>(lap.restingCalories + 0.5f))
+        .write();
     mLapCounter++;
 }
 
 void ActivityWriter::stop(const TrackData& track)
 {
-    if (!mFile) {
+    if (!mFit) {
         return;
     }
 
-    SDK::Interface::IFile* fp = mFile.get();
+    mFit->data(L_SESSION)
+        .u32(unixToFitTimestamp(track.timestamp))
+        .u32(unixToFitTimestamp(track.timeStart))
+        .u32(static_cast<uint32_t>(track.elapsed * 1000))
+        .u32(static_cast<uint32_t>(track.duration * 1000))
+        .u16(0)  // message_index
+        .u16(mLapCounter)
+        .u8(static_cast<uint8_t>(fit::Sport::Generic))
+        .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+        .u8(static_cast<uint8_t>(track.hrAvg))
+        .u8(static_cast<uint8_t>(track.hrMax))
+        .u16(static_cast<uint16_t>(track.calories + 0.5f))
+        .u16(static_cast<uint16_t>(track.metabolicCalories + 0.5f))
+        .write();
 
-    // Write Session message.
-    {
-        FIT_SESSION_MESG session_mesg{};
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session_mesg);
+    mFit->data(L_ACTIVITY)
+        .u32(unixToFitTimestamp(track.timestamp))
+        .u32(static_cast<uint32_t>(track.duration * 1000))
+        .u32(unixToFitTimestamp(epochToLocal(track.timestamp)))
+        .u16(1)
+        .write();
 
-        session_mesg.message_index = 0;
-        session_mesg.sport = FIT_SPORT_GENERIC;
-        session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC; // TODO: select correct type
-        session_mesg.timestamp = unixToFitTimestamp(track.timestamp);   // 1 * s + 0, Session end time
-        session_mesg.start_time = unixToFitTimestamp(track.timeStart);
+    mFit->finish();
+    mFit.reset();
 
-        session_mesg.total_elapsed_time = static_cast<FIT_UINT32>(track.elapsed * 1000);  // 1000 * s + 0, Time (includes pauses)
-        session_mesg.total_timer_time = static_cast<FIT_UINT32>(track.duration * 1000);   // 1000 * s + 0, Timer Time (excludes pauses)
-
-        session_mesg.avg_heart_rate     = static_cast<FIT_UINT8>(track.hrAvg);   // 1 * bpm + 0, average heart rate (excludes pause time)
-        session_mesg.max_heart_rate     = static_cast<FIT_UINT8>(track.hrMax);   // 1 * bpm + 0,
-        session_mesg.total_calories     = static_cast<FIT_UINT16>(track.calories + 0.5f);          // 1 * kcal + 0
-        session_mesg.metabolic_calories = static_cast<FIT_UINT16>(track.metabolicCalories + 0.5f); // 1 * kcal + 0, BMR over the session
-
-        session_mesg.num_laps = mLapCounter;
-
-        mFHSession.writeMessage(&session_mesg, fp);
+    if (mFile) {
+        mFile->flush();
+        mFile->close();
     }
-
-    // Write Activity message.
-    {
-        FIT_ACTIVITY_MESG activity_mesg {};
-
-        activity_mesg.timestamp        = unixToFitTimestamp(track.timestamp);
-        activity_mesg.local_timestamp  = unixToFitTimestamp(epochToLocal(track.timestamp));  // timestamp epoch expressed in local time
-        activity_mesg.total_timer_time = static_cast<FIT_UINT32>(track.duration * 1000);   // 1000 * s + 0, Exclude pauses
-        activity_mesg.num_sessions     = 1;
-
-        mFHActivity.writeMessage(&activity_mesg, fp);
-    }
-
-    fp->seek(0);
-
-    WriteFileHeader(fp);
-
-    WriteCRC(fp);
-
-    saveFile();
 
     saveSummary(track);
 }
 
 void ActivityWriter::discard()
 {
-    deleteFile();
+    mFit.reset();
+    if (!mFile) {
+        return;
+    }
+    if (mFile->isOpen()) {
+        mFile->close();
+    }
+    mFile->remove();
+    mFile.reset();
 }
 
-void ActivityWriter::AddMessageEvent(std::time_t t, FIT_EVENT_TYPE type)
+void ActivityWriter::addMessageEvent(std::time_t t, fit::EventType type)
 {
-    FIT_EVENT_MESG event_mesg{};
-
-    event_mesg.timestamp  = unixToFitTimestamp(t);
-    event_mesg.event      = FIT_EVENT_TIMER;
-    event_mesg.event_type = type;
-
-    mFHEvent.writeMessage(&event_mesg, mFile.get());
+    mFit->data(L_EVENT)
+        .u32(unixToFitTimestamp(t))
+        .u8(static_cast<uint8_t>(fit::Event::Timer))
+        .u8(static_cast<uint8_t>(type))
+        .write();
 }
 
 bool ActivityWriter::createAndOpenFile(std::time_t utc)
@@ -381,20 +273,19 @@ bool ActivityWriter::createAndOpenFile(std::time_t utc)
     localtime_r(&utc, &localTime);
 #endif
 
-    // Create directory
-    int len = snprintf(buff, sizeof(buff), "%s/%04u%02u/", mPath, localTime.tm_year + 1900, localTime.tm_mon + 1);
+    int len = snprintf(buff, sizeof(buff), "%s/%04u%02u/", mPath,
+                       localTime.tm_year + 1900, localTime.tm_mon + 1);
     if (len <= 0 || !mKernel.fs.mkdir(buff)) {
         LOG_ERROR("Failed to create dir [%s]\n", buff);
         return false;
     }
 
-    // Create file 
     snprintf(&buff[len], sizeof(buff) - len, "activity_%04u%02u%02uT%02u%02u%02u.fit",
         localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
         localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
 
     mFile = mKernel.fs.file(buff);
-    if (!mFile || !mFile->open(true, true)) { // write mode, override
+    if (!mFile || !mFile->open(true, true)) {
         LOG_ERROR("Failed to create file [%s]\n", buff);
         mFile.reset();
         return false;
@@ -403,36 +294,14 @@ bool ActivityWriter::createAndOpenFile(std::time_t utc)
     return true;
 }
 
-void ActivityWriter::saveFile()
-{
-    if (!mFile) {
-        return;
-    }
-
-    mFile->flush();
-    mFile->close();
-}
-
-void ActivityWriter::deleteFile()
-{
-    if (!mFile) {
-        return;
-    }
-
-    if (mFile->isOpen()) {
-        mFile->close();
-    }
-
-    mFile->remove();
-    mFile.reset();
-}
-
 void ActivityWriter::saveSummary(const TrackData& track)
 {
+    if (!mFile) {
+        return;
+    }
     char buff[256]{};
-    // Create name
     size_t nameLen = strlen(mFile->getPath());
-    snprintf(buff, sizeof(buff), "%.*s%s", nameLen - 3, mFile->getPath(), "json");
+    snprintf(buff, sizeof(buff), "%.*s%s", static_cast<int>(nameLen - 3), mFile->getPath(), "json");
 
     mFile->setPath(buff);
 
@@ -442,44 +311,33 @@ void ActivityWriter::saveSummary(const TrackData& track)
     }
 
     SDK::JsonStreamWriter writer(mFile.get());
-
     writer.startMap();
-
     writer.add("time_start", static_cast<uint32_t>(track.timeStart));
     writer.add("duration", static_cast<uint32_t>(track.duration));
     writer.add("hr_avg", track.hrAvg);
     writer.add("activity_type", "workout");
-
     writer.endMap();
 
     mFile->flush();
     mFile->close();
 }
 
-
 std::time_t ActivityWriter::tm2epoch(const struct tm* tm)
 {
     int y = tm->tm_year + 1900;
-    int m = tm->tm_mon + 1;     // 1..12
-    int d = tm->tm_mday;        // 1..31
-
-    if (m <= 2) {
-        y -= 1;
-        m += 12;
-    }
-
-    // Julian day
+    int m = tm->tm_mon + 1;
+    int d = tm->tm_mday;
+    if (m <= 2) { y -= 1; m += 12; }
     int64_t  era = (y >= 0 ? y : y - 399) / 400;
     uint32_t yoe = (uint32_t)(y - era * 400);
     uint32_t doy = (153 * (m - 3) + 2) / 5 + d - 1;
     uint32_t doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-    int64_t days = era * 146097 + (int64_t)doe - 719468; // 1970-01-01 is 719468
+    int64_t days = era * 146097 + (int64_t)doe - 719468;
     int64_t secs = days * 86400 + tm->tm_hour * 3600 + tm->tm_min * 60 + tm->tm_sec;
-
-    return (time_t)secs;
+    return (std::time_t)secs;
 }
 
-time_t ActivityWriter::epochToLocal(time_t utc)
+std::time_t ActivityWriter::epochToLocal(std::time_t utc)
 {
     std::tm localTime{};
 #if WIN32
@@ -490,81 +348,8 @@ time_t ActivityWriter::epochToLocal(time_t utc)
     return tm2epoch(&localTime);
 }
 
-FIT_DATE_TIME ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
+uint32_t ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
 {
     const std::time_t FIT_EPOCH_OFFSET = 631065600;
-    return static_cast<FIT_DATE_TIME>(unixTimestamp - FIT_EPOCH_OFFSET);
+    return static_cast<uint32_t>(unixTimestamp - FIT_EPOCH_OFFSET);
 }
-
-// FIT-C
-
-void ActivityWriter::WriteFileHeader(SDK::Interface::IFile* fp)
-{
-    FIT_FILE_HDR file_header{};
-
-    file_header.header_size = FIT_FILE_HDR_SIZE;
-    file_header.profile_version = FIT_PROFILE_VERSION;
-    file_header.protocol_version = FIT_PROTOCOL_VERSION_20;
-    memcpy((FIT_UINT8*)&file_header.data_type, ".FIT", 4);
-
-    fp->flush();
-    size_t fileSize = fp->size();
-
-    if (fileSize > FIT_FILE_HDR_SIZE) {
-        file_header.data_size = static_cast<FIT_UINT32>(fileSize - FIT_FILE_HDR_SIZE);
-    }
-    else {
-        file_header.data_size = 0;
-    }
-
-    file_header.crc = FitCRC_Calc16(&file_header, FIT_STRUCT_OFFSET(crc, FIT_FILE_HDR));
-
-    fp->seek(0);
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&file_header), FIT_FILE_HDR_SIZE, bw);
-
-    fp->flush();
-
-    // Move pointer to the end of the file
-    if (fileSize > 0) {
-        fp->seek(fileSize);
-    }
-}
-
-void ActivityWriter::WriteCRC(SDK::Interface::IFile* fp)
-{
-    fp->close();
-
-    fp->open(false);
-
-    FIT_UINT8 buffer[512];
-    size_t    size = fp->size();
-    size_t    pos = 0;
-    uint16_t  crc = 0;
-
-    while (pos < size) {
-        size_t toRead = size - pos;
-        if (toRead > sizeof(buffer)) {
-            toRead = sizeof(buffer);
-        }
-
-        size_t br;
-        fp->read(reinterpret_cast<char*>(buffer), toRead, br);
-
-        crc = FitCRC_Update16(crc, buffer, static_cast<FIT_UINT32>(br));
-
-        pos += br;
-    }
-
-    fp->close();
-
-    fp->open(true, false);
-
-    fp->seek(fp->size());
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&crc), sizeof(FIT_UINT16), bw);
-    fp->flush();
-}
-

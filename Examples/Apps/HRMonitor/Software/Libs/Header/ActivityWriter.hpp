@@ -1,11 +1,7 @@
 /**
  ******************************************************************************
  * @file    ActivityWriter.hpp
- * @date    31-08-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Serializes activity data to a FIT file.
- ******************************************************************************
- *
+ * @brief   Serializes activity data to a FIT file (native SDK::Fit encoder).
  ******************************************************************************
  */
 
@@ -13,15 +9,13 @@
 #define ACTIVITY_WRITER_HPP
 
 #include <cstdint>
+#include <ctime>
 #include <memory>
 #include <string>
 
 #include "SDK/Kernel/Kernel.hpp"
-#include "SDK/FitHelper/FitHelper.hpp"
-
-extern "C" {
-#include "fit_example.h"
-}
+#include "SDK/Fit/FitProfile.hpp"
+#include "SDK/Fit/FitWriter.hpp"
 
 /**
  * @class ActivityWriter
@@ -76,45 +70,39 @@ public:
     void discard();
 
 private:
+    /// Local message types (FIT record header, 0-15).
+    enum Local : uint8_t {
+        L_FILE_ID = 0,
+        L_DEV_ID,
+        L_FIELD_DESC,
+        L_EVENT,
+        L_RECORD,
+        L_LAP,
+        L_SESSION,
+        L_ACTIVITY,
+    };
+
+    /// Developer field definition numbers (UNA-assigned).
+    enum DevField : uint8_t {
+        DF_HR_TRUST_LEVEL = 0,
+    };
+
     const SDK::Kernel& mKernel;
     const char*        mPath = nullptr;
 
     std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
-    uint16_t   mLapCounter = 0;
-    FIT_UINT16 mDataCRC    = 0;
+    std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;
+    uint16_t mLapCounter = 0;
 
-    SDK::Component::FitHelper mFHFileID;
-    SDK::Component::FitHelper mFHDeveloper;
-    SDK::Component::FitHelper mFHLap;
-    SDK::Component::FitHelper mFHSession;
-    SDK::Component::FitHelper mFHEvent;
-    SDK::Component::FitHelper mFHActivity;
-    SDK::Component::FitHelper mFHRecord;
-    SDK::Component::FitHelper mFHTrustLevelField;
-
-    enum class MsgNumber : uint8_t {
-        FILE         = 1,
-        DEVELOP,
-        RECORD,
-        LAP,
-        SESSION,
-        ACTIVITY,
-        EVENT,
-        HR_TRUST_LEVEL,
-    };
-
-    void addMessageEvent(std::time_t t, FIT_EVENT_TYPE type);
+    void writeFieldDescription(uint8_t devFieldNum, const char* name,
+                               const char* units, SDK::Fit::BaseType baseType);
+    void addMessageEvent(std::time_t t, SDK::Fit::EventType type);
 
     bool createAndOpenFile(std::time_t utc);
-    void saveFile();
-    void deleteFile();
 
-    static time_t        tm2epoch(const struct tm* tm);
-    static time_t        epochToLocal(time_t utc);
-    static FIT_DATE_TIME unixToFitTimestamp(std::time_t unixTimestamp);
-
-    void writeFileHeader(SDK::Interface::IFile* fp);
-    void writeCRC(SDK::Interface::IFile* fp);
+    static std::time_t tm2epoch(const struct tm* tm);
+    static std::time_t epochToLocal(std::time_t utc);
+    static uint32_t    unixToFitTimestamp(std::time_t unixTimestamp);
 };
 
 #endif // ACTIVITY_WRITER_HPP

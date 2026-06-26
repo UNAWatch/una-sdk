@@ -1148,10 +1148,10 @@ void Service::emitIntervalsWorkout()
     auto runDuration = [&](ActivityWriter::WorkoutStepData& s) {
         if (cfg.runMetric == Settings::Intervals::TIME && cfg.runTime > 0) {
             s.durationType = SDK::Fit::WktStepDuration::Time;
-            s.durationValue = static_cast<FIT_UINT32>(cfg.runTime) * 1000u;        // ms
+            s.durationValue = static_cast<uint32_t>(cfg.runTime) * 1000u;        // ms
         } else if (cfg.runMetric == Settings::Intervals::DISTANCE && cfg.runDistance > 0.0f) {
             s.durationType = SDK::Fit::WktStepDuration::Distance;
-            s.durationValue = static_cast<FIT_UINT32>(cfg.runDistance * 100.0f);   // cm
+            s.durationValue = static_cast<uint32_t>(cfg.runDistance * 100.0f);   // cm
         } else {
             s.durationType = SDK::Fit::WktStepDuration::Open;
             s.durationValue = 0;
@@ -1160,10 +1160,10 @@ void Service::emitIntervalsWorkout()
     auto restDuration = [&](ActivityWriter::WorkoutStepData& s) {
         if (cfg.restMetric == Settings::Intervals::TIME && cfg.restTime > 0) {
             s.durationType = SDK::Fit::WktStepDuration::Time;
-            s.durationValue = static_cast<FIT_UINT32>(cfg.restTime) * 1000u;        // ms
+            s.durationValue = static_cast<uint32_t>(cfg.restTime) * 1000u;        // ms
         } else if (cfg.restMetric == Settings::Intervals::DISTANCE && cfg.restDistance > 0.0f) {
             s.durationType = SDK::Fit::WktStepDuration::Distance;
-            s.durationValue = static_cast<FIT_UINT32>(cfg.restDistance * 100.0f);   // cm
+            s.durationValue = static_cast<uint32_t>(cfg.restDistance * 100.0f);   // cm
         } else {
             s.durationType = SDK::Fit::WktStepDuration::Open;
             s.durationValue = 0;
@@ -1217,7 +1217,7 @@ void Service::emitIntervalsWorkout()
             n++;
             steps[n].durationType = SDK::Fit::WktStepDuration::RepeatUntilStepsComplete;
             steps[n].durationValue = map.runIdx;
-            steps[n].repeatCount = static_cast<FIT_UINT32>(cfg.repeatsNum - 1);
+            steps[n].repeatCount = static_cast<uint32_t>(cfg.repeatsNum - 1);
             n++;
             map.finalRunIdx = n;
             steps[n].intensity = SDK::Fit::Intensity::Active;

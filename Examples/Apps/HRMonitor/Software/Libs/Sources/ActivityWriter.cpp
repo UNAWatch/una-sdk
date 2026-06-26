@@ -1,265 +1,210 @@
 /**
  ******************************************************************************
  * @file    ActivityWriter.cpp
- * @date    08-04-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Serializes activity data to a FIT file.
- ******************************************************************************
- *
+ * @brief   Serializes activity data to a FIT file (native SDK::Fit encoder).
  ******************************************************************************
  */
 
 #include "ActivityWriter.hpp"
 
-#include <cassert>
-#include <cstring>
-
 #include "SDK/Interfaces/IFileSystem.hpp"
 
-extern "C" {
-#include "fit_product.h"
-#include "fit_crc.h"
-}
+#include <cassert>
+#include <cstring>
 
 #define LOG_MODULE_PRX      "ActivityWriter"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
 
+namespace fit = SDK::Fit;
+using DevFieldDef = fit::FitWriter::DevField;
 
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
-    : mKernel(kernel)
-    , mPath(pathToDir)
-    , mFHFileID(static_cast<uint8_t>(MsgNumber::FILE),         fit_mesg_defs[FIT_MESG_FILE_ID])
-    , mFHDeveloper(static_cast<uint8_t>(MsgNumber::DEVELOP),   fit_mesg_defs[FIT_MESG_DEVELOPER_DATA_ID])
-    , mFHLap(static_cast<uint8_t>(MsgNumber::LAP),             fit_mesg_defs[FIT_MESG_LAP])
-    , mFHSession(static_cast<uint8_t>(MsgNumber::SESSION),     fit_mesg_defs[FIT_MESG_SESSION])
-    , mFHEvent(static_cast<uint8_t>(MsgNumber::EVENT),         fit_mesg_defs[FIT_MESG_EVENT])
-    , mFHActivity(static_cast<uint8_t>(MsgNumber::ACTIVITY),   fit_mesg_defs[FIT_MESG_ACTIVITY])
-    , mFHRecord(static_cast<uint8_t>(MsgNumber::RECORD),       fit_mesg_defs[FIT_MESG_RECORD])
-    , mFHTrustLevelField(static_cast<uint8_t>(MsgNumber::HR_TRUST_LEVEL), 0, { &mFHRecord })
+    : mKernel(kernel), mPath(pathToDir)
 {
     assert(pathToDir != nullptr);
-
-    mFHFileID.init();
-
-    mFHDeveloper.init();
-
-    mFHLap.init({ FIT_LAP_FIELD_NUM_TIMESTAMP,
-                  FIT_LAP_FIELD_NUM_START_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_ELAPSED_TIME,
-                  FIT_LAP_FIELD_NUM_TOTAL_TIMER_TIME,
-                  FIT_LAP_FIELD_NUM_MESSAGE_INDEX,
-                  FIT_LAP_FIELD_NUM_AVG_HEART_RATE,
-                  FIT_LAP_FIELD_NUM_MAX_HEART_RATE });
-
-    mFHSession.init({ FIT_SESSION_FIELD_NUM_TIMESTAMP,
-                      FIT_SESSION_FIELD_NUM_START_TIME,
-                      FIT_SESSION_FIELD_NUM_TOTAL_ELAPSED_TIME,
-                      FIT_SESSION_FIELD_NUM_TOTAL_TIMER_TIME,
-                      FIT_SESSION_FIELD_NUM_MESSAGE_INDEX,
-                      FIT_SESSION_FIELD_NUM_NUM_LAPS,
-                      FIT_SESSION_FIELD_NUM_SPORT,
-                      FIT_SESSION_FIELD_NUM_SUB_SPORT,
-                      FIT_SESSION_FIELD_NUM_AVG_HEART_RATE,
-                      FIT_SESSION_FIELD_NUM_MAX_HEART_RATE });
-
-    mFHEvent.init({ FIT_EVENT_FIELD_NUM_TIMESTAMP,
-                    FIT_EVENT_FIELD_NUM_EVENT,
-                    FIT_EVENT_FIELD_NUM_EVENT_TYPE });
-
-    mFHActivity.init({ FIT_ACTIVITY_FIELD_NUM_TIMESTAMP,
-                       FIT_ACTIVITY_FIELD_NUM_TOTAL_TIMER_TIME,
-                       FIT_ACTIVITY_FIELD_NUM_LOCAL_TIMESTAMP,
-                       FIT_ACTIVITY_FIELD_NUM_NUM_SESSIONS });
-
-    mFHRecord.init({ FIT_RECORD_FIELD_NUM_TIMESTAMP,
-                     FIT_RECORD_FIELD_NUM_HEART_RATE });
-
-    mFHTrustLevelField.init({ FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                              FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID });
 }
 
 void ActivityWriter::start(const AppInfo& info)
 {
     mLapCounter = 0;
-    mDataCRC    = 0;
 
-    createAndOpenFile(info.timestamp);
-
-    if (!mFile) {
+    if (!createAndOpenFile(info.timestamp)) {
         return;
     }
 
-    SDK::Interface::IFile* fp = mFile.get();
+    mFit = std::make_unique<fit::FitWriter>(*mFile);
+    mFit->begin(/*profileVersion=*/0);
 
-    // Add empty header placeholder (will be updated in stop())
-    writeFileHeader(fp);
+    // file_id
+    mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
+        {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
+         fit::field::FileId::Product, fit::field::FileId::SerialNumber,
+         fit::field::FileId::TimeCreated});
+    mFit->data(L_FILE_ID)
+        .u8(static_cast<uint8_t>(fit::File::Activity))
+        .u16(static_cast<uint16_t>(fit::Manufacturer::Development))
+        .u16(0)
+        .u32(0)
+        .u32(unixToFitTimestamp(info.timestamp))
+        .write();
 
-    // File ID message
+    // developer_data_id
+    mFit->defineMessage(L_DEV_ID, fit::mesgNum(fit::MesgNum::DeveloperDataId),
+        {fit::field::DeveloperDataId::ApplicationId,
+         fit::field::DeveloperDataId::DeveloperDataIndex});
     {
-        mFHFileID.writeDef(fp);
-
-        FIT_FILE_ID_MESG file_id_mesg{};
-        strncpy(file_id_mesg.product_name, "UNA Watch", FIT_FILE_ID_MESG_PRODUCT_NAME_COUNT - 1);
-        file_id_mesg.serial_number = 0;
-        file_id_mesg.time_created  = unixToFitTimestamp(info.timestamp);
-        file_id_mesg.manufacturer  = FIT_MANUFACTURER_DEVELOPMENT;
-        file_id_mesg.product       = 0;
-        file_id_mesg.number        = 0;
-        file_id_mesg.type          = FIT_FILE_ACTIVITY;
-
-        mFHFileID.writeMessage(&file_id_mesg, fp);
+        uint8_t appId[16] = {};
+        std::strncpy(reinterpret_cast<char*>(appId), info.appID.c_str(), sizeof(appId));
+        mFit->data(L_DEV_ID).bytes(appId, sizeof(appId)).u8(0).write();
     }
 
-    // Developer Data ID message
+    // Developer field: hr_trust_level (label/units survive any profile).
+    writeFieldDescription(DF_HR_TRUST_LEVEL, "hr_trust_level", "percents", fit::BaseType::UInt8);
+
+    // event
+    mFit->defineMessage(L_EVENT, fit::mesgNum(fit::MesgNum::Event),
+        {fit::field::Event::Timestamp, fit::field::Event::EventField,
+         fit::field::Event::EventType});
+
+    // record (HR only) + hr_trust_level developer field
     {
-        mFHDeveloper.writeDef(fp);
-
-        FIT_DEVELOPER_DATA_ID_MESG developer{};
-        strncpy(reinterpret_cast<char*>(developer.developer_id), info.devID.c_str(), FIT_DEVELOPER_DATA_ID_MESG_DEVELOPER_ID_COUNT);
-        strncpy(reinterpret_cast<char*>(developer.application_id), info.appID.c_str(), FIT_DEVELOPER_DATA_ID_MESG_APPLICATION_ID_COUNT);
-        developer.application_version  = info.appVersion;
-        developer.manufacturer_id      = FIT_MANUFACTURER_DEVELOPMENT;
-        developer.developer_data_index = 0;
-
-        mFHDeveloper.writeMessage(&developer, fp);
+        const DevFieldDef hrTrust[] = {{DF_HR_TRUST_LEVEL, 1, 0}};
+        mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+            {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+            {hrTrust[0]});
     }
 
-    // Developer field: hr_trust_level
-    {
-        mFHTrustLevelField.writeDef(fp);
+    // lap / session / activity
+    mFit->defineMessage(L_LAP, fit::mesgNum(fit::MesgNum::Lap),
+        {fit::field::Lap::Timestamp, fit::field::Lap::StartTime,
+         fit::field::Lap::TotalElapsedTime, fit::field::Lap::TotalTimerTime,
+         fit::field::Lap::MessageIndex, fit::field::Lap::AvgHeartRate,
+         fit::field::Lap::MaxHeartRate});
+    mFit->defineMessage(L_SESSION, fit::mesgNum(fit::MesgNum::Session),
+        {fit::field::Session::Timestamp, fit::field::Session::StartTime,
+         fit::field::Session::TotalElapsedTime, fit::field::Session::TotalTimerTime,
+         fit::field::Session::MessageIndex, fit::field::Session::NumLaps,
+         fit::field::Session::Sport, fit::field::Session::SubSport,
+         fit::field::Session::AvgHeartRate, fit::field::Session::MaxHeartRate});
+    mFit->defineMessage(L_ACTIVITY, fit::mesgNum(fit::MesgNum::Activity),
+        {fit::field::Activity::Timestamp, fit::field::Activity::TotalTimerTime,
+         fit::field::Activity::LocalTimestamp, fit::field::Activity::NumSessions});
 
-        FIT_FIELD_DESCRIPTION_MESG trustLevel{};
-        strncpy(trustLevel.field_name, "hr_trust_level", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT - 1);
-        strncpy(trustLevel.units, "percents", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT - 1);
-        trustLevel.developer_data_index    = 0;
-        trustLevel.field_definition_number = 0;
-        trustLevel.fit_base_type_id        = FIT_BASE_TYPE_UINT8;
+    addMessageEvent(info.timestamp, fit::EventType::Start);
+}
 
-        mFHTrustLevelField.writeMessage(&trustLevel, fp);
-    }
+void ActivityWriter::writeFieldDescription(uint8_t devFieldNum, const char* name,
+                                           const char* units, fit::BaseType baseType)
+{
+    const uint8_t nameLen  = name ? static_cast<uint8_t>(std::strlen(name) + 1) : 1;
+    const uint8_t unitsLen = units ? static_cast<uint8_t>(std::strlen(units) + 1) : 1;
 
-    // Write all message definitions
-    mFHRecord.writeDef(fp);
-    mFHEvent.writeDef(fp);
-    mFHActivity.writeDef(fp);
-    mFHLap.writeDef(fp);
-    mFHSession.writeDef(fp);
-
-    // START event
-    addMessageEvent(info.timestamp, FIT_EVENT_TYPE_START);
+    // Redefine the field_description slot to size the name/units strings exactly.
+    mFit->defineMessage(L_FIELD_DESC, fit::mesgNum(fit::MesgNum::FieldDescription),
+        {fit::field::FieldDescription::DeveloperDataIndex,
+         fit::field::FieldDescription::FieldDefinitionNumber,
+         fit::field::FieldDescription::FitBaseTypeId,
+         {fit::field::FieldDescription::kFieldNameNum, fit::BaseType::String, nameLen},
+         {fit::field::FieldDescription::kUnitsNum, fit::BaseType::String, unitsLen}});
+    mFit->data(L_FIELD_DESC)
+        .u8(0)
+        .u8(devFieldNum)
+        .u8(fit::baseTypeId(baseType))
+        .str(name ? name : "", nameLen)
+        .str(units ? units : "", unitsLen)
+        .write();
 }
 
 void ActivityWriter::addRecord(const RecordData& record)
 {
-    if (!mFile) {
+    if (!mFit) {
         return;
     }
 
-    SDK::Interface::IFile* fp = mFile.get();
-
-    FIT_RECORD_MESG record_mesg{};
-    Fit_InitMesg(fit_mesg_defs[FIT_MESG_RECORD], &record_mesg);
-
-    record_mesg.timestamp  = unixToFitTimestamp(record.timestamp);
-    record_mesg.heart_rate = record.heartRate;
-
-    mFHRecord.writeMessage(&record_mesg, fp);
-
-    FIT_UINT8 trustLevel = record.trustLevel;
-    mFHRecord.writeFieldMessage(0, &trustLevel, fp);
+    mFit->data(L_RECORD)
+        .u32(unixToFitTimestamp(record.timestamp))
+        .u8(record.heartRate)
+        .u8(record.trustLevel)  // developer field hr_trust_level
+        .write();
 }
 
 void ActivityWriter::addLap(const LapData& lap)
 {
-    if (!mFile) {
+    if (!mFit) {
         return;
     }
-
-    SDK::Interface::IFile* fp = mFile.get();
-
-    FIT_LAP_MESG lap_mesg{};
-    Fit_InitMesg(fit_mesg_defs[FIT_MESG_LAP], &lap_mesg);
-
-    lap_mesg.message_index      = 0;
-    lap_mesg.timestamp          = unixToFitTimestamp(lap.timestamp);
-    lap_mesg.start_time         = unixToFitTimestamp(lap.timeStart);
-    lap_mesg.total_elapsed_time = static_cast<FIT_UINT32>(lap.elapsed  * 1000);  // ms (no sub-second precision)
-    lap_mesg.total_timer_time   = static_cast<FIT_UINT32>(lap.duration * 1000);  // ms (no sub-second precision)
-    lap_mesg.avg_heart_rate     = lap.hrAvg;
-    lap_mesg.max_heart_rate     = lap.hrMax;
-
-    mFHLap.writeMessage(&lap_mesg, fp);
-
+    mFit->data(L_LAP)
+        .u32(unixToFitTimestamp(lap.timestamp))
+        .u32(unixToFitTimestamp(lap.timeStart))
+        .u32(static_cast<uint32_t>(lap.elapsed * 1000))
+        .u32(static_cast<uint32_t>(lap.duration * 1000))
+        .u16(0)  // message_index
+        .u8(lap.hrAvg)
+        .u8(lap.hrMax)
+        .write();
     mLapCounter++;
 }
 
 void ActivityWriter::stop(const TrackData& track)
 {
-    if (!mFile) {
+    if (!mFit) {
         return;
     }
 
-    SDK::Interface::IFile* fp = mFile.get();
-
     // STOP event
-    addMessageEvent(track.timestamp, FIT_EVENT_TYPE_STOP);
+    addMessageEvent(track.timestamp, fit::EventType::Stop);
 
-    // Session message
-    {
-        FIT_SESSION_MESG session_mesg{};
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session_mesg);
+    mFit->data(L_SESSION)
+        .u32(unixToFitTimestamp(track.timestamp))
+        .u32(unixToFitTimestamp(track.timeStart))
+        .u32(static_cast<uint32_t>(track.elapsed * 1000))
+        .u32(static_cast<uint32_t>(track.duration * 1000))
+        .u16(0)  // message_index
+        .u16(mLapCounter)
+        .u8(static_cast<uint8_t>(fit::Sport::Generic))
+        .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+        .u8(track.hrAvg)
+        .u8(track.hrMax)
+        .write();
 
-        session_mesg.message_index      = 0;
-        session_mesg.sport              = FIT_SPORT_GENERIC;
-        session_mesg.sub_sport          = FIT_SUB_SPORT_GENERIC;
-        session_mesg.timestamp          = unixToFitTimestamp(track.timestamp);
-        session_mesg.start_time         = unixToFitTimestamp(track.timeStart);
-        session_mesg.total_elapsed_time = static_cast<FIT_UINT32>(track.elapsed  * 1000);  // ms (no sub-second precision)
-        session_mesg.total_timer_time   = static_cast<FIT_UINT32>(track.duration * 1000);  // ms (no sub-second precision)
-        session_mesg.avg_heart_rate     = track.hrAvg;
-        session_mesg.max_heart_rate     = track.hrMax;
-        session_mesg.num_laps           = mLapCounter;
+    mFit->data(L_ACTIVITY)
+        .u32(unixToFitTimestamp(track.timestamp))
+        .u32(static_cast<uint32_t>(track.duration * 1000))
+        .u32(unixToFitTimestamp(epochToLocal(track.timestamp)))
+        .u16(1)
+        .write();
 
-        mFHSession.writeMessage(&session_mesg, fp);
+    mFit->finish();
+    mFit.reset();
+
+    if (mFile) {
+        mFile->flush();
+        mFile->close();
+        mFile.reset();
     }
-
-    // Activity message
-    {
-        FIT_ACTIVITY_MESG activity_mesg{};
-
-        activity_mesg.timestamp        = unixToFitTimestamp(track.timestamp);
-        activity_mesg.local_timestamp  = unixToFitTimestamp(epochToLocal(track.timestamp));
-        activity_mesg.total_timer_time = static_cast<FIT_UINT32>(track.duration * 1000);  // 1000 * s + 0
-        activity_mesg.num_sessions     = 1;
-
-        mFHActivity.writeMessage(&activity_mesg, fp);
-    }
-
-    fp->seek(0);
-    writeFileHeader(fp);
-    writeCRC(fp);
-
-    saveFile();
 }
 
 void ActivityWriter::discard()
 {
-    deleteFile();
+    mFit.reset();
+    if (!mFile) {
+        return;
+    }
+    if (mFile->isOpen()) {
+        mFile->close();
+    }
+    mFile->remove();
+    mFile.reset();
 }
 
-void ActivityWriter::addMessageEvent(std::time_t t, FIT_EVENT_TYPE type)
+void ActivityWriter::addMessageEvent(std::time_t t, fit::EventType type)
 {
-    FIT_EVENT_MESG event_mesg{};
-
-    event_mesg.timestamp  = unixToFitTimestamp(t);
-    event_mesg.event      = FIT_EVENT_TIMER;
-    event_mesg.event_type = type;
-
-    mFHEvent.writeMessage(&event_mesg, mFile.get());
+    mFit->data(L_EVENT)
+        .u32(unixToFitTimestamp(t))
+        .u8(static_cast<uint8_t>(fit::Event::Timer))
+        .u8(static_cast<uint8_t>(type))
+        .write();
 }
 
 bool ActivityWriter::createAndOpenFile(std::time_t utc)
@@ -273,7 +218,8 @@ bool ActivityWriter::createAndOpenFile(std::time_t utc)
 #endif
 
     // Create directory
-    int len = snprintf(buff, sizeof(buff), "%s/%04u%02u/", mPath, localTime.tm_year + 1900, localTime.tm_mon + 1);
+    int len = snprintf(buff, sizeof(buff), "%s/%04u%02u/", mPath,
+                       localTime.tm_year + 1900, localTime.tm_mon + 1);
     if (len <= 0 || !mKernel.fs.mkdir(buff)) {
         LOG_ERROR("Failed to create dir [%s]\n", buff);
         return false;
@@ -294,31 +240,6 @@ bool ActivityWriter::createAndOpenFile(std::time_t utc)
     return true;
 }
 
-void ActivityWriter::saveFile()
-{
-    if (!mFile) {
-        return;
-    }
-
-    mFile->flush();
-    mFile->close();
-    mFile.reset();
-}
-
-void ActivityWriter::deleteFile()
-{
-    if (!mFile) {
-        return;
-    }
-
-    if (mFile->isOpen()) {
-        mFile->close();
-    }
-
-    mFile->remove();
-    mFile.reset();
-}
-
 std::time_t ActivityWriter::tm2epoch(const struct tm* tm)
 {
     int y = tm->tm_year + 1900;
@@ -336,10 +257,10 @@ std::time_t ActivityWriter::tm2epoch(const struct tm* tm)
     int64_t  days = era * 146097 + static_cast<int64_t>(doe) - 719468;
     int64_t  secs = days * 86400 + tm->tm_hour * 3600 + tm->tm_min * 60 + tm->tm_sec;
 
-    return static_cast<time_t>(secs);
+    return static_cast<std::time_t>(secs);
 }
 
-time_t ActivityWriter::epochToLocal(time_t utc)
+std::time_t ActivityWriter::epochToLocal(std::time_t utc)
 {
     std::tm localTime{};
 #if WIN32
@@ -350,68 +271,8 @@ time_t ActivityWriter::epochToLocal(time_t utc)
     return tm2epoch(&localTime);
 }
 
-FIT_DATE_TIME ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
+uint32_t ActivityWriter::unixToFitTimestamp(std::time_t unixTimestamp)
 {
     static constexpr std::time_t skFitEpochOffset = 631065600;  // seconds between 1970-01-01 and 1989-12-31
-    return static_cast<FIT_DATE_TIME>(unixTimestamp - skFitEpochOffset);
-}
-
-void ActivityWriter::writeFileHeader(SDK::Interface::IFile* fp)
-{
-    FIT_FILE_HDR file_header{};
-
-    file_header.header_size      = FIT_FILE_HDR_SIZE;
-    file_header.profile_version  = FIT_PROFILE_VERSION;
-    file_header.protocol_version = FIT_PROTOCOL_VERSION_20;
-    memcpy(reinterpret_cast<FIT_UINT8*>(&file_header.data_type), ".FIT", 4);
-
-    fp->flush();
-    size_t fileSize = fp->size();
-
-    file_header.data_size = (fileSize > FIT_FILE_HDR_SIZE)
-        ? static_cast<FIT_UINT32>(fileSize - FIT_FILE_HDR_SIZE)
-        : 0;
-
-    file_header.crc = FitCRC_Calc16(&file_header, FIT_STRUCT_OFFSET(crc, FIT_FILE_HDR));
-
-    fp->seek(0);
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&file_header), FIT_FILE_HDR_SIZE, bw);
-
-    fp->flush();
-
-    if (fileSize > 0) {
-        fp->seek(fileSize);
-    }
-}
-
-void ActivityWriter::writeCRC(SDK::Interface::IFile* fp)
-{
-    fp->close();
-    fp->open(false);
-
-    FIT_UINT8 buffer[512];
-    size_t    size = fp->size();
-    size_t    pos  = 0;
-    uint16_t  crc  = 0;
-
-    while (pos < size) {
-        size_t toRead = std::min(size - pos, sizeof(buffer));
-
-        size_t br;
-        fp->read(reinterpret_cast<char*>(buffer), toRead, br);
-
-        crc = FitCRC_Update16(crc, buffer, static_cast<FIT_UINT32>(br));
-
-        pos += br;
-    }
-
-    fp->close();
-    fp->open(true, false);
-    fp->seek(fp->size());
-
-    size_t bw;
-    fp->write(reinterpret_cast<const char*>(&crc), sizeof(FIT_UINT16), bw);
-    fp->flush();
+    return static_cast<uint32_t>(unixTimestamp - skFitEpochOffset);
 }
