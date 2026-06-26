@@ -2,7 +2,7 @@
 
 ## Overview
 
-The FitFiles app is a focused tutorial demonstrating FIT (Flexible and Interoperable Data Transfer) file creation and sensor data logging on wearable devices. This app showcases how to collect heart rate and step counter data during glance sessions and store it in the industry-standard FIT format using the UNA SDK's FitHelper components.
+The FitFiles app is a focused tutorial demonstrating FIT (Flexible and Interoperable Data Transfer) file creation and sensor data logging on wearable devices. This app showcases how to collect heart rate and step counter data during glance sessions and store it in the industry-standard FIT format using the UNA SDK's native `SDK::Fit` encoder.
 
 The application implements a glance-triggered recording service that monitors heart rate and steps data during active glance sessions, accumulates step counts, and writes them to FIT files with custom developer fields. It demonstrates core concepts of session-based recording, event-driven data collection, and FIT file structure creation with a simplified, tutorial-friendly approach.
 
@@ -23,7 +23,7 @@ The FitFiles app follows a service-only architecture pattern typical of glance a
 
 1. **Service Layer**: Core business logic, sensor integration, FIT file creation, data persistence
 2. **Glance UI**: Simple display interface showing current heart rate and step count
-3. **SDK Integration**: Kernel, sensor layer, file system, FIT helper utilities
+3. **SDK Integration**: Kernel, sensor layer, file system, native `SDK::Fit` encoder
 4. **Data Persistence**: FIT file format with custom developer fields
 
 ### Component Interaction
@@ -99,15 +99,21 @@ private:
     bool configGui();
     void createGuiControls();
 
-    // ===== FIT FILE MANAGEMENT =====
-    void saveFit(bool finalize);
-    void appendPendingRecords(SDK::Interface::IFile* fp);
-    void writeFitDefinitions(SDK::Interface::IFile* fp, std::time_t timestamp);
-    void writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t timestamp);
-
     // ===== SESSION MANAGEMENT =====
     void startSession();
     void finalizeSession();
+
+    // ===== FIT FILE MANAGEMENT =====
+    void saveFit(bool finalize);
+    void appendPendingRecords();
+    void writeFitDefinitions(std::time_t timestamp);
+    void writeFitSessionSummary(std::time_t timestamp);
+    void writeStepsFieldDescription();
+
+    // ===== FIT ENCODER =====
+    // Native SDK::Fit streaming encoder, constructed in saveFit() over the open
+    // file and reset after finish().
+    std::unique_ptr<SDK::Fit::FitWriter> mFit;
 
     // ... member variables
 };
@@ -194,7 +200,6 @@ void Service::startSession() {
     std::time_t now = std::time(nullptr);
     mSessionStart = now;
     mSessionOpen = true;
-    mFitFileInitialized = false;  // Will initialize on first save
     mTotalSteps = 0;
     mLastSteps = 0;
     mSampleCount = 0;
@@ -226,39 +231,101 @@ The app creates properly formatted FIT files with headers, definitions, and data
 - Activity Messages (overall activity data)
 - File CRC
 
-**FIT Helper Components:**
+**Native FIT Encoder (`SDK::Fit::FitWriter`):**
+
+The app uses the SDK's native streaming encoder. A single `FitWriter` is constructed over the open file; each FIT message type is registered with `defineMessage()` against a *local message type* (a small 0-15 handle), then data records are emitted with the fluent `data(localType)...write()` builder. Global message numbers, field-definition numbers and base types come from `SDK/Fit/FitProfile.hpp`.
+
 ```cpp
-SDK::Component::FitHelper mFitFileID(skFileMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_FILE_ID]);
-SDK::Component::FitHelper mFitDeveloper(skDevelopMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_DEVELOPER_DATA_ID]);
-SDK::Component::FitHelper mFitRecord(skRecordMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_RECORD]);
-SDK::Component::FitHelper mFitEvent(skEventMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_EVENT]);
-SDK::Component::FitHelper mFitSession(skSessionMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_SESSION]);
-SDK::Component::FitHelper mFitActivity(skActivityMsgNum, (FIT_MESG_DEF*)fit_mesg_defs[FIT_MESG_ACTIVITY]);
-SDK::Component::FitHelper mFitStepsField(skStepsMsgNum, 0, {&mFitRecord});
+namespace fit = SDK::Fit;
+
+// Local message types (0-15) bound to each FIT message definition.
+enum Local : uint8_t {
+    L_FILE_ID    = 0,
+    L_DEV_ID     = 1,
+    L_FIELD_DESC = 2,
+    L_EVENT      = 3,
+    L_RECORD     = 4,
+    L_SESSION    = 5,
+    L_ACTIVITY   = 6,
+};
+
+// One streaming encoder owns the whole file; constructed in saveFit().
+std::unique_ptr<fit::FitWriter> mFit;
 ```
 
-Each FitHelper manages a specific FIT message type and handles serialization ([FitHelper Component Deep Dive](../../FitFiles-Structure.md#fithelper-component-deep-dive)).
+`saveFit()` ties the lifecycle together: open (truncate) the file, construct the encoder over it, `begin()` the header placeholder, write definitions + records + the summary, then `finish()` to back-patch the header and append the file CRC:
+
+```cpp
+void Service::saveFit(bool finalize) {
+    if (!mSessionOpen) return;
+
+    auto file = mKernel.fs.file(skFitFileName);
+    if (!file || !file->open(/*write=*/true, /*truncate=*/true)) {
+        LOG_ERROR("Cannot open FIT file\n");
+        return;
+    }
+
+    std::time_t now = std::time(nullptr);
+
+    mFit = std::make_unique<fit::FitWriter>(*file);
+    mFit->begin(/*profileVersion=*/0);
+
+    writeFitDefinitions(mSessionStart);   // definitions + start event
+    appendPendingRecords();               // record messages
+    if (finalize) {
+        writeFitSessionSummary(now);      // stop event + session + activity
+    }
+
+    mFit->finish();   // back-patch header data size + CRC, append file CRC
+    mFit.reset();
+
+    file->flush();
+    file->close();
+}
+```
+
+`defineMessage()` takes a local type, the global message number from `fit::mesgNum(fit::MesgNum::X)`, an ordered list of `fit::field::<Msg>::<Field>` entries, and (optionally) a list of developer fields. For example, the File ID and Record definitions:
+
+```cpp
+mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
+    {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
+     fit::field::FileId::Product, fit::field::FileId::SerialNumber,
+     fit::field::FileId::TimeCreated});
+
+// Record carries timestamp + heart_rate, plus the "steps" developer field
+// (dev field number, size in bytes, developer-data index 0).
+mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
+    {fit::field::Record::Timestamp, fit::field::Record::HeartRate},
+    {{skStepsDevFieldNum, fit::baseTypeSize(fit::BaseType::UInt32), 0}});
+```
+
+Each definition record is written to the file as it is emitted; the encoder remembers the expected payload size per local type and validates it on `write()` ([Message Encoding](../../FitFiles-Structure.md#message-encoding)).
 
 #### 4. Custom Developer Fields
 
-The app demonstrates custom developer fields for extended data types:
+The "steps" value is recorded as a FIT *developer field*. This needs two pieces: a `field_description` message that names and types the field, and a developer-field entry on the `record` definition (added above). The encoder declares the field description with a few fixed columns plus the variable-length `field_name`/`units` strings, sized exactly at encode time:
 
 ```cpp
-// Initialize developer field description
-mFitStepsField.init({FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_NAME,
-                    FIT_FIELD_DESCRIPTION_FIELD_NUM_UNITS,
-                    FIT_FIELD_DESCRIPTION_FIELD_NUM_DEVELOPER_DATA_INDEX,
-                    FIT_FIELD_DESCRIPTION_FIELD_NUM_FIELD_DEFINITION_NUMBER,
-                    FIT_FIELD_DESCRIPTION_FIELD_NUM_FIT_BASE_TYPE_ID});
+void Service::writeStepsFieldDescription() {
+    const char* name  = "steps";
+    const char* units = "count";
+    const uint8_t nameLen  = static_cast<uint8_t>(std::strlen(name) + 1);
+    const uint8_t unitsLen = static_cast<uint8_t>(std::strlen(units) + 1);
 
-// Write field description in writeFitDefinitions()
-FIT_FIELD_DESCRIPTION_MESG stepsField{};
-std::strncpy(stepsField.field_name, "steps", FIT_FIELD_DESCRIPTION_MESG_FIELD_NAME_COUNT);
-std::strncpy(stepsField.units, "count", FIT_FIELD_DESCRIPTION_MESG_UNITS_COUNT);
-stepsField.developer_data_index = 0;
-stepsField.field_definition_number = 0;
-stepsField.fit_base_type_id = FIT_BASE_TYPE_UINT32;
-mFitStepsField.writeMessage(&stepsField, fp);
+    mFit->defineMessage(L_FIELD_DESC, fit::mesgNum(fit::MesgNum::FieldDescription),
+        {fit::field::FieldDescription::DeveloperDataIndex,
+         fit::field::FieldDescription::FieldDefinitionNumber,
+         fit::field::FieldDescription::FitBaseTypeId,
+         {fit::field::FieldDescription::kFieldNameNum, fit::BaseType::String, nameLen},
+         {fit::field::FieldDescription::kUnitsNum, fit::BaseType::String, unitsLen}});
+    mFit->data(L_FIELD_DESC)
+        .u8(0)                  // developer_data_index
+        .u8(skStepsDevFieldNum) // field_definition_number
+        .u8(fit::baseTypeId(fit::BaseType::UInt32))
+        .str(name, nameLen)
+        .str(units, unitsLen)
+        .write();
+}
 ```
 
 #### 4. Session and Activity Management
@@ -271,7 +338,6 @@ void Service::startSession() {
     std::time_t now = std::time(nullptr);
     mSessionStart = now;
     mSessionOpen = true;
-    mFitFileInitialized = false;  // Will initialize on first save
     mTotalSteps = 0;
     mLastSteps = 0;
     mSampleCount = 0;
@@ -282,33 +348,38 @@ void Service::startSession() {
 ```
 
 **Session Summary:**
+
+The `Session` and `Activity` definitions are emitted earlier in `writeFitDefinitions()`; here the summary just appends data records via the builder. Values are written in the same order the fields were declared, with multi-byte values stored little-endian. Time fields use the FIT scale-1000 convention (milliseconds).
+
 ```cpp
-void Service::writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t timestamp) {
-    // Stop session event
-    FIT_EVENT_MESG stop_event{};
-    stop_event.timestamp = unixToFitTimestamp(timestamp);
-    stop_event.event = FIT_EVENT_TIMER;
-    stop_event.event_type = FIT_EVENT_TYPE_STOP;
-    mFitEvent.writeMessage(&stop_event, fp);
+void Service::writeFitSessionSummary(std::time_t timestamp) {
+    // Stop session event.
+    mFit->data(L_EVENT)
+        .u32(unixToFitTimestamp(timestamp))
+        .u8(static_cast<uint8_t>(fit::Event::Timer))
+        .u8(static_cast<uint8_t>(fit::EventType::Stop))
+        .write();
 
-    // Session message with timing and sport data
-    FIT_SESSION_MESG session_mesg{};
-    session_mesg.message_index = 0;
-    session_mesg.sport = FIT_SPORT_GENERIC;
-    session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC;
-    session_mesg.timestamp = unixToFitTimestamp(timestamp);
-    session_mesg.start_time = unixToFitTimestamp(mSessionStart);
-    session_mesg.total_elapsed_time = static_cast<FIT_UINT32>((timestamp - mSessionStart) * 1000);
-    session_mesg.total_timer_time = static_cast<FIT_UINT32>((timestamp - mSessionStart) * 1000);
-    mFitSession.writeMessage(&session_mesg, fp);
+    const uint32_t elapsedMs = static_cast<uint32_t>((timestamp - mSessionStart) * 1000);
 
-    // Activity summary
-    FIT_ACTIVITY_MESG activity_mesg{};
-    activity_mesg.timestamp = unixToFitTimestamp(timestamp);
-    activity_mesg.local_timestamp = unixToFitTimestamp(timestamp);  // Simplified
-    activity_mesg.total_timer_time = static_cast<FIT_UINT32>((timestamp - mSessionStart) * 1000);
-    activity_mesg.num_sessions = 1;
-    mFitActivity.writeMessage(&activity_mesg, fp);
+    // Session summary.
+    mFit->data(L_SESSION)
+        .u32(unixToFitTimestamp(timestamp))
+        .u32(unixToFitTimestamp(mSessionStart))
+        .u32(elapsedMs)  // total_elapsed_time, scale 1000
+        .u32(elapsedMs)  // total_timer_time, scale 1000
+        .u16(0)          // message_index
+        .u8(static_cast<uint8_t>(fit::Sport::Generic))
+        .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+        .write();
+
+    // Activity summary.
+    mFit->data(L_ACTIVITY)
+        .u32(unixToFitTimestamp(timestamp))
+        .u32(elapsedMs)  // total_timer_time, scale 1000
+        .u32(unixToFitTimestamp(timestamp))  // local_timestamp (simplified)
+        .u16(1)          // num_sessions
+        .write();
 }
 ```
 
@@ -316,12 +387,14 @@ void Service::writeFitSessionSummary(SDK::Interface::IFile* fp, std::time_t time
 
 #### FIT File Writing Process
 
-1. **File Opening**: Open existing file or create new one
-2. **Header Management**: Update file header with correct data size
-3. **Definition Writing**: Write message definitions on first use
-4. **Data Append**: Add new records to existing file
-5. **Session Management**: Handle session start/stop events
-6. **CRC Calculation**: Compute and append file CRC
+`saveFit()` writes the whole activity in a single pass each time it runs - the native encoder streams records as they are produced, so there is no read-back-and-append step:
+
+1. **File (Re)creation**: Open the FIT file truncated for writing
+2. **Header Placeholder**: `FitWriter::begin()` writes a 14-byte header placeholder
+3. **Definitions + Start Event**: `writeFitDefinitions()` emits every message definition and the timer-start event
+4. **Data Records**: `appendPendingRecords()` emits the records accumulated this session
+5. **Session Summary**: `writeFitSessionSummary()` emits the stop event, session and activity records (on finalize)
+6. **Finish**: `FitWriter::finish()` back-patches the header data size + header CRC and appends the trailing file CRC
 
 #### Data Persistence Strategy
 
@@ -333,12 +406,12 @@ The app saves data on session completion:
 
 #### FIT File Writing Process
 
-1. **File Creation**: Create new FIT file on session start
-2. **Header Management**: Write placeholder header (updated with final size)
-3. **Definition Writing**: Write message definitions once
-4. **Data Append**: Add records during session
-5. **Session Finalization**: Write session summary on completion
-6. **CRC Calculation**: Compute and append file CRC
+1. **File Creation**: (Re)create the FIT file truncated on each save
+2. **Header Management**: `begin()` writes a placeholder header (data size + CRC patched at the end)
+3. **Definition Writing**: Define each message's local type before its first data record
+4. **Data Records**: Emit accumulated records via the `data(local)...write()` builder
+5. **Session Finalization**: Write the session summary on completion
+6. **CRC Calculation**: `finish()` computes and appends the file CRC
 
 ## Glance UI Implementation
 
@@ -434,42 +507,44 @@ FIT (Flexible and Interoperable Data Transfer) is Garmin's binary file format fo
 
 ### Message Types Used
 
-1. **File ID** (`FIT_MESG_FILE_ID`): File metadata ([File ID Message](../../FitFiles-Structure.md#file-id-message))
-2. **Developer Data ID** (`FIT_MESG_DEVELOPER_DATA_ID`): Developer identification ([Developer Data ID Message](../../FitFiles-Structure.md#developer-data-id-message))
-3. **Field Description** (`FIT_MESG_FIELD_DESCRIPTION`): Custom field definitions ([Field Description Messages](../../FitFiles-Structure.md#field-description-messages))
-4. **Record** (`FIT_MESG_RECORD`): Data points with timestamps ([Record Messages](../../FitFiles-Structure.md#record-messages))
-5. **Event** (`FIT_MESG_EVENT`): Session start/stop markers ([Event Messages](../../FitFiles-Structure.md#event-messages))
-6. **Session** (`FIT_MESG_SESSION`): Activity segment summaries ([Session Messages](../../FitFiles-Structure.md#session-messages))
-7. **Activity** (`FIT_MESG_ACTIVITY`): Overall activity summary ([Activity Messages](../../FitFiles-Structure.md#activity-messages))
+All message numbers come from `SDK::Fit::MesgNum`, passed to `defineMessage()` via `fit::mesgNum(...)`:
+
+1. **File ID** (`MesgNum::FileId`): File metadata ([File ID Message](../../FitFiles-Structure.md#file-id-message))
+2. **Developer Data ID** (`MesgNum::DeveloperDataId`): Developer identification ([Developer Data ID Message](../../FitFiles-Structure.md#developer-data-id-message))
+3. **Field Description** (`MesgNum::FieldDescription`): Custom field definitions ([Field Description Messages](../../FitFiles-Structure.md#field-description-messages))
+4. **Record** (`MesgNum::Record`): Data points with timestamps ([Record Messages](../../FitFiles-Structure.md#record-messages))
+5. **Event** (`MesgNum::Event`): Session start/stop markers ([Event Messages](../../FitFiles-Structure.md#event-messages))
+6. **Session** (`MesgNum::Session`): Activity segment summaries ([Session Messages](../../FitFiles-Structure.md#session-messages))
+7. **Activity** (`MesgNum::Activity`): Overall activity summary ([Activity Messages](../../FitFiles-Structure.md#activity-messages))
 
 ### Custom Developer Fields
 
 The app demonstrates developer fields for heart rate and step data ([Developer Fields Implementation](../../FitFiles-Structure.md#developer-fields-implementation)):
 
 **Heart Rate Field (Standard FIT):**
-- Built-in FIT field: `FIT_RECORD_FIELD_NUM_HEART_RATE`
+- Built-in FIT field: `fit::field::Record::HeartRate` (field number 3)
 - Units: BPM
-- Base Type: `FIT_BASE_TYPE_UINT8`
+- Base Type: `BaseType::UInt8`
 
 **Steps Field (Developer Field):**
 - Field Name: "steps"
 - Units: "count"
-- Base Type: `FIT_BASE_TYPE_UINT32`
+- Base Type: `BaseType::UInt32`
 - Developer Index: 0
-- Field Number: 0
+- Field Number: `skStepsDevFieldNum` (0)
 
 **Data Recording:**
+
+Because the steps developer field was declared on the `L_RECORD` definition, its value is appended to the same data record after the standard fields - in definition order, with the developer field last. There is no separate field-message call:
+
 ```cpp
 // In appendPendingRecords()
 for (const auto& rec : mPendingRecords) {
-    FIT_RECORD_MESG record_mesg{};
-    record_mesg.timestamp = unixToFitTimestamp(rec.timestamp);
-    record_mesg.heart_rate = rec.heartRate;
-    mFitRecord.writeMessage(&record_mesg, fp);
-
-    // Write developer field for steps
-    uint32_t steps = rec.steps;
-    mFitRecord.writeFieldMessage(0, &steps, fp);
+    mFit->data(L_RECORD)
+        .u32(unixToFitTimestamp(rec.timestamp))  // timestamp
+        .u8(rec.heartRate)                        // heart_rate
+        .u32(rec.steps)                           // "steps" developer field
+        .write();
 }
 ```
 
@@ -506,7 +581,7 @@ una_app_build_service(${APP_NAME}Service.elf)
 
 **SDK Components**:
 - UNA SDK common, service, and sensor sources
-- FIT helper utilities
+- Native FIT encoder (`SDK::Fit`, `${UNA_SDK_SOURCES_FIT}`)
 - File system interfaces
 - Kernel messaging system
 
@@ -553,6 +628,6 @@ This tutorial provides a foundation for more advanced glance-based fitness appli
 6. **Health Metrics**: Calculate calories, distance, and activity intensity
 7. **Session Analytics**: Add post-session summary and statistics
 
-The tutorial demonstrates essential FIT file creation using UNA SDK's FitHelper components with a clean, tutorial-friendly implementation.
+The tutorial demonstrates essential FIT file creation using the UNA SDK's native `SDK::Fit` encoder with a clean, tutorial-friendly implementation.
 
 The FitFiles tutorial demonstrates essential concepts for building robust, data-persistent wearable applications using the UNA SDK's FIT file capabilities and sensor integration features.

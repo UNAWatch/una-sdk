@@ -43,7 +43,7 @@ The SDK includes several utilities for common tasks:
 
 - **GSModel & GSBridge**: Type-safe GUI-Service communication
 - **Glance UI System**: Lightweight UI for 240x60 notification area
-- **FitHelper**: Garmin FIT file generation
+- **SDK::Fit**: Native FIT-format file generation
 - **TrackMapBuilder**: GPS track visualization
 - **Serialization**: CBOR and JSON stream readers/writers
 - **Signal Processing**: Filters, queues, timers

@@ -34,7 +34,6 @@ una-sdk/
 │       └── Simulator/        # Mock kernel and desktop simulator runtime
 ├── ThirdParty/               # Vendored dependencies
 │   ├── coreJSON/             # JSON parsing library
-│   ├── FitSDKRelease_21.171.00/  # Garmin FIT format
 │   ├── tinycbor_version/     # CBOR encoder/decoder
 │   └── touchgfx/             # TouchGFX framework (sources + prebuilt libs)
 ├── Utilities/Scripts/        # Build and packaging tools
@@ -72,13 +71,17 @@ auto text = form.createText();
 text.init({0, 0}, {240, 20}, "Notification", FONT_SMALL, COLOR_WHITE);
 ```
 
-#### FitHelper (Fitness Data)
+#### SDK::Fit (Fitness Data)
 
-Simplifies the generation of Garmin FIT files, allowing apps to export activity data in a standard format compatible with major fitness platforms.
+A native FIT-format encoder for exporting activity data in the standard format compatible with major fitness platforms (no external dependency). Define each message's fields from the FIT profile, then stream values through the builder.
 
 ```cpp
-SDK::Component::FitHelper fit(msgID, msgDef);
-fit.writeMessage(data, &file);
+SDK::Fit::FitWriter fit(file);
+fit.begin(/*profileVersion=*/0);
+fit.defineMessage(0, SDK::Fit::mesgNum(SDK::Fit::MesgNum::Record),
+                  {SDK::Fit::field::Record::Timestamp, SDK::Fit::field::Record::HeartRate});
+fit.data(0).u32(timestamp).u8(heartRate).write();
+fit.finish();
 ```
 
 #### TrackMapBuilder (GPS Visualization)
@@ -350,7 +353,6 @@ class MockSensorManager : public ISensorManager {
 ### Core Components
 
 - **coreJSON**: Lightweight JSON parsing for settings and data.
-- **FitSDK**: Official Garmin FitSDK for activity data format support.
 - **Shared libc++**: A memory-optimized standard C++ library shared across all applications to minimize binary size.
 - **FreeRTOS**: The underlying real-time operating system (kernel-side).
 - **TouchGFX**: UI framework for embedded systems.
