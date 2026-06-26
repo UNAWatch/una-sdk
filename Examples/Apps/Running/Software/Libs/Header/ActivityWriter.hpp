@@ -1,11 +1,7 @@
 /**
  ******************************************************************************
  * @file    ActivityWriter.hpp
- * @date    31-08-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Serializes activity data to a FIT file.
- ******************************************************************************
- *
+ * @brief   Serializes activity data to a FIT file (native SDK::Fit encoder).
  ******************************************************************************
  */
 
@@ -13,15 +9,14 @@
 #define ACTIVITY_WRITER_HPP
 
 #include <cstdint>
-#include <cstdbool>
+#include <ctime>
+#include <memory>
 #include <string>
 
 #include "SDK/Kernel/Kernel.hpp"
-#include "SDK/FitHelper/FitHelper.hpp"
-
-extern "C" {
-#include "fit_example.h"
-}
+#include "SDK/Fit/FitProfile.hpp"
+#include "SDK/Fit/FitRecordCadence.hpp"
+#include "SDK/Fit/FitWriter.hpp"
 
 /**
  * @class ActivityWriter
@@ -88,7 +83,8 @@ public:
         float       hrMax     = 0.0f;   // bpm
         float       ascent    = 0.0f;   // m
         float       descent   = 0.0f;   // m
-        FIT_MESSAGE_INDEX wktStepIndex = FIT_MESSAGE_INDEX_INVALID; // workout_step this lap belongs to (INVALID = none)
+        // workout_step this lap belongs to (kMessageIndexInvalid = none)
+        uint16_t    wktStepIndex = SDK::Fit::kMessageIndexInvalid;
     };
 
     /**
@@ -99,10 +95,10 @@ public:
      * iterations; intensity is left unset.
      */
     struct WorkoutStepData {
-        FIT_INTENSITY         intensity     = FIT_INTENSITY_INVALID;
-        FIT_WKT_STEP_DURATION durationType  = FIT_WKT_STEP_DURATION_OPEN;
-        FIT_UINT32            durationValue = 0;  // TIME: ms; DISTANCE: cm; OPEN: 0; REPEAT: first-step index
-        FIT_UINT32            repeatCount   = 0;  // REPEAT only -> target_value (iterations)
+        SDK::Fit::Intensity       intensity     = SDK::Fit::Intensity::Invalid;
+        SDK::Fit::WktStepDuration durationType  = SDK::Fit::WktStepDuration::Open;
+        uint32_t                  durationValue = 0;  // TIME: ms; DISTANCE: cm; OPEN: 0; REPEAT: first-step index
+        uint32_t                  repeatCount   = 0;  // REPEAT only -> target_value (iterations)
     };
 
     struct TrackData {
@@ -132,72 +128,51 @@ public:
     void discard();
 
 private:
-    /// A constant reference to an Kernel object.
-    const SDK::Kernel& mKernel;
-
-    /// Path to FIT file
-    const char* mPath = nullptr;
-
-    std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
-    uint16_t mLapCounter = 0;
-    FIT_UINT16 mDataCRC = 0;
-
-    SDK::Component::FitHelper mFHFileID;
-    SDK::Component::FitHelper mFHDeveloper;
-    SDK::Component::FitHelper mFHLap;
-    SDK::Component::FitHelper mFHSession;
-    SDK::Component::FitHelper mFHEvent;
-    SDK::Component::FitHelper mFHActivity;
-    SDK::Component::FitHelper mFHRecord;    // Record
-    SDK::Component::FitHelper mFHRecordG;   // Record + GPS
-    SDK::Component::FitHelper mFHRecordB;   // Record + Battery
-    SDK::Component::FitHelper mFHRecordGB;  // Record + GPS + Battery
-
-    SDK::Component::FitHelper mFHBatteryLevelField;
-    SDK::Component::FitHelper mFHBatteryVoltageField;
-    SDK::Component::FitHelper mFHHrSourceField;
-    SDK::Component::FitHelper mFHHrOpticalField;
-    SDK::Component::FitHelper mFHHrExternalField;
-
-    SDK::Component::FitHelper mFHWorkout;
-    SDK::Component::FitHelper mFHWorkoutStep;
-
-    enum class MsgNumber {
-        FILE = 1,
-        DEVELOP,
-        RECORD,
-        RECORD_G,
-        RECORD_B,
-        RECORD_GB,
-        LAP,
-        SESSION,
-        ACTIVITY,
-        EVENT,
-        BATTERY,
-        WORKOUT,
-        WORKOUT_STEP,
-        HR_SOURCE,
-        HR_OPTICAL,
-        HR_EXTERNAL,
+    /// Local message types (FIT record header, 0-15).
+    enum Local : uint8_t {
+        L_FILE_ID = 0,
+        L_DEV_ID,
+        L_FIELD_DESC,   // reused for each field_description (redefined per string size)
+        L_EVENT,
+        L_RECORD,       // no GPS, no battery
+        L_RECORD_G,     // + GPS
+        L_RECORD_B,     // + battery
+        L_RECORD_GB,    // + GPS + battery
+        L_LAP,
+        L_SESSION,
+        L_ACTIVITY,
+        L_WORKOUT,
+        L_WORKOUT_STEP,
     };
 
-    FIT_RECORD_MESG prepareRecordMsg(const RecordData& record);
+    /// Developer field definition numbers (UNA-assigned).
+    enum DevField : uint8_t {
+        DF_BATTERY_LEVEL   = 2,
+        DF_BATTERY_VOLTAGE = 3,
+        DF_HR_SOURCE       = 4,
+        DF_HR_OPTICAL      = 5,
+        DF_HR_EXTERNAL     = 6,
+    };
 
-    void AddMessageEvent(std::time_t t, FIT_EVENT_TYPE type);
+    const SDK::Kernel& mKernel;
+    const char*        mPath = nullptr;
+
+    std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
+    std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;
+    uint16_t mLapCounter = 0;
+
+    void defineRecordMessages();
+    void writeFieldDescription(uint8_t devFieldNum, const char* name,
+                               const char* units, SDK::Fit::BaseType baseType);
+    void addMessageEvent(std::time_t t, SDK::Fit::EventType type);
 
     bool createAndOpenFile(std::time_t utc);
-    void saveFile();
-    void deleteFile();
-
     void saveSummary(const TrackData& track);
 
-    static time_t tm2epoch(const struct tm* tm);
-    static time_t epochToLocal(time_t utc);
-    static FIT_DATE_TIME unixToFitTimestamp(std::time_t unixTimestamp);
-    static FIT_SINT32 ConvertDegreesToSemicircles(float degrees);
-
-    void WriteFileHeader(SDK::Interface::IFile* fp);
-    void WriteCRC(SDK::Interface::IFile* fp);
+    static std::time_t tm2epoch(const struct tm* tm);
+    static std::time_t epochToLocal(std::time_t utc);
+    static uint32_t unixToFitTimestamp(std::time_t unixTimestamp);
+    static int32_t  degreesToSemicircles(float degrees);
 };
 
 #endif // ACTIVITY_WRITER_HPP

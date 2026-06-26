@@ -48,12 +48,15 @@ enum class SubSport : uint8_t { Generic = 0, Treadmill = 1 };
 enum class Event : uint8_t { Timer = 0 };
 enum class EventType : uint8_t { Start = 0, Stop = 1 };
 enum class ActivityType : uint8_t { Manual = 0, AutoMultiSport = 1 };
-enum class Intensity : uint8_t { Active = 0, Rest = 1, Warmup = 2, Cooldown = 3 };
+enum class Intensity : uint8_t { Active = 0, Rest = 1, Warmup = 2, Cooldown = 3, Invalid = 0xFF };
 enum class Manufacturer : uint16_t { Development = 255 };
 enum class WktStepDuration : uint8_t {
     Time = 0, Distance = 1, Open = 5, RepeatUntilStepsComplete = 6,
 };
 enum class WktStepTarget : uint8_t { Open = 2 };
+
+/// message_index "invalid" sentinel (uint16).
+constexpr uint16_t kMessageIndexInvalid = 0xFFFFu;
 
 // --- Per-message field definitions ------------------------------------------
 // Each scalar field is a (field-definition-number, base type) pair ready to
