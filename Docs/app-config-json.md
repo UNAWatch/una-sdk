@@ -6,6 +6,7 @@
 |----------|-----------------|------------------|------|--------|
 | 1.00    | 07.08.2025      | Creating        |      | [Denys Saienko](https://github.com/sdvsaienko) |
 | 1.01    | 23.03.2025     | Removed mentions about signature file as it is not used |      | [Denys Sobchuk](https://github.com/AvatarSD) |
+| 1.02    | 29.06.2026     | Renamed `minSdkVersion` to `minKernelVersion`: the SDK is statically linked into the `.uapp`, so the runtime requirement is on the kernel firmware version (reported over BLE via the DIS Firmware Revision String, UUID 0x2A26), not the build-time SDK version | | Ross Ryles |
 
 ## Output Package
 
@@ -42,7 +43,7 @@ Simplest `config.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
   "icon": "Resources/icon_60x60.png",
   "binary": "Files_0.1.3-16-ed77913-dirty.uapp",
   "appVersion": "0.1.3",
-  "minSdkVersion": "0.1.3",
+  "minKernelVersion": "0.1.3",
   "requiredHardware": [],
   "stravaExport" : false,
   "id": "03AD5A741E38A35F",
@@ -70,7 +71,7 @@ Watch application config example:
   "binary": "running.uapp", // Relative path to the app binary file
   "previews": "assets/previews/", // Relative path to the previews images
   "appVersion": "1.0.3", // Current version of the app
-  "minSdkVersion": "3.0.0", // Minimum supported SDK version required to run the app
+  "minKernelVersion": "3.0.0", // Minimum watch kernel (firmware) version required to run the app. The SDK is statically linked into the .uapp, so this gates against the runtime kernel, not the build-time SDK. The mobile app reads the watch's firmware version from the BLE DIS Firmware Revision String (UUID 0x2A26).
   "requiredHardware": [ // List of hardware features required for the app to function
     "GPS",
     "ACCELEROMETER",
