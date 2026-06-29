@@ -177,3 +177,18 @@ For examples with GUI components like Hiking:
 - Join the community at [UNAWatch/una-sdk](https://github.com/UNAWatch/una-sdk)
 
 For additional support, see the [Community Support](Docs/community-support.md) guide.
+
+## License
+
+UNA Watch Ltd's own source code in this repository is released under the
+**MIT License** — see [`LICENSE`](LICENSE).
+
+Third-party components vendored under `ThirdParty/` (TouchGFX, coreJSON, tinycbor)
+are licensed separately under their own terms and are **not** covered by the MIT
+license — see [`THIRD-PARTY-LICENSES.md`](THIRD-PARTY-LICENSES.md).
+
+## Trademark
+
+"UNA", "UNA Watch", and the UNA logo are trademarks of UNA Watch Ltd. The MIT
+license covers the source code only and grants no rights to the UNA name or
+logos — see [`TRADEMARK.md`](TRADEMARK.md).
