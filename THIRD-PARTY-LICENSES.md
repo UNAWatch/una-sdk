@@ -10,7 +10,7 @@ redistributing.
 
 | Component | Location | License |
 |-----------|----------|---------|
-| TouchGFX | `ThirdParty/touchgfx/` | STMicroelectronics **SLA0048** — see [`ThirdParty/touchgfx/LICENSE.txt`](ThirdParty/touchgfx/LICENSE.txt). Use and redistribution are permitted **only in connection with a microcontroller or microprocessor manufactured by or for STMicroelectronics**, and the component **must not be made subject to any open-source license terms**. TouchGFX itself bundles further third-party code (e.g. the Anti-Grain Geometry rasterizer and, for the simulator, SDL2) under their own respective licenses. |
+| TouchGFX | `ThirdParty/touchgfx/` | STMicroelectronics **SLA0048** — see [`ThirdParty/touchgfx/LICENSE.txt`](ThirdParty/touchgfx/LICENSE.txt). Use and redistribution are permitted **only in connection with a microcontroller or microprocessor manufactured by or for STMicroelectronics**, and the component **must not be made subject to any open-source license terms**. TouchGFX itself bundles further third-party code (e.g. the Anti-Grain Geometry rasterizer, libjpeg (Independent JPEG Group), and, for the simulator, SDL2) under their own respective licenses. |
 | coreJSON | `ThirdParty/coreJSON/` | **MIT** — see [`ThirdParty/coreJSON/LICENSE`](ThirdParty/coreJSON/LICENSE). |
 | tinycbor | `ThirdParty/tinycbor_version/` | **MIT** — Copyright (C) Intel Corporation; `SPDX-License-Identifier: MIT` (see the header files in that directory). |
 
