@@ -11,12 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp" />
-
-    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp" />
-
-    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp" />
-
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2_icon.cpp"/>
@@ -103,9 +100,6 @@
     <ClCompile Include="..\..\gui\src\trackaction_screen\TrackActionPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\trackaction_screen\TrackActionView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\trackaction_screen\TrackActionViewBase.cpp"/>
-    <ClCompile Include="..\..\gui\src\trackdiscardconfirmation_screen\TrackDiscardConfirmationPresenter.cpp"/>
-    <ClCompile Include="..\..\gui\src\trackdiscardconfirmation_screen\TrackDiscardConfirmationView.cpp"/>
-    <ClCompile Include="..\..\generated\gui_generated\src\trackdiscardconfirmation_screen\TrackDiscardConfirmationViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\trackdiscarded_screen\TrackDiscardedPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\trackdiscarded_screen\TrackDiscardedView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\trackdiscarded_screen\TrackDiscardedViewBase.cpp"/>
@@ -166,6 +160,11 @@
     <ClCompile Include="..\..\generated\gui_generated\src\main_screen\MainViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\TrackFaceOverview.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\TrackFaceOverviewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\TimerRing.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\TimerRingBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackholdconfirmation_screen\TrackHoldConfirmationPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackholdconfirmation_screen\TrackHoldConfirmationView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackholdconfirmation_screen\TrackHoldConfirmationViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -395,9 +394,6 @@
     <ClInclude Include="..\..\gui\include\gui\trackaction_screen\TrackActionPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\trackaction_screen\TrackActionView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackaction_screen\TrackActionViewBase.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\trackdiscardconfirmation_screen\TrackDiscardConfirmationPresenter.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\trackdiscardconfirmation_screen\TrackDiscardConfirmationView.hpp"/>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackdiscardconfirmation_screen\TrackDiscardConfirmationViewBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\trackdiscarded_screen\TrackDiscardedPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\trackdiscarded_screen\TrackDiscardedView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackdiscarded_screen\TrackDiscardedViewBase.hpp"/>
@@ -460,6 +456,11 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\main_screen\MainViewBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\TrackFaceOverview.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TrackFaceOverviewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\TimerRing.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TimerRingBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackholdconfirmation_screen\TrackHoldConfirmationPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackholdconfirmation_screen\TrackHoldConfirmationView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackholdconfirmation_screen\TrackHoldConfirmationViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

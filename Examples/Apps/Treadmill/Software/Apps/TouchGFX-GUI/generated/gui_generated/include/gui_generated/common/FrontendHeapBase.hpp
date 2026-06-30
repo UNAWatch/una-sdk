@@ -56,8 +56,8 @@
 #include <gui/tracklap_screen/TrackLapPresenter.hpp>
 #include <gui/trackaction_screen/TrackActionView.hpp>
 #include <gui/trackaction_screen/TrackActionPresenter.hpp>
-#include <gui/trackdiscardconfirmation_screen/TrackDiscardConfirmationView.hpp>
-#include <gui/trackdiscardconfirmation_screen/TrackDiscardConfirmationPresenter.hpp>
+#include <gui/trackholdconfirmation_screen/TrackHoldConfirmationView.hpp>
+#include <gui/trackholdconfirmation_screen/TrackHoldConfirmationPresenter.hpp>
 #include <gui/trackdiscarded_screen/TrackDiscardedView.hpp>
 #include <gui/trackdiscarded_screen/TrackDiscardedPresenter.hpp>
 #include <gui/tracksaved_screen/TrackSavedView.hpp>
@@ -118,7 +118,7 @@ public:
             touchgfx::meta::TypeList< TrackView,
             touchgfx::meta::TypeList< TrackLapView,
             touchgfx::meta::TypeList< TrackActionView,
-            touchgfx::meta::TypeList< TrackDiscardConfirmationView,
+            touchgfx::meta::TypeList< TrackHoldConfirmationView,
             touchgfx::meta::TypeList< TrackDiscardedView,
             touchgfx::meta::TypeList< TrackSavedView,
             touchgfx::meta::TypeList< TrackCalibrateIntroView,
@@ -161,7 +161,7 @@ public:
             touchgfx::meta::TypeList< TrackPresenter,
             touchgfx::meta::TypeList< TrackLapPresenter,
             touchgfx::meta::TypeList< TrackActionPresenter,
-            touchgfx::meta::TypeList< TrackDiscardConfirmationPresenter,
+            touchgfx::meta::TypeList< TrackHoldConfirmationPresenter,
             touchgfx::meta::TypeList< TrackDiscardedPresenter,
             touchgfx::meta::TypeList< TrackSavedPresenter,
             touchgfx::meta::TypeList< TrackCalibrateIntroPresenter,

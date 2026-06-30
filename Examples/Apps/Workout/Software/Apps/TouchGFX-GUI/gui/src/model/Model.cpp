@@ -178,6 +178,16 @@ void Model::saveLap()
     mSrvSender.manualLap();
 }
 
+void Model::setHoldConfirmMode(HoldConfirmMode mode)
+{
+    mHoldConfirmMode = mode;
+}
+
+Model::HoldConfirmMode Model::getHoldConfirmMode() const
+{
+    return mHoldConfirmMode;
+}
+
 void Model::saveTrack()
 {
     mSrvSender.trackStop(false);

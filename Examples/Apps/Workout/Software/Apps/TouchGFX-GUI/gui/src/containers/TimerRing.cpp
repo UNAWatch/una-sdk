@@ -73,6 +73,17 @@ void TimerRing::setFPS(float fps)
 void TimerRing::setMaxValue(int32_t max)
 {
     mMaxValue = (max > 0) ? max : 1;
+    // Keep the current state within the (possibly shrunk) range so getProgress()
+    // can't exceed 1.0 and the arc stays on the track.
+    if (mValue > mMaxValue) {
+        mValue = mMaxValue;
+    }
+    if (mTarget > mMaxValue) {
+        mTarget = mMaxValue;
+    }
+    if (mAnimating && mValue == mTarget) {
+        stop();
+    }
     updateArc();
 }
 

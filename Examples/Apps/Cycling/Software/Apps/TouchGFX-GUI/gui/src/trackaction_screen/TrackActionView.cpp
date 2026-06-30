@@ -202,6 +202,24 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         infoCarousel.refresh();
     }
 
+    // Save & End / Discard start a hold-to-confirm: pressing (and holding) R1 opens the
+    // countdown screen immediately; it counts down while R1 stays held and releasing
+    // early returns here. Resume/Summary stay plain taps.
+    if (key == SDK::GUI::Button::R1_PRESS) {
+        switch (menuLayout.getSelectedItem()) {
+        case Menu::ID_SAVE:
+            presenter->setHoldConfirmMode(Model::HoldConfirmMode::Finish);
+            application().gotoTrackHoldConfirmationScreenNoTransition();
+            break;
+        case Menu::ID_DISCARD:
+            presenter->setHoldConfirmMode(Model::HoldConfirmMode::Discard);
+            application().gotoTrackHoldConfirmationScreenNoTransition();
+            break;
+        default:
+            break;
+        }
+    }
+
     if (key == SDK::GUI::Button::R1) {
         switch (menuLayout.getSelectedItem()) {
         case Menu::ID_RESUME:
@@ -210,12 +228,6 @@ void TrackActionView::handleKeyEvent(uint8_t key)
             break;
         case Menu::ID_SUMMARY:
             application().gotoTrackSummaryScreenNoTransition();
-            break;
-        case Menu::ID_SAVE:
-            application().gotoTrackSavedScreenNoTransition();
-            break;
-        case Menu::ID_DISCARD:
-            application().gotoTrackDiscardConfirmationScreenNoTransition();
             break;
         default:
             break;

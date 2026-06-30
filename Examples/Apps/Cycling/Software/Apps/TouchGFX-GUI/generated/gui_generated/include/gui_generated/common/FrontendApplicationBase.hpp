@@ -53,8 +53,8 @@ public:
     // TrackAction
     void gotoTrackActionScreenNoTransition();
 
-    // TrackDiscardConfirmation
-    void gotoTrackDiscardConfirmationScreenNoTransition();
+    // TrackHoldConfirmation
+    void gotoTrackHoldConfirmationScreenNoTransition();
 
     // TrackDiscarded
     void gotoTrackDiscardedScreenNoTransition();
@@ -103,8 +103,8 @@ protected:
     // TrackAction
     void gotoTrackActionScreenNoTransitionImpl();
 
-    // TrackDiscardConfirmation
-    void gotoTrackDiscardConfirmationScreenNoTransitionImpl();
+    // TrackHoldConfirmation
+    void gotoTrackHoldConfirmationScreenNoTransitionImpl();
 
     // TrackDiscarded
     void gotoTrackDiscardedScreenNoTransitionImpl();

@@ -27,8 +27,8 @@
 #include <gui/tracklap_screen/TrackLapPresenter.hpp>
 #include <gui/trackaction_screen/TrackActionView.hpp>
 #include <gui/trackaction_screen/TrackActionPresenter.hpp>
-#include <gui/trackdiscardconfirmation_screen/TrackDiscardConfirmationView.hpp>
-#include <gui/trackdiscardconfirmation_screen/TrackDiscardConfirmationPresenter.hpp>
+#include <gui/trackholdconfirmation_screen/TrackHoldConfirmationView.hpp>
+#include <gui/trackholdconfirmation_screen/TrackHoldConfirmationPresenter.hpp>
 #include <gui/trackdiscarded_screen/TrackDiscardedView.hpp>
 #include <gui/trackdiscarded_screen/TrackDiscardedPresenter.hpp>
 #include <gui/tracksaved_screen/TrackSavedView.hpp>
@@ -170,17 +170,17 @@ void FrontendApplicationBase::gotoTrackActionScreenNoTransitionImpl()
     touchgfx::makeTransition<TrackActionView, TrackActionPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
-// TrackDiscardConfirmation
+// TrackHoldConfirmation
 
-void FrontendApplicationBase::gotoTrackDiscardConfirmationScreenNoTransition()
+void FrontendApplicationBase::gotoTrackHoldConfirmationScreenNoTransition()
 {
-    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoTrackDiscardConfirmationScreenNoTransitionImpl);
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoTrackHoldConfirmationScreenNoTransitionImpl);
     pendingScreenTransitionCallback = &transitionCallback;
 }
 
-void FrontendApplicationBase::gotoTrackDiscardConfirmationScreenNoTransitionImpl()
+void FrontendApplicationBase::gotoTrackHoldConfirmationScreenNoTransitionImpl()
 {
-    touchgfx::makeTransition<TrackDiscardConfirmationView, TrackDiscardConfirmationPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+    touchgfx::makeTransition<TrackHoldConfirmationView, TrackHoldConfirmationPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
 // TrackDiscarded

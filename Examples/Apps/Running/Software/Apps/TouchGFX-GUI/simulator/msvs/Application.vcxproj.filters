@@ -199,13 +199,13 @@
     <Filter Include="Source Files\gui\menutime_screen">
       <UniqueIdentifier>49C7ADC4-5B49-9AEA-51F3-923D9850915F</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\gui\trackdiscardconfirmation_screen">
+    <Filter Include="Source Files\gui\trackholdconfirmation_screen">
       <UniqueIdentifier>5C88625D-D0BE-675F-76F8-F5E1EFC278E7</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\gui\menutimesaved_screen">
       <UniqueIdentifier>7D707D9D-016A-FE9D-BF26-F98BFEF1B254</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\gui\trackdiscardconfirmation_screen">
+    <Filter Include="Header Files\gui\trackholdconfirmation_screen">
       <UniqueIdentifier>04110E91-5706-9CA8-A17A-D44A1EA60B2F</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\gui\menutimesaved_screen">
@@ -301,10 +301,10 @@
     <Filter Include="Source Files\generated\gui_generated\trackdiscarded_screen">
       <UniqueIdentifier>8515888D-D9F1-1260-90A5-B287F98F7DCC</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\generated\gui_generated\trackdiscardconfirmation_screen">
+    <Filter Include="Header Files\generated\gui_generated\trackholdconfirmation_screen">
       <UniqueIdentifier>BA858B02-97E0-48E0-CB9B-80E6560AECF5</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\generated\gui_generated\trackdiscardconfirmation_screen">
+    <Filter Include="Source Files\generated\gui_generated\trackholdconfirmation_screen">
       <UniqueIdentifier>7F976D8F-F210-BBB6-D820-CD9837BEDE9A</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\generated\gui_generated\track_screen">
@@ -649,23 +649,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp">
-
       <Filter>Source Files</Filter>
-
     </ClCompile>
-
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp">
-
       <Filter>Source Files</Filter>
-
     </ClCompile>
-
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp">
-
       <Filter>Source Files</Filter>
-
     </ClCompile>
-
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
       <Filter>Source Files\TouchGFX\platform\driver\touch</Filter>
     </ClCompile>
@@ -777,14 +768,14 @@
     <ClCompile Include="..\..\generated\gui_generated\src\trackaction_screen\TrackActionViewBase.cpp">
       <Filter>Source Files\generated\gui_generated\trackaction_screen</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\trackdiscardconfirmation_screen\TrackDiscardConfirmationPresenter.cpp">
-      <Filter>Source Files\gui\trackdiscardconfirmation_screen</Filter>
+    <ClCompile Include="..\..\gui\src\trackholdconfirmation_screen\TrackHoldConfirmationPresenter.cpp">
+      <Filter>Source Files\gui\trackholdconfirmation_screen</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\trackdiscardconfirmation_screen\TrackDiscardConfirmationView.cpp">
-      <Filter>Source Files\gui\trackdiscardconfirmation_screen</Filter>
+    <ClCompile Include="..\..\gui\src\trackholdconfirmation_screen\TrackHoldConfirmationView.cpp">
+      <Filter>Source Files\gui\trackholdconfirmation_screen</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\generated\gui_generated\src\trackdiscardconfirmation_screen\TrackDiscardConfirmationViewBase.cpp">
-      <Filter>Source Files\generated\gui_generated\trackdiscardconfirmation_screen</Filter>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackholdconfirmation_screen\TrackHoldConfirmationViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\trackholdconfirmation_screen</Filter>
     </ClCompile>
     <ClCompile Include="..\..\gui\src\trackdiscarded_screen\TrackDiscardedPresenter.cpp">
       <Filter>Source Files\gui\trackdiscarded_screen</Filter>
@@ -1002,14 +993,14 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackaction_screen\TrackActionViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\trackaction_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\trackdiscardconfirmation_screen\TrackDiscardConfirmationPresenter.hpp">
-      <Filter>Header Files\gui\trackdiscardconfirmation_screen</Filter>
+    <ClInclude Include="..\..\gui\include\gui\trackholdconfirmation_screen\TrackHoldConfirmationPresenter.hpp">
+      <Filter>Header Files\gui\trackholdconfirmation_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\trackdiscardconfirmation_screen\TrackDiscardConfirmationView.hpp">
-      <Filter>Header Files\gui\trackdiscardconfirmation_screen</Filter>
+    <ClInclude Include="..\..\gui\include\gui\trackholdconfirmation_screen\TrackHoldConfirmationView.hpp">
+      <Filter>Header Files\gui\trackholdconfirmation_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackdiscardconfirmation_screen\TrackDiscardConfirmationViewBase.hpp">
-      <Filter>Header Files\generated\gui_generated\trackdiscardconfirmation_screen</Filter>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackholdconfirmation_screen\TrackHoldConfirmationViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\trackholdconfirmation_screen</Filter>
     </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\trackdiscarded_screen\TrackDiscardedPresenter.hpp">
       <Filter>Header Files\gui\trackdiscarded_screen</Filter>
@@ -2221,14 +2212,14 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackaction_screen\TrackActionViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\trackaction_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\trackdiscardconfirmation_screen\TrackDiscardConfirmationPresenter.hpp">
-      <Filter>Header Files\gui\trackdiscardconfirmation_screen</Filter>
+    <ClInclude Include="..\..\gui\include\gui\trackholdconfirmation_screen\TrackHoldConfirmationPresenter.hpp">
+      <Filter>Header Files\gui\trackholdconfirmation_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\trackdiscardconfirmation_screen\TrackDiscardConfirmationView.hpp">
-      <Filter>Header Files\gui\trackdiscardconfirmation_screen</Filter>
+    <ClInclude Include="..\..\gui\include\gui\trackholdconfirmation_screen\TrackHoldConfirmationView.hpp">
+      <Filter>Header Files\gui\trackholdconfirmation_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackdiscardconfirmation_screen\TrackDiscardConfirmationViewBase.hpp">
-      <Filter>Header Files\generated\gui_generated\trackdiscardconfirmation_screen</Filter>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackholdconfirmation_screen\TrackHoldConfirmationViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\trackholdconfirmation_screen</Filter>
     </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\trackdiscarded_screen\TrackDiscardedPresenter.hpp">
       <Filter>Header Files\gui\trackdiscarded_screen</Filter>

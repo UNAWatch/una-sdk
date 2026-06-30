@@ -100,6 +100,12 @@ public:
     void saveLap();
     void saveTrack();
     void discardTrack();
+
+    // Hold-to-confirm: which action the shared TrackHoldConfirmation screen performs.
+    enum class HoldConfirmMode { Finish, Discard };
+    void setHoldConfirmMode(HoldConfirmMode mode);
+    HoldConfirmMode getHoldConfirmMode() const;
+
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
 
@@ -140,6 +146,7 @@ private:
     uint8_t mAccessoryState = 0;   // SDK::Accessory::State (0 = UNAVAILABLE)
 
     // Track
+    HoldConfirmMode        mHoldConfirmMode = HoldConfirmMode::Discard;
     Track::State           mTrackState      {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData       {};

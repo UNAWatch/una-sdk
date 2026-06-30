@@ -108,6 +108,11 @@ public:
     void saveLap();
     void saveTrack();
     void discardTrack();
+
+    // Hold-to-confirm: which action the shared TrackHoldConfirmation screen performs.
+    enum class HoldConfirmMode { Finish, Discard };
+    void setHoldConfirmMode(HoldConfirmMode mode);
+    HoldConfirmMode getHoldConfirmMode() const;
     /// Post-run Calibrate & Save (§5): send the actual treadmill distance in
     /// metres (<= 0 means "skip" — finalise with the estimate).
     void trackCalibrate(float distanceActualM);
@@ -179,6 +184,7 @@ private:
     uint8_t mAccessoryState = 0;   // SDK::Accessory::State (0 = UNAVAILABLE)
 
     // Track
+    HoldConfirmMode        mHoldConfirmMode       = HoldConfirmMode::Discard;
     bool                   mPendingIntervalsMode  = false;
     Track::IntervalsData   mPendingAlertIntervals {};  ///< Snapshot from last INTERVALS_PHASE_ALERT
     Track::State           mTrackState            {};

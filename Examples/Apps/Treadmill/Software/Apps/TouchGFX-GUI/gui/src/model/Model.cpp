@@ -262,6 +262,16 @@ void Model::discardTrack()
     mSrvSender.trackStop(true);
 }
 
+void Model::setHoldConfirmMode(HoldConfirmMode mode)
+{
+    mHoldConfirmMode = mode;
+}
+
+Model::HoldConfirmMode Model::getHoldConfirmMode() const
+{
+    return mHoldConfirmMode;
+}
+
 void Model::trackCalibrate(float distanceActualM)
 {
     mSrvSender.trackCalibrate(distanceActualM);
