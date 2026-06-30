@@ -414,7 +414,7 @@ Key responsibilities:
 
 **Confirmations**:
 - `TrackStartConfirmationView` — Prompt to start without GPS fix; idle timeout → `MainView`
-- `TrackDiscardConfirmationView` — Confirm discard activity; idle timeout → `TrackActionView`
+- `TrackHoldConfirmationView` — Hold R1 to confirm finish (→ `TrackSavedView`) or discard (→ `TrackDiscardedView`); release early cancels; idle timeout → `TrackActionView`
 - `TrackDiscardedView` — Discard feedback (auto-dismisses after 3 s → exits app)
 - `TrackSavedView` — Save feedback (auto-dismisses after 3 s → `TrackSummaryView`)
 
@@ -465,15 +465,17 @@ MainView ──[Start, GPS ok]──► TrackView (faces: Total ◄──► Lap
     │              │                         │
     │    [Start, no GPS fix]                [R1]
     │              │                    TrackActionView
-    │    TrackStartConfirmationView       │    │    │
-    │         │           │           Resume  Save  Discard
-    │      [R1:start]  [idle/R2]        │      │      │
-    │      TrackView   MainView      TrackView │   TrackDiscardConfirmationView
-    │                                          │      │ [idle] → TrackActionView
-    │                                    TrackSavedView [R1:confirm]     [R2:cancel]
-    │                                    (3s auto)          │          TrackActionView
-    │                                          │      TrackDiscardedView
-    │                                   TrackSummaryView  (3s auto → exitApp)
+    │    TrackStartConfirmationView   Resume Summary Save Discard
+    │      │ [R1:start] → TrackView      │      │     └──┬──┘
+    │      │ [idle/R2]  → MainView   TrackView   │   [set Finish/Discard mode]
+    │                                            │            │
+    │                                            │   TrackHoldConfirmationView
+    │                                            │   hold R1 1.5s — arc grows 3→2→1:
+    │                                            │   ├ release early → TrackActionView
+    │                                            │   └ hold complete →
+    │                                            │       [Finish]  TrackSavedView ──(3s)──► TrackSummaryView
+    │                                            │       [Discard] TrackDiscardedView ──(3s)──► exitApp()
+    │                                     TrackSummaryView
     │                         (faces: Map ◄──► Overview ◄──► HeartRate ◄──► Laps)
     │                                          │
     │                     [back]: paused ──► TrackActionView
