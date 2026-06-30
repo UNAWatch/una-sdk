@@ -151,6 +151,16 @@ uint8_t Model::getAccessoryState() const
 
 // Track
 
+void Model::setHoldConfirmMode(HoldConfirmMode mode)
+{
+    mHoldConfirmMode = mode;
+}
+
+Model::HoldConfirmMode Model::getHoldConfirmMode() const
+{
+    return mHoldConfirmMode;
+}
+
 void Model::setPendingIntervalsMode(bool mode)
 {
     mPendingIntervalsMode = mode;

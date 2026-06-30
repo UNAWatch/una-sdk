@@ -30,6 +30,9 @@ public:
     virtual void onTrackData(const Track::Data& data) override;
 
     void resumeTrack();
+
+    /** Select which action the shared hold-confirm screen will perform. */
+    void setHoldConfirmMode(Model::HoldConfirmMode mode) { model->setHoldConfirmMode(mode); }
     /// Stop recording and always route to Calibrate & Save (every run, any
     /// tier); the user corrects the recorded distance/avg speed there, or skips.
     /// Whether an entered distance also updates the delta LUT is gated

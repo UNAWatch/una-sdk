@@ -49,7 +49,7 @@ void TrackStartConfirmationViewBase::setupScreen()
 void TrackStartConfirmationViewBase::transitionBegins()
 {
     //Interaction1
-    //When screen transition begins change screen to TrackDiscardConfirmation
-    //Go to TrackDiscardConfirmation with no screen transition
-    application().gotoTrackDiscardConfirmationScreenNoTransition();
+    //When screen transition begins change screen to TrackStartConfirmation
+    //Go to TrackStartConfirmation with no screen transition
+    application().gotoTrackStartConfirmationScreenNoTransition();
 }

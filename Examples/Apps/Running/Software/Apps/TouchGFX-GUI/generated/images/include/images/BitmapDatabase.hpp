@@ -30,6 +30,8 @@ const uint16_t BITMAP_SENSORGPSLIGHT_ID = 20;
 const uint16_t BITMAP_SENSORHRDARK_ID = 21;
 const uint16_t BITMAP_SENSORHRLIGHT_ID = 22;
 const uint16_t BITMAP_TICKAMBER_22X17_ID = 23;
+const uint16_t BITMAP_TICKGREEN_22X17_ID = 24;
+const uint16_t BITMAP_TICKRED_22X17_ID = 25;
 
 namespace BitmapDatabase
 {

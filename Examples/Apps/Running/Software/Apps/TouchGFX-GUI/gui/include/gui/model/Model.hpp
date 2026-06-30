@@ -90,6 +90,11 @@ public:
     // sends on change, so screens read this on activate to show the current icon.
     uint8_t getAccessoryState() const;
 
+    // Hold-to-confirm: which action the shared TrackHoldConfirmation screen performs.
+    enum class HoldConfirmMode { Finish, Discard };
+    void setHoldConfirmMode(HoldConfirmMode mode);
+    HoldConfirmMode getHoldConfirmMode() const;
+
     // Track
     void setPendingIntervalsMode(bool mode);
     bool isPendingIntervalsMode() const;
@@ -145,6 +150,7 @@ private:
     uint8_t mAccessoryState = 0;   // SDK::Accessory::State (0 = UNAVAILABLE)
 
     // Track
+    HoldConfirmMode        mHoldConfirmMode       = HoldConfirmMode::Discard;
     bool                   mPendingIntervalsMode  = false;
     Track::IntervalsData   mPendingAlertIntervals {};  ///< Snapshot from last INTERVALS_PHASE_ALERT
     Track::State           mTrackState            {};

@@ -394,11 +394,20 @@
       <Text Id="TEXT_DO_YOU_WANT_ACTIVITY" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Do you want&#10;to discard&#10;the activity?</Translation>
       </Text>
+      <Text Id="TEXT_HOLD_TO_FINISH" Alignment="Center" TypographyId="Poppins_Medium_18">
+        <Translation Language="GB">Hold to&#10;Finish</Translation>
+      </Text>
+      <Text Id="TEXT_HOLD_TO_DISCARD" Alignment="Center" TypographyId="Poppins_Medium_18">
+        <Translation Language="GB">Hold to&#10;Discard</Translation>
+      </Text>
+      <Text Id="TEXT_HOLD_COUNTDOWN" Alignment="Center" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">3</Translation>
+      </Text>
       <Text Id="TEXT_START_BEFORE_GPS_FIX" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Start before&#10;signal acquired?</Translation>
       </Text>
       <Text Id="TEXT_ACTIVITY_UPLOADED" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">Activity has&#10;been uploaded</Translation>
+        <Translation Language="GB">Activity has&#10;been saved</Translation>
       </Text>
       <Text Id="TEXT_ACTIVITY_DELETED" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Activity has&#10;been deleted</Translation>

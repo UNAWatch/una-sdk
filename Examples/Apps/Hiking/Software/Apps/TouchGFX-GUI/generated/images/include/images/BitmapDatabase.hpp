@@ -21,7 +21,9 @@ const uint16_t BITMAP_SENSORGPSLIGHT_ID = 11;
 const uint16_t BITMAP_SENSORHRDARK_ID = 12;
 const uint16_t BITMAP_SENSORHRLIGHT_ID = 13;
 const uint16_t BITMAP_TICKAMBER_22X17_ID = 14;
-const uint16_t BITMAP_WALKINGMAN_26X30_ID = 15;
+const uint16_t BITMAP_TICKGREEN_22X17_ID = 15;
+const uint16_t BITMAP_TICKRED_22X17_ID = 16;
+const uint16_t BITMAP_WALKINGMAN_26X30_ID = 17;
 
 namespace BitmapDatabase
 {

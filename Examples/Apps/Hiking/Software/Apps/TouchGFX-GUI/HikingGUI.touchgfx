@@ -690,9 +690,17 @@
         ]
       },
       {
-        "Name": "TrackDiscardConfirmation",
+        "Name": "TrackHoldConfirmation",
         "CanvasBufferSize": 3600,
         "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "timerRing",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "TimerRing"
+          },
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
@@ -701,26 +709,6 @@
             "Height": 146,
             "LockPosition": true,
             "CustomContainerDefinitionName": "Buttons"
-          },
-          {
-            "Type": "TextArea",
-            "Name": "questionText",
-            "X": 35,
-            "Y": 88,
-            "Width": 170,
-            "Height": 80,
-            "LockPosition": true,
-            "TextId": "TMP_SEMIBOLD_20",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 192,
-              "Green": 192,
-              "Blue": 192
-            },
-            "LineSpacing": -5,
-            "Wildcard1": {
-              "TextId": "TEXT_DO_YOU_WANT_ACTIVITY"
-            }
           },
           {
             "Type": "Image",
@@ -733,13 +721,42 @@
             "RelativeFilename": "TickAmber_22x17.png"
           },
           {
-            "Type": "CustomContainerInstance",
-            "Name": "title",
-            "X": 50,
-            "Width": 140,
-            "Height": 41,
+            "Type": "TextArea",
+            "Name": "questionText",
+            "X": 53,
+            "Y": 67,
+            "Width": 133,
+            "Height": 46,
             "LockPosition": true,
-            "CustomContainerDefinitionName": "Title"
+            "TextId": "TEXT_HOLD_TO_FINISH",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "LineSpacing": -5
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timeValue",
+            "X": 102,
+            "Y": 103,
+            "Width": 36,
+            "Height": 90,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_60",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_HOLD_COUNTDOWN",
+              "UseBuffer": true,
+              "BufferSize": 5
+            }
           }
         ],
         "Interactions": [
@@ -751,7 +768,7 @@
             "Action": {
               "Type": "ActionGotoScreen",
               "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "TrackDiscardConfirmation"
+              "ActionComponent": "TrackHoldConfirmation"
             }
           }
         ]
@@ -1610,6 +1627,49 @@
             "LineWidth": 8.5,
             "StartAngle": 290.0,
             "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "TimerRing",
+        "Width": 240,
+        "Height": 240,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "track",
+            "Width": 240,
+            "Height": 240,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 138.0,
+            "EndAngle": 402.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "progress",
+            "Width": 240,
+            "Height": 240,
+            "Color": {
+              "Red": 192,
+              "Green": 128
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 138.0,
+            "EndAngle": 160.0,
             "CapPrecision": "Round"
           }
         ],

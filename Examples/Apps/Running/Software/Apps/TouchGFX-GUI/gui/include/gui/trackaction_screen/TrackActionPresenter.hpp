@@ -31,6 +31,9 @@ public:
 
     void resumeTrack();
 
+    /** Select which action the shared hold-confirm screen will perform. */
+    void setHoldConfirmMode(Model::HoldConfirmMode mode) { model->setHoldConfirmMode(mode); }
+
 private:
     TrackActionPresenter();
 

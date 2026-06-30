@@ -18,7 +18,7 @@ TrackSavedViewBase::TrackSavedViewBase()
     subtitleText.setPosition(48, 156, 144, 57);
     subtitleText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     subtitleText.setLinespacing(0);
-    subtitleTextBuffer[0] = 0;
+    Unicode::snprintf(subtitleTextBuffer, SUBTITLETEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_ACTIVITY_UPLOADED).getText());
     subtitleText.setWildcard(subtitleTextBuffer);
     subtitleText.setTypedText(touchgfx::TypedText(T_TMP_MEDIUM_18));
     add(subtitleText);

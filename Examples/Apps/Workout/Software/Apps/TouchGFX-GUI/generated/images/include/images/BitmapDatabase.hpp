@@ -24,7 +24,9 @@ const uint16_t BITMAP_PAUSE_14X14_ID = 14;
 const uint16_t BITMAP_SENSORHRDARK_ID = 15;
 const uint16_t BITMAP_SENSORHRLIGHT_ID = 16;
 const uint16_t BITMAP_TICKAMBER_22X17_ID = 17;
-const uint16_t BITMAP_WORKOUTMAN_30X30_ID = 18;
+const uint16_t BITMAP_TICKGREEN_22X17_ID = 18;
+const uint16_t BITMAP_TICKRED_22X17_ID = 19;
+const uint16_t BITMAP_WORKOUTMAN_30X30_ID = 20;
 
 namespace BitmapDatabase
 {

@@ -182,6 +182,16 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         infoCarousel.refresh();
     }
 
+    // Discard starts a hold-to-confirm (press & hold R1) opening the countdown screen,
+    // which counts down while R1 stays held; releasing early returns here. Save & End
+    // and the other items stay plain taps (Save routes to Calibrate & Save).
+    if (key == SDK::GUI::Button::R1_PRESS) {
+        if (menuLayout.getSelectedItem() == Menu::ID_DISCARD) {
+            presenter->setHoldConfirmMode(Model::HoldConfirmMode::Discard);
+            application().gotoTrackHoldConfirmationScreenNoTransition();
+        }
+    }
+
     if (key == SDK::GUI::Button::R1) {
         switch (menuLayout.getSelectedItem()) {
         case Menu::ID_RESUME:
@@ -193,9 +203,6 @@ void TrackActionView::handleKeyEvent(uint8_t key)
             break;
         case Menu::ID_SAVE:
             presenter->saveRequested();
-            break;
-        case Menu::ID_DISCARD:
-            application().gotoTrackDiscardConfirmationScreenNoTransition();
             break;
         default:
             break;

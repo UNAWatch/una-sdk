@@ -906,9 +906,17 @@
         ]
       },
       {
-        "Name": "TrackDiscardConfirmation",
+        "Name": "TrackHoldConfirmation",
         "CanvasBufferSize": 3600,
         "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "timerRing",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "TimerRing"
+          },
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
@@ -917,28 +925,6 @@
             "Height": 146,
             "LockPosition": true,
             "CustomContainerDefinitionName": "Buttons"
-          },
-          {
-            "Type": "TextArea",
-            "Name": "questionText",
-            "X": 35,
-            "Y": 88,
-            "Width": 170,
-            "Height": 80,
-            "LockPosition": true,
-            "TextId": "TMP_SEMIBOLD_20",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 192,
-              "Green": 192,
-              "Blue": 192
-            },
-            "LineSpacing": -5,
-            "Wildcard1": {
-              "TextId": "TEXT_DO_YOU_WANT_ACTIVITY",
-              "UseBuffer": true,
-              "BufferSize": 40
-            }
           },
           {
             "Type": "Image",
@@ -951,13 +937,42 @@
             "RelativeFilename": "TickAmber_22x17.png"
           },
           {
-            "Type": "CustomContainerInstance",
-            "Name": "title",
-            "X": 50,
-            "Width": 140,
-            "Height": 41,
+            "Type": "TextArea",
+            "Name": "questionText",
+            "X": 53,
+            "Y": 67,
+            "Width": 133,
+            "Height": 46,
             "LockPosition": true,
-            "CustomContainerDefinitionName": "Title"
+            "TextId": "TEXT_HOLD_TO_FINISH",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "LineSpacing": -5
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timeValue",
+            "X": 102,
+            "Y": 103,
+            "Width": 36,
+            "Height": 90,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_60",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_HOLD_COUNTDOWN",
+              "UseBuffer": true,
+              "BufferSize": 5
+            }
           }
         ],
         "Interactions": [
@@ -969,7 +984,7 @@
             "Action": {
               "Type": "ActionGotoScreen",
               "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "TrackDiscardConfirmation"
+              "ActionComponent": "TrackHoldConfirmation"
             }
           }
         ]
