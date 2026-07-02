@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    SensorDataParserAccelerometer.hpp
+ * @file    SensorDataParserGyroscope.hpp
  * @date    23-March-2026
  * @author  Oleksandr Tymoshenko <oleksandr.tymoshenko@droid-technologies.com>
  * @brief   Sensor data parser for GYROSCOPE sensor
@@ -100,9 +100,9 @@ namespace SDK
                     return false;
                 }
 
-                x = mData.i[Field::X];
-                y = mData.i[Field::Y];
-                z = mData.i[Field::Z];
+                x = mData.f[Field::X];
+                y = mData.f[Field::Y];
+                z = mData.f[Field::Z];
 
                 return true;
             }
