@@ -17,8 +17,8 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 |----------|------|-----------|-------------|------------------|--------|
 | IMU | ACCELEROMETER | 0x10 | Acceleration (3-axis) | Yes | X,Y,Z (float g) - 3 |
 | IMU | ACCELEROMETER_RAW | 0x11 | Acceleration raw | Yes | X,Y,Z (int16 raw) - 3 |
-| IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | No | - |
-| IMU | GYROSCOPE_RAW | 0x21 | Angular rate raw | No | - |
+| IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | Yes | X,Y,Z (float) - 3 |
+| IMU | GYROSCOPE_RAW | 0x21 | Angular rate raw | Yes | X,Y,Z (int16 raw) - 3 |
 | IMU | MAGNETIC_FIELD | 0x30 | Magnetic field (3-axis) | No | - |
 | Cardio | HEART_BEAT | 0x40 | Beat peak event | No | - |
 | Cardio | HEART_RATE | 0x41 | Current heart rate (bpm) | Yes | BPM (float), TRUST_LEVEL (float) - 2 |
@@ -43,8 +43,8 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | Battery | BATTERY_LEVEL | 0x120 | Charge level (%) | Yes | LEVEL (f 0-100) - 1 |
 | Battery | BATTERY_CHARGING | 0x121 | Charging state | Yes | CONNECTED (u32 bool), CHARGING (u32 bool) - 2 |
 | Battery | BATTERY_METRICS | 0x122 | Voltage/current/capacity | Yes | VOLTAGE (f V), CURRENT (f mA), AVG_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh) - 5 |
-| Fusion | FUSION | 0x130 | Fused IMU | No | - |
-| Fusion | FUSION_RAW | 0x131 | Raw fusion inputs | No | - |
+| Fusion | FUSION | 0x130 | Fused IMU | Yes | ACCEL_X,Y,Z + GYRO_X,Y,Z (float) - 6 |
+| Fusion | FUSION_RAW | 0x131 | Raw fusion inputs | Yes | ACCEL_X,Y,Z + GYRO_X,Y,Z (int16 raw) - 6 |
 | Touch | TOUCH_DETECT | 0x140 | Touch/worn/unworn | Yes | TOUCH (u32 bool) - 1 |
 
 ## Connection API
@@ -281,10 +281,10 @@ Blood-oxygen saturation derived from the optical PPG path. Delivered as a proces
 
 **Fields**: TOUCH (bool)
 
-For sensors without parsers (e.g. GYROSCOPE), use DataView:
+For sensors without parsers (e.g. MAGNETIC_FIELD), use DataView:
 ```cpp
 SDK::Sensor::DataView view = batch[0];
-float gyroX = view.f[0]; // Assume layout known from driver docs
+float magX = view.f[0]; // Assume layout known from driver docs
 ```
 
 ## Workflow Diagram

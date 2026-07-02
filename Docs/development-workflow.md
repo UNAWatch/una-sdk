@@ -551,7 +551,7 @@ void sendResponse(MessageBase* msg) {
 
 **OTA Update Process:**
 1. File transfer via BLE to `2:/Update/` directory
-2. CRC and signature verification
+2. CRC verification
 3. Atomic replacement with rollback capability
 4. System reboot to activate new version
 
