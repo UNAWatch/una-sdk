@@ -18,10 +18,15 @@ public:
 
     void setRestValue(const Settings::Intervals& iv, bool isImperial);
 
+    void setGpsFix(bool state);
+    void setAccessoryStatus(uint8_t state, const char* name);
+
 protected:
     using Menu = App::MenuNav::Root::Intervals::Metric;
 
     static const uint16_t kBuffSize = 16;
+
+    bool mGpsFix = false;
     touchgfx::Unicode::UnicodeChar mTimeTipBuff[kBuffSize] {};
     touchgfx::Unicode::UnicodeChar mDistanceTipBuff[kBuffSize] {};
 

@@ -28,6 +28,8 @@ public:
     virtual ~MenuIntervalsRepeatsPresenter() {}
 
     virtual void onIdleTimeout() override { model->exitApp(); }
+    virtual void onGpsFix(bool acquired) override;
+    virtual void onAccessoryStatus(uint8_t state, const char* name) override;
 
     void saveRepeats(uint8_t repeatsNum);
 

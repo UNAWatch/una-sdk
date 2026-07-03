@@ -1,4 +1,5 @@
 #include <gui/containers/MainMenuLayout.hpp>
+#include <images/BitmapDatabase.hpp>
 
 MainMenuLayout::MainMenuLayout()
 {
@@ -13,6 +14,14 @@ void MainMenuLayout::initialize()
     buttons.setL2(Buttons::NONE);
     buttons.setR1(Buttons::AMBER);
     buttons.setR2(Buttons::WHITE);
+
+    // Pre-activity sensor-status row in the old infoText slot. Hidden until a
+    // screen opts in (value-entry pickers reuse this space, so they don't).
+    add(mSensorRow);
+    mSensorRow.setPosition(0, 52, 240, 24);
+    mSensorRow.setIcons(BITMAP_SENSORGPSDARK_ID, BITMAP_SENSORGPSLIGHT_ID,
+                        BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
+    mSensorRow.setVisible(false);
 }
 
 // ---- Delegated wheel operations --------------------------------------------
@@ -135,6 +144,30 @@ void MainMenuLayout::setInfoMsgColor(touchgfx::colortype color)
 {
     infoText.setColor(color);
     infoText.invalidate();
+}
+
+// ---- Sensor status row -----------------------------------------------------
+
+void MainMenuLayout::showSensorRow(bool show)
+{
+    // The row occupies the old infoText slot; keep them mutually exclusive
+    // so a stray setInfoMsg() can never overlap the sensor icons.
+    if (show) {
+        infoText.setVisible(false);
+        infoText.invalidate();
+    }
+    mSensorRow.setVisible(show);
+    mSensorRow.invalidate();
+}
+
+void MainMenuLayout::setGps(bool fix)
+{
+    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(fix));
+}
+
+void MainMenuLayout::setHr(uint8_t accessoryState)
+{
+    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(accessoryState));
 }
 
 // ---- Getters ---------------------------------------------------------------

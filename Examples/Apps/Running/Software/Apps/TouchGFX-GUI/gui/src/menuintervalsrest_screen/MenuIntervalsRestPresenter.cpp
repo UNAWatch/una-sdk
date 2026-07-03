@@ -25,11 +25,24 @@ void MenuIntervalsRestPresenter::activate()
     view.setRestValue(iv, model->isUnitsImperial());
     view.setPositionId(metricToMenuId(iv.restMetric));
     model->resetIdleTimer();
+
+    view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState(), "");
 }
 
 void MenuIntervalsRestPresenter::deactivate()
 {
     model->menu().intervals.rest.set(view.getPositionId());
+}
+
+void MenuIntervalsRestPresenter::onGpsFix(bool acquired)
+{
+    view.setGpsFix(acquired);
+}
+
+void MenuIntervalsRestPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuIntervalsRestPresenter::saveOpenRest()

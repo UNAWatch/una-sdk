@@ -16,6 +16,7 @@ void MenuSettingsView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
 
+    menuLayout.showSensorRow(true);
     setGpsFix(mGpsFix);
 
     menuLayout.invalidate();
@@ -29,7 +30,12 @@ void MenuSettingsView::tearDownScreen()
 void MenuSettingsView::setGpsFix(bool state)
 {
     mGpsFix = state;
-    menuLayout.setInfoMsg(state ? T_TEXT_SIGNAL_ACQUIRED : T_TEXT_ACQUIRING_SIGNAL);
+    menuLayout.setGps(state);
+}
+
+void MenuSettingsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuSettingsView::setPhoneNotif(bool state)

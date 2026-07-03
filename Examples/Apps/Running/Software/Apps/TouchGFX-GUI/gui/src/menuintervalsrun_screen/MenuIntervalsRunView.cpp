@@ -17,12 +17,27 @@ void MenuIntervalsRunView::setupScreen()
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
+
+    menuLayout.showSensorRow(true);
+    setGpsFix(mGpsFix);
+
     menuLayout.invalidate();
 }
 
 void MenuIntervalsRunView::tearDownScreen()
 {
     MenuIntervalsRunViewBase::tearDownScreen();
+}
+
+void MenuIntervalsRunView::setGpsFix(bool state)
+{
+    mGpsFix = state;
+    menuLayout.setGps(state);
+}
+
+void MenuIntervalsRunView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuIntervalsRunView::setupItems()
