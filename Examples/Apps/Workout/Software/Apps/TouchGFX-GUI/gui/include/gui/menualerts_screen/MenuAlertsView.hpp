@@ -14,6 +14,7 @@ public:
     virtual void tearDownScreen();
 
     void setTime(Settings::Alerts::Time::Id id);
+    void setAccessoryStatus(uint8_t state, const char* name);
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 

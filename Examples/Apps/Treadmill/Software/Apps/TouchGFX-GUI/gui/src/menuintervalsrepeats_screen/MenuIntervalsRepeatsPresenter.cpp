@@ -11,6 +11,13 @@ void MenuIntervalsRepeatsPresenter::activate()
 {
     view.setPositionId(model->getSettings().intervals.repeatsNum);
     model->resetIdleTimer();
+
+    view.setAccessoryStatus(model->getAccessoryState(), "");
+}
+
+void MenuIntervalsRepeatsPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuIntervalsRepeatsPresenter::deactivate()

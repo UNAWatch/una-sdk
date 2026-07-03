@@ -14,6 +14,9 @@ public:
 
     void setIntervals(const Settings::Intervals & inervals, bool isImperial);
 
+    void setGpsFix(bool state);
+    void setAccessoryStatus(uint8_t state, const char* name);
+
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
@@ -21,6 +24,9 @@ protected:
     using Menu = App::MenuNav::Root::Intervals;
 
     static const uint16_t kBuffSize = 16;
+
+    bool mGpsFix = false;
+
     touchgfx::Unicode::UnicodeChar mRepeatsTipBuff[kBuffSize] {};
     touchgfx::Unicode::UnicodeChar mRunTipBuff[kBuffSize] {};
     touchgfx::Unicode::UnicodeChar mRestTipBuff[kBuffSize] {};

@@ -13,7 +13,13 @@ void MenuSettingsPresenter::activate()
     model->menu().settings.resetChildren();
     model->resetIdleTimer();
 
+    view.setAccessoryStatus(model->getAccessoryState(), "");
     view.setPhoneNotif(model->getSettings().phoneNotifEn);
+}
+
+void MenuSettingsPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuSettingsPresenter::deactivate()

@@ -13,6 +13,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    void setAccessoryStatus(uint8_t state, const char* name);
     void setPhoneNotif(bool state);
     void setPositionId(uint16_t id);
     uint16_t getPositionId();

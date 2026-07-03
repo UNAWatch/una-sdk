@@ -16,12 +16,27 @@ void MenuIntervalsRepeatsView::setupScreen()
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::kMaxCount);
+
+    menuLayout.showSensorRow(true);
+    setGpsFix(mGpsFix);
+
     menuLayout.invalidate();
 }
 
 void MenuIntervalsRepeatsView::tearDownScreen()
 {
     MenuIntervalsRepeatsViewBase::tearDownScreen();
+}
+
+void MenuIntervalsRepeatsView::setGpsFix(bool state)
+{
+    mGpsFix = state;
+    menuLayout.setGps(state);
+}
+
+void MenuIntervalsRepeatsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuIntervalsRepeatsView::formatItem(touchgfx::Unicode::UnicodeChar* buf, int16_t index)

@@ -4,6 +4,7 @@
 #include <gui_generated/containers/MainMenuLayoutBase.hpp>
 #include <gui/containers/MenuItemConfig.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/SensorStatusRow.hpp>
 
 /**
  * @brief Standard full-screen menu layout container.
@@ -69,11 +70,22 @@ public:
     void setInfoMsg(TypedTextId msgId);
     void setInfoMsgColor(touchgfx::colortype color);
 
+    // ---- Sensor status row (GPS / external HR) -----------------------------
+    // Shared pre-activity icon bar, occupying the old infoText slot. Hidden by
+    // default; pre-activity menu screens opt in with showSensorRow(true) and
+    // forward live state via setGps()/setHr().
+    void showSensorRow(bool show);
+    void setGps(bool fix);
+    void setHr(uint8_t accessoryState);
+
     // ---- Getters -----------------------------------------------------------
     /** Direct access to navigation buttons (set L1/L2/R1/R2 state). */
     Buttons  &getButtons();
     /** Direct access to the scroll wheel menu (for advanced operations). */
     MainMenu &getMenu();
+
+private:
+    SDK::Gui::SensorStatusRow mSensorRow;
 };
 
 #endif // MAINMENULAYOUT_HPP

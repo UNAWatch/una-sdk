@@ -25,6 +25,13 @@ void MenuIntervalsRunPresenter::activate()
     view.setRunValue(iv, model->isUnitsImperial());
     view.setPositionId(metricToMenuId(iv.runMetric));
     model->resetIdleTimer();
+
+    view.setAccessoryStatus(model->getAccessoryState(), "");
+}
+
+void MenuIntervalsRunPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuIntervalsRunPresenter::deactivate()

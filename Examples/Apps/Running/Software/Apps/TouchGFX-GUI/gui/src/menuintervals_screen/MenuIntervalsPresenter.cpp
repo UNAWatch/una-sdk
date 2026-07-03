@@ -14,11 +14,23 @@ void MenuIntervalsPresenter::activate()
     model->resetIdleTimer();
 
     view.setIntervals(model->getSettings().intervals, model->isUnitsImperial());
+    view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState(), "");
 }
 
 void MenuIntervalsPresenter::deactivate()
 {
     model->menu().intervals.set(view.getPositionId());
+}
+
+void MenuIntervalsPresenter::onGpsFix(bool acquired)
+{
+    view.setGpsFix(acquired);
+}
+
+void MenuIntervalsPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuIntervalsPresenter::onIdleTimeout()

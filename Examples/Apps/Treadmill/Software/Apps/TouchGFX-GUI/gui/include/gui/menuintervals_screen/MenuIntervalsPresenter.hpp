@@ -28,6 +28,7 @@ public:
     virtual ~MenuIntervalsPresenter() {}
 
     virtual void onIdleTimeout() override;
+    virtual void onAccessoryStatus(uint8_t state, const char* name) override;
 
     void saveWarmUp(bool enable);
     void saveCoolDown(bool enable);

@@ -21,6 +21,8 @@ public:
     virtual ~MenuIntervalsRestPresenter() {}
 
     virtual void onIdleTimeout() override { model->exitApp(); }
+    virtual void onGpsFix(bool acquired) override;
+    virtual void onAccessoryStatus(uint8_t state, const char* name) override;
 
 private:
     MenuIntervalsRestPresenter();

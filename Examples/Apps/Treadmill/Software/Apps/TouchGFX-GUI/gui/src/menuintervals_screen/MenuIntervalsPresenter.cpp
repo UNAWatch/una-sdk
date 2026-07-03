@@ -13,7 +13,13 @@ void MenuIntervalsPresenter::activate()
     model->menu().intervals.resetChildren();
     model->resetIdleTimer();
 
+    view.setAccessoryStatus(model->getAccessoryState(), "");
     view.setIntervals(model->getSettings().intervals, model->isUnitsImperial());
+}
+
+void MenuIntervalsPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuIntervalsPresenter::deactivate()
