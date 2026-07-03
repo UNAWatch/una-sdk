@@ -144,6 +144,12 @@ bool File::open(bool wMode, bool override)
         flags = O_RDWR | O_CREAT;
     }
 
+    // Release any descriptor from a prior open() so reopening cannot leak it.
+    if (fd >= 0) {
+        ::close(fd);
+        fd = -1;
+    }
+
     fd = ::open(path.c_str(), flags, 0644);
     return fd >= 0;
 #endif
@@ -395,6 +401,10 @@ bool Directory::open()
     isOpenFlag = (handle != INVALID_HANDLE_VALUE);
     hasEntry = isOpenFlag;
 #else
+    // Release any stream from a prior open() so reopening cannot leak it.
+    if (handle != nullptr) {
+        ::closedir(handle);
+    }
     handle = ::opendir(path.c_str());
     isOpenFlag = (handle != nullptr);
 #endif

@@ -266,4 +266,31 @@ TEST_F(MockFileSystemTest, DirectoryDestructorReleasesHandle)
     }));
 }
 
+// Reopening the same object without an intervening close() must release the
+// previous handle; otherwise each open() leaks a descriptor and the lowered
+// fd limit is exhausted.
+TEST_F(MockFileSystemTest, FileReopenReleasesPreviousFd)
+{
+    FileSystem fs(root.c_str());
+    { auto f = fs.file("seed"); size_t bw = 0; f->open(true, true); f->write("x", 1, bw); f->close(); }
+
+    auto f = fs.file("seed");
+    EXPECT_TRUE(opensWithoutLeaking([&] {
+        return f->open(false); // no close() between iterations: open() must drop the prior fd
+    }));
+    f->close();
+}
+
+TEST_F(MockFileSystemTest, DirectoryReopenReleasesPreviousHandle)
+{
+    FileSystem fs(root.c_str());
+    ASSERT_TRUE(fs.mkdir("d"));
+
+    auto dir = fs.dir("d");
+    EXPECT_TRUE(opensWithoutLeaking([&] {
+        return dir->open(); // no close() between iterations: open() must drop the prior DIR*
+    }));
+    dir->close();
+}
+
 #endif // !_WIN32
