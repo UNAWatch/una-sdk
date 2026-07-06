@@ -70,6 +70,7 @@ Libs/Source/Simulator/Components/Sensors/HeartRate/SensorHeartRate.cpp\
 Libs/Source/Simulator/Components/Sensors/SensorPressure.cpp\
 Libs/Source/Simulator/Components/Sensors/Imu/ImuWristMotion.cpp\
 Libs/Source/Simulator/Components/Sensors/Imu/ImuStepCounter.cpp\
+Libs/Source/Simulator/Components/Sensors/Imu/ImuRunningCadence.cpp\
 Libs/Source/Simulator/Components/ComponentSimulator.cpp\
 Libs/Source/Simulator/Components/Simulator/GpsStepCounterSimulator.cpp\
 Libs/Source/Simulator/Components/SensorListener.cpp\

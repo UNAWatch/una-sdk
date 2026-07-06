@@ -71,10 +71,14 @@ Libs/Source/Simulator/Components/Sensors/HeartRate/SensorHeartRate.cpp\
 Libs/Source/Simulator/Components/Sensors/SensorPressure.cpp\
 Libs/Source/Simulator/Components/Sensors/Imu/ImuWristMotion.cpp\
 Libs/Source/Simulator/Components/Sensors/Imu/ImuStepCounter.cpp\
+Libs/Source/Simulator/Components/Sensors/Imu/ImuRunningCadence.cpp\
 Libs/Source/Simulator/Components/ComponentSimulator.cpp\
 Libs/Source/Simulator/Components/Simulator/GpsStepCounterSimulator.cpp\
 Libs/Source/Simulator/Components/SensorListener.cpp\
 Libs/Source/Simulator/Components/SensorDriver.cpp\
+Libs/Source/Fit/FitCrc.cpp\
+Libs/Source/Fit/FitWriter.cpp\
+Libs/Source/Fit/FitRecordCadence.cpp\
 ../../Libs/Sources/ActivitySummarySerializer.cpp\
 ../../Libs/Sources/ActivityWriter.cpp\
 ../../Libs/Sources/Service.cpp\
@@ -95,9 +99,3 @@ all assets: $(filter clean,$(MAKECMDGOALS))
 all clean assets:
 	@$(MAKE) -r -f una/Makefile -s $(MFLAGS) $@ -C "$(application_path)"
 endif
-
-
-# Native SDK::Fit encoder sources
-C_SRCS_FIT += $(SDK_LOC)/Libs/Source/Fit/FitCrc.cpp
-C_SRCS_FIT += $(SDK_LOC)/Libs/Source/Fit/FitWriter.cpp
-C_SRCS_FIT += $(SDK_LOC)/Libs/Source/Fit/FitRecordCadence.cpp
