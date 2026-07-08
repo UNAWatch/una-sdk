@@ -18,9 +18,8 @@ namespace {
 // samples is > 0 so a lap boundary is generally crossed mid-sample, producing
 // an overshoot -- exactly the condition that used to make laps drift.
 //
-// The stream starts at a non-zero base: MonotonicCounter treats a first sample
-// equal to T{} as a not-yet-seeded sentinel and would re-seat the base on the
-// following call, which is not the behaviour under test here.
+// The stream starts at a non-zero base to mimic an absolute odometer; the
+// lap-drift maths is independent of the base value.
 constexpr float kBase = 10000.0f;
 
 std::vector<float> makeStream(float stepM, int samples)
@@ -36,6 +35,24 @@ std::vector<float> makeStream(float stepM, int samples)
 }
 
 } // namespace
+
+// The base is seated on the very first sample, even when that sample is 0, so
+// the first real movement after a zero start is counted rather than consumed
+// as a second base point.
+TEST(MonotonicCounter, FirstMovementFromZeroNotDropped)
+{
+    MonotonicCounter<float> c;
+    c.init();
+
+    c.add(0.0f);   // seat base at 0
+    c.add(5.0f);   // first movement -- must count, not re-seat the base
+
+    EXPECT_FLOAT_EQ(c.getValueActive(), 5.0f);
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 5.0f);
+
+    c.add(11.0f);
+    EXPECT_FLOAT_EQ(c.getValueActive(), 11.0f);
+}
 
 // Baseline behaviour: resetLap() re-bases at the next sample, discarding the
 // overshoot. This is what caused the drift and is preserved for manual /

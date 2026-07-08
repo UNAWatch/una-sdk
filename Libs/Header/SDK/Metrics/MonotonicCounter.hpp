@@ -236,7 +236,11 @@ void MonotonicCounter<T>::add(T currentValue)
         return;
     }
 
-    if (mBaseValue == T{} && mValueActive == T{}) {
+    // Seat the base on the first sample. Keyed off mHasData, not the values:
+    // a first sample equal to T{} (e.g. distance starting at 0) would otherwise
+    // keep the value-sentinel true and re-seat on the next call, dropping the
+    // first real movement.
+    if (!mHasData) {
         mBaseValue         = currentValue;
         mBaseValueTotal    = currentValue;
         mLapBaseValue      = currentValue;
@@ -247,7 +251,9 @@ void MonotonicCounter<T>::add(T currentValue)
         return;
     }
 
-    if (mLapBaseValue == T{} && mLapValueActive == T{}) {
+    // Re-seat the lap base on the first sample after resetLap(); keyed off
+    // mHasLapData for the same reason as above.
+    if (!mHasLapData) {
         mLapBaseValue      = currentValue;
         mLapBaseValueTotal = currentValue;
         mHasLapData        = true;
