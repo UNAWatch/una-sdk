@@ -51,7 +51,10 @@ public:
     void reset();
 
     /**
-     * @brief Reset current lap values only. Total values are preserved.
+     * @brief Close the current lap and start a new one from the current
+     *        position, gap-free. Lap values reset to zero; total values are
+     *        preserved. Unlike a re-seat on the next sample, no sub-sample
+     *        distance is dropped at the lap boundary.
      */
     void resetLap();
 
@@ -209,11 +212,17 @@ void MonotonicCounter<T>::reset()
 template<typename T>
 void MonotonicCounter<T>::resetLap()
 {
+    // Close the current lap exactly where it stands and start the next lap
+    // there, with no gap: advance each lap base by the amount this lap already
+    // consumed (active and includes-pauses independently, so pauses stay
+    // correct). The old approach zeroed the base and re-seated on the *next*
+    // sample, which dropped the sub-sample sliver between the lap event and the
+    // following sample. Base stays seated (mHasLapData untouched), so add()
+    // keeps accumulating contiguously.
+    mLapBaseValue      = mLapBaseValue      + mLapValueActive;
+    mLapBaseValueTotal = mLapBaseValueTotal + mLapValueTotal;
     mLapValueActive    = T{};
     mLapValueTotal     = T{};
-    mLapBaseValue      = T{};
-    mLapBaseValueTotal = T{};
-    mHasLapData        = false;
 }
 
 template<typename T>
@@ -239,7 +248,8 @@ void MonotonicCounter<T>::add(T currentValue)
     // Seat the base on the first sample. Keyed off mHasData, not the values:
     // a first sample equal to T{} (e.g. distance starting at 0) would otherwise
     // keep the value-sentinel true and re-seat on the next call, dropping the
-    // first real movement.
+    // first real movement. This also seats the lap base; resetLap()/advanceLap()
+    // keep the lap base seated afterwards, so there is no separate re-seat path.
     if (!mHasData) {
         mBaseValue         = currentValue;
         mBaseValueTotal    = currentValue;
@@ -249,14 +259,6 @@ void MonotonicCounter<T>::add(T currentValue)
         mHasData           = true;
         mHasLapData        = true;
         return;
-    }
-
-    // Re-seat the lap base on the first sample after resetLap(); keyed off
-    // mHasLapData for the same reason as above.
-    if (!mHasLapData) {
-        mLapBaseValue      = currentValue;
-        mLapBaseValueTotal = currentValue;
-        mHasLapData        = true;
     }
 
     if (currentValue < mLastValidValue) {
