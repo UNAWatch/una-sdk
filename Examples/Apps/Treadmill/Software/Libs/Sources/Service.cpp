@@ -117,6 +117,13 @@ void Service::run()
         LOG_WARNING("Failed to load activity summary\n");
     }
 
+    // Recover any activity a previous boot left unfinished (power loss /
+    // crash mid-recording), before any new track can start.
+    if (mActivityWriter.recoverInterrupted()) {
+        LOG_INFO("Recovered an interrupted activity\n");
+        notifyNewActivity();
+    }
+
     SDK::Timer guiInitTimeout(TIMER_SECONDS(5));
     guiInitTimeout.start();
 
@@ -1088,8 +1095,13 @@ void Service::finalizeActivity(float distanceActualM)
     }
     mGuiSender.summary(&mSummary);
 
-    mActivityWriter.stop(mPendingFitTrack);
-    notifyNewActivity();
+    if (mActivityWriter.stop(mPendingFitTrack)) {
+        notifyNewActivity();
+    } else {
+        LOG_ERROR("activity save failed\n");
+        // Do NOT notify: the .fit is left unfinished, so the crash-recovery
+        // marker (if any) stays for the next boot to finalize.
+    }
 
     mAwaitingCalibration = false;
     LOG_INFO("Activity finalised: dist %.1f m (calibrated=%d, deltaUpdated=%d)\n",

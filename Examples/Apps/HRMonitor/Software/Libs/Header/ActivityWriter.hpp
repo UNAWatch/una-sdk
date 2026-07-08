@@ -16,6 +16,7 @@
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Fit/FitProfile.hpp"
 #include "SDK/Fit/FitWriter.hpp"
+#include "SDK/Fit/RecordingMarker.hpp"
 
 /**
  * @class ActivityWriter
@@ -66,8 +67,19 @@ public:
     void start(const AppInfo& info);
     void addRecord(const RecordData& record);
     void addLap(const LapData& lap);
-    void stop(const TrackData& track);
+    /// Finalize the current activity. Returns true only if the FIT stream and
+    /// its finish()/flush/close all succeed.
+    bool stop(const TrackData& track);
     void discard();
+
+    /// Finalize an activity that a previous boot left unfinished (power loss /
+    /// crash mid-recording). If the recovery marker exists it names the torn
+    /// .fit and the last record-complete data-end offset; the file is finalized
+    /// via SDK::Fit::FitWriter::recover() and the marker is removed. Returns true
+    /// only when an interrupted activity was recovered into a valid FIT file.
+    /// Safe (returns false, no side effects) when no marker is present. Must run
+    /// before any new activity is started.
+    bool recoverInterrupted();
 
 private:
     /// Local message types (FIT record header, 0-15).
@@ -87,12 +99,17 @@ private:
         DF_HR_TRUST_LEVEL = 0,
     };
 
+    /// Flush + marker-refresh cadence during recording (seconds of record time).
+    static constexpr std::time_t skFlushIntervalSec = 30;
+
     const SDK::Kernel& mKernel;
     const char*        mPath = nullptr;
 
     std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
     std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;
-    uint16_t mLapCounter = 0;
+    SDK::Fit::RecordingMarker              mMarker;   ///< Shared crash-recovery marker.
+    uint16_t    mLapCounter   = 0;
+    std::time_t mLastFlushUtc = 0;   ///< Record timestamp of the last durability flush.
 
     void writeFieldDescription(uint8_t devFieldNum, const char* name,
                                const char* units, SDK::Fit::BaseType baseType);

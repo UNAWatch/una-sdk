@@ -207,6 +207,11 @@ bool InMemoryFileSystem::InMemoryFile::write(const char* buff, size_t btw, size_
         return false;
     }
 
+    // Injected storage failure: refuse writes once the byte budget is spent.
+    if (mFs.bytesWritten >= mFs.failWritesAfterBytes) {
+        return false;
+    }
+
     auto& entry = mFs.files[mPath];
     entry.exists = true;
 
@@ -221,6 +226,7 @@ bool InMemoryFileSystem::InMemoryFile::write(const char* buff, size_t btw, size_
     std::memcpy(entry.content.data() + mPos, buff, btw);
     mPos += btw;
     bw = btw;
+    mFs.bytesWritten += btw;
     return true;
 }
 
@@ -248,6 +254,9 @@ bool InMemoryFileSystem::InMemoryFile::truncate(size_t offset)
 
 bool InMemoryFileSystem::InMemoryFile::flush()
 {
+    if (mOpen) {
+        ++mFs.flushCounts[mPath];
+    }
     return mOpen;
 }
 
