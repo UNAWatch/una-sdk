@@ -56,6 +56,21 @@ public:
     void resetLap();
 
     /**
+     * @brief Close the current lap as exactly @p span and carry the overshoot
+     *        into the next lap.
+     *
+     * Unlike resetLap(), which re-bases at the next sample and therefore
+     * discards whatever was accumulated beyond the lap target, advanceLap()
+     * shifts the lap base forward by @p span. The amount already accumulated
+     * past @p span becomes the starting value of the new lap, so distance-
+     * triggered laps stay pinned to exact multiples of the target instead of
+     * drifting by the per-sample overshoot.
+     *
+     * @param span Lap size to close on, in the counter's value units.
+     */
+    void advanceLap(T span);
+
+    /**
      * @brief Add new metric measurement.
      *
      * First call after init/reset sets the base point.
@@ -199,6 +214,19 @@ void MonotonicCounter<T>::resetLap()
     mLapBaseValue      = T{};
     mLapBaseValueTotal = T{};
     mHasLapData        = false;
+}
+
+template<typename T>
+void MonotonicCounter<T>::advanceLap(T span)
+{
+    // Move the lap base forward by exactly `span`; the excess already covered
+    // this lap (the overshoot past the target) rolls into the new lap so lap
+    // boundaries never drift. Base stays seated, so add() keeps accumulating
+    // instead of re-seating on the next sample.
+    mLapValueActive    = mLapValueActive    - span;
+    mLapValueTotal     = mLapValueTotal     - span;
+    mLapBaseValue      = mLapBaseValue      + span;
+    mLapBaseValueTotal = mLapBaseValueTotal + span;
 }
 
 template<typename T>
