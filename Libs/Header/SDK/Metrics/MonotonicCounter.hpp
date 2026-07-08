@@ -228,6 +228,14 @@ void MonotonicCounter<T>::resetLap()
 template<typename T>
 void MonotonicCounter<T>::advanceLap(T span)
 {
+    // Never advance past what the lap has accumulated: a span larger than the
+    // current lap value would drive the accumulators negative. Callers close on
+    // a target they have already reached (getLapValueActive() >= span), so this
+    // only guards against future misuse. Clamping to the active value keeps the
+    // total non-negative too, since the active value never exceeds the total.
+    if (span > mLapValueActive) {
+        span = mLapValueActive;
+    }
     // Move the lap base forward by exactly `span`; the excess already covered
     // this lap (the overshoot past the target) rolls into the new lap so lap
     // boundaries never drift. Base stays seated, so add() keeps accumulating

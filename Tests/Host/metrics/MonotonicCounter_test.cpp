@@ -188,22 +188,48 @@ TEST(MonotonicCounter, DistanceLapsDoNotDriftWithAdvanceLap)
     EXPECT_FLOAT_EQ(sum, static_cast<float>(fixedLapSizes.size()) * kTarget);
 }
 
-// advanceLap must carry both the active and the total (includes-pauses) lap
-// accumulators so paused sessions stay consistent too.
+// advanceLap must carry the active and the total (includes-pauses) lap
+// accumulators independently. A pause makes them diverge (total > active), so
+// this exercises both carry paths rather than the degenerate active == total.
 TEST(MonotonicCounter, AdvanceLapCarriesActiveAndTotal)
 {
     MonotonicCounter<float> c;
     c.init();
 
-    c.add(kBase);            // seat base
-    c.add(kBase + 1004.0f);
+    c.add(kBase);                 // seat base
+    c.add(kBase + 200.0f);        // 200 m active
 
-    EXPECT_FLOAT_EQ(c.getLapValueActive(), 1004.0f);
+    c.pause();                    // pause at +200
+    c.add(kBase + 500.0f);        // +300 m while paused: total grows, active frozen
+    c.resume();                   // resume at +500
+
+    c.add(kBase + 1004.0f);       // +504 m active after resuming
+
+    // active = 200 + 504 = 704; total = 1004 (includes the 300 m paused).
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 704.0f);
     EXPECT_FLOAT_EQ(c.getLapValueTotal(), 1004.0f);
 
-    c.advanceLap(1000.0f);
+    c.advanceLap(700.0f);
+    // Each accumulator is carried independently: active 704-700, total 1004-700.
     EXPECT_FLOAT_EQ(c.getLapValueActive(), 4.0f);
-    EXPECT_FLOAT_EQ(c.getLapValueTotal(), 4.0f);
+    EXPECT_FLOAT_EQ(c.getLapValueTotal(), 304.0f);
+}
+
+// advanceLap must never drive the accumulators negative: an oversized span is
+// clamped to the current lap value.
+TEST(MonotonicCounter, AdvanceLapClampsOversizedSpan)
+{
+    MonotonicCounter<float> c;
+    c.init();
+
+    c.add(kBase);
+    c.add(kBase + 300.0f);        // lap value 300
+
+    c.advanceLap(1000.0f);        // span > lap value -> clamp to 300
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 0.0f);
+    EXPECT_GE(c.getLapValueActive(), 0.0f);
+    EXPECT_FLOAT_EQ(c.getLapValueTotal(), 0.0f);
+    EXPECT_FLOAT_EQ(c.getValueActive(), 300.0f);  // total unaffected
 }
 
 // End-to-end mix of distance auto-laps and manual laps, mirroring the Service
