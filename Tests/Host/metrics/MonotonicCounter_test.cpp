@@ -54,24 +54,62 @@ TEST(MonotonicCounter, FirstMovementFromZeroNotDropped)
     EXPECT_FLOAT_EQ(c.getValueActive(), 11.0f);
 }
 
-// Baseline behaviour: resetLap() re-bases at the next sample, discarding the
-// overshoot. This is what caused the drift and is preserved for manual /
-// time / final laps.
-TEST(MonotonicCounter, ResetLapDropsOvershoot)
+// resetLap() closes the lap where it stands and starts the next lap there with
+// no gap: the distance travelled between the lap event and the next sample is
+// counted in the new lap, not dropped. (Used for manual / time / final laps.)
+TEST(MonotonicCounter, ResetLapIsGapFree)
 {
     MonotonicCounter<float> c;
     c.init();
 
     c.add(kBase);            // seat base
     c.add(kBase + 6.0f);
-    c.add(kBase + 12.0f);    // lap value now 12, target 10 -> overshoot 2
+    c.add(kBase + 12.0f);    // lap value now 12
 
     EXPECT_FLOAT_EQ(c.getLapValueActive(), 12.0f);
-    c.resetLap();
-    c.add(kBase + 18.0f);    // re-based here; overshoot of 2 is lost
+    c.resetLap();            // close the lap exactly here
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 0.0f);
 
-    EXPECT_FLOAT_EQ(c.getLapValueActive(), 0.0f); // 18 - 18 lap base
+    c.add(kBase + 18.0f);    // +6 m since the lap event
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 6.0f); // sliver counted, not dropped
     EXPECT_FLOAT_EQ(c.getValueActive(), 18.0f);   // total is unaffected
+}
+
+// resetLap() called mid-pause must stay consistent through resume(): the closed
+// lap keeps its pre-pause active distance, and the new lap starts from the reset
+// point with the paused distance correctly excluded from active. The old
+// re-seat path re-based to a mid-pause sample and then had resume() add the
+// pause offset on top, double-counting it into a NEGATIVE lap distance.
+TEST(MonotonicCounter, ResetLapDuringPauseStaysConsistent)
+{
+    MonotonicCounter<float> c;
+    c.init();
+
+    c.add(0.0f);
+    c.add(100.0f);          // 100 m of active distance this lap
+
+    c.pause();              // pause at 100
+    c.add(150.0f);          // sensor keeps moving while paused (not active)
+
+    // Manual lap while paused: closes at the frozen active distance and the
+    // includes-pauses total.
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 100.0f);
+    EXPECT_FLOAT_EQ(c.getLapValueTotal(), 150.0f);
+    c.resetLap();
+
+    c.add(170.0f);          // still paused after the reset -- the old bug trigger
+    c.resume();             // resume at 170; 70 m elapsed during the pause
+
+    c.add(200.0f);          // 30 m of real movement after resuming
+
+    // New lap counts only post-resume active movement; never negative.
+    EXPECT_GE(c.getLapValueActive(), 0.0f);
+    EXPECT_FLOAT_EQ(c.getLapValueActive(), 30.0f);
+    // New lap's includes-pauses total spans the reset point (150) to 200 = 50
+    // (20 m during the pause tail + 30 m active).
+    EXPECT_FLOAT_EQ(c.getLapValueTotal(), 50.0f);
+    // Session active distance excludes the 70 m paused: 100 + 30.
+    EXPECT_FLOAT_EQ(c.getValueActive(), 130.0f);
 }
 
 // advanceLap() carries the overshoot: after closing a 10 m lap at value 12,
@@ -93,15 +131,17 @@ TEST(MonotonicCounter, AdvanceLapCarriesOvershoot)
 }
 
 // The core regression: over many laps, advanceLap keeps the auto-lap firing on
-// exact multiples of the target, while resetLap drifts by the overshoot.
+// exact multiples of the target. resetLap is gap-free but does not carry the
+// overshoot, so a resetLap-driven auto-lap still drifts by the accumulated
+// overshoot -- which is exactly why the distance auto-lap uses advanceLap.
 TEST(MonotonicCounter, DistanceLapsDoNotDriftWithAdvanceLap)
 {
     constexpr float kTarget = 1000.0f;
     // 7 m/s at 1 Hz -> 7 m per sample; boundaries are crossed mid-sample.
     const std::vector<float> stream = makeStream(7.0f, 2000);
 
-    MonotonicCounter<float> drift;   // old behaviour
-    MonotonicCounter<float> fixed;   // new behaviour
+    MonotonicCounter<float> drift;   // resetLap: drifts by accumulated overshoot
+    MonotonicCounter<float> fixed;   // advanceLap: pinned to the grid
     drift.init();
     fixed.init();
 
@@ -164,4 +204,68 @@ TEST(MonotonicCounter, AdvanceLapCarriesActiveAndTotal)
     c.advanceLap(1000.0f);
     EXPECT_FLOAT_EQ(c.getLapValueActive(), 4.0f);
     EXPECT_FLOAT_EQ(c.getLapValueTotal(), 4.0f);
+}
+
+// End-to-end mix of distance auto-laps and manual laps, mirroring the Service
+// lap logic: auto-laps record exactly the target and carry (advanceLap); manual
+// laps record the actual distance and reset (resetLap). Verifies (a) a manual
+// lap re-syncs the auto grid to the manual point -- the next auto fires one full
+// target later, not on the original grid -- and (b) every metre is accounted
+// for: recorded laps + final partial sum to the total distance (no gap).
+TEST(MonotonicCounter, MixedAutoAndManualLaps)
+{
+    constexpr float kTarget    = 1000.0f;
+    constexpr float kManualAt  = 2500.0f;   // press lap here (getValueActive terms)
+    // 7 m/s at 1 Hz; enough samples for autos at ~1k/2k, a manual at 2.5k, then
+    // more autos out past 4.5k.
+    const std::vector<float> stream = makeStream(7.0f, 800);
+
+    MonotonicCounter<float> c;
+    c.init();
+
+    std::vector<float> recorded;        // every closed lap's recorded distance
+    std::vector<float> autoFires;       // cumulative distance at each auto fire
+    float manualFireDist = 0.0f;
+    bool  manualDone      = false;
+
+    for (float sample : stream) {
+        c.add(sample);
+        const float d = c.getValueActive();
+
+        if (!manualDone && d >= kManualAt) {
+            recorded.push_back(c.getLapValueActive());   // manual: actual distance
+            manualFireDist = d;
+            manualDone = true;
+            c.resetLap();
+        } else if (c.getLapValueActive() >= kTarget) {
+            recorded.push_back(kTarget);                 // auto: exactly the target
+            autoFires.push_back(d);
+            c.advanceLap(kTarget);
+        }
+    }
+    recorded.push_back(c.getLapValueActive());           // final partial lap
+    const float total = c.getValueActive();
+
+    ASSERT_TRUE(manualDone);
+
+    // Two autos land on the grid before the manual lap.
+    ASSERT_GE(autoFires.size(), 3u);
+    EXPECT_NEAR(autoFires[0], 1000.0f, 7.0f);
+    EXPECT_NEAR(autoFires[1], 2000.0f, 7.0f);
+
+    // The first auto after the manual lap fires ~1 target past the manual point
+    // (grid re-synced to the manual lap), NOT on the original 3000 m grid line.
+    float firstAutoAfterManual = 0.0f;
+    for (float f : autoFires) {
+        if (f > manualFireDist) { firstAutoAfterManual = f; break; }
+    }
+    ASSERT_GT(firstAutoAfterManual, 0.0f);
+    EXPECT_NEAR(firstAutoAfterManual, manualFireDist + kTarget, 7.0f);
+
+    // Conservation / gap-free: recorded laps + final partial == total distance.
+    // A dropped sub-sample sliver at the manual lap would make this short by
+    // ~one sample step (7 m), far above the 0.5 m float-noise tolerance.
+    float sum = 0.0f;
+    for (float r : recorded) sum += r;
+    EXPECT_NEAR(sum, total, 0.5f);
 }
