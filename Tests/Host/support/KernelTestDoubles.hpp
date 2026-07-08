@@ -127,6 +127,15 @@ public:
     std::string readFile(const std::string& path) const;
 
     std::unordered_map<std::string, InMemoryFileEntry> files;
+
+    // -- Test instrumentation -------------------------------------------------
+    /// Number of successful flush() calls, keyed by file path.
+    std::unordered_map<std::string, size_t> flushCounts;
+    /// Total bytes written across all files (successful writes only).
+    size_t bytesWritten = 0;
+    /// Once bytesWritten reaches this threshold, subsequent write() calls fail
+    /// (simulates a storage write error). Defaults to "never fail".
+    size_t failWritesAfterBytes = static_cast<size_t>(-1);
 };
 
 struct KernelFixture {

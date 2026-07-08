@@ -19,17 +19,29 @@ namespace fit = SDK::Fit;
 
 namespace {
 
-std::vector<uint8_t> findFitFile(const SDK::TestSupport::InMemoryFileSystem& fs)
+std::string findFitPath(const SDK::TestSupport::InMemoryFileSystem& fs)
 {
     for (const auto& kv : fs.files) {
         const std::string& path = kv.first;
-        if (path.size() > 4 && path.compare(path.size() - 4, 4, ".fit") == 0) {
-            const std::string s = fs.readFile(path);
-            return std::vector<uint8_t>(s.begin(), s.end());
+        if (kv.second.exists && path.size() > 4
+            && path.compare(path.size() - 4, 4, ".fit") == 0) {
+            return path;
         }
     }
     return {};
 }
+
+std::vector<uint8_t> findFitFile(const SDK::TestSupport::InMemoryFileSystem& fs)
+{
+    const std::string path = findFitPath(fs);
+    if (path.empty()) {
+        return {};
+    }
+    const std::string s = fs.readFile(path);
+    return std::vector<uint8_t>(s.begin(), s.end());
+}
+
+constexpr const char* kMarkerPath = "Activity/.recording";
 
 }  // namespace
 
@@ -120,4 +132,144 @@ TEST(RunningActivityWriter, ProducesValidFitFile)
     // session sport = running.
     const auto* ses = r.withGlobal(fit::mesgNum(fit::MesgNum::Session)).front();
     EXPECT_EQ(ses->fields.at(5).u(), static_cast<uint64_t>(fit::Sport::Running));
+}
+
+// The .fit is flushed at start, then only when a record crosses a >=30 s
+// boundary (and on every lap). Records at +0/+10/+20/+35/+70 s cross the
+// boundary twice.
+TEST(RunningActivityWriter, FlushCadence)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1000;  // small base keeps the flush deltas obvious
+    info.appID     = "running";
+    w.start(info);
+
+    const std::string fitPath = findFitPath(fx.fileSystem);
+    ASSERT_FALSE(fitPath.empty());
+    const size_t afterStart = fx.fileSystem.flushCounts[fitPath];
+    EXPECT_EQ(afterStart, 1u) << "start() flushes the .fit once (header + defs)";
+
+    const std::time_t offsets[] = {0, 10, 20, 35, 70};
+    for (std::time_t off : offsets) {
+        ActivityWriter::RecordData rec;
+        rec.timestamp = info.timestamp + off;
+        rec.set(ActivityWriter::RecordData::Field::HEART_RATE);
+        rec.heartRate = 120;
+        w.addRecord(rec);
+    }
+    EXPECT_EQ(fx.fileSystem.flushCounts[fitPath] - afterStart, 2u)
+        << "flush only when crossing the >=30 s boundary (at +35 and +70)";
+
+    const size_t beforeLap = fx.fileSystem.flushCounts[fitPath];
+    ActivityWriter::LapData lap;
+    lap.timestamp = info.timestamp + 70;
+    lap.timeStart = info.timestamp;
+    lap.duration  = 70;
+    lap.elapsed   = 70;
+    w.addLap(lap);
+    EXPECT_EQ(fx.fileSystem.flushCounts[fitPath] - beforeLap, 1u) << "each lap flushes";
+}
+
+// End-to-end wiring: a crash (no stop()) leaves the marker; a fresh writer's
+// recoverInterrupted() finalizes the .fit and clears the marker.
+TEST(RunningActivityWriter, RecoverInterruptedThroughApp)
+{
+    SDK::TestSupport::KernelFixture fx;
+
+    {
+        ActivityWriter w(fx.kernel, "Activity");
+        ActivityWriter::AppInfo info;
+        info.timestamp = 1782475200;  // 2026-06-26 12:00 UTC
+        info.appID     = "running";
+        w.start(info);
+
+        ActivityWriter::RecordData rec;
+        rec.timestamp = info.timestamp;
+        rec.set(ActivityWriter::RecordData::Field::HEART_RATE);
+        rec.heartRate = 120;
+        w.addRecord(rec);
+        rec.timestamp = info.timestamp + 1;
+        w.addRecord(rec);
+
+        ActivityWriter::LapData lap;  // laps flush -> marker covers all records
+        lap.timestamp = info.timestamp + 1;
+        lap.timeStart = info.timestamp;
+        lap.duration  = 1;
+        lap.elapsed   = 1;
+        w.addLap(lap);
+        // Crash: no stop() -> file left unfinished, marker present.
+    }
+
+    ASSERT_TRUE(fx.fileSystem.exist(kMarkerPath));
+
+    ActivityWriter fresh(fx.kernel, "Activity");
+    EXPECT_TRUE(fresh.recoverInterrupted());
+    EXPECT_FALSE(fx.fileSystem.exist(kMarkerPath)) << "marker cleared after recovery";
+
+    const std::vector<uint8_t> bytes = findFitFile(fx.fileSystem);
+    ASSERT_FALSE(bytes.empty());
+    testfit::FitReader r(bytes);
+    EXPECT_TRUE(r.ok()) << "recovered .fit parses";
+    EXPECT_TRUE(r.crcValid()) << "recovered .fit CRC verifies";
+
+    // Second call: no marker left -> nothing to do.
+    EXPECT_FALSE(fresh.recoverInterrupted());
+}
+
+// #40: stop() returns whether the activity was durably saved.
+TEST(RunningActivityWriter, StopReturnsTrueOnSuccess)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1782475200;
+    info.appID     = "running";
+    w.start(info);
+
+    ActivityWriter::RecordData rec;
+    rec.timestamp = info.timestamp;
+    rec.set(ActivityWriter::RecordData::Field::HEART_RATE);
+    rec.heartRate = 120;
+    w.addRecord(rec);
+
+    ActivityWriter::TrackData track;
+    track.timestamp = info.timestamp + 1;
+    track.timeStart = info.timestamp;
+    track.duration  = 1;
+    track.elapsed   = 1;
+    EXPECT_TRUE(w.stop(track));
+    EXPECT_FALSE(fx.fileSystem.exist(kMarkerPath)) << "success clears the marker";
+}
+
+TEST(RunningActivityWriter, StopReturnsFalseOnWriteFailure)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1782475200;
+    info.appID     = "running";
+    w.start(info);
+
+    ActivityWriter::RecordData rec;
+    rec.timestamp = info.timestamp;
+    rec.set(ActivityWriter::RecordData::Field::HEART_RATE);
+    rec.heartRate = 120;
+    w.addRecord(rec);
+
+    // Fail every write from here on: the session/activity/finish writes fail.
+    fx.fileSystem.failWritesAfterBytes = fx.fileSystem.bytesWritten;
+
+    ActivityWriter::TrackData track;
+    track.timestamp = info.timestamp + 1;
+    track.timeStart = info.timestamp;
+    track.duration  = 1;
+    track.elapsed   = 1;
+    EXPECT_FALSE(w.stop(track));
+    EXPECT_TRUE(fx.fileSystem.exist(kMarkerPath))
+        << "on failure the marker survives so the next boot recovers the .fit";
 }

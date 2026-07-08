@@ -112,7 +112,35 @@ public:
 
     bool ok() const { return mOk; }
 
+    /// Recover a FIT file that was streamed but never finish()ed (e.g. power
+    /// loss mid-activity), turning it into a complete, CRC-valid file.
+    ///
+    /// Opens @p file read/write WITHOUT truncation, so a torn file is never
+    /// destroyed. If the on-disk header already describes a finalized file
+    /// (non-zero data-size field and a total size of 14 + dataSize + 2), the
+    /// file is already good and is left untouched (idempotent no-op -> true).
+    /// Otherwise it is finalized: the header data size + header CRC are
+    /// back-patched, the file CRC is recomputed by reading the bytes back, the
+    /// CRC is appended, and any torn/garbage tail past @p dataEnd is trimmed.
+    ///
+    /// @p dataEnd is the byte offset one-past the last complete, flushed data
+    /// record. It is supplied by the caller (recover() does not parse FIT
+    /// records -- it trusts @p dataEnd as a record boundary) and must satisfy
+    /// 14 <= dataEnd <= file.size(). Returns false WITHOUT modifying the file on
+    /// a bad/non-FIT header or an out-of-range @p dataEnd.
+    static bool recover(SDK::Interface::IFile& file, uint32_t dataEnd);
+
 private:
+    /// Shared finalization tail used by both finish() and recover(): read the
+    /// on-disk 14-byte header (so protocol/profile survive a reboot), validate
+    /// it, back-patch the data size + header CRC, compute the file CRC over
+    /// [0, dataEnd) by reading the bytes back, append it little-endian at
+    /// dataEnd, and truncate to dataEnd + 2 (dropping any torn tail). Manages
+    /// the file's open mode internally (write handles cannot read). Returns
+    /// false WITHOUT corrupting the file on a bad header or out-of-range
+    /// dataEnd. Requires 14 <= dataEnd <= file.size().
+    static bool finalize(SDK::Interface::IFile& file, uint32_t dataEnd);
+
     bool emitData(uint8_t localType, const std::vector<uint8_t>& payload);
     bool writeBytes(const void* p, size_t n);
 

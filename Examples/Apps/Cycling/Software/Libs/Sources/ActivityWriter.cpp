@@ -33,21 +33,25 @@ namespace {
 }  // namespace
 
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
-    : mKernel(kernel), mPath(pathToDir)
+    : mKernel(kernel), mPath(pathToDir), mMarker(kernel.fs, pathToDir)
 {
     assert(pathToDir != nullptr);
 }
 
 void ActivityWriter::start(const AppInfo& info)
 {
-    mLapCounter = 0;
+    mLapCounter   = 0;
+    mLastFlushUtc = info.timestamp;
 
     if (!createAndOpenFile(info.timestamp)) {
         return;
     }
 
     mFit = std::make_unique<fit::FitWriter>(*mFile);
-    mFit->begin(/*profileVersion=*/0);
+    const bool begun = mFit->begin(/*profileVersion=*/0);
+    if (!begun) {
+        LOG_ERROR("Failed to write FIT header\n");
+    }
 
     // file_id
     mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
@@ -108,6 +112,16 @@ void ActivityWriter::start(const AppInfo& info)
          fit::field::Activity::LocalTimestamp, fit::field::Activity::NumSessions});
 
     addMessageEvent(info.timestamp, fit::EventType::Start);
+
+    // Header + all definitions are on disk: flush and drop the recovery marker.
+    // getPosition() here is a clean record boundary, so a crash after this point
+    // is recoverable up to at least the header/definitions. Only write the
+    // marker when begin() succeeded: a failed begin() leaves a near-empty/broken
+    // .fit that the recovery marker must not point next boot's recover() at.
+    if (begun) {
+        mFile->flush();
+        mMarker.write(mFile->getPath(), static_cast<uint32_t>(mFile->getPosition()));
+    }
 }
 
 void ActivityWriter::defineRecordMessages()
@@ -219,6 +233,17 @@ void ActivityWriter::addRecord(const RecordData& record)
     d.u8(record.hrSource).u8(record.hrOpticalBpm).u8(record.hrExternalBpm);
 
     d.write();
+
+    // Periodic durability flush: sync to eMMC and advance the marker to this
+    // record boundary so a later crash recovers a record-complete file.
+    if (record.timestamp - mLastFlushUtc >= skFlushIntervalSec) {
+        // Only advance the marker when the flush durably landed; otherwise keep
+        // the previous good offset (never point recover() past non-durable data).
+        if (mFile->flush()) {
+            mMarker.update(static_cast<uint32_t>(mFile->getPosition()));
+            mLastFlushUtc = record.timestamp;
+        }
+    }
 }
 
 void ActivityWriter::addLap(const LapData& lap)
@@ -241,15 +266,24 @@ void ActivityWriter::addLap(const LapData& lap)
         .u8(static_cast<uint8_t>(lap.hrMax))
         .write();
     mLapCounter++;
+
+    // Laps are sparse: flush and advance the marker, but only when the flush
+    // durably landed (else keep the previous good offset).
+    if (mFile->flush()) {
+        mMarker.update(static_cast<uint32_t>(mFile->getPosition()));
+        mLastFlushUtc = lap.timestamp;
+    }
 }
 
-void ActivityWriter::stop(const TrackData& track)
+bool ActivityWriter::stop(const TrackData& track)
 {
     if (!mFit) {
-        return;
+        return false;
     }
 
-    mFit->data(L_SESSION)
+    bool ok = mFit->ok();
+
+    ok = mFit->data(L_SESSION)
         .u32(unixToFitTimestamp(track.timestamp))
         .u32(unixToFitTimestamp(track.timeStart))
         .u32(static_cast<uint32_t>(track.elapsed * 1000))
@@ -265,29 +299,43 @@ void ActivityWriter::stop(const TrackData& track)
         .u8(static_cast<uint8_t>(fit::SubSport::Generic))
         .u8(static_cast<uint8_t>(track.hrAvg))
         .u8(static_cast<uint8_t>(track.hrMax))
-        .write();
+        .write() && ok;
 
-    mFit->data(L_ACTIVITY)
+    ok = mFit->data(L_ACTIVITY)
         .u32(unixToFitTimestamp(track.timestamp))
         .u32(static_cast<uint32_t>(track.duration * 1000))
         .u32(unixToFitTimestamp(epochToLocal(track.timestamp)))
         .u16(1)
-        .write();
+        .write() && ok;
 
-    mFit->finish();
+    const bool finishOk = mFit->finish();
+    if (!finishOk) {
+        LOG_ERROR("Failed to finalize FIT file\n");
+    }
+    ok = finishOk && mFit->ok() && ok;
     mFit.reset();
 
     if (mFile) {
-        mFile->flush();
-        mFile->close();
+        ok = mFile->flush() && ok;
+        ok = mFile->close() && ok;
+    } else {
+        ok = false;
     }
 
-    saveSummary(track);
+    // The .fit is durably finished on disk: drop the recovery marker so the
+    // next boot does not treat this activity as interrupted.
+    if (ok) {
+        mMarker.remove();
+    }
+
+    const bool summaryOk = saveSummary(track);
+    return ok && summaryOk;
 }
 
 void ActivityWriter::discard()
 {
     mFit.reset();
+    mMarker.remove();
     if (!mFile) {
         return;
     }
@@ -305,6 +353,19 @@ void ActivityWriter::addMessageEvent(std::time_t t, fit::EventType type)
         .u8(static_cast<uint8_t>(fit::Event::Timer))
         .u8(static_cast<uint8_t>(type))
         .write();
+}
+
+bool ActivityWriter::recoverInterrupted()
+{
+    // All marker I/O + FitWriter::recover() orchestration lives in the shared
+    // SDK::Fit::RecordingMarker. Recovery needs no sibling .json to register a
+    // recovered activity (the kernel's activity registry tracks .fit files
+    // only), so this is pure wiring.
+    const auto result = mMarker.recover();
+    if (result.recovered) {
+        LOG_INFO("Recovery: finalized interrupted activity [%s]\n", result.path.c_str());
+    }
+    return result.recovered;
 }
 
 bool ActivityWriter::createAndOpenFile(std::time_t utc)
@@ -338,10 +399,10 @@ bool ActivityWriter::createAndOpenFile(std::time_t utc)
     return true;
 }
 
-void ActivityWriter::saveSummary(const TrackData& track)
+bool ActivityWriter::saveSummary(const TrackData& track)
 {
     if (!mFile) {
-        return;
+        return false;
     }
     char buff[256]{};
     size_t nameLen = strlen(mFile->getPath());
@@ -350,8 +411,9 @@ void ActivityWriter::saveSummary(const TrackData& track)
     mFile->setPath(buff);
 
     if (!mFile->open(true, true)) {
+        LOG_ERROR("Failed to open activity summary [%s]\n", buff);
         mFile.reset();
-        return;
+        return false;
     }
 
     SDK::JsonStreamWriter writer(mFile.get());
@@ -364,8 +426,8 @@ void ActivityWriter::saveSummary(const TrackData& track)
     writer.add("activity_type", "cycling");
     writer.endMap();
 
-    mFile->flush();
-    mFile->close();
+    const bool ok = mFile->flush();
+    return mFile->close() && ok;
 }
 
 std::time_t ActivityWriter::tm2epoch(const struct tm* tm)
