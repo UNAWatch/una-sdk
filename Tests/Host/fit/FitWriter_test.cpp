@@ -355,3 +355,15 @@ TEST(FitWriter, RecoverRejectsBadInputWithoutClobbering)
         EXPECT_EQ(fs.fileContents("junk.bin"), junk) << "non-FIT header must not be clobbered";
     }
 }
+
+// recover() on a NON-EXISTENT path must return false and must NOT create the
+// file: it inspects read-only first, so a missing target is never conjured into
+// a stray 0-byte .fit (a non-truncating write open would create it).
+TEST(FitWriter, RecoverOnMissingFileDoesNotCreateIt)
+{
+    SDK::Test::FakeFileSystem fs;
+
+    auto file = fs.file("ghost.fit");
+    EXPECT_FALSE(FitWriter::recover(*file, 100));
+    EXPECT_FALSE(fs.hasFile("ghost.fit")) << "recover() must not create a missing file";
+}

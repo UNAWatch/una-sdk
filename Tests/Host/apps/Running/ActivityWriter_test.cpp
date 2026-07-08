@@ -273,3 +273,47 @@ TEST(RunningActivityWriter, StopReturnsFalseOnWriteFailure)
     EXPECT_TRUE(fx.fileSystem.exist(kMarkerPath))
         << "on failure the marker survives so the next boot recovers the .fit";
 }
+
+// Decoupling: the FIT finishes/flushes/closes durably but the auxiliary .json
+// summary cannot be persisted. stop() must still report success (FIT durability
+// is the save contract -- the kernel registers the .fit on close), clear the
+// marker, and leave a valid CRC-good .fit. A summary-only failure must never
+// suppress the activity's registration.
+TEST(RunningActivityWriter, StopSucceedsWhenOnlySummaryFails)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1782475200;
+    info.appID     = "running";
+    w.start(info);
+
+    ActivityWriter::RecordData rec;
+    rec.timestamp = info.timestamp;
+    rec.set(ActivityWriter::RecordData::Field::HEART_RATE);
+    rec.heartRate = 120;
+    w.addRecord(rec);
+
+    // Fail ONLY the summary: the .json open() fails, which happens after the
+    // .fit has been durably finished, flushed and closed. The FIT writes are
+    // untouched.
+    fx.fileSystem.failWriteOpenSuffix = ".json";
+
+    ActivityWriter::TrackData track;
+    track.timestamp = info.timestamp + 1;
+    track.timeStart = info.timestamp;
+    track.duration  = 1;
+    track.elapsed   = 1;
+
+    EXPECT_TRUE(w.stop(track))
+        << "FIT durable -> stop() succeeds despite the summary failure";
+    EXPECT_FALSE(fx.fileSystem.exist(kMarkerPath)) << "marker cleared: FIT durably saved";
+
+    // No .json persisted, but the .fit is present and CRC-valid.
+    const std::vector<uint8_t> fit = findFitFile(fx.fileSystem);
+    ASSERT_FALSE(fit.empty()) << ".fit present on disk";
+    testfit::FitReader r(fit);
+    EXPECT_TRUE(r.ok());
+    EXPECT_TRUE(r.crcValid()) << "recovered .fit CRC is valid";
+}

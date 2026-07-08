@@ -342,8 +342,16 @@ bool ActivityWriter::stop(const TrackData& track)
         mMarker.remove();
     }
 
-    const bool summaryOk = saveSummary(track);
-    return ok && summaryOk;
+    // FIT durability IS the save-success contract: the kernel auto-registers the
+    // .fit the moment its FileGuard::close() fires (and recoverInterrupted()
+    // re-registers after a crash), so once `ok` is true the activity is never
+    // orphaned. The .json summary is auxiliary/best-effort — recovery cannot
+    // rebuild it — so a summary-only failure must NOT suppress registration.
+    // Attempt it, log on failure, but gate the return value on FIT durability.
+    if (!saveSummary(track)) {
+        LOG_ERROR("Activity summary (.json) save failed; FIT is durable and registered\n");
+    }
+    return ok;
 }
 
 void ActivityWriter::discard()
