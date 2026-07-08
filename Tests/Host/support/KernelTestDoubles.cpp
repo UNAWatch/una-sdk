@@ -149,6 +149,16 @@ size_t InMemoryFileSystem::InMemoryFile::size() const
 
 bool InMemoryFileSystem::InMemoryFile::open(bool wMode, bool override)
 {
+    // Injected, file-kind-scoped storage failure: refuse to open a matching path
+    // for writing without touching the entry (e.g. the auxiliary ".json" summary
+    // fails while the ".fit" is already durable).
+    if (wMode && !mFs.failWriteOpenSuffix.empty()
+        && mPath.size() >= mFs.failWriteOpenSuffix.size()
+        && mPath.compare(mPath.size() - mFs.failWriteOpenSuffix.size(),
+                         mFs.failWriteOpenSuffix.size(), mFs.failWriteOpenSuffix) == 0) {
+        return false;
+    }
+
     mWriteMode = wMode;
 
     if (wMode) {

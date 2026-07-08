@@ -136,6 +136,10 @@ public:
     /// Once bytesWritten reaches this threshold, subsequent write() calls fail
     /// (simulates a storage write error). Defaults to "never fail".
     size_t failWritesAfterBytes = static_cast<size_t>(-1);
+    /// A write-mode open() targeting a path ending with this suffix fails without
+    /// creating/touching the entry (simulates a storage error scoped to one file
+    /// kind, e.g. the auxiliary ".json" summary). Empty = never fail.
+    std::string failWriteOpenSuffix;
 };
 
 struct KernelFixture {

@@ -89,8 +89,12 @@ public:
     void resume(std::time_t timestamp);
     void addRecord(const RecordData& record);
     void addLap(const LapData& lap);
-    /// Finalize the current activity and persist its summary. Returns true only
-    /// if the FIT stream, its finish()/flush/close and the summary all succeed.
+    /// Finalize the current activity. The return value is the FIT-durability
+    /// contract: true iff the FIT stream + its finish()/flush/close succeeded, so
+    /// the .fit is safely on disk (the kernel auto-registers it on close, and
+    /// recoverInterrupted() re-registers after a crash). The auxiliary .json
+    /// summary is best-effort — a summary-only failure is logged but does NOT
+    /// flip the result, so it can never suppress the activity's registration.
     bool stop(const TrackData& track);
     void discard();
 

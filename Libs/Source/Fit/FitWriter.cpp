@@ -268,8 +268,14 @@ bool FitWriter::finish()
 
 bool FitWriter::recover(SDK::Interface::IFile& file, uint32_t dataEnd)
 {
-    // Open read/write WITHOUT truncation so a torn file is preserved.
-    if (!file.open(/*wMode=*/true, /*override=*/false)) {
+    // Inspect the file READ-ONLY first. A non-truncating WRITE open (wMode=true,
+    // override=false) maps to FatFs FA_OPEN_ALWAYS, which CREATES a missing path
+    // -- leaving a stray 0-byte .fit and violating the public "does not modify
+    // the file on bad input" contract. A read open never creates or writes, so a
+    // missing/too-short/non-FIT path is rejected untouched. We only open for
+    // write inside finalize(), and only after confirming this is a genuine crash
+    // marker (dataSize == 0). A torn file is thus preserved either way.
+    if (!file.open(/*wMode=*/false)) {
         return false;
     }
     const size_t fileSize = file.size();
@@ -285,11 +291,7 @@ bool FitWriter::recover(SDK::Interface::IFile& file, uint32_t dataEnd)
     // trailing bytes): re-finalizing here would rewrite the header/CRC at the
     // MARKER's older crash-time dataEnd, discarding the session/activity
     // messages that finish() appended past it -- a far worse outcome than a
-    // handful of harmless trailing bytes. Inspect the header in read mode (a
-    // write handle cannot read).
-    if (!file.close() || !file.open(/*wMode=*/false)) {
-        return false;
-    }
+    // handful of harmless trailing bytes.
     if (fileSize >= kHeaderSize) {
         uint8_t hdr[kHeaderSize];
         if (readExact(file, hdr, sizeof(hdr)) && hdr[0] == kHeaderSize
