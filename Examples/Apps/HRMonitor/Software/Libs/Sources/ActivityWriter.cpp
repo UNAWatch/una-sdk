@@ -100,10 +100,10 @@ void ActivityWriter::start(const AppInfo& info)
     // Header + all definitions are on disk: flush and drop the recovery marker.
     // getPosition() here is a clean record boundary, so a crash after this point
     // is recoverable up to at least the header/definitions. Only write the
-    // marker when begin() succeeded: a failed begin() leaves a near-empty/broken
-    // .fit that the recovery marker must not point next boot's recover() at.
-    if (begun) {
-        mFile->flush();
+    // marker when begin() succeeded AND the initial flush is durable: a failed
+    // begin()/flush leaves a near-empty/broken or non-durable .fit that the
+    // recovery marker must not point next boot's recover() at.
+    if (begun && mFile->flush()) {
         mMarker.write(mFile->getPath(), static_cast<uint32_t>(mFile->getPosition()));
     }
 }

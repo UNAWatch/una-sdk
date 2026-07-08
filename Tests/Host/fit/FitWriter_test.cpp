@@ -19,6 +19,9 @@
 using SDK::Fit::BaseType;
 using SDK::Fit::FitWriter;
 
+// The FIT file header is a fixed 14 bytes.
+static constexpr size_t kFitHeaderSize = 14u;
+
 // FIT's file CRC is CRC-16/ARC; its canonical check value over "123456789"
 // is 0xBB3D. This is an independent known-answer check on the algorithm.
 TEST(FitCrc, KnownAnswerVectors)
@@ -276,11 +279,11 @@ TEST(FitWriter, RecoverOnFinishedFileIsNoop)
 
 // An already-finalized file (non-zero on-disk dataSize) that carries extra
 // trailing bytes -- e.g. an isolated truncate() failure left a torn tail past
-// the CRC -- must be treated as already finalized: recover() returns true and
-// leaves the bytes UNCHANGED. Re-finalizing at the marker's older crash-time
-// dataEnd would rewrite the header/CRC and truncate away the session/activity
-// messages that finish() appended -- silently discarding the recorded activity.
-TEST(FitWriter, RecoverOnFinalizedFileWithTrailingBytesIsNoop)
+// the CRC -- is repaired by trimming the tail: recover() re-finalizes at the
+// header's OWN durable dataSize (14 + dataSize), NOT the marker's stale offset,
+// so the session/activity messages finish() appended are preserved while the
+// extra bytes are dropped. The file ends exactly header + data + CRC.
+TEST(FitWriter, RecoverTrimsTrailingBytesAfterFinalizedHeader)
 {
     SDK::Test::FakeFileSystem fs;
     auto file = fs.file("trailing.fit");
@@ -301,6 +304,9 @@ TEST(FitWriter, RecoverOnFinalizedFileWithTrailingBytesIsNoop)
     file->close();
 
     const std::string finalized = fs.fileContents("trailing.fit");
+    // The durable data size stamped in the finalized header (== finalized size
+    // minus header minus the 2-byte CRC).
+    const size_t durableDataSize = finalized.size() - kFitHeaderSize - 2u;
 
     // Simulate an isolated truncate() failure: a few bytes linger past the CRC.
     {
@@ -312,23 +318,78 @@ TEST(FitWriter, RecoverOnFinalizedFileWithTrailingBytesIsNoop)
         ASSERT_TRUE(f->write(trailing, sizeof(trailing), bw));
         f->close();
     }
-    const std::string before = fs.fileContents("trailing.fit");
-    ASSERT_GT(before.size(), finalized.size()) << "trailing bytes present";
+    ASSERT_GT(fs.fileContents("trailing.fit").size(), finalized.size())
+        << "trailing bytes present";
 
-    // Recover with the STALE (older, 1-record) offset. Must be a no-op.
+    // Recover with the STALE (older, 1-record) marker offset. recover() must
+    // ignore it in favour of the header's durable dataSize and trim the tail.
     auto f2 = fs.file("trailing.fit");
     ASSERT_TRUE(FitWriter::recover(*f2, staleDataEnd));
     const std::string after = fs.fileContents("trailing.fit");
-    EXPECT_EQ(after, before)
-        << "already-finalized file must not be re-finalized at a stale offset";
 
-    // The full 4-record session is still intact -- not truncated back to the
-    // marker's 1-record offset. (The finalized prefix still parses cleanly.)
-    const std::vector<uint8_t> prefix(after.begin(), after.begin() + finalized.size());
-    testfit::FitReader r(prefix);
+    // Trailing bytes trimmed: file is exactly header + data + CRC.
+    EXPECT_EQ(after.size(), kFitHeaderSize + durableDataSize + 2u)
+        << "trailing tail must be trimmed to header + data + CRC";
+
+    const std::vector<uint8_t> b(after.begin(), after.end());
+    testfit::FitReader r(b);
     EXPECT_TRUE(r.ok());
     EXPECT_TRUE(r.crcValid());
-    EXPECT_EQ(r.withGlobal(20).size(), 4u) << "session data preserved, not discarded";
+    EXPECT_EQ(r.withGlobal(20).size(), 4u)
+        << "full session data preserved, not discarded at the stale marker";
+}
+
+// Crash AFTER the header flush (dataSize != 0) but BEFORE the trailing CRC was
+// written -- the exact window finalize() leaves open between flushing the header
+// and flushing the CRC. The file is header + data with NO CRC (size == 14 + D).
+// recover() must repair it (write the missing CRC) rather than trust the
+// non-zero dataSize and skip repair, which would leave an invalid FIT forever.
+TEST(FitWriter, RecoverRepairsCrashMidFinalize)
+{
+    SDK::Test::FakeFileSystem fs;
+    auto file = fs.file("midfinalize.fit");
+    ASSERT_TRUE(file->open(/*wMode=*/true, /*override=*/true));
+    FitWriter w(*file);
+    ASSERT_TRUE(w.begin(0x1234));
+    ASSERT_TRUE(w.defineMessage(0, 20, {{253, BaseType::UInt32}, {3, BaseType::UInt8}}));
+    for (int i = 0; i < 3; ++i) {
+        ASSERT_TRUE(w.data(0).u32(1000 + static_cast<uint32_t>(i))
+                        .u8(static_cast<uint8_t>(60 + i)).write());
+    }
+    file->flush();
+    const uint32_t dataEnd = static_cast<uint32_t>(file->getPosition());
+    file->close();
+
+    // Hand-patch the header so dataSize == D (= dataEnd - 14) but leave NO CRC
+    // appended: the file size stays 14 + D. This is the crash-mid-finalize state
+    // (header flushed with dataSize, CRC not yet written).
+    {
+        const uint32_t d = dataEnd - 14u;
+        auto f = fs.file("midfinalize.fit");
+        ASSERT_TRUE(f->open(/*wMode=*/true, /*override=*/false));
+        ASSERT_TRUE(f->seek(4));
+        const char sz[4] = {static_cast<char>(d & 0xFF),
+                            static_cast<char>((d >> 8) & 0xFF),
+                            static_cast<char>((d >> 16) & 0xFF),
+                            static_cast<char>((d >> 24) & 0xFF)};
+        size_t bw = 0;
+        ASSERT_TRUE(f->write(sz, sizeof(sz), bw));
+        f->close();
+    }
+    ASSERT_EQ(fs.fileContents("midfinalize.fit").size(), static_cast<size_t>(dataEnd))
+        << "no CRC yet -- size is header + data only";
+
+    // The marker offset is irrelevant here (header dataSize wins); pass it anyway.
+    auto f2 = fs.file("midfinalize.fit");
+    ASSERT_TRUE(FitWriter::recover(*f2, dataEnd));
+
+    const std::string s = fs.fileContents("midfinalize.fit");
+    const std::vector<uint8_t> b(s.begin(), s.end());
+    testfit::FitReader r(b);
+    EXPECT_TRUE(r.ok());
+    EXPECT_TRUE(r.crcValid()) << "missing CRC must be written by recover()";
+    EXPECT_EQ(r.withGlobal(20).size(), 3u);
+    EXPECT_EQ(b.size(), dataEnd + 2u) << "CRC appended: header + data + CRC";
 }
 
 // Bad input must be rejected (return false) without corrupting the file.
