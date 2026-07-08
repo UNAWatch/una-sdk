@@ -124,10 +124,10 @@ void ActivityWriter::start(const AppInfo& info)
     // Header + all definitions are on disk: flush and drop the recovery marker.
     // getPosition() here is a clean record boundary, so a crash after this point
     // is recoverable up to at least the header/definitions. Only write the
-    // marker when begin() succeeded: a failed begin() leaves a near-empty/broken
-    // .fit that the recovery marker must not point next boot's recover() at.
-    if (begun) {
-        mFile->flush();
+    // marker when begin() succeeded AND the initial flush is durable: a failed
+    // begin()/flush leaves a near-empty/broken or non-durable .fit that the
+    // recovery marker must not point next boot's recover() at.
+    if (begun && mFile->flush()) {
         mMarker.write(mFile->getPath(), static_cast<uint32_t>(mFile->getPosition()));
     }
 }
@@ -373,8 +373,11 @@ bool ActivityWriter::stop(const TrackData& track)
     // re-registers after a crash), so once `ok` is true the activity is never
     // orphaned. The .json summary is auxiliary/best-effort — recovery cannot
     // rebuild it — so a summary-only failure must NOT suppress registration.
-    // Attempt it, log on failure, but gate the return value on FIT durability.
-    if (!saveSummary(track)) {
+    // Attempt it ONLY when the FIT is durable (ok): with ok == false the marker
+    // is kept for next-boot recovery / the FIT is invalid, so a .json sidecar
+    // would misrepresent a non-durable activity. Log on failure; the return
+    // value is gated on FIT durability regardless.
+    if (ok && !saveSummary(track)) {
         LOG_ERROR("Activity summary (.json) save failed; FIT is durable and registered\n");
     }
     return ok;

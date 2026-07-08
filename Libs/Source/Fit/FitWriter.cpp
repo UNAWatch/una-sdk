@@ -273,42 +273,58 @@ bool FitWriter::recover(SDK::Interface::IFile& file, uint32_t dataEnd)
     // -- leaving a stray 0-byte .fit and violating the public "does not modify
     // the file on bad input" contract. A read open never creates or writes, so a
     // missing/too-short/non-FIT path is rejected untouched. We only open for
-    // write inside finalize(), and only after confirming this is a genuine crash
-    // marker (dataSize == 0). A torn file is thus preserved either way.
+    // write inside finalize().
     if (!file.open(/*wMode=*/false)) {
         return false;
     }
     const size_t fileSize = file.size();
 
-    // Idempotent guard: if the on-disk header already carries a non-zero
-    // dataSize, then finish()/finalize() has already run and back-patched it, so
-    // the file is already finalized. Return true WITHOUT calling finalize()
-    // again. Only a genuine crash marker leaves dataSize == 0 (begin() writes a
-    // zero placeholder), so that is the sole case we finalize.
-    //
-    // This must hold even when the total size does not exactly equal
-    // header + data + CRC (e.g. an isolated truncate() failure left a few
-    // trailing bytes): re-finalizing here would rewrite the header/CRC at the
-    // MARKER's older crash-time dataEnd, discarding the session/activity
-    // messages that finish() appended past it -- a far worse outcome than a
-    // handful of harmless trailing bytes.
-    if (fileSize >= kHeaderSize) {
-        uint8_t hdr[kHeaderSize];
-        if (readExact(file, hdr, sizeof(hdr)) && hdr[0] == kHeaderSize
-            && hdr[8] == '.' && hdr[9] == 'F' && hdr[10] == 'I' && hdr[11] == 'T') {
-            const uint32_t dataSize =
-                static_cast<uint32_t>(hdr[4]) | (static_cast<uint32_t>(hdr[5]) << 8)
-                | (static_cast<uint32_t>(hdr[6]) << 16)
-                | (static_cast<uint32_t>(hdr[7]) << 24);
-            if (dataSize != 0) {
-                file.close();
-                return true;  // already finalized -- do not re-finalize
-            }
-        }
+    // Read + validate the on-disk header. A missing/too-short/non-FIT path is
+    // rejected here, untouched.
+    uint8_t hdr[kHeaderSize];
+    if (fileSize < kHeaderSize || !readExact(file, hdr, sizeof(hdr))
+        || hdr[0] != kHeaderSize || hdr[8] != '.' || hdr[9] != 'F'
+        || hdr[10] != 'I' || hdr[11] != 'T') {
+        file.close();
+        return false;
     }
+    const uint32_t hdrDataSize =
+        static_cast<uint32_t>(hdr[4]) | (static_cast<uint32_t>(hdr[5]) << 8)
+        | (static_cast<uint32_t>(hdr[6]) << 16)
+        | (static_cast<uint32_t>(hdr[7]) << 24);
     file.close();
 
-    return finalize(file, dataEnd);
+    // Derive the effective data-end and ALWAYS re-run the (idempotent)
+    // finalize(). We must NOT early-return "already finalized" on dataSize != 0:
+    // finish()/finalize() flush the header (with dataSize) BEFORE writing and
+    // flushing the trailing CRC and truncating the tail. A crash in that window
+    // leaves dataSize != 0 but a missing/torn CRC -- skipping repair would leave
+    // an invalid FIT on disk forever. Re-finalizing is harmless because
+    // finalize() recomputes the same header/CRC and truncates to the same size.
+    //
+    //  - hdrDataSize != 0 (and it fits within the file): trust the header's own
+    //    dataSize -- finish()/a prior finalize got far enough to write it, so
+    //    this is the DURABLE data end, not the possibly-stale marker offset.
+    //    Finalizing here writes the correct CRC (crash-mid-finalize) and trims
+    //    any extra tail (isolated truncate() failure) WITHOUT discarding the
+    //    session/activity messages finish() appended past the marker.
+    //  - otherwise: use the caller/marker offset -- the genuine crash-mid-
+    //    recording case where dataSize is still 0, or a fallback if the header
+    //    over-claims vs the actual file size.
+    uint32_t effectiveEnd;
+    if (hdrDataSize != 0
+        && static_cast<uint64_t>(kHeaderSize) + hdrDataSize <= fileSize) {
+        effectiveEnd = kHeaderSize + hdrDataSize;
+    } else {
+        effectiveEnd = dataEnd;
+    }
+
+    // Guard: the effective data range must lie within the file.
+    if (effectiveEnd < kHeaderSize || effectiveEnd > fileSize) {
+        return false;
+    }
+
+    return finalize(file, effectiveEnd);
 }
 
 // --- Data builder -----------------------------------------------------------
