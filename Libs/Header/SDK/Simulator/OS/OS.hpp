@@ -18,6 +18,8 @@
 
 #include <mutex>
 #include <memory>
+#include <condition_variable>
+#include <chrono>
 
 #ifdef _WIN32
     #include <Windows.h>
