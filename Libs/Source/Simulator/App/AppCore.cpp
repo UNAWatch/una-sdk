@@ -9,7 +9,6 @@
 #include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 
-#include <gui/common/FrontendApplication.hpp>
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
 #include <cstring>
@@ -63,8 +62,6 @@ namespace App {
 				break;
 			}
 		}
-
-		FrontendApplication& app = *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());
 
 		mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_GUI_SUSPEND).release());
 		SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
