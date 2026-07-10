@@ -76,18 +76,12 @@ private:
     SDK::Sensor::Connection mSensorGrade;
     bool                    mIsSensorsConnected = false;
 
+    // Kernel RUNNING_CADENCE - already a clean windowed rate, so it is fed
+    // straight to the estimator and recorded to FIT with no app-side filtering.
     struct {
         float cadenceSpm      = 0.0f;
         bool  cadenceValid    = false;
-    } mRunningCadence{};   ///< Raw wrist cadence from the kernel sensor.
-
-    // Live cadence fed to the estimator and recorded to FIT. The kernel's
-    // windowed RUNNING_CADENCE is already clean, so it is used raw here (the
-    // former app-side spike filter is no longer needed).
-    struct {
-        float cadenceSpm   = 0.0f;
-        bool  cadenceValid = false;
-    } mCadence{};
+    } mRunningCadence{};
 
     // -- Cadence/stride estimation inputs ---------------------------------
     float       mHeightM      = 1.70f; ///< Profile height (m) for phase-1 demographic SL; from settings.
