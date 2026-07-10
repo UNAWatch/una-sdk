@@ -16,10 +16,15 @@ public:
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
+    void setGpsFix(bool state);
+    void setAccessoryStatus(uint8_t state, const char* name);
+
 protected:
     using Menu = App::MenuNav::Root::Intervals::Repeats;
 
     static const uint16_t kBuffSize = 8;
+
+    bool mGpsFix = false;
 
     touchgfx::Unicode::UnicodeChar mMainBuff[kBuffSize] {};
     touchgfx::Unicode::UnicodeChar mItemBuff[kBuffSize] {};

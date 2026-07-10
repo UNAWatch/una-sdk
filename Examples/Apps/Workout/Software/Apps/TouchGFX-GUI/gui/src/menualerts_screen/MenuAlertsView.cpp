@@ -16,6 +16,8 @@ void MenuAlertsView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
 
+    menuLayout.showSensorRow(true);
+
     formatTips();
     menuLayout.invalidate();
 }
@@ -23,6 +25,11 @@ void MenuAlertsView::setupScreen()
 void MenuAlertsView::tearDownScreen()
 {
     MenuAlertsViewBase::tearDownScreen();
+}
+
+void MenuAlertsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuAlertsView::setTime(Time::Id id)

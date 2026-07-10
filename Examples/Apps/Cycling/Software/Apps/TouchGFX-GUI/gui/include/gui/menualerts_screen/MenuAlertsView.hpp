@@ -13,6 +13,8 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    void setGpsFix(bool state);
+    void setAccessoryStatus(uint8_t state, const char* name);
     void setUnitsImperial(bool isImperial);
     void setDistance(Settings::Alerts::Distance::Id id);
     void setTime(Settings::Alerts::Time::Id id);
@@ -26,6 +28,7 @@ protected:
 
     static const uint16_t kBuffSize = 32;
 
+    bool         mGpsFix        = false;
     bool         mUnitsImperial = false;
     Distance::Id mDistanceId    = Distance::ID_OFF;
     Time::Id     mTimeId        = Time::ID_OFF;

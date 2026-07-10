@@ -16,6 +16,9 @@ void MenuAlertsView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
 
+    menuLayout.showSensorRow(true);
+    setGpsFix(mGpsFix);
+
     formatTips();
     menuLayout.invalidate();
 }
@@ -23,6 +26,17 @@ void MenuAlertsView::setupScreen()
 void MenuAlertsView::tearDownScreen()
 {
     MenuAlertsViewBase::tearDownScreen();
+}
+
+void MenuAlertsView::setGpsFix(bool state)
+{
+    mGpsFix = state;
+    menuLayout.setGps(state);
+}
+
+void MenuAlertsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuAlertsView::setUnitsImperial(bool isImperial)

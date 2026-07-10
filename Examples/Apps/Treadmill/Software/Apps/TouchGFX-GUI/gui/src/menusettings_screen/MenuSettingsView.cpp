@@ -16,10 +16,15 @@ void MenuSettingsView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
 
-    // Treadmill has no GPS: no acquisition status line.
-    menuLayout.setInfoMsg(TYPED_TEXT_INVALID);
+    // External-HR-only sensor status row (GPS slots are BITMAP_INVALID).
+    menuLayout.showSensorRow(true);
 
     menuLayout.invalidate();
+}
+
+void MenuSettingsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuSettingsView::tearDownScreen()

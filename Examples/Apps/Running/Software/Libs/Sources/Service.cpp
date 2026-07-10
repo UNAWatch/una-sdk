@@ -120,6 +120,13 @@ void Service::run()
         LOG_WARNING("Failed to load activity summary\n");
     }
 
+    // Recover any activity a previous boot left unfinished (power loss /
+    // crash mid-recording), before any new track can start.
+    if (mActivityWriter.recoverInterrupted()) {
+        LOG_INFO("Recovered an interrupted activity\n");
+        notifyNewActivity();
+    }
+
     SDK::Timer guiInitTimeout(TIMER_SECONDS(5));
     guiInitTimeout.start();
 
@@ -889,11 +896,17 @@ void Service::processTrack()
         mLapNotEmpty = true;        // Lap has at least one record
 
         // Next lap
-        bool switchLap = false;
+        bool  switchLap        = false;
+        float autoLapDistanceM = 0.0f;  // >0 marks a grid-aligned distance auto-lap
         switch (mLapDivSource) {
-        case LapDivSource::DISTANCE:
-            switchLap = mDistanceCounter.getLapValueActive() >= Settings::Alerts::Distance::toMeters(mSettings.alertDistanceId, mIsImperial);
+        case LapDivSource::DISTANCE: {
+            const float target = Settings::Alerts::Distance::toMeters(mSettings.alertDistanceId, mIsImperial);
+            if (mDistanceCounter.getLapValueActive() >= target) {
+                switchLap        = true;
+                autoLapDistanceM = target;
+            }
             break;
+        }
         case LapDivSource::TIME:
             switchLap = static_cast<uint32_t>(mTimeCounter.getLapValueActive()) >= Settings::Alerts::Time::toSeconds(mSettings.alertTimeId);
             break;
@@ -904,7 +917,7 @@ void Service::processTrack()
         }
 
         if (switchLap) {
-            saveLap();
+            saveLap(autoLapDistanceM);
             mGuiSender.lapEnd(mTrackData.lapNum);
             notifyLapEnd();
         }
@@ -913,10 +926,16 @@ void Service::processTrack()
 
 }
 
-void Service::saveLap()
+void Service::saveLap(float autoLapDistanceM)
 {
     const auto  lapTime     = mTimeCounter.getLapValueActive();
-    const float lapDistance = mDistanceCounter.getLapValueActive();
+    // A distance auto-lap (autoLapDistanceM > 0) is recorded as exactly the
+    // target distance; the overshoot is carried into the next lap below. This
+    // keeps lap boundaries on the km/mi grid and makes the reported lap pace
+    // agree with the lap duration.
+    const bool  gridLap     = autoLapDistanceM > 0.0f;
+    const float lapDistance = gridLap ? autoLapDistanceM
+                                      : mDistanceCounter.getLapValueActive();
     const float lapSpeed    = speedFromTotals(lapDistance, static_cast<float>(lapTime));
 
     // Accumulate lap into summary
@@ -962,7 +981,11 @@ void Service::saveLap()
 
     // Reset lap counters
     mTimeCounter.resetLap();
-    mDistanceCounter.resetLap();
+    if (gridLap) {
+        mDistanceCounter.advanceLap(lapDistance);
+    } else {
+        mDistanceCounter.resetLap();
+    }
     mSpeedCounter.resetLap();
     mHrCounter.resetLap();
     mAltitudeCounter.resetLap();
@@ -1039,9 +1062,13 @@ void Service::stopTrack(bool discard)
         fitTrack.ascent    = mAltitudeCounter.getAscent();
         fitTrack.descent   = mAltitudeCounter.getDescent();
 
-        mActivityWriter.stop(fitTrack);
-
-        notifyNewActivity();
+        if (mActivityWriter.stop(fitTrack)) {
+            notifyNewActivity();
+        } else {
+            LOG_ERROR("activity save failed\n");
+            // Do NOT notify: the .fit is left unfinished, so the crash-recovery
+            // marker (if any) stays for the next boot to finalize.
+        }
     } else {
         mActivityWriter.discard();
     }

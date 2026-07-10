@@ -12,6 +12,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    void setAccessoryStatus(uint8_t state, const char* name);
     void setIntervals(const Settings::Intervals & inervals, bool isImperial);
 
     void setPositionId(uint16_t id);

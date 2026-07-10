@@ -147,7 +147,7 @@ private:
     void sendInitialInfoToGui();
     void startTrack(std::time_t utc);
     void processTrack();
-    void saveLap();
+    void saveLap(float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
     void pauseTrack(bool pause);
     void buildPartialSummary();

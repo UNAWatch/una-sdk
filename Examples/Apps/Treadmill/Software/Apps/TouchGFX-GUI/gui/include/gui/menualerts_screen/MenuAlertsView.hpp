@@ -13,6 +13,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    void setAccessoryStatus(uint8_t state, const char* name);
     void setUnitsImperial(bool isImperial);
     void setDistance(Settings::Alerts::Distance::Id id);
     void setTime(Settings::Alerts::Time::Id id);

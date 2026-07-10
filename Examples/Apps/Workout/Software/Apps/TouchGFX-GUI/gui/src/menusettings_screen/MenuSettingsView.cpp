@@ -16,12 +16,19 @@ void MenuSettingsView::setupScreen()
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
 
+    menuLayout.showSensorRow(true);
+
     menuLayout.invalidate();
 }
 
 void MenuSettingsView::tearDownScreen()
 {
     MenuSettingsViewBase::tearDownScreen();
+}
+
+void MenuSettingsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuSettingsView::setPhoneNotif(bool state)

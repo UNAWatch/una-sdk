@@ -136,6 +136,116 @@ bool FitWriter::emitData(uint8_t localType, const std::vector<uint8_t>& payload)
     return writeBytes(rec.data(), rec.size());
 }
 
+namespace {
+    // Read exactly `n` bytes from a read-mode handle into `dst`. Returns false
+    // on any short read / IO error.
+    bool readExact(SDK::Interface::IFile& file, void* dst, size_t n)
+    {
+        auto*  p         = static_cast<char*>(dst);
+        size_t remaining = n;
+        while (remaining > 0) {
+            size_t got = 0;
+            if (!file.read(p, remaining, got) || got == 0) {
+                return false;
+            }
+            p         += got;
+            remaining -= got;
+        }
+        return true;
+    }
+}  // namespace
+
+bool FitWriter::finalize(SDK::Interface::IFile& file, uint32_t dataEnd)
+{
+    // --- Read the on-disk header (read mode) --------------------------------
+    // Protocol/profile MUST come from the file, not writer member state, so a
+    // reboot-time recover() reconstructs the correct header. A write-mode
+    // handle cannot read, so ensure we are in read mode first.
+    file.close();  // start from a known-closed handle (no-op if already closed)
+    if (!file.open(/*wMode=*/false)) {
+        return false;
+    }
+    uint8_t hdr[kHeaderSize];
+    if (!readExact(file, hdr, sizeof(hdr))) {
+        file.close();
+        return false;
+    }
+    const size_t fileSize = file.size();
+
+    // Validate: header size byte + ".FIT" signature.
+    if (hdr[0] != kHeaderSize || hdr[8] != '.' || hdr[9] != 'F'
+        || hdr[10] != 'I' || hdr[11] != 'T') {
+        file.close();
+        return false;
+    }
+    // Guard: the claimed data range must lie within the file.
+    if (dataEnd < kHeaderSize || dataEnd > fileSize) {
+        file.close();
+        return false;
+    }
+    const uint8_t  protocolVersion = hdr[1];
+    const uint16_t profileVersion =
+        static_cast<uint16_t>(hdr[2] | (static_cast<uint16_t>(hdr[3]) << 8));
+
+    // --- Back-patch the header (write mode, non-truncating) -----------------
+    // override=false must map to a non-truncating open (e.g. FatFs
+    // FA_OPEN_ALWAYS — NOT FA_CREATE_ALWAYS); a truncating backend would zero
+    // the activity here.
+    if (!file.close() || !file.open(/*wMode=*/true, /*override=*/false)) {
+        return false;
+    }
+    uint8_t patched[kHeaderSize];
+    buildHeader(patched, protocolVersion, profileVersion,
+                dataEnd - kHeaderSize, /*withCrc=*/true);
+    size_t bw = 0;
+    if (!file.seek(0)
+        || !file.write(reinterpret_cast<const char*>(patched), sizeof(patched), bw)
+        || bw != sizeof(patched)) {
+        file.close();
+        return false;
+    }
+    file.flush();
+
+    // --- Compute the file CRC over [0, dataEnd) (read mode) -----------------
+    if (!file.close() || !file.open(/*wMode=*/false)) {
+        return false;
+    }
+    uint16_t crc       = 0;
+    size_t   remaining = dataEnd;
+    char     buf[256];
+    while (remaining > 0) {
+        const size_t want = remaining < sizeof(buf) ? remaining : sizeof(buf);
+        size_t       got  = 0;
+        if (!file.read(buf, want, got) || got == 0) {
+            file.close();
+            return false;
+        }
+        crc = fitCrcUpdate(crc, buf, got);
+        remaining -= got;
+    }
+
+    // --- Append the CRC + trim any torn tail (write mode) -------------------
+    if (!file.close() || !file.open(/*wMode=*/true, /*override=*/false)) {
+        return false;
+    }
+    uint8_t crcLE[2] = {static_cast<uint8_t>(crc & 0xFFu),
+                        static_cast<uint8_t>((crc >> 8) & 0xFFu)};
+    bw = 0;
+    if (!file.seek(dataEnd)
+        || !file.write(reinterpret_cast<const char*>(crcLE), sizeof(crcLE), bw)
+        || bw != sizeof(crcLE)) {
+        file.close();
+        return false;
+    }
+    // Drop any partially-written record beyond the recovered data + CRC.
+    if (!file.truncate(dataEnd + 2)) {
+        file.close();
+        return false;
+    }
+    file.flush();
+    return true;
+}
+
 bool FitWriter::finish()
 {
     if (!mOk || !mBegun) {
@@ -148,52 +258,73 @@ bool FitWriter::finish()
         mOk = false;
         return false;
     }
-    const uint32_t dataSize = static_cast<uint32_t>(end - kHeaderSize);
-
-    // Back-patch the header in place (data size + header CRC over bytes 0..11).
-    uint8_t hdr[14];
-    buildHeader(hdr, mProtocolVersion, mProfileVersion, dataSize, /*withCrc=*/true);
-    if (!mFile.seek(0) || !writeBytes(hdr, sizeof(hdr))) {
+    // getPosition() after the final record is the current data-end offset.
+    if (!finalize(mFile, static_cast<uint32_t>(end))) {
         mOk = false;
         return false;
     }
-    mFile.flush();
-
-    // Compute the file CRC over header + data by reading the file back (a
-    // write-mode handle cannot read, so reopen read-only), then append it.
-    if (!mFile.close() || !mFile.open(/*wMode=*/false)) {
-        mOk = false;
-        return false;
-    }
-    uint16_t crc = 0;
-    size_t   remaining = end;
-    char     buf[256];
-    while (remaining > 0) {
-        const size_t want = remaining < sizeof(buf) ? remaining : sizeof(buf);
-        size_t got = 0;
-        if (!mFile.read(buf, want, got) || got == 0) {
-            mOk = false;
-            return false;
-        }
-        crc = fitCrcUpdate(crc, buf, got);
-        remaining -= got;
-    }
-    // Reopen for write WITHOUT truncating (override=false must map to a
-    // non-truncating open, e.g. FatFs FA_OPEN_ALWAYS — NOT FA_CREATE_ALWAYS),
-    // then append the CRC at the end. A truncating backend would zero the
-    // activity here.
-    if (!mFile.close() || !mFile.open(/*wMode=*/true, /*override=*/false)) {
-        mOk = false;
-        return false;
-    }
-    uint8_t crcLE[2] = {static_cast<uint8_t>(crc & 0xFFu),
-                        static_cast<uint8_t>((crc >> 8) & 0xFFu)};
-    if (!mFile.seek(end) || !writeBytes(crcLE, sizeof(crcLE))) {
-        mOk = false;
-        return false;
-    }
-    mFile.flush();
     return mOk;
+}
+
+bool FitWriter::recover(SDK::Interface::IFile& file, uint32_t dataEnd)
+{
+    // Inspect the file READ-ONLY first. A non-truncating WRITE open (wMode=true,
+    // override=false) maps to FatFs FA_OPEN_ALWAYS, which CREATES a missing path
+    // -- leaving a stray 0-byte .fit and violating the public "does not modify
+    // the file on bad input" contract. A read open never creates or writes, so a
+    // missing/too-short/non-FIT path is rejected untouched. We only open for
+    // write inside finalize().
+    if (!file.open(/*wMode=*/false)) {
+        return false;
+    }
+    const size_t fileSize = file.size();
+
+    // Read + validate the on-disk header. A missing/too-short/non-FIT path is
+    // rejected here, untouched.
+    uint8_t hdr[kHeaderSize];
+    if (fileSize < kHeaderSize || !readExact(file, hdr, sizeof(hdr))
+        || hdr[0] != kHeaderSize || hdr[8] != '.' || hdr[9] != 'F'
+        || hdr[10] != 'I' || hdr[11] != 'T') {
+        file.close();
+        return false;
+    }
+    const uint32_t hdrDataSize =
+        static_cast<uint32_t>(hdr[4]) | (static_cast<uint32_t>(hdr[5]) << 8)
+        | (static_cast<uint32_t>(hdr[6]) << 16)
+        | (static_cast<uint32_t>(hdr[7]) << 24);
+    file.close();
+
+    // Derive the effective data-end and ALWAYS re-run the (idempotent)
+    // finalize(). We must NOT early-return "already finalized" on dataSize != 0:
+    // finish()/finalize() flush the header (with dataSize) BEFORE writing and
+    // flushing the trailing CRC and truncating the tail. A crash in that window
+    // leaves dataSize != 0 but a missing/torn CRC -- skipping repair would leave
+    // an invalid FIT on disk forever. Re-finalizing is harmless because
+    // finalize() recomputes the same header/CRC and truncates to the same size.
+    //
+    //  - hdrDataSize != 0 (and it fits within the file): trust the header's own
+    //    dataSize -- finish()/a prior finalize got far enough to write it, so
+    //    this is the DURABLE data end, not the possibly-stale marker offset.
+    //    Finalizing here writes the correct CRC (crash-mid-finalize) and trims
+    //    any extra tail (isolated truncate() failure) WITHOUT discarding the
+    //    session/activity messages finish() appended past the marker.
+    //  - otherwise: use the caller/marker offset -- the genuine crash-mid-
+    //    recording case where dataSize is still 0, or a fallback if the header
+    //    over-claims vs the actual file size.
+    uint32_t effectiveEnd;
+    if (hdrDataSize != 0
+        && static_cast<uint64_t>(kHeaderSize) + hdrDataSize <= fileSize) {
+        effectiveEnd = kHeaderSize + hdrDataSize;
+    } else {
+        effectiveEnd = dataEnd;
+    }
+
+    // Guard: the effective data range must lie within the file.
+    if (effectiveEnd < kHeaderSize || effectiveEnd > fileSize) {
+        return false;
+    }
+
+    return finalize(file, effectiveEnd);
 }
 
 // --- Data builder -----------------------------------------------------------

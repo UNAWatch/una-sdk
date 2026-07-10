@@ -28,6 +28,7 @@ public:
     virtual ~MenuAlertsPresenter() {}
 
     virtual void onIdleTimeout() override { model->exitApp(); }
+    virtual void onAccessoryStatus(uint8_t state, const char* name) override;
 
 private:
     MenuAlertsPresenter();

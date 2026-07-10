@@ -11,11 +11,24 @@ void MenuIntervalsRepeatsPresenter::activate()
 {
     view.setPositionId(model->getSettings().intervals.repeatsNum);
     model->resetIdleTimer();
+
+    view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState(), "");
 }
 
 void MenuIntervalsRepeatsPresenter::deactivate()
 {
     model->menu().intervals.repeats.set(view.getPositionId());
+}
+
+void MenuIntervalsRepeatsPresenter::onGpsFix(bool acquired)
+{
+    view.setGpsFix(acquired);
+}
+
+void MenuIntervalsRepeatsPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuIntervalsRepeatsPresenter::saveRepeats(uint8_t repeatsNum)

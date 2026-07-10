@@ -46,10 +46,13 @@ add_executable(una-sdk-host-tests
     fit/FitWriter_test.cpp
     fit/FitProfile_test.cpp
     fit/FitRoundTrip_test.cpp
+    fit/RecordingMarker_test.cpp
     apps/Running/ActivityWriter_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
     simulator/FileSystemMock_test.cpp
+    sensorlayer/GyroscopeParser_test.cpp
+    metrics/MonotonicCounter_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/ActivityWriter.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
@@ -59,6 +62,7 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitCrc.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitWriter.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitRecordCadence.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Fit/RecordingMarker.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
