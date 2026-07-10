@@ -19,7 +19,7 @@ class CachedFontCpp < Template
     File.join(@output_directory, output_path)
   end
   def run
-    if !File::exists?(output_filename)
+    if !File.exist?(output_filename)
       #generate CachedFont.cpp
       super
     end

@@ -23,7 +23,7 @@ class Template
     @output_directory = output_directory
   end
   def run
-    result = ERB.new(File.read(input_path).gsub(WINDOWS_LINE_ENDINGS, UNIX_LINE_ENDINGS),0,"<>").
+    result = ERB.new(File.read(input_path).gsub(WINDOWS_LINE_ENDINGS, UNIX_LINE_ENDINGS), trim_mode: "<>").
                result(binding).
                gsub(WINDOWS_LINE_ENDINGS, UNIX_LINE_ENDINGS).
                gsub(UNIX_LINE_ENDINGS, LINE_ENDINGS)

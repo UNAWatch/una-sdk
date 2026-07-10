@@ -277,7 +277,7 @@ class FontsCpp
     @cache["max_commands"] = @max_commands
     @cache["max_font"] = @max_font
     new_cache_file = false
-    if not File::exists?(cache_file)
+    if not File.exist?(cache_file)
       new_cache_file = true
     else
       #cache file exists, compare data to cache file
@@ -288,9 +288,9 @@ class FontsCpp
       #write new cache file
       FileIO.write_file_silent(cache_file, @cache.to_json)
     end
-    if !File::exists?(output_filename) || new_cache_file
+    if !File.exist?(output_filename) || new_cache_file
       #generate VectorFontRendererBuffers.cpp
-      result = ERB.new(File.read(input_path).gsub(WINDOWS_LINE_ENDINGS, UNIX_LINE_ENDINGS),0,"<>").
+      result = ERB.new(File.read(input_path).gsub(WINDOWS_LINE_ENDINGS, UNIX_LINE_ENDINGS), trim_mode: "<>").
                  result(binding).
                  gsub(WINDOWS_LINE_ENDINGS, UNIX_LINE_ENDINGS).
                  gsub(UNIX_LINE_ENDINGS, LINE_ENDINGS)
