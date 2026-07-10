@@ -50,6 +50,7 @@ add_executable(una-sdk-host-tests
     apps/Running/ActivityWriter_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
+    simulator/FileSystemMock_test.cpp
     sensorlayer/GyroscopeParser_test.cpp
     metrics/MonotonicCounter_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
@@ -65,6 +66,8 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
+    "${UNA_SDK_ROOT}/Libs/Source/Simulator/Kernel/Mock/FileSystem.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Wrappers/StdLibWrappers.c"
 )
 # FIT encoding is covered by the SDK::Fit tests (fit/*) and the Running
 # ActivityWriter smoke test (apps/Running/ActivityWriter_test.cpp).

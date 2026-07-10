@@ -5,7 +5,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <dirent.h>
+#endif
 
 #include "SDK/Interfaces/IFileSystem.hpp"
 
@@ -20,7 +24,11 @@ public:
 
     File(const char *prefix, const char *relativePath);
 
-    ~File() = default;
+    ~File() override;
+
+    // Owns a raw handle (fd on POSIX); non-copyable to avoid a double close.
+    File(const File &) = delete;
+    File &operator=(const File &) = delete;
 
 
     virtual void setPath(const char *path) override;
@@ -55,8 +63,12 @@ public:
 
 private:
     std::string path;
+#ifdef _WIN32
     std::fstream file;
     bool isOpenFlag = false;
+#else
+    int fd = -1;   // POSIX file descriptor; -1 when closed
+#endif
     char pathBuffer[SDK::Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;
@@ -70,7 +82,11 @@ class Directory : public SDK::Interface::IDirectory {
 public:
     Directory(const char *prefix, const char *relativePath);
 
-    virtual ~Directory() = default;
+    ~Directory() override;
+
+    // Owns a raw handle (DIR* on POSIX); non-copyable to avoid a double close.
+    Directory(const Directory &) = delete;
+    Directory &operator=(const Directory &) = delete;
 
     virtual void setPath(const char *path) override;
 
@@ -94,10 +110,14 @@ public:
 
 private:
     std::string path;
+#ifdef _WIN32
     HANDLE handle;
     WIN32_FIND_DATAA findData;
-    bool isOpenFlag = false;
     bool hasEntry = false; // 'true' when findData holds an entry not yet returned by readNext
+#else
+    DIR *handle = nullptr; // POSIX directory stream; nullptr when closed
+#endif
+    bool isOpenFlag = false;
     char pathBuffer[SDK::Interface::IFileSystem::skMaxPathLen]; // Buffer to hold the path without prefix
 
     const char *mPathPrefix;
