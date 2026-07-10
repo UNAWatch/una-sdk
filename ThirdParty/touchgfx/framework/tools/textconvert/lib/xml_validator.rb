@@ -14,7 +14,7 @@ class XMLValidator
   def validate(xml_file_name)
     xml_doc = Nokogiri::XML(File.read(xml_file_name))
     schema_file_name = xml_file_name.gsub(/\.xml$/, '.xsd')
-    if File.exists?(schema_file_name)
+    if File.exist?(schema_file_name)
       xsd = Nokogiri::XML::Schema(File.read(schema_file_name))
       result = xsd.validate(xml_doc)
       if !result.empty?

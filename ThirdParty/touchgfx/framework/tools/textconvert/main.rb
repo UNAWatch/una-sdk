@@ -52,8 +52,8 @@ UPGRADE
   end
 
   def self.missing_files
-    return !File.exists?("#{@fonts_output_path}/include/fonts/ApplicationFontProvider.hpp") ||
-           !File.exists?("#{@localization_output_path}/include/texts/TextKeysAndLanguages.hpp")
+    return !File.exist?("#{@fonts_output_path}/include/fonts/ApplicationFontProvider.hpp") ||
+           !File.exist?("#{@localization_output_path}/include/texts/TextKeysAndLanguages.hpp")
   end
 
   if Integer(RUBY_VERSION.match(/\d+/)[0]) < 3 && !RUBY_PLATFORM.match(/linux/)
@@ -217,8 +217,8 @@ UPGRADE
       # 0:
       if file_name.match(/\.xlsx$/)
         xml_file_name = file_name.gsub(/\.xlsx$/, '.xml')
-        if File.exists?(xml_file_name)
-          if File.exists?(file_name)
+        if File.exist?(xml_file_name)
+          if File.exist?(file_name)
             puts "WARNING: Using \"#{xml_file_name}\" instead of \"#{file_name}\""
           end
         else
@@ -230,7 +230,7 @@ UPGRADE
       # 1:
       text_converter_time = Dir[File.join(__dir__,'**','*'), font_convert_path].collect{|f| [File.mtime(f), File.ctime(f)]}.flatten.max
 
-      if ((compile_time_exists = File.exists?("#{@localization_output_path}/cache/compile_time.cache")) && text_converter_time > File.mtime("#{@localization_output_path}/cache/compile_time.cache")) || !compile_time_exists
+      if ((compile_time_exists = File.exist?("#{@localization_output_path}/cache/compile_time.cache")) && text_converter_time > File.mtime("#{@localization_output_path}/cache/compile_time.cache")) || !compile_time_exists
         #remove all files, as text converter is newer (probably upgraded to new TouchGFX)
         puts "Cleaning generated files from #{@localization_output_path} and #{@fonts_output_path}."
         if @localization_output_path.match /generated\/texts$/
@@ -249,7 +249,7 @@ UPGRADE
       # 1c:
       force_run = false
       options_file = "#{@localization_output_path}/cache/options.cache"
-      options = File.exists?(options_file) && File.read(options_file)
+      options = File.exist?(options_file) && File.read(options_file)
 
       new_options = { :remap => remap_global,
                       :autohint => autohint_setting,
@@ -267,7 +267,7 @@ UPGRADE
       end
 
       # 2:
-      if File.exists?("#{@localization_output_path}/cache/compile_time.cache") && !self.missing_files && !force_run
+      if File.exist?("#{@localization_output_path}/cache/compile_time.cache") && !self.missing_files && !force_run
         mod_time = [File.mtime(file_name), File.ctime(file_name)].max
         cache_mod_time = File.mtime("#{@localization_output_path}/cache/compile_time.cache")
         # exit if cache is newer than input file and cache is also newer than application.config and target.config

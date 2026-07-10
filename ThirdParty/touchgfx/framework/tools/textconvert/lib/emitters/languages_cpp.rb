@@ -87,7 +87,7 @@ class LanguageXxCpp < Template
     @cache["generate_binary_translations"] = @generate_binary_translations
 
     new_cache_file = false
-    if not File::exists?(cache_file)
+    if not File.exist?(cache_file)
       new_cache_file = true
     else
       #cache file exists, compare data with cache file
@@ -100,7 +100,7 @@ class LanguageXxCpp < Template
       FileIO.write_file_silent(cache_file, @cache.to_json)
     end
 
-    if !File::exists?(output_filename) || new_cache_file
+    if !File.exist?(output_filename) || new_cache_file
       #generate LanguageXX.cpp
       super
     end

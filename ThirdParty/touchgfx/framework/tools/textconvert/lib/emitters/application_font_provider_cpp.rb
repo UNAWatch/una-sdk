@@ -32,7 +32,7 @@ class ApplicationFontProviderCpp < Template
     @cache["typographies"] = typographies.collect{|t| [t.name, t.font_file, t.font_size, t.bpp] }
     @cache["generate_font_format"] = @generate_font_format
     new_cache_file = false
-    if not File::exists?(cache_file)
+    if not File.exist?(cache_file)
       new_cache_file = true
     else
       #cache file exists, compare data with cache file
@@ -43,7 +43,7 @@ class ApplicationFontProviderCpp < Template
       #write new cache file
       FileIO.write_file_silent(cache_file, @cache.to_json)
     end
-    if !File::exists?(output_filename) || new_cache_file
+    if !File.exist?(output_filename) || new_cache_file
       #generate ApplicationFontProvider.cpp
       super
     end
