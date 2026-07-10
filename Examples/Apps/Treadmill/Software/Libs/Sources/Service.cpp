@@ -620,17 +620,17 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.batteryLevel   = static_cast<uint8_t>(mBatterySoc.get());
     fitRecord.batteryVoltage = static_cast<uint16_t>(mBatteryVoltage.get() * 1000);
 
-    // Use the spike-filtered cadence so the recorded cadence, step length and
-    // speed are all consistent with what drove the estimator this tick.
-    fitRecord.set(ActivityWriter::RecordData::Field::CADENCE, mCadence.cadenceValid);
-    fitRecord.cadenceSpm = mCadence.cadenceSpm;
+    // Record the same kernel cadence that drove the estimator this tick, so
+    // cadence, step length and speed stay consistent.
+    fitRecord.set(ActivityWriter::RecordData::Field::CADENCE, mRunningCadence.cadenceValid);
+    fitRecord.cadenceSpm = mRunningCadence.cadenceSpm;
 
     // Treadmill step length comes from the cadence/stride model: single-step
     // distance = SL_model(c) / 2. Written only when cadence is valid (§7.4).
-    const bool cadenceOk = mCadence.cadenceValid;
+    const bool cadenceOk = mRunningCadence.cadenceValid;
     fitRecord.set(ActivityWriter::RecordData::Field::STEP_LENGTH, cadenceOk);
     fitRecord.stepLengthM = cadenceOk
-        ? mModel.treadmillStrideLengthM(mCadence.cadenceSpm) / 2.0f
+        ? mModel.treadmillStrideLengthM(mRunningCadence.cadenceSpm) / 2.0f
         : 0.0f;
 
     return fitRecord;
@@ -709,7 +709,6 @@ void Service::startTrack(std::time_t utc)
     mLastTickUtc = 0;
     mModel.startSession(mHeightM);
     mEstimator.startSession();
-    mCadence = {};
 
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
@@ -781,14 +780,8 @@ void Service::processTrack()
             : static_cast<float>(nowUtc - mLastTickUtc);
         mLastTickUtc = nowUtc;
 
-        // De-spike the wrist cadence before it drives speed. Only valid samples
-        // are filtered; dropouts bypass so the estimator's hold-forward still
-        // owns them. mCadence then feeds both the estimator and the FIT record.
-        // Kernel RUNNING_CADENCE is already a clean windowed rate - use it raw.
-        mCadence.cadenceValid = mRunningCadence.cadenceValid;
-        mCadence.cadenceSpm   = mRunningCadence.cadenceSpm;
-
-        mEstimator.tick(mCadence.cadenceSpm, mCadence.cadenceValid, dt);
+        // Kernel RUNNING_CADENCE is already a clean windowed rate - fed raw.
+        mEstimator.tick(mRunningCadence.cadenceSpm, mRunningCadence.cadenceValid, dt);
         mDistanceCounter.add(mEstimator.distanceM());   // cumulative, monotonic
         // Feed speed every tick. speedMps() is 0 once the cadence hold-forward
         // window expires, so the current speed drops to 0 (display + FIT record)
