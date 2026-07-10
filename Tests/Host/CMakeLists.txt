@@ -42,7 +42,6 @@ add_executable(una-sdk-host-tests
     calibration/StrideMath_test.cpp
     calibration/CadenceStrideModel_test.cpp
     calibration/TreadmillSpeedEstimator_test.cpp
-    calibration/CadenceSpikeFilter_test.cpp
     fit/FitWriter_test.cpp
     fit/FitProfile_test.cpp
     fit/FitRoundTrip_test.cpp

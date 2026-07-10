@@ -709,7 +709,6 @@ void Service::startTrack(std::time_t utc)
     mLastTickUtc = 0;
     mModel.startSession(mHeightM);
     mEstimator.startSession();
-    mCadenceFilter.reset();
     mCadence = {};
 
     mSessionNotEmpty = false;
@@ -785,10 +784,9 @@ void Service::processTrack()
         // De-spike the wrist cadence before it drives speed. Only valid samples
         // are filtered; dropouts bypass so the estimator's hold-forward still
         // owns them. mCadence then feeds both the estimator and the FIT record.
+        // Kernel RUNNING_CADENCE is already a clean windowed rate - use it raw.
         mCadence.cadenceValid = mRunningCadence.cadenceValid;
-        mCadence.cadenceSpm   = mRunningCadence.cadenceValid
-            ? mCadenceFilter.filter(mRunningCadence.cadenceSpm)
-            : mRunningCadence.cadenceSpm;
+        mCadence.cadenceSpm   = mRunningCadence.cadenceSpm;
 
         mEstimator.tick(mCadence.cadenceSpm, mCadence.cadenceValid, dt);
         mDistanceCounter.add(mEstimator.distanceM());   // cumulative, monotonic
