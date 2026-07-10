@@ -16,7 +16,6 @@
 
 #include "SDK/Calibration/CadenceStrideModel.hpp"
 #include "SDK/Calibration/TreadmillSpeedEstimator.hpp"
-#include "SDK/Calibration/CadenceSpikeFilter.hpp"
 
 #include "SettingsSerializer.hpp"
 #include "ActivitySummarySerializer.hpp"
@@ -82,12 +81,9 @@ private:
         bool  cadenceValid    = false;
     } mRunningCadence{};   ///< Raw wrist cadence from the kernel sensor.
 
-    // Spike-filtered cadence (app-side fix for the wrist estimator's brief
-    // valid-but-low glitches). The raw mRunningCadence above is de-spiked once
-    // per active tick into mCadence, which drives speed/distance AND the
-    // recorded FIT cadence so all three stay consistent. Dropouts bypass the
-    // filter so the estimator's hold-forward still owns them.
-    SDK::Calibration::CadenceSpikeFilter mCadenceFilter;
+    // Live cadence fed to the estimator and recorded to FIT. The kernel's
+    // windowed RUNNING_CADENCE is already clean, so it is used raw here (the
+    // former app-side spike filter is no longer needed).
     struct {
         float cadenceSpm   = 0.0f;
         bool  cadenceValid = false;
