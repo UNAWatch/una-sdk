@@ -600,6 +600,12 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
     fitRecord.speed        = mSpeedCounter.getCurrent();
 
+    // Cumulative active distance (live uncorrected estimate, same source as the
+    // session total pre-calibration). Monotonic and always valid while recording,
+    // so it is written unconditionally.
+    fitRecord.set(ActivityWriter::RecordData::Field::DISTANCE, true);
+    fitRecord.distance     = mDistanceCounter.getValueActive();
+
     bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
     fitRecord.heartRate    = mHrCounter.getCurrent();

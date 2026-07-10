@@ -35,6 +35,7 @@ public:
     struct RecordData {
         // Treadmill records carry no position/altitude (§7.4.1).
         enum class Field : uint8_t {
+            DISTANCE     = 1u << 0,
             SPEED        = 1u << 1,
             HEART_RATE   = 1u << 3,
             BATTERY      = 1u << 4,
@@ -50,6 +51,7 @@ public:
 
         std::time_t timestamp      = 0;     // UTC
         float       speed          = 0.0f;  // m/s
+        float       distance       = 0.0f;  // m (cumulative, uncorrected estimate)
         float       heartRate      = 0.0f;  // bpm (arbitrated)
         uint8_t     hrSource       = 0;     // HeartRateEx::Source (0=none,1=optical,2=external)
         uint8_t     hrOpticalBpm   = 0;     // raw wrist-optical (PPG) bpm (0 = none)

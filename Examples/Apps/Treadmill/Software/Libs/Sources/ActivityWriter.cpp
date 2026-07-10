@@ -23,7 +23,8 @@ using DevFieldDef = fit::FitWriter::DevField;
 
 namespace {
     // Native record fields shared by every record variant (treadmill: no GPS,
-    // no altitude -- cadence-driven speed, HR, cadence, model step length).
+    // no altitude -- cadence-driven speed, HR, cadence, model step length,
+    // cumulative estimated distance).
     // Field order here defines the on-wire order and must match the value-write
     // order in addRecord().
     const Field kRecordCommonTail[] = {
@@ -32,6 +33,7 @@ namespace {
         fit::field::Record::Cadence,
         fit::field::Record::FractionalCadence,
         fit::field::Record::StepLength,
+        fit::field::Record::Distance,
     };
 }  // namespace
 
@@ -146,14 +148,14 @@ void ActivityWriter::defineRecordMessages()
     mFit->defineMessage(L_RECORD, fit::mesgNum(fit::MesgNum::Record),
         {fit::field::Record::Timestamp,
          kRecordCommonTail[0], kRecordCommonTail[1], kRecordCommonTail[2],
-         kRecordCommonTail[3], kRecordCommonTail[4]},
+         kRecordCommonTail[3], kRecordCommonTail[4], kRecordCommonTail[5]},
         {hr3[0], hr3[1], hr3[2]});
 
     // + battery (5 developer fields).
     mFit->defineMessage(L_RECORD_B, fit::mesgNum(fit::MesgNum::Record),
         {fit::field::Record::Timestamp,
          kRecordCommonTail[0], kRecordCommonTail[1], kRecordCommonTail[2],
-         kRecordCommonTail[3], kRecordCommonTail[4]},
+         kRecordCommonTail[3], kRecordCommonTail[4], kRecordCommonTail[5]},
         {batt5[0], batt5[1], batt5[2], batt5[3], batt5[4]});
 }
 
@@ -224,6 +226,11 @@ void ActivityWriter::addRecord(const RecordData& record)
     d.u16(record.has(RecordData::Field::STEP_LENGTH)
               ? SDK::FitRecordCadence::encodeStepLengthM(record.stepLengthM)
               : static_cast<uint16_t>(fit::baseTypeInvalid(fit::BaseType::UInt16)));
+
+    // distance (100 * m, cumulative)
+    d.u32(record.has(RecordData::Field::DISTANCE)
+              ? static_cast<uint32_t>(record.distance * 100.0f)
+              : static_cast<uint32_t>(fit::baseTypeInvalid(fit::BaseType::UInt32)));
 
     // Developer fields, in definition order.
     if (batt) {
