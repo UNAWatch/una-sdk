@@ -16,12 +16,21 @@ void MenuIntervalsRepeatsView::setupScreen()
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::kMaxCount);
+
+    // External-HR-only sensor status row (GPS slots are BITMAP_INVALID).
+    menuLayout.showSensorRow(true);
+
     menuLayout.invalidate();
 }
 
 void MenuIntervalsRepeatsView::tearDownScreen()
 {
     MenuIntervalsRepeatsViewBase::tearDownScreen();
+}
+
+void MenuIntervalsRepeatsView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuIntervalsRepeatsView::formatItem(touchgfx::Unicode::UnicodeChar* buf, int16_t index)

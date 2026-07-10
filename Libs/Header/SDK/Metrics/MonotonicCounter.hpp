@@ -51,9 +51,27 @@ public:
     void reset();
 
     /**
-     * @brief Reset current lap values only. Total values are preserved.
+     * @brief Close the current lap and start a new one from the current
+     *        position, gap-free. Lap values reset to zero; total values are
+     *        preserved. Unlike a re-seat on the next sample, no sub-sample
+     *        distance is dropped at the lap boundary.
      */
     void resetLap();
+
+    /**
+     * @brief Close the current lap as exactly @p span and carry the overshoot
+     *        into the next lap.
+     *
+     * Unlike resetLap(), which re-bases at the next sample and therefore
+     * discards whatever was accumulated beyond the lap target, advanceLap()
+     * shifts the lap base forward by @p span. The amount already accumulated
+     * past @p span becomes the starting value of the new lap, so distance-
+     * triggered laps stay pinned to exact multiples of the target instead of
+     * drifting by the per-sample overshoot.
+     *
+     * @param span Lap size to close on, in the counter's value units.
+     */
+    void advanceLap(T span);
 
     /**
      * @brief Add new metric measurement.
@@ -194,11 +212,38 @@ void MonotonicCounter<T>::reset()
 template<typename T>
 void MonotonicCounter<T>::resetLap()
 {
+    // Close the current lap exactly where it stands and start the next lap
+    // there, with no gap: advance each lap base by the amount this lap already
+    // consumed (active and includes-pauses independently, so pauses stay
+    // correct). The old approach zeroed the base and re-seated on the *next*
+    // sample, which dropped the sub-sample sliver between the lap event and the
+    // following sample. Base stays seated (mHasLapData untouched), so add()
+    // keeps accumulating contiguously.
+    mLapBaseValue      = mLapBaseValue      + mLapValueActive;
+    mLapBaseValueTotal = mLapBaseValueTotal + mLapValueTotal;
     mLapValueActive    = T{};
     mLapValueTotal     = T{};
-    mLapBaseValue      = T{};
-    mLapBaseValueTotal = T{};
-    mHasLapData        = false;
+}
+
+template<typename T>
+void MonotonicCounter<T>::advanceLap(T span)
+{
+    // Never advance past what the lap has accumulated: a span larger than the
+    // current lap value would drive the accumulators negative. Callers close on
+    // a target they have already reached (getLapValueActive() >= span), so this
+    // only guards against future misuse. Clamping to the active value keeps the
+    // total non-negative too, since the active value never exceeds the total.
+    if (span > mLapValueActive) {
+        span = mLapValueActive;
+    }
+    // Move the lap base forward by exactly `span`; the excess already covered
+    // this lap (the overshoot past the target) rolls into the new lap so lap
+    // boundaries never drift. Base stays seated, so add() keeps accumulating
+    // instead of re-seating on the next sample.
+    mLapValueActive    = mLapValueActive    - span;
+    mLapValueTotal     = mLapValueTotal     - span;
+    mLapBaseValue      = mLapBaseValue      + span;
+    mLapBaseValueTotal = mLapBaseValueTotal + span;
 }
 
 template<typename T>
@@ -208,7 +253,12 @@ void MonotonicCounter<T>::add(T currentValue)
         return;
     }
 
-    if (mBaseValue == T{} && mValueActive == T{}) {
+    // Seat the base on the first sample. Keyed off mHasData, not the values:
+    // a first sample equal to T{} (e.g. distance starting at 0) would otherwise
+    // keep the value-sentinel true and re-seat on the next call, dropping the
+    // first real movement. This also seats the lap base; resetLap()/advanceLap()
+    // keep the lap base seated afterwards, so there is no separate re-seat path.
+    if (!mHasData) {
         mBaseValue         = currentValue;
         mBaseValueTotal    = currentValue;
         mLapBaseValue      = currentValue;
@@ -217,12 +267,6 @@ void MonotonicCounter<T>::add(T currentValue)
         mHasData           = true;
         mHasLapData        = true;
         return;
-    }
-
-    if (mLapBaseValue == T{} && mLapValueActive == T{}) {
-        mLapBaseValue      = currentValue;
-        mLapBaseValueTotal = currentValue;
-        mHasLapData        = true;
     }
 
     if (currentValue < mLastValidValue) {

@@ -133,6 +133,13 @@ bool SettingsSerializer::load(Settings &settings)
         ? static_cast<Settings::Alerts::Time::Id>(timeId)
         : Settings::Alerts::Time::ID_OFF;
 
+    // Distance and time auto-laps are mutually exclusive. Normalize a legacy
+    // file that has both enabled by keeping distance (which getLapDivSource()
+    // prefers) and clearing time, matching the settings-menu invariant.
+    if (settings.alertDistanceId != Settings::Alerts::Distance::ID_OFF) {
+        settings.alertTimeId = Settings::Alerts::Time::ID_OFF;
+    }
+
     delete[] buffer;
 
     return true;

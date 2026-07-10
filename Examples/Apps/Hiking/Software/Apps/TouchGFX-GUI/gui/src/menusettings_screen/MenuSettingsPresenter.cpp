@@ -14,6 +14,7 @@ void MenuSettingsPresenter::activate()
     model->resetIdleTimer();
 
     view.setGpsFix(model->hasGpsFix());
+    view.setAccessoryStatus(model->getAccessoryState(), "");
     view.setPhoneNotif(model->getSettings().phoneNotifEn);
 }
 
@@ -25,6 +26,11 @@ void MenuSettingsPresenter::deactivate()
 void MenuSettingsPresenter::onGpsFix(bool acquired)
 {
     view.setGpsFix(acquired);
+}
+
+void MenuSettingsPresenter::onAccessoryStatus(uint8_t state, const char* name)
+{
+    view.setAccessoryStatus(state, name);
 }
 
 void MenuSettingsPresenter::savePhoneNotif(bool state)

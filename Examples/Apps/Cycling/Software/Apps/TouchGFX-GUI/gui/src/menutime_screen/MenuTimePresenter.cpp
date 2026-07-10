@@ -22,5 +22,10 @@ void MenuTimePresenter::saveTime(Settings::Alerts::Time::Id id)
 {
     Settings sett = model->getSettings();
     sett.alertTimeId = id;
+    // Distance and time auto-laps are mutually exclusive: enabling a time alert
+    // disables any active distance alert.
+    if (id != Settings::Alerts::Time::ID_OFF) {
+        sett.alertDistanceId = Settings::Alerts::Distance::ID_OFF;
+    }
     model->saveSettings(sett);
 }

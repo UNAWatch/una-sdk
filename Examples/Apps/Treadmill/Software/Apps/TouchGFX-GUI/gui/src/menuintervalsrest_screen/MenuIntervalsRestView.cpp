@@ -17,12 +17,21 @@ void MenuIntervalsRestView::setupScreen()
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menuLayout.setNumberOfItems(Menu::ID_COUNT);
+
+    // External-HR-only sensor status row (GPS slots are BITMAP_INVALID).
+    menuLayout.showSensorRow(true);
+
     menuLayout.invalidate();
 }
 
 void MenuIntervalsRestView::tearDownScreen()
 {
     MenuIntervalsRestViewBase::tearDownScreen();
+}
+
+void MenuIntervalsRestView::setAccessoryStatus(uint8_t state, const char* /*name*/)
+{
+    menuLayout.setHr(state);
 }
 
 void MenuIntervalsRestView::setupItems()

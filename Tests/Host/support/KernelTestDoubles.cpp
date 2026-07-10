@@ -149,6 +149,16 @@ size_t InMemoryFileSystem::InMemoryFile::size() const
 
 bool InMemoryFileSystem::InMemoryFile::open(bool wMode, bool override)
 {
+    // Injected, file-kind-scoped storage failure: refuse to open a matching path
+    // for writing without touching the entry (e.g. the auxiliary ".json" summary
+    // fails while the ".fit" is already durable).
+    if (wMode && !mFs.failWriteOpenSuffix.empty()
+        && mPath.size() >= mFs.failWriteOpenSuffix.size()
+        && mPath.compare(mPath.size() - mFs.failWriteOpenSuffix.size(),
+                         mFs.failWriteOpenSuffix.size(), mFs.failWriteOpenSuffix) == 0) {
+        return false;
+    }
+
     mWriteMode = wMode;
 
     if (wMode) {
@@ -207,6 +217,11 @@ bool InMemoryFileSystem::InMemoryFile::write(const char* buff, size_t btw, size_
         return false;
     }
 
+    // Injected storage failure: refuse writes once the byte budget is spent.
+    if (mFs.bytesWritten >= mFs.failWritesAfterBytes) {
+        return false;
+    }
+
     auto& entry = mFs.files[mPath];
     entry.exists = true;
 
@@ -221,6 +236,7 @@ bool InMemoryFileSystem::InMemoryFile::write(const char* buff, size_t btw, size_
     std::memcpy(entry.content.data() + mPos, buff, btw);
     mPos += btw;
     bw = btw;
+    mFs.bytesWritten += btw;
     return true;
 }
 
@@ -248,6 +264,9 @@ bool InMemoryFileSystem::InMemoryFile::truncate(size_t offset)
 
 bool InMemoryFileSystem::InMemoryFile::flush()
 {
+    if (mOpen) {
+        ++mFs.flushCounts[mPath];
+    }
     return mOpen;
 }
 

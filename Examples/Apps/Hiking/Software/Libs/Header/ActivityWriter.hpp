@@ -17,6 +17,7 @@
 #include "SDK/Fit/FitProfile.hpp"
 #include "SDK/Fit/FitRecordCadence.hpp"
 #include "SDK/Fit/FitWriter.hpp"
+#include "SDK/Fit/RecordingMarker.hpp"
 
 /**
  * @class ActivityWriter
@@ -106,8 +107,23 @@ public:
     void resume(std::time_t timestamp);
     void addRecord(const RecordData& record);
     void addLap(const LapData& lap);
-    void stop(const TrackData& track);
+    /// Finalize the current activity. The return value is the FIT-durability
+    /// contract: true iff the FIT stream + its finish()/flush/close succeeded, so
+    /// the .fit is safely on disk (the kernel auto-registers it on close, and
+    /// recoverInterrupted() re-registers after a crash). The auxiliary .json
+    /// summary is best-effort — a summary-only failure is logged but does NOT
+    /// flip the result, so it can never suppress the activity's registration.
+    bool stop(const TrackData& track);
     void discard();
+
+    /// Finalize an activity that a previous boot left unfinished (power loss /
+    /// crash mid-recording). If the recovery marker exists it names the torn
+    /// .fit and the last record-complete data-end offset; the file is finalized
+    /// via SDK::Fit::FitWriter::recover() and the marker is removed. Returns true
+    /// only when an interrupted activity was recovered into a valid FIT file.
+    /// Safe (returns false, no side effects) when no marker is present. Must run
+    /// before any new activity is started.
+    bool recoverInterrupted();
 
 private:
     /// Local message types (FIT record header, 0-15).
@@ -136,12 +152,17 @@ private:
         DF_HR_EXTERNAL     = 6,
     };
 
+    /// Flush + marker-refresh cadence during recording (seconds of record time).
+    static constexpr std::time_t skFlushIntervalSec = 30;
+
     const SDK::Kernel& mKernel;
     const char*        mPath = nullptr;
 
     std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
     std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;
-    uint16_t mLapCounter = 0;
+    SDK::Fit::RecordingMarker              mMarker;   ///< Shared crash-recovery marker.
+    uint16_t    mLapCounter   = 0;
+    std::time_t mLastFlushUtc = 0;   ///< Record timestamp of the last durability flush.
 
     void defineRecordMessages();
     void writeFieldDescription(uint8_t devFieldNum, const char* name,
@@ -149,7 +170,7 @@ private:
     void addMessageEvent(std::time_t t, SDK::Fit::EventType type);
 
     bool createAndOpenFile(std::time_t utc);
-    void saveSummary(const TrackData& track);
+    bool saveSummary(const TrackData& track);
 
     static std::time_t tm2epoch(const struct tm* tm);
     static std::time_t epochToLocal(std::time_t utc);

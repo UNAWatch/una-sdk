@@ -34,6 +34,21 @@ void Service::run()
 
     mSensorHr.connect();
 
+    // Recover any activity a previous boot left unfinished (power loss / crash
+    // mid-recording), before this run's own recording overwrites the marker.
+    //
+    // Known limitation: unlike the other activity apps, HRMonitor has NO
+    // activity-registration path -- it never sends CommandAppNewActivity, not
+    // even when a normally-completed session ends. Every HRMonitor .fit (both
+    // normal and recovered) is instead picked up by the kernel's boot-time
+    // activity scan. A recovered file is therefore registered on the NEXT boot's
+    // scan rather than immediately, i.e. recovery is one reboot late -- which is
+    // consistent with HRMonitor's normal (never-notified) behaviour, so no
+    // notify is wired here.
+    if (mActivityWriter.recoverInterrupted()) {
+        LOG_INFO("Recovered an interrupted activity\n");
+    }
+
     ActivityWriter::AppInfo info{};
     info.timestamp  = std::time(nullptr);
     info.appVersion = SDK::ParseVersion(BUILD_VERSION).u32;
@@ -137,7 +152,9 @@ void Service::run()
     fitTrack.elapsed   = utc - startTime;
     fitTrack.hrAvg     = static_cast<uint8_t>(hrAvgCount > 0 ? hrAvgSum / hrAvgCount : 0);
     fitTrack.hrMax     = static_cast<uint8_t>(hrMax);
-    mActivityWriter.stop(fitTrack);
+    if (!mActivityWriter.stop(fitTrack)) {
+        LOG_ERROR("activity save failed\n");
+    }
 
     mSensorHr.disconnect();
 

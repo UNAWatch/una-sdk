@@ -219,7 +219,7 @@ private:
     void sendInitialInfoToGui();
     void startTrack(std::time_t utc);
     void processTrack();
-    void saveLap();
+    void saveLap(float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
     void finalizeActivity(float distanceActualM); ///< Apply §5 calibration (<=0 = skip) + write FIT session.
     void pauseTrack(bool pause);

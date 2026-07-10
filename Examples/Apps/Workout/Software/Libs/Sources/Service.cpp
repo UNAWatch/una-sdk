@@ -91,6 +91,13 @@ void Service::run()
         LOG_WARNING("Failed to load activity summary\n");
     }
 
+    // Recover any activity a previous boot left unfinished (power loss /
+    // crash mid-recording), before any new track can start.
+    if (mActivityWriter.recoverInterrupted()) {
+        LOG_INFO("Recovered an interrupted activity\n");
+        notifyNewActivity();
+    }
+
     SDK::Timer guiInitTimeout(TIMER_SECONDS(5));
     guiInitTimeout.start();
 
@@ -807,9 +814,13 @@ void Service::stopTrack(bool discard)
         fitTrack.calories           = mTrackData.totalCalories;
         fitTrack.metabolicCalories  = mTrackData.restingCaloriesTotal;
 
-        mActivityWriter.stop(fitTrack);
-
-        notifyNewActivity();
+        if (mActivityWriter.stop(fitTrack)) {
+            notifyNewActivity();
+        } else {
+            LOG_ERROR("activity save failed\n");
+            // Do NOT notify: the .fit is left unfinished, so the crash-recovery
+            // marker (if any) stays for the next boot to finalize.
+        }
     } else {
         mActivityWriter.discard();
     }

@@ -19,6 +19,7 @@ set(UNA_SDK_SOURCES_FIT
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitCrc.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitWriter.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitRecordCadence.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/RecordingMarker.cpp"
 )
 
 set(UNA_SDK_SOURCES_JSON
