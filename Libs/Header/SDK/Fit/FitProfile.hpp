@@ -85,6 +85,7 @@ namespace Record {
     constexpr FitWriter::Field PositionLong{1, BaseType::SInt32};      // semicircles
     constexpr FitWriter::Field HeartRate{3, BaseType::UInt8};          // bpm
     constexpr FitWriter::Field Cadence{4, BaseType::UInt8};            // rpm
+    constexpr FitWriter::Field Distance{5, BaseType::UInt32};          // scale 100, m
     constexpr FitWriter::Field FractionalCadence{53, BaseType::UInt8}; // scale 128, rpm
     constexpr FitWriter::Field EnhancedSpeed{73, BaseType::UInt32};    // scale 1000, m/s
     constexpr FitWriter::Field EnhancedAltitude{78, BaseType::UInt32}; // scale 5, off 500, m
