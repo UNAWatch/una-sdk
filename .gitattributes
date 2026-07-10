@@ -1,3 +1,17 @@
+# Store all text files with LF in the repository; check out per-platform.
+# This stops CRLF/LF noise from Windows-generated files (e.g. TouchGFX
+# Designer output) without forcing anyone's working tree line endings.
+* text=auto
+
 # Shell scripts must keep LF line endings so they run on Linux/macOS
 # regardless of a contributor's core.autocrlf setting (a CRLF shebang breaks).
 *.sh text eol=lf
+
+# Treat binary assets as binary (no line-ending conversion).
+*.out    binary
+*.a      binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.bmp    binary
+*.ico    binary
