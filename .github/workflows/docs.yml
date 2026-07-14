@@ -164,7 +164,7 @@ jobs:
           } > site/versions.json
 
           # Custom domain + disable Jekyll processing of Sphinx output.
-          echo "developers.unawatch.com" > site/CNAME
+          echo "www.developers.unawatch.com" > site/CNAME
           touch site/.nojekyll
           echo "Assembled versions:"; ls -1 site | grep -E '^(sdk-v|preview)' || true
 
@@ -175,7 +175,7 @@ jobs:
           publish_dir: ./site
           publish_branch: gh-pages
           force_orphan: false      # keep gh-pages history so a destructive publish can be reverted
-          cname: developers.unawatch.com
+          cname: www.developers.unawatch.com
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: "docs: publish ${{ needs.build.outputs.slot }} (${{ github.sha }})"
