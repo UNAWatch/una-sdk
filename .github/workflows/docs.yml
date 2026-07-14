@@ -152,6 +152,15 @@ jobs:
             printf '<!doctype html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./preview/">\n<title>Una SDK Documentation</title>\n<a href="./preview/">Una SDK Documentation</a>\n' > site/index.html
           fi
 
+          # /latest/ alias -> current release, regenerated every deploy so an
+          # external link to /latest/ always resolves to the newest release.
+          # Target is the version dir directly (not the site root) so it can
+          # never loop against a stale cached root redirect.
+          if [ -n "${latest}" ]; then
+            mkdir -p site/latest
+            printf '<!doctype html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=/%s/">\n<title>Una SDK Documentation</title>\n<a href="/%s/">Una SDK Documentation (latest)</a>\n' "${latest}" "${latest}" > site/latest/index.html
+          fi
+
           # Version manifest consumed at runtime by _static/version-selector.js.
           {
             printf '{\n  "latest": "%s",\n  "versions": [\n' "${latest:-}"
