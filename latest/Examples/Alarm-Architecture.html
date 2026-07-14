@@ -1,0 +1,870 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alarm - Alarm Clock &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cycling - Cycling Activity Tracking" href="Cycling-Architecture.html" />
+    <link rel="prev" title="Running - Running Activity Tracking" href="Running-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Alarm - Alarm Clock</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alarm-data-structure">Alarm Data Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alarmmanager-class">AlarmManager Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#alarm-checking-logic">Alarm Checking Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alarm-persistence">Alarm Persistence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service-lifecycle-and-app-startup">Service Lifecycle and App Startup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#effect-playback">Effect Playback</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-view-presenter-pattern">Model-View-Presenter Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screens-6-total">Screens (6 total)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-handling-system">Message Handling System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screen-navigation">Screen Navigation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-containers">Custom Containers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sdk-widget-containers">SDK Widget Containers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#app-specific-containers">App-Specific Containers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#input-handling">Input Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#idle-timeout">Idle Timeout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#touchgfx-integration-with-una-sdk">TouchGFX Integration with UNA SDK</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#touchgfxcommandprocessor">TouchGFXCommandProcessor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kernel-provider-architecture">Kernel Provider Architecture</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-message-system">Custom Message System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#message-sender">Message Sender</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-setup">Development Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-build">Simulator Build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Alarm - Alarm Clock</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/Alarm-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="alarm-alarm-clock">
+<h1>Alarm - Alarm Clock<a class="headerlink" href="#alarm-alarm-clock" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Alarm app is a <strong>Utility</strong>-type application designed for wearable devices. It allows the user to create, edit, and delete alarms with configurable time, repeat schedule, and alert effect. When an alarm fires, the app wakes the screen, plays the configured buzzer or vibration pattern, and presents a ringing screen from which the user can stop or snooze the alarm.</p>
+<p>The app does not use any sensors. All logic is time-based: the service runs continuously in the background, checking the current local time against the alarm list once per minute and triggering the corresponding effect when a match is found.</p>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Up to 20 alarms stored in persistent JSON storage</p></li>
+<li><p>Per-alarm configuration: time (HH:MM), repeat schedule, and alert effect</p></li>
+<li><p>Repeat options: once, every day, weekdays, weekends, or a specific day of the week</p></li>
+<li><p>Alert effects: buzzer only, vibration only, or buzzer + vibration</p></li>
+<li><p>Snooze: re-triggers after 5 minutes, up to 5 times</p></li>
+<li><p>The app can be launched on-demand (user opens from menu) or automatically when an alarm fires</p></li>
+<li><p>If no active alarms exist and the GUI never starts within 5 seconds, the service exits without launching the display</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The app is structured as two independent components: a service that handles alarm persistence and time-based triggering, and a GUI that manages the alarm list and user interaction. Communication between them occurs through a message-based system using the UNA SDK kernel infrastructure.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: Alarm persistence, time-based checking, effect playback</p></li>
+<li><p><strong>GUI Layer</strong>: TouchGFX-based user interface, alarm CRUD operations</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, file system, messaging, backlight, buzzer, vibration</p></li>
+<li><p><strong>Data Persistence</strong>: JSON file for the alarm list</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[System Clock] ──► [AlarmManager] ──► [Service]
+                                           ^
+                                           |
+                    [Message System] ──► [GUI]
+</pre></div>
+</div>
+<p>The service runs as a separate thread, checking the alarm list each minute and dispatching effects through the kernel. The GUI runs on the TouchGFX framework, handling user input and displaying the alarm list and ringing screen.</p>
+</section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>. It owns an <code class="docutils literal notranslate"><span class="pre">AlarmManager</span></code> instance and acts as its observer, forwarding alarm events to the GUI through the messaging system.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">AlarmManager</span><span class="o">::</span><span class="n">AlarmCallback</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGuiStarted</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w"> </span><span class="n">mGuiSender</span><span class="p">;</span>
+<span class="w">    </span><span class="n">AlarmManager</span><span class="w">          </span><span class="n">mAlarmManager</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Alarm</span><span class="w">                 </span><span class="n">mActiveAlarm</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The service implements <code class="docutils literal notranslate"><span class="pre">AlarmManager::AlarmCallback</span></code> to receive two events:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">onAlarm(alarm)</span></code> — called when a scheduled alarm fires</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">onListChanged(list)</span></code> — called whenever the alarm list changes (load or save)</p></li>
+</ul>
+</section>
+<section id="alarm-data-structure">
+<h4>Alarm Data Structure<a class="headerlink" href="#alarm-data-structure" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">Alarm</span></code> is a plain struct shared between GUI and Service (defined in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Alarm.hpp</span></code>):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">Alarm</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">    </span><span class="n">on</span><span class="p">;</span><span class="w">           </span><span class="c1">// Whether the alarm is enabled</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">timeHours</span><span class="p">;</span><span class="w">    </span><span class="c1">// Hour (0–23)</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">timeMinutes</span><span class="p">;</span><span class="w">  </span><span class="c1">// Minute (0–59)</span>
+<span class="w">    </span><span class="n">Repeat</span><span class="w">  </span><span class="n">repeat</span><span class="p">;</span><span class="w">       </span><span class="c1">// Repetition schedule</span>
+<span class="w">    </span><span class="n">Effect</span><span class="w">  </span><span class="n">effect</span><span class="p">;</span><span class="w">       </span><span class="c1">// Alert effect</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">Alarm::Repeat</span></code></strong> (11 options):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>JSON key</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">REPEAT_NO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;no&quot;</span></code></p></td>
+<td><p>Fires once, then disabled automatically</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">REPEAT_EVERY_DAY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;every_day&quot;</span></code></p></td>
+<td><p>Every day</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">REPEAT_WEEK_DAYS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;week_days&quot;</span></code></p></td>
+<td><p>Monday – Friday</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">REPEAT_WEEKENDS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;weekends&quot;</span></code></p></td>
+<td><p>Saturday and Sunday</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">REPEAT_MONDAY</span></code> … <code class="docutils literal notranslate"><span class="pre">REPEAT_SUNDAY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;monday&quot;</span></code> … <code class="docutils literal notranslate"><span class="pre">&quot;sunday&quot;</span></code></p></td>
+<td><p>Specific day of the week</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code class="docutils literal notranslate"><span class="pre">Alarm::Effect</span></code></strong> (3 options):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>JSON key</p></th>
+<th class="head"><p>Behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP_AND_VIBRO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;beep_vibro&quot;</span></code></p></td>
+<td><p>Buzzer + vibration</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EFFECT_VIBRO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;vibro&quot;</span></code></p></td>
+<td><p>Vibration only</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;beep&quot;</span></code></p></td>
+<td><p>Buzzer only</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Identity</strong>: Two <code class="docutils literal notranslate"><span class="pre">Alarm</span></code> objects are considered equal (for snooze tracking and duplicate detection) if <code class="docutils literal notranslate"><span class="pre">timeHours</span></code>, <code class="docutils literal notranslate"><span class="pre">timeMinutes</span></code>, and <code class="docutils literal notranslate"><span class="pre">repeat</span></code> match. The <code class="docutils literal notranslate"><span class="pre">on</span></code> flag and <code class="docutils literal notranslate"><span class="pre">effect</span></code> are excluded from the comparison.</p>
+</section>
+<section id="alarmmanager-class">
+<h4>AlarmManager Class<a class="headerlink" href="#alarmmanager-class" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">AlarmManager</span></code> handles all alarm logic independently of the service loop. It is responsible for:</p>
+<ul class="simple">
+<li><p>Loading and saving the alarm list from a JSON file (<code class="docutils literal notranslate"><span class="pre">alarms.json</span></code>)</p></li>
+<li><p>Checking once per minute whether any enabled alarm is due</p></li>
+<li><p>Tracking snoozed alarms and re-triggering them after a 5-minute interval</p></li>
+<li><p>Notifying an observer (<code class="docutils literal notranslate"><span class="pre">AlarmCallback</span></code>) on each alarm fire and on list changes</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">AlarmManager</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">AlarmCallback</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">public</span><span class="o">:</span>
+<span class="w">        </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">onAlarm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">onListChanged</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Alarm</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">list</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w">     </span><span class="nf">load</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">     </span><span class="nf">attachCallback</span><span class="p">(</span><span class="n">AlarmCallback</span><span class="o">*</span><span class="w"> </span><span class="n">pCallback</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">tm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">tmNow</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="nf">saveAlarmList</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Alarm</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">list</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">     </span><span class="nf">disableAlarm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">     </span><span class="nf">disableAllActiveAlarm</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">     </span><span class="nf">snoozeAlarm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">     </span><span class="nf">snoozeAllActiveAlarm</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="nf">hasActiveAlarms</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>Constants</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Constant</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kSnoozedTimeMinutes</span></code></p></td>
+<td><p>5</p></td>
+<td><p>Minutes between snooze re-triggers</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kMaxSnoozeCount</span></code></p></td>
+<td><p>5</p></td>
+<td><p>Maximum snooze re-trigger count per alarm</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kInitialCount</span></code></p></td>
+<td><p>20</p></td>
+<td><p>Initial vector capacity (also the maximum for message transfer)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="alarm-checking-logic">
+<h3>Alarm Checking Logic<a class="headerlink" href="#alarm-checking-logic" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">AlarmManager::execute()</span></code> is called once per iteration of the service loop. It delegates to <code class="docutils literal notranslate"><span class="pre">checkAlarms()</span></code> and returns the milliseconds until the next full minute:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">AlarmManager::execute</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">tm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">tmNow</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">checkAlarms</span><span class="p">(</span><span class="n">tmNow</span><span class="p">.</span><span class="n">tm_hour</span><span class="p">,</span><span class="w"> </span><span class="n">tmNow</span><span class="p">.</span><span class="n">tm_min</span><span class="p">,</span><span class="w"> </span><span class="n">tmNow</span><span class="p">.</span><span class="n">tm_wday</span><span class="p">,</span><span class="w"> </span><span class="n">tmNow</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nextCheckMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">60</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tmNow</span><span class="p">.</span><span class="n">tm_sec</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">nextCheckMs</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">checkAlarms()</span></code> performs two passes per call:</p>
+<p><strong>Pass 1 — regular alarms</strong>: For each enabled alarm that matches the current hour, minute, and day schedule, and has not been snoozed yet:</p>
+<ol class="arabic simple">
+<li><p>Calls <code class="docutils literal notranslate"><span class="pre">mObserver-&gt;onAlarm(alarm)</span></code></p></li>
+<li><p>Adds the alarm to the snoozed-alarm tracking list (<code class="docutils literal notranslate"><span class="pre">addSnoozedAlarm</span></code>)</p></li>
+<li><p>For one-time alarms (<code class="docutils literal notranslate"><span class="pre">REPEAT_NO</span></code>): sets <code class="docutils literal notranslate"><span class="pre">alarm.on</span> <span class="pre">=</span> <span class="pre">false</span></code> and saves to file immediately</p></li>
+</ol>
+<p><strong>Pass 2 — snoozed alarms</strong>: Checks each entry in <code class="docutils literal notranslate"><span class="pre">mSnoozedAlarms</span></code>. When <code class="docutils literal notranslate"><span class="pre">nextTriggerHour:nextTriggerMinute</span></code> matches the current time:</p>
+<ul class="simple">
+<li><p>Decrements <code class="docutils literal notranslate"><span class="pre">snoozeCount</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">snoozeCount</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>: re-triggers <code class="docutils literal notranslate"><span class="pre">onAlarm</span></code> and advances the next trigger time by <code class="docutils literal notranslate"><span class="pre">kSnoozedTimeMinutes</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">snoozeCount</span> <span class="pre">==</span> <span class="pre">0</span></code>: removes the entry (snooze exhausted)</p></li>
+</ul>
+<p><strong>Snooze design note</strong>: <code class="docutils literal notranslate"><span class="pre">snoozeAlarm()</span></code> and <code class="docutils literal notranslate"><span class="pre">snoozeAllActiveAlarm()</span></code> are intentional no-ops. The alarm is already inserted into <code class="docutils literal notranslate"><span class="pre">mSnoozedAlarms</span></code> when it first fires in <code class="docutils literal notranslate"><span class="pre">checkAlarms</span></code>. Re-triggering after the snooze interval is handled automatically by <code class="docutils literal notranslate"><span class="pre">execute()</span></code>. The GUI only needs to call these methods to communicate intent; no additional action is required on the service side.</p>
+</section>
+<section id="alarm-persistence">
+<h3>Alarm Persistence<a class="headerlink" href="#alarm-persistence" title="Link to this heading"></a></h3>
+<p>Alarms are stored in <code class="docutils literal notranslate"><span class="pre">alarms.json</span></code> in the application’s file system. The JSON schema is:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;alarms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;time_h&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;time_m&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;week_days&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;beep_vibro&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;time_h&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;time_m&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;weekends&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vibro&quot;</span><span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The internal serialisation buffer is 2048 bytes. A worst-case file with 20 alarms (all using the longest field values: <code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">23:59</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;wednesday&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;beep_vibro&quot;</span></code>) produces ~1612 bytes of compact JSON, which fits comfortably within this limit. If the file exceeds the buffer, loading fails gracefully with an error log.</p>
+</section>
+<section id="service-lifecycle-and-app-startup">
+<h3>Service Lifecycle and App Startup<a class="headerlink" href="#service-lifecycle-and-app-startup" title="Link to this heading"></a></h3>
+<p>The Alarm service is configured with <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span> <span class="pre">On</span></code>, which instructs the kernel to launch the service automatically at boot. This is essential for time-based alarm detection: the service must be running in the background at all times so it can check the alarm list each minute, even when the GUI is not open.</p>
+<p>The service’s <code class="docutils literal notranslate"><span class="pre">run()</span></code> method handles two startup scenarios:</p>
+<p><strong>Scenario A — User opens app from menu</strong> (GUI already starting):</p>
+<ol class="arabic simple">
+<li><p>Service starts, loads alarms from <code class="docutils literal notranslate"><span class="pre">alarms.json</span></code></p></li>
+<li><p>Receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> → calls <code class="docutils literal notranslate"><span class="pre">onStartGUI()</span></code>:</p>
+<ul class="simple">
+<li><p>Sets <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span> <span class="pre">=</span> <span class="pre">true</span></code></p></li>
+<li><p>If a pending active alarm exists (<code class="docutils literal notranslate"><span class="pre">mActiveAlarm.on</span></code>), sends it to GUI via <code class="docutils literal notranslate"><span class="pre">ACTIVATED_ALARM</span></code></p></li>
+<li><p>Sends the full alarm list to GUI via <code class="docutils literal notranslate"><span class="pre">ALARM_LIST</span></code></p></li>
+</ul>
+</li>
+<li><p>Enters the minute-loop, checking for alarms and processing GUI messages</p></li>
+</ol>
+<p><strong>Scenario B — Alarm fires automatically</strong> (GUI not yet running):</p>
+<ol class="arabic simple">
+<li><p>Service starts, loads alarms</p></li>
+<li><p>First <code class="docutils literal notranslate"><span class="pre">execute()</span></code> call detects a due alarm → <code class="docutils literal notranslate"><span class="pre">onAlarm(alarm)</span></code>:</p>
+<ul class="simple">
+<li><p>Sends <code class="docutils literal notranslate"><span class="pre">RequestAppRunGui</span></code> to kernel (kernel launches GUI)</p></li>
+<li><p>Saves <code class="docutils literal notranslate"><span class="pre">mActiveAlarm</span> <span class="pre">=</span> <span class="pre">alarm</span></code></p></li>
+</ul>
+</li>
+<li><p>Kernel starts GUI; <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> arrives → <code class="docutils literal notranslate"><span class="pre">onStartGUI()</span></code> sends <code class="docutils literal notranslate"><span class="pre">ACTIVATED_ALARM</span></code> + <code class="docutils literal notranslate"><span class="pre">ALARM_LIST</span></code> to GUI</p></li>
+<li><p>GUI navigates directly to <code class="docutils literal notranslate"><span class="pre">RingingView</span></code></p></li>
+</ol>
+<p><strong>Early exit</strong>: If <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is still <code class="docutils literal notranslate"><span class="pre">false</span></code> after 5 seconds and <code class="docutils literal notranslate"><span class="pre">hasActiveAlarms()</span></code> returns <code class="docutils literal notranslate"><span class="pre">false</span></code>, the service exits without displaying anything.</p>
+</section>
+<section id="effect-playback">
+<h3>Effect Playback<a class="headerlink" href="#effect-playback" title="Link to this heading"></a></h3>
+<p>When the GUI sends <code class="docutils literal notranslate"><span class="pre">ACTIVATED_EFFECT</span></code>, the service plays the configured pattern:</p>
+<p><strong>Backlight</strong>: always on (brightness 100%, auto-off after 4000 ms).</p>
+<p><strong>Vibration pattern</strong> (for <code class="docutils literal notranslate"><span class="pre">EFFECT_VIBRO</span></code> and <code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP_AND_VIBRO</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ALERT_750MS_100 — 250ms pause — ALERT_750MS_100 — 250ms pause — ALERT_750MS_100
+</pre></div>
+</div>
+<p><strong>Buzzer pattern</strong> (for <code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP</span></code> and <code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP_AND_VIBRO</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>750ms@100% — 250ms@0% — 750ms@100% — 250ms@0% — 750ms@100%
+</pre></div>
+</div>
+<p>Stopping the effect (<code class="docutils literal notranslate"><span class="pre">stopRinging()</span></code>) sends empty <code class="docutils literal notranslate"><span class="pre">RequestBuzzerPlay</span></code> and <code class="docutils literal notranslate"><span class="pre">RequestVibroPlay</span></code> messages, which cancels any active pattern.</p>
+</section>
+</section>
+<section id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Link to this heading"></a></h2>
+<p>The GUI is built using the TouchGFX framework and follows the Model-View-Presenter pattern.</p>
+<section id="project-structure">
+<h3>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Alarm/Software/Apps/TouchGFX-GUI/
+├── AlarmGUI.touchgfx     # TouchGFX Designer project
+├── application.config    # Application configuration
+├── target.config         # Target hardware settings
+├── touchgfx.cmake        # CMake integration
+├── gui/                  # Custom GUI code
+├── assets/               # Images, fonts, texts
+├── generated/            # Auto-generated TouchGFX code
+└── simulator/            # Simulator builds
+</pre></div>
+</div>
+</section>
+<section id="model-view-presenter-pattern">
+<h3>Model-View-Presenter Pattern<a class="headerlink" href="#model-view-presenter-pattern" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Model</strong>: <code class="docutils literal notranslate"><span class="pre">Model.hpp/cpp</span></code> — Alarm state, service communication, lifecycle</p></li>
+<li><p><strong>View</strong>: Screen view classes — UI rendering and input</p></li>
+<li><p><strong>Presenter</strong>: Screen presenter classes — Logic binding model and view</p></li>
+</ul>
+</section>
+<section id="model">
+<h3>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h3>
+<p>The Model class serves as the central data hub and gateway to the service:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">UIEventListener</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IGuiLifeCycleCallback</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ICustomMessageHandler</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">tick</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleKeyEvent</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">resetIdleTimer</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">exitApp</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">switchToNextPriorityScreen</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Alarm access</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w">        </span><span class="nf">getActiveAlarm</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">                </span><span class="nf">playAlarm</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">                </span><span class="nf">stopAlarm</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">                </span><span class="nf">snoozeAlarm</span><span class="p">();</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Alarm</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getAlarmList</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">                </span><span class="nf">setAlarmEditId</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w">              </span><span class="nf">getAlarmEditId</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">                </span><span class="nf">saveAlarm</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">Alarm</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">                </span><span class="nf">deleteAlarm</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">id</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>Key Model behaviours</strong>:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">switchToNextPriorityScreen()</span></code></strong>: determines where to navigate after completing an action. Priority order: (1) alarm ringing → <code class="docutils literal notranslate"><span class="pre">RingingView</span></code>; (2) <code class="docutils literal notranslate"><span class="pre">mStayInApp</span></code> flag set → <code class="docutils literal notranslate"><span class="pre">MainView</span></code>; (3) otherwise → <code class="docutils literal notranslate"><span class="pre">exitApp()</span></code>. <code class="docutils literal notranslate"><span class="pre">mStayInApp</span></code> is set to <code class="docutils literal notranslate"><span class="pre">true</span></code> when the user presses any key while no alarm is ringing, ensuring the app stays visible after the user completes an edit, save, or delete flow.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">saveAlarm(id,</span> <span class="pre">alarm)</span></code></strong>: If <code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">&lt;</span> <span class="pre">list.size()</span></code>, overwrites in-place. If <code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">==</span> <span class="pre">list.size()</span></code> (new alarm), first checks for duplicates by identity (time + repeat); if a match is found, overwrites it instead of appending. Otherwise appends.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">setCapabilities()</span></code></strong>: Called in the constructor. Sends <code class="docutils literal notranslate"><span class="pre">RequestSetCapabilities</span></code> to the kernel with <code class="docutils literal notranslate"><span class="pre">enMusicControl</span> <span class="pre">=</span> <span class="pre">true</span></code> and <code class="docutils literal notranslate"><span class="pre">enUsbChargingScreen</span> <span class="pre">=</span> <span class="pre">true</span></code>, enabling the system to overlay music controls and USB charging status while this app is active.</p></li>
+<li><p><strong>Idle timer</strong>: Counts down at the frame rate; fires <code class="docutils literal notranslate"><span class="pre">modelListener-&gt;onIdleTimeout()</span></code> after <code class="docutils literal notranslate"><span class="pre">App::Config::kScreenTimeoutSteps</span></code> (30 seconds). Resets on any button press.</p></li>
+</ul>
+</section>
+<section id="screens-6-total">
+<h3>Screens (6 total)<a class="headerlink" href="#screens-6-total" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Screen</p></th>
+<th class="head"><p>Class</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Main</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MainView</span></code></p></td>
+<td><p>Alarm list with scroll-wheel selection</p></td>
+</tr>
+<tr class="row-odd"><td><p>Menu</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MenuView</span></code></p></td>
+<td><p>Action menu for a selected alarm (Toggle / Edit / Delete)</p></td>
+</tr>
+<tr class="row-even"><td><p>Edit</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EditView</span></code></p></td>
+<td><p>Time and options editor (time wheel + option wheels)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Saved</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SavedView</span></code></p></td>
+<td><p>Confirmation after save (auto-dismisses → next priority screen)</p></td>
+</tr>
+<tr class="row-even"><td><p>Deleted</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DeletedView</span></code></p></td>
+<td><p>Confirmation after delete (auto-dismisses → next priority screen)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ringing</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RingingView</span></code></p></td>
+<td><p>Active alarm: shows alarm time; buttons to Stop or Snooze</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="message-handling-system">
+<h3>Message Handling System<a class="headerlink" href="#message-handling-system" title="Link to this heading"></a></h3>
+<p>The Model implements <code class="docutils literal notranslate"><span class="pre">ICustomMessageHandler</span></code> to receive asynchronous messages from the service:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Model::customMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">ALARM_LIST</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">AlarmList</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">            </span><span class="n">mAlarmList</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">alarms</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">alarms</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">);</span>
+<span class="w">            </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">onAlarmListUpdated</span><span class="p">(</span><span class="n">mAlarmList</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">ACTIVATED_ALARM</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">m</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivatedAlarm</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">            </span><span class="n">mActiveAlarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">alarm</span><span class="p">;</span>
+<span class="w">            </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">onAlarmActivated</span><span class="p">(</span><span class="n">mActiveAlarm</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ModelListener::onAlarmActivated</span></code> has a default implementation that unconditionally navigates to <code class="docutils literal notranslate"><span class="pre">RingingView</span></code> — no presenter needs to override it. The active alarm data is available via <code class="docutils literal notranslate"><span class="pre">model-&gt;getActiveAlarm()</span></code>.</p>
+</section>
+<section id="screen-navigation">
+<h3>Screen Navigation<a class="headerlink" href="#screen-navigation" title="Link to this heading"></a></h3>
+<p>All screen changes use <code class="docutils literal notranslate"><span class="pre">gotoXxxScreenNoTransition()</span></code> — no animated transitions. Animations exist only within containers: <code class="docutils literal notranslate"><span class="pre">TimeWheel</span></code> and <code class="docutils literal notranslate"><span class="pre">OptionWheel</span></code> scroll movement.</p>
+<p><strong>Screen Flow</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MainView ──[R1: open menu]──► MenuView
+    │                             │           │           │
+    │                         [Toggle]      [Edit]     [Delete]
+    │                             │           │           │
+    │                         MainView    EditView    DeletedView
+    │                                         │       (auto → switchToNextPriorityScreen)
+    │                                   [R1: save]
+    │                                     SavedView
+    │                                  (auto → switchToNextPriorityScreen)
+    │
+    └──[R2: exit]──► exitApp()
+
+RingingView ──[R1: Stop]──►   stopAlarm()   → switchToNextPriorityScreen()
+             ──[R2: Snooze]──► snoozeAlarm() → switchToNextPriorityScreen()
+
+switchToNextPriorityScreen():
+    alarm ringing  ──► RingingView
+    mStayInApp     ──► MainView
+    else           ──► exitApp()
+</pre></div>
+</div>
+<p>When an alarm fires, <code class="docutils literal notranslate"><span class="pre">ModelListener::onAlarmActivated</span></code> navigates from any active screen directly to <code class="docutils literal notranslate"><span class="pre">RingingView</span></code>. If the user is currently in <code class="docutils literal notranslate"><span class="pre">EditView</span></code>, <code class="docutils literal notranslate"><span class="pre">RingingPresenter::deactivate()</span></code> calls <code class="docutils literal notranslate"><span class="pre">model-&gt;stopAlarm()</span></code> to ensure the effect is cleaned up if the user dismisses without pressing Stop.</p>
+</section>
+<section id="custom-containers">
+<h3>Custom Containers<a class="headerlink" href="#custom-containers" title="Link to this heading"></a></h3>
+<p>The app uses two categories of containers: ready-made <strong>SDK widgets</strong> from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> (imported as <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> packages) and <strong>app-specific containers</strong> built for alarm editing.</p>
+<section id="sdk-widget-containers">
+<h4>SDK Widget Containers<a class="headerlink" href="#sdk-widget-containers" title="Link to this heading"></a></h4>
+<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — button arc indicators (L1/L2/R1/R2)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Title</span></code> — screen title with underline</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Toggle</span></code> — on/off toggle switch</p></li>
+</ul>
+</section>
+<section id="app-specific-containers">
+<h4>App-Specific Containers<a class="headerlink" href="#app-specific-containers" title="Link to this heading"></a></h4>
+<p>Built specifically for this app and found in <code class="docutils literal notranslate"><span class="pre">gui/src/containers/</span></code>:</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">TimeWheel</span></code></strong> — dual scroll-wheel for picking hours (0–23) and minutes (0–59). Composed of two independent scroll columns with a highlighted center item (<code class="docutils literal notranslate"><span class="pre">TimeWheelHoursCenterItem</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeWheelMinutesCenterItem</span></code>) and adjacent items (<code class="docutils literal notranslate"><span class="pre">TimeWheelHoursItem</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeWheelMinutesItem</span></code>).</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">OptionWheel</span></code></strong> — generic vertical scroll-wheel for selecting one value from a list. Used for <code class="docutils literal notranslate"><span class="pre">Repeat</span></code> (11 items) and <code class="docutils literal notranslate"><span class="pre">Effect</span></code> (3 items) in <code class="docutils literal notranslate"><span class="pre">EditView</span></code>. Center item rendered by <code class="docutils literal notranslate"><span class="pre">OptionWheelCenterItem</span></code>; adjacent items by <code class="docutils literal notranslate"><span class="pre">OptionWheelItem</span></code>.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">CountdownTimer</span></code></strong> — self-registering per-frame countdown that fires a callback when it reaches zero. Used by <code class="docutils literal notranslate"><span class="pre">SavedView</span></code> and <code class="docutils literal notranslate"><span class="pre">DeletedView</span></code> for auto-dismiss after a fixed delay.</p>
+</section>
+</section>
+<section id="input-handling">
+<h3>Input Handling<a class="headerlink" href="#input-handling" title="Link to this heading"></a></h3>
+<p><strong>Button Mapping</strong>:</p>
+<ul class="simple">
+<li><p><strong>L1</strong>: Scroll up / previous item</p></li>
+<li><p><strong>L2</strong>: Scroll down / next item</p></li>
+<li><p><strong>R1</strong>: Primary action (confirm / open menu / save)</p></li>
+<li><p><strong>R2</strong>: Secondary action (exit / snooze)</p></li>
+</ul>
+<p>Any button press resets the idle timer. If no alarm is ringing at the time of the press, <code class="docutils literal notranslate"><span class="pre">mStayInApp</span></code> is set to <code class="docutils literal notranslate"><span class="pre">true</span></code> so the app does not exit after the current flow completes.</p>
+</section>
+<section id="idle-timeout">
+<h3>Idle Timeout<a class="headerlink" href="#idle-timeout" title="Link to this heading"></a></h3>
+<p>The app implements automatic timeout to conserve battery:</p>
+<ul class="simple">
+<li><p>Timeout: <code class="docutils literal notranslate"><span class="pre">App::Config::kScreenTimeoutSteps</span></code> = 30 seconds at the frame rate</p></li>
+<li><p>On timeout, the active presenter’s <code class="docutils literal notranslate"><span class="pre">onIdleTimeout()</span></code> is called, which navigates via <code class="docutils literal notranslate"><span class="pre">switchToNextPriorityScreen()</span></code></p></li>
+<li><p>Timer resets on any button press (<code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code>)</p></li>
+</ul>
+</section>
+<section id="touchgfx-integration-with-una-sdk">
+<h3>TouchGFX Integration with UNA SDK<a class="headerlink" href="#touchgfx-integration-with-una-sdk" title="Link to this heading"></a></h3>
+<section id="touchgfxcommandprocessor">
+<h4>TouchGFXCommandProcessor<a class="headerlink" href="#touchgfxcommandprocessor" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::TouchGFXCommandProcessor</span></code> is a singleton that bridges the SDK kernel and the TouchGFX event loop. Custom messages received during <code class="docutils literal notranslate"><span class="pre">waitForFrameTick()</span></code> (called from <code class="docutils literal notranslate"><span class="pre">OSWrappers::waitForVSync()</span></code>) are placed in an internal queue. <code class="docutils literal notranslate"><span class="pre">FrontendApplication::handleTickEvent()</span></code> calls <code class="docutils literal notranslate"><span class="pre">callCustomMessageHandler()</span></code> first, then <code class="docutils literal notranslate"><span class="pre">model.tick()</span></code>, ensuring pending service messages are dispatched to presenters before the view updates.</p>
+</section>
+<section id="kernel-provider-architecture">
+<h4>Kernel Provider Architecture<a class="headerlink" href="#kernel-provider-architecture" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::KernelProviderGUI</span></code> is a singleton that stores a pointer to the <code class="docutils literal notranslate"><span class="pre">SDK::Kernel</span></code> object. It is initialised before the GUI starts and retrieved by the <code class="docutils literal notranslate"><span class="pre">Model</span></code> constructor:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="o">::</span><span class="n">Model</span><span class="p">()</span>
+<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">mKernel</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">KernelProviderGUI</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">getKernel</span><span class="p">())</span>
+<span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">mSrvSender</span><span class="p">(</span><span class="n">mKernel</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">TouchGFXCommandProcessor</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">setAppLifeCycleCallback</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">TouchGFXCommandProcessor</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">setCustomMessageHandler</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setCapabilities</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="custom-message-system">
+<h2>Custom Message System<a class="headerlink" href="#custom-message-system" title="Link to this heading"></a></h2>
+<p>All service↔GUI messages are declared in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Commands.hpp</span></code> as <code class="docutils literal notranslate"><span class="pre">constexpr</span> <span class="pre">SDK::MessageType::Type</span></code> constants. Every message struct inherits from <code class="docutils literal notranslate"><span class="pre">SDK::MessageBase</span></code>. All structs are wrapped in <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">pack(push,</span> <span class="pre">4)</span></code> for alignment consistency with the message pool.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">kMaxAlarms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w">  </span><span class="c1">// must match AlarmManager::kInitialCount</span>
+
+<span class="c1">// Service &lt;-&gt; GUI</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ALARM_LIST</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+
+<span class="c1">// Service --&gt; GUI</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ACTIVATED_ALARM</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span>
+
+<span class="c1">// GUI --&gt; Service</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ACTIVATED_EFFECT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ALARM_STOP</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000004</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ALARM_STOP_ALL</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000005</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ALARM_SNOOZE</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000006</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ALARM_SNOOZE_ALL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000007</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
+</pre></div>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">AlarmList</span></code></strong> transfers the entire alarm list as a fixed-size C-array to avoid heap allocation in the message pool path:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">AlarmList</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Alarm</span><span class="w">   </span><span class="n">alarms</span><span class="p">[</span><span class="n">kMaxAlarms</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">count</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// sizeof = 32 (MessageBase) + 20*sizeof(Alarm) + 1 = 133 bytes → Pool 3 (256 bytes)</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>Message summary</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Trigger</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ALARM_LIST</span></code></p></td>
+<td><p>Service → GUI</p></td>
+<td><p>On GUI start; after any list change on service side</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ALARM_LIST</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>User saves or deletes an alarm</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ACTIVATED_ALARM</span></code></p></td>
+<td><p>Service → GUI</p></td>
+<td><p>Alarm fires</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ACTIVATED_EFFECT</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RingingPresenter::activate()</span></code> → <code class="docutils literal notranslate"><span class="pre">model-&gt;playAlarm()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ALARM_STOP</span></code> / <code class="docutils literal notranslate"><span class="pre">ALARM_STOP_ALL</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>User taps Stop on <code class="docutils literal notranslate"><span class="pre">RingingView</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ALARM_SNOOZE</span></code> / <code class="docutils literal notranslate"><span class="pre">ALARM_SNOOZE_ALL</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>User taps Snooze on <code class="docutils literal notranslate"><span class="pre">RingingView</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="message-sender">
+<h3>Message Sender<a class="headerlink" href="#message-sender" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CustomMessage::Sender</span></code> provides type-safe message sending for both directions. Each method allocates a typed message, fills fields, sends, and releases:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Sender</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Sender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Service &lt;-&gt; GUI</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">listUpd</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Alarm</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">list</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Service --&gt; GUI</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">alarmActivated</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// GUI --&gt; Service</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">activateEffect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">stopAll</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">snooze</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Alarm</span><span class="o">&amp;</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">snoozeAll</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Alarm/Software/Apps/Alarm-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Alarm&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Utility&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_AUTOSTART</span><span class="w"> </span><span class="s">On</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A19C2A7E4F8B6D31&quot;</span><span class="p">)</span>
+
+<span class="c"># Include SDK build scripts</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p><strong>Service Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_APPSYSTEM</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_JSON</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>GUI Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">TOUCHGFX_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_GUI</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Complete App</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>:</p>
+<ul class="simple">
+<li><p>UNA SDK common, GUI, app-system, and JSON sources</p></li>
+<li><p>Kernel and messaging systems</p></li>
+<li><p>File system interface</p></li>
+</ul>
+<p><strong>App Libraries</strong> (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AlarmManager</span></code> — alarm persistence and time-based triggering</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — service entry point and alarm event handling</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Alarm.hpp</span></code> — shared alarm data structure</p></li>
+</ul>
+</section>
+<section id="development-setup">
+<h3>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for comprehensive development environment setup, build instructions, and toolchain requirements.</p>
+</section>
+<section id="simulator-build">
+<h3>Simulator Build<a class="headerlink" href="#simulator-build" title="Link to this heading"></a></h3>
+<p>The TouchGFX project includes a Visual Studio simulator build located in <code class="docutils literal notranslate"><span class="pre">simulator/msvs/Application.vcxproj</span></code>.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The Alarm app demonstrates a lightweight but complete UNA application that operates independently of sensor hardware. Its architecture is simpler than activity-tracking apps — no sensor connections, no FIT recording, no real-time data streams — but it showcases key SDK patterns: background service with autonomous GUI launch, bidirectional messaging for CRUD operations, priority-based screen routing, and a clean separation between the alarm engine (<code class="docutils literal notranslate"><span class="pre">AlarmManager</span></code>) and the transport layer (<code class="docutils literal notranslate"><span class="pre">Service</span></code>).</p>
+<p>Key architectural strengths include:</p>
+<ul class="simple">
+<li><p><strong>Separation of Concerns</strong>: <code class="docutils literal notranslate"><span class="pre">AlarmManager</span></code> handles all timing logic independently; <code class="docutils literal notranslate"><span class="pre">Service</span></code> handles only transport and lifecycle</p></li>
+<li><p><strong>Zero heap allocation in the message path</strong>: Fixed-size <code class="docutils literal notranslate"><span class="pre">AlarmList</span></code> array fits entirely within a single pool block</p></li>
+<li><p><strong>Resilient app lifecycle</strong>: Service can start, trigger an alarm, and launch the GUI autonomously without user interaction</p></li>
+<li><p><strong>Priority-based navigation</strong>: <code class="docutils literal notranslate"><span class="pre">switchToNextPriorityScreen()</span></code> ensures a ringing alarm always surfaces above any other screen the user was on</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Running-Architecture.html" class="btn btn-neutral float-left" title="Running - Running Activity Tracking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Cycling-Architecture.html" class="btn btn-neutral float-right" title="Cycling - Cycling Activity Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

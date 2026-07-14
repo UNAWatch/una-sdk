@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GlanceHR - Heart Rate Glance &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GlanceSteps - Step Counter Glance" href="GlanceSteps-Architecture.html" />
+    <link rel="prev" title="HRMonitor - Heart Rate Monitor" href="HRMonitor-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GlanceHR - Heart Rate Glance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-data-structures">Key Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-integration">Sensor Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-processing-pipeline">Data Processing Pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-data-reception">1. Sensor Data Reception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-validation-and-filtering">2. Data Validation and Filtering</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#glance-update-logic">3. Glance Update Logic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-state-management">Activity State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#glance-ui-management">Glance UI Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#settings-and-configuration">Settings and Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Sensor Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#heart-rate-sensor">Heart Rate Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-data-processing-architecture">Sensor Data Processing Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#parser-classes">Parser Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-validation">Data Validation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-sampling-strategy">Sensor Sampling Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#error-handling-and-data-validation">Error Handling and Data Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#glance-framework-integration">Glance Framework Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#glance-message-system">Glance Message System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#control-types">Control Types</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#message-handling-system">Message Handling System</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-process">Build Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-setup">Development Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">GlanceHR - Heart Rate Glance</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/GlanceHR-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="glancehr-heart-rate-glance">
+<h1>GlanceHR - Heart Rate Glance<a class="headerlink" href="#glancehr-heart-rate-glance" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The GlanceHR app is a simple wearable application designed to display real-time heart rate data in a compact glance view. It provides continuous heart rate monitoring with a clean, minimal interface that shows the current heart rate value alongside an icon. The app integrates heart rate sensor data and presents it through the UNA SDK’s glance framework, making it easily accessible from the watch face.</p>
+<p>The application follows a service-only architecture with no separate GUI component, communicating directly with the glance system through the UNA SDK’s kernel infrastructure. It supports real-time heart rate updates and handles sensor connection management automatically.</p>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Real-time heart rate monitoring with live display</p></li>
+<li><p>Automatic sensor connection and data processing</p></li>
+<li><p>Clean glance interface with heart rate icon and value</p></li>
+<li><p>Graceful handling of sensor availability and data validity</p></li>
+<li><p>Low-power operation suitable for continuous monitoring</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The GlanceHR app follows a service-only architecture pattern where the service component handles all functionality including sensor integration, data processing, and glance UI management. Communication occurs through the UNA SDK’s kernel infrastructure and glance messaging system.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: Core business logic, sensor integration, data processing, and glance UI management</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, sensor layer, glance framework, messaging</p></li>
+<li><p><strong>Glance Framework</strong>: UNA SDK’s glance system for compact UI display</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Hardware</span> <span class="n">Sensors</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Sensor</span> <span class="n">Layer</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Service</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Glance</span> <span class="n">Framework</span><span class="p">]</span>
+        <span class="o">^</span>                    <span class="o">^</span>                <span class="o">^</span>
+        <span class="o">|</span>                    <span class="o">|</span>                <span class="o">|</span>
+<span class="p">[</span><span class="n">Kernel</span> <span class="n">Messages</span><span class="p">]</span> <span class="o">&lt;--</span> <span class="p">[</span><span class="n">Message</span> <span class="n">System</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="p">[</span><span class="n">Glance</span> <span class="n">Updates</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The service runs as a separate process, continuously processing heart rate sensor data and updating the glance display. The glance framework handles the actual rendering and user interaction.</p>
+</section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>, providing the core functionality for heart rate monitoring and glance display.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<p>The main service class inherits from no base class but implements lifecycle management and messaging through the kernel.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="c1">// Implementation details</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="key-data-structures">
+<h4>Key Data Structures<a class="headerlink" href="#key-data-structures" title="Link to this heading"></a></h4>
+<p><strong>Heart Rate Data:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorHR</span><span class="p">;</span><span class="w">  </span><span class="c1">// Heart rate sensor connection</span>
+<span class="kt">float</span><span class="w">                   </span><span class="n">mHrValue</span><span class="p">;</span><span class="w">    </span><span class="c1">// Current heart rate value</span>
+<span class="kt">bool</span><span class="w">                    </span><span class="n">mIsValid</span><span class="p">;</span><span class="w">    </span><span class="c1">// Data validity flag</span>
+</pre></div>
+</div>
+<p><strong>Glance UI Components:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">Form</span><span class="w">        </span><span class="n">mGlanceUI</span><span class="p">;</span><span class="w">      </span><span class="c1">// Main glance form</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">ControlText</span><span class="w"> </span><span class="n">mGlanceTitle</span><span class="p">;</span><span class="w">   </span><span class="c1">// &quot;Live HR&quot; title</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">ControlText</span><span class="w"> </span><span class="n">mGlanceValue</span><span class="p">;</span><span class="w">   </span><span class="c1">// Heart rate value display</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="sensor-integration">
+<h3>Sensor Integration<a class="headerlink" href="#sensor-integration" title="Link to this heading"></a></h3>
+<p>The service manages a single heart rate sensor connection:</p>
+<ul class="simple">
+<li><p><strong>Heart Rate Sensor</strong> (<code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::HEART_RATE</span></code>): Provides BPM measurements with trust levels</p></li>
+</ul>
+<p>The sensor is represented by an <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code> object with appropriate sampling periods and latencies.</p>
+</section>
+<section id="data-processing-pipeline">
+<h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
+<p>The data processing pipeline is streamlined for heart rate display, focusing on real-time updates and validity checking.</p>
+<section id="sensor-data-reception">
+<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<p>Heart rate data arrives through the kernel’s message system. The <code class="docutils literal notranslate"><span class="pre">handleSensorsData()</span></code> method processes the sensor data:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleSensorsData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="w"> </span><span class="n">p</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">newValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getBpm</span><span class="p">();</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;hr = %.2f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">newValue</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">newValue</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mHrValue</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">mHrValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newValue</span><span class="p">;</span>
+<span class="w">            </span><span class="n">glanceUpdate</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Each sensor connection has a <code class="docutils literal notranslate"><span class="pre">matchesDriver()</span></code> method to identify the source of the data batch.</p>
+</section>
+<section id="data-validation-and-filtering">
+<h4>2. Data Validation and Filtering<a class="headerlink" href="#data-validation-and-filtering" title="Link to this heading"></a></h4>
+<p>Raw heart rate data undergoes validation to ensure accuracy:</p>
+<p><strong>Heart Rate Validation:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mIsValid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Switch to valid display mode</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mIsValid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Switch to calculating display mode</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The app distinguishes between valid heart rate readings (&gt; 1.0 BPM) and invalid/calculating states.</p>
+</section>
+<section id="glance-update-logic">
+<h4>3. Glance Update Logic<a class="headerlink" href="#glance-update-logic" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">glanceUpdate()</span></code> method manages the display state based on data validity:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::glanceUpdate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mIsValid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">pos</span><span class="p">({</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">160</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="w"> </span><span class="p">})</span>
+<span class="w">                </span><span class="p">.</span><span class="n">font</span><span class="p">(</span><span class="n">GlanceFont_t</span><span class="o">::</span><span class="n">GLANCE_FONT_POPPINS_SEMIBOLD_30</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="n">alignment</span><span class="p">(</span><span class="n">GlanceAlignH_t</span><span class="o">::</span><span class="n">GLANCE_ALIGN_H_CENTER</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mIsValid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">pos</span><span class="p">({</span><span class="w"> </span><span class="mi">81</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">130</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="p">})</span>
+<span class="w">                </span><span class="p">.</span><span class="n">font</span><span class="p">(</span><span class="n">GlanceFont_t</span><span class="o">::</span><span class="n">GLANCE_FONT_POPPINS_SEMIBOLD_18</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="n">skTextCalculating</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="n">alignment</span><span class="p">(</span><span class="n">GlanceAlignH_t</span><span class="o">::</span><span class="n">GLANCE_ALIGN_H_LEFT</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;%.0f          &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mHrValue</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="activity-state-management">
+<h3>Activity State Management<a class="headerlink" href="#activity-state-management" title="Link to this heading"></a></h3>
+<p>The service maintains glance lifecycle states:</p>
+<ul class="simple">
+<li><p><strong>Glance Start</strong>: Initialize UI and connect sensors</p></li>
+<li><p><strong>Glance Stop</strong>: Disconnect sensors and cleanup</p></li>
+<li><p><strong>Glance Tick</strong>: Periodic UI updates and refresh</p></li>
+</ul>
+<p>State transitions are handled by message processing in the main run loop.</p>
+</section>
+<section id="glance-ui-management">
+<h3>Glance UI Management<a class="headerlink" href="#glance-ui-management" title="Link to this heading"></a></h3>
+<p>The app creates a simple glance interface with three components:</p>
+<p><strong>Glance Form Layout:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::createGuiControls</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Heart rate icon (60x60 pixels)</span>
+<span class="w">    </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">createImage</span><span class="p">().</span><span class="n">init</span><span class="p">({</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">},</span><span class="w"> </span><span class="n">ICON_60X60_ABGR2222</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Title text &quot;Live HR&quot;</span>
+<span class="w">    </span><span class="n">mGlanceTitle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">createText</span><span class="p">();</span>
+<span class="w">    </span><span class="n">mGlanceTitle</span><span class="p">.</span><span class="n">pos</span><span class="p">({</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="n">font</span><span class="p">(</span><span class="n">GlanceFont_t</span><span class="o">::</span><span class="n">GLANCE_FONT_POPPINS_SEMIBOLD_20</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">color</span><span class="p">(</span><span class="n">GlanceColor_t</span><span class="o">::</span><span class="n">GLANCE_COLOR_TEAL</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Live HR&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">alignment</span><span class="p">(</span><span class="n">GlanceAlignH_t</span><span class="o">::</span><span class="n">GLANCE_ALIGN_H_CENTER</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Heart rate value display</span>
+<span class="w">    </span><span class="n">mGlanceValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">createText</span><span class="p">();</span>
+<span class="w">    </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">pos</span><span class="p">({</span><span class="w"> </span><span class="mi">81</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">172</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="n">font</span><span class="p">(</span><span class="n">GlanceFont_t</span><span class="o">::</span><span class="n">GLANCE_FONT_POPPINS_SEMIBOLD_18</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">color</span><span class="p">(</span><span class="n">GlanceColor_t</span><span class="o">::</span><span class="n">GLANCE_COLOR_WHITE</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="n">skTextCalculating</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">alignment</span><span class="p">(</span><span class="n">GlanceAlignH_t</span><span class="o">::</span><span class="n">GLANCE_ALIGN_H_LEFT</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="settings-and-configuration">
+<h3>Settings and Configuration<a class="headerlink" href="#settings-and-configuration" title="Link to this heading"></a></h3>
+<p>The app configures the glance display through the UNA SDK’s glance configuration system:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Service::configGui</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">gc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestGlanceConfig</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gc</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">gc</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gc</span><span class="o">-&gt;</span><span class="n">maxControls</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">setWidth</span><span class="p">(</span><span class="n">gc</span><span class="o">-&gt;</span><span class="n">width</span><span class="p">);</span>
+<span class="w">                </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">setHeight</span><span class="p">(</span><span class="n">gc</span><span class="o">-&gt;</span><span class="n">height</span><span class="p">);</span>
+<span class="w">                </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The configuration ensures the glance has sufficient space for the three UI controls (icon, title, value).</p>
+</section>
+</section>
+<section id="id1">
+<h2>Sensor Integration<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>The GlanceHR app integrates a single physiological sensor through the UNA SDK’s sensor layer.</p>
+<section id="heart-rate-sensor">
+<h3>Heart Rate Sensor<a class="headerlink" href="#heart-rate-sensor" title="Link to this heading"></a></h3>
+<p><strong>Heart Rate Sensor</strong> (<code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::HEART_RATE</span></code>):</p>
+<ul class="simple">
+<li><p>Provides BPM measurements with trust levels</p></li>
+<li><p>Used for real-time heart rate display</p></li>
+<li><p>Trust levels: 1-3 (higher is better)</p></li>
+<li><p>Only valid data is displayed</p></li>
+</ul>
+</section>
+<section id="sensor-data-processing-architecture">
+<h3>Sensor Data Processing Architecture<a class="headerlink" href="#sensor-data-processing-architecture" title="Link to this heading"></a></h3>
+<p>The sensor data processing system uses specialized parsers for heart rate data extraction and validation.</p>
+<section id="parser-classes">
+<h4>Parser Classes<a class="headerlink" href="#parser-classes" title="Link to this heading"></a></h4>
+<p><strong>Heart Rate Parser:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="w"> </span><span class="nf">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">bpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">trustLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">();</span>
+<span class="w">    </span><span class="c1">// Process heart rate data</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="data-validation">
+<h4>Data Validation<a class="headerlink" href="#data-validation" title="Link to this heading"></a></h4>
+<p><strong>Heart Rate Validity Checking:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="n">isValidHeartRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">300.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Reasonable BPM range</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isValidHeartRate</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Display heart rate</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Show calculating state</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="sensor-sampling-strategy">
+<h4>Sensor Sampling Strategy<a class="headerlink" href="#sensor-sampling-strategy" title="Link to this heading"></a></h4>
+<p><strong>Adaptive Sampling Rates:</strong></p>
+<ul class="simple">
+<li><p><strong>Heart Rate</strong>: 1 Hz sampling for real-time display</p></li>
+<li><p><strong>Latency</strong>: 1000ms latency balancing responsiveness and power consumption</p></li>
+</ul>
+</section>
+<section id="error-handling-and-data-validation">
+<h4>Error Handling and Data Validation<a class="headerlink" href="#error-handling-and-data-validation" title="Link to this heading"></a></h4>
+<p><strong>Sensor Availability Management:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::connect</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">isConnected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Connect to sensors...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Service::disconnect</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">isConnected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Disconnect from sensors...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">disconnect</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Sensor connections are managed based on glance lifecycle events.</p>
+</section>
+</section>
+<section id="glance-framework-integration">
+<h3>Glance Framework Integration<a class="headerlink" href="#glance-framework-integration" title="Link to this heading"></a></h3>
+<p>The app uses the UNA SDK’s glance framework for compact UI display:</p>
+<section id="glance-message-system">
+<h4>Glance Message System<a class="headerlink" href="#glance-message-system" title="Link to this heading"></a></h4>
+<p><strong>Glance Update Messages:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::onGlanceTick</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">isInvalid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">upd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestGlanceUpdate</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">upd</span><span class="o">-&gt;</span><span class="n">name</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="n">APP_NAME</span><span class="p">;</span>
+<span class="w">            </span><span class="n">upd</span><span class="o">-&gt;</span><span class="n">controls</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">data</span><span class="p">();</span>
+<span class="w">            </span><span class="n">upd</span><span class="o">-&gt;</span><span class="n">controlsNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<span class="w">            </span><span class="n">upd</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">setValid</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The glance system handles periodic updates and invalidation management.</p>
+</section>
+<section id="control-types">
+<h4>Control Types<a class="headerlink" href="#control-types" title="Link to this heading"></a></h4>
+<p><strong>Text Controls:</strong></p>
+<ul class="simple">
+<li><p>Title control with fixed “Live HR” text</p></li>
+<li><p>Value control with dynamic heart rate display</p></li>
+<li><p>Font and color customization through SDK enums</p></li>
+</ul>
+<p><strong>Image Controls:</strong></p>
+<ul class="simple">
+<li><p>Heart rate icon display using pre-compiled bitmap data</p></li>
+<li><p>Positioned alongside text controls</p></li>
+</ul>
+</section>
+</section>
+<section id="message-handling-system">
+<h3>Message Handling System<a class="headerlink" href="#message-handling-system" title="Link to this heading"></a></h3>
+<p>The service implements message-based communication for lifecycle and data events:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">EVENT_GLANCE_START</span><span class="p">:</span>
+<span class="w">        </span><span class="c1">// Initialize glance and connect sensors</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">EVENT_GLANCE_STOP</span><span class="p">:</span>
+<span class="w">        </span><span class="c1">// Disconnect sensors and cleanup</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">EVENT_GLANCE_TICK</span><span class="p">:</span>
+<span class="w">        </span><span class="c1">// Periodic UI refresh</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">EVENT_SENSOR_LAYER_DATA</span><span class="p">:</span>
+<span class="w">        </span><span class="c1">// Process sensor data</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<p>The GlanceHR app uses CMake for cross-platform builds targeting embedded hardware.</p>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">GlanceHR-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;GlanceHR&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">&quot;Live HR&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Glance&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1358F7C2E9D4BA6&quot;</span><span class="p">)</span>
+
+<span class="c"># Include SDK build scripts</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p><strong>Service Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_SERVICE</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Complete App</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>:</p>
+<ul class="simple">
+<li><p>UNA SDK common and service sources</p></li>
+<li><p>Sensor layer interfaces</p></li>
+<li><p>Kernel and messaging systems</p></li>
+<li><p>Glance framework components</p></li>
+</ul>
+</section>
+<section id="build-process">
+<h3>Build Process<a class="headerlink" href="#build-process" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>CMake Configuration</strong>: Sets up toolchain and paths</p></li>
+<li><p><strong>Source Collection</strong>: Gathers service source files</p></li>
+<li><p><strong>Compilation</strong>: Builds service executable</p></li>
+<li><p><strong>Packaging</strong>: Combines into deployable glance app package</p></li>
+</ol>
+</section>
+<section id="development-setup">
+<h3>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for comprehensive development environment setup, build instructions, and toolchain requirements.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The GlanceHR app demonstrates a focused implementation of a heart rate monitoring glance for wearable devices. Its service-only architecture provides efficient real-time heart rate display with minimal resource usage.</p>
+<p>Key architectural strengths include:</p>
+<ul class="simple">
+<li><p><strong>Simplicity</strong>: Focused on single responsibility of heart rate display</p></li>
+<li><p><strong>Efficiency</strong>: Low-power operation suitable for continuous monitoring</p></li>
+<li><p><strong>Integration</strong>: Seamless integration with UNA SDK glance framework</p></li>
+<li><p><strong>Reliability</strong>: Robust sensor connection and data validation</p></li>
+<li><p><strong>User Experience</strong>: Clean, intuitive interface for quick heart rate checks</p></li>
+</ul>
+<p>The implementation showcases effective use of the UNA SDK’s glance system and sensor layer for building lightweight, purpose-driven wearable applications. The app successfully provides real-time heart rate monitoring while maintaining the performance characteristics expected of glance interfaces.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="HRMonitor-Architecture.html" class="btn btn-neutral float-left" title="HRMonitor - Heart Rate Monitor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GlanceSteps-Architecture.html" class="btn btn-neutral float-right" title="GlanceSteps - Step Counter Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

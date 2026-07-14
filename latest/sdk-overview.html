@@ -1,0 +1,672 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDK Overview &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sensor Layer" href="SensorsLayer.html" />
+    <link rel="prev" title="GlanceSteps - Step Counter Glance" href="Examples/GlanceSteps-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SDK Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#key-components">Key Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sdk-setup-and-build-reference">SDK Setup and Build Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sdk-project-structure">SDK Project Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-utilities">High-Level Utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gsmodel-gsbridge-gui-service-communication">GSModel &amp; GSBridge (GUI-Service Communication)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#glance-ui-system">Glance UI System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sdk-fit-fitness-data">SDK::Fit (Fitness Data)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trackmapbuilder-gps-visualization">TrackMapBuilder (GPS Visualization)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#serialization-cbor-json">Serialization (CBOR &amp; JSON)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#signal-processing-tools">Signal Processing &amp; Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#app-merging-script-app-merging-py">App Merging Script (app_merging.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-integration-scripts">Build Integration Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sdk-interfaces">SDK Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#iappcomm-communication-interface">IAppComm (Communication Interface)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#isystem-system-services-interface">ISystem (System Services Interface)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ifilesystem-storage-interface">IFileSystem (Storage Interface)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ilogger-debugging-interface">ILogger (Debugging Interface)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#isensormanager-sensor-interface">ISensorManager (Sensor Interface)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iglance-glance-application-interface">IGlance (Glance Application Interface)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-system-architecture">Message System Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#message-types-and-ranges">Message Types and Ranges</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-system-messages">Key System Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#message-processing-pattern">Message Processing Pattern</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulator-environment">Simulator Environment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-features">Simulator Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-architecture">Simulator Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-workflow-with-simulator">Development Workflow with Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#third-party-libraries-standard-library">Third-Party Libraries &amp; Standard Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-components">Core Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-points">Integration Points</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#development-best-practices">Development Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#memory-management">Memory Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sdk-version-compatibility">SDK Version Compatibility</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#versioning-scheme">Versioning Scheme</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SDK Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sdk-overview.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sdk-overview">
+<span id="id1"></span><h1>SDK Overview<a class="headerlink" href="#sdk-overview" title="Link to this heading"></a></h1>
+<p>The UNA Watch SDK provides a comprehensive suite of tools, libraries, and interfaces for building high-performance wearable applications. For platform architecture overview, see <a class="reference internal" href="platform-overview.html"><span class="std std-doc">platform overview</span></a>.</p>
+<section id="key-components">
+<h2>Key Components<a class="headerlink" href="#key-components" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Core Interfaces</strong>: Type-safe APIs for system services, communication, and hardware access.</p></li>
+<li><p><strong>Message System</strong>: High-performance inter-process communication (IPC) framework.</p></li>
+<li><p><strong>Sensor APIs</strong>: Simplified access to PPG, IMU, and GNSS sensors.</p></li>
+<li><p><strong>File System</strong>: Multi-volume storage management (Flash, USB, External).</p></li>
+<li><p><strong>Build Tools</strong>: Automated scripts for compilation and <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> packaging.</p></li>
+<li><p><strong>Simulator</strong>: Desktop-based environment for rapid prototyping and testing.</p></li>
+</ul>
+</section>
+<section id="sdk-setup-and-build-reference">
+<h2>SDK Setup and Build Reference<a class="headerlink" href="#sdk-setup-and-build-reference" title="Link to this heading"></a></h2>
+<p>To start using this SDK, see the <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">SDK setup</span></a></p>
+</section>
+<section id="sdk-project-structure">
+<h2>SDK Project Structure<a class="headerlink" href="#sdk-project-structure" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>una-sdk/
+├── Libs/
+│   ├── Header/SDK/           # Public SDK headers
+│   │   ├── Interfaces/       # Core API interfaces
+│   │   ├── Messages/         # Message type definitions
+│   │   ├── SensorLayer/      # Sensor data structures
+│   │   ├── Kernel/           # Kernel provider interfaces
+│   │   ├── Port/             # Platform port headers (TouchGFX)
+│   │   ├── Simulator/        # Simulator headers (mocks, sim sensors)
+│   │   └── Wrappers/         # Standard library wrappers
+│   └── Source/               # SDK implementation
+│       ├── Port/TouchGFX/    # TouchGFX integration
+│       └── Simulator/        # Mock kernel and desktop simulator runtime
+├── ThirdParty/               # Vendored dependencies
+│   ├── coreJSON/             # JSON parsing library
+│   ├── tinycbor_version/     # CBOR encoder/decoder
+│   └── touchgfx/             # TouchGFX framework (sources + prebuilt libs)
+├── Utilities/Scripts/        # Build and packaging tools
+├── Examples/                 # Sample reference applications
+├── cmake/                    # CMake toolchain and helpers
+└── Docs/                     # Documentation and tutorials
+</pre></div>
+</div>
+<section id="high-level-utilities">
+<h3>High-Level Utilities<a class="headerlink" href="#high-level-utilities" title="Link to this heading"></a></h3>
+<p>In addition to core interfaces, the SDK provides several high-level utilities to simplify common tasks:</p>
+<section id="gsmodel-gsbridge-gui-service-communication">
+<h4>GSModel &amp; GSBridge (GUI-Service Communication)<a class="headerlink" href="#gsmodel-gsbridge-gui-service-communication" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">GSModel</span></code> provides a type-safe, bidirectional bridge between the GUI and Service processes using <code class="docutils literal notranslate"><span class="pre">std::variant</span></code> and <code class="docutils literal notranslate"><span class="pre">std::visit</span></code>. This is the recommended way to handle application-level events between processes.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Define events in G2SEvents.hpp and S2GEvents.hpp</span>
+<span class="c1">// In Service:</span>
+<span class="n">GSModel</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="n">serviceHandler</span><span class="p">);</span>
+<span class="n">model</span><span class="p">.</span><span class="n">process</span><span class="p">();</span><span class="w"> </span><span class="c1">// Drain GUI-&gt;Service events</span>
+
+<span class="c1">// In GUI:</span>
+<span class="n">IGUIModel</span><span class="o">*</span><span class="w"> </span><span class="n">bridge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">bridge</span><span class="o">-&gt;</span><span class="k">post</span><span class="p">(</span><span class="n">G2SEvent</span><span class="o">::</span><span class="n">SomeEvent</span><span class="p">{</span><span class="n">data</span><span class="p">});</span>
+</pre></div>
+</div>
+</section>
+<section id="glance-ui-system">
+<h4>Glance UI System<a class="headerlink" href="#glance-ui-system" title="Link to this heading"></a></h4>
+<p>A lightweight UI framework for the 240x60 pixel notification area. It uses a <code class="docutils literal notranslate"><span class="pre">Form</span></code> to manage <code class="docutils literal notranslate"><span class="pre">GlanceControl</span></code> items like Text, Image, Line, and Rectangle. This system is optimized for low-power notification display.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">Form</span><span class="w"> </span><span class="nf">form</span><span class="p">(</span><span class="mi">240</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">form</span><span class="p">.</span><span class="n">createText</span><span class="p">();</span>
+<span class="n">text</span><span class="p">.</span><span class="n">init</span><span class="p">({</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">240</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">},</span><span class="w"> </span><span class="s">&quot;Notification&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">FONT_SMALL</span><span class="p">,</span><span class="w"> </span><span class="n">COLOR_WHITE</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="sdk-fit-fitness-data">
+<h4>SDK::Fit (Fitness Data)<a class="headerlink" href="#sdk-fit-fitness-data" title="Link to this heading"></a></h4>
+<p>A native FIT-format encoder for exporting activity data in the standard format compatible with major fitness platforms (no external dependency). Define each message’s fields from the FIT profile, then stream values through the builder.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Fit</span><span class="o">::</span><span class="n">FitWriter</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+<span class="n">fit</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="cm">/*profileVersion=*/</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">fit</span><span class="p">.</span><span class="n">defineMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">Record</span><span class="p">),</span>
+<span class="w">                  </span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Record</span><span class="o">::</span><span class="n">Timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Record</span><span class="o">::</span><span class="n">HeartRate</span><span class="p">});</span>
+<span class="n">fit</span><span class="p">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">u32</span><span class="p">(</span><span class="n">timestamp</span><span class="p">).</span><span class="n">u8</span><span class="p">(</span><span class="n">heartRate</span><span class="p">).</span><span class="n">write</span><span class="p">();</span>
+<span class="n">fit</span><span class="p">.</span><span class="n">finish</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="trackmapbuilder-gps-visualization">
+<h4>TrackMapBuilder (GPS Visualization)<a class="headerlink" href="#trackmapbuilder-gps-visualization" title="Link to this heading"></a></h4>
+<p>Creates a simplified pixel-based map representation of GPS tracks. It handles coordinate scaling, rotation, and filtering to fit a track into a circular or rectangular display area.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">TrackMapBuilder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">addPoint</span><span class="p">({</span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">lon</span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">screenMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="n">radiusPx</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="serialization-cbor-json">
+<h4>Serialization (CBOR &amp; JSON)<a class="headerlink" href="#serialization-cbor-json" title="Link to this heading"></a></h4>
+<p>The SDK includes stream-based readers and writers for both CBOR and JSON formats, optimized for memory-constrained environments. These are used for settings persistence and BLE data exchange.</p>
+<ul class="simple">
+<li><p><strong>CBOR</strong>: <code class="docutils literal notranslate"><span class="pre">CborStreamReader</span></code>, <code class="docutils literal notranslate"><span class="pre">CborStreamWriter</span></code> (efficient binary format)</p></li>
+<li><p><strong>JSON</strong>: <code class="docutils literal notranslate"><span class="pre">JsonStreamReader</span></code>, <code class="docutils literal notranslate"><span class="pre">JsonStreamWriter</span></code> (human-readable format)</p></li>
+</ul>
+</section>
+<section id="signal-processing-tools">
+<h4>Signal Processing &amp; Tools<a class="headerlink" href="#signal-processing-tools" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Filters</strong>: Basic signal processing filters like <code class="docutils literal notranslate"><span class="pre">FilterSmooth</span></code> for noise reduction.</p></li>
+<li><p><strong>FixedQueue</strong>: A template-based fixed-capacity queue for efficient data buffering.</p></li>
+<li><p><strong>CircularBuffer</strong>: A thread-safe circular buffer implementation integrated with kernel synchronization primitives.</p></li>
+<li><p><strong>SwTimer</strong>: High-level software timers for application-level periodic tasks.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>app_packer/app_packer.py<span class="w"> </span>-e<span class="w"> </span>&lt;elf_file&gt;<span class="w"> </span>-o<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span>-v<span class="w"> </span>&lt;version&gt;
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>ELF Processing</strong>: Parses compiled ELF files</p></li>
+<li><p><strong>Package Creation</strong>: Generates .uapp container files</p></li>
+<li><p><strong>Metadata Injection</strong>: Embeds version and configuration data</p></li>
+</ul>
+</section>
+</section>
+<section id="app-merging-script-app-merging-py">
+<h3>App Merging Script (app_merging.py)<a class="headerlink" href="#app-merging-script-app-merging-py" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>app_merging.py<span class="w"> </span>-name<span class="w"> </span>&lt;name&gt;<span class="w"> </span>-type<span class="w"> </span>&lt;Activity<span class="p">|</span>Utility<span class="p">|</span>Glance<span class="p">|</span>Clockface&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">                     </span>-autostart<span class="w"> </span>-header<span class="w"> </span>-normal_icon<span class="w"> </span>&lt;60x60.png&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">                     </span>-small_icon<span class="w"> </span>&lt;30x30.png&gt;<span class="w"> </span>-appid<span class="w"> </span>&lt;16hex&gt;<span class="w"> </span>-appver<span class="w"> </span>&lt;A.B.C&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">                     </span>-scripts<span class="w"> </span>&lt;SDK/Utilities/Scripts&gt;
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>App Metadata</strong>: Defines app properties and capabilities</p></li>
+<li><p><strong>Icon Processing</strong>: Converts and embeds PNG icons</p></li>
+<li><p><strong>Type Configuration</strong>: Sets app behavior and permissions</p></li>
+<li><p><strong>ID Assignment</strong>: Unique application identifiers</p></li>
+</ul>
+</section>
+<section id="build-integration-scripts">
+<h3>Build Integration Scripts<a class="headerlink" href="#build-integration-scripts" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>CMake Integration</strong>: Post-build scripts for automatic <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> packaging</p></li>
+<li><p><strong>Version Management</strong>: Automatic version incrementing</p></li>
+<li><p><strong>Dependency Checking</strong>: Validates build prerequisites</p></li>
+</ul>
+</section>
+</section>
+<section id="sdk-interfaces">
+<h2>SDK Interfaces<a class="headerlink" href="#sdk-interfaces" title="Link to this heading"></a></h2>
+<p>The SDK provides a comprehensive set of interfaces that apps use to interact with the watch’s kernel and hardware:</p>
+<section id="iappcomm-communication-interface">
+<h3>IAppComm (Communication Interface)<a class="headerlink" href="#iappcomm-communication-interface" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">IAppComm</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">getProcessId</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">getMessage</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timeoutMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">sendResponse</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">releaseMessage</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">sendMessage</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timeoutMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="n">T</span><span class="o">*</span><span class="w"> </span><span class="n">allocateMessage</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Process Identity</strong>: Unique process identifier assigned by kernel.</p></li>
+<li><p><strong>Message Reception</strong>: Receive messages with configurable timeout (blocking by default).</p></li>
+<li><p><strong>Response Handling</strong>: Send responses for request-response patterns.</p></li>
+<li><p><strong>Memory Management</strong>: Explicit message release back to kernel pool.</p></li>
+<li><p><strong>Type-safe Allocation</strong>: Template-based message allocation from kernel pools.</p></li>
+</ul>
+</section>
+<section id="isystem-system-services-interface">
+<h3>ISystem (System Services Interface)<a class="headerlink" href="#isystem-system-services-interface" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ISystem</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">exit</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">getTimeMs</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">delay</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">ms</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">yield</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Lifecycle</strong>: Terminate the application with an exit status.</p></li>
+<li><p><strong>Timing</strong>: Get system time in milliseconds and perform millisecond-precision delays.</p></li>
+<li><p><strong>Scheduling</strong>: Yield execution back to the kernel.</p></li>
+</ul>
+</section>
+<section id="ifilesystem-storage-interface">
+<h3>IFileSystem (Storage Interface)<a class="headerlink" href="#ifilesystem-storage-interface" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">IFileSystem</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">mkdir</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">IFile</span><span class="o">&gt;</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">IDirectory</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dir</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">exist</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">oldPath</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">newPath</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">oldPath</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">newPath</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">objectInfo</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="n">ObjectInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">item</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Object-Oriented API</strong>: Uses <code class="docutils literal notranslate"><span class="pre">IFile</span></code> and <code class="docutils literal notranslate"><span class="pre">IDirectory</span></code> objects for file and directory operations.</p></li>
+<li><p><strong>Path Management</strong>: Support for internal flash (<code class="docutils literal notranslate"><span class="pre">0:/</span></code>), external storage (<code class="docutils literal notranslate"><span class="pre">1:/</span></code>), and USB (<code class="docutils literal notranslate"><span class="pre">2:/</span></code>).</p></li>
+<li><p><strong>File Operations</strong>: Standard read/write/seek via <code class="docutils literal notranslate"><span class="pre">IFile</span></code> interface.</p></li>
+<li><p><strong>Metadata</strong>: Retrieve object information (size, type, timestamps).</p></li>
+</ul>
+</section>
+<section id="ilogger-debugging-interface">
+<h3>ILogger (Debugging Interface)<a class="headerlink" href="#ilogger-debugging-interface" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ILogger</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">printf</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">vprintf</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="kt">va_list</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">mvprintf</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">level</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">module_name</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">func</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">line</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">fmt</span><span class="p">,</span><span class="w"> </span><span class="kt">va_list</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Formatted Output</strong>: Standard <code class="docutils literal notranslate"><span class="pre">printf</span></code>-style logging.</p></li>
+<li><p><strong>Metadata Support</strong>: Log with level, module name, function, and line number.</p></li>
+</ul>
+</section>
+<section id="isensormanager-sensor-interface">
+<h3>ISensorManager (Sensor Interface)<a class="headerlink" href="#isensormanager-sensor-interface" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ISensorManager</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ISensorDriver</span><span class="o">*</span><span class="w"> </span><span class="n">getDefaultSensor</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ISensorDriver</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">getSensorList</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Sensor Discovery</strong>: Retrieve default sensors or a list of available sensors by type.</p></li>
+<li><p><strong>Driver-based Access</strong>: Interact with sensors via the <code class="docutils literal notranslate"><span class="pre">ISensorDriver</span></code> interface.</p></li>
+</ul>
+</section>
+<section id="iglance-glance-application-interface">
+<h3>IGlance (Glance Application Interface)<a class="headerlink" href="#iglance-glance-application-interface" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">IGlance</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">Info</span><span class="w"> </span><span class="n">glanceGetInfo</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">glanceUpdate</span><span class="p">()</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">glanceClose</span><span class="p">()</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Lifecycle Management</strong>: Methods for initializing, updating, and closing glance views.</p></li>
+<li><p><strong>Meta-information</strong>: Retrieve control information and alternative names for the glance.</p></li>
+</ul>
+</section>
+<section id="message-system-architecture">
+<h3>Message System Architecture<a class="headerlink" href="#message-system-architecture" title="Link to this heading"></a></h3>
+<section id="message-types-and-ranges">
+<h4>Message Types and Ranges<a class="headerlink" href="#message-types-and-ranges" title="Link to this heading"></a></h4>
+<p>The SDK uses a structured message system for inter-process communication:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Range</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x01010000 - 0x01060000</p></td>
+<td><p>Commands</p></td>
+<td><p>Kernel-to-app directives (response expected)</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x01070000 - 0x01090000</p></td>
+<td><p>App Control</p></td>
+<td><p>App-to-kernel lifecycle requests</p></td>
+</tr>
+<tr class="row-even"><td><p>0x02010000 - 0x020A0000</p></td>
+<td><p>System/Hardware</p></td>
+<td><p>Requests for system info, display, backlight, etc.</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x03010000 - 0x03040000</p></td>
+<td><p>Events</p></td>
+<td><p>System-level notifications (fire-and-forget)</p></td>
+</tr>
+<tr class="row-even"><td><p>0x030A0000 - 0x030E0000</p></td>
+<td><p>Glances</p></td>
+<td><p>Glance-specific updates and events</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x03100000 - 0x03180000</p></td>
+<td><p>Sensors</p></td>
+<td><p>Sensor discovery and data events</p></td>
+</tr>
+<tr class="row-even"><td><p>0x00000000 - 0x0000FFFF</p></td>
+<td><p>Custom</p></td>
+<td><p>Application-specific internal communication</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-system-messages">
+<h4>Key System Messages<a class="headerlink" href="#key-system-messages" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Application Control</span>
+<span class="n">COMMAND_APP_RUN</span><span class="w">              </span><span class="c1">// Start application</span>
+<span class="n">COMMAND_APP_STOP</span><span class="w">             </span><span class="c1">// Stop application</span>
+<span class="n">REQUEST_APP_TERMINATE</span><span class="w">        </span><span class="c1">// App requesting its own termination</span>
+
+<span class="c1">// System Info &amp; Settings</span>
+<span class="n">REQUEST_BATTERY_STATUS</span><span class="w">       </span><span class="c1">// Get battery level</span>
+<span class="n">REQUEST_SYSTEM_SETTINGS</span><span class="w">      </span><span class="c1">// Get watch settings</span>
+<span class="n">REQUEST_SYSTEM_INFO</span><span class="w">          </span><span class="c1">// Get firmware version, device name</span>
+
+<span class="c1">// Hardware Control</span>
+<span class="n">REQUEST_DISPLAY_CONFIG</span><span class="w">       </span><span class="c1">// Get screen dimensions</span>
+<span class="n">REQUEST_BACKLIGHT_SET</span><span class="w">        </span><span class="c1">// Set screen brightness</span>
+<span class="n">REQUEST_VIBRO_PLAY</span><span class="w">           </span><span class="c1">// Trigger vibration</span>
+<span class="n">REQUEST_BUZZER_PLAY</span><span class="w">          </span><span class="c1">// Trigger sound</span>
+
+<span class="c1">// Sensor Messages</span>
+<span class="n">REQUEST_SENSOR_LAYER_GET_DEFAULT</span><span class="w"> </span><span class="c1">// Request default sensor</span>
+<span class="n">REQUEST_SENSOR_LAYER_CONNECT</span><span class="w">     </span><span class="c1">// Start sensor sampling</span>
+<span class="n">EVENT_SENSOR_LAYER_DATA</span><span class="w">          </span><span class="c1">// Asynchronous sensor data update</span>
+</pre></div>
+</div>
+</section>
+<section id="message-processing-pattern">
+<h4>Message Processing Pattern<a class="headerlink" href="#message-processing-pattern" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// App message handling loop</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">Service::run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">comm</span><span class="o">-&gt;</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// 100ms timeout</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">MessageType</span><span class="o">::</span><span class="no">EVENT_SENSOR_LAYER_DATA</span><span class="p">:</span>
+<span class="w">                </span><span class="n">handleSensorData</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SensorDataEvent</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">));</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_STOP</span><span class="p">:</span>
+<span class="w">                </span><span class="n">handleStopCommand</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">StopCommand</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">));</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="c1">// ... other message types</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Send response if required</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">needsResponse</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">comm</span><span class="o">-&gt;</span><span class="n">sendResponse</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Always release message when done</span>
+<span class="w">        </span><span class="n">comm</span><span class="o">-&gt;</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="simulator-environment">
+<h2>Simulator Environment<a class="headerlink" href="#simulator-environment" title="Link to this heading"></a></h2>
+<p>The SDK includes a comprehensive simulator for app development and testing:</p>
+<section id="simulator-features">
+<h3>Simulator Features<a class="headerlink" href="#simulator-features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Hardware Emulation</strong>: Mock implementations of all watch hardware</p></li>
+<li><p><strong>Sensor Simulation</strong>: Realistic sensor data generation</p></li>
+<li><p><strong>UI Testing</strong>: TouchGFX simulator integration</p></li>
+<li><p><strong>Debugging Tools</strong>: Enhanced logging and breakpoint support</p></li>
+</ul>
+</section>
+<section id="simulator-architecture">
+<h3>Simulator Architecture<a class="headerlink" href="#simulator-architecture" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Mock hardware interfaces</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MockLcd</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">ILcd</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">setPixel</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">Color</span><span class="w"> </span><span class="n">color</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Render to simulator window</span>
+<span class="w">        </span><span class="n">simulatorWindow</span><span class="p">.</span><span class="n">setPixel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MockSensorManager</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">ISensorManager</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">requestDefaultSensor</span><span class="p">(</span><span class="n">SensorType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">SensorHandle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">handle</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Create simulated sensor</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">sensorSimulator</span><span class="p">.</span><span class="n">createSensor</span><span class="p">(</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="development-workflow-with-simulator">
+<h3>Development Workflow with Simulator<a class="headerlink" href="#development-workflow-with-simulator" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Code Development</strong>: Write app logic using SDK interfaces</p></li>
+<li><p><strong>Compile for Simulator</strong>: Build with simulator target</p></li>
+<li><p><strong>Run Tests</strong>: Execute automated test suites</p></li>
+<li><p><strong>UI Testing</strong>: Interact with simulated watch interface</p></li>
+<li><p><strong>Debugging</strong>: Step through code with full debugger support</p></li>
+</ol>
+</section>
+</section>
+<section id="third-party-libraries-standard-library">
+<h2>Third-Party Libraries &amp; Standard Library<a class="headerlink" href="#third-party-libraries-standard-library" title="Link to this heading"></a></h2>
+<section id="core-components">
+<h3>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>coreJSON</strong>: Lightweight JSON parsing for settings and data.</p></li>
+<li><p><strong>Shared libc++</strong>: A memory-optimized standard C++ library shared across all applications to minimize binary size.</p></li>
+<li><p><strong>FreeRTOS</strong>: The underlying real-time operating system (kernel-side).</p></li>
+<li><p><strong>TouchGFX</strong>: UI framework for embedded systems.</p></li>
+</ul>
+</section>
+<section id="integration-points">
+<h3>Integration Points<a class="headerlink" href="#integration-points" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Automatic Inclusion</strong>: Libraries linked automatically in build process</p></li>
+<li><p><strong>Header-Only</strong>: Many utilities available as headers only</p></li>
+<li><p><strong>Namespace Isolation</strong>: Prevent symbol conflicts</p></li>
+<li><p><strong>Version Management</strong>: Controlled library versions for compatibility</p></li>
+</ul>
+</section>
+</section>
+<section id="development-best-practices">
+<h2>Development Best Practices<a class="headerlink" href="#development-best-practices" title="Link to this heading"></a></h2>
+<section id="memory-management">
+<h3>Memory Management<a class="headerlink" href="#memory-management" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Pool Allocation</strong>: Use kernel message pools for IPC</p></li>
+<li><p><strong>RAII Pattern</strong>: Automatic resource cleanup</p></li>
+<li><p><strong>Stack Awareness</strong>: Monitor stack usage in constrained environment</p></li>
+</ul>
+</section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Event-Driven Design</strong>: Avoid polling, use callbacks</p></li>
+<li><p><strong>Message Batching</strong>: Group related operations</p></li>
+<li><p><strong>Sensor Optimization</strong>: Configure appropriate sampling rates</p></li>
+</ul>
+</section>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Graceful Degradation</strong>: Handle missing hardware gracefully</p></li>
+<li><p><strong>Timeout Management</strong>: Prevent infinite waits</p></li>
+<li><p><strong>Logging</strong>: Comprehensive error reporting</p></li>
+</ul>
+</section>
+<section id="testing">
+<h3>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Unit Tests</strong>: Test individual components</p></li>
+<li><p><strong>Integration Tests</strong>: Validate IPC communication</p></li>
+<li><p><strong>Simulator Validation</strong>: Test on simulated hardware</p></li>
+<li><p><strong>Hardware Testing</strong>: Final validation on real device</p></li>
+</ul>
+</section>
+</section>
+<section id="sdk-version-compatibility">
+<h2>SDK Version Compatibility<a class="headerlink" href="#sdk-version-compatibility" title="Link to this heading"></a></h2>
+<section id="versioning-scheme">
+<h3>Versioning Scheme<a class="headerlink" href="#versioning-scheme" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Major Version</strong>: Breaking API changes</p></li>
+<li><p><strong>Minor Version</strong>: New features, backward compatible</p></li>
+<li><p><strong>Patch Version</strong>: Bug fixes and improvements</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Examples/GlanceSteps-Architecture.html" class="btn btn-neutral float-left" title="GlanceSteps - Step Counter Glance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SensorsLayer.html" class="btn btn-neutral float-right" title="Sensor Layer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App Config JSON &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api-reference.html" />
+    <link rel="prev" title="How to Deploy" href="deploy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">App Config JSON</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#revision-history">Revision History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-package">Output Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#package-content">Package Content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#config-file">Config File</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#activity-data-format">Activity Data Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-format">General Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#predefined-metrics">Predefined Metrics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#supportslaps">supportsLaps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supportsdistance">supportsDistance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supportstrack">supportsTrack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supportsheartbeat">supportsHeartbeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supportselevation">supportsElevation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supportsstep">supportsStep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supportsspeed">supportsSpeed</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-metrics">Custom Metrics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#custom-non-time-based-metric">Custom Non-Time-Based Metric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-time-based-metric">Custom Time-Based Metric</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#activity-data-file-example">Activity Data File Example</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">App Config JSON</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/app-config-json.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="app-config-json">
+<h1>App Config JSON<a class="headerlink" href="#app-config-json" title="Link to this heading"></a></h1>
+<section id="revision-history">
+<h2>Revision History<a class="headerlink" href="#revision-history" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Revision</p></th>
+<th class="head"><p>Date of Changes</p></th>
+<th class="head"><p>Matter of Change</p></th>
+<th class="head"><p>Note</p></th>
+<th class="head"><p>Editor</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.00</p></td>
+<td><p>07.08.2025</p></td>
+<td><p>Creating</p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://github.com/sdvsaienko">Denys Saienko</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>1.01</p></td>
+<td><p>23.03.2025</p></td>
+<td><p>Removed mentions about signature file as it is not used</p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://github.com/AvatarSD">Denys Sobchuk</a></p></td>
+</tr>
+<tr class="row-even"><td><p>1.02</p></td>
+<td><p>29.06.2026</p></td>
+<td><p>Renamed <code class="docutils literal notranslate"><span class="pre">minSdkVersion</span></code> to <code class="docutils literal notranslate"><span class="pre">minKernelVersion</span></code>: the SDK is statically linked into the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>, so the runtime requirement is on the kernel firmware version (reported over BLE via the DIS Firmware Revision String, UUID 0x2A26), not the build-time SDK version</p></td>
+<td><p></p></td>
+<td><p>Ross Ryles</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="output-package">
+<h2>Output Package<a class="headerlink" href="#output-package" title="Link to this heading"></a></h2>
+<p>The watch application package is generated using the UNA SDK. It is provided as a ZIP archive containing the app binary and metadata.</p>
+<section id="package-content">
+<h3>Package Content<a class="headerlink" href="#package-content" title="Link to this heading"></a></h3>
+<p>The package includes the following files:</p>
+<ul class="simple">
+<li><p>A binary application file (<code class="docutils literal notranslate"><span class="pre">*.uapp</span></code>)</p></li>
+<li><p>A JSON file with application metadata and configuration (<code class="docutils literal notranslate"><span class="pre">config.json</span></code>)</p></li>
+<li><p>An icon image (<code class="docutils literal notranslate"><span class="pre">icon.png</span></code>) in PNG format</p></li>
+<li><p>A folder (<code class="docutils literal notranslate"><span class="pre">previews</span></code>) containing application preview images (multiple PNG screenshots)</p></li>
+<li><p>A folder (<code class="docutils literal notranslate"><span class="pre">assets</span></code>) with subdirectories (<code class="docutils literal notranslate"><span class="pre">icons</span></code> and <code class="docutils literal notranslate"><span class="pre">previews</span></code>):</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">assets/icons</span></code>: Icons of the application and widgets</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">assets/previews</span></code>: Application preview images (several screenshots in PNG format)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="config-file">
+<h3>Config File<a class="headerlink" href="#config-file" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">config.json</span></code> configuration file provides general metadata about the application and defines the structure, capabilities, and custom metrics supported by the watch app.</p>
+<p>This file is intended solely for defining supported features and displaying them in the mobile application. It should not contain runtime information or settings for the watch and should not be uploaded to the watch during application installation.</p>
+<p>All information needed by the watch is also embedded in the <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code> file.</p>
+<p>Simplest <code class="docutils literal notranslate"><span class="pre">config.json</span></code> for <a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html"><span class="std std-doc">Files</span></a> Tutorial</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;activity&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Files Tutorial&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Resources/icon_60x60.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;binary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Files_0.1.3-16-ed77913-dirty.uapp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;appVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1.3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;minKernelVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1.3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;requiredHardware&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;stravaExport&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;03AD5A741E38A35F&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsLaps&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsDistance&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsTrack&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsHeartbeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsElevation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsStep&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsSpeed&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;customMeasures&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Watch application config example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;activity&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Type of the app: activity, clockface, glance, or utility</span>
+<span class="w">    </span><span class="s2">&quot;glance&quot;</span><span class="w"> </span><span class="c1">// The app can combine several types</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Running&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Name of the activity</span>
+<span class="w">  </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/running.png&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Relative path to the activity icon</span>
+<span class="w">  </span><span class="nt">&quot;binary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running.uapp&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Relative path to the app binary file</span>
+<span class="w">  </span><span class="nt">&quot;previews&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/previews/&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Relative path to the previews images</span>
+<span class="w">  </span><span class="nt">&quot;appVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.3&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Current version of the app</span>
+<span class="w">  </span><span class="nt">&quot;minKernelVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Minimum watch kernel (firmware) version required to run the app. The SDK is statically linked into the .uapp, so this gates against the runtime kernel, not the build-time SDK. The mobile app reads the watch&#39;s firmware version from the BLE DIS Firmware Revision String (UUID 0x2A26).</span>
+<span class="w">  </span><span class="nt">&quot;requiredHardware&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="c1">// List of hardware features required for the app to function</span>
+<span class="w">    </span><span class="s2">&quot;GPS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;ACCELEROMETER&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;HR&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Running is a real-time tracking app for your runs. It displays current speed, pace, distance, and heart rate. Designed for athletes and casual runners alike, this app helps monitor and improve your training performance.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportsLaps&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether lap counting is supported</span>
+<span class="w">  </span><span class="nt">&quot;supportsDistance&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether distance tracking is supported</span>
+<span class="w">  </span><span class="nt">&quot;supportsTrack&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether GPS track/map is supported</span>
+<span class="w">  </span><span class="nt">&quot;supportsHeartbeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether heart rate tracking is supported</span>
+<span class="w">  </span><span class="nt">&quot;supportsElevation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether elevation data is supported</span>
+<span class="w">  </span><span class="nt">&quot;supportsStep&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether step counter data is supported</span>
+<span class="w">  </span><span class="nt">&quot;supportsSpeed&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pace&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Type of speed metric: &quot;none&quot;, &quot;speed&quot;, or &quot;pace&quot;</span>
+<span class="w">  </span><span class="nt">&quot;customMeasures&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="c1">// List of additional metrics shown during or after the activity</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;calories&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Unique identifier of the measure</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Calories Burned&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Display title for the user</span>
+<span class="w">      </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/calories.png&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Icon shown in the UI for this measure</span>
+<span class="w">      </span><span class="nt">&quot;unitMetric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kcal&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Unit in the metric system</span>
+<span class="w">      </span><span class="nt">&quot;unitImperial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kcal&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Unit in the imperial system</span>
+<span class="w">      </span><span class="nt">&quot;unitScalingFactor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="c1">// Scaling factor to convert from metric to imperial</span>
+<span class="w">      </span><span class="nt">&quot;isTimeBased&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// True if the value changes over time (e.g., one per second)</span>
+<span class="w">      </span><span class="nt">&quot;visualisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;line-chart&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Visualization type: &quot;line-chart&quot;, &quot;number&quot;, or &quot;gauge&quot;</span>
+<span class="w">      </span><span class="nt">&quot;preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Whether this measure should be shown in the activity preview</span>
+<span class="w">      </span><span class="nt">&quot;previewAggregation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;average&quot;</span><span class="w"> </span><span class="c1">// Aggregation type for preview if time-based: &quot;average&quot;, &quot;min&quot;, &quot;max&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;distance_to_goal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Distance to Goal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/distance_goal.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitMetric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;km&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Example: kilometers</span>
+<span class="w">      </span><span class="nt">&quot;unitImperial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mi&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Example: miles</span>
+<span class="w">      </span><span class="nt">&quot;unitScalingFactor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.621371</span><span class="p">,</span><span class="w"> </span><span class="c1">// Converts kilometers to miles</span>
+<span class="w">      </span><span class="nt">&quot;isTimeBased&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">// Only one value per activity</span>
+<span class="w">      </span><span class="nt">&quot;visualisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gauge&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;previewAggregation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;average&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training_load&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Training Load&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/load.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitMetric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pts&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitImperial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pts&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitScalingFactor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isTimeBased&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;visualisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cadence&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Running cadence&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/cadence.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitMetric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s/min&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitImperial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s/min&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitScalingFactor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isTimeBased&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;visualisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;line-chart&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;previewAggregation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;average&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;speed_max&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Maximum speed&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/speedmax.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitMetric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;km/h&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Example: kilometers</span>
+<span class="w">      </span><span class="nt">&quot;unitImperial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mi/h&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Example: miles</span>
+<span class="w">      </span><span class="nt">&quot;unitScalingFactor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.621371</span><span class="p">,</span><span class="w"> </span><span class="c1">// Converts kilometers to miles</span>
+<span class="w">      </span><span class="nt">&quot;isTimeBased&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;visualisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;previewAggregation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;average&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hr&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heart rate&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assets/icons/hr.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitMetric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b/min&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitImperial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b/min&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unitScalingFactor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isTimeBased&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;visualisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;line-chart&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;previewAggregation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;average&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;stravaExport&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="c1">// Whether the activity can be exported to Strava</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="activity-data-format">
+<h2>Activity Data Format<a class="headerlink" href="#activity-data-format" title="Link to this heading"></a></h2>
+<p>Correspondence of metrics in the config file to data in the CBOR activity report.</p>
+<section id="general-format">
+<h3>General Format<a class="headerlink" href="#general-format" title="Link to this heading"></a></h3>
+<p>General format for describing metrics for non-time-based values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;metric_id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value_in_lap_0</span><span class="p">,</span> <span class="n">value_in_lap_1</span><span class="p">,</span> <span class="o">...</span> <span class="n">value_in_lap_n</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>If the app does not support splitting the track into laps, then there will be only one value in the array:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;metric_id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>General format for describing metrics for time-based values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;metric_id&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="n">time_0</span><span class="p">,</span> <span class="n">value_0</span><span class="p">],</span> <span class="p">[</span><span class="n">time_1</span><span class="p">,</span> <span class="n">value_1</span><span class="p">],</span> <span class="o">...</span> <span class="p">[</span><span class="n">time_n</span><span class="p">,</span> <span class="n">value_n</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time_x</span></code> - Time in seconds since the start of the session activity (not lap!)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value_x</span></code> - Value at time <code class="docutils literal notranslate"><span class="pre">time_x</span></code></p></li>
+</ul>
+</section>
+<section id="predefined-metrics">
+<h3>Predefined Metrics<a class="headerlink" href="#predefined-metrics" title="Link to this heading"></a></h3>
+<section id="supportslaps">
+<h4>supportsLaps<a class="headerlink" href="#supportslaps" title="Link to this heading"></a></h4>
+<p>For the “supportsLaps” metric, the start of each lap is indicated in seconds from the start of the session.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;lap_start_time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">900</span><span class="p">,</span> <span class="mi">1800</span><span class="p">,</span> <span class="mi">2700</span><span class="p">]</span> <span class="o">//</span> <span class="mi">4</span> <span class="n">laps</span>
+</pre></div>
+</div>
+</section>
+<section id="supportsdistance">
+<h4>supportsDistance<a class="headerlink" href="#supportsdistance" title="Link to this heading"></a></h4>
+<p>The “supportsDistance” metric specifies the distance of each lap.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">203</span><span class="p">,</span> <span class="mi">206</span><span class="p">,</span> <span class="mi">209</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="supportstrack">
+<h4>supportsTrack<a class="headerlink" href="#supportstrack" title="Link to this heading"></a></h4>
+<p>The “supportsTrack” metric is time-based, it specifies the time in seconds since the start of the session activity (first value), latitude and longitude (second and third values).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;track&quot;</span><span class="p">:</span> <span class="p">[</span>
+  <span class="p">[</span> <span class="o">//</span> <span class="n">first</span> <span class="n">point</span>
+    <span class="mi">0</span><span class="p">,</span> <span class="o">//</span> <span class="n">time</span>
+    <span class="mf">52.22977066040039</span><span class="p">,</span> <span class="o">//</span> <span class="n">latitude</span>
+    <span class="mf">21.01177978515625</span> <span class="o">//</span> <span class="n">longitude</span>
+  <span class="p">],</span>
+  <span class="p">[</span> <span class="o">//</span> <span class="n">second</span> <span class="n">point</span>
+    <span class="mi">10</span><span class="p">,</span>
+    <span class="mf">52.329769134521484</span><span class="p">,</span>
+    <span class="mf">21.111780166625977</span>
+  <span class="p">],</span>
+  <span class="o">...</span>
+  <span class="p">[</span> <span class="o">//</span> <span class="n">last</span> <span class="n">point</span>
+    <span class="mi">3590</span><span class="p">,</span>
+    <span class="mf">88.12976837158203</span><span class="p">,</span>
+    <span class="mf">56.911781311035156</span>
+  <span class="p">]</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="supportsheartbeat">
+<h4>supportsHeartbeat<a class="headerlink" href="#supportsheartbeat" title="Link to this heading"></a></h4>
+<p>The “supportsHeartbeat” metric indicates the average heart rate of each lap.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;heartbeat&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">82</span><span class="p">,</span> <span class="mi">83</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="supportselevation">
+<h4>supportsElevation<a class="headerlink" href="#supportselevation" title="Link to this heading"></a></h4>
+<p>The “supportsElevation” metric shows the change in elevation on each lap.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;elevation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="supportsstep">
+<h4>supportsStep<a class="headerlink" href="#supportsstep" title="Link to this heading"></a></h4>
+<p>The “supportsStep” metric indicates the number of steps in each lap.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">520</span><span class="p">,</span> <span class="mi">540</span><span class="p">,</span> <span class="mi">580</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="supportsspeed">
+<h4>supportsSpeed<a class="headerlink" href="#supportsspeed" title="Link to this heading"></a></h4>
+<p>The “supportsSpeed” metric shows the average speed for each lap.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="custom-metrics">
+<h3>Custom Metrics<a class="headerlink" href="#custom-metrics" title="Link to this heading"></a></h3>
+<section id="custom-non-time-based-metric">
+<h4>Custom Non-Time-Based Metric<a class="headerlink" href="#custom-non-time-based-metric" title="Link to this heading"></a></h4>
+<p>See General format.</p>
+<p>Example for 4 laps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;custom_metric_id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value_0</span><span class="p">,</span> <span class="n">value_1</span><span class="p">,</span> <span class="n">value_2</span><span class="p">,</span> <span class="n">value_3</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Example for 1 lap or if “supportsLaps”: false:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;custom_metric_id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-time-based-metric">
+<h4>Custom Time-Based Metric<a class="headerlink" href="#custom-time-based-metric" title="Link to this heading"></a></h4>
+<p>See General format.</p>
+<p>Example for 5 points:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;custom_metric_id&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="n">time_0</span><span class="p">,</span> <span class="n">value_0</span><span class="p">],</span> <span class="p">[</span><span class="n">time_1</span><span class="p">,</span> <span class="n">value_1</span><span class="p">],</span> <span class="p">[</span><span class="n">time_2</span><span class="p">,</span> <span class="n">value_2</span><span class="p">],</span> <span class="p">[</span><span class="n">time_3</span><span class="p">,</span> <span class="n">value_3</span><span class="p">],</span> <span class="p">[</span><span class="n">time_4</span><span class="p">,</span> <span class="n">value_4</span><span class="p">]]</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="activity-data-file-example">
+<h2>Activity Data File Example<a class="headerlink" href="#activity-data-file-example" title="Link to this heading"></a></h2>
+<p>Example of track activity data saved in a CBOR file that matches the config above. Total track time – 1 hour. 4 laps of 15 minutes each.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1752871238</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;lap_start_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">900</span><span class="p">,</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"> </span><span class="mi">2700</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;distance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">203</span><span class="p">,</span><span class="w"> </span><span class="mi">206</span><span class="p">,</span><span class="w"> </span><span class="mi">209</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;track&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">52.22977066040039</span><span class="p">,</span><span class="w"> </span><span class="mf">21.01177978515625</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mf">52.329769134521484</span><span class="p">,</span><span class="w"> </span><span class="mf">21.111780166625977</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mf">52.429771423339844</span><span class="p">,</span><span class="w"> </span><span class="mf">21.211780548095703</span><span class="p">],</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">3590</span><span class="p">,</span><span class="w"> </span><span class="mf">88.12976837158203</span><span class="p">,</span><span class="w"> </span><span class="mf">56.911781311035156</span><span class="p">]</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;speed&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;step&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">520</span><span class="p">,</span><span class="w"> </span><span class="mi">540</span><span class="p">,</span><span class="w"> </span><span class="mi">560</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;heartbeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">81</span><span class="p">,</span><span class="w"> </span><span class="mi">82</span><span class="p">,</span><span class="w"> </span><span class="mi">83</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;elevation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;calories&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">41</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">],</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">3540</span><span class="p">,</span><span class="w"> </span><span class="mi">44</span><span class="p">]</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;training_load&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span><span class="w"> </span><span class="mi">44</span><span class="p">,</span><span class="w"> </span><span class="mi">51</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;cadence&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">61</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">720</span><span class="p">,</span><span class="w"> </span><span class="mi">62</span><span class="p">],</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">3540</span><span class="p">,</span><span class="w"> </span><span class="mi">63</span><span class="p">]</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;speed_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;hr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">81</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">82</span><span class="p">],</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">    </span><span class="p">[</span><span class="mi">3590</span><span class="p">,</span><span class="w"> </span><span class="mi">439</span><span class="p">]</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deploy.html" class="btn btn-neutral float-left" title="How to Deploy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api-reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1377 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitFiles - FIT File Creation and Sensor Logging Tutorial &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if ("False" === "True") {
+                                        addZoomToSvgs(d3.selectAll(""));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? mermaids_active.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Running - Running Activity Tracking" href="../../Examples/Running-Architecture.html" />
+    <link rel="prev" title="Files - Data Persistence and File Operations" href="../Files/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FitFiles - FIT File Creation and Sensor Logging Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app-workflow">App Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-data-structures">Key Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-integration">Sensor Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-processing-pipeline">Data Processing Pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-data-reception">1. Sensor Data Reception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#session-management">2. Session Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fit-file-creation-and-management">3. FIT File Creation and Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-developer-fields">4. Custom Developer Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#session-and-activity-management">4. Session and Activity Management</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data-persistence-strategy">Data Persistence Strategy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fit-file-writing-process">FIT File Writing Process</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Data Persistence Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">FIT File Writing Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#glance-ui-implementation">Glance UI Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ui-components">UI Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-handling">Message Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Sensor Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#heart-rate-and-step-counter-sensors">Heart Rate and Step Counter Sensors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-data-flow">Sensor Data Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fit-file-format-implementation">FIT File Format Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fit-protocol-overview">FIT Protocol Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-types-used">Message Types Used</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Custom Developer Fields</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-configuration">Build Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#key-concepts-demonstrated">Key Concepts Demonstrated</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fit-file-creation">FIT File Creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-data-logging">Sensor Data Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Session Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-system-integration">File System Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">FitFiles - FIT File Creation and Sensor Logging Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/FitFiles/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="fitfiles-fit-file-creation-and-sensor-logging-tutorial">
+<h1>FitFiles - FIT File Creation and Sensor Logging Tutorial<a class="headerlink" href="#fitfiles-fit-file-creation-and-sensor-logging-tutorial" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The FitFiles app is a focused tutorial demonstrating FIT (Flexible and Interoperable Data Transfer) file creation and sensor data logging on wearable devices. This app showcases how to collect heart rate and step counter data during glance sessions and store it in the industry-standard FIT format using the UNA SDK’s native <code class="docutils literal notranslate"><span class="pre">SDK::Fit</span></code> encoder.</p>
+<p>The application implements a glance-triggered recording service that monitors heart rate and steps data during active glance sessions, accumulates step counts, and writes them to FIT files with custom developer fields. It demonstrates core concepts of session-based recording, event-driven data collection, and FIT file structure creation with a simplified, tutorial-friendly approach.</p>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Real-time heart rate and step counting during glance sessions</p></li>
+<li><p>FIT file creation with proper headers, definitions, and CRC validation</p></li>
+<li><p>Custom developer fields for extended data types</p></li>
+<li><p>Activity session management triggered by glance start/stop events</p></li>
+<li><p>Session-based data persistence</p></li>
+<li><p>Glance UI displaying both current heart rate and step count</p></li>
+<li><p>Automatic data persistence on session completion</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The FitFiles app follows a service-only architecture pattern typical of glance applications, where all functionality resides in the service component with a minimal UI for data display. The service handles sensor integration, data processing, FIT file management, and communication with the glance interface. Unlike continuous monitoring apps, this application is event-driven, activating recording only during active glance sessions.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: Core business logic, sensor integration, FIT file creation, data persistence</p></li>
+<li><p><strong>Glance UI</strong>: Simple display interface showing current heart rate and step count</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, sensor layer, file system, native <code class="docutils literal notranslate"><span class="pre">SDK::Fit</span></code> encoder</p></li>
+<li><p><strong>Data Persistence</strong>: FIT file format with custom developer fields</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Hardware</span> <span class="n">Sensors</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Sensor</span> <span class="n">Layer</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+                                      <span class="o">^</span>
+                                      <span class="o">|</span>
+                            <span class="p">[</span><span class="n">Glance</span> <span class="n">Interface</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The service runs as a separate process/thread, processing sensor data only during active glance sessions and maintaining session-based activity data. The glance UI provides a simple display for the current heart rate and accumulated step data during the session.</p>
+</section>
+<section id="app-workflow">
+<h3>App Workflow<a class="headerlink" href="#app-workflow" title="Link to this heading"></a></h3>
+<pre  class="mermaid">
+        sequenceDiagram
+    participant U as User
+    participant G as Glance
+    participant S as Service
+    participant Sen as Sensors
+    participant F as FIT File
+
+    U-&gt;&gt;G: Activate Glance
+    G-&gt;&gt;S: EVENT_GLANCE_START
+    S-&gt;&gt;S: startSession()
+    S-&gt;&gt;Sen: connect() sensors
+
+    loop Every 5 seconds
+        Sen-&gt;&gt;S: onSdlNewData()
+        S-&gt;&gt;S: Process HR &amp; Steps
+        S-&gt;&gt;S: Accumulate data
+    end
+
+    G-&gt;&gt;S: EVENT_GLANCE_TICK
+    S-&gt;&gt;G: Update UI with current data
+
+    U-&gt;&gt;G: Deactivate Glance
+    G-&gt;&gt;S: EVENT_GLANCE_STOP
+    S-&gt;&gt;S: finalizeSession()
+    S-&gt;&gt;F: saveFit(true)
+    S-&gt;&gt;Sen: disconnect() sensors
+    </pre></section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>, providing the core functionality for heart rate and step tracking during glance sessions and FIT file management.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<p>The main service class handles all backend logic for heart rate and step counting during glance sessions and FIT file creation. It manages sensor connections, processes heart rate and step data, maintains activity state, and handles file I/O operations through the UNA SDK’s kernel interface.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ISensorDataListener</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="c1">// ===== SENSOR MANAGEMENT =====</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">connect</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// ISensorDataListener implementation</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">onSdlNewData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Data</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">stride</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// ===== GLANCE UI =====</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">onGlanceTick</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">configGui</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">createGuiControls</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// ===== SESSION MANAGEMENT =====</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">startSession</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">finalizeSession</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// ===== FIT FILE MANAGEMENT =====</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveFit</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">finalize</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">appendPendingRecords</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeFitDefinitions</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeFitSessionSummary</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeStepsFieldDescription</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// ===== FIT ENCODER =====</span>
+<span class="w">    </span><span class="c1">// Native SDK::Fit streaming encoder, constructed in saveFit() over the open</span>
+<span class="w">    </span><span class="c1">// file and reset after finish().</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Fit</span><span class="o">::</span><span class="n">FitWriter</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mFit</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// ... member variables</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="key-data-structures">
+<h4>Key Data Structures<a class="headerlink" href="#key-data-structures" title="Link to this heading"></a></h4>
+<p><strong>FitRecord Structure:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">FitRecord</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">     </span><span class="n">heartRate</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w">    </span><span class="n">steps</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>This structure represents individual data points containing timestamp, heart rate, and accumulated step count for FIT file recording during glance sessions.</p>
+</section>
+</section>
+<section id="sensor-integration">
+<h3>Sensor Integration<a class="headerlink" href="#sensor-integration" title="Link to this heading"></a></h3>
+<p>The service integrates with heart rate and step counter sensors to collect biometric data during glance sessions:</p>
+<ul class="simple">
+<li><p><strong>Heart Rate Sensor</strong> (<code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::HEART_RATE</span></code>): Provides real-time heart rate measurements in BPM</p></li>
+<li><p><strong>Step Counter Sensor</strong> (<code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::STEP_COUNTER</span></code>): Provides incremental step count measurements</p></li>
+<li><p><strong>Sampling Rate</strong>: 5-second intervals for efficient power management</p></li>
+<li><p><strong>Data Processing</strong>: Accumulates step deltas, captures heart rate values, and maintains session-based totals</p></li>
+</ul>
+</section>
+<section id="data-processing-pipeline">
+<h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
+<section id="sensor-data-reception">
+<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<p>Heart rate and step data arrive through the kernel’s message system. The <code class="docutils literal notranslate"><span class="pre">onSdlNewData()</span></code> method processes both sensor types during active glance sessions:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::onSdlNewData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Data</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">stride</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSessionOpen</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w">  </span><span class="c1">// Only process data during active sessions</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="w"> </span><span class="n">batch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="n">stride</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">hasNewData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Process step counter data</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorSteps</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">count</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">StepCounter</span><span class="w"> </span><span class="n">p</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">p</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getStepCount</span><span class="p">();</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">steps</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">mLastSteps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">delta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mLastSteps</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mTotalSteps</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">delta</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mLastSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">steps</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mSampleCount</span><span class="o">++</span><span class="p">;</span>
+<span class="w">                </span><span class="n">hasNewData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Process heart rate data</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">count</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="w"> </span><span class="n">p</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">p</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">newHR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">getBpm</span><span class="p">());</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">newHR</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// Only consider valid HR readings</span>
+<span class="w">                </span><span class="n">mCurrentHR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newHR</span><span class="p">;</span>
+<span class="w">                </span><span class="n">hasNewData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Accumulate records for FIT file if we have new valid data</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hasNewData</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mPendingRecords</span><span class="p">.</span><span class="n">push_back</span><span class="p">({</span><span class="n">now</span><span class="p">,</span><span class="w"> </span><span class="n">mCurrentHR</span><span class="p">,</span><span class="w"> </span><span class="n">mTotalSteps</span><span class="p">});</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Recorded data point: HR=%u, steps=%u</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mCurrentHR</span><span class="p">,</span><span class="w"> </span><span class="n">mTotalSteps</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="session-management">
+<h4>2. Session Management<a class="headerlink" href="#session-management" title="Link to this heading"></a></h4>
+<p>The app manages glance sessions with simple start/stop logic:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::startSession</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mSessionStart</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">now</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mSessionOpen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mTotalSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mLastSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mSampleCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mCurrentHR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mPendingRecords</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;FIT session started at %ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Service::finalizeSession</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSessionOpen</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">saveFit</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="w">        </span><span class="n">mSessionOpen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;FIT session finalized</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="fit-file-creation-and-management">
+<h4>3. FIT File Creation and Management<a class="headerlink" href="#fit-file-creation-and-management" title="Link to this heading"></a></h4>
+<p>The app creates properly formatted FIT files with headers, definitions, and data records:</p>
+<p><strong>FIT File Structure:</strong></p>
+<ul class="simple">
+<li><p>File Header (protocol version, data size, CRC)</p></li>
+<li><p>File ID Message (manufacturer, product, timestamp)</p></li>
+<li><p>Developer Data ID Message (developer/app identification)</p></li>
+<li><p>Field Descriptions (custom developer fields)</p></li>
+<li><p>Data Records (timestamped heart rate and step counts)</p></li>
+<li><p>Session Messages (activity summaries)</p></li>
+<li><p>Activity Messages (overall activity data)</p></li>
+<li><p>File CRC</p></li>
+</ul>
+<p><strong>Native FIT Encoder (<code class="docutils literal notranslate"><span class="pre">SDK::Fit::FitWriter</span></code>):</strong></p>
+<p>The app uses the SDK’s native streaming encoder. A single <code class="docutils literal notranslate"><span class="pre">FitWriter</span></code> is constructed over the open file; each FIT message type is registered with <code class="docutils literal notranslate"><span class="pre">defineMessage()</span></code> against a <em>local message type</em> (a small 0-15 handle), then data records are emitted with the fluent <code class="docutils literal notranslate"><span class="pre">data(localType)...write()</span></code> builder. Global message numbers, field-definition numbers and base types come from <code class="docutils literal notranslate"><span class="pre">SDK/Fit/FitProfile.hpp</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">SDK</span><span class="o">::</span><span class="nn">Fit</span><span class="p">;</span>
+
+<span class="c1">// Local message types (0-15) bound to each FIT message definition.</span>
+<span class="k">enum</span><span class="w"> </span><span class="nc">Local</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">L_FILE_ID</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">L_DEV_ID</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">L_FIELD_DESC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="n">L_EVENT</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="n">L_RECORD</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">    </span><span class="n">L_SESSION</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">    </span><span class="n">L_ACTIVITY</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="c1">// One streaming encoder owns the whole file; constructed in saveFit().</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">fit</span><span class="o">::</span><span class="n">FitWriter</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mFit</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">saveFit()</span></code> ties the lifecycle together: open (truncate) the file, construct the encoder over it, <code class="docutils literal notranslate"><span class="pre">begin()</span></code> the header placeholder, write definitions + records + the summary, then <code class="docutils literal notranslate"><span class="pre">finish()</span></code> to back-patch the header and append the file CRC:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::saveFit</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">finalize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSessionOpen</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">file</span><span class="p">(</span><span class="n">skFitFileName</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">file</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="cm">/*write=*/</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="cm">/*truncate=*/</span><span class="nb">true</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_ERROR</span><span class="p">(</span><span class="s">&quot;Cannot open FIT file</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">mFit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">fit</span><span class="o">::</span><span class="n">FitWriter</span><span class="o">&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">file</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">begin</span><span class="p">(</span><span class="cm">/*profileVersion=*/</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">writeFitDefinitions</span><span class="p">(</span><span class="n">mSessionStart</span><span class="p">);</span><span class="w">   </span><span class="c1">// definitions + start event</span>
+<span class="w">    </span><span class="n">appendPendingRecords</span><span class="p">();</span><span class="w">               </span><span class="c1">// record messages</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">finalize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">writeFitSessionSummary</span><span class="p">(</span><span class="n">now</span><span class="p">);</span><span class="w">      </span><span class="c1">// stop event + session + activity</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">finish</span><span class="p">();</span><span class="w">   </span><span class="c1">// back-patch header data size + CRC, append file CRC</span>
+<span class="w">    </span><span class="n">mFit</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">flush</span><span class="p">();</span>
+<span class="w">    </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">close</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">defineMessage()</span></code> takes a local type, the global message number from <code class="docutils literal notranslate"><span class="pre">fit::mesgNum(fit::MesgNum::X)</span></code>, an ordered list of <code class="docutils literal notranslate"><span class="pre">fit::field::&lt;Msg&gt;::&lt;Field&gt;</span></code> entries, and (optionally) a list of developer fields. For example, the File ID and Record definitions:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">defineMessage</span><span class="p">(</span><span class="n">L_FILE_ID</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">FileId</span><span class="p">),</span>
+<span class="w">    </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">Manufacturer</span><span class="p">,</span>
+<span class="w">     </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">Product</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">SerialNumber</span><span class="p">,</span>
+<span class="w">     </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">TimeCreated</span><span class="p">});</span>
+
+<span class="c1">// Record carries timestamp + heart_rate, plus the &quot;steps&quot; developer field</span>
+<span class="c1">// (dev field number, size in bytes, developer-data index 0).</span>
+<span class="n">mFit</span><span class="o">-&gt;</span><span class="n">defineMessage</span><span class="p">(</span><span class="n">L_RECORD</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">Record</span><span class="p">),</span>
+<span class="w">    </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Record</span><span class="o">::</span><span class="n">Timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Record</span><span class="o">::</span><span class="n">HeartRate</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{{</span><span class="n">skStepsDevFieldNum</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">baseTypeSize</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt32</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">}});</span>
+</pre></div>
+</div>
+<p>Each definition record is written to the file as it is emitted; the encoder remembers the expected payload size per local type and validates it on <code class="docutils literal notranslate"><span class="pre">write()</span></code> (<a class="reference internal" href="../../FitFiles-Structure.html#message-encoding"><span class="std std-ref">Message Encoding</span></a>).</p>
+</section>
+<section id="custom-developer-fields">
+<h4>4. Custom Developer Fields<a class="headerlink" href="#custom-developer-fields" title="Link to this heading"></a></h4>
+<p>The “steps” value is recorded as a FIT <em>developer field</em>. This needs two pieces: a <code class="docutils literal notranslate"><span class="pre">field_description</span></code> message that names and types the field, and a developer-field entry on the <code class="docutils literal notranslate"><span class="pre">record</span></code> definition (added above). The encoder declares the field description with a few fixed columns plus the variable-length <code class="docutils literal notranslate"><span class="pre">field_name</span></code>/<code class="docutils literal notranslate"><span class="pre">units</span></code> strings, sized exactly at encode time:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::writeStepsFieldDescription</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;steps&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">units</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;count&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">nameLen</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">strlen</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">unitsLen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">strlen</span><span class="p">(</span><span class="n">units</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">defineMessage</span><span class="p">(</span><span class="n">L_FIELD_DESC</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">FieldDescription</span><span class="p">),</span>
+<span class="w">        </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FieldDescription</span><span class="o">::</span><span class="n">DeveloperDataIndex</span><span class="p">,</span>
+<span class="w">         </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FieldDescription</span><span class="o">::</span><span class="n">FieldDefinitionNumber</span><span class="p">,</span>
+<span class="w">         </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FieldDescription</span><span class="o">::</span><span class="n">FitBaseTypeId</span><span class="p">,</span>
+<span class="w">         </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FieldDescription</span><span class="o">::</span><span class="n">kFieldNameNum</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">nameLen</span><span class="p">},</span>
+<span class="w">         </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FieldDescription</span><span class="o">::</span><span class="n">kUnitsNum</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">unitsLen</span><span class="p">}});</span>
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_FIELD_DESC</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w">                  </span><span class="c1">// developer_data_index</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="n">skStepsDevFieldNum</span><span class="p">)</span><span class="w"> </span><span class="c1">// field_definition_number</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">baseTypeId</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt32</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">str</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">nameLen</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">str</span><span class="p">(</span><span class="n">units</span><span class="p">,</span><span class="w"> </span><span class="n">unitsLen</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="session-and-activity-management">
+<h4>4. Session and Activity Management<a class="headerlink" href="#session-and-activity-management" title="Link to this heading"></a></h4>
+<p>The app manages activity sessions with proper start/stop events and summaries:</p>
+<p><strong>Session Creation:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::startSession</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mSessionStart</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">now</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mSessionOpen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mTotalSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mLastSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mSampleCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mCurrentHR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mPendingRecords</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;FIT session started at %ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Session Summary:</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Session</span></code> and <code class="docutils literal notranslate"><span class="pre">Activity</span></code> definitions are emitted earlier in <code class="docutils literal notranslate"><span class="pre">writeFitDefinitions()</span></code>; here the summary just appends data records via the builder. Values are written in the same order the fields were declared, with multi-byte values stored little-endian. Time fields use the FIT scale-1000 convention (milliseconds).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::writeFitSessionSummary</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Stop session event.</span>
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_EVENT</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">Event</span><span class="o">::</span><span class="n">Timer</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">EventType</span><span class="o">::</span><span class="n">Stop</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">elapsedMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">((</span><span class="n">timestamp</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mSessionStart</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Session summary.</span>
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_SESSION</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">mSessionStart</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">elapsedMs</span><span class="p">)</span><span class="w">  </span><span class="c1">// total_elapsed_time, scale 1000</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">elapsedMs</span><span class="p">)</span><span class="w">  </span><span class="c1">// total_timer_time, scale 1000</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u16</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w">          </span><span class="c1">// message_index</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">Sport</span><span class="o">::</span><span class="n">Generic</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">SubSport</span><span class="o">::</span><span class="n">Generic</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Activity summary.</span>
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_ACTIVITY</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">elapsedMs</span><span class="p">)</span><span class="w">  </span><span class="c1">// total_timer_time, scale 1000</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span><span class="w">  </span><span class="c1">// local_timestamp (simplified)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u16</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">          </span><span class="c1">// num_sessions</span>
+<span class="w">        </span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="data-persistence-strategy">
+<h3>Data Persistence Strategy<a class="headerlink" href="#data-persistence-strategy" title="Link to this heading"></a></h3>
+<section id="fit-file-writing-process">
+<h4>FIT File Writing Process<a class="headerlink" href="#fit-file-writing-process" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">saveFit()</span></code> writes the whole activity in a single pass each time it runs - the native encoder streams records as they are produced, so there is no read-back-and-append step:</p>
+<ol class="arabic simple">
+<li><p><strong>File (Re)creation</strong>: Open the FIT file truncated for writing</p></li>
+<li><p><strong>Header Placeholder</strong>: <code class="docutils literal notranslate"><span class="pre">FitWriter::begin()</span></code> writes a 14-byte header placeholder</p></li>
+<li><p><strong>Definitions + Start Event</strong>: <code class="docutils literal notranslate"><span class="pre">writeFitDefinitions()</span></code> emits every message definition and the timer-start event</p></li>
+<li><p><strong>Data Records</strong>: <code class="docutils literal notranslate"><span class="pre">appendPendingRecords()</span></code> emits the records accumulated this session</p></li>
+<li><p><strong>Session Summary</strong>: <code class="docutils literal notranslate"><span class="pre">writeFitSessionSummary()</span></code> emits the stop event, session and activity records (on finalize)</p></li>
+<li><p><strong>Finish</strong>: <code class="docutils literal notranslate"><span class="pre">FitWriter::finish()</span></code> back-patches the header data size + header CRC and appends the trailing file CRC</p></li>
+</ol>
+</section>
+<section id="id1">
+<h4>Data Persistence Strategy<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>The app saves data on session completion:</p>
+<ul class="simple">
+<li><p><strong>Session-based</strong>: Automatic save when glance session ends</p></li>
+<li><p><strong>Event-based</strong>: App termination triggers session finalization</p></li>
+<li><p><strong>Simple approach</strong>: One FIT file per session with complete data</p></li>
+</ul>
+</section>
+<section id="id2">
+<h4>FIT File Writing Process<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><strong>File Creation</strong>: (Re)create the FIT file truncated on each save</p></li>
+<li><p><strong>Header Management</strong>: <code class="docutils literal notranslate"><span class="pre">begin()</span></code> writes a placeholder header (data size + CRC patched at the end)</p></li>
+<li><p><strong>Definition Writing</strong>: Define each message’s local type before its first data record</p></li>
+<li><p><strong>Data Records</strong>: Emit accumulated records via the <code class="docutils literal notranslate"><span class="pre">data(local)...write()</span></code> builder</p></li>
+<li><p><strong>Session Finalization</strong>: Write the session summary on completion</p></li>
+<li><p><strong>CRC Calculation</strong>: <code class="docutils literal notranslate"><span class="pre">finish()</span></code> computes and appends the file CRC</p></li>
+</ol>
+</section>
+</section>
+</section>
+<section id="glance-ui-implementation">
+<h2>Glance UI Implementation<a class="headerlink" href="#glance-ui-implementation" title="Link to this heading"></a></h2>
+<p>The glance UI provides a simple display for the current heart rate and step count during active sessions:</p>
+<section id="ui-components">
+<h3>UI Components<a class="headerlink" href="#ui-components" title="Link to this heading"></a></h3>
+<p><strong>Glance Controls:</strong></p>
+<ul class="simple">
+<li><p>Icon display (60x60 pixel icon)</p></li>
+<li><p>Title text: “Steps”</p></li>
+<li><p>Value text: Current step count</p></li>
+<li><p>Heart rate text: Current heart rate in BPM</p></li>
+</ul>
+<p><strong>Layout:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-------------------+</span>
+<span class="o">|</span>        <span class="n">Icon</span>       <span class="o">|</span>
+<span class="o">|</span>                   <span class="o">|</span>
+<span class="o">|</span>      <span class="n">Steps</span>        <span class="o">|</span>
+<span class="o">|</span>     <span class="mi">1</span><span class="p">,</span><span class="mi">234</span>         <span class="o">|</span>
+<span class="o">|</span>   <span class="n">HR</span><span class="p">:</span> <span class="mi">72</span>          <span class="o">|</span>
+<span class="o">+-------------------+</span>
+</pre></div>
+</div>
+</section>
+<section id="message-handling">
+<h3>Message Handling<a class="headerlink" href="#message-handling" title="Link to this heading"></a></h3>
+<p>The service updates the glance display on each tick event with current sensor data:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::onGlanceTick</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;%u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mTotalSteps</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mGlanceHR</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;HR: %u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mCurrentHR</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Send update to glance interface</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>Sensor Integration<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>The FitFiles app integrates with the UNA SDK’s sensor layer for heart rate and step counting during glance sessions:</p>
+<section id="heart-rate-and-step-counter-sensors">
+<h3>Heart Rate and Step Counter Sensors<a class="headerlink" href="#heart-rate-and-step-counter-sensors" title="Link to this heading"></a></h3>
+<p><strong>Heart Rate Sensor Configuration:</strong></p>
+<ul class="simple">
+<li><p>Type: <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::HEART_RATE</span></code></p></li>
+<li><p>Sample Period: 5 seconds (300,000 ms)</p></li>
+<li><p>Latency: 1,000 ms</p></li>
+</ul>
+<p><strong>Step Counter Sensor Configuration:</strong></p>
+<ul class="simple">
+<li><p>Type: <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::STEP_COUNTER</span></code></p></li>
+<li><p>Sample Period: 5 seconds (300,000 ms)</p></li>
+<li><p>Latency: 1,000 ms</p></li>
+</ul>
+<p><strong>Sensor Connection Code:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::connect</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">samplePeriodMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="p">(</span><span class="n">skSamplePeriodSec</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000.0f</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSensorSteps</span><span class="p">.</span><span class="n">isConnected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Connecting to Steps sensor</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">mSensorSteps</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">samplePeriodMs</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">isConnected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Connecting to HR sensor</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">samplePeriodMs</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Data Processing:</strong></p>
+<ul class="simple">
+<li><p>Real-time heart rate measurements in BPM</p></li>
+<li><p>Incremental step counts from hardware steps</p></li>
+<li><p>Delta calculation to track new steps</p></li>
+<li><p>Session-based accumulation of biometric data</p></li>
+<li><p>Timestamp association for FIT recording</p></li>
+</ul>
+</section>
+<section id="sensor-data-flow">
+<h3>Sensor Data Flow<a class="headerlink" href="#sensor-data-flow" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Hardware</span> <span class="n">Sensors</span> <span class="o">-&gt;</span> <span class="n">Sensor</span> <span class="n">Drivers</span> <span class="o">-&gt;</span> <span class="n">SDK</span> <span class="n">Parsers</span> <span class="o">-&gt;</span> <span class="n">Service</span> <span class="n">Accumulator</span> <span class="o">-&gt;</span> <span class="n">FIT</span> <span class="n">File</span>
+    <span class="p">(</span><span class="n">HR</span> <span class="o">+</span> <span class="n">Steps</span><span class="p">)</span>      <span class="p">(</span><span class="n">HR</span> <span class="o">+</span> <span class="n">Steps</span><span class="p">)</span>     <span class="p">(</span><span class="n">HR</span> <span class="o">+</span> <span class="n">Steps</span><span class="p">)</span>       <span class="p">(</span><span class="n">Session</span> <span class="n">Data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="fit-file-format-implementation">
+<h2>FIT File Format Implementation<a class="headerlink" href="#fit-file-format-implementation" title="Link to this heading"></a></h2>
+<section id="fit-protocol-overview">
+<h3>FIT Protocol Overview<a class="headerlink" href="#fit-protocol-overview" title="Link to this heading"></a></h3>
+<p>FIT (Flexible and Interoperable Data Transfer) is Garmin’s binary file format for fitness data. Key characteristics:</p>
+<ul class="simple">
+<li><p>Binary format for efficient storage (<a class="reference internal" href="../../FitFiles-Structure.html#introduction-to-fit"><span class="std std-ref">Introduction to FIT</span></a>)</p></li>
+<li><p>Self-describing with message definitions (<a class="reference internal" href="../../FitFiles-Structure.html#message-encoding"><span class="std std-ref">Message Encoding</span></a>)</p></li>
+<li><p>Extensible through developer fields (<a class="reference internal" href="../../FitFiles-Structure.html#developer-fields-implementation"><span class="std std-ref">Developer Fields Implementation</span></a>)</p></li>
+<li><p>CRC validation for data integrity (<a class="reference internal" href="../../FitFiles-Structure.html#crc-calculation-and-validation"><span class="std std-ref">CRC Calculation and Validation</span></a>)</p></li>
+<li><p>Timestamp-based (seconds since FIT epoch: 1989-12-31 00:00:00 UTC) (<a class="reference internal" href="../../FitFiles-Structure.html#fit-timestamp-handling"><span class="std std-ref">FIT Timestamp Handling</span></a>)</p></li>
+</ul>
+</section>
+<section id="message-types-used">
+<h3>Message Types Used<a class="headerlink" href="#message-types-used" title="Link to this heading"></a></h3>
+<p>All message numbers come from <code class="docutils literal notranslate"><span class="pre">SDK::Fit::MesgNum</span></code>, passed to <code class="docutils literal notranslate"><span class="pre">defineMessage()</span></code> via <code class="docutils literal notranslate"><span class="pre">fit::mesgNum(...)</span></code>:</p>
+<ol class="arabic simple">
+<li><p><strong>File ID</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::FileId</span></code>): File metadata (<a class="reference internal" href="../../FitFiles-Structure.html#file-id-message"><span class="std std-ref">File ID Message</span></a>)</p></li>
+<li><p><strong>Developer Data ID</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::DeveloperDataId</span></code>): Developer identification (<a class="reference internal" href="../../FitFiles-Structure.html#developer-data-id-message"><span class="std std-ref">Developer Data ID Message</span></a>)</p></li>
+<li><p><strong>Field Description</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::FieldDescription</span></code>): Custom field definitions (<a class="reference internal" href="../../FitFiles-Structure.html#field-description-messages"><span class="std std-ref">Field Description Messages</span></a>)</p></li>
+<li><p><strong>Record</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::Record</span></code>): Data points with timestamps (<a class="reference internal" href="../../FitFiles-Structure.html#record-messages"><span class="std std-ref">Record Messages</span></a>)</p></li>
+<li><p><strong>Event</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::Event</span></code>): Session start/stop markers (<a class="reference internal" href="../../FitFiles-Structure.html#event-messages"><span class="std std-ref">Event Messages</span></a>)</p></li>
+<li><p><strong>Session</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::Session</span></code>): Activity segment summaries (<a class="reference internal" href="../../FitFiles-Structure.html#session-messages"><span class="std std-ref">Session Messages</span></a>)</p></li>
+<li><p><strong>Activity</strong> (<code class="docutils literal notranslate"><span class="pre">MesgNum::Activity</span></code>): Overall activity summary (<a class="reference internal" href="../../FitFiles-Structure.html#activity-messages"><span class="std std-ref">Activity Messages</span></a>)</p></li>
+</ol>
+</section>
+<section id="id4">
+<h3>Custom Developer Fields<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>The app demonstrates developer fields for heart rate and step data (<a class="reference internal" href="../../FitFiles-Structure.html#developer-fields-implementation"><span class="std std-ref">Developer Fields Implementation</span></a>):</p>
+<p><strong>Heart Rate Field (Standard FIT):</strong></p>
+<ul class="simple">
+<li><p>Built-in FIT field: <code class="docutils literal notranslate"><span class="pre">fit::field::Record::HeartRate</span></code> (field number 3)</p></li>
+<li><p>Units: BPM</p></li>
+<li><p>Base Type: <code class="docutils literal notranslate"><span class="pre">BaseType::UInt8</span></code></p></li>
+</ul>
+<p><strong>Steps Field (Developer Field):</strong></p>
+<ul class="simple">
+<li><p>Field Name: “steps”</p></li>
+<li><p>Units: “count”</p></li>
+<li><p>Base Type: <code class="docutils literal notranslate"><span class="pre">BaseType::UInt32</span></code></p></li>
+<li><p>Developer Index: 0</p></li>
+<li><p>Field Number: <code class="docutils literal notranslate"><span class="pre">skStepsDevFieldNum</span></code> (0)</p></li>
+</ul>
+<p><strong>Data Recording:</strong></p>
+<p>Because the steps developer field was declared on the <code class="docutils literal notranslate"><span class="pre">L_RECORD</span></code> definition, its value is appended to the same data record after the standard fields - in definition order, with the developer field last. There is no separate field-message call:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In appendPendingRecords()</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rec</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">mPendingRecords</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_RECORD</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">rec</span><span class="p">.</span><span class="n">timestamp</span><span class="p">))</span><span class="w">  </span><span class="c1">// timestamp</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="n">rec</span><span class="p">.</span><span class="n">heartRate</span><span class="p">)</span><span class="w">                        </span><span class="c1">// heart_rate</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">rec</span><span class="p">.</span><span class="n">steps</span><span class="p">)</span><span class="w">                           </span><span class="c1">// &quot;steps&quot; developer field</span>
+<span class="w">        </span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<p>The FitFiles app uses CMake for cross-platform builds:</p>
+<section id="build-configuration">
+<h3>Build Configuration<a class="headerlink" href="#build-configuration" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">FitFiles/Software/App/FitFiles-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;FitFiles&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Glance&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1B2C3D4-E5F6-7890-ABCD-EF1234567890&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p><strong>Service Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_SERVICE</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_SENSOR</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_FIT</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>:</p>
+<ul class="simple">
+<li><p>UNA SDK common, service, and sensor sources</p></li>
+<li><p>Native FIT encoder (<code class="docutils literal notranslate"><span class="pre">SDK::Fit</span></code>, <code class="docutils literal notranslate"><span class="pre">${UNA_SDK_SOURCES_FIT}</span></code>)</p></li>
+<li><p>File system interfaces</p></li>
+<li><p>Kernel messaging system</p></li>
+</ul>
+</section>
+</section>
+<section id="key-concepts-demonstrated">
+<h2>Key Concepts Demonstrated<a class="headerlink" href="#key-concepts-demonstrated" title="Link to this heading"></a></h2>
+<section id="fit-file-creation">
+<h3>FIT File Creation<a class="headerlink" href="#fit-file-creation" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>File Structure</strong>: Proper FIT file format with headers, definitions, and data (<a class="reference internal" href="../../FitFiles-Structure.html#visual-representations-and-diagrams"><span class="std std-ref">Visual Representations and Diagrams</span></a>)</p></li>
+<li><p><strong>Message Definitions</strong>: Dynamic definition writing for message types (<a class="reference internal" href="../../FitFiles-Structure.html#message-definition-structure"><span class="std std-ref">Message Definition Structure</span></a>)</p></li>
+<li><p><strong>Developer Fields</strong>: Custom field creation for extended data types (<a class="reference internal" href="../../FitFiles-Structure.html#developer-fields-implementation"><span class="std std-ref">Developer Fields Implementation</span></a>)</p></li>
+<li><p><strong>CRC Validation</strong>: File integrity through cyclic redundancy checks (<a class="reference internal" href="../../FitFiles-Structure.html#advanced-topics-and-best-practices"><span class="std std-ref">Advanced Topics and Best Practices</span></a>)</p></li>
+</ol>
+</section>
+<section id="sensor-data-logging">
+<h3>Sensor Data Logging<a class="headerlink" href="#sensor-data-logging" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Event-Driven Processing</strong>: Sensor data collection triggered by glance events</p></li>
+<li><p><strong>Multi-Sensor Integration</strong>: Simultaneous heart rate and step counter handling</p></li>
+<li><p><strong>Session-Based Accumulation</strong>: Data collection limited to active glance sessions</p></li>
+<li><p><strong>Timestamp Management</strong>: Proper time handling for session-based activity data</p></li>
+<li><p><strong>Power Efficiency</strong>: Optimized sampling rates and processing</p></li>
+</ol>
+</section>
+<section id="id5">
+<h3>Session Management<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Glance Sessions</strong>: Start/stop event handling based on user interaction</p></li>
+<li><p><strong>Session Boundaries</strong>: Automatic session management with FIT file creation</p></li>
+<li><p><strong>Data Persistence</strong>: Reliable storage with session completion</p></li>
+<li><p><strong>Simplified Approach</strong>: Clean session lifecycle without complex state recovery</p></li>
+</ol>
+</section>
+<section id="file-system-integration">
+<h3>File System Integration<a class="headerlink" href="#file-system-integration" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>File Operations</strong>: Create, read, write, and truncate operations</p></li>
+<li><p><strong>Path Management</strong>: Organized file naming and directory structure</p></li>
+<li><p><strong>Data Integrity</strong>: Header updates and CRC calculations</p></li>
+<li><p><strong>Resource Management</strong>: Proper file handle lifecycle</p></li>
+</ol>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>This tutorial provides a foundation for more advanced glance-based fitness applications. The simplified approach focuses on core FIT file creation concepts:</p>
+<ol class="arabic simple">
+<li><p><strong>Additional Sensors</strong>: Add GPS, altitude, or other biometric sensors</p></li>
+<li><p><strong>Advanced FIT Features</strong>: Implement laps, events, and complex activities</p></li>
+<li><p><strong>Data Synchronization</strong>: Add cloud upload capabilities</p></li>
+<li><p><strong>Enhanced UI</strong>: Extend to full TouchGFX applications with charts and trends</p></li>
+<li><p><strong>Performance Optimization</strong>: Implement data compression and efficient storage</p></li>
+<li><p><strong>Health Metrics</strong>: Calculate calories, distance, and activity intensity</p></li>
+<li><p><strong>Session Analytics</strong>: Add post-session summary and statistics</p></li>
+</ol>
+<p>The tutorial demonstrates essential FIT file creation using the UNA SDK’s native <code class="docutils literal notranslate"><span class="pre">SDK::Fit</span></code> encoder with a clean, tutorial-friendly implementation.</p>
+<p>The FitFiles tutorial demonstrates essential concepts for building robust, data-persistent wearable applications using the UNA SDK’s FIT file capabilities and sensor integration features.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Files/ARCHITECTURE.html" class="btn btn-neutral float-left" title="Files - Data Persistence and File Operations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../Examples/Running-Architecture.html" class="btn btn-neutral float-right" title="Running - Running Activity Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

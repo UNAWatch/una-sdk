@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UNA Watch Documentation &mdash; UNA Watch SDK 1.0 documentation</title>
+  <title>Post-merge tag push walkthrough &mdash; UNA Watch SDK 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
@@ -19,8 +19,7 @@
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Platform Overview" href="platform-overview.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +30,7 @@
 
           
           
-          <a href="#" class="icon icon-home">
+          <a href="index.html" class="icon icon-home">
             UNA Watch SDK
           </a>
 <div role="search">
@@ -103,17 +102,17 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">UNA Watch SDK</a>
+          <a href="index.html">UNA Watch SDK</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">UNA Watch Documentation</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Post-merge tag push walkthrough</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/merge-apps-release-walkthrough.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -121,44 +120,66 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="una-watch-documentation">
-<h1>UNA Watch Documentation<a class="headerlink" href="#una-watch-documentation" title="Link to this heading"></a></h1>
-<p>Welcome to the official UNA Watch SDK documentation hub. This platform enables developers to create high-performance applications for the UNA Watch ecosystem.</p>
-<p>The SDK includes tutorials to guide you through creating your own apps for the watch, as well as comprehensive documentation of the pre-made apps on the watch.</p>
-<section id="getting-started">
-<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
-<p>First, please follow the <a class="reference external" href="https://www.developers.unawatch.com/latest/sdk-setup.html">SDK Setup and Build Overview</a> to download and install the SDK for your operating system.</p>
-<section id="next-steps">
-<h3>Next steps:<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h3>
-<p><a class="reference external" href="https://www.developers.unawatch.com/latest/platform-overview.html">Platform Overview</a> - For an overview of the UNA Watch platform’s unique architecture and capabilities.</p>
-<p><a class="reference external" href="https://www.developers.unawatch.com/latest/Tutorials/HelloWorld/ARCHITECTURE.html">Tutorials</a> - For step-by-step guides for building different watch apps, increasing in complexity.</p>
-<p><a class="reference external" href="https://www.developers.unawatch.com/latest/Examples/Running-Architecture.html">Running - Fitness Tracking</a> to dive right into the code of pre-made watch Apps.</p>
-<div class="toctree-wrapper compound">
+  <section id="post-merge-tag-push-walkthrough">
+<h1>Post-merge tag push walkthrough<a class="headerlink" href="#post-merge-tag-push-walkthrough" title="Link to this heading"></a></h1>
+<p>Use this after merging <code class="docutils literal notranslate"><span class="pre">import/merge-apps</span></code> into <code class="docutils literal notranslate"><span class="pre">main</span></code> on <a class="reference external" href="https://github.com/UNAWatch/una-sdk">una-sdk</a>.</p>
+<p>Apps are imported as a <strong>snapshot</strong> under <code class="docutils literal notranslate"><span class="pre">Examples/</span></code> (no una-apps git history on <code class="docutils literal notranslate"><span class="pre">main</span></code>). Use <strong>Squash merge</strong> or <strong>Rebase and merge</strong> on the PR — a merge commit is not required.</p>
+<section id="phase-1-merge-github">
+<h2>Phase 1 — Merge (GitHub)<a class="headerlink" href="#phase-1-merge-github" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Open the PR: <code class="docutils literal notranslate"><span class="pre">import/merge-apps</span></code> → <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p>Confirm CI on the PR is green.</p></li>
+<li><p>Merge into <code class="docutils literal notranslate"><span class="pre">main</span></code> (squash or rebase-and-merge is fine).</p></li>
+<li><p>Locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>una-sdk
+git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
+</li>
+</ol>
+</section>
+<section id="phase-2-retag-apps-release-on-main-ci-on">
+<h2>Phase 2 — Retag apps release on <code class="docutils literal notranslate"><span class="pre">main</span></code> (CI <strong>on</strong>)<a class="headerlink" href="#phase-2-retag-apps-release-on-main-ci-on" title="Link to this heading"></a></h2>
+<p>The earlier <code class="docutils literal notranslate"><span class="pre">apps-v0.1.9-rc1</span></code> tag (if pushed) pointed at pre-import history and is not on <code class="docutils literal notranslate"><span class="pre">main</span></code>. Move it to the merge commit:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>-f<span class="w"> </span>apps-v0.1.9-rc1<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Apps release 0.1.9-rc1&quot;</span><span class="w"> </span>HEAD
+git<span class="w"> </span>push<span class="w"> </span>-f<span class="w"> </span>origin<span class="w"> </span>apps-v0.1.9-rc1
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
+<p><code class="docutils literal notranslate"><span class="pre">sdk-v0.1.4</span></code> can stay as-is (it marks a pre-import SDK release commit that remains in history).</p>
+<p><strong>Expect:</strong> One CI Apps run for the retagged <code class="docutils literal notranslate"><span class="pre">apps-v*</span></code> push, using the new root <code class="docutils literal notranslate"><span class="pre">.github/workflows/apps-ci.yml</span></code>.</p>
+</section>
+<section id="phase-3-kernel-internal">
+<h2>Phase 3 — Kernel (internal)<a class="headerlink" href="#phase-3-kernel-internal" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>una-kernel
+git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>pull
+<span class="nb">cd</span><span class="w"> </span>SDK<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>fetch<span class="w"> </span>origin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>pull<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+git<span class="w"> </span>add<span class="w"> </span>SDK
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;chore(SDK): bump submodule after una-apps merge&quot;</span>
+git<span class="w"> </span>push
+</pre></div>
 </div>
 </section>
+<section id="phase-4-archive-una-apps">
+<h2>Phase 4 — Archive una-apps<a class="headerlink" href="#phase-4-archive-una-apps" title="Link to this heading"></a></h2>
+<p>Copy <a class="reference internal" href="una-apps-archive-README.html"><span class="std std-doc">una-apps-archive-README.md</span></a> to the root <code class="docutils literal notranslate"><span class="pre">README.md</span></code> of <a class="reference external" href="https://github.com/UNAWatch/una-apps">una-apps</a>, then archive the repository on GitHub.</p>
+</section>
+<section id="optional-historical-sdk-v-tags">
+<h2>Optional — historical <code class="docutils literal notranslate"><span class="pre">sdk-v*</span></code> tags<a class="headerlink" href="#optional-historical-sdk-v-tags" title="Link to this heading"></a></h2>
+<p>Only if you want old SDK release markers on GitHub:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>Utilities/Scripts/migrate-release-tags.sh<span class="w">   </span><span class="c1"># creates sdk-v* from origin v* tags</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span><span class="s1">&#39;refs/tags/sdk-v*:refs/tags/sdk-v*&#39;</span>
+</pre></div>
+</div>
+<p>Skip bulk <code class="docutils literal notranslate"><span class="pre">apps-v*</span></code> historical tags — those commits are not on <code class="docutils literal notranslate"><span class="pre">main</span></code> after the snapshot import.</p>
 </section>
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="platform-overview.html" class="btn btn-neutral float-right" title="Platform Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
