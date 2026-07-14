@@ -1,0 +1,422 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HelloWorld - Introduction to UNA App Architecture &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/version-selector.js?v=50f89983"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Buttons - Handling User Input and Navigation" href="../Buttons/ARCHITECTURE.html" />
+    <link rel="prev" title="UNA-Watch Simulator" href="../../Simulator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HelloWorld - Introduction to UNA App Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-ll-learn">What You’ll Learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-and-running-helloworld">Building and Running HelloWorld</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-touchgfx-gui-optional">Working with TouchGFX GUI (Optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#helloworld-app-overview">HelloWorld App Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-service-layer-backend">The Service Layer (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-gui-layer-frontend">The GUI Layer (Frontend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#communication-between-layers">Communication Between Layers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#understanding-the-commented-code">Understanding the Commented Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#understanding-una-app-communication">Understanding UNA App Communication</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sdk-custom-messages-service-gui">SDK Custom Messages (Service → GUI)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#apptypes-events-gui-service">AppTypes Events (GUI → Service)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-patterns-and-best-practices">Common Patterns and Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-integration">Sensor Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-design">Message Design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui-updates">GUI Updates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-operations">File Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-issues">Build Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-issues">Runtime Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-mistakes">Common Mistakes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">HelloWorld - Introduction to UNA App Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/HelloWorld/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="helloworld-introduction-to-una-app-architecture">
+<span id="tutorials-helloworld-architecture"></span><h1>HelloWorld - Introduction to UNA App Architecture<a class="headerlink" href="#helloworld-introduction-to-una-app-architecture" title="Link to this heading"></a></h1>
+<p>Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA Watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.</p>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/HelloWorld">Project Folder</a></p>
+<section id="what-you-ll-learn">
+<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>How to set up your development environment for UNA apps</p></li>
+<li><p>The basic structure of a UNA Watch application</p></li>
+<li><p>How service and GUI layers communicate</p></li>
+<li><p>How to build and run apps on simulator and hardware</p></li>
+<li><p>Understanding the UNA app framework fundamentals</p></li>
+</ul>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>Before building HelloWorld, you need to set up the UNA SDK environment. Follow the <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a> for complete installation instructions, including:</p>
+<ul class="simple">
+<li><p>UNA SDK cloned (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/UNAWatch/una-sdk.git</span></code>)</p></li>
+<li><p>ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)</p></li>
+<li><p>CMake 3.21+ and make</p></li>
+<li><p>Python 3 with pip packages installed</p></li>
+</ul>
+<p><strong>Minimum requirements for HelloWorld:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable pointing to SDK root</p></li>
+<li><p>ARM GCC toolchain in PATH</p></li>
+<li><p>CMake and build tools</p></li>
+</ul>
+<p><strong>For GUI development/modification:</strong></p>
+<ul class="simple">
+<li><p>TouchGFX Designer installed (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>)</p></li>
+</ul>
+</section>
+<section id="building-and-running-helloworld">
+<h3>Building and Running HelloWorld<a class="headerlink" href="#building-and-running-helloworld" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Verify your environment setup</strong> (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a> for details):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$UNA_SDK</span><span class="w">                   </span><span class="c1"># Should point to SDK root. </span>
+<span class="w">                                </span><span class="c1"># Note for backward compatibility with linux path notation it uses &#39;/&#39;</span>
+
+which<span class="w"> </span>arm-none-eabi-gcc<span class="w">         </span><span class="c1"># Should find ST toolchain</span>
+which<span class="w"> </span>cmake<span class="w">                     </span><span class="c1"># Should find CMake</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Navigate to the HelloWorld directory:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/HelloWorld
+</pre></div>
+</div>
+</li>
+<li><p><strong>Build the application:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>../Software/Apps/HelloWorld-CMake
+make
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The app will start and show a basic GUI demonstrating the UNA app framework. This HelloWorld focuses on the core architecture - the service-GUI communication pattern that all UNA apps use.</p>
+</section>
+<section id="running-on-simulator">
+<h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
+<p>To test the app on the simulator (Windows only):</p>
+<ol class="arabic simple">
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">HelloWorld.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
+<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">HelloWorld\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
+<li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
+</ol>
+<p>The simulator will display the HelloWorld GUI. Since HelloWorld has minimal interactive elements, it primarily demonstrates the app startup and basic framework.</p>
+<p>For detailed simulator setup and features, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
+</section>
+<section id="working-with-touchgfx-gui-optional">
+<h3>Working with TouchGFX GUI (Optional)<a class="headerlink" href="#working-with-touchgfx-gui-optional" title="Link to this heading"></a></h3>
+<p>If you want to explore or modify the GUI design:</p>
+<ol class="arabic">
+<li><p><strong>Install TouchGFX Designer</strong> (see <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for installation)</p></li>
+<li><p><strong>Open the TouchGFX project:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">touchgfx</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Make design changes</strong> in TouchGFX Designer (add/modify screens, widgets, interactions)</p></li>
+<li><p><strong>Generate code</strong> after making changes:</p>
+<ul class="simple">
+<li><p>Click “Generate Code” button in TouchGFX Designer, OR</p></li>
+</ul>
+</li>
+<li><p><strong>Rebuild the app</strong> to include your GUI changes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>/path/to/HelloWorld-CMake<span class="w"> </span><span class="c1"># If artifacts has been changed</span>
+make
+</pre></div>
+</div>
+</li>
+</ol>
+<p><strong>Note</strong>: HelloWorld has a minimal GUI. For learning GUI development, study the more complex examples like Cycling or HRMonitor apps, or see the <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>.</p>
+</section>
+</section>
+<section id="helloworld-app-overview">
+<h2>HelloWorld App Overview<a class="headerlink" href="#helloworld-app-overview" title="Link to this heading"></a></h2>
+<p>HelloWorld demonstrates the essential UNA app architecture:</p>
+<section id="the-service-layer-backend">
+<h3>The Service Layer (Backend)<a class="headerlink" href="#the-service-layer-backend" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Runs as the main application thread</p></li>
+<li><p>Handles sensor connections and data processing</p></li>
+<li><p>Manages app lifecycle (start/stop)</p></li>
+<li><p>Communicates with the GUI through messages</p></li>
+</ul>
+</section>
+<section id="the-gui-layer-frontend">
+<h3>The GUI Layer (Frontend)<a class="headerlink" href="#the-gui-layer-frontend" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a></p></li>
+<li><p>Displays information to the user</p></li>
+<li><p>Receives updates from the service</p></li>
+<li><p>Handles user interactions</p></li>
+</ul>
+</section>
+<section id="communication-between-layers">
+<h3>Communication Between Layers<a class="headerlink" href="#communication-between-layers" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Uses the UNA kernel messaging system</p></li>
+<li><p>Service sends data to GUI via custom messages</p></li>
+<li><p>GUI can send commands back to service</p></li>
+</ul>
+</section>
+</section>
+<section id="understanding-the-commented-code">
+<h2>Understanding the Commented Code<a class="headerlink" href="#understanding-the-commented-code" title="Link to this heading"></a></h2>
+<p>HelloWorld includes commented-out implementations of common UNA app features. These serve as reference examples for future tutorials:</p>
+<ul class="simple">
+<li><p><strong>Heart Rate Sensor Integration</strong>: Complete sensor connection, data parsing, and real-time GUI updates</p></li>
+<li><p><strong>FIT File Logging</strong>: Activity data recording with session summaries</p></li>
+<li><p><strong>Custom Messaging</strong>: Service-to-GUI communication patterns</p></li>
+</ul>
+<p><strong>Note</strong>: The next tutorial will walk through enabling heart rate monitoring step-by-step. For now, focus on understanding the basic app structure and messaging framework.</p>
+</section>
+<section id="understanding-una-app-communication">
+<h2>Understanding UNA App Communication<a class="headerlink" href="#understanding-una-app-communication" title="Link to this heading"></a></h2>
+<p>HelloWorld demonstrates the two main ways UNA apps communicate between service and GUI:</p>
+<section id="sdk-custom-messages-service-gui">
+<h3>SDK Custom Messages (Service → GUI)<a class="headerlink" href="#sdk-custom-messages-service-gui" title="Link to this heading"></a></h3>
+<p>Used for real-time data updates. The service creates messages using <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;&gt;()</span></code> and sends them via the kernel. The GUI receives them in <code class="docutils literal notranslate"><span class="pre">Model::customMessageHandler()</span></code>.</p>
+</section>
+<section id="apptypes-events-gui-service">
+<h3>AppTypes Events (GUI → Service)<a class="headerlink" href="#apptypes-events-gui-service" title="Link to this heading"></a></h3>
+<p>Used for commands and configuration. The GUI sends events through the <code class="docutils literal notranslate"><span class="pre">IGuiBackend</span></code> interface, which the service implements to receive commands.</p>
+<p>These patterns form the foundation of all UNA app communication. Future tutorials will show how to implement specific features using these systems.</p>
+</section>
+</section>
+<section id="common-patterns-and-best-practices">
+<h2>Common Patterns and Best Practices<a class="headerlink" href="#common-patterns-and-best-practices" title="Link to this heading"></a></h2>
+<section id="sensor-integration">
+<h3>Sensor Integration<a class="headerlink" href="#sensor-integration" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Always check <code class="docutils literal notranslate"><span class="pre">matchesDriver(handle)</span></code> before processing sensor data</p></li>
+<li><p>Validate data with <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> before using</p></li>
+<li><p>Handle sensor timeouts and disconnections gracefully</p></li>
+</ul>
+</section>
+<section id="message-design">
+<h3>Message Design<a class="headerlink" href="#message-design" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use unique message type IDs (increment from 0x00000001)</p></li>
+<li><p>Keep messages small and focused on single purposes</p></li>
+<li><p>Use descriptive names for message types and fields</p></li>
+</ul>
+</section>
+<section id="gui-updates">
+<h3>GUI Updates<a class="headerlink" href="#gui-updates" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Only update GUI when necessary to avoid performance issues</p></li>
+<li><p>Use appropriate data types (float for measurements, int for counts)</p></li>
+<li><p>Handle invalid/missing data gracefully</p></li>
+</ul>
+</section>
+<section id="file-operations">
+<h3>File Operations<a class="headerlink" href="#file-operations" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use the kernel’s filesystem interface (<code class="docutils literal notranslate"><span class="pre">mKernel.fs</span></code>)</p></li>
+<li><p>Handle file I/O errors appropriately</p></li>
+<li><p>FIT files are Garmin’s standard format for activity data</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Get HelloWorld running</strong> - Follow the build steps above and confirm the app launches</p></li>
+<li><p><strong>Explore the code structure</strong> - Look at Service.cpp and Model.cpp to understand the messaging flow</p></li>
+<li><p><strong>Check the commented examples</strong> - Review the commented HR and FIT code to see what’s available</p></li>
+<li><p><strong>Continue to the next tutorial</strong> - Learn how to enable heart rate monitoring and data logging</p></li>
+<li><p><strong>Study other example apps</strong> - Look at Alarm or Cycling apps for different patterns</p></li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="build-issues">
+<h3>Build Issues<a class="headerlink" href="#build-issues" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Ensure all SDK paths are correctly configured</p></li>
+<li><p>Check that TouchGFX is properly installed</p></li>
+<li><p>Verify CMake finds all required dependencies</p></li>
+</ul>
+</section>
+<section id="runtime-issues">
+<h3>Runtime Issues<a class="headerlink" href="#runtime-issues" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Check log output for error messages</p></li>
+<li><p>Verify sensor connections on real hardware</p></li>
+<li><p>Use the simulator for initial testing</p></li>
+</ul>
+</section>
+<section id="common-mistakes">
+<h3>Common Mistakes<a class="headerlink" href="#common-mistakes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Forgetting to uncomment all related code sections</p></li>
+<li><p>Using duplicate message type IDs</p></li>
+<li><p>Not handling message memory management properly</p></li>
+</ul>
+<p>Remember: Every complex app started as a simple HelloWorld. Take it step by step, and you’ll be building amazing UNA Watch applications in no time!</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../Simulator.html" class="btn btn-neutral float-left" title="UNA-Watch Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Buttons/ARCHITECTURE.html" class="btn btn-neutral float-right" title="Buttons - Handling User Input and Navigation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

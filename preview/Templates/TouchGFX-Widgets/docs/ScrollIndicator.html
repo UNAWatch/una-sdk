@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScrollIndicator &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/version-selector.js?v=50f89983"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Texts" href="Texts.html" />
+    <link rel="prev" title="PauseIndicator" href="PauseIndicator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../touchgfx-widgets.html">TouchGFX Widgets</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../touchgfx-widgets.html#using-the-pre-built-widgets">Using the pre-built widgets</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../touchgfx-widgets.html#exporting-your-own-widgets">Exporting your own widgets</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Battery.html">Battery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Buttons.html">Buttons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GpsIndicator.html">GpsIndicator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HeartRateZone.html">HeartRateZone</a></li>
+<li class="toctree-l3"><a class="reference internal" href="InfoCarousel.html">InfoCarousel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MainMenu.html">MainMenu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map.html">Map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PauseIndicator.html">PauseIndicator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ScrollIndicator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#components">Components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#predefined-configs">Predefined Configs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#files-included">Files Included</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Texts.html">Texts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Title.html">Title</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Toggle.html">Toggle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+      <li class="breadcrumb-item active">ScrollIndicator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/Templates/TouchGFX-Widgets/docs/ScrollIndicator.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scrollindicator">
+<h1>ScrollIndicator<a class="headerlink" href="#scrollindicator" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The ScrollIndicator widget renders a circular arc indicator on the left edge of the screen that tracks the selected item in a scroll-wheel menu. A sliding arc handle moves along a background rail arc as the user navigates the list. It supports smooth animated transitions including wrap-around (last → first and first → last) using a dual-handle technique.</p>
+</section>
+<section id="components">
+<h2>Components<a class="headerlink" href="#components" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rail</span></code></p></td>
+<td><p>Circle arc</p></td>
+<td><p>Background track, 232°–308°, radius 112 px</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>Circle arc</p></td>
+<td><p>Active position indicator, slides along the rail</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handleOvf</span></code></p></td>
+<td><p>Circle arc</p></td>
+<td><p>Hidden; used only during wrap-around animations</p></td>
+</tr>
+</tbody>
+</table>
+<p>Container size: <strong>36×146 px</strong>, positioned at X=0, Y=47. The arc center is at (120, 73) relative to the screen — the same virtual center used by <code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — so the indicator aligns with the bezel geometry.</p>
+</section>
+<section id="predefined-configs">
+<h2>Predefined Configs<a class="headerlink" href="#predefined-configs" title="Link to this heading"></a></h2>
+<p>Two configurations are available as <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">constexpr</span></code> members:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Config</p></th>
+<th class="head"><p>Rail range</p></th>
+<th class="head"><p>Handle span</p></th>
+<th class="head"><p>Use case</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ScrollIndicator::kBig</span></code></p></td>
+<td><p>232°–308° (76°)</p></td>
+<td><p>18°</p></td>
+<td><p>Menus with few items (≤ 5)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ScrollIndicator::kSmall</span></code></p></td>
+<td><p>252°–288° (36°)</p></td>
+<td><p>10°</p></td>
+<td><p>Menus with many items</p></td>
+</tr>
+</tbody>
+</table>
+<p>The default (applied by the Designer-generated base) is <code class="docutils literal notranslate"><span class="pre">kBig</span></code>. Call <code class="docutils literal notranslate"><span class="pre">setConfig(kSmall)</span></code> to switch.</p>
+<p>Custom configs can be built from <code class="docutils literal notranslate"><span class="pre">ScrollIndicatorConfig</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">ScrollIndicatorConfig</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">handleLen</span><span class="p">;</span><span class="w">    </span><span class="c1">// Handle arc span (degrees)</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">railMin</span><span class="p">;</span><span class="w">      </span><span class="c1">// Rail low bound (degrees)</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">railMax</span><span class="p">;</span><span class="w">      </span><span class="c1">// Rail high bound (degrees)</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">handleColor</span><span class="p">;</span><span class="w">  </span><span class="c1">// Handle color (0xRRGGBB)</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">railColor</span><span class="p">;</span><span class="w">    </span><span class="c1">// Rail background color (0xRRGGBB)</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setConfig</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ScrollIndicatorConfig</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cfg</span><span class="p">);</span><span class="w">  </span><span class="c1">// apply config (optional, default = kBig)</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setCount</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">count</span><span class="p">);</span><span class="w">       </span><span class="c1">// total items; handle hidden when count &lt;= 1</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setActiveId</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">index</span><span class="p">);</span><span class="w">    </span><span class="c1">// instant jump to item</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">animateToId</span><span class="p">(</span><span class="kt">int16_t</span><span class="w"> </span><span class="n">index</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">int16_t</span><span class="w"> </span><span class="n">animationSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// animated move; 0 = instant</span>
+<span class="kt">uint16_t</span><span class="w"> </span><span class="nf">getActiveId</span><span class="p">();</span><span class="w">              </span><span class="c1">// current (or target) index</span>
+</pre></div>
+</div>
+<p>Wrap-around values for <code class="docutils literal notranslate"><span class="pre">animateToId</span></code>: passing <code class="docutils literal notranslate"><span class="pre">-1</span></code> wraps to the last item; passing <code class="docutils literal notranslate"><span class="pre">count</span></code> wraps to item 0.</p>
+</section>
+<section id="usage-in-touchgfx-designer">
+<h2>Usage in TouchGFX Designer<a class="headerlink" href="#usage-in-touchgfx-designer" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Import the package</strong>:</p>
+<ul class="simple">
+<li><p>Open TouchGFX Designer</p></li>
+<li><p>Go to <code class="docutils literal notranslate"><span class="pre">Edit</span></code> → <code class="docutils literal notranslate"><span class="pre">Import</span></code> → <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Containers</span></code></p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">ScrollIndicator.tpkg</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Add to screen</strong>: drag the <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code> container onto your screen. Position at X=0, Y=47.</p></li>
+<li><p><strong>No designer properties</strong> — all configuration is done in C++.</p></li>
+</ol>
+</section>
+<section id="usage-in-c-code">
+<h2>Usage in C++ Code<a class="headerlink" href="#usage-in-c-code" title="Link to this heading"></a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gui/containers/ScrollIndicator.hpp&gt;</span>
+
+<span class="n">ScrollIndicator</span><span class="w"> </span><span class="n">scrollIndicator</span><span class="p">;</span>
+<span class="n">add</span><span class="p">(</span><span class="n">scrollIndicator</span><span class="p">);</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">setPosition</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">47</span><span class="p">,</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">146</span><span class="p">);</span>
+
+<span class="c1">// Setup (kBig is default; only call setConfig to switch or customize)</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">ScrollIndicator</span><span class="o">::</span><span class="n">kSmall</span><span class="p">);</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">setCount</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w">     </span><span class="c1">// 5-item list, starts at index 0</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">setActiveId</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// Navigate — animated (8 ticks ≈ smooth on 60 fps)</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">animateToId</span><span class="p">(</span><span class="n">nextIndex</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span>
+
+<span class="c1">// Navigate — instant</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">setActiveId</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+<span class="c1">// Wrap-around (last -&gt; first)</span>
+<span class="n">scrollIndicator</span><span class="p">.</span><span class="n">animateToId</span><span class="p">(</span><span class="n">scrollIndicator</span><span class="p">.</span><span class="n">getActiveId</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span>
+<span class="c1">// If activeId was the last item, animateToId wraps back to 0 automatically.</span>
+</pre></div>
+</div>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The handle is automatically hidden when <code class="docutils literal notranslate"><span class="pre">count</span> <span class="pre">&lt;=</span> <span class="pre">1</span></code>.</p></li>
+<li><p>Starting a new animation while one is in progress snaps the handle to its current visual position before proceeding — no visual glitch.</p></li>
+<li><p>The overflow handle (<code class="docutils literal notranslate"><span class="pre">handleOvf</span></code>) is managed internally and must not be manipulated directly.</p></li>
+<li><p>The timer widget is automatically unregistered when the animation completes or in the destructor.</p></li>
+</ul>
+</section>
+<section id="files-included">
+<h2>Files Included<a class="headerlink" href="#files-included" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">manifest.xml</span></code> — package manifest (requires TouchGFX ≥ 4.26.1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">content/CustomContainerExport.touchgfx</span></code> — Designer container definition</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">content/CustomContainerManifest.xml</span></code> — container manifest</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">files/gui/include/gui/containers/ScrollIndicator.hpp</span></code> — header</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">files/gui/src/containers/ScrollIndicator.cpp</span></code> — implementation</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>TouchGFX Framework (minimum version 4.26.1)</p></li>
+<li><p>No image assets — fully vector-based</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="PauseIndicator.html" class="btn btn-neutral float-left" title="PauseIndicator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Texts.html" class="btn btn-neutral float-right" title="Texts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

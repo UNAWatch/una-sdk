@@ -1,0 +1,245 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>External Sensors (BLE Accessories) &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">External Sensors (BLE Accessories)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ExternalSensors.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="external-sensors-ble-accessories">
+<h1>External Sensors (BLE Accessories)<a class="headerlink" href="#external-sensors-ble-accessories" title="Link to this heading"></a></h1>
+<p>The watch can acquire an <strong>external BLE sensor</strong> — for v1, a heart-rate chest
+strap or arm band — and feed its readings into the normal sensor pipeline for
+the duration of an activity. This page describes the app-facing contract.</p>
+<section id="opt-in-nothing-happens-unless-an-app-asks">
+<h2>Opt-in: nothing happens unless an app asks<a class="headerlink" href="#opt-in-nothing-happens-unless-an-app-asks" title="Link to this heading"></a></h2>
+<p>External-sensor acquisition is <strong>explicitly opt-in per app</strong>. An app that never
+sends <code class="docutils literal notranslate"><span class="pre">RequestPrepare</span></code> never triggers scanning and behaves exactly as before.
+There is no implicit/background strap connection — acquisition is scoped to a
+workout.</p>
+<p>Heart-rate data continues to arrive through the existing <code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code> sensor
+type; you do <strong>not</strong> change how you read HR. The accessory messages only drive
+<em>acquisition</em> and surface <em>status</em>.</p>
+</section>
+<section id="messages">
+<h2>Messages<a class="headerlink" href="#messages" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">SDK/Messages/AccessoryMessages.hpp</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Payload</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RequestPrepare</span></code></p></td>
+<td><p>app → kernel</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kinds</span></code> (bitmask of <code class="docutils literal notranslate"><span class="pre">SDK::Accessory::Kind</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RequestRelease</span></code></p></td>
+<td><p>app → kernel</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kinds</span></code> (<code class="docutils literal notranslate"><span class="pre">0</span></code> = release all)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EventStatus</span></code></p></td>
+<td><p>kernel → app</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code>, <code class="docutils literal notranslate"><span class="pre">state</span></code> (<code class="docutils literal notranslate"><span class="pre">SDK::Accessory::State</span></code>), <code class="docutils literal notranslate"><span class="pre">name[24]</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">Kind</span></code> is a bitmask so a single prepare can request several accessory kinds;
+v1 defines <code class="docutils literal notranslate"><span class="pre">HRM</span> <span class="pre">=</span> <span class="pre">1&lt;&lt;0</span></code> and reserves the remaining bits for future cadence /
+power profiles.</p>
+<section id="status-flow">
+<h3>Status flow<a class="headerlink" href="#status-flow" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        RequestPrepare(HRM)
+IDLE ─────────────────────────▶ SEARCHING ──▶ CONNECTING ──▶ CONNECTED
+  ▲                                  │                            │
+  │ RequestRelease / app stop        │ no strap / feature off     │ link drop
+  │                                  ▼                            ▼
+  └───────────────────────────── UNAVAILABLE                    LOST ──▶ (re-acquire)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">UNAVAILABLE</span></code> means the feature is disabled or no accessory is remembered —
+treat it as “external HR not coming”. <code class="docutils literal notranslate"><span class="pre">LOST</span></code> is reported when a connected strap
+drops; the kernel falls back to the optical sensor and tries to re-acquire.</p>
+</section>
+</section>
+<section id="recommended-app-usage">
+<h2>Recommended app usage<a class="headerlink" href="#recommended-app-usage" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Send <code class="docutils literal notranslate"><span class="pre">RequestPrepare(HRM)</span></code> when the <strong>pre-activity screen</strong> appears, and tell
+the user to put the strap on / wake it before starting. Acquisition runs while
+they get ready.</p></li>
+<li><p>Subscribe to <code class="docutils literal notranslate"><span class="pre">EventStatus</span></code> and show a strap indicator (searching / connected /
+lost) so the user knows whether external HR is live.</p></li>
+<li><p>Send <code class="docutils literal notranslate"><span class="pre">RequestRelease</span></code> when leaving the activity. The kernel also releases
+automatically if the app stops, so a crash can never leave a strap connected.</p></li>
+</ul>
+</section>
+<section id="reading-the-hr-source-optional">
+<h2>Reading the HR source (optional)<a class="headerlink" href="#reading-the-hr-source-optional" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code> is unchanged — it stays the stable 2-field (BPM, trust) frame, and
+<code class="docutils literal notranslate"><span class="pre">SensorDataParserHeartRate</span></code> reads it exactly as before. Source provenance is
+exposed separately, opt-in, via the <code class="docutils literal notranslate"><span class="pre">HEART_RATE_EX</span></code> sensor type so existing
+consumers keep working untouched.</p>
+<p>Subscribe to <code class="docutils literal notranslate"><span class="pre">HEART_RATE_EX</span></code> and parse it with <code class="docutils literal notranslate"><span class="pre">SensorDataParserHeartRateEx</span></code>,
+which exposes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">getSource()</span></code> → <code class="docutils literal notranslate"><span class="pre">Source::{UNKNOWN,</span> <span class="pre">OPTICAL,</span> <span class="pre">EXTERNAL}</span></code> — which source produced
+the arbitrated reading;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">getBpm()</span></code> / <code class="docutils literal notranslate"><span class="pre">getTrustLevel()</span></code> — the arbitrated value (same as <code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code>);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">getOpticalBpm()</span></code> / <code class="docutils literal notranslate"><span class="pre">getOpticalTrust()</span></code> and <code class="docutils literal notranslate"><span class="pre">getExternalBpm()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">getExternalTrust()</span></code> — the raw per-source readings (0 when absent/stale).</p></li>
+</ul>
+<p>Validation is lenient (a future kernel may append fields), so an app built
+against this SDK keeps working as the frame grows. Use this to label records or
+log separate FIT series (e.g. <code class="docutils literal notranslate"><span class="pre">hr_source</span></code>, internal-PPG, and external-strap HR)
+— do not gate HR display on it. Apps that only need BPM should stay on
+<code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code> and ignore <code class="docutils literal notranslate"><span class="pre">HEART_RATE_EX</span></code> entirely.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

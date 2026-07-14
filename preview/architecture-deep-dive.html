@@ -1,0 +1,2928 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Architecture &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if ("False" === "True") {
+                                        addZoomToSvgs(d3.selectAll(""));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? mermaids_active.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development Workflow" href="development-workflow.html" />
+    <link rel="prev" title="Sensor Layer" href="SensorsLayer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Platform Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core-concepts">Core Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pure-machine-code-execution">Pure Machine Code Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#position-independent-code-pic">Position-Independent Code (PIC)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared-libc-integration">Shared libc Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dual-process-model">Dual-Process Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ipc-mechanisms">IPC Mechanisms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-management">Memory Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#power-management">Power Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#technical-architecture-details">Technical Architecture Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detailed-implementation-analysis">Detailed Implementation Analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#backend-core-implementation-backend-cpp">1. Backend Core Implementation (Backend.cpp)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backend-event-processing-flow">Backend Event Processing Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backend-interface-architecture">Backend Interface Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backend-state-management">Backend State Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backend-communication-patterns">Backend Communication Patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#component-factory-implementation-componentfactory-cpp">3. Component Factory Implementation (ComponentFactory.cpp)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-component-detection-flow">Hardware Component Detection Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#component-factory-interface-architecture">Component Factory Interface Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#component-lifecycle-and-error-recovery">Component Lifecycle and Error Recovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#i2c-bus-probing-and-component-identification">I2C Bus Probing and Component Identification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-layer-implementation-sensormanager-cpp">4. Sensor Layer Implementation (SensorManager.cpp)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-resource-arbitration-architecture">Sensor Resource Arbitration Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-data-pipeline-and-processing-flow">Sensor Data Pipeline and Processing Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-error-handling-and-recovery-mechanisms">Sensor Error Handling and Recovery Mechanisms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-performance-monitoring-and-optimization">Sensor Performance Monitoring and Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-management-implementation-settingsmanager-cpp">5. Settings Management Implementation (SettingsManager.cpp)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-persistence-and-recovery-flow">Settings Persistence and Recovery Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-configuration-state-machine">Settings Configuration State Machine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-access-patterns-and-concurrency">Settings Access Patterns and Concurrency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-migration-and-version-compatibility">Settings Migration and Version Compatibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-system-implementation-filesystem-cpp">6. File System Implementation (FileSystem.cpp)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multi-volume-file-system-architecture">Multi-Volume File System Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-system-operations-flow">File System Operations Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#thread-safe-file-access-state-machine">Thread-Safe File Access State Machine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-system-error-recovery-and-factory-reset-flow">File System Error Recovery and Factory Reset Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#time-zone-and-dst-handling-architecture">Time Zone and DST Handling Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#system-initialization-sequence">System Initialization Sequence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sequence-diagram-detailed-backend-thread-initialization">Sequence Diagram: Detailed Backend Thread Initialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#system-initialization-flow">System Initialization Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#system-initialization-from-multiple-perspectives">System Initialization from Multiple Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#thread-perspective-rtos-task-initialization">1. Thread Perspective: RTOS Task Initialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#component-dependency-perspective-initialization-order">2. Component Dependency Perspective: Initialization Order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timing-perspective-initialization-timeline">3. Timing Perspective: Initialization Timeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#memory-perspective-allocation-during-initialization">4. Memory Perspective: Allocation During Initialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#error-handling-perspective-fault-recovery-during-init">5. Error Handling Perspective: Fault Recovery During Init</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#power-management-perspective-energy-during-initialization">6. Power Management Perspective: Energy During Initialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-flow-perspective-information-movement-during-init">7. Data Flow Perspective: Information Movement During Init</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-management-patterns">Memory Management Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling-robustness">Error Handling &amp; Robustness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-system-architecture">Core System Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#backend-class-inheritance-diagram">Backend Class Inheritance Diagram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ble-service-stack">8. BLE Service Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ble-service-architecture">BLE Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-management-settingsmanagerbase-hpp">9. Settings Management (SettingsManagerBase.hpp)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#power-management-system">10. Power Management System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#power-management-state-machine">Power Management State Machine</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">System Initialization Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-design-patterns">Key Design Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#static-component-architecture">Static Component Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data-flow-user-input-to-app-response">Data Flow: User Input to App Response</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Platform Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/architecture-deep-dive.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="platform-architecture">
+<span id="architecture-deep-dive"></span><h1>Platform Architecture<a class="headerlink" href="#platform-architecture" title="Link to this heading"></a></h1>
+<p>This document explains the technical magic that enables the UNA Watch platform.</p>
+<section id="core-concepts">
+<h2>Core Concepts<a class="headerlink" href="#core-concepts" title="Link to this heading"></a></h2>
+<section id="pure-machine-code-execution">
+<h3>Pure Machine Code Execution<a class="headerlink" href="#pure-machine-code-execution" title="Link to this heading"></a></h3>
+<p>UNA Watch apps are not interpreted or virtualized. They are compiled ARM Cortex-M ELF binaries that execute directly in the MCU memory. This provides:</p>
+<ul class="simple">
+<li><p><strong>Native Performance</strong>: Zero abstraction overhead.</p></li>
+<li><p><strong>Direct Hardware Access</strong>: Apps can interact with peripherals at MCU speeds.</p></li>
+<li><p><strong>Efficiency</strong>: Minimal memory and CPU footprint.</p></li>
+</ul>
+</section>
+<section id="position-independent-code-pic">
+<h3>Position-Independent Code (PIC)<a class="headerlink" href="#position-independent-code-pic" title="Link to this heading"></a></h3>
+<p>To allow apps to be loaded at any memory address without re-linking, the SDK uses Position-Independent Code.</p>
+<ul class="simple">
+<li><p><strong>Kernel Abstraction</strong>: Apps are completely abstracted from the kernel’s memory layout.</p></li>
+<li><p><strong>Dynamic Loading</strong>: The kernel can load, run, and unload apps on demand.</p></li>
+<li><p><strong>Process Isolation</strong>: Ensures that apps do not interfere with each other or the kernel.</p></li>
+</ul>
+</section>
+<section id="shared-libc-integration">
+<h3>Shared libc Integration<a class="headerlink" href="#shared-libc-integration" title="Link to this heading"></a></h3>
+<p>UNA Watch implements a shared libc architecture to save memory.</p>
+<ul class="simple">
+<li><p><strong>Common Base</strong>: All apps share the same standard library implementation provided by the kernel.</p></li>
+<li><p><strong>Reduced Footprint</strong>: Significant reduction in the size of each <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> file.</p></li>
+<li><p><strong>C++ Support</strong>: Full support for modern C++ features (strings, vectors, etc.) via the shared library.</p></li>
+</ul>
+</section>
+<section id="dual-process-model">
+<h3>Dual-Process Model<a class="headerlink" href="#dual-process-model" title="Link to this heading"></a></h3>
+<p>Every UNA Watch app consists of two distinct components:</p>
+<ol class="arabic simple">
+<li><p><strong>Service Process</strong>: Handles background logic, sensors, and BLE.</p></li>
+<li><p><strong>GUI Process</strong>: Handles user interface and interaction.</p></li>
+</ol>
+</section>
+<section id="ipc-mechanisms">
+<h3>IPC Mechanisms<a class="headerlink" href="#ipc-mechanisms" title="Link to this heading"></a></h3>
+<p>Communication between processes is handled via a high-performance message-passing system.</p>
+<ul class="simple">
+<li><p><strong>Kernel Pools</strong>: Messages are allocated from pre-defined kernel memory pools.</p></li>
+<li><p><strong>Type-Safe</strong>: Messages are strongly typed using C++ structures.</p></li>
+<li><p><strong>Asynchronous</strong>: Non-blocking message exchange for smooth UI performance.</p></li>
+</ul>
+</section>
+<section id="memory-management">
+<h3>Memory Management<a class="headerlink" href="#memory-management" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Pool Allocation</strong>: Prevents heap fragmentation in long-running applications.</p></li>
+<li><p><strong>RAII Patterns</strong>: Automatic resource cleanup using modern C++ practices.</p></li>
+<li><p><strong>Protected Regions</strong>: Memory regions are protected to prevent unauthorized access.</p></li>
+</ul>
+</section>
+<section id="power-management">
+<h3>Power Management<a class="headerlink" href="#power-management" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Deep Sleep</strong>: The kernel automatically enters low-power modes when idle.</p></li>
+<li><p><strong>Wake Sources</strong>: Apps can define specific wake sources (timers, sensors, buttons).</p></li>
+<li><p><strong>Battery Optimization</strong>: Adaptive sampling rates and event-driven design.</p></li>
+</ul>
+</section>
+</section>
+<section id="technical-architecture-details">
+<h2>Technical Architecture Details<a class="headerlink" href="#technical-architecture-details" title="Link to this heading"></a></h2>
+<section id="detailed-implementation-analysis">
+<h3>Detailed Implementation Analysis<a class="headerlink" href="#detailed-implementation-analysis" title="Link to this heading"></a></h3>
+<section id="backend-core-implementation-backend-cpp">
+<h4>1. Backend Core Implementation (Backend.cpp)<a class="headerlink" href="#backend-core-implementation-backend-cpp" title="Link to this heading"></a></h4>
+<p>The Backend class is a <strong>1,045-line orchestration engine</strong> that implements 10+ callback interfaces:</p>
+<p><strong>Thread Management:</strong></p>
+<ul class="simple">
+<li><p>Dedicated backend thread with event loop processing GUI events</p></li>
+<li><p>Circular buffer message queues (20 slots each) for GUI RX/TX communication</p></li>
+<li><p>Periodic timers: minute updates, BLE monitoring, find-phone alerts</p></li>
+</ul>
+<p><strong>System Initialization Sequence:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Backend</span><span class="w"> </span><span class="kr">thread</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Device info broadcast</span>
+<span class="w">    </span><span class="n">sendEventToGui</span><span class="p">(</span><span class="n">B2GEvent</span><span class="o">::</span><span class="n">DevInfo</span><span class="p">{</span><span class="n">deviceInfo</span><span class="p">});</span>
+<span class="w">    </span><span class="n">sendEventToGui</span><span class="p">(</span><span class="n">B2GEvent</span><span class="o">::</span><span class="n">Settings</span><span class="p">{</span><span class="n">settings</span><span class="p">});</span>
+<span class="w">    </span><span class="n">sendEventToGui</span><span class="p">(</span><span class="n">B2GEvent</span><span class="o">::</span><span class="n">BatteryLevel</span><span class="p">{</span><span class="n">battery</span><span class="p">});</span>
+<span class="w">    </span><span class="n">sendEventToGui</span><span class="p">(</span><span class="n">B2GEvent</span><span class="o">::</span><span class="n">BleBond</span><span class="p">{</span><span class="n">ble</span><span class="p">.</span><span class="n">isBonded</span><span class="p">()});</span>
+
+<span class="w">    </span><span class="c1">// Component initialization</span>
+<span class="w">    </span><span class="n">ComponentFactory</span><span class="o">::</span><span class="n">scanModules</span><span class="p">();</span><span class="w">  </span><span class="c1">// Hardware discovery</span>
+<span class="w">    </span><span class="n">SensorLayer</span><span class="o">::</span><span class="n">init</span><span class="p">();</span><span class="w">              </span><span class="c1">// Sensor management</span>
+<span class="w">    </span><span class="n">App</span><span class="o">::</span><span class="n">Manager</span><span class="o">::</span><span class="n">scan</span><span class="p">();</span><span class="w">            </span><span class="c1">// App discovery</span>
+<span class="w">    </span><span class="n">GPS</span><span class="p">.</span><span class="n">attachCallback</span><span class="p">(</span><span class="k">this</span><span class="p">);</span><span class="w">         </span><span class="c1">// Location services</span>
+
+<span class="w">    </span><span class="c1">// Main event loop</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(;;)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">receiveBackendEvent</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">        </span><span class="n">evtHandler</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w">  </span><span class="c1">// Dispatch to handlers</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Event Handler Architecture:</strong></p>
+<ul class="simple">
+<li><p><strong>std::visit</strong> pattern for type-safe event dispatch</p></li>
+<li><p>20+ specialized event handlers (shutdown, backlight, buzzer, BLE pairing, etc.)</p></li>
+<li><p>GUI event processing with immediate feedback loops</p></li>
+</ul>
+<p><strong>BLE Integration:</strong></p>
+<ul class="simple">
+<li><p>Service stack: DeviceInfo, CurrentTime, Battery, FileTransfer, Notification, CustomCommand</p></li>
+<li><p>Dynamic service allocation with <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">(std::nothrow)</span></code> placement</p></li>
+<li><p>Firmware update via BLE file transfer with integrity checks</p></li>
+</ul>
+</section>
+<section id="backend-event-processing-flow">
+<h4>Backend Event Processing Flow<a class="headerlink" href="#backend-event-processing-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[Event Source] --&gt; B{Hardware/Input Type}
+
+    B --&gt;|Button Press| C[Button Driver&lt;br/&gt;onPress]
+    B --&gt;|Touch Gesture| D[Touch Controller&lt;br/&gt;onTouch]
+    B --&gt;|BLE Command| E[BLE Services&lt;br/&gt;onBleCommand]
+    B --&gt;|Timer Event| F[Periodic Timer&lt;br/&gt;onTimer]
+    B --&gt;|Sensor Data| G[Sensor Layer&lt;br/&gt;onSensorUpdate]
+    B --&gt;|GPS Update| H[GPS Module&lt;br/&gt;onLocationUpdate]
+    B --&gt;|USB Event| I[USB Stack&lt;br/&gt;onUsbEvent]
+    B --&gt;|System Event| J[System Services&lt;br/&gt;onSystemEvent]
+
+    C --&gt; K[Observer Dispatcher]
+    D --&gt; K
+    E --&gt; K
+    F --&gt; K
+    G --&gt; K
+    H --&gt; K
+    I --&gt; K
+    J --&gt; K
+
+    K --&gt; L[Backend receiveBackendEvent]
+
+    L --&gt; M[Backend evtHandler&lt;br/&gt;std visit Pattern]
+
+    M --&gt; N{Event Type}
+
+    N --&gt;|GUI Event| O[GUI Event Handlers&lt;br/&gt;Backlight/Buzzer/Vibration]
+    N --&gt;|BLE Event| P[BLE Event Handlers&lt;br/&gt;Pairing/Connection/Transfer]
+    N --&gt;|App Event| Q[App Event Handlers&lt;br/&gt;Lifecycle/Sensor/App Control]
+    N --&gt;|System Event| R[System Event Handlers&lt;br/&gt;Power/Sleep/Settings]
+    N --&gt;|Timer Event| S[Timer Event Handlers&lt;br/&gt;Minute Updates/BLE Monitoring]
+
+    O --&gt; T[sendEventToGui&lt;br/&gt;Immediate GUI Feedback]
+    P --&gt; U[BLE Service Response&lt;br/&gt;Connection Status Updates]
+    Q --&gt; V[App Manager Interaction&lt;br/&gt;App Lifecycle Control]
+    R --&gt; W[System State Changes&lt;br/&gt;Sleep/Wake/Power Management]
+    S --&gt; X[Periodic System Tasks&lt;br/&gt;Health Tracking/Status Updates]
+
+    T --&gt; Y[TouchGFX Update]
+    U --&gt; Z[BLE Client Notification]
+    V --&gt; AA[App State Change]
+    W --&gt; BB[System Configuration]
+    X --&gt; CC[Background Processing]
+
+    style L fill:#bbdefb
+    style M fill:#c8e6c9
+    style T fill:#fff3e0
+    </pre></section>
+<section id="backend-interface-architecture">
+<h4>Backend Interface Architecture<a class="headerlink" href="#backend-interface-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Core Backend Class&quot;
+        BACKEND[Backend&lt;br/&gt;Central Orchestrator&lt;br/&gt;1,045 lines]
+    end
+
+    subgraph &quot;GUI Communication&quot;
+        IGUI_BACKEND[IGuiBackend&lt;br/&gt;Bidirectional TouchGFX Events]
+        G2B_EVENTS[G2B Events&lt;br/&gt;Button/Touch/BLE Commands]
+        B2G_EVENTS[B2G Events&lt;br/&gt;Status Updates/Notifications]
+    end
+
+    subgraph &quot;Power Management&quot;
+        IPOWER_MGR[IPowerManager&lt;br/&gt;Battery/Charging/Sleep Control]
+        BATTERY_EVENTS[Battery Events&lt;br/&gt;Level/Charging Status]
+        POWER_COMMANDS[Power Commands&lt;br/&gt;Sleep/Wake/Screen Control]
+    end
+
+    subgraph &quot;User Input&quot;
+        IINPUT_HANDLER[IInputHandler&lt;br/&gt;Button/Touch Processing]
+        BUTTON_EVENTS[Button Events&lt;br/&gt;Press/Release/Long Press]
+        TOUCH_EVENTS[Touch Events&lt;br/&gt;Gestures/Coordinates]
+    end
+
+    subgraph &quot;BLE Services&quot;
+        IBLE_MANAGER[IBleManager&lt;br/&gt;BLE Stack Coordination]
+        BLE_CONNECTION[Connection Events&lt;br/&gt;Pairing/Disconnect]
+        BLE_SERVICES[Service Events&lt;br/&gt;DIS/CTS/BAS/FTS/NTS/CCS]
+    end
+
+    subgraph &quot;GPS Integration&quot;
+        IGPS_HANDLER[IGpsHandler&lt;br/&gt;Location Services]
+        GPS_EVENTS[GPS Events&lt;br/&gt;Location Updates/EPO]
+        LOCATION_DATA[Location Data&lt;br/&gt;Coordinates/Accuracy]
+    end
+
+    subgraph &quot;App Lifecycle&quot;
+        IAPP_MANAGER[IAppManager&lt;br/&gt;Application Control]
+        APP_EVENTS[App Events&lt;br/&gt;Start/Stop/Suspend/Resume]
+        APP_COMMANDS[App Commands&lt;br/&gt;Install/Update/Remove]
+    end
+
+    subgraph &quot;System Services&quot;
+        ISYSTEM_HANDLER[ISystemHandler&lt;br/&gt;System Integration]
+        SYSTEM_EVENTS[System Events&lt;br/&gt;USB/File/Health]
+        SYSTEM_COMMANDS[System Commands&lt;br/&gt;Settings/Configuration]
+    end
+
+    BACKEND --&gt; IGUI_BACKEND
+    BACKEND --&gt; IPOWER_MGR
+    BACKEND --&gt; IINPUT_HANDLER
+    BACKEND --&gt; IBLE_MANAGER
+    BACKEND --&gt; IGPS_HANDLER
+    BACKEND --&gt; IAPP_MANAGER
+    BACKEND --&gt; ISYSTEM_HANDLER
+
+    IGUI_BACKEND --&gt; G2B_EVENTS
+    IGUI_BACKEND --&gt; B2G_EVENTS
+
+    IPOWER_MGR --&gt; BATTERY_EVENTS
+    IPOWER_MGR --&gt; POWER_COMMANDS
+
+    IINPUT_HANDLER --&gt; BUTTON_EVENTS
+    IINPUT_HANDLER --&gt; TOUCH_EVENTS
+
+    IBLE_MANAGER --&gt; BLE_CONNECTION
+    IBLE_MANAGER --&gt; BLE_SERVICES
+
+    IGPS_HANDLER --&gt; GPS_EVENTS
+    IGPS_HANDLER --&gt; LOCATION_DATA
+
+    IAPP_MANAGER --&gt; APP_EVENTS
+    IAPP_MANAGER --&gt; APP_COMMANDS
+
+    ISYSTEM_HANDLER --&gt; SYSTEM_EVENTS
+    ISYSTEM_HANDLER --&gt; SYSTEM_COMMANDS
+
+    style BACKEND fill:#bbdefb
+    style IGUI_BACKEND fill:#c8e6c9
+    style IPOWER_MGR fill:#c8e6c9
+    style IINPUT_HANDLER fill:#c8e6c9
+    style IBLE_MANAGER fill:#c8e6c9
+    </pre></section>
+<section id="backend-state-management">
+<h4>Backend State Management<a class="headerlink" href="#backend-state-management" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; Uninitialized
+
+    Uninitialized --&gt; Initializing: Backend thread starts
+
+    Initializing --&gt; Broadcasting: Component discovery complete
+    Broadcasting --&gt; ComponentInit: Device info sent to GUI
+
+    ComponentInit --&gt; SensorInit: ComponentFactory scanModules
+    SensorInit --&gt; AppDiscovery: SensorLayer init
+    AppDiscovery --&gt; GpsAttach: App Manager scan
+    GpsAttach --&gt; EventLoopReady: GPS attachCallback
+
+    EventLoopReady --&gt; Running: System ready
+
+    Running --&gt; ProcessingEvent: receiveBackendEvent()
+    ProcessingEvent --&gt; Running: evtHandler() complete
+
+    Running --&gt; ShutdownRequested: Shutdown event received
+    ShutdownRequested --&gt; CleaningUp: Graceful shutdown
+    CleaningUp --&gt; [*]: Backend thread exits
+
+    Running --&gt; ErrorState: Critical error occurred
+    ErrorState --&gt; RecoveryAttempt: Error recovery
+    RecoveryAttempt --&gt; Running: Recovery successful
+    RecoveryAttempt --&gt; FatalError: Recovery failed
+    FatalError --&gt; [*]: System reset
+
+    note right of Initializing
+        Thread creation
+        Message queues setup
+        Initial system state
+    end note
+
+    note right of Broadcasting
+        Send device info to GUI
+        Send settings to GUI
+        Send battery status
+        Send BLE bond status
+    end note
+
+    note right of ComponentInit
+        Hardware component discovery
+        LCD/Backlight/BLE/GPS detection
+        Stub fallback for missing hardware
+    end note
+
+    note right of SensorInit
+        Sensor layer initialization
+        Driver registration
+        Sensor thread startup
+    end note
+
+    note right of AppDiscovery
+        App package scanning
+        .uapp file validation
+        App manager ready
+    end note
+
+    note right of GpsAttach
+        GPS callback registration
+        Location service ready
+        EPO management setup
+    end note
+
+    note right of EventLoopReady
+        Main event loop active
+        All subsystems initialized
+        System fully operational
+    end note
+
+    note right of ProcessingEvent
+        Event type detection
+        Handler dispatch via std visit
+        Immediate response generation
+        State updates and notifications
+    end note
+    </pre></section>
+<section id="backend-communication-patterns">
+<h4>Backend Communication Patterns<a class="headerlink" href="#backend-communication-patterns" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Backend as Hub&quot;
+        BACKEND[Backend&lt;br/&gt;Central Coordinator]
+    end
+
+    subgraph &quot;Upstream Communication&quot;
+        GUI[TouchGFX GUI&lt;br/&gt;User Interface]
+        APPS[User Applications&lt;br/&gt;Service + GUI Processes]
+        BLE_STACK[BLE Stack&lt;br/&gt;Phone/Companion Apps]
+        HARDWARE[Hardware Components&lt;br/&gt;Buttons/Sensors/GPS]
+    end
+
+    subgraph &quot;Downstream Communication&quot;
+        SYSTEM_SERVICES[System Services&lt;br/&gt;File/USB/Health]
+        POWER_MGR[Power Manager&lt;br/&gt;Battery/Sleep]
+        APP_MGR[App Manager&lt;br/&gt;Lifecycle Control]
+        SENSOR_LAYER[Sensor Layer&lt;br/&gt;Data Processing]
+    end
+
+    subgraph &quot;Communication Channels&quot;
+        MSG_QUEUES[Message Queues&lt;br/&gt;20-slot Circular Buffers]
+        CALLBACKS[Callback Interfaces&lt;br/&gt;10+ Interface Contracts]
+        EVENTS[Event System&lt;br/&gt;Type-safe std::visit Dispatch]
+        TIMERS[Periodic Timers&lt;br/&gt;System Tasks &amp; Monitoring]
+    end
+
+    GUI --&gt; MSG_QUEUES
+    APPS --&gt; MSG_QUEUES
+    BLE_STACK --&gt; CALLBACKS
+    HARDWARE --&gt; CALLBACKS
+
+    MSG_QUEUES --&gt; BACKEND
+    CALLBACKS --&gt; BACKEND
+    EVENTS --&gt; BACKEND
+    TIMERS --&gt; BACKEND
+
+    BACKEND --&gt; SYSTEM_SERVICES
+    BACKEND --&gt; POWER_MGR
+    BACKEND --&gt; APP_MGR
+    BACKEND --&gt; SENSOR_LAYER
+
+    BACKEND -.-&gt;|Broadcasts| GUI
+    BACKEND -.-&gt;|Commands| APPS
+    BACKEND -.-&gt;|Responses| BLE_STACK
+    BACKEND -.-&gt;|Controls| HARDWARE
+
+    MSG_QUEUES -.-&gt;|Thread-safe| BACKEND
+    CALLBACKS -.-&gt;|Interface-based| BACKEND
+    EVENTS -.-&gt;|Type-safe| BACKEND
+    TIMERS -.-&gt;|Periodic| BACKEND
+
+    style BACKEND fill:#bbdefb
+    style MSG_QUEUES fill:#c8e6c9
+    style CALLBACKS fill:#c8e6c9
+    style EVENTS fill:#c8e6c9
+    style TIMERS fill:#c8e6c9
+    </pre></section>
+<section id="component-factory-implementation-componentfactory-cpp">
+<h4>3. Component Factory Implementation (ComponentFactory.cpp)<a class="headerlink" href="#component-factory-implementation-componentfactory-cpp" title="Link to this heading"></a></h4>
+<p><strong>Hardware Auto-Discovery (202 lines):</strong></p>
+<p><strong>I2C Bus Probing:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">ComponentFactory::scanModules</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// LCD/Backlight discovery via EEPROM</span>
+<span class="w">    </span><span class="n">Hardware</span><span class="o">::</span><span class="n">N24S64B</span><span class="w"> </span><span class="n">eeprom</span><span class="p">{</span><span class="n">i2cMain</span><span class="p">};</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">eeprom</span><span class="p">.</span><span class="n">readUniqueId</span><span class="p">(</span><span class="n">uniqueId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mpLcd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LS012B7DD06A</span><span class="p">();</span>
+<span class="w">        </span><span class="n">mpBacklight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Backlight</span><span class="p">(</span><span class="n">gpio</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// BLE on Sensor1 bus</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">eeprom</span><span class="p">.</span><span class="n">readUniqueId</span><span class="p">(</span><span class="n">uniqueId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mpBle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Ble</span><span class="o">::</span><span class="n">PeripheralBlueNRG</span><span class="p">(</span><span class="n">core</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// GPS on Sensor2 bus</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">eeprom</span><span class="p">.</span><span class="n">readUniqueId</span><span class="p">(</span><span class="n">uniqueId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mpGps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Gps</span><span class="o">::</span><span class="n">GpsAiroha</span><span class="p">(</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="n">power</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Stub Pattern Fallback:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Stub::Backlight</span></code>, <code class="docutils literal notranslate"><span class="pre">Stub::Lcd</span></code>, <code class="docutils literal notranslate"><span class="pre">Stub::BleServer</span></code> for missing hardware</p></li>
+<li><p>Graceful degradation when components not detected</p></li>
+<li><p>Interface-based design enables runtime component replacement</p></li>
+</ul>
+</section>
+<section id="hardware-component-detection-flow">
+<h4>Hardware Component Detection Flow<a class="headerlink" href="#hardware-component-detection-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[System Startup&lt;br/&gt;ComponentFactory::scanModules] --&gt; B[I2C Bus&lt;br/&gt;Initialization]
+
+    B --&gt; C{I2C Bus 0&lt;br/&gt;Main Display Bus}
+    C --&gt;|Available| D[Address 0x50&lt;br/&gt;EEPROM Probe]
+    C --&gt;|Unavailable| E[Skip Bus 0]
+
+    D --&gt; F{EEPROM&lt;br/&gt;Responds?}
+    F --&gt;|Yes| G[Read Unique ID&lt;br/&gt;8-byte EEPROM]
+    F --&gt;|No| H[No EEPROM&lt;br/&gt;Component Absent]
+
+    G --&gt; I{ID Matches&lt;br/&gt;Known LCD?}
+    I --&gt;|Yes| J[LCD Component&lt;br/&gt;Detected]
+    I --&gt;|No| K[Unknown Component&lt;br/&gt;Skip]
+
+    J --&gt; L[Create LCD Instance&lt;br/&gt;LS012B7DD06A]
+    K --&gt; M[Bus 0 Complete]
+    H --&gt; M
+    E --&gt; M
+
+    M --&gt; N{I2C Bus 1&lt;br/&gt;Sensor Bus}
+    N --&gt;|Available| O[Address 0x50&lt;br/&gt;EEPROM Probe]
+    N --&gt;|Unavailable| P[Skip Bus 1]
+
+    O --&gt; Q{EEPROM&lt;br/&gt;Responds?}
+    Q --&gt;|Yes| R[Read Unique ID&lt;br/&gt;8-byte EEPROM]
+    Q --&gt;|No| S[No EEPROM&lt;br/&gt;Component Absent]
+
+    R --&gt; T{ID Matches&lt;br/&gt;Known BLE?}
+    T --&gt;|Yes| U[BLE Component&lt;br/&gt;Detected]
+    T --&gt;|No| V[Unknown Component&lt;br/&gt;Skip]
+
+    U --&gt; W[Create BLE Instance&lt;br/&gt;BlueNRG Peripheral]
+    V --&gt; X[Bus 1 Complete]
+    S --&gt; X
+    P --&gt; X
+
+    X --&gt; Y{I2C Bus 2&lt;br/&gt;Extension Bus}
+    Y --&gt;|Available| Z[Address 0x50&lt;br/&gt;EEPROM Probe]
+    Y --&gt;|Unavailable| AA[Skip Bus 2]
+
+    Z --&gt; BB{EEPROM&lt;br/&gt;Responds?}
+    BB --&gt;|Yes| CC[Read Unique ID&lt;br/&gt;8-byte EEPROM]
+    BB --&gt;|No| DD[No EEPROM&lt;br/&gt;Component Absent]
+
+    CC --&gt; EE{ID Matches&lt;br/&gt;Known GPS?}
+    EE --&gt;|Yes| FF[GPS Component&lt;br/&gt;Detected]
+    EE --&gt;|No| GG[Unknown Component&lt;br/&gt;Skip]
+
+    FF --&gt; HH[Create GPS Instance&lt;br/&gt;Airoha GPS]
+    GG --&gt; II[Bus 2 Complete]
+    DD --&gt; II
+    AA --&gt; II
+
+    L --&gt; JJ[Component Factory&lt;br/&gt;Population Complete]
+    W --&gt; JJ
+    HH --&gt; JJ
+    II --&gt; JJ
+
+    JJ --&gt; KK[Return Interface&lt;br/&gt;Pointers to System]
+
+    style A fill:#bbdefb
+    style JJ fill:#c8e6c9
+    style KK fill:#fff3e0
+    </pre></section>
+<section id="component-factory-interface-architecture">
+<h4>Component Factory Interface Architecture<a class="headerlink" href="#component-factory-interface-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Hardware Abstraction Layer&quot;
+        ILCD[ILcd Interface&lt;br/&gt;Display Control]
+        IBACKLIGHT[IBacklight Interface&lt;br/&gt;Screen Brightness]
+        IBLE[IBle Interface&lt;br/&gt;Wireless Communication]
+        IGPS[IGps Interface&lt;br/&gt;Location Services]
+    end
+
+    subgraph &quot;Concrete Implementations&quot;
+        LCD_REAL[LS012B7DD06A&lt;br/&gt;Real LCD Driver]
+        BACKLIGHT_REAL[Backlight&lt;br/&gt;Real PWM Control]
+        BLE_REAL[BlueNRG Peripheral&lt;br/&gt;Real BLE Stack]
+        GPS_REAL[Airoha GPS&lt;br/&gt;Real GPS Module]
+    end
+
+    subgraph &quot;Stub Implementations&quot;
+        LCD_STUB[Stub::Lcd&lt;br/&gt;No-Op LCD Driver]
+        BACKLIGHT_STUB[Stub::Backlight&lt;br/&gt;No-Op Brightness]
+        BLE_STUB[Stub::BleServer&lt;br/&gt;No-Op BLE Stack]
+        GPS_STUB[Stub::Gps&lt;br/&gt;No-Op GPS Module]
+    end
+
+    subgraph &quot;Component Factory&quot;
+        FACTORY[ComponentFactory&lt;br/&gt;Singleton Manager]
+        SCAN_MODULES[scanModules&lt;br/&gt;Hardware Discovery]
+        GET_COMPONENTS[getLcd/getBle/etc.&lt;br/&gt;Interface Access]
+    end
+
+    subgraph &quot;System Integration&quot;
+        BACKEND[Backend&lt;br/&gt;System Coordinator]
+        TOUCHGFX[TouchGFX&lt;br/&gt;GUI Framework]
+        BLE_STACK[BLE Services&lt;br/&gt;Communication Layer]
+        LOCATION_MGR[Location Manager&lt;br/&gt;GPS Integration]
+    end
+
+    FACTORY --&gt; SCAN_MODULES
+    SCAN_MODULES --&gt; LCD_REAL
+    SCAN_MODULES --&gt; BACKLIGHT_REAL
+    SCAN_MODULES --&gt; BLE_REAL
+    SCAN_MODULES --&gt; GPS_REAL
+
+    SCAN_MODULES --&gt; LCD_STUB
+    SCAN_MODULES --&gt; BACKLIGHT_STUB
+    SCAN_MODULES --&gt; BLE_STUB
+    SCAN_MODULES --&gt; GPS_STUB
+
+    LCD_REAL --&gt; ILCD
+    BACKLIGHT_REAL --&gt; IBACKLIGHT
+    BLE_REAL --&gt; IBLE
+    GPS_REAL --&gt; IGPS
+
+    LCD_STUB --&gt; ILCD
+    BACKLIGHT_STUB --&gt; IBACKLIGHT
+    BLE_STUB --&gt; IBLE
+    GPS_STUB --&gt; IGPS
+
+    FACTORY --&gt; GET_COMPONENTS
+    GET_COMPONENTS --&gt; ILCD
+    GET_COMPONENTS --&gt; IBACKLIGHT
+    GET_COMPONENTS --&gt; IBLE
+    GET_COMPONENTS --&gt; IGPS
+
+    BACKEND --&gt; FACTORY
+    TOUCHGFX --&gt; ILCD
+    TOUCHGFX --&gt; IBACKLIGHT
+    BLE_STACK --&gt; IBLE
+    LOCATION_MGR --&gt; IGPS
+
+    style FACTORY fill:#bbdefb
+    style ILCD fill:#c8e6c9
+    style IBACKLIGHT fill:#c8e6c9
+    style IBLE fill:#c8e6c9
+    style IGPS fill:#c8e6c9
+    </pre></section>
+<section id="component-lifecycle-and-error-recovery">
+<h4>Component Lifecycle and Error Recovery<a class="headerlink" href="#component-lifecycle-and-error-recovery" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; ComponentDetection: System Startup
+
+    ComponentDetection --&gt; ComponentAvailable: Hardware Found
+    ComponentDetection --&gt; ComponentMissing: Hardware Not Found
+
+    ComponentAvailable --&gt; ComponentInitialized: Instance Created
+    ComponentMissing --&gt; StubCreated: Fallback Stub
+
+    ComponentInitialized --&gt; ComponentActive: Interface Bound
+    StubCreated --&gt; StubActive: Interface Bound
+
+    ComponentActive --&gt; ComponentError: Hardware Failure
+    StubActive --&gt; ComponentError: Unexpected Error
+
+    ComponentError --&gt; ErrorRecovery: Recovery Attempt
+    ErrorRecovery --&gt; ComponentActive: Recovery Success
+    ErrorRecovery --&gt; ComponentFailed: Recovery Failed
+
+    ComponentFailed --&gt; StubFallback: Switch to Stub
+    StubFallback --&gt; StubActive: Graceful Degradation
+
+    ComponentActive --&gt; SystemShutdown: Power Off
+    StubActive --&gt; SystemShutdown: Power Off
+
+    ComponentFailed --&gt; SystemShutdown: Power Off
+    SystemShutdown --&gt; [*]: Cleanup Complete
+
+    note right of ComponentDetection
+        ComponentFactory::scanModules()
+        I2C bus probing
+        EEPROM identification
+    end note
+
+    note right of ComponentAvailable
+        Real hardware detected
+        Driver instance created
+        GPIO/SPI/UART configured
+    end note
+
+    note right of ComponentMissing
+        Hardware not present
+        EEPROM read failed
+        I2C bus unavailable
+    end note
+
+    note right of StubCreated
+        Stub::Lcd/Stub::Ble/etc.
+        No-op implementations
+        Interface compatibility
+    end note
+
+    note right of ComponentError
+        Hardware communication failure
+        I2C bus error
+        SPI timeout
+        UART framing error
+    end note
+
+    note right of ErrorRecovery
+        Re-initialize hardware
+        Reset communication bus
+        Retry component detection
+        Validate interface integrity
+    end note
+    </pre></section>
+<section id="i2c-bus-probing-and-component-identification">
+<h4>I2C Bus Probing and Component Identification<a class="headerlink" href="#i2c-bus-probing-and-component-identification" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[ComponentFactory::scanModules] --&gt; B[I2C Bus&lt;br/&gt;Enumeration]
+
+    B --&gt; C{I2C Bus 0&lt;br/&gt;Main Display Bus}
+    C --&gt;|Available| D[Address 0x50&lt;br/&gt;EEPROM Probe]
+    C --&gt;|Unavailable| E[Skip Bus 0]
+
+    D --&gt; F{EEPROM&lt;br/&gt;Responds?}
+    F --&gt;|Yes| G[Read Unique ID&lt;br/&gt;8-byte EEPROM]
+    F --&gt;|No| H[No EEPROM&lt;br/&gt;Component Absent]
+
+    G --&gt; I{ID Matches&lt;br/&gt;Known LCD?}
+    I --&gt;|Yes| J[LCD Component&lt;br/&gt;Detected]
+    I --&gt;|No| K[Unknown Component&lt;br/&gt;Skip]
+
+    J --&gt; L[Create LCD Instance&lt;br/&gt;LS012B7DD06A]
+    K --&gt; M[Bus 0 Complete]
+    H --&gt; M
+    E --&gt; M
+
+    M --&gt; N{I2C Bus 1&lt;br/&gt;Sensor Bus}
+    N --&gt;|Available| O[Address 0x50&lt;br/&gt;EEPROM Probe]
+    N --&gt;|Unavailable| P[Skip Bus 1]
+
+    O --&gt; Q{EEPROM&lt;br/&gt;Responds?}
+    Q --&gt;|Yes| R[Read Unique ID&lt;br/&gt;8-byte EEPROM]
+    Q --&gt;|No| S[No EEPROM&lt;br/&gt;Component Absent]
+
+    R --&gt; T{ID Matches&lt;br/&gt;Known BLE?}
+    T --&gt;|Yes| U[BLE Component&lt;br/&gt;Detected]
+    T --&gt;|No| V[Unknown Component&lt;br/&gt;Skip]
+
+    U --&gt; W[Create BLE Instance&lt;br/&gt;BlueNRG Peripheral]
+    V --&gt; X[Bus 1 Complete]
+    S --&gt; X
+    P --&gt; X
+
+    X --&gt; Y{I2C Bus 2&lt;br/&gt;Extension Bus}
+    Y --&gt;|Available| Z[Address 0x50&lt;br/&gt;EEPROM Probe]
+    Y --&gt;|Unavailable| AA[Skip Bus 2]
+
+    Z --&gt; BB{EEPROM&lt;br/&gt;Responds?}
+    BB --&gt;|Yes| CC[Read Unique ID&lt;br/&gt;8-byte EEPROM]
+    BB --&gt;|No| DD[No EEPROM&lt;br/&gt;Component Absent]
+
+    CC --&gt; EE{ID Matches&lt;br/&gt;Known GPS?}
+    EE --&gt;|Yes| FF[GPS Component&lt;br/&gt;Detected]
+    EE --&gt;|No| GG[Unknown Component&lt;br/&gt;Skip]
+
+    FF --&gt; HH[Create GPS Instance&lt;br/&gt;Airoha GPS]
+    GG --&gt; II[Bus 2 Complete]
+    DD --&gt; II
+    AA --&gt; II
+
+    L --&gt; JJ[Component Factory&lt;br/&gt;Population Complete]
+    W --&gt; JJ
+    HH --&gt; JJ
+    II --&gt; JJ
+
+    JJ --&gt; KK[Return Interface&lt;br/&gt;Pointers to System]
+
+    style A fill:#bbdefb
+    style JJ fill:#c8e6c9
+    style KK fill:#fff3e0
+    </pre></section>
+<section id="sensor-layer-implementation-sensormanager-cpp">
+<h4>4. Sensor Layer Implementation (SensorManager.cpp)<a class="headerlink" href="#sensor-layer-implementation-sensormanager-cpp" title="Link to this heading"></a></h4>
+<p><strong>Multi-Sensor Coordination (251 lines):</strong></p>
+<p><strong>Driver Registration:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Sensor::Manager::regDriver</span><span class="p">(</span><span class="n">Driver</span><span class="o">*</span><span class="w"> </span><span class="n">driver</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">OS</span><span class="o">::</span><span class="n">MutexCS</span><span class="w"> </span><span class="n">cs</span><span class="p">(</span><span class="n">mMutex</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">find</span><span class="p">(</span><span class="n">mDrivers</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">mDrivers</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">driver</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">mDrivers</span><span class="p">.</span><span class="n">end</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// Already registered</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mDrivers</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">driver</span><span class="p">);</span>
+<span class="w">    </span><span class="n">driver</span><span class="o">-&gt;</span><span class="n">setHandle</span><span class="p">(</span><span class="n">mDrivers</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<span class="w">    </span><span class="n">updateRefreshPeriodUnsafe</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Adaptive Refresh Periods:</strong></p>
+<ul class="simple">
+<li><p><strong>Dynamic Period Calculation</strong>: Minimum period across all registered sensors</p></li>
+<li><p><strong>Thread-Safe Updates</strong>: Mutex-protected period recalculation</p></li>
+<li><p><strong>Semaphore-Based Threading</strong>: Efficient blocking on sensor availability</p></li>
+</ul>
+<p><strong>Connection Management:</strong></p>
+<ul class="simple">
+<li><p><strong>Handle-Based Access</strong>: 1-based indexing for sensor identification</p></li>
+<li><p><strong>Type-Based Queries</strong>: <code class="docutils literal notranslate"><span class="pre">getSensorList(SDK::Sensor::Type::HEART_RATE)</span></code></p></li>
+<li><p><strong>Listener Registration</strong>: Separate listeners for service vs GUI processes</p></li>
+</ul>
+</section>
+<section id="sensor-resource-arbitration-architecture">
+<h4>Sensor Resource Arbitration Architecture<a class="headerlink" href="#sensor-resource-arbitration-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Sensor Arbitration Hub&quot;
+        ARBITER[Sensor::Arbiter&lt;br/&gt;Resource Manager]
+        PRIORITY_QUEUE[Priority Queue&lt;br/&gt;App Requests]
+        RESOURCE_TABLE[Resource Table&lt;br/&gt;Sensor Allocation]
+        CONFLICT_RESOLVER[Conflict Resolver&lt;br/&gt;Preemption Logic]
+    end
+
+    subgraph &quot;App Requests&quot;
+        APP_HIGH[High Priority App&lt;br/&gt;Heart Rate Monitor]
+        APP_MED[Medium Priority App&lt;br/&gt;Activity Tracker]
+        APP_LOW[Low Priority App&lt;br/&gt;Weather Display]
+    end
+
+    subgraph &quot;Sensor Resources&quot;
+        HR_SENSOR[Heart Rate Sensor&lt;br/&gt;Exclusive Resource]
+        ACCEL_SENSOR[Accelerometer&lt;br/&gt;Shared Resource]
+        TEMP_SENSOR[Temperature Sensor&lt;br/&gt;Shared Resource]
+    end
+
+    subgraph &quot;Allocation Policies&quot;
+        EXCLUSIVE[Exclusive Mode&lt;br/&gt;Single App Access]
+        SHARED[Shared Mode&lt;br/&gt;Multiple App Access]
+        TIME_SLICED[Time Sliced&lt;br/&gt;Round Robin Access]
+    end
+
+    APP_HIGH --&gt; PRIORITY_QUEUE
+    APP_MED --&gt; PRIORITY_QUEUE
+    APP_LOW --&gt; PRIORITY_QUEUE
+
+    PRIORITY_QUEUE --&gt; ARBITER
+
+    ARBITER --&gt; CONFLICT_RESOLVER
+    CONFLICT_RESOLVER --&gt; RESOURCE_TABLE
+
+    RESOURCE_TABLE --&gt; EXCLUSIVE
+    RESOURCE_TABLE --&gt; SHARED
+    RESOURCE_TABLE --&gt; TIME_SLICED
+
+    EXCLUSIVE --&gt; HR_SENSOR
+    SHARED --&gt; ACCEL_SENSOR
+    SHARED --&gt; TEMP_SENSOR
+    TIME_SLICED --&gt; ACCEL_SENSOR
+
+    style ARBITER fill:#bbdefb
+    style RESOURCE_TABLE fill:#c8e6c9
+    style EXCLUSIVE fill:#fff3e0
+    </pre></section>
+<section id="sensor-data-pipeline-and-processing-flow">
+<h4>Sensor Data Pipeline and Processing Flow<a class="headerlink" href="#sensor-data-pipeline-and-processing-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[Hardware Sensor&lt;br/&gt;Raw Data] --&gt; B[Sensor Driver&lt;br/&gt;Interrupt Handler]
+
+    B --&gt; C{Data Valid?}
+    C --&gt;|No| D[Discard Sample&lt;br/&gt;Error Counter++]
+    C --&gt;|Yes| E[Timestamp&lt;br/&gt;System Time]
+
+    E --&gt; F[Calibration&lt;br/&gt;Offset/Scale Correction]
+
+    F --&gt; G{Filtering Required?}
+    G --&gt;|Yes| H[Digital Filter&lt;br/&gt;LPF/HPF/BPF]
+    G --&gt;|No| I[Raw Processing]
+
+    H --&gt; J[Data Buffer&lt;br/&gt;Circular Queue]
+    I --&gt; J
+
+    J --&gt; K{Buffer Full?}
+    K --&gt;|Yes| L[Data Processing&lt;br/&gt;Algorithm]
+    K --&gt;|No| M[Wait for More&lt;br/&gt;Samples]
+
+    L --&gt; N[Feature Extraction&lt;br/&gt;Peak Detection/FFT]
+    N --&gt; O[Data Fusion&lt;br/&gt;Multi-Sensor Combine]
+
+    O --&gt; P{App Interest?}
+    P --&gt;|Yes| Q[Callback Dispatch&lt;br/&gt;onSensorUpdate]
+    P --&gt;|No| R[Data Discard&lt;br/&gt;Resource Conservation]
+
+    Q --&gt; S[App Processing&lt;br/&gt;Display/Update Logic]
+
+    style B fill:#bbdefb
+    style J fill:#c8e6c9
+    style Q fill:#fff3e0
+    </pre></section>
+<section id="sensor-error-handling-and-recovery-mechanisms">
+<h4>Sensor Error Handling and Recovery Mechanisms<a class="headerlink" href="#sensor-error-handling-and-recovery-mechanisms" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; SensorActive: Normal Operation
+
+    SensorActive --&gt; DataTimeout: No Data Received
+    SensorActive --&gt; DataInvalid: CRC/Range Check Failed
+    SensorActive --&gt; HardwareError: I2C/SPI Error
+
+    DataTimeout --&gt; RecoveryAttempt: Reset Sensor
+    DataInvalid --&gt; RecoveryAttempt: Reinitialize Driver
+    HardwareError --&gt; RecoveryAttempt: Bus Reset
+
+    RecoveryAttempt --&gt; SensorActive: Recovery Success
+    RecoveryAttempt --&gt; DegradedMode: Partial Recovery
+    RecoveryAttempt --&gt; SensorFailed: Recovery Failed
+
+    DegradedMode --&gt; SensorActive: Full Recovery
+    DegradedMode --&gt; SensorFailed: Degradation Worsens
+
+    SensorFailed --&gt; StubMode: Fallback to Stub
+    StubMode --&gt; SensorActive: Hardware Restored
+
+    StubMode --&gt; [*]: System Shutdown
+
+    note right of RecoveryAttempt
+        Retry counter increment
+        Exponential backoff
+        Error logging
+    end note
+
+    note right of DegradedMode
+        Reduced sampling rate
+        Limited functionality
+        User notification
+    end note
+
+    note right of StubMode
+        No-op implementation
+        Graceful degradation
+        System stability maintained
+    end note
+    </pre></section>
+<section id="sensor-performance-monitoring-and-optimization">
+<h4>Sensor Performance Monitoring and Optimization<a class="headerlink" href="#sensor-performance-monitoring-and-optimization" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Performance Metrics&quot;
+        SAMPLE_RATE[Sample Rate&lt;br/&gt;Hz Measurement]
+        LATENCY[Latency&lt;br/&gt;End-to-End Delay]
+        POWER_CONSUMPTION[Power Consumption&lt;br/&gt;Current Draw]
+        DATA_ACCURACY[Data Accuracy&lt;br/&gt;Error Rate]
+        CPU_USAGE[CPU Usage&lt;br/&gt;Processing Load]
+    end
+
+    subgraph &quot;Monitoring System&quot;
+        PERFORMANCE_MONITOR[Performance Monitor&lt;br/&gt;Metrics Collector]
+        THRESHOLDS[Threshold Manager&lt;br/&gt;Limits &amp; Alerts]
+        OPTIMIZER[Adaptive Optimizer&lt;br/&gt;Parameter Tuning]
+        LOGGER[Performance Logger&lt;br/&gt;Historical Data]
+    end
+
+    subgraph &quot;Optimization Actions&quot;
+        RATE_ADJUSTMENT[Sampling Rate&lt;br/&gt;Adjustment]
+        FILTER_TUNING[Filter Parameters&lt;br/&gt;Optimization]
+        POWER_SCALING[Power Scaling&lt;br/&gt;Duty Cycle Control]
+        ALGORITHM_SWITCH[Algorithm Switch&lt;br/&gt;Complexity Trade-off]
+    end
+
+    SAMPLE_RATE --&gt; PERFORMANCE_MONITOR
+    LATENCY --&gt; PERFORMANCE_MONITOR
+    POWER_CONSUMPTION --&gt; PERFORMANCE_MONITOR
+    DATA_ACCURACY --&gt; PERFORMANCE_MONITOR
+    CPU_USAGE --&gt; PERFORMANCE_MONITOR
+
+    PERFORMANCE_MONITOR --&gt; THRESHOLDS
+    THRESHOLDS --&gt; OPTIMIZER
+    OPTIMIZER --&gt; LOGGER
+
+    OPTIMIZER --&gt; RATE_ADJUSTMENT
+    OPTIMIZER --&gt; FILTER_TUNING
+    OPTIMIZER --&gt; POWER_SCALING
+    OPTIMIZER --&gt; ALGORITHM_SWITCH
+
+    RATE_ADJUSTMENT -.-&gt;|Feedback| SAMPLE_RATE
+    FILTER_TUNING -.-&gt;|Feedback| LATENCY
+    POWER_SCALING -.-&gt;|Feedback| POWER_CONSUMPTION
+    ALGORITHM_SWITCH -.-&gt;|Feedback| CPU_USAGE
+
+    style PERFORMANCE_MONITOR fill:#bbdefb
+    style OPTIMIZER fill:#c8e6c9
+    style THRESHOLDS fill:#fff3e0
+    </pre></section>
+<section id="settings-management-implementation-settingsmanager-cpp">
+<h4>5. Settings Management Implementation (SettingsManager.cpp)<a class="headerlink" href="#settings-management-implementation-settingsmanager-cpp" title="Link to this heading"></a></h4>
+<p><strong>JSON-Based Persistence (120 lines):</strong></p>
+<p><strong>Structured Configuration:</strong></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;units&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metric&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;watchFaceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">832675</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;phone&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;notifications&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;heartRateZones&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">150</span><span class="p">,</span><span class="w"> </span><span class="mi">170</span><span class="p">,</span><span class="w"> </span><span class="mi">190</span><span class="p">,</span><span class="w"> </span><span class="mi">210</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;dailyGoals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;activityMinutes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;floors&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Type-Safe Serialization:</strong></p>
+<ul class="simple">
+<li><p><strong>Template-Based ManagerBase</strong>: <code class="docutils literal notranslate"><span class="pre">ManagerBase&lt;WatchSettings&gt;</span></code></p></li>
+<li><p><strong>JSON Stream Processing</strong>: Custom reader/writer for structured data</p></li>
+<li><p><strong>Validation</strong>: Units enum checking, bounds validation for heart rate zones</p></li>
+</ul>
+</section>
+<section id="settings-persistence-and-recovery-flow">
+<h4>Settings Persistence and Recovery Flow<a class="headerlink" href="#settings-persistence-and-recovery-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[System Startup] --&gt; B[SettingsManager::init]
+    B --&gt; C{Settings File&lt;br/&gt;Exists?}
+
+    C --&gt;|Yes| D[Load Settings File&lt;br/&gt;JSON Parse]
+    C --&gt;|No| E[Create Default Settings&lt;br/&gt;Template Instantiation]
+
+    D --&gt; F{JSON Valid?}
+    F --&gt;|Yes| G[Validate Settings&lt;br/&gt;Range/Bounds Check]
+    F --&gt;|No| H[Log Error&lt;br/&gt;Use Defaults]
+
+    G --&gt; I{Validation Pass?}
+    I --&gt;|Yes| J[Settings Ready&lt;br/&gt;System Configured]
+    I --&gt;|No| K[Correct Invalid Values&lt;br/&gt;Apply Defaults]
+
+    E --&gt; J
+    H --&gt; J
+    K --&gt; J
+
+    J --&gt; L[Runtime Settings&lt;br/&gt;Access/Modification]
+
+    L --&gt; M{Settings Changed?}
+    M --&gt;|Yes| N[Serialize to JSON&lt;br/&gt;Write to File]
+    M --&gt;|No| O[No Changes&lt;br/&gt;Continue]
+
+    N --&gt; P{Write Success?}
+    P --&gt;|Yes| Q[Settings Persisted&lt;br/&gt;Backup Created]
+    P --&gt;|No| R[Log Error&lt;br/&gt;Retry/Fallback]
+
+    Q --&gt; S[System Shutdown]
+    O --&gt; S
+    R --&gt; S
+
+    style B fill:#bbdefb
+    style J fill:#c8e6c9
+    style N fill:#fff3e0
+    </pre></section>
+<section id="settings-configuration-state-machine">
+<h4>Settings Configuration State Machine<a class="headerlink" href="#settings-configuration-state-machine" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; Uninitialized
+
+    Uninitialized --&gt; Loading: System Startup
+    Loading --&gt; Validating: File Found
+    Loading --&gt; Defaults: File Missing
+
+    Validating --&gt; Active: Validation Success
+    Validating --&gt; Correcting: Validation Failed
+    Correcting --&gt; Active: Correction Complete
+
+    Defaults --&gt; TemplateInit: Default Values
+    TemplateInit --&gt; Active: Template Ready
+
+    Active --&gt; Modifying: User/App Changes
+    Modifying --&gt; Saving: Changes Committed
+    Saving --&gt; Active: Save Success
+    Saving --&gt; ErrorRecovery: Save Failed
+
+    ErrorRecovery --&gt; Active: Recovery Success
+    ErrorRecovery --&gt; FallbackMode: Recovery Failed
+
+    FallbackMode --&gt; Active: Manual Restore
+    FallbackMode --&gt; FactoryReset: Complete Failure
+
+    Active --&gt; Shutdown: System Halt
+    Shutdown --&gt; [*]: Settings Preserved
+
+    note right of Loading
+        JSON file parsing
+        Memory allocation
+        Structure validation
+    end note
+
+    note right of Validating
+        Range checking
+        Enum validation
+        Cross-field consistency
+    end note
+
+    note right of Saving
+        Atomic write operations
+        Backup creation
+        Integrity verification
+    end note
+    </pre></section>
+<section id="settings-access-patterns-and-concurrency">
+<h4>Settings Access Patterns and Concurrency<a class="headerlink" href="#settings-access-patterns-and-concurrency" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Reader Threads&quot;
+        GUI_THREAD[GUI Thread&lt;br/&gt;Display Settings]
+        APP_THREAD[App Thread&lt;br/&gt;Config Access]
+        SYSTEM_THREAD[System Thread&lt;br/&gt;Status Updates]
+    end
+
+    subgraph &quot;Settings Manager&quot;
+        SETTINGS_MGR[SettingsManager&lt;br/&gt;Central Hub]
+        READER_LOCK[Reader Lock&lt;br/&gt;Shared Access]
+        WRITER_LOCK[Writer Lock&lt;br/&gt;Exclusive Access]
+        CACHE_LAYER[Cache Layer&lt;br/&gt;Fast Access]
+    end
+
+    subgraph &quot;Storage Layer&quot;
+        FILE_STORAGE[File Storage&lt;br/&gt;Persistent JSON]
+        BACKUP_STORAGE[Backup Storage&lt;br/&gt;Safety Copy]
+        VALIDATION_LAYER[Validation Layer&lt;br/&gt;Integrity Check]
+    end
+
+    subgraph &quot;Access Patterns&quot;
+        READ_PATTERN[Read Pattern&lt;br/&gt;Shared Lock]
+        WRITE_PATTERN[Write Pattern&lt;br/&gt;Exclusive Lock]
+        ATOMIC_UPDATE[Atomic Update&lt;br/&gt;Copy-Modify-Write]
+    end
+
+    GUI_THREAD --&gt; READ_PATTERN
+    APP_THREAD --&gt; READ_PATTERN
+    SYSTEM_THREAD --&gt; READ_PATTERN
+
+    READ_PATTERN --&gt; READER_LOCK
+    READER_LOCK --&gt; CACHE_LAYER
+
+    CACHE_LAYER --&gt; SETTINGS_MGR
+
+    SETTINGS_MGR --&gt; WRITE_PATTERN
+    WRITE_PATTERN --&gt; WRITER_LOCK
+    WRITER_LOCK --&gt; FILE_STORAGE
+
+    FILE_STORAGE --&gt; VALIDATION_LAYER
+    VALIDATION_LAYER --&gt; BACKUP_STORAGE
+
+    ATOMIC_UPDATE --&gt; SETTINGS_MGR
+
+    style SETTINGS_MGR fill:#bbdefb
+    style CACHE_LAYER fill:#c8e6c9
+    style WRITER_LOCK fill:#fff3e0
+    </pre></section>
+<section id="settings-migration-and-version-compatibility">
+<h4>Settings Migration and Version Compatibility<a class="headerlink" href="#settings-migration-and-version-compatibility" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[Firmware Update&lt;br/&gt;New Version] --&gt; B[Settings File&lt;br/&gt;Version Check]
+
+    B --&gt; C{Version Match?}
+    C --&gt;|Yes| D[Direct Load&lt;br/&gt;No Migration]
+    C --&gt;|No| E{Backward Compatible?}
+
+    E --&gt;|Yes| F[Automatic Migration&lt;br/&gt;Schema Update]
+    E --&gt;|No| G[Manual Migration&lt;br/&gt;User Intervention]
+
+    F --&gt; H[Transform Data&lt;br/&gt;Field Mapping]
+    H --&gt; I{Transformation&lt;br/&gt;Success?}
+
+    I --&gt;|Yes| J[Migrated Settings&lt;br/&gt;Ready]
+    I --&gt;|No| K[Partial Migration&lt;br/&gt;Defaults Applied]
+
+    G --&gt; L[User Prompt&lt;br/&gt;Migration Options]
+    L --&gt; M{User Choice}
+    M --&gt;|Accept| N[Apply Migration&lt;br/&gt;Transform Data]
+    M --&gt;|Reject| O[Keep Old Settings&lt;br/&gt;Compatibility Mode]
+
+    N --&gt; J
+    O --&gt; J
+    K --&gt; J
+    D --&gt; J
+
+    J --&gt; P[Version Updated&lt;br/&gt;File Saved]
+
+    style B fill:#bbdefb
+    style J fill:#c8e6c9
+    style F fill:#fff3e0
+    </pre></section>
+<section id="file-system-implementation-filesystem-cpp">
+<h4>6. File System Implementation (FileSystem.cpp)<a class="headerlink" href="#file-system-implementation-filesystem-cpp" title="Link to this heading"></a></h4>
+<p><strong>FatFs Wrapper (577 lines):</strong></p>
+<p><strong>Multi-Volume Management:</strong></p>
+<ul class="simple">
+<li><p><strong>4 Logical Volumes</strong>: Internal flash, external storage partitions</p></li>
+<li><p><strong>exFAT Formatting</strong>: 4KB cluster size, partition table creation</p></li>
+<li><p><strong>Volume Labels</strong>: Custom disk labels for identification</p></li>
+</ul>
+<p><strong>Thread-Safe Operations:</strong></p>
+<ul class="simple">
+<li><p><strong>Mutex Array</strong>: Separate locks for each volume + system operations</p></li>
+<li><p><strong>FF_FS_REENTRANT</strong>: FatFs reentrancy support with OS mutexes</p></li>
+</ul>
+<p><strong>Time Zone Handling:</strong></p>
+<ul class="simple">
+<li><p><strong>FAT ↔ UTC Conversion</strong>: Proper timestamp management</p></li>
+<li><p><strong>exFAT Timezone Support</strong>: 15-minute offset encoding</p></li>
+<li><p><strong>DST Awareness</strong>: Local time calculations with timezone adjustments</p></li>
+</ul>
+<p><strong>Advanced Features:</strong></p>
+<ul class="simple">
+<li><p><strong>Recursive Directory Creation</strong>: <code class="docutils literal notranslate"><span class="pre">mkdir()</span></code> with path parsing</p></li>
+<li><p><strong>File Copy Operations</strong>: Block-based copying with progress tracking</p></li>
+<li><p><strong>Factory Reset</strong>: Complete volume reformatting capability</p></li>
+</ul>
+</section>
+<section id="multi-volume-file-system-architecture">
+<h4>Multi-Volume File System Architecture<a class="headerlink" href="#multi-volume-file-system-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Physical Storage&quot;
+        INTERNAL_FLASH[Internal Flash&lt;br/&gt;2MB NOR Flash]
+        EXTERNAL_FLASH[External Flash&lt;br/&gt;EMMC/eMMC]
+        SPI_FLASH[SPI Flash&lt;br/&gt;External Storage]
+        USB_MSC[USB Mass Storage&lt;br/&gt;Host Mode]
+    end
+
+    subgraph &quot;Logical Volumes&quot;
+        VOLUME_0[Volume 0:/&lt;br/&gt;Internal Flash&lt;br/&gt;System Files]
+        VOLUME_1[Volume 1:/&lt;br/&gt;External Flash&lt;br/&gt;User Data]
+        VOLUME_2[Volume 2:/&lt;br/&gt;USB Storage&lt;br/&gt;Media/Apps]
+        VOLUME_3[Volume 3:/&lt;br/&gt;SPI Flash&lt;br/&gt;Backup/Logs]
+    end
+
+    subgraph &quot;File System Layers&quot;
+        FATFS_LAYER[FATFS Layer&lt;br/&gt;FAT32/exFAT]
+        FILESYSTEM_WRAPPER[FileSystem Wrapper&lt;br/&gt;577 lines]
+        KERNEL_INTERFACE[IFileSystem Interface&lt;br/&gt;SDK API]
+    end
+
+    subgraph &quot;System Components&quot;
+        APPS[User Apps&lt;br/&gt;File Access]
+        BACKEND[Backend&lt;br/&gt;System Files]
+        BLE_STACK[BLE File Transfer&lt;br/&gt;OTA Updates]
+        SETTINGS[Settings Manager&lt;br/&gt;Configuration]
+    end
+
+    INTERNAL_FLASH --&gt; VOLUME_0
+    EXTERNAL_FLASH --&gt; VOLUME_1
+    USB_MSC --&gt; VOLUME_2
+    SPI_FLASH --&gt; VOLUME_3
+
+    VOLUME_0 --&gt; FATFS_LAYER
+    VOLUME_1 --&gt; FATFS_LAYER
+    VOLUME_2 --&gt; FATFS_LAYER
+    VOLUME_3 --&gt; FATFS_LAYER
+
+    FATFS_LAYER --&gt; FILESYSTEM_WRAPPER
+    FILESYSTEM_WRAPPER --&gt; KERNEL_INTERFACE
+
+    KERNEL_INTERFACE --&gt; APPS
+    KERNEL_INTERFACE --&gt; BACKEND
+    KERNEL_INTERFACE --&gt; BLE_STACK
+    KERNEL_INTERFACE --&gt; SETTINGS
+
+    style FILESYSTEM_WRAPPER fill:#bbdefb
+    style KERNEL_INTERFACE fill:#c8e6c9
+    style VOLUME_0 fill:#fff3e0
+    </pre></section>
+<section id="file-system-operations-flow">
+<h4>File System Operations Flow<a class="headerlink" href="#file-system-operations-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[File Operation Request] --&gt; B{Operation Type}
+
+    B --&gt;|Open File| C[f_open&lt;br/&gt;Path Resolution]
+    B --&gt;|Read Data| D[f_read&lt;br/&gt;Sequential Access]
+    B --&gt;|Write Data| E[f_write&lt;br/&gt;Atomic Updates]
+    B --&gt;|Create Directory| F[f_mkdir&lt;br/&gt;Recursive Creation]
+    B --&gt;|List Directory| G[f_readdir&lt;br/&gt;Content Enumeration]
+    B --&gt;|Copy File| H[Custom Copy&lt;br/&gt;Block-based Transfer]
+
+    C --&gt; I{Path Valid?}
+    I --&gt;|Yes| J[Volume Selection&lt;br/&gt;0:/ 1:/ 2:/ 3:/]
+    I --&gt;|No| K[Error: Invalid Path]
+
+    J --&gt; L[Mutex Lock&lt;br/&gt;Thread Safety]
+    L --&gt; M[FATFS Operation&lt;br/&gt;f_open/f_read/etc.]
+    M --&gt; N{Operation Success?}
+
+    N --&gt;|Yes| O[Result Return&lt;br/&gt;Data/File Handle]
+    N --&gt;|No| P[Error Handling&lt;br/&gt;FATFS Error Code]
+
+    D --&gt; Q[Buffer Management&lt;br/&gt;Size Validation]
+    E --&gt; R[Write Buffering&lt;br/&gt;Atomic Commits]
+
+    F --&gt; S{Parent Directory Exists?}
+    S --&gt;|No| T[Recursive mkdir&lt;br/&gt;Create Parents]
+    S --&gt;|Yes| U[Create Directory&lt;br/&gt;f_mkdir]
+
+    H --&gt; V[Source File Open&lt;br/&gt;Read Mode]
+    V --&gt; W[Destination File Open&lt;br/&gt;Write Mode]
+    W --&gt; X[Block Copy Loop&lt;br/&gt;Progress Tracking]
+
+    style A fill:#e1f5fe
+    style L fill:#bbdefb
+    style O fill:#c8e6c9
+    </pre></section>
+<section id="thread-safe-file-access-state-machine">
+<h4>Thread-Safe File Access State Machine<a class="headerlink" href="#thread-safe-file-access-state-machine" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; Idle: File System Ready
+
+    Idle --&gt; OperationRequested: File Operation Call
+    OperationRequested --&gt; VolumeMutexAcquired: Volume Lock Success
+    OperationRequested --&gt; VolumeMutexFailed: Volume Lock Timeout
+
+    VolumeMutexAcquired --&gt; SystemMutexAcquired: System Lock Success
+    VolumeMutexAcquired --&gt; SystemMutexFailed: System Lock Timeout
+
+    SystemMutexAcquired --&gt; FatFsOperation: Execute FATFS Call
+    FatFsOperation --&gt; OperationSuccess: FATFS Success
+    FatFsOperation --&gt; OperationFailed: FATFS Error
+
+    OperationSuccess --&gt; SystemMutexReleased: Unlock System
+    OperationFailed --&gt; SystemMutexReleased: Unlock System
+
+    SystemMutexReleased --&gt; VolumeMutexReleased: Unlock Volume
+    VolumeMutexReleased --&gt; Idle: Operation Complete
+
+    VolumeMutexFailed --&gt; ErrorRecovery: Retry/Timeout
+    SystemMutexFailed --&gt; ErrorRecovery: Retry/Timeout
+
+    ErrorRecovery --&gt; Idle: Recovery Success
+    ErrorRecovery --&gt; FatalError: Recovery Failed
+    FatalError --&gt; [*]: System Reset
+
+    note right of VolumeMutexAcquired
+        Separate mutex per volume
+        Prevents concurrent volume access
+        4KB cluster operations
+    end note
+
+    note right of SystemMutexAcquired
+        Global system operations lock
+        Directory operations, formatting
+        Prevents filesystem corruption
+    end note
+
+    note right of FatFsOperation
+        FATFS reentrant operations
+        FF_FS_REENTRANT enabled
+        OS mutex integration
+    end note
+    </pre></section>
+<section id="file-system-error-recovery-and-factory-reset-flow">
+<h4>File System Error Recovery and Factory Reset Flow<a class="headerlink" href="#file-system-error-recovery-and-factory-reset-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[File System Error] --&gt; B{Error Type}
+
+    B --&gt;|Volume Mount Failure| C[Volume Remount&lt;br/&gt;Retry Logic]
+    B --&gt;|File Corruption| D[File Integrity Check&lt;br/&gt;CRC Validation]
+    B --&gt;|Storage Full| E[Space Management&lt;br/&gt;Cleanup Old Files]
+    B --&gt;|Hardware Failure| F[Stub Mode&lt;br/&gt;Graceful Degradation]
+
+    C --&gt; G{Mount Success?}
+    G --&gt;|Yes| H[Normal Operation&lt;br/&gt;Resume]
+    G --&gt;|No| I[Factory Reset&lt;br/&gt;Complete Reformat]
+
+    D --&gt; J{File Recoverable?}
+    J --&gt;|Yes| K[File Repair&lt;br/&gt;Restore from Backup]
+    J --&gt;|No| L[File Deletion&lt;br/&gt;Remove Corrupt File]
+
+    E --&gt; M[Cleanup Strategy]
+    M --&gt; N[Delete Temp Files&lt;br/&gt;Clear Cache]
+    M --&gt; O[Compress Old Logs&lt;br/&gt;Archive Data]
+    M --&gt; P[User Notification&lt;br/&gt;Storage Warning]
+
+    I --&gt; Q{User Confirmation}
+    Q --&gt;|Yes| R[Volume Format&lt;br/&gt;exFAT 4KB Clusters]
+    Q --&gt;|No| S[Error State&lt;br/&gt;Limited Functionality]
+
+    R --&gt; T[Default Structure&lt;br/&gt;Create Directories]
+    T --&gt; U[System Files&lt;br/&gt;Restore Defaults]
+    U --&gt; V[Volume Labels&lt;br/&gt;Set Custom Names]
+
+    V --&gt; H
+
+    style A fill:#e1f5fe
+    style I fill:#fff3e0
+    style H fill:#c8e6c9
+    </pre></section>
+<section id="time-zone-and-dst-handling-architecture">
+<h4>Time Zone and DST Handling Architecture<a class="headerlink" href="#time-zone-and-dst-handling-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Time Sources&quot;
+        RTC[RTC Hardware&lt;br/&gt;Local Time]
+        GPS[GPS Module&lt;br/&gt;UTC Time]
+        BLE_STACK[BLE Time Service&lt;br/&gt;Phone Sync]
+    end
+
+    subgraph &quot;Time Zone Processing&quot;
+        TZ_MANAGER[Time Zone Manager&lt;br/&gt;Offset Calculation]
+        DST_HANDLER[DST Handler&lt;br/&gt;Daylight Saving]
+        UTC_CONVERTER[UTC Converter&lt;br/&gt;Local ↔ UTC]
+    end
+
+    subgraph &quot;File System Integration&quot;
+        FAT_TIME[FAT Timestamp&lt;br/&gt;32-bit DOS Format]
+        EXFAT_TIME[exFAT Timestamp&lt;br/&gt;64-bit with TZ]
+        FILE_METADATA[File Metadata&lt;br/&gt;Creation/Modified Times]
+    end
+
+    subgraph &quot;System Components&quot;
+        BACKEND[Backend&lt;br/&gt;Time Updates]
+        TOUCHGFX[TouchGFX&lt;br/&gt;Display Time]
+        APPS[User Apps&lt;br/&gt;Time Access]
+        LOGGING[Logging System&lt;br/&gt;Timestamped Events]
+    end
+
+    RTC --&gt; TZ_MANAGER
+    GPS --&gt; TZ_MANAGER
+    BLE_STACK --&gt; TZ_MANAGER
+
+    TZ_MANAGER --&gt; DST_HANDLER
+    DST_HANDLER --&gt; UTC_CONVERTER
+
+    UTC_CONVERTER --&gt; FAT_TIME
+    UTC_CONVERTER --&gt; EXFAT_TIME
+
+    FAT_TIME --&gt; FILE_METADATA
+    EXFAT_TIME --&gt; FILE_METADATA
+
+    FILE_METADATA --&gt; BACKEND
+    FILE_METADATA --&gt; TOUCHGFX
+    FILE_METADATA --&gt; APPS
+    FILE_METADATA --&gt; LOGGING
+
+    style TZ_MANAGER fill:#bbdefb
+    style UTC_CONVERTER fill:#c8e6c9
+    style FILE_METADATA fill:#fff3e0
+    </pre></section>
+</section>
+<section id="system-initialization-sequence">
+<h3>System Initialization Sequence<a class="headerlink" href="#system-initialization-sequence" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>HAL_Init() → System Clock → Logging → Watchdog → RTC → Sleep Init →
+Heap Monitor → Observer Dispatcher → StartupTask() → Hardware Init →
+I2C Setup → PMIC → Flash → File System → USB/BLE → Buttons/Buzzer →
+ComponentFactory.scanModules() → LCD/BLE/GPS Detection → SensorLayer.init() →
+DailyHealth.init() → AppManager.scan() → Backend.run() → TouchGFX Init →
+Event Loop Ready
+</pre></div>
+</div>
+<section id="sequence-diagram-detailed-backend-thread-initialization">
+<h4>Sequence Diagram: Detailed Backend Thread Initialization<a class="headerlink" href="#sequence-diagram-detailed-backend-thread-initialization" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        sequenceDiagram
+    participant Main as main()
+    participant ST as StartupTask
+    participant Backend as Backend::run()
+    participant Thread as Backend::thread()
+    participant Factory as ComponentFactory
+    participant SL as SensorLayer
+    participant AppMgr as App::Manager
+    participant GPS as GPS
+    participant GUI as GUI Queue
+
+    Main-&gt;&gt;ST: Backend::GetInstance().run()
+    Backend-&gt;&gt;Thread: mThread.init(thread)
+    Thread-&gt;&gt;Thread: HWButtons.attachCallback()
+    Thread-&gt;&gt;Factory: GetInstance()
+    Thread-&gt;&gt;Thread: minuteTimCallback() start timer
+    Thread-&gt;&gt;GUI: send DevInfo/Settings/Battery/BLE bond
+    Note over Thread: BLE init if present (services, enable, advertise)
+    Thread-&gt;&gt;SL: init()
+    Thread-&gt;&gt;Thread: DH.init(), attach
+    Thread-&gt;&gt;AppMgr: scan(), autoRun if button
+    Thread-&gt;&gt;GPS: attachCallback(), sendEpoTime
+    Thread-&gt;&gt;GUI: send Booted
+    Thread-&gt;&gt;Thread: backlight.on()
+    loop Event Loop
+        Thread-&gt;&gt;Thread: receiveBackendEvent()
+        Thread-&gt;&gt;Thread: evtHandler(std::visit)
+    end
+    </pre></section>
+<section id="system-initialization-flow">
+<h4>System Initialization Flow<a class="headerlink" href="#system-initialization-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[&quot;Power On&quot;] --&gt; B[&quot;HAL_Init()&quot;]
+    B --&gt; C[&quot;System Clock Setup&quot;]
+    C --&gt; D[&quot;FreeRTOS Start&quot;]
+    D --&gt; E[&quot;main() Entry&quot;]
+    E --&gt; F[&quot;Hardware Init&lt;br/&gt;Cache/Irq/Power&quot;]
+    F --&gt; G[&quot;PriorityMap_init()&quot;]
+    G --&gt; H[&quot;Driver::System::Init()&quot;]
+    H --&gt; I[&quot;Logging Setup&quot;]
+    I --&gt; J[&quot;Watchdog Start&quot;]
+    J --&gt; K[&quot;RTC Init&quot;]
+    K --&gt; L[&quot;Sleep Manager Init&quot;]
+    L --&gt; M[&quot;OS Kernel Start&quot;]
+    M --&gt; N[&quot;StartupTask Create&quot;]
+    N --&gt; O[&quot;StartupTask Run&quot;]
+
+    O --&gt; P[&quot;I2C Bus Setup&quot;]
+    P --&gt; Q[&quot;PMIC Init&quot;]
+    Q --&gt; R[&quot;Flash Storage Init&quot;]
+    R --&gt; S[&quot;File System Mount&quot;]
+    S --&gt; T[&quot;USB Device Init&quot;]
+    T --&gt; U[&quot;Battery Fuel Gauge&quot;]
+    U --&gt; V[&quot;Settings Load&quot;]
+    V --&gt; W[&quot;ComponentFactory.scanModules()&quot;]
+    W --&gt; X[&quot;LCD/Backlight Detect&quot;]
+    X --&gt; Y[&quot;BLE Module Detect&quot;]
+    Y --&gt; Z[&quot;GPS Module Detect&quot;]
+    Z --&gt; AA[&quot;Buzzer/Vibro Init&quot;]
+    AA --&gt; BB[&quot;HW Buttons Init&quot;]
+    BB --&gt; CC[&quot;Sensor Layer Init&quot;]
+    CC --&gt; DD[&quot;Daily Health Init&quot;]
+    DD --&gt; EE[&quot;App Manager Scan&quot;]
+    EE --&gt; FF[&quot;Backend.run()&quot;]
+    FF --&gt; GG[&quot;BLE Services Start&quot;]
+    GG --&gt; HH[&quot;TouchGFX Init&quot;]
+    HH --&gt; II[&quot;System Ready&quot;]
+
+    style A fill:#e1f5fe
+    style II fill:#c8e6c9
+    </pre></section>
+</section>
+<section id="system-initialization-from-multiple-perspectives">
+<h3>System Initialization from Multiple Perspectives<a class="headerlink" href="#system-initialization-from-multiple-perspectives" title="Link to this heading"></a></h3>
+<section id="thread-perspective-rtos-task-initialization">
+<h4>1. Thread Perspective: RTOS Task Initialization<a class="headerlink" href="#thread-perspective-rtos-task-initialization" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; SystemReset: Power On / Reset
+
+    SystemReset --&gt; HAL_Init: Hardware Abstraction Layer
+    HAL_Init --&gt; FreeRTOS_Start: RTOS Kernel Boot
+    FreeRTOS_Start --&gt; main_Entry: main() Function
+
+    main_Entry --&gt; StartupTask_Created: StartupTask Thread
+    StartupTask_Created --&gt; StartupTask_Running: Hardware Init Loop
+
+    StartupTask_Running --&gt; Backend_Thread_Created: Backend Thread Spawn
+    Backend_Thread_Created --&gt; Backend_Thread_Running: Component Discovery
+
+    Backend_Thread_Running --&gt; TouchGFX_Init: GUI Framework Start
+    TouchGFX_Init --&gt; EventLoop_Active: System Ready
+
+    EventLoop_Active --&gt; Running: Normal Operation
+    Running --&gt; Sleep: Inactivity
+    Running --&gt; Shutdown: Power Off
+
+    note right of StartupTask_Created
+        Thread: StartupTask
+        Priority: High
+        Stack: 4KB
+        Function: Hardware bringup
+    end note
+
+    note right of Backend_Thread_Created
+        Thread: Backend
+        Priority: Normal
+        Stack: 8KB
+        Function: System coordination
+    end note
+
+    note right of TouchGFX_Init
+        Thread: TouchGFX
+        Priority: Normal
+        Stack: 16KB
+        Function: UI rendering
+    end note
+    </pre></section>
+<section id="component-dependency-perspective-initialization-order">
+<h4>2. Component Dependency Perspective: Initialization Order<a class="headerlink" href="#component-dependency-perspective-initialization-order" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Phase 1: Core Hardware&quot;
+        HAL[HAL_Init&lt;br/&gt;MCU Setup]
+        CLOCK[System Clock&lt;br/&gt;PLL Config]
+        RTOS[FreeRTOS&lt;br/&gt;Kernel Start]
+    end
+
+    subgraph &quot;Phase 2: System Services&quot;
+        LOGGING[Logging System&lt;br/&gt;Debug Output]
+        WATCHDOG[Watchdog Timer&lt;br/&gt;System Reset]
+        RTC[RTC Module&lt;br/&gt;Time Keeping]
+        SLEEP[Sleep Manager&lt;br/&gt;Power States]
+    end
+
+    subgraph &quot;Phase 3: Storage &amp; Communication&quot;
+        HEAP[Heap Monitor&lt;br/&gt;Memory Tracking]
+        DISPATCHER[Observer Dispatcher&lt;br/&gt;Event System]
+        I2C[I2C Bus Setup&lt;br/&gt;Multi-Drop Bus]
+        PMIC[PMIC Init&lt;br/&gt;Power Management]
+        FLASH[Flash Storage&lt;br/&gt;File System Base]
+        FILESYSTEM[File System Mount&lt;br/&gt;FatFs Volumes]
+    end
+
+    subgraph &quot;Phase 4: Peripherals&quot;
+        USB[USB Stack&lt;br/&gt;Host/Device Mode]
+        BLE[BLE Services&lt;br/&gt;BlueNRG Stack]
+        BUTTONS[HW Buttons&lt;br/&gt;Input System]
+        BUZZER[Buzzer Control&lt;br/&gt;Audio Feedback]
+        VIBRO[Haptic Motor&lt;br/&gt;DRV2605]
+    end
+
+    subgraph &quot;Phase 5: Application Layer&quot;
+        COMPONENTS[ComponentFactory&lt;br/&gt;Hardware Discovery]
+        SENSORS[Sensor Layer&lt;br/&gt;Data Acquisition]
+        DAILYHEALTH[Daily Health&lt;br/&gt;Activity Tracking]
+        APPS[App Manager&lt;br/&gt;Application Scan]
+        BACKEND[Backend.run&lt;br/&gt;System Coordinator]
+        TOUCHGFX[TouchGFX Init&lt;br/&gt;GUI Framework]
+    end
+
+    HAL --&gt; CLOCK
+    CLOCK --&gt; RTOS
+    RTOS --&gt; LOGGING
+    LOGGING --&gt; WATCHDOG
+    WATCHDOG --&gt; RTC
+    RTC --&gt; SLEEP
+    SLEEP --&gt; HEAP
+    HEAP --&gt; DISPATCHER
+    DISPATCHER --&gt; I2C
+    I2C --&gt; PMIC
+    PMIC --&gt; FLASH
+    FLASH --&gt; FILESYSTEM
+    FILESYSTEM --&gt; USB
+    USB --&gt; BLE
+    BLE --&gt; BUTTONS
+    BUTTONS --&gt; BUZZER
+    BUZZER --&gt; VIBRO
+    VIBRO --&gt; COMPONENTS
+    COMPONENTS --&gt; SENSORS
+    SENSORS --&gt; DAILYHEALTH
+    DAILYHEALTH --&gt; APPS
+    APPS --&gt; BACKEND
+    BACKEND --&gt; TOUCHGFX
+
+    style HAL fill:#e1f5fe
+    style TOUCHGFX fill:#c8e6c9
+    </pre></section>
+<section id="timing-perspective-initialization-timeline">
+<h4>3. Timing Perspective: Initialization Timeline<a class="headerlink" href="#timing-perspective-initialization-timeline" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        gantt
+    title System Initialization Timeline(To-Do)
+    dateFormat HH:mm:ss
+    axisFormat %H:%M:%S
+
+    section Phase 1: MCU Core
+    HAL_Init()         :done, t1, 00:00:00, 50ms
+    System Clock Setup :done, t2, after t1, 10ms
+    FreeRTOS Start     :done, t3, after t2, 20ms
+
+    section Phase 2: System Services
+    Logging Setup      :done, t4, after t3, 5ms
+    Watchdog Start     :done, t5, after t4, 2ms
+    RTC Init          :done, t6, after t5, 15ms
+    Sleep Manager     :done, t7, after t6, 8ms
+
+    section Phase 3: Storage &amp; Comm
+    Heap Monitor      :done, t8, after t7, 3ms
+    Observer Dispatcher:done, t9, after t8, 5ms
+    I2C Setup         :done, t10, after t9, 25ms
+    PMIC Init         :done, t11, after t10, 30ms
+    Flash Init        :done, t12, after t11, 100ms
+    File System Mount :done, t13, after t12, 200ms
+
+    section Phase 4: Peripherals
+    USB Init          :done, t14, after t13, 50ms
+    BLE Stack Init    :done, t15, after t14, 150ms
+    Buttons Init      :done, t16, after t15, 10ms
+    Buzzer Init       :done, t17, after t16, 5ms
+    Vibro Init        :done, t18, after t17, 20ms
+
+    section Phase 5: Application
+    Component Scan    :done, t19, after t18, 100ms
+    Sensor Layer      :done, t20, after t19, 75ms
+    Daily Health      :done, t21, after t20, 25ms
+    App Manager Scan  :done, t22, after t21, 150ms
+    Backend Launch    :done, t23, after t22, 50ms
+    TouchGFX Init     :done, t24, after t23, 200ms
+    </pre></section>
+<section id="memory-perspective-allocation-during-initialization">
+<h4>4. Memory Perspective: Allocation During Initialization<a class="headerlink" href="#memory-perspective-allocation-during-initialization" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Static Memory (Compile-time)&quot;
+        CODE[Code Segment&lt;br/&gt;Flash: 512KB&lt;br/&gt;Firmware Binary]
+        RODATA[Read-Only Data&lt;br/&gt;Flash: 128KB&lt;br/&gt;Constants/Strings]
+        ZIDATA[Zero-Init Data&lt;br/&gt;RAM: 64KB&lt;br/&gt;Global Variables]
+    end
+
+    subgraph &quot;RTOS Memory (Boot-time)&quot;
+        RTOS_HEAP[RTOS Heap&lt;br/&gt;RAM: 32KB&lt;br/&gt;Task Stacks/Queues]
+        TASK_STACKS[Task Stacks&lt;br/&gt;RAM: 16KB&lt;br/&gt;StartupTask/Backend]
+        KERNEL_OBJECTS[Kernel Objects&lt;br/&gt;RAM: 8KB&lt;br/&gt;Mutexes/Semaphores]
+    end
+
+    subgraph &quot;Dynamic Memory (Runtime)&quot;
+        HEAP_ALLOC[Heap Allocations&lt;br/&gt;RAM: Variable&lt;br/&gt;new Operators]
+        MESSAGE_POOLS[Message Pools&lt;br/&gt;RAM: 4KB&lt;br/&gt;IPC Messages]
+        APP_MEMORY[App Memory&lt;br/&gt;RAM: 256KB&lt;br/&gt;Loaded Applications]
+    end
+
+    subgraph &quot;Component Memory (Init-time)&quot;
+        BACKEND_OBJ[Backend Object&lt;br/&gt;RAM: 2KB&lt;br/&gt;System Coordinator]
+        COMPONENT_OBJS[Component Objects&lt;br/&gt;RAM: 1KB&lt;br/&gt;LCD/BLE/GPS Instances]
+        SENSOR_OBJS[Sensor Objects&lt;br/&gt;RAM: 512B&lt;br/&gt;Driver Instances]
+        SETTINGS_OBJ[Settings Object&lt;br/&gt;RAM: 4KB&lt;br/&gt;Configuration Data]
+    end
+
+    subgraph &quot;File System Memory&quot;
+        FATFS_BUFFERS[FATFS Buffers&lt;br/&gt;RAM: 8KB&lt;br/&gt;File Operations]
+        CACHE_BUFFERS[Cache Buffers&lt;br/&gt;RAM: 4KB&lt;br/&gt;Read/Write Cache]
+        WORK_BUFFERS[Work Buffers&lt;br/&gt;RAM: 2KB&lt;br/&gt;Path Processing]
+    end
+
+    CODE --&gt; RTOS_HEAP
+    RODATA --&gt; RTOS_HEAP
+    ZIDATA --&gt; RTOS_HEAP
+
+    RTOS_HEAP --&gt; HEAP_ALLOC
+    HEAP_ALLOC --&gt; MESSAGE_POOLS
+    MESSAGE_POOLS --&gt; APP_MEMORY
+
+    APP_MEMORY --&gt; BACKEND_OBJ
+    BACKEND_OBJ --&gt; COMPONENT_OBJS
+    COMPONENT_OBJS --&gt; SENSOR_OBJS
+    SENSOR_OBJS --&gt; SETTINGS_OBJ
+
+    SETTINGS_OBJ --&gt; FATFS_BUFFERS
+    FATFS_BUFFERS --&gt; CACHE_BUFFERS
+    CACHE_BUFFERS --&gt; WORK_BUFFERS
+
+    style CODE fill:#e1f5fe
+    style WORK_BUFFERS fill:#c8e6c9
+    </pre></section>
+<section id="error-handling-perspective-fault-recovery-during-init">
+<h4>5. Error Handling Perspective: Fault Recovery During Init<a class="headerlink" href="#error-handling-perspective-fault-recovery-during-init" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[Initialization Step] --&gt; B{Step Success?}
+
+    B --&gt;|Yes| C[Next Step]
+    B --&gt;|No| D{Error Type}
+
+    D --&gt;|Hardware Missing| E[Create Stub&lt;br/&gt;Graceful Degradation]
+    D --&gt;|Timeout| F[Retry Logic&lt;br/&gt;Exponential Backoff]
+    D --&gt;|Resource Exhaustion| G[Memory Cleanup&lt;br/&gt;Reduce Allocations]
+    D --&gt;|Configuration Error| H[Load Defaults&lt;br/&gt;Safe Fallback]
+
+    E --&gt; I[Log Warning&lt;br/&gt;Continue Init]
+    F --&gt; J{Max Retries?}
+    J --&gt;|No| F
+    J --&gt;|Yes| K[Stub Fallback&lt;br/&gt;Degraded Mode]
+
+    G --&gt; L{Heap Available?}
+    L --&gt;|Yes| M[Compact Memory&lt;br/&gt;Defragment]
+    L --&gt;|No| N[Fatal Error&lt;br/&gt;System Reset]
+
+    H --&gt; O[Validation Check&lt;br/&gt;Bounds Checking]
+    O --&gt; P{Valid Defaults?}
+    P --&gt;|Yes| Q[Apply Defaults&lt;br/&gt;Continue]
+    P --&gt;|No| R[Factory Reset&lt;br/&gt;Clean Slate]
+
+    I --&gt; C
+    K --&gt; C
+    M --&gt; C
+    Q --&gt; C
+
+    C --&gt; S[Init Complete&lt;br/&gt;System Ready]
+    N --&gt; T[System Reset]
+    R --&gt; U[Factory Reset]
+
+    style A fill:#e1f5fe
+    style S fill:#c8e6c9
+    style T fill:#fff3e0
+    style U fill:#fff3e0
+    </pre></section>
+<section id="power-management-perspective-energy-during-initialization">
+<h4>6. Power Management Perspective: Energy During Initialization<a class="headerlink" href="#power-management-perspective-energy-during-initialization" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Power Sources&quot;
+        BATTERY[Battery&lt;br/&gt;3.7V LiPo&lt;br/&gt;400mAh]
+        USB[USB Power&lt;br/&gt;5V&lt;br/&gt;500mA Max]
+        PMIC[PMIC&lt;br/&gt;STPMIC1&lt;br/&gt;Power Controller]
+    end
+
+    subgraph &quot;Power States During Init&quot;
+        BOOT[Boot Phase&lt;br/&gt;High Current&lt;br/&gt;200-300mA]
+        DISCOVERY[Discovery Phase&lt;br/&gt;Moderate Current&lt;br/&gt;150-200mA]
+        STANDBY[Standby Phase&lt;br/&gt;Low Current&lt;br/&gt;50-100mA]
+        ACTIVE[Active Phase&lt;br/&gt;Variable Current&lt;br/&gt;100-250mA]
+    end
+
+    subgraph &quot;Power-Conscious Components&quot;
+        LCD_BACKLIGHT[LCD Backlight&lt;br/&gt;PWM Controlled&lt;br/&gt;20-50mA]
+        BLE_RADIO[BLE Radio&lt;br/&gt;TX/RX States&lt;br/&gt;10-20mA]
+        FLASH_STORAGE[Flash Storage&lt;br/&gt;Read/Write&lt;br/&gt;15-30mA]
+        SENSORS[Sensors&lt;br/&gt;Periodic Sampling&lt;br/&gt;5-15mA]
+    end
+
+    subgraph &quot;Power Management Actions&quot;
+        VOLTAGE_MONITOR[Voltage Monitoring&lt;br/&gt;Battery Level Check]
+        CURRENT_LIMIT[Current Limiting&lt;br/&gt;USB Charging]
+        SLEEP_MODES[Sleep Mode Setup&lt;br/&gt;Deep Sleep Config]
+        WAKE_SOURCES[Wake Sources&lt;br/&gt;Button/USB/Timer]
+    end
+
+    BATTERY --&gt; PMIC
+    USB --&gt; PMIC
+
+    PMIC --&gt; BOOT
+    BOOT --&gt; DISCOVERY
+    DISCOVERY --&gt; STANDBY
+    STANDBY --&gt; ACTIVE
+
+    ACTIVE --&gt; LCD_BACKLIGHT
+    ACTIVE --&gt; BLE_RADIO
+    ACTIVE --&gt; FLASH_STORAGE
+    ACTIVE --&gt; SENSORS
+
+    PMIC --&gt; VOLTAGE_MONITOR
+    VOLTAGE_MONITOR --&gt; CURRENT_LIMIT
+    CURRENT_LIMIT --&gt; SLEEP_MODES
+    SLEEP_MODES --&gt; WAKE_SOURCES
+
+    style BATTERY fill:#e1f5fe
+    style WAKE_SOURCES fill:#c8e6c9
+    </pre></section>
+<section id="data-flow-perspective-information-movement-during-init">
+<h4>7. Data Flow Perspective: Information Movement During Init<a class="headerlink" href="#data-flow-perspective-information-movement-during-init" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    subgraph &quot;Configuration Data&quot;
+        EEPROM_DATA[EEPROM Data&lt;br/&gt;Component IDs&lt;br/&gt;8-byte Unique IDs]
+        SETTINGS_FILE[Settings File&lt;br/&gt;JSON Config&lt;br/&gt;Watch Settings]
+        APP_PACKAGES[App Packages&lt;br/&gt;.uapp Files&lt;br/&gt;ELF + Metadata]
+    end
+
+    subgraph &quot;Hardware Detection&quot;
+        I2C_PROBE[I2C Bus Probe&lt;br/&gt;Address 0x50&lt;br/&gt;EEPROM Detection]
+        COMPONENT_ID[Component ID Read&lt;br/&gt;8-byte Unique ID&lt;br/&gt;Hardware Validation]
+        INTERFACE_BIND[Interface Binding&lt;br/&gt;ILcd/IBle/IGps&lt;br/&gt;Polymorphic Access]
+    end
+
+    subgraph &quot;System State Updates&quot;
+        DEVICE_INFO[Device Info&lt;br/&gt;Model/Serial/FW&lt;br/&gt;BLE Advertising]
+        BATTERY_STATUS[Battery Status&lt;br/&gt;Level/Charging&lt;br/&gt;Power State]
+        SETTINGS_LOAD[Settings Load&lt;br/&gt;Units/Timezone&lt;br/&gt;User Preferences]
+    end
+
+    subgraph &quot;Application Loading&quot;
+        ELF_PARSE[ELF Parsing&lt;br/&gt;Service/GUI ELFs&lt;br/&gt;Symbol Resolution]
+        MEMORY_MAP[Memory Mapping&lt;br/&gt;Protected Regions&lt;br/&gt;Address Space]
+        THREAD_CREATE[Thread Creation&lt;br/&gt;PID Assignment&lt;br/&gt;Process Isolation]
+    end
+
+    EEPROM_DATA --&gt; I2C_PROBE
+    I2C_PROBE --&gt; COMPONENT_ID
+    COMPONENT_ID --&gt; INTERFACE_BIND
+
+    SETTINGS_FILE --&gt; SETTINGS_LOAD
+    APP_PACKAGES --&gt; ELF_PARSE
+    ELF_PARSE --&gt; MEMORY_MAP
+    MEMORY_MAP --&gt; THREAD_CREATE
+
+    INTERFACE_BIND --&gt; DEVICE_INFO
+    DEVICE_INFO --&gt; BATTERY_STATUS
+    BATTERY_STATUS --&gt; SETTINGS_LOAD
+    SETTINGS_LOAD --&gt; THREAD_CREATE
+
+    THREAD_CREATE --&gt; SYSTEM_READY[System Ready&lt;br/&gt;Event Loop Active]
+
+    style EEPROM_DATA fill:#e1f5fe
+    style SYSTEM_READY fill:#c8e6c9
+    </pre></section>
+</section>
+<section id="memory-management-patterns">
+<h3>Memory Management Patterns<a class="headerlink" href="#memory-management-patterns" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Pool-Based Allocation</strong>: Kernel message pools prevent heap fragmentation</p></li>
+<li><p><strong>Reference Counting</strong>: Message lifecycle management with atomic counters</p></li>
+<li><p><strong>Placement New</strong>: Direct memory construction for performance</p></li>
+<li><p><strong>RAII Pattern</strong>: Automatic resource cleanup in destructors</p></li>
+<li><p><strong>Mutex Protection</strong>: Thread-safe access to shared resources</p></li>
+</ul>
+</section>
+<section id="error-handling-robustness">
+<h3>Error Handling &amp; Robustness<a class="headerlink" href="#error-handling-robustness" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>CRC Validation</strong>: .uapp file integrity checking</p></li>
+<li><p><strong>Exception Safety</strong>: <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">(std::nothrow)</span></code> for OOM protection</p></li>
+<li><p><strong>Graceful Degradation</strong>: Stub implementations for missing hardware</p></li>
+<li><p><strong>Watchdog Integration</strong>: Hardware reset on critical failures</p></li>
+<li><p><strong>Assert Handling</strong>: Custom assert function with system reset</p></li>
+</ul>
+</section>
+<section id="core-system-architecture">
+<h3>Core System Architecture<a class="headerlink" href="#core-system-architecture" title="Link to this heading"></a></h3>
+<section id="backend-class-inheritance-diagram">
+<h4>Backend Class Inheritance Diagram<a class="headerlink" href="#backend-class-inheritance-diagram" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        classDiagram
+    class Backend {
+        -OS::CircularBuffer~G2BEvent::Data,20~ mGuiRxQueue
+        -OS::CircularBuffer~B2GEvent::Data,20~ mGuiTxQueue
+        -OS::Timer~Backend~ mMinuteTimer
+        -OS::Thread~Backend,40k~ mThread
+        +static Backend&amp; GetInstance()
+        +void run()
+        -void thread()
+        -void evtHandler(G2BEvent::Data~)
+    }
+    class IGuiBackend {
+        &lt;&lt;interface&gt;&gt;
+        +bool receiveGuiEvent(B2GEvent::Data~&amp;)
+        +bool sendEventToBackend(G2BEvent::Data)
+    }
+    class PowerStatusCallback {
+        &lt;&lt;interface&gt;&gt;
+        +void onCharging(bool)
+        +void onUsbDetected(bool)
+        +void onBatteryLevelChanged(float)
+    }
+    class IButtonsCallback {
+        &lt;&lt;interface&gt;&gt;
+        +void onPress(Id)
+    }
+    class IBleStatusCallback {
+        &lt;&lt;interface&gt;&gt;
+        +void onPinRequest(uint32_t)
+        +void onPair(bool)
+        +void onConnect(Address~)
+        +void onDisconnect(uint8_t)
+    }
+    Backend ..|&gt; IGuiBackend : implements
+    Backend ..|&gt; PowerStatusCallback
+    Backend ..|&gt; IButtonsCallback
+    Backend ..|&gt; IBleStatusCallback
+    Note right of Backend: Central orchestrator~n~Implements 13 interfaces~n~1045 LOC
+    </pre></section>
+<section id="ble-service-stack">
+<h4>8. BLE Service Stack<a class="headerlink" href="#ble-service-stack" title="Link to this heading"></a></h4>
+<p><strong>Standard Services:</strong></p>
+<ul class="simple">
+<li><p><strong>Device Information Service</strong>: Manufacturer, model, serial, firmware info</p></li>
+<li><p><strong>Current Time Service</strong>: Time synchronization with timezone/DST support</p></li>
+<li><p><strong>Battery Service</strong>: Level reporting and charging status</p></li>
+<li><p><strong>File Transfer Service</strong>: Firmware updates and data exchange</p></li>
+<li><p><strong>Notification Service</strong>: iOS ANCS (Apple Notification Center Service) integration</p></li>
+<li><p><strong>Custom Command Service</strong>: Proprietary watch control commands</p></li>
+</ul>
+</section>
+<section id="ble-service-architecture">
+<h4>BLE Service Architecture<a class="headerlink" href="#ble-service-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;BLE Hardware&quot;
+        BLUENRG[BlueNRG-2&lt;br/&gt;BLE Controller]
+        SPI[SPI Interface&lt;br/&gt;4-wire]
+        INTERRUPTS[Interrupt Lines&lt;br/&gt;TX_INT/RST]
+    end
+
+    subgraph &quot;BLE Stack&quot;
+        PERIPHERAL[Ble::PeripheralBlueNRG&lt;br/&gt;Main Controller]
+        CORE[Ble::CoreBlueNRG&lt;br/&gt;SPI Driver]
+    end
+
+    subgraph &quot;BLE Services&quot;
+        DIS[Device Info Service&lt;br/&gt;Manufacturer/Model/Serial]
+        CTS[Current Time Service&lt;br/&gt;Time Sync/TZ/DST]
+        BAS[Battery Service&lt;br/&gt;Level/Charging Status]
+        FTS[File Transfer Service&lt;br/&gt;OTA Updates]
+        NTS[Notification Service&lt;br/&gt;iOS ANCS]
+        CCS[Custom Command Service&lt;br/&gt;Proprietary Commands]
+    end
+
+    subgraph &quot;BLE Integration&quot;
+        BACKEND[Backend&lt;br/&gt;Service Manager]
+        FILESYSTEM[FileSystem&lt;br/&gt;BLE Root Dir]
+        SETTINGS[SettingsManager&lt;br/&gt;Notification Config]
+        POWER[Power Manager&lt;br/&gt;Battery Data]
+    end
+
+    BLUENRG --&gt; CORE
+    SPI --&gt; CORE
+    INTERRUPTS --&gt; CORE
+
+    CORE --&gt; PERIPHERAL
+
+    PERIPHERAL --&gt; DIS
+    PERIPHERAL --&gt; CTS
+    PERIPHERAL --&gt; BAS
+    PERIPHERAL --&gt; FTS
+    PERIPHERAL --&gt; NTS
+    PERIPHERAL --&gt; CCS
+
+    DIS --&gt; BACKEND
+    CTS --&gt; BACKEND
+    BAS --&gt; BACKEND
+    FTS --&gt; BACKEND
+    NTS --&gt; BACKEND
+    CCS --&gt; BACKEND
+
+    FTS --&gt; FILESYSTEM
+    NTS --&gt; SETTINGS
+    BAS --&gt; POWER
+
+    BACKEND -.-&gt;|Advertising| PERIPHERAL
+    BACKEND -.-&gt;|Connections| PERIPHERAL
+    BACKEND -.-&gt;|Pairing| PERIPHERAL
+
+    style PERIPHERAL fill:#bbdefb
+    style BACKEND fill:#c8e6c9
+    </pre></section>
+<section id="settings-management-settingsmanagerbase-hpp">
+<h4>9. Settings Management (SettingsManagerBase.hpp)<a class="headerlink" href="#settings-management-settingsmanagerbase-hpp" title="Link to this heading"></a></h4>
+<p><strong>Persistent Configuration:</strong></p>
+<ul class="simple">
+<li><p><strong>Template-Based</strong>: Type-safe settings storage and retrieval</p></li>
+<li><p><strong>JSON Serialization</strong>: Human-readable configuration files</p></li>
+<li><p><strong>Thread-Safe</strong>: Mutex-protected read/write operations</p></li>
+<li><p><strong>Default Fallback</strong>: Automatic default value restoration</p></li>
+</ul>
+</section>
+<section id="power-management-system">
+<h4>10. Power Management System<a class="headerlink" href="#power-management-system" title="Link to this heading"></a></h4>
+<p><strong>Advanced Power States:</strong></p>
+<ul class="simple">
+<li><p><strong>Sleep Modes</strong>: Configurable low-power states with wake sources</p></li>
+<li><p><strong>Battery Monitoring</strong>: Real-time voltage, level, and charging status</p></li>
+<li><p><strong>USB Detection</strong>: Automatic power source switching</p></li>
+<li><p><strong>Component Control</strong>: Selective peripheral power management</p></li>
+</ul>
+</section>
+<section id="power-management-state-machine">
+<h4>Power Management State Machine<a class="headerlink" href="#power-management-state-machine" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; PowerOff: System Reset
+    PowerOff --&gt; Bootloader: Power Button Long Press
+    Bootloader --&gt; KernelInit: Firmware Valid
+    KernelInit --&gt; Running: System Ready
+
+    Running --&gt; Sleep: Inactivity Timer
+    Running --&gt; Charging: USB Connected
+    Charging --&gt; Running: USB Disconnected
+
+    Sleep --&gt; Wake: Button Press/Touch
+    Wake --&gt; Running: Activity Detected
+
+    Running --&gt; LowPower: Battery Critical
+    LowPower --&gt; PowerOff: Battery Depleted
+
+    Running --&gt; Shutdown: Power Button Long Press
+    Shutdown --&gt; PowerOff: Clean Shutdown
+
+    note right of Running
+        Full functionality
+        All peripherals active
+        TouchGFX running
+        Apps active
+    end note
+
+    note right of Sleep
+        CPU sleep mode
+        RAM retention
+        Wake on interrupt
+        Low power display
+    end note
+
+    note right of Charging
+        USB power detected
+        Battery charging
+        Display charging screen
+        Mass storage mode available
+    end note
+
+    note right of LowPower
+        Minimal functionality
+        Critical notifications only
+        Extended battery life
+    end note
+    </pre></section>
+</section>
+<section id="id1">
+<h3>System Initialization Sequence<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>HAL Init → RTOS Start → StartupTask → Hardware Init →
+File System → USB/BLE Setup → Sensor Layer → LCD/GUI →
+Backend Launch → TouchGFX Start → App Management Ready
+</pre></div>
+</div>
+</section>
+<section id="key-design-patterns">
+<h3>Key Design Patterns<a class="headerlink" href="#key-design-patterns" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Observer Pattern</strong>: Event dispatching and callback systems</p></li>
+<li><p><strong>Singleton Pattern</strong>: Core system components (Backend, managers, factories)</p></li>
+<li><p><strong>Factory Pattern</strong>: ComponentFactory for hardware module discovery</p></li>
+<li><p><strong>Strategy Pattern</strong>: Interface-based sensor and communication abstractions</p></li>
+<li><p><strong>Command Pattern</strong>: Message-based inter-process communication</p></li>
+<li><p><strong>Template Method</strong>: Settings management with type-safe serialization</p></li>
+</ul>
+<p>This architecture enables a <strong>professional-grade modular smartwatch platform</strong> supporting:</p>
+<ul class="simple">
+<li><p>Independent app development and deployment</p></li>
+<li><p>Hardware abstraction with runtime component detection</p></li>
+<li><p>Advanced power management and battery optimization</p></li>
+<li><p>Rich BLE services with iOS integration</p></li>
+<li><p>Comprehensive sensor data processing</p></li>
+<li><p>Persistent settings with JSON configuration</p></li>
+<li><p>Thread-safe inter-process communication</p></li>
+<li><p>TouchGFX-based user interface framework (see <a class="reference internal" href="TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a> for implementation details)</p></li>
+</ul>
+</section>
+<section id="static-component-architecture">
+<h3>Static Component Architecture<a class="headerlink" href="#static-component-architecture" title="Link to this heading"></a></h3>
+<pre  class="mermaid">
+        graph TB
+    subgraph &quot;Hardware Layer&quot;
+        MCU[STM32U595&lt;br/&gt;Microcontroller]
+        FLASH[(Internal Flash&lt;br/&gt;2MB)]
+        EXTERNAL[(External Flash&lt;br/&gt;EMMC)]
+        LCD[LCD Display&lt;br/&gt;320x300 RGB]
+        TOUCH[Touch Controller&lt;br/&gt;GT911]
+        BLE[BLE Module&lt;br/&gt;BlueNRG-2]
+        GPS[GPS Module&lt;br/&gt;Airoha AG3335M]
+        SENSORS[Sensors&lt;br/&gt;PPG/IMU/Barometer]
+        PMIC[Power Management&lt;br/&gt;IC]
+        BUTTONS[Physical Buttons&lt;br/&gt;×4]
+        BUZZER[Buzzer&lt;br/&gt;PWM]
+        VIBRO[Haptic Motor&lt;br/&gt;DRV2605]
+    end
+
+    subgraph &quot;RTOS Layer&quot;
+        FREERTOS[FreeRTOS&lt;br/&gt;Kernel]
+        TASKS[Tasks&lt;br/&gt;Startup/Backend/App]
+        QUEUES[Message Queues&lt;br/&gt;IPC]
+        TIMERS[Software Timers&lt;br/&gt;Periodic Tasks]
+        MUTEXES[Mutexes&lt;br/&gt;Synchronization]
+        SEMAPHORES[Semaphores&lt;br/&gt;Thread Control]
+    end
+
+    subgraph &quot;Core System Components&quot;
+        MAIN[main.cpp&lt;br/&gt;System Entry]
+        BACKEND[Backend&lt;br/&gt;Central Hub]
+        COMPONENT_FACTORY[ComponentFactory&lt;br/&gt;Hardware Discovery]
+        APP_MANAGER[App::Manager&lt;br/&gt;Application Control]
+        SENSOR_MANAGER[Sensor::Manager&lt;br/&gt;Sensor Coordination]
+        FILESYSTEM[FileSystem&lt;br/&gt;Storage Management]
+        SETTINGS[SettingsManager&lt;br/&gt;Configuration]
+        POWER[Power Manager&lt;br/&gt;Battery/Charging]
+    end
+
+    subgraph &quot;Communication Layer&quot;
+        MESSAGE_SYSTEM[Message System&lt;br/&gt;IPC Framework]
+        BLE_SERVICES[BLE Services&lt;br/&gt;DIS/CTS/BAS/FTS/NTS/CCS]
+        USB_STACK[USB Stack&lt;br/&gt;MSC/VCP]
+    end
+
+    subgraph &quot;Application Layer&quot;
+        KERNEL[Kernel SDK&lt;br/&gt;App Interfaces]
+        APPS[User Apps&lt;br/&gt;Service + GUI]
+        GLANCES[Glance System&lt;br/&gt;Notifications]
+        TOUCHGFX[TouchGFX&lt;br/&gt;GUI Framework]
+    end
+
+    MCU --&gt; FREERTOS
+    FREERTOS --&gt; TASKS
+    FREERTOS --&gt; QUEUES
+    FREERTOS --&gt; TIMERS
+    FREERTOS --&gt; MUTEXES
+    FREERTOS --&gt; SEMAPHORES
+
+    MAIN --&gt; BACKEND
+    BACKEND --&gt; COMPONENT_FACTORY
+    BACKEND --&gt; APP_MANAGER
+    BACKEND --&gt; SENSOR_MANAGER
+    BACKEND --&gt; FILESYSTEM
+    BACKEND --&gt; SETTINGS
+    BACKEND --&gt; POWER
+
+    COMPONENT_FACTORY --&gt; LCD
+    COMPONENT_FACTORY --&gt; BLE
+    COMPONENT_FACTORY --&gt; GPS
+    COMPONENT_FACTORY --&gt; SENSORS
+
+    MESSAGE_SYSTEM --&gt; BLE_SERVICES
+    MESSAGE_SYSTEM --&gt; USB_STACK
+
+    KERNEL --&gt; APPS
+    KERNEL --&gt; GLANCES
+    TOUCHGFX --&gt; APPS
+
+    APP_MANAGER --&gt; APPS
+    SENSOR_MANAGER --&gt; APPS
+    FILESYSTEM --&gt; APPS
+    SETTINGS --&gt; APPS
+    </pre><section id="data-flow-user-input-to-app-response">
+<h4>Data Flow: User Input to App Response<a class="headerlink" href="#data-flow-user-input-to-app-response" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[User Interaction] --&gt; B{Hardware Type}
+
+    B --&gt;|Button Press| C[HW Buttons Driver]
+    B --&gt;|Touch Gesture| D[Touch Controller]
+    B --&gt;|BLE Command| E[BLE Services]
+
+    C --&gt; F[Button Event]
+    D --&gt; G[Touch Event]
+    E --&gt; H[BLE Event]
+
+    F --&gt; I[Observer Dispatcher]
+    G --&gt; I
+    H --&gt; I
+
+    I --&gt; J[Backend.onPress&lt;br/&gt;Backend.onTouch&lt;br/&gt;Backend.onBleCommand]
+
+    J --&gt; K{Event Type}
+
+    K --&gt;|System| L[Backend Handler&lt;br/&gt;Power/BLE/Settings]
+    K --&gt;|App| M[App Manager&lt;br/&gt;Route to Active App]
+
+    L --&gt; N[Direct Action&lt;br/&gt;Backlight/Buzzer/Vibro]
+    M --&gt; O[Message Queue&lt;br/&gt;to App Process]
+
+    O --&gt; P[App Service&lt;br/&gt;Event Processing]
+    P --&gt; Q[App GUI&lt;br/&gt;UI Update]
+
+    Q --&gt; R[TouchGFX&lt;br/&gt;Display Update]
+    R --&gt; S[LCD Controller&lt;br/&gt;Hardware Update]
+
+    N --&gt; T[System Response]
+    S --&gt; T
+
+    style A fill:#e1f5fe
+    style T fill:#c8e6c9
+    style J fill:#fff3e0
+    </pre></section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="SensorsLayer.html" class="btn btn-neutral float-left" title="Sensor Layer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="development-workflow.html" class="btn btn-neutral float-right" title="Development Workflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

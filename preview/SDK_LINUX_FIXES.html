@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNA SDK — Linux Simulator Compatibility Fixes &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">UNA SDK — Linux Simulator Compatibility Fixes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/SDK_LINUX_FIXES.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="una-sdk-linux-simulator-compatibility-fixes">
+<h1>UNA SDK — Linux Simulator Compatibility Fixes<a class="headerlink" href="#una-sdk-linux-simulator-compatibility-fixes" title="Link to this heading"></a></h1>
+<p>This document records the changes made to the SDK to enable the TouchGFX simulator
+to build on x86-64 Linux (Ubuntu 24.04, GCC 13). All changes are backward-compatible:
+the embedded ARM build is unaffected and Windows simulator builds continue to work.</p>
+<hr class="docutils" />
+<section id="summary-of-changes">
+<h2>Summary of changes<a class="headerlink" href="#summary-of-changes" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>File</p></th>
+<th class="head"><p>Issue</p></th>
+<th class="head"><p>Fix</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Simulator/OS/OS.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;array&gt;</span></code> only in <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code> block; <code class="docutils literal notranslate"><span class="pre">OS::Queue&lt;T,N&gt;</span></code> uses <code class="docutils literal notranslate"><span class="pre">std::array</span></code></p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;array&gt;</span></code> to <code class="docutils literal notranslate"><span class="pre">#else</span></code> (Linux) branch</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Simulator/Kernel/Mock/Logger.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> is Win32-only</p></td>
+<td><p>Add portable <code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> wrapper using <code class="docutils literal notranslate"><span class="pre">clock_gettime(CLOCK_MONOTONIC)</span></code> for <code class="docutils literal notranslate"><span class="pre">#ifndef</span> <span class="pre">_WIN32</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Source/Simulator/Kernel/Mock/System.cpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> and <code class="docutils literal notranslate"><span class="pre">Sleep()</span></code> are Win32-only</p></td>
+<td><p>Add local wrappers using <code class="docutils literal notranslate"><span class="pre">clock_gettime</span></code> and <code class="docutils literal notranslate"><span class="pre">usleep</span></code> for <code class="docutils literal notranslate"><span class="pre">#ifndef</span> <span class="pre">_WIN32</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Messages/MessageBase.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">static_assert(sizeof(MessageBase)</span> <span class="pre">==</span> <span class="pre">32)</span></code> fails on x86-64 where <code class="docutils literal notranslate"><span class="pre">void*</span></code> and vtable pointer are 8 bytes</p></td>
+<td><p>Guard with <code class="docutils literal notranslate"><span class="pre">#if</span> <span class="pre">__SIZEOF_POINTER__</span> <span class="pre">==</span> <span class="pre">4</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Messages/CommandMessages.hpp</span></code></p></td>
+<td><p>18 <code class="docutils literal notranslate"><span class="pre">static_assert</span></code> size checks that assume 32-bit pointer layout</p></td>
+<td><p>Guard each with <code class="docutils literal notranslate"><span class="pre">#if</span> <span class="pre">__SIZEOF_POINTER__</span> <span class="pre">==</span> <span class="pre">4</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Source/Wrappers/StdLibWrappers.c</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::strncpy</span></code> used in a <code class="docutils literal notranslate"><span class="pre">.c</span></code> (C) file; <code class="docutils literal notranslate"><span class="pre">std::</span></code> namespace is C++ only</p></td>
+<td><p>Replace with plain <code class="docutils literal notranslate"><span class="pre">strncpy</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="detail">
+<h2>Detail<a class="headerlink" href="#detail" title="Link to this heading"></a></h2>
+<section id="os-hpp-missing-include-array">
+<h3><code class="docutils literal notranslate"><span class="pre">OS.hpp</span></code> — missing <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;array&gt;</span></code><a class="headerlink" href="#os-hpp-missing-include-array" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">OS::Queue&lt;T,</span> <span class="pre">N&gt;</span></code> uses <code class="docutils literal notranslate"><span class="pre">std::array&lt;T,</span> <span class="pre">N&gt;</span></code> for its internal buffer. The <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;array&gt;</span></code>
+was inside the <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code> block, so it was never included on Linux, leaving
+<code class="docutils literal notranslate"><span class="pre">std::array</span></code> with only a forward declaration (from <code class="docutils literal notranslate"><span class="pre">&lt;tuple&gt;</span></code> pulled in transitively).
+This caused an “incomplete type” error when the template was instantiated.</p>
+<p><strong>Fix</strong>: add <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;array&gt;</span></code> to the <code class="docutils literal notranslate"><span class="pre">#else</span></code> block.</p>
+</section>
+<hr class="docutils" />
+<section id="logger-hpp-and-system-cpp-gettickcount64-sleep">
+<h3><code class="docutils literal notranslate"><span class="pre">Logger.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">System.cpp</span></code> — <code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> / <code class="docutils literal notranslate"><span class="pre">Sleep()</span></code><a class="headerlink" href="#logger-hpp-and-system-cpp-gettickcount64-sleep" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> returns milliseconds since boot on Windows. The POSIX equivalent
+is <code class="docutils literal notranslate"><span class="pre">clock_gettime(CLOCK_MONOTONIC,</span> <span class="pre">...)</span></code>. <code class="docutils literal notranslate"><span class="pre">Sleep(ms)</span></code> maps to <code class="docutils literal notranslate"><span class="pre">usleep(ms</span> <span class="pre">*</span> <span class="pre">1000)</span></code> on POSIX.</p>
+<p>Both are provided as <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">inline</span></code> wrappers in <code class="docutils literal notranslate"><span class="pre">#ifndef</span> <span class="pre">_WIN32</span></code> blocks so they are
+only defined when the platform-provided versions are absent.</p>
+</section>
+<hr class="docutils" />
+<section id="messagebase-hpp-commandmessages-hpp-pointer-size-assertions">
+<h3><code class="docutils literal notranslate"><span class="pre">MessageBase.hpp</span></code> / <code class="docutils literal notranslate"><span class="pre">CommandMessages.hpp</span></code> — pointer-size assertions<a class="headerlink" href="#messagebase-hpp-commandmessages-hpp-pointer-size-assertions" title="Link to this heading"></a></h3>
+<p>The SDK message structs contain a <code class="docutils literal notranslate"><span class="pre">void*</span> <span class="pre">mCompletionSemaphore</span></code> field and a vtable pointer,
+both of which are 4 bytes on 32-bit ARM and 8 bytes on x86-64. The struct size checks
+hardcoded 32-bit sizes (e.g. <code class="docutils literal notranslate"><span class="pre">sizeof(MessageBase)</span> <span class="pre">==</span> <span class="pre">32</span></code>).</p>
+<p>On x86-64 the structs are larger (e.g. <code class="docutils literal notranslate"><span class="pre">sizeof(MessageBase)</span> <span class="pre">==</span> <span class="pre">40</span></code>), but this does not
+affect simulator correctness because:</p>
+<ul class="simple">
+<li><p>The GUI and service threads run in the <strong>same process</strong> and share the same memory layout.</p></li>
+<li><p>Binary-format IPC (packed structs sent over a wire) is not used in the simulator.</p></li>
+</ul>
+<p>The assertions are valuable for the embedded ARM build where memory layout matters.
+They are preserved under <code class="docutils literal notranslate"><span class="pre">#if</span> <span class="pre">__SIZEOF_POINTER__</span> <span class="pre">==</span> <span class="pre">4</span></code> so they still fire for ARM GCC.</p>
+</section>
+<hr class="docutils" />
+<section id="stdlibwrappers-c-std-strncpy-in-a-c-file">
+<h3><code class="docutils literal notranslate"><span class="pre">StdLibWrappers.c</span></code> — <code class="docutils literal notranslate"><span class="pre">std::strncpy</span></code> in a C file<a class="headerlink" href="#stdlibwrappers-c-std-strncpy-in-a-c-file" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">StdLibWrappers.c</span></code> is compiled as C (not C++). The Linux branch used <code class="docutils literal notranslate"><span class="pre">std::strncpy</span></code>
+which is a C++ qualified name and is not valid in C. GCC 13 rejects this.</p>
+<p><strong>Fix</strong>: replace with plain <code class="docutils literal notranslate"><span class="pre">strncpy</span></code> (both C and C++ have it in <code class="docutils literal notranslate"><span class="pre">&lt;string.h&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">&lt;cstring&gt;</span></code>).</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="what-is-not-fixed-in-the-sdk-handled-at-app-level">
+<h2>What is NOT fixed in the SDK (handled at app level)<a class="headerlink" href="#what-is-not-fixed-in-the-sdk-handled-at-app-level" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Libs/Source/Simulator/Kernel/Mock/FileSystem.cpp</span></code> and the corresponding header use
+Win32 file APIs (<code class="docutils literal notranslate"><span class="pre">GetFileAttributesA</span></code>, <code class="docutils literal notranslate"><span class="pre">CreateDirectoryA</span></code>, <code class="docutils literal notranslate"><span class="pre">FindFirstFileA</span></code>, etc.)
+throughout the implementation. Rather than a surgical patch, the rowing app provides
+a complete POSIX-based replacement at:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apps</span><span class="o">/</span><span class="n">rowing</span><span class="o">/</span><span class="n">Software</span><span class="o">/</span><span class="n">Apps</span><span class="o">/</span><span class="n">TouchGFX</span><span class="o">-</span><span class="n">GUI</span><span class="o">/</span><span class="n">simulator_linux</span><span class="o">/</span><span class="n">FileSystem</span><span class="o">.</span><span class="n">cpp</span>
+<span class="n">apps</span><span class="o">/</span><span class="n">rowing</span><span class="o">/</span><span class="n">Software</span><span class="o">/</span><span class="n">Apps</span><span class="o">/</span><span class="n">TouchGFX</span><span class="o">-</span><span class="n">GUI</span><span class="o">/</span><span class="n">simulator_linux</span><span class="o">/</span><span class="n">SDK</span><span class="o">/</span><span class="n">Simulator</span><span class="o">/</span><span class="n">Kernel</span><span class="o">/</span><span class="n">Mock</span><span class="o">/</span><span class="n">FileSystem</span><span class="o">.</span><span class="n">hpp</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">config/gcc/app.mk</span></code> selects this replacement by:</p>
+<ol class="arabic simple">
+<li><p>Adding <code class="docutils literal notranslate"><span class="pre">simulator_linux/</span></code> to the front of <code class="docutils literal notranslate"><span class="pre">ADDITIONAL_INCLUDE_PATHS</span></code> (shadows the SDK header).</p></li>
+<li><p>Replacing the SDK <code class="docutils literal notranslate"><span class="pre">FileSystem.cpp</span></code> entry in <code class="docutils literal notranslate"><span class="pre">ADDITIONAL_SOURCES_UNA</span></code> with the local one.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

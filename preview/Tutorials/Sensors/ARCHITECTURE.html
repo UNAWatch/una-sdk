@@ -1,0 +1,906 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sensors - Integrating Hardware Sensors &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if ("False" === "True") {
+                                        addZoomToSvgs(d3.selectAll(""));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? mermaids_active.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+      <script src="../../_static/version-selector.js?v=50f89983"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Files - Data Persistence and File Operations" href="../Files/ARCHITECTURE.html" />
+    <link rel="prev" title="Images - Working with Graphics and Assets" href="../Images/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sensors - Integrating Hardware Sensors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-implemented-sensors">List of Implemented Sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-overview">Architecture Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-steps">Implementation Steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optional-step-copy-the-sensor-tutorial-code-to-edit">Optional step: copy the Sensor tutorial code to edit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-define-custom-messages">Step 1: Define Custom Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-service-subscribe-process-sensors">Step 2: Service - Subscribe &amp; Process Sensors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-gui-model-receive-messages">Step 3: GUI Model - Receive Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-mainview-display-controls">Step 4: MainView - Display &amp; Controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-notes">Additional Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sensors - Integrating Hardware Sensors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/Sensors/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sensors-integrating-hardware-sensors">
+<span id="tutorials-sensors-architecture"></span><h1>Sensors - Integrating Hardware Sensors<a class="headerlink" href="#sensors-integrating-hardware-sensors" title="Link to this heading"></a></h1>
+<p>In this tutorial, we implement a sensors dashboard app that subscribes to available sensors at <strong>maximum frequency</strong> (period=0, count=0 except Accelerometer), processes new message structures with <strong>timestamps</strong> where available, and displays data on a <strong>single GUI screen</strong>:</p>
+<ul class="simple">
+<li><p><strong>Top</strong>: Battery level</p></li>
+<li><p><strong>Middle multiline text</strong>: Sensor data with <strong>L1/L2 verbosity levels</strong> (BASIC/DETAILED/FULL and individual sensor views)</p></li>
+<li><p><strong>Bottom</strong>: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Sensors">Project Folder</a></p>
+<section id="list-of-implemented-sensors">
+<h2>List of Implemented Sensors<a class="headerlink" href="#list-of-implemented-sensors" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sensor</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Heart Rate</p></td>
+<td><p>Live BPM + Trust Level</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>GPS Location</p></td>
+<td><p>Lat/Long/Alt (double)</p></td>
+<td><p>Always on</p></td>
+</tr>
+<tr class="row-even"><td><p>Altimeter</p></td>
+<td><p>Elevation (m)</p></td>
+<td><p>Barometric pressure based</p></td>
+</tr>
+<tr class="row-odd"><td><p>Accelerometer</p></td>
+<td><p>X/Y/Z G-forces</p></td>
+<td><p>connect(0.1f, 0); sender throttled ~100ms</p></td>
+</tr>
+<tr class="row-even"><td><p>Step Counter</p></td>
+<td><p>Total steps</p></td>
+<td><p>Cumulative</p></td>
+</tr>
+<tr class="row-odd"><td><p>Floor Counter</p></td>
+<td><p>Floors ascended</p></td>
+<td><p>Cumulative; parser.getFloorsUp()</p></td>
+</tr>
+<tr class="row-even"><td><p>Magnetometer</p></td>
+<td><p>X/Y/Z fields (for compass)</p></td>
+<td><p>Heading computed from X/Y fields</p></td>
+</tr>
+<tr class="row-odd"><td><p>RTC</p></td>
+<td><p>Time (sec since boot)</p></td>
+<td><p>From kernel sys.getTimeMs()/1000; not sensor</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="architecture-overview">
+<h2>Architecture Overview<a class="headerlink" href="#architecture-overview" title="Link to this heading"></a></h2>
+<pre  class="mermaid">
+        graph LR
+    Sensors[(Sensors HW)] --&gt; SDL[Sensor Data Layer]
+    SDL --&gt;|EVENT_SENSOR_LAYER_DATA| Service[Service Thread]
+    Service --&gt;|Custom Msgs w/ timestamps| Kernel[(Kernel)]
+    Kernel --&gt;|Custom Msgs| Model[GUI Model]
+    Model --&gt; View[MainView]
+    View --&gt; Display[&quot;Single Screen:
+        Battery Top
+        Multiline Data (L1/L2)
+        Bottom Stats&quot;]
+    Buttons[L1/L2 Buttons] -.-&gt; View
+    </pre></section>
+<section id="implementation-steps">
+<h2>Implementation Steps<a class="headerlink" href="#implementation-steps" title="Link to this heading"></a></h2>
+<section id="optional-step-copy-the-sensor-tutorial-code-to-edit">
+<h3>Optional step: copy the Sensor tutorial code to edit<a class="headerlink" href="#optional-step-copy-the-sensor-tutorial-code-to-edit" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Copy sensors tutorial</strong></p></li>
+<li><p><strong>Change naming</strong>: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else, Step 2 in <a class="reference external" href="https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps">Creating New Apps</a> gives commmands for generating your own app ID programatically from the name.</p></li>
+<li><p><strong>Commit initial changes</strong>: it’s a good practice to use version control system like git</p></li>
+<li><p>*<strong>Edit TouchGFX if you changed the name</strong>:</p>
+<ul class="simple">
+<li><p>Rename <code class="docutils literal notranslate"><span class="pre">*.touchgfx</span></code> to <code class="docutils literal notranslate"><span class="pre">&lt;MY_APP&gt;.touchgfx</span></code></p></li>
+<li><p>Rename <code class="docutils literal notranslate"><span class="pre">*.touchgfx:163</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;Name&quot;:</span> <span class="pre">&quot;MY_APP&quot;</span></code></p></li>
+<li><p>Click <strong>Generate code</strong></p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-1-define-custom-messages">
+<h3>Step 1: Define Custom Messages<a class="headerlink" href="#step-1-define-custom-messages" title="Link to this heading"></a></h3>
+<p>Create <a class="reference download internal" download="" href="../../_downloads/31b1d17c63cb546408e0586a0347b78e/Commands.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code></span></a> with message types and structs:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">HR_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">LOCATION_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ELEVATION_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ACCELEROMETER_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000004</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STEP_COUNTER_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000005</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">FLOORS_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000006</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">COMPASS_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000007</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STATS_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000008</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">RTC_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000009</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">HRValues</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">heartRate</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">;</span>
+<span class="w">        </span><span class="n">HRValues</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">HR_VALUES</span><span class="p">),</span><span class="w"> </span><span class="n">heartRate</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">    </span><span class="c1">// Similar for others:</span>
+<span class="w">    </span><span class="c1">// LocationValues: uint64_t timestamp; double latitude, longitude, altitude;</span>
+<span class="w">    </span><span class="c1">// ElevationValues: uint64_t timestamp; float elevation;</span>
+<span class="w">    </span><span class="c1">// AccelerometerValues: uint64_t timestamp; float x,y,z;</span>
+<span class="w">    </span><span class="c1">// StepCounterValues: uint64_t timestamp; uint32_t steps;</span>
+<span class="w">    </span><span class="c1">// FloorsValues: uint64_t timestamp; uint32_t floors;</span>
+<span class="w">    </span><span class="c1">// CompassValues: uint64_t timestamp; float heading;</span>
+<span class="w">    </span><span class="c1">// StatsValues: float serviceCpuPct, guiCpuPct, txMsgRate, rxMsgRate, txByteRate, rxByteRate;</span>
+<span class="w">    </span><span class="c1">// RtcValues: uint32_t time;</span>
+<span class="p">}</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GUISender</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">GUISender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">mKernel</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">updateHeartRate</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">tl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bpm</span><span class="p">;</span>
+<span class="w">            </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tl</span><span class="p">;</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">req</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Similar updateLocation(uint64_t ts, double lat, double lon, double alt), etc.</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="step-2-service-subscribe-process-sensors">
+<h3>Step 2: Service - Subscribe &amp; Process Sensors<a class="headerlink" href="#step-2-service-subscribe-process-sensors" title="Link to this heading"></a></h3>
+<p>In <a class="reference download internal" download="" href="../../_downloads/ab94e0f402d0d6ca25c82c9aa6811aeb/Service.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code></span></a>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorHR</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">HEART_RATE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorGPS</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">GPS_LOCATION</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorAltimeter</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">ALTIMETER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorAccelerometer</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">ACCELEROMETER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorStepCounter</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">STEP_COUNTER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorFloorCounter</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">FLOOR_COUNTER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="c1">// CustomMessage::GUISender mSender;</span>
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">run()</span></code> <a class="reference download internal" download="" href="../../_downloads/1c9f39bd8d71a8f0950a3a824efe3e81/Service.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code></span></a>: connect all (acc.connect(0.1f, 0)), loop getMessage:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">EVENT_SENSOR_LAYER_DATA</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">EventData</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">-&gt;</span><span class="n">stride</span><span class="p">);</span>
+<span class="w">    </span><span class="n">onSdlNewData</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">onSdlNewData</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="w"> </span><span class="nf">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mSender</span><span class="p">.</span><span class="n">updateHeartRate</span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">(),</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// Similar for GPS: parser.getLatitude() etc (double), updateLocation(ts, lat,lon,alt);</span>
+<span class="c1">// Altimeter: updateElevation(ts, parser.getAltitude());</span>
+<span class="c1">// Accel: if (nowMs - mLastAccTimeMs &gt;= 100) updateAccelerometer(ts, x,y,z);</span>
+<span class="c1">// Steps: updateStepCounter(ts, parser.getStepCount());</span>
+<span class="c1">// Floors: updateFloors(ts, parser.getFloorsUp());</span>
+<span class="c1">// Compass: compute heading from magnetic X/Y fields, updateCompass(ts, heading);</span>
+</pre></div>
+</div>
+<p>Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec), <code class="docutils literal notranslate"><span class="pre">mSender.updateStats(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">updateRtc(timeMs/1000)</span></code>.</p>
+</section>
+<section id="step-3-gui-model-receive-messages">
+<h3>Step 3: GUI Model - Receive Messages<a class="headerlink" href="#step-3-gui-model-receive-messages" title="Link to this heading"></a></h3>
+<p>In <a class="reference download internal" download="" href="../../_downloads/6d32ca734da0edec981d43d1d8d28b9f/Model.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Model.cpp</span></code></span></a>, implement <code class="docutils literal notranslate"><span class="pre">customMessageHandler</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">HR_VALUES</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">    </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">updateHR</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="c1">// Similar cases for all types: LOCATION_VALUES -&gt; updateGPS(m-&gt;latitude, m-&gt;longitude, m-&gt;altitude);</span>
+<span class="c1">// etc. for Elevation, Accelerometer, StepCounter, Floors, Compass, Stats, RTC</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-mainview-display-controls">
+<h3>Step 4: MainView - Display &amp; Controls<a class="headerlink" href="#step-4-mainview-display-controls" title="Link to this heading"></a></h3>
+<p>In <a class="reference download internal" download="" href="../../_downloads/396c6be73433ff9a7b4cd709d58824a5/MainView.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.hpp</span></code></span></a>, <a class="reference download internal" download="" href="../../_downloads/8ac8fd2c9e89e76186edb3a2b001afc6/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code></span></a>:</p>
+<p>Store data in members, <code class="docutils literal notranslate"><span class="pre">updateHR(float</span> <span class="pre">hr,</span> <span class="pre">float</span> <span class="pre">tl)</span></code> etc. store values.</p>
+<p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code>: L1: verbosity++ % VERB_LEVEL_MAX, L2: verbosity– % VERB_LEVEL_MAX (BASIC/DETAILED/FULL/HR/GPS/ALT/ACC/STEP/FLOOR/MAG), R1: TODO GPS toggle, R2: presenter-&gt;exit()</p>
+<p><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code> every tick: <code class="docutils literal notranslate"><span class="pre">refreshDisplay()</span></code> <code class="docutils literal notranslate"><span class="pre">refreshStats()</span></code> <code class="docutils literal notranslate"><span class="pre">refreshBattery()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">refreshDisplay()</span></code>: format multiline in <code class="docutils literal notranslate"><span class="pre">text_body</span></code> based on verbosity level, with group display for BASIC/DETAILED/FULL and per-sensor detailed views for individual sensors.</p>
+<p>Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE); invalidate</p>
+<p>Header: <code class="docutils literal notranslate"><span class="pre">refreshBattery()</span></code> “Battery: %.1f%%” <code class="docutils literal notranslate"><span class="pre">text_header</span></code></p>
+<p>Stats: <code class="docutils literal notranslate"><span class="pre">refreshStats()</span></code> “CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f” <code class="docutils literal notranslate"><span class="pre">text_stats</span></code></p>
+</section>
+<section id="additional-notes">
+<h3>Additional Notes<a class="headerlink" href="#additional-notes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Battery</strong>: Battery level retrieval implemented using SDK::Sensor::BATTERY_LEVEL</p></li>
+<li><p><strong>Altimeter</strong>: Uses altitude from barometric sensor; pressure not available in parser</p></li>
+<li><p><strong>Max Frequency</strong>: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.</p></li>
+<li><p><strong>RTC</strong>: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.</p></li>
+<li><p>Build with <a class="reference download internal" download="" href="../../_downloads/41e1bdb69103b1e12f92ceb841a33cee/CMakeLists.txt"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code></span></a>.</p></li>
+</ul>
+</section>
+<section id="running-on-simulator">
+<h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
+<p>To test the Sensors app on the simulator (Windows only):</p>
+<ol class="arabic simple">
+<li><p>Build the app following the <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">SDK setup</span></a> instructions.</p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Sensors.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
+<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">Sensors\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
+<li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
+</ol>
+<p>The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.</p>
+<p>For detailed sensor simulation configuration and features, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Images/ARCHITECTURE.html" class="btn btn-neutral float-left" title="Images - Working with Graphics and Assets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Files/ARCHITECTURE.html" class="btn btn-neutral float-right" title="Files - Data Persistence and File Operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

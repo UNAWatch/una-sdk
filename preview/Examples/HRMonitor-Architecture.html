@@ -1,0 +1,700 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HRMonitor - Heart Rate Monitor &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/version-selector.js?v=50f89983"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GlanceHR - Heart Rate Glance" href="GlanceHR-Architecture.html" />
+    <link rel="prev" title="Hiking - Hiking Activity Tracking" href="Hiking-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HRMonitor - Heart Rate Monitor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-integration">Sensor Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-processing-pipeline">Data Processing Pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-data-reception">1. Sensor Data Reception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-validation">2. Data Validation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fit-file-recording">3. FIT File Recording</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-state-management">Activity State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service-lifecycle">Service Lifecycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getmessage-timeout">getMessage Timeout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-statistics">Activity Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#persistence-fit">Persistence (FIT)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-view-presenter-pattern">Model-View-Presenter Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screens-1-total">Screens (1 total)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-handling-system">Message Handling System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screen-navigation">Screen Navigation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-containers">Custom Containers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-handling">Input Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#idle-timeout">Idle Timeout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-message-system">Custom Message System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#message-sender">Message Sender</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-setup">Development Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-build">Simulator Build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">HRMonitor - Heart Rate Monitor</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/HRMonitor-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hrmonitor-heart-rate-monitor">
+<h1>HRMonitor - Heart Rate Monitor<a class="headerlink" href="#hrmonitor-heart-rate-monitor" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The HRMonitor app is an <strong>Activity</strong>-type application designed for wearable devices. It provides continuous heart rate monitoring with real-time display and persistent data recording in FIT file format. The app connects to a heart rate sensor, shows the current BPM and trust level on screen, and writes a one-second FIT record throughout the session.</p>
+<p>The app does not use GPS or any other sensor. All logic is HR-driven: the service connects to the heart rate sensor on startup, waits for the GUI to become active, then records one FIT record per second and forwards every valid sensor reading to the display. If the GUI never starts within 5 seconds, the service exits without saving a file.</p>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Real-time heart rate display with trust level indicator</p></li>
+<li><p>Continuous FIT recording at 1 Hz while the GUI is active</p></li>
+<li><p>Session summary with average and maximum heart rate</p></li>
+<li><p>Single-screen interface with exit via R2 button</p></li>
+<li><p>Automatic exit if the GUI fails to start within 5 seconds</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The app is structured as two independent components: a service that handles sensor integration and FIT file recording, and a GUI that displays real-time heart rate data and provides application exit control. Communication between them occurs through a message-based system using the UNA SDK kernel infrastructure.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: Heart rate sensor connection, data processing, FIT recording</p></li>
+<li><p><strong>GUI Layer</strong>: TouchGFX-based single-screen interface, heart rate display</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, sensor layer, file system, messaging</p></li>
+<li><p><strong>Data Persistence</strong>: FIT file format for heart rate activity data</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Heart</span> <span class="n">Rate</span> <span class="n">Sensor</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Sensor</span> <span class="n">Layer</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+                                               <span class="o">^</span>
+                                               <span class="o">|</span>
+                        <span class="p">[</span><span class="n">Message</span> <span class="n">System</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">GUI</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The service runs as a separate thread, continuously processing heart rate sensor data and writing FIT records. The GUI runs on the TouchGFX framework, handling user input and displaying heart rate data received from the service.</p>
+</section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>, providing the core functionality for heart rate monitoring and FIT recording.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="c1">// -- Constants ---</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">skSamplePeriod</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">skSampleLatency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2000</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// -- Infrastructure ---</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGuiStarted</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w"> </span><span class="n">mGuiSender</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// -- Sensors ---</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorHr</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// -- Metrics ---</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">mHr</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">mHrTl</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// -- Activity ---</span>
+<span class="w">    </span><span class="n">ActivityWriter</span><span class="w"> </span><span class="n">mActivityWriter</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="sensor-integration">
+<h3>Sensor Integration<a class="headerlink" href="#sensor-integration" title="Link to this heading"></a></h3>
+<p>The service manages a single sensor connection:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sensor</p></th>
+<th class="head"><p>Type constant</p></th>
+<th class="head"><p>Period</p></th>
+<th class="head"><p>Latency</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Heart Rate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code></p></td>
+<td><p>1000 ms</p></td>
+<td><p>2000 ms</p></td>
+<td><p>BPM + trust level</p></td>
+</tr>
+</tbody>
+</table>
+<p>The sensor is connected at service startup (before the GUI is ready) and disconnected on exit, so the sensor driver has time to initialise and deliver the first reading by the time the GUI starts.</p>
+</section>
+<section id="data-processing-pipeline">
+<h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
+<section id="sensor-data-reception">
+<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<p>Sensor data arrives as <code class="docutils literal notranslate"><span class="pre">EVENT_SENSOR_LAYER_DATA</span></code>. The <code class="docutils literal notranslate"><span class="pre">handleSensorsData()</span></code> method identifies the source via <code class="docutils literal notranslate"><span class="pre">matchesDriver()</span></code> and parses the frame:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleSensorsData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHr</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGuiStarted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="w"> </span><span class="n">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">mHr</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">();</span>
+<span class="w">                </span><span class="n">mHrTl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">();</span>
+<span class="w">                </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">heartRate</span><span class="p">(</span><span class="n">mHr</span><span class="p">,</span><span class="w"> </span><span class="n">mHrTl</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mHr</span></code> and <code class="docutils literal notranslate"><span class="pre">mHrTl</span></code> are only updated while <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is true. Values remain at 0.0 until the first valid sensor reading after GUI start.</p>
+</section>
+<section id="data-validation">
+<h4>2. Data Validation<a class="headerlink" href="#data-validation" title="Link to this heading"></a></h4>
+<p>The HR parser’s <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> check rejects frames with out-of-range or missing signal. Trust level (0–3) is forwarded as-is to both the GUI and the FIT file; the app does not gate recording on trust level — all valid sensor frames contribute.</p>
+</section>
+<section id="fit-file-recording">
+<h4>3. FIT File Recording<a class="headerlink" href="#fit-file-recording" title="Link to this heading"></a></h4>
+<p>Heart rate data is recorded every second during active monitoring:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">time_t</span><span class="w"> </span><span class="n">utc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">processedUtc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">utc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">processedUtc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utc</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">ActivityWriter</span><span class="o">::</span><span class="n">RecordData</span><span class="w"> </span><span class="n">fitRecord</span><span class="p">{};</span>
+<span class="w">    </span><span class="n">fitRecord</span><span class="p">.</span><span class="n">timestamp</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">utc</span><span class="p">;</span>
+<span class="w">    </span><span class="n">fitRecord</span><span class="p">.</span><span class="n">heartRate</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mHr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">fitRecord</span><span class="p">.</span><span class="n">trustLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mHrTl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mActivityWriter</span><span class="p">.</span><span class="n">addRecord</span><span class="p">(</span><span class="n">fitRecord</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">processedUtc</span></code> is initialised to <code class="docutils literal notranslate"><span class="pre">startTime</span></code> (the timestamp passed to <code class="docutils literal notranslate"><span class="pre">ActivityWriter::start()</span></code>), so the first FIT record is written at <code class="docutils literal notranslate"><span class="pre">startTime</span> <span class="pre">+</span> <span class="pre">1s</span></code> — strictly after the FIT START event. This prevents the FIT validator from flagging a record at the same timestamp as the START event.</p>
+</section>
+</section>
+<section id="activity-state-management">
+<h3>Activity State Management<a class="headerlink" href="#activity-state-management" title="Link to this heading"></a></h3>
+<p>The service maintains a single boolean <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> to gate both sensor processing and FIT recording:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">onStartGUI()</span></code></strong> — sets <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span> <span class="pre">=</span> <span class="pre">true</span></code>, sends an initial <code class="docutils literal notranslate"><span class="pre">HR_VALUES(0.0,</span> <span class="pre">0.0)</span></code> to initialise the display.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">onStopGUI()</span></code></strong> — sets <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span> <span class="pre">=</span> <span class="pre">false</span></code>, stops FIT recording.</p></li>
+</ul>
+<p>Recording only occurs while the GUI is active. When <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is false, sensor data is ignored and no FIT records are written, but the service continues running and listening for <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>.</p>
+</section>
+<section id="service-lifecycle">
+<h3>Service Lifecycle<a class="headerlink" href="#service-lifecycle" title="Link to this heading"></a></h3>
+<p>The service’s <code class="docutils literal notranslate"><span class="pre">run()</span></code> method handles two exit conditions:</p>
+<p><strong>Normal exit — user presses R2:</strong></p>
+<ol class="arabic simple">
+<li><p>GUI sends <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> → service disconnects sensor, writes Lap + Session, returns.</p></li>
+</ol>
+<p><strong>Early exit — GUI never starts:</strong></p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SDK::Timer</span> <span class="pre">guiInitTimeout(TIMER_SECONDS(5))</span></code> starts at service entry.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is still false when the timer expires, the service breaks out of the loop and exits without saving a FIT file.</p></li>
+</ol>
+</section>
+<section id="getmessage-timeout">
+<h3>getMessage Timeout<a class="headerlink" href="#getmessage-timeout" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mKernel.comm.getMessage(msg,</span> <span class="pre">500)</span></code> uses a 500 ms timeout. This ensures the FIT record check (<code class="docutils literal notranslate"><span class="pre">processedUtc</span> <span class="pre">!=</span> <span class="pre">utc</span></code>) runs at least twice per second, maintaining a reliable 1 Hz recording cadence independently of sensor message frequency.</p>
+</section>
+<section id="activity-statistics">
+<h3>Activity Statistics<a class="headerlink" href="#activity-statistics" title="Link to this heading"></a></h3>
+<p>The service accumulates session statistics for the FIT Lap and Session summary messages:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">float</span><span class="w">    </span><span class="n">hrAvgSum</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">hrAvgCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">float</span><span class="w">    </span><span class="n">hrMax</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Only samples with <code class="docutils literal notranslate"><span class="pre">mHr</span> <span class="pre">&gt;</span> <span class="pre">1.0f</span></code> contribute to the average and maximum, filtering out zero readings that appear before the sensor delivers valid data.</p>
+</section>
+<section id="persistence-fit">
+<h3>Persistence (FIT)<a class="headerlink" href="#persistence-fit" title="Link to this heading"></a></h3>
+<p>FIT file lifecycle is managed by <code class="docutils literal notranslate"><span class="pre">ActivityWriter</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Called when</p></th>
+<th class="head"><p>Writes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start(info)</span></code></p></td>
+<td><p>Service entry</p></td>
+<td><p>FileHeader (placeholder), FileID, DeveloperDataID, FieldDescription (<code class="docutils literal notranslate"><span class="pre">hr_trust_level</span></code>), message definitions, START event</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">addRecord(record)</span></code></p></td>
+<td><p>Every second while <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code></p></td>
+<td><p>RECORD with timestamp, heart_rate, hr_trust_level</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">addLap(lap)</span></code></p></td>
+<td><p>Service exit</p></td>
+<td><p>LAP with duration, avg HR, max HR</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stop(track)</span></code></p></td>
+<td><p>Service exit</p></td>
+<td><p>STOP event, SESSION, ACTIVITY, updated FileHeader, CRC</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discard()</span></code></p></td>
+<td><p>(not used in this app)</p></td>
+<td><p>Deletes file</p></td>
+</tr>
+</tbody>
+</table>
+<p>FIT file structure per session:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FileHeader</span> <span class="p">(</span><span class="n">placeholder</span><span class="p">)</span>
+<span class="o">-&gt;</span> <span class="n">FileID</span> <span class="o">-&gt;</span> <span class="n">DeveloperDataID</span> <span class="o">-&gt;</span> <span class="n">FieldDescription</span><span class="p">(</span><span class="n">hr_trust_level</span><span class="p">)</span>
+<span class="o">-&gt;</span> <span class="p">[</span><span class="n">message</span> <span class="n">definitions</span><span class="p">]</span>
+<span class="o">-&gt;</span> <span class="n">Event</span><span class="p">(</span><span class="n">START</span><span class="p">)</span>  <span class="o">@</span> <span class="n">startTime</span>
+<span class="o">-&gt;</span> <span class="n">Record</span>        <span class="o">@</span> <span class="n">startTime</span> <span class="o">+</span> <span class="mi">1</span><span class="n">s</span>
+<span class="o">-&gt;</span> <span class="n">Record</span>        <span class="o">@</span> <span class="n">startTime</span> <span class="o">+</span> <span class="mi">2</span><span class="n">s</span>
+<span class="o">-&gt;</span> <span class="o">...</span>
+<span class="o">-&gt;</span> <span class="n">Event</span><span class="p">(</span><span class="n">STOP</span><span class="p">)</span>   <span class="o">@</span> <span class="n">endTime</span>
+<span class="o">-&gt;</span> <span class="n">Session</span>       <span class="o">@</span> <span class="n">endTime</span>
+<span class="o">-&gt;</span> <span class="n">Activity</span>      <span class="o">@</span> <span class="n">endTime</span>
+<span class="o">-&gt;</span> <span class="n">FileHeader</span>    <span class="p">(</span><span class="n">updated</span> <span class="k">with</span> <span class="n">final</span> <span class="n">data_size</span><span class="p">)</span>
+<span class="o">-&gt;</span> <span class="n">FileCRC</span>
+</pre></div>
+</div>
+<p>Files are stored under <code class="docutils literal notranslate"><span class="pre">Activity/YYYYMM/activity_YYYYMMDDThhmmss.fit</span></code>.</p>
+<p>See <a class="reference internal" href="../FitFiles-Structure.html"><span class="std std-doc">Docs/FitFiles-Structure.md</span></a> for FIT implementation details and <code class="docutils literal notranslate"><span class="pre">ActivityWriter</span></code> usage.</p>
+</section>
+</section>
+<section id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Link to this heading"></a></h2>
+<p>The GUI is built using the TouchGFX framework and follows the Model-View-Presenter pattern.</p>
+<section id="project-structure">
+<h3>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HRMonitor</span><span class="o">/</span><span class="n">Software</span><span class="o">/</span><span class="n">Apps</span><span class="o">/</span><span class="n">TouchGFX</span><span class="o">-</span><span class="n">GUI</span><span class="o">/</span>
+<span class="o">+--</span> <span class="n">HRMonitorGUI</span><span class="o">.</span><span class="n">touchgfx</span>   <span class="c1"># TouchGFX Designer project</span>
+<span class="o">+--</span> <span class="n">application</span><span class="o">.</span><span class="n">config</span>      <span class="c1"># Application configuration</span>
+<span class="o">+--</span> <span class="n">target</span><span class="o">.</span><span class="n">config</span>           <span class="c1"># Target hardware settings</span>
+<span class="o">+--</span> <span class="n">touchgfx</span><span class="o">.</span><span class="n">cmake</span>          <span class="c1"># CMake integration</span>
+<span class="o">+--</span> <span class="n">gui</span><span class="o">/</span>                    <span class="c1"># Custom GUI code</span>
+<span class="o">+--</span> <span class="n">assets</span><span class="o">/</span>                 <span class="c1"># Images, fonts, texts</span>
+<span class="o">+--</span> <span class="n">generated</span><span class="o">/</span>              <span class="c1"># Auto-generated TouchGFX code</span>
+<span class="o">+--</span> <span class="n">simulator</span><span class="o">/</span>              <span class="c1"># Simulator builds</span>
+</pre></div>
+</div>
+</section>
+<section id="model-view-presenter-pattern">
+<h3>Model-View-Presenter Pattern<a class="headerlink" href="#model-view-presenter-pattern" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Model</strong>: <code class="docutils literal notranslate"><span class="pre">Model.hpp/cpp</span></code> — service communication, lifecycle, idle timeout</p></li>
+<li><p><strong>View</strong>: <code class="docutils literal notranslate"><span class="pre">MainView</span></code> — UI rendering and button input</p></li>
+<li><p><strong>Presenter</strong>: <code class="docutils literal notranslate"><span class="pre">MainPresenter</span></code> — logic binding model and view</p></li>
+</ul>
+</section>
+<section id="model">
+<h3>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h3>
+<p>The Model class serves as the central data hub:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">UIEventListener</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IGuiLifeCycleCallback</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ICustomMessageHandler</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">bind</span><span class="p">(</span><span class="n">ModelListener</span><span class="o">*</span><span class="w"> </span><span class="n">listener</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">tick</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleKeyEvent</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">exitApp</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Key responsibilities:</p>
+<ul class="simple">
+<li><p>Lifecycle callbacks (<code class="docutils literal notranslate"><span class="pre">onStart</span></code>, <code class="docutils literal notranslate"><span class="pre">onResume</span></code>, <code class="docutils literal notranslate"><span class="pre">onSuspend</span></code>, <code class="docutils literal notranslate"><span class="pre">onStop</span></code>)</p></li>
+<li><p>Custom message handling from the service (<code class="docutils literal notranslate"><span class="pre">HR_VALUES</span></code>)</p></li>
+<li><p>Idle timeout management (<code class="docutils literal notranslate"><span class="pre">kScreenTimeoutSteps</span></code> = 30 s)</p></li>
+<li><p>Application exit via <code class="docutils literal notranslate"><span class="pre">mKernel.sys.exit()</span></code></p></li>
+</ul>
+</section>
+<section id="screens-1-total">
+<h3>Screens (1 total)<a class="headerlink" href="#screens-1-total" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Screen</p></th>
+<th class="head"><p>Class</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Main</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MainView</span></code></p></td>
+<td><p>Displays current heart rate and trust level; R2 exits</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="message-handling-system">
+<h3>Message Handling System<a class="headerlink" href="#message-handling-system" title="Link to this heading"></a></h3>
+<p>The Model implements <code class="docutils literal notranslate"><span class="pre">ICustomMessageHandler</span></code> to receive heart rate updates from the service:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Model::customMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">HR_VALUES</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">            </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">updateHR</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">default</span><span class="o">:</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="screen-navigation">
+<h3>Screen Navigation<a class="headerlink" href="#screen-navigation" title="Link to this heading"></a></h3>
+<p>The app uses a single-screen design with no transitions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MainView</span>
+    <span class="o">|</span>
+<span class="p">[</span><span class="n">R2</span><span class="p">:</span> <span class="n">exit</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="n">exitApp</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-containers">
+<h3>Custom Containers<a class="headerlink" href="#custom-containers" title="Link to this heading"></a></h3>
+<p>The app uses one SDK widget container from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — button arc indicators (L1/L2/R1/R2). Only R2 is lit (AMBER) on the main screen.</p></li>
+</ul>
+</section>
+<section id="input-handling">
+<h3>Input Handling<a class="headerlink" href="#input-handling" title="Link to this heading"></a></h3>
+<p><strong>Button Mapping</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Button</p></th>
+<th class="head"><p>Action</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>R2</p></td>
+<td><p>Exit application</p></td>
+</tr>
+</tbody>
+</table>
+<p>Any button press resets the idle timer.</p>
+</section>
+<section id="idle-timeout">
+<h3>Idle Timeout<a class="headerlink" href="#idle-timeout" title="Link to this heading"></a></h3>
+<p>The app implements automatic screen timeout:</p>
+<ul class="simple">
+<li><p>Timeout: <code class="docutils literal notranslate"><span class="pre">App::Config::kScreenTimeoutSteps</span></code> = 30 seconds at the frame rate</p></li>
+<li><p>On timeout, <code class="docutils literal notranslate"><span class="pre">modelListener-&gt;onIdleTimeout()</span></code> is called, which triggers <code class="docutils literal notranslate"><span class="pre">exitApp()</span></code></p></li>
+<li><p>Timer resets on any button press (<code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code>)</p></li>
+</ul>
+</section>
+</section>
+<section id="custom-message-system">
+<h2>Custom Message System<a class="headerlink" href="#custom-message-system" title="Link to this heading"></a></h2>
+<p>All service → GUI messages are declared in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Commands.hpp</span></code>. Message structs inherit from <code class="docutils literal notranslate"><span class="pre">SDK::MessageBase</span></code> and are wrapped in <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">pack(push,</span> <span class="pre">4)</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// Service --&gt; GUI</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">HR_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">HRValues</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">heartRate</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">HRValues</span><span class="p">()</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">HR_VALUES</span><span class="p">)</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">heartRate</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">)</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{}</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
+</pre></div>
+</div>
+<p><strong>Message summary</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Trigger</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HR_VALUES</span></code></p></td>
+<td><p>Service -&gt; GUI</p></td>
+<td><p>Every valid sensor reading while <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is true; also once on GUI start with (0.0, 0.0)</p></td>
+</tr>
+</tbody>
+</table>
+<section id="message-sender">
+<h3>Message Sender<a class="headerlink" href="#message-sender" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CustomMessage::Sender</span></code> provides type-safe message sending from the service to the GUI. It uses the <code class="docutils literal notranslate"><span class="pre">allocateMessage</span></code> / <code class="docutils literal notranslate"><span class="pre">sendMessage</span></code> / <code class="docutils literal notranslate"><span class="pre">releaseMessage</span></code> pattern:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Sender</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Sender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Service --&gt; GUI</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">heartRate</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">);</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">HRMonitor/Software/Apps/HRMonitor-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;HRMonitor&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Activity&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A14B7E9C2F8D6A53&quot;</span><span class="p">)</span>
+
+<span class="c"># Include SDK build scripts</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p><strong>Service Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_SERVICE</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>GUI Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">TOUCHGFX_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_GUI</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Complete App</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>:</p>
+<ul class="simple">
+<li><p>UNA SDK common, service, and GUI sources</p></li>
+<li><p>Sensor layer interfaces</p></li>
+<li><p>Kernel and messaging systems</p></li>
+</ul>
+<p><strong>App Libraries</strong> (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — service entry point, sensor handling, FIT recording coordination</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ActivityWriter</span></code> — FIT file lifecycle management</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — shared message types and <code class="docutils literal notranslate"><span class="pre">Sender</span></code> class</p></li>
+</ul>
+</section>
+<section id="development-setup">
+<h3>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for comprehensive development environment setup, build instructions, and toolchain requirements.</p>
+</section>
+<section id="simulator-build">
+<h3>Simulator Build<a class="headerlink" href="#simulator-build" title="Link to this heading"></a></h3>
+<p>The TouchGFX project includes a Visual Studio simulator build located in <code class="docutils literal notranslate"><span class="pre">simulator/msvs/Application.vcxproj</span></code>. The <code class="docutils literal notranslate"><span class="pre">ConfigurationSimulator.hpp</span></code> file controls which sensors are simulated; <code class="docutils literal notranslate"><span class="pre">HEAT_RATE_SIM_ENABLE</span> <span class="pre">1</span></code> activates the HR sensor simulator with configurable BPM range (<code class="docutils literal notranslate"><span class="pre">HEAT_RATE_SIM_MIN_HR</span></code> / <code class="docutils literal notranslate"><span class="pre">HEAT_RATE_SIM_MAX_HR</span></code>).</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The HRMonitor app is the simplest activity-recording UNA application: a single screen, a single sensor, and a single message type. Its minimal footprint makes it a clear reference for the SDK’s core patterns — sensor subscription, service-to-GUI messaging, FIT recording, and MVP-based display.</p>
+<p>Key architectural strengths include:</p>
+<ul class="simple">
+<li><p><strong>Separation of concerns</strong> — Service owns all sensor logic and FIT recording; GUI owns only display and exit</p></li>
+<li><p><strong>Minimal message surface</strong> — A single <code class="docutils literal notranslate"><span class="pre">HR_VALUES</span></code> message type covers the entire Service -&gt; GUI data path</p></li>
+<li><p><strong>Sensor abstraction</strong> — <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code> and <code class="docutils literal notranslate"><span class="pre">SensorDataParser::HeartRate</span></code> isolate the app from driver details</p></li>
+<li><p><strong>FIT persistence</strong> — <code class="docutils literal notranslate"><span class="pre">ActivityWriter</span></code> handles the full recording lifecycle (open, record, lap, session, CRC) independently of the service loop</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Hiking-Architecture.html" class="btn btn-neutral float-left" title="Hiking - Hiking Activity Tracking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GlanceHR-Architecture.html" class="btn btn-neutral float-right" title="GlanceHR - Heart Rate Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

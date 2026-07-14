@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Overview &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SDK Setup and Build Overview" href="sdk-setup.html" />
+    <link rel="prev" title="UNA Watch Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Platform Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#unique-architecture">Unique architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#platform-architecture">Platform Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-concepts">Core Concepts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pure-machine-code-execution">Pure Machine Code Execution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#position-independent-code-pic">Position-Independent Code (PIC)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shared-libc-integration">Shared libc Integration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dual-process-model">Dual-Process Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ipc-mechanisms">IPC Mechanisms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#memory-management">Memory Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#power-management">Power Management</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Platform Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/platform-overview.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="platform-overview">
+<span id="id1"></span><h1>Platform Overview<a class="headerlink" href="#platform-overview" title="Link to this heading"></a></h1>
+<p>This document provides an overview of the UNA Watch platform’s unique architecture and capabilities.</p>
+<section id="unique-architecture">
+<h2>Unique architecture<a class="headerlink" href="#unique-architecture" title="Link to this heading"></a></h2>
+<p>The UNA Watch architecture is unique: apps run as pure machine code directly in the MCU
+memory, leveraging position-independent code (PIC) and a shared libc library for maximum
+efficiency and abstraction from the kernel.</p>
+<p>UNA Watch apps are:</p>
+<ul class="simple">
+<li><p><strong>Pure Machine Code</strong>: Compiled ELF binaries executing directly in MCU memory</p></li>
+<li><p><strong>Position-Independent</strong>: Apps abstracted from kernel using PIC (Position-Independent Code)</p></li>
+<li><p><strong>Shared libc</strong>: Memory-efficient library sharing across all apps</p></li>
+<li><p><strong>Dual-Process</strong>: Service (background) + GUI (interface) process architecture</p></li>
+</ul>
+</section>
+<section id="platform-architecture">
+<h2>Platform Architecture<a class="headerlink" href="#platform-architecture" title="Link to this heading"></a></h2>
+<section id="core-concepts">
+<h3>Core Concepts<a class="headerlink" href="#core-concepts" title="Link to this heading"></a></h3>
+<section id="pure-machine-code-execution">
+<h4>Pure Machine Code Execution<a class="headerlink" href="#pure-machine-code-execution" title="Link to this heading"></a></h4>
+<p>UNA Watch apps are not interpreted or virtualized. They are compiled ARM Cortex-M ELF binaries that execute directly in the MCU memory. This provides:</p>
+<ul class="simple">
+<li><p><strong>Native Performance</strong>: Zero abstraction overhead.</p></li>
+<li><p><strong>Direct Hardware Access</strong>: Apps can interact with peripherals at MCU speeds.</p></li>
+<li><p><strong>Efficiency</strong>: Minimal memory and CPU footprint.</p></li>
+</ul>
+</section>
+<section id="position-independent-code-pic">
+<h4>Position-Independent Code (PIC)<a class="headerlink" href="#position-independent-code-pic" title="Link to this heading"></a></h4>
+<p>To allow apps to be loaded at any memory address without re-linking, the SDK uses Position-Independent Code.</p>
+<ul class="simple">
+<li><p><strong>Kernel Abstraction</strong>: Apps are completely abstracted from the kernel’s memory layout.</p></li>
+<li><p><strong>Dynamic Loading</strong>: The kernel can load, run, and unload apps on demand.</p></li>
+<li><p><strong>Process Isolation</strong>: No MMU, so the app can read entire MCU memory and execute whatever it want. Developers need to ensure that apps do not interfere with each other or the kernel.</p></li>
+</ul>
+</section>
+<section id="shared-libc-integration">
+<h4>Shared libc Integration<a class="headerlink" href="#shared-libc-integration" title="Link to this heading"></a></h4>
+<p>UNA Watch implements a shared libc architecture to save memory.</p>
+<ul class="simple">
+<li><p><strong>Common Base</strong>: All apps share the same standard library implementation provided by the kernel.</p></li>
+<li><p><strong>Reduced Footprint</strong>: Significant reduction in the size of each <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> file.</p></li>
+<li><p><strong>C++ Support</strong>: Full support for modern C++ features (strings, vectors, etc.) via the shared library.</p></li>
+</ul>
+</section>
+<section id="dual-process-model">
+<h4>Dual-Process Model<a class="headerlink" href="#dual-process-model" title="Link to this heading"></a></h4>
+<p>Every UNA Watch app consists of two distinct components:</p>
+<ol class="arabic simple">
+<li><p><strong>Service Process</strong>: Handles background logic, sensors, and BLE.</p></li>
+<li><p><strong>GUI Process</strong>: Handles user interface and interaction.</p></li>
+</ol>
+</section>
+<section id="ipc-mechanisms">
+<h4>IPC Mechanisms<a class="headerlink" href="#ipc-mechanisms" title="Link to this heading"></a></h4>
+<p>Communication between processes is handled via a high-performance message-passing system.</p>
+<ul class="simple">
+<li><p><strong>Kernel Pools</strong>: Messages are allocated from pre-defined kernel memory pools.</p></li>
+<li><p><strong>Type-Safe</strong>: Messages are strongly typed using C++ structures.</p></li>
+<li><p><strong>Asynchronous</strong>: Non-blocking message exchange for smooth UI performance.</p></li>
+</ul>
+</section>
+<section id="memory-management">
+<h4>Memory Management<a class="headerlink" href="#memory-management" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Pool Allocation</strong>: Prevents heap fragmentation in long-running applications.</p></li>
+<li><p><strong>RAII Patterns</strong>: Automatic resource cleanup using modern C++ practices.</p></li>
+<li><p><strong>Protected Regions</strong>: Memory regions are protected to prevent unauthorized access.</p></li>
+</ul>
+</section>
+<section id="power-management">
+<h4>Power Management<a class="headerlink" href="#power-management" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Deep Sleep</strong>: The kernel automatically enters low-power modes when idle.</p></li>
+<li><p><strong>Wake Sources</strong>: Apps uses common RTOS tehniques for manage cpu time: awating for messages from kernel or <code class="docutils literal notranslate"><span class="pre">sleep()</span></code>.</p></li>
+<li><p><strong>Battery Optimization</strong>: Ajustable sampling rates and batching sensors samples.</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>For detailed SDK setup and build workflows, see <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">SDK setup</span></a>.</p>
+<p>For hands-on app development tutorials, see <a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld tutorial</span></a>.</p>
+<p>For SDK APIs and interfaces, see <a class="reference internal" href="sdk-overview.html"><span class="std std-doc">SDK overview</span></a> and <a class="reference internal" href="architecture-deep-dive.html"><span class="std std-doc">architecture deep dive</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="UNA Watch Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sdk-setup.html" class="btn btn-neutral float-right" title="SDK Setup and Build Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

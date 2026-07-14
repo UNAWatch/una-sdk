@@ -1,0 +1,1289 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sensor Layer &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if ("False" === "True") {
+                                        addZoomToSvgs(d3.selectAll(""));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? mermaids_active.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Platform Architecture" href="architecture-deep-dive.html" />
+    <link rel="prev" title="SDK Overview" href="sdk-overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sensor Layer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sensor-types">Sensor Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#connection-api">Connection API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-reception-processing">Data Reception &amp; Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sensors">Sensors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#accelerometer-0x10">ACCELEROMETER (0x10)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accelerometer-raw-0x11">ACCELEROMETER_RAW (0x11)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heart-rate-0x41">HEART_RATE (0x41)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heart-rate-metrics-0x42">HEART_RATE_METRICS (0x42)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-detector-0x50">STEP_DETECTOR (0x50)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-counter-0x51">STEP_COUNTER (0x51)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#floor-counter-0x60">FLOOR_COUNTER (0x60)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ambient-temperature-0x70">AMBIENT_TEMPERATURE (0x70)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pressure-0x80">PRESSURE (0x80)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#altimeter-0x90">ALTIMETER (0x90)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wrist-motion-0xa0">WRIST_MOTION (0xA0)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#motion-detect-0xb0">MOTION_DETECT (0xB0)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-recognition-0xc0">ACTIVITY_RECOGNITION (0xC0)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-0xe0">ACTIVITY (0xE0)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spo2-0xf1">SPO2 (0xF1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gps-location-0x110">GPS_LOCATION (0x110)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gps-speed-0x111">GPS_SPEED (0x111)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gps-distance-0x112">GPS_DISTANCE (0x112)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#battery-level-0x120">BATTERY_LEVEL (0x120)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#battery-charging-0x121">BATTERY_CHARGING (0x121)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#battery-metrics-0x122">BATTERY_METRICS (0x122)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#touch-detect-0x140">TOUCH_DETECT (0x140)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-diagram">Workflow Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-multi-sensor-service">Example: Multi-Sensor Service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-messages">Additional Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#full-example">Full Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sensor Layer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/SensorsLayer.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sensor-layer">
+<h1>Sensor Layer<a class="headerlink" href="#sensor-layer" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The SensorLayer provides a high-level C++ API for subscribing to and receiving data from various sensors via IPC messages through the SDK Kernel. It abstracts low-level driver interactions, allowing applications to connect to sensors by type, specify sampling periods and latency, and receive batched sensor data events.</p>
+<p>Key components:</p>
+<ul class="simple">
+<li><p><a class="reference download internal" download="" href="_downloads/dff2268019dae627f8fd2da144f414a8/SensorConnection.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code></span></a>: Manages subscription (RequestDefault) and connection (RequestConnect/Disconnect).</p></li>
+<li><p>Sensor data delivery via <a class="reference download internal" download="" href="_downloads/160e77f48ee64da0da3a0e7c1dc98b77/SensorLayerMessages.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Message::Sensor::EventData</span></code></span></a> messages.</p></li>
+<li><p>Data processing with <a class="reference download internal" download="" href="_downloads/5be02dbaabeb3073791b1ed3f7d15ff4/SensorDataBatch.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Sensor::DataBatch</span></code></span></a>, <a class="reference download internal" download="" href="_downloads/dc33ef93c01a78255b2829918194b2a2/SensorDataView.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Sensor::DataView</span></code></span></a>, and type-specific parsers in DataParsers/.</p></li>
+</ul>
+</section>
+<section id="sensor-types">
+<h2>Sensor Types<a class="headerlink" href="#sensor-types" title="Link to this heading"></a></h2>
+<p>All available sensor types are defined in <a class="reference download internal" download="" href="_downloads/c469d8a3b0eb32b8df09af090005d172/SensorTypes.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type</span></code></span></a>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Category</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Hex Value</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Parser Available</p></th>
+<th class="head"><p>Fields</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>IMU</p></td>
+<td><p>ACCELEROMETER</p></td>
+<td><p>0x10</p></td>
+<td><p>Acceleration (3-axis)</p></td>
+<td><p>Yes</p></td>
+<td><p>X,Y,Z (float g) - 3</p></td>
+</tr>
+<tr class="row-odd"><td><p>IMU</p></td>
+<td><p>ACCELEROMETER_RAW</p></td>
+<td><p>0x11</p></td>
+<td><p>Acceleration raw</p></td>
+<td><p>Yes</p></td>
+<td><p>X,Y,Z (int16 raw) - 3</p></td>
+</tr>
+<tr class="row-even"><td><p>IMU</p></td>
+<td><p>GYROSCOPE</p></td>
+<td><p>0x20</p></td>
+<td><p>Angular rate (3-axis)</p></td>
+<td><p>Yes</p></td>
+<td><p>X,Y,Z (float) - 3</p></td>
+</tr>
+<tr class="row-odd"><td><p>IMU</p></td>
+<td><p>GYROSCOPE_RAW</p></td>
+<td><p>0x21</p></td>
+<td><p>Angular rate raw</p></td>
+<td><p>Yes</p></td>
+<td><p>X,Y,Z (int16 raw) - 3</p></td>
+</tr>
+<tr class="row-even"><td><p>IMU</p></td>
+<td><p>MAGNETIC_FIELD</p></td>
+<td><p>0x30</p></td>
+<td><p>Magnetic field (3-axis)</p></td>
+<td><p>No</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cardio</p></td>
+<td><p>HEART_BEAT</p></td>
+<td><p>0x40</p></td>
+<td><p>Beat peak event</p></td>
+<td><p>No</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>Cardio</p></td>
+<td><p>HEART_RATE</p></td>
+<td><p>0x41</p></td>
+<td><p>Current heart rate (bpm)</p></td>
+<td><p>Yes</p></td>
+<td><p>BPM (float), TRUST_LEVEL (float) - 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cardio</p></td>
+<td><p>HEART_RATE_METRICS</p></td>
+<td><p>0x42</p></td>
+<td><p>Aggregated metrics (AHR, RHR)</p></td>
+<td><p>Yes</p></td>
+<td><p>AHR (float bpm), RHR (float bpm) - 2</p></td>
+</tr>
+<tr class="row-even"><td><p>Pedometer</p></td>
+<td><p>STEP_DETECTOR</p></td>
+<td><p>0x50</p></td>
+<td><p>Step event</p></td>
+<td><p>Yes</p></td>
+<td><p>STEP_DETECTED (u32=1) - 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pedometer</p></td>
+<td><p>STEP_COUNTER</p></td>
+<td><p>0x51</p></td>
+<td><p>Step count since reboot</p></td>
+<td><p>Yes</p></td>
+<td><p>STEP_COUNT (u32) - 1</p></td>
+</tr>
+<tr class="row-even"><td><p>Pedometer</p></td>
+<td><p>FLOOR_COUNTER</p></td>
+<td><p>0x60</p></td>
+<td><p>Floor counter</p></td>
+<td><p>Yes</p></td>
+<td><p>FLOORS_UP (i32), FLOORS_DOWN (i32) - 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ambient</p></td>
+<td><p>AMBIENT_TEMPERATURE</p></td>
+<td><p>0x70</p></td>
+<td><p>Ambient temperature</p></td>
+<td><p>Yes</p></td>
+<td><p>TEMP (float °C?) - 1</p></td>
+</tr>
+<tr class="row-even"><td><p>Ambient</p></td>
+<td><p>PRESSURE</p></td>
+<td><p>0x80</p></td>
+<td><p>Atmospheric pressure</p></td>
+<td><p>Yes</p></td>
+<td><p>PRESS (float Pa), PRESS_SEA_LEVEL (float Pa) - 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ambient</p></td>
+<td><p>ALTIMETER</p></td>
+<td><p>0x90</p></td>
+<td><p>Altimeter</p></td>
+<td><p>Yes</p></td>
+<td><p>ALTITUDE (float m) - 1</p></td>
+</tr>
+<tr class="row-even"><td><p>Wrist</p></td>
+<td><p>WRIST_MOTION</p></td>
+<td><p>0xA0</p></td>
+<td><p>Wrist-motion event</p></td>
+<td><p>Yes</p></td>
+<td><p>WRIST_MOTION (u32=1) - 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Motion</p></td>
+<td><p>MOTION_DETECT</p></td>
+<td><p>0xB0</p></td>
+<td><p>Motion states (NO_MOTION, MOTION, SIG_MOTION)</p></td>
+<td><p>Yes</p></td>
+<td><p>ID (u32 enum) - 1</p></td>
+</tr>
+<tr class="row-even"><td><p>Motion</p></td>
+<td><p>ACTIVITY_RECOGNITION</p></td>
+<td><p>0xC0</p></td>
+<td><p>Activity classification (STILL, WALKING, RUNNING, UNKNOWN)</p></td>
+<td><p>Yes</p></td>
+<td><p>ID (u32 enum), CONFIDENCE (u8 %) - 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Motion</p></td>
+<td><p>GESTURE_RECOGNITION</p></td>
+<td><p>0xD0</p></td>
+<td><p>Discrete gesture events</p></td>
+<td><p>No</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>Daily</p></td>
+<td><p>ACTIVITY</p></td>
+<td><p>0xE0</p></td>
+<td><p>Active minutes (minutes)</p></td>
+<td><p>Yes</p></td>
+<td><p>DURATION (u32 ms) - 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Optical</p></td>
+<td><p>PPG</p></td>
+<td><p>0xF0</p></td>
+<td><p>Photoplethysmogram</p></td>
+<td><p>No</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>Optical</p></td>
+<td><p>SPO2</p></td>
+<td><p>0xF1</p></td>
+<td><p>Blood-oxygen saturation (SpO2)</p></td>
+<td><p>Yes</p></td>
+<td><p>SATURATION (float %), TRUST_LEVEL (float) - 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Optical</p></td>
+<td><p>ECG</p></td>
+<td><p>0x100</p></td>
+<td><p>Electrocardiogram</p></td>
+<td><p>No</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>GPS</p></td>
+<td><p>GPS_LOCATION</p></td>
+<td><p>0x110</p></td>
+<td><p>GNSS location</p></td>
+<td><p>Yes</p></td>
+<td><p>PRECISION (f m), COORDS_VALID (bool), LAT (f deg), LON (f deg), ALT (f m) - 5</p></td>
+</tr>
+<tr class="row-odd"><td><p>GPS</p></td>
+<td><p>GPS_SPEED</p></td>
+<td><p>0x111</p></td>
+<td><p>GNSS speed</p></td>
+<td><p>Yes</p></td>
+<td><p>SPEED (f m/s) - 1</p></td>
+</tr>
+<tr class="row-even"><td><p>GPS</p></td>
+<td><p>GPS_DISTANCE</p></td>
+<td><p>0x112</p></td>
+<td><p>GNSS distance/odometer</p></td>
+<td><p>Yes</p></td>
+<td><p>DISTANCE (f m) - 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Battery</p></td>
+<td><p>BATTERY_LEVEL</p></td>
+<td><p>0x120</p></td>
+<td><p>Charge level (%)</p></td>
+<td><p>Yes</p></td>
+<td><p>LEVEL (f 0-100) - 1</p></td>
+</tr>
+<tr class="row-even"><td><p>Battery</p></td>
+<td><p>BATTERY_CHARGING</p></td>
+<td><p>0x121</p></td>
+<td><p>Charging state</p></td>
+<td><p>Yes</p></td>
+<td><p>CONNECTED (u32 bool), CHARGING (u32 bool) - 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Battery</p></td>
+<td><p>BATTERY_METRICS</p></td>
+<td><p>0x122</p></td>
+<td><p>Voltage/current/capacity</p></td>
+<td><p>Yes</p></td>
+<td><p>VOLTAGE (f V), CURRENT (f mA), AVG_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh) - 5</p></td>
+</tr>
+<tr class="row-even"><td><p>Fusion</p></td>
+<td><p>FUSION</p></td>
+<td><p>0x130</p></td>
+<td><p>Fused IMU</p></td>
+<td><p>Yes</p></td>
+<td><p>ACCEL_X,Y,Z + GYRO_X,Y,Z (float) - 6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fusion</p></td>
+<td><p>FUSION_RAW</p></td>
+<td><p>0x131</p></td>
+<td><p>Raw fusion inputs</p></td>
+<td><p>Yes</p></td>
+<td><p>ACCEL_X,Y,Z + GYRO_X,Y,Z (int16 raw) - 6</p></td>
+</tr>
+<tr class="row-even"><td><p>Touch</p></td>
+<td><p>TOUCH_DETECT</p></td>
+<td><p>0x140</p></td>
+<td><p>Touch/worn/unworn</p></td>
+<td><p>Yes</p></td>
+<td><p>TOUCH (u32 bool) - 1</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="connection-api">
+<h2>Connection API<a class="headerlink" href="#connection-api" title="Link to this heading"></a></h2>
+<p>Use <a class="reference download internal" download="" href="_downloads/dff2268019dae627f8fd2da144f414a8/SensorConnection.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code></span></a>:</p>
+<p>Constructors:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Connection(Type</span> <span class="pre">id,</span> <span class="pre">float</span> <span class="pre">period</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">uint32_t</span> <span class="pre">latency</span> <span class="pre">=</span> <span class="pre">0)</span></code>: Lazy resolve handle on connect.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Connection(uint8_t</span> <span class="pre">handle,</span> <span class="pre">float</span> <span class="pre">period</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">uint32_t</span> <span class="pre">latency</span> <span class="pre">=</span> <span class="pre">0)</span></code>: Use existing handle.</p></li>
+</ul>
+<p>Methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">connect()</span></code>: Subscribe if needed, connect with stored params.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">connect(float</span> <span class="pre">period,</span> <span class="pre">uint32_t</span> <span class="pre">latency)</span></code>: Update params, connect.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">isValid()</span></code>: Handle != 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">isConnected()</span></code>: Active connection.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">disconnect()</span></code>: Send RequestDisconnect.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">matchesDriver(uint16_t</span> <span class="pre">handle)</span></code>: Compare handles.</p></li>
+</ul>
+<p>Destructor auto-disconnects.</p>
+<p>Implementation in <a class="reference download internal" download="" href="_downloads/43a8b775da9fe6961375b8fc37bbb9c8/SensorConnection.cpp"><span class="xref download myst">SensorConnection.cpp</span></a>.</p>
+</section>
+<section id="data-reception-processing">
+<h2>Data Reception &amp; Processing<a class="headerlink" href="#data-reception-processing" title="Link to this heading"></a></h2>
+<p><strong>Reception</strong>: Poll kernel IPC:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">KernelProviderService</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">getKernel</span><span class="p">();</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">;</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">kernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">EVENT_SENSOR_LAYER_DATA</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">EventData</span><span class="o">*</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">EventData</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="w"> </span><span class="nf">batch</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">-&gt;</span><span class="n">stride</span><span class="p">);</span>
+<span class="w">        </span><span class="n">processBatch</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">kernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Processing</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DataBatch</span></code>: Iterable views (<code class="docutils literal notranslate"><span class="pre">batch.size()</span></code>, <code class="docutils literal notranslate"><span class="pre">batch[i]</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataView</span></code>: Timestamps (<code class="docutils literal notranslate"><span class="pre">getTimestamp()</span></code>, <code class="docutils literal notranslate"><span class="pre">getTimestampUs()</span></code>), fields (<code class="docutils literal notranslate"><span class="pre">f[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">u[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">i[0]</span></code> float/u32/i32).</p></li>
+</ul>
+<p>See <a class="reference download internal" download="" href="_downloads/e19290aacc57e73c0756390becbaf1f1/SensorData.hpp"><span class="xref download myst">SensorData.hpp</span></a>, <a class="reference download internal" download="" href="_downloads/dc33ef93c01a78255b2829918194b2a2/SensorDataView.hpp"><span class="xref download myst">DataView.hpp</span></a>.</p>
+</section>
+<section id="sensors">
+<h2>Sensors<a class="headerlink" href="#sensors" title="Link to this heading"></a></h2>
+<p>Detailed usage for each supported sensor (with parser). For others, use DataView directly.</p>
+<section id="accelerometer-0x10">
+<h3>ACCELEROMETER (0x10)<a class="headerlink" href="#accelerometer-0x10" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Accelerometer</span></code></p>
+<p><strong>Fields</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>X</p></td>
+<td><p>float</p></td>
+<td><p>g</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>Y</p></td>
+<td><p>float</p></td>
+<td><p>g</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>Z</p></td>
+<td><p>float</p></td>
+<td><p>g</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Code Snippet</strong>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="nf">conn</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">ACCELEROMETER</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1f</span><span class="p">);</span>
+<span class="n">conn</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">processBatch</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">batch</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">Accelerometer</span><span class="w"> </span><span class="n">p</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kt">float</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getX</span><span class="p">(),</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getY</span><span class="p">(),</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getZ</span><span class="p">();</span>
+<span class="w">                </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">ts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getTimestampUs</span><span class="p">();</span>
+<span class="w">                </span><span class="c1">// Use data</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="accelerometer-raw-0x11">
+<h3>ACCELEROMETER_RAW (0x11)<a class="headerlink" href="#accelerometer-raw-0x11" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::AccelerometerRaw</span></code></p>
+<p><strong>Fields</strong>: X/Y/Z (int16_t raw)</p>
+<p><strong>Code Snippet</strong>:
+Similar, <code class="docutils literal notranslate"><span class="pre">int16_t</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">p.getX();</span></code> etc.</p>
+</section>
+<section id="heart-rate-0x41">
+<h3>HEART_RATE (0x41)<a class="headerlink" href="#heart-rate-0x41" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::HeartRate</span></code></p>
+<p><strong>Fields</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>BPM</p></td>
+<td><p>float</p></td>
+<td><p>bpm</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>TRUST_LEVEL</p></td>
+<td><p>float</p></td>
+<td><p>-</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Code Snippet</strong>:
+As above, <code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">bpm</span> <span class="pre">=</span> <span class="pre">p.getBpm();</span> <span class="pre">float</span> <span class="pre">trust</span> <span class="pre">=</span> <span class="pre">p.getTrustLevel();</span></code></p>
+</section>
+<section id="heart-rate-metrics-0x42">
+<h3>HEART_RATE_METRICS (0x42)<a class="headerlink" href="#heart-rate-metrics-0x42" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::HeartRateMetrics</span></code></p>
+<p><strong>Fields</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>AHR</p></td>
+<td><p>float</p></td>
+<td><p>bpm</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>RHR</p></td>
+<td><p>float</p></td>
+<td><p>bpm</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="step-detector-0x50">
+<h3>STEP_DETECTOR (0x50)<a class="headerlink" href="#step-detector-0x50" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::StepDetector</span></code></p>
+<p><strong>Fields</strong>: STEP_DETECTED (u32 =1)</p>
+<p><strong>Code</strong>: <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(p.isStepDetected())</span> <span class="pre">{</span> <span class="pre">/*</span> <span class="pre">step</span> <span class="pre">*/</span> <span class="pre">}</span></code></p>
+</section>
+<section id="step-counter-0x51">
+<h3>STEP_COUNTER (0x51)<a class="headerlink" href="#step-counter-0x51" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::StepCounter</span></code></p>
+<p><strong>Fields</strong>: STEP_COUNT (u32)</p>
+</section>
+<section id="floor-counter-0x60">
+<h3>FLOOR_COUNTER (0x60)<a class="headerlink" href="#floor-counter-0x60" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::FloorCounter</span></code></p>
+<p><strong>Fields</strong>: FLOORS_UP (i32), FLOORS_DOWN (i32)</p>
+</section>
+<section id="ambient-temperature-0x70">
+<h3>AMBIENT_TEMPERATURE (0x70)<a class="headerlink" href="#ambient-temperature-0x70" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Temperature</span></code></p>
+<p><strong>Fields</strong>: TEMP (float)</p>
+</section>
+<section id="pressure-0x80">
+<h3>PRESSURE (0x80)<a class="headerlink" href="#pressure-0x80" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Pressure</span></code></p>
+<p><strong>Fields</strong>: PRESS (float Pa), PRESS_SEA_LEVEL (float Pa)</p>
+</section>
+<section id="altimeter-0x90">
+<h3>ALTIMETER (0x90)<a class="headerlink" href="#altimeter-0x90" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Altimeter</span></code></p>
+<p><strong>Fields</strong>: ALTITUDE (float m)</p>
+</section>
+<section id="wrist-motion-0xa0">
+<h3>WRIST_MOTION (0xA0)<a class="headerlink" href="#wrist-motion-0xa0" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::WristMotion</span></code></p>
+<p><strong>Fields</strong>: WRIST_MOTION (u32=1)</p>
+<p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(p.isWristMotion())</span> <span class="pre">{</span> <span class="pre">/*</span> <span class="pre">raise</span> <span class="pre">wrist</span> <span class="pre">*/</span> <span class="pre">}</span></code></p>
+</section>
+<section id="motion-detect-0xb0">
+<h3>MOTION_DETECT (0xB0)<a class="headerlink" href="#motion-detect-0xb0" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::MotionDetect</span></code></p>
+<p><strong>Fields</strong>: ID (u32: NO_MOTION=0, MOTION, SIG_MOTION)</p>
+<p><code class="docutils literal notranslate"><span class="pre">MotionDetect::Motion</span> <span class="pre">m</span> <span class="pre">=</span> <span class="pre">p.getID();</span></code></p>
+</section>
+<section id="activity-recognition-0xc0">
+<h3>ACTIVITY_RECOGNITION (0xC0)<a class="headerlink" href="#activity-recognition-0xc0" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::ActivityRecognition</span></code></p>
+<p><strong>Fields</strong>: ID (STILL=0, WALKING, RUNNING, UNKNOWN), CONFIDENCE (u8 %)</p>
+</section>
+<section id="activity-0xe0">
+<h3>ACTIVITY (0xE0)<a class="headerlink" href="#activity-0xe0" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Activity</span></code></p>
+<p><strong>Fields</strong>: DURATION (u32 ms)</p>
+</section>
+<section id="spo2-0xf1">
+<h3>SPO2 (0xF1)<a class="headerlink" href="#spo2-0xf1" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Spo2</span></code></p>
+<p>Blood-oxygen saturation derived from the optical PPG path. Delivered as a processed scalar with a trust level, mirroring HEART_RATE.</p>
+<p><strong>Fields</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>SATURATION</p></td>
+<td><p>float</p></td>
+<td><p>%</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>TRUST_LEVEL</p></td>
+<td><p>float</p></td>
+<td><p>-</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">spo2</span> <span class="pre">=</span> <span class="pre">p.getSaturation();</span> <span class="pre">float</span> <span class="pre">trust</span> <span class="pre">=</span> <span class="pre">p.getTrustLevel();</span></code></p>
+</section>
+<section id="gps-location-0x110">
+<h3>GPS_LOCATION (0x110)<a class="headerlink" href="#gps-location-0x110" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::GpsLocation</span></code></p>
+<p><strong>Fields</strong>: PRECISION (f m), COORDS_VALID (bool), LAT/LON (f deg), ALT (f m)</p>
+<p><code class="docutils literal notranslate"><span class="pre">p.getLatitude()</span></code>, <code class="docutils literal notranslate"><span class="pre">p.isCoordinatesValid()</span></code></p>
+</section>
+<section id="gps-speed-0x111">
+<h3>GPS_SPEED (0x111)<a class="headerlink" href="#gps-speed-0x111" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::GpsSpeed</span></code></p>
+<p><strong>Fields</strong>: SPEED (f m/s)</p>
+</section>
+<section id="gps-distance-0x112">
+<h3>GPS_DISTANCE (0x112)<a class="headerlink" href="#gps-distance-0x112" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::GpsDistance</span></code></p>
+<p><strong>Fields</strong>: DISTANCE (f m)</p>
+</section>
+<section id="battery-level-0x120">
+<h3>BATTERY_LEVEL (0x120)<a class="headerlink" href="#battery-level-0x120" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::BatteryLevel</span></code></p>
+<p><strong>Fields</strong>: LEVEL (f 0-100 %)</p>
+</section>
+<section id="battery-charging-0x121">
+<h3>BATTERY_CHARGING (0x121)<a class="headerlink" href="#battery-charging-0x121" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::BatteryCharging</span></code></p>
+<p><strong>Fields</strong>: CONNECTED (bool), CHARGING (bool)</p>
+</section>
+<section id="battery-metrics-0x122">
+<h3>BATTERY_METRICS (0x122)<a class="headerlink" href="#battery-metrics-0x122" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::BatteryMetrics</span></code></p>
+<p><strong>Fields</strong>: VOLTAGE (f V), CURRENT (f mA), AVERAGE_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh)</p>
+</section>
+<section id="touch-detect-0x140">
+<h3>TOUCH_DETECT (0x140)<a class="headerlink" href="#touch-detect-0x140" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Touch</span></code></p>
+<p><strong>Fields</strong>: TOUCH (bool)</p>
+<p>For sensors without parsers (e.g. MAGNETIC_FIELD), use DataView:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataView</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">magX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w"> </span><span class="c1">// Assume layout known from driver docs</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="workflow-diagram">
+<h2>Workflow Diagram<a class="headerlink" href="#workflow-diagram" title="Link to this heading"></a></h2>
+<pre  class="mermaid">
+        graph TD
+    A[Connection(Type, period)] --&gt; B[conn.connect()]
+    B --&gt; C[Kernel: EventData(handle, data[], count, stride)]
+    C --&gt; D[app.getMessage() -&gt; EventData]
+    D --&gt; E[DataBatch batch]
+    E --&gt; F[DataView view = batch[0]]
+    F --&gt; G[Parser p(view)]
+    G --&gt; H{isDataValid?}
+    H --&gt;|Yes| I[Process fields]
+    </pre></section>
+<section id="example-multi-sensor-service">
+<h2>Example: Multi-Sensor Service<a class="headerlink" href="#example-multi-sensor-service" title="Link to this heading"></a></h2>
+<p>Adapted from tutorial <a class="reference download internal" download="" href="_downloads/1c9f39bd8d71a8f0950a3a824efe3e81/Service.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code></span></a>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In app service loop</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="nf">hr</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">HEART_RATE</span><span class="p">);</span>
+<span class="n">hr</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span><span class="w"> </span><span class="c1">// Auto-subscribe &amp; connect</span>
+
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">kernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">EVENT_SENSOR_LAYER_DATA</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">EventData</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="w"> </span><span class="nf">batch</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">-&gt;</span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">-&gt;</span><span class="n">stride</span><span class="p">);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hr</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">auto</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="kt">float</span><span class="w"> </span><span class="n">bpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">();</span>
+<span class="w">                    </span><span class="c1">// Send to GUI or process</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">kernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="n">hr</span><span class="p">.</span><span class="n">disconnect</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Full tutorial in Docs/Tutorials/Sensors/.</p>
+</section>
+<section id="additional-messages">
+<h2>Additional Messages<a class="headerlink" href="#additional-messages" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>RequestList: List handles for type.</p></li>
+<li><p>RequestGetDesc: Sensor descriptor string.</p></li>
+</ul>
+<p>See <a class="reference download internal" download="" href="_downloads/160e77f48ee64da0da3a0e7c1dc98b77/SensorLayerMessages.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SensorLayerMessages.hpp</span></code></span></a>.</p>
+</section>
+<section id="full-example">
+<h2>Full Example<a class="headerlink" href="#full-example" title="Link to this heading"></a></h2>
+<p>See tutorial <a class="reference download internal" download="" href="_downloads/ab94e0f402d0d6ca25c82c9aa6811aeb/Service.hpp"><span class="xref download myst">Service.hpp/cpp</span></a> for multi-sensor handling with GUI comm.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sdk-overview.html" class="btn btn-neutral float-left" title="SDK Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="architecture-deep-dive.html" class="btn btn-neutral float-right" title="Platform Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

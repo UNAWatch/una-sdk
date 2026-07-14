@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buttons - Handling User Input and Navigation &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/version-selector.js?v=50f89983"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ScrollMenu - Creating Scrollable Lists and Menus" href="../ScrollMenu/ARCHITECTURE.html" />
+    <link rel="prev" title="HelloWorld - Introduction to UNA App Architecture" href="../HelloWorld/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Buttons - Handling User Input and Navigation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-ll-learn">What You’ll Learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-and-running-buttons">Building and Running Buttons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#buttons-app-overview">Buttons App Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#navigation-flow">Navigation Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#architecture-components">Architecture Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-service-layer-backend">The Service Layer (Backend)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-gui-layer-frontend">The GUI Layer (Frontend)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#button-event-handling">Button Event Handling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#screen-updates">Screen Updates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#buttons-app-creation-process">Buttons app creation process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#understanding-button-event-handling">Understanding Button Event Handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#button-event-processing">Button Event Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screen-state-management">Screen State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exit-handling">Exit Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-patterns-and-best-practices">Common Patterns and Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#button-handling">Button Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ui-updates">UI Updates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-organization">Code Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-considerations">Performance Considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#key-code-insights-for-new-developers">Key Code Insights for New Developers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mainview-cpp-structure">MainView.cpp Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#button-configuration">Button Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#state-tracking">State Tracking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-issues">Build Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-issues">Runtime Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-mistakes">Common Mistakes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Buttons - Handling User Input and Navigation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/Buttons/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="buttons-handling-user-input-and-navigation">
+<span id="tutorials-buttons-architecture"></span><h1>Buttons - Handling User Input and Navigation<a class="headerlink" href="#buttons-handling-user-input-and-navigation" title="Link to this heading"></a></h1>
+<p>Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA Watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.</p>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Buttons">Project Folder</a></p>
+<section id="what-you-ll-learn">
+<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>How to implement GUI applications with TouchGFX</p></li>
+<li><p>Handling hardware button events for navigation</p></li>
+<li><p>Understanding the UNA app framework for interactive applications</p></li>
+</ul>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>Before building the Buttons app, you need to set up the UNA SDK environment. Follow the <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a> for complete installation instructions, including:</p>
+<ul class="simple">
+<li><p>UNA SDK cloned (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/UNAWatch/una-sdk.git</span></code>)</p></li>
+<li><p>ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)</p></li>
+<li><p>CMake 3.21+ and make</p></li>
+<li><p>Python 3 with pip packages installed</p></li>
+</ul>
+<p><strong>Minimum requirements for Buttons:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable pointing to SDK root</p></li>
+<li><p>ARM GCC toolchain in PATH</p></li>
+<li><p>CMake and build tools</p></li>
+</ul>
+<p><strong>For GUI development/modification:</strong></p>
+<ul class="simple">
+<li><p>TouchGFX Designer installed (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>)</p></li>
+</ul>
+</section>
+<section id="building-and-running-buttons">
+<h3>Building and Running Buttons<a class="headerlink" href="#building-and-running-buttons" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Verify your environment setup</strong> (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a> for details):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$UNA_SDK</span><span class="w">                   </span><span class="c1"># Should point to SDK root.</span>
+<span class="w">                                </span><span class="c1"># Note for backward compatibility with linux path notation it uses &#39;/&#39;</span>
+
+which<span class="w"> </span>arm-none-eabi-gcc<span class="w">         </span><span class="c1"># Should find ST toolchain</span>
+which<span class="w"> </span>cmake<span class="w">                     </span><span class="c1"># Should find CMake</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Navigate to the Buttons directory:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/Buttons
+</pre></div>
+</div>
+</li>
+<li><p><strong>Build the application:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>../Software/Apps/Buttons-CMake
+make
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The app will start and display an initial black screen. Use the hardware buttons to navigate between different colored screens, demonstrating buttons navigation patterns.</p>
+</section>
+<section id="running-on-simulator">
+<h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
+<p>To test the app on the simulator (Windows only):</p>
+<ol class="arabic simple">
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Buttons.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
+<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">Buttons\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
+<li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
+</ol>
+<p>In the simulator, use keyboard keys to simulate hardware buttons:</p>
+<ul class="simple">
+<li><p><strong>1</strong> = L1 (Red screen)</p></li>
+<li><p><strong>2</strong> = L2 (Black screen)</p></li>
+<li><p><strong>3</strong> = R1 (Blue screen)</p></li>
+<li><p><strong>4</strong> = R2 (Green screen, double-press to exit)</p></li>
+</ul>
+<p>The simulator will display color changes based on button presses. For detailed simulator setup and button mapping, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
+</section>
+</section>
+<section id="buttons-app-overview">
+<h2>Buttons App Overview<a class="headerlink" href="#buttons-app-overview" title="Link to this heading"></a></h2>
+<section id="navigation-flow">
+<h3>Navigation Flow<a class="headerlink" href="#navigation-flow" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Start on the black screen</p></li>
+<li><p>Press top right button (R1) → Blue screen</p></li>
+<li><p>Press bottom right button (R2) → Green screen</p></li>
+<li><p>Press left button (L1) → Red screen</p></li>
+<li><p>Press top left button (L2) → Return to black screen</p></li>
+<li><p>Double-press bottom right button (R2) → Exit the app</p></li>
+</ul>
+</section>
+<section id="architecture-components">
+<h3>Architecture Components<a class="headerlink" href="#architecture-components" title="Link to this heading"></a></h3>
+<section id="the-service-layer-backend">
+<h4>The Service Layer (Backend)<a class="headerlink" href="#the-service-layer-backend" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Manages the application lifecycle</p></li>
+<li><p>Handles communication with the GUI layer</p></li>
+<li><p>Minimal implementation since no sensors are used</p></li>
+</ul>
+</section>
+<section id="the-gui-layer-frontend">
+<h4>The GUI Layer (Frontend)<a class="headerlink" href="#the-gui-layer-frontend" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a></p></li>
+<li><p>Handles button events and screen transitions</p></li>
+<li><p>Updates the display based on user input</p></li>
+<li><p>Manages screen state and visual elements</p></li>
+</ul>
+</section>
+<section id="button-event-handling">
+<h4>Button Event Handling<a class="headerlink" href="#button-event-handling" title="Link to this heading"></a></h4>
+<p>The app responds to hardware button presses through the <code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code> method in <code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code>. Each button press triggers a screen change by updating the background color and potentially displaying text.</p>
+</section>
+<section id="screen-updates">
+<h4>Screen Updates<a class="headerlink" href="#screen-updates" title="Link to this heading"></a></h4>
+<p>After changing screen properties (like color), the <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> method is called to refresh the display, ensuring changes are visible to the user.</p>
+</section>
+</section>
+</section>
+<section id="buttons-app-creation-process">
+<h2>Buttons app creation process<a class="headerlink" href="#buttons-app-creation-process" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Copy HelloWorld tutorial</strong></p></li>
+<li><p><strong>Change naming</strong>: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in <a class="reference external" href="https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps">Creating New Apps</a> gives commmands for generating your own APP ID programatically from the name.</p></li>
+<li><p><strong>Commit initial changes</strong>: it’s a good practice to use version control system like git</p></li>
+<li><p>*<strong>Edit TouchGFX</strong>:</p>
+<ul class="simple">
+<li><p>Rename <code class="docutils literal notranslate"><span class="pre">*.touchgfx</span></code> to <code class="docutils literal notranslate"><span class="pre">&lt;MY_APP&gt;.touchgfx</span></code></p></li>
+<li><p>Rename the ‘Name’ field in Buttons.touchgfx at line 163: <code class="docutils literal notranslate"><span class="pre">Buttons.touchgfx:163</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;Name&quot;:</span> <span class="pre">&quot;Buttons&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;Name&quot;:</span> <span class="pre">&quot;&lt;MY_APP&gt;&quot;</span></code></p></li>
+<li><p>Add 240x240 a box <code class="docutils literal notranslate"><span class="pre">box1</span></code> at X:0 Y:0</p></li>
+<li><p>Click <strong>Generate code</strong></p></li>
+</ul>
+</li>
+<li><p><strong>Edit MainView.cpp</strong>:</p>
+<ul>
+<li><p>MainView.cpp is located at ‘…\Software\Apps\TouchGFX-GUI\gui\src\main_screen’</p></li>
+<li><p>You can see <code class="docutils literal notranslate"><span class="pre">touchgfx::Box</span> <span class="pre">box1;</span></code> in <code class="docutils literal notranslate"><span class="pre">MainViewBase.cpp</span></code> (’…\Software\Apps\TouchGFX-GUI\generated\gui_generated\src\main_screen’)</p></li>
+<li><p>Add box1 color set to <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">MainView::handleKeyEvent(uint8_t</span> <span class="pre">key)</span></code> :</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">MainView::handleKeyEvent</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">L1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">box1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="w">   </span><span class="p">}</span>
+
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">L2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">box1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="mh">0xff</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="w">   </span><span class="p">}</span>
+
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">box1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mh">0xff</span><span class="p">));</span>
+<span class="w">   </span><span class="p">}</span>
+
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">box1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mh">0xff</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>In MainView.hpp (’…\Software\Apps\TouchGFX-GUI\gui\include\gui\main_screen’)</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">lastKeyPressed</span></code> state to exit on double <strong>R2</strong> clicks:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MainView</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">MainViewBase</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;\0&#39;</span><span class="p">};</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">   </span><span class="n">MainView</span><span class="p">();</span>
+<span class="w">   </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">MainView</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">   </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">setupScreen</span><span class="p">();</span>
+<span class="w">   </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">tearDownScreen</span><span class="p">();</span>
+
+<span class="k">protected</span><span class="o">:</span>
+<span class="w">   </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">handleKeyEvent</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Exit:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">box1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mh">0xff</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">exit</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">key</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p><strong>Add Screen refresh</strong>: <code class="docutils literal notranslate"><span class="pre">box1.invalidate();</span></code></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="n">box1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mh">0xff</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">exit</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">key</span><span class="p">;</span>
+<span class="n">box1</span><span class="p">.</span><span class="n">invalidate</span><span class="p">();</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Compile code</strong> using <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">SDK setup</span></a> instructions.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk&gt;<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>.<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\</span>
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake&gt;<span class="w"> </span>mkdir<span class="w"> </span>build
+
+
+<span class="w">    </span>Directory:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake
+
+
+Mode<span class="w">                 </span>LastWriteTime<span class="w">         </span>Length<span class="w"> </span>Name
+----<span class="w">                 </span>-------------<span class="w">         </span>------<span class="w"> </span>----
+d-----<span class="w">         </span><span class="m">2</span>/18/2026<span class="w">   </span><span class="m">9</span>:37<span class="w"> </span>PM<span class="w">                </span>build
+
+
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake&gt;<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>.<span class="se">\b</span>uild<span class="se">\</span>
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild&gt;<span class="w">  </span>cmake<span class="w"> </span>-G<span class="w"> </span><span class="s1">&#39;Unix Makefiles&#39;</span><span class="w">  </span>..
+--<span class="w"> </span>The<span class="w"> </span>ASM<span class="w"> </span>compiler<span class="w"> </span>identification<span class="w"> </span>is<span class="w"> </span>GNU
+--<span class="w"> </span>Found<span class="w"> </span>assembler:<span class="w"> </span>C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/arm-none-eabi-gcc.exe
+--<span class="w"> </span>The<span class="w"> </span>C<span class="w"> </span>compiler<span class="w"> </span>identification<span class="w"> </span>is<span class="w"> </span>GNU<span class="w"> </span><span class="m">13</span>.3.1
+--<span class="w"> </span>The<span class="w"> </span>CXX<span class="w"> </span>compiler<span class="w"> </span>identification<span class="w"> </span>is<span class="w"> </span>GNU<span class="w"> </span><span class="m">13</span>.3.1
+--<span class="w"> </span>Detecting<span class="w"> </span>C<span class="w"> </span>compiler<span class="w"> </span>ABI<span class="w"> </span>info
+--<span class="w"> </span>Detecting<span class="w"> </span>C<span class="w"> </span>compiler<span class="w"> </span>ABI<span class="w"> </span>info<span class="w"> </span>-<span class="w"> </span><span class="k">done</span>
+--<span class="w"> </span>Check<span class="w"> </span><span class="k">for</span><span class="w"> </span>working<span class="w"> </span>C<span class="w"> </span>compiler:<span class="w"> </span>C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/arm-none-eabi-gcc.exe<span class="w"> </span>-<span class="w"> </span>skipped
+--<span class="w"> </span>Detecting<span class="w"> </span>C<span class="w"> </span>compile<span class="w"> </span>features
+--<span class="w"> </span>Detecting<span class="w"> </span>C<span class="w"> </span>compile<span class="w"> </span>features<span class="w"> </span>-<span class="w"> </span><span class="k">done</span>
+--<span class="w"> </span>Detecting<span class="w"> </span>CXX<span class="w"> </span>compiler<span class="w"> </span>ABI<span class="w"> </span>info
+--<span class="w"> </span>Detecting<span class="w"> </span>CXX<span class="w"> </span>compiler<span class="w"> </span>ABI<span class="w"> </span>info<span class="w"> </span>-<span class="w"> </span><span class="k">done</span>
+--<span class="w"> </span>Check<span class="w"> </span><span class="k">for</span><span class="w"> </span>working<span class="w"> </span>CXX<span class="w"> </span>compiler:<span class="w"> </span>C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/arm-none-eabi-g++.exe<span class="w"> </span>-<span class="w"> </span>skipped
+--<span class="w"> </span>Detecting<span class="w"> </span>CXX<span class="w"> </span>compile<span class="w"> </span>features
+--<span class="w"> </span>Detecting<span class="w"> </span>CXX<span class="w"> </span>compile<span class="w"> </span>features<span class="w"> </span>-<span class="w"> </span><span class="k">done</span>
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:08<span class="o">]</span><span class="w"> </span>Starting<span class="w"> </span>una-version.sh<span class="w"> </span>script
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:08<span class="o">]</span><span class="w"> </span>Default<span class="w"> </span>BUILD_VERSION<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to:<span class="w"> </span><span class="m">0</span>.0.0-dev
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:08<span class="o">]</span><span class="w"> </span>No<span class="w"> </span>argument<span class="w"> </span>provided,<span class="w"> </span>using<span class="w"> </span>current<span class="w"> </span>directory<span class="w"> </span>as<span class="w"> </span>UNA_GIT_DIR:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:08<span class="o">]</span><span class="w"> </span>Workspace:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:08<span class="o">]</span><span class="w"> </span>Successfully<span class="w"> </span>changed<span class="w"> </span>directory<span class="w"> </span>to:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>git<span class="w"> </span>rev-parse<span class="w"> </span>--git-dir<span class="w"> </span>output:<span class="w"> </span><span class="s1">&#39;C:/Users/sd/Desktop/una-dev/una-sdk/.git&#39;</span>
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>git<span class="w"> </span>rev-parse<span class="w"> </span>--show-toplevel<span class="w"> </span>output:<span class="w"> </span><span class="s1">&#39;C:/Users/sd/Desktop/una-dev/una-sdk&#39;</span>
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>toplevel:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Successfully<span class="w"> </span>changed<span class="w"> </span>directory<span class="w"> </span>to<span class="w"> </span>toplevel:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>UNA_WORKSPACE<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Git<span class="w"> </span>directory<span class="w"> </span>found,<span class="w"> </span>proceeding<span class="w"> </span>with<span class="w"> </span>version<span class="w"> </span>detection
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>COMMIT_HASH:<span class="w"> </span>bf09e2b
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Not<span class="w"> </span>on<span class="w"> </span>exact<span class="w"> </span>tag
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>DESC:<span class="w"> </span>v0.1.1-22-gbf09e2b
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Tags<span class="w"> </span>found,<span class="w"> </span>parsing<span class="w"> </span>TAG<span class="w"> </span>and<span class="w"> </span>HASH
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>TAG<span class="w"> </span>before<span class="w"> </span>removing<span class="w"> </span><span class="s1">&#39;v&#39;</span>:<span class="w"> </span>v0.1.1-22
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>TAG<span class="w"> </span>after<span class="w"> </span>removing<span class="w"> </span><span class="s1">&#39;v&#39;</span>:<span class="w"> </span><span class="m">0</span>.1.1-22
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>HASH:<span class="w"> </span>bf09e2b
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>BUILD_VERSION<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span>TAG-HASH:<span class="w"> </span><span class="m">0</span>.1.1-22-bf09e2b
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Checking<span class="w"> </span><span class="k">for</span><span class="w"> </span>uncommitted<span class="w"> </span>changes
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>git<span class="w"> </span>status<span class="w"> </span>--porcelain<span class="w"> </span>output:<span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>No<span class="w"> </span>uncommitted<span class="w"> </span>changes
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Final<span class="w"> </span><span class="nv">BUILD_VERSION</span><span class="o">=</span><span class="m">0</span>.1.1-22-bf09e2b
+<span class="o">[</span><span class="m">2026</span>-02-18<span class="w"> </span><span class="m">21</span>:37:09<span class="o">]</span><span class="w"> </span>Script<span class="w"> </span>completed<span class="w"> </span>successfully
+Detected<span class="w"> </span>BUILD_VERSION:<span class="w"> </span><span class="m">0</span>.1.1-22-bf09e2b
+UNA_APP_SERVICE_STACK_SIZE:<span class="w"> </span><span class="m">10</span>*1024
+UNA_APP_SERVICE_RAM_LENGTH:<span class="w"> </span>500K
+APP_ID:<span class="w"> </span>F1E2D3C448669782
+APP_NAME:<span class="w"> </span>Buttons
+DEV_ID:<span class="w"> </span>UNA
+UNA_APP_GUI_STACK_SIZE:<span class="w"> </span><span class="m">10</span>*1024
+UNA_APP_GUI_RAM_LENGTH:<span class="w"> </span>600K
+App<span class="w"> </span>autostart<span class="w"> </span>is<span class="w"> </span>OFF
+--<span class="w"> </span>Configuring<span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="o">(</span><span class="m">2</span>.8s<span class="o">)</span>
+--<span class="w"> </span>Generating<span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="o">(</span><span class="m">0</span>.1s<span class="o">)</span>
+--<span class="w"> </span>Build<span class="w"> </span>files<span class="w"> </span>have<span class="w"> </span>been<span class="w"> </span>written<span class="w"> </span>to:<span class="w"> </span>C:/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/Buttons-CMake/build
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild&gt;<span class="w"> </span>make
+<span class="o">[</span><span class="w">  </span><span class="m">0</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Libs/Sources/ActivityWriter.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">1</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Libs/Sources/Service.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">2</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/AtExitImpl.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">3</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>ASM<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/startup_user_app.s.obj
+<span class="o">[</span><span class="w">  </span><span class="m">4</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/system.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">5</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Kernel/KernelBuilder.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">5</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/UnaLogger/Logger.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">6</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/EntryPoint/Service/main.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">7</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Fit/FitCrc.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">8</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Fit/FitWriter.cpp.obj
+<span class="o">[</span><span class="w">  </span><span class="m">9</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Fit/FitRecordCadence.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">11</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/JSON/JsonStreamReader.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">12</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/JSON/JsonStreamWriter.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">13</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>C<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/ThirdParty/coreJSON/source/core_json.c.obj
+<span class="o">[</span><span class="w"> </span><span class="m">14</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/SensorLayer/SensorConnection.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">15</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsService.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/TrackMap/TrackMapBuilder.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">16</span>%<span class="o">]</span><span class="w"> </span>Linking<span class="w"> </span>CXX<span class="w"> </span>executable<span class="w"> </span>ButtonsService.elf
+Packing<span class="w"> </span>ButtonsService.elf
+INFO:root:ELF-file<span class="w">    </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\B</span>uttonsService.elf
+INFO:root:Out<span class="w">         </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\T</span>mp
+INFO:root:Version<span class="w">     </span>:<span class="w"> </span><span class="m">1</span>.0
+INFO:root:Output<span class="w"> </span>file<span class="w"> </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\T</span>mp<span class="se">\B</span>uttonsService.srv
+
+<span class="o">[</span><span class="w"> </span><span class="m">16</span>%<span class="o">]</span><span class="w"> </span>Built<span class="w"> </span>target<span class="w"> </span>ButtonsService.elf
+<span class="o">[</span><span class="w"> </span><span class="m">17</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/ApplicationFontProvider.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">18</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/CachedFont.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">19</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/CompressedFontCache.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">20</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/CompressedUnmappedFontCache.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">21</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/FontCache.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">21</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Italic_18_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">22</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Italic_18_2bpp_4.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">23</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Italic_20_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">24</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_LightItalic_18_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">25</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Light_60_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">26</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Medium_10_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">26</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Medium_18_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">27</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Medium_50_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">28</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_Regular_18_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">29</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_18_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">30</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_18_2bpp_4.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">31</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_20_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">31</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_25_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">32</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_30_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">33</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_35_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">34</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_40_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">35</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Font_Poppins_SemiBold_60_2bpp_0.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">36</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/GeneratedFont.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">37</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Italic_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">37</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Italic_20_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">38</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_LightItalic_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">39</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Light_60_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">40</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Medium_10_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">41</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Medium_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">42</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Medium_50_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">42</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_Regular_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">43</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">44</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_20_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">45</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_25_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">46</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_30_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">47</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_35_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">47</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_40_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">48</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Kerning_Poppins_SemiBold_60_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">49</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Italic_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">50</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Italic_20_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">51</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_LightItalic_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">52</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Light_60_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">52</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Medium_10_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">53</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Medium_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">54</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Medium_50_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">55</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_Regular_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">56</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_18_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">57</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_20_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">58</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_25_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">58</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_30_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">59</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_35_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">60</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_40_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">61</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/Table_Poppins_SemiBold_60_2bpp.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">62</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/UnmappedDataFont.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">63</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/fonts/src/VectorFontRendererBuffers.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">63</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/gui_generated/src/common/FrontendApplicationBase.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">64</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/gui_generated/src/containers/ButtonsSetBase.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">65</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/3d628a36580307821a6a00b9871d2825/Software/Apps/TouchGFX-GUI/generated/gui_generated/src/main_screen/MainViewBase.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">66</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/BitmapDatabase.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">67</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/SVGDatabase.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">68</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L1.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">68</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L1A.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">69</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L1R.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">70</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L2.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">71</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L2A.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">72</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_L2R_.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">73</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R1.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">73</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R1A.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">74</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R1R.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">75</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R2.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">76</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R2A.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">77</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Button_R2R.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">78</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_Heart.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">79</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_MenuAssets_Cross.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">79</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_MenuAssets_CrossYellow.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">80</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/9e8b1f0454dae51d1529dac2c47dcb08/Buttons/Software/Apps/TouchGFX-GUI/generated/images/src/image_MenuAssets_Tick.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">81</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/texts/src/LanguageGb.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">82</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/texts/src/Texts.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">83</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/ff49e2950d17f26ffd1c2220befc6afd/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/generated/texts/src/TypedTextDatabase.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">84</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/c1f22cc05670b178c052f9be5e8d2c31/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/common/FrontendApplication.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">84</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/containers/ButtonsSet.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">85</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainPresenter.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">86</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">87</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Docs/Tutorials/Buttons/Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">88</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/AtExitImpl.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">89</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>ASM<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/startup_user_app.s.obj
+<span class="o">[</span><span class="w"> </span><span class="m">89</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/AppSystem/system.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">90</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Kernel/KernelBuilder.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">93</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/STM32TouchController.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">94</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">94</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/TouchGFXGPIO.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">95</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">96</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">97</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/STM32DMA.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">98</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/TouchGFXConfiguration.cpp.obj
+<span class="o">[</span><span class="w"> </span><span class="m">99</span>%<span class="o">]</span><span class="w"> </span>Building<span class="w"> </span>CXX<span class="w"> </span>object<span class="w"> </span>CMakeFiles/ButtonsGUI.elf.dir/C_/Users/sd/Desktop/una-dev/una-sdk/Libs/Source/Port/TouchGFX/generated/TouchGFXGeneratedHAL.cpp.obj
+<span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span>Linking<span class="w"> </span>CXX<span class="w"> </span>executable<span class="w"> </span>ButtonsGUI.elf
+Packing<span class="w"> </span>ButtonsGUI.elf
+INFO:root:ELF-file<span class="w">    </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\B</span>uttonsGUI.elf
+INFO:root:Out<span class="w">         </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\T</span>mp
+INFO:root:Version<span class="w">     </span>:<span class="w"> </span><span class="m">1</span>.0
+INFO:root:Output<span class="w"> </span>file<span class="w"> </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\T</span>mp<span class="se">\B</span>uttonsGUI.gui
+<span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span>Built<span class="w"> </span>target<span class="w"> </span>ButtonsGUI.elf
+<span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span>Merging<span class="w"> </span>Buttons<span class="w"> </span>application
+INFO:root:Merge<span class="w"> </span><span class="nb">complete</span>
+INFO:root:Service<span class="w"> </span>file<span class="w">   </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\T</span>mp<span class="se">\B</span>uttonsService.srv
+INFO:root:GUI<span class="w"> </span>file<span class="w">       </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\T</span>mp<span class="se">\B</span>uttonsGUI.gui
+INFO:root:Name<span class="w">           </span>:<span class="w"> </span>Buttons
+INFO:root:ID<span class="w">             </span>:<span class="w"> </span>F1E2D3C448669782
+INFO:root:App<span class="w"> </span>Version<span class="w">    </span>:<span class="w"> </span><span class="m">0</span>.1.1
+INFO:root:LibC<span class="w"> </span>Version<span class="w">   </span>:<span class="w"> </span><span class="m">0</span>.0.3
+INFO:root:Flags<span class="w">          </span>:<span class="w"> </span>0x00000020
+INFO:root:Glance-capable<span class="w"> </span>:<span class="w"> </span>yes
+INFO:root:CRC<span class="w">            </span>:<span class="w"> </span>0x4B064208
+INFO:root:Image<span class="w">          </span>:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild<span class="se">\B</span>uttons_0.1.1-22-bf09e2b.uapp<span class="w"> </span><span class="o">(</span><span class="m">225256</span><span class="w"> </span>bytes<span class="o">)</span><span class="w">        </span>
+
+<span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span>Built<span class="w"> </span>target<span class="w"> </span>ButtonsApp
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\S</span>oftware<span class="se">\A</span>pps<span class="se">\B</span>uttons-CMake<span class="se">\b</span>uild&gt;<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>../../../../
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons&gt;<span class="w"> </span>ls<span class="w"> </span>.<span class="se">\O</span>utput<span class="se">\</span>
+
+
+<span class="w">    </span>Directory:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons<span class="se">\O</span>utput
+
+
+Mode<span class="w">                 </span>LastWriteTime<span class="w">         </span>Length<span class="w"> </span>Name
+----<span class="w">                 </span>-------------<span class="w">         </span>------<span class="w"> </span>----
+-a----<span class="w">         </span><span class="m">2</span>/17/2026<span class="w">   </span><span class="m">7</span>:10<span class="w"> </span>PM<span class="w">            </span><span class="m">165</span><span class="w"> </span>.gitignore
+-a----<span class="w">         </span><span class="m">2</span>/18/2026<span class="w">   </span><span class="m">9</span>:37<span class="w"> </span>PM<span class="w">         </span><span class="m">802019</span><span class="w"> </span>ButtonsGUI.elf.elf.map
+-a----<span class="w">         </span><span class="m">2</span>/18/2026<span class="w">   </span><span class="m">9</span>:37<span class="w"> </span>PM<span class="w">         </span><span class="m">321587</span><span class="w"> </span>ButtonsService.elf.elf.map
+-a----<span class="w">         </span><span class="m">2</span>/18/2026<span class="w">   </span><span class="m">9</span>:37<span class="w"> </span>PM<span class="w">         </span><span class="m">225256</span><span class="w"> </span>Buttons_0.1.1-22-bf09e2b.uapp
+
+
+PS<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>d<span class="se">\D</span>esktop<span class="se">\u</span>na-dev<span class="se">\u</span>na-sdk<span class="se">\D</span>ocs<span class="se">\T</span>utorials<span class="se">\B</span>uttons&gt;
+</pre></div>
+</div>
+</section>
+<section id="understanding-button-event-handling">
+<h2>Understanding Button Event Handling<a class="headerlink" href="#understanding-button-event-handling" title="Link to this heading"></a></h2>
+<p>The Buttons app demonstrates how to handle hardware button events in TouchGFX applications. Key concepts include:</p>
+<section id="button-event-processing">
+<h3>Button Event Processing<a class="headerlink" href="#button-event-processing" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Button presses are captured in the <code class="docutils literal notranslate"><span class="pre">handleKeyEvent(uint8_t</span> <span class="pre">key)</span></code> method</p></li>
+<li><p>Each button has a unique identifier (L1, L2, R1, R2)</p></li>
+<li><p>Events trigger immediate UI updates and state changes</p></li>
+</ul>
+</section>
+<section id="screen-state-management">
+<h3>Screen State Management<a class="headerlink" href="#screen-state-management" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>The app maintains current screen state through color and content changes</p></li>
+<li><p>Transitions are handled synchronously in the event handler</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> call ensures the display refreshes after changes</p></li>
+</ul>
+</section>
+<section id="exit-handling">
+<h3>Exit Handling<a class="headerlink" href="#exit-handling" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Double-press detection for the R2 button implements app exit</p></li>
+<li><p>State tracking with <code class="docutils literal notranslate"><span class="pre">lastKeyPressed</span></code> prevents accidental exits</p></li>
+</ul>
+</section>
+</section>
+<section id="common-patterns-and-best-practices">
+<h2>Common Patterns and Best Practices<a class="headerlink" href="#common-patterns-and-best-practices" title="Link to this heading"></a></h2>
+<section id="button-handling">
+<h3>Button Handling<a class="headerlink" href="#button-handling" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Map button IDs to meaningful actions consistently</p></li>
+<li><p>Use state variables to track multi-press sequences</p></li>
+<li><p>Always call <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> after visual changes</p></li>
+</ul>
+</section>
+<section id="ui-updates">
+<h3>UI Updates<a class="headerlink" href="#ui-updates" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Keep event handlers lightweight to maintain responsiveness</p></li>
+<li><p>Use appropriate TouchGFX widgets for different content types</p></li>
+<li><p>Consider user feedback for button presses (visual/audio)</p></li>
+</ul>
+</section>
+<section id="code-organization">
+<h3>Code Organization<a class="headerlink" href="#code-organization" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Separate UI logic from business logic</p></li>
+<li><p>Use clear naming for button actions and screen states</p></li>
+<li><p>Document button mappings in comments</p></li>
+</ul>
+</section>
+<section id="performance-considerations">
+<h3>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Minimize work in event handlers</p></li>
+<li><p>Batch UI updates when possible</p></li>
+<li><p>Avoid blocking operations that could delay response</p></li>
+</ul>
+</section>
+</section>
+<section id="key-code-insights-for-new-developers">
+<h2>Key Code Insights for New Developers<a class="headerlink" href="#key-code-insights-for-new-developers" title="Link to this heading"></a></h2>
+<section id="mainview-cpp-structure">
+<h3>MainView.cpp Structure<a class="headerlink" href="#mainview-cpp-structure" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code> is the central point for user input</p></li>
+<li><p>Color changes use <code class="docutils literal notranslate"><span class="pre">touchgfx::Color::getColorFromRGB()</span></code></p></li>
+<li><p>Screen refresh requires explicit <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> calls</p></li>
+</ul>
+</section>
+<section id="button-configuration">
+<h3>Button Configuration<a class="headerlink" href="#button-configuration" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Buttons are configured in <code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code> with initial states</p></li>
+<li><p>The ButtonsSet widget manages hardware button integration</p></li>
+<li><p>Button states can be NONE, PRESSED, or other states</p></li>
+</ul>
+</section>
+<section id="state-tracking">
+<h3>State Tracking<a class="headerlink" href="#state-tracking" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use member variables to maintain app state across events</p></li>
+<li><p>Track sequences like double-presses for special actions</p></li>
+<li><p>Reset state appropriately after actions complete</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Run the Buttons app</strong> - Build and test the navigation flow</p></li>
+<li><p><strong>Modify button mappings</strong> - Experiment with different screen transitions</p></li>
+<li><p><strong>Add new screens</strong> - Extend the app with additional colored screens</p></li>
+<li><p><strong>Explore TouchGFX widgets</strong> - Add text, images, or other elements</p></li>
+<li><p><strong>Study advanced examples</strong> - Look at apps with more complex navigation</p></li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="build-issues">
+<h3>Build Issues<a class="headerlink" href="#build-issues" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Ensure TouchGFX Designer is properly installed</p></li>
+<li><p>Check that all project files are generated correctly</p></li>
+<li><p>Verify CMake configuration matches your environment</p></li>
+</ul>
+</section>
+<section id="runtime-issues">
+<h3>Runtime Issues<a class="headerlink" href="#runtime-issues" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Confirm button mappings in the simulator match hardware</p></li>
+<li><p>Check log output for event handling errors</p></li>
+<li><p>Test on actual hardware for button responsiveness</p></li>
+</ul>
+</section>
+<section id="common-mistakes">
+<h3>Common Mistakes<a class="headerlink" href="#common-mistakes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Forgetting to call <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> after UI changes</p></li>
+<li><p>Incorrect button ID constants</p></li>
+<li><p>Not handling all button states appropriately</p></li>
+</ul>
+<p>The Buttons app provides a solid foundation for understanding user interaction on the UNA platform. Mastering these patterns will enable you to create engaging, responsive applications.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../HelloWorld/ARCHITECTURE.html" class="btn btn-neutral float-left" title="HelloWorld - Introduction to UNA App Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../ScrollMenu/ARCHITECTURE.html" class="btn btn-neutral float-right" title="ScrollMenu - Creating Scrollable Lists and Menus" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

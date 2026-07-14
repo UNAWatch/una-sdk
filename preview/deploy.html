@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Deploy &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="App Config JSON" href="app-config-json.html" />
+    <link rel="prev" title="FIT Files Structure" href="FitFiles-Structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to Deploy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#directly-onto-the-watch">Directly onto the Watch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#copy-your-app-into-the-watch-memory-via-usb">Copy Your App into the Watch Memory via USB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sharing-the-apps">Sharing the Apps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#via-https-apps-unawatch-com-for-closed-source-apps">Via https://apps.unawatch.com for Closed Source Apps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#via-pr-to-https-github-com-unawatch-una-sdk-for-open-source-apps">Via PR to https://github.com/UNAWatch/una-sdk for Open Source Apps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">How to Deploy</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/deploy.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="how-to-deploy">
+<h1>How to Deploy<a class="headerlink" href="#how-to-deploy" title="Link to this heading"></a></h1>
+<section id="directly-onto-the-watch">
+<h2>Directly onto the Watch<a class="headerlink" href="#directly-onto-the-watch" title="Link to this heading"></a></h2>
+<section id="copy-your-app-into-the-watch-memory-via-usb">
+<h3>Copy Your App into the Watch Memory via USB<a class="headerlink" href="#copy-your-app-into-the-watch-memory-via-usb" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Connect the watch via USB cable. Wait for Mass Storage to be attached. Note: It may take some time as running apps may need to flush their data before mass storage becomes active.</p></li>
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Apps/</span></code> directory and create a new one with a name equal to the app name.</p></li>
+<li><p>Paste the <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code> into this folder.</p></li>
+<li><p>Eject the attached watch drive <strong>safely</strong>.</p></li>
+<li><p>Disconnect the USB cable.</p></li>
+<li><p>Perform a watch power cycle: power off the watch and turn it on again.</p></li>
+<li><p>Press the top right button and check the app.</p></li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>If you do not see the app, check the hash sum of the copied file.</p></li>
+<li><p>If the error still persists, use a <strong>debug</strong> adapter to monitor the watch debug UART Tx line to see the logs.</p></li>
+<li><p>If you still encounter any platform issues, please create an issue at the <a class="reference external" href="https://github.com/UNAWatch/una-sdk/issues">GitHub project issue page</a>.</p></li>
+<li><p>To discuss any issues, use <a class="reference external" href="https://github.com/UNAWatch/una-sdk/discussions">Discussions</a>.</p></li>
+</ul>
+</section>
+</section>
+<section id="sharing-the-apps">
+<h2>Sharing the Apps<a class="headerlink" href="#sharing-the-apps" title="Link to this heading"></a></h2>
+<section id="via-https-apps-unawatch-com-for-closed-source-apps">
+<h3>Via https://apps.unawatch.com for Closed Source Apps<a class="headerlink" href="#via-https-apps-unawatch-com-for-closed-source-apps" title="Link to this heading"></a></h3>
+<p><strong>Disclaimer:</strong> In these instructional steps, we use the <strong>Files</strong> Tutorial <strong>as an example</strong>. Please apply the steps below to your own app!</p>
+<ul>
+<li><p>Enter the <a class="reference external" href="https://apps.unawatch.com">portal page</a> and sign up.</p>
+<p><img alt="Login" src="_images/login.png" /></p>
+</li>
+<li><p>After signing in, click <strong>Add New</strong>.</p>
+<p><img alt="Main" src="_images/main-page.png" /></p>
+</li>
+<li><p>Enter <strong>App Name</strong> and a brief description. Click the Generate button.</p>
+<p><img alt="Add New App" src="_images/add-app.png" /></p>
+</li>
+<li><p>Copy <strong>App ID</strong> from app Page:</p>
+<p><img alt="New App Page" src="_images/app-page.png" /></p>
+</li>
+<li><p>Paste it into your <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> into the <code class="docutils literal notranslate"><span class="pre">APP_ID</span></code> variable. <strong>Note:</strong> APP_ID is required to track the apps in the apps store and for the mobile app to match new <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code> file versions in case the file name itself has been changed.</p>
+<p><img alt="App ID" src="_images/paste-id.png" /></p>
+</li>
+<li><p>Compile the app with the generated <strong>APP_ID</strong> (see <a class="reference internal" href="sdk-setup.html#building-apps-manually"><span class="std std-ref">sdk-setup</span></a> for detailed instructions). Note: Run <code class="docutils literal notranslate"><span class="pre">cmake</span></code> to apply the new APP_ID. Verify in the build output that the ID matches in the <code class="docutils literal notranslate"><span class="pre">app_merging.py</span></code> log: <code class="docutils literal notranslate"><span class="pre">INFO:root:ID</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">:</span> <span class="pre">03AD5A741E38A35F</span></code></p>
+<p><img alt="Build output" src="_images/compiled-app.png" /></p>
+</li>
+<li><p>Create <code class="docutils literal notranslate"><span class="pre">config.json</span></code> file. Detailed instructions are <a class="reference internal" href="app-config-json.html"><span class="std std-doc">here</span></a></p>
+<p><img alt="Config" src="_images/config-json.png" /></p>
+</li>
+<li><p>Pack the resulting <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code>, <code class="docutils literal notranslate"><span class="pre">icon.png</span></code>, and <code class="docutils literal notranslate"><span class="pre">config.json</span></code> into a <code class="docutils literal notranslate"><span class="pre">*.zip</span></code> archive.</p>
+<p><img alt="Archive" src="_images/archive.png" /></p>
+</li>
+<li><p>At the app page, click the <strong>Version</strong> tab.</p>
+<p><img alt="Version Tab" src="_images/app-version-tab.png" /></p>
+</li>
+<li><p>Click <strong>Upload New</strong>.</p>
+<p><img alt="Upload Dialog" src="_images/app-upload.png" /></p>
+</li>
+<li><p>Upload the resulting <code class="docutils literal notranslate"><span class="pre">*.zip</span></code> file.</p>
+<p><img alt="Upload" src="_images/app-version-upload.png" /></p>
+</li>
+<li><p>After the upload succeeds, click <strong>Release</strong> to publish the app.</p>
+<p><img alt="Uploaded" src="_images/uploaded-app.png" /></p>
+</li>
+<li><p>Confirm by clicking <strong>Confirm and Publish</strong></p>
+<p><img alt="Publish" src="_images/publish.png" /></p>
+</li>
+</ul>
+</section>
+<section id="via-pr-to-https-github-com-unawatch-una-sdk-for-open-source-apps">
+<h3>Via PR to https://github.com/UNAWatch/una-sdk for Open Source Apps<a class="headerlink" href="#via-pr-to-https-github-com-unawatch-una-sdk-for-open-source-apps" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Apply a PR to https://github.com/UNAWatch/una-sdk with changes under <code class="docutils literal notranslate"><span class="pre">Examples/Apps/</span></code>.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="FitFiles-Structure.html" class="btn btn-neutral float-left" title="FIT Files Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="app-config-json.html" class="btn btn-neutral float-right" title="App Config JSON" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

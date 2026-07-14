@@ -1,0 +1,220 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDK Host Unit Testing &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SDK Host Unit Testing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/unit-testing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sdk-host-unit-testing">
+<h1>SDK Host Unit Testing<a class="headerlink" href="#sdk-host-unit-testing" title="Link to this heading"></a></h1>
+<p>This guide describes the reusable host-side unit test harness for SDK code and app example libraries.</p>
+<section id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SDK/Tests/Host/
+├── CMakeLists.txt
+├── cmake/
+│   └── FetchGoogleTest.cmake
+├── support/
+│   ├── KernelTestDoubles.hpp
+│   └── KernelTestDoubles.cpp
+└── apps/
+    └── Running/
+        ├── Settings_test.cpp
+        └── SettingsSerializer_test.cpp
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cmake/</span></code>: third-party bootstrap (GoogleTest).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">support/</span></code>: reusable fakes and fixtures (kernel facade dependencies, in-memory filesystem).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">apps/&lt;AppName&gt;/</span></code>: app-specific test cases.</p></li>
+</ul>
+</section>
+<section id="build-and-run">
+<h2>Build and Run<a class="headerlink" href="#build-and-run" title="Link to this heading"></a></h2>
+<p>From SDK root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-S<span class="w"> </span>Tests/Host<span class="w"> </span>-B<span class="w"> </span>build-host<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
+cmake<span class="w"> </span>--build<span class="w"> </span>build-host
+ctest<span class="w"> </span>--test-dir<span class="w"> </span>build-host<span class="w"> </span>--output-on-failure
+</pre></div>
+</div>
+<p>On Windows multi-config generators:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">ctest</span> <span class="p">-</span><span class="n">-test-dir</span> <span class="n">build-host</span> <span class="n">-C</span> <span class="n">Debug</span> <span class="p">-</span><span class="n">-output-on-failure</span>
+</pre></div>
+</div>
+<p>Expected: <code class="docutils literal notranslate"><span class="pre">una-sdk-host-tests</span></code> passes.</p>
+</section>
+<section id="add-tests-for-another-app">
+<h2>Add Tests For Another App<a class="headerlink" href="#add-tests-for-another-app" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Create a folder under <code class="docutils literal notranslate"><span class="pre">Tests/Host/apps/&lt;YourApp&gt;/</span></code>.</p></li>
+<li><p>Add one or more <code class="docutils literal notranslate"><span class="pre">*_test.cpp</span></code> files.</p></li>
+<li><p>Add test files and required app sources to <code class="docutils literal notranslate"><span class="pre">Tests/Host/CMakeLists.txt</span></code> executable source list.</p></li>
+<li><p>Reuse support doubles from <code class="docutils literal notranslate"><span class="pre">support/KernelTestDoubles.*</span></code> when the code requires <code class="docutils literal notranslate"><span class="pre">SDK::Kernel</span></code> or filesystem interactions.</p></li>
+</ol>
+</section>
+<section id="serializer-settings-test-pattern">
+<h2>Serializer/Settings Test Pattern<a class="headerlink" href="#serializer-settings-test-pattern" title="Link to this heading"></a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">SDK::TestSupport::KernelFixture</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fixture.kernel</span></code> provides a ready <code class="docutils literal notranslate"><span class="pre">SDK::Kernel</span></code> with stubbed dependencies.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fixture.fileSystem.seedFile(path,</span> <span class="pre">json)</span></code> seeds in-memory input files.</p></li>
+<li><p>Instantiate serializer with <code class="docutils literal notranslate"><span class="pre">SettingsSerializer(fixture.kernel,</span> <span class="pre">&quot;settings.json&quot;)</span></code>.</p></li>
+<li><p>Verify load/save behavior without device firmware or simulator runtime.</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">core_json.h</span></code> is missing, confirm include path:
+<code class="docutils literal notranslate"><span class="pre">SDK/ThirdParty/coreJSON/source/include</span></code>.</p></li>
+<li><p>If linker errors mention logger symbols, ensure <code class="docutils literal notranslate"><span class="pre">SDK/Libs/Source/UnaLogger/Logger.cpp</span></code> is linked.</p></li>
+<li><p>If app headers are not found, add app lib header paths to <code class="docutils literal notranslate"><span class="pre">target_include_directories(...)</span></code> for the test target.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

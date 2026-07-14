@@ -1,0 +1,1134 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiking - Hiking Activity Tracking &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/version-selector.js?v=50f89983"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="HRMonitor - Heart Rate Monitor" href="HRMonitor-Architecture.html" />
+    <link rel="prev" title="Cycling - Cycling Activity Tracking" href="Cycling-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hiking - Hiking Activity Tracking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-data-structures">Key Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-integration">Sensor Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-connection-management">Sensor Connection Management</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data-processing-pipeline">Data Processing Pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-data-reception">1. Sensor Data Reception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-capture-infrastructure">2. Data Capture Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parser-classes">3. Parser Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#track-processing-logic">4. Track Processing Logic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fit-file-recording">5. FIT File Recording</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#error-handling-and-data-validation">6. Error Handling and Data Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-state-management">Activity State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lap-management">Lap Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#settings-and-persistence">Settings and Persistence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auto-pause-hidden-in-ui">Auto-pause (hidden in UI)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#activity-data-management-and-persistence">Activity Data Management and Persistence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fit-file-format-implementation">FIT File Format Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#activity-summary-persistence">Activity Summary Persistence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-persistence">Settings Persistence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-synchronization">Data Synchronization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-view-presenter-pattern">Model-View-Presenter Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screens-15-total">Screens (15 total)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-handling-system">Message Handling System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screen-navigation">Screen Navigation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-containers">Custom Containers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sdk-widget-containers">SDK Widget Containers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#app-specific-containers">App-Specific Containers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#input-handling">Input Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-formatting-and-units">Data Formatting and Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#idle-timeout">Idle Timeout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#touchgfx-integration-with-una-sdk">TouchGFX Integration with UNA SDK</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#touchgfxcommandprocessor">TouchGFXCommandProcessor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kernel-provider-architecture">Kernel Provider Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-message-system">Custom Message System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#message-sender">Message Sender</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#asset-management">Asset Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-generation">Code Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-support">Simulator Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-process">Build Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-setup">Development Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-build">Simulator Build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Hiking - Hiking Activity Tracking</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/Hiking-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hiking-hiking-activity-tracking">
+<h1>Hiking - Hiking Activity Tracking<a class="headerlink" href="#hiking-hiking-activity-tracking" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Hiking app is a comprehensive hiking activity tracking application designed for wearable devices, specifically targeting hiking activities. It provides real-time tracking of distance, speed, pace, heart rate, elevation, steps taken, and floors climbed to deliver accurate and detailed activity data for hikers. The app integrates multiple sensors including GPS, heart rate monitor, barometric pressure sensor, step counter, floor counter, and battery monitoring to provide comprehensive hiking metrics.</p>
+<p>The application follows a modular architecture with separate service and GUI components, communicating through a custom message system. It supports features like automatic lap splitting based on distance, time, or step count, activity data persistence in FIT file format, and a rich TouchGFX-based user interface with multiple watch faces and screens.</p>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Real-time GPS tracking with position and speed data</p></li>
+<li><p>Heart rate monitoring with trust level assessment</p></li>
+<li><p>Elevation tracking using barometric pressure</p></li>
+<li><p>Step counting for distance validation</p></li>
+<li><p>Automatic and manual lap recording</p></li>
+<li><p>Multiple watch face layouts</p></li>
+<li><p>Activity summary</p></li>
+<li><p>Battery level monitoring</p></li>
+<li><p>Settings for alerts, and notifications</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The Hiking app follows a client-server architecture pattern where the service component handles all backend logic, sensor management, and data processing, while the GUI component manages user interaction and display. Communication between these components occurs through a message-based system using the UNA SDK’s kernel infrastructure.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: Core business logic, sensor integration, data processing</p></li>
+<li><p><strong>GUI Layer</strong>: TouchGFX-based user interface, screen management</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, sensor layer, file system, messaging</p></li>
+<li><p><strong>Data Persistence</strong>: FIT file format for activity data, JSON for settings</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Hardware</span> <span class="n">Sensors</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Sensor</span> <span class="n">Layer</span><span class="p">]</span> <span class="o">&lt;-&gt;</span> <span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+        <span class="o">^</span>                    <span class="o">^</span>                <span class="o">^</span>
+        <span class="o">|</span>                    <span class="o">|</span>                <span class="o">|</span>
+<span class="p">[</span><span class="n">Kernel</span> <span class="n">Messages</span><span class="p">]</span> <span class="o">&lt;--</span> <span class="p">[</span><span class="n">Message</span> <span class="n">System</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="p">[</span><span class="n">GUI</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The service runs as a separate process/thread, continuously processing sensor data and maintaining activity state. The GUI runs on the TouchGFX framework, handling user input and displaying data received from the service.</p>
+</section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>, providing the core functionality for activity tracking and sensor management.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<p>The main service class handles all backend logic for activity tracking. It manages sensor connections, processes sensor data, maintains activity state, and communicates with the GUI through the UNA SDK’s messaging system. The service runs as a separate process/thread and handles lifecycle management through the kernel interface.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">();</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGUIStarted</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w"> </span><span class="n">mGuiSender</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// ... additional members</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="key-data-structures">
+<h4>Key Data Structures<a class="headerlink" href="#key-data-structures" title="Link to this heading"></a></h4>
+<p><strong>Track Data (<code class="docutils literal notranslate"><span class="pre">Track::Data</span></code>)</strong> — real-time metrics snapshot sent to the GUI every second. Contains pace, distance, time, lap counters, HR (current/avg/max/lap), speed (current/avg/max/lap), elevation, ascent (total and lap), steps, and floors — all in SI units (m, m/s, s/m, bpm). Defined in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Track.hpp</span></code>.</p>
+</section>
+</section>
+<section id="sensor-integration">
+<h3>Sensor Integration<a class="headerlink" href="#sensor-integration" title="Link to this heading"></a></h3>
+<p>Each sensor is represented by an <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code> object. Polled sensors are configured with a period and latency; event-based sensors fire when the hardware generates an event and ignore those parameters.</p>
+<p><strong>Polled sensors</strong> (1000 ms period / 1000 ms latency):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sensor</p></th>
+<th class="head"><p>Type constant</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>GPS Location</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GPS_LOCATION</span></code></p></td>
+<td><p>Coordinates, altitude, fix state; used for map building</p></td>
+</tr>
+<tr class="row-odd"><td><p>GPS Speed</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GPS_SPEED</span></code></p></td>
+<td><p>Instantaneous speed → <code class="docutils literal notranslate"><span class="pre">mSpeedCounter</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>GPS Distance</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GPS_DISTANCE</span></code></p></td>
+<td><p>Incremental distance → <code class="docutils literal notranslate"><span class="pre">mDistanceCounter</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Heart Rate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code></p></td>
+<td><p>BPM + trust level (1–3) → <code class="docutils literal notranslate"><span class="pre">mHrCounter</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Pressure</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PRESSURE</span></code></p></td>
+<td><p>Barometric altitude (filtered) → <code class="docutils literal notranslate"><span class="pre">mAltitudeCounter</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Event-based sensors</strong> (period/latency ignored):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sensor</p></th>
+<th class="head"><p>Type constant</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Step Counter</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">STEP_COUNTER</span></code></p></td>
+<td><p>Steps → <code class="docutils literal notranslate"><span class="pre">mStepCounter</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Floor Counter</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FLOOR_COUNTER</span></code></p></td>
+<td><p>Floors up + down → <code class="docutils literal notranslate"><span class="pre">mFloorCounter</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Battery Level</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BATTERY_LEVEL</span></code></p></td>
+<td><p>State of charge → <code class="docutils literal notranslate"><span class="pre">mBatterySoc</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Wrist Motion</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">WRIST_MOTION</span></code></p></td>
+<td><p>Wrist raise → backlight activation</p></td>
+</tr>
+</tbody>
+</table>
+<section id="sensor-connection-management">
+<h4>Sensor Connection Management<a class="headerlink" href="#sensor-connection-management" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>GPS and Wrist Motion connected on GUI start (for fix acquisition before tracking begins)</p></li>
+<li><p>All remaining sensors connected when tracking starts</p></li>
+<li><p>All sensors disconnected when tracking stops</p></li>
+</ul>
+</section>
+</section>
+<section id="data-processing-pipeline">
+<h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
+<p>The data processing pipeline transforms raw sensor data into meaningful fitness metrics.</p>
+<section id="sensor-data-reception">
+<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<p>Sensor data arrives through the kernel’s message system. The <code class="docutils literal notranslate"><span class="pre">handleSensorsData()</span></code> method identifies the source via <code class="docutils literal notranslate"><span class="pre">matchesDriver()</span></code>, constructs the appropriate parser, and forwards the value:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleSensorsData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorGpsLocation</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">GpsLocation</span><span class="w"> </span><span class="n">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">mGps</span><span class="p">.</span><span class="n">timestamp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTimestamp</span><span class="p">();</span>
+<span class="w">            </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">isCoordinatesValid</span><span class="p">();</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">parser</span><span class="p">.</span><span class="n">getCoordinates</span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">longitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">altitude</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Location: fix %u, lat %f, lon %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">longitude</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ... additional sensor handlers</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="data-capture-infrastructure">
+<h4>2. Data Capture Infrastructure<a class="headerlink" href="#data-capture-infrastructure" title="Link to this heading"></a></h4>
+<p>GPS coordinates, battery level, and sensor metrics are collected through three complementary mechanisms that together ensure accurate, pause-aware data:</p>
+<p><strong>GPS state (<code class="docutils literal notranslate"><span class="pre">mGps</span></code>)</strong> — a simple struct updated on every GPS location event: fix flag, latitude/longitude, altitude (m), and timestamp. Used both for map building and for flagging whether coordinate/speed data is valid before writing to FIT.</p>
+<p><strong>Battery samplers</strong> — two <code class="docutils literal notranslate"><span class="pre">SDK::Metric::ThrottledSample</span></code> instances (<code class="docutils literal notranslate"><span class="pre">mBatterySoc</span></code>, <code class="docutils literal notranslate"><span class="pre">mBatteryVoltage</span></code>) that periodically write state-of-charge (%) and voltage (V) into the FIT file without flooding it with redundant records.</p>
+<p><strong>SDK Metric counters</strong> — all sensor values that feed into <code class="docutils literal notranslate"><span class="pre">Track::Data</span></code> pass through one of three SDK counter types from <code class="docutils literal notranslate"><span class="pre">SDK::Metric</span></code>. Counters are the central reason accurate per-lap and per-activity statistics are possible with minimal service logic: each counter automatically excludes time spent in the paused state from active totals, separates per-lap values from session totals via <code class="docutils literal notranslate"><span class="pre">resetLap()</span></code>, and silently rejects sensor anomalies (rollbacks, out-of-range spikes) before they corrupt averages.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Counter</p></th>
+<th class="head"><p>Suitable for</p></th>
+<th class="head"><p>Used for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MonotonicCounter&lt;T&gt;</span></code></p></td>
+<td><p>Cumulative values that only increase; ignores decreasing sensor readings</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mTimeCounter</span></code>, <code class="docutils literal notranslate"><span class="pre">mDistanceCounter</span></code>, <code class="docutils literal notranslate"><span class="pre">mStepCounter</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">VariableCounter</span></code></p></td>
+<td><p>Fluctuating values; filters readings outside a valid range; tracks avg/min/max per lap</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mSpeedCounter</span></code>, <code class="docutils literal notranslate"><span class="pre">mHrCounter</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DeltaCounter</span></code></p></td>
+<td><p>Bidirectional changes; accumulates ascent and descent separately with a noise threshold</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mAltitudeCounter</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Raw barometric altitude is pre-filtered through a <code class="docutils literal notranslate"><span class="pre">SimpleLPF</span></code> (α = 0.8) before being passed to <code class="docutils literal notranslate"><span class="pre">mAltitudeCounter</span></code>, because <code class="docutils literal notranslate"><span class="pre">DeltaCounter</span></code> does not perform any filtering itself.</p>
+</section>
+<section id="parser-classes">
+<h4>3. Parser Classes<a class="headerlink" href="#parser-classes" title="Link to this heading"></a></h4>
+<p>Each sensor has a corresponding <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::*</span></code> class. The pattern is always the same: construct the parser from <code class="docutils literal notranslate"><span class="pre">data[0]</span></code>, check <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code>, then extract the value and feed it into the appropriate counter or struct field. The pressure sensor is slightly more complex because it requires a sea-level calibration on the first reading:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">Pressure</span><span class="w"> </span><span class="nf">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mAltitudeCounter</span><span class="p">.</span><span class="n">isValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mSeaLevelPressure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getP0</span><span class="p">();</span><span class="w">  </span><span class="c1">// calibrate on first reading</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">altitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getAltitude</span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">getPressure</span><span class="p">(),</span><span class="w"> </span><span class="n">mSeaLevelPressure</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mAltitudeCounter</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">mAltitudeFilter</span><span class="p">.</span><span class="n">execute</span><span class="p">(</span><span class="n">altitude</span><span class="p">));</span><span class="w">  </span><span class="c1">// pre-filter before DeltaCounter</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>All other parsers (<code class="docutils literal notranslate"><span class="pre">GpsLocation</span></code>, <code class="docutils literal notranslate"><span class="pre">GpsSpeed</span></code>, <code class="docutils literal notranslate"><span class="pre">GpsDistance</span></code>, <code class="docutils literal notranslate"><span class="pre">HeartRate</span></code>, <code class="docutils literal notranslate"><span class="pre">StepCounter</span></code>, <code class="docutils literal notranslate"><span class="pre">FloorCounter</span></code>) follow the simpler <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> → <code class="docutils literal notranslate"><span class="pre">counter.add(value)</span></code> pattern.</p>
+</section>
+<section id="track-processing-logic">
+<h4>4. Track Processing Logic<a class="headerlink" href="#track-processing-logic" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">processTrack()</span></code> method runs every second during active tracking:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::processTrack</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// GPS map building</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mTrackMapBuilder</span><span class="p">.</span><span class="n">addPoint</span><span class="p">({</span><span class="n">mGps</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">longitude</span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Aggregate data for GUI</span>
+<span class="w">    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">totalTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mTimeCounter</span><span class="p">.</span><span class="n">getValueActive</span><span class="p">();</span>
+<span class="w">    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mDistanceCounter</span><span class="p">.</span><span class="n">getValueActive</span><span class="p">();</span>
+<span class="w">    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mSpeedCounter</span><span class="p">.</span><span class="n">getCurrent</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Calculate pace (min/km or min/mile)</span>
+<span class="w">    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">pace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getPace</span><span class="p">(</span><span class="n">mTrackData</span><span class="p">.</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">mSpeedCounter</span><span class="p">.</span><span class="n">getMinValid</span><span class="p">());</span>
+
+<span class="w">    </span><span class="c1">// Update GUI</span>
+<span class="w">    </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">trackData</span><span class="p">(</span><span class="n">mTrackData</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// FIT file recording</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mTrackState</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Track</span><span class="o">::</span><span class="n">State</span><span class="o">::</span><span class="n">ACTIVE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ActivityWriter</span><span class="o">::</span><span class="n">RecordData</span><span class="w"> </span><span class="n">fitRecord</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prepareRecordData</span><span class="p">();</span>
+<span class="w">        </span><span class="n">mActivityWriter</span><span class="p">.</span><span class="n">addRecord</span><span class="p">(</span><span class="n">fitRecord</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="fit-file-recording">
+<h4>5. FIT File Recording<a class="headerlink" href="#fit-file-recording" title="Link to this heading"></a></h4>
+<p>Activity data is recorded in FIT (Flexible and Interoperable Data Transfer) format, the standard for fitness devices.</p>
+<p>Each record is assembled from the current counter values and GPS state. Fields are optional — each is only written to the FIT file when marked valid via <code class="docutils literal notranslate"><span class="pre">RecordData::set(Field,</span> <span class="pre">bool)</span></code>. Fields include: coordinates, speed, altitude, heart rate, and battery state of charge.</p>
+</section>
+<section id="error-handling-and-data-validation">
+<h4>6. Error Handling and Data Validation<a class="headerlink" href="#error-handling-and-data-validation" title="Link to this heading"></a></h4>
+<p><strong>GPS Fix State Management</strong>:</p>
+<p>Fix state changes are tracked via <code class="docutils literal notranslate"><span class="pre">mPreviousGpsFixState</span></code>. On every change the GUI is notified via <code class="docutils literal notranslate"><span class="pre">mGuiSender.fix()</span></code>. The very first acquired fix also triggers <code class="docutils literal notranslate"><span class="pre">notifyFirstFix()</span></code> — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mPreviousGpsFixState</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mPreviousGpsFixState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">firstFix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">notifyFirstFix</span><span class="p">();</span>
+<span class="w">        </span><span class="n">firstFix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">fix</span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Heart Rate Trust Level Filtering</strong>:</p>
+<p>HR readings are only written to the FIT file when the value is above 20 bpm and the sensor trust level is in the valid range 1–3 (0 means no signal):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="n">hasHeartRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">mHrCounter</span><span class="p">.</span><span class="n">getCurrent</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">                    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">hrTrustLevel</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">                    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">hrTrustLevel</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="n">fitRecord</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="n">ActivityWriter</span><span class="o">::</span><span class="n">RecordData</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">HEART_RATE</span><span class="p">,</span><span class="w"> </span><span class="n">hasHeartRate</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Wrist Motion Backlight Activation</strong>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">WristMotion</span><span class="w"> </span><span class="nf">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">backlightOn</span><span class="p">();</span><span class="w">  </span><span class="c1">// brightness 100%, auto-off after skBacklightTimeout (5000 ms)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">backlightOn()</span></code> is a shared helper used across the service (first GPS fix, lap end, wrist motion). It sends a <code class="docutils literal notranslate"><span class="pre">RequestBacklightSet</span></code> message with brightness 100% and the default 5-second auto-off timeout.</p>
+</section>
+</section>
+<section id="activity-state-management">
+<h3>Activity State Management<a class="headerlink" href="#activity-state-management" title="Link to this heading"></a></h3>
+<p>The service maintains track state through <code class="docutils literal notranslate"><span class="pre">Track::State</span></code> enum:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">INACTIVE</span></code>: No active tracking</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ACTIVE</span></code>: Currently recording activity</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PAUSED</span></code>: Tracking suspended</p></li>
+</ul>
+<p>State transitions are handled by methods like <code class="docutils literal notranslate"><span class="pre">startTrack()</span></code>, <code class="docutils literal notranslate"><span class="pre">stopTrack()</span></code>, <code class="docutils literal notranslate"><span class="pre">pauseTrack()</span></code>.</p>
+</section>
+<section id="lap-management">
+<h3>Lap Management<a class="headerlink" href="#lap-management" title="Link to this heading"></a></h3>
+<p>Laps can be triggered automatically based on configurable thresholds:</p>
+<ul class="simple">
+<li><p><strong>Distance-based</strong>: Configurable via <code class="docutils literal notranslate"><span class="pre">MenuDistanceView</span></code> (<code class="docutils literal notranslate"><span class="pre">Settings::Alerts::Distance::Id</span></code>)</p></li>
+<li><p><strong>Time-based</strong>: Configurable via <code class="docutils literal notranslate"><span class="pre">MenuTimeView</span></code> (<code class="docutils literal notranslate"><span class="pre">Settings::Alerts::Time::Id</span></code>)</p></li>
+<li><p><strong>Manual</strong>: User-initiated via R2 button during tracking</p></li>
+</ul>
+<p>Lap data includes timing, distance, elevation changes, steps, and floors climbed.</p>
+</section>
+<section id="settings-and-persistence">
+<h3>Settings and Persistence<a class="headerlink" href="#settings-and-persistence" title="Link to this heading"></a></h3>
+<p>Settings are stored in JSON format and include:</p>
+<ul class="simple">
+<li><p>Alert distance threshold (<code class="docutils literal notranslate"><span class="pre">Settings::Alerts::Distance::Id</span></code>)</p></li>
+<li><p>Alert time threshold (<code class="docutils literal notranslate"><span class="pre">Settings::Alerts::Time::Id</span></code>)</p></li>
+<li><p>Auto-pause enable flag (<code class="docutils literal notranslate"><span class="pre">auto_pause_en</span></code>; persisted only — see below)</p></li>
+<li><p>Phone notification enablement</p></li>
+</ul>
+<section id="auto-pause-hidden-in-ui">
+<h4>Auto-pause (hidden in UI)<a class="headerlink" href="#auto-pause-hidden-in-ui" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>UI:</strong> Auto Pause is not shown on the settings wheel (<code class="docutils literal notranslate"><span class="pre">ID_AUTO_PAUSE</span></code> is removed from <code class="docutils literal notranslate"><span class="pre">App::MenuNav::Root::Settings::Id</span></code>, and <code class="docutils literal notranslate"><span class="pre">MenuSettingsView</span></code> no longer contains auto-pause menu switch cases).</p></li>
+<li><p><strong>Persisted:</strong> <code class="docutils literal notranslate"><span class="pre">Settings::autoPauseEn</span></code> and JSON key <code class="docutils literal notranslate"><span class="pre">auto_pause_en</span></code> are still loaded and saved by <code class="docutils literal notranslate"><span class="pre">SettingsSerializer</span></code>.</p></li>
+<li><p><strong>Runtime:</strong> No service logic reads <code class="docutils literal notranslate"><span class="pre">autoPauseEn</span></code> today; only manual pause/resume (<code class="docutils literal notranslate"><span class="pre">TRACK_PAUSE</span></code> / <code class="docutils literal notranslate"><span class="pre">pauseTrack()</span></code>) is implemented.</p></li>
+<li><p><strong>Rationale:</strong> Auto-pause was never fully implemented; showing the toggle caused confusion. The feature is deferred while other work is prioritized.</p></li>
+<li><p><strong>Re-enabling:</strong> Re-add <code class="docutils literal notranslate"><span class="pre">ID_AUTO_PAUSE</span></code> to <code class="docutils literal notranslate"><span class="pre">AppMenu.hpp</span></code>, restore auto-pause branches in <code class="docutils literal notranslate"><span class="pre">MenuSettingsView</span></code>/<code class="docutils literal notranslate"><span class="pre">MenuSettingsPresenter</span></code>, then implement detection in <code class="docutils literal notranslate"><span class="pre">Service</span></code> gated on <code class="docutils literal notranslate"><span class="pre">mSettings.autoPauseEn</span></code>.</p></li>
+</ul>
+<p>Activity summaries are persisted for historical data.</p>
+</section>
+</section>
+<section id="activity-data-management-and-persistence">
+<h3>Activity Data Management and Persistence<a class="headerlink" href="#activity-data-management-and-persistence" title="Link to this heading"></a></h3>
+<p>The Hiking app implements comprehensive data persistence using multiple storage mechanisms.</p>
+<section id="fit-file-format-implementation">
+<h4>FIT File Format Implementation<a class="headerlink" href="#fit-file-format-implementation" title="Link to this heading"></a></h4>
+<p><strong>ActivityWriter</strong> — writes activity data to a FIT file during tracking. Key methods: <code class="docutils literal notranslate"><span class="pre">start()</span></code>, <code class="docutils literal notranslate"><span class="pre">addRecord()</span></code> (called every second), <code class="docutils literal notranslate"><span class="pre">addLap()</span></code>, <code class="docutils literal notranslate"><span class="pre">pause()</span></code>, <code class="docutils literal notranslate"><span class="pre">resume()</span></code>, <code class="docutils literal notranslate"><span class="pre">stop()</span></code>, <code class="docutils literal notranslate"><span class="pre">discard()</span></code>. Each <code class="docutils literal notranslate"><span class="pre">RecordData</span></code> carries an optional-field bitmask so only valid sensor readings are written.</p>
+</section>
+<section id="activity-summary-persistence">
+<h4>Activity Summary Persistence<a class="headerlink" href="#activity-summary-persistence" title="Link to this heading"></a></h4>
+<p><strong>ActivitySummarySerializer</strong> — loads and saves <code class="docutils literal notranslate"><span class="pre">ActivitySummary</span></code> as JSON. Used at activity end (<code class="docutils literal notranslate"><span class="pre">save</span></code>) and on next app launch (<code class="docutils literal notranslate"><span class="pre">load</span></code>) to restore the last session for display in the summary screens.</p>
+<p><strong>ActivitySummary Structure</strong>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">LapSummary</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">time_t</span><span class="w">   </span><span class="n">duration</span><span class="p">;</span><span class="w">   </span><span class="c1">// Lap duration in seconds</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">distance</span><span class="p">;</span><span class="w">   </span><span class="c1">// Lap distance in m</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">steps</span><span class="p">;</span><span class="w">      </span><span class="c1">// Steps count per lap</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">ActivitySummary</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">time_t</span><span class="w">   </span><span class="n">utc</span><span class="p">;</span><span class="w">        </span><span class="c1">// Last activity UTC time</span>
+<span class="w">    </span><span class="kt">time_t</span><span class="w">   </span><span class="n">time</span><span class="p">;</span><span class="w">       </span><span class="c1">// Total track time in seconds</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">distance</span><span class="p">;</span><span class="w">   </span><span class="c1">// Total track distance in m</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">speedAvg</span><span class="p">;</span><span class="w">   </span><span class="c1">// Average speed in m/s</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">steps</span><span class="p">;</span><span class="w">      </span><span class="c1">// Total steps count</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">elevation</span><span class="p">;</span><span class="w">  </span><span class="c1">// Elevation in m</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">paceAvg</span><span class="p">;</span><span class="w">    </span><span class="c1">// Average pace in s/m</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">hrMax</span><span class="p">;</span><span class="w">      </span><span class="c1">// Maximum heart rate in bpm</span>
+<span class="w">    </span><span class="kt">float</span><span class="w">    </span><span class="n">hrAvg</span><span class="p">;</span><span class="w">      </span><span class="c1">// Average heart rate in bpm</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">TrackMapScreen</span><span class="w"> </span><span class="n">map</span><span class="p">;</span><span class="w">           </span><span class="c1">// Track map</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">LapSummary</span><span class="o">&gt;</span><span class="w"> </span><span class="n">laps</span><span class="p">;</span><span class="w">      </span><span class="c1">// Per-lap summary data</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="settings-persistence">
+<h4>Settings Persistence<a class="headerlink" href="#settings-persistence" title="Link to this heading"></a></h4>
+<p><strong>SettingsSerializer</strong> — loads and saves <code class="docutils literal notranslate"><span class="pre">Settings</span></code> as JSON. Called on startup (<code class="docutils literal notranslate"><span class="pre">load</span></code>) and whenever the user changes a setting (<code class="docutils literal notranslate"><span class="pre">save</span></code>).</p>
+<p><strong>Settings Structure</strong>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">Settings</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">autoPauseEn</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">  </span><span class="c1">// persisted; not on settings wheel until feature is implemented</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">phoneNotifEn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Alerts</span><span class="o">::</span><span class="n">Distance</span><span class="o">::</span><span class="n">Id</span><span class="w"> </span><span class="n">alertDistance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Alerts</span><span class="o">::</span><span class="n">Distance</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">KM_1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Alerts</span><span class="o">::</span><span class="n">Time</span><span class="o">::</span><span class="n">Id</span><span class="w">     </span><span class="n">alertTime</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">Alerts</span><span class="o">::</span><span class="n">Time</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">MIN_10</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="data-synchronization">
+<h4>Data Synchronization<a class="headerlink" href="#data-synchronization" title="Link to this heading"></a></h4>
+<p><strong>Real-time GUI Updates</strong>:</p>
+<ul class="simple">
+<li><p>Track data sent every second during active tracking</p></li>
+<li><p>Battery level updates on change</p></li>
+<li><p>GPS fix status notifications</p></li>
+<li><p>Lap completion events</p></li>
+</ul>
+<p><strong>Persistent Storage</strong>:</p>
+<ul class="simple">
+<li><p>FIT files written continuously during activity</p></li>
+<li><p>Summary updated on activity completion</p></li>
+<li><p>Settings saved on change</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Link to this heading"></a></h2>
+<p>The GUI is built using the TouchGFX framework and follows the Model-View-Presenter pattern.</p>
+<section id="project-structure">
+<h3>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Hiking/Software/Apps/TouchGFX-GUI/
+├── HikingGUI.touchgfx   # TouchGFX Designer project
+├── application.config    # Application configuration
+├── target.config         # Target hardware settings
+├── touchgfx.cmake        # CMake integration
+├── gui/                  # Generated and custom GUI code
+├── assets/               # Images, fonts, texts
+├── generated/            # Auto-generated code
+└── simulator/            # Simulator builds
+</pre></div>
+</div>
+</section>
+<section id="model-view-presenter-pattern">
+<h3>Model-View-Presenter Pattern<a class="headerlink" href="#model-view-presenter-pattern" title="Link to this heading"></a></h3>
+<p>The GUI follows MVP architecture:</p>
+<ul class="simple">
+<li><p><strong>Model</strong>: <code class="docutils literal notranslate"><span class="pre">Model.hpp/cpp</span></code> — Data management and service communication</p></li>
+<li><p><strong>View</strong>: Various view classes (<code class="docutils literal notranslate"><span class="pre">TrackView</span></code>, etc.) — UI rendering</p></li>
+<li><p><strong>Presenter</strong>: Presenter classes — Logic binding model and view</p></li>
+</ul>
+</section>
+<section id="model">
+<h3>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h3>
+<p>The Model class (<code class="docutils literal notranslate"><span class="pre">gui/model/Model.hpp</span></code>) serves as the central data hub:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">UIEventListener</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IGuiLifeCycleCallback</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ICustomMessageHandler</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">bind</span><span class="p">(</span><span class="n">ModelListener</span><span class="o">*</span><span class="w"> </span><span class="n">listener</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">tick</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleKeyEvent</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">resetIdleTimer</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">exitApp</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Time / date</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">getDate</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">month</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">day</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">weekday</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">getTime</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Sensors &amp; settings</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">getBatteryLevel</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">isUnitsImperial</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="nf">getHrThresholds</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">getHrThresholdsCount</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Settings</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">getSettings</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveSettings</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Settings</span><span class="o">&amp;</span><span class="w"> </span><span class="n">sett</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">hasGpsFix</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Track lifecycle</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">trackStart</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">isTrackActive</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">trackPause</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">trackResume</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">isTrackPaused</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Track</span><span class="o">::</span><span class="n">Data</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">getTrackData</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveLap</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveTrack</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">discardTrack</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Summary</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">isTrackSummaryAvailable</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">ActivitySummary</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">getTrackSummary</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Key responsibilities:</p>
+<ul class="simple">
+<li><p>Lifecycle management (<code class="docutils literal notranslate"><span class="pre">onStart</span></code>, <code class="docutils literal notranslate"><span class="pre">onResume</span></code>, <code class="docutils literal notranslate"><span class="pre">onSuspend</span></code>, <code class="docutils literal notranslate"><span class="pre">onStop</span></code>)</p></li>
+<li><p>Message handling from service (<code class="docutils literal notranslate"><span class="pre">ICustomMessageHandler</span></code>)</p></li>
+<li><p>Idle timeout management</p></li>
+<li><p>Menu position tracking</p></li>
+</ul>
+</section>
+<section id="screens-15-total">
+<h3>Screens (15 total)<a class="headerlink" href="#screens-15-total" title="Link to this heading"></a></h3>
+<p><strong>Entry &amp; Main Menu</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MainView</span></code> — App entry point; scroll-wheel menu (Start, Settings); GPS acquisition</p></li>
+</ul>
+<p><strong>Tracking</strong> (all face cycling happens inside <code class="docutils literal notranslate"><span class="pre">TrackView</span></code> via swipeable containers):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackView</span></code> — Active tracking screen; hosts <code class="docutils literal notranslate"><span class="pre">TrackFaceTotal</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackFaceOverview</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackFaceElevation</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackFaceStatus</span></code> (swipe L1/L2)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackActionView</span></code> — Pause menu: Resume / Summary / Save / Discard</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code> — Lap-saved notification (auto-dismisses after 3 s)</p></li>
+</ul>
+<p><strong>Confirmations</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackStartConfirmationView</span></code> — Prompt to start without GPS fix; idle timeout → exits app</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackHoldConfirmationView</span></code> — Hold R1 to confirm finish (→ <code class="docutils literal notranslate"><span class="pre">TrackSavedView</span></code>) or discard (→ <code class="docutils literal notranslate"><span class="pre">TrackDiscardedView</span></code>); release early cancels; idle timeout → <code class="docutils literal notranslate"><span class="pre">TrackActionView</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackDiscardedView</span></code> — Discard feedback (auto-dismisses after 3 s → exits app)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackSavedView</span></code> — Save feedback (auto-dismisses after 3 s → <code class="docutils literal notranslate"><span class="pre">TrackSummaryView</span></code>)</p></li>
+</ul>
+<p><strong>Summary</strong> (all face cycling happens inside <code class="docutils literal notranslate"><span class="pre">TrackSummaryView</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackSummaryView</span></code> — Post-activity summary; hosts <code class="docutils literal notranslate"><span class="pre">SummaryFaceMap</span></code>, <code class="docutils literal notranslate"><span class="pre">SummaryFaceOverview</span></code>, <code class="docutils literal notranslate"><span class="pre">SummaryFaceHeartRate</span></code> (swipe L1/L2)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">SummaryFaceMap</span></code> — route map + total distance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SummaryFaceOverview</span></code> — total distance, elevation, elapsed time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SummaryFaceHeartRate</span></code> — max HR, average HR</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Settings</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MenuSettingsView</span></code> — Root settings wheel (Alerts, Phone Notifications; auto-pause hidden — see Auto-pause above)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MenuAlertsView</span></code> — Alert type selection (Distance, Time)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MenuDistanceView</span></code> — Distance alert value picker</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MenuDistanceSavedView</span></code> — Save confirmation (auto-dismisses after 3 s → <code class="docutils literal notranslate"><span class="pre">MenuAlertsView</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MenuTimeView</span></code> — Time alert value picker</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MenuTimeSavedView</span></code> — Save confirmation (auto-dismisses after 3 s → <code class="docutils literal notranslate"><span class="pre">MenuAlertsView</span></code>)</p></li>
+</ul>
+</section>
+<section id="message-handling-system">
+<h3>Message Handling System<a class="headerlink" href="#message-handling-system" title="Link to this heading"></a></h3>
+<p>The Model implements <code class="docutils literal notranslate"><span class="pre">ICustomMessageHandler</span></code> to receive asynchronous updates from the service. Each message is cast to its concrete type, stored in a Model field, and forwarded to the active presenter via <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Model::customMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">TRACK_DATA_UPDATE</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">auto</span><span class="w"> </span><span class="o">*</span><span class="n">cmsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TrackDataUpd</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">            </span><span class="n">mTrackData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cmsg</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span><span class="w">                      </span><span class="c1">// store</span>
+<span class="w">            </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">onTrackData</span><span class="p">(</span><span class="n">mTrackData</span><span class="p">);</span><span class="w">       </span><span class="c1">// notify presenter</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// ... other message types follow the same pattern</span>
+<span class="w">        </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Messages handled: <code class="docutils literal notranslate"><span class="pre">SETTINGS_UPDATE</span></code>, <code class="docutils literal notranslate"><span class="pre">LOCAL_TIME</span></code>, <code class="docutils literal notranslate"><span class="pre">BATTERY</span></code>, <code class="docutils literal notranslate"><span class="pre">GPS_FIX</span></code>, <code class="docutils literal notranslate"><span class="pre">TRACK_STATE_UPDATE</span></code>, <code class="docutils literal notranslate"><span class="pre">TRACK_DATA_UPDATE</span></code>, <code class="docutils literal notranslate"><span class="pre">LAP_END</span></code>, <code class="docutils literal notranslate"><span class="pre">SUMMARY</span></code>.</p>
+</section>
+<section id="screen-navigation">
+<h3>Screen Navigation<a class="headerlink" href="#screen-navigation" title="Link to this heading"></a></h3>
+<p>All screen changes use <code class="docutils literal notranslate"><span class="pre">gotoXxxScreenNoTransition()</span></code> — there are no slide or animated screen transitions. Animations exist only within containers: <code class="docutils literal notranslate"><span class="pre">MainMenu</span></code> scroll-wheel and <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code> arc movement.</p>
+<p><strong>Screen Flow</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MainView ──[Start, GPS ok]──► TrackView (faces: Total ◄──► Overview ◄──► Elevation ◄──► Status)
+    │              │                         │
+    │    [Start, no GPS fix]                [R1]
+    │              │                    TrackActionView
+    │    TrackStartConfirmationView   Resume Summary Save Discard
+    │      │ [R1:start] → TrackView      │      │     └──┬──┘
+    │      │ [idle/R2]  → exitApp    TrackView   │   [set Finish/Discard mode]
+    │                                            │            │
+    │                                            │   TrackHoldConfirmationView
+    │                                            │   hold R1 1.5s — arc grows 3→2→1:
+    │                                            │   ├ release early → TrackActionView
+    │                                            │   └ hold complete →
+    │                                            │       [Finish]  TrackSavedView ──(3s)──► TrackSummaryView
+    │                                            │       [Discard] TrackDiscardedView ──(3s)──► exitApp()
+    │                                     TrackSummaryView
+    │                                   (faces: Map ◄──► Overview ◄──► HeartRate)
+    │                                          │
+    │                             [R2:back to track] ──► TrackView
+    │
+    └──[Settings]──► MenuSettingsView
+                     (items: Alerts, Phone Notifications toggle)
+                          │[Alerts]
+                     MenuAlertsView
+                       │             │
+                  [Distance]       [Time]
+                      │               │
+              MenuDistanceView   MenuTimeView
+                  │ [R1:save]        │ [R1:save]
+          MenuDistanceSavedView  MenuTimeSavedView
+              │ (3s auto)            │ (3s auto)
+          MenuAlertsView         MenuAlertsView
+</pre></div>
+</div>
+</section>
+<section id="custom-containers">
+<h3>Custom Containers<a class="headerlink" href="#custom-containers" title="Link to this heading"></a></h3>
+<p>The app uses two categories of containers: ready-made <strong>SDK widgets</strong> from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> (imported as <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> packages) and <strong>app-specific containers</strong> built for this app’s data and layout.</p>
+<section id="sdk-widget-containers">
+<h4>SDK Widget Containers<a class="headerlink" href="#sdk-widget-containers" title="Link to this heading"></a></h4>
+<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Battery</span></code> — 4-segment battery level indicator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — button arc indicators (L1/L2/R1/R2)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GpsIndicator</span></code> — blinking GPS fix status dot</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HeartRateZone</span></code> — 5-zone HR bar visualization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code> — arc position indicator for face and menu navigation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MainMenu</span></code> — scroll-wheel menu with bundled <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code> and <code class="docutils literal notranslate"><span class="pre">Toggle</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Map</span></code> — route map with start/end markers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PauseIndicator</span></code> — full-width pause overlay with elapsed pause time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Title</span></code> — screen title with underline</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InfoCarousel</span></code> — auto-cycling multi-value info panel</p></li>
+</ul>
+</section>
+<section id="app-specific-containers">
+<h4>App-Specific Containers<a class="headerlink" href="#app-specific-containers" title="Link to this heading"></a></h4>
+<p>Built specifically for this app and found in <code class="docutils literal notranslate"><span class="pre">gui/include/gui/containers/</span></code>:</p>
+<p><strong>Track watch faces</strong> (swipeable inside <code class="docutils literal notranslate"><span class="pre">TrackView</span></code>):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceTotal::setSteps</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">steps</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceTotal::setDistance</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceTotal::setTimer</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">sec</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceOverview::setHR</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">hr</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">thresholds</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">thresholdCount</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceOverview::setPace</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">pace</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceOverview::setElevation</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">elevation</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceElevation::setLapAscent</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">ascent</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceElevation::setTotalAscent</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">ascent</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceElevation::setElevation</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">elevation</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceStatus::setTime</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">m</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">TrackFaceStatus::setBatteryLevel</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">level</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Summary faces</strong> (swipeable inside <code class="docutils literal notranslate"><span class="pre">TrackSummaryView</span></code>):</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceMap::setDistance</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceMap::setMap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">TrackMapScreen</span><span class="o">&amp;</span><span class="w"> </span><span class="n">map</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceOverview::setDistance</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceOverview::setElevation</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">elevation</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceOverview::setTimer</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">sec</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceHeartRate::setMaxHR</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">hr</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceHeartRate::setAvgHR</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">hr</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Utility</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CountdownTimer</span></code> — self-registering countdown used by auto-dismiss screens (<code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackSavedView</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackDiscardedView</span></code>, <code class="docutils literal notranslate"><span class="pre">MenuDistanceSavedView</span></code>, <code class="docutils literal notranslate"><span class="pre">MenuTimeSavedView</span></code>)</p></li>
+</ul>
+</section>
+</section>
+<section id="input-handling">
+<h3>Input Handling<a class="headerlink" href="#input-handling" title="Link to this heading"></a></h3>
+<p>User input is processed through a hierarchical system:</p>
+<ol class="arabic simple">
+<li><p><strong>Hardware Events</strong>: Button presses detected by TouchGFX HAL</p></li>
+<li><p><strong>Key Event Processing</strong>: <code class="docutils literal notranslate"><span class="pre">Model::handleKeyEvent()</span></code> for global actions</p></li>
+<li><p><strong>Screen-Specific Handling</strong>: View classes handle context-specific input</p></li>
+</ol>
+<p><strong>Button Mapping</strong>:</p>
+<ul class="simple">
+<li><p><strong>L1</strong>: Previous item/navigation left</p></li>
+<li><p><strong>L2</strong>: Next item/navigation right</p></li>
+<li><p><strong>R1</strong>: Primary action (menu access)</p></li>
+<li><p><strong>R2</strong>: Secondary action (lap/manual trigger)</p></li>
+</ul>
+</section>
+<section id="data-formatting-and-units">
+<h3>Data Formatting and Units<a class="headerlink" href="#data-formatting-and-units" title="Link to this heading"></a></h3>
+<p>The GUI handles unit conversions and formatting before passing values to containers:</p>
+<ul class="simple">
+<li><p><strong>Distance</strong>: meters → km (metric) or miles (imperial)</p></li>
+<li><p><strong>Pace</strong>: seconds-per-metre → min/km or min/mile depending on unit setting</p></li>
+<li><p><strong>Elevation / ascent</strong>: metres → feet in imperial mode</p></li>
+<li><p><strong>Time</strong>: <code class="docutils literal notranslate"><span class="pre">std::time_t</span></code> seconds passed directly to containers; formatted as <code class="docutils literal notranslate"><span class="pre">MM:SS</span></code> or <code class="docutils literal notranslate"><span class="pre">H:MM:SS</span></code> by the container</p></li>
+<li><p><strong>Steps / floors</strong>: raw <code class="docutils literal notranslate"><span class="pre">uint32_t</span></code> counts, no conversion required</p></li>
+</ul>
+</section>
+<section id="idle-timeout">
+<h3>Idle Timeout<a class="headerlink" href="#idle-timeout" title="Link to this heading"></a></h3>
+<p>The app implements automatic screen timeout to conserve battery:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Model::decIdleTimer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mIdleTimer</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mIdleTimer</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mIdleTimer</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">onIdleTimeout</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Model::resetIdleTimer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mIdleTimer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">App</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">kScreenTimeoutSteps</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Idle timer resets on any user interaction, preventing accidental timeouts during active use.</p>
+</section>
+<section id="touchgfx-integration-with-una-sdk">
+<h3>TouchGFX Integration with UNA SDK<a class="headerlink" href="#touchgfx-integration-with-una-sdk" title="Link to this heading"></a></h3>
+<p>The integration between TouchGFX and UNA SDK is handled through several key components.</p>
+<section id="touchgfxcommandprocessor">
+<h4>TouchGFXCommandProcessor<a class="headerlink" href="#touchgfxcommandprocessor" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::TouchGFXCommandProcessor</span></code> is a singleton that bridges the SDK kernel and the TouchGFX event loop. It holds a <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">SDK::Kernel&amp;</span></code> reference internally and manages GUI lifecycle and incoming custom messages.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">SDK</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TouchGFXCommandProcessor</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">TouchGFXCommandProcessor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">GetInstance</span><span class="p">();</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">setAppLifeCycleCallback</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IGuiLifeCycleCallback</span><span class="o">*</span><span class="w"> </span><span class="n">cb</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">setCustomMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ICustomMessageHandler</span><span class="o">*</span><span class="w"> </span><span class="n">h</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">waitForFrameTick</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">getKeySample</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeDisplayFrameBuffer</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Called before Model::tick() on every frame</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">callCustomMessageHandler</span><span class="p">();</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace SDK</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FrontendApplication::handleTickEvent()</span></code> calls <code class="docutils literal notranslate"><span class="pre">callCustomMessageHandler()</span></code> first, then <code class="docutils literal notranslate"><span class="pre">model.tick()</span></code>, ensuring pending service messages are dispatched to <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code> before the presenter updates the view.</p>
+</section>
+<section id="kernel-provider-architecture">
+<h4>Kernel Provider Architecture<a class="headerlink" href="#kernel-provider-architecture" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::KernelProviderGUI</span></code> is a singleton that stores a pointer to the <code class="docutils literal notranslate"><span class="pre">SDK::Kernel</span></code> object. It is initialised early in the program (before the GUI starts) and later retrieved by the <code class="docutils literal notranslate"><span class="pre">Model</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">SDK</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">KernelProviderGUI</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">KernelProviderGUI</span><span class="o">&amp;</span><span class="w"> </span><span class="n">CreateInstance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">*</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">KernelProviderGUI</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">GetInstance</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">getKernel</span><span class="p">();</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace SDK</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Model</span></code> constructor retrieves the kernel via <code class="docutils literal notranslate"><span class="pre">SDK::KernelProviderGUI::GetInstance().getKernel()</span></code>, ensuring the GUI has access to the same kernel instance used by the service.</p>
+</section>
+<section id="custom-message-system">
+<h4>Custom Message System<a class="headerlink" href="#custom-message-system" title="Link to this heading"></a></h4>
+<p>All service↔GUI messages are declared in <code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> as plain <code class="docutils literal notranslate"><span class="pre">constexpr</span> <span class="pre">SDK::MessageType::Type</span></code> constants (not an enum) with fixed hex IDs. Every message struct inherits from <code class="docutils literal notranslate"><span class="pre">SDK::MessageBase</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// Service --&gt; GUI</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">SETTINGS_UPDATE</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">LOCAL_TIME</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BATTERY</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">GPS_FIX</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000004</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TRACK_STATE_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000005</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TRACK_DATA_UPDATE</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000006</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">LAP_END</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000007</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">SUMMARY</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000008</span><span class="p">;</span>
+
+<span class="c1">// GUI --&gt; Service</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">SETTINGS_SAVE</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000A</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TRACK_START</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000B</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TRACK_STOP</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000C</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TRACK_PAUSE</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000D</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TRACK_RESUME</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000E</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">MANUAL_LAP</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000F</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">SettingsUpd</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Settings</span><span class="w"> </span><span class="n">settings</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">unitsImperial</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">hrThresholds</span><span class="p">[</span><span class="n">kHrThresholdsCount</span><span class="p">];</span><span class="w">  </span><span class="c1">// C-array of 6</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">hrThresholdsCount</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">TrackDataUpd</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Track</span><span class="o">::</span><span class="n">Data</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// ... other structs follow the same pattern</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
+</pre></div>
+</div>
+</section>
+<section id="message-sender">
+<h4>Message Sender<a class="headerlink" href="#message-sender" title="Link to this heading"></a></h4>
+<p><strong><code class="docutils literal notranslate"><span class="pre">CustomMessage::Sender</span></code></strong> provides type-safe message sending from the service to the GUI. Each method allocates a typed message via <code class="docutils literal notranslate"><span class="pre">mKernel.comm.allocateMessage&lt;&gt;()</span></code>, fills its fields, sends it, and releases it, returning <code class="docutils literal notranslate"><span class="pre">bool</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Sender</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Sender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Service --&gt; GUI</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">settingsUpd</span><span class="p">(</span><span class="n">Settings</span><span class="w"> </span><span class="n">settings</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">units</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">thresholds</span><span class="p">)[</span><span class="n">kHrThresholdsCount</span><span class="p">],</span>
+<span class="w">                     </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">thresholdCount</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">time</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">tm</span><span class="w"> </span><span class="n">localTime</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">battery</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">level</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">fix</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackState</span><span class="p">(</span><span class="n">Track</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Track</span><span class="o">::</span><span class="n">Data</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">lapEnd</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">lapNum</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ActivitySummary</span><span class="o">*</span><span class="w"> </span><span class="n">summaryPtr</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// GUI --&gt; Service</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">settingsSave</span><span class="p">(</span><span class="n">Settings</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackStart</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackStop</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">discard</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackPause</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackResume</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">manualLap</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="asset-management">
+<h3>Asset Management<a class="headerlink" href="#asset-management" title="Link to this heading"></a></h3>
+<p><strong>Images</strong>: PNG assets for backgrounds, buttons, icons
+<strong>Fonts</strong>: Poppins family for various weights and styles
+<strong>Texts</strong>: Localized strings in XML format</p>
+</section>
+<section id="code-generation">
+<h3>Code Generation<a class="headerlink" href="#code-generation" title="Link to this heading"></a></h3>
+<p>TouchGFX Designer generates:</p>
+<ul class="simple">
+<li><p>Screen base classes (<code class="docutils literal notranslate"><span class="pre">TrackViewBase</span></code>, etc.)</p></li>
+<li><p>Container implementations</p></li>
+<li><p>Bitmap databases</p></li>
+<li><p>Font and text resources</p></li>
+</ul>
+<p>Custom code extends base classes with app-specific logic.</p>
+</section>
+<section id="simulator-support">
+<h3>Simulator Support<a class="headerlink" href="#simulator-support" title="Link to this heading"></a></h3>
+<p>The TouchGFX project includes simulator builds for development:</p>
+<ul class="simple">
+<li><p>Visual Studio project for Windows</p></li>
+<li><p>Mock sensor data for development</p></li>
+<li><p>Visual debugging capabilities</p></li>
+</ul>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<p>The Hiking app uses CMake for cross-platform builds targeting embedded hardware and simulation.</p>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Hiking/Software/Apps/Hiking-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Hiking&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Activity&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1F3C92B7E4D8A10&quot;</span><span class="p">)</span>
+
+<span class="c"># Include SDK build scripts</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p><strong>Service Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_SERVICE</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>GUI Build</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">TOUCHGFX_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_GUI</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Complete App</strong>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>:</p>
+<ul class="simple">
+<li><p>UNA SDK common, service, and GUI sources</p></li>
+<li><p>Sensor layer interfaces</p></li>
+<li><p>Kernel and messaging systems</p></li>
+</ul>
+<p><strong>External Libraries</strong>:</p>
+<ul class="simple">
+<li><p>TouchGFX framework</p></li>
+<li><p>Custom app libraries (ActivityWriter, etc.)</p></li>
+</ul>
+</section>
+<section id="build-process">
+<h3>Build Process<a class="headerlink" href="#build-process" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>CMake Configuration</strong>: Sets up toolchain and paths</p></li>
+<li><p><strong>Source Collection</strong>: Gathers all source files</p></li>
+<li><p><strong>Compilation</strong>: Separate builds for service and GUI</p></li>
+<li><p><strong>Linking</strong>: Creates ELF executables</p></li>
+<li><p><strong>Packaging</strong>: Combines into deployable app package</p></li>
+</ol>
+</section>
+<section id="development-setup">
+<h3>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for comprehensive development environment setup, build instructions, and toolchain requirements.</p>
+</section>
+<section id="simulator-build">
+<h3>Simulator Build<a class="headerlink" href="#simulator-build" title="Link to this heading"></a></h3>
+<p>TouchGFX provides simulator builds for PC development:</p>
+<ul class="simple">
+<li><p>Visual Studio project for Windows</p></li>
+<li><p>Makefile for Linux</p></li>
+<li><p>Includes mock hardware interfaces</p></li>
+</ul>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The Hiking app demonstrates a sophisticated implementation of a hiking activity tracking application on wearable devices. Its modular architecture separates concerns effectively between service logic and user interface, enabling robust sensor integration and real-time data processing.</p>
+<p>Key architectural strengths include:</p>
+<ul class="simple">
+<li><p><strong>Separation of Concerns</strong>: Clear division between service and GUI</p></li>
+<li><p><strong>Message-Based Communication</strong>: Loose coupling between components</p></li>
+<li><p><strong>Extensible Sensor Framework</strong>: Easy addition of new sensors</p></li>
+<li><p><strong>Rich UI Framework</strong>: TouchGFX provides professional user experience</p></li>
+<li><p><strong>Data Persistence</strong>: FIT file format ensures interoperability</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Cycling-Architecture.html" class="btn btn-neutral float-left" title="Cycling - Cycling Activity Tracking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="HRMonitor-Architecture.html" class="btn btn-neutral float-right" title="HRMonitor - Heart Rate Monitor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
