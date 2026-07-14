@@ -1,0 +1,1425 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Files - Data Persistence and File Operations &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if ("False" === "True") {
+                                        addZoomToSvgs(d3.selectAll(""));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? mermaids_active.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="FitFiles - FIT File Creation and Sensor Logging Tutorial" href="../FitFiles/ARCHITECTURE.html" />
+    <link rel="prev" title="Sensors - Integrating Hardware Sensors" href="../Sensors/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Files - Data Persistence and File Operations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-and-running-files">Building and Running Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#settings-system-architecture">Settings System Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#settings-data-model">Settings Data Model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#decimal-counter-float-based-setting">1. Decimal Counter (Float-based Setting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#activity-type-enumeration-setting">2. Activity Type (Enumeration Setting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#display-mode-enumeration-setting">3. Display Mode (Enumeration Setting)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#json-file-format">JSON File Format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#message-passing-system">Message Passing System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-message-types">Custom Message Types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#get-settings-0x00000002">GET_SETTINGS (0x00000002)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-settings-0x00000003">SET_SETTINGS (0x00000003)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-values-0x00000004">SETTINGS_VALUES (0x00000004)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#message-flow-architecture">Message Flow Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-layer-implementation">Service Layer Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#service-class-structure">Service Class Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#settings-file-operations">Settings File Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#loading-settings-loadsettings">Loading Settings (<code class="docutils literal notranslate"><span class="pre">loadSettings()</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#saving-settings-savesettings">Saving Settings (<code class="docutils literal notranslate"><span class="pre">saveSettings()</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#message-handling-in-service">Message Handling in Service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui-layer-implementation">GUI Layer Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-view-presenter-architecture">Model-View-Presenter Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-implementation">Model Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#message-sending">Message Sending</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#message-receiving">Message Receiving</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#presenter-implementation">Presenter Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#view-implementation">View Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#initialization">Initialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-display-update">Settings Display Update</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#button-event-handling">Button Event Handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#button-control-scheme">Button Control Scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-selection-flow">Setting Selection Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-system-integration">Build System Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cmake-configuration">CMake Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-and-recovery">Error Handling and Recovery</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-system-errors">File System Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-communication-errors">Message Communication Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-validation">Data Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#key-learning-concepts">Key Learning Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#persistent-storage">1. Persistent Storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inter-process-communication">2. Inter-Process Communication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mvp-architecture">3. MVP Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-recovery">4. Error Recovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#user-experience">5. User Experience</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#extension-points">Extension Points</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Files - Data Persistence and File Operations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/Files/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="files-data-persistence-and-file-operations">
+<h1>Files - Data Persistence and File Operations<a class="headerlink" href="#files-data-persistence-and-file-operations" title="Link to this heading"></a></h1>
+<p>This comprehensive tutorial demonstrates a complete settings management system for the UNA SDK, featuring persistent file-based storage, JSON serialization, and seamless GUI-Service communication. The tutorial implements three configurable settings with full CRUD operations, error handling, and an intuitive selectable settings interface using physical buttons for navigation and value cycling.</p>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Files">Project Folder</a></p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Files tutorial showcases advanced UNA SDK concepts including:</p>
+<ul class="simple">
+<li><p><strong>Persistent Settings Storage</strong>: JSON file operations with automatic save/load</p></li>
+<li><p><strong>Inter-Process Communication</strong>: Custom message passing between GUI and Service layers</p></li>
+<li><p><strong>TouchGFX MVP Architecture</strong>: Model-View-Presenter pattern implementation</p></li>
+<li><p><strong>File System Integration</strong>: Using SDK’s IFileSystem interface</p></li>
+<li><p><strong>Error Recovery</strong>: Graceful handling of corrupted files and I/O errors</p></li>
+</ul>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>Before building the Files app, you need to set up the UNA SDK environment. Follow the <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for complete installation instructions, including:</p>
+</section>
+<section id="building-and-running-files">
+<h3>Building and Running Files<a class="headerlink" href="#building-and-running-files" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for details)</p>
+</section>
+<section id="running-on-simulator">
+<h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
+<p>To test the app on the simulator (Windows only):</p>
+<ol class="arabic simple">
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Files.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
+<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">Files\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
+<li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
+</ol>
+<p>In the simulator, use keyboard keys to interact with the settings:</p>
+<ul class="simple">
+<li><p><strong>1</strong> = L1 (Increment selected setting value)</p></li>
+<li><p><strong>2</strong> = L2 (Decrement selected setting value)</p></li>
+<li><p><strong>3</strong> = R1 (Save settings and select next setting)</p></li>
+<li><p><strong>4</strong> = R2 (Save and exit)</p></li>
+</ul>
+<p>The simulator will display the settings interface with file persistence. Settings are saved to <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> in the simulator’s working directory. For detailed simulator setup and button mapping, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
+</section>
+</section>
+<section id="settings-system-architecture">
+<h2>Settings System Architecture<a class="headerlink" href="#settings-system-architecture" title="Link to this heading"></a></h2>
+<section id="settings-data-model">
+<h3>Settings Data Model<a class="headerlink" href="#settings-data-model" title="Link to this heading"></a></h3>
+<p>The system manages three distinct setting types:</p>
+<section id="decimal-counter-float-based-setting">
+<h4>1. Decimal Counter (Float-based Setting)<a class="headerlink" href="#decimal-counter-float-based-setting" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Purpose</strong>: Configurable numeric value for counting/display purposes</p></li>
+<li><p><strong>Type</strong>: <code class="docutils literal notranslate"><span class="pre">float</span></code> (GUI) / <code class="docutils literal notranslate"><span class="pre">int32_t</span></code> (Service - implementation detail)</p></li>
+<li><p><strong>Valid Values</strong>: 0.5, 1.0, 1.5, 2.0 (cycling through predefined values)</p></li>
+<li><p><strong>Default</strong>: 1.0</p></li>
+<li><p><strong>Storage</strong>: Multiplied by 10 for integer transmission (1.5 → 15)</p></li>
+</ul>
+</section>
+<section id="activity-type-enumeration-setting">
+<h4>2. Activity Type (Enumeration Setting)<a class="headerlink" href="#activity-type-enumeration-setting" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Purpose</strong>: Activity category selection</p></li>
+<li><p><strong>Type</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::ActivityType</span></code> enum</p></li>
+<li><p><strong>Values</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">RUNNING</span> <span class="pre">=</span> <span class="pre">0</span></code> - Running activities</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CYCLING</span> <span class="pre">=</span> <span class="pre">1</span></code> - Cycling activities</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SWIMMING</span> <span class="pre">=</span> <span class="pre">2</span></code> - Swimming activities</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WALKING</span> <span class="pre">=</span> <span class="pre">3</span></code> - Walking activities</p></li>
+</ul>
+</li>
+<li><p><strong>Default</strong>: <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code></p></li>
+</ul>
+</section>
+<section id="display-mode-enumeration-setting">
+<h4>3. Display Mode (Enumeration Setting)<a class="headerlink" href="#display-mode-enumeration-setting" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Purpose</strong>: UI display preference configuration</p></li>
+<li><p><strong>Type</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::DisplayMode</span></code> enum</p></li>
+<li><p><strong>Values</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIMPLE</span> <span class="pre">=</span> <span class="pre">0</span></code> - Basic display mode</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DETAILED</span> <span class="pre">=</span> <span class="pre">1</span></code> - Detailed display mode</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMPACT</span> <span class="pre">=</span> <span class="pre">2</span></code> - Compact display mode</p></li>
+</ul>
+</li>
+<li><p><strong>Default</strong>: <code class="docutils literal notranslate"><span class="pre">SIMPLE</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="json-file-format">
+<h3>JSON File Format<a class="headerlink" href="#json-file-format" title="Link to this heading"></a></h3>
+<p>Settings persist in <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> with this structure:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;decimalCounter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;activityType&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: Values stored as integers for simplicity; GUI converts decimal counter to/from float representation.</p>
+</section>
+</section>
+<section id="message-passing-system">
+<h2>Message Passing System<a class="headerlink" href="#message-passing-system" title="Link to this heading"></a></h2>
+<section id="custom-message-types">
+<h3>Custom Message Types<a class="headerlink" href="#custom-message-types" title="Link to this heading"></a></h3>
+<p>The tutorial defines custom messages in the application-specific range (0x00000000-0x0000FFFF):</p>
+<section id="get-settings-0x00000002">
+<h4>GET_SETTINGS (0x00000002)<a class="headerlink" href="#get-settings-0x00000002" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Direction</strong>: GUI → Service</p></li>
+<li><p><strong>Purpose</strong>: Request current settings from Service</p></li>
+<li><p><strong>Structure</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::GetSettings</span></code> (empty payload)</p></li>
+<li><p><strong>Response</strong>: <code class="docutils literal notranslate"><span class="pre">SETTINGS_VALUES</span></code> message with current values</p></li>
+</ul>
+</section>
+<section id="set-settings-0x00000003">
+<h4>SET_SETTINGS (0x00000003)<a class="headerlink" href="#set-settings-0x00000003" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Direction</strong>: GUI → Service</p></li>
+<li><p><strong>Purpose</strong>: Update settings and persist to file</p></li>
+<li><p><strong>Structure</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::SetSettings</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">decimalCounter</span></code> - Counter value (multiplied by 10)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">activityType</span></code> - Activity type enum value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">displayMode</span></code> - Display mode enum value</p></li>
+</ul>
+</li>
+<li><p><strong>Response</strong>: Automatic save to file</p></li>
+</ul>
+</section>
+<section id="settings-values-0x00000004">
+<h4>SETTINGS_VALUES (0x00000004)<a class="headerlink" href="#settings-values-0x00000004" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Direction</strong>: Service → GUI</p></li>
+<li><p><strong>Purpose</strong>: Deliver current settings to GUI</p></li>
+<li><p><strong>Structure</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::SettingsValues</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">decimalCounter</span></code> - Counter value (multiplied by 10)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">activityType</span></code> - Activity type enum value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">displayMode</span></code> - Display mode enum value</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="message-flow-architecture">
+<h3>Message Flow Architecture<a class="headerlink" href="#message-flow-architecture" title="Link to this heading"></a></h3>
+<pre  class="mermaid">
+        sequenceDiagram
+    participant GUI
+    participant Model
+    participant Service
+    participant FileSystem
+
+    Note over Service: Application Startup
+    Service-&gt;&gt;FileSystem: loadSettings() - Check settings.json
+    alt File exists and valid
+        Service-&gt;&gt;FileSystem: Read JSON content
+        Service-&gt;&gt;Service: Parse and store settings
+    else File missing/corrupted
+        Service-&gt;&gt;Service: Use default values
+        Service-&gt;&gt;FileSystem: Create settings.json with defaults
+    end
+
+    Note over GUI: GUI Initialization
+    GUI-&gt;&gt;Model: setupScreen() calls presenter-&gt;requestSettings()
+    Model-&gt;&gt;Service: Send GetSettings message
+    Service-&gt;&gt;Model: Respond with SettingsValues message
+    Model-&gt;&gt;GUI: Call modelListener-&gt;onSettingsUpdate()
+    GUI-&gt;&gt;GUI: Update display with current values
+
+    Note over GUI: User Button Press (R1 - Save &amp; Select Next)
+    GUI-&gt;&gt;Model: presenter-&gt;saveSettings() - Send current settings to Service
+    Model-&gt;&gt;Service: Send SetSettings message
+    Service-&gt;&gt;Service: Update internal settings
+    Service-&gt;&gt;FileSystem: saveSettings() - Write to JSON file
+    GUI-&gt;&gt;GUI: Switch to next setting selection and update colors
+
+    Note over GUI: User Button Press (L1/L2 - Change Selected Setting)
+    GUI-&gt;&gt;GUI: handleKeyEvent() - Increment/decrement selected setting value
+    GUI-&gt;&gt;GUI: updateSettingsDisplay() - Refresh UI with new value and colors
+
+    Note over GUI: User Button Press (R2 - Exit)
+    GUI-&gt;&gt;Model: presenter-&gt;exit() - Exit application
+    </pre></section>
+</section>
+<section id="service-layer-implementation">
+<h2>Service Layer Implementation<a class="headerlink" href="#service-layer-implementation" title="Link to this heading"></a></h2>
+<section id="service-class-structure">
+<h3>Service Class Structure<a class="headerlink" href="#service-class-structure" title="Link to this heading"></a></h3>
+<p>The Service class (<code class="docutils literal notranslate"><span class="pre">Service.hpp/cpp</span></code>) manages settings persistence and handles GUI communication:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="c1">// Settings storage</span>
+<span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">mDecimalCounter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Communication</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">GUISender</span><span class="w"> </span><span class="n">mSender</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Methods</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">loadSettings</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveSettings</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">onStartGUI</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">onStopGUI</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="settings-file-operations">
+<h3>Settings File Operations<a class="headerlink" href="#settings-file-operations" title="Link to this heading"></a></h3>
+<section id="loading-settings-loadsettings">
+<h4>Loading Settings (<code class="docutils literal notranslate"><span class="pre">loadSettings()</span></code>)<a class="headerlink" href="#loading-settings-loadsettings" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::loadSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;settings.json&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">file</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IFile</span><span class="o">::</span><span class="n">Mode</span><span class="o">::</span><span class="n">READ</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">char</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">bytesRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bytesRead</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">buffer</span><span class="p">[</span><span class="n">bytesRead</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">JsonStreamReader</span><span class="w"> </span><span class="n">reader</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">bytesRead</span><span class="p">);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reader</span><span class="p">.</span><span class="n">isValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Read integer values from JSON</span>
+<span class="w">                </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mDecimalCounter</span><span class="p">;</span>
+<span class="w">                </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">activityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">);</span>
+<span class="w">                </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">displayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">);</span>
+
+<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">getInt</span><span class="p">(</span><span class="s">&quot;decimalCounter&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">);</span>
+<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">getInt</span><span class="p">(</span><span class="s">&quot;activityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">activityType</span><span class="p">);</span>
+<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">getInt</span><span class="p">(</span><span class="s">&quot;displayMode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">displayMode</span><span class="p">);</span>
+
+<span class="w">                </span><span class="c1">// Validate and convert back to types</span>
+<span class="w">                </span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mActivityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activityType</span><span class="p">);</span>
+<span class="w">                </span><span class="n">mDisplayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="o">&gt;</span><span class="p">(</span><span class="n">displayMode</span><span class="p">);</span>
+
+<span class="w">                </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Settings loaded from file</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">close</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Settings file not found, using defaults</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Key Points</strong>:</p>
+<ul class="simple">
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">SDK::JsonStreamReader</span></code> for parsing</p></li>
+<li><p>Falls back to defaults if file missing or invalid</p></li>
+<li><p>Stores values as integers in JSON for simplicity</p></li>
+</ul>
+</section>
+<section id="saving-settings-savesettings">
+<h4>Saving Settings (<code class="docutils literal notranslate"><span class="pre">saveSettings()</span></code>)<a class="headerlink" href="#saving-settings-savesettings" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::saveSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;settings.json&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">file</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IFile</span><span class="o">::</span><span class="n">Mode</span><span class="o">::</span><span class="n">WRITE</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">JsonStreamWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">file</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">startObject</span><span class="p">();</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;decimalCounter&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mDecimalCounter</span><span class="p">);</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;activityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">));</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;displayMode&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">endObject</span><span class="p">();</span>
+<span class="w">        </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">close</span><span class="p">();</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Settings saved to file</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_ERROR</span><span class="p">(</span><span class="s">&quot;Failed to save settings</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Key Points</strong>:</p>
+<ul class="simple">
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">SDK::JsonStreamWriter</span></code> for serialization</p></li>
+<li><p>Overwrites entire file on each save</p></li>
+<li><p>Logs success/failure for debugging</p></li>
+</ul>
+</section>
+</section>
+<section id="message-handling-in-service">
+<h3>Message Handling in Service<a class="headerlink" href="#message-handling-in-service" title="Link to this heading"></a></h3>
+<p>The Service’s main loop processes custom messages:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">GET_SETTINGS</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Received GET_SETTINGS request</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mSender</span><span class="p">.</span><span class="n">updateSettings</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">),</span>
+<span class="w">                          </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
+<span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+
+<span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">SET_SETTINGS</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">setMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SetSettings</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Received SET_SETTINGS: dc=%d, at=%d, dm=%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">             </span><span class="n">setMsg</span><span class="o">-&gt;</span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">setMsg</span><span class="o">-&gt;</span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">setMsg</span><span class="o">-&gt;</span><span class="n">displayMode</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Update internal settings</span>
+<span class="w">    </span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setMsg</span><span class="o">-&gt;</span><span class="n">decimalCounter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mActivityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">setMsg</span><span class="o">-&gt;</span><span class="n">activityType</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mDisplayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="o">&gt;</span><span class="p">(</span><span class="n">setMsg</span><span class="o">-&gt;</span><span class="n">displayMode</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Persist to file</span>
+<span class="w">    </span><span class="n">saveSettings</span><span class="p">();</span>
+<span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="gui-layer-implementation">
+<h2>GUI Layer Implementation<a class="headerlink" href="#gui-layer-implementation" title="Link to this heading"></a></h2>
+<section id="model-view-presenter-architecture">
+<h3>Model-View-Presenter Architecture<a class="headerlink" href="#model-view-presenter-architecture" title="Link to this heading"></a></h3>
+<p>The GUI follows TouchGFX’s MVP pattern:</p>
+<ul class="simple">
+<li><p><strong>Model</strong> (<code class="docutils literal notranslate"><span class="pre">Model.hpp/cpp</span></code>): Handles business logic and Service communication</p></li>
+<li><p><strong>View</strong> (<code class="docutils literal notranslate"><span class="pre">MainView.hpp/cpp</span></code>): Manages UI rendering and user input</p></li>
+<li><p><strong>Presenter</strong> (<code class="docutils literal notranslate"><span class="pre">MainPresenter.hpp/cpp</span></code>): Bridges Model and View</p></li>
+</ul>
+</section>
+<section id="model-implementation">
+<h3>Model Implementation<a class="headerlink" href="#model-implementation" title="Link to this heading"></a></h3>
+<section id="message-sending">
+<h4>Message Sending<a class="headerlink" href="#message-sending" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Model::requestSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">GetSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">req</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Model::updateSettings</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">displayMode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SetSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w">  </span><span class="c1">// Convert to int</span>
+<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">activityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activityType</span><span class="p">);</span>
+<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">displayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">displayMode</span><span class="p">);</span>
+<span class="w">        </span><span class="n">req</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="message-receiving">
+<h4>Message Receiving<a class="headerlink" href="#message-receiving" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Model::customMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">SETTINGS_VALUES</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Update SETTINGS_VALUES</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SettingsValues</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+
+<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;decimalCounter %.1f, activityType %d, displayMode %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">10.0f</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">displayMode</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Notify presenter/view of settings update</span>
+<span class="w">            </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">onSettingsUpdate</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">10.0f</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">activityType</span><span class="p">),</span>
+<span class="w">                                          </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">displayMode</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="presenter-implementation">
+<h3>Presenter Implementation<a class="headerlink" href="#presenter-implementation" title="Link to this heading"></a></h3>
+<p>The Presenter acts as an intermediary:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">MainPresenter::requestSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">requestSettings</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">MainPresenter::saveSettings</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">displayMode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">updateSettings</span><span class="p">(</span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">displayMode</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">MainPresenter::onSettingsUpdate</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">displayMode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">view</span><span class="p">.</span><span class="n">updateSettingsDisplay</span><span class="p">(</span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">displayMode</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="view-implementation">
+<h3>View Implementation<a class="headerlink" href="#view-implementation" title="Link to this heading"></a></h3>
+<section id="initialization">
+<h4>Initialization<a class="headerlink" href="#initialization" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">MainView::setupScreen</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MainViewBase</span><span class="o">::</span><span class="n">setupScreen</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">buttons</span><span class="p">.</span><span class="n">setL1</span><span class="p">(</span><span class="n">ButtonsSet</span><span class="o">::</span><span class="n">WHITE</span><span class="p">);</span>
+<span class="w">    </span><span class="n">buttons</span><span class="p">.</span><span class="n">setL2</span><span class="p">(</span><span class="n">ButtonsSet</span><span class="o">::</span><span class="n">WHITE</span><span class="p">);</span>
+<span class="w">    </span><span class="n">buttons</span><span class="p">.</span><span class="n">setR1</span><span class="p">(</span><span class="n">ButtonsSet</span><span class="o">::</span><span class="n">AMBER</span><span class="p">);</span>
+<span class="w">    </span><span class="n">buttons</span><span class="p">.</span><span class="n">setR2</span><span class="p">(</span><span class="n">ButtonsSet</span><span class="o">::</span><span class="n">WHITE</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Request initial settings</span>
+<span class="w">    </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">requestSettings</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Initial display</span>
+<span class="w">    </span><span class="n">updateSettingsDisplay</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">,</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="settings-display-update">
+<h4>Settings Display Update<a class="headerlink" href="#settings-display-update" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">MainView::updateSettingsDisplay</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">displayMode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mActivityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">activityType</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mDisplayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">displayMode</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Update setting1: decimal counter</span>
+<span class="w">    </span><span class="n">Unicode</span><span class="o">::</span><span class="n">snprintf</span><span class="p">(</span><span class="n">setting1Buffer</span><span class="p">,</span><span class="w"> </span><span class="n">SETTING1_SIZE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;%.1f&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setting1</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG1</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG1</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG1</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">));</span>
+<span class="w">    </span><span class="n">setting1</span><span class="p">.</span><span class="n">resizeToCurrentText</span><span class="p">();</span>
+<span class="w">    </span><span class="n">setting1</span><span class="p">.</span><span class="n">invalidate</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Update setting2: activity type</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">activityStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">activityType</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">ActivityType</span><span class="o">::</span><span class="no">RUNNING</span><span class="p">:</span><span class="w"> </span><span class="n">activityStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;RUNNING&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">ActivityType</span><span class="o">::</span><span class="no">CYCLING</span><span class="p">:</span><span class="w"> </span><span class="n">activityStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CYCLING&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">ActivityType</span><span class="o">::</span><span class="no">SWIMMING</span><span class="p">:</span><span class="w"> </span><span class="n">activityStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;SWIMMING&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">ActivityType</span><span class="o">::</span><span class="no">WALKING</span><span class="p">:</span><span class="w"> </span><span class="n">activityStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;WALKING&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">Unicode</span><span class="o">::</span><span class="n">strncpy</span><span class="p">(</span><span class="n">setting2Buffer</span><span class="p">,</span><span class="w"> </span><span class="n">activityStr</span><span class="p">,</span><span class="w"> </span><span class="n">SETTING2_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setting2</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG2</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG2</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG2</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">));</span>
+<span class="w">    </span><span class="n">setting2</span><span class="p">.</span><span class="n">resizeToCurrentText</span><span class="p">();</span>
+<span class="w">    </span><span class="n">setting2</span><span class="p">.</span><span class="n">invalidate</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Update setting3: display mode</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">displayStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;-&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">displayMode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">DisplayMode</span><span class="o">::</span><span class="no">SIMPLE</span><span class="p">:</span><span class="w"> </span><span class="n">displayStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;SIMPLE&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">DisplayMode</span><span class="o">::</span><span class="no">DETAILED</span><span class="p">:</span><span class="w"> </span><span class="n">displayStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;DETAILED&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">DisplayMode</span><span class="o">::</span><span class="no">COMPACT</span><span class="p">:</span><span class="w"> </span><span class="n">displayStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;COMPACT&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">Unicode</span><span class="o">::</span><span class="n">strncpy</span><span class="p">(</span><span class="n">setting3Buffer</span><span class="p">,</span><span class="w"> </span><span class="n">displayStr</span><span class="p">,</span><span class="w"> </span><span class="n">SETTING3_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setting3</span><span class="p">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">getColorFromRGB</span><span class="p">(</span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG3</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG3</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">stgSel</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">StgType</span><span class="o">::</span><span class="n">STG3</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">255</span><span class="p">));</span>
+<span class="w">    </span><span class="n">setting3</span><span class="p">.</span><span class="n">resizeToCurrentText</span><span class="p">();</span>
+<span class="w">    </span><span class="n">setting3</span><span class="p">.</span><span class="n">invalidate</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="button-event-handling">
+<h4>Button Event Handling<a class="headerlink" href="#button-event-handling" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">MainView::handleKeyEvent</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">L1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Change value of selected setting</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">stgSel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">StgType</span><span class="o">::</span><span class="no">STG1</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Cycle decimal counter: 0.5, 1.0, 1.5, 2.0</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">values</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0f</span><span class="p">};</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">                        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">currentIndex</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// default</span>
+<span class="w">                </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">currentIndex</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">values</span><span class="p">[</span><span class="n">currentIndex</span><span class="p">];</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">StgType</span><span class="o">::</span><span class="no">STG2</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Cycle activity type</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">);</span>
+<span class="w">                </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">current</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mActivityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">StgType</span><span class="o">::</span><span class="no">STG3</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Cycle display mode</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">);</span>
+<span class="w">                </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">current</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">                </span><span class="n">mDisplayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="o">&gt;</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">updateSettingsDisplay</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">,</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">L2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Change value of selected setting (decrement)</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">stgSel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">StgType</span><span class="o">::</span><span class="no">STG1</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Cycle decimal counter: 0.5, 1.0, 1.5, 2.0</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">values</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0f</span><span class="p">};</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">                        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">currentIndex</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// default</span>
+<span class="w">                </span><span class="n">currentIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">currentIndex</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="c1">// decrement</span>
+<span class="w">                </span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">values</span><span class="p">[</span><span class="n">currentIndex</span><span class="p">];</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">StgType</span><span class="o">::</span><span class="no">STG2</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Cycle activity type</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">);</span>
+<span class="w">                </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">current</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="c1">// decrement</span>
+<span class="w">                </span><span class="n">mActivityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">StgType</span><span class="o">::</span><span class="no">STG3</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Cycle display mode</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">);</span>
+<span class="w">                </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">current</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="c1">// decrement</span>
+<span class="w">                </span><span class="n">mDisplayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="o">&gt;</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">updateSettingsDisplay</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">,</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Save current settings</span>
+<span class="w">        </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">saveSettings</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">,</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Switch selection</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">stgSel</span><span class="p">);</span>
+<span class="w">        </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">current</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">        </span><span class="n">stgSel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">StgType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="w">        </span><span class="n">updateSettingsDisplay</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">,</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">);</span><span class="w"> </span><span class="c1">// to update colors</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">saveSettings</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">,</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">);</span>
+<span class="w">        </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">exit</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="button-control-scheme">
+<h2>Button Control Scheme<a class="headerlink" href="#button-control-scheme" title="Link to this heading"></a></h2>
+<p>The tutorial uses physical buttons for user interaction with a selectable settings system:</p>
+<ul class="simple">
+<li><p><strong>L1 Button</strong>: Increment the currently selected setting value</p></li>
+<li><p><strong>L2 Button</strong>: Decrement the currently selected setting value</p></li>
+<li><p><strong>R1 Button</strong>: Save current settings to file and switch to next setting selection</p></li>
+<li><p><strong>R2 Button</strong>: Exit the application</p></li>
+</ul>
+<section id="setting-selection-flow">
+<h3>Setting Selection Flow<a class="headerlink" href="#setting-selection-flow" title="Link to this heading"></a></h3>
+<p>The system cycles through three selectable settings:</p>
+<ol class="arabic simple">
+<li><p><strong>Decimal Counter</strong> (STG1): Cycles through 0.5, 1.0, 1.5, 2.0</p></li>
+<li><p><strong>Activity Type</strong> (STG2): Cycles through RUNNING, CYCLING, SWIMMING, WALKING</p></li>
+<li><p><strong>Display Mode</strong> (STG3): Cycles through SIMPLE, DETAILED, COMPACT</p></li>
+</ol>
+<p>The currently selected setting is highlighted with red text color, while unselected settings appear in green. After saving with R1, the selection automatically advances to the next setting.</p>
+</section>
+</section>
+<section id="build-system-integration">
+<h2>Build System Integration<a class="headerlink" href="#build-system-integration" title="Link to this heading"></a></h2>
+<section id="cmake-configuration">
+<h3>CMake Configuration<a class="headerlink" href="#cmake-configuration" title="Link to this heading"></a></h3>
+<p>The tutorial uses the standard UNA SDK build system:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Files&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Activity&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;F1E2D3C448669786&quot;</span><span class="p">)</span>
+
+<span class="c"># Include SDK build tools</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+
+<span class="c"># Build service and GUI executables</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+<span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling-and-recovery">
+<h2>Error Handling and Recovery<a class="headerlink" href="#error-handling-and-recovery" title="Link to this heading"></a></h2>
+<section id="file-system-errors">
+<h3>File System Errors<a class="headerlink" href="#file-system-errors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Missing File</strong>: Automatically creates with default values</p></li>
+<li><p><strong>Corrupted JSON</strong>: Falls back to defaults, logs warning</p></li>
+<li><p><strong>I/O Failures</strong>: Logs error, continues with current values</p></li>
+<li><p><strong>Permission Issues</strong>: Uses SDK’s file system abstraction</p></li>
+</ul>
+</section>
+<section id="message-communication-errors">
+<h3>Message Communication Errors<a class="headerlink" href="#message-communication-errors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Failed Message Send</strong>: Logged, operation continues</p></li>
+<li><p><strong>Invalid Message Data</strong>: Uses default values, logs warning</p></li>
+<li><p><strong>Type Mismatches</strong>: Static casts with bounds checking</p></li>
+</ul>
+</section>
+<section id="data-validation">
+<h3>Data Validation<a class="headerlink" href="#data-validation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Enum Ranges</strong>: Clamped to valid values during conversion</p></li>
+<li><p><strong>Float Precision</strong>: Multiplied by 10 for integer transmission</p></li>
+<li><p><strong>Buffer Overflows</strong>: Fixed-size buffers with length limits</p></li>
+</ul>
+</section>
+</section>
+<section id="key-learning-concepts">
+<h2>Key Learning Concepts<a class="headerlink" href="#key-learning-concepts" title="Link to this heading"></a></h2>
+<section id="persistent-storage">
+<h3>1. Persistent Storage<a class="headerlink" href="#persistent-storage" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>JSON serialization with SDK’s stream writers/readers</p></li>
+<li><p>File system abstraction for cross-platform compatibility</p></li>
+<li><p>Automatic save/load during app lifecycle</p></li>
+</ul>
+</section>
+<section id="inter-process-communication">
+<h3>2. Inter-Process Communication<a class="headerlink" href="#inter-process-communication" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Custom message type definition</p></li>
+<li><p>Asynchronous message passing</p></li>
+<li><p>Request-response patterns</p></li>
+</ul>
+</section>
+<section id="mvp-architecture">
+<h3>3. MVP Architecture<a class="headerlink" href="#mvp-architecture" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Separation of concerns (Model/View/Presenter)</p></li>
+<li><p>Event-driven UI updates</p></li>
+<li><p>Clean interface design</p></li>
+</ul>
+</section>
+<section id="error-recovery">
+<h3>4. Error Recovery<a class="headerlink" href="#error-recovery" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Graceful degradation with defaults</p></li>
+<li><p>Comprehensive logging</p></li>
+<li><p>User-transparent error handling</p></li>
+</ul>
+</section>
+<section id="user-experience">
+<h3>5. User Experience<a class="headerlink" href="#user-experience" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Immediate UI feedback for local changes</p></li>
+<li><p>Persistent storage for settings survival</p></li>
+<li><p>Intuitive button-based navigation</p></li>
+</ul>
+</section>
+</section>
+<section id="extension-points">
+<h2>Extension Points<a class="headerlink" href="#extension-points" title="Link to this heading"></a></h2>
+<p>The tutorial provides a foundation for adding:</p>
+<ul class="simple">
+<li><p>Additional setting types (strings, arrays, nested objects)</p></li>
+<li><p>Settings validation and constraints</p></li>
+<li><p>Multiple settings files</p></li>
+<li><p>Settings import/export</p></li>
+<li><p>Cloud synchronization</p></li>
+<li><p>Settings profiles/presets</p></li>
+</ul>
+<p>This implementation demonstrates production-ready patterns for settings management in embedded applications using the UNA SDK.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Sensors/ARCHITECTURE.html" class="btn btn-neutral float-left" title="Sensors - Integrating Hardware Sensors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../FitFiles/ARCHITECTURE.html" class="btn btn-neutral float-right" title="FitFiles - FIT File Creation and Sensor Logging Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

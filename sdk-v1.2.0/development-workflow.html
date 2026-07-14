@@ -1,0 +1,1386 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Development Workflow &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if ("False" === "True") {
+                                        addZoomToSvgs(d3.selectAll(""));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? mermaids_active.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Scripts" href="Scripts.html" />
+    <link rel="prev" title="Platform Architecture" href="architecture-deep-dive.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Development Workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-stages">Workflow Stages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#planning">1. Planning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development">2. Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building">3. Building</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing">4. Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugging">5. Debugging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#packaging">6. Packaging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment">7. Deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#maintenance">8. Maintenance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#technical-architecture-details">Technical Architecture Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#application-framework-implementation">Application Framework Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#application-framework-dual-process-architecture">Application Framework Dual-Process Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dynamic-loading-and-memory-management-flow">Dynamic Loading and Memory Management Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#application-message-processing-architecture">Application Message Processing Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-integration-and-data-flow">Sensor Integration and Data Flow</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#app-development-framework">App Development Framework</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#app-architecture-lifecycle">App Architecture &amp; Lifecycle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#app-lifecycle-management">App Lifecycle &amp; Management</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sdk-interfaces-for-app-development">SDK Interfaces for App Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-system-architecture">Message System Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-layer-integration">Sensor Layer Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sensor-data-flow-architecture">Sensor Data Flow Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#app-development-workflow">App Development Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app-capabilities-system">App Capabilities System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app-deployment">App Deployment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#app-development-data-flow">App Development Data Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#building-individual-apps">Building Individual Apps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app-installation">App Installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Development Workflow</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/development-workflow.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="development-workflow">
+<span id="id1"></span><h1>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h1>
+<p>This document outlines the complete development lifecycle for UNA Watch applications.</p>
+<section id="workflow-stages">
+<h2>Workflow Stages<a class="headerlink" href="#workflow-stages" title="Link to this heading"></a></h2>
+<section id="planning">
+<h3>1. Planning<a class="headerlink" href="#planning" title="Link to this heading"></a></h3>
+<p>Before writing code, decide on your app type:</p>
+<ul class="simple">
+<li><p><strong>Activity</strong>: For long-running, interactive apps.</p></li>
+<li><p><strong>Utility</strong>: For tools like calculators or settings.</p></li>
+<li><p><strong>Glance</strong>: For notification-based widgets.</p></li>
+<li><p><strong>Clockface</strong>: For time-keeping displays.</p></li>
+</ul>
+</section>
+<section id="development">
+<h3>2. Development<a class="headerlink" href="#development" title="Link to this heading"></a></h3>
+<p>Use the SDK interfaces to build your app logic.</p>
+<ul class="simple">
+<li><p>Implement the <strong>Service process</strong> for background tasks.</p></li>
+<li><p>Implement the <strong>GUI process</strong> for user interaction.</p></li>
+<li><p>Use <strong>IPC messages</strong> to communicate between them.</p></li>
+</ul>
+</section>
+<section id="building">
+<h3>3. Building<a class="headerlink" href="#building" title="Link to this heading"></a></h3>
+<p>Compile your app into an ELF binary using the provided toolchain.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>release
+</pre></div>
+</div>
+<p>Ensure you are using the correct optimization flags for PIC execution.</p>
+</section>
+<section id="testing">
+<h3>4. Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Simulator</strong>: Test UI and basic logic on your development machine.</p></li>
+<li><p><strong>Unit Tests</strong>: Write tests for individual components.</p></li>
+<li><p><strong>Integration Tests</strong>: Verify IPC and sensor data flow.</p></li>
+</ul>
+</section>
+<section id="debugging">
+<h3>5. Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">ILogger</span></code> for real-time logging.</p></li>
+<li><p>Set breakpoints in the simulator.</p></li>
+<li><p>Use performance profiling to monitor CPU and memory usage.</p></li>
+</ul>
+</section>
+<section id="packaging">
+<h3>6. Packaging<a class="headerlink" href="#packaging" title="Link to this heading"></a></h3>
+<p>Package your ELF binary and assets into a <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> container using <code class="docutils literal notranslate"><span class="pre">app_packer.py</span></code>.</p>
+<ul class="simple">
+<li><p>Inject version metadata.</p></li>
+<li><p>Embed app icons.</p></li>
+</ul>
+</section>
+<section id="deployment">
+<h3>7. Deployment<a class="headerlink" href="#deployment" title="Link to this heading"></a></h3>
+<p>Deploy your app to the watch via:</p>
+<ul class="simple">
+<li><p><strong>USB</strong>: For direct development flashing.</p></li>
+<li><p><strong>BLE OTA</strong>: For wireless updates.</p></li>
+</ul>
+</section>
+<section id="maintenance">
+<h3>8. Maintenance<a class="headerlink" href="#maintenance" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Monitor crash reports.</p></li>
+<li><p>Release version updates.</p></li>
+<li><p>Respond to user feedback.</p></li>
+</ul>
+</section>
+</section>
+<section id="technical-architecture-details">
+<h2>Technical Architecture Details<a class="headerlink" href="#technical-architecture-details" title="Link to this heading"></a></h2>
+<section id="application-framework-implementation">
+<h3>Application Framework Implementation<a class="headerlink" href="#application-framework-implementation" title="Link to this heading"></a></h3>
+<p><strong>AppInstance Architecture:</strong></p>
+<p><strong>Dual-Process Model:</strong></p>
+<ul class="simple">
+<li><p><strong>Service Component</strong>: Background logic, sensor access, data processing</p></li>
+<li><p><strong>GUI Component</strong>: User interface, TouchGFX integration, screen rendering</p></li>
+</ul>
+<p><strong>Lifecycle State Machine:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">enum</span><span class="w"> </span><span class="nc">AppPartState</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">NONE</span><span class="p">,</span><span class="w">       </span><span class="c1">// Not loaded</span>
+<span class="w">    </span><span class="n">RUN</span><span class="p">,</span><span class="w">        </span><span class="c1">// Running normally</span>
+<span class="w">    </span><span class="n">RESUMED</span><span class="p">,</span><span class="w">    </span><span class="c1">// GUI active and visible</span>
+<span class="w">    </span><span class="n">GLANCE</span><span class="p">,</span><span class="w">     </span><span class="c1">// Glance mode (notification display)</span>
+<span class="w">    </span><span class="n">SUSPENDED</span><span class="w">   </span><span class="c1">// Backgrounded</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>Message Processing Thread:</strong></p>
+<ul class="simple">
+<li><p>Dedicated OS thread with cancellable event loop</p></li>
+<li><p>Handler dispatch: lifecycle, app-specific, sensor layer messages</p></li>
+<li><p>Automatic queue clearing on termination to prevent memory leaks</p></li>
+</ul>
+<p><strong>Dynamic Loading Mechanism:</strong></p>
+<ul class="simple">
+<li><p>ELF parsing with <code class="docutils literal notranslate"><span class="pre">Loader::ReadMainHeader()</span></code> for .uapp files</p></li>
+<li><p>Memory-mapped execution with <code class="docutils literal notranslate"><span class="pre">mSrvLoader.load()</span></code> and <code class="docutils literal notranslate"><span class="pre">mGuiLoader.load()</span></code></p></li>
+<li><p>Offset-based loading: GUI loads after service + icons in .uapp structure</p></li>
+</ul>
+<p><strong>Sensor Integration:</strong></p>
+<ul class="simple">
+<li><p><strong>SDK::Sensor::RequestDefault</strong> for default sensor discovery</p></li>
+<li><p><strong>SDK::Sensor::RequestConnect</strong> with period/latency negotiation</p></li>
+<li><p>Listener registration for service vs GUI process isolation</p></li>
+</ul>
+<section id="application-framework-dual-process-architecture">
+<h4>Application Framework Dual-Process Architecture<a class="headerlink" href="#application-framework-dual-process-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Application Package (.uapp)&quot;
+        UAPP[.uapp File&lt;br/&gt;Container]
+        SERVICE_ELF[Service ELF&lt;br/&gt;Background Logic]
+        GUI_ELF[GUI ELF&lt;br/&gt;User Interface]
+        METADATA[Metadata&lt;br/&gt;Icons/Config]
+    end
+
+    subgraph &quot;Runtime Processes&quot;
+        SERVICE_PROC[Service Process&lt;br/&gt;PID: Service_PID]
+        GUI_PROC[GUI Process&lt;br/&gt;PID: GUI_PID]
+    end
+
+    subgraph &quot;Kernel Interfaces&quot;
+        KERNEL_SDK[SDK Interfaces&lt;br/&gt;IAppComm/ISystem/IFileSystem]
+        MESSAGE_POOLS[Message Pools&lt;br/&gt;Events/Requests/Commands]
+        SENSOR_LAYER[Sensor Layer&lt;br/&gt;Hardware Access]
+        FILESYSTEM[FileSystem&lt;br/&gt;Storage Access]
+    end
+
+    subgraph &quot;Inter-Process Communication&quot;
+        DUAL_APP_COMM[DualAppComm&lt;br/&gt;IPC Bridge]
+        MSG_QUEUES[Message Queues&lt;br/&gt;20-slot Circular]
+        EVENT_DISPATCH[Event Dispatch&lt;br/&gt;Type-safe Routing]
+    end
+
+    UAPP --&gt; SERVICE_PROC
+    UAPP --&gt; GUI_PROC
+
+    SERVICE_PROC --&gt; KERNEL_SDK
+    GUI_PROC --&gt; KERNEL_SDK
+
+    KERNEL_SDK --&gt; MESSAGE_POOLS
+    KERNEL_SDK --&gt; SENSOR_LAYER
+    KERNEL_SDK --&gt; FILESYSTEM
+
+    SERVICE_PROC --&gt; DUAL_APP_COMM
+    GUI_PROC --&gt; DUAL_APP_COMM
+
+    DUAL_APP_COMM --&gt; MSG_QUEUES
+    DUAL_APP_COMM --&gt; EVENT_DISPATCH
+
+    style SERVICE_PROC fill:#bbdefb
+    style GUI_PROC fill:#c8e6c9
+    style DUAL_APP_COMM fill:#fff3e0
+    </pre></section>
+<section id="dynamic-loading-and-memory-management-flow">
+<h4>Dynamic Loading and Memory Management Flow<a class="headerlink" href="#dynamic-loading-and-memory-management-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[App Package&lt;br/&gt;.uapp File] --&gt; B[App::Manager::scan&lt;br/&gt;Package Discovery]
+
+    B --&gt; C{ELF Validation}
+    C --&gt;|Valid| D[Loader::ReadMainHeader&lt;br/&gt;Parse ELF Sections]
+    C --&gt;|Invalid| E[Error: Corrupt Package]
+
+    D --&gt; F[Memory Allocation&lt;br/&gt;Protected Memory Regions]
+    F --&gt; G{Service ELF&lt;br/&gt;Load First}
+
+    G --&gt;|Yes| H[Service Loader&lt;br/&gt;Load ELF + Relocate]
+    G --&gt;|No| I[GUI Loader&lt;br/&gt;Load ELF + Relocate&lt;br/&gt;Offset from Service]
+
+    H --&gt; J[Thread Creation&lt;br/&gt;Service Process Thread]
+    I --&gt; K[Thread Creation&lt;br/&gt;GUI Process Thread]
+
+    J --&gt; L[Kernel Registration&lt;br/&gt;PID Assignment]
+    K --&gt; L
+
+    L --&gt; M[Interface Binding&lt;br/&gt;SDK Kernel Access]
+    M --&gt; N[AppInstance Ready&lt;br/&gt;Lifecycle Management]
+
+    N --&gt; O{App State&lt;br/&gt;Transition}
+    O --&gt;|Start| P[InternalAppRunService&lt;br/&gt;Background Processing]
+    O --&gt;|Resume| Q[InternalAppRun&lt;br/&gt;GUI Active]
+    O --&gt;|Glance| R[InternalAppGlanceRun&lt;br/&gt;Notification Mode]
+    O --&gt;|Suspend| S[GUI Suspend&lt;br/&gt;Service Only]
+    O --&gt;|Stop| T[InternalAppStop&lt;br/&gt;Cleanup]
+
+    T --&gt; U[Memory Deallocation&lt;br/&gt;Thread Termination]
+    U --&gt; V[App Unloaded]
+
+    style B fill:#bbdefb
+    style N fill:#c8e6c9
+    style V fill:#fff3e0
+    </pre></section>
+<section id="application-message-processing-architecture">
+<h4>Application Message Processing Architecture<a class="headerlink" href="#application-message-processing-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Message Sources&quot;
+        KERNEL_EVENTS[Kernel Events&lt;br/&gt;System/App/BLE/Timer]
+        USER_INPUT[User Input&lt;br/&gt;Buttons/Touch/Gestures]
+        SENSOR_DATA[Sensor Data&lt;br/&gt;Periodic/Event-driven]
+        SYSTEM_REQUESTS[System Requests&lt;br/&gt;Settings/Battery/Status]
+    end
+
+    subgraph &quot;Message Classification&quot;
+        EVENTS[Events&lt;br/&gt;0x03010000-0x03040000&lt;br/&gt;Fire-and-forget]
+        REQUESTS[Requests&lt;br/&gt;0x01070000-0x020A0000&lt;br/&gt;With Response]
+        COMMANDS[Commands&lt;br/&gt;0x01010000-0x01060000&lt;br/&gt;With Confirmation]
+    end
+
+    subgraph &quot;Processing Pipeline&quot;
+        MSG_RECEIVE[Message Receive&lt;br/&gt;getMessage Timeout]
+        TYPE_DISPATCH[Type Dispatch&lt;br/&gt;std::visit Pattern]
+        HANDLER_EXEC[Handler Execution&lt;br/&gt;App-specific Logic]
+        RESPONSE_SEND[Response Send&lt;br/&gt;sendResponse Completion]
+    end
+
+    subgraph &quot;App Components&quot;
+        SERVICE_LOGIC[Service Logic&lt;br/&gt;Background Processing]
+        GUI_LOGIC[GUI Logic&lt;br/&gt;UI Updates]
+        STATE_MGMT[State Management&lt;br/&gt;Lifecycle Transitions]
+    end
+
+    KERNEL_EVENTS --&gt; EVENTS
+    USER_INPUT --&gt; REQUESTS
+    SENSOR_DATA --&gt; EVENTS
+    SYSTEM_REQUESTS --&gt; REQUESTS
+
+    EVENTS --&gt; MSG_RECEIVE
+    REQUESTS --&gt; MSG_RECEIVE
+    COMMANDS --&gt; MSG_RECEIVE
+
+    MSG_RECEIVE --&gt; TYPE_DISPATCH
+    TYPE_DISPATCH --&gt; HANDLER_EXEC
+    HANDLER_EXEC --&gt; RESPONSE_SEND
+
+    HANDLER_EXEC --&gt; SERVICE_LOGIC
+    HANDLER_EXEC --&gt; GUI_LOGIC
+    HANDLER_EXEC --&gt; STATE_MGMT
+
+    SERVICE_LOGIC -.-&gt;|Data Processing| HANDLER_EXEC
+    GUI_LOGIC -.-&gt;|UI Feedback| HANDLER_EXEC
+    STATE_MGMT -.-&gt;|State Changes| HANDLER_EXEC
+
+    style MSG_RECEIVE fill:#bbdefb
+    style TYPE_DISPATCH fill:#c8e6c9
+    style RESPONSE_SEND fill:#fff3e0
+    </pre></section>
+<section id="sensor-integration-and-data-flow">
+<h4>Sensor Integration and Data Flow<a class="headerlink" href="#sensor-integration-and-data-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        flowchart TD
+    A[App Sensor Request] --&gt; B{SDK::Sensor::RequestDefault}
+
+    B --&gt;|Heart Rate| C[Sensor::Type::HEART_RATE]
+    B --&gt;|Accelerometer| D[Sensor::Type::ACCELEROMETER]
+    B --&gt;|Other| E[Sensor::Type::*]
+
+    C --&gt; F[Sensor::Manager::getSensorList]
+    D --&gt; F
+    E --&gt; F
+
+    F --&gt; G{Sensor Available?}
+    G --&gt;|Yes| H[Return Sensor Handle&lt;br/&gt;1-based Index]
+    G --&gt;|No| I[Error: No Sensor&lt;br/&gt;Available]
+
+    H --&gt; J[SDK::Sensor::RequestConnect]
+    J --&gt; K[Handle Assignment&lt;br/&gt;Period Negotiation]
+    K --&gt; L[Latency Configuration&lt;br/&gt;ms/microseconds]
+
+    L --&gt; M[Listener Registration&lt;br/&gt;Service vs GUI Process]
+    M --&gt; N[Sensor Layer&lt;br/&gt;Connection Established]
+
+    N --&gt; O[Periodic Sampling&lt;br/&gt;Event Loop]
+    O --&gt; P[Data Acquisition&lt;br/&gt;Sensor Driver]
+    P --&gt; Q[Data Processing&lt;br/&gt;Calibration/Filtering]
+
+    Q --&gt; R[Callback Dispatch&lt;br/&gt;onSensorUpdate]
+    R --&gt; S{Process Type}
+
+    S --&gt;|Service| T[Service Process&lt;br/&gt;Background Logic]
+    S --&gt;|GUI| U[GUI Process&lt;br/&gt;UI Updates]
+
+    T --&gt; V[Data Storage&lt;br/&gt;Analysis/Trends]
+    U --&gt; W[Display Update&lt;br/&gt;Real-time Feedback]
+
+    V --&gt; X[Persistent Storage&lt;br/&gt;File System]
+    W --&gt; Y[TouchGFX Render&lt;br/&gt;Screen Update]
+
+    style A fill:#e1f5fe
+    style N fill:#c8e6c9
+    style R fill:#fff3e0
+    </pre></section>
+</section>
+</section>
+<section id="app-development-framework">
+<h2>App Development Framework<a class="headerlink" href="#app-development-framework" title="Link to this heading"></a></h2>
+<section id="app-architecture-lifecycle">
+<h3>App Architecture &amp; Lifecycle<a class="headerlink" href="#app-architecture-lifecycle" title="Link to this heading"></a></h3>
+<p><strong>Dual-Process Model:</strong></p>
+<ul class="simple">
+<li><p><strong>Service Process</strong>: Background logic, sensor access, data processing, glance notifications</p></li>
+<li><p><strong>GUI Process</strong>: User interface, TouchGFX integration, screen rendering, user interaction</p></li>
+</ul>
+<p><strong>App Types:</strong></p>
+<ul class="simple">
+<li><p><strong>Activity</strong>: Full-screen GUI app with service background processing</p></li>
+<li><p><strong>Utility</strong>: Specialized function app (calculator, settings, etc.)</p></li>
+<li><p><strong>Glance</strong>: Notification-only app without GUI (240x60 pixel display)</p></li>
+<li><p><strong>Clockface</strong>: Watch face app with time display</p></li>
+</ul>
+<p><strong>Lifecycle States:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">enum</span><span class="w"> </span><span class="nc">AppPartState</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">NONE</span><span class="p">,</span><span class="w">       </span><span class="c1">// Not loaded</span>
+<span class="w">    </span><span class="n">RUN</span><span class="p">,</span><span class="w">        </span><span class="c1">// Running normally</span>
+<span class="w">    </span><span class="n">RESUMED</span><span class="p">,</span><span class="w">    </span><span class="c1">// GUI active and visible</span>
+<span class="w">    </span><span class="n">GLANCE</span><span class="p">,</span><span class="w">     </span><span class="c1">// Glance mode (notification display)</span>
+<span class="w">    </span><span class="n">SUSPENDED</span><span class="w">   </span><span class="c1">// Backgrounded</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<section id="app-lifecycle-management">
+<h4>App Lifecycle &amp; Management<a class="headerlink" href="#app-lifecycle-management" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; Created
+    Created --&gt; Initialized
+    Initialized --&gt; ServiceRunning
+    ServiceRunning --&gt; FullRunning
+    FullRunning --&gt; ServiceOnly
+    ServiceOnly --&gt; FullRunning
+    FullRunning --&gt; GlanceMode
+    GlanceMode --&gt; ServiceOnly
+
+    ServiceRunning --&gt; Stopped
+    ServiceOnly --&gt; Stopped
+    GlanceMode --&gt; Stopped
+    Stopped --&gt; Destroyed
+    Destroyed --&gt; [*]
+
+    Created : App Manager addApp()
+    Initialized : AppInstance init()
+    ServiceRunning : InternalAppRunService
+    FullRunning : InternalAppRun (GUI)
+    GlanceMode : InternalAppGlanceRun
+    ServiceOnly : GUI Suspend
+    Stopped : InternalAppStop
+    Destroyed : AppInstance deinit()
+    Destroyed --&gt; [*]
+
+    note right of Created
+        .uapp file loaded
+        ELF parsed
+        Memory allocated
+    end note
+
+    note right of Initialized
+        Thread created
+        Message queues ready
+        Kernel registered
+    end note
+
+    note right of ServiceRunning
+        Service ELF loaded
+        Background processing
+        Sensor connections
+    end note
+
+    note right of FullRunning
+        GUI ELF loaded
+        TouchGFX active
+        User interaction
+    end note
+
+    note right of GlanceMode
+        Notification display
+        240x60 pixel canvas
+        Low power mode
+    end note
+    </pre></section>
+</section>
+<section id="sdk-interfaces-for-app-development">
+<h3>SDK Interfaces for App Development<a class="headerlink" href="#sdk-interfaces-for-app-development" title="Link to this heading"></a></h3>
+<p><strong>Core Interfaces Available to Apps:</strong></p>
+<p><strong>1. IAppComm (Communication)</strong></p>
+<ul class="simple">
+<li><p>Message passing between app and kernel</p></li>
+<li><p>Type-safe message allocation from pools</p></li>
+<li><p>Process identity with unique PIDs</p></li>
+</ul>
+<p><strong>2. ISystem (System Services)</strong></p>
+<ul class="simple">
+<li><p>Timing functions and delays</p></li>
+<li><p>Battery status and power management</p></li>
+<li><p>Device identification</p></li>
+</ul>
+<p><strong>3. IFileSystem (Storage)</strong></p>
+<ul class="simple">
+<li><p>File operations on multiple volumes (0:/, 1:/, 2:/)</p></li>
+<li><p>Directory navigation and content listing</p></li>
+</ul>
+<p><strong>4. ILogger (Debugging)</strong></p>
+<ul class="simple">
+<li><p>Formatted logging with multiple levels</p></li>
+<li><p>System timestamp integration</p></li>
+</ul>
+</section>
+<section id="message-system-architecture">
+<h3>Message System Architecture<a class="headerlink" href="#message-system-architecture" title="Link to this heading"></a></h3>
+<p><strong>Message Type Ranges:</strong></p>
+<ul class="simple">
+<li><p><strong>Custom/App-specific</strong> (0x00000000-0x0000FFFF): Application-specific internal communication</p></li>
+<li><p><strong>Commands</strong> (0x01010000-0x01060000): Kernel-to-app directives (response expected)</p></li>
+<li><p><strong>Requests</strong> (0x01070000-0x020A0000): App-to-kernel lifecycle and hardware requests</p></li>
+<li><p><strong>Events</strong> (0x03010000-0x03040000): System-level notifications (fire-and-forget)</p></li>
+<li><p><strong>Sensors</strong> (0x03100000-0x03180000): Sensor discovery and data events</p></li>
+</ul>
+<p><strong>Key System Messages:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">REQUEST_BATTERY_STATUS</span><span class="w">       </span><span class="c1">// Get battery level</span>
+<span class="n">REQUEST_SYSTEM_SETTINGS</span><span class="w">      </span><span class="c1">// Get watch settings</span>
+<span class="n">REQUEST_DISPLAY_CONFIG</span><span class="w">       </span><span class="c1">// Get screen dimensions (GUI only)</span>
+<span class="n">REQUEST_BACKLIGHT_SET</span><span class="w">        </span><span class="c1">// Set screen brightness</span>
+<span class="n">REQUEST_SENSOR_LAYER_CONNECT</span><span class="w"> </span><span class="c1">// Start sensor sampling</span>
+</pre></div>
+</div>
+</section>
+<section id="sensor-layer-integration">
+<h3>Sensor Layer Integration<a class="headerlink" href="#sensor-layer-integration" title="Link to this heading"></a></h3>
+<p><strong>Sensor Access Pattern:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Modern way using SDK::Sensor::Connection wrapper</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="nf">hrSensor</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">HEART_RATE</span><span class="p">,</span><span class="w"> </span><span class="mf">1000.0f</span><span class="p">);</span>
+<span class="n">hrSensor</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span>
+
+<span class="c1">// Manual way using messages</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">RequestDefault</span><span class="o">&gt;</span><span class="p">(</span><span class="n">kernel</span><span class="p">);</span>
+<span class="n">msg</span><span class="o">-&gt;</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">HEART_RATE</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">handle</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// ... use handle to connect</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="sensor-data-flow-architecture">
+<h4>Sensor Data Flow Architecture<a class="headerlink" href="#sensor-data-flow-architecture" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph TD
+    subgraph &quot;Hardware Sensors&quot;
+        PPG[PPG Sensor&lt;br/&gt;Heart Rate]
+        IMU[IMU Sensor&lt;br/&gt;Accel/Gyro]
+        BARO[Barometer&lt;br/&gt;Pressure/Altitude]
+        TEMP[Temperature&lt;br/&gt;Ambient]
+    end
+
+    subgraph &quot;Sensor Drivers&quot;
+        PPG_DRV[PPG Driver&lt;br/&gt;PAH8316LS]
+        IMU_DRV[IMU Driver&lt;br/&gt;BMI270]
+        BARO_DRV[Barometer Driver&lt;br/&gt;MS5837]
+        TEMP_DRV[Temp Driver&lt;br/&gt;Internal]
+    end
+
+    subgraph &quot;Sensor Manager&quot;
+        SM[Sensor::Manager&lt;br/&gt;Coordination Hub]
+        SM_THREAD[Sensor Thread&lt;br/&gt;Polling Loop]
+        SM_QUEUE[Data Queue&lt;br/&gt;Sample Buffer]
+    end
+
+    subgraph &quot;App Integration&quot;
+        APP_SENSOR_LISTENER[Sensor Listener&lt;br/&gt;App Callback]
+        APP_DATA_QUEUE[App Data Queue&lt;br/&gt;Processed Samples]
+        APP_SERVICE[App Service&lt;br/&gt;Data Processing]
+    end
+
+    PPG --&gt; PPG_DRV
+    IMU --&gt; IMU_DRV
+    BARO --&gt; BARO_DRV
+    TEMP --&gt; TEMP_DRV
+
+    PPG_DRV --&gt; SM
+    IMU_DRV --&gt; SM
+    BARO_DRV --&gt; SM
+    TEMP_DRV --&gt; SM
+
+    SM --&gt; SM_THREAD
+    SM_THREAD --&gt; SM_QUEUE
+
+    SM_QUEUE --&gt; APP_SENSOR_LISTENER
+    APP_SENSOR_LISTENER --&gt; APP_DATA_QUEUE
+    APP_DATA_QUEUE --&gt; APP_SERVICE
+
+    SM -.-&gt;|Period Negotiation| PPG_DRV
+    SM -.-&gt;|Latency Control| IMU_DRV
+    SM -.-&gt;|Handle Assignment| BARO_DRV
+
+    style SM fill:#bbdefb
+    style SM_THREAD fill:#c8e6c9
+    style APP_SERVICE fill:#fff3e0
+    </pre></section>
+</section>
+<section id="app-development-workflow">
+<h3>App Development Workflow<a class="headerlink" href="#app-development-workflow" title="Link to this heading"></a></h3>
+<p><strong>1. Project Structure Setup:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>AppName/
+├── Software/
+│   ├── App/
+│   │   └── AppName-CMake/            # CMake project (service + GUI + .uapp)
+│   │       └── CMakeLists.txt
+│   └── Libs/
+│       ├── Header/Service.hpp        # Service class
+│       └── Source/Service.cpp        # Service implementation
+├── Resources/
+│   ├── icon_30x30.png               # Small app icon
+│   └── icon_60x60.png               # Large app icon
+└── Output/Release/                  # Built .uapp files
+</pre></div>
+</div>
+<p><strong>2. Service Implementation:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IApp</span><span class="o">::</span><span class="n">Callback</span><span class="p">,</span>
+<span class="w">                </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IGlance</span><span class="w"> </span><span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">mTerminate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">mKernel</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Register this instance as a lifecycle callback</span>
+<span class="w">        </span><span class="c1">// Note: IApp interface must be queried via IKIP if not passed directly</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mTerminate</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Main service loop</span>
+<span class="w">            </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Handle messages</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// ... handle message</span>
+<span class="w">                </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Lifecycle callbacks</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">onCreate</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Initialize */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">onStart</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Start processing */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">onStop</span><span class="p">()</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">mTerminate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>3. Message Handling:</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">getMessage</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timeout</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">sendResponse</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">sendResponse</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="app-capabilities-system">
+<h3>App Capabilities System<a class="headerlink" href="#app-capabilities-system" title="Link to this heading"></a></h3>
+<p><strong>Permission-Based Features:</strong></p>
+<ul class="simple">
+<li><p><strong>Phone Notifications</strong>: iOS ANCS integration</p></li>
+<li><p><strong>USB Charging Screen</strong>: Custom charging UI</p></li>
+<li><p><strong>Music Control</strong>: Media playback integration</p></li>
+</ul>
+</section>
+<section id="app-deployment">
+<h3>App Deployment<a class="headerlink" href="#app-deployment" title="Link to this heading"></a></h3>
+<p><strong>OTA Update Process:</strong></p>
+<ol class="arabic simple">
+<li><p>File transfer via BLE to <code class="docutils literal notranslate"><span class="pre">2:/Update/</span></code> directory</p></li>
+<li><p>CRC verification</p></li>
+<li><p>Atomic replacement with rollback capability</p></li>
+<li><p>System reboot to activate new version</p></li>
+</ol>
+<section id="app-development-data-flow">
+<h4>App Development Data Flow<a class="headerlink" href="#app-development-data-flow" title="Link to this heading"></a></h4>
+<pre  class="mermaid">
+        graph LR
+    subgraph &quot;App Development&quot;
+        DEV[Developer&lt;br/&gt;Writes Code]
+        SDK[SDK Headers&lt;br/&gt;Interfaces]
+        BUILD[CMake&lt;br/&gt;Build Process]
+        PACK[Post-build Scripts&lt;br/&gt;app_packer.py]
+    end
+
+    subgraph &quot;App Package&quot;
+        UAPP[.uapp File&lt;br/&gt;ELF + Icons + Metadata]
+        HEADER[MainHeader&lt;br/&gt;App Info]
+        SERVICE[Service ELF&lt;br/&gt;Background Logic]
+        GUI[GUI ELF&lt;br/&gt;User Interface]
+        ICONS[Icons&lt;br/&gt;30x30 + 60x60 PNG]
+    end
+
+    subgraph &quot;Runtime Loading&quot;
+        MANAGER[App::Manager&lt;br/&gt;Package Scanner]
+        LOADER[App Loader&lt;br/&gt;ELF Parser]
+        MEMORY[Memory Allocator&lt;br/&gt;Protected Regions]
+        KERNEL[Kernel Interfaces&lt;br/&gt;SDK Bridge]
+    end
+
+    subgraph &quot;Execution&quot;
+        SRV_PROCESS[Service Process&lt;br/&gt;PID Assigned]
+        GUI_PROCESS[GUI Process&lt;br/&gt;PID Assigned]
+        COMM[DualAppComm&lt;br/&gt;IPC Bridge]
+        MESSAGES[Message System&lt;br/&gt;Kernel Communication]
+    end
+
+    DEV --&gt; SDK
+    SDK --&gt; BUILD
+    BUILD --&gt; PACK
+    PACK --&gt; UAPP
+
+    UAPP --&gt; HEADER
+    UAPP --&gt; SERVICE
+    UAPP --&gt; GUI
+    UAPP --&gt; ICONS
+
+    MANAGER --&gt; LOADER
+    LOADER --&gt; MEMORY
+    MEMORY --&gt; KERNEL
+
+    KERNEL --&gt; SRV_PROCESS
+    KERNEL --&gt; GUI_PROCESS
+    SRV_PROCESS --&gt; COMM
+    GUI_PROCESS --&gt; COMM
+    COMM --&gt; MESSAGES
+
+    style DEV fill:#e1f5fe
+    style UAPP fill:#c8e6c9
+    style SRV_PROCESS fill:#fff3e0
+    style GUI_PROCESS fill:#fff3e0
+    </pre><p>This framework enables <strong>independent app development</strong> with clean SDK interfaces, resource management, and comprehensive tooling support.</p>
+</section>
+</section>
+<section id="building-individual-apps">
+<h3>Building Individual Apps<a class="headerlink" href="#building-individual-apps" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> to the SDK root (see <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">sdk-setup.md</span></a>).</p></li>
+<li><p>Configure and build from the app’s <code class="docutils literal notranslate"><span class="pre">*-CMake</span></code> directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Examples/Apps/&lt;AppName&gt;/Software/Apps/&lt;AppName&gt;-CMake<span class="w">   </span><span class="c1"># or Software/App/ for Glance apps</span>
+cmake<span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build
+cmake<span class="w"> </span>--build<span class="w"> </span>build
+</pre></div>
+</div>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> file is written under <code class="docutils literal notranslate"><span class="pre">build/</span></code> and copied to <code class="docutils literal notranslate"><span class="pre">Output/</span></code> by the CMake post-build steps.</p></li>
+</ol>
+</section>
+<section id="app-installation">
+<h3>App Installation<a class="headerlink" href="#app-installation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Apps are installed as <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> files</p></li>
+<li><p>Deploy via the watch’s companion app or development interface</p></li>
+<li><p>Apps can be updated independently of the main firmware</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="architecture-deep-dive.html" class="btn btn-neutral float-left" title="Platform Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Scripts.html" class="btn btn-neutral float-right" title="Scripts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

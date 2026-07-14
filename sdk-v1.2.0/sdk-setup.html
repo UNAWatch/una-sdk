@@ -1,0 +1,622 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDK Setup and Build Overview &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="UNA-Watch Simulator" href="Simulator.html" />
+    <link rel="prev" title="Platform Overview" href="platform-overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SDK Setup and Build Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#toolchain-setup">Toolchain Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#linux-setup">Linux Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#get-required-software">Get required software</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prepare">Prepare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#copy-and-build-an-existing-example">Copy and Build an Existing Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optional-linux">Optional (Linux)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#windows-setup">Windows Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Get required software</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Prepare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Copy and Build an Existing Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#troubleshooting-windows-setup">Troubleshooting Windows Setup</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cmake-based-workflow-development">CMake-Based Workflow Development</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#examples-project-structure-overview"><code class="docutils literal notranslate"><span class="pre">Examples/</span></code> Project Structure Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cmake-command-explanations">CMake Command Explanations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-new-apps">Creating New Apps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-apps-manually">Building Apps Manually</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#host-unit-tests">Host Unit Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#touchgfx-windows-only-for-designer">TouchGFX (Windows-only for Designer)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-touchgfx-designer-for-visual-editing">Using TouchGFX Designer for Visual Editing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-with-cmake">Integration with CMake</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modifying-generated-code-safely">Modifying Generated Code Safely</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting"><strong>Troubleshooting</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SDK Setup and Build Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sdk-setup.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sdk-setup-and-build-overview">
+<span id="sdk-setup"></span><h1>SDK Setup and Build Overview<a class="headerlink" href="#sdk-setup-and-build-overview" title="Link to this heading"></a></h1>
+<p>This guide covers SDK installation, manual environment setup, and the CMake workflow for building example apps.</p>
+<p>The focus is on a <strong>manual, transparent setup</strong> (no helper scripts required on Linux) so you can see exactly which tools are used and which environment variables are expected.</p>
+<p>For platform architecture, see <a class="reference internal" href="platform-overview.html"><span class="std std-doc">platform overview</span></a>. For tutorials, see <a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld tutorial</span></a>.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Linux/macOS/Windows development machine</p></li>
+<li><p>CMake 3.21+ (for manual builds)</p></li>
+<li><p>A build tool: <code class="docutils literal notranslate"><span class="pre">make</span></code> (Unix Makefiles)</p></li>
+<li><p>Python 3 + pip (for packaging/build utilities)</p></li>
+<li><p><strong>ST ARM GCC Toolchain (CRITICAL)</strong>: STM32CubeIDE or STM32CubeCLT version <strong>required</strong>. System <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> is often incompatible (newlib syscall stubs such as <code class="docutils literal notranslate"><span class="pre">_write</span></code> can be missing). See <a class="reference internal" href="#toolchain-setup">toolchain setup</a>.</p></li>
+<li><p><strong>TouchGFX (Windows-only for Designer)</strong>: For GUI development - TouchGFX Designer requires Windows. See <a class="reference internal" href="#touchgfx-require-a-windows-host">TouchGFX</a> below.</p></li>
+<li><p>USB cable for device flashing</p></li>
+<li><p>Git for cloning the SDK (release tags use <code class="docutils literal notranslate"><span class="pre">sdk-v*</span></code> for the SDK and <code class="docutils literal notranslate"><span class="pre">apps-v*</span></code> for reference apps in <code class="docutils literal notranslate"><span class="pre">Examples/</span></code>)</p></li>
+</ul>
+<p>The rest of this document provides OS-specific, end-to-end setup sections (Linux/Windows) that follow the same flow:</p>
+<p><strong>Get required software → Prepare → Clone and setup environment → Copy example and build</strong></p>
+</section>
+<section id="toolchain-setup">
+<span id="id1"></span><h2>Toolchain Setup<a class="headerlink" href="#toolchain-setup" title="Link to this heading"></a></h2>
+<p><strong>CRITICAL</strong>: Use STMicroelectronics GNU Tools for STM32 (from <strong>STM32CubeIDE</strong> or <strong>STM32CubeCLT</strong>).</p>
+<p>The system <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> shipped by many distros (often GCC 13+) is frequently incompatible with this SDK’s bare-metal/newlib expectations and may fail with undefined syscall stubs (<code class="docutils literal notranslate"><span class="pre">_write</span></code>, <code class="docutils literal notranslate"><span class="pre">_close</span></code>, etc.).</p>
+<section id="linux-setup">
+<h3>Linux Setup<a class="headerlink" href="#linux-setup" title="Link to this heading"></a></h3>
+<section id="get-required-software">
+<h4>Get required software<a class="headerlink" href="#get-required-software" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference external" href="https://git-scm.com/">Git</a> (clone + version string generation)</p></li>
+<li><p>Python 3 + pip (packaging utilities)</p></li>
+<li><p>CMake 3.21+</p></li>
+<li><p>make</p></li>
+<li><p><strong>STM32CubeIDE</strong> or <strong>STM32CubeCLT</strong> (provides the <strong>ST</strong> <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> toolchain)</p></li>
+</ul>
+<p>Install hints (keep it minimal; equivalents work on other distros):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ubuntu/Debian</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w"> </span>python3<span class="w"> </span>python3-pip<span class="w"> </span>cmake<span class="w"> </span>build-essential
+</pre></div>
+</div>
+</section>
+<section id="prepare">
+<h4>Prepare<a class="headerlink" href="#prepare" title="Link to this heading"></a></h4>
+<section id="toolchain-cubeide-cubeclt-and-path">
+<h5>Toolchain (CubeIDE/CubeCLT) and PATH<a class="headerlink" href="#toolchain-cubeide-cubeclt-and-path" title="Link to this heading"></a></h5>
+<ol class="arabic simple">
+<li><p>Install the ST toolchain (choose one):</p></li>
+</ol>
+<ul>
+<li><p><strong>STM32CubeCLT</strong> (CLI-first):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chmod<span class="w"> </span>+x<span class="w"> </span>~/Downloads/STM32CubeCLT_Linux64_v1-*.run
+~/Downloads/STM32CubeCLT_Linux64_v1-*.run
+</pre></div>
+</div>
+</li>
+<li><p><strong>STM32CubeIDE</strong> (IDE + toolchain):
+Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>Ensure the ST toolchain is on your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p></li>
+</ol>
+<p>If you installed <strong>CubeCLT</strong>, the toolchain is typically under:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> is still not found and you installed <strong>CubeIDE</strong>, add the directory that contains <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> to your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> (it is usually a <code class="docutils literal notranslate"><span class="pre">.../plugins/...gnu-tools-for-stm32.../tools/bin</span></code> folder inside the CubeIDE installation).</p>
+</section>
+<section id="clone-and-setup-environment">
+<h5>Clone and setup environment<a class="headerlink" href="#clone-and-setup-environment" title="Link to this heading"></a></h5>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone (Examples/ reference apps are included in the repo)</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/UNAWatch/una-sdk.git
+<span class="nb">cd</span><span class="w"> </span>una-sdk
+
+<span class="c1"># Export environment for the current shell</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">&quot;</span>
+
+<span class="c1"># Satisfy python dependencies</span>
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UNA_SDK</span><span class="s2">/Utilities/Scripts/app_packer/requirements.txt&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="verify-your-environment">
+<h5>Verify your environment<a class="headerlink" href="#verify-your-environment" title="Link to this heading"></a></h5>
+<p>This SDK expects the toolchain and build tools to be discoverable via <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>which<span class="w"> </span>arm-none-eabi-gcc<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+which<span class="w"> </span>cmake<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+which<span class="w"> </span>make<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+which<span class="w"> </span>python3<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>--version
+
+arm-none-eabi-gcc<span class="w"> </span>--version<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+cmake<span class="w"> </span>--version<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+make<span class="w"> </span>--version<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">which</span> <span class="pre">arm-none-eabi-gcc</span></code> prints nothing, your ST toolchain bin directory is not on <code class="docutils literal notranslate"><span class="pre">PATH</span></code> yet. Add it (see <strong>Prepare</strong> above) and re-open your terminal.</p>
+</section>
+</section>
+<section id="copy-and-build-an-existing-example">
+<h4>Copy and Build an Existing Example<a class="headerlink" href="#copy-and-build-an-existing-example" title="Link to this heading"></a></h4>
+<p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
+<p>This uses the same <strong>Alarm CMake</strong> example flow as Windows: <strong>copy project → create build dir → configure → build</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copy entire project for simplicity</span>
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UNA_SDK</span><span class="s2">/Examples/Apps/Alarm/&quot;</span>*<span class="w"> </span>MyAlarm
+
+<span class="c1"># Create build dir</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>MyAlarm/build
+
+<span class="c1"># Configure</span>
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>-S<span class="w"> </span>MyAlarm/Software/Apps/Alarm-CMake<span class="w"> </span>-B<span class="w"> </span>MyAlarm/build
+
+<span class="c1"># Build</span>
+cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
+</pre></div>
+</div>
+</section>
+<section id="optional-linux">
+<h4>Optional (Linux)<a class="headerlink" href="#optional-linux" title="Link to this heading"></a></h4>
+<section id="persist-una-sdk-and-toolchain-path">
+<h5>Persist <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> and toolchain <code class="docutils literal notranslate"><span class="pre">PATH</span></code><a class="headerlink" href="#persist-una-sdk-and-toolchain-path" title="Link to this heading"></a></h5>
+<p>If you don’t want to export variables every time, add them to your shell profile.</p>
+<p>For bash:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export UNA_SDK=&quot;$HOME/path/to/una-sdk&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
+<p>For zsh:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export UNA_SDK=&quot;$HOME/path/to/una-sdk&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
+<span class="nb">source</span><span class="w"> </span>~/.zshrc
+</pre></div>
+</div>
+</section>
+<section id="note-about-distro-gcc-arm-none-eabi">
+<h5>Note about distro <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code><a class="headerlink" href="#note-about-distro-gcc-arm-none-eabi" title="Link to this heading"></a></h5>
+<p>If you installed <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> from your distro repositories and builds fail with missing syscall stubs, switch to the <strong>ST</strong> toolchain from CubeIDE/CubeCLT and ensure its <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> is the one found first in <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+</section>
+</section>
+</section>
+<section id="windows-setup">
+<h3>Windows Setup<a class="headerlink" href="#windows-setup" title="Link to this heading"></a></h3>
+<section id="id2">
+<h4>Get required software<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference external" href="https://git-scm.com/install/windows">Git</a></p></li>
+<li><p><a class="reference external" href="https://www.python.org/downloads/windows/">Python 3</a> -  Notes:</p>
+<ul>
+<li><p>Enable “Add python.exe to PATH” checkmark</p></li>
+<li><p>Click “Disable path length limit” after installation</p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software">STM32CubeIDE</a> - Provides Toolchain, CMake, Make utilities (<em>note</em>: STM32CubeCLT does not includes <code class="docutils literal notranslate"><span class="pre">make</span></code> program, which is required)</p></li>
+<li><p><a class="reference external" href="https://code.visualstudio.com/download">VS Code</a> - IDE</p></li>
+</ul>
+</section>
+<section id="id3">
+<h4>Prepare<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<section id="id4">
+<h5>Clone and setup environment<a class="headerlink" href="#id4" title="Link to this heading"></a></h5>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Clone via SSH</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nv">@github</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="n">UNAWatch</span><span class="p">/</span><span class="n">una-sdk</span><span class="p">.</span><span class="n">git</span>
+<span class="c"># Or use HTTPS</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">UNAWatch</span><span class="p">/</span><span class="n">una-sdk</span><span class="p">.</span><span class="n">git</span>
+
+<span class="c"># Export environment (persistent)</span>
+<span class="c"># If you encounter a security error (e.g., running scripts is disabled), run this first:</span>
+<span class="nb">Set-ExecutionPolicy</span> <span class="n">-ExecutionPolicy</span> <span class="n">RemoteSigned</span> <span class="n">-Scope</span> <span class="k">Process</span>
+<span class="p">.</span> <span class="p">./</span><span class="n">una-sdk</span><span class="p">/</span><span class="n">Utilities</span><span class="p">/</span><span class="n">Scripts</span><span class="p">/</span><span class="nb">export-stm32</span><span class="n">-tools</span><span class="p">.</span><span class="n">ps1</span>
+
+<span class="c"># Satisfy python dependencies</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="p">${</span><span class="n">env</span><span class="p">:</span><span class="n">UNA_SDK</span><span class="p">}/</span><span class="n">Utilities</span><span class="p">/</span><span class="n">Scripts</span><span class="p">/</span><span class="n">app_packer</span><span class="p">/</span><span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="c"># If pip fails or dependencies are not found, verify Python is in PATH and restart PowerShell.</span>
+</pre></div>
+</div>
+<p>Reboot your PC or restart PowerShell to apply the environment variables. This ensures all changes take effect and may resolve issues like copy errors in later steps.</p>
+</section>
+</section>
+<section id="id5">
+<h4>Copy and Build an Existing Example<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Copy entire project for simplicity</span>
+<span class="c"># Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).</span>
+<span class="c"># If you get &quot;Container cannot be copied onto existing leaf item&quot; error, restart PowerShell and try again.</span>
+<span class="nb">cp </span><span class="s2">&quot;${env:UNA_SDK}\Examples\Apps\Alarm\*&quot;</span> <span class="n">MyAlarm</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
+
+<span class="c"># Create build dir</span>
+<span class="n">mkdir</span> <span class="n">-p</span> <span class="n">MyAlarm</span><span class="p">\</span><span class="n">build</span>
+
+<span class="c"># Call CMake</span>
+<span class="n">cmake</span> <span class="n">-G</span> <span class="s2">&quot;Unix Makefiles&quot;</span> <span class="n">-S</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">Software</span><span class="p">/</span><span class="n">Apps</span><span class="p">/</span><span class="n">Alarm-CMake</span> <span class="n">-B</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
+
+<span class="c"># Build</span>
+<span class="n">cmake</span> <span class="p">-</span><span class="n">-build</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
+</pre></div>
+</div>
+</section>
+<section id="troubleshooting-windows-setup">
+<h4>Troubleshooting Windows Setup<a class="headerlink" href="#troubleshooting-windows-setup" title="Link to this heading"></a></h4>
+<p>If you encounter errors like “include could not find requested file: /cmake/una-app.cmake” or “/cmake/una-sdk.cmake”, ensure the <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable is set. Run the export script with dot sourcing to apply it to the current shell: <code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">./una-sdk/Utilities/Scripts/export-stm32-tools.ps1</span></code>. Reboot your PC or restart PowerShell if issues persist, as environment variables may not apply immediately.</p>
+<p>If CMake reports “CMAKE_MAKE_PROGRAM is not set”, “CMAKE_C_COMPILER not set”, or “CMAKE_CXX_COMPILER not set”, even after setting environment variables, add the following compiler flags to the CMake command:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">cmake</span> <span class="n">-G</span> <span class="s2">&quot;Unix Makefiles&quot;</span> <span class="n">-DCMAKE_SYSTEM_NAME</span><span class="p">=</span><span class="n">Generic</span> <span class="n">-DCMAKE_C_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-gcc</span> <span class="n">-DCMAKE_CXX_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-g</span><span class="p">++</span> <span class="n">-DCMAKE_TRY_COMPILE_TARGET_TYPE</span><span class="p">=</span><span class="n">STATIC_LIBRARY</span> <span class="n">-DCMAKE_ASM_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-gcc</span> <span class="n">-S</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">Software</span><span class="p">/</span><span class="n">Apps</span><span class="p">/</span><span class="n">Alarm-CMake</span> <span class="n">-B</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
+</pre></div>
+</div>
+<p>Then proceed with the build step: <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">MyAlarm/build</span></code>.</p>
+</section>
+</section>
+</section>
+<section id="cmake-based-workflow-development">
+<h2>CMake-Based Workflow Development<a class="headerlink" href="#cmake-based-workflow-development" title="Link to this heading"></a></h2>
+<p>The CMake workflow is recommended for command-line control and is fully standalone. Apps reference the SDK via <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> and use relative paths for flexibility.</p>
+<section id="examples-project-structure-overview">
+<h3><code class="docutils literal notranslate"><span class="pre">Examples/</span></code> Project Structure Overview<a class="headerlink" href="#examples-project-structure-overview" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MyApp/  # App root (can be anywhere)
+├── Software/
+│   ├── Apps/
+│   │   ├── MyApp-CMake/  # CMake project (builds service, GUI, and .uapp)
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── MyAppService.ld  # Linker script
+│   │   │   └── syscalls.cpp
+│   │   └── TouchGFX-GUI/  # For GUI apps
+│   └── Libs/
+│       ├── Header/  # Headers
+│       └── Sources/ # Sources
+├── Resources/
+│   ├── icon_30x30.png
+│   └── icon_60x60.png
+└── Output/  # Built .uapp files
+</pre></div>
+</div>
+</section>
+<section id="cmake-command-explanations">
+<h3>CMake Command Explanations<a class="headerlink" href="#cmake-command-explanations" title="Link to this heading"></a></h3>
+<p>The CMake build process is a two-step procedure:</p>
+<ol class="arabic simple">
+<li><p><strong>Configuration/Generation</strong>: <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">-G</span> <span class="pre">&quot;Unix</span> <span class="pre">Makefiles&quot;</span> <span class="pre">-S</span> <span class="pre">&lt;source-dir&gt;</span> <span class="pre">-B</span> <span class="pre">&lt;build-dir&gt;</span></code> generates intermediate build files (e.g., Makefiles) in the specified build directory. This step configures the project, resolves dependencies, sets compilers and paths, and prepares the build environment. Run this for initial setup or when <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> changes.</p></li>
+<li><p><strong>Build/Compilation</strong>: <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">&lt;build-dir&gt;</span></code> (from any directory) or <code class="docutils literal notranslate"><span class="pre">make</span></code> (inside the build directory) compiles the source code using the generated build files. Run this to build or recompile after source file modifications.</p></li>
+</ol>
+<p>For a clean rebuild, remove the build directory and repeat both steps: <code class="docutils literal notranslate"><span class="pre">rm</span> <span class="pre">-rf</span> <span class="pre">build</span> <span class="pre">&amp;&amp;</span> <span class="pre">cmake</span> <span class="pre">-S</span> <span class="pre">.</span> <span class="pre">-B</span> <span class="pre">build</span> <span class="pre">&amp;&amp;</span> <span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">build</span></code>.</p>
+<p>If build files are generated in the wrong directory (e.g., root instead of build dir), navigate to the correct build directory and run <code class="docutils literal notranslate"><span class="pre">make</span></code> or <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">.</span></code> from there.</p>
+</section>
+<section id="creating-new-apps">
+<h3>Creating New Apps<a class="headerlink" href="#creating-new-apps" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Copy CMake Template</strong>:
+To create a new app, copy an existing one from Examples/Apps (replace <app-name> with e.g., “Alarm” or “HRMonitor”). There are two ways: an easy way without renaming (no path changes needed) and an optional way to fully rename and reorganize.</p>
+<p><strong>Easy Way (No Renaming, Minimal Changes):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copy the entire app folder</span>
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;&quot;</span><span class="w"> </span>MyApp
+
+<span class="c1"># Copy or create icons in MyApp/Resources/ if needed (required: icon_30x30.png, icon_60x60.png)</span>
+</pre></div>
+</div>
+<p>This keeps all original folder and file names. When building, use the original <app-name>-CMake in commands (e.g., cmake -S MyApp/Software/Apps/<app-name>-CMake -B MyApp/build).</p>
+<p>To adapt for your app:</p>
+<ul class="simple">
+<li><p>Update APP_NAME and APP_ID in MyApp/Software/Apps/<app-name>-CMake/CMakeLists.txt (see step 2).</p></li>
+<li><p>For GUI apps: Open MyApp/Software/Apps/TouchGFX-GUI/<app-name>GUI.touchgfx in TouchGFX Designer, update project name if desired, and save as MyAppGUI.touchgfx.</p></li>
+</ul>
+<p>Other references remain the same.</p>
+<p><strong>Optional: Full Rename and Reorganization (Customize Structure):</strong>
+If you want to match your app name or change folder structure:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create custom structure</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>MyApp/Software/Apps/MyApp-CMake<span class="w"> </span>MyApp/Software/Libs<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI<span class="w"> </span>MyApp/Resources<span class="w"> </span>MyApp/Output
+
+<span class="c1"># Copy and rename CMake folder contents</span>
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Apps/&lt;app-name&gt;-CMake/*&quot;</span><span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/
+<span class="c1"># Rename internal files, e.g.:</span>
+mv<span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/&lt;app-name&gt;Service.ld<span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/MyAppService.ld
+
+<span class="c1"># Copy libs (or move to custom path and update LIBS_PATH in CMakeLists.txt)</span>
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Libs/*&quot;</span><span class="w"> </span>MyApp/Software/Libs/
+
+<span class="c1"># Copy TouchGFX (skip if not GUI; adjust TOUCHGFX_PATH if moved)</span>
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Apps/TouchGFX-GUI/*&quot;</span><span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/
+<span class="c1"># Rename TouchGFX project if desired:</span>
+mv<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/&lt;app-name&gt;GUI.touchgfx<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/MyAppGUI.touchgfx
+
+<span class="c1"># Copy or create icons in MyApp/Resources/ (adjust RESOURCES_PATH if changed)</span>
+</pre></div>
+</div>
+<p>Note: A clean template is planned for future releases. If reorganizing, update paths in CMakeLists.txt accordingly (see step 2).</p>
+</li>
+<li><p><strong>Customize CMakeLists.txt</strong> (located at MyApp/Software/Apps/MyApp-CMake/CMakeLists.txt):
+Update the following variables to customize your app. These are defined in the CMakeLists.txt and control build parameters, paths, and app metadata. Defaults are provided where applicable.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_NAME</span></code>: Set to your app’s name, e.g., “MyApp”. This is used for output filenames and internal references.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_ID</span></code>: A unique 16-character uppercase hexadecimal string identifying your app.</p>
+<ul>
+<li><p>Generate locally:</p>
+<ul>
+<li><p>Bash/Linux: python -c ‘import hashlib; print(hashlib.md5(b”MyApp”).hexdigest().upper()[:16])’</p></li>
+<li><p>PowerShell/Windows: python -c “import hashlib; print(hashlib.md5(b’MyApp’).hexdigest().upper()[:16])”</p></li>
+</ul>
+</li>
+<li><p>Alternatively, acquire from the developer portal for published apps as described in <a class="reference internal" href="deploy.html"><span class="std std-doc">deploy.md</span></a>.
+Replace “MyApp” with your app name. See <a class="reference internal" href="api-reference.html"><span class="std std-doc">API reference</span></a> for details.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEV_ID</span></code>: Device identifier, typically “UNAWatch”.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>: App type, e.g., “app”.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>: “On” or “Off” (default “Off”) to enable autostart.</p></li>
+<li><p>Paths (adjust if reorganizing file structure):</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIBS_PATH</span></code>: Path to libraries, default “../../Libs”.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OUTPUT_PATH</span></code>: Path for built files, default “../../../Output”.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RESOURCES_PATH</span></code>: Path to resources like icons, default “../../../Resources”.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TOUCHGFX_PATH</span></code>: Path to TouchGFX directory for GUI apps, e.g., “../TouchGFX-GUI”.</p></li>
+</ul>
+</li>
+<li><p>Memory settings (optional, adjust for app needs; defaults in una-app.cmake):</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_APP_SERVICE_STACK_SIZE</span></code>: Service stack, default 10*1024.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_APP_SERVICE_RAM_LENGTH</span></code>: Service RAM, default 500K.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_APP_GUI_STACK_SIZE</span></code>: GUI stack, default 10*1024.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_APP_GUI_RAM_LENGTH</span></code>: GUI RAM, default 600K.</p></li>
+</ul>
+</li>
+<li><p>Other optional: <code class="docutils literal notranslate"><span class="pre">BUILD_VERSION</span></code> (auto-detected from git or script), <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code> (defaults to APP_NAME).</p></li>
+</ul>
+<p>After updating APP_NAME, rename files like the linker script (e.g., from AlarmService.ld to MyAppService.ld) to match, as CMakeLists.txt references “${APP_NAME}Service.ld”.</p>
+<p>Note: Paths are relative to CMakeLists.txt. You can reorganize folders by updating these paths accordingly. For example, if libs are in a different location, change LIBS_PATH.</p>
+</li>
+<li><p><strong>Implement Logic</strong>:</p>
+<ul class="simple">
+<li><p>Edit <code class="docutils literal notranslate"><span class="pre">Libs/Sources/</span></code> for service code.</p></li>
+<li><p>For GUI, configure TouchGFX in <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI/</span></code> (e.g., update <code class="docutils literal notranslate"><span class="pre">application.config</span></code>, generate code via TouchGFX Designer).</p></li>
+</ul>
+</li>
+<li><p><strong>Add Resources</strong>:</p>
+<ul class="simple">
+<li><p>Place icons in <code class="docutils literal notranslate"><span class="pre">MyApp/Resources/</span></code> (30x30 and 60x60 PNGs required; copy from the original app or create new ones).</p></li>
+</ul>
+</li>
+<li><p><strong>Set Environment</strong>:
+Ensure the <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable is set, as described in the Linux or Windows setup sections above (e.g., run the export script or export command). If you’ve just set it, restart your terminal or PowerShell for the changes to take effect.</p></li>
+</ol>
+</section>
+<section id="building-apps-manually">
+<h3>Building Apps Manually<a class="headerlink" href="#building-apps-manually" title="Link to this heading"></a></h3>
+<p>Navigate to the app’s CMake directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>MyApp/Software/Apps/MyApp-CMake
+<span class="c1"># Ensure UNA_SDK and other vars are exported</span>
+
+<span class="c1"># Configure (creates build dir)</span>
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build
+
+<span class="c1"># Build</span>
+cmake<span class="w"> </span>--build<span class="w"> </span>build
+
+<span class="c1"># Output: .uapp in Output/</span>
+</pre></div>
+</div>
+<p>For clean rebuild: <code class="docutils literal notranslate"><span class="pre">rm</span> <span class="pre">-rf</span> <span class="pre">build</span> <span class="pre">&amp;&amp;</span> <span class="pre">cmake</span> <span class="pre">-S</span> <span class="pre">.</span> <span class="pre">-B</span> <span class="pre">build</span> <span class="pre">&amp;&amp;</span> <span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">build</span></code>.</p>
+</section>
+</section>
+<section id="host-unit-tests">
+<span id="id6"></span><h2>Host Unit Tests<a class="headerlink" href="#host-unit-tests" title="Link to this heading"></a></h2>
+<p>The SDK provides a reusable GoogleTest-based host test harness under <code class="docutils literal notranslate"><span class="pre">Tests/Host</span></code>.</p>
+<p>From the SDK root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-S<span class="w"> </span>Tests/Host<span class="w"> </span>-B<span class="w"> </span>build-host<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
+cmake<span class="w"> </span>--build<span class="w"> </span>build-host
+ctest<span class="w"> </span>--test-dir<span class="w"> </span>build-host<span class="w"> </span>--output-on-failure
+</pre></div>
+</div>
+<p>On Windows multi-config generators use:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">ctest</span> <span class="p">-</span><span class="n">-test-dir</span> <span class="n">build-host</span> <span class="n">-C</span> <span class="n">Debug</span> <span class="p">-</span><span class="n">-output-on-failure</span>
+</pre></div>
+</div>
+<p>For test layout and guidance on adding tests for app examples, see <a class="reference internal" href="unit-testing.html"><span class="std std-doc">Host Unit Testing</span></a>.</p>
+</section>
+<section id="touchgfx-windows-only-for-designer">
+<span id="touchgfx-require-a-windows-host"></span><h2>TouchGFX (Windows-only for Designer)<a class="headerlink" href="#touchgfx-windows-only-for-designer" title="Link to this heading"></a></h2>
+<p>TouchGFX is a high-performance graphics framework designed for STM32 microcontrollers, enabling rich graphical user interfaces on embedded devices with limited resources.</p>
+<p>For now this is single supported way to create graphical applications for UNAwatch platform.</p>
+<p><strong>Note</strong>: Glances operates without TouchGFX framework, it uses embedded lightweight drawing API which allow to draw simple text and icons in glances menu.</p>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Download and Install TouchGFX Designer</strong>:</p>
+<ul class="simple">
+<li><p>Create a free account on the <a class="reference external" href="https://www.st.com">STMicroelectronics website</a>.</p></li>
+<li><p>Download the latest version of TouchGFX from the ST Developer Zone.</p></li>
+<li><p>Install the TouchGFX Designer tool on your development machine (Windows only).</p></li>
+</ul>
+</li>
+<li><p><strong>Framework Integration</strong>:</p>
+<ul class="simple">
+<li><p>In the UNA SDK, TouchGFX is pre-integrated in example GUI projects (e.g., <code class="docutils literal notranslate"><span class="pre">Examples/Apps/&lt;app&gt;/Software/Apps/TouchGFX-GUI/</span></code>).</p></li>
+<li><p>For new projects, copy the TouchGFX-GUI directory from an example and ensure the framework libraries are available via the SDK paths.</p></li>
+<li><p>No separate installation of the framework is needed if using the SDK’s bundled version; otherwise, download the TouchGFX framework package from ST.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="using-touchgfx-designer-for-visual-editing">
+<h3>Using TouchGFX Designer for Visual Editing<a class="headerlink" href="#using-touchgfx-designer-for-visual-editing" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Launch Designer</strong>: Open TouchGFX Designer and create a new project or open an existing <code class="docutils literal notranslate"><span class="pre">.touchgfx</span></code> configuration file (e.g., <code class="docutils literal notranslate"><span class="pre">MyAppGUI.touchgfx</span></code>).</p></li>
+<li><p><strong>Visual Design</strong>: Define display settings, add widgets, organize screens, import assets, and configure interactions.</p></li>
+<li><p><strong>Preview and Simulate</strong>: Use the built-in simulator to test the UI before generating code.</p></li>
+</ul>
+<p>For comprehensive guidance on TouchGFX Designer usage, code generation, project structure, CMake integration, build configuration, code organization, MVP pattern implementation, and custom GUI development, see the <a class="reference internal" href="TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a> document.</p>
+</section>
+<section id="integration-with-cmake">
+<h3>Integration with CMake<a class="headerlink" href="#integration-with-cmake" title="Link to this heading"></a></h3>
+<p>In UNA SDK projects, TouchGFX integrates seamlessly with CMake for building GUI applications. Set <code class="docutils literal notranslate"><span class="pre">TOUCHGFX_PATH</span></code> in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>, include <code class="docutils literal notranslate"><span class="pre">touchgfx.cmake</span></code>, and configure GUI sources.</p>
+</section>
+<section id="modifying-generated-code-safely">
+<h3>Modifying Generated Code Safely<a class="headerlink" href="#modifying-generated-code-safely" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Avoid Editing Generated Files</strong>: Files in <code class="docutils literal notranslate"><span class="pre">generated/</span></code> are automatically overwritten during code generation.</p></li>
+<li><p><strong>Custom Code Locations</strong>: Place custom implementations in <code class="docutils literal notranslate"><span class="pre">gui/src/</span></code> (views, presenters, model).</p></li>
+<li><p><strong>Regeneration Workflow</strong>: Design → Generate Code → Implement custom logic in <code class="docutils literal notranslate"><span class="pre">gui/src/</span></code> → Rebuild.</p></li>
+</ul>
+</section>
+</section>
+<section id="troubleshooting">
+<h2><strong>Troubleshooting</strong><a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Missing Dependencies</strong>: Ensure all required libraries are linked.</p></li>
+<li><p><strong>Path Errors</strong>: Verify <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> and other paths are correctly set.</p></li>
+<li><p><strong>Toolchain Issues</strong>: Confirm ARM GCC is properly installed and in PATH. On Windows, run the export script with dot sourcing and reboot if necessary.</p></li>
+<li><p><strong>CMake Compiler Errors</strong>: If CMake cannot find compilers (e.g., “CMAKE_C_COMPILER not set”), add <code class="docutils literal notranslate"><span class="pre">-DCMAKE_SYSTEM_NAME=Generic</span> <span class="pre">-DCMAKE_C_COMPILER=arm-none-eabi-gcc</span> <span class="pre">-DCMAKE_CXX_COMPILER=arm-none-eabi-g++</span> <span class="pre">-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY</span> <span class="pre">-DCMAKE_ASM_COMPILER=arm-none-eabi-gcc</span></code> to the cmake command.</p></li>
+<li><p><strong>Build Conflicts</strong>: Clean build dirs if errors persist after changes. Use <code class="docutils literal notranslate"><span class="pre">rm</span> <span class="pre">-rf</span> <span class="pre">build</span></code> (Linux) or <code class="docutils literal notranslate"><span class="pre">Remove-Item</span> <span class="pre">-Recurse</span> <span class="pre">build</span></code> (PowerShell) and reconfigure.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="platform-overview.html" class="btn btn-neutral float-left" title="Platform Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Simulator.html" class="btn btn-neutral float-right" title="UNA-Watch Simulator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

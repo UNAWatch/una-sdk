@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Images - Working with Graphics and Assets &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Sensors - Integrating Hardware Sensors" href="../Sensors/ARCHITECTURE.html" />
+    <link rel="prev" title="ScrollMenu - Creating Scrollable Lists and Menus" href="../ScrollMenu/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Images - Working with Graphics and Assets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-ll-learn">What You’ll Learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-and-running-import-images">Building and Running Import Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#images-app-overview">Images App Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#key-features-demonstrated">Key Features Demonstrated</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-asset-pipeline">The Asset Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-gui-layer-frontend">The GUI Layer (Frontend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-management-in-una-sdk">Image Management in UNA SDK</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#image-import-process">Image Import Process</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-create-your-image-asset">Step 1: Create Your Image Asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-import-into-touchgfx-designer">Step 2: Import into TouchGFX Designer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-display-the-image-in-code">Step 3: Display the Image in Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-build-and-test">Step 4: Build and Test</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-details">Code Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#understanding-bitmap-ids">Understanding Bitmap IDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-images-in-touchgfx-widgets-n-nsuggested-additional-screenshots-n-static-scaled-image-display-n-image-during-custom-jump-animation-triggered-by-r1-button-n-toggle-between-scaled-and-animated-modes-n-n">Using Images in TouchGFX Widgets\n\n<strong>Suggested additional screenshots:</strong>\n- Static scaled image display\n- Image during custom jump animation (triggered by R1 button)\n- Toggle between scaled and animated modes\n\n</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-memory-management">Image Memory Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#image-creation">Image Creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#import-optimization">Import Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-organization">File Organization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#import-issues">Import Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-problems">Display Problems</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-errors">Build Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-issues">Performance Issues</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Images - Working with Graphics and Assets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/Images/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="images-working-with-graphics-and-assets">
+<span id="tutorials-images-architecture"></span><h1>Images - Working with Graphics and Assets<a class="headerlink" href="#images-working-with-graphics-and-assets" title="Link to this heading"></a></h1>
+<p>Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA Watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.</p>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Images">Project Folder</a></p>
+<section id="what-you-ll-learn">
+<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>How to create and prepare graphic assets for UNA apps</p></li>
+<li><p>The process of importing images into TouchGFX Designer</p></li>
+<li><p>How images are converted and stored in the UNA SDK</p></li>
+<li><p>Using bitmap IDs to reference and display images in code</p></li>
+<li><p>Programmatically adding images without using designer-generated backgrounds</p></li>
+<li><p>Mode switching between Image and ScalableImage using L1 button</p></li>
+<li><p>Tick-based jump animation triggered by R1 button via <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code></span></a></p></li>
+<li><p>Understanding the TouchGFX image pipeline in UNA applications. For detailed information about the TouchGFX port implementation, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a></p></li>
+<li><p>Best practices for image optimization and management</p></li>
+</ul>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>Before starting the Import Images tutorial, you need to set up the UNA SDK environment. Follow the <a class="reference internal" href="../../sdk-setup.html#windows-setup"><span class="std std-ref">Windows Setup section of sdk-setup.md</span></a> for complete installation instructions, including:</p>
+<ul class="simple">
+<li><p>UNA SDK cloned (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/UNAWatch/una-sdk.git</span></code>)</p></li>
+<li><p>ST ARM GCC Toolchain (from STM32CubeIDE/CubeCLT, not system GCC)</p></li>
+<li><p>CMake 3.21+ and make</p></li>
+<li><p>Python 3 with pip packages installed</p></li>
+<li><p>TouchGFX Designer installed (see <a class="reference internal" href="../../sdk-setup.html#windows-setup"><span class="std std-ref">Windows Setup section of sdk-setup.md</span></a>)</p></li>
+</ul>
+<p><strong>Minimum requirements for Import Images:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable pointing to SDK root</p></li>
+<li><p>ARM GCC toolchain in PATH</p></li>
+<li><p>CMake and build tools</p></li>
+<li><p>TouchGFX Designer for GUI development</p></li>
+<li><p>Image editing software (Paint, GIMP, Photoshop, etc.)</p></li>
+</ul>
+</section>
+<section id="building-and-running-import-images">
+<h3>Building and Running Import Images<a class="headerlink" href="#building-and-running-import-images" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Verify your environment setup</strong> (see <a class="reference internal" href="../../sdk-setup.html#windows-setup"><span class="std std-ref">Windows Setup section of sdk-setup.md</span></a> for details):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$UNA_SDK</span><span class="w">                   </span><span class="c1"># Should point to SDK root.</span>
+<span class="w">                                </span><span class="c1"># Note for backward compatibility with linux path notation it uses &#39;/&#39;</span>
+
+which<span class="w"> </span>arm-none-eabi-gcc<span class="w">         </span><span class="c1"># Should find ST toolchain</span>
+which<span class="w"> </span>cmake<span class="w">                     </span><span class="c1"># Should find CMake</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Navigate to the Images tutorial directory:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/Images
+</pre></div>
+</div>
+</li>
+<li><p><strong>Build the application:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>../Software/Apps/Images-CMake
+make
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps.</p>
+</section>
+<section id="running-on-simulator">
+<h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
+<p>To test the app on the simulator (Windows only):</p>
+<ol class="arabic simple">
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Images.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
+<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">Images\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
+<li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
+</ol>
+<p>In the simulator, use keyboard keys to interact:</p>
+<ul class="simple">
+<li><p><strong>1</strong> = L1 (Toggle between Image and ScalableImage modes)</p></li>
+<li><p><strong>3</strong> = R1 (Trigger jump animation when in Image mode)</p></li>
+</ul>
+<p>The simulator will display the imported character image with scaling and animation capabilities. For detailed simulator setup and button mapping, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
+</section>
+</section>
+<section id="images-app-overview">
+<h2>Images App Overview<a class="headerlink" href="#images-app-overview" title="Link to this heading"></a></h2>
+<p>The Images tutorial demonstrates programmatic image display and interactivity in UNA Watch apps:</p>
+<section id="key-features-demonstrated">
+<h3>Key Features Demonstrated<a class="headerlink" href="#key-features-demonstrated" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>No background</strong>: Pure programmatic content - no designer-generated backgrounds or boxes</p></li>
+<li><p><strong>Dual image modes</strong>: L1 toggles between Image (<code class="docutils literal notranslate"><span class="pre">guyImage</span></code>) and ScalableImage (<code class="docutils literal notranslate"><span class="pre">scaledGuyImage</span></code>)</p></li>
+<li><p><strong>Jump animation</strong>: R1 triggers sine-wave Y-offset animation on <code class="docutils literal notranslate"><span class="pre">guyImage</span></code> via tick events</p></li>
+</ul>
+</section>
+<section id="the-asset-pipeline">
+<h3>The Asset Pipeline<a class="headerlink" href="#the-asset-pipeline" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Creation</strong>: Images are created using external tools (Paint, GIMP, etc.)</p></li>
+<li><p><strong>Import</strong>: Images are added to TouchGFX Designer project</p></li>
+<li><p><strong>Conversion</strong>: TouchGFX converts images to optimized bitmap formats</p></li>
+<li><p><strong>Storage</strong>: Converted images are stored in flash memory</p></li>
+<li><p><strong>Display</strong>: Images are referenced by ID and displayed on screen</p></li>
+</ul>
+</section>
+<section id="the-gui-layer-frontend">
+<h3>The GUI Layer (Frontend)<a class="headerlink" href="#the-gui-layer-frontend" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a></p></li>
+<li><p>Programmatically adds images in <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code></span></a></p></li>
+<li><p>Handles L1/R1 buttons for mode switching and animation triggers in <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code></span></a></p></li>
+<li><p>Drives animation in <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code></span></a></p></li>
+</ul>
+</section>
+<section id="image-management-in-una-sdk">
+<h3>Image Management in UNA SDK<a class="headerlink" href="#image-management-in-una-sdk" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Images are converted to TouchGFX bitmap format during build</p></li>
+<li><p>Each image gets a unique ID in <a class="reference download internal" download="" href="../../_downloads/b948b7ae241bce3008cc273987d15075/BitmapDatabase.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">BitmapDatabase.hpp</span></code></span></a></p></li>
+<li><p>Images are stored in flash memory for efficient access</p></li>
+<li><p>TouchGFX handles image decompression and display</p></li>
+</ul>
+</section>
+</section>
+<section id="image-import-process">
+<h2>Image Import Process<a class="headerlink" href="#image-import-process" title="Link to this heading"></a></h2>
+<p>Follow these steps to import and display images in your UNA app:</p>
+<section id="step-1-create-your-image-asset">
+<h3>Step 1: Create Your Image Asset<a class="headerlink" href="#step-1-create-your-image-asset" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Open your image editor</strong> (Paint, GIMP, Photoshop, etc.)</p></li>
+<li><p><strong>Create a new image</strong> with appropriate dimensions:</p>
+<ul class="simple">
+<li><p>Consider the UNA Watch display (typically 240x240 pixels)</p></li>
+<li><p>Use power-of-2 dimensions when possible for better compression</p></li>
+<li><p>Choose appropriate color depth (RGB565 for photos, indexed for icons)</p></li>
+</ul>
+</li>
+<li><p><strong>Draw or import your graphic</strong>:</p>
+<ul class="simple">
+<li><p>For this tutorial, create a simple character or icon</p></li>
+<li><p>Save as PNG format with transparency if needed</p></li>
+</ul>
+</li>
+<li><p><strong>Save your image</strong> as <code class="docutils literal notranslate"><span class="pre">my_image.png</span></code> in a temporary location</p></li>
+</ol>
+</section>
+<section id="step-2-import-into-touchgfx-designer">
+<h3>Step 2: Import into TouchGFX Designer<a class="headerlink" href="#step-2-import-into-touchgfx-designer" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Open the TouchGFX project</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Images</span><span class="o">.</span><span class="n">touchgfx</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Navigate to the Images tab</strong> in TouchGFX Designer</p></li>
+<li><p><strong>Click “Import Images”</strong> and select your <code class="docutils literal notranslate"><span class="pre">my_image.png</span></code> file</p></li>
+</ol>
+<p><img alt="Add Image Button" src="../../_images/add-image-button.png" /></p>
+<ol class="arabic simple" start="4">
+<li><p><strong>Configure image settings</strong>:</p>
+<ul class="simple">
+<li><p>Choose appropriate color format (RGB565, ARGB8888, etc.)</p></li>
+<li><p>Enable dithering if needed for better quality</p></li>
+<li><p>Set compression options</p></li>
+</ul>
+</li>
+<li><p><strong>Generate code</strong> after importing:</p>
+<ul class="simple">
+<li><p>Click “Generate Code” in TouchGFX Designer</p></li>
+</ul>
+</li>
+</ol>
+<p><img alt="Generated Image Asset" src="../../_images/generated-image-asset.png" /></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>- This creates bitmap IDs and conversion code
+</pre></div>
+</div>
+</section>
+<section id="step-3-display-the-image-in-code">
+<h3>Step 3: Display the Image in Code<a class="headerlink" href="#step-3-display-the-image-in-code" title="Link to this heading"></a></h3>
+<p>After importing <code class="docutils literal notranslate"><span class="pre">guy-transparent.png</span></code>, TouchGFX generates <a class="reference download internal" download="" href="../../_downloads/b948b7ae241bce3008cc273987d15075/BitmapDatabase.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">BITMAP_GUY_TRANSPARENT_ID</span></code></span></a>.</p>
+<p>Images are added programmatically in <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView::setupScreen()</span></code></span></a>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Programmatic image setup - no background</span>
+<span class="n">guyImage</span><span class="p">.</span><span class="n">setBitmap</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Bitmap</span><span class="p">(</span><span class="n">BITMAP_GUY_TRANSPARENT_ID</span><span class="p">));</span>
+<span class="n">guyImage</span><span class="p">.</span><span class="n">setPosition</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="n">originalY</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="n">guyImage</span><span class="p">.</span><span class="n">setVisible</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span><span class="w">  </span><span class="c1">// Initially hidden (scaled mode active)</span>
+<span class="n">add</span><span class="p">(</span><span class="n">guyImage</span><span class="p">);</span>
+
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setBitmap</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Bitmap</span><span class="p">(</span><span class="n">BITMAP_GUY_TRANSPARENT_ID</span><span class="p">));</span>
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setPosition</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="n">originalY</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">);</span>
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setScalingAlgorithm</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">ScalableImage</span><span class="o">::</span><span class="n">BILINEAR_INTERPOLATION</span><span class="p">);</span>
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setVisible</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w">  </span><span class="c1">// Initially shown</span>
+<span class="n">add</span><span class="p">(</span><span class="n">scaledGuyImage</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: Widgets declared as members in <a class="reference download internal" download="" href="../../_downloads/f836c6c89a4933e4d25a157cb21897f1/MainView.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.hpp</span></code></span></a>. Includes placed in header.</p>
+</section>
+<section id="step-4-build-and-test">
+<h3>Step 4: Build and Test<a class="headerlink" href="#step-4-build-and-test" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Rebuild the application</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>../Software/Apps/Images-CMake
+make
+</pre></div>
+</div>
+</li>
+<li><p><strong>Run on simulator</strong> to see your imported image displayed</p></li>
+<li><p><strong>Test on hardware</strong> to verify performance and appearance</p></li>
+</ol>
+</section>
+</section>
+<section id="code-details">
+<h2>Code Details<a class="headerlink" href="#code-details" title="Link to this heading"></a></h2>
+<section id="understanding-bitmap-ids">
+<h3>Understanding Bitmap IDs<a class="headerlink" href="#understanding-bitmap-ids" title="Link to this heading"></a></h3>
+<p>When you import images into TouchGFX, each image gets a unique ID defined in <code class="docutils literal notranslate"><span class="pre">BitmapDatabase.hpp</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Generated by imageconverter. Please, do not edit!</span>
+<span class="cp">#ifndef TOUCHGFX_BITMAPDATABASE_HPP</span>
+<span class="cp">#define TOUCHGFX_BITMAPDATABASE_HPP</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;touchgfx/hal/Types.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;touchgfx/Bitmap.hpp&gt;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">BITMAP_GUY_TRANSPARENT_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">// Additional bitmap IDs for other images...</span>
+</pre></div>
+</div>
+</section>
+<section id="using-images-in-touchgfx-widgets-n-nsuggested-additional-screenshots-n-static-scaled-image-display-n-image-during-custom-jump-animation-triggered-by-r1-button-n-toggle-between-scaled-and-animated-modes-n-n">
+<h3>Using Images in TouchGFX Widgets\n\n<strong>Suggested additional screenshots:</strong>\n- Static scaled image display\n- Image during custom jump animation (triggered by R1 button)\n- Toggle between scaled and animated modes\n\n<a class="headerlink" href="#using-images-in-touchgfx-widgets-n-nsuggested-additional-screenshots-n-static-scaled-image-display-n-image-during-custom-jump-animation-triggered-by-r1-button-n-toggle-between-scaled-and-animated-modes-n-n" title="Link to this heading"></a></h3>
+<p>TouchGFX provides several ways to display images:</p>
+<p><strong>No Background:</strong>
+The demo has no background image or box. All content is added programmatically in <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code></span></a>.</p>
+<p><strong>ScalableImage (scaledGuyImage):</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setBitmap</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Bitmap</span><span class="p">(</span><span class="n">BITMAP_GUY_TRANSPARENT_ID</span><span class="p">));</span>
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setPosition</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="n">originalY</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">);</span>
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setScalingAlgorithm</span><span class="p">(</span><span class="n">touchgfx</span><span class="o">::</span><span class="n">ScalableImage</span><span class="o">::</span><span class="n">BILINEAR_INTERPOLATION</span><span class="p">);</span>
+<span class="n">scaledGuyImage</span><span class="p">.</span><span class="n">setVisible</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">add</span><span class="p">(</span><span class="n">scaledGuyImage</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Custom Tick-Based Animation:</strong>
+Demo uses <code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code> for sine-wave jump on <code class="docutils literal notranslate"><span class="pre">guyImage</span></code>:</p>
+<ul class="simple">
+<li><p>Triggered by R1 when Image mode active</p></li>
+<li><p>60 ticks (~6s at 10Hz), sin(phase)*30px offset
+(See <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code></span></a>)</p></li>
+</ul>
+</section>
+<section id="image-memory-management">
+<h3>Image Memory Management<a class="headerlink" href="#image-memory-management" title="Link to this heading"></a></h3>
+<p>Images in UNA apps are stored in flash memory and loaded into RAM as needed:</p>
+<ul class="simple">
+<li><p><strong>Flash Storage</strong>: Images are compressed and stored in internal/external flash</p></li>
+<li><p><strong>RAM Usage</strong>: Only active images are decompressed into RAM</p></li>
+<li><p><strong>Caching</strong>: TouchGFX manages image caching automatically</p></li>
+<li><p><strong>Optimization</strong>: Use appropriate color depths to balance quality and memory usage</p></li>
+</ul>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="image-creation">
+<h3>Image Creation<a class="headerlink" href="#image-creation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use vector graphics when possible for scalability</p></li>
+<li><p>Choose appropriate color depths (RGB565 for most cases)</p></li>
+<li><p>Consider transparency needs (ARGB8888 for transparent images)</p></li>
+<li><p>Test images on actual device for color accuracy</p></li>
+</ul>
+</section>
+<section id="import-optimization">
+<h3>Import Optimization<a class="headerlink" href="#import-optimization" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Enable dithering for better quality on limited color displays</p></li>
+<li><p>Use compression options to reduce flash usage</p></li>
+<li><p>Group similar images for better compression</p></li>
+<li><p>Consider image dimensions vs. display capabilities</p></li>
+</ul>
+</section>
+<section id="performance-considerations">
+<h3>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Minimize number of active images on screen</p></li>
+<li><p>Use appropriate scaling algorithms</p></li>
+<li><p>Avoid frequent image switching in animations</p></li>
+<li><p>Profile memory usage on target hardware</p></li>
+</ul>
+</section>
+<section id="file-organization">
+<h3>File Organization<a class="headerlink" href="#file-organization" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Keep original source images in <code class="docutils literal notranslate"><span class="pre">assets/images/</span></code></p></li>
+<li><p>Use descriptive names for bitmap IDs</p></li>
+<li><p>Document image purposes and dimensions</p></li>
+<li><p>Version control your image assets</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Import your first image</strong> - Follow the steps above to add a custom image to the tutorial app</p></li>
+<li><p><strong>Experiment with different formats</strong> - Try various color depths and compression settings</p></li>
+<li><p><strong>Create image sequences</strong> - Import multiple frames for animations</p></li>
+<li><p><strong>Optimize for performance</strong> - Test memory usage and display performance</p></li>
+<li><p><strong>Explore advanced features</strong> - Study TouchGFX documentation for effects and transformations</p></li>
+<li><p><strong>Continue to other tutorials</strong> - Learn about buttons, text, and complex interactions</p></li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="import-issues">
+<h3>Import Issues<a class="headerlink" href="#import-issues" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Ensure image dimensions are reasonable for the display</p></li>
+<li><p>Check that TouchGFX Designer is properly installed</p></li>
+<li><p>Verify image format is supported (PNG, BMP, etc.)</p></li>
+<li><p>Regenerate code after making changes</p></li>
+</ul>
+</section>
+<section id="display-problems">
+<h3>Display Problems<a class="headerlink" href="#display-problems" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Confirm bitmap ID is correct in <code class="docutils literal notranslate"><span class="pre">BitmapDatabase.hpp</span></code></p></li>
+<li><p>Check image position and dimensions fit the screen</p></li>
+<li><p>Verify color format matches display capabilities</p></li>
+<li><p>Test on simulator first, then hardware</p></li>
+</ul>
+</section>
+<section id="build-errors">
+<h3>Build Errors<a class="headerlink" href="#build-errors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Ensure TouchGFX project is synchronized with CMake build</p></li>
+<li><p>Check for missing image files in assets directory</p></li>
+<li><p>Verify bitmap database is regenerated after changes</p></li>
+<li><p>Clean build directory and rebuild if issues persist</p></li>
+</ul>
+</section>
+<section id="performance-issues">
+<h3>Performance Issues<a class="headerlink" href="#performance-issues" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reduce image resolution if memory constrained</p></li>
+<li><p>Use simpler color formats (RGB565 vs ARGB8888)</p></li>
+<li><p>Limit number of simultaneous images</p></li>
+<li><p>Profile with TouchGFX Performance Analyzer</p></li>
+</ul>
+<p>Remember: Images are a powerful way to make your UNA Watch apps visually appealing. Start simple, optimize as needed, and you’ll create engaging user interfaces that work great on the small screen!</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../ScrollMenu/ARCHITECTURE.html" class="btn btn-neutral float-left" title="ScrollMenu - Creating Scrollable Lists and Menus" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Sensors/ARCHITECTURE.html" class="btn btn-neutral float-right" title="Sensors - Integrating Hardware Sensors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

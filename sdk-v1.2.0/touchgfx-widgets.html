@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TouchGFX Widgets &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Battery" href="Templates/TouchGFX-Widgets/docs/Battery.html" />
+    <link rel="prev" title="TouchGFX Port Architecture" href="TouchGFX-Port-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TouchGFX Widgets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-pre-built-widgets">Using the pre-built widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exporting-your-own-widgets">Exporting your own widgets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html">Battery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html">Buttons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html">GpsIndicator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html">HeartRateZone</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html">InfoCarousel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html">MainMenu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html">Map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html">PauseIndicator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html">ScrollIndicator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html">Texts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html">Title</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html">Toggle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">TouchGFX Widgets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/touchgfx-widgets.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="touchgfx-widgets">
+<h1>TouchGFX Widgets<a class="headerlink" href="#touchgfx-widgets" title="Link to this heading"></a></h1>
+<p>The UNA SDK ships a set of ready-made TouchGFX custom containers that cover the most common UI patterns for watch applications. Each widget is distributed as a <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> file — a standard TouchGFX Custom Container Package (ZIP archive) that can be imported directly into TouchGFX Designer.</p>
+<section id="using-the-pre-built-widgets">
+<h2>Using the pre-built widgets<a class="headerlink" href="#using-the-pre-built-widgets" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Open TouchGFX Designer.</p></li>
+<li><p>Go to <strong>Edit → Import → Custom Containers</strong>.</p></li>
+<li><p>Select the desired <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> file from <code class="docutils literal notranslate"><span class="pre">Docs/Templates/TouchGFX-Widgets/</span></code>.</p></li>
+</ol>
+</section>
+<section id="exporting-your-own-widgets">
+<h2>Exporting your own widgets<a class="headerlink" href="#exporting-your-own-widgets" title="Link to this heading"></a></h2>
+<p>Any custom container in an existing project can be exported and reused in a new one. This is the recommended way to transfer app-specific widgets between projects or share them with other developers.</p>
+<p>To export a container from TouchGFX Designer:</p>
+<ol class="arabic simple">
+<li><p>Open the project that contains the widget.</p></li>
+<li><p>In the <strong>Custom Containers</strong> panel, right-click the container you want to export.</p></li>
+<li><p>Select <strong>Export</strong> — Designer creates a <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> file with all required source files, assets, and fonts bundled inside.</p></li>
+<li><p>Import the resulting <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> into any other project using the steps above.</p></li>
+</ol>
+<p>You can modify the exported container freely: edit the C++ implementation, adjust the Designer layout, change assets, or extend the class before importing.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">🎨 TouchGFX Widgets</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html">Battery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#color-scheme">Color Scheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Battery.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html">Buttons</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#color-states">Color States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Buttons.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html">GpsIndicator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#behavior">Behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/GpsIndicator.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html">HeartRateZone</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#zone-detection-logic">Zone Detection Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/HeartRateZone.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html">InfoCarousel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#cycling-control">Cycling control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#content-call-from-inside-the-callback">Content (call from inside the callback)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/InfoCarousel.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html">MainMenu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#bundled-files">Bundled Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#components-designer">Components (Designer)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#item-styles">Item Styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#menuitemconfig">MenuItemConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#layout-priority">Layout Priority</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#wheel-size">Wheel size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#navigation">Navigation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#item-callbacks">Item callbacks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#animation-callbacks">Animation callbacks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#layout">Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/MainMenu.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html">Map</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#polyline">PolyLine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Map.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html">PauseIndicator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/PauseIndicator.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html">ScrollIndicator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#predefined-configs">Predefined Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/ScrollIndicator.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html">Texts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#purpose">Purpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#included-fonts">Included Fonts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#available-typographies">Available Typographies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#text-id-naming-convention">Text ID Naming Convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Texts.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html">Title</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Title.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html">Toggle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#components">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#default-colors">Default Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#usage-in-touchgfx-designer">Usage in TouchGFX Designer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#usage-in-c-code">Usage in C++ Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#files-included">Files Included</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/TouchGFX-Widgets/docs/Toggle.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="TouchGFX-Port-Architecture.html" class="btn btn-neutral float-left" title="TouchGFX Port Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Templates/TouchGFX-Widgets/docs/Battery.html" class="btn btn-neutral float-right" title="Battery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
