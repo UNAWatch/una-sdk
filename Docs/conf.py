@@ -55,7 +55,7 @@ language = 'en'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-html_js_files = []
+html_js_files = ['version-selector.js']
 html_css_files = ['custom.css']
 
 # -- Options for intersphinx extension ---------------------------------------
