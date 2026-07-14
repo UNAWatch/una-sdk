@@ -18,7 +18,14 @@ on:
         description: 'Slot to (re)build when dispatched on a branch (ignored on a tag ref, which uses the tag name). Use to rebuild "preview".'
         required: false
         default: 'preview'
+      build_ref:
+        description: 'Git ref to build docs from (e.g. sdk-v1.2.0). Slot is derived from it. Blank = use the triggering ref.'
+        required: false
+        default: ''
 
+# NOTE: with a shared group and cancel-in-progress off, GitHub keeps only the
+# newest QUEUED run per group — a run superseded while queued never publishes
+# its version. Re-dispatch the workflow (with build_ref) to recover that slot.
 concurrency:
   group: "docs-pages"
   cancel-in-progress: false
@@ -33,17 +40,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.build_ref || github.ref }}
           submodules: false
+          persist-credentials: false
 
       - name: Determine version slot
         id: slot
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          INPUT_BUILD_REF: ${{ github.event.inputs.build_ref }}
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/sdk-v* ]]; then
+          if [ -n "${INPUT_BUILD_REF}" ]; then
+            slot="${INPUT_BUILD_REF}"                       # explicit ref to (re)build -> its own slot
+          elif [[ "${GITHUB_REF}" == refs/tags/sdk-v* ]]; then
             slot="${GITHUB_REF_NAME}"                       # a release tag -> its own version dir
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            slot="${{ github.event.inputs.version }}"       # manual rebuild on a branch
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            slot="${INPUT_VERSION}"                         # manual rebuild on a branch
           else
             slot="preview"                                  # main / PR -> preview, never the root default
+          fi
+          # Allow-list the slot: it is used as a directory name and in rm -rf.
+          if [[ ! "${slot}" =~ ^(preview|sdk-v[A-Za-z0-9._-]+)$ ]]; then
+            echo "::error::Invalid/unsafe slot: '${slot}'"; exit 1
           fi
           echo "slot=${slot}" >> "$GITHUB_OUTPUT"
           echo "Building docs slot: ${slot}"
@@ -80,17 +98,30 @@ jobs:
     permissions:
       contents: write            # push to the gh-pages serve branch
     steps:
+      # Gate the gh-pages checkout on branch existence rather than masking
+      # failures: a transient checkout error followed by the publish step would
+      # otherwise silently wipe every previously published version.
+      - name: Check if gh-pages exists
+        id: ghp
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}.git" gh-pages >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Check out existing published site (gh-pages)
+        if: steps.ghp.outputs.exists == 'true'
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: site
-        continue-on-error: true   # first ever run: branch does not exist yet
+          persist-credentials: false
 
       - name: Prepare site tree
         run: |
-          mkdir -p site
-          rm -rf site/.git         # never publish the checkout's git metadata
+          mkdir -p site                # first ever run: gh-pages does not exist yet
+          rm -rf site/.git             # never publish the checkout's git metadata
 
       - name: Download freshly built HTML
         uses: actions/download-artifact@v4
@@ -103,15 +134,22 @@ jobs:
           SLOT: ${{ needs.build.outputs.slot }}
         run: |
           set -euo pipefail
+          # Defense in depth: never rm -rf with an unvalidated slot name.
+          [[ "${SLOT}" =~ ^(preview|sdk-v[A-Za-z0-9._-]+)$ ]] || { echo "::error::bad SLOT"; exit 1; }
           # Replace ONLY this version's subdir; every other version is left intact.
           rm -rf "site/${SLOT}"
           mkdir -p "site/${SLOT}"
           cp -a docs-html/. "site/${SLOT}/"
 
-          # Latest RELEASED version = highest sdk-v* dir present (preview never wins the root).
-          latest="$(ls -1 site | { grep -E '^sdk-v' || true; } | sort -V | tail -1)"
+          # Latest RELEASED version = highest final-release-shaped sdk-v* dir
+          # (preview and RC/pre-release dirs never win the root).
+          latest="$(ls -1 site | { grep -E '^sdk-v[0-9]+(\.[0-9]+)*$' || true; } | sort -V | tail -1)"
           if [ -n "${latest}" ]; then
             printf '<!doctype html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./%s/">\n<title>Una SDK Documentation</title>\n<a href="./%s/">Una SDK Documentation</a>\n' "${latest}" "${latest}" > site/index.html
+          elif [ -d "site/preview" ]; then
+            # No released version published yet: fall back to /preview/ so the
+            # site root never 404s regardless of publish order.
+            printf '<!doctype html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./preview/">\n<title>Una SDK Documentation</title>\n<a href="./preview/">Una SDK Documentation</a>\n' > site/index.html
           fi
 
           # Version manifest consumed at runtime by _static/version-selector.js.
@@ -136,7 +174,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
           publish_branch: gh-pages
-          force_orphan: true       # single-commit branch; the full multi-version tree is assembled above
+          force_orphan: false      # keep gh-pages history so a destructive publish can be reverted
           cname: developers.unawatch.com
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
