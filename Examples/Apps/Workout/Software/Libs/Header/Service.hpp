@@ -48,6 +48,7 @@ private:
 
     Settings                  mSettings;
     bool                      mIsImperial = false;
+    SDK::Message::TimeFormat  mTimeFormat = SDK::Message::TimeFormat::Hour24;
     SettingsSerializer        mSettingsSerializer;
     ActivitySummary           mSummary;
     ActivitySummarySerializer mActivitySummarySerializer;

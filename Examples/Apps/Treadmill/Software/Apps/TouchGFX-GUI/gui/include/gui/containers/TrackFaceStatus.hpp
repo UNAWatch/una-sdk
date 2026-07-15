@@ -3,6 +3,7 @@
 
 #include <gui_generated/containers/TrackFaceStatusBase.hpp>
 #include <SDK/GUI/SensorStatusRow.hpp>
+#include <SDK/Messages/CommandMessages.hpp>
 
 /**
  * @brief Track face showing device status: current time of day and battery level.
@@ -21,8 +22,9 @@ public:
      * @brief Display the current time of day.
      * @param h Hour   (0-23).
      * @param m Minute (0-59).
+     * @param format Time-of-day rendering format.
      */
-    void setTime(uint8_t h, uint8_t m);
+    void setTime(uint8_t h, uint8_t m, SDK::Message::TimeFormat format);
 
     /**
      * @brief Display the battery charge level.

@@ -121,6 +121,7 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             auto* settings = static_cast<SDK::Message::RequestSystemSettings*>(msg);
 
             settings->imperialUnits = mSettings.unitsImperial;
+            settings->timeFormat    = mSettings.timeFormat;
 
             const uint32_t limit = std::min(
                 SDK::Message::RequestSystemSettings::skMaxHearRateTh,

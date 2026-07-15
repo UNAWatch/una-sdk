@@ -188,6 +188,15 @@ static_assert(sizeof(RequestBatteryStatus) == 44, "RequestBatteryStatus size mus
 #endif
 
 /**
+ * @brief Time-of-day display format
+ */
+enum class TimeFormat : uint8_t {
+    Hour24   = 0,  // 17:42 (default)
+    Hour12   = 1,  // 5:42
+    Military = 2,  // 1742
+};
+
+/**
  * @brief System settings request
  *
  * App requests system configuration.
@@ -200,7 +209,7 @@ struct RequestSystemSettings : public MessageBase {
     // Response fields
     uint8_t languageId;      // System language
     bool    imperialUnits;   // Units imperial/metric
-    bool    timeFormat;      // 12/24 hour format
+    TimeFormat timeFormat;   // Time-of-day display format
 
     uint8_t heartRateCount;
     uint8_t heartRateTh[skMaxHearRateTh];
@@ -216,7 +225,7 @@ struct RequestSystemSettings : public MessageBase {
         : MessageBase(MessageType::REQUEST_SYSTEM_SETTINGS)
         , languageId(0)
         , imperialUnits(false)
-        , timeFormat(false)
+        , timeFormat(TimeFormat::Hour24)
         , heartRateCount(0)
         , heartRateTh {}
         , activityMin(0)

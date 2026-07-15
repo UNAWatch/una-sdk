@@ -680,6 +680,7 @@ constexpr SDK::MessageType::Type MANUAL_LAP     = 0x0000000F;
 struct SettingsUpd : public SDK::MessageBase {
     Settings settings;
     bool     unitsImperial;
+    SDK::Message::TimeFormat timeFormat;
     uint8_t  hrThresholds[kHrThresholdsCount];  // C-array of 6
     uint8_t  hrThresholdsCount;
 };
@@ -703,7 +704,7 @@ public:
     Sender(const SDK::Kernel& kernel);
 
     // Service --> GUI
-    bool settingsUpd(Settings settings, bool units,
+    bool settingsUpd(Settings settings, bool units, SDK::Message::TimeFormat timeFormat,
                      const uint8_t (&thresholds)[kHrThresholdsCount],
                      uint8_t thresholdCount);
     bool time(std::tm localTime);

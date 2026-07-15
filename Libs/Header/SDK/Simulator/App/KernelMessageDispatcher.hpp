@@ -10,6 +10,7 @@
 
 #include <cstdint>
 
+#include "SDK/Messages/CommandMessages.hpp"
 #include "SDK/Simulator/App/DualAppComm.hpp"
 #include "SDK/Simulator/App/MessageManager.hpp"
 #include "SDK/Interfaces/IVibro.hpp"
@@ -124,6 +125,12 @@ private:
         bool unitsImperial = false;
 
         /**
+         * @brief   Time-of-day display format preference.
+         * @note    24-hour by default.
+         */
+        SDK::Message::TimeFormat timeFormat = SDK::Message::TimeFormat::Hour24;
+
+        /**
          * @brief Phone-related settings group.
          */
         struct
@@ -145,6 +152,7 @@ private:
         bool operator==(const WatchSettings& other) const
         {
             return (unitsImperial == other.unitsImperial &&
+                    timeFormat == other.timeFormat &&
                     phone.notifications == other.phone.notifications &&
                     watchfaceAppId == other.watchfaceAppId &&
                     heartRateZones == other.heartRateZones &&

@@ -16,9 +16,21 @@ void TrackFaceStatus::initialize()
                         BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
 }
 
-void TrackFaceStatus::setTime(uint8_t h, uint8_t m)
+void TrackFaceStatus::setTime(uint8_t h, uint8_t m, SDK::Message::TimeFormat format)
 {
-    Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%u:%02u", h, m);
+    switch (format) {
+        case SDK::Message::TimeFormat::Hour12: {
+            const uint8_t h12 = (h % 12 == 0) ? 12 : (h % 12);
+            Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%u:%02u", h12, m);
+        } break;
+        case SDK::Message::TimeFormat::Military:
+            Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%02u%02u", h, m);
+            break;
+        case SDK::Message::TimeFormat::Hour24:
+        default:
+            Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%u:%02u", h, m);
+            break;
+    }
     dayTimeValue.invalidate();
 }
 

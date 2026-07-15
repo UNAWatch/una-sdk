@@ -14,7 +14,7 @@ void TrackPresenter::activate()
 
     view.setPositionId(model->menu().track.get());
 
-    view.setConfig(model->isUnitsImperial(), model->getHrThresholds(), model->getHrThresholdsCount());
+    view.setConfig(model->isUnitsImperial(), model->getTimeFormat(), model->getHrThresholds(), model->getHrThresholdsCount());
 
     onTrackData(model->getTrackData());
 

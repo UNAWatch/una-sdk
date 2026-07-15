@@ -693,6 +693,7 @@ void Service::sendInitialInfoToGui()
     if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
         if (msg.send(100) && msg.ok()) {
             mIsImperial = msg->imperialUnits;
+            mTimeFormat = msg->timeFormat;
 
             if (msg->heartRateCount > CustomMessage::kHrThresholdsCount) {
                 msg->heartRateCount = CustomMessage::kHrThresholdsCount;
@@ -717,7 +718,7 @@ void Service::sendInitialInfoToGui()
         }
     }
 
-    mGuiSender.settingsUpd(mSettings, mIsImperial, hrThresholds, CustomMessage::kHrThresholdsCount);
+    mGuiSender.settingsUpd(mSettings, mIsImperial, mTimeFormat, hrThresholds, CustomMessage::kHrThresholdsCount);
     mGuiSender.summary(&mSummary);
     mGuiSender.battery(static_cast<uint8_t>(mBatterySoc.get()));
 }

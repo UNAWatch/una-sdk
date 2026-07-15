@@ -31,7 +31,7 @@ void TrackPresenter::activate()
 
     view.setPositionId(faceId);
 
-    view.setConfig(model->isUnitsImperial(), model->getHrThresholds(), model->getHrThresholdsCount());
+    view.setConfig(model->isUnitsImperial(), model->getTimeFormat(), model->getHrThresholds(), model->getHrThresholdsCount());
 
     onTrackData(model->getTrackData());
 
