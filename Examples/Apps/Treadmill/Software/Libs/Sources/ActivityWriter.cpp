@@ -59,16 +59,20 @@ void ActivityWriter::start(const AppInfo& info)
     }
 
     // file_id
+    const uint8_t productNameLen =
+        static_cast<uint8_t>(std::strlen(fit::kProductName) + 1);
     mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
         {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
          fit::field::FileId::Product, fit::field::FileId::SerialNumber,
-         fit::field::FileId::TimeCreated});
+         fit::field::FileId::TimeCreated,
+         {fit::field::FileId::kProductNameNum, fit::BaseType::String, productNameLen}});
     mFit->data(L_FILE_ID)
         .u8(static_cast<uint8_t>(fit::File::Activity))
-        .u16(static_cast<uint16_t>(fit::Manufacturer::Development))
-        .u16(0)
+        .u16(static_cast<uint16_t>(fit::Manufacturer::Una))
+        .u16(static_cast<uint16_t>(fit::Product::UnaWatch))
         .u32(0)
         .u32(unixToFitTimestamp(info.timestamp))
+        .str(fit::kProductName, productNameLen)
         .write();
 
     // developer_data_id
@@ -104,7 +108,6 @@ void ActivityWriter::start(const AppInfo& info)
          fit::field::Lap::TotalElapsedTime, fit::field::Lap::TotalTimerTime,
          fit::field::Lap::TotalDistance, fit::field::Lap::MessageIndex,
          fit::field::Lap::AvgSpeed, fit::field::Lap::MaxSpeed,
-         fit::field::Lap::TotalAscent, fit::field::Lap::TotalDescent,
          fit::field::Lap::AvgHeartRate, fit::field::Lap::MaxHeartRate,
          fit::field::Lap::WktStepIndex});
     mFit->defineMessage(L_SESSION, fit::mesgNum(fit::MesgNum::Session),
@@ -112,7 +115,6 @@ void ActivityWriter::start(const AppInfo& info)
          fit::field::Session::TotalElapsedTime, fit::field::Session::TotalTimerTime,
          fit::field::Session::TotalDistance, fit::field::Session::MessageIndex,
          fit::field::Session::AvgSpeed, fit::field::Session::MaxSpeed,
-         fit::field::Session::TotalAscent, fit::field::Session::TotalDescent,
          fit::field::Session::NumLaps, fit::field::Session::Sport,
          fit::field::Session::SubSport, fit::field::Session::AvgHeartRate,
          fit::field::Session::MaxHeartRate},
@@ -266,8 +268,6 @@ void ActivityWriter::addLap(const LapData& lap)
         .u16(0)  // message_index
         .u16(static_cast<uint16_t>(lap.speedAvg * 1000))
         .u16(static_cast<uint16_t>(lap.speedMax * 1000))
-        .u16(static_cast<uint16_t>(lap.ascent))
-        .u16(static_cast<uint16_t>(lap.descent))
         .u8(static_cast<uint8_t>(lap.hrAvg))
         .u8(static_cast<uint8_t>(lap.hrMax))
         .u16(lap.wktStepIndex)
@@ -337,8 +337,6 @@ bool ActivityWriter::stop(const TrackData& track)
         .u16(0)  // message_index
         .u16(static_cast<uint16_t>(track.speedAvg * 1000))
         .u16(static_cast<uint16_t>(track.speedMax * 1000))
-        .u16(static_cast<uint16_t>(track.ascent))
-        .u16(static_cast<uint16_t>(track.descent))
         .u16(mLapCounter)
         .u8(static_cast<uint8_t>(fit::Sport::Running))
         .u8(static_cast<uint8_t>(fit::SubSport::Treadmill))  // indoor treadmill run (§7.3)

@@ -693,10 +693,11 @@ Files are named: `activity_YYYYMMDDTHHMMSS.fit`
 
 **Fields** (`field::FileId::*`, `MesgNum::FileId`):
 - `type`: `Sport`/`File::Activity` (4)
-- `manufacturer`: `Manufacturer::Development` (255)
-- `product`: 0 (development product)
+- `manufacturer`: `Manufacturer::Una` (351)
+- `product`: `Product::UnaWatch` (1)
 - `serial_number`: 0
 - `time_created`: FIT timestamp of activity start
+- `product_name`: `"UNA Watch"` (string, field 8)
 
 ### Developer Data ID Message
 **Purpose**: Registers developer and app for custom fields.
@@ -786,10 +787,11 @@ battery level/voltage on the battery record variants).
 - **Purpose**: Identifies the file type and creator.
 - **Fields** (`field::FileId::*`):
   - `type`: `File::Activity`
-  - `manufacturer`: `Manufacturer::Development`
-  - `product`: 0
+  - `manufacturer`: `Manufacturer::Una`
+  - `product`: `Product::UnaWatch`
   - `serial_number`: 0
   - `time_created`: Unix timestamp converted to FIT time
+  - `product_name`: `"UNA Watch"`
 
 ### Developer Data ID Message
 - **Purpose**: Registers the developer and app for custom fields.
@@ -1207,16 +1209,20 @@ void ActivityWriter::start(const AppInfo& info)
     mFit->begin(/*profileVersion=*/0);
 
     // 2. file_id: define, then write one data record.
+    const uint8_t productNameLen =
+        static_cast<uint8_t>(std::strlen(fit::kProductName) + 1);
     mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
         {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
          fit::field::FileId::Product, fit::field::FileId::SerialNumber,
-         fit::field::FileId::TimeCreated});
+         fit::field::FileId::TimeCreated,
+         {fit::field::FileId::kProductNameNum, fit::BaseType::String, productNameLen}});
     mFit->data(L_FILE_ID)
         .u8(static_cast<uint8_t>(fit::File::Activity))
-        .u16(static_cast<uint16_t>(fit::Manufacturer::Development))
-        .u16(0)  // product
+        .u16(static_cast<uint16_t>(fit::Manufacturer::Una))
+        .u16(static_cast<uint16_t>(fit::Product::UnaWatch))  // product
         .u32(0)  // serial_number
         .u32(unixToFitTimestamp(info.timestamp))
+        .str(fit::kProductName, productNameLen)  // product_name
         .write();
 
     // 3. developer_data_id: registers the app for custom fields.

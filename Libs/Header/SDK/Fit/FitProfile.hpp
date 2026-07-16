@@ -51,7 +51,14 @@ enum class Event : uint8_t { Timer = 0 };
 enum class EventType : uint8_t { Start = 0, Stop = 1 };
 enum class ActivityType : uint8_t { Manual = 0, AutoMultiSport = 1 };
 enum class Intensity : uint8_t { Active = 0, Rest = 1, Warmup = 2, Cooldown = 3, Invalid = 0xFF };
-enum class Manufacturer : uint16_t { Development = 255 };
+// 255 (Development) is the reserved value for apps without an allocated
+// manufacturer ID; use it in tutorial/example code. 351 is Una's ID,
+// allocated by Garmin for the FIT SDK — ship activity files with it.
+enum class Manufacturer : uint16_t { Development = 255, Una = 351 };
+// Product IDs are Una-scoped (not allocated by Garmin); assign our own.
+enum class Product : uint16_t { UnaWatch = 1 };
+// Human-readable product name written to file_id.product_name.
+constexpr char kProductName[] = "UNA Watch";
 enum class WktStepDuration : uint8_t {
     Time = 0, Distance = 1, Open = 5, RepeatUntilStepsComplete = 6,
 };
@@ -73,6 +80,7 @@ namespace FileId {
     constexpr FitWriter::Field Product{2, BaseType::UInt16};
     constexpr FitWriter::Field SerialNumber{3, BaseType::UInt32z};
     constexpr FitWriter::Field TimeCreated{4, BaseType::UInt32};  // date_time
+    constexpr uint8_t          kProductNameNum = 8;  // string, size set by caller
 }
 
 namespace Event {
