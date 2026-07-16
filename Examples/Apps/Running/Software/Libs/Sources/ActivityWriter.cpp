@@ -57,16 +57,20 @@ void ActivityWriter::start(const AppInfo& info)
     }
 
     // file_id
+    const uint8_t productNameLen =
+        static_cast<uint8_t>(std::strlen(fit::kProductName) + 1);
     mFit->defineMessage(L_FILE_ID, fit::mesgNum(fit::MesgNum::FileId),
         {fit::field::FileId::Type, fit::field::FileId::Manufacturer,
          fit::field::FileId::Product, fit::field::FileId::SerialNumber,
-         fit::field::FileId::TimeCreated});
+         fit::field::FileId::TimeCreated,
+         {fit::field::FileId::kProductNameNum, fit::BaseType::String, productNameLen}});
     mFit->data(L_FILE_ID)
         .u8(static_cast<uint8_t>(fit::File::Activity))
-        .u16(static_cast<uint16_t>(fit::Manufacturer::Development))
-        .u16(0)
+        .u16(static_cast<uint16_t>(fit::Manufacturer::Una))
+        .u16(static_cast<uint16_t>(fit::Product::UnaWatch))
         .u32(0)
         .u32(unixToFitTimestamp(info.timestamp))
+        .str(fit::kProductName, productNameLen)
         .write();
 
     // developer_data_id

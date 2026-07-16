@@ -53,6 +53,7 @@ TEST(FitProfile, EnumValues)
     EXPECT_EQ(static_cast<uint8_t>(fit::EventType::Stop), 1);
     EXPECT_EQ(static_cast<uint8_t>(fit::File::Activity), 4);
     EXPECT_EQ(static_cast<uint16_t>(fit::Manufacturer::Development), 255);
+    EXPECT_EQ(static_cast<uint16_t>(fit::Manufacturer::Una), 351);
     EXPECT_EQ(static_cast<uint8_t>(fit::WktStepDuration::Open), 5);
 }
 

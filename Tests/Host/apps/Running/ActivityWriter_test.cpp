@@ -110,7 +110,13 @@ TEST(RunningActivityWriter, ProducesValidFitFile)
     EXPECT_TRUE(r.ok()) << "records parse cleanly";
     EXPECT_TRUE(r.crcValid()) << "file CRC verifies";
 
-    EXPECT_EQ(r.withGlobal(fit::mesgNum(fit::MesgNum::FileId)).size(), 1u);
+    const auto fileIds = r.withGlobal(fit::mesgNum(fit::MesgNum::FileId));
+    ASSERT_EQ(fileIds.size(), 1u);
+    EXPECT_EQ(fileIds[0]->fields.at(1).u(), 351u);  // manufacturer = Una
+    EXPECT_EQ(fileIds[0]->fields.at(2).u(), 1u);    // product = UnaWatch
+    EXPECT_EQ(                                       // product_name (null-terminated string)
+        std::string(reinterpret_cast<const char*>(fileIds[0]->fields.at(8).raw.data())),
+        "UNA Watch");
     EXPECT_EQ(r.withGlobal(fit::mesgNum(fit::MesgNum::Event)).size(), 1u);  // start only
     EXPECT_EQ(r.withGlobal(fit::mesgNum(fit::MesgNum::Record)).size(), 3u);
     EXPECT_EQ(r.withGlobal(fit::mesgNum(fit::MesgNum::Lap)).size(), 1u);
