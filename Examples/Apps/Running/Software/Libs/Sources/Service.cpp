@@ -917,24 +917,22 @@ void Service::processTrack()
         }
 
         if (switchLap) {
-            saveLap(autoLapDistanceM);
-
             // A distance auto-lap is recorded at exactly the target distance,
-            // with the overshoot carried into the next lap. Refresh the lap
-            // fields the lap-alert popup reads from the just-recorded lap so its
-            // pace is computed over that same grid distance -- the live snapshot
-            // pushed earlier this tick holds the small overshoot, whose pace
-            // would disagree with the lap's whole-second duration.
-            if (autoLapDistanceM > 0.0f && !mSummary.laps.empty()) {
-                const LapSummary& saved = mSummary.laps.back();
-                mTrackData.lapTime     = saved.duration;
-                mTrackData.lapDistance = saved.distance;
-                mTrackData.avgLapSpeed = speedFromTotals(saved.distance,
-                                                         static_cast<float>(saved.duration));
+            // with the overshoot carried into the next lap. Before saveLap()
+            // (which increments lapNum and resets the lap counters), refresh the
+            // lap fields the lap-alert popup reads so its pace is computed over
+            // that same grid distance -- the live snapshot pushed earlier this
+            // tick holds the small overshoot, whose pace would disagree with the
+            // lap's whole-second duration. lapTime is still the completed lap's.
+            if (autoLapDistanceM > 0.0f) {
+                mTrackData.lapDistance = autoLapDistanceM;
+                mTrackData.avgLapSpeed = speedFromTotals(autoLapDistanceM,
+                                                         static_cast<float>(mTrackData.lapTime));
                 mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, mSpeedCounter.getMinValid());
                 mGuiSender.trackData(mTrackData);
             }
 
+            saveLap(autoLapDistanceM);
             mGuiSender.lapEnd(mTrackData.lapNum);
             notifyLapEnd();
         }
