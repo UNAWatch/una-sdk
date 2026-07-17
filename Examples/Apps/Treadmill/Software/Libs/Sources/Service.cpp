@@ -879,6 +879,23 @@ void Service::processTrack()
 
         if (switchLap) {
             saveLap(autoLapDistanceM);
+
+            // A distance auto-lap is recorded at exactly the target distance,
+            // with the overshoot carried into the next lap. Refresh the lap
+            // fields the lap-alert popup reads from the just-recorded lap so its
+            // speed is computed over that same grid distance -- the live snapshot
+            // pushed earlier this tick holds the small overshoot, whose speed
+            // would disagree with the lap's whole-second duration.
+            if (autoLapDistanceM > 0.0f && !mSummary.laps.empty()) {
+                const LapSummary& saved = mSummary.laps.back();
+                mTrackData.lapTime     = saved.duration;
+                mTrackData.lapDistance = saved.distance;
+                mTrackData.avgLapSpeed = speedFromTotals(saved.distance,
+                                                         static_cast<float>(saved.duration));
+                mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, mSpeedCounter.getMinValid());
+                mGuiSender.trackData(mTrackData);
+            }
+
             mGuiSender.lapEnd(mTrackData.lapNum);
             notifyLapEnd();
         }

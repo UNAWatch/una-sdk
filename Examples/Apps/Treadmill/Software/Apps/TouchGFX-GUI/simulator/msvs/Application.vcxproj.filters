@@ -717,6 +717,9 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\RecordingMarker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
       <Filter>Source Files\TouchGFX\platform\driver\touch</Filter>
     </ClCompile>
