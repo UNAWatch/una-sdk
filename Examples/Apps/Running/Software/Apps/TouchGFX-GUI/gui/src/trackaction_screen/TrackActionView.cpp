@@ -147,7 +147,8 @@ void TrackActionView::onCarouselUpdate(int16_t index)
             if (mAvgPaceConv < App::Display::kMinPace) {
                 Unicode::snprintf(buf, kBufSize, "---");
             } else {
-                auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(mAvgPaceConv));
+                // Round to the nearest second (consistent with the lap pace displays).
+                auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(mAvgPaceConv + 0.5f));
                 if (hms.h > 0) {
                     Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.h, hms.m);
                 } else {

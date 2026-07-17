@@ -100,7 +100,8 @@ void TrackFaceIntervals::setPace(float pace)
     if (pace < App::Display::kMinPace) {
         Unicode::snprintf(paceTextBuffer, PACETEXT_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace));
+        // Round to the nearest second (consistent with the lap pace displays).
+        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace + 0.5f));
         if (hms.h > 0) {
             Unicode::snprintf(paceTextBuffer, PACETEXT_SIZE, "%u:%02u", hms.h, hms.m);
         } else {
