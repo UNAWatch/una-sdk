@@ -94,10 +94,12 @@ void SummaryFaceLaps::scrollListUpdateItem(LapListItem& item, int16_t itemIndex)
     const float km   = lap.distance / 1000.0f;
     const float dist = mIsImperial ? SDK::Utils::kmToMiles(km) : km;
 
-    const float   secPerKm = (lap.paceAvg > 1e-6f) ? lap.paceAvg * 1000.0f : 0.0f;
-    const time_t  pace     = (secPerKm > 0.0f)
-        ? static_cast<time_t>(mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm)
-        : 0;
+    const float   secPerKm  = (lap.paceAvg > 1e-6f) ? lap.paceAvg * 1000.0f : 0.0f;
+    const float   paceUnits = mIsImperial ? secPerKm / SDK::Utils::kmToMiles(1.0f) : secPerKm;
+    // Round to the nearest second so a grid-aligned lap's pace matches its
+    // displayed whole-second duration (pace is a float speed round-trip that
+    // lands a hair below the exact value; truncating would drop a second).
+    const time_t  pace      = (secPerKm > 0.0f) ? static_cast<time_t>(paceUnits + 0.5f) : 0;
 
     touchgfx::Unicode::UnicodeChar buf[32];
 

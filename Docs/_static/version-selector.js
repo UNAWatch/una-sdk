@@ -1,34 +1,30 @@
-// Version selector for Sphinx documentation on GitHub Pages
-// Fetches GitHub tags and creates a dropdown in the navigation
+// Version selector for the Sphinx docs.
+//
+// Reads /versions.json (written at deploy time by .github/workflows/docs.yml),
+// so the dropdown lists exactly the versions that are actually published — every
+// entry links to a real page, never a 404. Docs are served at
+// <site>/<version>/..., so the first path segment is the current version.
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Assuming the repo is una-watch/una-sdk, adjust if needed
-    const repoOwner = 'una-watch';
-    const repoName = 'una-sdk';
-    const baseUrl = `https://${repoOwner}.github.io/${repoName}/`;
-
-    // Create the selector element
+document.addEventListener('DOMContentLoaded', function () {
     const selector = document.createElement('select');
     selector.id = 'version-selector';
     selector.style.cssText = `
-    display: block;
-    margin: 8px auto 12px;
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: var(--white, #fff);
-    color: #333;
-    cursor: pointer;
+        display: block;
+        margin: 8px auto 12px;
+        padding: 5px 10px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: var(--white, #fff);
+        color: #333;
+        cursor: pointer;
     `;
 
+    const loading = document.createElement('option');
+    loading.textContent = 'Loading versions…';
+    selector.appendChild(loading);
 
-    // Add loading option
-    const loadingOption = document.createElement('option');
-    loadingOption.textContent = 'Loading versions...';
-    selector.appendChild(loadingOption);
-
-    // Insert below the header title in the sidebar search area
+    // Insert below the header title in the RTD sidebar search area.
     const searchArea = document.querySelector('.wy-side-nav-search');
     const searchContainer = searchArea ? searchArea.querySelector('[role="search"]') : null;
     if (searchArea && searchContainer) {
@@ -36,47 +32,36 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (searchArea) {
         searchArea.appendChild(selector);
     } else {
-        const nav = document.querySelector('.wy-nav-side') || document.querySelector('nav') || document.body;
-        nav.appendChild(selector);
+        (document.querySelector('.wy-nav-side') || document.querySelector('nav') || document.body).appendChild(selector);
     }
 
-    // Fetch tags from GitHub API
-    fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/tags`)
-        .then(response => response.json())
-        .then(tags => {
-            // Clear loading option
+    // Current version = first non-empty path segment (e.g. /sdk-v1.2.0/… -> sdk-v1.2.0).
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const current = segments.length ? segments[0] : '';
+
+    // versions.json lives at the site root, regardless of custom domain.
+    fetch('/versions.json', { cache: 'no-store' })
+        .then(r => { if (!r.ok) throw new Error('versions.json ' + r.status); return r.json(); })
+        .then(data => {
+            const versions = Array.isArray(data.versions) ? data.versions : [];
             selector.innerHTML = '';
-
-            // Add current version option
-            const currentOption = document.createElement('option');
-            currentOption.textContent = 'latest';
-            currentOption.value = baseUrl;
-            selector.appendChild(currentOption);
-
-            // Add tag options
-            tags.forEach(tag => {
-                const option = document.createElement('option');
-                option.textContent = tag.name;
-                option.value = `${baseUrl}${tag.name}/`;
-                selector.appendChild(option);
+            versions.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = '/' + v + '/';
+                opt.textContent = (v === data.latest) ? (v + ' (latest)') : v;
+                if (v === current) opt.selected = true;
+                selector.appendChild(opt);
             });
-
-            // Set current version based on URL
-            const currentPath = window.location.pathname;
-            const versionMatch = currentPath.match(/\/([^\/]+)\//);
-            if (versionMatch) {
-                selector.value = `${baseUrl}${versionMatch[1]}/`;
-            } else {
-                selector.value = baseUrl;
+            if (!versions.length) {
+                selector.innerHTML = '<option>No versions published</option>';
+                return;
             }
-
-            // Handle change
-            selector.addEventListener('change', function() {
+            selector.addEventListener('change', function () {
                 window.location.href = this.value;
             });
         })
-        .catch(error => {
-            console.error('Failed to load versions:', error);
-            selector.innerHTML = '<option>Error loading versions</option>';
+        .catch(err => {
+            console.error('version-selector: failed to load versions.json', err);
+            selector.innerHTML = '<option>Versions unavailable</option>';
         });
 });

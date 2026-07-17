@@ -736,6 +736,21 @@ void Service::processTrack()
         }
 
         if (switchLap) {
+            // A distance auto-lap is recorded at exactly the target distance,
+            // with the overshoot carried into the next lap. Before saveLap()
+            // (which increments lapNum and resets the lap counters), refresh the
+            // lap fields the lap-alert popup reads so its speed is computed over
+            // that same grid distance -- the live snapshot pushed earlier this
+            // tick holds the small overshoot, whose speed would disagree with the
+            // lap's whole-second duration. lapTime is still the completed lap's.
+            if (autoLapDistanceM > 0.0f) {
+                mTrackData.lapDistance = autoLapDistanceM;
+                mTrackData.avgLapSpeed = speedFromTotals(autoLapDistanceM,
+                                                         static_cast<float>(mTrackData.lapTime));
+                mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, mSpeedCounter.getMinValid());
+                mGuiSender.trackData(mTrackData);
+            }
+
             saveLap(autoLapDistanceM);
             mGuiSender.lapEnd(mTrackData.lapNum);
             notifyLapEnd();
@@ -820,7 +835,7 @@ void Service::buildPartialSummary()
     mSummary.time      = mTimeCounter.getValueActive();
     mSummary.distance  = mDistanceCounter.getValueActive();
     mSummary.speedAvg  = speedFromTotals(mSummary.distance, mSummary.time);
-    mSummary.elevation = mAltitudeCounter.getCurrent();
+    mSummary.elevation = mAltitudeCounter.getAscent();
     mSummary.paceAvg   = getPace(mSummary.speedAvg, mSpeedCounter.getMinValid());
     mSummary.hrMax     = mHrCounter.getMaximum();
     mSummary.hrAvg     = mHrCounter.getAverage();

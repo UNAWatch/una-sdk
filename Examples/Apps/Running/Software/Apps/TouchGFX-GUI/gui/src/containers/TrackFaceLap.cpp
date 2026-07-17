@@ -29,7 +29,9 @@ void TrackFaceLap::setPace(float pace)
     if (pace < App::Display::kMinPace) {
         Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace));
+        // Round to the nearest second (matches the lap-alert popup / summary
+        // pace; truncating would read a second low for the same grid lap).
+        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace + 0.5f));
         if (hms.h > 0) {
             Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
         } else {

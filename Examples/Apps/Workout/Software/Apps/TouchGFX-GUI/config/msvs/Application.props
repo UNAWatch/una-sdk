@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros">
     <UseBPP>8</UseBPP>
     <TouchGFXReleasePath>..\..\..\..\..\..\..\..\ThirdParty\touchgfx</TouchGFXReleasePath>
-    <TouchGFXEnvPath>..\..\..\..\..\..\..\..\..\..\..\..\TouchGFX\4.26.1\env</TouchGFXEnvPath>
+    <TouchGFXEnvPath Condition="'$(TouchGFXEnvPath)'==''">C:\TouchGFX\4.26.1\env</TouchGFXEnvPath>
     <ApplicationRoot>..\..</ApplicationRoot>
   </PropertyGroup>
   <PropertyGroup/>

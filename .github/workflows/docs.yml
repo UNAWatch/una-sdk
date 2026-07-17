@@ -1,131 +1,189 @@
 name: Documentation
 
+# Multi-version docs. Each released tag (sdk-v*) is published to its own
+# subdirectory on the `gh-pages` branch and PRESERVED across deploys; the site
+# root redirects to the latest released version. `main` publishes to /preview/
+# (never the default). PRs build only, to validate.
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
     tags: [ 'sdk-v*' ]
-    paths:
-      - 'Docs/**'
-      - '.github/workflows/docs.yml'
   pull_request:
     paths:
       - 'Docs/**'
       - '.github/workflows/docs.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Slot to (re)build when dispatched on a branch (ignored on a tag ref, which uses the tag name). Use to rebuild "preview".'
+        required: false
+        default: 'preview'
+      build_ref:
+        description: 'Git ref to build docs from (e.g. sdk-v1.2.0). Slot is derived from it. Blank = use the triggering ref.'
+        required: false
+        default: ''
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
+# NOTE: with a shared group and cancel-in-progress off, GitHub keeps only the
+# newest QUEUED run per group — a run superseded while queued never publishes
+# its version. Re-dispatch the workflow (with build_ref) to recover that slot.
 concurrency:
-  group: "pages"
+  group: "docs-pages"
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      slot: ${{ steps.slot.outputs.slot }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        submodules: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.build_ref || github.ref }}
+          submodules: false
+          persist-credentials: false
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Determine version slot
+        id: slot
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          INPUT_BUILD_REF: ${{ github.event.inputs.build_ref }}
+        run: |
+          if [ -n "${INPUT_BUILD_REF}" ]; then
+            slot="${INPUT_BUILD_REF}"                       # explicit ref to (re)build -> its own slot
+          elif [[ "${GITHUB_REF}" == refs/tags/sdk-v* ]]; then
+            slot="${GITHUB_REF_NAME}"                       # a release tag -> its own version dir
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            slot="${INPUT_VERSION}"                         # manual rebuild on a branch
+          else
+            slot="preview"                                  # main / PR -> preview, never the root default
+          fi
+          # Allow-list the slot: it is used as a directory name and in rm -rf.
+          if [[ ! "${slot}" =~ ^(preview|sdk-v[A-Za-z0-9._-]+)$ ]]; then
+            echo "::error::Invalid/unsafe slot: '${slot}'"; exit 1
+          fi
+          echo "slot=${slot}" >> "$GITHUB_OUTPUT"
+          echo "Building docs slot: ${slot}"
 
-    - name: Install dependencies
-      run: pip install -r Docs/requirements.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-    - name: Install Doxygen and Graphviz
-      run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
+      - name: Install dependencies
+        run: pip install -r Docs/requirements.txt
 
-    - name: Generate API Docs
-      run: |
-        mkdir -p Docs/_build/doxygen
-        cd Docs && doxygen Doxyfile
+      - name: Install Doxygen and Graphviz
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
-    - name: Generate version selector
-      run: |
-        TAGS_JSON=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${{ github.repository }}/tags)
-        TAGS=$(echo "$TAGS_JSON" | jq -r '.[].name' 2>/dev/null | sed 's/.*/"&"/' | tr '\n' ',' | sed 's/,$//')
-        if [ -z "$TAGS" ]; then
-          TAGS='"v1.0","v2.0"'
-        fi
-        cat > Docs/_static/version-selector.js << EOF
-        // Version selector for Sphinx documentation
-        document.addEventListener('DOMContentLoaded', function() {
-            const baseUrl = window.location.origin + '/';
-            const versions = ['latest', $TAGS];
-            // Create the selector
-            const selector = document.createElement('select');
-            selector.id = 'version-selector';
-            selector.style.cssText = \`
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                z-index: 1000;
-                padding: 5px;
-                font-size: 14px;
-            \`;
-            // Add options
-            versions.forEach(version => {
-                const option = document.createElement('option');
-                option.textContent = version;
-                option.value = baseUrl + version + '/';
-                selector.appendChild(option);
-            });
-            // Insert
-            const nav = document.querySelector('.wy-nav-side') || document.querySelector('nav') || document.body;
-            nav.appendChild(selector);
-            // Set current
-            const currentPath = window.location.pathname;
-            const currentVersion = versions.find(v => currentPath.includes('/' + v + '/'));
-            if (currentVersion) {
-                selector.value = baseUrl + currentVersion + '/';
-            } else {
-                selector.value = baseUrl + 'latest/';
-            }
-            // Handle change
-            selector.addEventListener('change', function() {
-                window.location.href = this.value;
-            });
-        });
-        EOF
+      - name: Generate API docs (doxygen)
+        run: |
+          mkdir -p Docs/_build/doxygen
+          cd Docs && doxygen Doxyfile
 
-    - name: Set version
-      run: |
-        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-          VERSION="latest"
-        elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          VERSION="${{ github.ref_name }}"
-        else
-          VERSION="${{ github.ref_name }}"
-        fi
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Build HTML
+        run: sphinx-build Docs _build/html
 
-    - name: Build documentation
-      run: sphinx-build Docs _site/$VERSION
-
-    - name: Add redirect for main page
-      if: github.ref == 'refs/heads/main'
-      run: |
-        echo '<html><head><meta http-equiv="refresh" content="0; url=latest/" /></head><body></body></html>' > _site/index.html
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: './_site'
+      - name: Upload built HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-html
+          path: _build/html
 
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    # PRs run `build` only (validation); never publish from a PR.
+    if: github.event_name != 'pull_request'
     needs: build
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write            # push to the gh-pages serve branch
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      # Gate the gh-pages checkout on branch existence rather than masking
+      # failures: a transient checkout error followed by the publish step would
+      # otherwise silently wipe every previously published version.
+      - name: Check if gh-pages exists
+        id: ghp
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}.git" gh-pages >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out existing published site (gh-pages)
+        if: steps.ghp.outputs.exists == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+          persist-credentials: false
+
+      - name: Prepare site tree
+        run: |
+          mkdir -p site                # first ever run: gh-pages does not exist yet
+          rm -rf site/.git             # never publish the checkout's git metadata
+
+      - name: Download freshly built HTML
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-html
+          path: docs-html
+
+      - name: Assemble multi-version site (preserve all prior versions)
+        env:
+          SLOT: ${{ needs.build.outputs.slot }}
+        run: |
+          set -euo pipefail
+          # Defense in depth: never rm -rf with an unvalidated slot name.
+          [[ "${SLOT}" =~ ^(preview|sdk-v[A-Za-z0-9._-]+)$ ]] || { echo "::error::bad SLOT"; exit 1; }
+          # Replace ONLY this version's subdir; every other version is left intact.
+          rm -rf "site/${SLOT}"
+          mkdir -p "site/${SLOT}"
+          cp -a docs-html/. "site/${SLOT}/"
+
+          # Latest RELEASED version = highest final-release-shaped sdk-v* dir
+          # (preview and RC/pre-release dirs never win the root).
+          latest="$(ls -1 site | { grep -E '^sdk-v[0-9]+(\.[0-9]+)*$' || true; } | sort -V | tail -1)"
+          if [ -n "${latest}" ]; then
+            printf '<!doctype html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./%s/">\n<title>Una SDK Documentation</title>\n<a href="./%s/">Una SDK Documentation</a>\n' "${latest}" "${latest}" > site/index.html
+          elif [ -d "site/preview" ]; then
+            # No released version published yet: fall back to /preview/ so the
+            # site root never 404s regardless of publish order.
+            printf '<!doctype html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./preview/">\n<title>Una SDK Documentation</title>\n<a href="./preview/">Una SDK Documentation</a>\n' > site/index.html
+          fi
+
+          # /latest/ = a full copy of the current release, refreshed every deploy
+          # so external deep links (e.g. /latest/sdk-setup.html) always resolve to
+          # the newest release. Relative links keep the copy self-contained.
+          if [ -n "${latest}" ]; then
+            rm -rf site/latest
+            cp -a "site/${latest}/." site/latest/
+          fi
+
+          # Version manifest consumed at runtime by _static/version-selector.js.
+          {
+            printf '{\n  "latest": "%s",\n  "versions": [\n' "${latest:-}"
+            first=1
+            for d in $(ls -1 site | { grep -E '^(sdk-v|preview$)' || true; } | sort -Vr); do
+              if [ $first -eq 1 ]; then first=0; else printf ',\n'; fi
+              printf '    "%s"' "$d"
+            done
+            printf '\n  ]\n}\n'
+          } > site/versions.json
+
+          # Custom domain + disable Jekyll processing of Sphinx output.
+          echo "www.developers.unawatch.com" > site/CNAME
+          touch site/.nojekyll
+          echo "Assembled versions:"; ls -1 site | grep -E '^(sdk-v|preview)' || true
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          force_orphan: false      # keep gh-pages history so a destructive publish can be reverted
+          cname: www.developers.unawatch.com
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: "docs: publish ${{ needs.build.outputs.slot }} (${{ github.sha }})"

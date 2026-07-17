@@ -600,6 +600,12 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
     fitRecord.speed        = mSpeedCounter.getCurrent();
 
+    // Cumulative active distance (live uncorrected estimate, same source as the
+    // session total pre-calibration). Monotonic and always valid while recording,
+    // so it is written unconditionally.
+    fitRecord.set(ActivityWriter::RecordData::Field::DISTANCE, true);
+    fitRecord.distance     = mDistanceCounter.getValueActive();
+
     bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
     fitRecord.heartRate    = mHrCounter.getCurrent();
@@ -872,6 +878,21 @@ void Service::processTrack()
         }
 
         if (switchLap) {
+            // A distance auto-lap is recorded at exactly the target distance,
+            // with the overshoot carried into the next lap. Before saveLap()
+            // (which increments lapNum and resets the lap counters), refresh the
+            // lap fields the lap-alert popup reads so its speed is computed over
+            // that same grid distance -- the live snapshot pushed earlier this
+            // tick holds the small overshoot, whose speed would disagree with the
+            // lap's whole-second duration. lapTime is still the completed lap's.
+            if (autoLapDistanceM > 0.0f) {
+                mTrackData.lapDistance = autoLapDistanceM;
+                mTrackData.avgLapSpeed = speedFromTotals(autoLapDistanceM,
+                                                         static_cast<float>(mTrackData.lapTime));
+                mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, mSpeedCounter.getMinValid());
+                mGuiSender.trackData(mTrackData);
+            }
+
             saveLap(autoLapDistanceM);
             mGuiSender.lapEnd(mTrackData.lapNum);
             notifyLapEnd();

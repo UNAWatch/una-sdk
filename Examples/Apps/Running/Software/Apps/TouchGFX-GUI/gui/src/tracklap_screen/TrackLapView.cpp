@@ -57,7 +57,10 @@ void TrackLapView::setPace(float secPerM)
     if (value < App::Display::kMinPace) {
         Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "---");
     } else {
-        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(value));
+        // Round to the nearest second so a grid-aligned lap's pace matches its
+        // displayed whole-second duration (pace is a float speed round-trip that
+        // lands a hair below the exact value; truncating would drop a second).
+        auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(value + 0.5f));
         if (hms.h > 0) {
             Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
         } else {
