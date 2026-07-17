@@ -188,12 +188,14 @@ static_assert(sizeof(RequestBatteryStatus) == 44, "RequestBatteryStatus size mus
 #endif
 
 /**
- * @brief Time-of-day display format
+ * @brief Time-of-day display format.
+ *
+ * Note: mixes two axes -- 12h/24h and, for 24h, ISO-8601 extended vs basic.
  */
 enum class TimeFormat : uint8_t {
-    Hour24   = 0,  // 17:42 (default)
-    Hour12   = 1,  // 5:42
-    Military = 2,  // 1742
+    Hour24        = 0,  // 17:42 (default; ISO-8601 extended)
+    Hour12        = 1,  // 5:42
+    Hour24Compact = 2,  // 1742  (ISO-8601 basic)
 };
 
 /**

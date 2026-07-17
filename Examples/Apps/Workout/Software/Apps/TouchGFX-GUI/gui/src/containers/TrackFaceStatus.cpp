@@ -1,5 +1,6 @@
 #include <gui/containers/TrackFaceStatus.hpp>
 #include <images/BitmapDatabase.hpp>
+#include <SDK/Utils/TimeFormat.hpp>
 
 TrackFaceStatus::TrackFaceStatus()
 {
@@ -18,19 +19,9 @@ void TrackFaceStatus::initialize()
 
 void TrackFaceStatus::setTime(uint8_t h, uint8_t m, SDK::Message::TimeFormat format)
 {
-    switch (format) {
-        case SDK::Message::TimeFormat::Hour12: {
-            const uint8_t h12 = (h % 12 == 0) ? 12 : (h % 12);
-            Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%u:%02u", h12, m);
-        } break;
-        case SDK::Message::TimeFormat::Military:
-            Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%02u%02u", h, m);
-            break;
-        case SDK::Message::TimeFormat::Hour24:
-        default:
-            Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%u:%02u", h, m);
-            break;
-    }
+    char text[8];
+    SDK::Utils::formatTimeOfDay(text, sizeof(text), h, m, format);
+    Unicode::strncpy(dayTimeValueBuffer, text, DAYTIMEVALUE_SIZE);
     dayTimeValue.invalidate();
 }
 

@@ -37,6 +37,7 @@ target_include_directories(sdk_host_test_support PUBLIC
 add_executable(una-sdk-host-tests
     apps/Running/Settings_test.cpp
     apps/Running/SettingsSerializer_test.cpp
+    utils/TimeFormat_test.cpp
     calibration/OutdoorStrideCalibrator_test.cpp
     calibration/StrideLut_test.cpp
     calibration/StrideMath_test.cpp
