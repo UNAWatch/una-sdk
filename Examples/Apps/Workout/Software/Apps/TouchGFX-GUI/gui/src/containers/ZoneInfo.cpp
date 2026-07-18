@@ -35,6 +35,14 @@ void ZoneInfo::setRow(uint8_t zoneNumber1to5,
                           static_cast<unsigned>(hms.m),
                           static_cast<unsigned>(hms.s));
     }
+    // The generated base sizes/places zoneTime for a short "M:SS" placeholder,
+    // and the parent container clips children at its right edge, so a wider
+    // H:MM:SS value (a zone time over an hour) would be cut off.  Re-fit the
+    // widget to the current text and right-align it to the row's right edge so
+    // it grows leftward and stays within the container bounds.
+    zoneTime.invalidate();
+    zoneTime.resizeToCurrentText();
+    zoneTime.setX(static_cast<int16_t>(kZoneTimeRightEdgeX - zoneTime.getWidth()));
     zoneTime.invalidate();
 
     const float clampedPct = std::clamp(percent0to100, 0.0f, 100.0f);

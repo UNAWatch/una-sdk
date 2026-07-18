@@ -42,6 +42,10 @@ protected:
     static constexpr int16_t kBarFullEndX = 48;
     /// Bar y coordinate (from generated base).
     static constexpr int16_t kBarY = 10;
+    /// Right edge (local x) the time text is right-aligned to.  Just inside the
+    /// 180-wide container so a wide H:MM:SS grows leftward without being clipped
+    /// by the container bounds; still clears the progress bar (ends near x=120).
+    static constexpr int16_t kZoneTimeRightEdgeX = 179;
 };
 
 #endif // ZONEINFO_HPP
