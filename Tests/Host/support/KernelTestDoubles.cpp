@@ -129,6 +129,13 @@ bool InMemoryFileSystem::InMemoryFile::rename(const char* newPath)
     if (!mFs.rename(mPath.c_str(), newPath)) {
         return false;
     }
+    // Keep the open-handle instrumentation keyed by the handle's current path:
+    // without the migration a rename-while-open leaves the old bucket nonzero
+    // forever and the eventual close() would drain the wrong (new) bucket.
+    if (mOpen) {
+        --mFs.openHandles[mPath];
+        ++mFs.openHandles[newPath];
+    }
     mPath = newPath;
     return true;
 }
