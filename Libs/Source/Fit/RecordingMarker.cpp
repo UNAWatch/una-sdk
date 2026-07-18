@@ -170,6 +170,12 @@ RecordingMarker::RecoverResult RecordingMarker::recover()
 
     auto file = mFs.file(fitPath.c_str());
     if (file && file->exist() && FitWriter::recover(*file, dataEnd)) {
+        // A successful recover() leaves the file open in write mode, and
+        // destroying the handle does NOT close it. Close it here: a leaked
+        // write-mode open pins a FatFs lock-table slot until reboot, making
+        // every later open/rename/delete of the just-recovered activity fail
+        // with FR_LOCKED. (Failed recovers close on every path themselves.)
+        file->close();
         result.recovered = true;
         result.path      = fitPath;
     }

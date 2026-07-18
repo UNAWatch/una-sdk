@@ -128,6 +128,10 @@ public:
     /// records -- it trusts @p dataEnd as a record boundary) and must satisfy
     /// 14 <= dataEnd <= file.size(). Returns false WITHOUT modifying the file on
     /// a bad/non-FIT header or an out-of-range @p dataEnd.
+    ///
+    /// On success @p file is left OPEN in write mode (mirroring finish(), whose
+    /// caller owns and closes the writer's file); the caller must close() it --
+    /// destroying the handle does not. On failure the file is closed.
     static bool recover(SDK::Interface::IFile& file, uint32_t dataEnd);
 
 private:

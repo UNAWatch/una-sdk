@@ -131,6 +131,11 @@ public:
     // -- Test instrumentation -------------------------------------------------
     /// Number of successful flush() calls, keyed by file path.
     std::unordered_map<std::string, size_t> flushCounts;
+    /// Currently-open handle count, keyed by file path: a successful open()
+    /// increments, close() of an open handle decrements. Destroying a handle
+    /// does NOT decrement (mirrors IFile: destructors do not close), so tests
+    /// can assert no handle -- and thus no FatFs lock slot -- is leaked.
+    std::unordered_map<std::string, size_t> openHandles;
     /// Total bytes written across all files (successful writes only).
     size_t bytesWritten = 0;
     /// Once bytesWritten reaches this threshold, subsequent write() calls fail
