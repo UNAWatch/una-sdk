@@ -110,6 +110,9 @@ TEST(RecordingMarker, RecoverFinalizesTornFit)
     EXPECT_TRUE(res.recovered);
     EXPECT_EQ(res.path, fitPath);
     EXPECT_FALSE(fs.exist("Activity/.recording")) << "marker cleared after recovery";
+    EXPECT_EQ(fs.openHandles[fitPath], 0u)
+        << "recovered .fit must be closed (a leaked write handle pins a FatFs "
+           "lock slot until reboot, blocking sync/delete of the activity)";
 
     const std::vector<uint8_t> b = bytesOf(fs, fitPath);
     testfit::FitReader r(b);
@@ -208,6 +211,7 @@ TEST(RecordingMarker, CrashDuringUpdateFallsBackToBak)
     EXPECT_EQ(res.path, fitPath);
     EXPECT_FALSE(fs.exist("Activity/.recording"));
     EXPECT_FALSE(fs.exist("Activity/.recording.bak"));
+    EXPECT_EQ(fs.openHandles[fitPath], 0u) << "recovered .fit must be closed";
 
     const std::vector<uint8_t> b = bytesOf(fs, fitPath);
     testfit::FitReader r(b);

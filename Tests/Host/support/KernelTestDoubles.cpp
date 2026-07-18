@@ -174,6 +174,9 @@ bool InMemoryFileSystem::InMemoryFile::open(bool wMode, bool override)
         }
     }
 
+    if (!mOpen) {
+        ++mFs.openHandles[mPath];
+    }
     mOpen = true;
     mPos = 0;
     return true;
@@ -186,6 +189,9 @@ bool InMemoryFileSystem::InMemoryFile::isOpen() const
 
 bool InMemoryFileSystem::InMemoryFile::close()
 {
+    if (mOpen) {
+        --mFs.openHandles[mPath];
+    }
     mOpen = false;
     return true;
 }
