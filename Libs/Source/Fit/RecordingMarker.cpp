@@ -175,13 +175,21 @@ RecordingMarker::RecoverResult RecordingMarker::recover()
         // write-mode open pins a FatFs lock-table slot until reboot, making
         // every later open/rename/delete of the just-recovered activity fail
         // with FR_LOCKED. (Failed recovers close on every path themselves.)
-        file->close();
+        if (!file->close()) {
+            // f_close can fail on its final sync and then keeps the handle
+            // (and its lock) held. The recovered bytes are already durable,
+            // but the file is unusable this session -- and the kernel only
+            // registers a .fit on a successful close -- so KEEP the marker
+            // and report failure: the next boot retries, which is safe
+            // because recover() is idempotent on an already-finalized file.
+            return result;
+        }
         result.recovered = true;
         result.path      = fitPath;
     }
 
-    // One-shot: always clear the marker (a missing file or failed recover is
-    // given up on cleanly so the next boot does not retry forever).
+    // One-shot otherwise: clear the marker (a missing file or failed recover
+    // is given up on cleanly so the next boot does not retry forever).
     remove();
     return result;
 }

@@ -70,8 +70,12 @@ public:
 
     /// Full recover orchestration: if the marker exists, open the .fit it names
     /// and finalize it via FitWriter::recover(file, offset). The marker is
-    /// ALWAYS removed afterwards (recovery is one-shot; give up cleanly on a
-    /// missing file or a failed recover). Safe to call with no marker present.
+    /// removed afterwards (recovery is one-shot; give up cleanly on a missing
+    /// file or a failed recover) -- EXCEPT when the finalized file's close()
+    /// fails: the bytes are durable but the handle (and its FatFs lock) stays
+    /// held, so the marker is kept and failure reported; the next boot retries
+    /// (FitWriter::recover() is idempotent on an already-finalized file).
+    /// Safe to call with no marker present.
     RecoverResult recover();
 
 private:
