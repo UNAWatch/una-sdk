@@ -3,6 +3,7 @@
 #include <cstdarg>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -145,6 +146,11 @@ public:
     /// creating/touching the entry (simulates a storage error scoped to one file
     /// kind, e.g. the auxiliary ".json" summary). Empty = never fail.
     std::string failWriteOpenSuffix;
+    /// Fault hook: when set, consulted before an open handle's close() with the
+    /// file path; returning false makes that close() fail and leaves the handle
+    /// OPEN (FatFs f_close semantics: a sync failure keeps the FIL valid and
+    /// its lock-table entry held). Unset = closes never fail.
+    std::function<bool(const std::string& path)> closeGate;
 };
 
 struct KernelFixture {

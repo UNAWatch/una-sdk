@@ -189,6 +189,11 @@ bool InMemoryFileSystem::InMemoryFile::isOpen() const
 
 bool InMemoryFileSystem::InMemoryFile::close()
 {
+    // Injected close failure (FatFs f_close semantics: a sync failure keeps
+    // the FIL valid and its lock-table entry held): the handle stays open.
+    if (mOpen && mFs.closeGate && !mFs.closeGate(mPath)) {
+        return false;
+    }
     if (mOpen) {
         --mFs.openHandles[mPath];
     }

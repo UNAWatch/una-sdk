@@ -159,6 +159,58 @@ TEST(RecordingMarker, RecoverBadOffsetGivesUpWithoutClobber)
     EXPECT_EQ(bytesOf(fs, fitPath), before) << "out-of-range offset must not clobber the .fit";
 }
 
+// A close() that fails AFTER a successful FitWriter::recover() (FatFs f_close:
+// a sync failure keeps the FIL valid and its lock held) must NOT report
+// success or consume the marker: the bytes are durable but the file is
+// unusable this session (and the kernel only registers a .fit on a successful
+// close), so recover() defers to a next-boot retry -- safe because
+// FitWriter::recover() is idempotent on an already-finalized file.
+TEST(RecordingMarker, CloseFailureKeepsMarkerForNextBootRetry)
+{
+    InMemoryFileSystem fs;
+    const char* fitPath = "Activity/202606/activity.fit";
+    const uint32_t dataEnd = seedTornFit(fs, fitPath);
+
+    RecordingMarker m(fs, "Activity");
+    ASSERT_TRUE(m.write(fitPath, dataEnd));
+
+    // Fail exactly the post-recover close: every earlier close on the .fit
+    // happens while it is still torn / CRC-less, so gate on the on-disk bytes
+    // already forming a complete, CRC-valid FIT.
+    fs.closeGate = [&fs, fitPath](const std::string& path) {
+        if (path != fitPath) {
+            return true;   // marker/sibling closes are unaffected
+        }
+        const std::vector<uint8_t> b = bytesOf(fs, path);
+        testfit::FitReader r(b);
+        return !(r.ok() && r.crcValid());
+    };
+
+    const auto res = m.recover();
+    EXPECT_FALSE(res.recovered) << "a failed close must not report success";
+    EXPECT_TRUE(res.path.empty());
+    EXPECT_TRUE(fs.exist("Activity/.recording")) << "marker kept for next-boot retry";
+    EXPECT_EQ(fs.openHandles[fitPath], 1u) << "handle (and its lock) still held";
+
+    // The recovered bytes themselves are already durable and finalized.
+    const std::vector<uint8_t> before = bytesOf(fs, fitPath);
+    {
+        testfit::FitReader r(before);
+        EXPECT_TRUE(r.ok());
+        EXPECT_TRUE(r.crcValid());
+    }
+
+    // "Next boot": closes work again; the idempotent re-finalize succeeds,
+    // the marker set is cleared and the bytes are untouched.
+    fs.closeGate = nullptr;
+    RecordingMarker m2(fs, "Activity");
+    const auto res2 = m2.recover();
+    EXPECT_TRUE(res2.recovered);
+    EXPECT_EQ(res2.path, fitPath);
+    EXPECT_FALSE(fs.exist("Activity/.recording"));
+    EXPECT_EQ(bytesOf(fs, fitPath), before) << "retry is an idempotent no-op on the bytes";
+}
+
 // Fix 1: a crash during update() can leave the primary marker torn (empty).
 // read()/recover() must fall back to the .bak (the previous, slightly older but
 // still record-aligned offset) so the fully-flushed .fit is NOT orphaned/lost.
