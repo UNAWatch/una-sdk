@@ -50,6 +50,8 @@ Libs/Source/Simulator/Kernel/Mock/System.cpp\
 ThirdParty/coreJSON/source/core_json.c\
 Libs/Source/JSON/JsonStreamReader.cpp\
 Libs/Source/JSON/JsonStreamWriter.cpp\
+Libs/Source/Fit/FitCrc.cpp\
+Libs/Source/Fit/FitWriter.cpp\
 ADDITIONAL_SOURCES :=
 ADDITIONAL_INCLUDE_PATHS := $(SDK)/Libs/Header\
 ../../Libs/Header\
