@@ -41,6 +41,9 @@ ThirdParty/coreJSON/source/core_json.c\
 Libs/Source/JSON/JsonStreamReader.cpp\
 Libs/Source/JSON/JsonStreamWriter.cpp\
 Libs/Source/Calibration/OutdoorStrideCalibrator.cpp\
+Libs/Source/Calibration/StrideLut.cpp\
+Libs/Source/Calibration/CadenceStrideModel.cpp\
+Libs/Source/Calibration/TreadmillSpeedEstimator.cpp\
 Libs/Source/TrackMap/TrackMapBuilder.cpp\
 Libs/Source/Kernel/KernelBuilder.cpp\
 Libs/Source/Timer/Timer.cpp\
