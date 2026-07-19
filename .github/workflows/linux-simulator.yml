@@ -1,0 +1,182 @@
+name: Linux Simulator (non-gating)
+
+on:
+  pull_request:
+    paths:
+      - 'Libs/**'
+      - 'ThirdParty/**'
+      - 'Examples/Apps/**'
+      - 'Docs/Tutorials/**'
+      - '.github/workflows/linux-simulator.yml'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Libs/**'
+      - 'ThirdParty/**'
+      - 'Examples/Apps/**'
+      - 'Docs/Tutorials/**'
+      - '.github/workflows/linux-simulator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-sim-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    outputs:
+      projects: ${{ steps.pick.outputs.projects }}
+      count: ${{ steps.pick.outputs.count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0            # PR change-detection diffs against the base
+          persist-credentials: false
+
+      - name: Select projects to build
+        id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+
+          # A project is any dir containing simulator/gcc/Makefile.
+          find_projects() {
+            find Examples/Apps Docs/Tutorials -path '*/simulator/gcc/Makefile' 2>/dev/null \
+              | sed 's#/simulator/gcc/Makefile##' | sort
+          }
+          TOTAL="$(find_projects | wc -l | tr -d ' ')"
+          echo "Discovered $TOTAL simulator project(s)."
+
+          # push / dispatch build everything; a PR builds only the projects it
+          # touches, or everything when it touches shared inputs.
+          BUILD_ALL=false
+          case "$EVENT" in
+            push|workflow_dispatch) BUILD_ALL=true ;;
+          esac
+
+          CHANGED=""
+          if [ "$EVENT" = "pull_request" ]; then
+            # Ensure the base commit is present, then diff the PR against it.
+            git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null \
+              || git fetch --no-tags --depth=1 origin "$BASE_SHA" 2>/dev/null || true
+            if git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+              CHANGED="$(git diff --name-only "${BASE_SHA}...HEAD")" || CHANGED=""
+            fi
+
+            if [ -z "$CHANGED" ]; then
+              # Empty on a real PR means detection failed (unresolved base), not
+              # "nothing to build" -- fail safe to a full build rather than skip.
+              echo "::warning::Could not determine changed files for base ${BASE_SHA}; building all projects."
+              BUILD_ALL=true
+            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|\.github/workflows/linux-simulator\.yml)'; then
+              BUILD_ALL=true
+            fi
+          fi
+
+          SEL='[]'
+          while IFS= read -r d; do
+            [ -n "$d" ] || continue
+            name="$(printf '%s' "$d" | cut -d/ -f3)"     # Examples/Apps/<name> or Docs/Tutorials/<name>
+            root="$(printf '%s' "$d" | cut -d/ -f1-3)"   # app/tutorial root (covers its Libs/Sources)
+            take=false
+            if $BUILD_ALL; then
+              take=true
+            elif printf '%s\n' "$CHANGED" | grep -q "^${root}/"; then
+              take=true
+            fi
+            if $take; then
+              slug="$(printf '%s' "$d" | tr '/' '-')"   # unique artifact key (leaf names can collide)
+              SEL="$(printf '%s' "$SEL" | jq -c --arg n "$name" --arg d "$d" --arg s "$slug" '. + [{name:$n, dir:$d, slug:$s}]')"
+            fi
+          done < <(find_projects)
+
+          echo "projects=$SEL" >> "$GITHUB_OUTPUT"
+          echo "count=$(printf '%s' "$SEL" | jq 'length')" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Linux Simulator — selection"
+            echo ""
+            echo "- event: \`$EVENT\`  | build-all: \`$BUILD_ALL\`"
+            echo "- selected $(printf '%s' "$SEL" | jq 'length') of $TOTAL project(s):"
+            printf '%s' "$SEL" | jq -r '.[].dir | "  - `" + . + "`"'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    needs: discover
+    if: needs.discover.outputs.projects != '[]'
+    name: build (${{ matrix.project.name }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.discover.outputs.projects) }}
+    env:
+      APP_DIR: ${{ matrix.project.dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install simulator build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri
+
+      - name: Build simulator
+        id: build
+        run: |
+          cd "$APP_DIR"
+          UNA_SDK="$GITHUB_WORKSPACE" make -f simulator/gcc/Makefile -j"$(nproc)" 2>&1 \
+            | tee "$GITHUB_WORKSPACE/build.log"
+          exit "${PIPESTATUS[0]}"
+
+      - name: Headless smoke run
+        id: smoke
+        if: steps.build.outcome == 'success'
+        run: |
+          cd "$APP_DIR"
+          # Dummy SDL drivers => headless. The sim is a GUI loop that never exits,
+          # so the watchdog reaps it; success = a boot marker, not the exit code.
+          set +e
+          SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+            timeout 20 ./build/bin/simulator.out > "$GITHUB_WORKSPACE/sim.log" 2>&1
+          echo "exit=$?"
+          echo "----- first 30 lines of sim.log -----"; head -30 "$GITHUB_WORKSPACE/sim.log" || true
+          grep -q "GUI is now running" "$GITHUB_WORKSPACE/sim.log" \
+            && echo "BOOT OK" || { echo "BOOT FAILED: marker not found"; exit 1; }
+
+      - name: Write PASS/FAIL summary
+        if: always()
+        run: |
+          b='${{ steps.build.outcome }}'; s='${{ steps.smoke.outcome }}'
+          icon() { [ "$1" = success ] && echo '✅' || { [ "$1" = skipped ] && echo '⏭️' || echo '❌'; }; }
+          {
+            echo "### ${{ matrix.project.name }} — _(informational, non-gating)_"
+            echo "| Stage | Result |"
+            echo "|-------|--------|"
+            echo "| Build | $(icon "$b") \`$b\` |"
+            echo "| Headless boot | $(icon "$s") \`$s\` |"
+            echo ""
+            echo "\`${{ matrix.project.dir }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload logs and binary
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-sim-${{ matrix.project.slug }}
+          path: |
+            build.log
+            sim.log
+            ${{ matrix.project.dir }}/build/bin/simulator.out
+          if-no-files-found: ignore
+          retention-days: 14
