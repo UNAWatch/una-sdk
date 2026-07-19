@@ -77,6 +77,8 @@ Libs/Source/Simulator/Components/SensorDriver.cpp\
 Libs/Source/Fit/FitCrc.cpp\
 Libs/Source/Fit/FitWriter.cpp\
 Libs/Source/Fit/FitRecordCadence.cpp\
+Libs/Source/Fit/RecordingMarker.cpp\
+Libs/Source/Timer/Timer.cpp\
 ../../Libs/Sources/ActivityWriter.cpp\
 ../../Libs/Sources/Service.cpp\
 ADDITIONAL_SOURCES :=
