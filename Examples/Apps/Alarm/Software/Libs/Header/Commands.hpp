@@ -43,10 +43,12 @@ namespace CustomMessage {
     struct AlarmList : public SDK::MessageBase {
         Alarm   alarms[kMaxAlarms];
         uint8_t count;
+        bool    timeFormat12h;   // Service -> GUI: true = 12-hour clock
         AlarmList()
             : SDK::MessageBase(ALARM_LIST)
             , alarms{}
             , count(0)
+            , timeFormat12h(false)
         {}
     };
 
@@ -107,7 +109,10 @@ public:
     virtual ~Sender() = default;
 
     // Service <-> GUI
-    bool listUpd(const std::vector<Alarm> &list)
+    //
+    // timeFormat12h is only meaningful Service -> GUI; the GUI -> Service
+    // direction leaves it at the default (the Service ignores it there).
+    bool listUpd(const std::vector<Alarm> &list, bool timeFormat12h = false)
     {
         bool status = false;
         auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmList>();
@@ -117,6 +122,7 @@ public:
             for (uint8_t i = 0; i < msg->count; ++i) {
                 msg->alarms[i] = list[i];
             }
+            msg->timeFormat12h = timeFormat12h;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

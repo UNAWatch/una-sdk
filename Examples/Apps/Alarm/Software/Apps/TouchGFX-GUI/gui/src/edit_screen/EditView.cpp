@@ -1,11 +1,20 @@
 #include <gui/edit_screen/EditView.hpp>
 #include <gui/common/AlarmLabels.hpp>
+#include <gui/common/TimeFormat.hpp>
+
+// AM/PM labels drawn in the AM/PM wheel and step name (literals avoid adding
+// new TypedTexts; the OptionWheel/messageText fonts already carry the letters).
+static const touchgfx::Unicode::UnicodeChar kAmText[]   = {'A', 'M', 0};
+static const touchgfx::Unicode::UnicodeChar kPmText[]   = {'P', 'M', 0};
+static const touchgfx::Unicode::UnicodeChar kAmPmName[] = {'A', 'M', '/', 'P', 'M', 0};
 
 EditView::EditView() :
     mRepeatItemCb(this,       &EditView::updateRepeatItem),
     mRepeatCenterItemCb(this, &EditView::updateRepeatCenterItem),
     mEffectItemCb(this,       &EditView::updateEffectItem),
-    mEffectCenterItemCb(this, &EditView::updateEffectCenterItem)
+    mEffectCenterItemCb(this, &EditView::updateEffectCenterItem),
+    mAmPmItemCb(this,         &EditView::updateAmPmItem),
+    mAmPmCenterItemCb(this,   &EditView::updateAmPmCenterItem)
 {
 }
 
@@ -29,6 +38,16 @@ void EditView::setupScreen()
     effectMenu.setUpdateCenterItemCallback(mEffectCenterItemCb);
     effectMenu.setNumberOfItems(Alarm::EFFECT_COUNT);
     effectMenu.invalidate();
+
+    // AM/PM wheel: hand-added so it shares the (20,55) slot with the other
+    // wheels without a designer change. Only used in 12-hour mode.
+    mAmPmMenu.initialize();
+    mAmPmMenu.setXY(20, 55);
+    mAmPmMenu.setUpdateItemCallback(mAmPmItemCb);
+    mAmPmMenu.setUpdateCenterItemCallback(mAmPmCenterItemCb);
+    mAmPmMenu.setNumberOfItems(2);   // 0 = AM, 1 = PM
+    mAmPmMenu.setVisible(false);
+    add(mAmPmMenu);
 }
 
 void EditView::tearDownScreen()
@@ -38,7 +57,16 @@ void EditView::tearDownScreen()
 
 void EditView::set(uint8_t h, uint8_t m, Alarm::Repeat repeat, Alarm::Effect effect)
 {
+    timeMenu.setFormat(mIs12Hour);
     timeMenu.setTime(h, m);
+
+    if (mIs12Hour) {
+        uint8_t h12;
+        bool    pm;
+        App::TimeFormat::split12(h, h12, pm);
+        mAmPmMenu.selectItem(pm ? 1 : 0);
+    }
+
     repeatMenu.selectItem(static_cast<int16_t>(repeat));
     effectMenu.selectItem(static_cast<int16_t>(effect));
 }
@@ -71,6 +99,20 @@ void EditView::updateEffectCenterItem(OptionWheelCenterItem& item, int16_t index
     item.apply(cfg);
 }
 
+void EditView::updateAmPmItem(OptionWheelItem& item, int16_t index)
+{
+    OptionWheelConfig cfg;
+    cfg.rawText = (index == 1) ? kPmText : kAmText;
+    item.apply(cfg);
+}
+
+void EditView::updateAmPmCenterItem(OptionWheelCenterItem& item, int16_t index)
+{
+    OptionWheelConfig cfg;
+    cfg.rawText = (index == 1) ? kPmText : kAmText;
+    item.apply(cfg);
+}
+
 void EditView::setPosition(Position id)
 {
     switch (id) {
@@ -81,6 +123,7 @@ void EditView::setPosition(Position id)
         timeMenu.setActiveHours();
         repeatMenu.setVisible(false);
         effectMenu.setVisible(false);
+        mAmPmMenu.setVisible(false);
         tick.setVisible(false);
         break;
     case Position::MINUTES:
@@ -90,6 +133,18 @@ void EditView::setPosition(Position id)
         timeMenu.setActiveMinutes();
         repeatMenu.setVisible(false);
         effectMenu.setVisible(false);
+        mAmPmMenu.setVisible(false);
+        tick.setVisible(false);
+        tick.invalidate();
+        break;
+    case Position::AMPM:
+        title.set(T_TEXT_ALARM_UC);
+        Unicode::snprintf(messageTextBuffer, MESSAGETEXT_SIZE, "%s", kAmPmName);
+        messageText.invalidate();
+        timeMenu.setVisible(false);
+        repeatMenu.setVisible(false);
+        effectMenu.setVisible(false);
+        mAmPmMenu.setVisible(true);
         tick.setVisible(false);
         tick.invalidate();
         break;
@@ -99,6 +154,7 @@ void EditView::setPosition(Position id)
         timeMenu.setVisible(false);
         repeatMenu.setVisible(true);
         effectMenu.setVisible(false);
+        mAmPmMenu.setVisible(false);
         tick.setVisible(false);
         tick.invalidate();
         break;
@@ -107,6 +163,7 @@ void EditView::setPosition(Position id)
         setActiveName(T_TEXT_ALERT);
         timeMenu.setVisible(false);
         repeatMenu.setVisible(false);
+        mAmPmMenu.setVisible(false);
         effectMenu.setVisible(true);
         tick.setVisible(true);
         tick.invalidate();
@@ -119,6 +176,7 @@ void EditView::setPosition(Position id)
     timeMenu.invalidate();
     repeatMenu.invalidate();
     effectMenu.invalidate();
+    mAmPmMenu.invalidate();
     tick.invalidate();
 }
 
@@ -133,6 +191,8 @@ void EditView::handleKeyEvent(uint8_t key)
     if (key == SDK::GUI::Button::L1) {
         if (mPosition == Position::HOURS || mPosition == Position::MINUTES) {
             timeMenu.decValue();
+        } else if (mPosition == Position::AMPM) {
+            mAmPmMenu.selectPrev();
         } else if (mPosition == Position::REPEAT) {
             repeatMenu.selectPrev();
         } else if (mPosition == Position::EFFECT) {
@@ -143,6 +203,8 @@ void EditView::handleKeyEvent(uint8_t key)
     if (key == SDK::GUI::Button::L2) {
         if (mPosition == Position::HOURS || mPosition == Position::MINUTES) {
             timeMenu.incValue();
+        } else if (mPosition == Position::AMPM) {
+            mAmPmMenu.selectNext();
         } else if (mPosition == Position::REPEAT) {
             repeatMenu.selectNext();
         } else if (mPosition == Position::EFFECT) {
@@ -155,6 +217,10 @@ void EditView::handleKeyEvent(uint8_t key)
             uint8_t h = 0;
             uint8_t m = 0;
             timeMenu.getTime(h, m);
+            if (mIs12Hour) {
+                // getTime() gave a 1-12 hour; fold in the AM/PM choice.
+                h = App::TimeFormat::to24(h, mAmPmMenu.getSelectedItem() == 1);
+            }
             presenter->save(h, m,
                 static_cast<Alarm::Repeat>(repeatMenu.getSelectedItem()),
                 static_cast<Alarm::Effect>(effectMenu.getSelectedItem()));
@@ -162,6 +228,10 @@ void EditView::handleKeyEvent(uint8_t key)
         }
         else {
             mPosition = static_cast<Position>(static_cast<uint8_t>(mPosition) + 1);
+            // The AM/PM step only exists in 12-hour mode.
+            if (mPosition == Position::AMPM && !mIs12Hour) {
+                mPosition = Position::REPEAT;
+            }
             setPosition(mPosition);
         }
     }
@@ -172,6 +242,9 @@ void EditView::handleKeyEvent(uint8_t key)
         }
         else {
             mPosition = static_cast<Position>(static_cast<uint8_t>(mPosition) - 1);
+            if (mPosition == Position::AMPM && !mIs12Hour) {
+                mPosition = Position::MINUTES;
+            }
             setPosition(mPosition);
         }
     }

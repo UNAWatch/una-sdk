@@ -1,5 +1,7 @@
 #include <gui/main_screen/MainView.hpp>
 #include <gui/common/AlarmLabels.hpp>
+#include <gui/common/TimeFormat.hpp>
+#include <touchgfx/Color.hpp>
 
 MainView::MainView()
 {
@@ -16,6 +18,17 @@ void MainView::setupScreen()
     buttons.setR2(Buttons::WHITE);
 
     title.set(T_TEXT_ALARM_UC);
+
+    // Draw the time left-aligned so the AM/PM suffix can follow it; show()
+    // re-centres the whole group. (The generated base centres timeValue.)
+    timeValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_60_L));
+
+    mMeridiem.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    mMeridiem.setLinespacing(0);
+    mMeridiem.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20_L));
+    mMeridiem.setWildcard(mMeridiemBuffer);
+    mMeridiem.setVisible(false);
+    add(mMeridiem);
 }
 
 void MainView::tearDownScreen()
@@ -109,6 +122,7 @@ void MainView::show()
         alarmValue.setVisible(false);
         toggle.setVisible(false);
         timeValue.setVisible(false);
+        mMeridiem.setVisible(false);
         repeatText.setVisible(false);
         repeatValue.setVisible(false);
     }
@@ -127,8 +141,48 @@ void MainView::show()
 
         toggle.setState((*pList)[mAlarmId].on);
 
-        Unicode::snprintf(timeValueBuffer, TIMEVALUE_SIZE, "%02d:%02d",
-            (*pList)[mAlarmId].timeHours, (*pList)[mAlarmId].timeMinutes);
+        const uint8_t h = (*pList)[mAlarmId].timeHours;
+        const uint8_t m = (*pList)[mAlarmId].timeMinutes;
+
+        timeValue.invalidate();   // clear the old glyph rect before the group moves
+        mMeridiem.invalidate();
+
+        if (mIs12Hour) {
+            uint8_t h12;
+            bool    pm;
+            App::TimeFormat::split12(h, h12, pm);
+            Unicode::snprintf(timeValueBuffer, TIMEVALUE_SIZE, "%d:%02d", h12, m);
+
+            mMeridiemBuffer[0] = pm ? 'P' : 'A';
+            mMeridiemBuffer[1] = 'M';
+            mMeridiemBuffer[2] = 0;
+            mMeridiem.setWildcard(mMeridiemBuffer);
+        } else {
+            Unicode::snprintf(timeValueBuffer, TIMEVALUE_SIZE, "%02d:%02d", h, m);
+        }
+        timeValue.setWildcard(timeValueBuffer);
+
+        // Centre the time (+ AM/PM suffix) as one group on the 240px screen.
+        const uint16_t timeW = timeValue.getTextWidth();
+        uint16_t       merW  = 0;
+        uint16_t       groupW = timeW;
+        if (mIs12Hour) {
+            merW   = mMeridiem.getTextWidth();
+            groupW = static_cast<uint16_t>(timeW + kMeridiemGap + merW);
+        }
+        const int16_t groupLeft = static_cast<int16_t>((240 - groupW) / 2);
+
+        timeValue.setPosition(groupLeft, kTimeY, static_cast<int16_t>(timeW + 4), kTimeH);
+        timeValue.invalidate();
+
+        if (mIs12Hour) {
+            mMeridiem.setPosition(static_cast<int16_t>(groupLeft + timeW + kMeridiemGap),
+                                  kMeridiemY, static_cast<int16_t>(merW + 4), kMeridiemH);
+            mMeridiem.setVisible(true);
+            mMeridiem.invalidate();
+        } else {
+            mMeridiem.setVisible(false);
+        }
 
         Unicode::snprintf(repeatValueBuffer, REPEATVALUE_SIZE, "%s",
             touchgfx::TypedText(App::Labels::kRepeatLabels[(*pList)[mAlarmId].repeat]).getText());

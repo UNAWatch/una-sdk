@@ -12,6 +12,7 @@ void MainPresenter::activate()
     // Reset idle timer
     model->resetIdleTimer();
 
+    view.setTimeFormat(model->is12HourFormat());
     view.updateAlarmList(model->getAlarmList());
     view.setSelectedAlarm(model->getAlarmEditId());
 }
@@ -21,8 +22,9 @@ void MainPresenter::deactivate()
 
 }
 
-void MainPresenter::onAlarmListUpdated(const std::vector<Alarm>& list) 
+void MainPresenter::onAlarmListUpdated(const std::vector<Alarm>& list)
 {
+    view.setTimeFormat(model->is12HourFormat());
     view.updateAlarmList(list);
 }
 

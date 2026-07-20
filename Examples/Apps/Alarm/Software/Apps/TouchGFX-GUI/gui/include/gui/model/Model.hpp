@@ -55,6 +55,7 @@ public:
     void                stopAlarm();
     void                snoozeAlarm();
     std::vector<Alarm>& getAlarmList();
+    bool                is12HourFormat() const { return mTimeFormat12h; }
     void                setAlarmEditId(size_t id);
     size_t              getAlarmEditId();
     void                saveAlarm(size_t id, Alarm alarm);
@@ -88,6 +89,7 @@ private:
     Alarm              mActiveAlarm  {};
     std::vector<Alarm> mAlarmList;
     size_t             mEditAlarmId  = 0;
+    bool               mTimeFormat12h = false;
 };
 
 #endif // MODEL_HPP

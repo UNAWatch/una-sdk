@@ -11,6 +11,10 @@ void EditPresenter::activate()
 {
     // Reset idle timer
     model->resetIdleTimer();
+
+    // Must precede set() so the hours wheel and AM/PM step are configured.
+    view.setTimeFormat(model->is12HourFormat());
+
     size_t id = model->getAlarmEditId();
     if (id < model->getAlarmList().size()) {
         const Alarm& alarm = model->getAlarmList()[id];

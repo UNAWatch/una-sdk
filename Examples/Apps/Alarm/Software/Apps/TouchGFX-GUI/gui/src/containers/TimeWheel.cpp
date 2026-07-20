@@ -11,11 +11,28 @@ void TimeWheel::initialize()
     TimeWheelBase::initialize();
 }
 
+void TimeWheel::setFormat(bool is12Hour)
+{
+    mIs12Hour = is12Hour;
+    hoursWheel.setNumberOfItems(is12Hour ? 12 : 24);
+    hoursWheel.invalidate();
+}
+
 void TimeWheel::setTime(uint8_t h, uint8_t m)
 {
     if (h < 24 && m < 60) {
-        hoursWheel.animateToItem(h, 0);
-        setHours(h);
+        // In 12-hour mode item index 0..11 maps to displayed hour 1..12.
+        int16_t hourIndex = h;
+        if (mIs12Hour) {
+            uint8_t h12 = h % 12;
+            if (h12 == 0) {
+                h12 = 12;
+            }
+            hourIndex = static_cast<int16_t>(h12 - 1);
+        }
+
+        hoursWheel.animateToItem(hourIndex, 0);
+        setHours(hourIndex);
 
         minutesWheel.animateToItem(m, 0);
         setMinutes(m);
@@ -24,7 +41,8 @@ void TimeWheel::setTime(uint8_t h, uint8_t m)
 
 void TimeWheel::getTime(uint8_t& h, uint8_t& m)
 {
-    h = hoursWheel.getSelectedItem();
+    const int16_t hourIndex = hoursWheel.getSelectedItem();
+    h = static_cast<uint8_t>(mIs12Hour ? hourIndex + 1 : hourIndex);
     m = minutesWheel.getSelectedItem();
 }
 
@@ -100,12 +118,12 @@ void TimeWheel::decValue()
 
 void TimeWheel::hoursWheelUpdateItem(TimeWheelHoursItem& item, int16_t itemIndex)
 {
-    item.setValue(itemIndex);
+    item.setValue(mIs12Hour ? itemIndex + 1 : itemIndex);
 }
 
 void TimeWheel::hoursWheelUpdateCenterItem(TimeWheelHoursCenterItem& item, int16_t itemIndex)
 {
-    item.setValue(itemIndex);
+    item.setValue(mIs12Hour ? itemIndex + 1 : itemIndex);
 }
 
 void TimeWheel::minutesWheelUpdateItem(TimeWheelMinutesItem& item, int16_t itemIndex)
@@ -118,9 +136,11 @@ void TimeWheel::minutesWheelUpdateCenterItem(TimeWheelMinutesCenterItem& item, i
     item.setValue(itemIndex);
 }
 
-void TimeWheel::setHours(int16_t h)
+void TimeWheel::setHours(int16_t index)
 {
-    Unicode::snprintf(hoursInactiveBuffer, HOURSINACTIVE_SIZE, "%02d", h);
+    // The inactive label mirrors the active wheel: display the mapped hour value.
+    const int16_t value = mIs12Hour ? index + 1 : index;
+    Unicode::snprintf(hoursInactiveBuffer, HOURSINACTIVE_SIZE, "%02d", value);
     hoursInactive.invalidate();
 }
 

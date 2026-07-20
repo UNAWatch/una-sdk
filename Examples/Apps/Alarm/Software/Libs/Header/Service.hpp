@@ -26,11 +26,15 @@ private:
 
     AlarmManager    mAlarmManager;
     Alarm           mActiveAlarm;
+    bool            mTimeFormat12h = false;  // cached system clock-format setting
 
     // -- Lifecycle ------------------------------------------------------------
 
     void onStartGUI();
     void onStopGUI();
+
+    /** @brief Query the kernel for the current 12/24-hour clock setting. */
+    void refreshTimeFormat();
 
     // -- Ringing control ------------------------------------------------------
 

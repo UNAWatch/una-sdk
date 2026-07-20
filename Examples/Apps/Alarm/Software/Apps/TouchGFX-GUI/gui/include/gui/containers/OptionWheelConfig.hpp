@@ -2,6 +2,7 @@
 #define OPTIONWHEELCONFIG_HPP
 
 #include <texts/TextKeysAndLanguages.hpp>
+#include <touchgfx/Unicode.hpp>
 
 /**
  * @brief Configuration passed to OptionWheelItem / OptionWheelCenterItem via apply().
@@ -21,6 +22,7 @@ struct OptionWheelConfig
 
     Style       style       = SIMPLE;
     TypedTextId msgId       = TYPED_TEXT_INVALID;  ///< Label text             (SIMPLE)
+    const touchgfx::Unicode::UnicodeChar* rawText = nullptr;  ///< Literal label, overrides msgId (SIMPLE)
     TypedTextId msgIdLeft   = TYPED_TEXT_INVALID;  ///< Left label             (TOGGLE)
     TypedTextId msgIdRight  = TYPED_TEXT_INVALID;  ///< Right label            (TOGGLE)
     bool        toggleState = false;               ///< Current switch state   (TOGGLE)

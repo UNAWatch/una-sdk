@@ -1,4 +1,6 @@
 #include <gui/ringing_screen/RingingView.hpp>
+#include <gui/common/TimeFormat.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
 static constexpr uint16_t kSnoozeTicks = SDK::Utils::secToTicks(120, App::Config::kFrameRate);
 static constexpr uint16_t kPlayTicks = SDK::Utils::secToTicks(5, App::Config::kFrameRate);
@@ -33,9 +35,25 @@ void RingingView::tearDownScreen()
     RingingViewBase::tearDownScreen();
 }
 
-void RingingView::setTime(uint8_t h, uint8_t m)
+void RingingView::setTime(uint8_t h, uint8_t m, bool is12Hour)
 {
-    Unicode::snprintf(timeValueBuffer, TIMEVALUE_SIZE, "%02u:%02u", h, m);
+    if (is12Hour) {
+        // " AM"/" PM" as a Unicode suffix so snprintf's %s can consume it.
+        static const touchgfx::Unicode::UnicodeChar kAm[] = {' ', 'A', 'M', 0};
+        static const touchgfx::Unicode::UnicodeChar kPm[] = {' ', 'P', 'M', 0};
+
+        uint8_t h12;
+        bool    pm;
+        App::TimeFormat::split12(h, h12, pm);
+
+        // Left-align and widen the box so "12:45 PM" fits (the base centres it
+        // in a 75px box sized for "HH:MM").
+        timeValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25_L));
+        timeValue.setPosition(15, 105, 150, 32);
+        Unicode::snprintf(timeValueBuffer, TIMEVALUE_SIZE, "%u:%02u%s", h12, m, pm ? kPm : kAm);
+    } else {
+        Unicode::snprintf(timeValueBuffer, TIMEVALUE_SIZE, "%02u:%02u", h, m);
+    }
     timeValue.invalidate();
 }
 
