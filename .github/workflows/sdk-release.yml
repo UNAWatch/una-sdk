@@ -12,6 +12,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: startsWith(github.event.release.tag_name, 'sdk-v')
+    env:
+      TAG: ${{ github.ref_name }}
     steps:
       - name: Install dependencies
         run: |
@@ -37,7 +39,7 @@ jobs:
 
       - name: Make release immutable
         run: |
-          gh release edit ${{ github.ref_name }} --draft=false
+          gh release edit "$TAG" --draft=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -50,10 +52,11 @@ jobs:
           RELEASE_URL: ${{ github.event.release.html_url }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_BODY=$(gh release view ${{ github.ref_name }} --json body --jq '.body')
-          echo "body<<EOF" >> $GITHUB_OUTPUT
+          RELEASE_BODY=$(gh release view "$TAG" --json body --jq '.body')
+          DELIM="EOF_$(openssl rand -hex 16)"
+          echo "body<<$DELIM" >> $GITHUB_OUTPUT
           echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "$DELIM" >> $GITHUB_OUTPUT
           echo "author=$RELEASE_AUTHOR" >> $GITHUB_OUTPUT
           echo "created_at=$RELEASE_CREATED" >> $GITHUB_OUTPUT
           echo "name=$RELEASE_NAME" >> $GITHUB_OUTPUT
