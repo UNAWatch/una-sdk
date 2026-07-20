@@ -2,6 +2,7 @@
 
 OptionWheelItem::OptionWheelItem()
 {
+    mTextBuffer[0] = 0;
 }
 
 void OptionWheelItem::initialize()
