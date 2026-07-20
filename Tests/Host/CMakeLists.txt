@@ -52,6 +52,7 @@ add_executable(una-sdk-host-tests
     simulator/FileSystemMock_test.cpp
     sensorlayer/GyroscopeParser_test.cpp
     metrics/MonotonicCounter_test.cpp
+    utils/ClockTime_test.cpp
     support/KernelTestDoubles_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/ActivityWriter.cpp"
