@@ -13,10 +13,11 @@ void OptionWheelCenterItem::apply(const OptionWheelConfig& cfg)
 {
     switch (cfg.style) {
     case OptionWheelConfig::SIMPLE:
+        text.setWildcard(mTextBuffer);
         if (cfg.rawText != nullptr) {
-            Unicode::snprintf(textBuffer, TEXT_SIZE, "%s", cfg.rawText);
+            Unicode::snprintf(mTextBuffer, kTextSize, "%s", cfg.rawText);
         } else if (cfg.msgId != TYPED_TEXT_INVALID) {
-            Unicode::snprintf(textBuffer, TEXT_SIZE, "%s", touchgfx::TypedText(cfg.msgId).getText());
+            Unicode::snprintf(mTextBuffer, kTextSize, "%s", touchgfx::TypedText(cfg.msgId).getText());
         }
         text.setVisible(true);
         toggle.setVisible(false);

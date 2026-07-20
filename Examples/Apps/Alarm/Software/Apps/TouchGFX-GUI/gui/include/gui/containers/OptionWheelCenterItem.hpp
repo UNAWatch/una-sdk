@@ -23,6 +23,12 @@ public:
 
     /** @brief Apply a configuration to this item (called from the screen's update callback). */
     void apply(const OptionWheelConfig& cfg);
+
+protected:
+    // The generated base buffer is only 10 chars, which clips longer labels
+    // (e.g. "Beep & Vibrate"); render into this wider one instead.
+    static const uint16_t kTextSize = 24;
+    touchgfx::Unicode::UnicodeChar mTextBuffer[kTextSize];
 };
 
 #endif // OPTIONWHEELCENTERITEM_HPP
