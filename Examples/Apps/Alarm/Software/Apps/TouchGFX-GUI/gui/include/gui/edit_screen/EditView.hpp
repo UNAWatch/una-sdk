@@ -8,11 +8,11 @@
 /**
  * @brief Screen for creating or editing an alarm.
  *
- * Steps through four sequential positions using R1 (next) / R2 (back):
- *   HOURS -> MINUTES -> REPEAT -> EFFECT
+ * Steps through the positions using R1 (next) / R2 (back):
+ *   HOURS -> MINUTES -> [AMPM] -> REPEAT -> EFFECT
  *
- * Each position shows a different wheel; only the active wheel is visible.
- * Pressing R1 on the last step (EFFECT) saves the alarm.
+ * AMPM is only visited in 12-hour mode and shares the time screen (the TimeWheel
+ * shows an AM/PM field beside HH:MM). Pressing R1 on the last step (EFFECT) saves.
  */
 class EditView : public EditViewBase
 {
@@ -38,25 +38,18 @@ protected:
     enum Position { HOURS = 0, MINUTES, AMPM, REPEAT, EFFECT };
     Position mPosition{};
 
-    /// 12-hour editing (hours wheel shows 1-12 plus a separate AM/PM step).
+    /// 12-hour editing (hours wheel shows 1-12 plus an in-screen AM/PM field).
     bool mIs12Hour = false;
-
-    /// AM/PM step wheel (hand-added; 12-hour mode only). Shares the (20,55) slot.
-    OptionWheel mAmPmMenu;
 
     touchgfx::Callback<EditView, OptionWheelItem&,       int16_t> mRepeatItemCb;
     touchgfx::Callback<EditView, OptionWheelCenterItem&, int16_t> mRepeatCenterItemCb;
     touchgfx::Callback<EditView, OptionWheelItem&,       int16_t> mEffectItemCb;
     touchgfx::Callback<EditView, OptionWheelCenterItem&, int16_t> mEffectCenterItemCb;
-    touchgfx::Callback<EditView, OptionWheelItem&,       int16_t> mAmPmItemCb;
-    touchgfx::Callback<EditView, OptionWheelCenterItem&, int16_t> mAmPmCenterItemCb;
 
     void updateRepeatItem(OptionWheelItem& item, int16_t index);
     void updateRepeatCenterItem(OptionWheelCenterItem& item, int16_t index);
     void updateEffectItem(OptionWheelItem& item, int16_t index);
     void updateEffectCenterItem(OptionWheelCenterItem& item, int16_t index);
-    void updateAmPmItem(OptionWheelItem& item, int16_t index);
-    void updateAmPmCenterItem(OptionWheelCenterItem& item, int16_t index);
 
     /** @brief Switch the visible wheel and header label to the given @p id. */
     void setPosition(Position id);
