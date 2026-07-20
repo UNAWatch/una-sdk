@@ -76,6 +76,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/apps-v')
     permissions:
       contents: write
+    env:
+      TAG: ${{ github.ref_name }}
     steps:
       - name: Install dependencies
         run: |
@@ -120,17 +122,18 @@ jobs:
 
       - name: Make release immutable
         run: |
-          gh release edit ${{ github.ref_name }} --draft=false
+          gh release edit "$TAG" --draft=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - id: get_slack_params
         name: Get required parameters for slack notification
         run: |
-          RELEASE_JSON=$(gh release view ${{ github.ref_name }} --json body,author,createdAt,name,url)
-          echo "body<<EOF" >> $GITHUB_OUTPUT
+          RELEASE_JSON=$(gh release view "$TAG" --json body,author,createdAt,name,url)
+          DELIM="EOF_$(openssl rand -hex 16)"
+          echo "body<<$DELIM" >> $GITHUB_OUTPUT
           echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "$DELIM" >> $GITHUB_OUTPUT
           echo "author=$(echo "$RELEASE_JSON" | jq -r '.author.login')" >> $GITHUB_OUTPUT
           echo "created_at=$(echo "$RELEASE_JSON" | jq -r '.createdAt')" >> $GITHUB_OUTPUT
           echo "name=$(echo "$RELEASE_JSON" | jq -r '.name')" >> $GITHUB_OUTPUT
