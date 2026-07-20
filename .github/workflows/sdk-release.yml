@@ -61,8 +61,15 @@ jobs:
 
       - id: prepare_slack_payload
         name: Prepare Slack payload
+        env:
+          BODY_RAW: ${{ steps.get_slack_params.outputs.body }}
+          SLACK_NAME: ${{ steps.get_slack_params.outputs.name }}
+          SLACK_TAG: ${{ github.ref_name }}
+          SLACK_AUTHOR: ${{ steps.get_slack_params.outputs.author }}
+          SLACK_CREATED: ${{ steps.get_slack_params.outputs.created_at }}
+          SLACK_URL: ${{ steps.get_slack_params.outputs.url }}
         run: |
-          BODY="${{ steps.get_slack_params.outputs.body }}"
+          BODY="$BODY_RAW"
           # Convert markdown to Slack mrkdwn
           BODY=$(echo "$BODY" | perl -pe 's/\[([^\]]+)\]\(([^)]+)\)/<$2|$1>/g' || { echo "Error converting links"; exit 1; })  # Links
           BODY=$(echo "$BODY" | perl -pe 's/\*\*([^*]+)\*\*/\*$1\*/g' || { echo "Error converting bold"; exit 1; })  # Bold
@@ -73,7 +80,7 @@ jobs:
           BODY=$(echo "$BODY" | perl -pe 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/' || { echo "Error adjusting changelog"; exit 1; })  # Changelog
           BODY=$(echo "$BODY" | perl -pe 's/"/\\"/g' || { echo "Error escaping quotes"; exit 1; })  # Escape double quotes
           if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
-          PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
+          PAYLOAD=$(jq -c -n --arg name "$SLACK_NAME" --arg tag "$SLACK_TAG" --arg body "$BODY" --arg author "$SLACK_AUTHOR" --arg created "$SLACK_CREATED" --arg url "$SLACK_URL" '{
             text: (":books: *UNA SDK*: " + $name),
             blocks: [
               {
