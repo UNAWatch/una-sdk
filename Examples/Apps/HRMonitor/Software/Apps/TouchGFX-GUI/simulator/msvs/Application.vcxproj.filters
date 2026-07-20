@@ -339,6 +339,12 @@
 
     </ClCompile>
 
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\RecordingMarker.cpp">
+
+      <Filter>Source Files</Filter>
+
+    </ClCompile>
+
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
       <Filter>Source Files\TouchGFX\platform\driver\touch</Filter>
     </ClCompile>
@@ -466,6 +472,9 @@
       <Filter>SDK\Libs\Source\Simulator\Components</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuStepCounter.cpp">
+      <Filter>SDK\Libs\Source\Simulator\Components\Sensors\Imu</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuRunningCadence.cpp">
       <Filter>SDK\Libs\Source\Simulator\Components\Sensors\Imu</Filter>
     </ClCompile>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuWristMotion.cpp">
