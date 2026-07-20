@@ -554,6 +554,7 @@ void Service::sendInitialInfoToGui()
     if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
         if (msg.send(100) && msg.ok()) {
             mIsImperial = msg->imperialUnits;
+            mTimeFormat12h = msg->timeFormat;
 
             if (msg->weightKg > 0.0f) {
                 mWeightKg = msg->weightKg;
@@ -582,7 +583,7 @@ void Service::sendInitialInfoToGui()
         }
     }
 
-    mGuiSender.settingsUpd(mSettings, mIsImperial, hrThresholds, CustomMessage::kHrThresholdsCount);
+    mGuiSender.settingsUpd(mSettings, mIsImperial, mTimeFormat12h, hrThresholds, CustomMessage::kHrThresholdsCount);
     memcpy(mHrThresholds.data(), hrThresholds, sizeof(hrThresholds));
     mHrThresholdCount = CustomMessage::kHrThresholdsCount;
     mGuiSender.summary(&mSummary);
