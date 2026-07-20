@@ -140,14 +140,21 @@ jobs:
 
       - id: prepare_slack_payload
         name: Prepare Slack payload
+        env:
+          BODY_RAW: ${{ steps.get_slack_params.outputs.body }}
+          SLACK_NAME: ${{ steps.get_slack_params.outputs.name }}
+          SLACK_TAG: ${{ github.ref_name }}
+          SLACK_AUTHOR: ${{ steps.get_slack_params.outputs.author }}
+          SLACK_CREATED: ${{ steps.get_slack_params.outputs.created_at }}
+          SLACK_URL: ${{ steps.get_slack_params.outputs.url }}
         run: |
-          BODY="${{ steps.get_slack_params.outputs.body }}"
+          BODY="$BODY_RAW"
           BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g')
           BODY=$(echo "$BODY" | sed 's/^## \([^$]*\)$/*\1*/')
           BODY=$(echo "$BODY" | sed 's/^* /- /')
           BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/')
           if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
-          PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
+          PAYLOAD=$(jq -c -n --arg name "$SLACK_NAME" --arg tag "$SLACK_TAG" --arg body "$BODY" --arg author "$SLACK_AUTHOR" --arg created "$SLACK_CREATED" --arg url "$SLACK_URL" '{
             text: (":roller_coaster: *UNA Apps*: " + $name),
             blocks: [
               {
