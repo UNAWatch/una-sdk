@@ -3,6 +3,8 @@
 #include <texts/TextKeysAndLanguages.hpp>
 #include <touchgfx/Color.hpp>
 
+#include "SDK/Utils/ClockTime.hpp"
+
 TrackFaceStatus::TrackFaceStatus()
 {}
 
@@ -36,15 +38,9 @@ void TrackFaceStatus::setTime(uint8_t h, uint8_t m, bool is12Hour)
     dayTimeValue.invalidate();
     mMeridiem.invalidate();
 
-    uint8_t hour = h;
-    bool    pm   = false;
-    if (is12Hour) {
-        pm   = (h >= 12);
-        hour = h % 12;
-        if (hour == 0) {
-            hour = 12;
-        }
-    }
+    const SDK::Clock::Hour12 civil = SDK::Clock::to12Hour(h);
+    const uint8_t hour = is12Hour ? civil.hour : h;
+    const bool    pm   = civil.pm;
 
     Unicode::snprintf(dayTimeValueBuffer, DAYTIMEVALUE_SIZE, "%u:%02u", hour, m);
     dayTimeValue.setWildcard(dayTimeValueBuffer);

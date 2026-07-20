@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "SDK/Utils/ClockTime.hpp"
+
 /**
  * @brief Helpers for converting between the stored 24-hour time and the
  *        12-hour clock shown when the system clock-format setting is 12H.
@@ -15,18 +17,15 @@ namespace App::TimeFormat {
 /** @brief Split a 0-23 hour into a 1-12 hour and an AM/PM flag. */
 inline void split12(uint8_t hour24, uint8_t& hour12, bool& pm)
 {
-    pm     = (hour24 >= 12);
-    hour12 = static_cast<uint8_t>(hour24 % 12);
-    if (hour12 == 0) {
-        hour12 = 12;
-    }
+    const SDK::Clock::Hour12 t = SDK::Clock::to12Hour(hour24);
+    hour12 = t.hour;
+    pm     = t.pm;
 }
 
 /** @brief Combine a 1-12 hour and an AM/PM flag back into a 0-23 hour. */
 inline uint8_t to24(uint8_t hour12, bool pm)
 {
-    const uint8_t base = static_cast<uint8_t>(hour12 % 12);   // 12 -> 0
-    return static_cast<uint8_t>(base + (pm ? 12 : 0));
+    return SDK::Clock::to24Hour(hour12, pm);
 }
 
 } // namespace App::TimeFormat
