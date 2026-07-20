@@ -46,6 +46,7 @@ private:
 
     Settings                  mSettings;
     bool                      mIsImperial = false;
+    bool                      mTimeFormat12h = false;
     SettingsSerializer        mSettingsSerializer;
     ActivitySummary           mSummary;
     ActivitySummarySerializer mActivitySummarySerializer;

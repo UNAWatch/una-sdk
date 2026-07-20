@@ -54,12 +54,14 @@ namespace CustomMessage {
 
         // Kernel settings
         bool    unitsImperial;
+        bool    timeFormat12h;   // true = 12-hour clock, false = 24-hour
         uint8_t hrThresholds[kHrThresholdsCount];
         uint8_t hrThresholdsCount;
 
         SettingsUpd()
             : SDK::MessageBase(SETTINGS_UPDATE)
             , unitsImperial(false)
+            , timeFormat12h(false)
             , hrThresholds {}
             , hrThresholdsCount(0)
         {}
@@ -193,12 +195,13 @@ public:
     virtual ~Sender() = default;
 
     // Service --> GUI
-    bool settingsUpd(Settings settings, bool units,
+    bool settingsUpd(Settings settings, bool units, bool timeFormat12h,
                      const uint8_t (&thresholds)[kHrThresholdsCount], uint8_t thresholdCount)
     {
         if (auto msg = SDK::make_msg<CustomMessage::SettingsUpd>(mKernel)) {
             msg->settings          = settings;
             msg->unitsImperial     = units;
+            msg->timeFormat12h     = timeFormat12h;
             memcpy(msg->hrThresholds, thresholds, sizeof(msg->hrThresholds));
             msg->hrThresholdsCount = thresholdCount;
             return msg.send();

@@ -78,6 +78,7 @@ public:
 
     // Settings
     bool isUnitsImperial() const;
+    bool is12HourFormat() const;
     const uint8_t* getHrThresholds() const;
     uint8_t        getHrThresholdsCount() const;
     const Settings& getSettings() const;
@@ -140,6 +141,7 @@ private:
 
     // Settings (mirrored from Service)
     bool mUnitsImperial = false;
+    bool mTimeFormat12h = false;
     uint8_t mHrThresholds[App::Config::kHrThresholdsCount] = {};
     uint8_t mHrThresholdsCount = App::Config::kHrThresholdsCount;
     Settings mSettings {};

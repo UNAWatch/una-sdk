@@ -32,6 +32,7 @@ void TrackPresenter::activate()
     view.setPositionId(faceId);
 
     view.setConfig(model->isUnitsImperial(), model->getHrThresholds(), model->getHrThresholdsCount());
+    view.setTimeFormat(model->is12HourFormat());
 
     onTrackData(model->getTrackData());
 

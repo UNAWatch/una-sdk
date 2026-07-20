@@ -16,6 +16,7 @@ public:
     uint16_t getPositionId();
 
     void setConfig(bool isImperial, const uint8_t* thresholds, uint8_t thresholdCount);
+    void setTimeFormat(bool is12Hour);
     void setTrackData(const Track::Data& data);
 
     void setTime(uint8_t h, uint8_t m);
@@ -33,6 +34,7 @@ protected:
 
     uint16_t mCurrentFaceId = 0;
     bool     mIsImperial = false;
+    bool     mIs12Hour      = false;
     uint8_t  mHrThresholds[App::Config::kHrThresholdsCount] = {};
     uint8_t  mHrThresholdCount = 0;
     uint8_t  mAccessoryState = 0;  // last SDK::Accessory::State (engaged?)

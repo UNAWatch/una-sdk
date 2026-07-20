@@ -15,6 +15,7 @@ void TrackPresenter::activate()
     view.setPositionId(model->menu().track.get());
 
     view.setConfig(model->isUnitsImperial(), model->getHrThresholds(), model->getHrThresholdsCount());
+    view.setTimeFormat(model->is12HourFormat());
 
     onTrackData(model->getTrackData());
 

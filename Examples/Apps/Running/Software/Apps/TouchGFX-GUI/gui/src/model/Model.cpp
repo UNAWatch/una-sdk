@@ -114,6 +114,11 @@ bool Model::isUnitsImperial() const
     return mUnitsImperial;
 }
 
+bool Model::is12HourFormat() const
+{
+    return mTimeFormat12h;
+}
+
 const uint8_t* Model::getHrThresholds() const
 {
     return mHrThresholds;
@@ -345,6 +350,7 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             auto* msg          = static_cast<CustomMessage::SettingsUpd*>(message);
             mSettings          = msg->settings;
             mUnitsImperial     = msg->unitsImperial;
+            mTimeFormat12h     = msg->timeFormat12h;
             memcpy(mHrThresholds, msg->hrThresholds, sizeof(mHrThresholds));
             mHrThresholdsCount = msg->hrThresholdsCount;
             modelListener->onSettings(mSettings);

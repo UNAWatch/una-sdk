@@ -67,6 +67,11 @@ void TrackView::setConfig(bool isImperial, const uint8_t* thresholds, uint8_t th
     memcpy(mHrThresholds, thresholds, mHrThresholdCount);
 }
 
+void TrackView::setTimeFormat(bool is12Hour)
+{
+    mIs12Hour = is12Hour;
+}
+
 void TrackView::setTrackData(const Track::Data& data)
 {
     trackFaceTotal.setHR(data.hr, mHrThresholds, mHrThresholdCount);
@@ -83,7 +88,7 @@ void TrackView::setTrackData(const Track::Data& data)
 
 void TrackView::setTime(uint8_t h, uint8_t m)
 {
-    trackFaceStatus.setTime(h, m);
+    trackFaceStatus.setTime(h, m, mIs12Hour);
 }
 
 void TrackView::setBatteryLevel(uint8_t level)
