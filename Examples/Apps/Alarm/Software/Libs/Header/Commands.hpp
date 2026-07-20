@@ -38,7 +38,7 @@ namespace CustomMessage {
     // Service <-> GUI
     //
     // Fixed-size array avoids heap allocation in the message pool path.
-    // sizeof(AlarmList) = 32 (MessageBase) + kMaxAlarms*sizeof(Alarm) + 1 = 133 bytes
+    // sizeof(AlarmList) = 32 (MessageBase) + kMaxAlarms*sizeof(Alarm) + 2 = 134 bytes
     // -> allocated from Pool 3 (256 bytes), zero dynamic allocations.
     struct AlarmList : public SDK::MessageBase {
         Alarm   alarms[kMaxAlarms];

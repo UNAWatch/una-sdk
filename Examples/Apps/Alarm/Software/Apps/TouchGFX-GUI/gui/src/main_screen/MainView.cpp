@@ -202,6 +202,7 @@ void MainView::show()
     alarmValue.invalidate();
     toggle.invalidate();
     timeValue.invalidate();
+    mMeridiem.invalidate();
     repeatText.invalidate();
     repeatValue.invalidate();
 }
