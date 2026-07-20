@@ -1,6 +1,8 @@
 
 #include "Service.hpp"
 
+#include "SDK/Messages/MessageGuard.hpp"
+
 #include <cstdio>
 
 #define LOG_MODULE_PRX      "Service"
@@ -120,9 +122,21 @@ void Service::run()
     }
 }
 
+void Service::refreshTimeFormat()
+{
+    if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
+        if (msg.send(100) && msg.ok()) {
+            mTimeFormat12h = msg->timeFormat;
+        }
+    }
+}
+
 void Service::onStartGUI()
 {
     mGuiStarted = true;
+
+    // Pick up the current clock-format setting so the list carries it to the GUI.
+    refreshTimeFormat();
 
     // If there is an active alarm, send it to GUI first
     if (mActiveAlarm.on) {
@@ -131,7 +145,7 @@ void Service::onStartGUI()
     }
 
     // Send current alarm list to GUI
-    mGuiSender.listUpd(mAlarmManager.getAlarmList());
+    mGuiSender.listUpd(mAlarmManager.getAlarmList(), mTimeFormat12h);
 }
 
 void Service::onStopGUI()
@@ -256,7 +270,7 @@ void Service::onAlarm(const Alarm& alarm)
 void Service::onListChanged(const std::vector<Alarm>& list)
 {
     if (mGuiStarted) {
-        mGuiSender.listUpd(list);
+        mGuiSender.listUpd(list, mTimeFormat12h);
     }
 }
 

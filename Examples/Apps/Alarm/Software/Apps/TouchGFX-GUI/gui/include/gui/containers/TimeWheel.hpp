@@ -27,9 +27,18 @@ public:
 
     virtual void initialize();
 
-    /** @brief Pre-set the wheels to the given time. */
+    /**
+     * @brief Select 12- or 24-hour mode for the hours wheel.
+     *
+     * 12-hour shows 1-12 (wrapping); 24-hour shows 0-23. Call before setTime().
+     * getTime() then returns the displayed hour (1-12 or 0-23); the caller pairs
+     * it with a separate AM/PM choice to recover the stored 0-23 hour.
+     */
+    void setFormat(bool is12Hour);
+
+    /** @brief Pre-set the wheels to the given time (@p h is 0-23). */
     void setTime(uint8_t h, uint8_t m);
-    /** @brief Read the currently selected time. */
+    /** @brief Read the currently selected time (@p h is 1-12 in 12-hour mode). */
     void getTime(uint8_t& h, uint8_t& m);
 
     /** @brief Show the hours wheel and hide the minutes wheel. */
@@ -44,6 +53,7 @@ public:
 
 protected:
     bool mMinutesActive{};  ///< true while the minutes wheel is active
+    bool mIs12Hour{};       ///< true while the hours wheel shows 1-12
 
     virtual void hoursWheelUpdateItem(TimeWheelHoursItem& item, int16_t itemIndex) override;
     virtual void hoursWheelUpdateCenterItem(TimeWheelHoursCenterItem& item, int16_t itemIndex) override;

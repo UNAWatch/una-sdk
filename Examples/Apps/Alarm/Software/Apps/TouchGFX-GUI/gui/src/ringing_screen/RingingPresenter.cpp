@@ -11,7 +11,8 @@ void RingingPresenter::activate()
 {
     play();
     
-    view.setTime(model->getActiveAlarm().timeHours, model->getActiveAlarm().timeMinutes);
+    view.setTime(model->getActiveAlarm().timeHours, model->getActiveAlarm().timeMinutes,
+                 model->is12HourFormat());
 }
 
 void RingingPresenter::deactivate()

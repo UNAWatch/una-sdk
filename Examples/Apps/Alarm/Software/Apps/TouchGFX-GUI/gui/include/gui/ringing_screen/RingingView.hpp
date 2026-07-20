@@ -23,7 +23,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
-    void setTime(uint8_t h, uint8_t );
+    void setTime(uint8_t h, uint8_t m, bool is12Hour);
 
 protected:
     virtual void handleKeyEvent(uint8_t key) override;

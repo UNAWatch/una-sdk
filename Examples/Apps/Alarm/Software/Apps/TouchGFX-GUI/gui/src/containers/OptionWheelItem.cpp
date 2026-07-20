@@ -11,7 +11,9 @@ void OptionWheelItem::initialize()
 
 void OptionWheelItem::apply(const OptionWheelConfig& cfg)
 {
-    if (cfg.msgId != TYPED_TEXT_INVALID) {
+    if (cfg.rawText != nullptr) {
+        Unicode::snprintf(textBuffer, TEXT_SIZE, "%s", cfg.rawText);
+    } else if (cfg.msgId != TYPED_TEXT_INVALID) {
         Unicode::snprintf(textBuffer, TEXT_SIZE, "%s", touchgfx::TypedText(cfg.msgId).getText());
     }
     text.invalidate();
