@@ -20,6 +20,15 @@ void OptionWheelCenterItem::apply(const OptionWheelConfig& cfg)
         } else if (cfg.msgId != TYPED_TEXT_INVALID) {
             Unicode::snprintf(mTextBuffer, kTextSize, "%s", touchgfx::TypedText(cfg.msgId).getText());
         }
+        // Shrink to the largest size that fits the fixed-width item so long
+        // labels (e.g. "Beep & Vibrate") are not clipped.
+        text.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_30));
+        if (text.getTextWidth() > text.getWidth()) {
+            text.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
+        }
+        if (text.getTextWidth() > text.getWidth()) {
+            text.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20));
+        }
         text.setVisible(true);
         toggle.setVisible(false);
         textToggleLeft.setVisible(false);
