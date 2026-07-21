@@ -76,6 +76,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/apps-v')
     permissions:
       contents: write
+    env:
+      TAG: ${{ github.ref_name }}
     steps:
       - name: Install dependencies
         run: |
@@ -120,17 +122,18 @@ jobs:
 
       - name: Make release immutable
         run: |
-          gh release edit ${{ github.ref_name }} --draft=false
+          gh release edit "$TAG" --draft=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - id: get_slack_params
         name: Get required parameters for slack notification
         run: |
-          RELEASE_JSON=$(gh release view ${{ github.ref_name }} --json body,author,createdAt,name,url)
-          echo "body<<EOF" >> $GITHUB_OUTPUT
+          RELEASE_JSON=$(gh release view "$TAG" --json body,author,createdAt,name,url)
+          DELIM="EOF_$(openssl rand -hex 16)"
+          echo "body<<$DELIM" >> $GITHUB_OUTPUT
           echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "$DELIM" >> $GITHUB_OUTPUT
           echo "author=$(echo "$RELEASE_JSON" | jq -r '.author.login')" >> $GITHUB_OUTPUT
           echo "created_at=$(echo "$RELEASE_JSON" | jq -r '.createdAt')" >> $GITHUB_OUTPUT
           echo "name=$(echo "$RELEASE_JSON" | jq -r '.name')" >> $GITHUB_OUTPUT
@@ -140,14 +143,21 @@ jobs:
 
       - id: prepare_slack_payload
         name: Prepare Slack payload
+        env:
+          BODY_RAW: ${{ steps.get_slack_params.outputs.body }}
+          SLACK_NAME: ${{ steps.get_slack_params.outputs.name }}
+          SLACK_TAG: ${{ github.ref_name }}
+          SLACK_AUTHOR: ${{ steps.get_slack_params.outputs.author }}
+          SLACK_CREATED: ${{ steps.get_slack_params.outputs.created_at }}
+          SLACK_URL: ${{ steps.get_slack_params.outputs.url }}
         run: |
-          BODY="${{ steps.get_slack_params.outputs.body }}"
+          BODY="$BODY_RAW"
           BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g')
           BODY=$(echo "$BODY" | sed 's/^## \([^$]*\)$/*\1*/')
           BODY=$(echo "$BODY" | sed 's/^* /- /')
           BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/')
           if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
-          PAYLOAD=$(jq -c -n --arg name "${{ steps.get_slack_params.outputs.name }}" --arg tag "${{ github.ref_name }}" --arg body "$BODY" --arg author "${{ steps.get_slack_params.outputs.author }}" --arg created "${{ steps.get_slack_params.outputs.created_at }}" --arg url "${{ steps.get_slack_params.outputs.url }}" '{
+          PAYLOAD=$(jq -c -n --arg name "$SLACK_NAME" --arg tag "$SLACK_TAG" --arg body "$BODY" --arg author "$SLACK_AUTHOR" --arg created "$SLACK_CREATED" --arg url "$SLACK_URL" '{
             text: (":roller_coaster: *UNA Apps*: " + $name),
             blocks: [
               {
