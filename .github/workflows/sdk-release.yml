@@ -73,15 +73,20 @@ jobs:
           SLACK_URL: ${{ steps.get_slack_params.outputs.url }}
         run: |
           BODY="$BODY_RAW"
-          # Convert markdown to Slack mrkdwn
-          BODY=$(echo "$BODY" | perl -pe 's/\[([^\]]+)\]\(([^)]+)\)/<$2|$1>/g' || { echo "Error converting links"; exit 1; })  # Links
-          BODY=$(echo "$BODY" | perl -pe 's/\*\*([^*]+)\*\*/\*$1\*/g' || { echo "Error converting bold"; exit 1; })  # Bold
-          BODY=$(echo "$BODY" | perl -pe 's/\*([^*]+)\*/_$1_/g' || { echo "Error converting italic"; exit 1; })  # Italic
-          BODY=$(echo "$BODY" | perl -pe 's/^-\s*/- /g; s/^\*\s*/- /g' || { echo "Error converting lists"; exit 1; })  # Lists
-          BODY=$(echo "$BODY" | perl -pe 's/^#\+\s*\(.*\)$/*$1*/g' || { echo "Error converting headers"; exit 1; })  # Headers
-          BODY=$(echo "$BODY" | perl -pe 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/$1|@$1>/g' || { echo "Error converting mentions"; exit 1; })  # Mentions
-          BODY=$(echo "$BODY" | perl -pe 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/' || { echo "Error adjusting changelog"; exit 1; })  # Changelog
-          BODY=$(echo "$BODY" | perl -pe 's/"/\\"/g' || { echo "Error escaping quotes"; exit 1; })  # Escape double quotes
+          # Convert markdown to Slack mrkdwn. Bold is parked in a \x01 placeholder so the
+          # italic rule cannot eat it; the changelog and header rules emit the placeholder
+          # too so their bold survives. No quote escaping here: jq --arg JSON-encodes $BODY.
+          BODY=$(echo "$BODY" | perl -pe '
+            s/^-\s+/- /;                                            # "-" lists
+            s/^\*\s+/- /;                                           # "*" lists
+            s/^#+\s*(.*)$/\x01$1\x01/;                              # Headers -> bold
+            s/\*\*Full Changelog\*\*:/ \x01Full Changelog\x01\n/;   # Changelog
+            s/\*\*([^*]+)\*\*/\x01$1\x01/g;                         # Bold -> placeholder
+            s/\*([^*]+)\*/_$1_/g;                                   # Italic
+            s/\x01([^\x01]+)\x01/*$1*/g;                            # Placeholder -> Slack bold
+            s/\[([^\]]+)\]\(([^)]+)\)/<$2|$1>/g;                    # Links
+            s/@([a-zA-Z0-9_-]+)/<https:\/\/github.com\/$1|\@$1>/g;  # Mentions
+          ') || { echo "Error converting markdown to Slack mrkdwn"; exit 1; }
           if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
           PAYLOAD=$(jq -c -n --arg name "$SLACK_NAME" --arg tag "$SLACK_TAG" --arg body "$BODY" --arg author "$SLACK_AUTHOR" --arg created "$SLACK_CREATED" --arg url "$SLACK_URL" '{
             text: (":books: *UNA SDK*: " + $name),
