@@ -1,6 +1,6 @@
 # UNA-Watch Simulator
 
-The simulator application works only on Windows OS. The UNA Simulator works with TouchGFX Designer and Visual Studio.   
+The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow; for Linux, see [Linux (GCC)](#linux-gcc).   
 Note: If you move the application to another location, you need to update the relative path to **TouchGFX library path**.
       See: [Transfer Application](#transfer-application) 
 ## Getting Started
@@ -179,7 +179,7 @@ Options:
      `<app_name>\Software\Apps\TouchGFX-GUI\simulator\msvs
 2. Add header paths to **ClInclude**.
 3. Add source file paths to **ClCompile**.
-#### GCC
+#### GCC {#gcc}
 1. Open **MakeFile** in text editor:
   `<app-name>\Software\Apps\TouchGFX-GUI\simulator\gcc`
 2. Add header paths to **ADDITIONAL_INCLUDE_PATHS**.
@@ -199,3 +199,35 @@ Example:
 
 4. If you move the **una_sdk** folder, you must update UNA_SDK environment variable.
    See: [Install UNA_SDK variable](#install-una-sdk-variable) 
+
+## Linux (GCC) {#linux-gcc}
+
+The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.
+
+### Build and run
+
+This assumes the SDK is cloned and `UNA_SDK` is exported, per [SDK Setup](sdk-setup.md). Unlike the firmware build, the desktop simulator does **not** need the ST ARM toolchain; it needs GCC, SDL2, and Ruby.
+
+From an app's `TouchGFX-GUI` directory (for example `Examples/Apps/Running/Software/Apps/TouchGFX-GUI`):
+
+```bash
+# Simulator dependencies (Debian/Ubuntu)
+sudo apt-get install -y libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri
+
+# Build
+UNA_SDK=<repo-root> make -f simulator/gcc/Makefile -j"$(nproc)"
+
+# Run headless (no X display needed)
+SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./build/bin/simulator.out
+```
+
+The build links `touchgfx SDL2 SDL2_image jpeg rt m pthread dl`. To add your own headers or sources to the Linux build, edit `simulator/gcc/Makefile` (`ADDITIONAL_INCLUDE_PATHS` / `ADDITIONAL_SOURCES_UNA`), as described under [GCC](#gcc) above.
+
+### What makes the Linux build work
+
+Linux support is spread across the repo rather than in one place:
+
+- **SDK (`Libs/`)** — the simulator layer is platform-split with `#ifdef _WIN32` / `#else`: POSIX `GetTickCount64()` / `Sleep()` shims (via `clock_gettime` and `usleep`), a `dirent`-based FileSystem backend, message-size `static_assert`s guarded to 32-bit (ARM) builds with `#if __SIZEOF_POINTER__ == 4`, and a C-valid plain `strncpy` in `StdLibWrappers.c`.
+- **Vendored TouchGFX tooling (`ThirdParty/`)** — the Linux asset converters carry the execute bit and the `textconvert` Ruby scripts run on modern Ruby. See [`ThirdParty-Local-Patches.md`](ThirdParty-Local-Patches.md).
+- **Per-app config** — each `TouchGFX-GUI` project tracks `config/gcc/app.mk` (it holds the repo-relative `touchgfx_path` the Linux `una/Makefile` hard-includes), adds `-no-pie` to the Linux linker options in `una/Makefile`, and guards its `Windows.h` include with `#ifdef _WIN32`.
+- **CI** — `.github/workflows/linux-simulator.yml` builds and headlessly smoke-runs the simulator (non-gating).

@@ -5,9 +5,9 @@ diverge from the upstream vendor drop. These are **not** part of the SDK's own
 source: when a vendored component is re-imported at a new version, the drop will
 overwrite these files and each patch below must be **re-applied**.
 
-> This is distinct from [`SDK_LINUX_FIXES.md`](SDK_LINUX_FIXES.md), which records
-> changes to the SDK's **own** source (e.g. the simulator OS shims). Changes to
-> our own code survive a vendor bump; the patches here do not.
+> This is distinct from the SDK's **own** source (e.g. the simulator OS shims
+> documented in [`Simulator.md`](Simulator.md#linux-gcc)): changes to our own code
+> survive a vendor bump; the patches here do not.
 
 ## How to use this document
 
