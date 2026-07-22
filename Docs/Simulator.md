@@ -212,10 +212,10 @@ From an app's `TouchGFX-GUI` directory (for example `Examples/Apps/Running/Softw
 
 ```bash
 # Simulator dependencies (Debian/Ubuntu)
-sudo apt-get install -y libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri
+sudo apt-get install -y build-essential libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri
 
-# Build
-UNA_SDK=<repo-root> make -f simulator/gcc/Makefile -j"$(nproc)"
+# Build (UNA_SDK is the absolute path to the repo root)
+UNA_SDK=/absolute/path/to/una-sdk make -f simulator/gcc/Makefile -j"$(nproc)"
 
 # Run headless (no X display needed)
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./build/bin/simulator.out
