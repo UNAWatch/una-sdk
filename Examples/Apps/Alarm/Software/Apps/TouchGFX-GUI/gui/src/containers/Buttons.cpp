@@ -18,6 +18,7 @@ touchgfx::colortype Buttons::toColortype(Color color)
         case WHITE: return touchgfx::Color::getColorFromRGB(192, 192, 192);
         case AMBER: return touchgfx::Color::getColorFromRGB(192, 128,   0);
         case RED:   return touchgfx::Color::getColorFromRGB(192,   0,   0);
+        case TEAL:  return touchgfx::Color::getColorFromRGB(  0, 128, 128);
         default:    return 0;
     }
 }
