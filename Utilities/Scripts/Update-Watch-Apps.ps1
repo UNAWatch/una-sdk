@@ -121,42 +121,118 @@ $appsRoot = Join-Path $root 'Apps'
 if (-not (Test-Path -LiteralPath $appsRoot)) { throw "No Apps folder at $appsRoot." }
 Write-Host "Watch apps folder: $appsRoot  ($($srcApps.Count) apps in source)"
 
-# ---- locale-independent safe eject (P/Invoke storage IOCTLs) --------------
+# ---- locale-independent safe eject (P/Invoke) ------------------------------
+# The watch is a USB *composite* device, so IOCTL_STORAGE_EJECT_MEDIA on the
+# volume only flushes -- it doesn't take the drive offline (the device just
+# re-presents its media). A true "Safely Remove" is CM_Request_Device_Eject on
+# the removable USB devnode: map the drive letter -> disk device number -> its
+# devnode, then eject that node or the first ejectable ancestor up the tree.
 function Invoke-SafeEject([string]$root) {
     $letter = ($root.TrimEnd('\')).TrimEnd(':')
-    if (-not ([System.Management.Automation.PSTypeName]'Una.VolumeEject').Type) {
+    if (-not ([System.Management.Automation.PSTypeName]'Una.DeviceEject').Type) {
         # -TypeDefinition (full namespace/class) so the `using` directives are legal.
         Add-Type -TypeDefinition @'
 using System;
+using System.Text;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 namespace Una {
-    public static class VolumeEject {
-        const uint GENERIC_RW = 0x80000000 | 0x40000000, SHARE_RW = 0x1 | 0x2, OPEN_EXISTING = 3;
+    public static class DeviceEject {
+        const uint SHARE_RW = 0x1 | 0x2, OPEN_EXISTING = 3, GENERIC_RW = 0x80000000 | 0x40000000;
+        const uint IOCTL_STORAGE_GET_DEVICE_NUMBER = 0x2D1080;
         const uint FSCTL_LOCK_VOLUME = 0x00090018, FSCTL_DISMOUNT_VOLUME = 0x00090020;
-        const uint IOCTL_MEDIA_REMOVAL = 0x002D4804, IOCTL_EJECT_MEDIA = 0x002D4808;
+        const int DIGCF_PRESENT = 0x2, DIGCF_DEVICEINTERFACE = 0x10;
+        static Guid GUID_DISK = new Guid("53f56307-b6bf-11d0-94f2-00a0c91efb8b");
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct STORAGE_DEVICE_NUMBER { public int DeviceType; public uint DeviceNumber; public uint PartitionNumber; }
+        [StructLayout(LayoutKind.Sequential)]
+        struct SP_DEVICE_INTERFACE_DATA { public int cbSize; public Guid guid; public int Flags; public IntPtr Reserved; }
+        [StructLayout(LayoutKind.Sequential)]
+        struct SP_DEVINFO_DATA { public int cbSize; public Guid ClassGuid; public uint DevInst; public IntPtr Reserved; }
+
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern SafeFileHandle CreateFile(string n, uint a, uint s, IntPtr sec, uint d, uint f, IntPtr t);
         [DllImport("kernel32", SetLastError = true)]
-        static extern bool DeviceIoControl(SafeFileHandle h, uint code, byte[] ib, uint ibl, byte[] ob, uint obl, out uint br, IntPtr ov);
-        public static string Eject(char letter) {
-            var h = CreateFile(@"\\.\" + letter + ":", GENERIC_RW, SHARE_RW, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
-            if (h.IsInvalid) return "open failed (err " + Marshal.GetLastWin32Error() + ")";
+        static extern bool DeviceIoControl(SafeFileHandle h, uint code, IntPtr ib, uint ibl, IntPtr ob, uint obl, out uint br, IntPtr ov);
+        [DllImport("setupapi", SetLastError = true)]
+        static extern IntPtr SetupDiGetClassDevs(ref Guid g, IntPtr en, IntPtr hwnd, int flags);
+        [DllImport("setupapi", SetLastError = true)]
+        static extern bool SetupDiEnumDeviceInterfaces(IntPtr h, IntPtr di, ref Guid g, int idx, ref SP_DEVICE_INTERFACE_DATA d);
+        [DllImport("setupapi", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern bool SetupDiGetDeviceInterfaceDetail(IntPtr h, ref SP_DEVICE_INTERFACE_DATA d, IntPtr det, int detSize, ref int req, ref SP_DEVINFO_DATA info);
+        [DllImport("setupapi", SetLastError = true)]
+        static extern bool SetupDiDestroyDeviceInfoList(IntPtr h);
+        [DllImport("cfgmgr32")]
+        static extern int CM_Get_Parent(out uint parent, uint dev, int flags);
+        [DllImport("cfgmgr32", CharSet = CharSet.Unicode)]
+        static extern int CM_Request_Device_EjectW(uint dev, out int veto, StringBuilder name, int len, int flags);
+
+        static uint DeviceNumberOf(string path) {
+            var h = CreateFile(path, 0, SHARE_RW, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
+            if (h.IsInvalid) return 0xFFFFFFFF;
             try {
-                uint br; bool locked = false;
-                for (int i = 0; i < 12 && !locked; i++) { locked = DeviceIoControl(h, FSCTL_LOCK_VOLUME, null, 0, null, 0, out br, IntPtr.Zero); if (!locked) System.Threading.Thread.Sleep(250); }
-                if (!locked) return "lock failed - files still open on the volume";
-                if (!DeviceIoControl(h, FSCTL_DISMOUNT_VOLUME, null, 0, null, 0, out br, IntPtr.Zero)) return "dismount failed (err " + Marshal.GetLastWin32Error() + ")";
-                DeviceIoControl(h, IOCTL_MEDIA_REMOVAL, new byte[] { 0 }, 1, null, 0, out br, IntPtr.Zero);
-                if (!DeviceIoControl(h, IOCTL_EJECT_MEDIA, null, 0, null, 0, out br, IntPtr.Zero)) return "eject failed (err " + Marshal.GetLastWin32Error() + ")";
-                return "OK";
+                int sz = Marshal.SizeOf(typeof(STORAGE_DEVICE_NUMBER));
+                IntPtr buf = Marshal.AllocHGlobal(sz);
+                try {
+                    uint br;
+                    if (!DeviceIoControl(h, IOCTL_STORAGE_GET_DEVICE_NUMBER, IntPtr.Zero, 0, buf, (uint)sz, out br, IntPtr.Zero)) return 0xFFFFFFFF;
+                    return ((STORAGE_DEVICE_NUMBER)Marshal.PtrToStructure(buf, typeof(STORAGE_DEVICE_NUMBER))).DeviceNumber;
+                } finally { Marshal.FreeHGlobal(buf); }
             } finally { h.Close(); }
+        }
+
+        public static string Eject(char letter) {
+            string vol = @"\\.\" + letter + ":";
+            // flush + dismount first (also makes a later -Verify read cold flash)
+            var vh = CreateFile(vol, GENERIC_RW, SHARE_RW, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
+            if (!vh.IsInvalid) {
+                uint br; bool locked = false;
+                for (int i = 0; i < 12 && !locked; i++) { locked = DeviceIoControl(vh, FSCTL_LOCK_VOLUME, IntPtr.Zero, 0, IntPtr.Zero, 0, out br, IntPtr.Zero); if (!locked) System.Threading.Thread.Sleep(250); }
+                DeviceIoControl(vh, FSCTL_DISMOUNT_VOLUME, IntPtr.Zero, 0, IntPtr.Zero, 0, out br, IntPtr.Zero);
+                vh.Close();
+            }
+
+            uint num = DeviceNumberOf(vol);
+            if (num == 0xFFFFFFFF) return "could not read the volume's device number";
+
+            IntPtr hDev = SetupDiGetClassDevs(ref GUID_DISK, IntPtr.Zero, IntPtr.Zero, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+            if (hDev == new IntPtr(-1)) return "SetupDiGetClassDevs failed";
+            try {
+                var did = new SP_DEVICE_INTERFACE_DATA(); did.cbSize = Marshal.SizeOf(did);
+                for (int i = 0; SetupDiEnumDeviceInterfaces(hDev, IntPtr.Zero, ref GUID_DISK, i, ref did); i++) {
+                    int req = 0; var info = new SP_DEVINFO_DATA(); info.cbSize = Marshal.SizeOf(info);
+                    SetupDiGetDeviceInterfaceDetail(hDev, ref did, IntPtr.Zero, 0, ref req, ref info);
+                    IntPtr det = Marshal.AllocHGlobal(req);
+                    try {
+                        Marshal.WriteInt32(det, IntPtr.Size == 8 ? 8 : 6);   // cbSize of SP_DEVICE_INTERFACE_DETAIL_DATA
+                        info = new SP_DEVINFO_DATA(); info.cbSize = Marshal.SizeOf(info);
+                        if (!SetupDiGetDeviceInterfaceDetail(hDev, ref did, det, req, ref req, ref info)) continue;
+                        string path = Marshal.PtrToStringUni(new IntPtr(det.ToInt64() + 4));
+                        if (DeviceNumberOf(path) != num) continue;
+                        // our disk: eject it, or the first ejectable ancestor up the USB tree
+                        var diag = new StringBuilder();
+                        uint target = info.DevInst;
+                        for (int up = 0; up < 8; up++) {
+                            int veto = -1; var sb = new StringBuilder(300);
+                            int cr = CM_Request_Device_EjectW(target, out veto, sb, 300, 0);
+                            if (cr == 0 && veto == 0) return "OK";
+                            diag.Append(String.Format("[cr={0} veto={1} {2}] ", cr, veto, sb.ToString()));
+                            uint parent;
+                            if (CM_Get_Parent(out parent, target, 0) != 0) break;
+                            target = parent;
+                        }
+                        return "removal vetoed " + diag.ToString();
+                    } finally { Marshal.FreeHGlobal(det); }
+                }
+                return "disk devnode not found for device number " + num;
+            } finally { SetupDiDestroyDeviceInfoList(hDev); }
         }
     }
 }
 '@
     }
-    $res = [Una.VolumeEject]::Eject([char]$letter)
+    $res = [Una.DeviceEject]::Eject([char]$letter)
     if ($res -ne 'OK') { Write-Warning "Auto-eject failed: $res. Eject $letter`: manually via the tray."; return $false }
     for ($i = 0; $i -lt 20; $i++) { Start-Sleep -Milliseconds 500; if (-not (Test-Path -LiteralPath $root)) { return $true } }
     Write-Warning "$letter`: still present after eject. Eject it manually via the tray."; return $false
