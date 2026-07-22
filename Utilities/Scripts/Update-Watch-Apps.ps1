@@ -77,6 +77,8 @@ $ErrorActionPreference = 'Stop'
 # ---- resolve source (folder, or a .zip we auto-extract) --------------------
 $origSource = $Source     # what to show the user for the follow-up -Verify command
 $tmp = $null              # temp extract dir (cleaned up at the end) if -Source is a .zip
+# any throw after extraction (no apps, no watch, bad drive, ...) still cleans up $tmp
+trap { if ($tmp -and (Test-Path -LiteralPath $tmp)) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue -WhatIf:$false -Confirm:$false } }
 if (Test-Path -LiteralPath $Source -PathType Leaf) {
     if ($Source -notmatch '\.zip$') { throw "Source must be a folder or a .zip: $Source" }
     $tmp = Join-Path ([IO.Path]::GetTempPath()) ('uapp-src-' + [Guid]::NewGuid().ToString('N'))
@@ -106,7 +108,9 @@ function Resolve-WatchDrive {
         if (-not (Test-Path -LiteralPath (Join-Path $r 'Apps'))) { Write-Warning "No \Apps folder on $r - is that the watch drive?" }
         return $r
     }
-    $vols = @(Get-Volume -ErrorAction SilentlyContinue | Where-Object { $_.FileSystemLabel -eq $Label -and $_.DriveLetter -and $_.DriveType -eq 'Removable' })
+    # match on the exact label only: it is specific enough (never C:), and some USB
+    # mass-storage watches report DriveType 'Fixed', which a Removable filter would miss.
+    $vols = @(Get-Volume -ErrorAction SilentlyContinue | Where-Object { $_.FileSystemLabel -eq $Label -and $_.DriveLetter })
     if ($vols.Count -eq 1) { return ("{0}:\" -f $vols[0].DriveLetter) }
     if ($vols.Count -gt 1) { throw ("Multiple volumes labelled '$Label': {0}. Pass -Drive." -f (($vols.DriveLetter) -join ', ')) }
     # fallback: a REMOVABLE drive with an \Apps folder (never a fixed drive like C:\Apps)
@@ -274,25 +278,33 @@ foreach ($a in $srcApps) {
     $dst    = Join-Path $appDir $a.File.Name
     $action = if ($exists) { 'update' } else { 'install' }
     if ($PSCmdlet.ShouldProcess("$($a.App)  ->  $dst", $action)) {
-        if (-not $exists) { [System.IO.Directory]::CreateDirectory($appDir) | Out-Null }   # .NET (no prompt in non-interactive)
-        try { [System.IO.File]::Copy($a.File.FullName, $dst, $true) }          # new first, via .NET (not Copy-Item)
+        try {
+            if (-not $exists) { [System.IO.Directory]::CreateDirectory($appDir) | Out-Null }   # .NET (no prompt in non-interactive)
+            [System.IO.File]::Copy($a.File.FullName, $dst, $true)             # new first, via .NET (not Copy-Item)
+        }
         catch {
             Write-Warning ("  {0}: copy failed ({1}); removing any partial file" -f $a.App, $_.Exception.Message)
-            if (Test-Path -LiteralPath $dst) { [System.IO.File]::Delete($dst) }
+            try { if (Test-Path -LiteralPath $dst) { [System.IO.File]::Delete($dst) } } catch { }
             $failed += $a.App; continue
         }
         $dstLen = (Get-Item -LiteralPath $dst).Length
         if ($a.File.Length -ne $dstLen) {
             # bad copy: remove the corrupt new file; do NOT delete any stale .uapp
-            [System.IO.File]::Delete($dst)
+            try { [System.IO.File]::Delete($dst) } catch { Write-Warning ("  {0}: could not remove bad copy ({1})" -f $a.App, $_.Exception.Message) }
             $remain = @(Get-ChildItem -LiteralPath $appDir -Filter *.uapp -File)
             if ($remain.Count -eq 0) { Write-Warning ("  {0}: size mismatch - bad copy removed; NO valid .uapp remains, re-run to reinstall (settings/Activity preserved)" -f $a.App) }
             else { Write-Warning ("  {0}: size mismatch - bad copy removed; kept existing {1}" -f $a.App, $remain[0].Name) }
             $failed += $a.App; continue
         }
         # copy validated -> now safe to remove stale .uapp(s); keep settings.json / Activity
-        Get-ChildItem -LiteralPath $appDir -Filter *.uapp -File | Where-Object { $_.Name -ne $a.File.Name } | ForEach-Object {
-            [System.IO.File]::Delete($_.FullName); Write-Host ("    removed old {0}" -f $_.Name)
+        try {
+            Get-ChildItem -LiteralPath $appDir -Filter *.uapp -File | Where-Object { $_.Name -ne $a.File.Name } | ForEach-Object {
+                [System.IO.File]::Delete($_.FullName); Write-Host ("    removed old {0}" -f $_.Name)
+            }
+        }
+        catch {
+            Write-Warning ("  {0}: new .uapp copied OK, but a stale .uapp could not be removed ({1}); the folder now has >1 .uapp - delete the old one manually" -f $a.App, $_.Exception.Message)
+            $failed += $a.App; continue
         }
         if ($exists) { $updated += $a.App } else { $installed += $a.App }
         Write-Host ("  [{0,-8}] {1} -> {2}" -f $action, $a.App, $a.File.Name)
