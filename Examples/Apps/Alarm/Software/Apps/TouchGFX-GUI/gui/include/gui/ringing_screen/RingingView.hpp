@@ -13,7 +13,7 @@
  *   - mSnoozeTimer : auto-snoozes the alarm when it expires (after kSnoozeTicks).
  *   - mPlayTimer   : repeats the alarm sound every kPlayTicks.
  *
- * R1 stops the alarm; R2 snoozes it immediately.
+ * R1 (top-right) snoozes the alarm; R2 (bottom-right) stops it.
  */
 class RingingView : public RingingViewBase
 {
@@ -23,10 +23,13 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
-    void setTime(uint8_t h, uint8_t m, bool is12Hour);
-
 protected:
     virtual void handleKeyEvent(uint8_t key) override;
+
+    // Large "Alarm" title shown in place of the time/icon (see setupScreen).
+    touchgfx::TextAreaWithOneWildcard mAlarmTitle;
+    static const uint16_t ALARM_TITLE_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar mAlarmTitleBuffer[ALARM_TITLE_SIZE];
 
     /** @brief Fired by mSnoozeTimer when the auto-snooze timeout elapses. */
     void onSnooze();

@@ -34,6 +34,7 @@ public:
         WHITE,     ///< White  -- neutral action  (#C0C0C0)
         AMBER,     ///< Amber  -- primary action  (#C08000)
         RED,       ///< Red    -- warning / destructive action  (#C00000)
+        TEAL,      ///< Teal   -- secondary / positive action  (#008080)
     };
 
     void setL1(Color color = NONE); ///< Top-left button
