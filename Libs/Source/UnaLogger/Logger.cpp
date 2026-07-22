@@ -23,6 +23,15 @@ void Logger_init(SDK::Interface::ILogger& ilogger)
     }
 }
 
+void Logger_deinit(SDK::Interface::ILogger& ilogger)
+{
+    // Only clear if this is the currently-installed logger, so a stray deinit of some other
+    // ILogger instance cannot silence logging.
+    if (sILogger == &ilogger) {
+        sILogger = nullptr;
+    }
+}
+
 void Logger_message(const char* level,
                     const char* module,
                     const char* func,

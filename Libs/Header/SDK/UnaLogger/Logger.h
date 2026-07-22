@@ -86,6 +86,21 @@
 void Logger_init(SDK::Interface::ILogger& ilogger);
 
 /**
+ * @brief   Deregister a logger previously installed via Logger_init().
+ *
+ * Clears the internal logger pointer, but only if it currently refers to
+ * @p ilogger. Call this before the ILogger instance is destroyed so that a
+ * later log call cannot dereference a dangling logger (e.g. queue-drain
+ * logging during teardown after the owning kernel has already been
+ * destroyed).
+ *
+ * @param[in]   ilogger     Reference to the ILogger interface instance
+ *
+ * @note Safe to call with a logger that was never installed (no-op).
+ */
+void Logger_deinit(SDK::Interface::ILogger& ilogger);
+
+/**
  * @brief   Output formatted log message with metadata.
  *
  * This function formats and outputs a log message with metadata including

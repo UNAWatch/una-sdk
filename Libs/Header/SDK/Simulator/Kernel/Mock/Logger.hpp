@@ -13,6 +13,7 @@
 #pragma once
 
 #include "SDK/Interfaces/ILogger.hpp"
+#include "SDK/UnaLogger/Logger.h"
 
 #include "SDK/Simulator/OS/OS.hpp"
 #include "touchgfx/Utils.hpp"
@@ -58,7 +59,13 @@ public:
         svlog(level, module_name, func, line, fmt, args);
     }
 
-    virtual ~Logger() = default;
+    virtual ~Logger() override
+    {
+        // If this is the currently-installed global logger, uninstall it. Otherwise a later log
+        // call -- the queue-drain LOG_WARNINGs in ~DualAppComm, which outlives the kernel that
+        // owns this logger -- would run through a freed vtable and hit a pure virtual.
+        Logger_deinit(*this);
+    }
 
 private:
     static inline OS::Mutex mMutexLog;
