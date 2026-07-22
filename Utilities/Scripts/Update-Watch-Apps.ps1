@@ -80,7 +80,9 @@ $tmp = $null              # temp extract dir (cleaned up at the end) if -Source 
 if (Test-Path -LiteralPath $Source -PathType Leaf) {
     if ($Source -notmatch '\.zip$') { throw "Source must be a folder or a .zip: $Source" }
     $tmp = Join-Path ([IO.Path]::GetTempPath()) ('uapp-src-' + [Guid]::NewGuid().ToString('N'))
-    Expand-Archive -LiteralPath $Source -DestinationPath $tmp -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue   # PS 5.1 needs this; PS 7 has it built in
+    # .NET extraction (creates $tmp) - no cmdlet ShouldProcess/prompt, so it works non-interactively and under -WhatIf
+    [System.IO.Compression.ZipFile]::ExtractToDirectory((Resolve-Path -LiteralPath $Source).Path, $tmp)
     $Source = $tmp
 } elseif (-not (Test-Path -LiteralPath $Source -PathType Container)) {
     throw "Source not found: $Source"
@@ -104,7 +106,7 @@ function Resolve-WatchDrive {
         if (-not (Test-Path -LiteralPath (Join-Path $r 'Apps'))) { Write-Warning "No \Apps folder on $r - is that the watch drive?" }
         return $r
     }
-    $vols = @(Get-Volume -ErrorAction SilentlyContinue | Where-Object { $_.FileSystemLabel -eq $Label -and $_.DriveLetter })
+    $vols = @(Get-Volume -ErrorAction SilentlyContinue | Where-Object { $_.FileSystemLabel -eq $Label -and $_.DriveLetter -and $_.DriveType -eq 'Removable' })
     if ($vols.Count -eq 1) { return ("{0}:\" -f $vols[0].DriveLetter) }
     if ($vols.Count -gt 1) { throw ("Multiple volumes labelled '$Label': {0}. Pass -Drive." -f (($vols.DriveLetter) -join ', ')) }
     # fallback: a REMOVABLE drive with an \Apps folder (never a fixed drive like C:\Apps)
@@ -166,14 +168,17 @@ namespace Una {
 if ($Verify) {
     Write-Host "`nVerify - ensure you EJECTED and RECONNECTED the watch first, else this reads"
     Write-Host "the Windows write cache and can report a false OK.`n"
-    $bad = 0
+    $bad = 0; $na = 0
     foreach ($a in $srcApps) {
-        $dst = Join-Path (Join-Path $appsRoot $a.App) $a.File.Name
+        $appDir = Join-Path $appsRoot $a.App
+        if (-not (Test-Path -LiteralPath $appDir -PathType Container)) { Write-Host ("  [n/a     ] {0} (not installed - skipped)" -f $a.App); $na++; continue }
+        $dst = Join-Path $appDir $a.File.Name
         if (-not (Test-Path -LiteralPath $dst)) { Write-Host ("  [MISSING ] {0}\{1}" -f $a.App, $a.File.Name); $bad++; continue }
         if ((Get-FileHash -LiteralPath $a.File.FullName -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash) {
             Write-Host ("  [OK      ] {0}\{1}" -f $a.App, $a.File.Name)
         } else { Write-Host ("  [MISMATCH] {0}\{1}" -f $a.App, $a.File.Name); $bad++ }
     }
+    if ($na -gt 0) { Write-Host ("  ($na source app(s) not installed on the watch - skipped)") }
     if ($tmp) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue -WhatIf:$false -Confirm:$false }
     if ($bad -gt 0) { Write-Warning "$bad file(s) failed - re-copy, then eject/reconnect and verify again."; exit 1 }
     Write-Host "`nAll files verified against flash. Reboot the watch to refresh the launcher."
@@ -193,15 +198,21 @@ foreach ($a in $srcApps) {
     $dst    = Join-Path $appDir $a.File.Name
     $action = if ($exists) { 'update' } else { 'install' }
     if ($PSCmdlet.ShouldProcess("$($a.App)  ->  $dst", $action)) {
-        if (-not $exists) { New-Item -ItemType Directory -Path $appDir -Force | Out-Null }
-        [System.IO.File]::Copy($a.File.FullName, $dst, $true)                  # new first, via .NET (not Copy-Item)
+        if (-not $exists) { [System.IO.Directory]::CreateDirectory($appDir) | Out-Null }   # .NET (no prompt in non-interactive)
+        try { [System.IO.File]::Copy($a.File.FullName, $dst, $true) }          # new first, via .NET (not Copy-Item)
+        catch {
+            Write-Warning ("  {0}: copy failed ({1}); removing any partial file" -f $a.App, $_.Exception.Message)
+            if (Test-Path -LiteralPath $dst) { [System.IO.File]::Delete($dst) }
+            $failed += $a.App; continue
+        }
         $dstLen = (Get-Item -LiteralPath $dst).Length
         if ($a.File.Length -ne $dstLen) {
-            # bad copy: remove the corrupt new file and KEEP the old .uapp so the app still works
-            Write-Warning ("  {0}: size mismatch (src={1} dev={2}) - bad copy; removed it, kept the existing .uapp" -f $a.App, $a.File.Length, $dstLen)
+            # bad copy: remove the corrupt new file; do NOT delete any stale .uapp
             [System.IO.File]::Delete($dst)
-            $failed += $a.App
-            continue
+            $remain = @(Get-ChildItem -LiteralPath $appDir -Filter *.uapp -File)
+            if ($remain.Count -eq 0) { Write-Warning ("  {0}: size mismatch - bad copy removed; NO valid .uapp remains, re-run to reinstall (settings/Activity preserved)" -f $a.App) }
+            else { Write-Warning ("  {0}: size mismatch - bad copy removed; kept existing {1}" -f $a.App, $remain[0].Name) }
+            $failed += $a.App; continue
         }
         # copy validated -> now safe to remove stale .uapp(s); keep settings.json / Activity
         Get-ChildItem -LiteralPath $appDir -Filter *.uapp -File | Where-Object { $_.Name -ne $a.File.Name } | ForEach-Object {
@@ -233,4 +244,4 @@ if ($Eject -and $PSCmdlet.ShouldProcess($root, 'safely eject')) {
     Write-Host "  3. Reboot the watch so it rebuilds the launcher / app list."
 }
 
-if ($tmp) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue }
+if ($tmp) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue -WhatIf:$false -Confirm:$false }
