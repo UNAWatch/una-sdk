@@ -184,7 +184,7 @@ void MainView::setLayout(bool compact, bool hours)
         timeMainText.setPosition(face.main.x, face.main.y, face.main.width, face.main.height);
     }
 
-    // Hundredths are dropped once the reading shows hours -- there is no room
+    // Tenths are dropped once the reading shows hours -- there is no room
     // for them and sub-second precision past an hour is pointless.
     timeFracText.setVisible(!hours);
     if (!hours) {
