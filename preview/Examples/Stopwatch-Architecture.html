@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stopwatch - Interval Timer &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/version-selector.js?v=50f89983"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Stopwatch - Interval Timer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/Stopwatch-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="stopwatch-interval-timer">
+<h1>Stopwatch - Interval Timer<a class="headerlink" href="#stopwatch-interval-timer" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Stopwatch app is a <strong>Utility</strong>-type application that measures elapsed time and records laps. It is a single-screen app: one face shows the running clock, the controls, and a scrollable list of laps, changing shape according to the state rather than switching between screens.</p>
+<p>The app uses no sensors and writes no files. Its only job is timekeeping, and it does that without any periodic work: the kernel hands the service and the GUI the same monotonic millisecond tick, so a start timestamp taken by the service stays meaningful in the GUI. The GUI extrapolates the running time from the last snapshot against its own clock, and the service sends a snapshot only in response to an event — a state-changing command, the GUI starting, or an explicit request to resync — never on a timer. Between those events there is no traffic at all.</p>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Start, pause, resume, reset, and up to 50 recorded laps</p></li>
+<li><p>Tenths-of-a-second precision, matching the 10 Hz frame rate: a hundredths digit would be finer than the screen can move and would sit frozen</p></li>
+<li><p>Lap times shown as durations; the running total kept exact by storing lap boundaries rather than per-lap durations</p></li>
+<li><p>Two time faces (large and compact) chosen by the lap count, plus an hour form that widens the reading to <code class="docutils literal notranslate"><span class="pre">HH:MM:SS</span></code> once the clock passes an hour</p></li>
+<li><p>A readout capped at <code class="docutils literal notranslate"><span class="pre">99:59:59.9</span></code></p></li>
+<li><p>Background counting: the service keeps timing while the GUI is closed or suspended, and re-entering the app picks the time back up</p></li>
+<li><p>The service ends itself once the GUI is gone <strong>and</strong> the clock is not running, so a stopped stopwatch holds no resident thread</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The app is structured as two independent components: a service that owns the stopwatch state and a GUI that renders it. Communication between them uses the UNA SDK kernel messaging system.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: The single source of truth for the stopwatch state; applies commands and publishes snapshots</p></li>
+<li><p><strong>GUI Layer</strong>: TouchGFX-based single screen; extrapolates the running time and draws the laps</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, messaging, monotonic system clock, GUI capabilities</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                    command (start/pause/lap/reset)
+        [GUI] ─────────────────────────────────────► [Service]
+          ▲                                               │
+          │            snapshot (full State)              │
+          └───────────────────────────────────────────────┘
+          │
+   [Kernel tick] ──► both processes read the same getTimeMs()
+</pre></div>
+</div>
+<p>The headline design point is that the snapshot is <strong>not</strong> sent periodically. The service publishes a full <code class="docutils literal notranslate"><span class="pre">Stopwatch::State</span></code> in response to an event — a state-changing command, the GUI coming up, or an explicit resync request — but never on a timer. The GUI mirror never goes stale between snapshots because the running time is recomputed on every frame from <code class="docutils literal notranslate"><span class="pre">accumMs</span> <span class="pre">+</span> <span class="pre">(now</span> <span class="pre">-</span> <span class="pre">startMs)</span></code>, using the same kernel tick the service stamped the snapshot with. This keeps the message path idle while the clock runs, which is what lets the chip reach its low-power state with the stopwatch still counting.</p>
+</section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>. It owns a <code class="docutils literal notranslate"><span class="pre">Stopwatch::Core</span></code> and answers every app command with a full snapshot.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w">           </span><span class="o">&amp;</span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w">  </span><span class="n">mSender</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">Core</span><span class="w">        </span><span class="n">mStopwatch</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">                   </span><span class="n">mGuiStarted</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleCommand</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">publish</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">run()</span></code> blocks on <code class="docutils literal notranslate"><span class="pre">getMessage()</span></code> with an infinite timeout — there is no polling loop and no timer. It reacts to three kernel lifecycle messages plus the app’s own commands:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> — forced exit; releases the message and returns</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> — the GUI is up; marks <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> and publishes the current state so the screen opens on real data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> — the GUI is gone; see lifecycle below</p></li>
+<li><p>everything else falls through to <code class="docutils literal notranslate"><span class="pre">handleCommand()</span></code></p></li>
+</ul>
+</section>
+<section id="state-structure">
+<h4>State Structure<a class="headerlink" href="#state-structure" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">Stopwatch::State</span></code> is a plain struct shared verbatim between the service and the GUI (defined in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Stopwatch.hpp</span></code>). It is small enough to travel in a single message and complete enough for the GUI to extrapolate from without further traffic:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">accumMs</span><span class="p">;</span><span class="w">           </span><span class="c1">// Elapsed time banked by previous runs</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">startMs</span><span class="p">;</span><span class="w">           </span><span class="c1">// Tick at the last resume; valid only while running</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">laps</span><span class="p">[</span><span class="n">kMaxLaps</span><span class="p">];</span><span class="w">    </span><span class="c1">// Elapsed time at each lap boundary</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">lapCount</span><span class="p">;</span><span class="w">          </span><span class="c1">// Number of valid entries in laps</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">running</span><span class="p">;</span><span class="w">           </span><span class="c1">// True while the clock is advancing</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>Laps are stored as boundaries, not durations.</strong> Each entry is the elapsed time at the moment the lap was taken; a single lap’s duration is derived on display as <code class="docutils literal notranslate"><span class="pre">laps[i]</span> <span class="pre">-</span> <span class="pre">laps[i-1]</span></code>. This keeps the running total exact instead of accumulating rounding across laps.</p>
+<p><strong>Constants</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Constant</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kMaxLaps</span></code></p></td>
+<td><p>50</p></td>
+<td><p>Maximum laps retained; bounded so <code class="docutils literal notranslate"><span class="pre">State</span></code> fits the 256-byte message pool block</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="core-class">
+<h4>Core Class<a class="headerlink" href="#core-class" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">Stopwatch::Core</span></code> holds the state and applies transitions over a <strong>caller-supplied</strong> clock. The tick is passed in rather than read internally, so the logic stays testable on the host and the caller decides which tick a transition is stamped with:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Core</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">start</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nowMs</span><span class="p">);</span><span class="w">   </span><span class="c1">// Start/resume; no-op if already running</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">pause</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nowMs</span><span class="p">);</span><span class="w">   </span><span class="c1">// Bank the time run so far</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">reset</span><span class="p">();</span><span class="w">                 </span><span class="c1">// Clear elapsed time and every lap</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">lap</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nowMs</span><span class="p">);</span><span class="w">     </span><span class="c1">// Record a boundary; false if stopped or full</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">isRunning</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="w"> </span><span class="o">&amp;</span><span class="nf">state</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Two free functions in the same header do the timekeeping arithmetic and are shared by both processes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">elapsed(state,</span> <span class="pre">nowMs)</span></code> — <code class="docutils literal notranslate"><span class="pre">running</span> <span class="pre">?</span> <span class="pre">accumMs</span> <span class="pre">+</span> <span class="pre">(nowMs</span> <span class="pre">-</span> <span class="pre">startMs)</span> <span class="pre">:</span> <span class="pre">accumMs</span></code>. The unsigned subtraction stays correct across the 32-bit tick wrap that happens roughly every 49.7 days.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lapDuration(state,</span> <span class="pre">index)</span></code> — the gap between one lap boundary and the previous one.</p></li>
+</ul>
+</section>
+</section>
+<section id="command-handling">
+<h3>Command Handling<a class="headerlink" href="#command-handling" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">handleCommand()</span></code> reads the kernel tick once, applies the matching transition, and calls <code class="docutils literal notranslate"><span class="pre">publish()</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_START</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mStopwatch.start(now)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_PAUSE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mStopwatch.pause(now)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_LAP</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mStopwatch.lap(now)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_RESET</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mStopwatch.reset()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_REQUEST</span></code></p></td>
+<td><p>no state change; the following <code class="docutils literal notranslate"><span class="pre">publish()</span></code> answers with the current snapshot</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">publish()</span></code> sends the full state to the GUI, but only when <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is true — there is no point publishing to a screen that is not there.</p>
+</section>
+<section id="service-lifecycle-and-app-startup">
+<h3>Service Lifecycle and App Startup<a class="headerlink" href="#service-lifecycle-and-app-startup" title="Link to this heading"></a></h3>
+<p>Unlike the Alarm app, the Stopwatch service is <strong>not</strong> an autostart service. It is launched when the user opens the app, and it exists only to keep the clock advancing.</p>
+<p>The kernel does not stop a service when its GUI closes. That is what lets the stopwatch keep counting after the user walks back to the menu — but it also means nothing else will ever reclaim the thread. The service therefore ends <strong>itself</strong> on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, but only when the clock is not running:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_NOTIF_GUI_STOP</span><span class="p">:</span>
+<span class="w">    </span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mStopwatch</span><span class="p">.</span><span class="n">isRunning</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// A stopped stopwatch does no work and is not worth a resident thread.</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">                       </span><span class="c1">// state goes with it</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">break</span><span class="p">;</span><span class="w">                            </span><span class="c1">// still counting: stay alive, GUI-less</span>
+</pre></div>
+</div>
+<p>So the resident thread is earned only while the clock advances. Close the GUI while paused or cleared, and the service exits and its state is discarded; close it while running, and the service stays alive with no GUI, still timing, until the app is reopened (which re-attaches to the resident service) or the clock is paused and the GUI closed.</p>
+</section>
+</section>
+<section id="custom-message-system">
+<h2>Custom Message System<a class="headerlink" href="#custom-message-system" title="Link to this heading"></a></h2>
+<p>All service↔GUI messages are declared in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Commands.hpp</span></code> as <code class="docutils literal notranslate"><span class="pre">constexpr</span> <span class="pre">SDK::MessageType::Type</span></code> constants. Every message struct inherits from <code class="docutils literal notranslate"><span class="pre">SDK::MessageBase</span></code>, and all are wrapped in <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">pack(push,</span> <span class="pre">4)</span></code> for alignment consistency with the message pool.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// Service --&gt; GUI</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STOPWATCH_STATE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+
+<span class="c1">// GUI --&gt; Service</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STOPWATCH_START</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STOPWATCH_PAUSE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STOPWATCH_LAP</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000004</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STOPWATCH_RESET</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000005</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STOPWATCH_REQUEST</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000006</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">StopwatchState</span></code> carries the entire state — including the fixed 50-entry lap array — as a value, keeping the path allocation-free. A compile-time assertion guards the pool budget:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">StopwatchState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">StopwatchState</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">              </span><span class="s">&quot;StopwatchState must fit the largest kernel message pool block&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The remaining messages are empty commands. A <code class="docutils literal notranslate"><span class="pre">Sender</span></code> helper allocates, fills, sends, and releases each message for both directions.</p>
+<p><strong>Message summary</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Trigger</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_STATE</span></code></p></td>
+<td><p>Service → GUI</p></td>
+<td><p>After any command; on GUI start; in reply to a request</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_START</span></code> / <code class="docutils literal notranslate"><span class="pre">_PAUSE</span></code> / <code class="docutils literal notranslate"><span class="pre">_LAP</span></code> / <code class="docutils literal notranslate"><span class="pre">_RESET</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>User presses the corresponding control</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STOPWATCH_REQUEST</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>GUI start and resume, to (re)sync the mirror</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Link to this heading"></a></h2>
+<p>The GUI is built with TouchGFX and follows the Model-View-Presenter pattern. It has a single screen.</p>
+<section id="project-structure">
+<h3>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Stopwatch/Software/Apps/TouchGFX-GUI/
+├── *.touchgfx        # TouchGFX Designer project
+├── gui/              # Custom GUI code (Model, MainView/Presenter, containers, TimeFormat)
+├── assets/           # Fonts and texts
+├── generated/        # Auto-generated TouchGFX code
+└── simulator/        # Simulator build
+</pre></div>
+</div>
+</section>
+<section id="model">
+<h3>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Model</span></code> is the GUI-side mirror of the state the service owns. It is never polled: it stores the last snapshot and computes the live time on demand.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">UIEventListener</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IGuiLifeCycleCallback</span><span class="p">,</span>
+<span class="w">              </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ICustomMessageHandler</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">startStopwatch</span><span class="p">();</span><span class="w">   </span><span class="c1">// each returns whether the command was accepted</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">pauseStopwatch</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">lapStopwatch</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">resetStopwatch</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="o">&amp;</span><span class="nf">stopwatch</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">   </span><span class="c1">// last snapshot</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">nowMs</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">                      </span><span class="c1">// the same tick the service stamps</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">elapsedMs</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">                  </span><span class="c1">// Stopwatch::elapsed(mState, nowMs())</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><strong>Key Model behaviours</strong>:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">customMessageHandler()</span></code></strong>: accepts only <code class="docutils literal notranslate"><span class="pre">STOPWATCH_STATE</span></code>, copies the snapshot into <code class="docutils literal notranslate"><span class="pre">mState</span></code>, and notifies the listener via <code class="docutils literal notranslate"><span class="pre">onStopwatchChanged()</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">elapsedMs()</span></code></strong>: extrapolates the running time from the stored snapshot against the current kernel tick. This is the mechanism that lets the display advance without any message from the service.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">onResume()</span></code> / <code class="docutils literal notranslate"><span class="pre">onStart()</span></code></strong>: send <code class="docutils literal notranslate"><span class="pre">STOPWATCH_REQUEST</span></code> so the mirror is resynced after the GUI was (re)started or unparked — the stopwatch may have moved on while the GUI was suspended.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">onSuspend()</span></code></strong>: intentionally empty. The service is untouched by a GUI suspend and keeps timing, so there is nothing to save.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">setCapabilities()</span></code></strong>: called in the constructor; enables the USB charging screen, phone notifications, and music-control overlays while this app is active.</p></li>
+</ul>
+<p>There is <strong>no idle-timeout timer</strong>. Unlike most apps, this one never closes itself on inactivity: the user leaves via the red R2 button, and a kernel suspend simply parks the GUI while the service keeps time.</p>
+</section>
+<section id="the-single-screen-mainview">
+<h3>The Single Screen: MainView<a class="headerlink" href="#the-single-screen-mainview" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MainView</span></code> renders three shapes rather than three screens — which shape is showing is derived from the state, not tracked separately:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Mode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Idle</span><span class="p">,</span><span class="w"> </span><span class="n">Running</span><span class="p">,</span><span class="w"> </span><span class="n">Paused</span><span class="w"> </span><span class="p">};</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Idle</strong>: cleared, nothing timed yet (<code class="docutils literal notranslate"><span class="pre">accumMs</span> <span class="pre">==</span> <span class="pre">0</span> <span class="pre">&amp;&amp;</span> <span class="pre">lapCount</span> <span class="pre">==</span> <span class="pre">0</span></code>)</p></li>
+<li><p><strong>Running</strong>: the clock advances; <code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code> refreshes the reading each frame</p></li>
+<li><p><strong>Paused</strong>: stopped with time on the clock</p></li>
+</ul>
+<p>Only a running screen redraws itself on the tick; idle and paused screens are repainted by the snapshot that put them there.</p>
+<section id="two-faces-and-the-hour-form">
+<h4>Two faces and the hour form<a class="headerlink" href="#two-faces-and-the-hour-form" title="Link to this heading"></a></h4>
+<p>The time readout has two <strong>faces</strong>, chosen by the lap count, and an orthogonal <strong>hour form</strong> applied within either face:</p>
+<ul class="simple">
+<li><p><strong>Large face</strong> (default): big reading centred on the display, laps below a separator line.</p></li>
+<li><p><strong>Compact face</strong>: once the laps outgrow what the large reading leaves room for, the reading shrinks and rises under the title, giving the lap list more rows. The threshold (<code class="docutils literal notranslate"><span class="pre">kCompactFromLaps</span></code>) is derived from the large list’s row capacity, not hard-coded, so it cannot drift from the geometry.</p></li>
+<li><p><strong>Hour form</strong>: once the clock passes an hour the reading widens to <code class="docutils literal notranslate"><span class="pre">HH:MM:SS</span></code> and drops the tenths (there is no room for them, and sub-second precision past an hour is pointless). The font shrinks — <code class="docutils literal notranslate"><span class="pre">60</span> <span class="pre">→</span> <span class="pre">40</span></code> on the large face, <code class="docutils literal notranslate"><span class="pre">40</span> <span class="pre">→</span> <span class="pre">35</span></code> on the compact — and the reading stretches to reclaim the space the fraction leaves.</p></li>
+</ul>
+<p>Only the <strong>compact</strong> geometry is spelled out in code; the large face is read back from the widgets in <code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code>, so moving them in the Designer is enough and nothing has to be mirrored by hand. The lap list is the exception: the generator sizes its drawable pool from the height it is given in the Designer, so the Designer holds the taller (compact) list rect and the shorter large-face rect is the constant.</p>
+<p><code class="docutils literal notranslate"><span class="pre">applyLayout(compact,</span> <span class="pre">hours)</span></code> memoizes on the current <code class="docutils literal notranslate"><span class="pre">(face,</span> <span class="pre">hours)</span></code> pair and only calls <code class="docutils literal notranslate"><span class="pre">setLayout()</span></code> on a real change. <code class="docutils literal notranslate"><span class="pre">setLayout()</span></code> invalidates the outgoing rectangles <strong>before</strong> moving the widgets, so the old area is repainted and does not leave stale pixels behind.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">HH:MM:SS</span></code> cap at <code class="docutils literal notranslate"><span class="pre">99:59:59.9</span></code> and all the field formatting live in <code class="docutils literal notranslate"><span class="pre">gui/common/TimeFormat.hpp</span></code>, which fills the gap left by <code class="docutils literal notranslate"><span class="pre">SDK::Utils::toHMS</span></code> (that helper works in whole seconds and cannot express tenths).</p>
+</section>
+<section id="lap-list-and-scroll-indicator">
+<h4>Lap list and scroll indicator<a class="headerlink" href="#lap-list-and-scroll-indicator" title="Link to this heading"></a></h4>
+<p>The laps are shown in a TouchGFX scroll list of <code class="docutils literal notranslate"><span class="pre">LapListItem</span></code>s. <code class="docutils literal notranslate"><span class="pre">lapListUpdateItem()</span></code> fills each row with its index and derived duration; out-of-range rows are cleared. <code class="docutils literal notranslate"><span class="pre">refreshLaps()</span></code> reads the previous count back from the list itself (no shadow copy), grows or shrinks it, and follows a newly taken lap so the newest row stays in view. Because <code class="docutils literal notranslate"><span class="pre">animateToItem()</span></code> only scrolls when the target lies outside the window, it is aimed at the row on the edge the window is moving toward.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code> rail keeps the lap list company from the very first lap so it does not pop in halfway through a run. Its handle appears only once the list is actually scrollable (more laps than fit). Scrolling belongs to the running clock: on pause the whole indicator is taken away and L2 becomes the reset action.</p>
+</section>
+</section>
+<section id="input-handling">
+<h3>Input Handling<a class="headerlink" href="#input-handling" title="Link to this heading"></a></h3>
+<p>The screen reads four buttons; several change meaning with the clock:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Button</p></th>
+<th class="head"><p>While Running</p></th>
+<th class="head"><p>While Paused / Idle</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>R1</strong></p></td>
+<td><p>Pause</p></td>
+<td><p>Start / resume</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>R2</strong></p></td>
+<td><p>Lap (white)</p></td>
+<td><p><strong>Exit</strong> the app (red)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>L1</strong></p></td>
+<td><p>Scroll laps up</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>L2</strong></p></td>
+<td><p>Scroll laps down</p></td>
+<td><p>Reset (only when paused)</p></td>
+</tr>
+</tbody>
+</table>
+<p>R2 is the only way out of the app, and only once the clock is stopped: while running it is white and takes a lap; while stopped it turns red and leaves. The button-arc colours track the icon next to each: the pause icon is amber and the play icon teal (R1), reset is white (L2). L1 stays dark even though it scrolls, because the scroll indicator sits on the same stretch of bezel and is the navigation cue on its own.</p>
+<p>A subtlety on pause: R1 sets <code class="docutils literal notranslate"><span class="pre">mPausePending</span></code> only if the pause command was actually accepted for delivery. Until the confirming snapshot arrives the mirror still reads as running, so ticking the display on would run it past the moment the service stopped and the snapshot would then yank the digits backward; holding the display until the snapshot avoids that.</p>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Stopwatch/Software/Apps/Stopwatch-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Stopwatch&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">&quot;Stopwatch&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Utility&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A159B1C005CFD2A5&quot;</span><span class="p">)</span>
+
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The app is <strong>not</strong> autostarted — it is launched on demand from the menu.</p>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p>The source lists are deliberately narrow. The service owns no sensors and writes no files, so the FIT, sensor, track-map, and calibration groups of <code class="docutils literal notranslate"><span class="pre">UNA_SDK_SOURCES_SERVICE</span></code> are left out; only <code class="docutils literal notranslate"><span class="pre">COMMON</span></code> and <code class="docutils literal notranslate"><span class="pre">APPSYSTEM</span></code> are pulled in:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_APPSYSTEM</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">TOUCHGFX_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_GUI</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+
+<span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>: UNA SDK common, GUI, and app-system sources; the kernel and messaging systems. No sensor, FIT, or file-system sources.</p>
+<p><strong>App Libraries</strong> (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Stopwatch.hpp</span></code> — state struct, timekeeping arithmetic, and the <code class="docutils literal notranslate"><span class="pre">Core</span></code> transition logic (header-only, host-testable)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — the service↔GUI message contract and <code class="docutils literal notranslate"><span class="pre">Sender</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — the service entry point and message loop</p></li>
+</ul>
+</section>
+<section id="host-tests">
+<h3>Host Tests<a class="headerlink" href="#host-tests" title="Link to this heading"></a></h3>
+<p>The timekeeping logic is covered by host unit tests in <code class="docutils literal notranslate"><span class="pre">Tests/Host/apps/Stopwatch/</span></code>, exercising <code class="docutils literal notranslate"><span class="pre">Stopwatch::Core</span></code> over an injected clock: start/pause/resume accumulation, tick-wrap correctness, lap boundaries and durations, the full-lap-store guard, and the “a stopped clock is not running whatever it holds” invariant.</p>
+</section>
+<section id="simulator-build">
+<h3>Simulator Build<a class="headerlink" href="#simulator-build" title="Link to this heading"></a></h3>
+<p>The TouchGFX project includes a Visual Studio simulator build in <code class="docutils literal notranslate"><span class="pre">simulator/msvs/Application.vcxproj</span></code>. In the simulator the buttons map to keys <code class="docutils literal notranslate"><span class="pre">1=L1</span> <span class="pre">2=L2</span> <span class="pre">3=R1</span> <span class="pre">4=R2</span></code>.</p>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for the full development environment and toolchain.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The Stopwatch app is the second simple <strong>Utility</strong> example alongside Alarm, and it demonstrates a different corner of the SDK. Where Alarm shows an autostart service with autonomous GUI launch and JSON persistence, Stopwatch shows a <strong>traffic-free, extrapolation-based</strong> design: a service that owns a tiny state and is silent between transitions, a GUI that derives the live reading from a shared monotonic clock, and a single screen that reshapes itself — two faces plus an hour form — instead of navigating between many.</p>
+<p>Key architectural strengths:</p>
+<ul class="simple">
+<li><p><strong>Zero periodic IPC</strong>: the running time is computed, not messaged; the message path is idle while the clock runs, letting the chip stay in low power</p></li>
+<li><p><strong>Exact totals</strong>: laps stored as boundaries keep the running total free of accumulated rounding</p></li>
+<li><p><strong>Allocation-free path</strong>: the whole state, including the fixed lap array, fits one 256-byte pool block</p></li>
+<li><p><strong>Purposeful lifetime</strong>: the service earns its thread only while the clock advances, and ends itself otherwise — background counting is free, but a stopped stopwatch costs nothing</p></li>
+<li><p><strong>State-derived UI</strong>: one screen with three modes and two faces, each derived from the state rather than tracked, keeps the view logic small and consistent</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
