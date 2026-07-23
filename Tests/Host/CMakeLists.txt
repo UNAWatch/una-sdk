@@ -54,6 +54,7 @@ add_executable(una-sdk-host-tests
     metrics/MonotonicCounter_test.cpp
     utils/ClockTime_test.cpp
     support/KernelTestDoubles_test.cpp
+    apps/Stopwatch/Stopwatch_test.cpp
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/ActivityWriter.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
@@ -78,6 +79,7 @@ target_include_directories(una-sdk-host-tests PRIVATE
     "${UNA_SDK_ROOT}/Libs/Header"
     "${COREJSON_DIR}/include"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Header"
+    "${UNA_SDK_ROOT}/Examples/Apps/Stopwatch/Software/Libs/Header"
 )
 
 target_link_libraries(una-sdk-host-tests PRIVATE
