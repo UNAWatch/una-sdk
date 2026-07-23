@@ -8,10 +8,10 @@ The app uses no sensors and writes no files. Its only job is timekeeping, and it
 
 Key features include:
 - Start, pause, resume, reset, and up to 50 recorded laps
-- Hundredths-of-a-second precision, ticked at 10 Hz
+- Tenths-of-a-second precision, matching the 10 Hz frame rate: a hundredths digit would be finer than the screen can move and would sit frozen
 - Lap times shown as durations; the running total kept exact by storing lap boundaries rather than per-lap durations
 - Two time faces (large and compact) chosen by the lap count, plus an hour form that widens the reading to `HH:MM:SS` once the clock passes an hour
-- A readout capped at `99:59:59.99`
+- A readout capped at `99:59:59.9`
 - Background counting: the service keeps timing while the GUI is closed or suspended, and re-entering the app picks the time back up
 - The service ends itself once the GUI is gone **and** the clock is not running, so a stopped stopwatch holds no resident thread
 
@@ -254,13 +254,13 @@ The time readout has two **faces**, chosen by the lap count, and an orthogonal *
 
 - **Large face** (default): big reading centred on the display, laps below a separator line.
 - **Compact face**: once the laps outgrow what the large reading leaves room for, the reading shrinks and rises under the title, giving the lap list more rows. The threshold (`kCompactFromLaps`) is derived from the large list's row capacity, not hard-coded, so it cannot drift from the geometry.
-- **Hour form**: once the clock passes an hour the reading widens to `HH:MM:SS` and drops the hundredths (there is no room for them, and sub-second precision past an hour is pointless). The font shrinks — `60 → 40` on the large face, `40 → 35` on the compact — and the reading stretches to reclaim the space the fraction leaves.
+- **Hour form**: once the clock passes an hour the reading widens to `HH:MM:SS` and drops the tenths (there is no room for them, and sub-second precision past an hour is pointless). The font shrinks — `60 → 40` on the large face, `40 → 35` on the compact — and the reading stretches to reclaim the space the fraction leaves.
 
 Only the **compact** geometry is spelled out in code; the large face is read back from the widgets in `setupScreen()`, so moving them in the Designer is enough and nothing has to be mirrored by hand. The lap list is the exception: the generator sizes its drawable pool from the height it is given in the Designer, so the Designer holds the taller (compact) list rect and the shorter large-face rect is the constant.
 
 `applyLayout(compact, hours)` memoizes on the current `(face, hours)` pair and only calls `setLayout()` on a real change. `setLayout()` invalidates the outgoing rectangles **before** moving the widgets, so the old area is repainted and does not leave stale pixels behind.
 
-The `HH:MM:SS` cap at `99:59:59.99` and all the field formatting live in `gui/common/TimeFormat.hpp`, which fills the gap left by `SDK::Utils::toHMS` (that helper works in whole seconds and cannot express hundredths).
+The `HH:MM:SS` cap at `99:59:59.9` and all the field formatting live in `gui/common/TimeFormat.hpp`, which fills the gap left by `SDK::Utils::toHMS` (that helper works in whole seconds and cannot express tenths).
 
 #### Lap list and scroll indicator
 

@@ -17,10 +17,11 @@ static constexpr int16_t kScrollSteps = 6;
 // icons (x 190..210) rather than under them. The line then sits at y=99 and
 // the lap list starts directly below it, filling the rest of the face.
 // Widths come from the generated font tables: SemiBold 40 needs 152 px for the
-// longest "H:MM:SS", the hundredths 26 px.
+// longest "H:MM:SS". The tenth is left-aligned right off the seconds (main's
+// right edge is x=165), so its box only needs room for the one digit.
 static const MainView::TimeFace kCompactFace = {
     {50, 44, 115, 51},    // main
-    {163, 68, 25, 20},    // hundredths
+    {166, 68, 20, 20},    // tenths
     99                    // line; the list keeps its Designer rect here
 };
 
@@ -38,7 +39,7 @@ static const touchgfx::Rect kLargeListRect = {58, 159, 125, kLargeListHeight};
 static constexpr uint8_t kCompactFromLaps = kLargeListHeight / kRowHeight + 1;
 
 // Time-readout geometry for the hour form of each face. Past an hour the
-// reading grows to HH:MM:SS and drops the hundredths, so it needs more width
+// reading grows to HH:MM:SS and drops the tenths, so it needs more width
 // than "MM:SS" leaves and a smaller face to find it. Widths are from the
 // generated font tables: HH:MM:SS is 178 px at SemiBold 40 and 156 px at
 // SemiBold 35.
@@ -188,7 +189,7 @@ void MainView::setLayout(bool compact, bool hours)
     timeFracText.setVisible(!hours);
     if (!hours) {
         timeFracText.setTypedText(touchgfx::TypedText(
-                compact ? T_TMP_MEDIUM_16_R : T_TMP_SEMIBOLD_20_L));
+                compact ? T_TMP_MEDIUM_16_L : T_TMP_SEMIBOLD_20_L));
         timeFracText.setPosition(face.frac.x, face.frac.y, face.frac.width, face.frac.height);
     }
 

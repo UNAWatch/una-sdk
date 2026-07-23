@@ -60,7 +60,7 @@ private:
      * @brief Apply the time-readout layout for a (face, hours) combination.
      *
      * The face (large vs compact) is chosen by the lap count; the hour form is
-     * an orthogonal modifier that shrinks the reading and drops the hundredths
+     * an orthogonal modifier that shrinks the reading and drops the tenths
      * once the clock passes an hour.
      */
     void applyLayout(bool compact, bool hours);
