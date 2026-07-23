@@ -18,7 +18,9 @@ jobs:
       apps: ${{ steps.generate.outputs.apps }}
     steps:
       - name: Setup GIT
-        run: apt update && apt install -y git jq
+        # Debian base image (python:3.11-slim) — not affected by the Ubuntu security
+        # mirror; the cmake-build job repoints security.ubuntu.com for that reason.
+        run: apt-get update && apt-get install -y git jq
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -40,7 +42,14 @@ jobs:
         app: ${{ fromJson(needs.prepare.outputs.apps) }}
     steps:
       - name: Setup GIT
-        run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
+        run: |
+          # security.ubuntu.com has a history of outages that hang `apt update` for the
+          # whole job (a bounded timeout doesn't reliably help — apt won't cap a blackholed
+          # multi-IP host). Repoint the security pocket at the main archive, which carries
+          # -security too and stays up, so setup never depends on that CDN.
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i 's#security\.ubuntu\.com/ubuntu#archive.ubuntu.com/ubuntu#g' {} +
+          apt-get update && apt-get install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
