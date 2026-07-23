@@ -4,7 +4,7 @@
 
 The Stopwatch app is a **Utility**-type application that measures elapsed time and records laps. It is a single-screen app: one face shows the running clock, the controls, and a scrollable list of laps, changing shape according to the state rather than switching between screens.
 
-The app uses no sensors and writes no files. Its only job is timekeeping, and it does that without any periodic work: the kernel hands the service and the GUI the same monotonic millisecond tick, so a start timestamp taken by the service stays meaningful in the GUI. The GUI extrapolates the running time from the last snapshot against its own clock, and the service only ever sends a message in response to a state transition. Between transitions there is no traffic at all.
+The app uses no sensors and writes no files. Its only job is timekeeping, and it does that without any periodic work: the kernel hands the service and the GUI the same monotonic millisecond tick, so a start timestamp taken by the service stays meaningful in the GUI. The GUI extrapolates the running time from the last snapshot against its own clock, and the service sends a snapshot only in response to an event — a state-changing command, the GUI starting, or an explicit request to resync — never on a timer. Between those events there is no traffic at all.
 
 Key features include:
 - Start, pause, resume, reset, and up to 50 recorded laps
@@ -27,7 +27,7 @@ The app is structured as two independent components: a service that owns the sto
 
 ### Component Interaction
 
-```
+```text
                     command (start/pause/lap/reset)
         [GUI] ─────────────────────────────────────► [Service]
           ▲                                               │
@@ -37,7 +37,7 @@ The app is structured as two independent components: a service that owns the sto
    [Kernel tick] ──► both processes read the same getTimeMs()
 ```
 
-The headline design point is that the snapshot is **not** sent periodically. The service publishes a full `Stopwatch::State` only when a command changes it. The GUI mirror never goes stale between snapshots because the running time is recomputed on every frame from `accumMs + (now - startMs)`, using the same kernel tick the service stamped the snapshot with. This keeps the message path idle while the clock runs, which is what lets the chip reach its low-power state with the stopwatch still counting.
+The headline design point is that the snapshot is **not** sent periodically. The service publishes a full `Stopwatch::State` in response to an event — a state-changing command, the GUI coming up, or an explicit resync request — but never on a timer. The GUI mirror never goes stale between snapshots because the running time is recomputed on every frame from `accumMs + (now - startMs)`, using the same kernel tick the service stamped the snapshot with. This keeps the message path idle while the clock runs, which is what lets the chip reach its low-power state with the stopwatch still counting.
 
 ## Service Backend
 
@@ -194,7 +194,7 @@ The GUI is built with TouchGFX and follows the Model-View-Presenter pattern. It 
 
 ### Project Structure
 
-```
+```text
 Stopwatch/Software/Apps/TouchGFX-GUI/
 ├── *.touchgfx        # TouchGFX Designer project
 ├── gui/              # Custom GUI code (Model, MainView/Presenter, containers, TimeFormat)
