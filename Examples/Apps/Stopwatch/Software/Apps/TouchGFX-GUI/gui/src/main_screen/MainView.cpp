@@ -10,10 +10,6 @@ static constexpr int16_t kRowHeight = 18;
 
 static constexpr int16_t kScrollSteps = 6;
 
-// One hour. Past this the reading gains two characters and only the compact
-// face still fits the display.
-static constexpr uint32_t kHourMs = 60u * 60u * 1000u;
-
 // The compact face has no Designer counterpart, so it is the only geometry
 // spelled out here; the large one is read back from the screen at setup.
 //
@@ -41,10 +37,27 @@ static const touchgfx::Rect kLargeListRect = {58, 159, 125, kLargeListHeight};
 // capacity instead of being a literal that could drift from it.
 static constexpr uint8_t kCompactFromLaps = kLargeListHeight / kRowHeight + 1;
 
+// Time-readout geometry for the hour form of each face. Past an hour the
+// reading grows to HH:MM:SS and drops the hundredths, so it needs more width
+// than "MM:SS" leaves and a smaller face to find it. Widths are from the
+// generated font tables: HH:MM:SS is 178 px at SemiBold 40 and 156 px at
+// SemiBold 35.
+//   - Large: SemiBold 60 -> 40, centred across the display.
+//   - Compact: SemiBold 40 -> 35, right-aligned to stop short of the R1 icons
+//     at x=190.
+struct MainLayout
+{
+    uint16_t       textId;
+    touchgfx::Rect rect;
+};
+static const MainLayout kLargeHoursMain   = { T_TMP_SEMIBOLD_40,   {20, 98, 200, 61} };
+static const MainLayout kCompactHoursMain = { T_TMP_SEMIBOLD_35_R, {29, 44, 156, 51} };
+
 MainView::MainView()
     : mScrollTop(0)
     , mIndicatorCount(0)
     , mCompactFace(false)
+    , mHoursShown(false)
     , mPausePending(false)
 {
 
@@ -64,9 +77,9 @@ void MainView::setupScreen()
     // The Designer rect is the extended one, so the compact face borrows it.
     mCompactList = lapList.getRect();
 
-    // Apply the large layout outright: the screen opens on it, and the list
-    // still carries the taller Designer rect until it is told otherwise.
-    setFaceLayout(false);
+    // Apply the large, no-hours layout outright: the screen opens on it, and
+    // the list still carries the taller Designer rect until told otherwise.
+    setLayout(false, false);
 
     title.set(T_TEXT_STOPWATCH);
 
@@ -114,7 +127,7 @@ void MainView::refreshTime(bool force)
 {
     const uint32_t ms = presenter->elapsedMs();
 
-    applyTimeFace(wantsCompact());
+    applyLayout(wantsCompact(), TimeFormat::hasHours(ms));
 
     touchgfx::Unicode::UnicodeChar main[TIMEMAINTEXT_SIZE];
     touchgfx::Unicode::UnicodeChar frac[TIMEFRACTEXT_SIZE];
@@ -135,19 +148,20 @@ void MainView::refreshTime(bool force)
     }
 }
 
-void MainView::applyTimeFace(bool compact)
+void MainView::applyLayout(bool compact, bool hours)
 {
-    if (compact == mCompactFace) {
+    if (compact == mCompactFace && hours == mHoursShown) {
         return;
     }
-    setFaceLayout(compact);
+    setLayout(compact, hours);
 }
 
-void MainView::setFaceLayout(bool compact)
+void MainView::setLayout(bool compact, bool hours)
 {
     mCompactFace = compact;
+    mHoursShown  = hours;
 
-    // The faces occupy different rectangles. Invalidating only after the move
+    // The states occupy different rectangles. Invalidating only after the move
     // repaints the new area and leaves the old one holding stale pixels, so
     // the outgoing rectangles are invalidated first.
     timeMainText.invalidate();
@@ -155,18 +169,32 @@ void MainView::setFaceLayout(bool compact)
     line.invalidate();
     lapList.invalidate();
 
-    const TimeFace       &face = compact ? kCompactFace : mLargeFace;
-    const touchgfx::Rect &list = compact ? mCompactList : mLargeFace.list;
+    const TimeFace &face = compact ? kCompactFace : mLargeFace;
 
-    timeMainText.setTypedText(touchgfx::TypedText(
-            compact ? T_TMP_SEMIBOLD_40_R : T_TMP_SEMIBOLD_60_R));
-    timeMainText.setPosition(face.main.x, face.main.y, face.main.width, face.main.height);
+    // Main reading: the hour form has its own smaller font and wider rect; the
+    // normal form is the face's own (Designer-sourced large, or compact).
+    if (hours) {
+        const MainLayout &m = compact ? kCompactHoursMain : kLargeHoursMain;
+        timeMainText.setTypedText(touchgfx::TypedText(m.textId));
+        timeMainText.setPosition(m.rect.x, m.rect.y, m.rect.width, m.rect.height);
+    } else {
+        timeMainText.setTypedText(touchgfx::TypedText(
+                compact ? T_TMP_SEMIBOLD_40_R : T_TMP_SEMIBOLD_60_R));
+        timeMainText.setPosition(face.main.x, face.main.y, face.main.width, face.main.height);
+    }
 
-    timeFracText.setTypedText(touchgfx::TypedText(
-        compact ? T_TMP_MEDIUM_16_R : T_TMP_SEMIBOLD_20_L));
-    timeFracText.setPosition(face.frac.x, face.frac.y, face.frac.width, face.frac.height);
+    // Hundredths are dropped once the reading shows hours -- there is no room
+    // for them and sub-second precision past an hour is pointless.
+    timeFracText.setVisible(!hours);
+    if (!hours) {
+        timeFracText.setTypedText(touchgfx::TypedText(
+                compact ? T_TMP_MEDIUM_16_R : T_TMP_SEMIBOLD_20_L));
+        timeFracText.setPosition(face.frac.x, face.frac.y, face.frac.width, face.frac.height);
+    }
 
+    // Line and list follow the face alone; the hour form does not move them.
     line.setY(face.lineY);
+    const touchgfx::Rect &list = compact ? mCompactList : mLargeFace.list;
     lapList.setPosition(list.x, list.y, list.width, list.height);
 
     timeMainText.invalidate();
@@ -213,10 +241,9 @@ void MainView::refreshControls()
 
 bool MainView::wantsCompact() const
 {
-    // Room is only needed once the list outgrows what the large reading leaves
-    // it, and past an hour the reading is too wide for the large face anyway.
-    return presenter->stopwatch().lapCount >= kCompactFromLaps ||
-           presenter->elapsedMs() >= kHourMs;
+    // The face is chosen by the laps alone: it shrinks to make room for the
+    // list. The hour form is a separate modifier applied within either face.
+    return presenter->stopwatch().lapCount >= kCompactFromLaps;
 }
 
 int16_t MainView::visibleLaps() const

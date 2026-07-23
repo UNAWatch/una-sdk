@@ -57,16 +57,16 @@ private:
     void refreshControls();
 
     /**
-     * @brief Pick the large or the compact time face.
+     * @brief Apply the time-readout layout for a (face, hours) combination.
      *
-     * The large face only fits "MM:SS"; past an hour the reading grows by two
-     * characters and no longer does, so the compact face covers that as well
-     * as the case where the lap list needs the room.
+     * The face (large vs compact) is chosen by the lap count; the hour form is
+     * an orthogonal modifier that shrinks the reading and drops the hundredths
+     * once the clock passes an hour.
      */
-    void applyTimeFace(bool compact);
+    void applyLayout(bool compact, bool hours);
 
-    /** @brief Move every widget to one face, whether or not it is the current one. */
-    void setFaceLayout(bool compact);
+    /** @brief Move every widget to one layout, whether or not it is current. */
+    void setLayout(bool compact, bool hours);
     void refreshLaps();
     void refreshScrollIndicator(bool animate);
 
@@ -93,6 +93,7 @@ private:
     int16_t  mScrollTop;        ///< Index of the row at the top of the list
     uint16_t mIndicatorCount;   ///< Item count the scroll indicator was last given
     bool     mCompactFace;      ///< True while the compact time face is applied
+    bool     mHoursShown;       ///< True while the HH:MM:SS hour form is applied
 
     /**
      * @brief The layout as the Designer left it, captured in setupScreen().

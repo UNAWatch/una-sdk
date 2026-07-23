@@ -23,33 +23,50 @@ namespace TimeFormat
 {
 
 /**
+ * @brief The display is capped at 99:59:59.99; a longer run freezes there.
+ */
+constexpr uint32_t kMaxMs = (99u * 3600u + 59u * 60u + 59u) * 1000u + 990u;
+
+/**
  * @brief A duration broken into display fields.
  */
 struct Parts
 {
-    uint32_t h;   ///< Hours, unbounded
-    uint8_t  m;   ///< Minutes, 0-59
-    uint8_t  s;   ///< Seconds, 0-59
-    uint8_t  cs;  ///< Hundredths, 0-99
+    uint8_t h;   ///< Hours, 0-99
+    uint8_t m;   ///< Minutes, 0-59
+    uint8_t s;   ///< Seconds, 0-59
+    uint8_t cs;  ///< Hundredths, 0-99
 };
 
 /**
- * @brief Split a duration into display fields.
+ * @brief Split a duration into display fields, clamped to 99:59:59.99.
  * @param ms Duration in milliseconds.
  */
 inline Parts split(uint32_t ms)
 {
+    if (ms > kMaxMs) {
+        ms = kMaxMs;
+    }
     Parts p;
     p.cs = static_cast<uint8_t>((ms / 10) % 100);
     const uint32_t totalSec = ms / 1000;
     p.s = static_cast<uint8_t>(totalSec % 60);
     p.m = static_cast<uint8_t>((totalSec / 60) % 60);
-    p.h = totalSec / 3600;
+    p.h = static_cast<uint8_t>(totalSec / 3600);
     return p;
 }
 
 /**
- * @brief Write the large field: "MM:SS", widening to "H:MM:SS" past an hour.
+ * @brief True once the duration reaches an hour, where the reading widens to
+ *        HH:MM:SS and the hundredths are dropped.
+ */
+inline bool hasHours(uint32_t ms)
+{
+    return ms >= 3600u * 1000u;
+}
+
+/**
+ * @brief Write the main field: "MM:SS" under an hour, "HH:MM:SS" from an hour.
  * @param ms   Duration in milliseconds.
  * @param buf  Destination buffer.
  * @param size Capacity of buf in characters.
@@ -58,7 +75,7 @@ inline void mainField(uint32_t ms, touchgfx::Unicode::UnicodeChar *buf, uint16_t
 {
     const Parts p = split(ms);
     if (p.h > 0) {
-        touchgfx::Unicode::snprintf(buf, size, "%u:%02u:%02u", p.h, p.m, p.s);
+        touchgfx::Unicode::snprintf(buf, size, "%02u:%02u:%02u", p.h, p.m, p.s);
     } else {
         touchgfx::Unicode::snprintf(buf, size, "%02u:%02u", p.m, p.s);
     }
@@ -80,7 +97,7 @@ inline void fracField(uint32_t ms, touchgfx::Unicode::UnicodeChar *buf, uint16_t
 }
 
 /**
- * @brief Write a lap duration: "MM:SS.CC", widening to "H:MM:SS" past an hour.
+ * @brief Write a lap duration: "MM:SS.CC", widening to "HH:MM:SS" from an hour.
  * @param ms   Duration in milliseconds.
  * @param buf  Destination buffer.
  * @param size Capacity of buf in characters.
@@ -89,7 +106,7 @@ inline void lapField(uint32_t ms, touchgfx::Unicode::UnicodeChar *buf, uint16_t 
 {
     const Parts p = split(ms);
     if (p.h > 0) {
-        touchgfx::Unicode::snprintf(buf, size, "%u:%02u:%02u", p.h, p.m, p.s);
+        touchgfx::Unicode::snprintf(buf, size, "%02u:%02u:%02u", p.h, p.m, p.s);
     } else {
         touchgfx::Unicode::snprintf(buf, size, "%02u:%02u.%02u", p.m, p.s, p.cs);
     }
