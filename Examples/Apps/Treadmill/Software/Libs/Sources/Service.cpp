@@ -54,7 +54,6 @@ static float speedFromTotals(float distanceM, float activeTimeS)
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
         , mGuiStarted(false)
-        , mGuiSender(kernel)
         , mSettings{}
         , mSettingsSerializer(mKernel, "settings.json")
         , mSummary{}
@@ -222,7 +221,7 @@ void Service::run()
                 case SDK::MessageType::EVENT_ACCESSORY_STATUS: {
                     auto* evt = static_cast<SDK::Message::Accessory::EventStatus*>(msg);
                     LOG_INFO("Accessory status: state %u\n", evt->state);
-                    mGuiSender.accessoryStatus(evt->state, evt->name);
+                    SDK::send_msg<CustomMessage::AccessoryStatusUpd>(mKernel, evt->state, evt->name);
                 } break;
 
                 default:
@@ -243,9 +242,9 @@ void Service::run()
 
                 // Send to GUI real "local time" to display
                 std::tm tmNow = mTimeTracker.getLocalTime(std::time(nullptr));
-                mGuiSender.time(tmNow);
+                SDK::send_msg<CustomMessage::Time>(mKernel, tmNow);
 
-                mGuiSender.battery(static_cast<uint8_t>(mBatterySoc.get()));
+                SDK::send_msg<CustomMessage::Battery>(mKernel, static_cast<uint8_t>(mBatterySoc.get()));
 
                 if (mTrackState != Track::State::INACTIVE) {
                     mTimeCounter.add(utc);
@@ -460,7 +459,7 @@ void Service::handleEvent(const CustomMessage::TrackResume& /*event*/)
 void Service::handleEvent(const CustomMessage::ManualLap& /*event*/)
 {
     saveLap();
-    mGuiSender.lapEnd(mTrackData.lapNum);
+    SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
     notifyLapEnd();
 }
 
@@ -683,9 +682,9 @@ void Service::sendInitialInfoToGui()
         }
     }
 
-    mGuiSender.settingsUpd(mSettings, mIsImperial, mTimeFormat12h, hrThresholds, CustomMessage::kHrThresholdsCount);
-    mGuiSender.summary(&mSummary);
-    mGuiSender.battery(static_cast<uint8_t>(mBatterySoc.get()));
+    SDK::send_msg<CustomMessage::SettingsUpd>(mKernel, mSettings, mIsImperial, mTimeFormat12h, hrThresholds, CustomMessage::kHrThresholdsCount);
+    SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
+    SDK::send_msg<CustomMessage::Battery>(mKernel, static_cast<uint8_t>(mBatterySoc.get()));
 }
 
 void Service::startTrack(std::time_t utc)
@@ -769,7 +768,7 @@ void Service::startTrack(std::time_t utc)
 
     mTrackState = Track::State::ACTIVE;
 
-    mGuiSender.trackState(mTrackState);
+    SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
 }
 
 void Service::processTrack()
@@ -846,7 +845,7 @@ void Service::processTrack()
     }
 
     // Update GUI
-    mGuiSender.trackData(mTrackData);
+    SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
 
 
     if (mTrackState == Track::State::ACTIVE) {
@@ -891,11 +890,11 @@ void Service::processTrack()
                 mTrackData.avgLapSpeed = speedFromTotals(autoLapDistanceM,
                                                          static_cast<float>(mTrackData.lapTime));
                 mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, mSpeedCounter.getMinValid());
-                mGuiSender.trackData(mTrackData);
+                SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
             }
 
             saveLap(autoLapDistanceM);
-            mGuiSender.lapEnd(mTrackData.lapNum);
+            SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
             notifyLapEnd();
         }
 
@@ -1001,7 +1000,7 @@ void Service::stopTrack(bool discard)
         mActivityWriter.discard();
         mAwaitingCalibration = false;
         mTrackState = Track::State::INACTIVE;
-        mGuiSender.trackState(mTrackState);
+        SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
         disconnect();
         LOG_INFO("Track discarded.\n");
         return;
@@ -1026,7 +1025,7 @@ void Service::stopTrack(bool discard)
     if (!mActivitySummarySerializer.save(mSummary)) {
         LOG_ERROR("Can't save activity summary\n");
     }
-    mGuiSender.summary(&mSummary);
+    SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
 
     // Snapshot the FIT session message and the inputs for the §5.3 delta update.
     mPendingFitTrack = ActivityWriter::TrackData{};
@@ -1051,7 +1050,7 @@ void Service::stopTrack(bool discard)
     mCalibDEstimatedM = mDistanceCounter.getValueActive();
 
     mTrackState = Track::State::INACTIVE;
-    mGuiSender.trackState(mTrackState);
+    SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
     disconnect();
 
     LOG_INFO("Track stopped. Time %u/%u s, Dist %.1f m\n",
@@ -1106,7 +1105,7 @@ void Service::finalizeActivity(float distanceActualM)
     if (!mActivitySummarySerializer.save(mSummary)) {
         LOG_ERROR("Can't save activity summary\n");
     }
-    mGuiSender.summary(&mSummary);
+    SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
 
     if (mActivityWriter.stop(mPendingFitTrack)) {
         notifyNewActivity();
@@ -1151,8 +1150,8 @@ void Service::handleEvent(const CustomMessage::CalibDataRequest& /*event*/)
     const uint8_t status = lut.readyForPhase2()          ? 2
                          : lut.readyForOutdoorEstimate()  ? 1
                                                           : 0;
-    mGuiSender.calibData(status, static_cast<uint16_t>(lut.validBinCount()), kN,
-                         lut.totalCalibrationDistanceM(), pct, kN);
+    SDK::send_msg<CustomMessage::CalibData>(mKernel, status, static_cast<uint16_t>(lut.validBinCount()), kN,
+                                   lut.totalCalibrationDistanceM(), pct, kN);
 }
 
 void Service::handleEvent(const CustomMessage::CalibClear& /*event*/)
@@ -1198,10 +1197,10 @@ void Service::pauseTrack(bool pause)
 
         mTrackState = Track::State::PAUSED;
         LOG_INFO("Track paused. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-        mGuiSender.trackState(mTrackState);
+        SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
 
         buildPartialSummary();
-        mGuiSender.summary(&mSummary);
+        SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
     } else if (!pause && mTrackState == Track::State::PAUSED) {
         mTimeCounter.resume();
         mDistanceCounter.resume();
@@ -1216,7 +1215,7 @@ void Service::pauseTrack(bool pause)
 
         mTrackState = Track::State::ACTIVE;
         LOG_INFO("Track resumed. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-        mGuiSender.trackState(mTrackState);
+        SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
     }
 }
 
@@ -1556,7 +1555,7 @@ void Service::advanceIntervalsPhase(bool manual)
         // alert=true: user needs notification when workout ends automatically (REST->END).
         // COOL_DOWN->END is always manual, so alert&&!manual stays false -> no vibro.
         onIntervalsPhaseChange(true, manual);
-        mGuiSender.intervalsWorkoutCompleted();
+        SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel);
         return;
     }
 
@@ -1582,7 +1581,7 @@ void Service::advanceIntervalsPhase(bool manual)
                                     (!manual && nextPhase == Track::IntervalsPhase::COOL_DOWN);
 
     if (showAlertScreen) {
-        mGuiSender.intervalsPhaseAlert(mTrackData.intervals);
+        SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals);
     }
 
     onIntervalsPhaseChange(showAlertScreen, manual);

@@ -1,4 +1,5 @@
 #include <gui/model/Model.hpp>
+#include "SDK/Messages/MessageGuard.hpp"
 #include <gui/model/ModelListener.hpp>
 #include <gui/common/FrontendApplication.hpp>
 
@@ -12,7 +13,6 @@
 Model::Model()
     : modelListener(nullptr)
     , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
-    , mSrvSender(mKernel)
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
     SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
@@ -142,7 +142,7 @@ const Settings& Model::getSettings() const
 void Model::saveSettings(const Settings& sett)
 {
     mSettings = sett;
-    mSrvSender.settingsSave(mSettings);
+    SDK::send_msg<CustomMessage::SettingsSave>(mKernel, mSettings);
 }
 
 
@@ -219,12 +219,12 @@ void Model::trackStart(bool intervalsMode)
         }
     }
 
-    mSrvSender.trackStart(intervalsMode);
+    SDK::send_msg<CustomMessage::TrackStart>(mKernel, intervalsMode);
 }
 
 void Model::intervalsNextPhase()
 {
-    mSrvSender.intervalsNextPhase();
+    SDK::send_msg<CustomMessage::IntervalsNextPhase>(mKernel);
 }
 
 bool Model::isTrackActive() const
@@ -234,12 +234,12 @@ bool Model::isTrackActive() const
 
 void Model::trackPause()
 {
-    mSrvSender.trackPause();
+    SDK::send_msg<CustomMessage::TrackPause>(mKernel);
 }
 
 void Model::trackResume()
 {
-    mSrvSender.trackResume();
+    SDK::send_msg<CustomMessage::TrackResume>(mKernel);
 }
 
 bool Model::isTrackPaused() const
@@ -254,17 +254,17 @@ const Track::Data& Model::getTrackData() const
 
 void Model::saveLap()
 {
-    mSrvSender.manualLap();
+    SDK::send_msg<CustomMessage::ManualLap>(mKernel);
 }
 
 void Model::saveTrack()
 {
-    mSrvSender.trackStop(false);
+    SDK::send_msg<CustomMessage::TrackStop>(mKernel, false);
 }
 
 void Model::discardTrack()
 {
-    mSrvSender.trackStop(true);
+    SDK::send_msg<CustomMessage::TrackStop>(mKernel, true);
 }
 
 void Model::setHoldConfirmMode(HoldConfirmMode mode)
@@ -279,7 +279,7 @@ Model::HoldConfirmMode Model::getHoldConfirmMode() const
 
 void Model::trackCalibrate(float distanceActualM)
 {
-    mSrvSender.trackCalibrate(distanceActualM);
+    SDK::send_msg<CustomMessage::TrackCalibrate>(mKernel, distanceActualM);
 }
 
 bool Model::isTrackSummaryAvailable() const
@@ -297,12 +297,12 @@ const ActivitySummary& Model::getTrackSummary() const
 
 void Model::requestCalibrationData()
 {
-    mSrvSender.calibDataRequest();
+    SDK::send_msg<CustomMessage::CalibDataRequest>(mKernel);
 }
 
 void Model::clearCalibrationData()
 {
-    mSrvSender.calibClear();
+    SDK::send_msg<CustomMessage::CalibClear>(mKernel);
 }
 
 

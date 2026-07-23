@@ -51,7 +51,6 @@ static float speedFromTotals(float distanceM, float activeTimeS)
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
         , mGuiStarted(false)
-        , mGuiSender(kernel)
         , mSettings{}
         , mSettingsSerializer(mKernel, "settings.json")
         , mSummary{}
@@ -184,7 +183,7 @@ void Service::run()
                 case SDK::MessageType::EVENT_ACCESSORY_STATUS: {
                     auto* evt = static_cast<SDK::Message::Accessory::EventStatus*>(msg);
                     LOG_INFO("Accessory status: state %u\n", evt->state);
-                    mGuiSender.accessoryStatus(evt->state, evt->name);
+                    SDK::send_msg<CustomMessage::AccessoryStatusUpd>(mKernel, evt->state, evt->name);
                 } break;
 
                 default:
@@ -217,9 +216,9 @@ void Service::run()
 
                 // Send to GUI real "local time" to display
                 std::tm tmNow = mTimeTracker.getLocalTime(std::time(nullptr));
-                mGuiSender.time(tmNow);
+                SDK::send_msg<CustomMessage::Time>(mKernel, tmNow);
 
-                mGuiSender.battery(static_cast<uint8_t>(mBatterySoc.get()));
+                SDK::send_msg<CustomMessage::Battery>(mKernel, static_cast<uint8_t>(mBatterySoc.get()));
 
                 // Update GPS fix
                 if (mPreviousGpsFixState != mGps.fix) {
@@ -229,7 +228,7 @@ void Service::run()
                         notifyFirstFix();
                         firstFix = true;
                     }
-                    mGuiSender.fix(mGps.fix);
+                    SDK::send_msg<CustomMessage::GpsFix>(mKernel, mGps.fix);
                 }
 
                 if (mTrackState != Track::State::INACTIVE) {
@@ -436,7 +435,7 @@ void Service::handleEvent(const CustomMessage::TrackResume& /*event*/)
 void Service::handleEvent(const CustomMessage::ManualLap& /*event*/)
 {
     saveLap();
-    mGuiSender.lapEnd(mTrackData.lapNum);
+    SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
     notifyLapEnd();
 }
 
@@ -640,9 +639,9 @@ void Service::sendInitialInfoToGui()
         }
     }
 
-    mGuiSender.settingsUpd(mSettings, mIsImperial, mTimeFormat12h, hrThresholds, hrThresholdsCount);
-    mGuiSender.summary(&mSummary);
-    mGuiSender.battery(static_cast<uint8_t>(mBatterySoc.get()));
+    SDK::send_msg<CustomMessage::SettingsUpd>(mKernel, mSettings, mIsImperial, mTimeFormat12h, hrThresholds, hrThresholdsCount);
+    SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
+    SDK::send_msg<CustomMessage::Battery>(mKernel, static_cast<uint8_t>(mBatterySoc.get()));
 }
 
 void Service::startTrack(std::time_t utc)
@@ -691,7 +690,7 @@ void Service::startTrack(std::time_t utc)
     mTrackState = Track::State::ACTIVE;
 
     LOG_INFO("Track started. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-    mGuiSender.trackState(mTrackState);
+    SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
 }
 
 void Service::processTrack()
@@ -742,7 +741,7 @@ void Service::processTrack()
     mTrackData.elevation = mAltitudeCounter.getCurrent();
 
     // Update GUI
-    mGuiSender.trackData(mTrackData);
+    SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
 
     if (mTrackState == Track::State::ACTIVE) {
         // Save record to the FIT file
@@ -784,11 +783,11 @@ void Service::processTrack()
                 mTrackData.avgLapSpeed = speedFromTotals(autoLapDistanceM,
                                                          static_cast<float>(mTrackData.lapTime));
                 mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, mSpeedCounter.getMinValid());
-                mGuiSender.trackData(mTrackData);
+                SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
             }
 
             saveLap(autoLapDistanceM);
-            mGuiSender.lapEnd(mTrackData.lapNum);
+            SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
             notifyLapEnd();
         }
     }
@@ -905,7 +904,7 @@ void Service::stopTrack(bool discard)
         if (!mActivitySummarySerializer.save(mSummary)) {
             LOG_ERROR("Can't save activity summary\n");
         }
-        mGuiSender.summary(&mSummary);
+        SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
 
         // Save FIT file
         ActivityWriter::TrackData fitTrack{};
@@ -945,7 +944,7 @@ void Service::stopTrack(bool discard)
     LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getAverage(), mHrCounter.getMaximum());
     LOG_INFO("Ascent/Descent: %.1f / %.1f m\n", mAltitudeCounter.getAscent(), mAltitudeCounter.getDescent());
 
-    mGuiSender.trackState(mTrackState);
+    SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
 
     disconnect();
 }
@@ -967,10 +966,10 @@ void Service::pauseTrack(bool pause)
 
         mTrackState = Track::State::PAUSED;
         LOG_INFO("Track paused. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-        mGuiSender.trackState(mTrackState);
+        SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
 
         buildPartialSummary();
-        mGuiSender.summary(&mSummary);
+        SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
     } else if (!pause && mTrackState == Track::State::PAUSED) {
         mTimeCounter.resume();
         mDistanceCounter.resume();
@@ -982,7 +981,7 @@ void Service::pauseTrack(bool pause)
 
         mTrackState = Track::State::ACTIVE;
         LOG_INFO("Track resumed. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-        mGuiSender.trackState(mTrackState);
+        SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
     }
 }
 

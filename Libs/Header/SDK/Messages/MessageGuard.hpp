@@ -69,10 +69,11 @@ private:
     T*                 mPtr;
 };
 
-template<typename T>
-MessageGuard<T> make_msg(const SDK::Kernel& kernel)
+template<typename T, typename... Args>
+MessageGuard<T> make_msg(const SDK::Kernel& kernel, Args&&... args)
 {
-    T* raw = kernel.comm.template allocateMessage<T>();
+    // static_cast<Args&&> is std::forward without pulling in <utility>.
+    T* raw = kernel.comm.template allocateMessage<T>(static_cast<Args&&>(args)...);
     return MessageGuard<T>(kernel, raw);
 }
 
@@ -82,6 +83,19 @@ inline SDK::MessageGuard<MessageID> make_msg(const SDK::Kernel&     kernel,
     auto* raw = kernel.comm.template allocateMessage<MessageID>(); // 0 args
     raw->setType(type);
     return SDK::MessageGuard<MessageID>(kernel, raw);
+}
+
+// One-shot: allocate a T (forwarding any ctor args), send it, and release it on return -- the whole
+// send path for a fire-and-forget message in one call, so the message type stays pure data and never
+// needs to know about the kernel.
+template<typename T, typename... Args>
+bool send_msg(const SDK::Kernel& kernel, Args&&... args)
+{
+    auto guard = make_msg<T>(kernel, static_cast<Args&&>(args)...);
+    if (!guard) {
+        return false;
+    }
+    return guard.send();
 }
 
 } // namespace SDK

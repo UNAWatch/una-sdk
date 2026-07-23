@@ -27,7 +27,6 @@ private:
 
     SDK::Kernel&          mKernel;
     bool                  mGuiStarted;
-    CustomMessage::Sender mGuiSender;
 
     // -- Sensors --------------------------------------------------------------
 

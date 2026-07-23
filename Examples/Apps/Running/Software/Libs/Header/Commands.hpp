@@ -7,8 +7,6 @@
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
-#include "SDK/Messages/MessageGuard.hpp"
-#include "SDK/Kernel/Kernel.hpp"
 
 // Application types
 #include "Settings.hpp"
@@ -65,6 +63,17 @@ namespace CustomMessage {
             , hrThresholds {}
             , hrThresholdsCount(0)
         {}
+
+        explicit SettingsUpd(Settings settings, bool units, bool timeFormat12h,
+                         const uint8_t (&thresholds)[kHrThresholdsCount], uint8_t thresholdCount)
+            : SettingsUpd()
+        {
+            this->settings          = settings;
+            this->unitsImperial     = units;
+            this->timeFormat12h     = timeFormat12h;
+            memcpy(this->hrThresholds, thresholds, sizeof(this->hrThresholds));
+            this->hrThresholdsCount = thresholdCount;
+        }
     };
 
     // Service --> GUI
@@ -74,6 +83,12 @@ namespace CustomMessage {
             : SDK::MessageBase(LOCAL_TIME)
             , localTime {}
         {}
+
+        explicit Time(std::tm localTime)
+            : Time()
+        {
+            this->localTime = localTime;
+        }
     };
 
     struct Battery : public SDK::MessageBase {
@@ -82,6 +97,12 @@ namespace CustomMessage {
             : SDK::MessageBase(BATTERY)
             , level(0)
         {}
+
+        explicit Battery(uint8_t level)
+            : Battery()
+        {
+            this->level = level;
+        }
     };
 
     struct GpsFix : public SDK::MessageBase {
@@ -90,6 +111,12 @@ namespace CustomMessage {
             : SDK::MessageBase(GPS_FIX)
             , state(false)
         {}
+
+        explicit GpsFix(bool state)
+            : GpsFix()
+        {
+            this->state = state;
+        }
     };
 
     struct TrackStateUpd : public SDK::MessageBase {
@@ -98,6 +125,12 @@ namespace CustomMessage {
             : SDK::MessageBase(TRACK_STATE_UPDATE)
             , state{}
         {}
+
+        explicit TrackStateUpd(Track::State state)
+            : TrackStateUpd()
+        {
+            this->state = state;
+        }
     };
 
     struct TrackDataUpd : public SDK::MessageBase {
@@ -106,6 +139,12 @@ namespace CustomMessage {
             : SDK::MessageBase(TRACK_DATA_UPDATE)
             , data{}
         {}
+
+        explicit TrackDataUpd(const Track::Data &data)
+            : TrackDataUpd()
+        {
+            this->data = data;
+        }
     };
 
     struct LapEnded : public SDK::MessageBase {
@@ -114,6 +153,12 @@ namespace CustomMessage {
             : SDK::MessageBase(LAP_END)
             , lapNum(0)
         {}
+
+        explicit LapEnded(uint32_t lapNum)
+            : LapEnded()
+        {
+            this->lapNum = lapNum;
+        }
     };
 
     struct Summary : public SDK::MessageBase {
@@ -122,11 +167,23 @@ namespace CustomMessage {
             : SDK::MessageBase(SUMMARY)
             , summary(nullptr)
         {}
+
+        explicit Summary(const ActivitySummary* summaryPtr)
+            : Summary()
+        {
+            this->summary = summaryPtr;
+        }
     };
 
     struct IntervalsPhaseAlert : public SDK::MessageBase {
         Track::IntervalsData intervals; ///< Snapshot of the NEW phase — already set before this message is sent
         IntervalsPhaseAlert() : SDK::MessageBase(INTERVALS_PHASE_ALERT) {}
+
+        explicit IntervalsPhaseAlert(const Track::IntervalsData& intervals)
+            : IntervalsPhaseAlert()
+        {
+            this->intervals = intervals;
+        }
     };
 
     struct IntervalsWorkoutCompleted : public SDK::MessageBase {
@@ -143,6 +200,15 @@ namespace CustomMessage {
             , state(0)
             , name{}
         {}
+
+        explicit AccessoryStatusUpd(uint8_t state, const char* name)
+            : AccessoryStatusUpd()
+        {
+            this->state = state;
+            if (name) {
+                strncpy(this->name, name, sizeof(this->name) - 1);
+            }
+        }
     };
 
     // GUI --> Service
@@ -153,11 +219,23 @@ namespace CustomMessage {
         SettingsSave()
             : SDK::MessageBase(SETTINGS_SAVE)
         {}
+
+        explicit SettingsSave(Settings settings)
+            : SettingsSave()
+        {
+            this->settings = settings;
+        }
     };
 
     struct TrackStart : public SDK::MessageBase {
         bool intervalsMode = false;
         TrackStart() : SDK::MessageBase(TRACK_START) {}
+
+        explicit TrackStart(bool intervalsMode)
+            : TrackStart()
+        {
+            this->intervalsMode = intervalsMode;
+        }
     };
 
     struct IntervalsNextPhase : public SDK::MessageBase {
@@ -170,6 +248,12 @@ namespace CustomMessage {
             : SDK::MessageBase(TRACK_STOP)
             , discard(false)
         {}
+
+        explicit TrackStop(bool discard)
+            : TrackStop()
+        {
+            this->discard = discard;
+        }
     };
 
     struct TrackPause : public SDK::MessageBase {
@@ -183,238 +267,6 @@ namespace CustomMessage {
     struct ManualLap : public SDK::MessageBase {
         ManualLap() : SDK::MessageBase(MANUAL_LAP) {}
     };
-
-
-// Helper wrapper
-class Sender {
-public:
-    Sender(const SDK::Kernel &kernel) :
-            mKernel(kernel)
-    {
-    }
-    virtual ~Sender() = default;
-
-    // Service --> GUI
-    bool settingsUpd(Settings settings, bool units, bool timeFormat12h,
-                     const uint8_t (&thresholds)[kHrThresholdsCount], uint8_t thresholdCount)
-    {
-        if (auto msg = SDK::make_msg<CustomMessage::SettingsUpd>(mKernel)) {
-            msg->settings          = settings;
-            msg->unitsImperial     = units;
-            msg->timeFormat12h     = timeFormat12h;
-            memcpy(msg->hrThresholds, thresholds, sizeof(msg->hrThresholds));
-            msg->hrThresholdsCount = thresholdCount;
-            return msg.send();
-        }
-
-        return false;
-    }
-
-    bool time(std::tm localTime)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::Time>();
-        if (msg) {
-            msg->localTime = localTime;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool battery(uint8_t level)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::Battery>();
-        if (msg) {
-            msg->level = level;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool fix(bool state)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::GpsFix>();
-        if (msg) {
-            msg->state = state;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool trackState(Track::State state)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackStateUpd>();
-        if (msg) {
-            msg->state = state;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool trackData(const Track::Data &data)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackDataUpd>();
-        if (msg) {
-            msg->data = data;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool intervalsPhaseAlert(const Track::IntervalsData& intervals)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::IntervalsPhaseAlert>();
-        if (msg) {
-            msg->intervals = intervals;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool intervalsWorkoutCompleted()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::IntervalsWorkoutCompleted>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool lapEnd(uint32_t lapNum)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::LapEnded>();
-        if (msg) {
-            msg->lapNum = lapNum;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool summary(const ActivitySummary* summaryPtr)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::Summary>();
-        if (msg) {
-            msg->summary = summaryPtr;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool accessoryStatus(uint8_t state, const char* name)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AccessoryStatusUpd>();
-        if (msg) {
-            msg->state = state;
-            if (name) {
-                strncpy(msg->name, name, sizeof(msg->name) - 1);
-            }
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    // GUI --> Service
-    bool settingsSave(Settings settings)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::SettingsSave>();
-        if (msg) {
-            msg->settings = settings;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool trackStart(bool intervalsMode)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackStart>();
-        if (msg) {
-            msg->intervalsMode = intervalsMode;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool intervalsNextPhase()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::IntervalsNextPhase>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool trackStop(bool discard)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackStop>();
-        if (msg) {
-            msg->discard = discard;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool trackPause()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackPause>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool trackResume()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TrackResume>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool manualLap()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::ManualLap>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-private:
-    const SDK::Kernel &mKernel;
-};
 
 
 } // namespace CustomMessage

@@ -5,7 +5,6 @@
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
-#include "SDK/Kernel/Kernel.hpp"
 
 #include "Alarm.hpp"
 #include <vector>
@@ -50,6 +49,21 @@ namespace CustomMessage {
             , count(0)
             , timeFormat12h(false)
         {}
+
+        // Service <-> GUI
+        //
+        // timeFormat12h is only meaningful Service -> GUI; the GUI -> Service
+        // direction leaves it at the default (the Service ignores it there).
+        explicit AlarmList(const std::vector<Alarm> &list, bool timeFormat12h = false)
+            : AlarmList()
+        {
+            this->count = static_cast<uint8_t>(
+                list.size() < kMaxAlarms ? list.size() : kMaxAlarms);
+            for (uint8_t i = 0; i < this->count; ++i) {
+                this->alarms[i] = list[i];
+            }
+            this->timeFormat12h = timeFormat12h;
+        }
     };
 
     // Service --> GUI
@@ -59,6 +73,13 @@ namespace CustomMessage {
             : SDK::MessageBase(ACTIVATED_ALARM)
             , alarm{}
         {}
+
+        // Service --> GUI
+        explicit ActivatedAlarm(const Alarm &alarm)
+            : ActivatedAlarm()
+        {
+            this->alarm = alarm;
+        }
     };
 
     // GUI --> Service
@@ -68,6 +89,13 @@ namespace CustomMessage {
             : SDK::MessageBase(ACTIVATED_EFFECT)
             , alarm{}
         {}
+
+        // GUI --> Service
+        explicit AlarmActivateEffect(const Alarm &alarm)
+            : AlarmActivateEffect()
+        {
+            this->alarm = alarm;
+        }
     };
 
     struct AlarmStop : public SDK::MessageBase {
@@ -97,113 +125,6 @@ namespace CustomMessage {
             : SDK::MessageBase(ALARM_SNOOZE_ALL)
         {}
     };
-
-
-// Helper wrapper
-class Sender {
-public:
-    Sender(const SDK::Kernel &kernel) :
-            mKernel(kernel)
-    {
-    }
-    virtual ~Sender() = default;
-
-    // Service <-> GUI
-    //
-    // timeFormat12h is only meaningful Service -> GUI; the GUI -> Service
-    // direction leaves it at the default (the Service ignores it there).
-    bool listUpd(const std::vector<Alarm> &list, bool timeFormat12h = false)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmList>();
-        if (msg) {
-            msg->count = static_cast<uint8_t>(
-                list.size() < kMaxAlarms ? list.size() : kMaxAlarms);
-            for (uint8_t i = 0; i < msg->count; ++i) {
-                msg->alarms[i] = list[i];
-            }
-            msg->timeFormat12h = timeFormat12h;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    // Service --> GUI
-    bool alarmActivated(const Alarm &alarm)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::ActivatedAlarm>();
-        if (msg) {
-            msg->alarm = alarm;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    // GUI --> Service
-    bool activateEffect(const Alarm &alarm)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmActivateEffect>();
-        if (msg) {
-            msg->alarm = alarm;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool stop(const Alarm &alarm)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmStop>();
-        if (msg) {
-            msg->alarm = alarm;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool stopAll()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmStopAll>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool snooze(const Alarm &alarm)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmSnooze>();
-        if (msg) {
-            msg->alarm = alarm;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool snoozeAll()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::AlarmSnoozeAll>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-private:
-    const SDK::Kernel &mKernel;
-};
 
 
 } // namespace CustomMessage

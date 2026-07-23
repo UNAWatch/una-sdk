@@ -111,16 +111,18 @@ public:
      * @retval nullptr if allocation failed
      *
      * @note Template wrapper for type-safe allocation
-     * @note Calls placement new on allocated memory
+     * @note Calls placement new on allocated memory, forwarding any ctor args
      * @note Pool determined automatically by address during deallocation
      * @note Example: auto* msg = comm->allocateMessage<GpsRequestMsg>();
+     * @note Example: auto* msg = comm->allocateMessage<BatteryMsg>(level);
      */
-    template<typename T>
-    T* allocateMessage() {
+    template<typename T, typename... Args>
+    T* allocateMessage(Args&&... args) {
         void* ptr = allocateMessage(sizeof(T));
         if (ptr) {
-            // Placement new to construct typed object
-            return new (ptr) T();
+            // Placement new to construct typed object (forwarding ctor args).
+            // static_cast<Args&&> is std::forward without pulling in <utility>.
+            return new (ptr) T(static_cast<Args&&>(args)...);
         }
         return nullptr;
     }
