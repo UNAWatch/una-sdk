@@ -118,7 +118,6 @@ public:
 private:
     ModelListener*        modelListener;
     const SDK::Kernel&    mKernel;
-    CustomMessage::Sender mSrvSender;
     SDK::Variant::Config  mVariant;
     char                  mVariantTitle[16] {};
 

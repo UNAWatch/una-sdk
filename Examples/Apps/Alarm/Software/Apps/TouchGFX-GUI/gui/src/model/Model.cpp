@@ -1,4 +1,5 @@
 #include <gui/model/Model.hpp>
+#include "SDK/Messages/MessageGuard.hpp"
 #include <gui/model/ModelListener.hpp>
 #include <gui/common/FrontendApplication.hpp>
 
@@ -12,7 +13,6 @@
 Model::Model()
     : modelListener(nullptr)
     , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
-    , mSrvSender(mKernel)
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
     SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
@@ -104,20 +104,20 @@ const Alarm& Model::getActiveAlarm() const
 void Model::playAlarm()
 {
     LOG_DEBUG("called\n");
-    mSrvSender.activateEffect(mActiveAlarm);
+    SDK::send_msg<CustomMessage::AlarmActivateEffect>(mKernel, mActiveAlarm);
 }
 
 void Model::stopAlarm()
 {
     LOG_DEBUG("called\n");
-    mSrvSender.stopAll();
+    SDK::send_msg<CustomMessage::AlarmStopAll>(mKernel);
     mActiveAlarm = {};
 }
 
 void Model::snoozeAlarm()
 {
     LOG_DEBUG("called\n");
-    mSrvSender.snoozeAll();
+    SDK::send_msg<CustomMessage::AlarmSnoozeAll>(mKernel);
     mActiveAlarm = {};
 }
 
@@ -145,7 +145,7 @@ void Model::saveAlarm(size_t id, Alarm alarm)
 
     if (id < mAlarmList.size()) {
         mAlarmList[id] = alarm;
-        mSrvSender.listUpd(mAlarmList);
+        SDK::send_msg<CustomMessage::AlarmList>(mKernel, mAlarmList);
         modelListener->onAlarmListUpdated(mAlarmList);
         return;
     }
@@ -156,14 +156,14 @@ void Model::saveAlarm(size_t id, Alarm alarm)
             if (mAlarmList[i] == alarm) {
                 mEditAlarmId  = i;
                 mAlarmList[i] = alarm;
-                mSrvSender.listUpd(mAlarmList);
+                SDK::send_msg<CustomMessage::AlarmList>(mKernel, mAlarmList);
                 modelListener->onAlarmListUpdated(mAlarmList);
                 return;
             }
         }
 
         mAlarmList.push_back(alarm);
-        mSrvSender.listUpd(mAlarmList);
+        SDK::send_msg<CustomMessage::AlarmList>(mKernel, mAlarmList);
     }
 }
 
@@ -173,7 +173,7 @@ void Model::deleteAlarm(size_t id)
         return;
     }
     mAlarmList.erase(mAlarmList.begin() + id);
-    mSrvSender.listUpd(mAlarmList);
+    SDK::send_msg<CustomMessage::AlarmList>(mKernel, mAlarmList);
     modelListener->onAlarmListUpdated(mAlarmList);
 }
 

@@ -1,4 +1,5 @@
 #include <gui/model/Model.hpp>
+#include "SDK/Messages/MessageGuard.hpp"
 #include <gui/model/ModelListener.hpp>
 #include <gui/common/FrontendApplication.hpp>
 
@@ -14,7 +15,6 @@
 Model::Model()
     : modelListener(nullptr)
     , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
-    , mSrvSender(mKernel)
     , mVariant(mKernel)
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
@@ -160,7 +160,7 @@ const Settings& Model::getSettings() const
 void Model::saveSettings(const Settings& sett)
 {
     mSettings = sett;
-    mSrvSender.settingsSave(mSettings);
+    SDK::send_msg<CustomMessage::SettingsSave>(mKernel, mSettings);
 }
 
 
@@ -181,7 +181,7 @@ uint8_t Model::getAccessoryState() const
 
 void Model::trackStart()
 {
-    mSrvSender.trackStart();
+    SDK::send_msg<CustomMessage::TrackStart>(mKernel);
 }
 
 bool Model::isTrackActive() const
@@ -191,12 +191,12 @@ bool Model::isTrackActive() const
 
 void Model::trackPause()
 {
-    mSrvSender.trackPause();
+    SDK::send_msg<CustomMessage::TrackPause>(mKernel);
 }
 
 void Model::trackResume()
 {
-    mSrvSender.trackResume();
+    SDK::send_msg<CustomMessage::TrackResume>(mKernel);
 }
 
 bool Model::isTrackPaused() const
@@ -211,7 +211,7 @@ const Track::Data& Model::getTrackData() const
 
 void Model::saveLap()
 {
-    mSrvSender.manualLap();
+    SDK::send_msg<CustomMessage::ManualLap>(mKernel);
 }
 
 void Model::setHoldConfirmMode(HoldConfirmMode mode)
@@ -226,12 +226,12 @@ Model::HoldConfirmMode Model::getHoldConfirmMode() const
 
 void Model::saveTrack()
 {
-    mSrvSender.trackStop(false);
+    SDK::send_msg<CustomMessage::TrackStop>(mKernel, false);
 }
 
 void Model::discardTrack()
 {
-    mSrvSender.trackStop(true);
+    SDK::send_msg<CustomMessage::TrackStop>(mKernel, true);
 }
 
 bool Model::isTrackSummaryAvailable() const

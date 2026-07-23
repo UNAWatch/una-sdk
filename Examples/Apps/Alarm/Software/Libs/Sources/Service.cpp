@@ -26,7 +26,6 @@ static std::tm getLocalTime()
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
         , mGuiStarted(false)
-        , mGuiSender(kernel)
         , mAlarmManager(kernel)
         , mActiveAlarm()
 {
@@ -140,12 +139,12 @@ void Service::onStartGUI()
 
     // If there is an active alarm, send it to GUI first
     if (mActiveAlarm.on) {
-        mGuiSender.alarmActivated(mActiveAlarm);
+        SDK::send_msg<CustomMessage::ActivatedAlarm>(mKernel, mActiveAlarm);
         mActiveAlarm = {}; // clear active alarm
     }
 
     // Send current alarm list to GUI
-    mGuiSender.listUpd(mAlarmManager.getAlarmList(), mTimeFormat12h);
+    SDK::send_msg<CustomMessage::AlarmList>(mKernel, mAlarmManager.getAlarmList(), mTimeFormat12h);
 }
 
 void Service::onStopGUI()
@@ -262,7 +261,7 @@ void Service::onAlarm(const Alarm& alarm)
 
         mActiveAlarm = alarm; // save active alarm
     } else {
-        mGuiSender.alarmActivated(alarm);
+        SDK::send_msg<CustomMessage::ActivatedAlarm>(mKernel, alarm);
         mActiveAlarm = {};
     }
 }
@@ -270,7 +269,7 @@ void Service::onAlarm(const Alarm& alarm)
 void Service::onListChanged(const std::vector<Alarm>& list)
 {
     if (mGuiStarted) {
-        mGuiSender.listUpd(list, mTimeFormat12h);
+        SDK::send_msg<CustomMessage::AlarmList>(mKernel, list, mTimeFormat12h);
     }
 }
 

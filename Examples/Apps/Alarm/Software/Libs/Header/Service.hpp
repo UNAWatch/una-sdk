@@ -20,7 +20,6 @@ private:
 
     SDK::Kernel&          mKernel;
     bool                  mGuiStarted;
-    CustomMessage::Sender mGuiSender;
 
     // -- Alarm & persistence --------------------------------------------------
 

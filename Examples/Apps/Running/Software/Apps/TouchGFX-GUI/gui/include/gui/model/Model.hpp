@@ -117,7 +117,6 @@ private:
     // Fields required for GUI <-> Service communication
     ModelListener*           modelListener;
     const SDK::Kernel&       mKernel;
-    CustomMessage::Sender    mSrvSender;
 
     // IGuiLifeCycleCallback
     void onStart()   override;

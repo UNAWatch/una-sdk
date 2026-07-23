@@ -1,4 +1,5 @@
 #include "Service.hpp"
+#include "SDK/Messages/MessageGuard.hpp"
 
 #include <ctime>
 #include <algorithm>
@@ -16,7 +17,6 @@
 Service::Service(SDK::Kernel& kernel)
     : mKernel(kernel)
     , mGuiStarted(false)
-    , mGuiSender(mKernel)
     , mSensorHr(SDK::Sensor::Type::HEART_RATE, skSamplePeriod, skSampleLatency)
     , mHr(0.0f)
     , mHrTl(0.0f)
@@ -164,7 +164,7 @@ void Service::run()
 void Service::onStartGUI()
 {
     mGuiStarted = true;
-    mGuiSender.heartRate(0.0f, 0.0f);
+    SDK::send_msg<CustomMessage::HRValues>(mKernel, 0.0f, 0.0f);
 }
 
 void Service::onStopGUI()
@@ -181,7 +181,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 mHr   = parser.getBpm();
                 mHrTl = parser.getTrustLevel();
 
-                mGuiSender.heartRate(mHr, mHrTl);
+                SDK::send_msg<CustomMessage::HRValues>(mKernel, mHr, mHrTl);
             }
         }
     }
