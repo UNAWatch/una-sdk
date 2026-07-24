@@ -19,13 +19,14 @@ namespace {
 // On-disk .uapp layout facts this reader depends on (the authoritative
 // definition lives kernel-side in App/AppHeaders.hpp; the byte layout is
 // locked by the kernel's host tests and by make_variant.py).
-constexpr uint32_t kFlagVariantAlias = 0x40;
-constexpr size_t   kMainHeaderSize   = 48;
-constexpr size_t   kFlagsOffset      = 20;   // after uappID u64 + 3x u32
-constexpr size_t   kPayloadOffset    = kMainHeaderSize + 3600 + 900;
-constexpr size_t   kConfigOffset     = kPayloadOffset + 32;
-constexpr size_t   kConfigSizeOffset = kPayloadOffset + 17;  // u32, unaligned
-constexpr uint32_t kConfigSizeMax    = 8192;
+constexpr uint32_t kFlagVariantAlias  = 0x40;
+constexpr size_t   kMainHeaderSize    = 48;
+constexpr size_t   kFlagsOffset       = 20;   // after uappID u64 + 3x u32
+constexpr size_t   kPayloadOffset     = kMainHeaderSize + 3600 + 900;
+constexpr size_t   kConfigOffset      = kPayloadOffset + 32;
+constexpr size_t   kConfigSizeOffset  = kPayloadOffset + 17;  // u32, unaligned
+constexpr uint32_t kConfigSizeMax     = 8192;
+constexpr uint32_t kPayloadVersion    = 1;    // the layout this reader parses
 
 bool hasUappExtension(const char *name)
 {
@@ -34,12 +35,30 @@ bool hasUappExtension(const char *name)
     return len > strlen(kExt) && strcmp(&name[len - strlen(kExt)], kExt) == 0;
 }
 
+/// Read the app-flags word of a .uapp; false when unreadable.
+bool readFlags(const SDK::Kernel &kernel, const char *path, uint32_t &flags)
+{
+    std::unique_ptr<SDK::Interface::IFile> file = kernel.fs.file(path);
+    if (!file || !file->open()) {
+        return false;
+    }
+    size_t br = 0;
+    bool ok = file->seek(kFlagsOffset) &&
+            file->read(reinterpret_cast<char*>(&flags), sizeof(flags), br) &&
+            br == sizeof(flags);
+    file->close();
+    return ok;
+}
+
 } // namespace
 
 Config::Config(const SDK::Kernel &kernel)
 {
-    // The sandbox root holds exactly one .uapp: the app's own binary, or the
-    // alias this variant was launched through.
+    // Pick the same file the kernel's scan picked (mixed-dir determinism,
+    // design doc section 3.4): any real (non-alias) .uapp in the sandbox
+    // root means the app runs as its classic self; otherwise the first
+    // alias-flagged .uapp is this variant's identity. An unreadable
+    // candidate counts as a real app, mirroring the kernel's routing.
     char path[SDK::Interface::IFileSystem::skMaxPathLen] {};
     {
         std::unique_ptr<SDK::Interface::IDirectory> dir = kernel.fs.dir("/");
@@ -47,17 +66,33 @@ Config::Config(const SDK::Kernel &kernel)
             return;
         }
 
+        char candidate[SDK::Interface::IFileSystem::skMaxPathLen] {};
         SDK::Interface::IFileSystem::ObjectInfo item {};
+        bool realAppSeen = false;
         while (dir->readNext(item)) {
-            if (!item.isDir && hasUappExtension(item.name)) {
-                snprintf(path, sizeof(path), "/%s", item.name);
+            if (item.isDir || !hasUappExtension(item.name)) {
+                continue;
+            }
+            snprintf(candidate, sizeof(candidate), "/%s", item.name);
+            uint32_t flags = 0;
+            if (!readFlags(kernel, candidate, flags) ||
+                    (flags & kFlagVariantAlias) == 0) {
+                realAppSeen = true;
                 break;
+            }
+            if (path[0] == '\0') {
+                snprintf(path, sizeof(path), "%s", candidate);
             }
         }
         dir->close();
+
+        if (realAppSeen) {
+            path[0] = '\0';
+        }
     }
 
     if (path[0] == '\0') {
+        // The app is its classic self.
         return;
     }
 
@@ -67,23 +102,26 @@ Config::Config(const SDK::Kernel &kernel)
     }
 
     bool ok = false;
-    uint32_t flags = 0;
+    uint32_t payloadVersion = 0;
     uint32_t configSize = 0;
 
     do {
         size_t br = 0;
-        if (!file->seek(kFlagsOffset) ||
-                !file->read(reinterpret_cast<char*>(&flags), sizeof(flags), br)) {
-            break;
-        }
 
-        if ((flags & kFlagVariantAlias) == 0) {
-            // A real binary: the app is its classic self.
+        // Only the payload layout this reader was built for: a future kernel
+        // may accept newer payloads, but a shipped binary must never guess
+        // at rearranged fields -- unknown version ==> classic defaults.
+        if (!file->seek(kPayloadOffset) ||
+                !file->read(reinterpret_cast<char*>(&payloadVersion),
+                        sizeof(payloadVersion), br) ||
+                br != sizeof(payloadVersion) ||
+                payloadVersion != kPayloadVersion) {
             break;
         }
 
         if (!file->seek(kConfigSizeOffset) ||
-                !file->read(reinterpret_cast<char*>(&configSize), sizeof(configSize), br)) {
+                !file->read(reinterpret_cast<char*>(&configSize), sizeof(configSize), br) ||
+                br != sizeof(configSize)) {
             break;
         }
 
