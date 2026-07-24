@@ -32,6 +32,20 @@ namespace {
     };
 }  // namespace
 
+/// The .json sidecar's activity_type string for a FIT sport (variants report
+/// their own identity, e.g. Walking on the Hiking binary).
+static const char* sportName(fit::Sport sport)
+{
+    switch (sport) {
+    case fit::Sport::Running:  return "running";
+    case fit::Sport::Cycling:  return "cycling";
+    case fit::Sport::Training: return "training";
+    case fit::Sport::Walking:  return "walking";
+    case fit::Sport::Hiking:   return "hiking";
+    default:                   return "generic";
+    }
+}
+
 ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir,
                                SDK::Fit::Sport sport, SDK::Fit::SubSport subSport)
     : mKernel(kernel), mPath(pathToDir), mSport(sport), mSubSport(subSport),
@@ -450,7 +464,7 @@ bool ActivityWriter::saveSummary(const TrackData& track)
     writer.add("distance", track.distance);
     writer.add("hr_avg", track.hrAvg);
     writer.add("elevation", track.ascent - track.descent);
-    writer.add("activity_type", "hiking");
+    writer.add("activity_type", sportName(mSport));
     writer.endMap();
 
     const bool ok = mFile->flush();
