@@ -100,7 +100,12 @@ public:
         uint32_t    floors    = 0;      // count
     };
 
-    ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir);
+    /// sport/subSport parameterize the FIT session identity so a variant
+    /// (e.g. Walking) can reuse this binary; the defaults keep the classic
+    /// Hiking behaviour when no variant config is present.
+    ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir,
+                   SDK::Fit::Sport sport = SDK::Fit::Sport::Hiking,
+                   SDK::Fit::SubSport subSport = SDK::Fit::SubSport::Generic);
 
     void start(const AppInfo& info);
     void pause(std::time_t timestamp);
@@ -157,6 +162,10 @@ private:
 
     const SDK::Kernel& mKernel;
     const char*        mPath = nullptr;
+
+    /// FIT session identity (variant configuration point).
+    SDK::Fit::Sport    mSport    = SDK::Fit::Sport::Hiking;
+    SDK::Fit::SubSport mSubSport = SDK::Fit::SubSport::Generic;
 
     std::unique_ptr<SDK::Interface::IFile> mFile = nullptr;
     std::unique_ptr<SDK::Fit::FitWriter>   mFit  = nullptr;

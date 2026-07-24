@@ -29,6 +29,7 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Variant\VariantConfig.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>

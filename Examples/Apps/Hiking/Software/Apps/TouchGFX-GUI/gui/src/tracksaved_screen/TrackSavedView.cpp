@@ -11,7 +11,11 @@ void TrackSavedView::setupScreen()
 {
     TrackSavedViewBase::setupScreen();
 
-    title.set(T_TEXT_APP_NAME_UC);
+    if (const char* variant = application().getModel().variantTitle()) {
+        title.set(variant);
+    } else {
+        title.set(T_TEXT_APP_NAME_UC);
+    }
 
     mDismissTimer.setDuration(kDismissTicks);
     mDismissTimer.setCallback(mDismissCb);

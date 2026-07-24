@@ -9,7 +9,11 @@ void TrackStartConfirmationView::setupScreen()
 {
     TrackStartConfirmationViewBase::setupScreen();
 
-    title.set(T_TEXT_APP_NAME_UC);
+    if (const char* variant = application().getModel().variantTitle()) {
+        title.set(variant);
+    } else {
+        title.set(T_TEXT_APP_NAME_UC);
+    }
 
     buttons.setL1(Buttons::NONE);
     buttons.setL2(Buttons::NONE);
