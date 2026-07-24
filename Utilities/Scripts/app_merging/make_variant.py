@@ -119,6 +119,8 @@ def main() -> int:
     name_utf8 = args.name.encode("utf-8")
     if len(name_utf8) > 15:
         parser.error("-name must fit 15 bytes (NUL-terminated 16-byte field)")
+    if not args.name.isascii():
+        parser.error("-name must be ASCII (the wildcard fonts cover ASCII only)")
 
     if args.icons_from is not None:
         if args.normal_icon or args.small_icon:
