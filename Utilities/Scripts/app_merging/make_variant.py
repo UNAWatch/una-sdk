@@ -121,6 +121,9 @@ def main() -> int:
         parser.error("-name must fit 15 bytes (NUL-terminated 16-byte field)")
     if not args.name.isascii():
         parser.error("-name must be ASCII (the wildcard fonts cover ASCII only)")
+    if args.appid == args.target_appid:
+        parser.error("-appid must differ from -target_appid (an alias cannot claim "
+                     "the target's own identity; the kernel rejects the collision at scan)")
 
     if args.icons_from is not None:
         if args.normal_icon or args.small_icon:
@@ -136,7 +139,11 @@ def main() -> int:
         raise ValueError("Icon payloads must be exactly 3600 / 900 bytes")
 
     config_bytes = args.config.read_bytes()
-    json.loads(config_bytes)  # authoring-side syntax check; the kernel never parses it
+    config_json = json.loads(config_bytes)  # authoring-side syntax check; the kernel never parses it
+    if config_json.get("schema") != 1:
+        parser.error('config JSON must carry "schema": 1 -- the app-side reader '
+                     "falls back to classic defaults on anything else, so the "
+                     "variant would build but never activate")
     if len(config_bytes) > CONFIG_SIZE_MAX:
         raise ValueError(f"Config exceeds the kernel's {CONFIG_SIZE_MAX}-byte bound")
 
