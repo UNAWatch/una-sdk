@@ -5,6 +5,8 @@
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
+#include <cctype>
+
 #define LOG_MODULE_PRX      "Model"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
@@ -13,10 +15,25 @@ Model::Model()
     : modelListener(nullptr)
     , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
     , mSrvSender(mKernel)
+    , mVariant(mKernel)
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
     SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
     memcpy(mHrThresholds, CustomMessage::kHrThresholdsDefault, sizeof(mHrThresholds));
+
+    // Screen titles show the variant's name in upper case; the compiled
+    // typed text keeps serving the classic binary.
+    if (mVariant.isVariant()) {
+        const char* name = mVariant.name(nullptr);
+        if (name != nullptr) {
+            size_t i = 0;
+            for (; name[i] != '\0' && i < sizeof(mVariantTitle) - 1; i++) {
+                mVariantTitle[i] = static_cast<char>(toupper(
+                        static_cast<unsigned char>(name[i])));
+            }
+            mVariantTitle[i] = '\0';
+        }
+    }
 
 #if defined(SIMULATOR)
     std::string fsPath = SDK::Simulator::KernelHolder::Get().getFsPath();
@@ -36,6 +53,11 @@ FrontendApplication& Model::application()
 App::MenuNav::Nav& Model::menu()
 {
     return mMenu;
+}
+
+const char* Model::variantTitle() const
+{
+    return (mVariantTitle[0] != '\0') ? mVariantTitle : nullptr;
 }
 
 void Model::invalidate()

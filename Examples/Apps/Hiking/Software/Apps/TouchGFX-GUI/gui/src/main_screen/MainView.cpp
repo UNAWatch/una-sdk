@@ -15,7 +15,11 @@ void MainView::setupScreen()
 
     setupItems();
     menuLayout.setAnimationSteps(App::Config::kMenuAnimationSteps);
-    menuLayout.setTitle(T_TEXT_APP_NAME_UC);
+    if (const char* variant = application().getModel().variantTitle()) {
+        menuLayout.setTitle(variant);
+    } else {
+        menuLayout.setTitle(T_TEXT_APP_NAME_UC);
+    }
     menuLayout.setInfoMsg(TYPED_TEXT_INVALID);   // GPS status now shown by the icon row
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
     menuLayout.setUpdateCenterItemCallback(mUpdateCenterItemCb);

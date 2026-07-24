@@ -7,6 +7,7 @@
 #include <images/BitmapDatabase.hpp>
 
 #include "SDK/Kernel/Kernel.hpp"
+#include "SDK/Variant/VariantConfig.hpp"
 #include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
 #include "SDK/Interfaces/ICustomMessageHandler.hpp"
 #include <SDK/Utils/Utils.hpp>
@@ -110,10 +111,16 @@ public:
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
 
+    // Variant identity: the uppercased display name for screen titles, or
+    // nullptr when this binary runs as its classic self (use the typed text).
+    const char* variantTitle() const;
+
 private:
     ModelListener*        modelListener;
     const SDK::Kernel&    mKernel;
     CustomMessage::Sender mSrvSender;
+    SDK::Variant::Config  mVariant;
+    char                  mVariantTitle[16] {};
 
     // IGuiLifeCycleCallback
     void onStart()   override;

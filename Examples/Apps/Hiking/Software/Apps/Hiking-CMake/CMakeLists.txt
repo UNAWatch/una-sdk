@@ -53,11 +53,16 @@ if(DEFINED TOUCHGFX_PATH)
         ${TOUCHGFX_SOURCES}
         ${UNA_SDK_SOURCES_COMMON}
         ${UNA_SDK_SOURCES_GUI}
+        # The GUI reads the variant config directly (screen titles), so it
+        # needs the reader and its JSON machinery in this link too.
+        ${UNA_SDK_SOURCES_VARIANT}
+        ${UNA_SDK_SOURCES_JSON}
     )
     set(GUI_INCLUDE_DIRS
         ${LIBS_INCLUDE_DIRS}
         ${UNA_SDK_INCLUDE_DIRS_COMMON}
         ${UNA_SDK_INCLUDE_DIRS_GUI}
+        ${UNA_SDK_INCLUDE_DIRS_JSON}
         ${TOUCHGFX_INCLUDE_DIRS}
     )
     una_app_build_gui(${APP_NAME}GUI.elf)

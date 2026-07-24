@@ -32,8 +32,10 @@ namespace {
     };
 }  // namespace
 
-ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir)
-    : mKernel(kernel), mPath(pathToDir), mMarker(kernel.fs, pathToDir)
+ActivityWriter::ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir,
+                               SDK::Fit::Sport sport, SDK::Fit::SubSport subSport)
+    : mKernel(kernel), mPath(pathToDir), mSport(sport), mSubSport(subSport),
+      mMarker(kernel.fs, pathToDir)
 {
     assert(pathToDir != nullptr);
 }
@@ -306,8 +308,8 @@ bool ActivityWriter::stop(const TrackData& track)
         .u16(static_cast<uint16_t>(track.ascent))
         .u16(static_cast<uint16_t>(track.descent))
         .u16(mLapCounter)
-        .u8(static_cast<uint8_t>(fit::Sport::Hiking))
-        .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+        .u8(static_cast<uint8_t>(mSport))
+        .u8(static_cast<uint8_t>(mSubSport))
         .u8(static_cast<uint8_t>(track.hrAvg))
         .u8(static_cast<uint8_t>(track.hrMax))
         // developer fields: steps, floors

@@ -36,6 +36,12 @@ set(UNA_SDK_SOURCES_TRACKMAP
     "$ENV{UNA_SDK}/Libs/Source/TrackMap/TrackMapBuilder.cpp"
 )
 
+# Variant-alias config reader (SDK::Variant). Needs UNA_SDK_SOURCES_JSON in
+# the same link (the GUI process must add both to read the config directly).
+set(UNA_SDK_SOURCES_VARIANT
+    "$ENV{UNA_SDK}/Libs/Source/Variant/VariantConfig.cpp"
+)
+
 set(UNA_SDK_SOURCES_CALIBRATION
     "$ENV{UNA_SDK}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Calibration/StrideLut.cpp"
@@ -51,6 +57,7 @@ set(UNA_SDK_SOURCES_SERVICE
     "${UNA_SDK_SOURCES_SENSOR}"
     "${UNA_SDK_SOURCES_TRACKMAP}"
     "${UNA_SDK_SOURCES_CALIBRATION}"
+    "${UNA_SDK_SOURCES_VARIANT}"
 )
 
 set(UNA_SDK_SOURCES_GUI

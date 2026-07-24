@@ -19,6 +19,8 @@ public:
     FrontendApplication(Model& m, FrontendHeap& heap);
     virtual ~FrontendApplication() { }
 
+    Model& getModel() { return model; }
+
     virtual void handleTickEvent()
     {
 #if defined(SIMULATOR)

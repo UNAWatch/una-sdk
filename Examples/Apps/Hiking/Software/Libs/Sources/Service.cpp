@@ -54,11 +54,16 @@ Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
         , mGuiStarted(false)
         , mGuiSender(kernel)
+        , mVariant(kernel)
         , mSettings{}
         , mSettingsSerializer(mKernel, "settings.json")
         , mSummary{}
         , mActivitySummarySerializer(mKernel, "Activity/summary.json")
-        , mActivityWriter(mKernel, "Activity")
+        , mActivityWriter(mKernel, "Activity",
+                static_cast<SDK::Fit::Sport>(mVariant.fitSport(
+                        static_cast<uint8_t>(SDK::Fit::Sport::Hiking))),
+                static_cast<SDK::Fit::SubSport>(mVariant.fitSubSport(
+                        static_cast<uint8_t>(SDK::Fit::SubSport::Generic))))
         , mTrackMapBuilder{}
         , mSensorGpsLocation(SDK::Sensor::Type::GPS_LOCATION, skSamplePeriod, skSampleLatency)
         , mSensorGpsSpeed(SDK::Sensor::Type::GPS_SPEED, skSamplePeriod, skSampleLatency)

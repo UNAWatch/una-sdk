@@ -3,6 +3,7 @@
 #define SERVICE_HPP
 
 #include "SDK/Kernel/Kernel.hpp"
+#include "SDK/Variant/VariantConfig.hpp"
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
 #include "SDK/TrackMap/TrackMapBuilder.hpp"
@@ -45,6 +46,9 @@ private:
 
     // -- Settings & persistence -----------------------------------------------
 
+    // Declared before mActivityWriter: the variant config supplies the FIT
+    // identity the writer is constructed with.
+    SDK::Variant::Config      mVariant;
     Settings                  mSettings;
     bool                      mIsImperial = false;
     bool                      mTimeFormat12h = false;

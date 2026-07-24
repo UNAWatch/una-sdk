@@ -61,6 +61,7 @@ public:
 
     // ---- Chrome ------------------------------------------------------------
     void setTitle(TypedTextId msgId);
+    void setTitle(const char* text);
     void showTitle(bool state);
 
     void setBackground(touchgfx::colortype color);

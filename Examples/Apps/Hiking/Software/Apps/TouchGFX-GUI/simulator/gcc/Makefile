@@ -40,6 +40,7 @@ Libs/Source/Wrappers/StdLibWrappers.c\
 ThirdParty/coreJSON/source/core_json.c\
 Libs/Source/JSON/JsonStreamReader.cpp\
 Libs/Source/JSON/JsonStreamWriter.cpp\
+Libs/Source/Variant/VariantConfig.cpp\
 Libs/Source/TrackMap/TrackMapBuilder.cpp\
 Libs/Source/Kernel/KernelBuilder.cpp\
 Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp\
