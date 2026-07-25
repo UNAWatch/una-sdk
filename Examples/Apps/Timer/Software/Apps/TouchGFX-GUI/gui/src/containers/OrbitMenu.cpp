@@ -356,13 +356,19 @@ void OrbitMenu::handleTickEvent()
     const float f = static_cast<float>(mAnimStep) / static_cast<float>(mAnimSteps);
     mScrollPos = mAnimStart + (mTargetPos - mAnimStart) * f;
 
+    bool justEnded = false;
     if (mAnimStep >= mAnimSteps) {
         mScrollPos = mTargetPos;
         mAnimating = false;
+        justEnded  = true;
     }
 
     layout();
     invalidate();
+
+    if (justEnded && mpAnimEndedCb != nullptr && mpAnimEndedCb->isValid()) {
+        mpAnimEndedCb->execute();
+    }
 }
 
 void OrbitMenu::layout()

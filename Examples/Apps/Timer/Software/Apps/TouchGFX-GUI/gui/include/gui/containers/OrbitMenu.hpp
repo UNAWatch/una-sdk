@@ -5,6 +5,7 @@
 #include <touchgfx/widgets/Image.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <touchgfx/hal/Types.hpp>
+#include <touchgfx/Callback.hpp>
 
 /**
  * @brief One row of OrbitMenu: an icon plus a label.
@@ -153,6 +154,9 @@ public:
      */
     void           setAnimationSteps(int16_t steps);
 
+    /** @brief Register a callback fired once when a selectNext/Prev animation settles. */
+    void setAnimationEndedCallback(touchgfx::GenericCallback<> &cb) { mpAnimEndedCb = &cb; }
+
 protected:
     virtual void handleTickEvent() override;
 
@@ -178,6 +182,8 @@ private:
     Anchors mAnchors = { { 0, 22,  87 },  ///< centre  (60px icon)
                          { 50, 45,  92 },  ///< +/-1    (30px icon, pushed right)
                          { 80, 71, 108 } };///< +/-2
+
+    touchgfx::GenericCallback<>* mpAnimEndedCb = nullptr;
 
     float   mScrollPos = 0.0f; ///< Animated fractional selected index.
     float   mTargetPos = 0.0f; ///< Integer target we are easing toward.

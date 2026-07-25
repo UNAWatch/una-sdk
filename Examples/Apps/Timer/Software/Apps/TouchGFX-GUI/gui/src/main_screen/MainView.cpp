@@ -13,6 +13,7 @@ static std::string formatValue(uint16_t sec)
 }
 
 MainView::MainView()
+    : mAnimEndedCb(this, &MainView::onOrbitAnimationEnded)
 {
 }
 
@@ -34,6 +35,8 @@ void MainView::setupScreen()
                                          { 58, 45,  92 },
                                          { 96, 71, 108 } };
     orbitMenu.setAnchors(anchors);
+
+    orbitMenu.setAnimationEndedCallback(mAnimEndedCb);
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
 
@@ -57,6 +60,7 @@ void MainView::setLists(const std::vector<Timer>& presets,
     scrollIndicator.setCount(static_cast<uint16_t>(mEntries.size()));
     scrollIndicator.setActiveId(0);
 
+    updateRecentLabel();
     syncView();
 }
 
@@ -120,6 +124,12 @@ void MainView::moveSelection(bool forward)
         scrollIndicator.animateToId(next, kAnimSteps);
     }
 
+    // Entering the recents shows the value immediately; leaving keeps the value
+    // through the slide and defers the swap to "Recent" to the animation end.
+    if (next >= 0 && next < static_cast<int16_t>(mItems.size()) && mItems[next].isRecent) {
+        updateRecentLabel();
+    }
+
     syncView();
 }
 
@@ -140,13 +150,28 @@ void MainView::syncView()
     const bool centeredRecent =
         sel >= 0 && sel < static_cast<int16_t>(mItems.size()) && mItems[sel].isRecent;
     title.set(centeredRecent ? "RECENT" : "TIMER");
+}
 
+void MainView::updateRecentLabel()
+{
     // The first recent doubles as the "Recent" section hint: it reads "Recent"
     // while a non-recent is centred, and its value once the recents are entered.
-    if (mFirstRecentIdx >= 0) {
-        orbitMenu.setEntryLabel(mFirstRecentIdx,
-            centeredRecent ? mLabels[mFirstRecentIdx].c_str() : "Recent");
+    if (mFirstRecentIdx < 0) {
+        return;
     }
+    const int16_t sel = orbitMenu.getSelected();
+    const bool centeredRecent =
+        sel >= 0 && sel < static_cast<int16_t>(mItems.size()) && mItems[sel].isRecent;
+    orbitMenu.setEntryLabel(mFirstRecentIdx,
+        centeredRecent ? mLabels[mFirstRecentIdx].c_str() : "Recent");
+}
+
+void MainView::onOrbitAnimationEnded()
+{
+    // Settle the "Recent" hint on the final frame: leaving the recents keeps the
+    // number on screen for the whole animation and only turns it into "Recent"
+    // here, so the user sees a shrinking value rather than a shrinking label.
+    updateRecentLabel();
 }
 
 void MainView::handleKeyEvent(uint8_t key)

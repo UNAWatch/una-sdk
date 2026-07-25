@@ -53,6 +53,10 @@ private:
     void syncView();     ///< Toggle static-New face vs orbit and set the title.
     void onConfirm();
 
+    /** @brief Set the first recent's label to its value (in recents) or "Recent". */
+    void updateRecentLabel();
+    void onOrbitAnimationEnded();
+
     std::vector<Item>             mItems;    ///< Parallel to the orbit entries.
     std::vector<std::string>      mLabels;   ///< Stable backing for Entry::label.
     std::vector<OrbitMenu::Entry> mEntries;
@@ -60,6 +64,8 @@ private:
     /// Index of the first recent (shows "Recent" while a non-recent is centred),
     /// or -1 when there are no recents.
     int16_t                       mFirstRecentIdx = -1;
+
+    touchgfx::Callback<MainView>  mAnimEndedCb;
 };
 
 #endif // MAINVIEW_HPP
