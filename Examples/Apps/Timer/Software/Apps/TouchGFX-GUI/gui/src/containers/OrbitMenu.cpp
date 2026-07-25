@@ -123,7 +123,8 @@ void OrbitMenuItem::render(bool bigIcon, touchgfx::TypedTextId labelFont,
                            int16_t iconCenterX, int16_t textX, int16_t centerY)
 {
     // Full-width row; icon and label are placed independently in row-local X.
-    const int16_t rowH = 68; // tall enough for the 60px centre value/icon.
+    // Tall enough that the 60px centre value never clips top/bottom.
+    const int16_t rowH = 84;
 
     // Icon: the bitmap itself carries the size, so a swap is all that is needed.
     // Placed by its centre (iconCenterX) so the 60<->30 swap shrinks in place
@@ -152,12 +153,18 @@ void OrbitMenuItem::render(bool bigIcon, touchgfx::TypedTextId labelFont,
                           static_cast<int16_t>(w + 4), rowH);
     }
     label.resizeHeightToCurrentText();
-    // The bigger the font, the more empty line-box space sits above the digits,
-    // so a plain box-centre makes large rows read low and the bottom gap tighter
-    // than the top. Lift the label proportionally to the font height so every
-    // row's optical centre lands on its geometric centre -> symmetric neighbours.
-    label.setY(static_cast<int16_t>((rowH - label.getHeight()) / 2
-                                    - (label.getHeight() * 6) / 16));
+    // Centre by the digit's real cap box, not the line box: a digit rests on the
+    // baseline with height == glyph height, so placing the baseline at
+    // rowH/2 + digitH/2 lands the digit's centre on the row centre for every
+    // font size. This removes the ascent-space bias that made large rows read
+    // low (tight top gap) and keeps the value from clipping.
+    const touchgfx::Font* font = label.getTypedText().getFont();
+    const touchgfx::GlyphNode* zero = (font != nullptr) ? font->getGlyph('0') : nullptr;
+    if (zero != nullptr) {
+        label.setBaselineY(static_cast<int16_t>(rowH / 2 + zero->height() / 2));
+    } else {
+        label.setY(static_cast<int16_t>((rowH - label.getHeight()) / 2));
+    }
 
     setWidthHeight(240, rowH);
     setXY(0, static_cast<int16_t>(centerY - rowH / 2));
