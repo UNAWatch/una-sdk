@@ -6,11 +6,19 @@
 #include "TimerManager.hpp"
 #include "Commands.hpp"
 
-class Service : public TimerManager::TimerCallback
+/**
+ * @brief Background process that owns the countdown and drives the alerts.
+ *
+ * Sleeps on the message queue with a timeout equal to the remaining countdown,
+ * so the chip can reach low power while a timer runs. On expiry it plays the
+ * alert (buzzer / vibro / backlight) and, if the GUI is closed, launches it to
+ * show the Fired screen -- the timer therefore goes off in the app and on the
+ * home screen alike.
+ */
+class Service : public TimerManager::Callback
 {
 public:
-    Service(SDK::Kernel &kernel);
-
+    explicit Service(SDK::Kernel &kernel);
     virtual ~Service();
 
     void run();
@@ -21,38 +29,34 @@ private:
     SDK::Kernel&          mKernel;
     bool                  mGuiStarted;
     CustomMessage::Sender mGuiSender;
+    TimerManager          mTimerManager;
 
-    // -- Timer & persistence --------------------------------------------------
-
-    TimerManager    mTimerManager;
-    Timer           mActiveTimer;
-    bool            mTimeFormat12h = false;  // cached system clock-format setting
+    // A fire that happened while the GUI was closed: launch the GUI, then
+    // deliver it once the GUI signals it is running.
+    bool                  mPendingFired = false;
+    Timer                 mPendingTimer {};
 
     // -- Lifecycle ------------------------------------------------------------
 
     void onStartGUI();
     void onStopGUI();
 
-    /** @brief Query the kernel for the current 12/24-hour clock setting. */
-    void refreshTimeFormat();
+    // -- Command handlers (GUI -> Service) ------------------------------------
 
-    // -- Fired control ------------------------------------------------------
+    void handleStart(const CustomMessage::TimerStart& msg);
+    void handleControl(const CustomMessage::TimerControl& msg);
+    void handleRecentsSave(const CustomMessage::TimerRecentsSave& msg);
 
-    void stopFired();
+    // -- Helpers --------------------------------------------------------------
 
-    // -- Event handlers -------------------------------------------------------
-
-    void handleEvent(const CustomMessage::TimerList& event);
-    void handleEvent(const CustomMessage::TimerActivateEffect& event);
-    void handleEvent(const CustomMessage::TimerStop& event);
-    void handleEvent(const CustomMessage::TimerStopAll& event);
-    void handleEvent(const CustomMessage::TimerSnooze& event);
-    void handleEvent(const CustomMessage::TimerSnoozeAll& event);
+    void sendStateToGui();
+    void playEffect(Timer::Effect effect);
+    void stopEffect();
 
     // -- TimerManager callbacks -----------------------------------------------
 
-    void onTimer(const Timer& timer);
-    void onListChanged(const std::vector<Timer>& list);
+    void onFired(const Timer& timer) override;
+    void onRecentsChanged(const std::vector<Timer>& list) override;
 };
 
 #endif // SERVICE_HPP

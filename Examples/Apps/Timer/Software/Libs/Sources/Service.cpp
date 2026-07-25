@@ -1,34 +1,21 @@
-
 #include "Service.hpp"
 
 #include "SDK/Messages/MessageGuard.hpp"
-
-#include <cstdio>
 
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
 
-static std::tm getLocalTime()
-{
-    std::tm tmResult {};
-    std::time_t utc = time(nullptr);
+// Grace period after launch during which the service stays alive waiting for
+// the GUI to appear, even with no active countdown.
+static constexpr uint32_t kStartupGraceMs = 5000;
 
-#if defined(_WIN32) || defined(_WIN64)
-    localtime_s(&tmResult, &utc);
-#else
-    localtime_r(&utc, &tmResult);
-#endif
-
-    return tmResult;
-}
 
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
         , mGuiStarted(false)
         , mGuiSender(kernel)
         , mTimerManager(kernel)
-        , mActiveTimer()
 {
 }
 
@@ -44,10 +31,24 @@ void Service::run()
     mTimerManager.attachCallback(this);
     mTimerManager.load();
 
-    uint32_t startTime = mKernel.sys.getTimeMs();
+    const uint32_t startTime = mKernel.sys.getTimeMs();
 
     while (true) {
-        uint32_t sleepTime = mTimerManager.execute(getLocalTime());
+        uint32_t now      = mKernel.sys.getTimeMs();
+        uint32_t sleepTime = mTimerManager.execute(now);
+
+        // Nothing keeps us alive: no GUI and no armed / paused countdown and no
+        // fire waiting to be delivered. Exit after the startup grace period;
+        // during the grace period poll instead of blocking forever.
+        if (!mGuiStarted && !mTimerManager.hasActiveTimers() && !mPendingFired) {
+            if (now - startTime > kStartupGraceMs) {
+                LOG_INFO("Idle and GUI closed, exiting service\n");
+                break;
+            }
+            if (sleepTime > kStartupGraceMs) {
+                sleepTime = kStartupGraceMs;
+            }
+        }
 
         SDK::MessageBase *msg;
         if (mKernel.comm.getMessage(msg, sleepTime)) {
@@ -57,7 +58,6 @@ void Service::run()
                 case SDK::MessageType::COMMAND_APP_STOP:
                     LOG_INFO("Force exit from the application\n");
                     mTimerManager.attachCallback(nullptr);
-                    // We must release message because this is the last event.
                     mKernel.comm.releaseMessage(msg);
                     return;
 
@@ -71,81 +71,43 @@ void Service::run()
                     onStopGUI();
                     break;
 
-                // Custom messages
-                case CustomMessage::TIMER_LIST:
-                    LOG_DEBUG("TIMER_LIST\n");
-                    handleEvent(*static_cast<CustomMessage::TimerList*>(msg));
+                // Custom messages (GUI -> Service)
+                case CustomMessage::TIMER_START:
+                    handleStart(*static_cast<CustomMessage::TimerStart*>(msg));
                     break;
 
-                case CustomMessage::ACTIVATED_EFFECT:
-                    LOG_DEBUG("ACTIVATED_EFFECT\n");
-                    handleEvent(*static_cast<CustomMessage::TimerActivateEffect*>(msg));
+                case CustomMessage::TIMER_CONTROL:
+                    handleControl(*static_cast<CustomMessage::TimerControl*>(msg));
                     break;
 
-                case CustomMessage::TIMER_STOP:
-                    LOG_DEBUG("TIMER_STOP\n");
-                    handleEvent(*static_cast<CustomMessage::TimerStop*>(msg));
-                    break;
-
-                case CustomMessage::TIMER_STOP_ALL:
-                    LOG_DEBUG("TIMER_STOP_ALL\n");
-                    handleEvent(*static_cast<CustomMessage::TimerStopAll*>(msg));
-                    break;
-
-                case CustomMessage::TIMER_SNOOZE:
-                    LOG_DEBUG("TIMER_SNOOZE\n");
-                    handleEvent(*static_cast<CustomMessage::TimerSnooze*>(msg));
-                    break;
-
-                case CustomMessage::TIMER_SNOOZE_ALL:
-                    LOG_DEBUG("TIMER_SNOOZE_ALL\n");
-                    handleEvent(*static_cast<CustomMessage::TimerSnoozeAll*>(msg));
+                case CustomMessage::TIMER_RECENTS_SAVE:
+                    handleRecentsSave(*static_cast<CustomMessage::TimerRecentsSave*>(msg));
                     break;
 
                 default:
                     break;
             }
-            // Release message after processing
             mKernel.comm.releaseMessage(msg);
         }
-
-        if (!mGuiStarted) {
-            // Just wait some time to see if GUI starts
-            if (mKernel.sys.getTimeMs() - startTime > 5000) {
-                if (!mTimerManager.hasActiveTimers()) {
-                    LOG_INFO("No active timers and GUI not started, exiting service\n");
-                    mTimerManager.attachCallback(nullptr);
-                    return; // Exit app
-                }
-            }
-        }
     }
 }
 
-void Service::refreshTimeFormat()
-{
-    if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
-        if (msg.send(100) && msg.ok()) {
-            mTimeFormat12h = msg->timeFormat;
-        }
-    }
-}
+
+// -- Lifecycle ----------------------------------------------------------------
 
 void Service::onStartGUI()
 {
     mGuiStarted = true;
 
-    // Pick up the current clock-format setting so the list carries it to the GUI.
-    refreshTimeFormat();
+    // Bring the GUI up to date: current countdown, then recents.
+    sendStateToGui();
+    mGuiSender.sendRecents(mTimerManager.getRecents());
 
-    // If there is an active timer, send it to GUI first
-    if (mActiveTimer.on) {
-        mGuiSender.timerActivated(mActiveTimer);
-        mActiveTimer = {}; // clear active timer
+    // Deliver a fire that happened while the GUI was closed.
+    if (mPendingFired) {
+        mGuiSender.fired(mPendingTimer);
+        mPendingFired = false;
     }
-
-    // Send current timer list to GUI
-    mGuiSender.listUpd(mTimerManager.getTimerList(), mTimeFormat12h);
 }
 
 void Service::onStopGUI()
@@ -153,12 +115,65 @@ void Service::onStopGUI()
     mGuiStarted = false;
 }
 
-void Service::handleEvent(const CustomMessage::TimerList& event)
+
+// -- Command handlers ---------------------------------------------------------
+
+void Service::handleStart(const CustomMessage::TimerStart& msg)
 {
-    mTimerManager.saveTimerList({event.timers, event.timers + event.count});
+    mTimerManager.start(msg.durationSec, msg.effect, mKernel.sys.getTimeMs());
+    sendStateToGui();
 }
 
-void Service::handleEvent(const CustomMessage::TimerActivateEffect& event)
+void Service::handleControl(const CustomMessage::TimerControl& msg)
+{
+    uint32_t now = mKernel.sys.getTimeMs();
+
+    switch (msg.cmd) {
+        case CustomMessage::TimerCmd::PAUSE:
+            mTimerManager.pause(now);
+            break;
+        case CustomMessage::TimerCmd::RESUME:
+            mTimerManager.resume(now);
+            break;
+        case CustomMessage::TimerCmd::RESET:
+            mTimerManager.reset(now);
+            break;
+        case CustomMessage::TimerCmd::STOP:
+            stopEffect();
+            mTimerManager.stop();
+            break;
+        case CustomMessage::TimerCmd::REPEAT:
+            stopEffect();
+            mTimerManager.repeat(now);
+            break;
+    }
+
+    sendStateToGui();
+}
+
+void Service::handleRecentsSave(const CustomMessage::TimerRecentsSave& msg)
+{
+    std::vector<Timer> list;
+    list.reserve(msg.count);
+    for (uint8_t i = 0; i < msg.count && i < CustomMessage::kMaxRecents; ++i) {
+        list.push_back(Timer{ msg.entries[i].durationSec, msg.entries[i].effect });
+    }
+    mTimerManager.saveRecents(list);
+}
+
+
+// -- Helpers ------------------------------------------------------------------
+
+void Service::sendStateToGui()
+{
+    if (!mGuiStarted) {
+        return;
+    }
+    TimerManager::State s = mTimerManager.getState();
+    mGuiSender.sendState(s.state, s.endTick, s.remainingMs, s.durationSec, s.effect);
+}
+
+void Service::playEffect(Timer::Effect effect)
 {
     auto *backlightMsg = mKernel.comm.allocateMessage<SDK::Message::RequestBacklightSet>();
     if (backlightMsg) {
@@ -168,13 +183,12 @@ void Service::handleEvent(const CustomMessage::TimerActivateEffect& event)
         mKernel.comm.releaseMessage(backlightMsg);
     }
 
-    bool isVibro = event.timer.effect == Timer::Effect::EFFECT_BEEP_AND_VIBRO ||
-            event.timer.effect == Timer::Effect::EFFECT_VIBRO;
+    bool isVibro = effect == Timer::EFFECT_BEEP_AND_VIBRO ||
+                   effect == Timer::EFFECT_VIBRO;
 
     if (isVibro) {
         auto *vibroMsg = mKernel.comm.allocateMessage<SDK::Message::RequestVibroPlay>();
         if (vibroMsg) {
-
             vibroMsg->notes[0].effect = SDK::Message::RequestVibroPlay::Effect::ALERT_750MS_100;
             vibroMsg->notes[1].pause  = 250;
             vibroMsg->notes[2].effect = SDK::Message::RequestVibroPlay::Effect::ALERT_750MS_100;
@@ -187,22 +201,22 @@ void Service::handleEvent(const CustomMessage::TimerActivateEffect& event)
         }
     }
 
-    bool isBuzzer = event.timer.effect == Timer::Effect::EFFECT_BEEP_AND_VIBRO ||
-            event.timer.effect == Timer::Effect::EFFECT_BEEP;
+    bool isBuzzer = effect == Timer::EFFECT_BEEP_AND_VIBRO ||
+                    effect == Timer::EFFECT_BEEP;
 
     if (isBuzzer) {
         auto *buzzerMsg = mKernel.comm.allocateMessage<SDK::Message::RequestBuzzerPlay>();
         if (buzzerMsg) {
             buzzerMsg->notes[0].volume = 100;
-            buzzerMsg->notes[0].time  = 750;
+            buzzerMsg->notes[0].time   = 750;
             buzzerMsg->notes[1].volume = 0;
-            buzzerMsg->notes[1].time  = 250;
+            buzzerMsg->notes[1].time   = 250;
             buzzerMsg->notes[2].volume = 100;
-            buzzerMsg->notes[2].time  = 750;
+            buzzerMsg->notes[2].time   = 750;
             buzzerMsg->notes[3].volume = 0;
-            buzzerMsg->notes[3].time  = 250;
+            buzzerMsg->notes[3].time   = 250;
             buzzerMsg->notes[4].volume = 100;
-            buzzerMsg->notes[4].time  = 750;
+            buzzerMsg->notes[4].time   = 750;
             buzzerMsg->notesCount = 5;
 
             mKernel.comm.sendMessage(buzzerMsg);
@@ -211,32 +225,9 @@ void Service::handleEvent(const CustomMessage::TimerActivateEffect& event)
     }
 }
 
-void Service::handleEvent(const CustomMessage::TimerStop& event)
+void Service::stopEffect()
 {
-    mTimerManager.disableTimer(event.timer);
-    stopFired();
-}
-
-void Service::handleEvent(const CustomMessage::TimerStopAll& /*event*/)
-{
-    mTimerManager.disableAllActiveTimer();
-    stopFired();
-}
-
-void Service::handleEvent(const CustomMessage::TimerSnooze& event)
-{
-    mTimerManager.snoozeTimer(event.timer);
-    stopFired();
-}
-
-void Service::handleEvent(const CustomMessage::TimerSnoozeAll& /*event*/)
-{
-    mTimerManager.snoozeAllActiveTimer();
-    stopFired();
-}
-
-void Service::stopFired()
-{
+    // Empty play messages silence the buzzer and stop the vibro pattern.
     auto *buzzerMsg = mKernel.comm.allocateMessage<SDK::Message::RequestBuzzerPlay>();
     if (buzzerMsg) {
         mKernel.comm.sendMessage(buzzerMsg);
@@ -250,27 +241,30 @@ void Service::stopFired()
     }
 }
 
-void Service::onTimer(const Timer& timer)
+
+// -- TimerManager callbacks ---------------------------------------------------
+
+void Service::onFired(const Timer& timer)
 {
-    // Make sure GUI is started
-    if (!mGuiStarted) {
+    playEffect(timer.effect);
+
+    if (mGuiStarted) {
+        mGuiSender.fired(timer);
+    } else {
+        // Launch the GUI, then deliver the fire once it signals it is running.
         auto *msg = mKernel.comm.allocateMessage<SDK::Message::RequestAppRunGui>();
         if (msg) {
             mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }
-
-        mActiveTimer = timer; // save active timer
-    } else {
-        mGuiSender.timerActivated(timer);
-        mActiveTimer = {};
+        mPendingFired = true;
+        mPendingTimer = timer;
     }
 }
 
-void Service::onListChanged(const std::vector<Timer>& list)
+void Service::onRecentsChanged(const std::vector<Timer>& list)
 {
     if (mGuiStarted) {
-        mGuiSender.listUpd(list, mTimeFormat12h);
+        mGuiSender.sendRecents(list);
     }
 }
-

@@ -5,9 +5,14 @@
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
+#include <algorithm>
+
 #define LOG_MODULE_PRX      "Model"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
+
+// Preset durations (seconds) shown at the top of the Main list.
+static constexpr uint16_t kPresetSec[] = { 60, 180, 300, 600, 900, 1800, 3600 };
 
 Model::Model()
     : modelListener(nullptr)
@@ -18,17 +23,16 @@ Model::Model()
     SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
 
     setCapabilities();
+    buildPresets();
 
 #if defined(SIMULATOR)
-    std::string fsPath = SDK::Simulator::KernelHolder::Get().getFsPath();
     LOG_INFO("Simulator.\n");
-    LOG_INFO("FS path: [%s].\n", fsPath.c_str());
     LOG_INFO("Buttons: 1=L1 2=L2 3=R1 4=R2\n\n");
 #endif
 }
 
 
-// Controls
+// -- Controls -----------------------------------------------------------------
 
 FrontendApplication& Model::application()
 {
@@ -54,8 +58,9 @@ void Model::handleKeyEvent(uint8_t key)
     if (isAnyKeyPressed(key)) {
         resetIdleTimer();
 
-        // If the user presses any key while no timer is fired, stay in app on exit
-        if (!mActiveTimer.on) {
+        // Any interaction means the user is in the app; return to Main on exit
+        // rather than leaving the app entirely.
+        if (mState != TimerState::FIRED) {
             mStayInApp = true;
         }
     }
@@ -79,8 +84,13 @@ void Model::exitApp()
 
 void Model::switchToNextPriorityScreen()
 {
-    if (mActiveTimer.on) {
+    if (mState == TimerState::FIRED) {
         application().gotoFiredScreenNoTransition();
+        return;
+    }
+
+    if (mState == TimerState::RUNNING || mState == TimerState::PAUSED) {
+        application().gotoRunningScreenNoTransition();
         return;
     }
 
@@ -94,91 +104,63 @@ void Model::switchToNextPriorityScreen()
 }
 
 
-// Timer
+// -- Countdown ----------------------------------------------------------------
 
-const Timer& Model::getActiveTimer() const
+void Model::startTimer(const Timer& timer)
 {
-    return mActiveTimer;
+    mSrvSender.start(timer.durationSec, timer.effect);
 }
 
-void Model::playTimer()
+void Model::pauseTimer()  { mSrvSender.pause();  }
+void Model::resumeTimer() { mSrvSender.resume(); }
+void Model::resetTimer()  { mSrvSender.reset();  }
+void Model::stopTimer()   { mSrvSender.stop();   }
+void Model::repeatTimer() { mSrvSender.repeat(); }
+
+uint32_t Model::getRemainingMs() const
 {
-    LOG_DEBUG("called\n");
-    mSrvSender.activateEffect(mActiveTimer);
-}
-
-void Model::stopTimer()
-{
-    LOG_DEBUG("called\n");
-    mSrvSender.stopAll();
-    mActiveTimer = {};
-}
-
-void Model::snoozeTimer()
-{
-    LOG_DEBUG("called\n");
-    mSrvSender.snoozeAll();
-    mActiveTimer = {};
-}
-
-std::vector<Timer>& Model::getTimerList()
-{
-    return mTimerList;
-}
-
-void Model::setTimerEditId(size_t id)
-{
-    if (id > mTimerList.size()) {  // id == mTimerList.size() means new timer
-        return;
-    }
-    mEditTimerId = id;
-}
-
-size_t Model::getTimerEditId()
-{
-    return mEditTimerId;
-}
-
-void Model::saveTimer(size_t id, Timer timer)
-{
-    LOG_DEBUG("called\n");
-
-    if (id < mTimerList.size()) {
-        mTimerList[id] = timer;
-        mSrvSender.listUpd(mTimerList);
-        modelListener->onTimerListUpdated(mTimerList);
-        return;
-    }
-
-    if (id == mTimerList.size()) {
-        // If an timer with the same identity already exists, overwrite it to avoid duplicates
-        for (size_t i = 0; i < mTimerList.size(); i++) {
-            if (mTimerList[i] == timer) {
-                mEditTimerId  = i;
-                mTimerList[i] = timer;
-                mSrvSender.listUpd(mTimerList);
-                modelListener->onTimerListUpdated(mTimerList);
-                return;
-            }
+    switch (mState) {
+        case TimerState::RUNNING: {
+            int32_t left = static_cast<int32_t>(mEndTick - mKernel.sys.getTimeMs());
+            return left > 0 ? static_cast<uint32_t>(left) : 0;
         }
-
-        mTimerList.push_back(timer);
-        mSrvSender.listUpd(mTimerList);
+        case TimerState::PAUSED:
+            return mRemainingMs;
+        case TimerState::FIRED:
+            return 0;
+        case TimerState::IDLE:
+        default:
+            return static_cast<uint32_t>(mDurationSec) * 1000u;
     }
 }
 
-void Model::deleteTimer(size_t id)
+
+// -- Presets & recents --------------------------------------------------------
+
+void Model::buildPresets()
 {
-    if (id >= mTimerList.size()) {
-        return;
+    mPresets.clear();
+    mPresets.reserve(sizeof(kPresetSec) / sizeof(kPresetSec[0]));
+    for (uint16_t sec : kPresetSec) {
+        mPresets.push_back(Timer{ sec, Timer::EFFECT_BEEP_AND_VIBRO });
     }
-    mTimerList.erase(mTimerList.begin() + id);
-    mSrvSender.listUpd(mTimerList);
-    modelListener->onTimerListUpdated(mTimerList);
+}
+
+void Model::addRecent(const Timer& timer)
+{
+    // Move-to-front with de-duplication, newest first.
+    mRecents.erase(std::remove(mRecents.begin(), mRecents.end(), timer), mRecents.end());
+    mRecents.insert(mRecents.begin(), timer);
+
+    if (mRecents.size() > CustomMessage::kMaxRecents) {
+        mRecents.resize(CustomMessage::kMaxRecents);
+    }
+
+    mSrvSender.saveRecents(mRecents);
 }
 
 
-// Private
+// -- Private ------------------------------------------------------------------
 
 void Model::decIdleTimer()
 {
@@ -209,7 +191,7 @@ bool Model::isAnyKeyPressed(uint8_t key) const
 }
 
 
-// IGuiLifeCycleCallback
+// -- IGuiLifeCycleCallback ----------------------------------------------------
 
 void Model::onStart()
 {
@@ -234,24 +216,38 @@ void Model::onStop()
 }
 
 
-// ICustomMessageHandler
+// -- ICustomMessageHandler ----------------------------------------------------
 
 bool Model::customMessageHandler(SDK::MessageBase* msg)
 {
     switch (msg->getType()) {
-        case CustomMessage::TIMER_LIST: {
-            LOG_DEBUG("TIMER_LIST\n");
-            auto* m = static_cast<CustomMessage::TimerList*>(msg);
-            mTimerList.assign(m->timers, m->timers + m->count);
-            mTimeFormat12h = m->timeFormat12h;
-            modelListener->onTimerListUpdated(mTimerList);
+        case CustomMessage::TIMER_STATE: {
+            auto* m = static_cast<CustomMessage::TimerStateMsg*>(msg);
+            mState       = static_cast<TimerState>(m->state);
+            mEndTick     = m->endTick;
+            mRemainingMs = m->remainingMs;
+            mDurationSec = m->durationSec;
+            mEffect      = m->effect;
+            modelListener->onStateChanged();
         } break;
 
-        case CustomMessage::ACTIVATED_TIMER: {
-            LOG_DEBUG("ACTIVATED_TIMER\n");
-            auto* m  = static_cast<CustomMessage::ActivatedTimer*>(msg);
-            mActiveTimer = m->timer;
-            modelListener->onTimerActivated(mActiveTimer);
+        case CustomMessage::TIMER_FIRED: {
+            auto* m = static_cast<CustomMessage::TimerFired*>(msg);
+            mState       = TimerState::FIRED;
+            mRemainingMs = 0;
+            mDurationSec = m->durationSec;
+            mEffect      = m->effect;
+            modelListener->onFired(Timer{ m->durationSec, m->effect });
+        } break;
+
+        case CustomMessage::TIMER_RECENTS: {
+            auto* m = static_cast<CustomMessage::TimerRecents*>(msg);
+            mRecents.clear();
+            mRecents.reserve(m->count);
+            for (uint8_t i = 0; i < m->count && i < CustomMessage::kMaxRecents; ++i) {
+                mRecents.push_back(Timer{ m->entries[i].durationSec, m->entries[i].effect });
+            }
+            modelListener->onRecentsChanged(mRecents);
         } break;
 
         default:

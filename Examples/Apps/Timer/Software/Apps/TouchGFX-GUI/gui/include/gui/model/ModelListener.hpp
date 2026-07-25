@@ -9,7 +9,7 @@ class ModelListener
 {
 public:
     ModelListener() : model(0) {}
-    
+
     virtual ~ModelListener() {}
 
     void bind(Model* m)
@@ -19,17 +19,20 @@ public:
 
     virtual void onIdleTimeout() {}
 
-    virtual void onTimerListUpdated(const std::vector<Timer>& list) {}
+    /** @brief The countdown state changed (start / pause / resume / reset / stop). */
+    virtual void onStateChanged() {}
 
-    virtual void onTimerActivated(const Timer& timer) {
-        // Switch to Timer screen from any other screen of this app
+    /** @brief The recents list changed. */
+    virtual void onRecentsChanged(const std::vector<Timer>& list) {}
+
+    /** @brief The countdown reached zero. Jump to the Fired screen by default. */
+    virtual void onFired(const Timer& timer)
+    {
         model->application().gotoFiredScreenNoTransition();
     }
 
 protected:
     Model* model;
-
-    
 };
 
 #endif // MODELLISTENER_HPP

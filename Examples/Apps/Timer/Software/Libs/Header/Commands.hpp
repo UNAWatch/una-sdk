@@ -1,4 +1,3 @@
-
 #ifndef COMMANDS_HPP
 #define COMMANDS_HPP
 
@@ -16,90 +15,112 @@
 
 namespace CustomMessage {
 
-    // Maximum number of timers that can be transferred in a single message.
-    // Must match or exceed TimerManager::kInitialCount.
-    static constexpr size_t kMaxTimers = 20;
+    // Maximum number of recent timers kept and transferred in one message.
+    static constexpr size_t kMaxRecents = 3;
 
-    // Application custom commands
-
-    // Service <-> GUI
-    constexpr SDK::MessageType::Type TIMER_LIST        = 0x00000001;
-
-    // Service --> GUI
-    constexpr SDK::MessageType::Type ACTIVATED_TIMER   = 0x00000002;
+    // -- Message type ids (application-custom) --------------------------------
 
     // GUI --> Service
-    constexpr SDK::MessageType::Type ACTIVATED_EFFECT  = 0x00000003;
-    constexpr SDK::MessageType::Type TIMER_STOP        = 0x00000004;
-    constexpr SDK::MessageType::Type TIMER_STOP_ALL    = 0x00000005;
-    constexpr SDK::MessageType::Type TIMER_SNOOZE      = 0x00000006;
-    constexpr SDK::MessageType::Type TIMER_SNOOZE_ALL  = 0x00000007;
+    constexpr SDK::MessageType::Type TIMER_START        = 0x00000001;
+    constexpr SDK::MessageType::Type TIMER_CONTROL      = 0x00000002;
+    constexpr SDK::MessageType::Type TIMER_RECENTS_SAVE = 0x00000003;
 
-    // Service <-> GUI
-    //
-    // Fixed-size array avoids heap allocation in the message pool path.
-    // sizeof(TimerList) = 32 (MessageBase) + kMaxTimers*sizeof(Timer) + 2 = 134 bytes
-    // -> allocated from Pool 3 (256 bytes), zero dynamic allocations.
-    struct TimerList : public SDK::MessageBase {
-        Timer   timers[kMaxTimers];
-        uint8_t count;
-        bool    timeFormat12h;   // Service -> GUI: true = 12-hour clock
-        TimerList()
-            : SDK::MessageBase(TIMER_LIST)
-            , timers{}
+    // Service --> GUI
+    constexpr SDK::MessageType::Type TIMER_STATE        = 0x00000010;
+    constexpr SDK::MessageType::Type TIMER_FIRED        = 0x00000011;
+    constexpr SDK::MessageType::Type TIMER_RECENTS      = 0x00000012;
+
+    // -- Payload helpers ------------------------------------------------------
+
+    /** @brief One recent-timer entry (duration + effect), packed for transfer. */
+    struct RecentEntry {
+        uint16_t      durationSec;
+        Timer::Effect effect;
+    };
+
+    /** @brief Sub-command carried by a TIMER_CONTROL message. */
+    enum class TimerCmd : uint8_t {
+        PAUSE,
+        RESUME,
+        RESET,
+        STOP,
+        REPEAT
+    };
+
+    // -- GUI --> Service ------------------------------------------------------
+
+    struct TimerStart : public SDK::MessageBase {
+        uint16_t      durationSec;
+        Timer::Effect effect;
+        TimerStart()
+            : SDK::MessageBase(TIMER_START)
+            , durationSec(0)
+            , effect(Timer::EFFECT_BEEP_AND_VIBRO)
+        {}
+    };
+
+    struct TimerControl : public SDK::MessageBase {
+        TimerCmd cmd;
+        TimerControl()
+            : SDK::MessageBase(TIMER_CONTROL)
+            , cmd(TimerCmd::STOP)
+        {}
+    };
+
+    struct TimerRecentsSave : public SDK::MessageBase {
+        RecentEntry entries[kMaxRecents];
+        uint8_t     count;
+        TimerRecentsSave()
+            : SDK::MessageBase(TIMER_RECENTS_SAVE)
+            , entries{}
             , count(0)
-            , timeFormat12h(false)
         {}
     };
 
-    // Service --> GUI
-    struct ActivatedTimer : public SDK::MessageBase {
-        Timer timer;
-        ActivatedTimer()
-            : SDK::MessageBase(ACTIVATED_TIMER)
-            , timer{}
+    // -- Service --> GUI ------------------------------------------------------
+
+    // Live countdown snapshot. The GUI extrapolates the displayed time locally
+    // from the shared monotonic tick:
+    //   RUNNING -> remaining = endTick - now
+    //   PAUSED  -> remaining = remainingMs
+    struct TimerStateMsg : public SDK::MessageBase {
+        uint8_t       state;        // TimerState
+        uint32_t      endTick;      // absolute tick of expiry (RUNNING)
+        uint32_t      remainingMs;  // frozen remainder (PAUSED)
+        uint16_t      durationSec;
+        Timer::Effect effect;
+        TimerStateMsg()
+            : SDK::MessageBase(TIMER_STATE)
+            , state(static_cast<uint8_t>(TimerState::IDLE))
+            , endTick(0)
+            , remainingMs(0)
+            , durationSec(0)
+            , effect(Timer::EFFECT_BEEP_AND_VIBRO)
         {}
     };
 
-    // GUI --> Service
-    struct TimerActivateEffect : public SDK::MessageBase {
-        Timer timer;
-        TimerActivateEffect()
-            : SDK::MessageBase(ACTIVATED_EFFECT)
-            , timer{}
+    struct TimerFired : public SDK::MessageBase {
+        uint16_t      durationSec;
+        Timer::Effect effect;
+        TimerFired()
+            : SDK::MessageBase(TIMER_FIRED)
+            , durationSec(0)
+            , effect(Timer::EFFECT_BEEP_AND_VIBRO)
         {}
     };
 
-    struct TimerStop : public SDK::MessageBase {
-        Timer timer;
-        TimerStop()
-            : SDK::MessageBase(TIMER_STOP)
-            , timer{}
-        {}
-    };
-
-    struct TimerStopAll : public SDK::MessageBase {
-        TimerStopAll()
-            : SDK::MessageBase(TIMER_STOP_ALL)
-        {}
-    };
-
-    struct TimerSnooze : public SDK::MessageBase {
-        Timer timer;
-        TimerSnooze()
-            : SDK::MessageBase(TIMER_SNOOZE)
-            , timer{}
-        {}
-    };
-
-    struct TimerSnoozeAll : public SDK::MessageBase {
-        TimerSnoozeAll()
-            : SDK::MessageBase(TIMER_SNOOZE_ALL)
+    struct TimerRecents : public SDK::MessageBase {
+        RecentEntry entries[kMaxRecents];
+        uint8_t     count;
+        TimerRecents()
+            : SDK::MessageBase(TIMER_RECENTS)
+            , entries{}
+            , count(0)
         {}
     };
 
 
-// Helper wrapper
+// Helper wrapper: constructs, sends and releases the pool message in one call.
 class Sender {
 public:
     Sender(const SDK::Kernel &kernel) :
@@ -108,93 +129,99 @@ public:
     }
     virtual ~Sender() = default;
 
-    // Service <-> GUI
-    //
-    // timeFormat12h is only meaningful Service -> GUI; the GUI -> Service
-    // direction leaves it at the default (the Service ignores it there).
-    bool listUpd(const std::vector<Timer> &list, bool timeFormat12h = false)
+    // -- GUI --> Service --------------------------------------------------
+
+    bool start(uint16_t durationSec, Timer::Effect effect)
     {
         bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TimerList>();
+        auto *msg = mKernel.comm.allocateMessage<TimerStart>();
+        if (msg) {
+            msg->durationSec = durationSec;
+            msg->effect      = effect;
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
+    }
+
+    bool control(TimerCmd cmd)
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<TimerControl>();
+        if (msg) {
+            msg->cmd = cmd;
+            status = mKernel.comm.sendMessage(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+        return status;
+    }
+
+    bool pause()  { return control(TimerCmd::PAUSE);  }
+    bool resume() { return control(TimerCmd::RESUME); }
+    bool reset()  { return control(TimerCmd::RESET);  }
+    bool stop()   { return control(TimerCmd::STOP);   }
+    bool repeat() { return control(TimerCmd::REPEAT); }
+
+    bool saveRecents(const std::vector<Timer>& list)
+    {
+        bool status = false;
+        auto *msg = mKernel.comm.allocateMessage<TimerRecentsSave>();
         if (msg) {
             msg->count = static_cast<uint8_t>(
-                list.size() < kMaxTimers ? list.size() : kMaxTimers);
+                list.size() < kMaxRecents ? list.size() : kMaxRecents);
             for (uint8_t i = 0; i < msg->count; ++i) {
-                msg->timers[i] = list[i];
+                msg->entries[i].durationSec = list[i].durationSec;
+                msg->entries[i].effect      = list[i].effect;
             }
-            msg->timeFormat12h = timeFormat12h;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }
         return status;
     }
 
-    // Service --> GUI
-    bool timerActivated(const Timer &timer)
+    // -- Service --> GUI --------------------------------------------------
+
+    bool sendState(TimerState state, uint32_t endTick, uint32_t remainingMs,
+                   uint16_t durationSec, Timer::Effect effect)
     {
         bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::ActivatedTimer>();
+        auto *msg = mKernel.comm.allocateMessage<TimerStateMsg>();
         if (msg) {
-            msg->timer = timer;
+            msg->state       = static_cast<uint8_t>(state);
+            msg->endTick     = endTick;
+            msg->remainingMs = remainingMs;
+            msg->durationSec = durationSec;
+            msg->effect      = effect;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }
         return status;
     }
 
-    // GUI --> Service
-    bool activateEffect(const Timer &timer)
+    bool fired(const Timer& timer)
     {
         bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TimerActivateEffect>();
+        auto *msg = mKernel.comm.allocateMessage<TimerFired>();
         if (msg) {
-            msg->timer = timer;
+            msg->durationSec = timer.durationSec;
+            msg->effect      = timer.effect;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }
         return status;
     }
 
-    bool stop(const Timer &timer)
+    bool sendRecents(const std::vector<Timer>& list)
     {
         bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TimerStop>();
+        auto *msg = mKernel.comm.allocateMessage<TimerRecents>();
         if (msg) {
-            msg->timer = timer;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool stopAll()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TimerStopAll>();
-        if (msg) {
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool snooze(const Timer &timer)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TimerSnooze>();
-        if (msg) {
-            msg->timer = timer;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool snoozeAll()
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<CustomMessage::TimerSnoozeAll>();
-        if (msg) {
+            msg->count = static_cast<uint8_t>(
+                list.size() < kMaxRecents ? list.size() : kMaxRecents);
+            for (uint8_t i = 0; i < msg->count; ++i) {
+                msg->entries[i].durationSec = list[i].durationSec;
+                msg->entries[i].effect      = list[i].effect;
+            }
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

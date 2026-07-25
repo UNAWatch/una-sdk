@@ -14,7 +14,6 @@
 #include "Commands.hpp"
 
 #include <vector>
-#include <memory>
 
 
 // ---------------------------------------------------------------------------
@@ -41,7 +40,8 @@ public:
 
     void bind(ModelListener* listener) { modelListener = listener; }
 
-    // Controls
+    // -- Controls -------------------------------------------------------------
+
     FrontendApplication& application();
     void tick();
     void handleKeyEvent(uint8_t key);
@@ -49,17 +49,37 @@ public:
     void exitApp();
     void switchToNextPriorityScreen();
 
-    // Timer
-    const Timer&        getActiveTimer() const;
-    void                playTimer();
-    void                stopTimer();
-    void                snoozeTimer();
-    std::vector<Timer>& getTimerList();
-    bool                is12HourFormat() const { return mTimeFormat12h; }
-    void                setTimerEditId(size_t id);
-    size_t              getTimerEditId();
-    void                saveTimer(size_t id, Timer timer);
-    void                deleteTimer(size_t id);
+    // -- Countdown ------------------------------------------------------------
+
+    /** @brief Send a start request for the given timer to the service. */
+    void startTimer(const Timer& timer);
+    void pauseTimer();
+    void resumeTimer();
+    void resetTimer();
+    void stopTimer();
+    void repeatTimer();
+
+    TimerState    getState()       const { return mState; }
+    uint16_t      getDurationSec() const { return mDurationSec; }
+    Timer::Effect getEffect()      const { return mEffect; }
+
+    /** @brief Remaining countdown in milliseconds, extrapolated locally. */
+    uint32_t getRemainingMs() const;
+
+    // -- Selection (Main -> Edit -> Alert -> Menu flow) -----------------------
+
+    void         setEditTimer(const Timer& t) { mEditTimer = t; }
+    const Timer& getEditTimer() const         { return mEditTimer; }
+
+    // -- Presets & recents ----------------------------------------------------
+
+    /** @brief Fixed preset durations shown at the top of the Main list. */
+    const std::vector<Timer>& getPresets() const { return mPresets; }
+
+    const std::vector<Timer>& getRecents() const { return mRecents; }
+
+    /** @brief Add a manually entered timer to recents (dedup, cap) and persist. */
+    void addRecent(const Timer& timer);
 
 private:
     ModelListener*        modelListener;
@@ -78,18 +98,28 @@ private:
     void decIdleTimer();
     void setCapabilities();
     bool isAnyKeyPressed(uint8_t key) const;
+    void buildPresets();
 
-    // State
+    // -- GUI state ------------------------------------------------------------
+
     bool     mIsRunning  = false;
     bool     mInvalidate = false;
     uint32_t mIdleTimer  = 0;
     bool     mStayInApp  = false;
 
-    // Timer
-    Timer              mActiveTimer  {};
-    std::vector<Timer> mTimerList;
-    size_t             mEditTimerId  = 0;
-    bool               mTimeFormat12h = false;
+    // -- Countdown snapshot (mirrors the service) -----------------------------
+
+    TimerState    mState       = TimerState::IDLE;
+    uint32_t      mEndTick     = 0;
+    uint32_t      mRemainingMs = 0;
+    uint16_t      mDurationSec = 0;
+    Timer::Effect mEffect      = Timer::EFFECT_BEEP_AND_VIBRO;
+
+    // -- Lists ----------------------------------------------------------------
+
+    Timer              mEditTimer { 60, Timer::EFFECT_BEEP_AND_VIBRO };
+    std::vector<Timer> mPresets;
+    std::vector<Timer> mRecents;
 };
 
 #endif // MODEL_HPP

@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file    Timer.hpp
- * @date    24-07-2024
+ * @date    25-07-2026
  * @author  Denys Saienko <denys.saienko@droid-technologies.com>
  * @brief   Timer type shared between GUI and Service.
  ******************************************************************************
@@ -16,33 +16,20 @@
 
 /**
  * @struct Timer
- * @brief A single timer configuration.
+ * @brief A single countdown timer definition (duration + alert effect).
+ *
+ * This is the immutable configuration of a timer. The live countdown state
+ * (running / paused / remaining) is tracked separately by the Service via
+ * @ref TimerState and the state snapshot in Commands.hpp.
  */
 struct Timer {
 
-    /**
-     * @enum Repeat
-     * @brief Timer repetition schedule.
-     */
-    enum Repeat : uint8_t {
-        REPEAT_NO,
-        REPEAT_EVERY_DAY,
-        REPEAT_WEEK_DAYS,
-        REPEAT_WEEKENDS,
-        REPEAT_MONDAY,
-        REPEAT_TUESDAY,
-        REPEAT_WEDNESDAY,
-        REPEAT_THURSDAY,
-        REPEAT_FRIDAY,
-        REPEAT_SATURDAY,
-        REPEAT_SUNDAY,
-
-        REPEAT_COUNT    ///< Number of repeat options.
-    };
+    /** @brief Total countdown duration in seconds (0..kMaxDurationSec). */
+    uint16_t durationSec;
 
     /**
      * @enum Effect
-     * @brief Alert effect (sound, vibration, or both).
+     * @brief Alert effect played when the countdown reaches zero.
      */
     enum Effect : uint8_t {
         EFFECT_BEEP_AND_VIBRO,
@@ -52,47 +39,44 @@ struct Timer {
         EFFECT_COUNT    ///< Number of effect options.
     };
 
+    Effect effect;
+
     /**
      * @enum Action
-     * @brief Actions available on a saved timer (timer action menu).
+     * @brief Actions offered on the per-timer menu screen.
      */
     enum Action : uint8_t {
-        ACTION_TOGGLE = 0,  ///< Toggle the timer on or off.
-        ACTION_EDIT,        ///< Edit the timer time and settings.
-        ACTION_DELETE,      ///< Delete the timer.
+        ACTION_START = 0,   ///< Start the countdown.
+        ACTION_EDIT,        ///< Edit the duration and effect.
+        ACTION_DELETE,      ///< Delete the timer (recents only).
         ACTION_COUNT        ///< Number of actions.
     };
 
-    bool    on;             ///< Whether the timer is enabled.
-    uint8_t timeHours;      ///< Hour component of the timer time (0–23).
-    uint8_t timeMinutes;    ///< Minute component of the timer time (0–59).
-    Repeat  repeat;         ///< Repetition schedule.
-    Effect  effect;         ///< Alert effect.
+    /** @brief Upper bound for a manually entered duration: 99:59. */
+    static constexpr uint16_t kMaxDurationSec = 99 * 60 + 59;
 
+    /** @brief Identity for recents de-duplication: duration + effect. */
     bool operator==(const Timer& other) const
     {
-        return timeHours   == other.timeHours   &&
-               timeMinutes == other.timeMinutes &&
-               repeat      == other.repeat;
-        // Ignore 'on' and 'effect' — they do not define the timer identity
+        return durationSec == other.durationSec &&
+               effect      == other.effect;
     }
 
     bool operator!=(const Timer& other) const
     {
         return !(*this == other);
     }
+};
 
-    Timer& operator=(const Timer& other)
-    {
-        if (this != &other) {
-            on          = other.on;
-            timeHours   = other.timeHours;
-            timeMinutes = other.timeMinutes;
-            repeat      = other.repeat;
-            effect      = other.effect;
-        }
-        return *this;
-    }
+/**
+ * @enum TimerState
+ * @brief Live state of the single active countdown, owned by the Service.
+ */
+enum class TimerState : uint8_t {
+    IDLE = 0,   ///< No countdown armed.
+    RUNNING,    ///< Counting down; expires at endTick.
+    PAUSED,     ///< Frozen with remainingMs left.
+    FIRED       ///< Reached zero; alert is playing until acknowledged.
 };
 
 #endif // TIMER_HPP

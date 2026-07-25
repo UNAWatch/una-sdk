@@ -7,14 +7,14 @@
 #include "SDK/JSON/JsonStreamReader.hpp"
 #include "SDK/JSON/JsonStreamWriter.hpp"
 
-#include <algorithm>
+#include <cstdio>
+#include <cstring>
 
 
 TimerManager::TimerManager(const SDK::Kernel& kernel)
     : mKernel(kernel)
 {
-    mTimers.reserve(kInitialCount);
-    mSnoozedTimers.reserve(kInitialCount / 4);
+    mRecents.reserve(kMaxRecents);
 }
 
 TimerManager::~TimerManager()
@@ -23,115 +23,141 @@ TimerManager::~TimerManager()
 
 void TimerManager::load()
 {
-    loadFromFile(mTimers);
+    loadFromFile(mRecents);
 
-    LOG_DEBUG("Timers loaded\n");
-    dump(mTimers);
+    LOG_DEBUG("Recents loaded: %u\n", static_cast<unsigned>(mRecents.size()));
 
     if (mObserver) {
-        mObserver->onListChanged(mTimers);
+        mObserver->onRecentsChanged(mRecents);
     }
 }
 
-uint32_t TimerManager::execute(const std::tm& tmNow)
+
+// -- Countdown control --------------------------------------------------------
+
+void TimerManager::arm(uint16_t durationSec, Timer::Effect effect, uint32_t nowMs)
 {
-    checkTimers(static_cast<uint8_t>(tmNow.tm_hour),
-                static_cast<uint8_t>(tmNow.tm_min),
-                static_cast<uint8_t>(tmNow.tm_wday),
-                tmNow);
-
-    // Calculate time until next minute (when next timers can trigger)
-    uint32_t nextCheckMs = (60 - tmNow.tm_sec) * 1000;
-
-    LOG_DEBUG("Next timer check in %u ms\n", nextCheckMs);
-    return nextCheckMs;
+    mDurationSec = durationSec;
+    mEffect      = effect;
+    mRemainingMs = static_cast<uint32_t>(durationSec) * 1000u;
+    mEndTick     = nowMs + mRemainingMs;
+    mState       = TimerState::RUNNING;
 }
 
-const std::vector<Timer>& TimerManager::getTimerList()
+void TimerManager::start(uint16_t durationSec, Timer::Effect effect, uint32_t nowMs)
 {
-    return mTimers;
+    arm(durationSec, effect, nowMs);
+    LOG_INFO("Start %u s\n", static_cast<unsigned>(durationSec));
 }
 
-bool TimerManager::saveTimerList(const std::vector<Timer>& list)
+void TimerManager::pause(uint32_t nowMs)
 {
-    bool status = saveToFile(list);
-
-    if (status) {
-        mTimers = list;
-
-        // Remove snoozed timers that no longer have a matching enabled timer
-        removeObsoleteSnoozedTimers();
-
-        LOG_DEBUG("Timers saved\n");
-
-        if (mObserver) {
-            mObserver->onListChanged(mTimers);
-        }
-    }
-
-    return status;
-}
-
-void TimerManager::disableTimer(const Timer& timer)
-{
-    auto it = std::find_if(mSnoozedTimers.begin(), mSnoozedTimers.end(),
-        [&](const SnoozedTimer& snoozed) {
-            return snoozed.info == timer;
-        });
-
-    if (it != mSnoozedTimers.end()) {
-        LOG_DEBUG("Removing snoozed timer: %02d:%02d\n",
-            it->info.timeHours, it->info.timeMinutes);
-        mSnoozedTimers.erase(it);
-    }
-
-    removeObsoleteSnoozedTimers();
-}
-
-void TimerManager::disableAllActiveTimer()
-{
-    if (mSnoozedTimers.empty()) {
+    if (mState != TimerState::RUNNING) {
         return;
     }
 
-    for (const auto& snoozed : mSnoozedTimers) {
-        LOG_DEBUG("Removing snoozed timer: %02d:%02d\n",
-            snoozed.info.timeHours, snoozed.info.timeMinutes);
-        (void)snoozed;
+    int32_t left = static_cast<int32_t>(mEndTick - nowMs);
+    mRemainingMs = left > 0 ? static_cast<uint32_t>(left) : 0;
+    mState       = TimerState::PAUSED;
+    LOG_INFO("Pause, %u ms left\n", static_cast<unsigned>(mRemainingMs));
+}
+
+void TimerManager::resume(uint32_t nowMs)
+{
+    if (mState != TimerState::PAUSED) {
+        return;
     }
 
-    mSnoozedTimers.clear();
+    mEndTick = nowMs + mRemainingMs;
+    mState   = TimerState::RUNNING;
+    LOG_INFO("Resume\n");
 }
 
-void TimerManager::snoozeTimer(const Timer& timer)
+void TimerManager::reset(uint32_t /*nowMs*/)
 {
-    // The timer was already added to mSnoozedTimers when it first fired
-    // (see checkTimers -> addSnoozedTimer). Re-triggering after kSnoozedTimeMinutes
-    // is handled automatically by execute(). Nothing to do here.
-    LOG_DEBUG("Snooze acknowledged for timer %02d:%02d\n",
-        timer.timeHours, timer.timeMinutes);
-    (void)timer;
+    mRemainingMs = static_cast<uint32_t>(mDurationSec) * 1000u;
+    mState       = TimerState::PAUSED;
+    LOG_INFO("Reset to %u s\n", static_cast<unsigned>(mDurationSec));
 }
 
-void TimerManager::snoozeAllActiveTimer()
+void TimerManager::stop()
 {
-    // Same as snoozeTimer() -- all active timers are already tracked.
-    LOG_DEBUG("Snooze all acknowledged (%u active)\n",
-        static_cast<unsigned>(mSnoozedTimers.size()));
+    mState       = TimerState::IDLE;
+    mRemainingMs = 0;
+    LOG_INFO("Stop\n");
+}
+
+void TimerManager::repeat(uint32_t nowMs)
+{
+    arm(mDurationSec, mEffect, nowMs);
+    LOG_INFO("Repeat %u s\n", static_cast<unsigned>(mDurationSec));
+}
+
+uint32_t TimerManager::execute(uint32_t nowMs)
+{
+    if (mState != TimerState::RUNNING) {
+        return kNoTimeout;
+    }
+
+    // Wrap-safe: expired once (now - endTick) is non-negative.
+    if (static_cast<int32_t>(nowMs - mEndTick) >= 0) {
+        mState       = TimerState::FIRED;
+        mRemainingMs = 0;
+
+        LOG_INFO("Fired\n");
+
+        if (mObserver) {
+            Timer fired{ mDurationSec, mEffect };
+            mObserver->onFired(fired);
+        }
+        return kNoTimeout;
+    }
+
+    return mEndTick - nowMs;
 }
 
 bool TimerManager::hasActiveTimers() const
 {
-    bool hasEnabledTimers = std::any_of(mTimers.begin(), mTimers.end(),
-        [](const Timer& timer) { return timer.on; });
+    return mState == TimerState::RUNNING || mState == TimerState::PAUSED;
+}
 
-    return hasEnabledTimers || !mSnoozedTimers.empty();
+TimerManager::State TimerManager::getState() const
+{
+    State s;
+    s.state       = mState;
+    s.endTick     = mEndTick;
+    s.remainingMs = mRemainingMs;
+    s.durationSec = mDurationSec;
+    s.effect      = mEffect;
+    return s;
 }
 
 
-// -- Private ------------------------------------------------------------------
+// -- Recents ------------------------------------------------------------------
 
-bool TimerManager::saveToFile(const std::vector<Timer>& timers)
+bool TimerManager::saveRecents(const std::vector<Timer>& list)
+{
+    std::vector<Timer> capped = list;
+    if (capped.size() > kMaxRecents) {
+        capped.resize(kMaxRecents);
+    }
+
+    bool status = saveToFile(capped);
+    if (status) {
+        mRecents = std::move(capped);
+        LOG_DEBUG("Recents saved: %u\n", static_cast<unsigned>(mRecents.size()));
+
+        if (mObserver) {
+            mObserver->onRecentsChanged(mRecents);
+        }
+    }
+    return status;
+}
+
+
+// -- Persistence --------------------------------------------------------------
+
+bool TimerManager::saveToFile(const std::vector<Timer>& list)
 {
     bool rv = false;
     size_t bw = 0;
@@ -142,7 +168,7 @@ bool TimerManager::saveToFile(const std::vector<Timer>& timers)
         return false;
     }
 
-    size_t len = createJSON(timers, mBuffer, sizeof(mBuffer));
+    size_t len = createJSON(list, mBuffer, sizeof(mBuffer));
     if (len > 0) {
         if (file->open(true, true)) {
             if (file->write(mBuffer, len, bw) && bw == len) {
@@ -153,12 +179,12 @@ bool TimerManager::saveToFile(const std::vector<Timer>& timers)
     }
 
     if (!rv) {
-        LOG_ERROR("Failed to save timers!\n");
+        LOG_ERROR("Failed to save recents!\n");
     }
     return rv;
 }
 
-bool TimerManager::loadFromFile(std::vector<Timer>& timers)
+bool TimerManager::loadFromFile(std::vector<Timer>& list)
 {
     bool rv = false;
     size_t br = 0;
@@ -170,7 +196,7 @@ bool TimerManager::loadFromFile(std::vector<Timer>& timers)
     }
 
     if (!file->exist()) {
-        LOG_INFO("No saved file with timers %s\n", skFilePath);
+        LOG_INFO("No saved recents file %s\n", skFilePath);
         return false;
     }
 
@@ -178,22 +204,21 @@ bool TimerManager::loadFromFile(std::vector<Timer>& timers)
     if (len < sizeof(mBuffer)) {
         if (file->open()) {
             if (file->read(mBuffer, len, br) && br > 0) {
-                rv = parseJSON(mBuffer, len, timers);
+                rv = parseJSON(mBuffer, len, list);
             }
             file->close();
         }
     } else {
-        LOG_ERROR("Buffer is too small. Required %u bytes\n", len);
+        LOG_ERROR("Buffer is too small. Required %u bytes\n", static_cast<unsigned>(len));
     }
 
     if (!rv) {
-        LOG_ERROR("Can't read timers file or file is corrupted.\n");
+        LOG_ERROR("Can't read recents file or file is corrupted.\n");
     }
-
     return rv;
 }
 
-bool TimerManager::parseJSON(char* buff, uint32_t length, std::vector<Timer>& timers)
+bool TimerManager::parseJSON(char* buff, uint32_t length, std::vector<Timer>& list)
 {
     SDK::JsonStreamReader reader{ buff, length };
     if (!reader.validate()) {
@@ -201,63 +226,31 @@ bool TimerManager::parseJSON(char* buff, uint32_t length, std::vector<Timer>& ti
         return false;
     }
 
-    timers.clear();
+    list.clear();
 
     size_t arrayLength = 0;
-    if (!reader.getArrayLength("timers", arrayLength)) {
-        LOG_ERROR("Failed to get timers array length\n");
+    if (!reader.getArrayLength("recents", arrayLength)) {
+        LOG_ERROR("Failed to get recents array length\n");
         return false;
     }
 
-    timers.reserve(arrayLength);
+    list.reserve(arrayLength);
 
-    for (size_t i = 0; i < arrayLength; i++) {
+    for (size_t i = 0; i < arrayLength && list.size() < kMaxRecents; i++) {
         Timer timer{};
         char query[32];
 
-        snprintf(query, sizeof(query), "timers[%u].on", static_cast<unsigned>(i));
-        if (!reader.get(query, timer.on)) {
-            LOG_ERROR("Failed to parse 'on' field for timer %u\n", static_cast<unsigned>(i));
+        snprintf(query, sizeof(query), "recents[%u].sec", static_cast<unsigned>(i));
+        if (!reader.get(query, timer.durationSec) ||
+            timer.durationSec > Timer::kMaxDurationSec) {
+            LOG_ERROR("Invalid 'sec' for recent %u\n", static_cast<unsigned>(i));
             continue;
         }
 
-        snprintf(query, sizeof(query), "timers[%u].time_h", static_cast<unsigned>(i));
-        if (!reader.get(query, timer.timeHours) || timer.timeHours >= 24) {
-            LOG_ERROR("Failed to parse or invalid 'time_h' for timer %u\n", static_cast<unsigned>(i));
-            continue;
-        }
-
-        snprintf(query, sizeof(query), "timers[%u].time_m", static_cast<unsigned>(i));
-        if (!reader.get(query, timer.timeMinutes) || timer.timeMinutes >= 60) {
-            LOG_ERROR("Failed to parse or invalid 'time_m' for timer %u\n", static_cast<unsigned>(i));
-            continue;
-        }
-
-        snprintf(query, sizeof(query), "timers[%u].repeat", static_cast<unsigned>(i));
-        std::string_view repeatStr;
-        if (!reader.get(query, repeatStr)) {
-            LOG_ERROR("Failed to parse 'repeat' for timer %u\n", static_cast<unsigned>(i));
-            continue;
-        }
-
-        bool repeatFound = false;
-        for (uint8_t j = 0; j < Timer::REPEAT_COUNT; j++) {
-            if (kRepeatJsonKeyValue[j] == repeatStr) {
-                timer.repeat = static_cast<Timer::Repeat>(j);
-                repeatFound = true;
-                break;
-            }
-        }
-        if (!repeatFound) {
-            LOG_ERROR("Invalid 'repeat' value for timer %u: %.*s\n",
-                static_cast<unsigned>(i), static_cast<int>(repeatStr.length()), repeatStr.data());
-            continue;
-        }
-
-        snprintf(query, sizeof(query), "timers[%u].effect", static_cast<unsigned>(i));
+        snprintf(query, sizeof(query), "recents[%u].effect", static_cast<unsigned>(i));
         std::string_view effectStr;
         if (!reader.get(query, effectStr)) {
-            LOG_ERROR("Failed to parse 'effect' for timer %u\n", static_cast<unsigned>(i));
+            LOG_ERROR("Failed to parse 'effect' for recent %u\n", static_cast<unsigned>(i));
             continue;
         }
 
@@ -265,50 +258,39 @@ bool TimerManager::parseJSON(char* buff, uint32_t length, std::vector<Timer>& ti
         for (uint8_t j = 0; j < Timer::EFFECT_COUNT; j++) {
             if (kEffectJsonKeyValue[j] == effectStr) {
                 timer.effect = static_cast<Timer::Effect>(j);
-                effectFound = true;
+                effectFound  = true;
                 break;
             }
         }
         if (!effectFound) {
-            LOG_ERROR("Invalid 'effect' value for timer %u: %.*s\n",
-                static_cast<unsigned>(i), static_cast<int>(effectStr.length()), effectStr.data());
+            LOG_ERROR("Invalid 'effect' for recent %u\n", static_cast<unsigned>(i));
             continue;
         }
 
-        timers.push_back(timer);
+        list.push_back(timer);
     }
 
-    LOG_DEBUG("Parsed %u timers\n", static_cast<unsigned>(timers.size()));
+    LOG_DEBUG("Parsed %u recents\n", static_cast<unsigned>(list.size()));
     return true;
 }
 
-uint32_t TimerManager::createJSON(const std::vector<Timer>& timers, char* buff, uint32_t buffSize)
+uint32_t TimerManager::createJSON(const std::vector<Timer>& list, char* buff, uint32_t buffSize)
 {
     SDK::JsonStreamWriter writer{ buff, buffSize };
 
     writer.startMap();
 
     {
-        SDK::JsonStreamWriter::KeyedArrayScope timersArray{ writer, "timers", timers.size() };
+        SDK::JsonStreamWriter::KeyedArrayScope recentsArray{ writer, "recents", list.size() };
 
-        for (const auto& timer : timers) {
-            SDK::JsonStreamWriter::MapScope timerObj{ writer };
+        for (const auto& timer : list) {
+            SDK::JsonStreamWriter::MapScope recentObj{ writer };
 
-            writer.add("on",     timer.on);
-            writer.add("time_h", timer.timeHours);
-            writer.add("time_m", timer.timeMinutes);
-
-            if (timer.repeat < Timer::REPEAT_COUNT) {
-                writer.add("repeat", kRepeatJsonKeyValue[timer.repeat].data());
-            } else {
-                LOG_ERROR("Invalid repeat value: %u\n", static_cast<unsigned>(timer.repeat));
-                writer.add("repeat", "no");
-            }
+            writer.add("sec", timer.durationSec);
 
             if (timer.effect < Timer::EFFECT_COUNT) {
                 writer.add("effect", kEffectJsonKeyValue[timer.effect].data());
             } else {
-                LOG_ERROR("Invalid effect value: %u\n", static_cast<unsigned>(timer.effect));
                 writer.add("effect", "beep_vibro");
             }
         }
@@ -325,145 +307,4 @@ uint32_t TimerManager::createJSON(const std::vector<Timer>& timers, char* buff, 
     uint32_t jsonLength = static_cast<uint32_t>(strlen(buff));
     LOG_DEBUG("Created JSON: %u bytes\n", jsonLength);
     return jsonLength;
-}
-
-void TimerManager::dump(const std::vector<Timer>& timers)
-{
-    for (size_t i = 0; i < timers.size(); i++) {
-        LOG_DEBUG("timer %u: on=%d %02d:%02d repeat=%d effect=%d\n",
-            static_cast<unsigned>(i), timers[i].on,
-            timers[i].timeHours, timers[i].timeMinutes,
-            timers[i].repeat, timers[i].effect);
-    }
-}
-
-void TimerManager::checkTimers(uint8_t currentHour, uint8_t currentMinute,
-                                uint8_t currentDay, const std::tm& tmNow)
-{
-    bool needSave = false;
-
-    for (auto& timer : mTimers) {
-        if (!timer.on) continue;
-
-        if (timer.timeHours   == currentHour   &&
-            timer.timeMinutes == currentMinute  &&
-            isTimerDueToday(timer, currentDay)  &&
-            !isSnoozed(timer))
-        {
-            LOG_INFO("Triggering timer: %02d:%02d\n", timer.timeHours, timer.timeMinutes);
-
-            if (mObserver) {
-                mObserver->onTimer(timer);
-            }
-            addSnoozedTimer(timer, tmNow);
-
-            // One-time timers are disabled immediately after first trigger
-            if (timer.repeat == Timer::REPEAT_NO) {
-                timer.on = false;
-                needSave = true;
-                LOG_DEBUG("Disabled one-time timer: %02d:%02d\n",
-                    timer.timeHours, timer.timeMinutes);
-            }
-        }
-    }
-
-    // Re-trigger snoozed timers whose next interval has elapsed
-    auto it = mSnoozedTimers.begin();
-    while (it != mSnoozedTimers.end()) {
-        if (it->snoozeCount > 0          &&
-            it->nextTriggerHour   == currentHour &&
-            it->nextTriggerMinute == currentMinute)
-        {
-            it->snoozeCount--;
-
-            if (it->snoozeCount > 0) {
-                LOG_INFO("Re-triggering snoozed timer: %02d:%02d\n",
-                    it->info.timeHours, it->info.timeMinutes);
-                if (mObserver) {
-                    mObserver->onTimer(it->info);
-                }
-                updateSnoozedTriggerTime(*it, tmNow);
-                ++it;
-            } else {
-                LOG_INFO("Snooze exhausted, removing timer: %02d:%02d\n",
-                    it->info.timeHours, it->info.timeMinutes);
-                it = mSnoozedTimers.erase(it);
-            }
-        } else {
-            ++it;
-        }
-    }
-
-    if (needSave) {
-        saveToFile(mTimers);
-        if (mObserver) {
-            mObserver->onListChanged(mTimers);
-        }
-    }
-}
-
-void TimerManager::addSnoozedTimer(const Timer& timer, const std::tm& tmNow)
-{
-    SnoozedTimer snoozed;
-    snoozed.info = timer;
-    updateSnoozedTriggerTime(snoozed, tmNow);
-
-    mSnoozedTimers.push_back(std::move(snoozed));
-}
-
-void TimerManager::updateSnoozedTriggerTime(SnoozedTimer& snoozed, const std::tm& tmNow)
-{
-    uint16_t totalMinutes = static_cast<uint16_t>(
-        tmNow.tm_hour * 60 + tmNow.tm_min + kSnoozedTimeMinutes);
-
-    // Wrap around midnight
-    if (totalMinutes >= 24 * 60) {
-        totalMinutes -= 24 * 60;
-    }
-
-    snoozed.nextTriggerHour   = static_cast<uint8_t>(totalMinutes / 60);
-    snoozed.nextTriggerMinute = static_cast<uint8_t>(totalMinutes % 60);
-
-    LOG_DEBUG("Next snooze trigger: %02d:%02d\n",
-        snoozed.nextTriggerHour, snoozed.nextTriggerMinute);
-}
-
-void TimerManager::removeObsoleteSnoozedTimers()
-{
-    mSnoozedTimers.erase(
-        std::remove_if(mSnoozedTimers.begin(), mSnoozedTimers.end(),
-            [this](const SnoozedTimer& snoozed) {
-                auto it = std::find(mTimers.begin(), mTimers.end(), snoozed.info);
-                return it == mTimers.end() || !it->on;
-            }),
-        mSnoozedTimers.end());
-}
-
-bool TimerManager::isTimerDueToday(const Timer& timer, uint8_t currentDay) const
-{
-    switch (timer.repeat) {
-    case Timer::REPEAT_NO:
-    case Timer::REPEAT_EVERY_DAY:
-        return true;
-    case Timer::REPEAT_WEEK_DAYS:
-        return currentDay >= 1 && currentDay <= 5;
-    case Timer::REPEAT_WEEKENDS:
-        return currentDay == 0 || currentDay == 6;
-    case Timer::REPEAT_MONDAY:    return currentDay == 1;
-    case Timer::REPEAT_TUESDAY:   return currentDay == 2;
-    case Timer::REPEAT_WEDNESDAY: return currentDay == 3;
-    case Timer::REPEAT_THURSDAY:  return currentDay == 4;
-    case Timer::REPEAT_FRIDAY:    return currentDay == 5;
-    case Timer::REPEAT_SATURDAY:  return currentDay == 6;
-    case Timer::REPEAT_SUNDAY:    return currentDay == 0;
-    default:                      return false;
-    }
-}
-
-bool TimerManager::isSnoozed(const Timer& timer) const
-{
-    return std::any_of(mSnoozedTimers.begin(), mSnoozedTimers.end(),
-        [&](const SnoozedTimer& snoozed) {
-            return snoozed.info == timer;
-        });
 }
