@@ -43,7 +43,14 @@ private:
     void updateItem(MainMenuItem& item, int16_t index);
     void updateCenterItem(MainMenuCenterItem& item, int16_t index);
     void onAnimationEnded(int16_t index);
-    void updateTitle(int16_t index);
+
+    /**
+     * @brief Toggle the static "New" entry screen vs the wheel and set the title.
+     *
+     * Index 0 (New) is shown as a static plus-icon + label with the wheel hidden;
+     * scrolling to any value reveals the animated wheel.
+     */
+    void syncView(int16_t index);
     void onConfirm();
 
     std::vector<Item>            mItems;

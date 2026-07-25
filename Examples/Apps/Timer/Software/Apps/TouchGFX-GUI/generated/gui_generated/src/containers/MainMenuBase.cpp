@@ -8,7 +8,7 @@ MainMenuBase::MainMenuBase() :
 {
     setWidth(240);
     setHeight(240);
-    wheel.setPosition(0, 87, 240, 132);
+    wheel.setPosition(0, 46, 240, 188);
     wheel.setHorizontal(false);
     wheel.setCircular(true);
     wheel.setEasingEquation(touchgfx::EasingEquations::linearEaseOut);
@@ -19,7 +19,7 @@ MainMenuBase::MainMenuBase() :
     wheel.setOvershootPercentage(100);
     wheel.setSelectedItemExtraSize(0, 0);
     wheel.setSelectedItemMargin(0, 15);
-    wheel.setDrawableSize(66, 0);
+    wheel.setDrawableSize(62, 0);
     wheel.setDrawables(wheelListItems, updateItemCallback,
     
                           wheelSelectedListItems, updateItemCallback);

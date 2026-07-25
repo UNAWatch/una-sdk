@@ -9,7 +9,7 @@
 MainMenuCenterItemBase::MainMenuCenterItemBase()
 {
     setWidth(240);
-    setHeight(66);
+    setHeight(62);
     tipText.setPosition(0, 40, 240, 25);
     tipText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     tipText.setLinespacing(-8);
@@ -19,7 +19,7 @@ MainMenuCenterItemBase::MainMenuCenterItemBase()
     tipText.setVisible(false);
     add(tipText);
 
-    labelText.setPosition(0, 13, 240, 40);
+    labelText.setPosition(0, 8, 240, 48);
     labelText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     labelText.setLinespacing(-8);
     Unicode::snprintf(labelTextBuffer, LABELTEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW_TEXT).getText());

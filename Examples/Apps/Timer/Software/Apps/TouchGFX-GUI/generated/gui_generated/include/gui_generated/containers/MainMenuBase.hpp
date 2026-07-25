@@ -37,7 +37,7 @@ protected:
      * Member Declarations
      */
     touchgfx::ScrollWheelWithSelectionStyle wheel;
-    touchgfx::DrawableListItems<MainMenuItem, 3> wheelListItems;
+    touchgfx::DrawableListItems<MainMenuItem, 4> wheelListItems;
     touchgfx::DrawableListItems<MainMenuCenterItem, 2> wheelSelectedListItems;
     ScrollIndicator scrollIndicator;
 

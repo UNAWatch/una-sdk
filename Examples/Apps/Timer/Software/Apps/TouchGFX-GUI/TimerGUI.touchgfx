@@ -16,6 +16,37 @@
             "CustomContainerDefinitionName": "MainMenu"
           },
           {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 92,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CirclePlus_50x50.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "newText",
+            "X": 60,
+            "Y": 150,
+            "Width": 120,
+            "Height": 40,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
             "X": 0,
@@ -820,9 +851,9 @@
           {
             "Type": "ScrollWheel",
             "Name": "wheel",
-            "Y": 87,
+            "Y": 46,
             "Width": 240,
-            "Height": 132,
+            "Height": 188,
             "LockPosition": true,
             "UseSelectedStyle": true,
             "SelectedItemTemplateName": "MainMenuCenterItem",
@@ -851,7 +882,7 @@
       {
         "Name": "MainMenuItem",
         "Width": 240,
-        "Height": 66,
+        "Height": 62,
         "Components": [
           {
             "Type": "TextArea",
@@ -877,7 +908,7 @@
           {
             "Type": "TextArea",
             "Name": "labelText",
-            "Y": 20,
+            "Y": 18,
             "Width": 240,
             "Height": 23,
             "TextId": "TMP_MEDIUM_18",
@@ -910,7 +941,7 @@
       {
         "Name": "MainMenuCenterItem",
         "Width": 240,
-        "Height": 66,
+        "Height": 62,
         "Components": [
           {
             "Type": "TextArea",
@@ -937,9 +968,9 @@
           {
             "Type": "TextArea",
             "Name": "labelText",
-            "Y": 13,
+            "Y": 8,
             "Width": 240,
-            "Height": 40,
+            "Height": 48,
             "TextId": "TMP_SEMIBOLD_30",
             "TextRotation": "0",
             "Color": {

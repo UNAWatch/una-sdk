@@ -30,6 +30,13 @@ void MainView::setupScreen()
     menu.setUpdateItemCallback(mUpdateItemCb);
     menu.setUpdateCenterItemCallback(mUpdateCenterItemCb);
     menu.setAnimationEndedCallback(mAnimationEndedCb);
+
+    // Centre the selected value in the wheel so a neighbour shows above and
+    // below (the wheel defaults to the selected slot at the top).
+    menu.getWheel().setSelectedItemOffset(63);   // (wheelH 188 - itemH 62) / 2
+
+    touchgfx::Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "New");
+    newText.setWildcard(newTextBuffer);
 }
 
 void MainView::tearDownScreen()
@@ -46,7 +53,7 @@ void MainView::setLists(const std::vector<Timer>& presets,
     menu.selectItem(0);
     menu.invalidate();
 
-    updateTitle(0);
+    syncView(0);
 }
 
 void MainView::buildItems(const std::vector<Timer>& presets,
@@ -102,14 +109,29 @@ void MainView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
 
 void MainView::onAnimationEnded(int16_t index)
 {
-    updateTitle(index);
+    syncView(index);
 }
 
-void MainView::updateTitle(int16_t index)
+void MainView::syncView(int16_t index)
 {
     if (index < 0 || index >= static_cast<int16_t>(mItems.size())) {
         return;
     }
+
+    const bool isNew = mItems[index].kind == Item::NEW;
+
+    // Index 0 (New) shows the static plus-icon + label; the wheel is hidden and
+    // reappears as soon as the user scrolls to a value.
+    menu.setVisible(!isNew);
+    icon.setVisible(isNew);
+    newText.setVisible(isNew);
+
+    if (!isNew) {
+        menu.invalidate();
+    }
+    icon.invalidate();
+    newText.invalidate();
+
     title.set(mItems[index].isRecent ? "RECENT" : "TIMER");
 }
 
@@ -121,9 +143,11 @@ void MainView::handleKeyEvent(uint8_t key)
 
     if (key == SDK::GUI::Button::L1) {
         menu.selectPrev();
+        syncView(static_cast<int16_t>(menu.getSelectedItem()));
     }
     else if (key == SDK::GUI::Button::L2) {
         menu.selectNext();
+        syncView(static_cast<int16_t>(menu.getSelectedItem()));
     }
     else if (key == SDK::GUI::Button::R1) {
         onConfirm();
