@@ -41,6 +41,15 @@ private:
 
     void buildEntries(const std::vector<Timer>& presets,
                       const std::vector<Timer>& recents);
+    /**
+     * @brief Step the selection one place.
+     *
+     * Value<->value steps animate; crossing the New face (to or from New) is
+     * instant for both the orbit and the scroll indicator, so they stay in sync
+     * and the 60px centre never renders the letter label "New" (which its
+     * digits-only font would draw as "????").
+     */
+    void moveSelection(bool forward);
     void syncView();     ///< Toggle static-New face vs orbit and set the title.
     void onConfirm();
 

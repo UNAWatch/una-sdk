@@ -90,6 +90,36 @@ void MainView::buildEntries(const std::vector<Timer>& presets,
     }
 }
 
+void MainView::moveSelection(bool forward)
+{
+    const int16_t n = static_cast<int16_t>(mItems.size());
+    if (n <= 1) {
+        return;
+    }
+
+    const int16_t cur  = orbitMenu.getSelected();
+    const int16_t next = forward ? static_cast<int16_t>((cur + 1) % n)
+                                  : static_cast<int16_t>((cur - 1 + n) % n);
+
+    // Crossing the New face is instant (no orbit animation through the digits-
+    // only 60px centre, and the scroll indicator jumps in step); value<->value
+    // animates.
+    if (cur == 0 || next == 0) {
+        orbitMenu.setSelected(next);
+        scrollIndicator.setActiveId(static_cast<uint16_t>(next));
+    }
+    else {
+        if (forward) {
+            orbitMenu.selectNext();
+        } else {
+            orbitMenu.selectPrev();
+        }
+        scrollIndicator.animateToId(next, kAnimSteps);
+    }
+
+    syncView();
+}
+
 void MainView::syncView()
 {
     const int16_t sel   = orbitMenu.getSelected();
@@ -116,16 +146,10 @@ void MainView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::L1) {
-        orbitMenu.selectPrev();
-        scrollIndicator.animateToId(
-            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), kAnimSteps);
-        syncView();
+        moveSelection(false);
     }
     else if (key == SDK::GUI::Button::L2) {
-        orbitMenu.selectNext();
-        scrollIndicator.animateToId(
-            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), kAnimSteps);
-        syncView();
+        moveSelection(true);
     }
     else if (key == SDK::GUI::Button::R1) {
         onConfirm();
