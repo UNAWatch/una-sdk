@@ -29,8 +29,7 @@ void MainView::setupScreen()
     orbitMenu.setHeight(152);
     orbitMenu.setCenterOffset(0);
     orbitMenu.setAnimationSteps(kAnimSteps);
-    orbitMenu.setCircularMinItems(1000);   // bounded: New is the wrap boundary
-    // Spread the rows for the large 60px centre value.
+    orbitMenu.setCircularMinItems(3);      // wrap through New at the ends
     const OrbitMenu::Anchors anchors = { {  0, 22,  87 },
                                          { 58, 45,  92 },
                                          { 96, 71, 108 } };
@@ -55,10 +54,7 @@ void MainView::setLists(const std::vector<Timer>& presets,
     orbitMenu.setItems(mEntries.data(), static_cast<int16_t>(mEntries.size()));
     orbitMenu.setSelected(0);
 
-    mCount    = static_cast<int16_t>(mValues.size()) + 1;   // New + values
-    mSelIndex = 0;                                           // start on New
-
-    scrollIndicator.setCount(static_cast<uint16_t>(mCount));
+    scrollIndicator.setCount(static_cast<uint16_t>(mEntries.size()));
     scrollIndicator.setActiveId(0);
 
     syncView();
@@ -67,82 +63,69 @@ void MainView::setLists(const std::vector<Timer>& presets,
 void MainView::buildEntries(const std::vector<Timer>& presets,
                             const std::vector<Timer>& recents)
 {
-    mValues.clear();
+    mItems.clear();
     mLabels.clear();
     mEntries.clear();
 
+    // New is entry 0 so it wraps into view as a neighbour at the list ends.
+    mItems.push_back({ Item::NEW, {}, false });
     for (const auto& p : presets) {
-        mValues.push_back({ p, false });
+        mItems.push_back({ Item::VALUE, p, false });
     }
     for (const auto& r : recents) {
-        mValues.push_back({ r, true });
+        mItems.push_back({ Item::VALUE, r, true });
     }
 
-    // Stable label strings (Entry::label points into this vector).
-    mLabels.reserve(mValues.size());
-    for (const auto& v : mValues) {
-        mLabels.push_back(formatValue(v.timer.durationSec));
+    mLabels.reserve(mItems.size());
+    for (const auto& it : mItems) {
+        mLabels.push_back(it.kind == Item::NEW ? std::string("New")
+                                               : formatValue(it.timer.durationSec));
     }
 
-    mEntries.assign(mValues.size(), OrbitMenu::Entry{});
-    for (size_t i = 0; i < mValues.size(); ++i) {
-        mEntries[i].label = mLabels[i].c_str();   // icon-less -> centred value
+    // Icon-less entries: New shows as plain "New" text in the wheel (its centred
+    // face is the static overlay); values are centred numbers.
+    mEntries.assign(mItems.size(), OrbitMenu::Entry{});
+    for (size_t i = 0; i < mItems.size(); ++i) {
+        mEntries[i].label = mLabels[i].c_str();
     }
-}
-
-void MainView::moveSelection(bool forward)
-{
-    const int16_t prev = mSelIndex;
-    mSelIndex = forward ? static_cast<int16_t>((mSelIndex + 1) % mCount)
-                        : static_cast<int16_t>((mSelIndex - 1 + mCount) % mCount);
-
-    scrollIndicator.animateToId(
-        forward ? static_cast<int16_t>(scrollIndicator.getActiveId() + 1)
-                : static_cast<int16_t>(scrollIndicator.getActiveId() - 1),
-        kAnimSteps);
-
-    if (mSelIndex != 0) {
-        const int16_t orbitIdx = static_cast<int16_t>(mSelIndex - 1);
-        if (prev == 0) {
-            // Entering the orbit from New: jump instantly to the correct end.
-            orbitMenu.setSelected(orbitIdx);
-        } else if (forward) {
-            orbitMenu.selectNext();
-        } else {
-            orbitMenu.selectPrev();
-        }
-    }
-
-    syncView();
 }
 
 void MainView::syncView()
 {
-    const bool isNew = mSelIndex == 0;
+    const int16_t sel   = orbitMenu.getSelected();
+    const bool    isNew = (sel == 0);
 
+    // New centred -> static plus-icon + label face, orbit hidden.
     orbitMenu.setVisible(!isNew);
     icon.setVisible(isNew);
     newText.setVisible(isNew);
 
+    orbitMenu.invalidate();
     icon.invalidate();
     newText.invalidate();
-    orbitMenu.invalidate();
 
-    bool isRecent = (!isNew) && mValues[mSelIndex - 1].isRecent;
+    const bool isRecent =
+        sel >= 0 && sel < static_cast<int16_t>(mItems.size()) && mItems[sel].isRecent;
     title.set(isRecent ? "RECENT" : "TIMER");
 }
 
 void MainView::handleKeyEvent(uint8_t key)
 {
-    if (mCount <= 0) {
+    if (mItems.empty()) {
         return;
     }
 
     if (key == SDK::GUI::Button::L1) {
-        moveSelection(false);
+        orbitMenu.selectPrev();
+        scrollIndicator.animateToId(
+            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), kAnimSteps);
+        syncView();
     }
     else if (key == SDK::GUI::Button::L2) {
-        moveSelection(true);
+        orbitMenu.selectNext();
+        scrollIndicator.animateToId(
+            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), kAnimSteps);
+        syncView();
     }
     else if (key == SDK::GUI::Button::R1) {
         onConfirm();
@@ -154,15 +137,17 @@ void MainView::handleKeyEvent(uint8_t key)
 
 void MainView::onConfirm()
 {
-    if (mSelIndex == 0) {
-        presenter->editNew();
-        application().gotoEditScreenNoTransition();
+    const int16_t sel = orbitMenu.getSelected();
+    if (sel < 0 || sel >= static_cast<int16_t>(mItems.size())) {
         return;
     }
 
-    const int16_t idx = static_cast<int16_t>(mSelIndex - 1);
-    if (idx >= 0 && idx < static_cast<int16_t>(mValues.size())) {
-        presenter->selectTimer(mValues[idx].timer);
+    if (mItems[sel].kind == Item::NEW) {
+        presenter->editNew();
+        application().gotoEditScreenNoTransition();
+    }
+    else {
+        presenter->selectTimer(mItems[sel].timer);
         application().gotoMenuScreenNoTransition();
     }
 }

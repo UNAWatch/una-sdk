@@ -8,13 +8,14 @@
 #include <string>
 
 /**
- * @brief Main screen: static "New" entry + a COROS-style OrbitMenu of values.
+ * @brief Main screen: a wrapping OrbitMenu with a static "New" face.
  *
- * Index 0 is a separate static plus-icon + "New" screen (the orbit is hidden);
- * scrolling reveals the OrbitMenu of preset/recent values, which curve and
- * shrink toward a large centred value. The side ScrollIndicator (small style)
- * counts every entry including New. L1/L2 scroll, R1 selects (New -> Edit,
- * value -> Menu), R2 leaves the app.
+ * The orbit wraps through New -> presets -> recents -> New, so New appears as a
+ * small neighbour at the list ends. When New is the centred entry the orbit is
+ * hidden and a static plus-icon + "New" face is shown instead. A small side
+ * ScrollIndicator counts every entry (New included). L1/L2 scroll, R1 selects
+ * (New -> Edit, value -> Menu), R2 leaves the app. Title reads TIMER over
+ * presets/New and RECENT over recents.
  */
 class MainView : public MainViewBase
 {
@@ -32,23 +33,20 @@ protected:
     virtual void handleKeyEvent(uint8_t key) override;
 
 private:
-    struct Value {
-        Timer timer;
-        bool  isRecent;
+    struct Item {
+        enum Kind { NEW, VALUE } kind;
+        Timer                    timer;
+        bool                     isRecent;
     };
 
     void buildEntries(const std::vector<Timer>& presets,
                       const std::vector<Timer>& recents);
-    void moveSelection(bool forward);
-    void syncView();     ///< Toggle static-New vs orbit and set the title.
+    void syncView();     ///< Toggle static-New face vs orbit and set the title.
     void onConfirm();
 
-    std::vector<Value>            mValues;   ///< Orbit entries (New is index 0, separate).
+    std::vector<Item>             mItems;    ///< Parallel to the orbit entries.
     std::vector<std::string>      mLabels;   ///< Stable backing for Entry::label.
     std::vector<OrbitMenu::Entry> mEntries;
-
-    int16_t mSelIndex = 0;   ///< 0 = New (static); 1.. = value (orbit index - 1).
-    int16_t mCount    = 1;   ///< New + values.
 };
 
 #endif // MAINVIEW_HPP
