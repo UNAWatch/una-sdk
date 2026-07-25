@@ -8,13 +8,12 @@
 #include <string>
 
 /**
- * @brief Main screen: a COROS-style OrbitMenu over the timer catalogue.
+ * @brief Main screen: static "New" entry + a COROS-style OrbitMenu of values.
  *
- * The orbit lists a "New" entry (plus icon), the fixed presets, then the recent
- * timers -- New is a normal element of the wheel. The centered entry is largest
- * and rows shrink/curve toward it. A small side ScrollIndicator (covering every
- * element, New included) replaces the left buttons. The title reads TIMER over
- * presets and RECENT over recents. L1/L2 scroll, R1 selects (New -> Edit,
+ * Index 0 is a separate static plus-icon + "New" screen (the orbit is hidden);
+ * scrolling reveals the OrbitMenu of preset/recent values, which curve and
+ * shrink toward a large centred value. The side ScrollIndicator (small style)
+ * counts every entry including New. L1/L2 scroll, R1 selects (New -> Edit,
  * value -> Menu), R2 leaves the app.
  */
 class MainView : public MainViewBase
@@ -33,20 +32,23 @@ protected:
     virtual void handleKeyEvent(uint8_t key) override;
 
 private:
-    struct Item {
-        enum Kind { NEW, VALUE } kind;
-        Timer                    timer;
-        bool                     isRecent;
+    struct Value {
+        Timer timer;
+        bool  isRecent;
     };
 
     void buildEntries(const std::vector<Timer>& presets,
                       const std::vector<Timer>& recents);
-    void updateTitle(int16_t index);
+    void moveSelection(bool forward);
+    void syncView();     ///< Toggle static-New vs orbit and set the title.
     void onConfirm();
 
-    std::vector<Item>            mItems;
-    std::vector<std::string>     mLabels;    ///< Stable backing for Entry::label.
+    std::vector<Value>            mValues;   ///< Orbit entries (New is index 0, separate).
+    std::vector<std::string>      mLabels;   ///< Stable backing for Entry::label.
     std::vector<OrbitMenu::Entry> mEntries;
+
+    int16_t mSelIndex = 0;   ///< 0 = New (static); 1.. = value (orbit index - 1).
+    int16_t mCount    = 1;   ///< New + values.
 };
 
 #endif // MAINVIEW_HPP

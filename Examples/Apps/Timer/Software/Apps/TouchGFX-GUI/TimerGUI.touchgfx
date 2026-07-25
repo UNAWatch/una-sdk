@@ -26,6 +26,37 @@
             "CustomContainerDefinitionName": "ScrollIndicator"
           },
           {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 92,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CirclePlus_50x50.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "newText",
+            "X": 60,
+            "Y": 150,
+            "Width": 120,
+            "Height": 40,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
             "X": 0,

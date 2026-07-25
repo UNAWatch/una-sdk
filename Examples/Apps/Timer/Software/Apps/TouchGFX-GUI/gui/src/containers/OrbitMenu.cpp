@@ -33,13 +33,16 @@ struct LabelTier
     TypedTextId font;    ///< Left-aligned wildcard typed text.
     uint32_t    color;   ///< Exact palette entry.
 };
+// Large centre value with an even step-down toward the edges. Rest positions
+// land at |d| = 0 / 1 / 2 (=> 60 / 35 / 20); the extra thresholds cover the
+// in-between animation frames so the size eases smoothly.
 const LabelTier kTiers[] = {
-    { 0.25f,  T_TMP_SEMIBOLD_26_L, SDK::GUI::Color::WHITE },
-    { 0.60f,  T_TMP_SEMIBOLD_22_L, SDK::GUI::Color::WHITE },
-    { 0.90f,  T_TMP_SEMIBOLD_20_L, SDK::GUI::Color::WHITE },
-    { 1.40f,  T_TMP_SEMIBOLD_18_L, SDK::GUI::Color::GRAY },
-    { 1.90f,  T_TMP_REGULAR_18_L, SDK::GUI::Color::GRAY  }, // currently not in use. Select appropriate fonts
-    { 1.0e9f, T_TMP_REGULAR_18_L, SDK::GUI::Color::GRAY  }, // currently not in use. Select appropriate fonts
+    { 0.30f,  T_TMP_SEMIBOLD_60, SDK::GUI::Color::WHITE },
+    { 0.70f,  T_TMP_SEMIBOLD_40, SDK::GUI::Color::WHITE },
+    { 1.10f,  T_TMP_SEMIBOLD_35, SDK::GUI::Color::WHITE },
+    { 1.50f,  T_TMP_SEMIBOLD_30, SDK::GUI::Color::GRAY  },
+    { 1.90f,  T_TMP_SEMIBOLD_25, SDK::GUI::Color::GRAY  },
+    { 1.0e9f, T_TMP_SEMIBOLD_20, SDK::GUI::Color::GRAY  },
 };
 
 const LabelTier &pickTier(float absD)
@@ -122,7 +125,7 @@ void OrbitMenuItem::render(bool bigIcon, touchgfx::TypedTextId labelFont,
                            int16_t iconCenterX, int16_t textX, int16_t centerY)
 {
     // Full-width row; icon and label are placed independently in row-local X.
-    const int16_t rowH = 60; // tall enough for the 60px centre icon.
+    const int16_t rowH = 68; // tall enough for the 60px centre value/icon.
 
     // Icon: the bitmap itself carries the size, so a swap is all that is needed.
     // Placed by its centre (iconCenterX) so the 60<->30 swap shrinks in place

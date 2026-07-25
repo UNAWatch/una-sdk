@@ -1,6 +1,5 @@
 #include <gui/main_screen/MainView.hpp>
 #include <SDK/GUI/Button.hpp>
-#include <images/BitmapDatabase.hpp>
 
 #include <cstdio>
 
@@ -27,12 +26,20 @@ void MainView::setupScreen()
     buttons.setR1(Buttons::AMBER);
     buttons.setR2(Buttons::WHITE);
 
-    orbitMenu.setHeight(152);          // visible/clip area, centred on screen
+    orbitMenu.setHeight(152);
     orbitMenu.setCenterOffset(0);
     orbitMenu.setAnimationSteps(kAnimSteps);
-    orbitMenu.setCircularMinItems(3);
+    orbitMenu.setCircularMinItems(1000);   // bounded: New is the wrap boundary
+    // Spread the rows for the large 60px centre value.
+    const OrbitMenu::Anchors anchors = { {  0, 22,  87 },
+                                         { 58, 45,  92 },
+                                         { 96, 71, 108 } };
+    orbitMenu.setAnchors(anchors);
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
+
+    touchgfx::Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "New");
+    newText.setWildcard(newTextBuffer);
 }
 
 void MainView::tearDownScreen()
@@ -48,68 +55,94 @@ void MainView::setLists(const std::vector<Timer>& presets,
     orbitMenu.setItems(mEntries.data(), static_cast<int16_t>(mEntries.size()));
     orbitMenu.setSelected(0);
 
-    scrollIndicator.setCount(static_cast<uint16_t>(mEntries.size()));
+    mCount    = static_cast<int16_t>(mValues.size()) + 1;   // New + values
+    mSelIndex = 0;                                           // start on New
+
+    scrollIndicator.setCount(static_cast<uint16_t>(mCount));
     scrollIndicator.setActiveId(0);
 
-    updateTitle(0);
+    syncView();
 }
 
 void MainView::buildEntries(const std::vector<Timer>& presets,
                             const std::vector<Timer>& recents)
 {
-    mItems.clear();
+    mValues.clear();
     mLabels.clear();
     mEntries.clear();
 
-    mItems.push_back({ Item::NEW, {}, false });
     for (const auto& p : presets) {
-        mItems.push_back({ Item::VALUE, p, false });
+        mValues.push_back({ p, false });
     }
     for (const auto& r : recents) {
-        mItems.push_back({ Item::VALUE, r, true });
+        mValues.push_back({ r, true });
     }
 
     // Stable label strings (Entry::label points into this vector).
-    mLabels.reserve(mItems.size());
-    for (const auto& it : mItems) {
-        mLabels.push_back(it.kind == Item::NEW ? std::string("New")
-                                               : formatValue(it.timer.durationSec));
+    mLabels.reserve(mValues.size());
+    for (const auto& v : mValues) {
+        mLabels.push_back(formatValue(v.timer.durationSec));
     }
 
-    mEntries.assign(mItems.size(), OrbitMenu::Entry{});
-    for (size_t i = 0; i < mItems.size(); ++i) {
-        mEntries[i].label = mLabels[i].c_str();
-        if (mItems[i].kind == Item::NEW) {
-            // New carries the plus icon; values are icon-less (centred labels).
-            mEntries[i].icon60 = BITMAP_CIRCLEPLUS_50X50_ID;
-            mEntries[i].icon30 = BITMAP_CIRCLEPLUS_50X50_ID;
-        }
+    mEntries.assign(mValues.size(), OrbitMenu::Entry{});
+    for (size_t i = 0; i < mValues.size(); ++i) {
+        mEntries[i].label = mLabels[i].c_str();   // icon-less -> centred value
     }
 }
 
-void MainView::updateTitle(int16_t index)
+void MainView::moveSelection(bool forward)
 {
-    if (index < 0 || index >= static_cast<int16_t>(mItems.size())) {
-        return;
+    const int16_t prev = mSelIndex;
+    mSelIndex = forward ? static_cast<int16_t>((mSelIndex + 1) % mCount)
+                        : static_cast<int16_t>((mSelIndex - 1 + mCount) % mCount);
+
+    scrollIndicator.animateToId(
+        forward ? static_cast<int16_t>(scrollIndicator.getActiveId() + 1)
+                : static_cast<int16_t>(scrollIndicator.getActiveId() - 1),
+        kAnimSteps);
+
+    if (mSelIndex != 0) {
+        const int16_t orbitIdx = static_cast<int16_t>(mSelIndex - 1);
+        if (prev == 0) {
+            // Entering the orbit from New: jump instantly to the correct end.
+            orbitMenu.setSelected(orbitIdx);
+        } else if (forward) {
+            orbitMenu.selectNext();
+        } else {
+            orbitMenu.selectPrev();
+        }
     }
-    title.set(mItems[index].isRecent ? "RECENT" : "TIMER");
+
+    syncView();
+}
+
+void MainView::syncView()
+{
+    const bool isNew = mSelIndex == 0;
+
+    orbitMenu.setVisible(!isNew);
+    icon.setVisible(isNew);
+    newText.setVisible(isNew);
+
+    icon.invalidate();
+    newText.invalidate();
+    orbitMenu.invalidate();
+
+    bool isRecent = (!isNew) && mValues[mSelIndex - 1].isRecent;
+    title.set(isRecent ? "RECENT" : "TIMER");
 }
 
 void MainView::handleKeyEvent(uint8_t key)
 {
-    if (mItems.empty()) {
+    if (mCount <= 0) {
         return;
     }
 
     if (key == SDK::GUI::Button::L1) {
-        orbitMenu.selectPrev();
-        scrollIndicator.animateToId(scrollIndicator.getActiveId() - 1, kAnimSteps);
-        updateTitle(orbitMenu.getSelected());
+        moveSelection(false);
     }
     else if (key == SDK::GUI::Button::L2) {
-        orbitMenu.selectNext();
-        scrollIndicator.animateToId(scrollIndicator.getActiveId() + 1, kAnimSteps);
-        updateTitle(orbitMenu.getSelected());
+        moveSelection(true);
     }
     else if (key == SDK::GUI::Button::R1) {
         onConfirm();
@@ -121,18 +154,15 @@ void MainView::handleKeyEvent(uint8_t key)
 
 void MainView::onConfirm()
 {
-    int16_t idx = orbitMenu.getSelected();
-    if (idx < 0 || idx >= static_cast<int16_t>(mItems.size())) {
+    if (mSelIndex == 0) {
+        presenter->editNew();
+        application().gotoEditScreenNoTransition();
         return;
     }
 
-    const Item& cur = mItems[idx];
-    if (cur.kind == Item::NEW) {
-        presenter->editNew();
-        application().gotoEditScreenNoTransition();
-    }
-    else {
-        presenter->selectTimer(cur.timer);
+    const int16_t idx = static_cast<int16_t>(mSelIndex - 1);
+    if (idx >= 0 && idx < static_cast<int16_t>(mValues.size())) {
+        presenter->selectTimer(mValues[idx].timer);
         application().gotoMenuScreenNoTransition();
     }
 }
