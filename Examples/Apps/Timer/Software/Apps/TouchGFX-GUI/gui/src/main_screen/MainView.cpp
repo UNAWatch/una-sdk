@@ -97,23 +97,23 @@ void MainView::moveSelection(bool forward)
         return;
     }
 
-    const int16_t cur  = orbitMenu.getSelected();
-    const int16_t next = forward ? static_cast<int16_t>((cur + 1) % n)
-                                  : static_cast<int16_t>((cur - 1 + n) % n);
+    const int16_t next = forward
+        ? static_cast<int16_t>((orbitMenu.getSelected() + 1) % n)
+        : static_cast<int16_t>((orbitMenu.getSelected() - 1 + n) % n);
 
-    // Crossing the New face is instant (no orbit animation through the digits-
-    // only 60px centre, and the scroll indicator jumps in step); value<->value
-    // animates.
-    if (cur == 0 || next == 0) {
-        orbitMenu.setSelected(next);
-        scrollIndicator.setActiveId(static_cast<uint16_t>(next));
+    // The wheel animates in every direction (the 60px font now carries the "New"
+    // letters, so leaving New shows the "New" text scrolling away).
+    if (forward) {
+        orbitMenu.selectNext();
+    } else {
+        orbitMenu.selectPrev();
     }
-    else {
-        if (forward) {
-            orbitMenu.selectNext();
-        } else {
-            orbitMenu.selectPrev();
-        }
+
+    // Scroll indicator: landing on New swaps its static face in instantly, so
+    // jump the indicator to match; otherwise animate in sync with the wheel.
+    if (next == 0) {
+        scrollIndicator.setActiveId(0);
+    } else {
         scrollIndicator.animateToId(next, kAnimSteps);
     }
 

@@ -15,7 +15,10 @@ KEEP extern const touchgfx::GlyphNode glyphs_Poppins_SemiBold_60_2bpp[] FONT_TAB
     {  2643, 0x0038,  32,  46,  45,   4,  40,   0,   0, 0x00 }, // eight
     {  3011, 0x0039,  31,  45,  45,   5,  40,   0,   0, 0x00 }, // nine
     {  3360, 0x003A,  11,  34,  34,   2,  16,   0,   0, 0x00 }, // colon
-    {  3454, 0x003F,  28,  44,  44,   2,  32,   0,   0, 0x00 }  // question
+    {  3454, 0x003F,  28,  44,  44,   2,  32,   0,   0, 0x00 }, // question
+    {  3762, 0x004E,  36,  42,  42,   4,  44,   0,   0, 0x00 }, // N
+    {  4140, 0x0065,  33,  35,  34,   2,  37,   0,   0, 0x00 }, // e
+    {  4429, 0x0077,  50,  33,  33,   0,  51,   0,   0, 0x00 }  // w
 };
 
 // GSUB tables:
@@ -35,6 +38,6 @@ touchgfx::GeneratedFont& getFont_Poppins_SemiBold_60_2bpp();
 
 touchgfx::GeneratedFont& getFont_Poppins_SemiBold_60_2bpp()
 {
-    static touchgfx::GeneratedFont Poppins_SemiBold_60_2bpp(glyphs_Poppins_SemiBold_60_2bpp, 12, 61, 60, 0, 0, 2, 0, 0, 0, unicodes_Poppins_SemiBold_60_2bpp, kerning_Poppins_SemiBold_60_2bpp, 63, 0, 0, 0);
+    static touchgfx::GeneratedFont Poppins_SemiBold_60_2bpp(glyphs_Poppins_SemiBold_60_2bpp, 15, 61, 60, 0, 0, 2, 0, 0, 0, unicodes_Poppins_SemiBold_60_2bpp, kerning_Poppins_SemiBold_60_2bpp, 63, 0, 0, 0);
     return Poppins_SemiBold_60_2bpp;
 }
