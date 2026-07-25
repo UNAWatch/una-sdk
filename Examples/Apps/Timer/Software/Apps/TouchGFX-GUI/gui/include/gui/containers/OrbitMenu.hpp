@@ -119,6 +119,14 @@ public:
     /** Populate the menu. Copies up to kMaxEntries entries. */
     void setItems(const Entry *entries, int16_t count);
 
+    /**
+     * @brief Replace one entry's label and re-render in place.
+     *
+     * Does not disturb the scroll position. The label pointer must stay valid
+     * for as long as the entry is shown (same rule as setItems).
+     */
+    void setEntryLabel(int16_t index, const char *label);
+
     void    selectNext();
     void    selectPrev();
     int16_t getSelected() const;

@@ -72,6 +72,9 @@ void MainView::buildEntries(const std::vector<Timer>& presets,
     for (const auto& p : presets) {
         mItems.push_back({ Item::VALUE, p, false });
     }
+    mFirstRecentIdx = recents.empty()
+        ? static_cast<int16_t>(-1)
+        : static_cast<int16_t>(mItems.size());   // first recent lands here
     for (const auto& r : recents) {
         mItems.push_back({ Item::VALUE, r, true });
     }
@@ -134,9 +137,16 @@ void MainView::syncView()
     icon.invalidate();
     newText.invalidate();
 
-    const bool isRecent =
+    const bool centeredRecent =
         sel >= 0 && sel < static_cast<int16_t>(mItems.size()) && mItems[sel].isRecent;
-    title.set(isRecent ? "RECENT" : "TIMER");
+    title.set(centeredRecent ? "RECENT" : "TIMER");
+
+    // The first recent doubles as the "Recent" section hint: it reads "Recent"
+    // while a non-recent is centred, and its value once the recents are entered.
+    if (mFirstRecentIdx >= 0) {
+        orbitMenu.setEntryLabel(mFirstRecentIdx,
+            centeredRecent ? mLabels[mFirstRecentIdx].c_str() : "Recent");
+    }
 }
 
 void MainView::handleKeyEvent(uint8_t key)

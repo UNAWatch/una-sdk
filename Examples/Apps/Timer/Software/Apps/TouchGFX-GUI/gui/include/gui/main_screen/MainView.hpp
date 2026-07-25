@@ -56,6 +56,10 @@ private:
     std::vector<Item>             mItems;    ///< Parallel to the orbit entries.
     std::vector<std::string>      mLabels;   ///< Stable backing for Entry::label.
     std::vector<OrbitMenu::Entry> mEntries;
+
+    /// Index of the first recent (shows "Recent" while a non-recent is centred),
+    /// or -1 when there are no recents.
+    int16_t                       mFirstRecentIdx = -1;
 };
 
 #endif // MAINVIEW_HPP

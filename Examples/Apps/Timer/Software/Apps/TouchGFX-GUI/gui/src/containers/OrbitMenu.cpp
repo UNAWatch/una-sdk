@@ -258,6 +258,23 @@ void OrbitMenu::setItems(const Entry *entries, int16_t count)
     invalidate();
 }
 
+void OrbitMenu::setEntryLabel(int16_t index, const char *label)
+{
+    if (index < 0 || index >= mCount) {
+        return;
+    }
+    mEntries[index].label = label;
+
+    // Force a re-fetch of the slot that currently holds this entry.
+    for (int16_t s = 0; s < kVisible; s++) {
+        if (mSlotDataIdx[s] == index) {
+            mSlotDataIdx[s] = -1;
+        }
+    }
+    layout();
+    invalidate();
+}
+
 int16_t OrbitMenu::getSelected() const
 {
     if (mCount <= 0) {
