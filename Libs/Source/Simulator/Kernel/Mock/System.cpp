@@ -1,5 +1,6 @@
 
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
+#include <platform/hal/simulator/sdl2/HALSDL2.hpp>
 #include <cstdint>
 
 // GetTickCount64() and Sleep() are Windows-only. Provide portable replacements.

@@ -2,7 +2,6 @@
 #pragma once
 
 #include "SDK/Interfaces/ISystem.hpp"
-#include <platform/hal/simulator/sdl2/HALSDL2.hpp>
 #include "SDK/Simulator/OS/OS.hpp"
 #include <chrono>
 
