@@ -9,8 +9,29 @@ MainPresenter::MainPresenter(MainView& v)
 void MainPresenter::activate()
 {
     model->resetIdleTimer();
+    view.setLists(model->getPresets(), model->getRecents());
 }
 
 void MainPresenter::deactivate()
 {
+}
+
+void MainPresenter::onRecentsChanged(const std::vector<Timer>& list)
+{
+    view.setLists(model->getPresets(), list);
+}
+
+void MainPresenter::selectTimer(const Timer& timer)
+{
+    model->setEditTimer(timer);
+}
+
+void MainPresenter::editNew()
+{
+    model->setEditTimer(Timer{ 60, Timer::EFFECT_BEEP_AND_VIBRO });
+}
+
+void MainPresenter::exitApp()
+{
+    model->exitApp();
 }
