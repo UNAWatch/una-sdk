@@ -13,6 +13,7 @@
 
 #include "SDK/Interfaces/IAppMemory.hpp"
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 
 namespace SDK::Simulator::Mock

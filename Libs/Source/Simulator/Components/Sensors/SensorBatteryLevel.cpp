@@ -16,6 +16,7 @@
 
 #include "SDK/Simulator/Components/Sensors/SensorBatteryLevel.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryLevel.hpp"
+#include <cmath>
 #include <SDK/Simulator/Kernel/Mock/System.hpp>
 #include "SDK/Simulator/OS/OS.hpp"
 #include "SDK/Simulator/Components/ComponentSimulator.hpp"
@@ -104,7 +105,7 @@ void BatteryLevel::sensorRefresh()
     float level = mBattLevel.getBattLevel();
 
     OS::MutexCS cs(mDataMutex);
-    if (mPrevLevel > 0 && abs(mPrevLevel - level) < 0.1) {
+    if (mPrevLevel > 0 && std::fabs(mPrevLevel - level) < 0.1) {
         LOG_DEBUG("EXIT\n");
         return;
     }
