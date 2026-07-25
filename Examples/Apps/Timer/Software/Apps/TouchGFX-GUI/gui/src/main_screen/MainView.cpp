@@ -1,7 +1,10 @@
 #include <gui/main_screen/MainView.hpp>
 #include <SDK/GUI/Button.hpp>
+#include <images/BitmapDatabase.hpp>
 
 #include <cstdio>
+
+static constexpr int16_t kAnimSteps = 4;
 
 static std::string formatValue(uint16_t sec)
 {
@@ -11,9 +14,6 @@ static std::string formatValue(uint16_t sec)
 }
 
 MainView::MainView()
-    : mUpdateItemCb(this,       &MainView::updateItem)
-    , mUpdateCenterItemCb(this, &MainView::updateCenterItem)
-    , mAnimationEndedCb(this,   &MainView::onAnimationEnded)
 {
 }
 
@@ -27,16 +27,12 @@ void MainView::setupScreen()
     buttons.setR1(Buttons::AMBER);
     buttons.setR2(Buttons::WHITE);
 
-    menu.setUpdateItemCallback(mUpdateItemCb);
-    menu.setUpdateCenterItemCallback(mUpdateCenterItemCb);
-    menu.setAnimationEndedCallback(mAnimationEndedCb);
+    orbitMenu.setHeight(152);          // visible/clip area, centred on screen
+    orbitMenu.setCenterOffset(0);
+    orbitMenu.setAnimationSteps(kAnimSteps);
+    orbitMenu.setCircularMinItems(3);
 
-    // Centre the selected value in the wheel so a neighbour shows above and
-    // below (the wheel defaults to the selected slot at the top).
-    menu.getWheel().setSelectedItemOffset(63);   // (wheelH 188 - itemH 62) / 2
-
-    touchgfx::Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "New");
-    newText.setWildcard(newTextBuffer);
+    scrollIndicator.setConfig(ScrollIndicator::kSmall);
 }
 
 void MainView::tearDownScreen()
@@ -47,20 +43,23 @@ void MainView::tearDownScreen()
 void MainView::setLists(const std::vector<Timer>& presets,
                         const std::vector<Timer>& recents)
 {
-    buildItems(presets, recents);
+    buildEntries(presets, recents);
 
-    menu.setNumberOfItems(static_cast<int16_t>(mItems.size()));
-    menu.selectItem(0);
-    menu.invalidate();
+    orbitMenu.setItems(mEntries.data(), static_cast<int16_t>(mEntries.size()));
+    orbitMenu.setSelected(0);
 
-    syncView(0);
+    scrollIndicator.setCount(static_cast<uint16_t>(mEntries.size()));
+    scrollIndicator.setActiveId(0);
+
+    updateTitle(0);
 }
 
-void MainView::buildItems(const std::vector<Timer>& presets,
-                          const std::vector<Timer>& recents)
+void MainView::buildEntries(const std::vector<Timer>& presets,
+                            const std::vector<Timer>& recents)
 {
     mItems.clear();
     mLabels.clear();
+    mEntries.clear();
 
     mItems.push_back({ Item::NEW, {}, false });
     for (const auto& p : presets) {
@@ -70,68 +69,29 @@ void MainView::buildItems(const std::vector<Timer>& presets,
         mItems.push_back({ Item::VALUE, r, true });
     }
 
-    // Build stable label strings (msgChar points into this vector).
+    // Stable label strings (Entry::label points into this vector).
     mLabels.reserve(mItems.size());
     for (const auto& it : mItems) {
         mLabels.push_back(it.kind == Item::NEW ? std::string("New")
                                                : formatValue(it.timer.durationSec));
     }
 
-    // One config per item for both the surrounding and center renderers.
-    mItemCfg.assign(mItems.size(), MenuItemConfig{});
-    mCenterCfg.assign(mItems.size(), MenuItemConfig{});
+    mEntries.assign(mItems.size(), OrbitMenu::Entry{});
     for (size_t i = 0; i < mItems.size(); ++i) {
-        mItemCfg[i].style   = MenuItemConfig::SIMPLE;
-        mItemCfg[i].msgChar = mLabels[i].c_str();
-
-        mCenterCfg[i].style     = MenuItemConfig::SIMPLE;
-        mCenterCfg[i].msgChar   = mLabels[i].c_str();
-        mCenterCfg[i].msgIdType = (mItems[i].kind == Item::NEW) ? T_TMP_SEMIBOLD_35
-                                                                : T_TMP_SEMIBOLD_60;
+        mEntries[i].label = mLabels[i].c_str();
+        if (mItems[i].kind == Item::NEW) {
+            // New carries the plus icon; values are icon-less (centred labels).
+            mEntries[i].icon60 = BITMAP_CIRCLEPLUS_50X50_ID;
+            mEntries[i].icon30 = BITMAP_CIRCLEPLUS_50X50_ID;
+        }
     }
 }
 
-void MainView::updateItem(MainMenuItem& item, int16_t index)
-{
-    if (index < 0 || index >= static_cast<int16_t>(mItemCfg.size())) {
-        return;
-    }
-    item.apply(mItemCfg[index]);
-}
-
-void MainView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
-{
-    if (index < 0 || index >= static_cast<int16_t>(mCenterCfg.size())) {
-        return;
-    }
-    item.apply(mCenterCfg[index]);
-}
-
-void MainView::onAnimationEnded(int16_t index)
-{
-    syncView(index);
-}
-
-void MainView::syncView(int16_t index)
+void MainView::updateTitle(int16_t index)
 {
     if (index < 0 || index >= static_cast<int16_t>(mItems.size())) {
         return;
     }
-
-    const bool isNew = mItems[index].kind == Item::NEW;
-
-    // Index 0 (New) shows the static plus-icon + label; the wheel is hidden and
-    // reappears as soon as the user scrolls to a value.
-    menu.setVisible(!isNew);
-    icon.setVisible(isNew);
-    newText.setVisible(isNew);
-
-    if (!isNew) {
-        menu.invalidate();
-    }
-    icon.invalidate();
-    newText.invalidate();
-
     title.set(mItems[index].isRecent ? "RECENT" : "TIMER");
 }
 
@@ -142,12 +102,14 @@ void MainView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::L1) {
-        menu.selectPrev();
-        syncView(static_cast<int16_t>(menu.getSelectedItem()));
+        orbitMenu.selectPrev();
+        scrollIndicator.animateToId(scrollIndicator.getActiveId() - 1, kAnimSteps);
+        updateTitle(orbitMenu.getSelected());
     }
     else if (key == SDK::GUI::Button::L2) {
-        menu.selectNext();
-        syncView(static_cast<int16_t>(menu.getSelectedItem()));
+        orbitMenu.selectNext();
+        scrollIndicator.animateToId(scrollIndicator.getActiveId() + 1, kAnimSteps);
+        updateTitle(orbitMenu.getSelected());
     }
     else if (key == SDK::GUI::Button::R1) {
         onConfirm();
@@ -159,7 +121,7 @@ void MainView::handleKeyEvent(uint8_t key)
 
 void MainView::onConfirm()
 {
-    int16_t idx = static_cast<int16_t>(menu.getSelectedItem());
+    int16_t idx = orbitMenu.getSelected();
     if (idx < 0 || idx >= static_cast<int16_t>(mItems.size())) {
         return;
     }

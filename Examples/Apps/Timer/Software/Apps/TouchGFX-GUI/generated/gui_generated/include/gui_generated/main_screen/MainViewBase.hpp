@@ -8,9 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/main_screen/MainPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <gui/containers/MainMenu.hpp>
-#include <touchgfx/widgets/Image.hpp>
-#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
+#include <gui/containers/OrbitMenu.hpp>
+#include <gui/containers/ScrollIndicator.hpp>
 #include <gui/containers/Buttons.hpp>
 #include <gui/containers/Title.hpp>
 
@@ -31,17 +30,10 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    MainMenu menu;
-    touchgfx::Image icon;
-    touchgfx::TextAreaWithOneWildcard newText;
+    OrbitMenu orbitMenu;
+    ScrollIndicator scrollIndicator;
     Buttons buttons;
     Title title;
-
-    /*
-     * Wildcard Buffers
-     */
-    static const uint16_t NEWTEXT_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar newTextBuffer[NEWTEXT_SIZE];
 
 private:
 

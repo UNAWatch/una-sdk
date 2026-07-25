@@ -8,13 +8,14 @@
 #include <string>
 
 /**
- * @brief Main screen: an animated scroll-wheel menu over the timer catalogue.
+ * @brief Main screen: a COROS-style OrbitMenu over the timer catalogue.
  *
- * Uses the shared MainMenu component (scroll wheel + side scroll indicator).
- * The wheel lists a "New" entry, the fixed presets, then the recent timers.
- * The centered value is drawn large; the title reads TIMER over presets and
- * RECENT over recents. L1/L2 scroll, R1 selects (New -> Edit, value -> Menu),
- * R2 leaves the app.
+ * The orbit lists a "New" entry (plus icon), the fixed presets, then the recent
+ * timers -- New is a normal element of the wheel. The centered entry is largest
+ * and rows shrink/curve toward it. A small side ScrollIndicator (covering every
+ * element, New included) replaces the left buttons. The title reads TIMER over
+ * presets and RECENT over recents. L1/L2 scroll, R1 selects (New -> Edit,
+ * value -> Menu), R2 leaves the app.
  */
 class MainView : public MainViewBase
 {
@@ -24,7 +25,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
-    /** @brief Replace the presets/recents shown and rebuild the wheel. */
+    /** @brief Replace the presets/recents shown and rebuild the orbit. */
     void setLists(const std::vector<Timer>& presets,
                   const std::vector<Timer>& recents);
 
@@ -38,29 +39,14 @@ private:
         bool                     isRecent;
     };
 
-    void buildItems(const std::vector<Timer>& presets,
-                    const std::vector<Timer>& recents);
-    void updateItem(MainMenuItem& item, int16_t index);
-    void updateCenterItem(MainMenuCenterItem& item, int16_t index);
-    void onAnimationEnded(int16_t index);
-
-    /**
-     * @brief Toggle the static "New" entry screen vs the wheel and set the title.
-     *
-     * Index 0 (New) is shown as a static plus-icon + label with the wheel hidden;
-     * scrolling to any value reveals the animated wheel.
-     */
-    void syncView(int16_t index);
+    void buildEntries(const std::vector<Timer>& presets,
+                      const std::vector<Timer>& recents);
+    void updateTitle(int16_t index);
     void onConfirm();
 
     std::vector<Item>            mItems;
-    std::vector<std::string>     mLabels;   ///< Backing storage for msgChar.
-    std::vector<MenuItemConfig>  mItemCfg;
-    std::vector<MenuItemConfig>  mCenterCfg;
-
-    touchgfx::Callback<MainView, MainMenuItem&, int16_t>       mUpdateItemCb;
-    touchgfx::Callback<MainView, MainMenuCenterItem&, int16_t> mUpdateCenterItemCb;
-    touchgfx::Callback<MainView, int16_t>                      mAnimationEndedCb;
+    std::vector<std::string>     mLabels;    ///< Stable backing for Entry::label.
+    std::vector<OrbitMenu::Entry> mEntries;
 };
 
 #endif // MAINVIEW_HPP

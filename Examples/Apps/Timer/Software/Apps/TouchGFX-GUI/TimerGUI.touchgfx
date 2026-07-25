@@ -7,44 +7,23 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
-            "Name": "menu",
+            "Name": "orbitMenu",
             "X": 0,
-            "Y": 0,
+            "Y": 44,
             "Width": 240,
-            "Height": 240,
+            "Height": 152,
             "LockPosition": true,
-            "CustomContainerDefinitionName": "MainMenu"
+            "CustomContainerDefinitionName": "OrbitMenu"
           },
           {
-            "Type": "Image",
-            "Name": "icon",
-            "X": 95,
-            "Y": 92,
-            "Width": 50,
-            "Height": 50,
+            "Type": "CustomContainerInstance",
+            "Name": "scrollIndicator",
+            "X": 0,
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
             "LockPosition": true,
-            "RelativeFilename": "CirclePlus_50x50.png"
-          },
-          {
-            "Type": "TextArea",
-            "Name": "newText",
-            "X": 60,
-            "Y": 150,
-            "Width": 120,
-            "Height": 40,
-            "LockPosition": true,
-            "TextId": "TMP_SEMIBOLD_35",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 192,
-              "Green": 192,
-              "Blue": 192
-            },
-            "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 10
-            }
+            "CustomContainerDefinitionName": "ScrollIndicator"
           },
           {
             "Type": "CustomContainerInstance",
@@ -1007,6 +986,13 @@
             "LockPosition": true
           }
         ],
+        "Interactions": []
+      },
+      {
+        "Name": "OrbitMenu",
+        "Width": 240,
+        "Height": 150,
+        "Components": [],
         "Interactions": []
       }
     ],

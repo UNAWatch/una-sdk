@@ -4,8 +4,6 @@
 #include <gui_generated/main_screen/MainViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
-#include <images/BitmapDatabase.hpp>
-#include <texts/TextKeysAndLanguages.hpp>
 
 MainViewBase::MainViewBase()
 {
@@ -15,20 +13,11 @@ MainViewBase::MainViewBase()
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
-    menu.setXY(0, 0);
-    add(menu);
+    orbitMenu.setXY(0, 44);
+    add(orbitMenu);
 
-    icon.setXY(95, 92);
-    icon.setBitmap(touchgfx::Bitmap(BITMAP_CIRCLEPLUS_50X50_ID));
-    add(icon);
-
-    newText.setPosition(60, 150, 120, 40);
-    newText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
-    newText.setLinespacing(0);
-    Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    newText.setWildcard(newTextBuffer);
-    newText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_35));
-    add(newText);
+    scrollIndicator.setXY(0, 47);
+    add(scrollIndicator);
 
     buttons.setXY(0, 47);
     add(buttons);
@@ -44,7 +33,8 @@ MainViewBase::~MainViewBase()
 
 void MainViewBase::setupScreen()
 {
-    menu.initialize();
+    orbitMenu.initialize();
+    scrollIndicator.initialize();
     buttons.initialize();
     title.initialize();
     transitionBegins();
