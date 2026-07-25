@@ -27,7 +27,7 @@ void MainView::setupScreen()
     buttons.setR2(Buttons::WHITE);
 
     orbitMenu.setHeight(152);
-    orbitMenu.setCenterOffset(0);
+    orbitMenu.setCenterOffset(17);   // re-centre after the optical label lift
     orbitMenu.setAnimationSteps(kAnimSteps);
     orbitMenu.setCircularMinItems(1000);   // bounded: New is the wrap boundary
     // Spread the rows for the large 60px centre value.

@@ -38,11 +38,9 @@ struct LabelTier
 // in-between animation frames so the size eases smoothly.
 const LabelTier kTiers[] = {
     { 0.30f,  T_TMP_SEMIBOLD_60, SDK::GUI::Color::WHITE },
-    { 0.70f,  T_TMP_SEMIBOLD_40, SDK::GUI::Color::WHITE },
-    { 1.10f,  T_TMP_SEMIBOLD_35, SDK::GUI::Color::WHITE },
-    { 1.50f,  T_TMP_SEMIBOLD_30, SDK::GUI::Color::GRAY  },
-    { 1.90f,  T_TMP_SEMIBOLD_25, SDK::GUI::Color::GRAY  },
-    { 1.0e9f, T_TMP_SEMIBOLD_20, SDK::GUI::Color::GRAY  },
+    { 0.60f,  T_TMP_SEMIBOLD_40, SDK::GUI::Color::WHITE },
+    { 0.90f,  T_TMP_SEMIBOLD_30, SDK::GUI::Color::GRAY  },
+    { 1.0e9f, T_TMP_SEMIBOLD_25, SDK::GUI::Color::GRAY  }, // all rest neighbours 25
 };
 
 const LabelTier &pickTier(float absD)
@@ -154,7 +152,12 @@ void OrbitMenuItem::render(bool bigIcon, touchgfx::TypedTextId labelFont,
                           static_cast<int16_t>(w + 4), rowH);
     }
     label.resizeHeightToCurrentText();
-    label.setY((rowH - label.getHeight()) / 2);
+    // The bigger the font, the more empty line-box space sits above the digits,
+    // so a plain box-centre makes large rows read low and the bottom gap tighter
+    // than the top. Lift the label proportionally to the font height so every
+    // row's optical centre lands on its geometric centre -> symmetric neighbours.
+    label.setY(static_cast<int16_t>((rowH - label.getHeight()) / 2
+                                    - (label.getHeight() * 6) / 16));
 
     setWidthHeight(240, rowH);
     setXY(0, static_cast<int16_t>(centerY - rowH / 2));
