@@ -8,9 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/main_screen/MainPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <gui/containers/MainMenu.hpp>
 #include <gui/containers/Buttons.hpp>
-#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
-#include <touchgfx/widgets/Image.hpp>
 #include <gui/containers/Title.hpp>
 
 class MainViewBase : public touchgfx::View<MainPresenter>
@@ -30,25 +29,9 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    MainMenu menu;
     Buttons buttons;
-    touchgfx::TextAreaWithOneWildcard prevValue;
-    touchgfx::TextAreaWithOneWildcard currentValue;
-    touchgfx::TextAreaWithOneWildcard nextValue;
-    touchgfx::TextAreaWithOneWildcard newText;
-    touchgfx::Image icon;
     Title title;
-
-    /*
-     * Wildcard Buffers
-     */
-    static const uint16_t PREVVALUE_SIZE = 12;
-    touchgfx::Unicode::UnicodeChar prevValueBuffer[PREVVALUE_SIZE];
-    static const uint16_t CURRENTVALUE_SIZE = 12;
-    touchgfx::Unicode::UnicodeChar currentValueBuffer[CURRENTVALUE_SIZE];
-    static const uint16_t NEXTVALUE_SIZE = 12;
-    touchgfx::Unicode::UnicodeChar nextValueBuffer[NEXTVALUE_SIZE];
-    static const uint16_t NEWTEXT_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar newTextBuffer[NEWTEXT_SIZE];
 
 private:
 

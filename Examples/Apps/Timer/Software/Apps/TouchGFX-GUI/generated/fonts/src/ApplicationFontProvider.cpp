@@ -21,24 +21,27 @@ touchgfx::Font* ApplicationFontProvider::getFont(touchgfx::FontId typography)
     case Typography::POPPINS_SEMIBOLD_30:
         // Poppins_SemiBold_30_2bpp
         return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[3]);
+    case Typography::POPPINS_MEDIUM_18:
+        // Poppins_Medium_18_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[4]);
     case Typography::POPPINS_SEMIBOLD_35:
         // Poppins_SemiBold_35_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[4]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[5]);
     case Typography::POPPINS_SEMIBOLD_40:
         // Poppins_SemiBold_40_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[5]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[6]);
     case Typography::POPPINS_SEMIBOLD_60:
         // Poppins_SemiBold_60_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[6]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[7]);
     case Typography::POPPINS_ITALIC_18:
         // Poppins_Italic_18_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[7]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[8]);
     case Typography::POPPINS_ITALIC_20:
         // Poppins_Italic_20_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[8]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[9]);
     case Typography::POPPINS_LIGHT_60:
         // Poppins_Light_60_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[9]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[10]);
     default:
         return 0;
     }

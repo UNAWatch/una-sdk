@@ -4,8 +4,6 @@
 #include <gui_generated/main_screen/MainViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
-#include <texts/TextKeysAndLanguages.hpp>
-#include <images/BitmapDatabase.hpp>
 
 MainViewBase::MainViewBase()
 {
@@ -15,46 +13,11 @@ MainViewBase::MainViewBase()
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
+    menu.setXY(0, 0);
+    add(menu);
+
     buttons.setXY(0, 47);
     add(buttons);
-
-    prevValue.setPosition(20, 50, 200, 30);
-    prevValue.setColor(touchgfx::Color::getColorFromRGB(128, 128, 128));
-    prevValue.setLinespacing(0);
-    Unicode::snprintf(prevValueBuffer, PREVVALUE_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    prevValue.setWildcard(prevValueBuffer);
-    prevValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
-    add(prevValue);
-
-    currentValue.setPosition(20, 82, 200, 77);
-    currentValue.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
-    currentValue.setLinespacing(0);
-    Unicode::snprintf(currentValueBuffer, CURRENTVALUE_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    currentValue.setWildcard(currentValueBuffer);
-    currentValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_60));
-    add(currentValue);
-
-    nextValue.setPosition(20, 162, 200, 30);
-    nextValue.setColor(touchgfx::Color::getColorFromRGB(128, 128, 128));
-    nextValue.setLinespacing(0);
-    Unicode::snprintf(nextValueBuffer, NEXTVALUE_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    nextValue.setWildcard(nextValueBuffer);
-    nextValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
-    add(nextValue);
-
-    newText.setPosition(67, 145, 107, 36);
-    newText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
-    newText.setLinespacing(0);
-    Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    newText.setWildcard(newTextBuffer);
-    newText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
-    newText.setVisible(false);
-    add(newText);
-
-    icon.setXY(95, 95);
-    icon.setBitmap(touchgfx::Bitmap(BITMAP_CIRCLEPLUS_50X50_ID));
-    icon.setVisible(false);
-    add(icon);
 
     title.setXY(50, 0);
     add(title);
@@ -67,6 +30,7 @@ MainViewBase::~MainViewBase()
 
 void MainViewBase::setupScreen()
 {
+    menu.initialize();
     buttons.initialize();
     title.initialize();
     transitionBegins();

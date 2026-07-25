@@ -81,6 +81,14 @@
     <ClCompile Include="..\..\generated\gui_generated\src\containers\ToggleBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\OptionWheel.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\OptionWheelBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\MainMenu.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\MainMenuBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\MainMenuItem.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\MainMenuItemBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\MainMenuCenterItem.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\MainMenuCenterItemBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\ScrollIndicator.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\ScrollIndicatorBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\OptionWheelCenterItem.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\OptionWheelCenterItemBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\OptionWheelItem.cpp"/>
@@ -297,6 +305,12 @@
     <ClInclude Include="..\..\gui\include\gui\containers\Toggle.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ToggleBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\OptionWheel.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MainMenu.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MainMenuItem.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MainMenuCenterItem.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\ScrollIndicator.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MenuItemConfig.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\MenuItemRenderer.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\OptionWheelBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\OptionWheelCenterItem.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\OptionWheelCenterItemBase.hpp"/>
@@ -327,6 +341,10 @@
     <ClInclude Include="..\..\gui\include\gui\running_screen\RunningView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\running_screen\RunningViewBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\common\TimeFormat.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MainMenuBase.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MainMenuCenterItemBase.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\MainMenuItemBase.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ScrollIndicatorBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

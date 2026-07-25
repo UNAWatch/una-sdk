@@ -5,16 +5,16 @@
 #include <gui/main_screen/MainPresenter.hpp>
 
 #include <vector>
+#include <string>
 
 /**
- * @brief Main screen: a button-driven wheel over the timer catalogue.
+ * @brief Main screen: an animated scroll-wheel menu over the timer catalogue.
  *
- * The wheel lists, in order: a "New" entry, the fixed presets, and -- when any
- * exist -- the recent timers behind a non-selectable "Recent" divider. The
- * centered entry is drawn large; its neighbours are dimmed. The screen title
- * reads TIMER over presets and RECENT over recents.
- *
- * L1/L2 scroll, R1 selects (New -> Edit, a value -> Menu), R2 leaves the app.
+ * Uses the shared MainMenu component (scroll wheel + side scroll indicator).
+ * The wheel lists a "New" entry, the fixed presets, then the recent timers.
+ * The centered value is drawn large; the title reads TIMER over presets and
+ * RECENT over recents. L1/L2 scroll, R1 selects (New -> Edit, value -> Menu),
+ * R2 leaves the app.
  */
 class MainView : public MainViewBase
 {
@@ -33,21 +33,27 @@ protected:
 
 private:
     struct Item {
-        enum Kind { NEW, VALUE, DIVIDER } kind;
-        Timer                            timer;
-        bool                             isRecent;
+        enum Kind { NEW, VALUE } kind;
+        Timer                    timer;
+        bool                     isRecent;
     };
 
-    void   rebuildItems(const std::vector<Timer>& presets,
-                        const std::vector<Timer>& recents);
-    void   show();
-    size_t step(size_t index, bool forward) const;   ///< Skips the divider.
-    void   fillLabel(touchgfx::TextAreaWithOneWildcard& area,
-                     touchgfx::Unicode::UnicodeChar* buffer, uint16_t bufSize,
-                     size_t index);
+    void buildItems(const std::vector<Timer>& presets,
+                    const std::vector<Timer>& recents);
+    void updateItem(MainMenuItem& item, int16_t index);
+    void updateCenterItem(MainMenuCenterItem& item, int16_t index);
+    void onAnimationEnded(int16_t index);
+    void updateTitle(int16_t index);
+    void onConfirm();
 
-    std::vector<Item> mItems;
-    size_t            mIndex = 0;
+    std::vector<Item>            mItems;
+    std::vector<std::string>     mLabels;   ///< Backing storage for msgChar.
+    std::vector<MenuItemConfig>  mItemCfg;
+    std::vector<MenuItemConfig>  mCenterCfg;
+
+    touchgfx::Callback<MainView, MainMenuItem&, int16_t>       mUpdateItemCb;
+    touchgfx::Callback<MainView, MainMenuCenterItem&, int16_t> mUpdateCenterItemCb;
+    touchgfx::Callback<MainView, int16_t>                      mAnimationEndedCb;
 };
 
 #endif // MAINVIEW_HPP
