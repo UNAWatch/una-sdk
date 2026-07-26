@@ -28,8 +28,14 @@ public:
     void initialize();
 
     // ---- Geometry ----------------------------------------------------------
-    /** @brief Column box: numbers are centred within [x, x+width]. */
-    void setColumn(int16_t x, int16_t y, int16_t width, int16_t height);
+    /**
+     * @brief Column box + centre line.
+     * @param centerLocalY Y of the selected row within the box. The box extends
+     *        below it far enough to show the lower neighbours; rows past the box
+     *        bottom are clipped so a new value slides in from there.
+     */
+    void setColumn(int16_t x, int16_t y, int16_t width, int16_t height,
+                   int16_t centerLocalY);
 
     // ---- Data --------------------------------------------------------------
     /**
@@ -57,7 +63,7 @@ protected:
     virtual void handleTickEvent() override;
 
 private:
-    static const int16_t kVisible = 5;   ///< centre +/- 2
+    static const int16_t kVisible = 7;   ///< centre + up to 3 below (+ off-box buffer)
 
     void layout();
     void renderRow(int16_t slot, int16_t value, float absD,
@@ -70,6 +76,7 @@ private:
 
     int16_t mX        = 0;
     int16_t mWidth    = 120;
+    int16_t mCenterY  = 76;  ///< Y of the selected row within the box.
     int16_t mCurveDir = 0;   ///< +1/-1: rows curve toward the screen centre; 0 = straight
 
     int16_t mMax    = 59;

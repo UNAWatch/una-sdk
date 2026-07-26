@@ -32,15 +32,17 @@ void EditView::setupScreen()
     touchgfx::Unicode::snprintf(colonBuffer, COLON_SIZE, ":");
     colon.setWildcard(colonBuffer);
 
+    // Box reaches low enough that the second neighbour is fully drawn; the third
+    // sits just past the bottom and slides up into view. Centre stays at y120.
     mMins.initialize();
     add(mMins);
-    mMins.setColumn(10, 44, 105, 152);
+    mMins.setColumn(10, 44, 105, 170, 76);
     mMins.setRange(kMinsMax, kMinsStep);
     mMins.setAnimationSteps(4);
 
     mSecs.initialize();
     add(mSecs);
-    mSecs.setColumn(125, 44, 105, 152);
+    mSecs.setColumn(125, 44, 105, 170, 76);
     mSecs.setRange(kSecsMax, kSecsStep);
     mSecs.setAnimationSteps(4);
 

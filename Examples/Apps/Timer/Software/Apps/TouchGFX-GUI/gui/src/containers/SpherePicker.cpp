@@ -9,6 +9,7 @@ namespace {
 // Vertical anchors: |y| distance from the centre line for the rest positions.
 const int16_t kYoffPos1 = 46;   // +/-1
 const int16_t kYoffPos2 = 78;   // +/-2
+const int16_t kYoffPos3 = 108;  // +/-3 (mostly off-box; slides in)
 
 const int16_t kSlotBoxH = 64;   // per-row box height (fits the 40px centre)
 
@@ -30,7 +31,8 @@ int16_t curveOffset(float absD)
 {
     if (absD < 1.0f) return static_cast<int16_t>(lerpf(0.0f,  12.0f, absD));
     if (absD < 2.0f) return static_cast<int16_t>(lerpf(12.0f, 28.0f, absD - 1.0f));
-    return 28;
+    if (absD < 3.0f) return static_cast<int16_t>(lerpf(28.0f, 44.0f, absD - 2.0f));
+    return 44;
 }
 
 } // namespace
@@ -52,10 +54,12 @@ void SpherePicker::initialize()
     touchgfx::Application::getInstance()->registerTimerWidget(this);
 }
 
-void SpherePicker::setColumn(int16_t x, int16_t y, int16_t width, int16_t height)
+void SpherePicker::setColumn(int16_t x, int16_t y, int16_t width, int16_t height,
+                             int16_t centerLocalY)
 {
-    mX     = 0;            // rows are laid out in container-local X
-    mWidth = width;
+    mX       = 0;         // rows are laid out in container-local X
+    mWidth   = width;
+    mCenterY = centerLocalY;
 
     // Curve toward the round display's centre (x=120): the left column bends
     // right, the right column bends left as rows move away from the centre.
@@ -76,7 +80,7 @@ void SpherePicker::setRange(int16_t maxValue, int16_t step)
 
 int16_t SpherePicker::centerLineY() const
 {
-    return static_cast<int16_t>(getHeight() / 2);
+    return mCenterY;
 }
 
 void SpherePicker::setValue(int16_t value)
@@ -198,8 +202,10 @@ void SpherePicker::layout()
             yOff = lerpf(0.0f, kYoffPos1, absD);
         } else if (absD < 2.0f) {
             yOff = lerpf(kYoffPos1, kYoffPos2, absD - 1.0f);
+        } else if (absD < 3.0f) {
+            yOff = lerpf(kYoffPos2, kYoffPos3, absD - 2.0f);
         } else {
-            yOff = kYoffPos2;
+            yOff = kYoffPos3;
         }
         const int16_t y = static_cast<int16_t>(centerLineY() + (d < 0.0f ? -yOff : yOff));
 
