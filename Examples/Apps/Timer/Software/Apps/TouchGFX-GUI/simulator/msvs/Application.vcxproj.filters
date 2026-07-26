@@ -912,6 +912,12 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\OrbitMenuBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
+    <ClCompile Include="..\..\gui\src\containers\SpherePicker.cpp">
+      <Filter>Source Files\gui\containers</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\containers\SpherePicker.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml">

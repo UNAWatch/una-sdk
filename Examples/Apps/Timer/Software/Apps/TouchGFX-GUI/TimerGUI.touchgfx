@@ -97,6 +97,79 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "X": 0,
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "minsHdr",
+            "X": 14,
+            "Y": 52,
+            "Width": 90,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "secsHdr",
+            "X": 136,
+            "Y": 52,
+            "Width": 90,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "colon",
+            "X": 108,
+            "Y": 92,
+            "Width": 24,
+            "Height": 50,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_40",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
             "Y": 0,

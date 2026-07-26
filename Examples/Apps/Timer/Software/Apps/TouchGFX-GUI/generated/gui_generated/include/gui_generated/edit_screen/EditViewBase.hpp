@@ -8,6 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/edit_screen/EditPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <gui/containers/Buttons.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <gui/containers/Title.hpp>
 
 class EditViewBase : public touchgfx::View<EditPresenter>
@@ -27,7 +29,21 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    Buttons buttons;
+    touchgfx::TextAreaWithOneWildcard minsHdr;
+    touchgfx::TextAreaWithOneWildcard secsHdr;
+    touchgfx::TextAreaWithOneWildcard colon;
     Title title;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t MINSHDR_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar minsHdrBuffer[MINSHDR_SIZE];
+    static const uint16_t SECSHDR_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar secsHdrBuffer[SECSHDR_SIZE];
+    static const uint16_t COLON_SIZE = 4;
+    touchgfx::Unicode::UnicodeChar colonBuffer[COLON_SIZE];
 
 private:
 
