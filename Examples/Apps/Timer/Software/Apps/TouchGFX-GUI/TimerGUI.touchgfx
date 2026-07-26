@@ -198,18 +198,24 @@
         "CanvasBufferSize": 3600,
         "Components": [
           {
-            "Type": "Box",
+            "Type": "Circle",
             "Name": "pill",
             "X": 16,
-            "Y": 94,
+            "Y": 98,
             "Width": 208,
-            "Height": 50,
+            "Height": 44,
             "LockPosition": true,
             "Color": {
               "Red": 0,
               "Green": 74,
               "Blue": 74
-            }
+            },
+            "CenterX": 104.0,
+            "CenterY": 22.0,
+            "Radius": 104.0,
+            "StartAngle": 0.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt"
           },
           {
             "Type": "CustomContainerInstance",

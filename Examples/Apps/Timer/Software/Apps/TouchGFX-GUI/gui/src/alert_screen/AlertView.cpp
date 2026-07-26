@@ -9,10 +9,11 @@ static const Timer::Effect kEffects[] = { Timer::EFFECT_BEEP,
                                           Timer::EFFECT_VIBRO,
                                           Timer::EFFECT_BEEP_AND_VIBRO };
 
-// Uniform tier: every row is the same size and colour -- the teal pill behind
-// the centre is what marks the selection.
+// Size-only sphere: centre SemiBold 26, neighbours Medium 18, all white and
+// centre-aligned. The teal pill behind the centre marks the selection.
 static const OrbitTier kAlertTiers[] = {
-    { 1.0e9f, T_TMP_SEMIBOLD_30, SDK::GUI::Color::WHITE },
+    { 0.40f,  T_TMP_SEMIBOLD_26_L, SDK::GUI::Color::WHITE },
+    { 1.0e9f, T_TMP_MEDIUM_18,     SDK::GUI::Color::WHITE },
 };
 
 AlertView::AlertView()
@@ -33,7 +34,8 @@ void AlertView::setupScreen()
     touchgfx::Unicode::snprintf(alertLabelBuffer, ALERTLABEL_SIZE, "Alert");
     alertLabel.setWildcard(alertLabelBuffer);
 
-    orbitMenu.setTiers(kAlertTiers, 1);
+    orbitMenu.setTiers(kAlertTiers,
+                       static_cast<int16_t>(sizeof(kAlertTiers) / sizeof(kAlertTiers[0])));
     // Uniform spacing; the far (+/-2) rows fall outside the box and are clipped
     // so the 3 options never show a duplicate.
     const OrbitMenu::Anchors anchors = { { 0, 22, 87 }, { 44, 22, 87 }, { 88, 22, 87 } };

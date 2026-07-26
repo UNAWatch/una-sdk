@@ -14,8 +14,13 @@ AlertViewBase::AlertViewBase()
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
-    pill.setPosition(16, 94, 208, 50);
-    pill.setColor(touchgfx::Color::getColorFromRGB(0, 74, 74));
+    pill.setPosition(16, 98, 208, 44);
+    pill.setCenter(104, 22);
+    pill.setRadius(104);
+    pill.setLineWidth(0);
+    pill.setArc(0, 360);
+    pillPainter.setColor(touchgfx::Color::getColorFromRGB(0, 74, 74));
+    pill.setPainter(pillPainter);
     add(pill);
 
     orbitMenu.setXY(0, 44);

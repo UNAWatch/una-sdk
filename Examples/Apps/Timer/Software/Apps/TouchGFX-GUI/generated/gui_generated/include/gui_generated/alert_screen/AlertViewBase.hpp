@@ -8,6 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/alert_screen/AlertPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/canvas/Circle.hpp>
+#include <touchgfx/widgets/canvas/PainterABGR2222.hpp>
 #include <gui/containers/OrbitMenu.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <gui/containers/Buttons.hpp>
@@ -30,7 +32,8 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    touchgfx::Box pill;
+    touchgfx::Circle pill;
+    touchgfx::PainterABGR2222 pillPainter;
     OrbitMenu orbitMenu;
     touchgfx::TextAreaWithOneWildcard alertLabel;
     Buttons buttons;
