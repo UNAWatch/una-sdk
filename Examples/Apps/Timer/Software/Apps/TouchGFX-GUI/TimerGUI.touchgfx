@@ -297,6 +297,86 @@
         "CanvasBufferSize": 3600,
         "Components": [
           {
+            "Type": "Circle",
+            "Name": "pill",
+            "X": 16,
+            "Y": 87,
+            "Width": 220,
+            "Height": 66,
+            "LockPosition": true,
+            "Color": {
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 110.0,
+            "CenterY": 33.0,
+            "Radius": 110.0,
+            "StartAngle": 0.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "orbitMenu",
+            "X": 0,
+            "Y": 96,
+            "Width": 240,
+            "Height": 104,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "OrbitMenu"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "valueText",
+            "X": 40,
+            "Y": 50,
+            "Width": 160,
+            "Height": 28,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_20",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "playIcon",
+            "X": 190,
+            "Y": 59,
+            "Width": 20,
+            "Height": 20,
+            "LockPosition": true,
+            "Visible": true,
+            "RelativeFilename": "Play_22x24.png"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "scrollIndicator",
+            "X": 0,
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "ScrollIndicator"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "X": 0,
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,

@@ -9,8 +9,14 @@ MenuPresenter::MenuPresenter(MenuView& v)
 void MenuPresenter::activate()
 {
     model->resetIdleTimer();
+    view.setValue(model->getEditTimer().durationSec);
 }
 
 void MenuPresenter::deactivate()
 {
+}
+
+void MenuPresenter::startTimer()
+{
+    model->startTimer(model->getEditTimer());
 }

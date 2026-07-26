@@ -9,7 +9,10 @@ using namespace touchgfx;
 class MenuView;
 
 /**
- * @brief Presenter for the Menu screen -- skeleton placeholder.
+ * @brief Presenter for the Menu screen (Start / Edit / Delete).
+ *
+ * Feeds the view the value of the timer being acted on and, when Start is
+ * chosen, launches the countdown for the current edit timer.
  */
 class MenuPresenter : public touchgfx::Presenter, public ModelListener
 {
@@ -19,6 +22,9 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual ~MenuPresenter() {}
+
+    /** @brief Start the countdown for the current edit timer. */
+    void startTimer();
 
 private:
     MenuPresenter();

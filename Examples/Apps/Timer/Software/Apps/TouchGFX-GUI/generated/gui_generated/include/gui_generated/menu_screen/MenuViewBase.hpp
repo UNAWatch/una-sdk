@@ -8,6 +8,13 @@
 #include <mvp/View.hpp>
 #include <gui/menu_screen/MenuPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/canvas/Circle.hpp>
+#include <touchgfx/widgets/canvas/PainterABGR2222.hpp>
+#include <gui/containers/OrbitMenu.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <gui/containers/ScrollIndicator.hpp>
+#include <gui/containers/Buttons.hpp>
 #include <gui/containers/Title.hpp>
 
 class MenuViewBase : public touchgfx::View<MenuPresenter>
@@ -27,7 +34,20 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::Circle pill;
+    touchgfx::PainterABGR2222 pillPainter;
+    OrbitMenu orbitMenu;
+    touchgfx::TextAreaWithOneWildcard valueText;
+    touchgfx::Image playIcon;
+    ScrollIndicator scrollIndicator;
+    Buttons buttons;
     Title title;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t VALUETEXT_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar valueTextBuffer[VALUETEXT_SIZE];
 
 private:
 

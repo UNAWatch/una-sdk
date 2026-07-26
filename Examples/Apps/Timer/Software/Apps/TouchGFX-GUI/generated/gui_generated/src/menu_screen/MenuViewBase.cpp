@@ -4,6 +4,8 @@
 #include <gui_generated/menu_screen/MenuViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
+#include <images/BitmapDatabase.hpp>
 
 MenuViewBase::MenuViewBase()
 {
@@ -12,6 +14,36 @@ MenuViewBase::MenuViewBase()
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    pill.setPosition(16, 87, 220, 66);
+    pill.setCenter(110, 33);
+    pill.setRadius(110);
+    pill.setLineWidth(0);
+    pill.setArc(0, 360);
+    pillPainter.setColor(touchgfx::Color::getColorFromRGB(0, 64, 64));
+    pill.setPainter(pillPainter);
+    add(pill);
+
+    orbitMenu.setXY(0, 96);
+    add(orbitMenu);
+
+    valueText.setPosition(40, 50, 160, 28);
+    valueText.setColor(touchgfx::Color::getColorFromRGB(0, 128, 128));
+    valueText.setLinespacing(0);
+    Unicode::snprintf(valueTextBuffer, VALUETEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    valueText.setWildcard(valueTextBuffer);
+    valueText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20));
+    add(valueText);
+
+    playIcon.setXY(190, 59);
+    playIcon.setBitmap(touchgfx::Bitmap(BITMAP_PLAY_22X24_ID));
+    add(playIcon);
+
+    scrollIndicator.setXY(0, 47);
+    add(scrollIndicator);
+
+    buttons.setXY(0, 47);
+    add(buttons);
 
     title.setXY(50, 0);
     add(title);
@@ -24,6 +56,9 @@ MenuViewBase::~MenuViewBase()
 
 void MenuViewBase::setupScreen()
 {
+    orbitMenu.initialize();
+    scrollIndicator.initialize();
+    buttons.initialize();
     title.initialize();
     transitionBegins();
 }

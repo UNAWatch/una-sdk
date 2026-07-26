@@ -104,9 +104,10 @@ void MainView::moveSelection(bool forward)
         return;
     }
 
-    const int16_t next = forward
-        ? static_cast<int16_t>((orbitMenu.getSelected() + 1) % n)
-        : static_cast<int16_t>((orbitMenu.getSelected() - 1 + n) % n);
+    // Virtual (un-wrapped) target: may be -1 or n. The scroll indicator needs it
+    // raw so it can pick the correct wrap direction; the wheel index wraps.
+    const int16_t virtualId = static_cast<int16_t>(orbitMenu.getSelected()) + (forward ? 1 : -1);
+    const int16_t next      = static_cast<int16_t>((virtualId % n + n) % n);
 
     // The wheel animates in every direction (the 60px font now carries the "New"
     // letters, so leaving New shows the "New" text scrolling away).
@@ -117,11 +118,12 @@ void MainView::moveSelection(bool forward)
     }
 
     // Scroll indicator: landing on New swaps its static face in instantly, so
-    // jump the indicator to match; otherwise animate in sync with the wheel.
+    // jump the indicator to match; otherwise animate to the virtual id so the
+    // wrap slides the short way round.
     if (next == 0) {
         scrollIndicator.setActiveId(0);
     } else {
-        scrollIndicator.animateToId(next, kAnimSteps);
+        scrollIndicator.animateToId(virtualId, kAnimSteps);
     }
 
     // Entering the recents shows the value immediately; leaving keeps the value

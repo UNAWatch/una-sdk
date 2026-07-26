@@ -10,7 +10,8 @@ const uint16_t BITMAP_ALARM_60X60_ID = 0;
 const uint16_t BITMAP_CIRCLECROSS_50X50_ID = 1;
 const uint16_t BITMAP_CIRCLEPLUS_50X50_ID = 2;
 const uint16_t BITMAP_CIRCLETICK_50X50_ID = 3;
-const uint16_t BITMAP_TICKAMBER_22X17_ID = 4;
+const uint16_t BITMAP_PLAY_22X24_ID = 4;
+const uint16_t BITMAP_TICKAMBER_22X17_ID = 5;
 
 namespace BitmapDatabase
 {
