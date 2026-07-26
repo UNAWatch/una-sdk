@@ -9,6 +9,11 @@ DeletedPresenter::DeletedPresenter(DeletedView& v)
 void DeletedPresenter::activate()
 {
     model->resetIdleTimer();
+
+    // Committing the delete here (rather than in Menu) keeps the action and its
+    // confirmation together. A preset is not in recents, so this is a no-op for
+    // it -- the screen still confirms.
+    model->removeRecent(model->getEditTimer());
 }
 
 void DeletedPresenter::deactivate()

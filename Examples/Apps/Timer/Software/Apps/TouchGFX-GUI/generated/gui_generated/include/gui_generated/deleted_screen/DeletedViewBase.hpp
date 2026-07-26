@@ -8,6 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/deleted_screen/DeletedPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <gui/containers/Title.hpp>
 
 class DeletedViewBase : public touchgfx::View<DeletedPresenter>
@@ -27,7 +29,15 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::Image icon;
+    touchgfx::TextAreaWithOneWildcard deletedLabel;
     Title title;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t DELETEDLABEL_SIZE = 10;
+    touchgfx::Unicode::UnicodeChar deletedLabelBuffer[DELETEDLABEL_SIZE];
 
 private:
 

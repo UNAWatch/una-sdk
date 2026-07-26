@@ -81,6 +81,9 @@ public:
     /** @brief Add a manually entered timer to recents (dedup, cap) and persist. */
     void addRecent(const Timer& timer);
 
+    /** @brief Remove a timer from recents if present and persist. */
+    void removeRecent(const Timer& timer);
+
 private:
     ModelListener*        modelListener;
     const SDK::Kernel&    mKernel;

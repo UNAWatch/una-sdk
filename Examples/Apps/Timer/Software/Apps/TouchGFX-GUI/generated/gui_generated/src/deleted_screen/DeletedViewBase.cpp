@@ -4,6 +4,8 @@
 #include <gui_generated/deleted_screen/DeletedViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
+#include <images/BitmapDatabase.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
 DeletedViewBase::DeletedViewBase()
 {
@@ -12,6 +14,18 @@ DeletedViewBase::DeletedViewBase()
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    icon.setXY(95, 74);
+    icon.setBitmap(touchgfx::Bitmap(BITMAP_CIRCLECROSS_50X50_ID));
+    add(icon);
+
+    deletedLabel.setPosition(20, 140, 200, 34);
+    deletedLabel.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    deletedLabel.setLinespacing(0);
+    Unicode::snprintf(deletedLabelBuffer, DELETEDLABEL_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    deletedLabel.setWildcard(deletedLabelBuffer);
+    deletedLabel.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
+    add(deletedLabel);
 
     title.setXY(50, 0);
     add(title);

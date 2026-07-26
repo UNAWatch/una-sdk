@@ -464,6 +464,37 @@
         "CanvasBufferSize": 3600,
         "Components": [
           {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 74,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CircleCross_50x50.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "deletedLabel",
+            "X": 20,
+            "Y": 140,
+            "Width": 200,
+            "Height": 34,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_25",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,

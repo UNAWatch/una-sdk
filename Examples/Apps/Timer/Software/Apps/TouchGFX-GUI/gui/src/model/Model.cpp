@@ -159,6 +159,17 @@ void Model::addRecent(const Timer& timer)
     mSrvSender.saveRecents(mRecents);
 }
 
+void Model::removeRecent(const Timer& timer)
+{
+    const size_t before = mRecents.size();
+    mRecents.erase(std::remove(mRecents.begin(), mRecents.end(), timer), mRecents.end());
+
+    // A preset (not in recents) leaves the list unchanged -- nothing to persist.
+    if (mRecents.size() != before) {
+        mSrvSender.saveRecents(mRecents);
+    }
+}
+
 
 // -- Private ------------------------------------------------------------------
 
