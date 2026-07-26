@@ -85,9 +85,27 @@ void ScrollIndicator::setActiveId(uint16_t index)
     mPosition = index;
     const float start = getStartAngle(index);
 
-    handle.setArc(start, start + mHandleLen);
-    handle.invalidate();
+    setClampedArc(handle, start, mCount > 1);
     rail.invalidate();
+}
+
+void ScrollIndicator::setClampedArc(touchgfx::Circle& arc, float start, bool baseVisible)
+{
+    float a = start;
+    float b = start + mHandleLen;
+    if (a < mRailMin) {
+        a = mRailMin;
+    }
+    if (b > mRailMax) {
+        b = mRailMax;
+    }
+
+    const bool visible = baseVisible && (b > a);
+    arc.setVisible(visible);
+    if (visible) {
+        arc.setArc(a, b);
+    }
+    arc.invalidate();
 }
 
 void ScrollIndicator::animateToId(int16_t index, int16_t animationSteps)
@@ -186,17 +204,15 @@ void ScrollIndicator::nextAnimationStep()
         // Outgoing handle slides toward the rail edge
         pos = mAnimationStartPos + t * (mAnimOutgoingEnd - mAnimationStartPos);
 
-        // Incoming handle appears from the opposite rail edge
+        // Incoming handle appears from the opposite rail edge (clipped to the
+        // rail so it grows out of the edge rather than floating past it).
         const float incomingPos = mAnimIncomingStart + t * (mAnimationEndPos - mAnimIncomingStart);
-        handleOvf.setArc(incomingPos, incomingPos + mHandleLen);
-        handleOvf.setVisible(true);
-        handleOvf.invalidate();
+        setClampedArc(handleOvf, incomingPos, true);
     } else {
         pos = mAnimationStartPos + t * (mAnimationEndPos - mAnimationStartPos);
     }
 
-    handle.setArc(pos, pos + mHandleLen);
-    handle.invalidate();
+    setClampedArc(handle, pos, mCount > 1);
     rail.invalidate();
 
     if (mAnimationCounter >= mAnimationDuration) {

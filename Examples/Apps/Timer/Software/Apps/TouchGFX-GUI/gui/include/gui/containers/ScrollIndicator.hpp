@@ -128,6 +128,20 @@ private:
     float getStartAngle(uint16_t index) const;
 
     /**
+     * @brief Set an arc handle, clipped to the rail range [railMin, railMax].
+     *
+     * Keeps the wrap-around slide from drawing the handle past the rail ends
+     * (into empty container space): the outgoing handle shrinks to nothing at
+     * the near end, the incoming grows from the far end. A no-op clamp for the
+     * normal in-rail positions.
+     *
+     * @param arc         The handle Circle to update.
+     * @param start       Desired arc start angle (may fall outside the rail).
+     * @param baseVisible Caller's visibility intent before clipping is applied.
+     */
+    void  setClampedArc(touchgfx::Circle& arc, float start, bool baseVisible);
+
+    /**
      * @brief Stop any running animation and clean up the overflow handle.
      *
      * Must be called before setActiveId() or before starting a new animation
