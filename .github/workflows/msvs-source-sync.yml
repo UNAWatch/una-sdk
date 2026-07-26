@@ -1,0 +1,34 @@
+name: MSVS Source Sync
+
+# Nothing else here builds the MSVS side (that needs MSVC/Windows), so if a
+# source file gets added to the vcxproj or its Makefile but not both, nobody
+# finds out until someone opens Visual Studio. check_msvs_sources.py has the
+# backstory on how many times that's already happened.
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    paths:
+      - 'Examples/Apps/**/simulator/gcc/Makefile'
+      - 'Examples/Apps/**/simulator/msvs/Application.vcxproj'
+      - 'Docs/Tutorials/**/simulator/gcc/Makefile'
+      - 'Docs/Tutorials/**/simulator/msvs/Application.vcxproj'
+      - '.github/scripts/check_msvs_sources.py'
+      - '.github/workflows/msvs-source-sync.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Selftest the checker itself
+        run: python3 .github/scripts/check_msvs_sources.py --selftest
+
+      - name: Compare Makefile and Application.vcxproj source lists
+        run: python3 .github/scripts/check_msvs_sources.py
