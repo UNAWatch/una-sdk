@@ -9,8 +9,16 @@ AlertPresenter::AlertPresenter(AlertView& v)
 void AlertPresenter::activate()
 {
     model->resetIdleTimer();
+    view.set(model->getEditTimer().effect);
 }
 
 void AlertPresenter::deactivate()
 {
+}
+
+void AlertPresenter::setEffect(Timer::Effect effect)
+{
+    Timer t = model->getEditTimer();
+    t.effect = effect;
+    model->setEditTimer(t);
 }

@@ -92,6 +92,19 @@ struct PosAnchor
  * Max 5 rows are shown (centre + 2 above + 2 below). Font/colour tiers live as
  * constants in OrbitMenu.cpp.
  */
+/**
+ * @brief One label tier: the font + colour used while |distance| < maxAbsD.
+ *
+ * Ordered nearest-first. The last entry should use a very large maxAbsD so it
+ * acts as the catch-all for the farthest rows.
+ */
+struct OrbitTier
+{
+    float                 maxAbsD;
+    touchgfx::TypedTextId font;
+    touchgfx::colortype   color;
+};
+
 class OrbitMenu : public OrbitMenuBase
 {
 public:
@@ -157,6 +170,16 @@ public:
     /** @brief Register a callback fired once when a selectNext/Prev animation settles. */
     void setAnimationEndedCallback(touchgfx::GenericCallback<> &cb) { mpAnimEndedCb = &cb; }
 
+    /**
+     * @brief Override the label tiers (font + colour by distance).
+     * @param tiers Nearest-first array; the pointer must outlive the menu.
+     * @param count Number of entries. Pass nullptr/0 to restore the default.
+     *
+     * The default is a large-centre number ladder; a single uniform tier turns
+     * the wheel into a plain same-size scroller (e.g. a text option list).
+     */
+    void setTiers(const OrbitTier *tiers, int16_t count);
+
 protected:
     virtual void handleTickEvent() override;
 
@@ -184,6 +207,10 @@ private:
                          { 80, 71, 108 } };///< +/-2
 
     touchgfx::GenericCallback<>* mpAnimEndedCb = nullptr;
+
+    const OrbitTier* mpTiers    = nullptr;  ///< nullptr = built-in default ladder.
+    int16_t          mTierCount = 0;
+    const OrbitTier& pickTier(float absD) const;
 
     float   mScrollPos = 0.0f; ///< Animated fractional selected index.
     float   mTargetPos = 0.0f; ///< Integer target we are easing toward.

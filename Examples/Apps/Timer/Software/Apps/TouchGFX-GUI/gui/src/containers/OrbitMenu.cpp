@@ -22,36 +22,17 @@ const float kBigThreshold = 0.5f;
 
 float lerpf(float a, float b, float t) { return a + (b - a) * t; }
 
-// --- Label tiers: font + colour by distance from centre ------------------
-// Depth is conveyed by discrete palette colours only (no alpha) -- the panel
-// is 64-colour, so an alpha gradient would land off-palette and band.
-// Rest positions land on 30 / 22 / 18; the intermediate sizes (27, 25, 20)
-// cover the in-between animation frames.
-struct LabelTier
-{
-    float       maxAbsD; ///< Applies while |d| < this.
-    TypedTextId font;    ///< Left-aligned wildcard typed text.
-    uint32_t    color;   ///< Exact palette entry.
-};
+// --- Default label tiers: font + colour by distance from centre ----------
 // Large centre value with an even step-down toward the edges. Rest positions
 // land at |d| = 0 / 1 / 2 (=> 60 / 35 / 20); the extra thresholds cover the
-// in-between animation frames so the size eases smoothly.
-const LabelTier kTiers[] = {
+// in-between animation frames so the size eases smoothly. A screen may replace
+// this via setTiers() (e.g. a uniform tier for a plain text list).
+const OrbitTier kDefaultTiers[] = {
     { 0.30f,  T_TMP_SEMIBOLD_60, SDK::GUI::Color::WHITE },
     { 0.60f,  T_TMP_SEMIBOLD_40, SDK::GUI::Color::WHITE },
     { 0.90f,  T_TMP_SEMIBOLD_30, SDK::GUI::Color::GRAY  },
     { 1.0e9f, T_TMP_SEMIBOLD_25, SDK::GUI::Color::GRAY  }, // all rest neighbours 25
 };
-
-const LabelTier &pickTier(float absD)
-{
-    for (const LabelTier &t : kTiers) {
-        if (absD < t.maxAbsD) {
-            return t;
-        }
-    }
-    return kTiers[sizeof(kTiers) / sizeof(kTiers[0]) - 1];
-}
 
 } // namespace
 
@@ -258,6 +239,34 @@ void OrbitMenu::setItems(const Entry *entries, int16_t count)
     invalidate();
 }
 
+void OrbitMenu::setTiers(const OrbitTier *tiers, int16_t count)
+{
+    if (tiers != nullptr && count > 0) {
+        mpTiers    = tiers;
+        mTierCount = count;
+    } else {
+        mpTiers    = nullptr;   // fall back to the built-in default
+        mTierCount = 0;
+    }
+    layout();
+    invalidate();
+}
+
+const OrbitTier& OrbitMenu::pickTier(float absD) const
+{
+    const OrbitTier* tiers = (mpTiers != nullptr) ? mpTiers : kDefaultTiers;
+    const int16_t    count = (mpTiers != nullptr)
+        ? mTierCount
+        : static_cast<int16_t>(sizeof(kDefaultTiers) / sizeof(kDefaultTiers[0]));
+
+    for (int16_t i = 0; i < count; i++) {
+        if (absD < tiers[i].maxAbsD) {
+            return tiers[i];
+        }
+    }
+    return tiers[count - 1];
+}
+
 void OrbitMenu::setEntryLabel(int16_t index, const char *label)
 {
     if (index < 0 || index >= mCount) {
@@ -448,7 +457,7 @@ void OrbitMenu::layout()
         // Rows outside the container are clipped automatically (top + bottom),
         // so no manual visibility limit is needed -- the container size is the
         // visible area.
-        const LabelTier &tier = pickTier(ad);
+        const OrbitTier &tier = pickTier(ad);
         mItems[s].setVisible(true); // may have been hidden by an empty list
         mItems[s].render(ad < kBigThreshold,
                          tier.font,

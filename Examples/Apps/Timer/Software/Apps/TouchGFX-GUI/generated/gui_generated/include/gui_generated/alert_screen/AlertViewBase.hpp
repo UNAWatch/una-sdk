@@ -8,6 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/alert_screen/AlertPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <gui/containers/OrbitMenu.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
+#include <gui/containers/Buttons.hpp>
 #include <gui/containers/Title.hpp>
 
 class AlertViewBase : public touchgfx::View<AlertPresenter>
@@ -27,7 +30,17 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::Box pill;
+    OrbitMenu orbitMenu;
+    touchgfx::TextAreaWithOneWildcard alertLabel;
+    Buttons buttons;
     Title title;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t ALERTLABEL_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar alertLabelBuffer[ALERTLABEL_SIZE];
 
 private:
 

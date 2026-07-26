@@ -198,6 +198,61 @@
         "CanvasBufferSize": 3600,
         "Components": [
           {
+            "Type": "Box",
+            "Name": "pill",
+            "X": 16,
+            "Y": 94,
+            "Width": 208,
+            "Height": 50,
+            "LockPosition": true,
+            "Color": {
+              "Red": 0,
+              "Green": 74,
+              "Blue": 74
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "orbitMenu",
+            "X": 0,
+            "Y": 44,
+            "Width": 240,
+            "Height": 152,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "OrbitMenu"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "alertLabel",
+            "X": 80,
+            "Y": 200,
+            "Width": 80,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 230,
+              "Green": 160,
+              "Blue": 0
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "X": 0,
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,

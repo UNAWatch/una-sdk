@@ -4,6 +4,7 @@
 #include <gui_generated/alert_screen/AlertViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
 AlertViewBase::AlertViewBase()
 {
@@ -12,6 +13,24 @@ AlertViewBase::AlertViewBase()
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    pill.setPosition(16, 94, 208, 50);
+    pill.setColor(touchgfx::Color::getColorFromRGB(0, 74, 74));
+    add(pill);
+
+    orbitMenu.setXY(0, 44);
+    add(orbitMenu);
+
+    alertLabel.setPosition(80, 200, 80, 22);
+    alertLabel.setColor(touchgfx::Color::getColorFromRGB(230, 160, 0));
+    alertLabel.setLinespacing(0);
+    Unicode::snprintf(alertLabelBuffer, ALERTLABEL_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    alertLabel.setWildcard(alertLabelBuffer);
+    alertLabel.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_18));
+    add(alertLabel);
+
+    buttons.setXY(0, 47);
+    add(buttons);
 
     title.setXY(50, 0);
     add(title);
@@ -24,6 +43,8 @@ AlertViewBase::~AlertViewBase()
 
 void AlertViewBase::setupScreen()
 {
+    orbitMenu.initialize();
+    buttons.initialize();
     title.initialize();
     transitionBegins();
 }
