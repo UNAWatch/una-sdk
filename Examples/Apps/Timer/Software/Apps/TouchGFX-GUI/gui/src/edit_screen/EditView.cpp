@@ -68,8 +68,8 @@ void EditView::updateActive()
     mMins.setActive(minsActive);
     mSecs.setActive(!minsActive);
 
-    minsHdr.setColor(minsActive ? SDK::GUI::Color::TEAL : SDK::GUI::Color::GRAY);
-    secsHdr.setColor(minsActive ? SDK::GUI::Color::GRAY : SDK::GUI::Color::TEAL);
+    minsHdr.setColor(minsActive ? SDK::GUI::Color::TEAL : SDK::GUI::Color::WHITE);
+    secsHdr.setColor(minsActive ? SDK::GUI::Color::WHITE : SDK::GUI::Color::TEAL);
     minsHdr.invalidate();
     secsHdr.invalidate();
 }

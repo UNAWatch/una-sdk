@@ -17,20 +17,20 @@ EditViewBase::EditViewBase()
     buttons.setXY(0, 47);
     add(buttons);
 
-    minsHdr.setPosition(14, 52, 90, 22);
+    minsHdr.setPosition(34, 52, 90, 22);
     minsHdr.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     minsHdr.setLinespacing(0);
     Unicode::snprintf(minsHdrBuffer, MINSHDR_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
     minsHdr.setWildcard(minsHdrBuffer);
-    minsHdr.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_18));
+    minsHdr.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_20));
     add(minsHdr);
 
-    secsHdr.setPosition(136, 52, 90, 22);
+    secsHdr.setPosition(116, 52, 90, 22);
     secsHdr.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     secsHdr.setLinespacing(0);
     Unicode::snprintf(secsHdrBuffer, SECSHDR_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
     secsHdr.setWildcard(secsHdrBuffer);
-    secsHdr.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_18));
+    secsHdr.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_20));
     add(secsHdr);
 
     colon.setPosition(108, 92, 24, 50);

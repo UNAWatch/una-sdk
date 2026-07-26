@@ -108,12 +108,12 @@
           {
             "Type": "TextArea",
             "Name": "minsHdr",
-            "X": 14,
+            "X": 34,
             "Y": 52,
             "Width": 90,
             "Height": 22,
             "LockPosition": true,
-            "TextId": "TMP_ITALIC_18",
+            "TextId": "TMP_ITALIC_20",
             "TextRotation": "0",
             "Color": {
               "Red": 192,
@@ -129,12 +129,12 @@
           {
             "Type": "TextArea",
             "Name": "secsHdr",
-            "X": 136,
+            "X": 116,
             "Y": 52,
             "Width": 90,
             "Height": 22,
             "LockPosition": true,
-            "TextId": "TMP_ITALIC_18",
+            "TextId": "TMP_ITALIC_20",
             "TextRotation": "0",
             "Color": {
               "Red": 192,
