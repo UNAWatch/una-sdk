@@ -201,18 +201,17 @@
             "Type": "Circle",
             "Name": "pill",
             "X": 16,
-            "Y": 98,
-            "Width": 208,
-            "Height": 44,
+            "Y": 87,
+            "Width": 220,
+            "Height": 66,
             "LockPosition": true,
             "Color": {
-              "Red": 0,
-              "Green": 74,
-              "Blue": 74
+              "Green": 64,
+              "Blue": 64
             },
-            "CenterX": 104.0,
-            "CenterY": 22.0,
-            "Radius": 104.0,
+            "CenterX": 110.0,
+            "CenterY": 33.0,
+            "Radius": 110.0,
             "StartAngle": 0.0,
             "EndAngle": 360.0,
             "CapPrecision": "Butt"
@@ -226,6 +225,16 @@
             "Height": 152,
             "LockPosition": true,
             "CustomContainerDefinitionName": "OrbitMenu"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "scrollIndicator",
+            "X": 0,
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "ScrollIndicator"
           },
           {
             "Type": "TextArea",

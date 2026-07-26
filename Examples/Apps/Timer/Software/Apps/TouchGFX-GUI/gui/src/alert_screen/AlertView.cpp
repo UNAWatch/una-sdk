@@ -26,10 +26,15 @@ void AlertView::setupScreen()
 
     title.set("TIMER");
 
-    buttons.setL1(Buttons::WHITE);
-    buttons.setL2(Buttons::WHITE);
+    // Side scroll indicator replaces the left buttons.
+    buttons.setL1(Buttons::NONE);
+    buttons.setL2(Buttons::NONE);
     buttons.setR1(Buttons::AMBER);
     buttons.setR2(Buttons::WHITE);
+
+    scrollIndicator.setConfig(ScrollIndicator::kSmall);
+    scrollIndicator.setCount(kCount);
+    scrollIndicator.setActiveId(0);
 
     touchgfx::Unicode::snprintf(alertLabelBuffer, ALERTLABEL_SIZE, "Alert");
     alertLabel.setWildcard(alertLabelBuffer);
@@ -38,7 +43,7 @@ void AlertView::setupScreen()
                        static_cast<int16_t>(sizeof(kAlertTiers) / sizeof(kAlertTiers[0])));
     // Uniform spacing; the far (+/-2) rows fall outside the box and are clipped
     // so the 3 options never show a duplicate.
-    const OrbitMenu::Anchors anchors = { { 0, 22, 87 }, { 44, 22, 87 }, { 88, 22, 87 } };
+    const OrbitMenu::Anchors anchors = { { 0, 22, 87 }, { 58, 22, 87 }, { 98, 22, 87 } };
     orbitMenu.setAnchors(anchors);
     orbitMenu.setHeight(152);
     orbitMenu.setAnimationSteps(4);
@@ -62,6 +67,7 @@ void AlertView::set(Timer::Effect effect)
     for (int16_t i = 0; i < kCount; i++) {
         if (kEffects[i] == effect) {
             orbitMenu.setSelected(i);
+            scrollIndicator.setActiveId(static_cast<uint16_t>(i));
             return;
         }
     }
@@ -71,9 +77,13 @@ void AlertView::handleKeyEvent(uint8_t key)
 {
     if (key == SDK::GUI::Button::L1) {
         orbitMenu.selectPrev();
+        scrollIndicator.animateToId(
+            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), 4);
     }
     else if (key == SDK::GUI::Button::L2) {
         orbitMenu.selectNext();
+        scrollIndicator.animateToId(
+            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), 4);
     }
     else if (key == SDK::GUI::Button::R1) {
         confirm();

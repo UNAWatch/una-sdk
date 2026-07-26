@@ -14,17 +14,20 @@ AlertViewBase::AlertViewBase()
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
-    pill.setPosition(16, 98, 208, 44);
-    pill.setCenter(104, 22);
-    pill.setRadius(104);
+    pill.setPosition(16, 87, 220, 66);
+    pill.setCenter(110, 33);
+    pill.setRadius(110);
     pill.setLineWidth(0);
     pill.setArc(0, 360);
-    pillPainter.setColor(touchgfx::Color::getColorFromRGB(0, 74, 74));
+    pillPainter.setColor(touchgfx::Color::getColorFromRGB(0, 64, 64));
     pill.setPainter(pillPainter);
     add(pill);
 
     orbitMenu.setXY(0, 44);
     add(orbitMenu);
+
+    scrollIndicator.setXY(0, 47);
+    add(scrollIndicator);
 
     alertLabel.setPosition(80, 200, 80, 22);
     alertLabel.setColor(touchgfx::Color::getColorFromRGB(230, 160, 0));
@@ -49,6 +52,7 @@ AlertViewBase::~AlertViewBase()
 void AlertViewBase::setupScreen()
 {
     orbitMenu.initialize();
+    scrollIndicator.initialize();
     buttons.initialize();
     title.initialize();
     transitionBegins();

@@ -11,6 +11,7 @@
 #include <touchgfx/widgets/canvas/Circle.hpp>
 #include <touchgfx/widgets/canvas/PainterABGR2222.hpp>
 #include <gui/containers/OrbitMenu.hpp>
+#include <gui/containers/ScrollIndicator.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <gui/containers/Buttons.hpp>
 #include <gui/containers/Title.hpp>
@@ -35,6 +36,7 @@ protected:
     touchgfx::Circle pill;
     touchgfx::PainterABGR2222 pillPainter;
     OrbitMenu orbitMenu;
+    ScrollIndicator scrollIndicator;
     touchgfx::TextAreaWithOneWildcard alertLabel;
     Buttons buttons;
     Title title;
