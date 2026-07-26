@@ -33,24 +33,36 @@ touchgfx::Font* ApplicationFontProvider::getFont(touchgfx::FontId typography)
     case Typography::POPPINS_MEDIUM_18:
         // Poppins_Medium_18_2bpp
         return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[7]);
+    case Typography::POPPINS_MEDIUM_50:
+        // Poppins_Medium_50_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[8]);
+    case Typography::POPPINS_MEDIUM_40:
+        // Poppins_Medium_40_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[9]);
+    case Typography::POPPINS_MEDIUM_32:
+        // Poppins_Medium_32_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[10]);
+    case Typography::POPPINS_MEDIUM_25:
+        // Poppins_Medium_25_2bpp
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[11]);
     case Typography::POPPINS_SEMIBOLD_35:
         // Poppins_SemiBold_35_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[8]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[12]);
     case Typography::POPPINS_SEMIBOLD_40:
         // Poppins_SemiBold_40_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[9]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[13]);
     case Typography::POPPINS_SEMIBOLD_60:
         // Poppins_SemiBold_60_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[10]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[14]);
     case Typography::POPPINS_ITALIC_18:
         // Poppins_Italic_18_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[11]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[15]);
     case Typography::POPPINS_ITALIC_20:
         // Poppins_Italic_20_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[12]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[16]);
     case Typography::POPPINS_LIGHT_60:
         // Poppins_Light_60_2bpp
-        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[13]);
+        return const_cast<touchgfx::Font*>(TypedTextDatabase::getFonts()[17]);
     default:
         return 0;
     }

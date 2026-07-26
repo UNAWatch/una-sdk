@@ -14,12 +14,23 @@ const int16_t kSlotBoxH = 64;   // per-row box height (fits the 40px centre)
 
 float lerpf(float a, float b, float t) { return a + (b - a) * t; }
 
-// Font by distance from the centre. Rest positions land on 40 / 25 / 25.
-touchgfx::TypedTextId fontFor(float absD)
+// Non-centre size ladder (Medium). Rest positions land on 40 (|d|=1) and 25
+// (|d|=2); the extra sizes cover the in-between animation frames.
+touchgfx::TypedTextId mediumFontFor(float absD)
 {
-    if (absD < 0.35f) return T_TMP_SEMIBOLD_40;
-    if (absD < 0.75f) return T_TMP_SEMIBOLD_30;
-    return T_TMP_SEMIBOLD_25;
+    if (absD < 0.65f) return T_TMP_MEDIUM_50;
+    if (absD < 1.15f) return T_TMP_MEDIUM_40;
+    if (absD < 1.60f) return T_TMP_MEDIUM_32;
+    return T_TMP_MEDIUM_25;
+}
+
+// Horizontal inset toward the screen centre so the rows follow a round arc
+// instead of a straight vertical line (anchors 0 / 12 / 28 at |d| = 0 / 1 / 2).
+int16_t curveOffset(float absD)
+{
+    if (absD < 1.0f) return static_cast<int16_t>(lerpf(0.0f,  12.0f, absD));
+    if (absD < 2.0f) return static_cast<int16_t>(lerpf(12.0f, 28.0f, absD - 1.0f));
+    return 28;
 }
 
 } // namespace
@@ -45,6 +56,12 @@ void SpherePicker::setColumn(int16_t x, int16_t y, int16_t width, int16_t height
 {
     mX     = 0;            // rows are laid out in container-local X
     mWidth = width;
+
+    // Curve toward the round display's centre (x=120): the left column bends
+    // right, the right column bends left as rows move away from the centre.
+    const int16_t colCenter = static_cast<int16_t>(x + width / 2);
+    mCurveDir = (colCenter < 120) ? 1 : (colCenter > 120 ? -1 : 0);
+
     setPosition(x, y, width, height);
     layout();
 }
@@ -198,21 +215,30 @@ void SpherePicker::renderRow(int16_t slot, int16_t value, float absD,
 {
     touchgfx::TextAreaWithOneWildcard& row = mRows[slot];
 
-    const touchgfx::colortype color = isCenter
-        ? (mActive ? SDK::GUI::Color::TEAL : SDK::GUI::Color::WHITE)
-        : SDK::GUI::Color::GRAY;
+    touchgfx::TypedTextId fontId;
+    touchgfx::colortype   color;
+    if (isCenter) {
+        // Centre: SemiBold 60 when active (teal), Light 60 when not (white).
+        fontId = mActive ? T_TMP_SEMIBOLD_60 : T_TMP_LIGHT_60;
+        color  = mActive ? SDK::GUI::Color::TEAL : SDK::GUI::Color::WHITE;
+    } else {
+        fontId = mediumFontFor(absD);
+        color  = SDK::GUI::Color::GRAY;
+    }
 
     touchgfx::Unicode::snprintf(mBuffers[slot], kBufSize, "%02d", value);
     row.setWildcard(mBuffers[slot]);
-    row.setTypedText(touchgfx::TypedText(fontFor(absD)));   // centre-aligned digits
+    row.setTypedText(touchgfx::TypedText(fontId));   // centre-aligned digits
     row.setColor(color);
 
-    // Full-column-width box centres the digits horizontally; the baseline is
-    // placed so the digit's cap box centres vertically on centerY.
+    // Full-column-width box centres the digits horizontally; the whole box is
+    // then nudged along the arc toward the screen centre.
     row.setPosition(mX, 0, mWidth, kSlotBoxH);
     row.resizeHeightToCurrentText();
     row.setWidth(mWidth);
+    row.setX(static_cast<int16_t>(mX + curveOffset(absD) * mCurveDir));
 
+    // Baseline placed so the digit's cap box centres vertically on centerY.
     const touchgfx::Font*      font = row.getTypedText().getFont();
     const touchgfx::GlyphNode* zero = (font != nullptr) ? font->getGlyph('0') : nullptr;
     const int16_t digitH = (zero != nullptr) ? zero->height()

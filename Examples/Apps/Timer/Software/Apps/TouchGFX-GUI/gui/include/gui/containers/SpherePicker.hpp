@@ -68,8 +68,9 @@ private:
     static const uint16_t             kBufSize = 4;      // "00" + NUL + slack
     touchgfx::Unicode::UnicodeChar    mBuffers[kVisible][kBufSize];
 
-    int16_t mX      = 0;
-    int16_t mWidth  = 120;
+    int16_t mX        = 0;
+    int16_t mWidth    = 120;
+    int16_t mCurveDir = 0;   ///< +1/-1: rows curve toward the screen centre; 0 = straight
 
     int16_t mMax    = 59;
     int16_t mStep   = 1;

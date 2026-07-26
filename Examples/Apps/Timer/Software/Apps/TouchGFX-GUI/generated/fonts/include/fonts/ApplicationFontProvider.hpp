@@ -21,12 +21,16 @@ struct Typography
     static const touchgfx::FontId POPPINS_SEMIBOLD_25 = 5;
     static const touchgfx::FontId POPPINS_SEMIBOLD_30 = 6;
     static const touchgfx::FontId POPPINS_MEDIUM_18 = 7;
-    static const touchgfx::FontId POPPINS_SEMIBOLD_35 = 8;
-    static const touchgfx::FontId POPPINS_SEMIBOLD_40 = 9;
-    static const touchgfx::FontId POPPINS_SEMIBOLD_60 = 10;
-    static const touchgfx::FontId POPPINS_ITALIC_18 = 11;
-    static const touchgfx::FontId POPPINS_ITALIC_20 = 12;
-    static const touchgfx::FontId POPPINS_LIGHT_60 = 13;
+    static const touchgfx::FontId POPPINS_MEDIUM_50 = 8;
+    static const touchgfx::FontId POPPINS_MEDIUM_40 = 9;
+    static const touchgfx::FontId POPPINS_MEDIUM_32 = 10;
+    static const touchgfx::FontId POPPINS_MEDIUM_25 = 11;
+    static const touchgfx::FontId POPPINS_SEMIBOLD_35 = 12;
+    static const touchgfx::FontId POPPINS_SEMIBOLD_40 = 13;
+    static const touchgfx::FontId POPPINS_SEMIBOLD_60 = 14;
+    static const touchgfx::FontId POPPINS_ITALIC_18 = 15;
+    static const touchgfx::FontId POPPINS_ITALIC_20 = 16;
+    static const touchgfx::FontId POPPINS_LIGHT_60 = 17;
 };
 
 struct TypographyFontIndex
@@ -39,13 +43,17 @@ struct TypographyFontIndex
     static const touchgfx::FontId POPPINS_SEMIBOLD_25 = 5; // Poppins_SemiBold_25_2bpp
     static const touchgfx::FontId POPPINS_SEMIBOLD_30 = 6; // Poppins_SemiBold_30_2bpp
     static const touchgfx::FontId POPPINS_MEDIUM_18 = 7;   // Poppins_Medium_18_2bpp
-    static const touchgfx::FontId POPPINS_SEMIBOLD_35 = 8; // Poppins_SemiBold_35_2bpp
-    static const touchgfx::FontId POPPINS_SEMIBOLD_40 = 9; // Poppins_SemiBold_40_2bpp
-    static const touchgfx::FontId POPPINS_SEMIBOLD_60 = 10; // Poppins_SemiBold_60_2bpp
-    static const touchgfx::FontId POPPINS_ITALIC_18 = 11;   // Poppins_Italic_18_2bpp
-    static const touchgfx::FontId POPPINS_ITALIC_20 = 12;   // Poppins_Italic_20_2bpp
-    static const touchgfx::FontId POPPINS_LIGHT_60 = 13;    // Poppins_Light_60_2bpp
-    static const uint16_t NUMBER_OF_FONTS = 14;
+    static const touchgfx::FontId POPPINS_MEDIUM_50 = 8;   // Poppins_Medium_50_2bpp
+    static const touchgfx::FontId POPPINS_MEDIUM_40 = 9;   // Poppins_Medium_40_2bpp
+    static const touchgfx::FontId POPPINS_MEDIUM_32 = 10;   // Poppins_Medium_32_2bpp
+    static const touchgfx::FontId POPPINS_MEDIUM_25 = 11;   // Poppins_Medium_25_2bpp
+    static const touchgfx::FontId POPPINS_SEMIBOLD_35 = 12; // Poppins_SemiBold_35_2bpp
+    static const touchgfx::FontId POPPINS_SEMIBOLD_40 = 13; // Poppins_SemiBold_40_2bpp
+    static const touchgfx::FontId POPPINS_SEMIBOLD_60 = 14; // Poppins_SemiBold_60_2bpp
+    static const touchgfx::FontId POPPINS_ITALIC_18 = 15;   // Poppins_Italic_18_2bpp
+    static const touchgfx::FontId POPPINS_ITALIC_20 = 16;   // Poppins_Italic_20_2bpp
+    static const touchgfx::FontId POPPINS_LIGHT_60 = 17;    // Poppins_Light_60_2bpp
+    static const uint16_t NUMBER_OF_FONTS = 18;
 };
 
 class ApplicationFontProvider : public touchgfx::FontProvider

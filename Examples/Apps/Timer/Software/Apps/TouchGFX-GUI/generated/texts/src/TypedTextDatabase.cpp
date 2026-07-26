@@ -13,6 +13,10 @@ extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_18_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_25_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_30_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Medium_18_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Medium_50_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Medium_40_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Medium_32_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Medium_25_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_35_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_40_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_60_2bpp();
@@ -29,6 +33,10 @@ const touchgfx::Font* touchgfx_fonts[] = {
     &(getFont_Poppins_SemiBold_25_2bpp()),
     &(getFont_Poppins_SemiBold_30_2bpp()),
     &(getFont_Poppins_Medium_18_2bpp()),
+    &(getFont_Poppins_Medium_50_2bpp()),
+    &(getFont_Poppins_Medium_40_2bpp()),
+    &(getFont_Poppins_Medium_32_2bpp()),
+    &(getFont_Poppins_Medium_25_2bpp()),
     &(getFont_Poppins_SemiBold_35_2bpp()),
     &(getFont_Poppins_SemiBold_40_2bpp()),
     &(getFont_Poppins_SemiBold_60_2bpp()),
@@ -42,12 +50,12 @@ extern const touchgfx::TypedText::TypedTextData* const typedTextDatabaseArray[];
 
 TEXT_LOCATION_FLASH_PRAGMA
 const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCATION_FLASH_ATTRIBUTE = {
-    { 11, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
-    { 11, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 11, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
-    { 12, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
-    { 12, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 12, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 15, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 16, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 16, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 16, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 1, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
     { 1, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 1, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
@@ -62,18 +70,22 @@ const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCAT
     { 6, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 6, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 7, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
-    { 7, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 7, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 8, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
-    { 8, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 8, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 9, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
     { 10, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
-    { 10, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 10, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 11, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 7, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 7, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 12, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 12, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 12, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 13, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
-    { 13, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 13, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 14, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 14, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 14, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::CENTER, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::RIGHT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
@@ -109,14 +121,14 @@ const touchgfx::TypedText::TypedTextData typedText_database_DEFAULT[] TEXT_LOCAT
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 13, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 13, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 13, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 10, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 8, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 10, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 8, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
-    { 10, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 17, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 14, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 12, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 14, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 12, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
+    { 14, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR },
     { 0, touchgfx::LEFT, touchgfx::TEXT_DIRECTION_LTR }
 };
 
@@ -177,22 +189,34 @@ void resetFont(touchgfx::FontId fontId)
         touchgfx_fonts[7] = &(getFont_Poppins_Medium_18_2bpp());
         break;
     case 8:
-        touchgfx_fonts[8] = &(getFont_Poppins_SemiBold_35_2bpp());
+        touchgfx_fonts[8] = &(getFont_Poppins_Medium_50_2bpp());
         break;
     case 9:
-        touchgfx_fonts[9] = &(getFont_Poppins_SemiBold_40_2bpp());
+        touchgfx_fonts[9] = &(getFont_Poppins_Medium_40_2bpp());
         break;
     case 10:
-        touchgfx_fonts[10] = &(getFont_Poppins_SemiBold_60_2bpp());
+        touchgfx_fonts[10] = &(getFont_Poppins_Medium_32_2bpp());
         break;
     case 11:
-        touchgfx_fonts[11] = &(getFont_Poppins_Italic_18_2bpp());
+        touchgfx_fonts[11] = &(getFont_Poppins_Medium_25_2bpp());
         break;
     case 12:
-        touchgfx_fonts[12] = &(getFont_Poppins_Italic_20_2bpp());
+        touchgfx_fonts[12] = &(getFont_Poppins_SemiBold_35_2bpp());
         break;
     case 13:
-        touchgfx_fonts[13] = &(getFont_Poppins_Light_60_2bpp());
+        touchgfx_fonts[13] = &(getFont_Poppins_SemiBold_40_2bpp());
+        break;
+    case 14:
+        touchgfx_fonts[14] = &(getFont_Poppins_SemiBold_60_2bpp());
+        break;
+    case 15:
+        touchgfx_fonts[15] = &(getFont_Poppins_Italic_18_2bpp());
+        break;
+    case 16:
+        touchgfx_fonts[16] = &(getFont_Poppins_Italic_20_2bpp());
+        break;
+    case 17:
+        touchgfx_fonts[17] = &(getFont_Poppins_Light_60_2bpp());
         break;
     }
 }
