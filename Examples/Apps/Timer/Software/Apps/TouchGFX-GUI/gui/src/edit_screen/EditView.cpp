@@ -11,6 +11,13 @@ static constexpr int16_t kSecsStep = 1;
 static constexpr int16_t kMinsMax  = 99;
 static constexpr int16_t kSecsMax  = 59;
 
+// Hold-to-repeat timing (GUI ticks). A held button starts auto-scrolling after
+// kHoldStart, then repeats every kRepeatSlow ticks and speeds up one tick per
+// step down to kRepeatFast, so scanning a long way ramps up smoothly.
+static constexpr uint32_t kHoldStart  = SDK::Utils::secToTicks(1, App::Config::kFrameRate);
+static constexpr int16_t  kRepeatSlow = 4;
+static constexpr int16_t  kRepeatFast = 1;
+
 EditView::EditView()
 {
 }
@@ -86,32 +93,92 @@ void EditView::confirm()
     application().gotoAlertScreenNoTransition();
 }
 
-void EditView::handleKeyEvent(uint8_t key)
+void EditView::scrollActive(bool forward, bool snap)
 {
     SpherePicker& active = (mStep == STEP_MINS) ? mMins : mSecs;
-
-    if (key == SDK::GUI::Button::L1) {
-        active.selectPrev();
-        syncConfirmButton();
-    }
-    else if (key == SDK::GUI::Button::L2) {
+    if (forward) {
         active.selectNext();
-        syncConfirmButton();
+    } else {
+        active.selectPrev();
     }
-    else if (key == SDK::GUI::Button::R1) {
+    if (snap) {
+        active.setValue(active.getValue());   // pin the display to the new value
+    }
+    syncConfirmButton();
+}
+
+void EditView::handleKeyEvent(uint8_t key)
+{
+    switch (key) {
+    // Click: a single step (a short tap that never becomes a hold).
+    case SDK::GUI::Button::L1:
+        scrollActive(false);
+        break;
+    case SDK::GUI::Button::L2:
+        scrollActive(true);
+        break;
+
+    // Press/release bracket a hold; the tick handler does the repeating.
+    case SDK::GUI::Button::L1_PRESS:
+        mHeldDir = SDK::GUI::Button::L1;
+        mHoldTicks = 0;
+        break;
+    case SDK::GUI::Button::L2_PRESS:
+        mHeldDir = SDK::GUI::Button::L2;
+        mHoldTicks = 0;
+        break;
+    case SDK::GUI::Button::L1_RELEASE:
+    case SDK::GUI::Button::L2_RELEASE:
+        mHeldDir = 0;
+        break;
+
+    case SDK::GUI::Button::R1:
+        mHeldDir = 0;
         if (mStep == STEP_MINS) {
             mStep = STEP_SECS;
             updateActive();
         } else if (mMins.getValue() * 60 + mSecs.getValue() > 0) {
             confirm();   // 00:00 is not startable -- R1 is hidden and ignored
         }
-    }
-    else if (key == SDK::GUI::Button::R2) {
+        break;
+    case SDK::GUI::Button::R2:
+        mHeldDir = 0;
         if (mStep == STEP_SECS) {
             mStep = STEP_MINS;
             updateActive();
         } else {
             application().gotoMainScreenNoTransition();
         }
+        break;
+
+    default:
+        break;
+    }
+}
+
+void EditView::handleTickEvent()
+{
+    EditViewBase::handleTickEvent();
+
+    if (mHeldDir == 0) {
+        return;
+    }
+
+    // Wait out the hold threshold; a tap releases before this and never repeats.
+    if (++mHoldTicks < kHoldStart) {
+        return;
+    }
+    if (mHoldTicks == kHoldStart) {
+        mRepeatInterval  = kRepeatSlow;
+        mRepeatCountdown = 0;   // fire the first auto-scroll straight away
+    }
+
+    if (--mRepeatCountdown > 0) {
+        return;
+    }
+    scrollActive(mHeldDir == SDK::GUI::Button::L2, true);   // snap: fast + no overshoot
+    mRepeatCountdown = mRepeatInterval;
+    if (mRepeatInterval > kRepeatFast) {
+        --mRepeatInterval;   // accelerate toward the fastest step
     }
 }
