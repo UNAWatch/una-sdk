@@ -26,6 +26,9 @@ public:
     /** @brief Start the countdown for the current edit timer. */
     void startTimer();
 
+    /** @brief True when the timer being acted on is a preset (not deletable). */
+    bool isEditPreset() const { return model->isPreset(model->getEditTimer()); }
+
 private:
     MenuPresenter();
 

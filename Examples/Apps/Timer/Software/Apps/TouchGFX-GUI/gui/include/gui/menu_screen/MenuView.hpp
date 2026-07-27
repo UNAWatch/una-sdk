@@ -32,10 +32,10 @@ private:
     void confirm();
     void onOrbitAnimationEnded();
     /**
-     * @brief Refresh Start-only accents: the play glyph and a teal R1 arc when
-     * Start is centred, hidden glyph and a white R1 otherwise.
+     * @brief Refresh per-action accents: the play glyph + teal R1 on Start, and
+     * a grey pill when Delete is centred on a (non-deletable) preset.
      */
-    void updateStartVisuals();
+    void syncActionVisuals();
 
     static const int16_t kCount = 3;   ///< Start / Edit / Delete.
 

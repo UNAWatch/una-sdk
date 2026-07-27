@@ -1,6 +1,7 @@
 #include <gui/menu_screen/MenuView.hpp>
 #include <SDK/GUI/Button.hpp>
 #include <SDK/GUI/Color.hpp>
+#include <touchgfx/Color.hpp>
 #include <Timer.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
 
@@ -29,7 +30,7 @@ void MenuView::setupScreen()
     buttons.setL1(Buttons::NONE);
     buttons.setL2(Buttons::NONE);
     buttons.setR2(Buttons::WHITE);
-    // R1 colour is set per-selection by updateStartVisuals().
+    // R1 colour + pill are set per-selection by syncActionVisuals().
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
     scrollIndicator.setCount(kCount);
@@ -54,7 +55,7 @@ void MenuView::setupScreen()
     orbitMenu.setItems(entries, kCount);
     orbitMenu.setSelected(0);
     orbitMenu.setAnimationEndedCallback(mAnimEndedCb);
-    updateStartVisuals();
+    syncActionVisuals();
 }
 
 void MenuView::tearDownScreen()
@@ -91,15 +92,28 @@ void MenuView::handleKeyEvent(uint8_t key)
 
 void MenuView::onOrbitAnimationEnded()
 {
-    updateStartVisuals();
+    syncActionVisuals();
 }
 
-void MenuView::updateStartVisuals()
+void MenuView::syncActionVisuals()
 {
-    const bool onStart = orbitMenu.getSelected() == Timer::ACTION_START;
+    const int16_t sel = orbitMenu.getSelected();
+    const bool onStart = sel == Timer::ACTION_START;
+
+    // A preset cannot be deleted; keep the menu geometry but grey the pill and
+    // hide R1 (also ignored in confirm()) while Delete is centred on a preset.
+    const bool deleteDisabled =
+        (sel == Timer::ACTION_DELETE) && presenter->isEditPreset();
+
     playIcon.setVisible(onStart);
     playIcon.invalidate();
-    buttons.setR1(onStart ? Buttons::TEAL : Buttons::WHITE);
+    buttons.setR1(deleteDisabled ? Buttons::NONE
+                                 : (onStart ? Buttons::TEAL : Buttons::WHITE));
+
+    pillPainter.setColor(deleteDisabled
+        ? touchgfx::Color::getColorFromRGB(64, 64, 64)   // #404040 -- disabled
+        : touchgfx::Color::getColorFromRGB(0, 64, 64));   // teal
+    pill.invalidate();
 }
 
 void MenuView::confirm()
@@ -113,7 +127,9 @@ void MenuView::confirm()
         application().gotoEditScreenNoTransition();
         break;
     case Timer::ACTION_DELETE:
-        application().gotoDeletedScreenNoTransition();
+        if (!presenter->isEditPreset()) {   // presets are not deletable
+            application().gotoDeletedScreenNoTransition();
+        }
         break;
     default:
         break;

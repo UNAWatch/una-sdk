@@ -79,6 +79,9 @@ public:
     /** @brief Fixed preset durations shown at the top of the Main list. */
     const std::vector<Timer>& getPresets() const { return mPresets; }
 
+    /** @brief True when the timer exactly matches a preset (duration + effect). */
+    bool isPreset(const Timer& timer) const;
+
     const std::vector<Timer>& getRecents() const { return mRecents; }
 
     /** @brief Add a manually entered timer to recents (dedup, cap) and persist. */
@@ -105,7 +108,6 @@ private:
     void setCapabilities();
     bool isAnyKeyPressed(uint8_t key) const;
     void buildPresets();
-    bool isPreset(const Timer& timer) const;
 
     // -- GUI state ------------------------------------------------------------
 

@@ -66,6 +66,17 @@ void EditView::updateActive()
     secsHdr.setColor(minsActive ? SDK::GUI::Color::WHITE : SDK::GUI::Color::TEAL);
     minsHdr.invalidate();
     secsHdr.invalidate();
+
+    syncConfirmButton();
+}
+
+void EditView::syncConfirmButton()
+{
+    // R1 advances on the Mins step, and confirms on the Secs step -- but a
+    // 00:00 timer cannot be started, so hide (and ignore) the confirm then.
+    const bool isZero = (mMins.getValue() * 60 + mSecs.getValue()) == 0;
+    const bool showR1 = (mStep == STEP_MINS) || !isZero;
+    buttons.setR1(showR1 ? Buttons::AMBER : Buttons::NONE);
 }
 
 void EditView::confirm()
@@ -81,16 +92,18 @@ void EditView::handleKeyEvent(uint8_t key)
 
     if (key == SDK::GUI::Button::L1) {
         active.selectPrev();
+        syncConfirmButton();
     }
     else if (key == SDK::GUI::Button::L2) {
         active.selectNext();
+        syncConfirmButton();
     }
     else if (key == SDK::GUI::Button::R1) {
         if (mStep == STEP_MINS) {
             mStep = STEP_SECS;
             updateActive();
-        } else {
-            confirm();
+        } else if (mMins.getValue() * 60 + mSecs.getValue() > 0) {
+            confirm();   // 00:00 is not startable -- R1 is hidden and ignored
         }
     }
     else if (key == SDK::GUI::Button::R2) {

@@ -30,6 +30,7 @@ private:
     enum Step { STEP_MINS, STEP_SECS };
 
     void updateActive();
+    void syncConfirmButton();   ///< Hide R1 when the duration is 00:00.
     void confirm();
 
     Step         mStep = STEP_MINS;
