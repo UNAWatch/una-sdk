@@ -23,6 +23,9 @@ public:
     virtual void deactivate();
     virtual ~FiredPresenter() {}
 
+    /** @brief The alert stays up until acknowledged -- do not close on idle. */
+    virtual void onIdleTimeout() override {}
+
     /** @brief Silence the alert and re-arm the same countdown, paused. */
     void repeat() { model->repeatTimer(); }
     /** @brief Silence the alert and end the countdown. */

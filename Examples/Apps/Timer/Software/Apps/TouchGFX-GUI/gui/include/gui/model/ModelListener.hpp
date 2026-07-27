@@ -17,7 +17,11 @@ public:
         model = m;
     }
 
-    virtual void onIdleTimeout() {}
+    /**
+     * @brief Idle timeout elapsed. By default the app closes; screens that must
+     * stay up (Running, Fired) or dismiss themselves (Deleted) override this.
+     */
+    virtual void onIdleTimeout() { model->exitApp(); }
 
     /** @brief The countdown state changed (start / pause / resume / reset / stop). */
     virtual void onStateChanged() {}

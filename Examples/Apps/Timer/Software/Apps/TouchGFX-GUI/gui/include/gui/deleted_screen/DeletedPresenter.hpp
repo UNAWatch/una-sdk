@@ -9,7 +9,7 @@ using namespace touchgfx;
 class DeletedView;
 
 /**
- * @brief Presenter for the Deleted screen -- skeleton placeholder.
+ * @brief Presenter for the Deleted screen (brief confirmation).
  */
 class DeletedPresenter : public touchgfx::Presenter, public ModelListener
 {
@@ -19,6 +19,9 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual ~DeletedPresenter() {}
+
+    /** @brief The screen dismisses itself to Main -- do not close on idle. */
+    virtual void onIdleTimeout() override {}
 
 private:
     DeletedPresenter();

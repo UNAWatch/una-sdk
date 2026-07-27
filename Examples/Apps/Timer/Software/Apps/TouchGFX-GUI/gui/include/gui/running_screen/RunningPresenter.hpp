@@ -27,6 +27,9 @@ public:
     /** @brief Countdown state echoed by the service changed -- re-sync the view. */
     virtual void onStateChanged() override;
 
+    /** @brief Keep the countdown on screen on idle rather than closing the app. */
+    virtual void onIdleTimeout() override {}
+
     // -- Live snapshot read by the view --------------------------------------
     TimerState getState()       const { return model->getState(); }
     uint32_t   getRemainingMs() const { return model->getRemainingMs(); }
