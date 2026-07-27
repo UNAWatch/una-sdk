@@ -159,7 +159,7 @@ void Model::setCapabilities()
 {
     auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestSetCapabilities>();
     if (msg) {
-        msg->enMusicControl      = true;
+        msg->enMusicControl      = false;
         msg->enUsbChargingScreen = true;
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
@@ -226,10 +226,11 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
 
         case CustomMessage::TIMER_FIRED: {
             auto* m = static_cast<CustomMessage::TimerFired*>(msg);
-            mState       = TimerState::FIRED;
-            mRemainingMs = 0;
-            mDurationSec = m->durationSec;
-            mEffect      = m->effect;
+            mState                = TimerState::FIRED;
+            mRemainingMs          = 0;
+            mDurationSec          = m->durationSec;
+            mEffect               = m->effect;
+            mFiredFromBackground  = m->background;
             modelListener->onFired(Timer{ m->durationSec, m->effect });
         } break;
 

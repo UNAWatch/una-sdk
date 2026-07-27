@@ -8,6 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/fired_screen/FiredPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <gui/containers/Buttons.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <gui/containers/Title.hpp>
 
 class FiredViewBase : public touchgfx::View<FiredPresenter>
@@ -27,7 +30,22 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    Buttons buttons;
+    touchgfx::Image icon;
+    touchgfx::TextAreaWithOneWildcard timeText;
+    touchgfx::TextAreaWithOneWildcard doneText;
+    touchgfx::TextAreaWithOneWildcard repeatText;
     Title title;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t TIMETEXT_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar timeTextBuffer[TIMETEXT_SIZE];
+    static const uint16_t DONETEXT_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar doneTextBuffer[DONETEXT_SIZE];
+    static const uint16_t REPEATTEXT_SIZE = 10;
+    touchgfx::Unicode::UnicodeChar repeatTextBuffer[REPEATTEXT_SIZE];
 
 private:
 

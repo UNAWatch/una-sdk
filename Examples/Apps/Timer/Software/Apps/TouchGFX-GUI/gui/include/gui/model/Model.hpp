@@ -65,6 +65,9 @@ public:
     /** @brief Remaining countdown in milliseconds, extrapolated locally. */
     uint32_t getRemainingMs() const;
 
+    /** @brief True when the last fire happened while the GUI was closed. */
+    bool firedFromBackground() const { return mFiredFromBackground; }
+
     // -- Selection (Main -> Edit -> Alert -> Menu flow) -----------------------
 
     void         setEditTimer(const Timer& t) { mEditTimer = t; }
@@ -112,6 +115,7 @@ private:
     // -- Countdown snapshot (mirrors the service) -----------------------------
 
     TimerState    mState       = TimerState::IDLE;
+    bool          mFiredFromBackground = false;
     uint32_t      mEndTick     = 0;
     uint32_t      mRemainingMs = 0;
     uint16_t      mDurationSec = 0;

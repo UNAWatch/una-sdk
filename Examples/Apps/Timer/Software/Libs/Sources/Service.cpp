@@ -105,7 +105,7 @@ void Service::onStartGUI()
 
     // Deliver a fire that happened while the GUI was closed.
     if (mPendingFired) {
-        mGuiSender.fired(mPendingTimer);
+        mGuiSender.fired(mPendingTimer, true);   // GUI was closed -> background fire
         mPendingFired = false;
     }
 }
@@ -249,7 +249,7 @@ void Service::onFired(const Timer& timer)
     playEffect(timer.effect);
 
     if (mGuiStarted) {
-        mGuiSender.fired(timer);
+        mGuiSender.fired(timer, false);   // GUI is up -> fired in-app
     } else {
         // Launch the GUI, then deliver the fire once it signals it is running.
         auto *msg = mKernel.comm.allocateMessage<SDK::Message::RequestAppRunGui>();

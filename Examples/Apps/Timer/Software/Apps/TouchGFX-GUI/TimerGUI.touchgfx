@@ -508,8 +508,92 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "X": 0,
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 97,
+            "Y": 82,
+            "Width": 55,
+            "Height": 60,
+            "LockPosition": true,
+            "RelativeFilename": "Icon_Timer.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timeText",
+            "X": 12,
+            "Y": 98,
+            "Width": 90,
+            "Height": 34,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_25",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "doneText",
+            "X": 150,
+            "Y": 58,
+            "Width": 80,
+            "Height": 26,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_20",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "repeatText",
+            "X": 135,
+            "Y": 155,
+            "Width": 95,
+            "Height": 26,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_20",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
+            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,

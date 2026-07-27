@@ -102,10 +102,12 @@ namespace CustomMessage {
     struct TimerFired : public SDK::MessageBase {
         uint16_t      durationSec;
         Timer::Effect effect;
+        bool          background;   ///< true = fired while the GUI was closed.
         TimerFired()
             : SDK::MessageBase(TIMER_FIRED)
             , durationSec(0)
             , effect(Timer::EFFECT_BEEP_AND_VIBRO)
+            , background(false)
         {}
     };
 
@@ -198,13 +200,14 @@ public:
         return status;
     }
 
-    bool fired(const Timer& timer)
+    bool fired(const Timer& timer, bool background)
     {
         bool status = false;
         auto *msg = mKernel.comm.allocateMessage<TimerFired>();
         if (msg) {
             msg->durationSec = timer.durationSec;
             msg->effect      = timer.effect;
+            msg->background  = background;
             status = mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }

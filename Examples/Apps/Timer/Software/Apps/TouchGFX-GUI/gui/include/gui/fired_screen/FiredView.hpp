@@ -5,18 +5,22 @@
 #include <gui/fired_screen/FiredPresenter.hpp>
 
 /**
- * @brief Fired screen -- skeleton placeholder.
+ * @brief Fired screen: the countdown reached zero and the alert is sounding.
  *
- * Renders the app title and the screen name. Real widgets and logic are
- * added in the next stage.
+ * An amber "Timer" label with two static actions: Repeat (R1) silences the
+ * alert and restarts the countdown (-> Running); Stop (R2) silences it and
+ * returns to Main.
  */
 class FiredView : public FiredViewBase
 {
 public:
-    FiredView() {}
+    FiredView();
     virtual ~FiredView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+
+protected:
+    virtual void handleKeyEvent(uint8_t key) override;
 };
 
 #endif // FIREDVIEW_HPP

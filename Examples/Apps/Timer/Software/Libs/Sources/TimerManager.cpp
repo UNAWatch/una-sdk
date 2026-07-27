@@ -100,9 +100,12 @@ void TimerManager::stop()
     LOG_INFO("Stop\n");
 }
 
-void TimerManager::repeat(uint32_t nowMs)
+void TimerManager::repeat(uint32_t /*nowMs*/)
 {
-    arm(mDurationSec, mEffect, nowMs);
+    // Re-arm at the full duration but paused, so the user resumes it from the
+    // Running screen when ready.
+    mRemainingMs = static_cast<uint32_t>(mDurationSec) * 1000u;
+    mState       = TimerState::PAUSED;
     LOG_INFO("Repeat %u s\n", static_cast<unsigned>(mDurationSec));
 }
 

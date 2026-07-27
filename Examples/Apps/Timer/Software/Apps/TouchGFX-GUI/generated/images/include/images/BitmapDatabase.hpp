@@ -14,8 +14,9 @@ const uint16_t BITMAP_ICON_PAUSE_ID = 4;
 const uint16_t BITMAP_ICON_PLAY_ID = 5;
 const uint16_t BITMAP_ICON_RESET_ID = 6;
 const uint16_t BITMAP_ICON_STOP_ID = 7;
-const uint16_t BITMAP_PLAY_22X24_ID = 8;
-const uint16_t BITMAP_TICKAMBER_22X17_ID = 9;
+const uint16_t BITMAP_ICON_TIMER_ID = 8;
+const uint16_t BITMAP_PLAY_22X24_ID = 9;
+const uint16_t BITMAP_TICKAMBER_22X17_ID = 10;
 
 namespace BitmapDatabase
 {

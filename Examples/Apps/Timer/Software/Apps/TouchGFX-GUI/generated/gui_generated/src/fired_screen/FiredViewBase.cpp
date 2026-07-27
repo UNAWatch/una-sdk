@@ -4,6 +4,8 @@
 #include <gui_generated/fired_screen/FiredViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
+#include <images/BitmapDatabase.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
 FiredViewBase::FiredViewBase()
 {
@@ -12,6 +14,37 @@ FiredViewBase::FiredViewBase()
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    buttons.setXY(0, 47);
+    add(buttons);
+
+    icon.setXY(97, 82);
+    icon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_TIMER_ID));
+    add(icon);
+
+    timeText.setPosition(12, 98, 90, 34);
+    timeText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    timeText.setLinespacing(0);
+    Unicode::snprintf(timeTextBuffer, TIMETEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    timeText.setWildcard(timeTextBuffer);
+    timeText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
+    add(timeText);
+
+    doneText.setPosition(150, 58, 80, 26);
+    doneText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    doneText.setLinespacing(0);
+    Unicode::snprintf(doneTextBuffer, DONETEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    doneText.setWildcard(doneTextBuffer);
+    doneText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20));
+    add(doneText);
+
+    repeatText.setPosition(135, 155, 95, 26);
+    repeatText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    repeatText.setLinespacing(0);
+    Unicode::snprintf(repeatTextBuffer, REPEATTEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    repeatText.setWildcard(repeatTextBuffer);
+    repeatText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20));
+    add(repeatText);
 
     title.setXY(50, 0);
     add(title);
@@ -24,6 +57,7 @@ FiredViewBase::~FiredViewBase()
 
 void FiredViewBase::setupScreen()
 {
+    buttons.initialize();
     title.initialize();
     transitionBegins();
 }
