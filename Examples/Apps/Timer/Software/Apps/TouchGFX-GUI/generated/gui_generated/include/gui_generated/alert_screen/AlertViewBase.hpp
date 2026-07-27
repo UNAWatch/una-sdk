@@ -41,12 +41,6 @@ protected:
     Buttons buttons;
     Title title;
 
-    /*
-     * Wildcard Buffers
-     */
-    static const uint16_t ALERTLABEL_SIZE = 8;
-    touchgfx::Unicode::UnicodeChar alertLabelBuffer[ALERTLABEL_SIZE];
-
 private:
 
     /*

@@ -24,7 +24,7 @@ void AlertView::setupScreen()
 {
     AlertViewBase::setupScreen();
 
-    title.set("TIMER");
+    title.set(T_TEXT_TIMER_UC);
 
     // Side scroll indicator replaces the left buttons.
     buttons.setL1(Buttons::NONE);
@@ -35,9 +35,6 @@ void AlertView::setupScreen()
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
     scrollIndicator.setCount(kCount);
     scrollIndicator.setActiveId(0);
-
-    touchgfx::Unicode::snprintf(alertLabelBuffer, ALERTLABEL_SIZE, "Alert");
-    alertLabel.setWildcard(alertLabelBuffer);
 
     orbitMenu.setTiers(kAlertTiers,
                        static_cast<int16_t>(sizeof(kAlertTiers) / sizeof(kAlertTiers[0])));

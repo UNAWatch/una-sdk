@@ -208,6 +208,30 @@
       <Text Id="TEXT_NEW_TEXT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">New Text</Translation>
       </Text>
+      <Text Id="TEXT_TIMER_UC" Alignment="Center" TypographyId="Poppins_Italic_18">
+        <Translation Language="GB">TIMER</Translation>
+      </Text>
+      <Text Id="TEXT_SET_TIMER_UC" Alignment="Center" TypographyId="Poppins_Italic_18">
+        <Translation Language="GB">SET TIMER</Translation>
+      </Text>
+      <Text Id="TEXT_RECENT_UC" Alignment="Center" TypographyId="Poppins_Italic_18">
+        <Translation Language="GB">RECENT</Translation>
+      </Text>
+      <Text Id="TEXT_RESET" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Reset</Translation>
+      </Text>
+      <Text Id="TEXT_DONE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Done</Translation>
+      </Text>
+      <Text Id="TEXT_MINS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Mins.</Translation>
+      </Text>
+      <Text Id="TEXT_SECS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Secs.</Translation>
+      </Text>
+      <Text Id="TEXT_COLON" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">:</Translation>
+      </Text>
     </TextGroup>
     <TextGroup Id="Unsorted">
       <Text Id="__SingleUse_Z0MH" Alignment="Left" TypographyId="Poppins_Regular_18">

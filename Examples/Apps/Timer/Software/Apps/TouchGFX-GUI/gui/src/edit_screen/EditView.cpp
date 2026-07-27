@@ -1,4 +1,5 @@
 #include <gui/edit_screen/EditView.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 #include <SDK/GUI/Button.hpp>
 #include <SDK/GUI/Color.hpp>
 
@@ -18,19 +19,12 @@ void EditView::setupScreen()
 {
     EditViewBase::setupScreen();
 
-    title.set("SET TIMER");
+    title.set(T_TEXT_SET_TIMER_UC);
 
     buttons.setL1(Buttons::WHITE);
     buttons.setL2(Buttons::WHITE);
     buttons.setR1(Buttons::AMBER);
     buttons.setR2(Buttons::WHITE);
-
-    touchgfx::Unicode::snprintf(minsHdrBuffer, MINSHDR_SIZE, "Mins.");
-    minsHdr.setWildcard(minsHdrBuffer);
-    touchgfx::Unicode::snprintf(secsHdrBuffer, SECSHDR_SIZE, "Secs.");
-    secsHdr.setWildcard(secsHdrBuffer);
-    touchgfx::Unicode::snprintf(colonBuffer, COLON_SIZE, ":");
-    colon.setWildcard(colonBuffer);
 
     // Box reaches low enough that the second neighbour is fully drawn; the third
     // sits just past the bottom and slides up into view. Centre stays at y120.

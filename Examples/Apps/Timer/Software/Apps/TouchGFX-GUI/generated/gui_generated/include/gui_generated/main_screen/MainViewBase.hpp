@@ -39,12 +39,6 @@ protected:
     Buttons buttons;
     Title title;
 
-    /*
-     * Wildcard Buffers
-     */
-    static const uint16_t NEWTEXT_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar newTextBuffer[NEWTEXT_SIZE];
-
 private:
 
     /*

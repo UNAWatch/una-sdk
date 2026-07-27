@@ -45,8 +45,7 @@ RunningViewBase::RunningViewBase()
     resetLabel.setPosition(54, 161, 90, 22);
     resetLabel.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     resetLabel.setLinespacing(0);
-    Unicode::snprintf(resetLabelBuffer, RESETLABEL_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    resetLabel.setWildcard(resetLabelBuffer);
+    resetLabel.setWildcard(touchgfx::TypedText(T_TEXT_RESET).getText());
     resetLabel.setTypedText(touchgfx::TypedText(T_TMP_MEDIUM_18_L));
     add(resetLabel);
 

@@ -42,10 +42,6 @@ protected:
      */
     static const uint16_t TIMETEXT_SIZE = 8;
     touchgfx::Unicode::UnicodeChar timeTextBuffer[TIMETEXT_SIZE];
-    static const uint16_t DONETEXT_SIZE = 8;
-    touchgfx::Unicode::UnicodeChar doneTextBuffer[DONETEXT_SIZE];
-    static const uint16_t REPEATTEXT_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar repeatTextBuffer[REPEATTEXT_SIZE];
 
 private:
 

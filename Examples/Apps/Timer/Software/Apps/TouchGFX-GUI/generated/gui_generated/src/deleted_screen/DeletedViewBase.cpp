@@ -22,8 +22,7 @@ DeletedViewBase::DeletedViewBase()
     deletedLabel.setPosition(20, 140, 200, 34);
     deletedLabel.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     deletedLabel.setLinespacing(0);
-    Unicode::snprintf(deletedLabelBuffer, DELETEDLABEL_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    deletedLabel.setWildcard(deletedLabelBuffer);
+    deletedLabel.setWildcard(touchgfx::TypedText(T_TEXT_DELETED).getText());
     deletedLabel.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
     add(deletedLabel);
 

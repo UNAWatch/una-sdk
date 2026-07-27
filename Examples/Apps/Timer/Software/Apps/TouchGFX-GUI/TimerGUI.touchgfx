@@ -49,9 +49,7 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 10
+              "TextId": "TEXT_NEW"
             }
           },
           {
@@ -116,9 +114,7 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 8
+              "TextId": "TEXT_MINS"
             }
           },
           {
@@ -137,9 +133,7 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 8
+              "TextId": "TEXT_SECS"
             }
           },
           {
@@ -158,9 +152,7 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 4
+              "TextId": "TEXT_COLON"
             }
           },
           {
@@ -242,9 +234,7 @@
               "Green": 160
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 8
+              "TextId": "TEXT_ALERT"
             }
           },
           {
@@ -473,9 +463,7 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 8
+              "TextId": "TEXT_RESET"
             }
           },
           {
@@ -509,7 +497,6 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
-            "X": 0,
             "Y": 47,
             "Width": 240,
             "Height": 146,
@@ -550,12 +537,12 @@
           {
             "Type": "TextArea",
             "Name": "doneText",
-            "X": 150,
+            "X": 128,
             "Y": 58,
             "Width": 80,
             "Height": 26,
             "LockPosition": true,
-            "TextId": "TMP_SEMIBOLD_20",
+            "TextId": "TMP_SEMIBOLD_20_R",
             "TextRotation": "0",
             "Color": {
               "Red": 192,
@@ -563,20 +550,18 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 8
+              "TextId": "TEXT_DONE"
             }
           },
           {
             "Type": "TextArea",
             "Name": "repeatText",
-            "X": 135,
+            "X": 112,
             "Y": 155,
             "Width": 95,
             "Height": 26,
             "LockPosition": true,
-            "TextId": "TMP_SEMIBOLD_20",
+            "TextId": "TMP_SEMIBOLD_20_R",
             "TextRotation": "0",
             "Color": {
               "Red": 192,
@@ -584,16 +569,13 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 10
+              "TextId": "TEXT_REPEAT"
             }
           },
           {
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -644,9 +626,7 @@
               "Blue": 192
             },
             "Wildcard1": {
-              "TextId": "TEXT_NEW",
-              "UseBuffer": true,
-              "BufferSize": 10
+              "TextId": "TEXT_DELETED"
             }
           },
           {

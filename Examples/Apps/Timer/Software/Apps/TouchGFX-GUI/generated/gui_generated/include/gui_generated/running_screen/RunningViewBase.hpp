@@ -44,8 +44,6 @@ protected:
      */
     static const uint16_t TIMETEXT_SIZE = 8;
     touchgfx::Unicode::UnicodeChar timeTextBuffer[TIMETEXT_SIZE];
-    static const uint16_t RESETLABEL_SIZE = 8;
-    touchgfx::Unicode::UnicodeChar resetLabelBuffer[RESETLABEL_SIZE];
 
 private:
 

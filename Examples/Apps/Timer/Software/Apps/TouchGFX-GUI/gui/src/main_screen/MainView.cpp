@@ -1,4 +1,5 @@
 #include <gui/main_screen/MainView.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 #include <SDK/GUI/Button.hpp>
 
 #include <cstdio>
@@ -40,8 +41,6 @@ void MainView::setupScreen()
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
 
-    touchgfx::Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "New");
-    newText.setWildcard(newTextBuffer);
 }
 
 void MainView::tearDownScreen()
@@ -151,7 +150,7 @@ void MainView::syncView()
 
     const bool centeredRecent =
         sel >= 0 && sel < static_cast<int16_t>(mItems.size()) && mItems[sel].isRecent;
-    title.set(centeredRecent ? "RECENT" : "TIMER");
+    title.set(centeredRecent ? T_TEXT_RECENT_UC : T_TEXT_TIMER_UC);
 }
 
 void MainView::updateRecentLabel()

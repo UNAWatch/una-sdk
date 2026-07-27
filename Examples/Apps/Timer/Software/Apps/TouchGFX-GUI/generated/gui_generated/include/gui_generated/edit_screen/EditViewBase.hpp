@@ -35,16 +35,6 @@ protected:
     touchgfx::TextAreaWithOneWildcard colon;
     Title title;
 
-    /*
-     * Wildcard Buffers
-     */
-    static const uint16_t MINSHDR_SIZE = 8;
-    touchgfx::Unicode::UnicodeChar minsHdrBuffer[MINSHDR_SIZE];
-    static const uint16_t SECSHDR_SIZE = 8;
-    touchgfx::Unicode::UnicodeChar secsHdrBuffer[SECSHDR_SIZE];
-    static const uint16_t COLON_SIZE = 4;
-    touchgfx::Unicode::UnicodeChar colonBuffer[COLON_SIZE];
-
 private:
 
     /*

@@ -1,4 +1,5 @@
 #include <gui/deleted_screen/DeletedView.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
 // How long the confirmation stays up before returning to Main.
 static const uint16_t kHoldTicks = SDK::Utils::secToTicks(2, App::Config::kFrameRate);
@@ -12,10 +13,7 @@ void DeletedView::setupScreen()
 {
     DeletedViewBase::setupScreen();
 
-    title.set("TIMER");
-
-    touchgfx::Unicode::snprintf(deletedLabelBuffer, DELETEDLABEL_SIZE, "Deleted");
-    deletedLabel.setWildcard(deletedLabelBuffer);
+    title.set(T_TEXT_TIMER_UC);
 
     mDismissTimer.setDuration(kHoldTicks);
     mDismissTimer.setCallback(mDismissCb);

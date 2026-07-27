@@ -1,4 +1,5 @@
 #include <gui/running_screen/RunningView.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 #include <SDK/GUI/Button.hpp>
 
 RunningView::RunningView()
@@ -9,10 +10,7 @@ void RunningView::setupScreen()
 {
     RunningViewBase::setupScreen();
 
-    title.set("TIMER");
-
-    touchgfx::Unicode::snprintf(resetLabelBuffer, RESETLABEL_SIZE, "Reset");
-    resetLabel.setWildcard(resetLabelBuffer);
+    title.set(T_TEXT_TIMER_UC);
 
     updateTime();
     syncControls();
@@ -42,7 +40,6 @@ void RunningView::updateTime()
     const uint32_t sec = (presenter->getRemainingMs() + 999u) / 1000u;
     touchgfx::Unicode::snprintf(timeTextBuffer, TIMETEXT_SIZE, "%02u:%02u",
                                 sec / 60u, sec % 60u);
-    timeText.setWildcard(timeTextBuffer);
     timeText.invalidate();
 }
 

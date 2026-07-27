@@ -32,8 +32,7 @@ AlertViewBase::AlertViewBase()
     alertLabel.setPosition(80, 200, 80, 22);
     alertLabel.setColor(touchgfx::Color::getColorFromRGB(230, 160, 0));
     alertLabel.setLinespacing(0);
-    Unicode::snprintf(alertLabelBuffer, ALERTLABEL_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    alertLabel.setWildcard(alertLabelBuffer);
+    alertLabel.setWildcard(touchgfx::TypedText(T_TEXT_ALERT).getText());
     alertLabel.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_18));
     add(alertLabel);
 

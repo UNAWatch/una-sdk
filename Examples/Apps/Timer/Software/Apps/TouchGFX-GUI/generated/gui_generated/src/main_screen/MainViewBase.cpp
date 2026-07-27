@@ -28,8 +28,7 @@ MainViewBase::MainViewBase()
     newText.setPosition(60, 150, 120, 40);
     newText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     newText.setLinespacing(0);
-    Unicode::snprintf(newTextBuffer, NEWTEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    newText.setWildcard(newTextBuffer);
+    newText.setWildcard(touchgfx::TypedText(T_TEXT_NEW).getText());
     newText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_35));
     add(newText);
 

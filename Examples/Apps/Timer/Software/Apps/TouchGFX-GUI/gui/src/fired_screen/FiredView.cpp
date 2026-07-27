@@ -1,4 +1,5 @@
 #include <gui/fired_screen/FiredView.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 #include <SDK/GUI/Button.hpp>
 
 FiredView::FiredView()
@@ -9,18 +10,12 @@ void FiredView::setupScreen()
 {
     FiredViewBase::setupScreen();
 
-    title.set("TIMER");
+    title.set(T_TEXT_TIMER_UC);
 
     const uint16_t sec = presenter->getDurationSec();
     touchgfx::Unicode::snprintf(timeTextBuffer, TIMETEXT_SIZE, "%02u:%02u",
                                 sec / 60u, sec % 60u);
-    timeText.setWildcard(timeTextBuffer);
-
-    touchgfx::Unicode::snprintf(doneTextBuffer, DONETEXT_SIZE, "Done");
-    doneText.setWildcard(doneTextBuffer);
-
-    touchgfx::Unicode::snprintf(repeatTextBuffer, REPEATTEXT_SIZE, "Repeat");
-    repeatText.setWildcard(repeatTextBuffer);
+    timeText.invalidate();
 
     // Done (R1) amber, Repeat (R2) white; left buttons unused.
     buttons.setL1(Buttons::NONE);

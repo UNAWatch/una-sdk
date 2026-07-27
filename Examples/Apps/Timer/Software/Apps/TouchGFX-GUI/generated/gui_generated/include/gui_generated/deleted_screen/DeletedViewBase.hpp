@@ -33,12 +33,6 @@ protected:
     touchgfx::TextAreaWithOneWildcard deletedLabel;
     Title title;
 
-    /*
-     * Wildcard Buffers
-     */
-    static const uint16_t DELETEDLABEL_SIZE = 10;
-    touchgfx::Unicode::UnicodeChar deletedLabelBuffer[DELETEDLABEL_SIZE];
-
 private:
 
     /*

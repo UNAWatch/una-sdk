@@ -30,20 +30,18 @@ FiredViewBase::FiredViewBase()
     timeText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_25));
     add(timeText);
 
-    doneText.setPosition(150, 58, 80, 26);
+    doneText.setPosition(128, 58, 80, 26);
     doneText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     doneText.setLinespacing(0);
-    Unicode::snprintf(doneTextBuffer, DONETEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    doneText.setWildcard(doneTextBuffer);
-    doneText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20));
+    doneText.setWildcard(touchgfx::TypedText(T_TEXT_DONE).getText());
+    doneText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20_R));
     add(doneText);
 
-    repeatText.setPosition(135, 155, 95, 26);
+    repeatText.setPosition(112, 155, 95, 26);
     repeatText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     repeatText.setLinespacing(0);
-    Unicode::snprintf(repeatTextBuffer, REPEATTEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    repeatText.setWildcard(repeatTextBuffer);
-    repeatText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20));
+    repeatText.setWildcard(touchgfx::TypedText(T_TEXT_REPEAT).getText());
+    repeatText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_20_R));
     add(repeatText);
 
     title.setXY(50, 0);

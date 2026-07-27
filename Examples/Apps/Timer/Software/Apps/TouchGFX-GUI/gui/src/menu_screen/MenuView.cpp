@@ -23,7 +23,7 @@ void MenuView::setupScreen()
 {
     MenuViewBase::setupScreen();
 
-    title.set("TIMER");
+    title.set(T_TEXT_TIMER_UC);
 
     // Side scroll indicator replaces the left buttons.
     buttons.setL1(Buttons::NONE);
@@ -66,7 +66,6 @@ void MenuView::setValue(uint16_t durationSec)
 {
     touchgfx::Unicode::snprintf(valueTextBuffer, VALUETEXT_SIZE, "%02u:%02u",
                                 durationSec / 60u, durationSec % 60u);
-    valueText.setWildcard(valueTextBuffer);
     valueText.invalidate();
 }
 

@@ -20,24 +20,21 @@ EditViewBase::EditViewBase()
     minsHdr.setPosition(34, 52, 90, 22);
     minsHdr.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     minsHdr.setLinespacing(0);
-    Unicode::snprintf(minsHdrBuffer, MINSHDR_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    minsHdr.setWildcard(minsHdrBuffer);
+    minsHdr.setWildcard(touchgfx::TypedText(T_TEXT_MINS).getText());
     minsHdr.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_20));
     add(minsHdr);
 
     secsHdr.setPosition(116, 52, 90, 22);
     secsHdr.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     secsHdr.setLinespacing(0);
-    Unicode::snprintf(secsHdrBuffer, SECSHDR_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    secsHdr.setWildcard(secsHdrBuffer);
+    secsHdr.setWildcard(touchgfx::TypedText(T_TEXT_SECS).getText());
     secsHdr.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_20));
     add(secsHdr);
 
     colon.setPosition(108, 92, 24, 50);
     colon.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
     colon.setLinespacing(0);
-    Unicode::snprintf(colonBuffer, COLON_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
-    colon.setWildcard(colonBuffer);
+    colon.setWildcard(touchgfx::TypedText(T_TEXT_COLON).getText());
     colon.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_40));
     add(colon);
 
