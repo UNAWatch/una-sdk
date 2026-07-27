@@ -27,19 +27,19 @@ RunningViewBase::RunningViewBase()
     add(timeText);
 
     pauseIcon.setXY(194, 59);
-    pauseIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_PAUSE_ID));
+    pauseIcon.setBitmap(touchgfx::Bitmap(BITMAP_PAUSE_12X20_ID));
     add(pauseIcon);
 
     playIcon.setXY(190, 59);
-    playIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_PLAY_ID));
+    playIcon.setBitmap(touchgfx::Bitmap(BITMAP_PLAY_20X20_ID));
     add(playIcon);
 
     stopIcon.setXY(31, 59);
-    stopIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_STOP_ID));
+    stopIcon.setBitmap(touchgfx::Bitmap(BITMAP_STOP_20X20_ID));
     add(stopIcon);
 
     resetIcon.setXY(31, 162);
-    resetIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_RESET_ID));
+    resetIcon.setBitmap(touchgfx::Bitmap(BITMAP_RESET_18X18_ID));
     add(resetIcon);
 
     resetLabel.setPosition(54, 161, 90, 22);

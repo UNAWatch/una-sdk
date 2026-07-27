@@ -329,7 +329,7 @@
             "Width": 20,
             "Height": 20,
             "LockPosition": true,
-            "RelativeFilename": "Play_22x24.png"
+            "RelativeFilename": "Play_20x20.png"
           },
           {
             "Type": "CustomContainerInstance",
@@ -415,7 +415,7 @@
             "Width": 12,
             "Height": 20,
             "LockPosition": true,
-            "RelativeFilename": "Icon_Pause.png"
+            "RelativeFilename": "Pause_12x20.png"
           },
           {
             "Type": "Image",
@@ -425,7 +425,7 @@
             "Width": 20,
             "Height": 20,
             "LockPosition": true,
-            "RelativeFilename": "Icon_Play.png"
+            "RelativeFilename": "Play_20x20.png"
           },
           {
             "Type": "Image",
@@ -435,7 +435,7 @@
             "Width": 20,
             "Height": 20,
             "LockPosition": true,
-            "RelativeFilename": "Icon_Stop.png"
+            "RelativeFilename": "Stop_20x20.png"
           },
           {
             "Type": "Image",
@@ -445,7 +445,7 @@
             "Width": 18,
             "Height": 18,
             "LockPosition": true,
-            "RelativeFilename": "Icon_Reset.png"
+            "RelativeFilename": "Reset_18x18.png"
           },
           {
             "Type": "TextArea",
@@ -511,7 +511,7 @@
             "Width": 55,
             "Height": 60,
             "LockPosition": true,
-            "RelativeFilename": "Icon_Timer.png"
+            "RelativeFilename": "Timer_55x60.png"
           },
           {
             "Type": "TextArea",

@@ -19,7 +19,7 @@ FiredViewBase::FiredViewBase()
     add(buttons);
 
     icon.setXY(97, 82);
-    icon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_TIMER_ID));
+    icon.setBitmap(touchgfx::Bitmap(BITMAP_TIMER_55X60_ID));
     add(icon);
 
     timeText.setPosition(12, 98, 90, 34);

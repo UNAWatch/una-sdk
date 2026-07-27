@@ -6,17 +6,13 @@
 #include <touchgfx/hal/Types.hpp>
 #include <touchgfx/Bitmap.hpp>
 
-const uint16_t BITMAP_ALARM_60X60_ID = 0;
-const uint16_t BITMAP_CIRCLECROSS_50X50_ID = 1;
-const uint16_t BITMAP_CIRCLEPLUS_50X50_ID = 2;
-const uint16_t BITMAP_CIRCLETICK_50X50_ID = 3;
-const uint16_t BITMAP_ICON_PAUSE_ID = 4;
-const uint16_t BITMAP_ICON_PLAY_ID = 5;
-const uint16_t BITMAP_ICON_RESET_ID = 6;
-const uint16_t BITMAP_ICON_STOP_ID = 7;
-const uint16_t BITMAP_ICON_TIMER_ID = 8;
-const uint16_t BITMAP_PLAY_22X24_ID = 9;
-const uint16_t BITMAP_TICKAMBER_22X17_ID = 10;
+const uint16_t BITMAP_CIRCLECROSS_50X50_ID = 0;
+const uint16_t BITMAP_CIRCLEPLUS_50X50_ID = 1;
+const uint16_t BITMAP_PAUSE_12X20_ID = 2;
+const uint16_t BITMAP_PLAY_20X20_ID = 3;
+const uint16_t BITMAP_RESET_18X18_ID = 4;
+const uint16_t BITMAP_STOP_20X20_ID = 5;
+const uint16_t BITMAP_TIMER_55X60_ID = 6;
 
 namespace BitmapDatabase
 {

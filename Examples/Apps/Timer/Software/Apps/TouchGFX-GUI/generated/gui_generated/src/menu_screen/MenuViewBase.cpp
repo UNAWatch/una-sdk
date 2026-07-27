@@ -36,7 +36,7 @@ MenuViewBase::MenuViewBase()
     add(valueText);
 
     playIcon.setXY(190, 59);
-    playIcon.setBitmap(touchgfx::Bitmap(BITMAP_PLAY_22X24_ID));
+    playIcon.setBitmap(touchgfx::Bitmap(BITMAP_PLAY_20X20_ID));
     add(playIcon);
 
     scrollIndicator.setXY(0, 47);
