@@ -4,7 +4,8 @@
 #include <texts/TextKeysAndLanguages.hpp>
 
 // The three options, in wheel order, and their effect mapping.
-static const char* const  kLabels[]  = { "Beep", "Vibrate", "Beep & Vibrate" };
+static const touchgfx::TypedTextId kLabelIds[] = { T_TEXT_BEEP, T_TEXT_VIBRATE,
+                                                   T_TEXT_BEEP_AND_VIBRATE };
 static const Timer::Effect kEffects[] = { Timer::EFFECT_BEEP,
                                           Timer::EFFECT_VIBRO,
                                           Timer::EFFECT_BEEP_AND_VIBRO };
@@ -48,7 +49,7 @@ void AlertView::setupScreen()
 
     OrbitMenu::Entry entries[kCount] = {};
     for (int16_t i = 0; i < kCount; i++) {
-        entries[i].label = kLabels[i];
+        entries[i].labelId = kLabelIds[i];
     }
     orbitMenu.setItems(entries, kCount);
     orbitMenu.setSelected(0);

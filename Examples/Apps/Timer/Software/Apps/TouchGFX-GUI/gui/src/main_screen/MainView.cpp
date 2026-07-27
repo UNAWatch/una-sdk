@@ -88,11 +88,15 @@ void MainView::buildEntries(const std::vector<Timer>& presets,
                                                : formatValue(it.timer.durationSec));
     }
 
-    // Icon-less entries: New shows as plain "New" text in the wheel (its centred
-    // face is the static overlay); values are centred numbers.
+    // Icon-less entries: New shows a localised "New" in the wheel (its centred
+    // face is the static overlay); values are centred numbers (raw strings).
     mEntries.assign(mItems.size(), OrbitMenu::Entry{});
     for (size_t i = 0; i < mItems.size(); ++i) {
-        mEntries[i].label = mLabels[i].c_str();
+        if (mItems[i].kind == Item::NEW) {
+            mEntries[i].labelId = T_TEXT_NEW;
+        } else {
+            mEntries[i].label = mLabels[i].c_str();
+        }
     }
 }
 
@@ -163,8 +167,11 @@ void MainView::updateRecentLabel()
     const int16_t sel = orbitMenu.getSelected();
     const bool centeredRecent =
         sel >= 0 && sel < static_cast<int16_t>(mItems.size()) && mItems[sel].isRecent;
-    orbitMenu.setEntryLabel(mFirstRecentIdx,
-        centeredRecent ? mLabels[mFirstRecentIdx].c_str() : "Recent");
+    if (centeredRecent) {
+        orbitMenu.setEntryLabel(mFirstRecentIdx, mLabels[mFirstRecentIdx].c_str());
+    } else {
+        orbitMenu.setEntryLabel(mFirstRecentIdx, T_TEXT_RECENT);
+    }
 }
 
 void MainView::onOrbitAnimationEnded()

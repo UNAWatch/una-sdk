@@ -5,7 +5,7 @@
 #include <texts/TextKeysAndLanguages.hpp>
 
 // The three actions, in wheel order, matching Timer::Action.
-static const char* const kLabels[] = { "Start", "Edit", "Delete" };
+static const touchgfx::TypedTextId kLabelIds[] = { T_TEXT_START, T_TEXT_EDIT, T_TEXT_DELETE };
 
 // Size-only sphere: centre SemiBold 35, the row below Medium 18, both white and
 // centre-aligned. The teal pill behind the centre marks the selection.
@@ -49,7 +49,7 @@ void MenuView::setupScreen()
 
     OrbitMenu::Entry entries[kCount] = {};
     for (int16_t i = 0; i < kCount; i++) {
-        entries[i].label = kLabels[i];
+        entries[i].labelId = kLabelIds[i];
     }
     orbitMenu.setItems(entries, kCount);
     orbitMenu.setSelected(0);

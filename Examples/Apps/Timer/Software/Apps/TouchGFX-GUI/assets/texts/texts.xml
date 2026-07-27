@@ -232,6 +232,12 @@
       <Text Id="TEXT_COLON" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">:</Translation>
       </Text>
+      <Text Id="TEXT_START" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Start</Translation>
+      </Text>
+      <Text Id="TEXT_RECENT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Recent</Translation>
+      </Text>
     </TextGroup>
     <TextGroup Id="Unsorted">
       <Text Id="__SingleUse_Z0MH" Alignment="Left" TypographyId="Poppins_Regular_18">

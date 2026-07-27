@@ -30,7 +30,8 @@ public:
      * Owned dynamic bitmaps are freed here and in the destructor.
      */
     void setData(touchgfx::BitmapId static60, touchgfx::BitmapId static30,
-                 const uint8_t *ext60, const uint8_t *ext30, const char *label);
+                 const uint8_t *ext60, const uint8_t *ext30,
+                 const char *label, touchgfx::TypedTextId labelId);
 
     /**
      * @brief Render this row for the current frame.
@@ -110,11 +111,12 @@ class OrbitMenu : public OrbitMenuBase
 public:
     struct Entry
     {
-        touchgfx::BitmapId icon60 = 0;       ///< Static icon (fixed lists / quick checks).
-        touchgfx::BitmapId icon30 = 0;
-        const char        *label  = nullptr;
-        const uint8_t     *ext60  = nullptr; ///< External 60x60 ABGR2222 (real app data); wins if set.
-        const uint8_t     *ext30  = nullptr; ///< External 30x30 ABGR2222.
+        touchgfx::BitmapId    icon60  = 0;       ///< Static icon (fixed lists / quick checks).
+        touchgfx::BitmapId    icon30  = 0;
+        const char           *label   = nullptr; ///< Raw label; overrides labelId when set (dynamic text).
+        touchgfx::TypedTextId labelId = TYPED_TEXT_INVALID; ///< Localised label for a known item.
+        const uint8_t        *ext60   = nullptr; ///< External 60x60 ABGR2222 (real app data); wins if set.
+        const uint8_t        *ext30   = nullptr; ///< External 30x30 ABGR2222.
     };
 
     /** The three position anchors: centre, +/-1 (pos1), +/-2 (pos2). */
@@ -140,6 +142,9 @@ public:
      * for as long as the entry is shown (same rule as setItems).
      */
     void setEntryLabel(int16_t index, const char *label);
+
+    /** @brief Replace one entry's label with a localised text id (see above). */
+    void setEntryLabel(int16_t index, touchgfx::TypedTextId labelId);
 
     void    selectNext();
     void    selectPrev();
@@ -187,6 +192,7 @@ private:
     static const int16_t kVisible    = 5;   ///< Slots rendered (centre +/- 2).
     static const int16_t kMaxEntries = 16;
 
+    void    refreshEntry(int16_t index); ///< Re-fetch an entry's slot after a label change.
     void    layout();           ///< Place every slot from mScrollPos.
     void    reorderByDepth();   ///< Draw farthest rows first, centre on top.
     void    startAnimation();   ///< (Re)start easing toward mTargetPos.

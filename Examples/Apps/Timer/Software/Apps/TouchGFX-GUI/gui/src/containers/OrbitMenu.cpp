@@ -75,7 +75,8 @@ void OrbitMenuItem::initialize()
 }
 
 void OrbitMenuItem::setData(touchgfx::BitmapId static60, touchgfx::BitmapId static30,
-                            const uint8_t *ext60, const uint8_t *ext30, const char *text)
+                            const uint8_t *ext60, const uint8_t *ext30,
+                            const char *text, touchgfx::TypedTextId labelId)
 {
     freeDynamic();
 
@@ -95,8 +96,16 @@ void OrbitMenuItem::setData(touchgfx::BitmapId static60, touchgfx::BitmapId stat
         mIcon30 = static30;
     }
 
-    touchgfx::Unicode::fromUTF8(reinterpret_cast<const uint8_t *>(text),
-                                labelBuffer, kLabelSize);
+    // A raw string wins (dynamic values); otherwise pull a localised label.
+    if (text != nullptr) {
+        touchgfx::Unicode::fromUTF8(reinterpret_cast<const uint8_t *>(text),
+                                    labelBuffer, kLabelSize);
+    } else if (labelId != TYPED_TEXT_INVALID) {
+        touchgfx::Unicode::snprintf(labelBuffer, kLabelSize, "%s",
+                                    touchgfx::TypedText(labelId).getText());
+    } else {
+        labelBuffer[0] = 0;
+    }
 }
 
 void OrbitMenuItem::render(bool bigIcon, touchgfx::TypedTextId labelFont,
@@ -272,8 +281,23 @@ void OrbitMenu::setEntryLabel(int16_t index, const char *label)
     if (index < 0 || index >= mCount) {
         return;
     }
-    mEntries[index].label = label;
+    mEntries[index].label   = label;
+    mEntries[index].labelId = TYPED_TEXT_INVALID;
+    refreshEntry(index);
+}
 
+void OrbitMenu::setEntryLabel(int16_t index, touchgfx::TypedTextId labelId)
+{
+    if (index < 0 || index >= mCount) {
+        return;
+    }
+    mEntries[index].label   = nullptr;
+    mEntries[index].labelId = labelId;
+    refreshEntry(index);
+}
+
+void OrbitMenu::refreshEntry(int16_t index)
+{
     // Force a re-fetch of the slot that currently holds this entry.
     for (int16_t s = 0; s < kVisible; s++) {
         if (mSlotDataIdx[s] == index) {
@@ -416,7 +440,7 @@ void OrbitMenu::layout()
 
         if (dataIdx != mSlotDataIdx[s]) {
             const Entry &e = mEntries[dataIdx];
-            mItems[s].setData(e.icon60, e.icon30, e.ext60, e.ext30, e.label);
+            mItems[s].setData(e.icon60, e.icon30, e.ext60, e.ext30, e.label, e.labelId);
             mSlotDataIdx[s] = dataIdx;
         }
 
