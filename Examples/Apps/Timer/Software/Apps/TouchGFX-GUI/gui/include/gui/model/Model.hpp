@@ -104,6 +104,7 @@ private:
     void setCapabilities();
     bool isAnyKeyPressed(uint8_t key) const;
     void buildPresets();
+    bool isPreset(const Timer& timer) const;
 
     // -- GUI state ------------------------------------------------------------
 

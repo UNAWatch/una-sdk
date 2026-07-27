@@ -25,14 +25,6 @@ void TimerManager::load()
 {
     loadFromFile(mRecents);
 
-#if 1   // TEST recents for UI verification -- remove before shipping
-    if (mRecents.empty()) {
-        mRecents.push_back(Timer{ 720,  Timer::EFFECT_BEEP_AND_VIBRO });  // 12:00
-        mRecents.push_back(Timer{ 2520, Timer::EFFECT_BEEP });            // 42:00
-        mRecents.push_back(Timer{ 1314, Timer::EFFECT_VIBRO });           // 21:54
-    }
-#endif
-
     LOG_DEBUG("Recents loaded: %u\n", static_cast<unsigned>(mRecents.size()));
 
     if (mObserver) {

@@ -82,6 +82,17 @@ void Model::exitApp()
 void Model::startTimer(const Timer& timer)
 {
     mSrvSender.start(timer.durationSec, timer.effect);
+
+    // Remember custom and modified-preset timers as recents; an unchanged preset
+    // is already offered in the list, so it is not duplicated.
+    if (!isPreset(timer)) {
+        addRecent(timer);
+    }
+}
+
+bool Model::isPreset(const Timer& timer) const
+{
+    return std::find(mPresets.begin(), mPresets.end(), timer) != mPresets.end();
 }
 
 void Model::pauseTimer()  { mSrvSender.pause();  }
