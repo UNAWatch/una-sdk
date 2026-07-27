@@ -25,13 +25,18 @@ public:
 
     void onRecentsChanged(const std::vector<Timer>& list) override;
 
-    /** @brief Record a selected preset/recent as the timer to act on. */
-    void selectTimer(const Timer& timer);
+    /** @brief Record a selected preset/recent (and its wheel index) to act on. */
+    void selectTimer(const Timer& timer, int16_t index);
 
     /** @brief Seed the edit flow with a default duration for a new timer. */
     void editNew();
 
     void exitApp();
+
+    /** @brief The timer to re-select on Main, and whether a restore is pending. */
+    const Timer& editTimer() const      { return model->getEditTimer(); }
+    bool         takeRestoreSelection() { return model->takeRestoreSelection(); }
+    int16_t      restoreIndex() const   { return model->restoreIndex(); }
 
 private:
     MainPresenter();

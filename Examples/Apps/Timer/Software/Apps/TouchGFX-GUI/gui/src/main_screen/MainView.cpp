@@ -52,13 +52,36 @@ void MainView::setLists(const std::vector<Timer>& presets,
     buildEntries(presets, recents);
 
     orbitMenu.setItems(mEntries.data(), static_cast<int16_t>(mEntries.size()));
-    orbitMenu.setSelected(0);
-
     scrollIndicator.setCount(static_cast<uint16_t>(mEntries.size()));
-    scrollIndicator.setActiveId(0);
+
+    // Returning from Menu re-selects the chosen timer instantly (no animation).
+    // If it is gone (deleted), land on whatever now sits at its old index -- the
+    // next timer -- or New when nothing follows. Any other entry starts on New.
+    int16_t sel = 0;
+    if (presenter->takeRestoreSelection()) {
+        const int16_t byValue = indexOfTimer(presenter->editTimer());
+        if (byValue != 0) {
+            sel = byValue;
+        } else {
+            const int16_t next = presenter->restoreIndex();
+            sel = (next > 0 && next < static_cast<int16_t>(mItems.size())) ? next : 0;
+        }
+    }
+    orbitMenu.setSelected(sel);
+    scrollIndicator.setActiveId(static_cast<uint16_t>(sel));
 
     updateRecentLabel();
     syncView();
+}
+
+int16_t MainView::indexOfTimer(const Timer& timer) const
+{
+    for (size_t i = 0; i < mItems.size(); ++i) {
+        if (mItems[i].kind == Item::VALUE && mItems[i].timer == timer) {
+            return static_cast<int16_t>(i);
+        }
+    }
+    return 0;   // not found (e.g. a just-deleted recent) -> New
 }
 
 void MainView::buildEntries(const std::vector<Timer>& presets,
@@ -212,7 +235,7 @@ void MainView::onConfirm()
         application().gotoEditScreenNoTransition();
     }
     else {
-        presenter->selectTimer(mItems[sel].timer);
+        presenter->selectTimer(mItems[sel].timer, sel);
         application().gotoMenuScreenNoTransition();
     }
 }

@@ -74,6 +74,17 @@ public:
     void         setEditTimer(const Timer& t) { mEditTimer = t; }
     const Timer& getEditTimer() const         { return mEditTimer; }
 
+    /**
+     * @brief Ask Main to re-select the edit timer (once) when it next opens.
+     * @param index Its wheel index, used as the fall-back landing spot if the
+     *              timer is gone (deleted) -- the item that took its place.
+     */
+    void requestRestoreSelection(int16_t index) { mRestoreSelection = true; mRestoreIndex = index; }
+    /** @brief Consume the restore-selection request (true once after a request). */
+    bool takeRestoreSelection() { bool r = mRestoreSelection; mRestoreSelection = false; return r; }
+    /** @brief Wheel index recorded with the last restore request. */
+    int16_t restoreIndex() const { return mRestoreIndex; }
+
     // -- Presets & recents ----------------------------------------------------
 
     /** @brief Fixed preset durations shown at the top of the Main list. */
@@ -114,7 +125,9 @@ private:
     bool     mIsRunning  = false;
     bool     mInvalidate = false;
     uint32_t mIdleTimer  = 0;
-    bool     mStartupRouted = false;  ///< First service state seen -> initial screen chosen.
+    bool     mStartupRouted   = false; ///< First service state seen -> initial screen chosen.
+    bool     mRestoreSelection = false; ///< Main should re-select the edit timer once.
+    int16_t  mRestoreIndex     = 0;     ///< Fall-back wheel index if that timer is gone.
 
     // -- Countdown snapshot (mirrors the service) -----------------------------
 

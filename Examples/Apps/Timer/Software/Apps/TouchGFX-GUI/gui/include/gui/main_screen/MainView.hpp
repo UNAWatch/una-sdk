@@ -50,6 +50,7 @@ private:
      * digits-only font would draw as "????").
      */
     void moveSelection(bool forward);
+    int16_t indexOfTimer(const Timer& timer) const;  ///< Wheel index of a value, else 0 (New).
     void syncView();     ///< Toggle static-New face vs orbit and set the title.
     void onConfirm();
 
