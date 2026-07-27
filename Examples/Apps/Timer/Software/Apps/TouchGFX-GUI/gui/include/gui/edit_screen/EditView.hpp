@@ -36,12 +36,13 @@ private:
 
     /**
      * @brief Step the active column one place.
-     * @param snap Collapse the sphere animation to the new value at once. Used
-     *        by the fast auto-repeat so the shown number tracks the committed
-     *        one exactly (no trailing, so releasing never overshoots); a single
-     *        tap leaves it false to keep the smooth roll.
+     * @param animSteps Ticks the sphere roll spans, or 0 to pin the display to
+     *        the new value at once. A single tap and the slow auto-repeat phase
+     *        animate (the roll fits between steps, so it reads as motion); the
+     *        fast phase passes 0 so the shown number tracks the committed one
+     *        exactly and releasing at top speed never overshoots.
      */
-    void scrollActive(bool forward, bool snap = false);
+    void scrollActive(bool forward, int16_t animSteps);
 
     Step         mStep = STEP_MINS;
     SpherePicker mMins;

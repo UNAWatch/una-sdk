@@ -13,10 +13,14 @@ static constexpr int16_t kSecsMax  = 59;
 
 // Hold-to-repeat timing (GUI ticks). A held button starts auto-scrolling after
 // kHoldStart, then repeats every kRepeatSlow ticks and speeds up one tick per
-// step down to kRepeatFast, so scanning a long way ramps up smoothly.
+// step down to kRepeatFast, so scanning a long way ramps up smoothly. While the
+// interval is still above kSnapAt each step animates (the roll fits in the gap
+// and reads as motion); at or below it the step snaps, so top-speed scanning
+// stays exact and releasing never overshoots.
 static constexpr uint32_t kHoldStart  = SDK::Utils::secToTicks(1, App::Config::kFrameRate);
 static constexpr int16_t  kRepeatSlow = 4;
 static constexpr int16_t  kRepeatFast = 1;
+static constexpr int16_t  kSnapAt     = 1;
 
 EditView::EditView()
 {
@@ -93,15 +97,18 @@ void EditView::confirm()
     application().gotoAlertScreenNoTransition();
 }
 
-void EditView::scrollActive(bool forward, bool snap)
+void EditView::scrollActive(bool forward, int16_t animSteps)
 {
     SpherePicker& active = (mStep == STEP_MINS) ? mMins : mSecs;
+    if (animSteps > 0) {
+        active.setAnimationSteps(animSteps);
+    }
     if (forward) {
         active.selectNext();
     } else {
         active.selectPrev();
     }
-    if (snap) {
+    if (animSteps <= 0) {
         active.setValue(active.getValue());   // pin the display to the new value
     }
     syncConfirmButton();
@@ -112,10 +119,10 @@ void EditView::handleKeyEvent(uint8_t key)
     switch (key) {
     // Click: a single step (a short tap that never becomes a hold).
     case SDK::GUI::Button::L1:
-        scrollActive(false);
+        scrollActive(false, App::Config::kMenuAnimationSteps);
         break;
     case SDK::GUI::Button::L2:
-        scrollActive(true);
+        scrollActive(true, App::Config::kMenuAnimationSteps);
         break;
 
     // Press/release bracket a hold; the tick handler does the repeating.
@@ -176,7 +183,10 @@ void EditView::handleTickEvent()
     if (--mRepeatCountdown > 0) {
         return;
     }
-    scrollActive(mHeldDir == SDK::GUI::Button::L2, true);   // snap: fast + no overshoot
+    // Slow phase animates over its own interval (roll finishes before the next
+    // step); fast phase snaps for an exact, overshoot-free release.
+    const int16_t animSteps = (mRepeatInterval > kSnapAt) ? mRepeatInterval : 0;
+    scrollActive(mHeldDir == SDK::GUI::Button::L2, animSteps);
     mRepeatCountdown = mRepeatInterval;
     if (mRepeatInterval > kRepeatFast) {
         --mRepeatInterval;   // accelerate toward the fastest step
