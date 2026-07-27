@@ -55,11 +55,16 @@ struct Timer {
     /** @brief Upper bound for a manually entered duration: 99:59. */
     static constexpr uint16_t kMaxDurationSec = 99 * 60 + 59;
 
-    /** @brief Identity for recents de-duplication: duration + effect. */
+    /**
+     * @brief Identity for lists (recents, presets): duration only.
+     *
+     * The wheel shows just the time, so two timers of the same duration are
+     * indistinguishable there -- they are one entry, the effect being a
+     * last-used detail carried alongside, not part of the identity.
+     */
     bool operator==(const Timer& other) const
     {
-        return durationSec == other.durationSec &&
-               effect      == other.effect;
+        return durationSec == other.durationSec;
     }
 
     bool operator!=(const Timer& other) const
