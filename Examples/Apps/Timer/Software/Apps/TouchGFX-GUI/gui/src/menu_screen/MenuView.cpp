@@ -44,7 +44,7 @@ void MenuView::setupScreen()
     orbitMenu.setAnchors(anchors);
     orbitMenu.setHeight(104);
     orbitMenu.setCenterOffset(-28);   // centreLineY 24 -> centre lands at screen y120 (pill).
-    orbitMenu.setAnimationSteps(4);
+    orbitMenu.setAnimationSteps(App::Config::kMenuAnimationSteps);
     orbitMenu.setCircularMinItems(3);
 
     OrbitMenu::Entry entries[kCount] = {};
@@ -74,12 +74,12 @@ void MenuView::handleKeyEvent(uint8_t key)
     if (key == SDK::GUI::Button::L1) {
         orbitMenu.selectPrev();
         scrollIndicator.animateToId(
-            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), 4);
+            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), App::Config::kMenuAnimationSteps);
     }
     else if (key == SDK::GUI::Button::L2) {
         orbitMenu.selectNext();
         scrollIndicator.animateToId(
-            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), 4);
+            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), App::Config::kMenuAnimationSteps);
     }
     else if (key == SDK::GUI::Button::R1) {
         confirm();

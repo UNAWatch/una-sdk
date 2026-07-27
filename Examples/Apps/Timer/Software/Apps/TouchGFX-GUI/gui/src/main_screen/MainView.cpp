@@ -4,8 +4,6 @@
 
 #include <cstdio>
 
-static constexpr int16_t kAnimSteps = 4;
-
 static std::string formatValue(uint16_t sec)
 {
     char b[8];
@@ -30,7 +28,7 @@ void MainView::setupScreen()
 
     orbitMenu.setHeight(152);
     orbitMenu.setCenterOffset(0);
-    orbitMenu.setAnimationSteps(kAnimSteps);
+    orbitMenu.setAnimationSteps(App::Config::kMenuAnimationSteps);
     orbitMenu.setCircularMinItems(3);      // wrap through New at the ends
     const OrbitMenu::Anchors anchors = { {  0, 22,  87 },
                                          { 58, 45,  92 },
@@ -126,7 +124,7 @@ void MainView::moveSelection(bool forward)
     if (next == 0) {
         scrollIndicator.setActiveId(0);
     } else {
-        scrollIndicator.animateToId(virtualId, kAnimSteps);
+        scrollIndicator.animateToId(virtualId, App::Config::kMenuAnimationSteps);
     }
 
     // Entering the recents shows the value immediately; leaving keeps the value

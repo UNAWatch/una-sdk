@@ -32,13 +32,13 @@ void EditView::setupScreen()
     add(mMins);
     mMins.setColumn(10, 44, 105, 170, 76);
     mMins.setRange(kMinsMax, kMinsStep);
-    mMins.setAnimationSteps(4);
+    mMins.setAnimationSteps(App::Config::kMenuAnimationSteps);
 
     mSecs.initialize();
     add(mSecs);
     mSecs.setColumn(125, 44, 105, 170, 76);
     mSecs.setRange(kSecsMax, kSecsStep);
-    mSecs.setAnimationSteps(4);
+    mSecs.setAnimationSteps(App::Config::kMenuAnimationSteps);
 
     mStep = STEP_MINS;
     updateActive();

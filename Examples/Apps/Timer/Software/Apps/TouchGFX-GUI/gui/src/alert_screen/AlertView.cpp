@@ -44,7 +44,7 @@ void AlertView::setupScreen()
     const OrbitMenu::Anchors anchors = { { 0, 22, 87 }, { 58, 22, 87 }, { 98, 22, 87 } };
     orbitMenu.setAnchors(anchors);
     orbitMenu.setHeight(152);
-    orbitMenu.setAnimationSteps(4);
+    orbitMenu.setAnimationSteps(App::Config::kMenuAnimationSteps);
     orbitMenu.setCircularMinItems(3);
 
     OrbitMenu::Entry entries[kCount] = {};
@@ -76,12 +76,12 @@ void AlertView::handleKeyEvent(uint8_t key)
     if (key == SDK::GUI::Button::L1) {
         orbitMenu.selectPrev();
         scrollIndicator.animateToId(
-            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), 4);
+            static_cast<int16_t>(scrollIndicator.getActiveId() - 1), App::Config::kMenuAnimationSteps);
     }
     else if (key == SDK::GUI::Button::L2) {
         orbitMenu.selectNext();
         scrollIndicator.animateToId(
-            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), 4);
+            static_cast<int16_t>(scrollIndicator.getActiveId() + 1), App::Config::kMenuAnimationSteps);
     }
     else if (key == SDK::GUI::Button::R1) {
         confirm();

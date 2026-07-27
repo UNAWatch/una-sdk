@@ -24,6 +24,7 @@ namespace App::Config
 {
 constexpr uint32_t kFrameRate = SDK::GUI::Config::kFrameRate;
 
+constexpr uint32_t kMenuAnimationSteps = 4;   ///< Ticks per wheel/scroll step.
 constexpr uint32_t kScreenTimeoutSteps = SDK::Utils::secToTicks(30, kFrameRate);  // 30 s
 } // namespace App::Config
 
