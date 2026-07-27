@@ -55,7 +55,9 @@ void Model::handleKeyEvent(uint8_t key)
 {
     LOG_DEBUG("key = %c\n", static_cast<char>(key));
 
-    if (isAnyKeyPressed(key)) {
+    // Any button activity keeps the app awake -- clicks and the press/release
+    // pair a hold sends, so playing with the wheel does not idle out mid-hold.
+    if (SDK::GUI::Button::isButtonCode(key)) {
         resetIdleTimer();
     }
 }
@@ -175,14 +177,6 @@ void Model::setCapabilities()
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
     }
-}
-
-bool Model::isAnyKeyPressed(uint8_t key) const
-{
-    return key == SDK::GUI::Button::L1 ||
-           key == SDK::GUI::Button::L2 ||
-           key == SDK::GUI::Button::R1 ||
-           key == SDK::GUI::Button::R2;
 }
 
 

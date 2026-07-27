@@ -117,7 +117,6 @@ private:
 
     void decIdleTimer();
     void setCapabilities();
-    bool isAnyKeyPressed(uint8_t key) const;
     void buildPresets();
 
     // -- GUI state ------------------------------------------------------------
