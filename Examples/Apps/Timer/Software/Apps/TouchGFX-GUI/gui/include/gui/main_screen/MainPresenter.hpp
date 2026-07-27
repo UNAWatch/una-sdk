@@ -25,8 +25,8 @@ public:
 
     void onRecentsChanged(const std::vector<Timer>& list) override;
 
-    /** @brief Record a selected preset/recent (and its wheel index) to act on. */
-    void selectTimer(const Timer& timer, int16_t index);
+    /** @brief Record a selected preset/recent to act on in Menu. */
+    void selectTimer(const Timer& timer);
 
     /** @brief Seed the edit flow with a default duration for a new timer. */
     void editNew();

@@ -85,6 +85,15 @@ public:
     /** @brief Wheel index recorded with the last restore request. */
     int16_t restoreIndex() const { return mRestoreIndex; }
 
+    /**
+     * @brief Main wheel slot of the edit timer: New(0), then presets, recents.
+     *
+     * Returns 0 (New) when it is in neither list. Callers capture this before a
+     * delete so Main can land on the timer that takes the freed slot -- the next
+     * one -- once it is gone.
+     */
+    int16_t editTimerIndex() const;
+
     // -- Presets & recents ----------------------------------------------------
 
     /** @brief Fixed preset durations shown at the top of the Main list. */

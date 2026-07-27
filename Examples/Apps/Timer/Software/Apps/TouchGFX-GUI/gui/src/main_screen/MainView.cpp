@@ -235,7 +235,7 @@ void MainView::onConfirm()
         application().gotoEditScreenNoTransition();
     }
     else {
-        presenter->selectTimer(mItems[sel].timer, sel);
+        presenter->selectTimer(mItems[sel].timer);
         application().gotoMenuScreenNoTransition();
     }
 }

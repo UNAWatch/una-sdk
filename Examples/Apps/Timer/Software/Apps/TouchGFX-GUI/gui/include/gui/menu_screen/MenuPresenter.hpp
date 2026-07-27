@@ -26,6 +26,9 @@ public:
     /** @brief Start the countdown for the current edit timer. */
     void startTimer();
 
+    /** @brief Ask Main to re-select the edit timer when we return to it (R2). */
+    void prepareReturnToMain() { model->requestRestoreSelection(model->editTimerIndex()); }
+
     /** @brief True when the timer being acted on is a preset (not deletable). */
     bool isEditPreset() const { return model->isPreset(model->getEditTimer()); }
 

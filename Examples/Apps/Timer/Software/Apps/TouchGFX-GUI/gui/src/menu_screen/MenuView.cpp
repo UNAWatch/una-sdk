@@ -86,6 +86,7 @@ void MenuView::handleKeyEvent(uint8_t key)
         confirm();
     }
     else if (key == SDK::GUI::Button::R2) {
+        presenter->prepareReturnToMain();   // Main re-selects this timer
         application().gotoMainScreenNoTransition();
     }
 }

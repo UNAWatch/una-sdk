@@ -21,10 +21,12 @@ void MainPresenter::onRecentsChanged(const std::vector<Timer>& list)
     view.setLists(model->getPresets(), list);
 }
 
-void MainPresenter::selectTimer(const Timer& timer, int16_t index)
+void MainPresenter::selectTimer(const Timer& timer)
 {
+    // Record the timer to act on; the restore request is raised on the way back
+    // out of Menu (see MenuPresenter/DeletedPresenter), so every path into Menu
+    // -- not just this one -- re-selects it on Main.
     model->setEditTimer(timer);
-    model->requestRestoreSelection(index);   // Main re-selects it when we come back
 }
 
 void MainPresenter::editNew()

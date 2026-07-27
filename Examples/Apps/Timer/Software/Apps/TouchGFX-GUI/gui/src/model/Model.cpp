@@ -97,6 +97,21 @@ bool Model::isPreset(const Timer& timer) const
     return std::find(mPresets.begin(), mPresets.end(), timer) != mPresets.end();
 }
 
+int16_t Model::editTimerIndex() const
+{
+    // Mirror the Main wheel order: New(0), presets, then recents.
+    int16_t idx = 1;
+    for (const auto& p : mPresets) {
+        if (p == mEditTimer) { return idx; }
+        ++idx;
+    }
+    for (const auto& r : mRecents) {
+        if (r == mEditTimer) { return idx; }
+        ++idx;
+    }
+    return 0;   // not in either list -> New
+}
+
 void Model::pauseTimer()  { mSrvSender.pause();  }
 void Model::resumeTimer() { mSrvSender.resume(); }
 void Model::resetTimer()  { mSrvSender.reset();  }
@@ -224,6 +239,9 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
             if (!mStartupRouted) {
                 mStartupRouted = true;
                 if (mState == TimerState::RUNNING || mState == TimerState::PAUSED) {
+                    // Seed the edit timer from the live countdown so its Menu and
+                    // the Main selection resolve to it, not the stale default.
+                    mEditTimer = Timer{ mDurationSec, mEffect };
                     application().gotoRunningScreenNoTransition();
                 }
             }
