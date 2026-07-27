@@ -57,12 +57,6 @@ void Model::handleKeyEvent(uint8_t key)
 
     if (isAnyKeyPressed(key)) {
         resetIdleTimer();
-
-        // Any interaction means the user is in the app; return to Main on exit
-        // rather than leaving the app entirely.
-        if (mState != TimerState::FIRED) {
-            mStayInApp = true;
-        }
     }
 }
 
@@ -80,27 +74,6 @@ void Model::exitApp()
 
     mKernel.sys.exit();
     // On simulator sys.exit() only sets a flag -- the current tick completes normally.
-}
-
-void Model::switchToNextPriorityScreen()
-{
-    if (mState == TimerState::FIRED) {
-        application().gotoFiredScreenNoTransition();
-        return;
-    }
-
-    if (mState == TimerState::RUNNING || mState == TimerState::PAUSED) {
-        application().gotoRunningScreenNoTransition();
-        return;
-    }
-
-    if (mStayInApp) {
-        mStayInApp = false;
-        application().gotoMainScreenNoTransition();
-        return;
-    }
-
-    exitApp();
 }
 
 
@@ -240,6 +213,15 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
             mDurationSec = m->durationSec;
             mEffect      = m->effect;
             modelListener->onStateChanged();
+
+            // First state after launch: if a countdown is already active, open
+            // the Running screen straight away instead of staying on Main.
+            if (!mStartupRouted) {
+                mStartupRouted = true;
+                if (mState == TimerState::RUNNING || mState == TimerState::PAUSED) {
+                    application().gotoRunningScreenNoTransition();
+                }
+            }
         } break;
 
         case CustomMessage::TIMER_FIRED: {

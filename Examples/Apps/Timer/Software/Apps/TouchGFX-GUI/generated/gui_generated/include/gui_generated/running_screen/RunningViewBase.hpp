@@ -8,6 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/running_screen/RunningPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <gui/containers/Buttons.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
+#include <touchgfx/widgets/Image.hpp>
 #include <gui/containers/Title.hpp>
 
 class RunningViewBase : public touchgfx::View<RunningPresenter>
@@ -27,7 +30,22 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    Buttons buttons;
+    touchgfx::TextAreaWithOneWildcard timeText;
+    touchgfx::Image pauseIcon;
+    touchgfx::Image playIcon;
+    touchgfx::Image stopIcon;
+    touchgfx::Image resetIcon;
+    touchgfx::TextAreaWithOneWildcard resetLabel;
     Title title;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t TIMETEXT_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar timeTextBuffer[TIMETEXT_SIZE];
+    static const uint16_t RESETLABEL_SIZE = 8;
+    touchgfx::Unicode::UnicodeChar resetLabelBuffer[RESETLABEL_SIZE];
 
 private:
 

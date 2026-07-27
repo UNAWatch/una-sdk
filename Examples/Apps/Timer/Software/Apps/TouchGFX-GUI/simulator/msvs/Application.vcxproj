@@ -83,7 +83,6 @@
     <ClCompile Include="..\..\generated\gui_generated\src\containers\OptionWheelBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\OrbitMenu.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\SpherePicker.cpp"/>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\OrbitMenuBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\MainMenu.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\MainMenuBase.cpp"/>
@@ -311,7 +310,6 @@
     <ClInclude Include="..\..\gui\include\gui\containers\OptionWheel.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\OrbitMenu.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\SpherePicker.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\MainMenu.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\MainMenuItem.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\MainMenuCenterItem.hpp"/>

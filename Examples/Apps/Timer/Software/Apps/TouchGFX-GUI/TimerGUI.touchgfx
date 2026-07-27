@@ -8,17 +8,15 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "orbitMenu",
-            "X": 0,
             "Y": 44,
             "Width": 240,
-            "Height": 152,
+            "Height": 150,
             "LockPosition": true,
             "CustomContainerDefinitionName": "OrbitMenu"
           },
           {
             "Type": "CustomContainerInstance",
             "Name": "scrollIndicator",
-            "X": 0,
             "Y": 47,
             "Width": 36,
             "Height": 146,
@@ -59,7 +57,6 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
-            "X": 0,
             "Y": 47,
             "Width": 240,
             "Height": 146,
@@ -70,7 +67,6 @@
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -98,7 +94,6 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
-            "X": 0,
             "Y": 47,
             "Width": 240,
             "Height": 146,
@@ -172,7 +167,6 @@
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -212,24 +206,21 @@
             "CenterX": 110.0,
             "CenterY": 33.0,
             "Radius": 110.0,
-            "StartAngle": 0.0,
             "EndAngle": 360.0,
             "CapPrecision": "Butt"
           },
           {
             "Type": "CustomContainerInstance",
             "Name": "orbitMenu",
-            "X": 0,
             "Y": 44,
             "Width": 240,
-            "Height": 152,
+            "Height": 150,
             "LockPosition": true,
             "CustomContainerDefinitionName": "OrbitMenu"
           },
           {
             "Type": "CustomContainerInstance",
             "Name": "scrollIndicator",
-            "X": 0,
             "Y": 47,
             "Width": 36,
             "Height": 146,
@@ -248,8 +239,7 @@
             "TextRotation": "0",
             "Color": {
               "Red": 230,
-              "Green": 160,
-              "Blue": 0
+              "Green": 160
             },
             "Wildcard1": {
               "TextId": "TEXT_NEW",
@@ -260,7 +250,6 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
-            "X": 0,
             "Y": 47,
             "Width": 240,
             "Height": 146,
@@ -271,7 +260,6 @@
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -311,17 +299,15 @@
             "CenterX": 110.0,
             "CenterY": 33.0,
             "Radius": 110.0,
-            "StartAngle": 0.0,
             "EndAngle": 360.0,
             "CapPrecision": "Butt"
           },
           {
             "Type": "CustomContainerInstance",
             "Name": "orbitMenu",
-            "X": 0,
             "Y": 96,
             "Width": 240,
-            "Height": 104,
+            "Height": 150,
             "LockPosition": true,
             "CustomContainerDefinitionName": "OrbitMenu"
           },
@@ -353,13 +339,11 @@
             "Width": 20,
             "Height": 20,
             "LockPosition": true,
-            "Visible": true,
             "RelativeFilename": "Play_22x24.png"
           },
           {
             "Type": "CustomContainerInstance",
             "Name": "scrollIndicator",
-            "X": 0,
             "Y": 47,
             "Width": 36,
             "Height": 146,
@@ -369,7 +353,6 @@
           {
             "Type": "CustomContainerInstance",
             "Name": "buttons",
-            "X": 0,
             "Y": 47,
             "Width": 240,
             "Height": 146,
@@ -380,7 +363,6 @@
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -407,9 +389,99 @@
         "Components": [
           {
             "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timeText",
+            "X": 10,
+            "Y": 80,
+            "Width": 220,
+            "Height": 70,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_60",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "pauseIcon",
+            "X": 194,
+            "Y": 59,
+            "Width": 12,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Icon_Pause.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "playIcon",
+            "X": 190,
+            "Y": 59,
+            "Width": 20,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Icon_Play.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "stopIcon",
+            "X": 31,
+            "Y": 59,
+            "Width": 20,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Icon_Stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "resetIcon",
+            "X": 31,
+            "Y": 162,
+            "Width": 18,
+            "Height": 18,
+            "LockPosition": true,
+            "RelativeFilename": "Icon_Reset.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "resetLabel",
+            "X": 54,
+            "Y": 161,
+            "Width": 90,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_18_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -438,7 +510,6 @@
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,
@@ -498,7 +569,6 @@
             "Type": "CustomContainerInstance",
             "Name": "title",
             "X": 50,
-            "Y": 0,
             "Width": 140,
             "Height": 41,
             "LockPosition": true,

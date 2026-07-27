@@ -5,18 +5,31 @@
 #include <gui/running_screen/RunningPresenter.hpp>
 
 /**
- * @brief Running screen -- skeleton placeholder.
+ * @brief Running screen: the active / paused countdown.
  *
- * Renders the app title and the screen name. Real widgets and logic are
- * added in the next stage.
+ * Shows the remaining time (MM:SS) updated each tick. All other graphics are
+ * static and simply shown/hidden by state: running shows a pause action on R1;
+ * paused shows resume on R1 and a red stop on L1. Reset (L2) is always offered,
+ * R2 returns to Main while the service keeps counting.
  */
 class RunningView : public RunningViewBase
 {
 public:
-    RunningView() {}
+    RunningView();
     virtual ~RunningView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleTickEvent() override;
+
+    /** @brief Re-sync icons and button colours to the current countdown state. */
+    void onStateChanged();
+
+protected:
+    virtual void handleKeyEvent(uint8_t key) override;
+
+private:
+    void updateTime();
+    void syncControls();
 };
 
 #endif // RUNNINGVIEW_HPP

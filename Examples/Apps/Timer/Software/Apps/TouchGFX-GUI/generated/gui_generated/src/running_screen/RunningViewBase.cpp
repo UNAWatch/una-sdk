@@ -4,6 +4,8 @@
 #include <gui_generated/running_screen/RunningViewBase.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include <touchgfx/Color.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
+#include <images/BitmapDatabase.hpp>
 
 RunningViewBase::RunningViewBase()
 {
@@ -12,6 +14,41 @@ RunningViewBase::RunningViewBase()
     __background.setPosition(0, 0, 240, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    buttons.setXY(0, 47);
+    add(buttons);
+
+    timeText.setPosition(10, 80, 220, 70);
+    timeText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    timeText.setLinespacing(0);
+    Unicode::snprintf(timeTextBuffer, TIMETEXT_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    timeText.setWildcard(timeTextBuffer);
+    timeText.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_60));
+    add(timeText);
+
+    pauseIcon.setXY(194, 59);
+    pauseIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_PAUSE_ID));
+    add(pauseIcon);
+
+    playIcon.setXY(190, 59);
+    playIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_PLAY_ID));
+    add(playIcon);
+
+    stopIcon.setXY(31, 59);
+    stopIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_STOP_ID));
+    add(stopIcon);
+
+    resetIcon.setXY(31, 162);
+    resetIcon.setBitmap(touchgfx::Bitmap(BITMAP_ICON_RESET_ID));
+    add(resetIcon);
+
+    resetLabel.setPosition(54, 161, 90, 22);
+    resetLabel.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+    resetLabel.setLinespacing(0);
+    Unicode::snprintf(resetLabelBuffer, RESETLABEL_SIZE, "%s", touchgfx::TypedText(T_TEXT_NEW).getText());
+    resetLabel.setWildcard(resetLabelBuffer);
+    resetLabel.setTypedText(touchgfx::TypedText(T_TMP_MEDIUM_18_L));
+    add(resetLabel);
 
     title.setXY(50, 0);
     add(title);
@@ -24,6 +61,7 @@ RunningViewBase::~RunningViewBase()
 
 void RunningViewBase::setupScreen()
 {
+    buttons.initialize();
     title.initialize();
     transitionBegins();
 }

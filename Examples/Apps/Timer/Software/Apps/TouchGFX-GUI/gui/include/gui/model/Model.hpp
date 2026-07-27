@@ -47,7 +47,6 @@ public:
     void handleKeyEvent(uint8_t key);
     void resetIdleTimer();
     void exitApp();
-    void switchToNextPriorityScreen();
 
     // -- Countdown ------------------------------------------------------------
 
@@ -108,7 +107,7 @@ private:
     bool     mIsRunning  = false;
     bool     mInvalidate = false;
     uint32_t mIdleTimer  = 0;
-    bool     mStayInApp  = false;
+    bool     mStartupRouted = false;  ///< First service state seen -> initial screen chosen.
 
     // -- Countdown snapshot (mirrors the service) -----------------------------
 

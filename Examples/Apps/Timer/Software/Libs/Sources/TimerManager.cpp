@@ -81,10 +81,15 @@ void TimerManager::resume(uint32_t nowMs)
     LOG_INFO("Resume\n");
 }
 
-void TimerManager::reset(uint32_t /*nowMs*/)
+void TimerManager::reset(uint32_t nowMs)
 {
-    mRemainingMs = static_cast<uint32_t>(mDurationSec) * 1000u;
-    mState       = TimerState::PAUSED;
+    // Reset to the full duration, preserving the run state: a running timer
+    // keeps counting from the top, a paused one stays paused at the top.
+    if (mState == TimerState::PAUSED) {
+        mRemainingMs = static_cast<uint32_t>(mDurationSec) * 1000u;
+    } else {
+        arm(mDurationSec, mEffect, nowMs);
+    }
     LOG_INFO("Reset to %u s\n", static_cast<unsigned>(mDurationSec));
 }
 
