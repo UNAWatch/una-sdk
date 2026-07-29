@@ -228,6 +228,20 @@ void Service::run()
             if (processedUtc != utc) {
                 processedUtc = utc;
 
+                // GPS_LOCATION is subscribed once at GUI start so acquisition
+                // begins on the pre-activity screen. That first attempt can lose
+                // a ~100 ms connect race during app startup, which would strand
+                // position logging for the entire session (distance/speed still
+                // record via the kernel's own GPS_LOCATION listener, so the run
+                // looks complete but has no map). Retry until it takes.
+                if (!mSensorGpsLocation.isConnected()) {
+                    connectGps();
+                    if (mGpsInitialConnectFailed && mSensorGpsLocation.isConnected()) {
+                        mGpsInitialConnectFailed = false;
+                        LOG_INFO("GPS location subscription recovered after a lost startup connect\n");
+                    }
+                }
+
                 // Send to GUI real "local time" to display
                 std::tm tmNow = mTimeTracker.getLocalTime(std::time(nullptr));
                 mGuiSender.time(tmNow);
@@ -270,21 +284,21 @@ void Service::connectGps()
 
 void Service::connectSensors()
 {
-    if (!mIsSensorsConnected) {
-        LOG_DEBUG("Connect to sensors...\n");
+    // Idempotent + self-healing: connect only sensors not already connected,
+    // so a subscribe that lost the ~100 ms ack race at track start is retried
+    // (pumped from processTrack each tick) instead of dropped for the whole
+    // session. Already-connected sensors are skipped, so there is no churn.
+    if (!mSensorBatteryLevel.isConnected())   { mSensorBatteryLevel.connect(); }
+    if (!mSensorBatteryMetrics.isConnected()) { mSensorBatteryMetrics.connect(); }
+    if (!mSensorGpsSpeed.isConnected())       { mSensorGpsSpeed.connect(); }
+    if (!mSensorGpsDistance.isConnected())    { mSensorGpsDistance.connect(); }
+    if (!mSensorPressure.isConnected())       { mSensorPressure.connect(); }
+    if (!mSensorHr.isConnected())             { mSensorHr.connect(); }
+    if (!mSensorFusion.isConnected())         { mSensorFusion.connect(); }
+    if (!mSensorRunningCadence.isConnected()) { mSensorRunningCadence.connect(); }
+    if (!mSensorGrade.isConnected())          { mSensorGrade.connect(); }
 
-        mSensorBatteryLevel.connect();
-        mSensorBatteryMetrics.connect();
-        mSensorGpsSpeed.connect();
-        mSensorGpsDistance.connect();
-        mSensorPressure.connect();
-        mSensorHr.connect();
-        mSensorFusion.connect();
-        mSensorRunningCadence.connect();
-        mSensorGrade.connect();
-
-        mIsSensorsConnected = true;
-    }
+    mIsSensorsConnected = true;
 }
 
 void Service::disconnect()
@@ -439,8 +453,14 @@ void Service::onStartGUI()
     setCapabilities();
     requestAccessoryPrepare();   // pre-warm external HR while on the pre-activity screen
 
-    // Subscribe to GPS to get fix
+    // Subscribe to GPS to get fix. If this first attempt loses the ~100 ms
+    // startup ack race, the run() loop retries; flag it so the recovery is
+    // logged (and field/monitoring logs reveal how often the race fires).
     connectGps();
+    if (!mSensorGpsLocation.isConnected()) {
+        mGpsInitialConnectFailed = true;
+        LOG_WARNING("GPS location subscribe lost the startup race; will retry\n");
+    }
 
     mSensorWristMotion.connect();
 
@@ -814,6 +834,12 @@ void Service::startTrack(std::time_t utc)
 void Service::processTrack()
 {
     LOG_DEBUG("Time: %u / %u\n", static_cast<uint32_t>(mTimeCounter.getValueActive()), static_cast<uint32_t>(mTimeCounter.getValueTotal()));
+
+    // Retry any track-sensor subscription that lost the connect-ack race at
+    // track start. connectSensors() is idempotent, so this is a cheap no-op
+    // once everything is connected, and it runs only while the track is active
+    // (processTrack) so it never re-powers sensors after the track ends.
+    connectSensors();
 
     // Creating map
     SDK::TrackMapBuilder::GpsPoint newPoint{ mGps.latitude, mGps.longitude };
