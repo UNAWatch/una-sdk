@@ -320,12 +320,13 @@ void Service::disconnect()
     }
 
     // The activity is over (stopTrack) or the app is stopping: GPS is no longer
-    // wanted, so the run() retry must not re-wake it. Release it if still up.
+    // wanted, so the run() retry must not re-wake it. Release unconditionally --
+    // disconnect() is a no-op if never subscribed, and firing it whenever a
+    // handle is held is what releases a listener whose connect-ack timed out
+    // (isConnected() would be false in exactly that case).
     mGpsWanted = false;
-    if (mSensorGpsLocation.isConnected()) {
-        LOG_DEBUG("Disconnect from GPS sensor...\n");
-        mSensorGpsLocation.disconnect();
-    }
+    LOG_DEBUG("Disconnect from GPS sensor...\n");
+    mSensorGpsLocation.disconnect();
 }
 
 
