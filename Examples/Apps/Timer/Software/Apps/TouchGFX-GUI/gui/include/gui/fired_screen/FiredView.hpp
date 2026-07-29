@@ -7,9 +7,9 @@
 /**
  * @brief Fired screen: the countdown reached zero and the alert is sounding.
  *
- * An amber "Timer" label with two static actions: Repeat (R1) silences the
- * alert and restarts the countdown (-> Running); Stop (R2) silences it and
- * returns to Main.
+ * An amber "Timer" label with two static actions: Done (R1) silences and ends
+ * the timer (-> Main, or exits when the alert opened the GUI); Repeat (R2)
+ * silences and re-arms the countdown (-> Running).
  */
 class FiredView : public FiredViewBase
 {

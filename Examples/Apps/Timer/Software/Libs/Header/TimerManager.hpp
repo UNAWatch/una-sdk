@@ -105,7 +105,7 @@ private:
 
     static constexpr char     skFilePath[] = "timer.json";
     static constexpr uint32_t kNoTimeout   = 0xFFFFFFFF;
-    static constexpr size_t   kMaxRecents  = 3;
+    static constexpr size_t   kMaxRecents  = Timer::kMaxRecents;   // single source: Timer.hpp
 
     // -- State ----------------------------------------------------------------
 

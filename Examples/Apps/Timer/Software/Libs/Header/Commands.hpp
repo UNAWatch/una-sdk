@@ -16,7 +16,7 @@
 namespace CustomMessage {
 
     // Maximum number of recent timers kept and transferred in one message.
-    static constexpr size_t kMaxRecents = 3;
+    static constexpr size_t kMaxRecents = Timer::kMaxRecents;   // single source: Timer.hpp
 
     // -- Message type ids (application-custom) --------------------------------
 

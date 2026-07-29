@@ -13,6 +13,7 @@
 #define TIMER_HPP
 
 #include <cstdint>
+#include <cstddef>
 
 /**
  * @struct Timer
@@ -54,6 +55,14 @@ struct Timer {
 
     /** @brief Upper bound for a manually entered duration: 99:59. */
     static constexpr uint16_t kMaxDurationSec = 99 * 60 + 59;
+
+    /**
+     * @brief Recents kept and carried in one IPC message -- the single source.
+     *
+     * The persistence cap (TimerManager) and the message capacity (CustomMessage)
+     * both derive from this so they cannot drift apart.
+     */
+    static constexpr size_t kMaxRecents = 3;
 
     /**
      * @brief Identity for lists (recents, presets): duration only.
