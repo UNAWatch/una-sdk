@@ -146,6 +146,11 @@ void Service::handleControl(const CustomMessage::TimerControl& msg)
             stopEffect();
             mTimerManager.repeat(now);
             break;
+        case CustomMessage::TimerCmd::REPLAY_ALERT:
+            // Re-indication only: replay the alert, state is unchanged (FIRED),
+            // so there is nothing new to report to the GUI.
+            playEffect(mTimerManager.getState().effect);
+            return;
     }
 
     sendStateToGui();

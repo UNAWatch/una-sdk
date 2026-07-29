@@ -44,7 +44,8 @@ namespace CustomMessage {
         RESUME,
         RESET,
         STOP,
-        REPEAT
+        REPEAT,
+        REPLAY_ALERT   ///< Re-play the fired alert effect (periodic re-indication).
     };
 
     // -- GUI --> Service ------------------------------------------------------
@@ -163,6 +164,7 @@ public:
     bool reset()  { return control(TimerCmd::RESET);  }
     bool stop()   { return control(TimerCmd::STOP);   }
     bool repeat() { return control(TimerCmd::REPEAT); }
+    bool replayAlert() { return control(TimerCmd::REPLAY_ALERT); }
 
     bool saveRecents(const std::vector<Timer>& list)
     {

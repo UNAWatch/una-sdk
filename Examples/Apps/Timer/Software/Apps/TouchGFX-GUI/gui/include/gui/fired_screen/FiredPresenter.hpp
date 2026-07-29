@@ -30,6 +30,8 @@ public:
     void repeat() { model->repeatTimer(); }
     /** @brief Silence the alert and end the countdown. */
     void done()   { model->stopTimer();   }
+    /** @brief Re-play the alert effect (periodic re-indication while fired). */
+    void replayAlert() { model->replayAlert(); }
     /** @brief Leave the GUI entirely. */
     void exit()   { model->exitApp();     }
 

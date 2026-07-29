@@ -59,6 +59,9 @@ public:
     void stopTimer();
     void repeatTimer();
 
+    /** @brief Ask the service to replay the fired alert (periodic re-indication). */
+    void replayAlert();
+
     TimerState    getState()       const { return mState; }
     uint16_t      getDurationSec() const { return mDurationSec; }
     Timer::Effect getEffect()      const { return mEffect; }

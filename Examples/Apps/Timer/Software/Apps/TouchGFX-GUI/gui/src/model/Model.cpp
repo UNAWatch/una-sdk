@@ -117,6 +117,7 @@ void Model::resumeTimer() { mSrvSender.resume(); }
 void Model::resetTimer()  { mSrvSender.reset();  }
 void Model::stopTimer()   { mSrvSender.stop();   }
 void Model::repeatTimer() { mSrvSender.repeat(); }
+void Model::replayAlert() { mSrvSender.replayAlert(); }
 
 uint32_t Model::getRemainingMs() const
 {
