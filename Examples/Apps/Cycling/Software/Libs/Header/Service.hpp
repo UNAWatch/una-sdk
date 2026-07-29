@@ -114,6 +114,7 @@ private:
     Track::State mTrackState          = Track::State::INACTIVE;
     bool         mPreviousGpsFixState = false;
     bool         mGpsInitialConnectFailed = false;  ///< GPS_LOCATION subscribe lost the startup ack race; the retry logs the recovery.
+    bool         mGpsWanted = false;                 ///< GPS_LOCATION should stay connected (pre-activity + active track); cleared in disconnect() so the retry never re-wakes the GNSS post-activity.
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
     Track::Data  mTrackData{};

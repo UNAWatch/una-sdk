@@ -218,7 +218,7 @@ void Service::run()
                 // position logging for the entire session (distance/speed still
                 // record via the kernel's own GPS_LOCATION listener, so the run
                 // looks complete but has no map). Retry until it takes.
-                if (!mSensorGpsLocation.isConnected()) {
+                if (mGpsWanted && !mSensorGpsLocation.isConnected()) {
                     connectGps();
                     if (mGpsInitialConnectFailed && mSensorGpsLocation.isConnected()) {
                         mGpsInitialConnectFailed = false;
@@ -301,6 +301,9 @@ void Service::disconnect()
         mIsSensorsConnected = false;
     }
 
+    // The activity is over (stopTrack) or the app is stopping: GPS is no longer
+    // wanted, so the run() retry must not re-wake it. Release it if still up.
+    mGpsWanted = false;
     if (mSensorGpsLocation.isConnected()) {
         LOG_DEBUG("Disconnect from GPS sensor...\n");
         mSensorGpsLocation.disconnect();
@@ -396,12 +399,17 @@ void Service::onStartGUI()
     setCapabilities();
     requestAccessoryPrepare();   // pre-warm external HR while on the pre-activity screen
 
+    // GPS stays wanted from the pre-activity screen until the activity ends
+    // (cleared in disconnect()), so the run() loop keeps it connected during the
+    // activity but never re-wakes the GNSS on the post-activity summary screen.
+    mGpsWanted = true;
+
     // Subscribe to GPS to get fix. If this first attempt loses the ~100 ms
-    // startup ack race, the run() loop retries; flag it so the recovery is
-    // logged (and field/monitoring logs reveal how often the race fires).
+    // startup ack race, the run() loop retries; track the outcome so the retry
+    // logs the recovery (and field logs reveal how often the race fires).
     connectGps();
-    if (!mSensorGpsLocation.isConnected()) {
-        mGpsInitialConnectFailed = true;
+    mGpsInitialConnectFailed = !mSensorGpsLocation.isConnected();
+    if (mGpsInitialConnectFailed) {
         LOG_WARNING("GPS location subscribe lost the startup race; will retry\n");
     }
 

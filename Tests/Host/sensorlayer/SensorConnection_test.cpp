@@ -37,6 +37,7 @@ public:
     // (send succeeded, only the response timed out) with result != SUCCESS,
     // exactly as the device comm does.
     int      defaultTimeouts = 0;   // RequestDefault (subscribe) timeouts before success
+    int      defaultFails    = 0;   // RequestDefault replies FAIL (not a timeout) before success
     int      connectTimeouts = 0;   // RequestConnect timeouts before success
     bool     connectFails    = false;  // RequestConnect replies FAIL (not a timeout)
     uint32_t handle          = 42;  // handle a successful RequestDefault returns
@@ -50,6 +51,7 @@ public:
     void reset()
     {
         defaultTimeouts = 0;
+        defaultFails    = 0;
         connectTimeouts = 0;
         connectFails    = false;
         handle          = 42;
@@ -69,6 +71,11 @@ public:
                 --defaultTimeouts;
                 msg->setResult(SDK::MessageResult::TIMEOUT);
                 return true;  // device returns true even on a response timeout
+            }
+            if (defaultFails > 0) {
+                --defaultFails;
+                msg->setResult(SDK::MessageResult::FAIL);
+                return true;
             }
             static_cast<RequestDefault*>(msg)->handle = handle;
             msg->setResult(SDK::MessageResult::SUCCESS);
@@ -224,4 +231,50 @@ TEST(SensorConnection, DisconnectReleasesHandleEvenIfConnectFlagFalse)
     conn.disconnect();
     EXPECT_EQ(comm.disconnectCalls, 1);  // would be 0 under the old mIsConnected gate
     EXPECT_EQ(comm.lastDisconnectHandle, 42u);
+}
+
+// A reconnect after a clean connect+disconnect re-sends RequestConnect but NOT
+// RequestDefault (the handle is retained) and comes back connected. This is the
+// contract the apps rely on when GPS is torn down and later wanted again.
+TEST(SensorConnection, ReconnectsWithoutResubscribing)
+{
+    ScriptedComm& comm = scriptedComm();
+    comm.reset();
+
+    SDK::Sensor::Connection conn(kGps, 1000, 1000);
+    EXPECT_TRUE(conn.connect());
+    EXPECT_EQ(comm.defaultCalls, 1);
+    EXPECT_EQ(comm.connectCalls, 1);
+
+    conn.disconnect();
+    EXPECT_FALSE(conn.isConnected());
+    EXPECT_TRUE(conn.isValid());  // handle retained
+    EXPECT_EQ(comm.disconnectCalls, 1);
+
+    EXPECT_TRUE(conn.connect());
+    EXPECT_TRUE(conn.isConnected());
+    EXPECT_EQ(comm.defaultCalls, 1);  // no re-subscribe: handle already held
+    EXPECT_EQ(comm.connectCalls, 2);
+}
+
+// A subscribe that FAILs (rather than times out) also leaves the connection
+// unresolved, and a retry recovers once the kernel resolves the handle.
+TEST(SensorConnection, RecoversAfterSubscribeFail)
+{
+    ScriptedComm& comm = scriptedComm();
+    comm.reset();
+    comm.defaultFails = 1;  // first RequestDefault replies FAIL, then succeeds
+
+    SDK::Sensor::Connection conn(kGps, 1000, 1000);
+
+    EXPECT_FALSE(conn.connect());
+    EXPECT_FALSE(conn.isConnected());
+    EXPECT_FALSE(conn.isValid());
+    EXPECT_EQ(comm.defaultCalls, 1);
+    EXPECT_EQ(comm.connectCalls, 0);
+
+    EXPECT_TRUE(conn.connect());
+    EXPECT_TRUE(conn.isConnected());
+    EXPECT_EQ(comm.defaultCalls, 2);
+    EXPECT_EQ(comm.connectCalls, 1);
 }
