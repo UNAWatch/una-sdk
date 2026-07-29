@@ -110,8 +110,11 @@ void Connection::disconnect()
     if (request) {
         request->handle = mHandle;
         request.send();
-        mIsConnected = false;
     }
+    // Clear regardless of whether the message could be allocated: disconnect()
+    // means this Connection no longer considers itself connected, and nothing
+    // retries disconnect().
+    mIsConnected = false;
 }
 
 bool Connection::matchesDriver(uint16_t handle)
