@@ -384,7 +384,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ApplicationRoot)\gui\include;$(ApplicationRoot)\generated\images\include;$(ApplicationRoot)\generated\bitmaps\include;$(ApplicationRoot)\generated\fonts\include;$(ApplicationRoot)\generated\texts\include;$(ApplicationRoot)\generated\videos\include;$(ApplicationRoot)\generated\gui_generated\include;$(ApplicationRoot)\generated\simulator\include;$(TouchGFXReleasePath)\framework\common\include;$(TouchGFXReleasePath)\framework\mvp\include;$(TouchGFXReleasePath)\framework\include\platform\hal\simulator\sdl2\vendor;$(TouchGFXReleasePath)\3rdparty\libjpeg\include;$(TouchGFXReleasePath)\framework\include;../../gui/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ApplicationRoot)\gui\include;$(ApplicationRoot)\generated\images\include;$(ApplicationRoot)\generated\bitmaps\include;$(ApplicationRoot)\generated\fonts\include;$(ApplicationRoot)\generated\texts\include;$(ApplicationRoot)\generated\videos\include;$(ApplicationRoot)\generated\gui_generated\include;$(ApplicationRoot)\generated\simulator\include;$(TouchGFXReleasePath)\framework\common\include;$(TouchGFXReleasePath)\framework\mvp\include;$(TouchGFXReleasePath)\framework\include\platform\hal\simulator\sdl2\vendor;$(TouchGFXReleasePath)\3rdparty\libjpeg\include;$(TouchGFXReleasePath)\framework\include;../../gui/include;../../../../Libs/Header;$(SdkPath)/ThirdParty/coreJSON/source/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
