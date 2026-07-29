@@ -45,15 +45,19 @@ void CountdownTimer::reset()
 
 void CountdownTimer::handleTickEvent()
 {
-    if (mCounter == 0) {
+    if (!mRegistered) {
         return;
     }
 
-    if (--mCounter == 0) {
-        unregisterTimer();
-        if (mpCb != nullptr && mpCb->isValid()) {
-            mpCb->execute();
-        }
+    // A zero-duration countdown (mCounter already 0) expires on this tick rather
+    // than staying registered forever; the guard also avoids a uint16 underflow.
+    if (mCounter > 0 && --mCounter != 0) {
+        return;
+    }
+
+    unregisterTimer();
+    if (mpCb != nullptr && mpCb->isValid()) {
+        mpCb->execute();
     }
 }
 
