@@ -2,6 +2,24 @@
   "Application": {
     "Screens": [
       {
+        "Name": "Startup",
+        "CanvasBufferSize": 3600,
+        "Components": [],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Startup"
+            }
+          }
+        ]
+      },
+      {
         "Name": "Main",
         "CanvasBufferSize": 3600,
         "Components": [
@@ -867,7 +885,7 @@
       "Height": 240
     },
     "SelectedColorDepth": 8,
-    "StartupScreenName": "Main",
+    "StartupScreenName": "Startup",
     "SelectedStartupLanguage": "GB",
     "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
     "UIPath": ".",

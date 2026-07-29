@@ -234,8 +234,10 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
             mEffect      = m->effect;
             modelListener->onStateChanged();
 
-            // First state after launch: if a countdown is already active, open
-            // the Running screen straight away instead of staying on Main.
+            // First state after launch: route away from the blank Startup screen
+            // to the right destination, so Main's "New" face never flashes before
+            // a cold-start countdown takes over. (A cold-start fire arrives as
+            // TIMER_FIRED instead and is routed there.)
             if (!mStartupRouted) {
                 mStartupRouted = true;
                 if (mState == TimerState::RUNNING || mState == TimerState::PAUSED) {
@@ -243,6 +245,8 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
                     // the Main selection resolve to it, not the stale default.
                     mEditTimer = Timer{ mDurationSec, mEffect };
                     application().gotoRunningScreenNoTransition();
+                } else {
+                    application().gotoMainScreenNoTransition();
                 }
             }
         } break;
@@ -254,6 +258,10 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
             mDurationSec          = m->durationSec;
             mEffect               = m->effect;
             mFiredFromBackground  = m->background;
+            // A fire is also a valid first-message-after-launch (cold-start into a
+            // fired alarm): onFired routes to the Fired screen, so mark startup
+            // routed to keep a later idle state from re-routing to Main.
+            mStartupRouted = true;
             modelListener->onFired(Timer{ m->durationSec, m->effect });
         } break;
 

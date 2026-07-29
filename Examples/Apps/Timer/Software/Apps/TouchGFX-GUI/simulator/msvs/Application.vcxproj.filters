@@ -379,6 +379,18 @@
     <Filter Include="Source Files\generated\gui_generated\running_screen">
       <UniqueIdentifier>9BE8148F-DBC4-BCA6-F2EA-B9D99E7EE08B</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\gui\startup_screen">
+      <UniqueIdentifier>A2FA60CE-77C2-2AD5-2C84-247EFEE49462</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\startup_screen">
+      <UniqueIdentifier>3C7333A5-531C-0E08-4893-2036DE4C5715</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\startup_screen">
+      <UniqueIdentifier>A7FB06E9-6C68-FDED-2940-249046004C59</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\startup_screen">
+      <UniqueIdentifier>2E88DF9B-A4BF-9C2B-5AE5-3D35F1FCE47C</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -764,6 +776,24 @@
     </ClCompile>
     <ClInclude Include="..\..\gui\include\gui\containers\SpherePicker.hpp">
       <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\startup_screen\StartupPresenter.cpp">
+      <Filter>Source Files\gui\startup_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\startup_screen\StartupView.cpp">
+      <Filter>Source Files\gui\startup_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\startup_screen\StartupViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\startup_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\startup_screen\StartupPresenter.hpp">
+      <Filter>Header Files\gui\startup_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\startup_screen\StartupView.hpp">
+      <Filter>Header Files\gui\startup_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\startup_screen\StartupViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\startup_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

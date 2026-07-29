@@ -17,8 +17,11 @@ public:
 
     virtual void changeToStartScreen()
     {
-        gotoMainScreenNoTransition();
+        gotoStartupScreenNoTransition();
     }
+
+    // Startup
+    void gotoStartupScreenNoTransition();
 
     // Main
     void gotoMainScreenNoTransition();
@@ -45,6 +48,9 @@ protected:
     touchgfx::Callback<FrontendApplicationBase> transitionCallback;
     FrontendHeap& frontendHeap;
     Model& model;
+
+    // Startup
+    void gotoStartupScreenNoTransitionImpl();
 
     // Main
     void gotoMainScreenNoTransitionImpl();

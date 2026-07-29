@@ -95,6 +95,9 @@
     <ClCompile Include="..\..\gui\src\running_screen\RunningPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\running_screen\RunningView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\running_screen\RunningViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\startup_screen\StartupPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\startup_screen\StartupView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\startup_screen\StartupViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -300,6 +303,9 @@
     <ClInclude Include="..\..\gui\include\gui\common\TimeFormat.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ScrollIndicatorBase.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\OrbitMenuBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\startup_screen\StartupPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\startup_screen\StartupView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\startup_screen\StartupViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>
