@@ -215,22 +215,22 @@ void Service::run()
 
 void Service::connectSensors()
 {
-    if (!mIsSensorsConnected) {
-        LOG_DEBUG("Connect to sensors...\n");
+    // Idempotent + self-healing: connect only sensors not already connected,
+    // so a subscribe that lost the ~100 ms ack race at track start is retried
+    // (pumped from processTrack each tick) instead of dropped for the whole
+    // session. Already-connected sensors are skipped, so there is no churn.
+    if (!mSensorBatteryLevel.isConnected())   { mSensorBatteryLevel.connect(); }
+    if (!mSensorBatteryMetrics.isConnected()) { mSensorBatteryMetrics.connect(); }
+    if (!mSensorPressure.isConnected())       { mSensorPressure.connect(); }
+    if (!mSensorHr.isConnected())             { mSensorHr.connect(); }
+    if (!mSensorFusion.isConnected())         { mSensorFusion.connect(); }
 
-        mSensorBatteryLevel.connect();
-        mSensorBatteryMetrics.connect();
-        mSensorPressure.connect();
-        mSensorHr.connect();
-        mSensorFusion.connect();
+    // External HR strap is pre-acquired at the pre-activity screen via the
+    // accessoryKinds capability (WP-S4), not here — so it is already
+    // connecting before the workout starts. Its readings arrive through the
+    // normal HEART_RATE sensor (the kernel arbitrates external vs optical).
 
-        // External HR strap is pre-acquired at the pre-activity screen via the
-        // accessoryKinds capability (WP-S4), not here — so it is already
-        // connecting before the workout starts. Its readings arrive through the
-        // normal HEART_RATE sensor (the kernel arbitrates external vs optical).
-
-        mIsSensorsConnected = true;
-    }
+    mIsSensorsConnected = true;
 }
 
 void Service::disconnect()
@@ -636,6 +636,12 @@ void Service::startTrack(std::time_t utc)
 void Service::processTrack()
 {
     LOG_DEBUG("Time: %u / %u\n", static_cast<uint32_t>(mTimeCounter.getValueActive()), static_cast<uint32_t>(mTimeCounter.getValueTotal()));
+
+    // Retry any track-sensor subscription that lost the connect-ack race at
+    // track start. connectSensors() is idempotent, so this is a cheap no-op
+    // once everything is connected, and it runs only while the track is active
+    // (processTrack) so it never re-powers sensors after the track ends.
+    connectSensors();
 
     // Time, s
     mTrackData.totalTime = mTimeCounter.getValueActive();
