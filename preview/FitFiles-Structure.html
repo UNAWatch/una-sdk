@@ -1171,10 +1171,11 @@ buffering.</p></li>
 <p><strong>Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::FileId::*</span></code>, <code class="docutils literal notranslate"><span class="pre">MesgNum::FileId</span></code>):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">type</span></code>: <code class="docutils literal notranslate"><span class="pre">Sport</span></code>/<code class="docutils literal notranslate"><span class="pre">File::Activity</span></code> (4)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code>: <code class="docutils literal notranslate"><span class="pre">Manufacturer::Development</span></code> (255)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">product</span></code>: 0 (development product)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code>: <code class="docutils literal notranslate"><span class="pre">Manufacturer::Una</span></code> (351)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">product</span></code>: <code class="docutils literal notranslate"><span class="pre">Product::UnaWatch</span></code> (1)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">serial_number</span></code>: 0</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">time_created</span></code>: FIT timestamp of activity start</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">product_name</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;UNA</span> <span class="pre">Watch&quot;</span></code> (string, field 8)</p></li>
 </ul>
 </section>
 <section id="developer-data-id-message">
@@ -1284,10 +1285,11 @@ battery level/voltage on the battery record variants).</p>
 <li><p><strong>Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::FileId::*</span></code>):</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">type</span></code>: <code class="docutils literal notranslate"><span class="pre">File::Activity</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code>: <code class="docutils literal notranslate"><span class="pre">Manufacturer::Development</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">product</span></code>: 0</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code>: <code class="docutils literal notranslate"><span class="pre">Manufacturer::Una</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">product</span></code>: <code class="docutils literal notranslate"><span class="pre">Product::UnaWatch</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">serial_number</span></code>: 0</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">time_created</span></code>: Unix timestamp converted to FIT time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">product_name</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;UNA</span> <span class="pre">Watch&quot;</span></code></p></li>
 </ul>
 </li>
 </ul>
@@ -1763,16 +1765,20 @@ enums in the header (see “Constructor and Initialization”), and the
 <span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">begin</span><span class="p">(</span><span class="cm">/*profileVersion=*/</span><span class="mi">0</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// 2. file_id: define, then write one data record.</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">productNameLen</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">strlen</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">kProductName</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 <span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">defineMessage</span><span class="p">(</span><span class="n">L_FILE_ID</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">FileId</span><span class="p">),</span>
 <span class="w">        </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">Manufacturer</span><span class="p">,</span>
 <span class="w">         </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">Product</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">SerialNumber</span><span class="p">,</span>
-<span class="w">         </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">TimeCreated</span><span class="p">});</span>
+<span class="w">         </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">TimeCreated</span><span class="p">,</span>
+<span class="w">         </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">FileId</span><span class="o">::</span><span class="n">kProductNameNum</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">productNameLen</span><span class="p">}});</span>
 <span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_FILE_ID</span><span class="p">)</span>
 <span class="w">        </span><span class="p">.</span><span class="n">u8</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">File</span><span class="o">::</span><span class="n">Activity</span><span class="p">))</span>
-<span class="w">        </span><span class="p">.</span><span class="n">u16</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">Manufacturer</span><span class="o">::</span><span class="n">Development</span><span class="p">))</span>
-<span class="w">        </span><span class="p">.</span><span class="n">u16</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w">  </span><span class="c1">// product</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u16</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">Manufacturer</span><span class="o">::</span><span class="n">Una</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">u16</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">Product</span><span class="o">::</span><span class="n">UnaWatch</span><span class="p">))</span><span class="w">  </span><span class="c1">// product</span>
 <span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w">  </span><span class="c1">// serial_number</span>
 <span class="w">        </span><span class="p">.</span><span class="n">u32</span><span class="p">(</span><span class="n">unixToFitTimestamp</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">timestamp</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">str</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">kProductName</span><span class="p">,</span><span class="w"> </span><span class="n">productNameLen</span><span class="p">)</span><span class="w">  </span><span class="c1">// product_name</span>
 <span class="w">        </span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
 
 <span class="w">    </span><span class="c1">// 3. developer_data_id: registers the app for custom fields.</span>
