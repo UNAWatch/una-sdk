@@ -122,6 +122,7 @@ private:
     LapDivSource mLapDivSource        = LapDivSource::OFF;
     Track::State mTrackState          = Track::State::INACTIVE;
     bool         mPreviousGpsFixState = false;
+    bool         mGpsInitialConnectFailed = false;  ///< GPS_LOCATION subscribe lost the startup ack race; the retry logs the recovery.
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
     Track::Data  mTrackData{};

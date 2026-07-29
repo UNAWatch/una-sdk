@@ -60,9 +60,13 @@ bool Connection::connect()
     reqConnect->period  = mPeriod;
     reqConnect->latency = mLatency;
 
-    if (reqConnect.send(100) || reqConnect.ok()) {
-        mIsConnected = true;
-    }
+    // Connected only when the kernel actually returned SUCCESS. sendMessage()
+    // returns true even when only the *response* timed out (not just on a real
+    // reply), so the old `send() || ok()` latched mIsConnected on a timed-out
+    // ack -- the field failure mode -- as well as on FAIL, then never retried.
+    // Gating on ok() leaves mIsConnected false on timeout/FAIL so the caller
+    // can retry. Mirrors subscribe()'s `!send() || !ok()`.
+    mIsConnected = reqConnect.send(100) && reqConnect.ok();
 
     return mIsConnected;
 }
@@ -96,13 +100,17 @@ void Connection::disconnect()
         return;
     }
 
-    if (mIsConnected) {
-        auto request = SDK::make_msg<SDK::Message::Sensor::RequestDisconnect>(mKernel);
-        if (request) {
-            request->handle = mHandle;
-            request.send();
-            mIsConnected = false;
-        }
+    // Disconnect whenever we hold a handle, not only when mIsConnected is set.
+    // A connect() whose ack timed out can still have registered the listener
+    // kernel-side (sendMessage returns true on a response timeout), leaving
+    // mIsConnected false; gating on it would leak that listener -- and any
+    // duty-cycled hardware behind it -- until app stop. Disconnecting an
+    // unregistered listener is a safe kernel-side no-op.
+    auto request = SDK::make_msg<SDK::Message::Sensor::RequestDisconnect>(mKernel);
+    if (request) {
+        request->handle = mHandle;
+        request.send();
+        mIsConnected = false;
     }
 }
 
