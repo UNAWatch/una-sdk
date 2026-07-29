@@ -79,7 +79,7 @@ Libs/Source/Simulator/Components/SensorDriver.cpp\
 ADDITIONAL_SOURCES :=
 ADDITIONAL_INCLUDE_PATHS := $(SDK)/Libs/Header\
 ../../Libs/Header\
-$(SDK)/ThirdParty/coreJSON/source/include\
+$(SDK)/ThirdParty/coreJSON/source/include
 ADDITIONAL_LIBRARY_PATHS := 
 ADDITIONAL_LIBRARIES :=
 
