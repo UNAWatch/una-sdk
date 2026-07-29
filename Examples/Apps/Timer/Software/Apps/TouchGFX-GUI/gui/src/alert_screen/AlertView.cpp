@@ -41,7 +41,7 @@ void AlertView::setupScreen()
                        static_cast<int16_t>(sizeof(kAlertTiers) / sizeof(kAlertTiers[0])));
     // Uniform spacing; the far (+/-2) rows fall outside the box and are clipped
     // so the 3 options never show a duplicate.
-    const OrbitMenu::Anchors anchors = { { 0, 22, 87 }, { 58, 22, 87 }, { 98, 22, 87 } };
+    const OrbitMenu::Anchors anchors = { { 0 }, { 58 }, { 98 } };
     orbitMenu.setAnchors(anchors);
     orbitMenu.setHeight(152);
     orbitMenu.setAnimationSteps(App::Config::kMenuAnimationSteps);

@@ -41,7 +41,7 @@ void MenuView::setupScreen()
     // The box top (Y96) clips the row above the selection off its top edge; its
     // slot holds the value label instead, and the far row below clips off the
     // bottom, leaving centre + one below.
-    const OrbitMenu::Anchors anchors = { { 0, 22, 87 }, { 58, 22, 87 }, { 98, 22, 87 } };
+    const OrbitMenu::Anchors anchors = { { 0 }, { 58 }, { 98 } };
     orbitMenu.setAnchors(anchors);
     orbitMenu.setHeight(104);
     orbitMenu.setCenterOffset(-28);   // centreLineY 24 -> centre lands at screen y120 (pill).

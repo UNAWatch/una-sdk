@@ -1,15 +1,8 @@
 #include <gui/containers/OrbitMenu.hpp>
 #include <touchgfx/Application.hpp>
-#include <touchgfx/Bitmap.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
 #include <SDK/GUI/Color.hpp>
 #include <math.h>
-
-namespace {
-// App icon sizes (raw ABGR2222 buffers from App::Item).
-const int16_t kIconBig   = 60;
-const int16_t kIconSmall = 30;
-} // namespace
 
 // ============================================================================
 // Tuning knobs -- adjust these to shape the effect, then rebuild the simulator.
@@ -17,8 +10,6 @@ const int16_t kIconSmall = 30;
 namespace {
 
 // Position anchors are runtime-configurable; defaults live in OrbitMenu.hpp.
-// Icon size: |d| below this gets the 60px icon (only the centre).
-const float kBigThreshold = 0.5f;
 
 float lerpf(float a, float b, float t) { return a + (b - a) * t; }
 
@@ -45,28 +36,8 @@ OrbitMenuItem::OrbitMenuItem()
 {
 }
 
-OrbitMenuItem::~OrbitMenuItem()
-{
-    freeDynamic();
-}
-
-void OrbitMenuItem::freeDynamic()
-{
-    if (mDyn60 != touchgfx::BITMAP_INVALID) {
-        touchgfx::Bitmap::dynamicBitmapDelete(mDyn60);
-        mDyn60 = touchgfx::BITMAP_INVALID;
-    }
-    if (mDyn30 != touchgfx::BITMAP_INVALID) {
-        touchgfx::Bitmap::dynamicBitmapDelete(mDyn30);
-        mDyn30 = touchgfx::BITMAP_INVALID;
-    }
-}
-
 void OrbitMenuItem::initialize()
 {
-    icon.setXY(0, 0);
-    add(icon);
-
     label.setColor(SDK::GUI::Color::WHITE);
     labelBuffer[0] = 0;
     label.setWildcard(labelBuffer);
@@ -74,28 +45,8 @@ void OrbitMenuItem::initialize()
     add(label);
 }
 
-void OrbitMenuItem::setData(touchgfx::BitmapId static60, touchgfx::BitmapId static30,
-                            const uint8_t *ext60, const uint8_t *ext30,
-                            const char *text, touchgfx::TypedTextId labelId)
+void OrbitMenuItem::setData(const char *text, touchgfx::TypedTextId labelId)
 {
-    freeDynamic();
-
-    if (ext60 != nullptr) {
-        mDyn60  = touchgfx::Bitmap::dynamicBitmapCreateExternal(
-            kIconBig, kIconBig, ext60, touchgfx::Bitmap::ABGR2222);
-        mIcon60 = mDyn60;
-    } else {
-        mIcon60 = static60;
-    }
-
-    if (ext30 != nullptr) {
-        mDyn30  = touchgfx::Bitmap::dynamicBitmapCreateExternal(
-            kIconSmall, kIconSmall, ext30, touchgfx::Bitmap::ABGR2222);
-        mIcon30 = mDyn30;
-    } else {
-        mIcon30 = static30;
-    }
-
     // A raw string wins (dynamic values); otherwise pull a localised label.
     if (text != nullptr) {
         touchgfx::Unicode::fromUTF8(reinterpret_cast<const uint8_t *>(text),
@@ -108,40 +59,19 @@ void OrbitMenuItem::setData(touchgfx::BitmapId static60, touchgfx::BitmapId stat
     }
 }
 
-void OrbitMenuItem::render(bool bigIcon, touchgfx::TypedTextId labelFont,
-                           touchgfx::colortype labelColor,
-                           int16_t iconCenterX, int16_t textX, int16_t centerY)
+void OrbitMenuItem::render(touchgfx::TypedTextId labelFont,
+                           touchgfx::colortype labelColor, int16_t centerY)
 {
-    // Full-width row; icon and label are placed independently in row-local X.
     // Tall enough that the 60px centre value never clips top/bottom.
     const int16_t rowH = 84;
 
-    // Icon: the bitmap itself carries the size, so a swap is all that is needed.
-    // Placed by its centre (iconCenterX) so the 60<->30 swap shrinks in place
-    // instead of darting sideways. Rows without an icon (e.g. plain values)
-    // hide it and centre their label across the row instead.
-    const touchgfx::BitmapId iconId = bigIcon ? mIcon60 : mIcon30;
-    const bool hasIcon = iconId != touchgfx::BITMAP_INVALID && iconId != 0;
-
-    icon.setVisible(hasIcon);
-    if (hasIcon) {
-        icon.setBitmap(touchgfx::Bitmap(iconId));
-        const int16_t iconSz = icon.getHeight();
-        icon.setXY(static_cast<int16_t>(iconCenterX - iconSz / 2), (rowH - iconSz) / 2);
-    }
-
     label.setTypedText(touchgfx::TypedText(labelFont));
     label.setColor(labelColor);
-    if (hasIcon) {
-        // Icon rows: label left-aligned beside the icon.
-        label.setPosition(textX, 0, 240 - textX, rowH);
-    } else {
-        // Value rows: centre the (left-aligned) label across the full width.
-        label.setPosition(0, 0, 240, rowH);
-        const int16_t w = label.getTextWidth();
-        label.setPosition(static_cast<int16_t>((240 - w) / 2), 0,
-                          static_cast<int16_t>(w + 4), rowH);
-    }
+    // Centre the (left-aligned) label across the full row width.
+    label.setPosition(0, 0, 240, rowH);
+    const int16_t w = label.getTextWidth();
+    label.setPosition(static_cast<int16_t>((240 - w) / 2), 0,
+                      static_cast<int16_t>(w + 4), rowH);
     label.resizeHeightToCurrentText();
     // Centre by the digit's real cap box, not the line box: a digit rests on the
     // baseline with height == glyph height, so placing the baseline at
@@ -440,55 +370,34 @@ void OrbitMenu::layout()
 
         if (dataIdx != mSlotDataIdx[s]) {
             const Entry &e = mEntries[dataIdx];
-            mItems[s].setData(e.icon60, e.icon30, e.ext60, e.ext30, e.label, e.labelId);
+            mItems[s].setData(e.label, e.labelId);
             mSlotDataIdx[s] = dataIdx;
         }
 
         const float ad = fabsf(d);
 
-        // Interpolate position between the two bracketing anchors:
+        // Interpolate the y-offset between the two bracketing anchors:
         // |d| in [0,1) -> centre..near, [1,2) -> near..far, >=2 -> far.
-        // The icon is anchored by its CENTRE (anchor.iconX is the left edge of
-        // the anchor's rest-size icon, so centre = iconX + restHalf). This keeps
-        // the icon centre on a smooth path across the 60<->30 size swap; anchoring
-        // by the left edge instead makes the centre dart back at the swap (zigzag).
-        const float bigHalf   = kIconBig   / 2.0f; // centre anchor uses the 60px icon
-        const float smallHalf = kIconSmall / 2.0f; // +/-1, +/-2 use the 30px icon
-
         const PosAnchor *a0;
         const PosAnchor *a1;
         float            f;
-        float            ic0; // icon-centre X at a0
-        float            ic1; // icon-centre X at a1
         if (ad < 1.0f) {
             a0 = &mAnchors.center; a1 = &mAnchors.pos1; f = ad;
-            ic0 = a0->iconX + bigHalf;
-            ic1 = a1->iconX + smallHalf;
         } else if (ad < 2.0f) {
             a0 = &mAnchors.pos1;   a1 = &mAnchors.pos2; f = ad - 1.0f;
-            ic0 = a0->iconX + smallHalf;
-            ic1 = a1->iconX + smallHalf;
         } else {
             a0 = &mAnchors.pos2;   a1 = &mAnchors.pos2; f = 0.0f;
-            ic0 = ic1 = a0->iconX + smallHalf;
         }
 
-        const float yOff        = lerpf(a0->yOffset, a1->yOffset, f);
-        const float iconCenterX = lerpf(ic0, ic1, f);
-        const float textX       = lerpf(a0->textX, a1->textX, f);
-        const float y           = centerLineY() + (d < 0.0f ? -yOff : yOff);
+        const float yOff = lerpf(a0->yOffset, a1->yOffset, f);
+        const float y    = centerLineY() + (d < 0.0f ? -yOff : yOff);
 
         // Rows outside the container are clipped automatically (top + bottom),
         // so no manual visibility limit is needed -- the container size is the
         // visible area.
         const OrbitTier &tier = pickTier(ad);
         mItems[s].setVisible(true); // may have been hidden by an empty list
-        mItems[s].render(ad < kBigThreshold,
-                         tier.font,
-                         tier.color,
-                         static_cast<int16_t>(iconCenterX),
-                         static_cast<int16_t>(textX),
-                         static_cast<int16_t>(y));
+        mItems[s].render(tier.font, tier.color, static_cast<int16_t>(y));
         mSlotAbsD[s] = ad;
     }
 

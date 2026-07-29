@@ -30,9 +30,7 @@ void MainView::setupScreen()
     orbitMenu.setCenterOffset(0);
     orbitMenu.setAnimationSteps(App::Config::kMenuAnimationSteps);
     orbitMenu.setCircularMinItems(3);      // wrap through New at the ends
-    const OrbitMenu::Anchors anchors = { {  0, 22,  87 },
-                                         { 58, 45,  92 },
-                                         { 96, 71, 108 } };
+    const OrbitMenu::Anchors anchors = { { 0 }, { 58 }, { 96 } };
     orbitMenu.setAnchors(anchors);
 
     orbitMenu.setAnimationEndedCallback(mAnimEndedCb);
