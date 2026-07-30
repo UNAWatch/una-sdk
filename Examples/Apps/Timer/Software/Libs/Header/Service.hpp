@@ -2,6 +2,7 @@
 #define SERVICE_HPP
 
 #include "SDK/Kernel/Kernel.hpp"
+#include "SDK/HomeWidget/HomeWidget.hpp"
 
 #include "TimerManager.hpp"
 #include "Commands.hpp"
@@ -30,11 +31,17 @@ private:
     bool                  mGuiStarted;
     CustomMessage::Sender mGuiSender;
     TimerManager          mTimerManager;
+    SDK::HomeWidget       mWidget;
 
     // A fire that happened while the GUI was closed: launch the GUI, then
     // deliver it once the GUI signals it is running.
     bool                  mPendingFired = false;
     Timer                 mPendingTimer {};
+
+    // Home-screen widget: shown while a countdown is RUNNING/PAUSED *and the GUI
+    // is closed* -- with the app open the user already sees the Running screen.
+    bool                  mWidgetActive  = false;  ///< Widget currently claimed.
+    int32_t               mLastWidgetSec = -1;     ///< Last MM:SS pushed (dedup).
 
     // -- Lifecycle ------------------------------------------------------------
 
@@ -52,6 +59,16 @@ private:
     void sendStateToGui();
     void playEffect(Timer::Effect effect);
     void stopEffect();
+
+    /**
+     * @brief Push the home widget from the current countdown state.
+     *
+     * Claims/releases the widget as the countdown (with the GUI closed) enters/
+     * leaves RUNNING/PAUSED, refreshes MM:SS + completion percent when the shown
+     * second changes, and caps @p sleepTime so the loop wakes on the next second
+     * boundary while running (a paused countdown needs no periodic wake).
+     */
+    void pumpWidget(uint32_t now, uint32_t& sleepTime);
 
     // -- TimerManager callbacks -----------------------------------------------
 

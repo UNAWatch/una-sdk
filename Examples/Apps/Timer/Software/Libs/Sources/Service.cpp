@@ -2,6 +2,8 @@
 
 #include "SDK/Messages/MessageGuard.hpp"
 
+#include <cstdio>
+
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
@@ -16,6 +18,7 @@ Service::Service(SDK::Kernel &kernel)
         , mGuiStarted(false)
         , mGuiSender(kernel)
         , mTimerManager(kernel)
+        , mWidget(kernel)
 {
 }
 
@@ -50,6 +53,10 @@ void Service::run()
             }
         }
 
+        // Reflect the countdown on the home screen (may shorten sleepTime so the
+        // MM:SS ticks each second while running).
+        pumpWidget(now, sleepTime);
+
         SDK::MessageBase *msg;
         if (mKernel.comm.getMessage(msg, sleepTime)) {
             switch (msg->getType()) {
@@ -57,6 +64,7 @@ void Service::run()
                 // Kernel messages
                 case SDK::MessageType::COMMAND_APP_STOP:
                     LOG_INFO("Force exit from the application\n");
+                    mWidget.stop();   // leave no stale widget on the home screen
                     mTimerManager.attachCallback(nullptr);
                     mKernel.comm.releaseMessage(msg);
                     return;
@@ -176,6 +184,72 @@ void Service::sendStateToGui()
     }
     TimerManager::State s = mTimerManager.getState();
     mGuiSender.sendState(s.state, s.endTick, s.remainingMs, s.durationSec, s.effect);
+}
+
+void Service::pumpWidget(uint32_t now, uint32_t& sleepTime)
+{
+    const TimerManager::State s = mTimerManager.getState();
+    // Only surface the widget while the app is backgrounded: with the GUI open
+    // the user already sees the Running screen, so opening it hides the widget
+    // and closing it (countdown still going) brings it back.
+    const bool active = !mGuiStarted &&
+                        (s.state == TimerState::RUNNING || s.state == TimerState::PAUSED);
+
+    if (!active) {
+        if (mWidgetActive) {
+            mWidget.stop();
+            mWidgetActive  = false;
+            mLastWidgetSec = -1;
+        }
+        return;
+    }
+
+    if (!mWidgetActive) {
+        mWidget.start();
+        mWidgetActive  = true;
+        mLastWidgetSec = -1;   // force the first update below
+    }
+
+    // Remaining ms: extrapolated from the shared tick while running, frozen when
+    // paused. Wrap-safe via the signed difference.
+    uint32_t remMs;
+    if (s.state == TimerState::RUNNING) {
+        const int32_t left = static_cast<int32_t>(s.endTick - now);
+        remMs = (left > 0) ? static_cast<uint32_t>(left) : 0u;
+
+        // Wake on the next whole-second boundary so MM:SS ticks crisply.
+        uint32_t toNextSec = remMs % 1000u;
+        if (toNextSec == 0u) {
+            toNextSec = 1000u;
+        }
+        if (toNextSec < sleepTime) {
+            sleepTime = toNextSec;
+        }
+    } else {
+        remMs = s.remainingMs;
+    }
+
+    // Only push when the shown second changes (so a paused timer pushes once).
+    const int32_t secs = static_cast<int32_t>((remMs + 999u) / 1000u);   // ceil
+    if (secs == mLastWidgetSec) {
+        return;
+    }
+    mLastWidgetSec = secs;
+
+    // percent = completion (elapsed / total); the home renderer draws the
+    // remaining arc, which depletes as the count runs down.
+    const uint32_t totalMs = static_cast<uint32_t>(s.durationSec) * 1000u;
+    float percent = 0.0f;
+    if (totalMs > 0u) {
+        const uint32_t elapsedMs = (remMs < totalMs) ? (totalMs - remMs) : totalMs;
+        percent = 100.0f * static_cast<float>(elapsedMs) / static_cast<float>(totalMs);
+    }
+
+    const unsigned mm = (static_cast<unsigned>(secs) / 60u) % 100u;   // MM:SS, minutes 0..99
+    const unsigned ss =  static_cast<unsigned>(secs) % 60u;
+    char buf[8];
+    std::snprintf(buf, sizeof(buf), "%02u:%02u", mm, ss);
+    mWidget.update(percent, buf);
 }
 
 void Service::playEffect(Timer::Effect effect)
