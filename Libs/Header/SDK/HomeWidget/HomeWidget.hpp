@@ -87,6 +87,19 @@ public:
     }
 
     /**
+     * @brief Integer/double percent forwarders to the (float, text) overload.
+     *
+     * update(intVar, text) is the most natural percent call an app writes. Without
+     * these, int->float and int->uint32_t are both conversion-rank, so the deleted
+     * update(uint32_t, const char*) guard below makes such a call ambiguous rather
+     * than resolving to the float overload (same for double). These exact matches
+     * win over both deleted conversions, while a lone WidgetShow enum and an OR-ed
+     * uint32_t mask still exact-match the deleted guards and fail to compile.
+     */
+    bool update(int percent, const char* text)    { return update(static_cast<float>(percent), text); }
+    bool update(double percent, const char* text) { return update(static_cast<float>(percent), text); }
+
+    /**
      * @brief Show exactly the fields in @p shown (a WidgetShow mask).
      *
      * Fields not in @p shown are hidden. @p text is UTF-8 and only used when
