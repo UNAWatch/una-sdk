@@ -1,5 +1,6 @@
 #include "Service.hpp"
 
+#include "SDK/Messages/CommandMessages.hpp"
 #include "SDK/Messages/MessageGuard.hpp"
 
 #include <cstdio>
@@ -236,20 +237,22 @@ void Service::pumpWidget(uint32_t now, uint32_t& sleepTime)
     }
     mLastWidgetSec = secs;
 
-    // percent = completion (elapsed / total); the home renderer draws the
-    // remaining arc, which depletes as the count runs down.
+    // percent = remaining share of the duration. WIDGET_PROGRESS_FROM_END pins the
+    // fill to the bar's end, so it empties from the start as the count runs down.
     const uint32_t totalMs = static_cast<uint32_t>(s.durationSec) * 1000u;
     float percent = 0.0f;
     if (totalMs > 0u) {
-        const uint32_t elapsedMs = (remMs < totalMs) ? (totalMs - remMs) : totalMs;
-        percent = 100.0f * static_cast<float>(elapsedMs) / static_cast<float>(totalMs);
+        const uint32_t remClamped = (remMs < totalMs) ? remMs : totalMs;
+        percent = 100.0f * static_cast<float>(remClamped) / static_cast<float>(totalMs);
     }
 
     const unsigned mm = (static_cast<unsigned>(secs) / 60u) % 100u;   // MM:SS, minutes 0..99
     const unsigned ss =  static_cast<unsigned>(secs) % 60u;
     char buf[8];
     std::snprintf(buf, sizeof(buf), "%02u:%02u", mm, ss);
-    mWidget.update(percent, buf);
+    mWidget.update(SDK::Message::WIDGET_SHOW_TEXT | SDK::Message::WIDGET_SHOW_PERCENT |
+                       SDK::Message::WIDGET_PROGRESS_FROM_END,
+                   percent, buf);
 }
 
 void Service::playEffect(Timer::Effect effect)
