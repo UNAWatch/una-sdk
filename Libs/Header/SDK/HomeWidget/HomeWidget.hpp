@@ -14,10 +14,12 @@ namespace SDK {
 namespace detail {
 
 /**
- * @brief Copy a UTF-8 string into a fixed buffer, NUL-terminated.
+ * @brief Copy a UTF-8 string into a fixed buffer, always NUL-terminated.
  *
- * Never splits a multi-byte sequence: if @p src does not fit, it is truncated
- * back to the last whole character so the buffer always holds valid UTF-8.
+ * @p src is assumed to be valid UTF-8. On truncation the copy backs off to a
+ * character boundary, so a valid @p src is never split mid-sequence. The routine
+ * does not validate @p src: malformed input is copied as-is (still bounded and
+ * terminated), never rejected.
  * @p dst holds at most @p cap - 1 payload bytes plus the terminator; a @p cap of
  * 0 writes nothing and a null @p src yields an empty string.
  *

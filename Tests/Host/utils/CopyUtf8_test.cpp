@@ -109,4 +109,15 @@ TEST(CopyUtf8, AllContinuationBytesDegradeToEmpty)
     EXPECT_EQ(dst[0], '\0');
 }
 
+TEST(CopyUtf8, MalformedButFittingInputCopiedAsIs)
+{
+    // Contract: src is assumed valid UTF-8; the copy does not validate it. A
+    // malformed byte that fits (here a lone continuation byte) is passed through
+    // unchanged -- back-off only fires when truncation would split a sequence.
+    const char src[] = {'\x94', '\0'};
+    char dst[16];
+    EXPECT_EQ(copyInto(dst, 8, src), 1u);
+    EXPECT_EQ(std::memcmp(dst, src, 2), 0);
+}
+
 }  // namespace
