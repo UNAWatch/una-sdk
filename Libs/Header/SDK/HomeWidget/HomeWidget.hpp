@@ -6,9 +6,46 @@
 #include <SDK/Messages/MessageGuard.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 
 namespace SDK {
+
+namespace detail {
+
+/**
+ * @brief Copy a UTF-8 string into a fixed buffer, NUL-terminated.
+ *
+ * Never splits a multi-byte sequence: if @p src does not fit, it is truncated
+ * back to the last whole character so the buffer always holds valid UTF-8.
+ * @p dst holds at most @p cap - 1 payload bytes plus the terminator; a @p cap of
+ * 0 writes nothing and a null @p src yields an empty string.
+ *
+ * Internal helper (the @c detail namespace); not part of the stable SDK surface.
+ */
+inline void copyUtf8(char* dst, std::size_t cap, const char* src)
+{
+    if (cap == 0) {
+        return;
+    }
+    std::size_t max = cap - 1;                 // reserve the NUL
+    std::size_t n   = 0;
+    if (src != nullptr) {
+        while (src[n] != '\0' && n < max) {
+            ++n;
+        }
+        // Stopped at the limit mid-sequence? Drop the partial trailing char.
+        if (src[n] != '\0') {
+            while (n > 0 && (static_cast<unsigned char>(src[n]) & 0xC0) == 0x80) {
+                --n;
+            }
+        }
+        std::memcpy(dst, src, n);
+    }
+    dst[n] = '\0';
+}
+
+}  // namespace detail
 
 /**
  * @brief Ergonomic wrapper for the home-screen widget a running app pushes.
@@ -62,9 +99,21 @@ public:
         msg->shown   = shown & SDK::Message::WIDGET_SHOW_ALL;   // never emit stray bits
         // Clamp to the documented range; the >= test also maps NaN and -inf to 0.
         msg->percent = (percent >= 0.0f) ? (percent > 100.0f ? 100.0f : percent) : 0.0f;
-        copyUtf8(msg->text, SDK::Message::WIDGET_TEXT_BYTES, text);
+        detail::copyUtf8(msg->text, SDK::Message::WIDGET_TEXT_BYTES, text);
         return msg.send();
     }
+
+    /**
+     * @brief Reject a WidgetShow mask where a percent value is expected.
+     *
+     * WidgetShow is an unscoped enum, so it converts implicitly to float. Without
+     * these deletions update(WIDGET_SHOW_TEXT, "12:00") would silently bind to
+     * update(float, const char*) as percent = 1.0f and show both fields. Deleting
+     * the (mask, text) shapes turns that mistake into a compile error. The uint32_t
+     * form also catches OR-ed masks, which promote to uint32_t.
+     */
+    bool update(SDK::Message::WidgetShow, const char*) = delete;
+    bool update(uint32_t, const char*) = delete;
 
 private:
     template <typename T>
@@ -72,34 +121,6 @@ private:
     {
         auto msg = SDK::make_msg<T>(mKernel);
         return msg && msg.send();
-    }
-
-    /**
-     * @brief Copy a UTF-8 string into a fixed buffer, NUL-terminated.
-     *
-     * Never splits a multi-byte sequence: if @p src does not fit, it is truncated
-     * back to the last whole character so the buffer always holds valid UTF-8.
-     */
-    static void copyUtf8(char* dst, std::size_t cap, const char* src)
-    {
-        if (cap == 0) {
-            return;
-        }
-        std::size_t max = cap - 1;                 // reserve the NUL
-        std::size_t n   = 0;
-        if (src != nullptr) {
-            while (src[n] != '\0' && n < max) {
-                ++n;
-            }
-            // Stopped at the limit mid-sequence? Drop the partial trailing char.
-            if (src[n] != '\0') {
-                while (n > 0 && (static_cast<unsigned char>(src[n]) & 0xC0) == 0x80) {
-                    --n;
-                }
-            }
-            std::memcpy(dst, src, n);
-        }
-        dst[n] = '\0';
     }
 
     const SDK::Kernel& mKernel;
