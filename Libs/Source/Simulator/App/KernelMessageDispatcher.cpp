@@ -240,6 +240,23 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
 
+        case SDK::MessageType::REQUEST_WIDGET_START: {
+            LOG_DEBUG("Widget start\n");
+            // No home screen to render in the simulator; just accept it.
+            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+        } break;
+
+        case SDK::MessageType::REQUEST_WIDGET_UPDATE: {
+            LOG_DEBUG("Widget update\n");
+            // No home screen to render in the simulator; just accept it.
+            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+        } break;
+
+        case SDK::MessageType::REQUEST_WIDGET_STOP: {
+            LOG_DEBUG("Widget stop\n");
+            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+        } break;
+
         default:
             break;
     }

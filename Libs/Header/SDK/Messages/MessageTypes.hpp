@@ -7,13 +7,24 @@
  * This file defines common message types used in the system.
  * Applications can define custom types without modifying this file.
  *
- * Type ranges:
- * 0x0000_0000-0x0000_0FFF : Events (fire-and-forget, kernel -> app)
- * 0x0000_1000-0x0000_1FFF : Requests (app -> kernel, response expected)
- * 0x0000_2000-0x0000_2FFF : Responses (kernel -> app, response to request)
- * 0x0000_3000-0x0000_3FFF : Commands (kernel -> app, response expected)
- * 0x0000_4000-0x00FF_FFFF : Application-specific custom messages
- * 0x0100_0000-0xFFFF_FFFF : Internal kernel messages (private)
+ * The type lives in the high 16 bits; the low 16 bits are reserved and left
+ * zero for the shared types below.
+ *
+ * 0x0000_0000-0x0000_FFFF : Application-private messages, exchanged Service <->
+ *                           GUI directly over DualAppComm. The kernel never
+ *                           interprets these; each app owns the whole range.
+ * 0x0001_0000-0x7FFF_0000 : Shared kernel <-> application messages defined
+ *                           below, grouped by the high byte:
+ *                             0x01xx : application lifecycle and control
+ *                             0x02xx : system info queries and actuator
+ *                                      requests (backlight, buzzer, vibro)
+ *                             0x03xx : asynchronous events and Service-only
+ *                                      feature channels (glances, sensor
+ *                                      layer, accessories, home widget)
+ * 0x8000_0000-0xFFFF_0000 : Internal kernel messages, never seen by apps.
+ *
+ * Whether a type expects a reply is a property of the message, not of its
+ * range -- there is no separate request/response/command band.
  *
  * Shared between kernel and applications.
  */
@@ -107,6 +118,14 @@ namespace MessageType {
     constexpr Type REQUEST_ACCESSORY_PREPARE           = 0x03200000;
     constexpr Type REQUEST_ACCESSORY_RELEASE           = 0x03210000;
     constexpr Type EVENT_ACCESSORY_STATUS              = 0x03220000;
+
+    // Widget (Service only): a running app pushes a live element (a text label +
+    // completion percent) that the kernel surfaces on the home screen. Explicit
+    // START/STOP bracket the activity; UPDATE refreshes it whenever the app
+    // chooses (no fixed cadence). The kernel clears it if the app process dies.
+    constexpr Type REQUEST_WIDGET_START                = 0x03300000;
+    constexpr Type REQUEST_WIDGET_UPDATE               = 0x03310000;
+    constexpr Type REQUEST_WIDGET_STOP                 = 0x03320000;
 
     // Application-specific custom messages (Service <-> GUI direct, used by DualAppComm)
     constexpr Type RANGE_APP_SPECIFIC_MIN       = 0x00000000;
