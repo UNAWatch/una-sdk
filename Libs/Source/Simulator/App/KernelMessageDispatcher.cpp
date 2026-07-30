@@ -240,6 +240,25 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
 
+        case SDK::MessageType::REQUEST_WIDGET_START: {
+            LOG_DEBUG("Widget start\n");
+            // No home screen to render in the simulator; just accept it.
+            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+        } break;
+
+        case SDK::MessageType::REQUEST_WIDGET_UPDATE: {
+            auto* w = static_cast<SDK::Message::RequestWidgetUpdate*>(msg);
+            LOG_DEBUG("Widget update: shown=0x%X pct=%d text='%s'\n",
+                      w->shown, static_cast<int>(w->percent),
+                      (w->shown & SDK::Message::WIDGET_SHOW_TEXT) ? w->text : "");
+            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+        } break;
+
+        case SDK::MessageType::REQUEST_WIDGET_STOP: {
+            LOG_DEBUG("Widget stop\n");
+            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+        } break;
+
         default:
             break;
     }

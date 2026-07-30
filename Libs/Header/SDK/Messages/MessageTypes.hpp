@@ -108,6 +108,14 @@ namespace MessageType {
     constexpr Type REQUEST_ACCESSORY_RELEASE           = 0x03210000;
     constexpr Type EVENT_ACCESSORY_STATUS              = 0x03220000;
 
+    // Widget (Service only): a running app pushes a live element (a text label +
+    // completion percent) that the kernel surfaces on the home screen. Explicit
+    // START/STOP bracket the activity; UPDATE refreshes it whenever the app
+    // chooses (no fixed cadence). The kernel clears it if the app process dies.
+    constexpr Type REQUEST_WIDGET_START                = 0x03300000;
+    constexpr Type REQUEST_WIDGET_UPDATE               = 0x03310000;
+    constexpr Type REQUEST_WIDGET_STOP                 = 0x03320000;
+
     // Application-specific custom messages (Service <-> GUI direct, used by DualAppComm)
     constexpr Type RANGE_APP_SPECIFIC_MIN       = 0x00000000;
     constexpr Type RANGE_APP_SPECIFIC_MAX       = 0x0000FFFF;

@@ -624,6 +624,102 @@ struct EventGlanceStop : public MessageBase {
     EventGlanceStop() : MessageBase(MessageType::EVENT_GLANCE_STOP) {}
 };
 
+// -- Widget (Service -> kernel: live home-screen element) ---------------------
+
+/** @brief Widget label buffer size in bytes (UTF-8, including the NUL). */
+inline constexpr uint32_t WIDGET_TEXT_BYTES = 64;
+
+/**
+ * @brief Which fields of a widget update the kernel should show (bitmask).
+ *
+ * Authoritative / replace semantics: each update fully specifies what the widget
+ * shows *now*. Only fields whose bit is set in `shown` are displayed; every other
+ * field is hidden (a field is cleared simply by leaving its bit unset).
+ *
+ * Cross-version compatible by design. New field kinds (e.g. an icon) are added by
+ * APPENDING a field to RequestWidgetUpdate and a new bit here -- never reorder,
+ * remove, or reuse existing fields/bits, so the offsets of the old fields stay
+ * put. An older sender simply never sets the newer bits, and an older reader
+ * ignores bits it does not know (that field is just not shown).
+ *
+ * The message is a plain struct over IPC -- it cannot validate what the sender
+ * writes -- so the guarantee lives on the READER (the kernel): mask `shown`
+ * against the bits it knows (`shown & WIDGET_SHOW_ALL`) and read a field only
+ * when its known bit is set. That drops any unknown or garbage bit. And because
+ * every field is zero-initialised (see the ctor), even a stray known bit reads a
+ * valid default (empty label, 0 percent) -- never uninitialised memory. So the
+ * worst a bad `shown` can do is blank a field, never crash or over-read.
+ */
+enum WidgetShow : uint32_t {
+    WIDGET_SHOW_TEXT    = 1u << 0,   ///< Display `text`.
+    WIDGET_SHOW_PERCENT = 1u << 1,   ///< Display `percent` as a progress bar.
+
+    /** @brief All bits this SDK version defines -- readers mask `shown` with this. */
+    WIDGET_SHOW_ALL     = WIDGET_SHOW_TEXT | WIDGET_SHOW_PERCENT,
+};
+
+/**
+ * @brief Widget start request.
+ *
+ * A running app claims the single home-screen widget slot for an ongoing
+ * activity; the kernel begins showing an element for it. The app is identified by
+ * the sender's process (its name and icon come from the .uapp), so no payload is
+ * needed. Follow with RequestWidgetUpdate to fill in content, RequestWidgetStop
+ * to end it.
+ *
+ * Ownership is last-start-wins: a START from another app takes the slot over, and
+ * from then on only that new owner's UPDATE/STOP take effect. There is no owner
+ * stack -- when the owner STOPs, the slot is cleared, not handed back to a
+ * previously displaced app (which must START again to show). The kernel also
+ * clears the slot if the owning process dies.
+ */
+struct RequestWidgetStart : public MessageBase {
+    RequestWidgetStart() : MessageBase(MessageType::REQUEST_WIDGET_START) {}
+};
+
+/**
+ * @brief Widget update request.
+ *
+ * Replaces the home-screen element's content: `shown` (a WidgetShow bitmask) is
+ * the authoritative set of fields to display right now -- label, progress bar, or
+ * both -- and fields left out are hidden. Sent whenever the app chooses; there is
+ * no fixed cadence. Fire-and-forget.
+ *
+ * Takes effect only from the slot's current owner: an update before the owner's
+ * START, after its STOP, or from a displaced app is ignored.
+ */
+struct RequestWidgetUpdate : public MessageBase {
+    uint32_t shown;                    // Bitmask of WidgetShow: fields to display now
+    float    percent;                  // Completion 0..100 (if WIDGET_SHOW_PERCENT); a
+                                       // reader clamps out-of-range / NaN to that range
+    char     text[WIDGET_TEXT_BYTES];  // Label (if WIDGET_SHOW_TEXT); UTF-8, NUL-terminated
+
+    // shown MUST default to 0 -- allocateMessage() placement-news every message,
+    // so this guarantees a clean bitmask (no uninitialised bits): an unset field
+    // is never read. That is what makes the cross-version contract above safe;
+    // do not drop this zero-init, and only ever assign shown (never |= it onto an
+    // unconstructed value).
+    RequestWidgetUpdate()
+        : MessageBase(MessageType::REQUEST_WIDGET_UPDATE)
+        , shown(0)
+        , percent(0.0f)
+        , text{}
+    {}
+};
+#if __SIZEOF_POINTER__ == 4
+static_assert(sizeof(RequestWidgetUpdate) == 104, "RequestWidgetUpdate size must be 104 bytes");
+#endif
+
+/**
+ * @brief Widget stop request.
+ *
+ * The activity ended; the kernel clears the slot. Effective only from the current
+ * owner, and it does not restore any previously displaced app (no owner stack).
+ */
+struct RequestWidgetStop : public MessageBase {
+    RequestWidgetStop() : MessageBase(MessageType::REQUEST_WIDGET_STOP) {}
+};
+
 } // namespace SDK::Message
 
 #pragma pack(pop)
