@@ -77,7 +77,7 @@ public:
     /** @brief Release the slot; the kernel removes the element. */
     bool stop()  { return send<SDK::Message::RequestWidgetStop>(); }
 
-    /** @brief Show a label and a 0..100 progress bar (both fields). */
+    /** @brief Show a label and a 0..100 progress bar filled from its start (both fields). */
     bool update(float percent, const char* text)
     {
         return update(SDK::Message::WIDGET_SHOW_TEXT | SDK::Message::WIDGET_SHOW_PERCENT,
@@ -89,6 +89,8 @@ public:
      *
      * Fields not in @p shown are hidden. @p text is UTF-8 and only used when
      * WIDGET_SHOW_TEXT is set; @p percent only when WIDGET_SHOW_PERCENT is set.
+     * Add WIDGET_PROGRESS_FROM_END to pin the fill to the bar's end -- a countdown
+     * that empties from the start.
      */
     bool update(uint32_t shown, float percent, const char* text)
     {

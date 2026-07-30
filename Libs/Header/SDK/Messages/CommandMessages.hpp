@@ -636,11 +636,15 @@ inline constexpr uint32_t WIDGET_TEXT_BYTES = 64;
  * shows *now*. Only fields whose bit is set in `shown` are displayed; every other
  * field is hidden (a field is cleared simply by leaving its bit unset).
  *
+ * A bit either gates a field (WIDGET_SHOW_TEXT / WIDGET_SHOW_PERCENT) or modifies
+ * how a shown field renders (WIDGET_PROGRESS_FROM_END).
+ *
  * Cross-version compatible by design. New field kinds (e.g. an icon) are added by
  * APPENDING a field to RequestWidgetUpdate and a new bit here -- never reorder,
  * remove, or reuse existing fields/bits, so the offsets of the old fields stay
  * put. An older sender simply never sets the newer bits, and an older reader
- * ignores bits it does not know (that field is just not shown).
+ * ignores bits it does not know (an unknown field stays hidden; an unknown
+ * modifier is simply not applied, so the field renders its default way).
  *
  * The message is a plain struct over IPC -- it cannot validate what the sender
  * writes -- so the guarantee lives on the READER (the kernel): mask `shown`
@@ -654,8 +658,23 @@ enum WidgetShow : uint32_t {
     WIDGET_SHOW_TEXT    = 1u << 0,   ///< Display `text`.
     WIDGET_SHOW_PERCENT = 1u << 1,   ///< Display `percent` as a progress bar.
 
+    /**
+     * @brief Anchor the progress fill at the bar's end (default: its start).
+     *
+     * Modifier for WIDGET_SHOW_PERCENT (meaningless without it). The bar colours
+     * `percent` of the track; this bit fixes the point that share is measured
+     * from. Start and end are logical positions -- the kernel maps them to the
+     * widget's actual layout and orientation.
+     *
+     * Clear: the fill grows from the start (the 0% end); a rising percent fills
+     * the bar -- e.g. steps toward a goal. Set: the fill is pinned to the end
+     * (the 100% end); a falling percent recedes to that end and empties the bar
+     * from the start -- e.g. a countdown timer sending its remaining share.
+     */
+    WIDGET_PROGRESS_FROM_END = 1u << 2,
+
     /** @brief All bits this SDK version defines -- readers mask `shown` with this. */
-    WIDGET_SHOW_ALL     = WIDGET_SHOW_TEXT | WIDGET_SHOW_PERCENT,
+    WIDGET_SHOW_ALL     = WIDGET_SHOW_TEXT | WIDGET_SHOW_PERCENT | WIDGET_PROGRESS_FROM_END,
 };
 
 /**
@@ -690,7 +709,9 @@ struct RequestWidgetStart : public MessageBase {
  */
 struct RequestWidgetUpdate : public MessageBase {
     uint32_t shown;                    // Bitmask of WidgetShow: fields to display now
-    float    percent;                  // Completion 0..100 (if WIDGET_SHOW_PERCENT); a
+    float    percent;                  // Share of the bar to colour, 0..100 (if
+                                       // WIDGET_SHOW_PERCENT), measured from the bar's
+                                       // start or its end (WIDGET_PROGRESS_FROM_END); a
                                        // reader clamps out-of-range / NaN to that range
     char     text[WIDGET_TEXT_BYTES];  // Label (if WIDGET_SHOW_TEXT); UTF-8, NUL-terminated
 
