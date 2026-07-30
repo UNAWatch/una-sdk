@@ -67,10 +67,15 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#include-header-source-file">Include Header &amp; Source file</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#msvs">MSVS</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gcc">GCC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gcc-gcc">GCC {#gcc}</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#transfer-application-transfer-application">Transfer Application {#transfer-application}</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#linux-gcc-linux-gcc">Linux (GCC) {#linux-gcc}</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-and-run">Build and run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-makes-the-linux-build-work">What makes the Linux build work</a></li>
 </ul>
 </li>
 </ul>
@@ -151,7 +156,7 @@
              
   <section id="una-watch-simulator">
 <h1>UNA-Watch Simulator<a class="headerlink" href="#una-watch-simulator" title="Link to this heading"></a></h1>
-<p>The simulator application works only on Windows OS. The UNA Simulator works with TouchGFX Designer and Visual Studio.<br />
+<p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>.<br />
 Note: If you move the application to another location, you need to update the relative path to <strong>TouchGFX library path</strong>.
 See: <a class="reference internal" href="#transfer-application"><span class="xref myst">Transfer Application</span></a></p>
 <section id="getting-started">
@@ -407,8 +412,8 @@ Location:
 <li><p>Add source file paths to <strong>ClCompile</strong>.</p></li>
 </ol>
 </section>
-<section id="gcc">
-<h4>GCC<a class="headerlink" href="#gcc" title="Link to this heading"></a></h4>
+<section id="gcc-gcc">
+<h4>GCC {#gcc}<a class="headerlink" href="#gcc-gcc" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p>Open <strong>MakeFile</strong> in text editor:
 <code class="docutils literal notranslate"><span class="pre">&lt;app-name&gt;\Software\Apps\TouchGFX-GUI\simulator\gcc</span></code></p></li>
@@ -435,6 +440,36 @@ Example:</p>
 <li><p>If you move the <strong>una_sdk</strong> folder, you must update UNA_SDK environment variable.
 See: <a class="reference internal" href="#install-una-sdk-variable"><span class="xref myst">Install UNA_SDK variable</span></a></p></li>
 </ol>
+</section>
+</section>
+<section id="linux-gcc-linux-gcc">
+<h2>Linux (GCC) {#linux-gcc}<a class="headerlink" href="#linux-gcc-linux-gcc" title="Link to this heading"></a></h2>
+<p>The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.</p>
+<section id="build-and-run">
+<h3>Build and run<a class="headerlink" href="#build-and-run" title="Link to this heading"></a></h3>
+<p>This assumes the SDK is cloned and <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> is exported, per <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">SDK Setup</span></a>. Unlike the firmware build, the desktop simulator does <strong>not</strong> need the ST ARM toolchain; it needs GCC, SDL2, and Ruby.</p>
+<p>From an app’s <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> directory (for example <code class="docutils literal notranslate"><span class="pre">Examples/Apps/Running/Software/Apps/TouchGFX-GUI</span></code>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulator dependencies (Debian/Ubuntu)</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>build-essential<span class="w"> </span>libsdl2-dev<span class="w"> </span>libsdl2-image-dev<span class="w"> </span>libjpeg-dev<span class="w"> </span>ruby<span class="w"> </span>ruby-nokogiri
+
+<span class="c1"># Build (UNA_SDK is the absolute path to the repo root)</span>
+<span class="nv">UNA_SDK</span><span class="o">=</span>/absolute/path/to/una-sdk<span class="w"> </span>make<span class="w"> </span>-f<span class="w"> </span>simulator/gcc/Makefile<span class="w"> </span>-j<span class="s2">&quot;</span><span class="k">$(</span>nproc<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="c1"># Run headless (no X display needed)</span>
+<span class="nv">SDL_VIDEODRIVER</span><span class="o">=</span>dummy<span class="w"> </span><span class="nv">SDL_AUDIODRIVER</span><span class="o">=</span>dummy<span class="w"> </span>./build/bin/simulator.out
+</pre></div>
+</div>
+<p>The build links <code class="docutils literal notranslate"><span class="pre">touchgfx</span> <span class="pre">SDL2</span> <span class="pre">SDL2_image</span> <span class="pre">jpeg</span> <span class="pre">rt</span> <span class="pre">m</span> <span class="pre">pthread</span> <span class="pre">dl</span></code>. To add your own headers or sources to the Linux build, edit <code class="docutils literal notranslate"><span class="pre">simulator/gcc/Makefile</span></code> (<code class="docutils literal notranslate"><span class="pre">ADDITIONAL_INCLUDE_PATHS</span></code> / <code class="docutils literal notranslate"><span class="pre">ADDITIONAL_SOURCES_UNA</span></code>), as described under <a class="reference internal" href="#gcc"><span class="xref myst">GCC</span></a> above.</p>
+</section>
+<section id="what-makes-the-linux-build-work">
+<h3>What makes the Linux build work<a class="headerlink" href="#what-makes-the-linux-build-work" title="Link to this heading"></a></h3>
+<p>Linux support is spread across the repo rather than in one place:</p>
+<ul class="simple">
+<li><p><strong>SDK (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>)</strong> — the simulator layer is platform-split with <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code> / <code class="docutils literal notranslate"><span class="pre">#else</span></code>: POSIX <code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> / <code class="docutils literal notranslate"><span class="pre">Sleep()</span></code> shims (via <code class="docutils literal notranslate"><span class="pre">clock_gettime</span></code> and <code class="docutils literal notranslate"><span class="pre">usleep</span></code>), a <code class="docutils literal notranslate"><span class="pre">dirent</span></code>-based FileSystem backend, message-size <code class="docutils literal notranslate"><span class="pre">static_assert</span></code>s guarded to 32-bit (ARM) builds with <code class="docutils literal notranslate"><span class="pre">#if</span> <span class="pre">__SIZEOF_POINTER__</span> <span class="pre">==</span> <span class="pre">4</span></code>, and a C-valid plain <code class="docutils literal notranslate"><span class="pre">strncpy</span></code> in <code class="docutils literal notranslate"><span class="pre">StdLibWrappers.c</span></code>.</p></li>
+<li><p><strong>Vendored TouchGFX tooling (<code class="docutils literal notranslate"><span class="pre">ThirdParty/</span></code>)</strong> — the Linux asset converters carry the execute bit and the <code class="docutils literal notranslate"><span class="pre">textconvert</span></code> Ruby scripts run on modern Ruby. See <a class="reference internal" href="ThirdParty-Local-Patches.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">ThirdParty-Local-Patches.md</span></code></span></a>.</p></li>
+<li><p><strong>Per-app config</strong> — each <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> project tracks <code class="docutils literal notranslate"><span class="pre">config/gcc/app.mk</span></code> (it holds the repo-relative <code class="docutils literal notranslate"><span class="pre">touchgfx_path</span></code> the Linux <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code> hard-includes), adds <code class="docutils literal notranslate"><span class="pre">-no-pie</span></code> to the Linux linker options in <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code>, and guards its <code class="docutils literal notranslate"><span class="pre">Windows.h</span></code> include with <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code>.</p></li>
+<li><p><strong>CI</strong> — <code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds and headlessly smoke-runs the simulator (non-gating).</p></li>
+</ul>
 </section>
 </section>
 </section>
