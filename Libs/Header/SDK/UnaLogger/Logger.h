@@ -169,6 +169,10 @@ void Logger_hexdump(const char *level,
 #define Logger_message(...)             do { } while(0)
 #define Logger_hexdump(...)             do { } while(0)
 
+// Nothing can be installed when logging is compiled out, so there is nothing to deregister --
+// but ~Logger() calls this unconditionally, so it still has to name something.
+#define Logger_deinit(...)              do { } while(0)
+
 #define LOG(...)                        do { } while(0)
 #define LOG_DUMP(...)                   do { } while(0)
 
