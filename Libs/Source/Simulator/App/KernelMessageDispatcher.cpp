@@ -248,9 +248,18 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 
         case SDK::MessageType::REQUEST_WIDGET_UPDATE: {
             auto* w = static_cast<SDK::Message::RequestWidgetUpdate*>(msg);
-            LOG_DEBUG("Widget update: shown=0x%X pct=%d text='%s'\n",
-                      w->shown, static_cast<int>(w->percent),
-                      (w->shown & SDK::Message::WIDGET_SHOW_TEXT) ? w->text : "");
+            // Sanitize as the reader contract requires: mask shown, clamp percent
+            // (NaN / out-of-range -> bounds) before the int cast, and bound the
+            // text read so a non-NUL-terminated buffer cannot over-read.
+            const uint32_t shown   = w->shown & SDK::Message::WIDGET_SHOW_ALL;
+            const float    pct     = (w->percent >= 0.0f)
+                                         ? (w->percent > 100.0f ? 100.0f : w->percent)
+                                         : 0.0f;
+            const bool     hasText = (shown & SDK::Message::WIDGET_SHOW_TEXT) != 0;
+            LOG_DEBUG("Widget update: shown=0x%X pct=%d text='%.*s'\n",
+                      shown, static_cast<int>(pct),
+                      hasText ? static_cast<int>(SDK::Message::WIDGET_TEXT_BYTES) : 0,
+                      hasText ? w->text : "");
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
 
