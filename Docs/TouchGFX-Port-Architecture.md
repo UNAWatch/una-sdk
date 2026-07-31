@@ -808,7 +808,7 @@ public:
 ```cpp
 // In Service (Backend)
 void Service::sendHeartRateUpdate(uint16_t bpm) {
-    SDK::send_msg<HeartRateMessage>(*kernel, bpm);
+    SDK::send_msg<HeartRateMessage>(*kernel, bpm, getCurrentTime());
 }
 
 // In Model (GUI)
