@@ -144,7 +144,10 @@ public:
 ```cpp
 uint32_t AlarmManager::execute(const std::tm& tmNow)
 {
-    checkAlarms(tmNow.tm_hour, tmNow.tm_min, tmNow.tm_wday, tmNow);
+    checkAlarms(static_cast<uint8_t>(tmNow.tm_hour),
+                static_cast<uint8_t>(tmNow.tm_min),
+                static_cast<uint8_t>(tmNow.tm_wday),
+                tmNow);
     uint32_t nextCheckMs = (60 - tmNow.tm_sec) * 1000;
     return nextCheckMs;
 }
