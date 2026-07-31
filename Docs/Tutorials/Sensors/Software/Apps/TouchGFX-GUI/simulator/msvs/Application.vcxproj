@@ -20,6 +20,11 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Kernel\Mock\FileSystem.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\UnaLogger\Logger.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
+    <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\TrackMap\TrackMapBuilder.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\SensorLayer\SensorConnection.cpp"/>
@@ -51,6 +56,7 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\SensorPressure.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuWristMotion.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuStepCounter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Sensors\Imu\ImuRunningCadence.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\ComponentSimulator.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\Simulator\GpsStepCounterSimulator.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\SensorListener.cpp"/>
