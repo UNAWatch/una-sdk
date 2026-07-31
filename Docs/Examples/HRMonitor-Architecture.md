@@ -351,7 +351,7 @@ Fire-and-forget sends go through `SDK::send_msg<T>()`, which allocates the messa
 SDK::send_msg<CustomMessage::HRValues>(mKernel, mHr, mHrTl);
 ```
 
-There is no per-app sender class to write: the message type carries the field-filling constructor and `send_msg` supplies the rest. That is the only send this app needs — every HRMonitor message is fire-and-forget.
+There is no per-app sender class to write: the message type carries the field-filling constructor and `send_msg` supplies the rest. That is the only send this app needs — every HRMonitor message is fire-and-forget, and `send_msg` posts with a zero timeout, so a full queue drops the sample rather than waiting for room. That is the right trade here: the next reading is a second away.
 
 When the reply matters, `SDK::make_msg<T>()` is the counterpart: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result back (`msg.send(timeout) && msg.ok()`). The Cycling, Hiking, Running, and Alarm services use it that way to query `SDK::Message::RequestSystemSettings` — see [Cycling](Cycling-Architecture.md#sending-messages) for a worked example.
 
