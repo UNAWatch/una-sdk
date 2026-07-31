@@ -99,7 +99,7 @@ public:
     };
 
     OrbitMenu();
-    virtual ~OrbitMenu() {}
+    virtual ~OrbitMenu();
 
     virtual void initialize() override;
 

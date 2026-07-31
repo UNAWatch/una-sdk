@@ -99,6 +99,13 @@ OrbitMenu::OrbitMenu()
 {
 }
 
+OrbitMenu::~OrbitMenu()
+{
+    // initialize() registered this container as a timer widget; the FrontendHeap
+    // partition is reused, so drop the stale pointer or TouchGFX ticks a corpse.
+    touchgfx::Application::getInstance()->unregisterTimerWidget(this);
+}
+
 void OrbitMenu::initialize()
 {
     OrbitMenuBase::initialize();
