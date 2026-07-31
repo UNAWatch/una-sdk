@@ -158,8 +158,7 @@
         <Translation Language="GB">Recent</Translation>
       </Text>
     </TextGroup>
-    <TextGroup Id="Unsorted">
-    </TextGroup>
+    <TextGroup Id="Unsorted" />
   </Texts>
   <Typographies>
     <Typography Id="Poppins_Regular_18" Font="Poppins-Regular.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="! \&quot;#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~…" EllipsisCharacter="…" />

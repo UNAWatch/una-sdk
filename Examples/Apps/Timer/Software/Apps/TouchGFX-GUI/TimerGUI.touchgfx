@@ -3,7 +3,6 @@
     "Screens": [
       {
         "Name": "Startup",
-        "CanvasBufferSize": 3600,
         "Components": [],
         "Interactions": [
           {
