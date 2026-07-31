@@ -34,7 +34,7 @@ namespace SDK::Interface
 {
 
 #define DUMMY_KERNEL_ADDR           (0xA5A5A5A5)
-#define KERNEL_INTERFACE_VERSION    (2)
+#define KERNEL_INTERFACE_VERSION    (3)
 
 class IKernel {
 public:
