@@ -807,8 +807,8 @@ public:
 #### Service Layer Communication
 ```cpp
 // In Service (Backend)
-void Service::sendHeartRateUpdate(uint16_t bpm) {
-    SDK::send_msg<HeartRateMessage>(*kernel, bpm, getCurrentTime());
+bool Service::sendHeartRateUpdate(uint16_t bpm) {
+    return SDK::send_msg<HeartRateMessage>(*kernel, bpm, getCurrentTime());
 }
 
 // In Model (GUI)
