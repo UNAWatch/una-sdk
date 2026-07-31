@@ -6,6 +6,7 @@
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
 #include "SDK/Interfaces/ICustomMessageHandler.hpp"
+#include "SDK/Messages/MessageGuard.hpp"
 #include <SDK/GUI/Config.hpp>
 
 #include "Commands.hpp"
@@ -66,10 +67,10 @@ public:
      * that was sent is always answered with a snapshot, which is what lets the
      * screen trust that a pending change will resolve.
      *  @{ */
-    bool startStopwatch() { return mSender.start(); }
-    bool pauseStopwatch() { return mSender.pause(); }
-    bool lapStopwatch()   { return mSender.lap(); }
-    bool resetStopwatch() { return mSender.reset(); }
+    bool startStopwatch() { return SDK::send_msg<CustomMessage::StopwatchStart>(mKernel); }
+    bool pauseStopwatch() { return SDK::send_msg<CustomMessage::StopwatchPause>(mKernel); }
+    bool lapStopwatch()   { return SDK::send_msg<CustomMessage::StopwatchLap>(mKernel); }
+    bool resetStopwatch() { return SDK::send_msg<CustomMessage::StopwatchReset>(mKernel); }
     /** @} */
 
     /**
@@ -98,8 +99,7 @@ protected:
 
     bool mInvalidate = false;               ///< Request to redraw current screen
 
-    CustomMessage::Sender mSender;          ///< Outbound commands to the service
-    Stopwatch::State      mState;           ///< Last snapshot from the service
+    Stopwatch::State mState;                ///< Last snapshot from the service
 
     // IGuiLifeCycleCallback
     void onStart()   override;

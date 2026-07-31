@@ -22,7 +22,6 @@ public:
 
 private:
     SDK::Kernel&             mKernel;
-    CustomMessage::GUISender mSender;
     bool                     mGUIStarted;
     // Settings
     int32_t                  mDecimalCounter;

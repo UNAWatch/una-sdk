@@ -35,10 +35,9 @@ public:
     void run();
 
 private:
-    SDK::Kernel           &mKernel;
-    CustomMessage::Sender  mSender;
-    Stopwatch::Core        mStopwatch;
-    bool                   mGuiStarted;
+    SDK::Kernel     &mKernel;
+    Stopwatch::Core  mStopwatch;
+    bool             mGuiStarted;
 
     /**
      * @brief Apply one app-specific command to the stopwatch and publish it.

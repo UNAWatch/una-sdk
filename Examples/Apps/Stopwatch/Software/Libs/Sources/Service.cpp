@@ -1,4 +1,5 @@
 #include "Service.hpp"
+#include "SDK/Messages/MessageGuard.hpp"
 
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -12,7 +13,6 @@ static constexpr uint32_t kWaitForever = 0xFFFFFFFF;
 
 Service::Service(SDK::Kernel &kernel)
     : mKernel(kernel)
-    , mSender(kernel)
     , mStopwatch()
     , mGuiStarted(false)
 {
@@ -102,5 +102,5 @@ void Service::publish()
     if (!mGuiStarted) {
         return;
     }
-    mSender.state(mStopwatch.state());
+    SDK::send_msg<CustomMessage::StopwatchState>(mKernel, mStopwatch.state());
 }

@@ -4,8 +4,6 @@
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
-#include "SDK/Messages/MessageGuard.hpp"
-#include "SDK/Kernel/Kernel.hpp"
 
 #include <array>
 
@@ -59,7 +57,9 @@ namespace CustomMessage {
     /*
      * HRValues Message Struct:
      * - Inherits from SDK::MessageBase for SDK messaging
-     * - Constructor initializes message type to HR_VALUES
+     * - The default constructor sets the message type to HR_VALUES
+     * - A second constructor fills the fields and delegates to the first, which
+     *   is what lets a caller send it in one line with SDK::send_msg
      * - Contains HR data: heartRate (BPM) and trustLevel (0.0-1.0)
      */
     // struct HRValues : public SDK::MessageBase {
@@ -71,6 +71,13 @@ namespace CustomMessage {
     //         , heartRate()
     //         , trustLevel()
     //     {}
+
+    //     explicit HRValues(float heartRate, float trustLevel)
+    //         : HRValues()
+    //     {
+    //         this->heartRate  = heartRate;
+    //         this->trustLevel = trustLevel;
+    //     }
     // };
 
     // GUI --> Service
@@ -92,6 +99,14 @@ namespace CustomMessage {
             , activityType(0)
             , displayMode(0)
         {}
+
+        explicit SetSettings(int decimalCounter, int activityType, int displayMode)
+            : SetSettings()
+        {
+            this->decimalCounter = decimalCounter;
+            this->activityType   = activityType;
+            this->displayMode    = displayMode;
+        }
     };
 
     // Service --> GUI
@@ -106,57 +121,16 @@ namespace CustomMessage {
             , activityType(0)
             , displayMode(0)
         {}
-    };
 
-
-    ///////////////////////////////////////
-    //// Wrappers
-    ///////////////////////////////////////
-
-    class GUISender {
-    public:
-        GUISender(const SDK::Kernel& kernel) : mKernel(kernel)
-        {}
-
-        virtual ~GUISender() = default;
-
-        // Service --> GUI
-        /*
-         * updateHeartRate Method:
-         * - Creates and sends HR update message to GUI
-         * - Uses SDK::make_msg to allocate message from kernel pool
-         * - Returns true if message sent successfully
-         * - Automatically cleaned up by SDK after delivery
-         */
-        // bool updateHeartRate(float value, float trustLevel)
-        // {
-        //     if (auto req = SDK::make_msg<CustomMessage::HRValues>(mKernel)) {
-        //         req->heartRate  = value;
-        //         req->trustLevel = trustLevel;
-
-        //         return req.send();  // Send to GUI via SDK messaging
-        //     }
-
-        //     return false;
-        // }
-
-        // Service --> GUI
-        bool updateSettings(int decimalCounter, int activityType, int displayMode)
+        explicit SettingsValues(int32_t decimalCounter, int activityType, int displayMode)
+            : SettingsValues()
         {
-            if (auto req = SDK::make_msg<CustomMessage::SettingsValues>(mKernel)) {
-                req->decimalCounter = decimalCounter;
-                req->activityType = activityType;
-                req->displayMode = displayMode;
-
-                return req.send();
-            }
-
-            return false;
+            this->decimalCounter = decimalCounter;
+            this->activityType   = activityType;
+            this->displayMode    = displayMode;
         }
-
-    private:
-        const SDK::Kernel& mKernel;
     };
+
 
 } // namespace CustomMessage
 
