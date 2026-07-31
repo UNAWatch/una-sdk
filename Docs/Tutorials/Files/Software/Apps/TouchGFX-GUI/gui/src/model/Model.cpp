@@ -3,6 +3,7 @@
 #include <gui/common/FrontendApplication.hpp>
 
 #include "SDK/Kernel/KernelProviderGUI.hpp"
+#include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
 #define LOG_MODULE_PRX      "Model"
@@ -79,19 +80,15 @@ void Model::exitApp()
 
 void Model::requestSettings()
 {
-    if (auto req = SDK::make_msg<CustomMessage::GetSettings>(mKernel)) {
-        req.send();
-    }
+    SDK::send_msg<CustomMessage::GetSettings>(mKernel);
 }
 
 void Model::updateSettings(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode)
 {
-    if (auto req = SDK::make_msg<CustomMessage::SetSettings>(mKernel)) {
-        req->decimalCounter = static_cast<int>(decimalCounter * 10);
-        req->activityType = static_cast<int>(activityType);
-        req->displayMode = static_cast<int>(displayMode);
-        req.send();
-    }
+    SDK::send_msg<CustomMessage::SetSettings>(mKernel,
+                                             static_cast<int>(decimalCounter * 10),
+                                             static_cast<int>(activityType),
+                                             static_cast<int>(displayMode));
 }
 
 // IUserApp implementation

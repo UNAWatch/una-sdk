@@ -1,5 +1,6 @@
 // #include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRate.hpp"  // Commented out: HR parser include
 #include "SDK/Messages/SensorLayerMessages.hpp"
+#include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/JSON/JsonStreamReader.hpp"
 #include "SDK/JSON/JsonStreamWriter.hpp"
 
@@ -11,7 +12,6 @@
 
 Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
-    , mSender(mKernel)
     , mGUIStarted(false)
     , mDecimalCounter(10)  // 1.0f * 10
     , mActivityType(CustomMessage::ActivityType::RUNNING)
@@ -75,9 +75,10 @@ void Service::run()
                 // Settings messages
                 case CustomMessage::GET_SETTINGS: {
                     LOG_INFO("Received GET_SETTINGS request\n");
-                    mSender.updateSettings(mDecimalCounter,
-                                           static_cast<int>(mActivityType),
-                                           static_cast<int>(mDisplayMode));
+                    SDK::send_msg<CustomMessage::SettingsValues>(
+                        mKernel, mDecimalCounter,
+                        static_cast<int>(mActivityType),
+                        static_cast<int>(mDisplayMode));
                 } break;
 
                 case CustomMessage::SET_SETTINGS: {
@@ -192,7 +193,7 @@ void Service::onStartGUI()
      * To enable: Uncomment below and ensure HR message types are defined in Commands.hpp
      * This initializes the GUI display with default values before real sensor data arrives.
      */
-    // mSender.updateHeartRate(0.0f, 0.0f);  // Send initial HR (0.0) and trust level (0.0) to GUI
+    // SDK::send_msg<CustomMessage::HRValues>(mKernel, 0.0f, 0.0f);  // Send initial HR (0.0) and trust level (0.0) to GUI
 }
 
 void Service::onStopGUI()
@@ -217,7 +218,7 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
     //             mHR   = parser.getBpm();  // Extract BPM
     //             mHRTL = parser.getTrustLevel();  // Extract trust level
 
-    //             mSender.updateHeartRate(mHR, mHRTL);  // Send to GUI
+    //             SDK::send_msg<CustomMessage::HRValues>(mKernel, mHR, mHRTL);  // Send to GUI
     //         }
     //     }
     // }

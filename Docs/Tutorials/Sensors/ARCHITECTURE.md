@@ -86,20 +86,35 @@ namespace CustomMessage {
     // RtcValues: uint32_t time;
 }
 
-class GUISender {
-public:
-    GUISender(const SDK::Kernel& kernel) : mKernel(kernel) {}
-    bool updateHeartRate(float bpm, float tl) {
-        if (auto req = SDK::make_msg<CustomMessage::HRValues>(mKernel)) {
-            req->heartRate = bpm;
-            req->trustLevel = tl;
-            return req.send();
-        }
-        return false;
-    }
-    // Similar updateLocation(uint64_t ts, double lat, double lon, double alt), etc.
-};
 ```
+
+Each struct pairs its default constructor (which sets the message type) with one that fills the
+fields and delegates to it:
+
+```cpp
+struct HRValues : public SDK::MessageBase {
+    float heartRate;
+    float trustLevel;
+
+    HRValues()
+        : SDK::MessageBase(HR_VALUES)
+        , heartRate()
+        , trustLevel()
+    {}
+
+    explicit HRValues(float heartRate, float trustLevel)
+        : HRValues()
+    {
+        this->heartRate  = heartRate;
+        this->trustLevel = trustLevel;
+    }
+};
+// The other ten messages follow the same shape.
+```
+
+That constructor is what lets `SDK::send_msg<T>(kernel, args...)` do the whole send in one call —
+allocate from the kernel pool, forward the arguments to the constructor, send, and release. The app
+needs no sender class of its own.
 
 ### Step 2: Service - Subscribe & Process Sensors
 
@@ -112,7 +127,6 @@ SDK::Sensor::Connection mSensorAltimeter{SDK::Sensor::Type::ALTIMETER, 0, 0};
 SDK::Sensor::Connection mSensorAccelerometer{SDK::Sensor::Type::ACCELEROMETER, 0, 0};
 SDK::Sensor::Connection mSensorStepCounter{SDK::Sensor::Type::STEP_COUNTER, 0, 0};
 SDK::Sensor::Connection mSensorFloorCounter{SDK::Sensor::Type::FLOOR_COUNTER, 0, 0};
-// CustomMessage::GUISender mSender;
 ```
 
 In `run()` [`Service.cpp`](Software/Libs/Sources/Service.cpp): connect all (acc.connect(0.1f, 0)), loop getMessage:
@@ -131,18 +145,18 @@ In `onSdlNewData`:
 if (mSensorHR.matchesDriver(handle)) {
     SDK::SensorDataParser::HeartRate parser(data[0]);
     if (parser.isDataValid()) {
-        mSender.updateHeartRate(parser.getBpm(), parser.getTrustLevel());
+        SDK::send_msg<CustomMessage::HRValues>(mKernel, parser.getBpm(), parser.getTrustLevel());
     }
 }
-// Similar for GPS: parser.getLatitude() etc (double), updateLocation(ts, lat,lon,alt);
-// Altimeter: updateElevation(ts, parser.getAltitude());
-// Accel: if (nowMs - mLastAccTimeMs >= 100) updateAccelerometer(ts, x,y,z);
-// Steps: updateStepCounter(ts, parser.getStepCount());
-// Floors: updateFloors(ts, parser.getFloorsUp());
-// Compass: compute heading from magnetic X/Y fields, updateCompass(ts, heading);
+// Similar for GPS:  send_msg<LocationValues>(mKernel, ts, lat, lon, alt);
+// Altimeter:        send_msg<ElevationValues>(mKernel, ts, parser.getAltitude());
+// Accel:            if (nowMs - mLastAccTimeMs >= 100) send_msg<AccelerometerValues>(mKernel, ts, x, y, z);
+// Steps:            send_msg<StepCounterValues>(mKernel, ts, parser.getStepCount());
+// Floors:           send_msg<FloorsValues>(mKernel, ts, parser.getFloorsUp());
+// Compass:          compute heading from magnetic X/Y fields, then send_msg<CompassValues>(mKernel, ts, heading);
 ```
 
-Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec), `mSender.updateStats(...)`, `updateRtc(timeMs/1000)`.
+Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with `send_msg<StatsValues>(...)`, and `send_msg<RtcValues>(mKernel, timeMs/1000)`.
 
 ### Step 3: GUI Model - Receive Messages
 

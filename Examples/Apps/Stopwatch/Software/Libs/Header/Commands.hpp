@@ -18,7 +18,6 @@
 
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
-#include "SDK/Kernel/Kernel.hpp"
 
 #include "Stopwatch.hpp"
 
@@ -47,6 +46,12 @@ struct StopwatchState : public SDK::MessageBase {
         : SDK::MessageBase(STOPWATCH_STATE)
         , state{}
     {}
+
+    explicit StopwatchState(const Stopwatch::State &state)
+        : StopwatchState()
+    {
+        this->state = state;
+    }
 };
 
 // The fixed lap array keeps the message inside the 256-byte pool block, which
@@ -75,56 +80,6 @@ struct StopwatchReset : public SDK::MessageBase {
  */
 struct StopwatchRequest : public SDK::MessageBase {
     StopwatchRequest() : SDK::MessageBase(STOPWATCH_REQUEST) {}
-};
-
-/**
- * @class Sender
- * @brief Allocates, sends and releases the custom messages.
- */
-class Sender
-{
-public:
-    Sender(const SDK::Kernel &kernel)
-        : mKernel(kernel)
-    {}
-
-    virtual ~Sender() = default;
-
-    /**
-     * @brief Service --> GUI: publish the current state.
-     */
-    bool state(const Stopwatch::State &state)
-    {
-        auto *msg = mKernel.comm.allocateMessage<StopwatchState>();
-        if (!msg) {
-            return false;
-        }
-        msg->state = state;
-        const bool status = mKernel.comm.sendMessage(msg);
-        mKernel.comm.releaseMessage(msg);
-        return status;
-    }
-
-    bool start()        { return send<StopwatchStart>(); }
-    bool pause()        { return send<StopwatchPause>(); }
-    bool lap()          { return send<StopwatchLap>(); }
-    bool reset()        { return send<StopwatchReset>(); }
-    bool requestState() { return send<StopwatchRequest>(); }
-
-private:
-    template<typename T>
-    bool send()
-    {
-        auto *msg = mKernel.comm.allocateMessage<T>();
-        if (!msg) {
-            return false;
-        }
-        const bool status = mKernel.comm.sendMessage(msg);
-        mKernel.comm.releaseMessage(msg);
-        return status;
-    }
-
-    const SDK::Kernel &mKernel;
 };
 
 } // namespace CustomMessage
