@@ -7,7 +7,7 @@
  * @brief Physical button indicator container.
  *
  * Displays four watch-bezel arc indicators (L1, L2, R1, R2), each in one of
- * four visual states: hidden (NONE), white, amber, or red.
+ * five visual states: hidden (NONE), white, amber, red, or teal.
  *
  * The arc geometry is fixed by the Designer-generated base. Only the colour
  * and visibility are controlled at runtime.
