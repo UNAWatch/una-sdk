@@ -61,7 +61,7 @@ public:
 
 private:
     SDK::Kernel& mKernel;
-    bool         mGUIStarted;
+    bool         mGuiStarted;
     // ... additional members
 };
 ```
