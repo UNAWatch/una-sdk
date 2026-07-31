@@ -34,9 +34,11 @@ private:
     SDK::HomeWidget       mWidget;
 
     // A fire that happened while the GUI was closed: launch the GUI, then
-    // deliver it once the GUI signals it is running.
+    // deliver it once the GUI signals it is running. mPendingFiredTick bounds the
+    // wait so a dropped launch (GUI never signals) cannot pin the service alive.
     bool                  mPendingFired = false;
     Timer                 mPendingTimer {};
+    uint32_t              mPendingFiredTick = 0;
 
     // Home-screen widget: shown while a countdown is RUNNING/PAUSED *and the GUI
     // is closed* -- with the app open the user already sees the Running screen.

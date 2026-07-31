@@ -13,6 +13,12 @@
 // the GUI to appear, even with no active countdown.
 static constexpr uint32_t kStartupGraceMs = 5000;
 
+// Upper bound on how long a background fire waits for the GUI it launched to
+// come up and consume it. If the launch is dropped or the GUI never signals
+// COMMAND_APP_NOTIF_GUI_RUN, the pending delivery is dropped so the service can
+// go idle and exit instead of blocking forever.
+static constexpr uint32_t kFiredDeliveryTimeoutMs = 10000;
+
 
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
@@ -40,6 +46,19 @@ void Service::run()
     while (true) {
         uint32_t now      = mKernel.sys.getTimeMs();
         uint32_t sleepTime = mTimerManager.execute(now);
+
+        // A fire waiting for the GUI must not pin the service alive forever: if
+        // the launched GUI never comes up to consume it, drop the pending
+        // delivery so the idle-exit below can trip. While still waiting, keep the
+        // loop ticking so the deadline is actually checked.
+        if (mPendingFired) {
+            if (now - mPendingFiredTick > kFiredDeliveryTimeoutMs) {
+                LOG_INFO("GUI never consumed the fire, dropping pending delivery\n");
+                mPendingFired = false;
+            } else if (sleepTime > kFiredDeliveryTimeoutMs) {
+                sleepTime = kFiredDeliveryTimeoutMs;
+            }
+        }
 
         // Nothing keeps us alive: no GUI and no armed / paused countdown and no
         // fire waiting to be delivered. Exit after the startup grace period;
@@ -339,8 +358,9 @@ void Service::onFired(const Timer& timer)
             mKernel.comm.sendMessage(msg);
             mKernel.comm.releaseMessage(msg);
         }
-        mPendingFired = true;
-        mPendingTimer = timer;
+        mPendingFired     = true;
+        mPendingTimer     = timer;
+        mPendingFiredTick = mKernel.sys.getTimeMs();
     }
 }
 
