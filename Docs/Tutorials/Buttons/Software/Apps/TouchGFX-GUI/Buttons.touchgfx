@@ -212,7 +212,7 @@
     "LandscapeSkinY": 0,
     "PortraitSkinX": 0,
     "PortraitSkinY": 0,
-    "DisplayOrientation": "Portrait",
+    "DisplayOrientation": "Landscape",
     "Family": "STM32U5",
     "SubFamily": "STM32U575/585",
     "Toolchain": "STM32CubeIDE",
