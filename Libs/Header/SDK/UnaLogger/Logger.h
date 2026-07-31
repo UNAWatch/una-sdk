@@ -48,29 +48,15 @@
 #define LOG_LEVEL               4
 #endif
 
-#if (LOG_LEVEL > LOG_LEVEL_NO_LOG)
-
-// Get file name from __FILE__ without full path
-#ifndef __FILENAME__
-#if defined(_WIN32) || defined(_WIN64)
-    #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-#else
-    #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#endif
-#endif
-
-// Function name macro
-#ifndef __FUNCTION_NAME__
-#define __FUNCTION_NAME__       __func__
-#endif
-
-#ifndef LOG_MODULE_PRX
-#define LOG_MODULE_PRX          __FILENAME__
-#endif
-
-#ifndef LOG_MODULE_LEVEL
-#define LOG_MODULE_LEVEL        LOG_LEVEL_DEBUG
-#endif
+/*
+ * Logger lifecycle. Declared unconditionally, outside the LOG_LEVEL guard below: these are
+ * registration calls rather than logging output, and callers invoke them without regard to the
+ * translation unit's LOG_LEVEL. Compiling them out per-TU would give an inline caller such as
+ * SDK::Simulator::Mock::Logger::~Logger() a different body in a no-log TU than everywhere else,
+ * which is an ODR violation -- the linker would keep one arbitrary copy and could silently drop
+ * the deregistration. Both are one-shot calls, so there is no hot-path cost to always declaring
+ * them.
+ */
 
 /**
  * @brief   Initialize logger with kernel logging interface.
@@ -99,6 +85,30 @@ void Logger_init(SDK::Interface::ILogger& ilogger);
  * @note Safe to call with a logger that was never installed (no-op).
  */
 void Logger_deinit(SDK::Interface::ILogger& ilogger);
+
+#if (LOG_LEVEL > LOG_LEVEL_NO_LOG)
+
+// Get file name from __FILE__ without full path
+#ifndef __FILENAME__
+#if defined(_WIN32) || defined(_WIN64)
+    #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#else
+    #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#endif
+#endif
+
+// Function name macro
+#ifndef __FUNCTION_NAME__
+#define __FUNCTION_NAME__       __func__
+#endif
+
+#ifndef LOG_MODULE_PRX
+#define LOG_MODULE_PRX          __FILENAME__
+#endif
+
+#ifndef LOG_MODULE_LEVEL
+#define LOG_MODULE_LEVEL        LOG_LEVEL_DEBUG
+#endif
 
 /**
  * @brief   Output formatted log message with metadata.
@@ -168,10 +178,6 @@ void Logger_hexdump(const char *level,
 #else
 #define Logger_message(...)             do { } while(0)
 #define Logger_hexdump(...)             do { } while(0)
-
-// Nothing can be installed when logging is compiled out, so there is nothing to deregister --
-// but ~Logger() calls this unconditionally, so it still has to name something.
-#define Logger_deinit(...)              do { } while(0)
 
 #define LOG(...)                        do { } while(0)
 #define LOG_DUMP(...)                   do { } while(0)
