@@ -62,9 +62,8 @@ public:
     void run();
 
 private:
-    SDK::Kernel&          mKernel;
-    bool                  mGuiStarted;
-    CustomMessage::Sender mGuiSender;
+    SDK::Kernel& mKernel;
+    bool         mGuiStarted;
     // ... additional members
 };
 ```
@@ -202,7 +201,7 @@ void Service::processTrack() {
     mTrackData.pace = getPace(mTrackData.speed, mSpeedCounter.getMinValid());
 
     // Update GUI
-    mGuiSender.trackData(mTrackData);
+    SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
 
     // FIT file recording
     if (mTrackState == Track::State::ACTIVE) {
@@ -227,7 +226,7 @@ Each record is assembled from the current counter values and GPS state. Fields a
 
 **GPS Fix State Management**:
 
-Fix state changes are tracked via `mPreviousGpsFixState`. On every change the GUI is notified via `mGuiSender.fix()`. The very first acquired fix also triggers `notifyFirstFix()` — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:
+Fix state changes are tracked via `mPreviousGpsFixState`. On every change the GUI is notified with a `GpsFix` message. The very first acquired fix also triggers `notifyFirstFix()` — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:
 
 ```cpp
 if (mPreviousGpsFixState != mGps.fix) {
@@ -236,7 +235,7 @@ if (mPreviousGpsFixState != mGps.fix) {
         notifyFirstFix();
         firstFix = true;
     }
-    mGuiSender.fix(mGps.fix);
+    SDK::send_msg<CustomMessage::GpsFix>(mKernel, mGps.fix);
 }
 ```
 
@@ -326,8 +325,8 @@ mPhaseStartActiveDist = mDistanceCounter.getValueActive();
 #### Interval Phase Notifications
 
 On every phase change, `onIntervalsPhaseChange(bool alert, bool manual)` is called:
-- If `alert` is true, `mGuiSender.intervalsPhaseAlert(mTrackData.intervals)` sends an `INTERVALS_PHASE_ALERT` message to the GUI, which navigates to `TrackIntervalsAlertView` and shows a countdown timer before returning to the track screen.
-- When the entire workout is complete (all repeats done and `COOL_DOWN` phase ended or skipped), `mGuiSender.intervalsWorkoutCompleted()` sends `INTERVALS_WORKOUT_COMPLETED` and sets `mIntervalsCompleted = true` to block further phase processing.
+- If `alert` is true, `SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals)` sends an `INTERVALS_PHASE_ALERT` message to the GUI, which navigates to `TrackIntervalsAlertView` and shows a countdown timer before returning to the track screen.
+- When the entire workout is complete (all repeats done and `COOL_DOWN` phase ended or skipped), `SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel)` sends `INTERVALS_WORKOUT_COMPLETED` and sets `mIntervalsCompleted = true` to block further phase processing.
 
 ### WristTiltDetector
 
@@ -833,6 +832,7 @@ constexpr SDK::MessageType::Type INTERVALS_NEXT_PHASE = 0x00000011;
 struct SettingsUpd : public SDK::MessageBase {
     Settings settings;
     bool     unitsImperial;
+    bool     timeFormat12h;                     // true = 12-hour clock
     uint8_t  hrThresholds[kHrThresholdsCount];  // C-array of 6
     uint8_t  hrThresholdsCount;
 };
@@ -858,38 +858,58 @@ struct IntervalsNextPhase : public SDK::MessageBase {};
 } // namespace CustomMessage
 ```
 
-#### Message Sender
+#### Sending Messages
 
-**`CustomMessage::Sender`** provides type-safe message sending from the service to the GUI. Each method allocates a typed message via `mKernel.comm.allocateMessage<>()`, fills its fields, sends it, and releases it, returning `bool`:
+Every message struct keeps a default constructor (which sets its message type) plus, where it has fields, a field-filling constructor that delegates to it. Anything unusual — a `memcpy`, a clamp, a bounded string copy — lives in that constructor rather than at the call site:
 
 ```cpp
-class Sender {
-public:
-    Sender(const SDK::Kernel& kernel);
+struct AccessoryStatusUpd : public SDK::MessageBase {
+    uint8_t state;     ///< SDK::Accessory::State
+    char    name[24];  ///< device name (may be empty)
 
-    // Service --> GUI
-    bool settingsUpd(Settings settings, bool units,
-                     const uint8_t (&thresholds)[kHrThresholdsCount],
-                     uint8_t thresholdCount);
-    bool time(std::tm localTime);
-    bool battery(uint8_t level);
-    bool fix(bool state);
-    bool trackState(Track::State state);
-    bool trackData(const Track::Data& data);
-    bool lapEnd(uint32_t lapNum);
-    bool summary(const ActivitySummary* summaryPtr);
-    bool intervalsPhaseAlert(const Track::IntervalsData& intervals);
-    bool intervalsWorkoutCompleted();
+    AccessoryStatusUpd()
+        : SDK::MessageBase(ACCESSORY_STATUS)
+        , state(0)
+        , name{}
+    {}
 
-    // GUI --> Service
-    bool settingsSave(Settings settings);
-    bool trackStart(bool intervalsMode);
-    bool trackStop(bool discard);
-    bool trackPause();
-    bool trackResume();
-    bool manualLap();
-    bool intervalsNextPhase();
+    explicit AccessoryStatusUpd(uint8_t state, const char* name)
+        : AccessoryStatusUpd()
+    {
+        this->state = state;
+        if (name) {
+            strncpy(this->name, name, sizeof(this->name) - 1);
+        }
+    }
 };
+```
+
+Sending is then one call in either direction. `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...` to the constructor, sends it, and releases it, returning `false` if allocation or the send failed:
+
+```cpp
+// Service --> GUI
+SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
+SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals);
+SDK::send_msg<CustomMessage::SettingsUpd>(mKernel, mSettings, mIsImperial, mTimeFormat12h,
+                                          hrThresholds, CustomMessage::kHrThresholdsCount);
+
+// GUI --> Service
+SDK::send_msg<CustomMessage::TrackStart>(mKernel, intervalsMode);
+SDK::send_msg<CustomMessage::IntervalsNextPhase>(mKernel);   // zero-field message
+```
+
+There is no per-app sender class to write: the message type owns its field filling and `send_msg` owns the allocate/send/release sequence.
+
+`send_msg` is for fire-and-forget sends. When the reply matters, use `SDK::make_msg<T>()` instead — it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result back. `sendInitialInfoToGui()` does this to pick up the system units and clock format before forwarding them to the GUI:
+
+```cpp
+if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
+    if (msg.send(100) && msg.ok()) {
+        mIsImperial    = msg->imperialUnits;
+        mTimeFormat12h = msg->timeFormat;
+        // ... copy the HR zone thresholds ...
+    }
+}
 ```
 
 ### Asset Management

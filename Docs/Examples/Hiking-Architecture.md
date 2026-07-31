@@ -60,9 +60,8 @@ public:
     void run();
 
 private:
-    SDK::Kernel&          mKernel;
-    bool                  mGUIStarted;
-    CustomMessage::Sender mGuiSender;
+    SDK::Kernel& mKernel;
+    bool         mGUIStarted;
     // ... additional members
 };
 ```
@@ -180,7 +179,7 @@ void Service::processTrack() {
     mTrackData.pace = getPace(mTrackData.speed, mSpeedCounter.getMinValid());
 
     // Update GUI
-    mGuiSender.trackData(mTrackData);
+    SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
 
     // FIT file recording
     if (mTrackState == Track::State::ACTIVE) {
@@ -200,7 +199,7 @@ Each record is assembled from the current counter values and GPS state. Fields a
 
 **GPS Fix State Management**:
 
-Fix state changes are tracked via `mPreviousGpsFixState`. On every change the GUI is notified via `mGuiSender.fix()`. The very first acquired fix also triggers `notifyFirstFix()` — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:
+Fix state changes are tracked via `mPreviousGpsFixState`. On every change the GUI is notified with a `GpsFix` message. The very first acquired fix also triggers `notifyFirstFix()` — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:
 
 ```cpp
 if (mPreviousGpsFixState != mGps.fix) {
@@ -209,7 +208,7 @@ if (mPreviousGpsFixState != mGps.fix) {
         notifyFirstFix();
         firstFix = true;
     }
-    mGuiSender.fix(mGps.fix);
+    SDK::send_msg<CustomMessage::GpsFix>(mKernel, mGps.fix);
 }
 ```
 
@@ -682,6 +681,7 @@ constexpr SDK::MessageType::Type MANUAL_LAP     = 0x0000000F;
 struct SettingsUpd : public SDK::MessageBase {
     Settings settings;
     bool     unitsImperial;
+    bool     timeFormat12h;                     // true = 12-hour clock
     uint8_t  hrThresholds[kHrThresholdsCount];  // C-array of 6
     uint8_t  hrThresholdsCount;
 };
@@ -695,35 +695,58 @@ struct TrackDataUpd : public SDK::MessageBase {
 } // namespace CustomMessage
 ```
 
-#### Message Sender
+#### Sending Messages
 
-**`CustomMessage::Sender`** provides type-safe message sending from the service to the GUI. Each method allocates a typed message via `mKernel.comm.allocateMessage<>()`, fills its fields, sends it, and releases it, returning `bool`:
+Every message struct keeps a default constructor (which sets its message type) plus, where it has fields, a field-filling constructor that delegates to it. Anything unusual — a `memcpy`, a clamp, a bounded string copy — lives in that constructor rather than at the call site. For `SettingsUpd`, whose fields are listed above:
 
 ```cpp
-class Sender {
-public:
-    Sender(const SDK::Kernel& kernel);
+    SettingsUpd()
+        : SDK::MessageBase(SETTINGS_UPDATE)
+        , unitsImperial(false)
+        , timeFormat12h(false)
+        , hrThresholds {}
+        , hrThresholdsCount(0)
+    {}
 
-    // Service --> GUI
-    bool settingsUpd(Settings settings, bool units,
-                     const uint8_t (&thresholds)[kHrThresholdsCount],
-                     uint8_t thresholdCount);
-    bool time(std::tm localTime);
-    bool battery(uint8_t level);
-    bool fix(bool state);
-    bool trackState(Track::State state);
-    bool trackData(const Track::Data& data);
-    bool lapEnd(uint32_t lapNum);
-    bool summary(const ActivitySummary* summaryPtr);
+    explicit SettingsUpd(Settings settings, bool units, bool timeFormat12h,
+                         const uint8_t (&thresholds)[kHrThresholdsCount],
+                         uint8_t thresholdCount)
+        : SettingsUpd()
+    {
+        this->settings          = settings;
+        this->unitsImperial     = units;
+        this->timeFormat12h     = timeFormat12h;
+        memcpy(this->hrThresholds, thresholds, sizeof(this->hrThresholds));
+        this->hrThresholdsCount = thresholdCount;
+    }
+```
 
-    // GUI --> Service
-    bool settingsSave(Settings settings);
-    bool trackStart();
-    bool trackStop(bool discard);
-    bool trackPause();
-    bool trackResume();
-    bool manualLap();
-};
+Sending is then one call in either direction. `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...` to the constructor, sends it, and releases it, returning `false` if allocation or the send failed:
+
+```cpp
+// Service --> GUI
+SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
+SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
+SDK::send_msg<CustomMessage::SettingsUpd>(mKernel, mSettings, mIsImperial,
+                                          mTimeFormat12h, hrThresholds, hrThresholdsCount);
+
+// GUI --> Service
+SDK::send_msg<CustomMessage::TrackStop>(mKernel, /* discard */ true);
+SDK::send_msg<CustomMessage::ManualLap>(mKernel);   // zero-field message
+```
+
+There is no per-app sender class to write: the message type owns its field filling and `send_msg` owns the allocate/send/release sequence.
+
+`send_msg` is for fire-and-forget sends. When the reply matters, use `SDK::make_msg<T>()` instead — it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result back. `sendInitialInfoToGui()` does this to pick up the system units and clock format before forwarding them to the GUI:
+
+```cpp
+if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
+    if (msg.send(100) && msg.ok()) {
+        mIsImperial    = msg->imperialUnits;
+        mTimeFormat12h = msg->timeFormat;
+        // ... copy the HR zone thresholds ...
+    }
+}
 ```
 
 ### Asset Management

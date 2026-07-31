@@ -926,15 +926,22 @@ struct WorkoutCommand : public SDK::MessageBase {
 ```
 
 #### Service-Side Message Sending
+
+Because each message fills its own fields in its constructor, sending one is a single call:
+`SDK::send_msg<T>(kernel, args...)` allocates the message, forwards `args...` to the constructor,
+sends it, and releases it — returning `false` if allocation or the send failed. Apps do not need a
+sender class of their own.
+
+Return the `bool` rather than swallowing it, so the caller can decide. For periodic telemetry the
+caller usually ignores it — a dropped heart-rate sample is superseded a second later, and the
+example apps do exactly that. A dropped reply to a request is not self-correcting, so those sends
+are worth checking (see the request-response pattern below).
+
 ```cpp
 class FitnessService {
 public:
-    void sendHeartRateUpdate(uint16_t bpm) {
-        auto msg = mKernel.comm.allocateMessage<HeartRateMessage>(bpm, getCurrentTime());
-        if (msg) {
-            mKernel.comm.sendMessage(msg, 100); // 100ms timeout
-            mKernel.comm.releaseMessage(msg);
-        }
+    bool sendHeartRateUpdate(uint16_t bpm) {
+        return SDK::send_msg<HeartRateMessage>(mKernel, bpm, getCurrentTime());
     }
 
     void handleWorkoutCommand(WorkoutCommand::Action action) {
@@ -1008,9 +1015,10 @@ struct ConfigurationResponse : public MessageBase {
 // Service implementation
 void Service::handleConfigRequest(ConfigurationRequest* req) {
     std::string value = getConfigurationValue(req->type);
-    auto response = allocateMessage<ConfigurationResponse>(req->type, value);
-    comm.sendMessage(response);
-    releaseMessage(response);
+    if (!SDK::send_msg<ConfigurationResponse>(mKernel, req->type, value)) {
+        // Nothing retries this for us: the requester will block until it times out.
+        Logger::error("Config response for type %d dropped", static_cast<int>(req->type));
+    }
 }
 ```
 
