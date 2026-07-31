@@ -22,7 +22,6 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Kernel\KernelBuilder.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Port\TouchGFX\TouchGFXCommandProcessor.cpp"/>
-    <ClCompile Include="$(SdkPath)\Libs\Source\SensorLayer\SensorConnection.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\DualAppComm.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppCore.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\App\AppMessageCore.cpp"/>

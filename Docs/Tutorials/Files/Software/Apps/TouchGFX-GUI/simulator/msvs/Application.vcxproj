@@ -34,6 +34,8 @@
     <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamReader.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\JSON\JsonStreamWriter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\common\FrontendApplicationBase.cpp"/>
     <ClCompile Include="..\..\gui\src\model\Model.cpp"/>
     <ClCompile Include="..\..\generated\simulator\src\video\SoftwareMJPEGDecoder.cpp"/>
