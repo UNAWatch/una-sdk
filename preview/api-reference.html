@@ -132,7 +132,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK9Interface8IAppComm12sendResponseEP11MessageBase"><code class="docutils literal notranslate"><span class="pre">sendResponse()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK9Interface8IAppComm14releaseMessageEP11MessageBase"><code class="docutils literal notranslate"><span class="pre">releaseMessage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK9Interface8IAppComm11sendMessageEP11MessageBase8uint32_t"><code class="docutils literal notranslate"><span class="pre">sendMessage()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#_CPPv4I0EN3SDK9Interface8IAppComm15allocateMessageEP1Tv"><code class="docutils literal notranslate"><span class="pre">allocateMessage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args"><code class="docutils literal notranslate"><span class="pre">allocateMessage()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv4N3SDK11MessageBaseE"><code class="docutils literal notranslate"><span class="pre">SDK::MessageBase</span></code></a><ul>
@@ -789,8 +789,8 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4I0EN3SDK9Interface8IAppComm15allocateMessageEP1Tv">
-<span id="_CPPv3I0EN3SDK9Interface8IAppComm15allocateMessageEv"></span><span id="_CPPv2I0EN3SDK9Interface8IAppComm15allocateMessageEv"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classSDK_1_1Interface_1_1IAppComm_1abc33609ed277d9b6b60b308278f6ce55"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3SDK9Interface8IAppComm15allocateMessageEP1Tv" title="SDK::Interface::IAppComm::allocateMessage::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">allocateMessage</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN3SDK9Interface8IAppComm15allocateMessageEP1Tv" title="Link to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args">
+<span id="_CPPv3I0DpEN3SDK9Interface8IAppComm15allocateMessageEDpRR4Args"></span><span id="_CPPv2I0DpEN3SDK9Interface8IAppComm15allocateMessageEDpRR4Args"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="sig-name descname"><span class="n"><span class="pre">Args</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classSDK_1_1Interface_1_1IAppComm_1aae9ba60211dbae1d4751b1b23370a69c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args" title="SDK::Interface::IAppComm::allocateMessage::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">allocateMessage</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args" title="SDK::Interface::IAppComm::allocateMessage::Args"><span class="n"><span class="pre">Args</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">...</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args" title="Link to this definition"></a><br /></dt>
 <dd><p>Allocate typed message object from kernel pool. </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -798,7 +798,7 @@
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Calls placement new on allocated memory </p>
+<p>Calls placement new on allocated memory, forwarding any ctor args </p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -806,7 +806,11 @@
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Example: auto* msg = comm-&gt;<a class="reference internal" href="#classSDK_1_1Interface_1_1IAppComm_1abc33609ed277d9b6b60b308278f6ce55"><span class="std std-ref">allocateMessage&lt;GpsRequestMsg&gt;()</span></a>; </p>
+<p>Example: auto* msg = comm-&gt;<a class="reference internal" href="#classSDK_1_1Interface_1_1IAppComm_1aae9ba60211dbae1d4751b1b23370a69c"><span class="std std-ref">allocateMessage&lt;GpsRequestMsg&gt;()</span></a>; </p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Example: auto* msg = comm-&gt;allocateMessage&lt;BatteryMsg&gt;(level); </p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return values<span class="colon">:</span></dt>
