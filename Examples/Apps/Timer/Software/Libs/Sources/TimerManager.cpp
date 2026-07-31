@@ -75,12 +75,14 @@ void TimerManager::resume(uint32_t nowMs)
 
 void TimerManager::reset(uint32_t nowMs)
 {
-    // Reset to the full duration, preserving the run state: a running timer
-    // keeps counting from the top, a paused one stays paused at the top.
-    if (mState == TimerState::PAUSED) {
-        mRemainingMs = static_cast<uint32_t>(mDurationSec) * 1000u;
-    } else {
+    // Reset to the full duration, preserving the run state: only a running timer
+    // re-arms and keeps counting from the top; any other state (paused, idle, or
+    // fired) just restores the remaining time without starting a countdown -- a
+    // reset must never silently turn a stopped/fired timer into a running one.
+    if (mState == TimerState::RUNNING) {
         arm(mDurationSec, mEffect, nowMs);
+    } else {
+        mRemainingMs = static_cast<uint32_t>(mDurationSec) * 1000u;
     }
     LOG_INFO("Reset to %u s\n", static_cast<unsigned>(mDurationSec));
 }
