@@ -480,6 +480,26 @@ struct ActivatedAlarm : public SDK::MessageBase {
 };
 ```
 
+`AlarmList` is the one worth reading closely, because the awkward part of the conversion lives in
+its constructor rather than at any call site. It takes a `std::vector<Alarm>` but stores a fixed
+array, so it clamps the count and copies element-wise — the caller just hands over the vector:
+
+```cpp
+explicit AlarmList(const std::vector<Alarm> &list, bool timeFormat12h = false)
+    : AlarmList()
+{
+    this->count = static_cast<uint8_t>(
+        list.size() < kMaxAlarms ? list.size() : kMaxAlarms);
+    for (uint8_t i = 0; i < this->count; ++i) {
+        this->alarms[i] = list[i];
+    }
+    this->timeFormat12h = timeFormat12h;
+}
+```
+
+`timeFormat12h` defaults to `false` because it is only meaningful Service → GUI; the GUI → Service
+direction leaves it alone and the service ignores it there.
+
 Sending is then one call in either direction. `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...` to the constructor, sends it, and releases it, returning `false` if allocation or the send failed:
 
 ```cpp
@@ -494,7 +514,7 @@ SDK::send_msg<CustomMessage::AlarmStopAll>(mKernel);   // zero-field message
 
 There is no per-app sender class: the message type owns its field filling and `send_msg` owns the allocate/send/release sequence.
 
-`send_msg` is for fire-and-forget sends. When the reply matters, use `SDK::make_msg<T>()` instead — it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result back. `refreshTimeFormat()` does exactly this to pick up the system clock format:
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room the message is dropped rather than waited for. Reach for `SDK::make_msg<T>()` when the reply matters *or* when you need to wait for queue space: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout (`msg.send(100)`) and read the result back. `refreshTimeFormat()` does exactly this to pick up the system clock format:
 
 ```cpp
 if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {

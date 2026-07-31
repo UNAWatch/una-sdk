@@ -737,7 +737,7 @@ SDK::send_msg<CustomMessage::ManualLap>(mKernel);   // zero-field message
 
 There is no per-app sender class to write: the message type owns its field filling and `send_msg` owns the allocate/send/release sequence.
 
-`send_msg` is for fire-and-forget sends. When the reply matters, use `SDK::make_msg<T>()` instead — it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result back. `sendInitialInfoToGui()` does this to pick up the system units and clock format before forwarding them to the GUI:
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room the message is dropped rather than waited for. Reach for `SDK::make_msg<T>()` when the reply matters *or* when you need to wait for queue space: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout (`msg.send(100)`) and read the result back. `sendInitialInfoToGui()` does this to pick up the system units and clock format before forwarding them to the GUI:
 
 ```cpp
 if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
