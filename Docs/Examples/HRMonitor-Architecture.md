@@ -57,9 +57,8 @@ private:
     static constexpr uint32_t skSampleLatency = 2000;
 
     // -- Infrastructure ---
-    SDK::Kernel&          mKernel;
-    bool                  mGuiStarted;
-    CustomMessage::Sender mGuiSender;
+    SDK::Kernel& mKernel;
+    bool         mGuiStarted;
 
     // -- Sensors ---
     SDK::Sensor::Connection mSensorHr;
@@ -98,7 +97,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             if (parser.isDataValid()) {
                 mHr   = parser.getBpm();
                 mHrTl = parser.getTrustLevel();
-                mGuiSender.heartRate(mHr, mHrTl);
+                SDK::send_msg<CustomMessage::HRValues>(mKernel, mHr, mHrTl);
             }
         }
     }
@@ -324,10 +323,19 @@ struct HRValues : public SDK::MessageBase {
         , heartRate(0.0f)
         , trustLevel(0.0f)
     {}
+
+    explicit HRValues(float heartRate, float trustLevel)
+        : HRValues()
+    {
+        this->heartRate  = heartRate;
+        this->trustLevel = trustLevel;
+    }
 };
 
 } // namespace CustomMessage
 ```
+
+Each message keeps a default constructor (which sets its message type) and a field-filling constructor that delegates to it. The field-filling constructor is what makes the one-line send below possible.
 
 **Message summary**:
 
@@ -335,22 +343,17 @@ struct HRValues : public SDK::MessageBase {
 |---------|-----------|---------|
 | `HR_VALUES` | Service -> GUI | Every valid sensor reading while `mGuiStarted` is true; also once on GUI start with (0.0, 0.0) |
 
-### Message Sender
+### Sending Messages
 
-`CustomMessage::Sender` provides type-safe message sending from the service to the GUI. It uses the `allocateMessage` / `sendMessage` / `releaseMessage` pattern:
+Fire-and-forget sends go through `SDK::send_msg<T>()`, which allocates the message from the kernel pool, forwards its arguments to the message's constructor, sends it, and releases it — returning `false` if allocation or the send failed:
 
 ```cpp
-class Sender {
-public:
-    Sender(const SDK::Kernel& kernel);
-
-    // Service --> GUI
-    bool heartRate(float value, float trustLevel);
-
-private:
-    const SDK::Kernel& mKernel;
-};
+SDK::send_msg<CustomMessage::HRValues>(mKernel, mHr, mHrTl);
 ```
+
+There is no per-app sender class to write: the message type carries the field-filling constructor and `send_msg` supplies the rest. That is the only send this app needs — every HRMonitor message is fire-and-forget.
+
+When the reply matters, `SDK::make_msg<T>()` is the counterpart: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result back (`msg.send(timeout) && msg.ok()`). The Cycling, Hiking, Running, and Alarm services use it that way to query `SDK::Message::RequestSystemSettings` — see [Cycling](Cycling-Architecture.md#sending-messages) for a worked example.
 
 ## Build and Setup
 
@@ -407,7 +410,7 @@ una_app_build_app()
 **App Libraries** (`Libs/`):
 - `Service` — service entry point, sensor handling, FIT recording coordination
 - `ActivityWriter` — FIT file lifecycle management
-- `Commands.hpp` — shared message types and `Sender` class
+- `Commands.hpp` — shared message types for the service↔GUI contract
 
 ### Development Setup
 
