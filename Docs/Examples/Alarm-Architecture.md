@@ -306,6 +306,7 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
         case CustomMessage::ALARM_LIST: {
             auto* m = static_cast<CustomMessage::AlarmList*>(msg);
             mAlarmList.assign(m->alarms, m->alarms + m->count);
+            mTimeFormat12h = m->timeFormat12h;
             modelListener->onAlarmListUpdated(mAlarmList);
         } break;
 
