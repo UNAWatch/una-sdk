@@ -705,9 +705,6 @@
     <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp">
       <Filter>Header Files\gui\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\common\TimerLabels.hpp">
-      <Filter>Header Files\gui\common</Filter>
-    </ClInclude>
     <ClCompile Include="..\..\gui\src\alert_screen\AlertPresenter.cpp">
       <Filter>Source Files\gui\alert_screen</Filter>
     </ClCompile>
