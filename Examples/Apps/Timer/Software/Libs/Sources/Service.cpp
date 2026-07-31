@@ -52,7 +52,12 @@ void Service::run()
         // delivery so the idle-exit below can trip. While still waiting, keep the
         // loop ticking so the deadline is actually checked.
         if (mPendingFired) {
-            if (now - mPendingFiredTick > kFiredDeliveryTimeoutMs) {
+            // Wrap-safe elapsed. onFired stamps mPendingFiredTick from getTimeMs()
+            // *after* `now` was sampled at the top of the loop, so on the firing
+            // iteration the stamp can sit a hair ahead of `now`; an unsigned
+            // (now - tick) would then underflow to a huge value and drop the fire
+            // we just armed. The signed difference stays correctly negative.
+            if (static_cast<int32_t>(now - mPendingFiredTick) > static_cast<int32_t>(kFiredDeliveryTimeoutMs)) {
                 LOG_INFO("GUI never consumed the fire, dropping pending delivery\n");
                 mPendingFired = false;
             } else if (sleepTime > kFiredDeliveryTimeoutMs) {
@@ -128,15 +133,17 @@ void Service::onStartGUI()
 {
     mGuiStarted = true;
 
-    // Bring the GUI up to date: current countdown, then recents.
-    sendStateToGui();
-    mGuiSender.sendRecents(mTimerManager.getRecents());
-
-    // Deliver a fire that happened while the GUI was closed.
+    // Deliver a fire that happened while the GUI was closed FIRST, so the GUI
+    // routes straight to the Fired screen. A state update sent before it would
+    // route the blank Startup screen to Main, flashing it before Fired takes over.
     if (mPendingFired) {
         mGuiSender.fired(mPendingTimer, true);   // GUI was closed -> background fire
         mPendingFired = false;
     }
+
+    // Bring the GUI up to date: current countdown, then recents.
+    sendStateToGui();
+    mGuiSender.sendRecents(mTimerManager.getRecents());
 }
 
 void Service::onStopGUI()
