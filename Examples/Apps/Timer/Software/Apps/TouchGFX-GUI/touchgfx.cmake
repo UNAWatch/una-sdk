@@ -1,4 +1,4 @@
-file(GLOB_RECURSE TOUCHGFX_SOURCES
+file(GLOB_RECURSE TOUCHGFX_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_LIST_DIR}/gui/src/*.cpp
     ${CMAKE_CURRENT_LIST_DIR}/generated/fonts/src/*.cpp
     ${CMAKE_CURRENT_LIST_DIR}/generated/gui_generated/src/*.cpp
