@@ -49,8 +49,6 @@ add_compile_options(
     -nostdlib
     -mthumb
     -ffunction-sections
-    -fcyclomatic-complexity
-
 )
 
 # C++ specific flags
@@ -112,6 +110,29 @@ function(una_app_setup_version BUILD_VERSION_OUT WORKING_DIR)
     message("Fallback BUILD_VERSION: ${BUILD_VERSION}")
 endfunction()
 
+# -fcyclomatic-complexity exists only in ST's GNU Tools for STM32 fork; mainline
+# arm-none-eabi-gcc rejects it outright. Probed rather than assumed so both
+# toolchains work unchanged. This runs from the build functions below, not at
+# include time, because the languages are not enabled until the app calls
+# project(). C and CXX are probed separately so each language is gated by its
+# own compiler's answer rather than the other's.
+function(una_app_add_metrics_flags TARGET_NAME)
+    include(CheckCCompilerFlag)
+    include(CheckCXXCompilerFlag)
+    check_c_compiler_flag(-fcyclomatic-complexity UNA_HAVE_FCYCLOMATIC_COMPLEXITY_C)
+    check_cxx_compiler_flag(-fcyclomatic-complexity UNA_HAVE_FCYCLOMATIC_COMPLEXITY_CXX)
+    if(UNA_HAVE_FCYCLOMATIC_COMPLEXITY_C)
+        target_compile_options(${TARGET_NAME} PRIVATE
+            $<$<COMPILE_LANGUAGE:C>:-fcyclomatic-complexity>
+        )
+    endif()
+    if(UNA_HAVE_FCYCLOMATIC_COMPLEXITY_CXX)
+        target_compile_options(${TARGET_NAME} PRIVATE
+            $<$<COMPILE_LANGUAGE:CXX>:-fcyclomatic-complexity>
+        )
+    endif()
+endfunction()
+
 # Function to build service executable
 # Needs:
 # - TARGET_NAME - arg
@@ -147,6 +168,8 @@ function(una_app_build_service TARGET_NAME)
     message("DEV_ID: ${DEV_ID}")
 
     add_executable(${TARGET_NAME} ${SERVICE_SOURCES})
+
+    una_app_add_metrics_flags(${TARGET_NAME})
 
     target_include_directories(${TARGET_NAME} PRIVATE ${SERVICE_INCLUDE_DIRS})
 
@@ -213,6 +236,8 @@ function(una_app_build_gui TARGET_NAME)
     list(REMOVE_DUPLICATES TOUCHGFX_LIBS_DIRS)
 
     add_executable(${TARGET_NAME} ${GUI_SOURCES})
+
+    una_app_add_metrics_flags(${TARGET_NAME})
 
     target_include_directories(${TARGET_NAME} PRIVATE ${GUI_INCLUDE_DIRS})
 
