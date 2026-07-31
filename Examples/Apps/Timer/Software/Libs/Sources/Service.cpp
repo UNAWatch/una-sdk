@@ -84,6 +84,7 @@ void Service::run()
                 // Kernel messages
                 case SDK::MessageType::COMMAND_APP_STOP:
                     LOG_INFO("Force exit from the application\n");
+                    stopEffect();     // silence a FIRED alert before we go away
                     mWidget.stop();   // leave no stale widget on the home screen
                     mTimerManager.attachCallback(nullptr);
                     mKernel.comm.releaseMessage(msg);
