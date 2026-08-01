@@ -15,6 +15,8 @@
  ******************************************************************************
  */
 
+#include <new>
+
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/Kernel/KernelProviderGUI.hpp"
