@@ -895,14 +895,17 @@ graph TD
 
 #### Message Definition
 ```cpp
-// In shared header file (e.g., AppTypes.hpp)
-enum class CustomMessageType : uint32_t {
-    HEART_RATE_UPDATE = 0x00010001,
-    GPS_LOCATION_UPDATE = 0x00010002,
-    BATTERY_STATUS = 0x00010003,
-    WORKOUT_START = 0x00010004,
-    WORKOUT_STOP = 0x00010005
-};
+// In shared header file (e.g., Commands.hpp)
+namespace CustomMessage {
+
+// `SDK::MessageType::Type` is a `uint32_t` alias, and `MessageBase` takes one directly, so
+// declare the IDs as constants of that type. A scoped `enum class` would not convert
+// implicitly — neither in the constructor below nor in a `switch (msg->getType())`.
+constexpr SDK::MessageType::Type HEART_RATE_UPDATE   = 0x00010001;
+constexpr SDK::MessageType::Type GPS_LOCATION_UPDATE = 0x00010002;
+constexpr SDK::MessageType::Type BATTERY_STATUS      = 0x00010003;
+constexpr SDK::MessageType::Type WORKOUT_START       = 0x00010004;
+constexpr SDK::MessageType::Type WORKOUT_STOP        = 0x00010005;
 
 // Message structures
 struct HeartRateMessage : public SDK::MessageBase {
@@ -910,7 +913,7 @@ struct HeartRateMessage : public SDK::MessageBase {
     uint32_t timestamp;
 
     HeartRateMessage(uint16_t heartRate, uint32_t time)
-        : MessageBase(CustomMessageType::HEART_RATE_UPDATE)
+        : SDK::MessageBase(HEART_RATE_UPDATE)
         , bpm(heartRate), timestamp(time) {}
 };
 
@@ -918,10 +921,12 @@ struct WorkoutCommand : public SDK::MessageBase {
     enum class Action { START, PAUSE, RESUME, STOP };
     Action command;
 
-    WorkoutCommand(Action cmd)
-        : MessageBase(CustomMessageType::WORKOUT_START)
+    explicit WorkoutCommand(Action cmd)
+        : SDK::MessageBase(WORKOUT_START)
         , command(cmd) {}
 };
+
+} // namespace CustomMessage
 ```
 
 #### Service-Side Message Sending
@@ -972,14 +977,14 @@ class FitnessModel : public ICustomMessageHandler {
 public:
     bool customMessageHandler(MessageBase* msg) override {
         switch (msg->getType()) {
-            case CustomMessageType::HEART_RATE_UPDATE: {
+            case CustomMessage::HEART_RATE_UPDATE: {
                 auto* hrMsg = static_cast<HeartRateMessage*>(msg);
                 mCurrentHeartRate = hrMsg->bpm;
                 mLastUpdateTime = hrMsg->timestamp;
                 notifyHeartRateChanged();
                 return true;
             }
-            case CustomMessageType::BATTERY_STATUS: {
+            case CustomMessage::BATTERY_STATUS: {
                 auto* battMsg = static_cast<BatteryMessage*>(msg);
                 mBatteryLevel = battMsg->percentage;
                 notifyBatteryChanged();
@@ -1003,22 +1008,25 @@ private:
 
 #### Request-Response Pattern
 ```cpp
+constexpr SDK::MessageType::Type CONFIG_REQUEST  = 0x00010006;
+constexpr SDK::MessageType::Type CONFIG_RESPONSE = 0x00010007;
+
 // Request message
-struct ConfigurationRequest : public MessageBase {
+struct ConfigurationRequest : public SDK::MessageBase {
     enum class ConfigType { UNITS, THEME, ALERTS };
     ConfigType type;
 
-    ConfigurationRequest(ConfigType t)
-        : MessageBase(CONFIG_REQUEST_TYPE), type(t) {}
+    explicit ConfigurationRequest(ConfigType t)
+        : SDK::MessageBase(CONFIG_REQUEST), type(t) {}
 };
 
 // Response message
-struct ConfigurationResponse : public MessageBase {
+struct ConfigurationResponse : public SDK::MessageBase {
     ConfigurationRequest::ConfigType type;
     std::string value;
 
-    ConfigurationResponse(ConfigType t, const std::string& val)
-        : MessageBase(CONFIG_RESPONSE_TYPE), type(t), value(val) {}
+    ConfigurationResponse(ConfigurationRequest::ConfigType t, const std::string& val)
+        : SDK::MessageBase(CONFIG_RESPONSE), type(t), value(val) {}
 };
 
 // Service implementation
