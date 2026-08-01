@@ -1702,9 +1702,8 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <section id="service-layer-communication">
 <h4>Service Layer Communication<a class="headerlink" href="#service-layer-communication" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In Service (Backend)</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">Service::sendHeartRateUpdate</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">bpm</span><span class="p">);</span>
-<span class="w">    </span><span class="n">kernel</span><span class="o">-&gt;</span><span class="n">comm</span><span class="p">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">Service::sendHeartRateUpdate</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">());</span>
 <span class="p">}</span>
 
 <span class="c1">// In Model (GUI)</span>
@@ -1855,14 +1854,26 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 </section>
 <section id="service-side-message-sending">
 <h4>Service-Side Message Sending<a class="headerlink" href="#service-side-message-sending" title="Link to this heading"></a></h4>
+<p>Because each message fills its own fields in its constructor, sending one is a single call:
+<code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> allocates the message, forwards <code class="docutils literal notranslate"><span class="pre">args...</span></code> to the constructor,
+sends it, and releases it — returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the send failed. Apps do not need a
+sender class of their own.</p>
+<p>Return the <code class="docutils literal notranslate"><span class="pre">bool</span></code> rather than swallowing it, so the caller can decide. For periodic telemetry the
+caller usually ignores it — a dropped heart-rate sample is superseded a second later, and the
+example apps do exactly that. A dropped reply to a request is not self-correcting, so those sends
+are worth checking (see the request-response pattern below).</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> posts with a <strong>zero timeout</strong>: if the message queue is full it gives up
+immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
+space — or to read a reply — use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> and send it yourself with an explicit timeout:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// wait up to 100 ms for queue space</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FitnessService</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">sendHeartRateUpdate</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">allocateMessage</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">());</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w"> </span><span class="c1">// 100ms timeout</span>
-<span class="w">            </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">sendHeartRateUpdate</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">());</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">handleWorkoutCommand</span><span class="p">(</span><span class="n">WorkoutCommand</span><span class="o">::</span><span class="n">Action</span><span class="w"> </span><span class="n">action</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -1939,9 +1950,10 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="c1">// Service implementation</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleConfigRequest</span><span class="p">(</span><span class="n">ConfigurationRequest</span><span class="o">*</span><span class="w"> </span><span class="n">req</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getConfigurationValue</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">);</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allocateMessage</span><span class="o">&lt;</span><span class="n">ConfigurationResponse</span><span class="o">&gt;</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
-<span class="w">    </span><span class="n">comm</span><span class="p">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">response</span><span class="p">);</span>
-<span class="w">    </span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">response</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">ConfigurationResponse</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Nothing retries this for us: the requester will block until it times out.</span>
+<span class="w">        </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Config response for type %d dropped&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>

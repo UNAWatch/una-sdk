@@ -105,7 +105,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-message-system">Custom Message System</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#message-sender">Message Sender</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sending-messages">Sending Messages</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
@@ -233,9 +233,8 @@
 <span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">skSampleLatency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2000</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// -- Infrastructure ---</span>
-<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGuiStarted</span><span class="p">;</span>
-<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w"> </span><span class="n">mGuiSender</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">         </span><span class="n">mGuiStarted</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// -- Sensors ---</span>
 <span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorHr</span><span class="p">;</span>
@@ -287,7 +286,7 @@
 <span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="n">mHr</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">();</span>
 <span class="w">                </span><span class="n">mHrTl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">();</span>
-<span class="w">                </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">heartRate</span><span class="p">(</span><span class="n">mHr</span><span class="p">,</span><span class="w"> </span><span class="n">mHrTl</span><span class="p">);</span>
+<span class="w">                </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mHr</span><span class="p">,</span><span class="w"> </span><span class="n">mHrTl</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
@@ -550,11 +549,19 @@
 <span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">heartRate</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">)</span>
 <span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">)</span>
 <span class="w">    </span><span class="p">{}</span>
+
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">HRValues</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">heartRate</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">HRValues</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">heartRate</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
 
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
 </pre></div>
 </div>
+<p>Each message keeps a default constructor (which sets its message type) and a field-filling constructor that delegates to it. The field-filling constructor is what makes the one-line send below possible.</p>
 <p><strong>Message summary</strong>:</p>
 <table class="docutils align-default">
 <thead>
@@ -570,21 +577,14 @@
 </tr>
 </tbody>
 </table>
-<section id="message-sender">
-<h3>Message Sender<a class="headerlink" href="#message-sender" title="Link to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">CustomMessage::Sender</span></code> provides type-safe message sending from the service to the GUI. It uses the <code class="docutils literal notranslate"><span class="pre">allocateMessage</span></code> / <code class="docutils literal notranslate"><span class="pre">sendMessage</span></code> / <code class="docutils literal notranslate"><span class="pre">releaseMessage</span></code> pattern:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Sender</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="n">Sender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// Service --&gt; GUI</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">heartRate</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">);</span>
-
-<span class="k">private</span><span class="o">:</span>
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">mKernel</span><span class="p">;</span>
-<span class="p">};</span>
+<section id="sending-messages">
+<h3>Sending Messages<a class="headerlink" href="#sending-messages" title="Link to this heading"></a></h3>
+<p>Fire-and-forget sends go through <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;()</span></code>, which allocates the message from the kernel pool, forwards its arguments to the message’s constructor, sends it, and releases it — returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the send failed:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mHr</span><span class="p">,</span><span class="w"> </span><span class="n">mHrTl</span><span class="p">);</span>
 </pre></div>
 </div>
+<p>There is no per-app sender class to write: the message type carries the field-filling constructor and <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> supplies the rest. That is the only send this app needs — every HRMonitor message is fire-and-forget, and <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> posts with a zero timeout, so a full queue drops the sample rather than waiting for room. That is the right trade here: the next reading is a second away.</p>
+<p>When the reply matters, <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;()</span></code> is the counterpart: it returns an RAII <code class="docutils literal notranslate"><span class="pre">MessageGuard</span></code> that releases on scope exit, so you can send with a timeout and read the result back (<code class="docutils literal notranslate"><span class="pre">msg.send(timeout)</span> <span class="pre">&amp;&amp;</span> <span class="pre">msg.ok()</span></code>). The Cycling, Hiking, Running, and Alarm services use it that way to query <code class="docutils literal notranslate"><span class="pre">SDK::Message::RequestSystemSettings</span></code> — see <a class="reference internal" href="Cycling-Architecture.html#sending-messages"><span class="std std-ref">Cycling</span></a> for a worked example.</p>
 </section>
 </section>
 <section id="build-and-setup">
@@ -641,7 +641,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — service entry point, sensor handling, FIT recording coordination</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ActivityWriter</span></code> — FIT file lifecycle management</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — shared message types and <code class="docutils literal notranslate"><span class="pre">Sender</span></code> class</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — shared message types for the service↔GUI contract</p></li>
 </ul>
 </section>
 <section id="development-setup">

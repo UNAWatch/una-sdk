@@ -129,7 +129,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#touchgfxcommandprocessor">TouchGFXCommandProcessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#kernel-provider-architecture">Kernel Provider Architecture</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#custom-message-system">Custom Message System</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#message-sender">Message Sender</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sending-messages">Sending Messages</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#asset-management">Asset Management</a></li>
@@ -270,9 +270,8 @@
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
 
 <span class="k">private</span><span class="o">:</span>
-<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGuiStarted</span><span class="p">;</span>
-<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w"> </span><span class="n">mGuiSender</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">         </span><span class="n">mGuiStarted</span><span class="p">;</span>
 <span class="w">    </span><span class="c1">// ... additional members</span>
 <span class="p">};</span>
 </pre></div>
@@ -454,7 +453,7 @@
 <span class="w">    </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">pace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getPace</span><span class="p">(</span><span class="n">mTrackData</span><span class="p">.</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">mSpeedCounter</span><span class="p">.</span><span class="n">getMinValid</span><span class="p">());</span>
 
 <span class="w">    </span><span class="c1">// Update GUI</span>
-<span class="w">    </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">trackData</span><span class="p">(</span><span class="n">mTrackData</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TrackDataUpd</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mTrackData</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// FIT file recording</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mTrackState</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Track</span><span class="o">::</span><span class="n">State</span><span class="o">::</span><span class="n">ACTIVE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -478,14 +477,14 @@
 <section id="error-handling-and-data-validation">
 <h4>6. Error Handling and Data Validation<a class="headerlink" href="#error-handling-and-data-validation" title="Link to this heading"></a></h4>
 <p><strong>GPS Fix State Management</strong>:</p>
-<p>Fix state changes are tracked via <code class="docutils literal notranslate"><span class="pre">mPreviousGpsFixState</span></code>. On every change the GUI is notified via <code class="docutils literal notranslate"><span class="pre">mGuiSender.fix()</span></code>. The very first acquired fix also triggers <code class="docutils literal notranslate"><span class="pre">notifyFirstFix()</span></code> — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:</p>
+<p>Fix state changes are tracked via <code class="docutils literal notranslate"><span class="pre">mPreviousGpsFixState</span></code>. On every change the GUI is notified with a <code class="docutils literal notranslate"><span class="pre">GpsFix</span></code> message. The very first acquired fix also triggers <code class="docutils literal notranslate"><span class="pre">notifyFirstFix()</span></code> — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mPreviousGpsFixState</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">mPreviousGpsFixState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">;</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">firstFix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">notifyFirstFix</span><span class="p">();</span>
 <span class="w">        </span><span class="n">firstFix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">fix</span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">GpsFix</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -570,8 +569,8 @@
 <h4>Interval Phase Notifications<a class="headerlink" href="#interval-phase-notifications" title="Link to this heading"></a></h4>
 <p>On every phase change, <code class="docutils literal notranslate"><span class="pre">onIntervalsPhaseChange(bool</span> <span class="pre">alert,</span> <span class="pre">bool</span> <span class="pre">manual)</span></code> is called:</p>
 <ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">alert</span></code> is true, <code class="docutils literal notranslate"><span class="pre">mGuiSender.intervalsPhaseAlert(mTrackData.intervals)</span></code> sends an <code class="docutils literal notranslate"><span class="pre">INTERVALS_PHASE_ALERT</span></code> message to the GUI, which navigates to <code class="docutils literal notranslate"><span class="pre">TrackIntervalsAlertView</span></code> and shows a countdown timer before returning to the track screen.</p></li>
-<li><p>When the entire workout is complete (all repeats done and <code class="docutils literal notranslate"><span class="pre">COOL_DOWN</span></code> phase ended or skipped), <code class="docutils literal notranslate"><span class="pre">mGuiSender.intervalsWorkoutCompleted()</span></code> sends <code class="docutils literal notranslate"><span class="pre">INTERVALS_WORKOUT_COMPLETED</span></code> and sets <code class="docutils literal notranslate"><span class="pre">mIntervalsCompleted</span> <span class="pre">=</span> <span class="pre">true</span></code> to block further phase processing.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">alert</span></code> is true, <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;CustomMessage::IntervalsPhaseAlert&gt;(mKernel,</span> <span class="pre">mTrackData.intervals)</span></code> sends an <code class="docutils literal notranslate"><span class="pre">INTERVALS_PHASE_ALERT</span></code> message to the GUI, which navigates to <code class="docutils literal notranslate"><span class="pre">TrackIntervalsAlertView</span></code> and shows a countdown timer before returning to the track screen.</p></li>
+<li><p>When the entire workout is complete (all repeats done and <code class="docutils literal notranslate"><span class="pre">COOL_DOWN</span></code> phase ended or skipped), <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;CustomMessage::IntervalsWorkoutCompleted&gt;(mKernel)</span></code> sends <code class="docutils literal notranslate"><span class="pre">INTERVALS_WORKOUT_COMPLETED</span></code> and sets <code class="docutils literal notranslate"><span class="pre">mIntervalsCompleted</span> <span class="pre">=</span> <span class="pre">true</span></code> to block further phase processing.</p></li>
 </ul>
 </section>
 </section>
@@ -1085,6 +1084,7 @@
 <span class="k">struct</span><span class="w"> </span><span class="nc">SettingsUpd</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Settings</span><span class="w"> </span><span class="n">settings</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">unitsImperial</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">timeFormat12h</span><span class="p">;</span><span class="w">                     </span><span class="c1">// true = 12-hour clock</span>
 <span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">hrThresholds</span><span class="p">[</span><span class="n">kHrThresholdsCount</span><span class="p">];</span><span class="w">  </span><span class="c1">// C-array of 6</span>
 <span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">hrThresholdsCount</span><span class="p">;</span>
 <span class="p">};</span>
@@ -1111,36 +1111,51 @@
 </pre></div>
 </div>
 </section>
-<section id="message-sender">
-<h4>Message Sender<a class="headerlink" href="#message-sender" title="Link to this heading"></a></h4>
-<p><strong><code class="docutils literal notranslate"><span class="pre">CustomMessage::Sender</span></code></strong> provides type-safe message sending from the service to the GUI. Each method allocates a typed message via <code class="docutils literal notranslate"><span class="pre">mKernel.comm.allocateMessage&lt;&gt;()</span></code>, fills its fields, sends it, and releases it, returning <code class="docutils literal notranslate"><span class="pre">bool</span></code>:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Sender</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="n">Sender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+<section id="sending-messages">
+<h4>Sending Messages<a class="headerlink" href="#sending-messages" title="Link to this heading"></a></h4>
+<p>Every message struct keeps a default constructor (which sets its message type) plus, where it has fields, a field-filling constructor that delegates to it. Anything unusual — a <code class="docutils literal notranslate"><span class="pre">memcpy</span></code>, a clamp, a bounded string copy — lives in that constructor rather than at the call site:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">AccessoryStatusUpd</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">state</span><span class="p">;</span><span class="w">     </span><span class="c1">///&lt; SDK::Accessory::State</span>
+<span class="w">    </span><span class="kt">char</span><span class="w">    </span><span class="n">name</span><span class="p">[</span><span class="mi">24</span><span class="p">];</span><span class="w">  </span><span class="c1">///&lt; device name (may be empty)</span>
 
-<span class="w">    </span><span class="c1">// Service --&gt; GUI</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">settingsUpd</span><span class="p">(</span><span class="n">Settings</span><span class="w"> </span><span class="n">settings</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">units</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">thresholds</span><span class="p">)[</span><span class="n">kHrThresholdsCount</span><span class="p">],</span>
-<span class="w">                     </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">thresholdCount</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">time</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">tm</span><span class="w"> </span><span class="n">localTime</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">battery</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">level</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">fix</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackState</span><span class="p">(</span><span class="n">Track</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Track</span><span class="o">::</span><span class="n">Data</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">lapEnd</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">lapNum</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ActivitySummary</span><span class="o">*</span><span class="w"> </span><span class="n">summaryPtr</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">intervalsPhaseAlert</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Track</span><span class="o">::</span><span class="n">IntervalsData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">intervals</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">intervalsWorkoutCompleted</span><span class="p">();</span>
+<span class="w">    </span><span class="n">AccessoryStatusUpd</span><span class="p">()</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">ACCESSORY_STATUS</span><span class="p">)</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">{}</span>
+<span class="w">    </span><span class="p">{}</span>
 
-<span class="w">    </span><span class="c1">// GUI --&gt; Service</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">settingsSave</span><span class="p">(</span><span class="n">Settings</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackStart</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">intervalsMode</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackStop</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">discard</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackPause</span><span class="p">();</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">trackResume</span><span class="p">();</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">manualLap</span><span class="p">();</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">intervalsNextPhase</span><span class="p">();</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">AccessoryStatusUpd</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">AccessoryStatusUpd</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">strncpy</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
+</pre></div>
+</div>
+<p>Sending is then one call in either direction. <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> allocates the message from the kernel pool, forwards <code class="docutils literal notranslate"><span class="pre">args...</span></code> to the constructor, sends it, and releases it, returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the send failed:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Service --&gt; GUI</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TrackDataUpd</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mTrackData</span><span class="p">);</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">IntervalsPhaseAlert</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mTrackData</span><span class="p">.</span><span class="n">intervals</span><span class="p">);</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SettingsUpd</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mSettings</span><span class="p">,</span><span class="w"> </span><span class="n">mIsImperial</span><span class="p">,</span><span class="w"> </span><span class="n">mTimeFormat12h</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">hrThresholds</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">kHrThresholdsCount</span><span class="p">);</span>
+
+<span class="c1">// GUI --&gt; Service</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TrackStart</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">intervalsMode</span><span class="p">);</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">IntervalsNextPhase</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">);</span><span class="w">   </span><span class="c1">// zero-field message</span>
+</pre></div>
+</div>
+<p>There is no per-app sender class to write: the message type owns its field filling and <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> owns the allocate/send/release sequence.</p>
+<p><code class="docutils literal notranslate"><span class="pre">send_msg</span></code> is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room the message is dropped rather than waited for. Reach for <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;()</span></code> when the reply matters <em>or</em> when you need to wait for queue space: it returns an RAII <code class="docutils literal notranslate"><span class="pre">MessageGuard</span></code> that releases on scope exit, so you can send with a timeout (<code class="docutils literal notranslate"><span class="pre">msg.send(100)</span></code>) and read the result back. <code class="docutils literal notranslate"><span class="pre">sendInitialInfoToGui()</span></code> does this to pick up the system units and clock format before forwarding them to the GUI:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestSystemSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mIsImperial</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">imperialUnits</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mTimeFormat12h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span>
+<span class="w">        </span><span class="c1">// ... copy the HR zone thresholds ...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>

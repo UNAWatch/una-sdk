@@ -54,11 +54,10 @@ public:
     void run();
 
 private:
-    SDK::Kernel&          mKernel;
-    bool                  mGuiStarted;
-    CustomMessage::Sender mGuiSender;
-    AlarmManager          mAlarmManager;
-    Alarm                 mActiveAlarm;
+    SDK::Kernel& mKernel;
+    bool         mGuiStarted;
+    AlarmManager mAlarmManager;
+    Alarm        mActiveAlarm;
     // ...
 };
 ```
@@ -145,7 +144,10 @@ public:
 ```cpp
 uint32_t AlarmManager::execute(const std::tm& tmNow)
 {
-    checkAlarms(tmNow.tm_hour, tmNow.tm_min, tmNow.tm_wday, tmNow);
+    checkAlarms(static_cast<uint8_t>(tmNow.tm_hour),
+                static_cast<uint8_t>(tmNow.tm_min),
+                static_cast<uint8_t>(tmNow.tm_wday),
+                tmNow);
     uint32_t nextCheckMs = (60 - tmNow.tm_sec) * 1000;
     return nextCheckMs;
 }
@@ -307,6 +309,7 @@ bool Model::customMessageHandler(SDK::MessageBase* msg)
         case CustomMessage::ALARM_LIST: {
             auto* m = static_cast<CustomMessage::AlarmList*>(msg);
             mAlarmList.assign(m->alarms, m->alarms + m->count);
+            mTimeFormat12h = m->timeFormat12h;
             modelListener->onAlarmListUpdated(mAlarmList);
         } break;
 
@@ -404,8 +407,8 @@ The app implements automatic timeout to conserve battery:
 
 ```cpp
 Model::Model()
-    : mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
-    , mSrvSender(mKernel)
+    : modelListener(nullptr)
+    , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
     SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
@@ -444,7 +447,8 @@ constexpr SDK::MessageType::Type ALARM_SNOOZE_ALL = 0x00000007;
 struct AlarmList : public SDK::MessageBase {
     Alarm   alarms[kMaxAlarms];
     uint8_t count;
-    // sizeof = 32 (MessageBase) + 20*sizeof(Alarm) + 1 = 133 bytes → Pool 3 (256 bytes)
+    bool    timeFormat12h;  // Service -> GUI only; the GUI leaves it at the default
+    // sizeof = 32 (MessageBase) + 20*sizeof(Alarm) + 2 = 134 bytes → Pool 3 (256 bytes)
 };
 ```
 
@@ -459,28 +463,69 @@ struct AlarmList : public SDK::MessageBase {
 | `ALARM_STOP` / `ALARM_STOP_ALL` | GUI → Service | User taps Stop on `RingingView` |
 | `ALARM_SNOOZE` / `ALARM_SNOOZE_ALL` | GUI → Service | User taps Snooze on `RingingView` |
 
-### Message Sender
+### Sending Messages
 
-`CustomMessage::Sender` provides type-safe message sending for both directions. Each method allocates a typed message, fills fields, sends, and releases:
+Each message struct keeps a default constructor (which sets its message type) plus, where it has fields, a field-filling constructor that delegates to it:
 
 ```cpp
-class Sender {
-public:
-    Sender(const SDK::Kernel& kernel);
+struct ActivatedAlarm : public SDK::MessageBase {
+    Alarm alarm;
 
-    // Service <-> GUI
-    bool listUpd(const std::vector<Alarm>& list);
+    ActivatedAlarm()
+        : SDK::MessageBase(ACTIVATED_ALARM)
+        , alarm{}
+    {}
 
-    // Service --> GUI
-    bool alarmActivated(const Alarm& alarm);
-
-    // GUI --> Service
-    bool activateEffect(const Alarm& alarm);
-    bool stop(const Alarm& alarm);
-    bool stopAll();
-    bool snooze(const Alarm& alarm);
-    bool snoozeAll();
+    explicit ActivatedAlarm(const Alarm &alarm)
+        : ActivatedAlarm()
+    {
+        this->alarm = alarm;
+    }
 };
+```
+
+`AlarmList` is the one worth reading closely, because the awkward part of the conversion lives in
+its constructor rather than at any call site. It takes a `std::vector<Alarm>` but stores a fixed
+array, so it clamps the count and copies element-wise — the caller just hands over the vector:
+
+```cpp
+explicit AlarmList(const std::vector<Alarm> &list, bool timeFormat12h = false)
+    : AlarmList()
+{
+    this->count = static_cast<uint8_t>(
+        list.size() < kMaxAlarms ? list.size() : kMaxAlarms);
+    for (uint8_t i = 0; i < this->count; ++i) {
+        this->alarms[i] = list[i];
+    }
+    this->timeFormat12h = timeFormat12h;
+}
+```
+
+`timeFormat12h` defaults to `false` because it is only meaningful Service → GUI; the GUI → Service
+direction leaves it alone and the service ignores it there.
+
+Sending is then one call in either direction. `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...` to the constructor, sends it, and releases it, returning `false` if allocation or the send failed:
+
+```cpp
+// Service --> GUI
+SDK::send_msg<CustomMessage::ActivatedAlarm>(mKernel, alarm);
+SDK::send_msg<CustomMessage::AlarmList>(mKernel, list, mTimeFormat12h);
+
+// GUI --> Service
+SDK::send_msg<CustomMessage::AlarmActivateEffect>(mKernel, mActiveAlarm);
+SDK::send_msg<CustomMessage::AlarmStopAll>(mKernel);   // zero-field message
+```
+
+There is no per-app sender class: the message type owns its field filling and `send_msg` owns the allocate/send/release sequence.
+
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room the message is dropped rather than waited for. Reach for `SDK::make_msg<T>()` when the reply matters *or* when you need to wait for queue space: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout (`msg.send(100)`) and read the result back. `refreshTimeFormat()` does exactly this to pick up the system clock format:
+
+```cpp
+if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
+    if (msg.send(100) && msg.ok()) {
+        mTimeFormat12h = msg->timeFormat;
+    }
+}
 ```
 
 ## Build and Setup
