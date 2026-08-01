@@ -77,14 +77,17 @@ def parse_makefile_sources(makefile_path):
         entries.append(value.strip())
         i += 1
         for entry in entries:
-            entry = entry.strip()
-            # Heads up: if the last source line keeps its trailing "\", Make
-            # just glues the next line onto this value, doesn't care that it
-            # looks like a new variable. We've actually seen
-            # "ADDITIONAL_SOURCES :=" show up as a "source" because of this.
-            # Filtering to .cpp/.c files keeps that junk out.
-            if entry and re.search(r"\.(cpp|c)$", entry):
-                sources.append(strip_leading_dotdots(entry.replace("\\", "/")))
+            # Make separates sources on whitespace, so one line can hold several
+            # of them. Split before filtering or "a.cpp b.cpp" lands in the set
+            # as a single bogus path and every real file on it reads as drift.
+            for token in entry.split():
+                # Heads up: if the last source line keeps its trailing "\", Make
+                # just glues the next line onto this value, doesn't care that it
+                # looks like a new variable. We've actually seen
+                # "ADDITIONAL_SOURCES :=" show up as a "source" because of this.
+                # Filtering to .cpp/.c files keeps that junk out.
+                if re.search(r"\.(cpp|c)$", token):
+                    sources.append(strip_leading_dotdots(token.replace("\\", "/")))
     return set(sources)
 
 
@@ -168,6 +171,25 @@ def run_selftest():
             "trailing-backslash-quirk Makefile",
             parse_makefile_sources(makefile_quirk),
             {"Libs/Source/UnaLogger/Logger.cpp", "Libs/Source/Fit/FitCrc.cpp"},
+        )
+
+        # Make is happy to put several sources on one line, with or without a
+        # continuation; each has to come out as its own path.
+        makefile_multi = os.path.join(tmp, "Makefile.multi")
+        with open(makefile_multi, "w") as f:
+            f.write(
+                "ADDITIONAL_SOURCES_UNA := ../../Libs/Sources/Service.cpp Libs/Source/Fit/FitCrc.cpp\\\n"
+                "Libs/Source/UnaLogger/Logger.cpp   Libs/Source/Fit/FitEncoder.cpp\n"
+            )
+        check(
+            "multiple sources per line",
+            parse_makefile_sources(makefile_multi),
+            {
+                "Libs/Sources/Service.cpp",
+                "Libs/Source/Fit/FitCrc.cpp",
+                "Libs/Source/UnaLogger/Logger.cpp",
+                "Libs/Source/Fit/FitEncoder.cpp",
+            },
         )
 
         vcxproj = os.path.join(tmp, "Application.vcxproj")
