@@ -1822,14 +1822,17 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <h3>Implementing Custom Messages<a class="headerlink" href="#implementing-custom-messages" title="Link to this heading"></a></h3>
 <section id="message-definition">
 <h4>Message Definition<a class="headerlink" href="#message-definition" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In shared header file (e.g., AppTypes.hpp)</span>
-<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">CustomMessageType</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">HEART_RATE_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010001</span><span class="p">,</span>
-<span class="w">    </span><span class="n">GPS_LOCATION_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010002</span><span class="p">,</span>
-<span class="w">    </span><span class="n">BATTERY_STATUS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010003</span><span class="p">,</span>
-<span class="w">    </span><span class="n">WORKOUT_START</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010004</span><span class="p">,</span>
-<span class="w">    </span><span class="n">WORKOUT_STOP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010005</span>
-<span class="p">};</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In shared header file (e.g., Commands.hpp)</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// `SDK::MessageType::Type` is a `uint32_t` alias, and `MessageBase` takes one directly, so</span>
+<span class="c1">// declare the IDs as constants of that type. A scoped `enum class` would not convert</span>
+<span class="c1">// implicitly — neither in the constructor below nor in a `switch (msg-&gt;getType())`.</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">HEART_RATE_UPDATE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010001</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">GPS_LOCATION_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010002</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BATTERY_STATUS</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010003</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">WORKOUT_START</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010004</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">WORKOUT_STOP</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010005</span><span class="p">;</span>
 
 <span class="c1">// Message structures</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">HeartRateMessage</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
@@ -1837,7 +1840,7 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">HeartRateMessage</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">heartRate</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">time</span><span class="p">)</span>
-<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CustomMessageType</span><span class="o">::</span><span class="n">HEART_RATE_UPDATE</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">HEART_RATE_UPDATE</span><span class="p">)</span>
 <span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">(</span><span class="n">heartRate</span><span class="p">),</span><span class="w"> </span><span class="n">timestamp</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
 
@@ -1845,10 +1848,12 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Action</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">START</span><span class="p">,</span><span class="w"> </span><span class="n">PAUSE</span><span class="p">,</span><span class="w"> </span><span class="n">RESUME</span><span class="p">,</span><span class="w"> </span><span class="n">STOP</span><span class="w"> </span><span class="p">};</span>
 <span class="w">    </span><span class="n">Action</span><span class="w"> </span><span class="n">command</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">WorkoutCommand</span><span class="p">(</span><span class="n">Action</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span>
-<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CustomMessageType</span><span class="o">::</span><span class="n">WORKOUT_START</span><span class="p">)</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">WorkoutCommand</span><span class="p">(</span><span class="n">Action</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">WORKOUT_START</span><span class="p">)</span>
 <span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">command</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
 </pre></div>
 </div>
 </section>
@@ -1862,14 +1867,6 @@ sender class of their own.</p>
 caller usually ignores it — a dropped heart-rate sample is superseded a second later, and the
 example apps do exactly that. A dropped reply to a request is not self-correcting, so those sends
 are worth checking (see the request-response pattern below).</p>
-<p>Note that <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> posts with a <strong>zero timeout</strong>: if the message queue is full it gives up
-immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
-space — or to read a reply — use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> and send it yourself with an explicit timeout:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// wait up to 100 ms for queue space</span>
-<span class="p">}</span>
-</pre></div>
-</div>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FitnessService</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">sendHeartRateUpdate</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -1889,6 +1886,14 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="p">};</span>
 </pre></div>
 </div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> posts with a <strong>zero timeout</strong>: if the message queue is full it gives up
+immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
+space — or to read a reply — use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> and send it yourself with an explicit timeout:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// wait up to 100 ms for queue space</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </section>
 <section id="gui-side-message-handling">
 <h4>GUI-Side Message Handling<a class="headerlink" href="#gui-side-message-handling" title="Link to this heading"></a></h4>
@@ -1896,14 +1901,14 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="k">public</span><span class="o">:</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">customMessageHandler</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessageType</span><span class="o">::</span><span class="no">HEART_RATE_UPDATE</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">HEART_RATE_UPDATE</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">hrMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
 <span class="w">                </span><span class="n">mCurrentHeartRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hrMsg</span><span class="o">-&gt;</span><span class="n">bpm</span><span class="p">;</span>
 <span class="w">                </span><span class="n">mLastUpdateTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hrMsg</span><span class="o">-&gt;</span><span class="n">timestamp</span><span class="p">;</span>
 <span class="w">                </span><span class="n">notifyHeartRateChanged</span><span class="p">();</span>
 <span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">            </span><span class="p">}</span>
-<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessageType</span><span class="o">::</span><span class="no">BATTERY_STATUS</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">BATTERY_STATUS</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">battMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">BatteryMessage</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
 <span class="w">                </span><span class="n">mBatteryLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">battMsg</span><span class="o">-&gt;</span><span class="n">percentage</span><span class="p">;</span>
 <span class="w">                </span><span class="n">notifyBatteryChanged</span><span class="p">();</span>
@@ -1929,22 +1934,25 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <h3>Advanced Message Patterns<a class="headerlink" href="#advanced-message-patterns" title="Link to this heading"></a></h3>
 <section id="request-response-pattern">
 <h4>Request-Response Pattern<a class="headerlink" href="#request-response-pattern" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Request message</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">ConfigurationRequest</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">CONFIG_REQUEST</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010006</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">CONFIG_RESPONSE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010007</span><span class="p">;</span>
+
+<span class="c1">// Request message</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ConfigurationRequest</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigType</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">UNITS</span><span class="p">,</span><span class="w"> </span><span class="n">THEME</span><span class="p">,</span><span class="w"> </span><span class="n">ALERTS</span><span class="w"> </span><span class="p">};</span>
 <span class="w">    </span><span class="n">ConfigType</span><span class="w"> </span><span class="n">type</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">ConfigurationRequest</span><span class="p">(</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">t</span><span class="p">)</span>
-<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_REQUEST_TYPE</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">ConfigurationRequest</span><span class="p">(</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">t</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_REQUEST</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
 
 <span class="c1">// Response message</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">ConfigurationResponse</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ConfigurationResponse</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">ConfigurationRequest</span><span class="o">::</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">type</span><span class="p">;</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">ConfigurationResponse</span><span class="p">(</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
-<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_RESPONSE_TYPE</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">value</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="n">ConfigurationResponse</span><span class="p">(</span><span class="n">ConfigurationRequest</span><span class="o">::</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_RESPONSE</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">value</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
 
 <span class="c1">// Service implementation</span>
