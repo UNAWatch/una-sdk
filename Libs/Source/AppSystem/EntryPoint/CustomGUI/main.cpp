@@ -17,7 +17,7 @@
 
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Kernel/KernelBuilder.hpp"
-#include "SDK/Kernel/KernelProviderGui.hpp"
+#include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/UnaLogger/Logger.h"
 
 // Include path must be defined globally
