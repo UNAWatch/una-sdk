@@ -936,16 +936,6 @@ caller usually ignores it — a dropped heart-rate sample is superseded a second
 example apps do exactly that. A dropped reply to a request is not self-correcting, so those sends
 are worth checking (see the request-response pattern below).
 
-Note that `send_msg` posts with a **zero timeout**: if the message queue is full it gives up
-immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
-space — or to read a reply — use `SDK::make_msg<T>` and send it yourself with an explicit timeout:
-
-```cpp
-if (auto msg = SDK::make_msg<HeartRateMessage>(mKernel, bpm, getCurrentTime())) {
-    msg.send(100);  // wait up to 100 ms for queue space
-}
-```
-
 ```cpp
 class FitnessService {
 public:
@@ -964,6 +954,16 @@ public:
         }
     }
 };
+```
+
+Note that `send_msg` posts with a **zero timeout**: if the message queue is full it gives up
+immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
+space — or to read a reply — use `SDK::make_msg<T>` and send it yourself with an explicit timeout:
+
+```cpp
+if (auto msg = SDK::make_msg<HeartRateMessage>(mKernel, bpm, getCurrentTime())) {
+    msg.send(100);  // wait up to 100 ms for queue space
+}
 ```
 
 #### GUI-Side Message Handling
