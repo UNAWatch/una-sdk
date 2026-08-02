@@ -261,7 +261,6 @@ namespace CustomMessage {
         }
     };
 
-
 } // namespace CustomMessage
 
 #pragma pack(pop)
