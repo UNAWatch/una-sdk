@@ -69,13 +69,31 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type COMPASS_VALUES = 0x00000007;
     constexpr SDK::MessageType::Type STATS_VALUES = 0x00000008;
     constexpr SDK::MessageType::Type RTC_VALUES = 0x00000009;
+    constexpr SDK::MessageType::Type BATTERY_VALUES = 0x0000000A;
+    constexpr SDK::MessageType::Type PRESSURE_VALUES = 0x0000000B;
 
+    // Every message pairs a default constructor, which sets the message type,
+    // with one that fills the fields and delegates to it. That second
+    // constructor is what lets a caller send the message in a single call.
     struct HRValues : public SDK::MessageBase {
         float heartRate;
         float trustLevel;
-        HRValues() : SDK::MessageBase(HR_VALUES), heartRate(0), trustLevel(0) {}
+
+        HRValues()
+            : SDK::MessageBase(HR_VALUES)
+            , heartRate()
+            , trustLevel()
+        {}
+
+        explicit HRValues(float heartRate, float trustLevel)
+            : HRValues()
+        {
+            this->heartRate  = heartRate;
+            this->trustLevel = trustLevel;
+        }
     };
-    // Similar for others:
+
+    // The rest follow the same shape, over these fields:
     // LocationValues: uint64_t timestamp; double latitude, longitude, altitude;
     // ElevationValues: uint64_t timestamp; float elevation;
     // AccelerometerValues: uint64_t timestamp; float x,y,z;
@@ -84,35 +102,14 @@ namespace CustomMessage {
     // CompassValues: uint64_t timestamp; float heading;
     // StatsValues: float serviceCpuPct, guiCpuPct, txMsgRate, rxMsgRate, txByteRate, rxByteRate;
     // RtcValues: uint32_t time;
+    // BatteryValues: float level;
+    // PressureValues: uint64_t timestamp; float pressure;
+    //   ^ defined, and Model.cpp already handles PRESSURE_VALUES, but the
+    //     service only logs the raw frame today -- it never sends this one.
 }
-
 ```
 
-Each struct pairs its default constructor (which sets the message type) with one that fills the
-fields and delegates to it:
-
-```cpp
-struct HRValues : public SDK::MessageBase {
-    float heartRate;
-    float trustLevel;
-
-    HRValues()
-        : SDK::MessageBase(HR_VALUES)
-        , heartRate()
-        , trustLevel()
-    {}
-
-    explicit HRValues(float heartRate, float trustLevel)
-        : HRValues()
-    {
-        this->heartRate  = heartRate;
-        this->trustLevel = trustLevel;
-    }
-};
-// The other ten messages follow the same shape.
-```
-
-That constructor is what lets `SDK::send_msg<T>(kernel, args...)` do the whole send in one call —
+Those constructors are what let `SDK::send_msg<T>(kernel, args...)` do the whole send in one call —
 allocate from the kernel pool, forward the arguments to the constructor, send, and release. The app
 needs no sender class of its own.
 
