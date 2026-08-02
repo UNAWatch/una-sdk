@@ -71,12 +71,17 @@ struct HMS {
 
 /**
  * @brief Decompose a total-seconds value into hours, minutes and seconds.
- * @param sec  Total seconds (non-negative).
+ * @param sec  Total seconds. Negative clamps to zero.
  * @return     HMS struct with h, m, s fields.
  */
 inline constexpr HMS toHMS(std::time_t sec)
 {
     HMS result{};
+
+    if (sec <= 0) {
+        return result;  // a negative remainder would surface as 00:00:255
+    }
+
     result.h = static_cast<uint16_t>(sec / 3600);
     sec %= 3600;
     result.m = static_cast<uint8_t>(sec / 60);

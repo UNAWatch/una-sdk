@@ -69,6 +69,10 @@ static_assert(toHMS(3600).h == 1 && toHMS(3600).m == 0 && toHMS(3600).s == 0, ""
 static_assert(toHMS(86399).h == 23 && toHMS(86399).m == 59 && toHMS(86399).s == 59, "");
 static_assert(toHMS(360000).h == 100, "hours are not wrapped at 24");
 
+static_assert(toHMS(-1).h == 0 && toHMS(-1).m == 0 && toHMS(-1).s == 0,
+              "negative input clamps to zero");
+static_assert(toHMS(-3661).h == 0 && toHMS(-3661).m == 0 && toHMS(-3661).s == 0, "");
+
 // =============================================================================
 // Runtime coverage
 // =============================================================================
@@ -120,6 +124,17 @@ TEST(Utils, ToHMSDecomposesAndDoesNotWrapAtADay)
     // A stopwatch past a day keeps counting hours rather than rolling over.
     EXPECT_EQ(toHMS(360000).h, 100u);
     EXPECT_EQ(toHMS(360000).m, 0u);
+}
+
+TEST(Utils, ToHMSClampsNegativeInput)
+{
+    for (const std::time_t sec : {std::time_t{-1}, std::time_t{-59}, std::time_t{-60},
+                                  std::time_t{-3661}, std::time_t{-360000}}) {
+        const auto hms = toHMS(sec);
+        EXPECT_EQ(hms.h, 0u) << "sec = " << sec;
+        EXPECT_EQ(hms.m, 0u) << "sec = " << sec;
+        EXPECT_EQ(hms.s, 0u) << "sec = " << sec;
+    }
 }
 
 TEST(Utils, ToHMSRecomposes)
