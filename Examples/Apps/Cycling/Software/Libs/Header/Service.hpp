@@ -8,6 +8,7 @@
 #include "SDK/Metrics/MonotonicTime.hpp"
 #include "SDK/Metrics/MonotonicCounter.hpp"
 #include "SDK/Metrics/VariableCounter.hpp"
+#include "SDK/Metrics/SpeedSmoother.hpp"
 #include "SDK/Metrics/DeltaCounter.hpp"
 #include "SDK/Metrics/ThrottledSample.hpp"
 #include "SDK/Filters/SimpleLPF.hpp"
@@ -35,6 +36,12 @@ private:
     static constexpr float    skMapDistanceThreshold = 10.0f; // meters
     static constexpr uint32_t skMapMaxPoints         = 70;
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
+
+    /// Window, in 1 Hz track ticks, over which the live speed / pace readout is
+    /// averaged. Ten seconds cuts the GPS speed noise to about a third -- enough
+    /// to hold a target speed by -- while still tracking a real change of effort
+    /// fast enough to be useful.
+    static constexpr std::size_t skPaceSmoothingTicks = 10;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -64,12 +71,21 @@ private:
     SDK::Sensor::Connection mSensorWristMotion;
     bool                    mIsSensorsConnected = false;
 
+    // -- Latched GPS speed (drives the smoothed live readout) ------------------
+
+    float mGpsSpeedMs    = 0.0f;  ///< Latest raw GPS speed sample.
+    bool  mGpsSpeedValid = false; ///< Sample came from a current, non-dead-reckoned fix.
+    bool  mGpsSpeedFresh = false; ///< A speed sample arrived since the last track tick.
+
     // -- Metrics --------------------------------------------------------------
 
     SDK::Metric::MonotonicTime<SDK::Interface::ISystem> mTimeTracker;
     SDK::Metric::MonotonicCounter<std::time_t>          mTimeCounter;
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
+    /// Smooths the GPS speed for the live speed / pace readout only; the FIT
+    /// records, averages and maxima stay on the raw samples in mSpeedCounter.
+    SDK::Metric::SpeedSmoother<skPaceSmoothingTicks>    mSpeedSmoother;
     SDK::Metric::VariableCounter                        mHrCounter;
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.

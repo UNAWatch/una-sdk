@@ -32,11 +32,15 @@ enum class State {
  *
  * All distances are in metres, speeds in m/s, pace in s/m, times in seconds.
  * The GUI converts to display units as needed.
+ *
+ * @note This snapshot exists for the GUI only. The live speed and pace it
+ *       carries are smoothed for readability; the raw samples still back the
+ *       FIT records, session averages and maxima.
  */
 struct Data {
 
     // Pace, s/m
-    float pace        = 0.0f;
+    float pace        = 0.0f;   ///< Live pace, smoothed over a rolling window (see SpeedSmoother)
     float avgPace     = 0.0f;
     float lapPace     = 0.0f;
 
@@ -60,7 +64,7 @@ struct Data {
     float maxLapHR     = 0.0f;
 
     // Speed, m/s
-    float speed       = 0.0f;
+    float speed       = 0.0f;   ///< Live speed, smoothed over the same window as pace
     float avgSpeed    = 0.0f;
     float maxSpeed    = 0.0f;
     float avgLapSpeed = 0.0f;
