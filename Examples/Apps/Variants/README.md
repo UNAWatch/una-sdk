@@ -23,7 +23,7 @@ compiled-app matrix (no `*-CMake` directory) by design.
 | `appid` | The variant's OWN unique 16-hex uappID — never the target's (see allocation below) |
 | `target` | Directory name of the base app under `Examples/Apps/` (e.g. `Hiking`). The target's uappID is read from its freshly built `.uapp` at pack time, so it can never drift from the binary |
 | `type` | App type — must match the target's (`Activity`/`Utility`/`Clockface`; glance targets are rejected by the kernel) |
-| `appver` | Alias content revision `A.B.C` — bump when this variant's config changes |
+| *(version)* | Not a manifest field: variants carry the **same version as their target app** — derived at pack time from the freshly built target `.uapp`, so everything in one `una-apps-*` release shares one version. A config-only change still ships under the next release's version |
 | `min_target_version` | Minimum target app version, `0.0.0` = any |
 | `origin` | `shipped` for everything in this tree (`user` is reserved for on-watch CreateVariant) |
 | `config` | Path (relative to the manifest) of the embedded config JSON; must carry `"schema": 1` |
