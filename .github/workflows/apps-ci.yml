@@ -111,10 +111,22 @@ jobs:
       - name: Prepare release zip
         env:
           REF_NAME: ${{ github.ref_name }}
+          # Apps that are still built and CI-tested, but do NOT ship on the watch and
+          # are therefore left out of the release zip. Space-separated app names.
+          # HRMonitor is a pure SDK reference example, unlike its siblings under
+          # Examples/Apps which are the real shipping apps.
+          # NOT the same knob as APPS_EXCLUDED (see generate-app-list.py): that one
+          # drops an app from the build matrix entirely, so it stops being compiled
+          # and CI-tested. Use this one to ship less, that one to build less.
+          RELEASE_EXCLUDED_APPS: HRMonitor
         run: |
           mkdir -p temp/apps
           for dir in artifacts/app-*; do
             app=$(basename "$dir" | sed 's/^app-//')
+            if echo " $RELEASE_EXCLUDED_APPS " | grep -qF " $app "; then
+              echo "Excluding $app from the release zip (does not ship on the watch)"
+              continue
+            fi
             mkdir -p "temp/apps/$app"
             find "$dir" -name "*.uapp" -exec cp {} "temp/apps/$app/" \;
           done
