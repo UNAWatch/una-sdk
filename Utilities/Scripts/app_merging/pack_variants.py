@@ -63,6 +63,29 @@ def is_alias(uapp: Path) -> bool:
     return bool(header_of(uapp)[1] & FLAG_APP_VARIANT_ALIAS)
 
 
+def version_of(uapp: Path) -> int:
+    """uappVersion (u32 at offset 8) of a built .uapp."""
+    with open(uapp, "rb") as f:
+        raw = f.read(12)
+    return struct.unpack_from("<I", raw, 8)[0]
+
+
+def version_string_of(uapp: Path, app_name: str) -> str:
+    """The full version string of a built app, filename first.
+
+    app_merging.py names outputs <safe-name>_<version>.uapp where <version>
+    keeps any pre-release suffix (1.3.0-rc4) that the packed u32 cannot carry,
+    so the filename is the richest source. Falls back to the header's A.B.C
+    for a bare <name>.uapp.
+    """
+    stem = uapp.stem
+    prefix = app_name + "_"
+    if stem.startswith(prefix) and stem != prefix:
+        return stem[len(prefix):]
+    v = version_of(uapp)
+    return f"{(v >> 16) & 0xFF}.{(v >> 8) & 0xFF}.{v & 0xFF}"
+
+
 def find_built_uapp(name: str, search_roots: list[Path]) -> Path | None:
     """Newest compiled <Name>*.uapp under any search root (aliases excluded)."""
     candidates = []
@@ -165,10 +188,13 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     for m in manifests:
         spec = json.loads(m.read_text())
-        missing = [k for k in ("name", "appid", "target", "type", "appver", "config")
+        missing = [k for k in ("name", "appid", "target", "type", "config")
                    if k not in spec]
         if missing:
             fail(f"{m}: manifest is missing required key(s): {', '.join(missing)}")
+        if "appver" in spec:
+            fail(f"{m}: 'appver' is no longer a manifest key -- variants version "
+                 "in lockstep with their target app (same release, same version)")
         name = spec["name"]
         dirname = m.parent.name
         print(f"packing variant {name} (from {m})")
@@ -198,6 +224,11 @@ def main() -> int:
             fail(f"{name}: manifest type '{spec['type']}' does not match the "
                  f"target binary's type bits ({target_type})")
 
+        # Variants carry the same version as the app they release alongside:
+        # derived from the freshly built target, never from the manifest.
+        target_version = version_string_of(target_uapp, spec["target"])
+        print(f"  version (lockstep with target): {target_version}")
+
         out_dir = args.out / dirname
         out_dir.mkdir(parents=True, exist_ok=True)
         for stale in out_dir.glob("*.uapp"):
@@ -209,7 +240,7 @@ def main() -> int:
                "-target_uapp", str(target_uapp),
                "-config", str(m.parent / spec["config"]),
                "-type", spec["type"],
-               "-appver", spec["appver"],
+               "-appver", target_version,
                "-min_target_version", spec.get("min_target_version", "0.0.0"),
                "-origin", spec.get("origin", "shipped"),
                "-out", str(out_dir)]
@@ -229,6 +260,9 @@ def main() -> int:
         if len(packed) != 1:
             fail(f"{name}: expected exactly one packed .uapp, found {len(packed)}")
         verify_alias(packed[0], int(spec["appid"], 16), uappid_of(target_uapp))
+        if version_of(packed[0]) != version_of(target_uapp):
+            fail(f"{name}: alias uappVersion 0x{version_of(packed[0]):08X} is not "
+                 f"in lockstep with the target's 0x{version_of(target_uapp):08X}")
 
     print(f"pack_variants: {len(manifests)} variant(s) packed and verified -> {args.out}")
     return 0
