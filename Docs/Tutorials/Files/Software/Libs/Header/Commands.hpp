@@ -5,7 +5,6 @@
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
 
-#include <array>
 #include <cstdint>
 
 // Force 4-byte alignment for all message structures
@@ -91,8 +90,8 @@ namespace CustomMessage {
     // GUI --> Service
     struct SetSettings : public SDK::MessageBase {
         int32_t decimalCounter;
-        int activityType;
-        int displayMode;
+        int32_t activityType;
+        int32_t displayMode;
 
         SetSettings()
             : SDK::MessageBase(SET_SETTINGS)
@@ -101,7 +100,7 @@ namespace CustomMessage {
             , displayMode(0)
         {}
 
-        explicit SetSettings(int32_t decimalCounter, int activityType, int displayMode)
+        explicit SetSettings(int32_t decimalCounter, int32_t activityType, int32_t displayMode)
             : SetSettings()
         {
             this->decimalCounter = decimalCounter;
@@ -113,8 +112,8 @@ namespace CustomMessage {
     // Service --> GUI
     struct SettingsValues : public SDK::MessageBase {
         int32_t decimalCounter;
-        int activityType;
-        int displayMode;
+        int32_t activityType;
+        int32_t displayMode;
 
         SettingsValues()
             : SDK::MessageBase(SETTINGS_VALUES)
@@ -123,7 +122,7 @@ namespace CustomMessage {
             , displayMode(0)
         {}
 
-        explicit SettingsValues(int32_t decimalCounter, int activityType, int displayMode)
+        explicit SettingsValues(int32_t decimalCounter, int32_t activityType, int32_t displayMode)
             : SettingsValues()
         {
             this->decimalCounter = decimalCounter;
