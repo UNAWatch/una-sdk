@@ -32,7 +32,7 @@ public:
 
     /**
      * @brief Update the timer for a time-based metric (TIME_OPEN / TIME_REMAINING / TIME_ELAPSED).
-     * @param sec    Seconds value, clamped to 59:59.
+     * @param sec    Seconds value, clamped to 99:59.
      * @param metric Determines the description label.
      */
     void setPhaseTime(std::time_t sec, Track::IntervalsMetric metric);

@@ -15,8 +15,8 @@ public:
     /**
      * @brief Update timer for a time-based metric -- shows MM:SS + description label.
      *
-     * Time is clamped to 59:59. If sec > 3599, display freezes at "59:59"
-     * (non-nominal; restrict maximum interval duration in settings).
+     * Time is clamped to 99:59. If sec > 5999, display freezes at "99:59"
+     * (non-nominal; the settings picker caps interval duration at 60:55).
      *
      * @param sec    Seconds (remaining / elapsed / open depending on metric).
      * @param metric TIME_OPEN -> "Open", TIME_REMAINING -> "Remaining", TIME_ELAPSED -> "Elapsed".
@@ -35,7 +35,7 @@ public:
     /**
      * @brief Update timer for alert screens -- MM:SS only, no description, no line.
      *
-     * Time is clamped to 59:59. Description widget is hidden.
+     * Time is clamped to 99:59. Description widget is hidden.
      */
     void setRemainingTime(std::time_t sec);
 
@@ -57,7 +57,7 @@ public:
     void setDescriptionVisible(bool visible);
 
 private:
-    /** @brief Clamp @p sec to [0, 3599] and display as MM:SS. */
+    /** @brief Clamp @p sec to [0, 5999] and display as MM:SS. */
     void setTimerClamped(std::time_t sec);
 
     void setTimerMS(uint8_t mm, uint8_t ss);
