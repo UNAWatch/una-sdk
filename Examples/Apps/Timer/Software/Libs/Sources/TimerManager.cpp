@@ -1,3 +1,14 @@
+/**
+ ******************************************************************************
+ * @file    TimerManager.cpp
+ * @date    25-07-2026
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   Owns the active countdown and the recent-timers store.
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
+
 #include "TimerManager.hpp"
 
 #define LOG_MODULE_PRX      "TimerManager"
@@ -172,9 +183,9 @@ bool TimerManager::saveToFile(const std::vector<Timer>& list)
     bool rv = false;
     size_t bw = 0;
 
-    auto file = mKernel.fs.file(skFilePath);
+    auto file = mKernel.fs.file(kFilePath);
     if (!file) {
-        LOG_ERROR("Failed to create file object for %s\n", skFilePath);
+        LOG_ERROR("Failed to create file object for %s\n", kFilePath);
         return false;
     }
 
@@ -199,14 +210,14 @@ bool TimerManager::loadFromFile(std::vector<Timer>& list)
     bool rv = false;
     size_t br = 0;
 
-    auto file = mKernel.fs.file(skFilePath);
+    auto file = mKernel.fs.file(kFilePath);
     if (!file) {
-        LOG_ERROR("Failed to create file object for %s\n", skFilePath);
+        LOG_ERROR("Failed to create file object for %s\n", kFilePath);
         return false;
     }
 
     if (!file->exist()) {
-        LOG_INFO("No saved recents file %s\n", skFilePath);
+        LOG_INFO("No saved recents file %s\n", kFilePath);
         return false;
     }
 
@@ -281,7 +292,10 @@ bool TimerManager::parseJSON(char* buff, uint32_t length, std::vector<Timer>& li
     }
 
     LOG_DEBUG("Parsed %u recents\n", static_cast<unsigned>(list.size()));
-    return true;
+
+    // An empty array is a valid "no recents"; a non-empty array from which every
+    // entry was rejected means the file is corrupt -- report it as a failure.
+    return arrayLength == 0 || !list.empty();
 }
 
 uint32_t TimerManager::createJSON(const std::vector<Timer>& list, char* buff, uint32_t buffSize)

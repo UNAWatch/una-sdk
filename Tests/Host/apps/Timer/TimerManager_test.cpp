@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <string>
 #include <vector>
 
 #include "KernelTestDoubles.hpp"
@@ -274,6 +275,29 @@ TEST(TimerManager, RecentsRoundTripThroughStorage)
     EXPECT_EQ(cb.recentsChanges, 1);       // load notifies once
 }
 
+TEST(TimerManager, RecentsWorstCaseRoundTrip)
+{
+    KernelFixture fx;
+    // kMaxRecents entries at the 4-digit max duration and the longest effect --
+    // the largest file the writer produces; it must still fit the scratch buffer.
+    const std::vector<Timer> maxed(
+        Timer::kMaxRecents,
+        Timer{Timer::kMaxDurationSec, Timer::EFFECT_BEEP_AND_VIBRO});
+
+    {
+        TimerManager writer(fx.kernel);
+        ASSERT_TRUE(writer.saveRecents(maxed));
+    }
+
+    TimerManager reader(fx.kernel);
+    reader.load();
+
+    ASSERT_EQ(reader.getRecents().size(), Timer::kMaxRecents);
+    EXPECT_EQ(reader.getRecents()[0].durationSec, Timer::kMaxDurationSec);
+    EXPECT_EQ(reader.getRecents()[Timer::kMaxRecents - 1].effect,
+              Timer::EFFECT_BEEP_AND_VIBRO);
+}
+
 TEST(TimerManager, LoadWithNoFileYieldsEmpty)
 {
     KernelFixture fx;
@@ -293,4 +317,72 @@ TEST(TimerManager, LoadMalformedFileYieldsEmpty)
     tm.load();
 
     EXPECT_TRUE(tm.getRecents().empty());
+}
+
+TEST(TimerManager, LoadKeepsValidEntriesAndSkipsInvalid)
+{
+    KernelFixture fx;
+    // The second entry's duration exceeds kMaxDurationSec, so it is rejected
+    // while the first, valid entry is kept.
+    fx.fileSystem.seedFile(
+        "timer.json",
+        R"({"recents":[{"sec":60,"effect":"beep"},{"sec":9999999,"effect":"beep"}]})");
+    TimerManager tm(fx.kernel);
+
+    tm.load();
+
+    ASSERT_EQ(tm.getRecents().size(), 1u);
+    EXPECT_EQ(tm.getRecents()[0].durationSec, 60u);
+    EXPECT_EQ(tm.getRecents()[0].effect, Timer::EFFECT_BEEP);
+}
+
+TEST(TimerManager, LoadAllEntriesInvalidYieldsEmpty)
+{
+    KernelFixture fx;
+    // Valid JSON with a recents array, but every entry is unusable (bad duration,
+    // then bad effect) -- the list ends up empty.
+    fx.fileSystem.seedFile(
+        "timer.json",
+        R"({"recents":[{"sec":9999999,"effect":"beep"},{"sec":30,"effect":"nope"}]})");
+    TimerManager tm(fx.kernel);
+
+    tm.load();
+
+    EXPECT_TRUE(tm.getRecents().empty());
+}
+
+TEST(TimerManager, LoadsHandFormattedFile)
+{
+    KernelFixture fx;
+    // A user could pretty-print the file over USB: 4-space indent, one field per
+    // line, CRLF newlines (Windows). It must still load and fit the scratch buffer.
+    const std::string pretty =
+        "{\r\n"
+        "    \"recents\": [\r\n"
+        "        {\r\n"
+        "            \"sec\": 5999,\r\n"
+        "            \"effect\": \"beep_vibro\"\r\n"
+        "        },\r\n"
+        "        {\r\n"
+        "            \"sec\": 3000,\r\n"
+        "            \"effect\": \"vibro\"\r\n"
+        "        },\r\n"
+        "        {\r\n"
+        "            \"sec\": 60,\r\n"
+        "            \"effect\": \"beep\"\r\n"
+        "        }\r\n"
+        "    ]\r\n"
+        "}\r\n";
+    fx.fileSystem.seedFile("timer.json", pretty);
+    TimerManager tm(fx.kernel);
+
+    tm.load();
+
+    ASSERT_EQ(tm.getRecents().size(), 3u);
+    EXPECT_EQ(tm.getRecents()[0].durationSec, 5999u);
+    EXPECT_EQ(tm.getRecents()[0].effect, Timer::EFFECT_BEEP_AND_VIBRO);
+    EXPECT_EQ(tm.getRecents()[1].durationSec, 3000u);
+    EXPECT_EQ(tm.getRecents()[1].effect, Timer::EFFECT_VIBRO);
+    EXPECT_EQ(tm.getRecents()[2].durationSec, 60u);
+    EXPECT_EQ(tm.getRecents()[2].effect, Timer::EFFECT_BEEP);
 }

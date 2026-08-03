@@ -2,7 +2,7 @@
 #include <touchgfx/Application.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
 #include <SDK/GUI/Color.hpp>
-#include <math.h>
+#include <cmath>
 
 namespace {
 

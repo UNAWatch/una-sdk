@@ -1,3 +1,14 @@
+/**
+ ******************************************************************************
+ * @file    TimerManager.hpp
+ * @date    25-07-2026
+ * @author  Denys Saienko <denys.saienko@droid-technologies.com>
+ * @brief   Owns the active countdown and the recent-timers store.
+ ******************************************************************************
+ *
+ ******************************************************************************
+ */
+
 #ifndef TIMER_MANAGER_HPP
 #define TIMER_MANAGER_HPP
 
@@ -31,10 +42,10 @@ public:
     class Callback {
     public:
         /** @brief Called once when the running countdown reaches zero. */
-        virtual void onFired(const Timer& timer) {}
+        virtual void onFired(const Timer& /*timer*/) {}
 
         /** @brief Called when the recents list changes (load, save). */
-        virtual void onRecentsChanged(const std::vector<Timer>& list) {}
+        virtual void onRecentsChanged(const std::vector<Timer>& /*list*/) {}
     protected:
         virtual ~Callback() = default;
     };
@@ -49,7 +60,7 @@ public:
     };
 
     explicit TimerManager(const SDK::Kernel& kernel);
-    virtual ~TimerManager();
+    ~TimerManager();
 
     /** @brief Attach observer to receive fire and recents-change events. */
     void attachCallback(Callback* pCallback) { mObserver = pCallback; }
@@ -74,7 +85,7 @@ public:
     /** @brief Cancel the countdown and return to IDLE. */
     void stop();
 
-    /** @brief Restart the current timer from its full duration (from FIRED). */
+    /** @brief Re-arm at the full duration but held paused (used from FIRED). */
     void repeat(uint32_t nowMs);
 
     /**
@@ -103,7 +114,7 @@ private:
 
     // -- Constants ------------------------------------------------------------
 
-    static constexpr char     skFilePath[] = "timer.json";
+    static constexpr char     kFilePath[]  = "timer.json";
     static constexpr uint32_t kNoTimeout   = 0xFFFFFFFF;
     static constexpr size_t   kMaxRecents  = Timer::kMaxRecents;   // single source: Timer.hpp
 
@@ -121,7 +132,14 @@ private:
 
     // Recents
     std::vector<Timer> mRecents;
-    char               mBuffer[1024]{};
+    // Scratch for the recents JSON. A member (not a local) to keep it off the
+    // service thread stack, which save/load run on. The app writes compact JSON
+    // (kMaxRecents entries == 118 bytes), but the file is user-reachable over USB,
+    // so size for a hand-formatted copy too: 4-space indented, one field per line,
+    // 3 entries is ~268 bytes (LF) / ~286 (CRLF). 512 loads such a file with room;
+    // anything larger the load path rejects.
+    static constexpr size_t kBufferSize = 512;
+    char               mBuffer[kBufferSize]{};
 
     inline static constexpr std::array<std::string_view, Timer::EFFECT_COUNT> kEffectJsonKeyValue =
         { "beep_vibro", "vibro", "beep" };
