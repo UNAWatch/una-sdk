@@ -25,6 +25,8 @@ import zlib
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+from make_variant import make_file_safe_name  # noqa: E402  (same package, no installer)
 
 MAIN_HEADER_SIZE = 48
 ICONS_SIZE = 3600 + 900
@@ -77,12 +79,14 @@ def version_string_of(uapp: Path, app_name: str) -> str:
 
     app_merging.py names outputs <safe-name>_<version>.uapp where <version>
     keeps any pre-release suffix (1.3.0-rc4) that the packed u32 cannot carry,
-    so the filename is the richest source. Falls back to the header's A.B.C
+    so the filename is the richest source. Uses the same filename-safe
+    normalization the artifact producer used, case-insensitively (rglob
+    matches case-insensitively on Windows). Falls back to the header's A.B.C
     for a bare <name>.uapp.
     """
     stem = uapp.stem
-    prefix = app_name + "_"
-    if stem.startswith(prefix) and stem != prefix:
+    prefix = make_file_safe_name(app_name) + "_"
+    if stem.lower().startswith(prefix.lower()) and len(stem) > len(prefix):
         return stem[len(prefix):]
     v = version_of(uapp)
     return f"{(v >> 16) & 0xFF}.{(v >> 8) & 0xFF}.{v & 0xFF}"
@@ -90,9 +94,10 @@ def version_string_of(uapp: Path, app_name: str) -> str:
 
 def find_built_uapp(name: str, search_roots: list[Path]) -> Path | None:
     """Newest compiled <Name>*.uapp under any search root (aliases excluded)."""
+    safe = make_file_safe_name(name)
     candidates = []
     for root in search_roots:
-        candidates += list(root.rglob(f"{name}_*.uapp")) + list(root.rglob(f"{name}.uapp"))
+        candidates += list(root.rglob(f"{safe}_*.uapp")) + list(root.rglob(f"{safe}.uapp"))
     candidates = [c for c in candidates if not is_alias(c)]
     if not candidates:
         return None
@@ -265,6 +270,12 @@ def main() -> int:
         if version_of(packed[0]) != version_of(target_uapp):
             fail(f"{name}: alias uappVersion 0x{version_of(packed[0]):08X} is not "
                  f"in lockstep with the target's 0x{version_of(target_uapp):08X}")
+        expected_stem = f"{make_file_safe_name(name)}_{target_version}"
+        if packed[0].stem != expected_stem:
+            # The u32 check above cannot see pre-release suffixes; the
+            # filename carries the full string, so pin it too.
+            fail(f"{name}: packed filename {packed[0].name} does not carry the "
+                 f"target's full version ({expected_stem}.uapp expected)")
 
     print(f"pack_variants: {len(manifests)} variant(s) packed and verified -> {args.out}")
     return 0
