@@ -1,0 +1,11 @@
+{
+    "name": "Walking",
+    "appid": "A1E5D3B7C9F04A82",
+    "target": "Hiking",
+    "type": "Activity",
+    "appver": "1.0.0",
+    "min_target_version": "0.0.0",
+    "origin": "shipped",
+    "config": "config.json",
+    "icons": "target"
+}
