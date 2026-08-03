@@ -30,7 +30,10 @@ MAIN_HEADER_SIZE = 48
 ICONS_SIZE = 3600 + 900
 PAYLOAD_OFFSET = MAIN_HEADER_SIZE + ICONS_SIZE
 PAYLOAD_SIZE = 32
+FLAGS_OFFSET = 20
 FLAG_APP_VARIANT_ALIAS = 0x40
+APP_TYPE_MASK = 0x03
+APP_TYPES = {"Activity": 0, "Utility": 1, "Glance": 2, "Clockface": 3}
 
 
 def fail(msg: str) -> None:
@@ -38,16 +41,34 @@ def fail(msg: str) -> None:
     sys.exit(1)
 
 
-def uappid_of(uapp: Path) -> int:
+def header_of(uapp: Path) -> tuple[int, int]:
+    """(uappID, flags) from a .uapp MainHeader."""
     with open(uapp, "rb") as f:
-        return struct.unpack("<Q", f.read(8))[0]
+        raw = f.read(MAIN_HEADER_SIZE)
+    if len(raw) != MAIN_HEADER_SIZE:
+        fail(f"{uapp} is too short to carry a MainHeader")
+    uappid = struct.unpack_from("<Q", raw, 0)[0]
+    flags = struct.unpack_from("<I", raw, FLAGS_OFFSET)[0]
+    return uappid, flags
+
+
+def uappid_of(uapp: Path) -> int:
+    return header_of(uapp)[0]
+
+
+def is_alias(uapp: Path) -> bool:
+    """True for a code-less variant alias. In CI the artifacts directory can
+    already contain OTHER variants' outputs (matrix jobs upload as they
+    finish), so alias files must never count as compiled-app inputs."""
+    return bool(header_of(uapp)[1] & FLAG_APP_VARIANT_ALIAS)
 
 
 def find_built_uapp(name: str, search_roots: list[Path]) -> Path | None:
-    """Newest <Name>*.uapp under any search root (CI artifacts or build dirs)."""
+    """Newest compiled <Name>*.uapp under any search root (aliases excluded)."""
     candidates = []
     for root in search_roots:
         candidates += list(root.rglob(f"{name}_*.uapp")) + list(root.rglob(f"{name}.uapp"))
+    candidates = [c for c in candidates if not is_alias(c)]
     if not candidates:
         return None
     return max(candidates, key=lambda p: p.stat().st_mtime)
@@ -66,11 +87,20 @@ def verify_alias(path: Path, expected_appid: int, expected_target: int) -> None:
         fail(f"{path.name}: alias must carry libcVersion=0 and serviceSize=0")
     if not (flags & FLAG_APP_VARIANT_ALIAS):
         fail(f"{path.name}: FLAG_APP_VARIANT_ALIAS missing (flags=0x{flags:02X})")
+    if flags & ~0x7F:
+        fail(f"{path.name}: flags outside the alias mask (0x{flags:08X})")
+    if 0 not in data[24:40]:
+        fail(f"{path.name}: app_name is not NUL-terminated within 16 bytes")
+    normal_icon, small_icon = struct.unpack_from("<II", data, 40)
+    if normal_icon != 3600 or small_icon != 900:
+        fail(f"{path.name}: icon size fields must be 3600/900")
 
     (payload_ver, target, _min_ver, _origin, config_size) = \
         struct.unpack_from("<IQIBI", data, PAYLOAD_OFFSET)
     if payload_ver != 1:
         fail(f"{path.name}: unexpected payloadVersion {payload_ver}")
+    if config_size > 8192:
+        fail(f"{path.name}: configSize {config_size} exceeds the kernel's 8192-byte bound")
     if target != expected_target:
         fail(f"{path.name}: payload target {target:016X} != built target {expected_target:016X}")
     if len(data) != PAYLOAD_OFFSET + PAYLOAD_SIZE + config_size + 4:
@@ -106,9 +136,19 @@ def main() -> int:
     search_roots = [args.built_apps if args.built_apps else args.apps_root]
 
     # ---- AppID allocation rule: collide with nothing ------------------------
+    # Alias files are skipped: in CI they are other variants' outputs, whose
+    # IDs are already accounted for by the manifest-vs-manifest check below.
     ids: dict[int, str] = {}
+    seen_files: dict[int, str] = {}
     for uapp in search_roots[0].rglob("*.uapp"):
-        ids.setdefault(uappid_of(uapp), f"built app {uapp.name}")
+        if is_alias(uapp):
+            continue
+        appid = uappid_of(uapp)
+        if appid in seen_files and seen_files[appid] != uapp.name:
+            fail(f"built apps {seen_files[appid]} and {uapp.name} share appID "
+                 f"{appid:016X}")
+        seen_files[appid] = uapp.name
+        ids.setdefault(appid, f"built app {uapp.name}")
     for m in manifests:
         spec = json.loads(m.read_text())
         appid = int(spec["appid"], 16)
@@ -125,14 +165,43 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     for m in manifests:
         spec = json.loads(m.read_text())
+        missing = [k for k in ("name", "appid", "target", "type", "appver", "config")
+                   if k not in spec]
+        if missing:
+            fail(f"{m}: manifest is missing required key(s): {', '.join(missing)}")
         name = spec["name"]
+        dirname = m.parent.name
         print(f"packing variant {name} (from {m})")
+
+        # The artifact name and upload glob are keyed on the DIRECTORY name,
+        # so a directory name that shadows a compiled app would collide with
+        # its app-<Name> artifact.
+        if (args.apps_root / dirname).is_dir():
+            fail(f"{dirname}: variant directory name shadows an app directory")
 
         target_uapp = find_built_uapp(spec["target"], search_roots)
         if target_uapp is None:
             fail(f"{name}: no built .uapp found for target '{spec['target']}' "
                  f"under {search_roots[0]}")
         print(f"  target binary: {target_uapp}")
+
+        # The manifest's type must match the target binary's (the kernel
+        # adopts the target's type bits regardless), and glance targets are
+        # rejected outright, mirroring the kernel's scan rules -- catch both
+        # at packaging time, not on a watch.
+        _, target_flags = header_of(target_uapp)
+        target_type = target_flags & APP_TYPE_MASK
+        if target_type == APP_TYPES["Glance"]:
+            fail(f"{name}: target '{spec['target']}' is glance-typed; "
+                 "variants of glance apps are not supported")
+        if APP_TYPES.get(spec["type"]) != target_type:
+            fail(f"{name}: manifest type '{spec['type']}' does not match the "
+                 f"target binary's type bits ({target_type})")
+
+        out_dir = args.out / dirname
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for stale in out_dir.glob("*.uapp"):
+            stale.unlink()
 
         cmd = [sys.executable, str(SCRIPT_DIR / "make_variant.py"),
                "-name", name,
@@ -143,7 +212,7 @@ def main() -> int:
                "-appver", spec["appver"],
                "-min_target_version", spec.get("min_target_version", "0.0.0"),
                "-origin", spec.get("origin", "shipped"),
-               "-out", str(args.out / name)]
+               "-out", str(out_dir)]
 
         icons = spec.get("icons", "target")
         if icons == "target":
@@ -156,7 +225,7 @@ def main() -> int:
         if result.returncode != 0:
             fail(f"{name}: make_variant.py failed (exit {result.returncode})")
 
-        packed = list((args.out / name).glob("*.uapp"))
+        packed = list(out_dir.glob("*.uapp"))
         if len(packed) != 1:
             fail(f"{name}: expected exactly one packed .uapp, found {len(packed)}")
         verify_alias(packed[0], int(spec["appid"], 16), uappid_of(target_uapp))
