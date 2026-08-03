@@ -10,11 +10,14 @@
 /**
  * @brief Background process that owns the countdown and drives the alerts.
  *
- * Sleeps on the message queue with a timeout equal to the remaining countdown,
- * so the chip can reach low power while a timer runs. On expiry it plays the
- * alert (buzzer / vibro / backlight) and, if the GUI is closed, launches it to
- * show the Fired screen -- the timer therefore goes off in the app and on the
- * home screen alike.
+ * Sleeps on the message queue with a timeout equal to the remaining countdown.
+ * The one deliberate exception is the backgrounded home-screen widget: while a
+ * countdown runs with the GUI closed it shows MM:SS, so the loop wakes once a
+ * second to keep the displayed seconds accurate -- a conscious trade of idle
+ * power for a second-resolution home countdown (second precision is the point of
+ * a timer). On expiry it plays the alert (buzzer / vibro / backlight) and, if the
+ * GUI is closed, launches it to show the Fired screen -- the timer therefore goes
+ * off in the app and on the home screen alike.
  */
 class Service : public TimerManager::Callback
 {
