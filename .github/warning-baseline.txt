@@ -1,0 +1,56 @@
+# Tolerated compiler warnings in the gcc simulator build -- see
+# Utilities/Scripts/warning-baseline/warning_baseline.py.
+#
+# Generated. Do not hand-edit to make a build pass: the number is the count of
+# warning sites of that flag in that file, and raising one is how a warning gets
+# in. It is rewritten downwards automatically when a push to main builds every
+# project and finds fewer.
+#
+# path<TAB>flag<TAB>count
+Docs/Tutorials/Files/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp	-Wswitch	4
+Docs/Tutorials/Files/Software/Libs/Sources/Service.cpp	-Wpedantic	1
+Docs/Tutorials/HelloWorld/Software/Libs/Sources/Service.cpp	-Wpedantic	1
+Docs/Tutorials/Images/Software/Libs/Sources/Service.cpp	-Wpedantic	1
+Docs/Tutorials/ScrollMenu/Software/Libs/Sources/Service.cpp	-Wpedantic	1
+Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp	-Wformat=	6
+Docs/Tutorials/Sensors/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp	-Wswitch	4
+Docs/Tutorials/Sensors/Software/Libs/Sources/Service.cpp	-Wpedantic	1
+Examples/Apps/Alarm/Software/Apps/TouchGFX-GUI/gui/src/edit_screen/EditPresenter.cpp	-Wdeprecated-copy	1
+Examples/Apps/Alarm/Software/Apps/TouchGFX-GUI/gui/src/menu_screen/MenuPresenter.cpp	-Wdeprecated-copy	2
+Examples/Apps/Cycling/Software/Libs/Sources/ActivitySummarySerializer.cpp	-Wformat=	1
+Examples/Apps/Cycling/Software/Libs/Sources/SettingsSerializer.cpp	-Wformat=	1
+Examples/Apps/Hiking/Software/Libs/Sources/ActivitySummarySerializer.cpp	-Wformat=	1
+Examples/Apps/Hiking/Software/Libs/Sources/SettingsSerializer.cpp	-Wformat=	1
+Examples/Apps/Running/Software/Libs/Sources/ActivitySummarySerializer.cpp	-Wformat=	1
+Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp	-Wformat=	1
+Examples/Apps/Stopwatch/Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp	-Wmissing-field-initializers	1
+Examples/Apps/Treadmill/Software/Libs/Sources/ActivitySummarySerializer.cpp	-Wformat=	1
+Examples/Apps/Treadmill/Software/Libs/Sources/SettingsSerializer.cpp	-Wformat=	1
+Examples/Apps/Workout/Software/Libs/Sources/ActivitySummarySerializer.cpp	-Wformat=	1
+Examples/Apps/Workout/Software/Libs/Sources/SettingsSerializer.cpp	-Wformat=	1
+Libs/Header/SDK/Simulator/App/KernelMessageDispatcher.hpp	-Wreorder	2
+Libs/Header/SDK/Simulator/Components/InstanceSensorLayer.hpp	-Wreorder	2
+Libs/Header/SDK/Simulator/Components/Sensors/Gps/GpsDistance.hpp	-Wreorder	2
+Libs/Header/SDK/Simulator/Components/Sensors/Gps/GpsSpeed.hpp	-Wreorder	2
+Libs/Header/SDK/Simulator/Components/Sensors/IMU/ImuStepCounter.hpp	-Wreorder	2
+Libs/Header/SDK/Simulator/Components/Sensors/SensorBatteryLevel.hpp	-Wreorder	2
+Libs/Header/SDK/Simulator/Components/Simulator/GpsStepCounterSimulator.hpp	-Wreorder	10
+Libs/Header/SDK/Simulator/OS/OS.hpp	-Wreorder	2
+Libs/Header/SDK/Tools/FirmwareVersion.hpp	-Wpedantic	1
+Libs/Source/JSON/JsonStreamReader.cpp	-Wformat=	1
+Libs/Source/JSON/JsonStreamWriter.cpp	-Wformat=	2
+Libs/Source/Simulator/App/KernelMessageDispatcher.cpp	-Wignored-qualifiers	1
+Libs/Source/Simulator/App/KernelMessageDispatcher.cpp	-Wreorder	1
+Libs/Source/Simulator/App/KernelMessageDispatcher.cpp	-Wunused-variable	2
+Libs/Source/Simulator/Components/InstanceSensorLayer.cpp	-Wreorder	1
+Libs/Source/Simulator/Components/SensorDataQueue.cpp	-Wcast-qual	2
+Libs/Source/Simulator/Components/SensorListener.cpp	-Wcast-qual	1
+Libs/Source/Simulator/Components/Sensors/Gps/GpsDistance.cpp	-Wreorder	1
+Libs/Source/Simulator/Components/Sensors/Gps/GpsDistance.cpp	-Wunused-variable	1
+Libs/Source/Simulator/Components/Sensors/Gps/GpsSpeed.cpp	-Wreorder	1
+Libs/Source/Simulator/Components/Sensors/Imu/ImuStepCounter.cpp	-Wreorder	1
+Libs/Source/Simulator/Components/Sensors/SensorBatteryLevel.cpp	-Wreorder	1
+Libs/Source/Simulator/Components/Simulator/GpsStepCounterSimulator.cpp	-Wreorder	1
+Libs/Source/Simulator/Components/Simulator/GpsStepCounterSimulator.cpp	-Wunused-but-set-variable	1
+Libs/Source/Simulator/OS/OS.cpp	-Wreorder	1
+Libs/Source/Variant/VariantConfig.cpp	-Wformat-truncation=	1

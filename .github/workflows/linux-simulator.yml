@@ -1,4 +1,13 @@
-name: Linux Simulator (non-gating)
+name: Linux Simulator
+
+# The build and headless-boot stages are informational. The warning ratchet is not:
+# it is the one job here meant to be a required check. See warning_baseline.py for
+# why -- in short, the simulator build already asks for -Wall -Wextra -Wformat=2 and
+# then throws the answers into an artifact nobody reads.
+#
+# NOTE: the baseline commit this workflow pushes to main carries [skip ci], because
+# apps-ci, host-tests and tutorials-ci all trigger on an unfiltered push to main and
+# would otherwise run a full cycle for a one-line generated file.
 
 on:
   pull_request:
@@ -7,6 +16,7 @@ on:
       - 'ThirdParty/**'
       - 'Examples/Apps/**'
       - 'Docs/Tutorials/**'
+      - '.github/scripts/warning_baseline.py'
       - '.github/workflows/linux-simulator.yml'
   push:
     branches: [ main, develop ]
@@ -15,8 +25,12 @@ on:
       - 'ThirdParty/**'
       - 'Examples/Apps/**'
       - 'Docs/Tutorials/**'
+      - '.github/scripts/warning_baseline.py'
       - '.github/workflows/linux-simulator.yml'
   workflow_dispatch:
+
+# Deliberately NOT in the paths filters above: .github/warning-baseline.txt. The
+# ratchet job commits it, and a self-trigger would loop.
 
 permissions:
   contents: read
@@ -31,6 +45,7 @@ jobs:
     outputs:
       projects: ${{ steps.pick.outputs.projects }}
       count: ${{ steps.pick.outputs.count }}
+      total: ${{ steps.pick.outputs.total }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -99,6 +114,7 @@ jobs:
 
           echo "projects=$SEL" >> "$GITHUB_OUTPUT"
           echo "count=$(printf '%s' "$SEL" | jq 'length')" >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
           {
             echo "### Linux Simulator — selection"
             echo ""
@@ -106,6 +122,32 @@ jobs:
             echo "- selected $(printf '%s' "$SEL" | jq 'length') of $TOTAL project(s):"
             printf '%s' "$SEL" | jq -r '.[].dir | "  - `" + . + "`"'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Raising the baseline is a legitimate escape hatch, but it should never be a
+      # quiet one -- it is how a warning gets to stay. Surface it; don't block on it.
+      - name: Note any hand-raised warning baseline
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+          BASELINE=.github/warning-baseline.txt
+          # Without the base blob every entry would read as newly raised, so skip
+          # rather than cry wolf. (Absent on the commit that first adds the baseline.)
+          if ! git show "${BASE_SHA}:${BASELINE}" > /tmp/baseline.before 2>/dev/null; then
+            echo "No baseline at the base revision; nothing to compare."
+            exit 0
+          fi
+          [ -f "$BASELINE" ] || : > "$BASELINE"
+          if ! out="$(python3 .github/scripts/warning_baseline.py compare \
+                        --before /tmp/baseline.before --after "$BASELINE")"; then
+            echo "$out"
+            echo "::warning title=Warning baseline raised::This PR tolerates more compiler warnings than its base. See the job summary."
+            { echo "### ⚠️ Warning baseline raised"; echo ""; echo '```'; echo "$out"; echo '```'; } \
+              >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "$out"
+          fi
 
   build:
     needs: discover
@@ -154,13 +196,36 @@ jobs:
           grep -q "GUI is now running" "$GITHUB_WORKSPACE/sim.log" \
             && echo "BOOT OK" || { echo "BOOT FAILED: marker not found"; exit 1; }
 
+      # Runs even on a failed build: a build that dies after emitting a new warning
+      # should still have that warning reach the gate. A truncated log can only
+      # under-report, so it never causes a false failure.
+      - name: Extract compiler warnings
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f build.log ] || { echo "no build.log; nothing to extract"; exit 0; }
+          python3 .github/scripts/warning_baseline.py extract \
+            --log build.log \
+            --app-dir "$APP_DIR" \
+            --workspace "$GITHUB_WORKSPACE" \
+            --out "warnings-${{ matrix.project.slug }}.tsv"
+
+      - name: Upload warning counts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: warning-counts-${{ matrix.project.slug }}
+          path: warnings-${{ matrix.project.slug }}.tsv
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Write PASS/FAIL summary
         if: always()
         run: |
           b='${{ steps.build.outcome }}'; s='${{ steps.smoke.outcome }}'
           icon() { [ "$1" = success ] && echo '✅' || { [ "$1" = skipped ] && echo '⏭️' || echo '❌'; }; }
           {
-            echo "### ${{ matrix.project.name }} — _(informational, non-gating)_"
+            echo "### ${{ matrix.project.name }} — _(build/boot informational)_"
             echo "| Stage | Result |"
             echo "|-------|--------|"
             echo "| Build | $(icon "$b") \`$b\` |"
@@ -180,3 +245,155 @@ jobs:
             ${{ matrix.project.dir }}/build/bin/simulator.out
           if-no-files-found: ignore
           retention-days: 14
+
+  # The gate. Needs no write permission and no secrets, so it works unchanged on a
+  # pull request from a fork.
+  warnings:
+    needs: [ discover, build ]
+    # always(), so a failed build leg still has its warnings checked -- but only once
+    # discover actually produced a selection.
+    if: always() && needs.discover.result == 'success' && needs.discover.outputs.projects != '[]'
+    name: Warning ratchet
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Selftest the ratchet itself
+        run: python3 .github/scripts/warning_baseline.py --selftest
+
+      - name: Download warning counts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: warning-counts-*
+          path: counts
+          merge-multiple: true
+
+      - name: Compare against the baseline
+        id: gate
+        run: |
+          set -uo pipefail
+          shopt -s nullglob
+          files=(counts/*.tsv)
+          echo "legs=${#files[@]}" >> "$GITHUB_OUTPUT"
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error title=No warning counts::Every build leg failed before producing a log; the ratchet has nothing to check."
+            exit 1
+          fi
+          echo "Checking ${#files[@]} of ${{ needs.discover.outputs.count }} selected project(s)."
+          # No `set -e` here, so the status has to be captured and re-raised at the
+          # end; without the explicit `exit $rc` a failing gate would exit 0 on the
+          # trailing echo.
+          python3 .github/scripts/warning_baseline.py check \
+            --baseline .github/warning-baseline.txt "${files[@]}" > /tmp/gate.out 2>&1
+          rc=$?
+          cat /tmp/gate.out
+          if [ $rc -ne 0 ]; then
+            echo "::error title=New compiler warning::The build added a warning that is not in .github/warning-baseline.txt. See the job summary."
+          fi
+          exit $rc
+
+      - name: Summary
+        if: always()
+        run: |
+          ok='${{ steps.gate.outcome }}'
+          {
+            if [ "$ok" = success ]; then echo "### ✅ Warning ratchet"; else echo "### ❌ Warning ratchet"; fi
+            echo ""
+            echo '```'; cat /tmp/gate.out 2>/dev/null || echo "(no output)"; echo '```'
+            echo ""
+            echo "Coverage: ${{ steps.gate.outputs.legs || 0 }} of ${{ needs.discover.outputs.count }} selected project(s), out of ${{ needs.discover.outputs.total }} in the repo."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Ratchet down on merge. Only ever lowers the baseline, and only from a build that
+  # covered every project in the repo -- a partial run would look like a fix and
+  # quietly discard warnings the missing projects would have reported.
+  ratchet:
+    needs: [ discover, build, warnings ]
+    if: >-
+      github.event_name == 'push'
+      && github.ref == 'refs/heads/main'
+      && needs.build.result == 'success'
+      && needs.warnings.result == 'success'
+      && needs.discover.outputs.count == needs.discover.outputs.total
+    name: Ratchet baseline down
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Download warning counts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: warning-counts-*
+          path: counts
+          merge-multiple: true
+
+      # Retried in full: another push can land between the checkout and the push, and
+      # the baseline is generated, so the correct resolution is always "recompute on
+      # top of the new tip", never a merge.
+      - name: Lower the baseline if the warnings went away
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          shopt -s nullglob
+          files=("$GITHUB_WORKSPACE"/counts/*.tsv)
+
+          # An empty or partial set would look exactly like "the warnings were fixed"
+          # and wipe the baseline. Refuse rather than guess.
+          expected='${{ needs.discover.outputs.count }}'
+          if [ ${#files[@]} -ne "$expected" ]; then
+            echo "::error title=Incomplete warning coverage::Got ${#files[@]} count file(s) for ${expected} project(s); refusing to rewrite the baseline from a partial build."
+            exit 1
+          fi
+
+          for attempt in 1 2 3; do
+            # cd is guarded throughout: there is no `set -e` here, and a silent cd
+            # failure would point the rm/add/commit below at the wrong tree.
+            cd "$GITHUB_WORKSPACE" || exit 1
+            rm -rf repo
+            git clone --quiet --depth 1 --branch main \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo \
+              || { echo "::error::clone failed"; exit 1; }
+            cd repo || exit 1
+
+            python3 .github/scripts/warning_baseline.py update \
+              --baseline .github/warning-baseline.txt "${files[@]}"
+            rc=$?
+            case $rc in
+              0) ;;                                     # changed; commit it
+              2) echo "Baseline already matches; nothing to commit."; exit 0 ;;
+              *) echo "::error title=Warning count increased on main::A warning reached main without failing the gate. Refusing to absorb it into the baseline."
+                 exit 1 ;;
+            esac
+
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/warning-baseline.txt
+            # [skip ci]: apps-ci, host-tests and tutorials-ci trigger on any push to
+            # main, and this commit is one generated line.
+            git commit -m "chore(ci): ratchet the simulator warning baseline down [skip ci]" \
+                       -m "Generated by .github/workflows/linux-simulator.yml from ${GITHUB_SHA}."
+
+            if git push origin main; then
+              echo "Baseline lowered."
+              {
+                echo "### ⬇️ Warning baseline lowered"
+                echo ""
+                echo '```'
+                git --no-pager show --stat --oneline HEAD
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY" || true
+              exit 0
+            fi
+            echo "Push rejected (attempt ${attempt}/3) -- main moved. Recomputing."
+          done
+
+          # Losing the race three times is not a code problem, and the stale baseline
+          # is the conservative direction: the gate still holds, just one warning
+          # higher than it could.
+          echo "::warning title=Baseline not lowered::Lost the push race 3 times. The next merge will lower it."
