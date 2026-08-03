@@ -52,6 +52,7 @@ Next steps:
    Examples/Cycling-Architecture
    Examples/Hiking-Architecture
    Examples/HRMonitor-Architecture
+   Examples/Stopwatch-Architecture
    Examples/GlanceHR-Architecture
    Examples/GlanceSteps-Architecture
 
