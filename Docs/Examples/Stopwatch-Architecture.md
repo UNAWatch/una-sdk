@@ -218,8 +218,7 @@ mid-session is corrected by the next command, not immediately. That is an accept
 example, not a pattern to copy into something that must not miss an update. Reach for
 `SDK::make_msg<T>()` when the reply matters: it returns an RAII `MessageGuard` that releases on scope
 exit, so you can send with a timeout and read the result back (`msg.send(timeout) && msg.ok()`). That
-timeout bounds the wait for the reply, not for queue space — the kernel gives every queue push the
-same short deadline, so neither call waits out a full queue.
+timeout bounds the wait for the reply, not for queue space — no send waits out a full queue.
 
 **Message summary**:
 
