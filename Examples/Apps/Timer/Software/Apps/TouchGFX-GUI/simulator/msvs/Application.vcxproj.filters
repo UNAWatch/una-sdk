@@ -741,9 +741,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\running_screen\RunningViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\running_screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gui\include\gui\common\TimeFormat.hpp">
-      <Filter>Header Files\gui\common</Filter>
-    </ClInclude>
     <ClCompile Include="..\..\gui\src\containers\ScrollIndicator.cpp">
       <Filter>Source Files\gui\containers</Filter>
     </ClCompile>
