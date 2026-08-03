@@ -105,18 +105,20 @@ struct Root {
             static constexpr uint16_t kCountFrac = 20;     ///< 0.00..0.95 in 0.05 steps
         };
 
-        // Calibrate & Save "actual distance" picker (Treadmill, §5). Same whole
-        // ranges as the interval picker, but a finer 0.01-unit fraction step
-        // (0.00..0.99 -> 100 items) so the user can match the treadmill console
-        // distance precisely.
+        // Calibrate & Save "actual distance" picker (Treadmill, §5). The value is
+        // held as a single count of 0.01 display units (km or mi) spanning
+        // 0.00..99.99, wide enough for any treadmill console reading. Three stages
+        // select the step size -- whole unit / tenth / hundredth -- and a step at
+        // the top of a place carries into the one above it, so no reading is more
+        // than a handful of presses away. See PickerLogic::DistanceFine.
         struct CalibratePicker {
-            static constexpr uint16_t kMaxWholeKm   = 10;
-            static constexpr uint16_t kMaxWholeMi   = 6;
-            static constexpr uint16_t kCountWholeKm = kMaxWholeKm + 1;  ///< 0..10 -> 11 items
-            static constexpr uint16_t kCountWholeMi = kMaxWholeMi + 1;  ///< 0..6  -> 7 items
+            static constexpr uint16_t kMaxWhole  = 99;   ///< 0..99 whole units
+            static constexpr uint16_t kStepWhole = 100;  ///< 1.00 unit per press
+            static constexpr uint16_t kStepTenth = 10;   ///< 0.10 unit per press
+            static constexpr uint16_t kStepHund  = 1;    ///< 0.01 unit per press
 
-            static constexpr float    kFracStep  = 0.01f;  ///< Units (km or mi) per index step
-            static constexpr uint16_t kCountFrac = 100;    ///< 0.00..0.99 in 0.01 steps
+            /// Number of 0.01-unit steps in the range: 0.00..99.99 -> 10000.
+            static constexpr uint16_t kCountHund = (kMaxWhole + 1) * 100;
         };
     };
 

@@ -6,10 +6,12 @@
 #include <gui/containers/PickerLogic.hpp>
 
 /**
- * Post-run "Calibrate & Save" distance entry (§5). Uses the shared TwoTonePicker:
- * stage 1 edits the whole part, stage 2 the 0.01-unit fraction. R1 confirms /
- * advances; R2 steps back a stage, or (from stage 1) backs out to the pause menu
- * without saving (the activity stays paused until R1 confirms).
+ * Post-run "Calibrate & Save" distance entry (§5). Uses the shared TwoTonePicker
+ * in its three-slot layout: stage 1 edits whole units, stage 2 tenths, stage 3
+ * hundredths, over 0.00..99.99 with carry and wrap (PickerLogic::DistanceFine).
+ * R1 moves to the finer place and confirms from the last one; R2 steps back a
+ * place, or (from stage 1) backs out to the pause menu without saving (the
+ * activity stays paused until R1 confirms).
  */
 class TrackCalibrateView : public TrackCalibrateViewBase
 {
@@ -24,7 +26,7 @@ public:
 protected:
     using Menu = App::MenuNav::Root::Intervals::CalibratePicker;
 
-    PickerLogic::Distance<Menu> mLogic;
+    PickerLogic::DistanceFine<Menu> mLogic;
 
     virtual void handleKeyEvent(uint8_t key) override;
 };
