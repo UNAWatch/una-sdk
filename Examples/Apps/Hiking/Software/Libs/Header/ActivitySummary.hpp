@@ -38,7 +38,7 @@ struct ActivitySummary {
     float distance;     ///< Total track distance in m
     float speedAvg;     ///< Average speed in m/s
     uint32_t steps;     ///< Total steps count
-    float elevation;    ///< Elevation in m
+    float elevation;    ///< Accumulated elevation gain (ascent) in m
     float paceAvg;      ///< Average pace in s/m
     float hrMax;        ///< Maximum Heart Rate in bpm
     float hrAvg;        ///< Average Heart Rate in bpm
