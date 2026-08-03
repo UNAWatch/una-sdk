@@ -172,12 +172,23 @@ constexpr SDK::MessageType::Type STOPWATCH_REQUEST = 0x00000006;
 ```cpp
 struct StopwatchState : public SDK::MessageBase {
     Stopwatch::State state;
+    StopwatchState()
+        : SDK::MessageBase(STOPWATCH_STATE)
+        , state{}
+    {}
+
+    explicit StopwatchState(const Stopwatch::State &state)
+        : StopwatchState()
+    {
+        this->state = state;
+    }
 };
 static_assert(sizeof(StopwatchState) <= 256,
               "StopwatchState must fit the largest kernel message pool block");
 ```
 
-`StopwatchState` also carries a constructor that fills the snapshot, so publishing is a single call:
+The second constructor fills the snapshot and delegates to the first, so the message type is named in
+exactly one place. It is also what makes publishing a single call:
 
 ```cpp
 SDK::send_msg<CustomMessage::StopwatchState>(mKernel, mStopwatch.state());
@@ -193,6 +204,14 @@ bool startStopwatch() { return SDK::send_msg<CustomMessage::StopwatchStart>(mKer
 `SDK::send_msg<T>` allocates the message from the kernel pool, forwards any arguments to the
 message's constructor, sends it, and releases it, returning `false` if allocation or the send
 failed. There is no per-app sender class.
+
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room
+the message is dropped rather than waited for. That is why the commands return the bool: a `false`
+tells the screen the press never left, so it must not show the change as applied. A snapshot lost the
+other way needs no such handling, because the GUI re-requests one on start and resume. Reach for
+`SDK::make_msg<T>()` when the reply matters *or* when you need to wait for queue space: it returns an
+RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result
+back (`msg.send(timeout) && msg.ok()`).
 
 **Message summary**:
 
