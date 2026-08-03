@@ -40,7 +40,7 @@ Variant uappIDs live in the same 16-hex namespace as app `APP_ID`s
    `.uapp` headers and all manifests) and the kernel independently rejects a collision at
    boot scan — but catch it here, not on a customer's watch.
 3. Once shipped, an ID is permanent: the phone's update/uninstall bookkeeping keys on it.
-   Bump `appver` for content changes; never reuse or rotate the ID.
+   Content changes simply ship under the next release's version; never reuse or rotate the ID.
 
 Current allocations:
 
