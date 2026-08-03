@@ -67,6 +67,8 @@ def version_of(uapp: Path) -> int:
     """uappVersion (u32 at offset 8) of a built .uapp."""
     with open(uapp, "rb") as f:
         raw = f.read(12)
+    if len(raw) != 12:
+        fail(f"{uapp} is too short to carry a MainHeader")
     return struct.unpack_from("<I", raw, 8)[0]
 
 

@@ -116,7 +116,9 @@ def main() -> int:
     parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()),
                         help="Application type (must match the target's)")
     parser.add_argument("-appver", type=parse_semver_u32, default=(0x00010000, "1.0.0"),
-                        help="Alias content revision A.B.C (default 1.0.0)")
+                        help="Version to stamp into the alias, A.B.C with optional suffix "
+                             "(shipped variants pass the target app's version; "
+                             "default 1.0.0)")
     parser.add_argument("-min_target_version", type=parse_semver_u32, default=(0, "0.0.0"),
                         help="Minimum target app version A.B.C (default: any)")
     parser.add_argument("-origin", choices=list(ORIGINS.keys()), default="shipped",
@@ -194,7 +196,7 @@ def main() -> int:
     logging.info(f"Name            : {args.name}")
     logging.info(f"ID              : {args.appid:016X}")
     logging.info(f"Target ID       : {args.target_appid:016X}")
-    logging.info(f"Alias revision  : {app_version}")
+    logging.info(f"Version         : {app_version}")
     logging.info(f"Min target ver  : {min_target}")
     logging.info(f"Origin          : {args.origin}")
     logging.info(f"Flags           : 0x{flags:08X}")
