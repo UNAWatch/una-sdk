@@ -321,7 +321,7 @@ Beyond mirroring, the Model owns the **selection and list state** that the multi
 - **Buttons** — the four watch-bezel arc indicators (L1/L2/R1/R2), each in one of five colours (hidden, white, amber, red, teal).
 - **Title** — the screen heading.
 
-> Note: containers that register themselves with TouchGFX (`OrbitMenu`, `CountdownTimer`, `ScrollIndicator`) unregister in their destructors — the `FrontendHeap` partition is reused, so a stale timer-widget pointer would otherwise be ticked after the object is gone.
+> Note: containers that register themselves with TouchGFX (`OrbitMenu`, `SpherePicker`, `CountdownTimer`, `ScrollIndicator`) unregister in their destructors — the `FrontendHeap` partition is reused, so a stale timer-widget pointer would otherwise be ticked after the object is gone.
 
 ### Input Handling
 
