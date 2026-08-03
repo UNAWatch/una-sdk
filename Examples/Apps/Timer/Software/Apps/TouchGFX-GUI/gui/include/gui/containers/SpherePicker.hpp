@@ -22,7 +22,7 @@ class SpherePicker : public touchgfx::Container
 {
 public:
     SpherePicker();
-    virtual ~SpherePicker() {}
+    virtual ~SpherePicker();
 
     /** @brief Build the row widgets. Call once after construction. */
     void initialize();
@@ -95,6 +95,14 @@ private:
 
     void startAnimation();
     int16_t centerLineY() const;
+
+    // Timer-widget registration. initialize() runs on every screen entry and the
+    // FrontendHeap partition is reused, so guard against a double-register and
+    // drop the pointer in the destructor -- otherwise TouchGFX keeps ticking this
+    // object through the memory the next screen now occupies.
+    bool mRegistered = false;
+    void registerTimer();
+    void unregisterTimer();
 };
 
 #endif // SPHEREPICKER_HPP

@@ -42,6 +42,27 @@ SpherePicker::SpherePicker()
 {
 }
 
+SpherePicker::~SpherePicker()
+{
+    unregisterTimer();
+}
+
+void SpherePicker::registerTimer()
+{
+    if (!mRegistered) {
+        touchgfx::Application::getInstance()->registerTimerWidget(this);
+        mRegistered = true;
+    }
+}
+
+void SpherePicker::unregisterTimer()
+{
+    if (mRegistered) {
+        touchgfx::Application::getInstance()->unregisterTimerWidget(this);
+        mRegistered = false;
+    }
+}
+
 void SpherePicker::initialize()
 {
     for (int16_t i = 0; i < kVisible; i++) {
@@ -51,7 +72,7 @@ void SpherePicker::initialize()
         mRows[i].setColor(SDK::GUI::Color::WHITE);
         add(mRows[i]);
     }
-    touchgfx::Application::getInstance()->registerTimerWidget(this);
+    registerTimer();
 }
 
 void SpherePicker::setColumn(int16_t x, int16_t y, int16_t width, int16_t height,
