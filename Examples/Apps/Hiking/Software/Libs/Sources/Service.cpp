@@ -327,13 +327,15 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
     } else if (mSensorGpsSpeed.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsSpeed parser(data[0]);
         if (parser.isDataValid()) {
-            mSpeedCounter.add(parser.getSpeed());
-            // Latched separately for the smoothed live readout, which -- unlike
-            // the counter above -- drops samples taken without a current fix.
-            // isSpeedValid() already excludes dead reckoning.
-            mGpsSpeedMs    = parser.getSpeed();
-            mGpsSpeedValid = parser.isSpeedValid();
-            mGpsSpeedFresh = true;
+            mGpsSpeedMs    = parser.getSpeed();  // raw instantaneous speed
+            mGpsSpeedValid = parser.isSpeedValid();  // already excludes dead reckoning
+            mGpsSpeedFresh = true;   // consumed by the pace smoother each tick
+            // Only feed a current (valid-fix) speed into the aggregated metrics
+            // so acquisition / fix-loss / dead-reckoning readings don't inflate
+            // the max-speed statistics.
+            if (mGpsSpeedValid) {
+                mSpeedCounter.add(mGpsSpeedMs);
+            }
             LOG_DEBUG("Speed:    %.2f m/s (valid %u)\n", mGpsSpeedMs, mGpsSpeedValid);
         }
     } else if (mSensorGpsDistance.matchesDriver(handle)) {

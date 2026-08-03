@@ -351,7 +351,8 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             mGpsDeadReckoning = parser.isDeadReckoning();
             mGpsSpeedFresh    = true;   // consumed by the pace smoother each tick
             // Only feed a current (valid-fix) speed into the aggregated metrics
-            // so acquisition/fix-loss readings don't pollute avg/max/distance.
+            // so acquisition / fix-loss / dead-reckoning readings don't inflate
+            // the max-speed statistics.
             if (mGpsSpeedValid) {
                 mSpeedCounter.add(mGpsSpeedMs);
             }

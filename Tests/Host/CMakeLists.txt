@@ -54,6 +54,7 @@ add_executable(una-sdk-host-tests
     sensorlayer/SensorConnection_test.cpp
     metrics/MonotonicCounter_test.cpp
     metrics/SpeedSmoother_test.cpp
+    metrics/VariableCounter_test.cpp
     utils/ClockTime_test.cpp
     utils/Utils_test.cpp
     utils/CopyUtf8_test.cpp
