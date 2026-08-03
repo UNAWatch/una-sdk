@@ -102,6 +102,9 @@ jobs:
           path: built-apps
           pattern: app-*
 
+      # No Pillow installed: fine while every variant uses icons: "target"
+      # (the PNG conversion path in make_variant.py imports PIL lazily). The
+      # first custom-PNG-icon variant needs a pip install here.
       - name: Pack and verify variant ${{ matrix.variant }}
         run: |
           python3 Utilities/Scripts/app_merging/pack_variants.py \
@@ -115,11 +118,19 @@ jobs:
         with:
           name: app-${{ matrix.variant }}
           path: variants-out/${{ matrix.variant }}/*.uapp
+          if-no-files-found: error
 
   release:
     runs-on: ubuntu-latest
     needs: [cmake-build, pack-variants]
-    if: startsWith(github.ref, 'refs/tags/apps-v')
+    # pack-variants is skipped when no variants exist; that must not skip the
+    # release with it (skipped needs propagate by default), so spell out the
+    # acceptable results instead.
+    if: >-
+      startsWith(github.ref, 'refs/tags/apps-v') &&
+      !cancelled() &&
+      needs.cmake-build.result == 'success' &&
+      (needs.pack-variants.result == 'success' || needs.pack-variants.result == 'skipped')
     permissions:
       contents: write
     env:

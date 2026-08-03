@@ -38,7 +38,7 @@ for root, dirs, files in os.walk(base_path):
 variants = set()
 variants_path = os.path.join(base_path, 'Variants')
 if os.path.isdir(variants_path):
-    for dir_name in sorted(os.listdir(variants_path)):
+    for dir_name in os.listdir(variants_path):
         if os.path.isfile(os.path.join(variants_path, dir_name, 'manifest.json')):
             if dir_name not in apps_excluded:
                 variants.add(dir_name)
