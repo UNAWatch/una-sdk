@@ -29,8 +29,19 @@ for root, dirs, files in os.walk(base_path):
             parts = rel_path.split(os.sep)
             if len(parts) >= 1 and parts[0] and parts[0] != '.':
                 app_name = parts[0]
-                if app_name not in apps_excluded:
+                if app_name not in apps_excluded and app_name != 'Variants':
                     apps.add(app_name)
 
-output = {'apps': sorted(list(apps))}
+# Shipped variants: code-less alias .uapps packed after the app build (no
+# -CMake dir, so they can never appear in the compiled-app matrix above).
+# See Examples/Apps/Variants/README.md.
+variants = set()
+variants_path = os.path.join(base_path, 'Variants')
+if os.path.isdir(variants_path):
+    for dir_name in os.listdir(variants_path):
+        if os.path.isfile(os.path.join(variants_path, dir_name, 'manifest.json')):
+            if dir_name not in apps_excluded:
+                variants.add(dir_name)
+
+output = {'apps': sorted(list(apps)), 'variants': sorted(list(variants))}
 print(json.dumps(output))
