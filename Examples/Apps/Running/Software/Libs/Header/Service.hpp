@@ -105,7 +105,9 @@ private:
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
     /// Smooths the GPS speed for the live pace / speed readout only; the FIT
-    /// records, averages and maxima stay on the raw samples in mSpeedCounter.
+    /// record series and the maxima stay on the unsmoothed samples in
+    /// mSpeedCounter. The averages are not involved either way -- they come
+    /// from the distance and time totals, not from a mean of these samples.
     SDK::Metric::SpeedSmoother<skPaceSmoothingTicks>    mSpeedSmoother;
     SDK::Metric::VariableCounter                        mHrCounter;
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
