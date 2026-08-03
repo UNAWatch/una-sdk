@@ -189,7 +189,7 @@ private:
 ```cpp
 void Service::loadSettings() {
     auto file = mKernel.fs.file("settings.json");
-    if (file && file->open(SDK::Interface::IFile::Mode::READ)) {
+    if (file && file->open(0)) {   // open(bool wMode = false) -- 0 reads
         char buffer[1024];
         size_t bytesRead = file->read(buffer, sizeof(buffer) - 1);
         if (bytesRead > 0) {
@@ -230,7 +230,7 @@ void Service::loadSettings() {
 ```cpp
 void Service::saveSettings() {
     auto file = mKernel.fs.file("settings.json");
-    if (file && file->open(SDK::Interface::IFile::Mode::WRITE)) {
+    if (file && file->open(1)) {   // open(bool wMode = false) -- 1 writes
         SDK::JsonStreamWriter writer(file.get());
         writer.startMap(3);
         writer.add("decimalCounter", mDecimalCounter);
@@ -314,8 +314,7 @@ write.
 reply, and a message that finds no room in the queue is dropped. Use `SDK::make_msg<T>` instead when
 the reply matters: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with
 a timeout and read the result back (`msg.send(timeout) && msg.ok()`). That timeout bounds the wait for
-the reply, not for queue space — the kernel gives every queue push the same short deadline, so neither
-call waits out a full queue.
+the reply, not for queue space — no send waits out a full queue.
 
 #### Message Receiving
 

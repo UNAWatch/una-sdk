@@ -122,8 +122,7 @@ reply, and a message that finds no room in the queue is dropped. That is the rig
 data: the next sample is moments away. Reach for `SDK::make_msg<T>()` when the reply matters: it
 returns an RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read
 the result back (`msg.send(timeout) && msg.ok()`). That timeout bounds the wait for the reply, not for
-queue space — the kernel gives every queue push the same short deadline, so neither call waits out a
-full queue.
+queue space — no send waits out a full queue.
 
 ### Step 2: Service - Subscribe & Process Sensors
 
