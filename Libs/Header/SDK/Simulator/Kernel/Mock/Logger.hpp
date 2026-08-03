@@ -65,6 +65,37 @@ public:
 private:
     static inline OS::Mutex mMutexLog;
 
+    /**
+     * @brief   snprintf() that reports how much it actually wrote rather than
+     *          how much it would have written, so the result is safe to use as
+     *          a buffer offset.
+     * @return  Characters written, excluding the terminator: never more than
+     *          size - 1, and 0 when size is 0 or the encoding failed.
+     *
+     * The format attribute keeps -Wformat checking on the call sites, which a
+     * plain variadic wrapper would otherwise hide from the compiler.
+     */
+#if defined(__GNUC__)
+    __attribute__((format(printf, 3, 4)))
+#endif
+    static size_t appendTo(char* buf, size_t size, const char* fmt, ...)
+    {
+        if (size == 0) {
+            return 0;
+        }
+
+        va_list args;
+        va_start(args, fmt);
+        const int written = vsnprintf(buf, size, fmt, args);
+        va_end(args);
+
+        if (written < 0) {
+            return 0;
+        }
+
+        return (static_cast<size_t>(written) < size - 1) ? static_cast<size_t>(written) : size - 1;
+    }
+
     static void svlog(const char* level, const char* module_name, const char* func, int line,
         const char* fmt, va_list args)
     {
@@ -75,21 +106,21 @@ private:
         char timeBuff[16] = { 0 };
         sprintf(timeBuff, "%10u ", time);
 
-        static char levelBuff[10]{};
+        char levelBuff[10] = { 0 };
         if (level) {
-            sprintf(levelBuff, "-%s- ", level);
+            snprintf(levelBuff, sizeof(levelBuff), "-%s- ", level);
         }
 
         static char meta[64]{};
-        int idx = 0;
+        size_t idx = 0;
         if (module_name) {
-            idx += snprintf(&meta[idx], sizeof(meta) - idx, "%s::", module_name);
+            idx += appendTo(&meta[idx], sizeof(meta) - idx, "%s::", module_name);
         }
         if (func) {
-            idx += snprintf(&meta[idx], sizeof(meta) - idx, "%s", func);
+            idx += appendTo(&meta[idx], sizeof(meta) - idx, "%s", func);
         }
         if (line != 0) {
-            idx += snprintf(&meta[idx], sizeof(meta) - idx, "%s%d", func ? "::" : "", line);
+            idx += appendTo(&meta[idx], sizeof(meta) - idx, "%s%d", func ? "::" : "", line);
         }
 
         char userMsg[2048];
@@ -98,7 +129,7 @@ private:
         if (idx) {
             touchgfx_printf("%s%s%-36s: %s", timeBuff, levelBuff, meta, userMsg);
         } else {
-            touchgfx_printf("%s%s%%s", timeBuff, level, userMsg);
+            touchgfx_printf("%s%s%s", timeBuff, levelBuff, userMsg);
         } 
     }
 };
