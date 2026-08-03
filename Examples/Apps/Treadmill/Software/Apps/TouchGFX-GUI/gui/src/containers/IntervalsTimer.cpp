@@ -2,7 +2,9 @@
 #include <texts/TextKeysAndLanguages.hpp>
 #include <touchgfx/Color.hpp>
 
-static const std::time_t kMaxIntervalSec = 3599; // 59:59
+// Largest value the MM:SS field can render; the picker tops out well below this
+// (60:55), so the clamp only ever bites on open-ended count-up phases.
+static const std::time_t kMaxIntervalSec = 5999; // 99:59
 
 IntervalsTimer::IntervalsTimer()
 {

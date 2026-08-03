@@ -31,7 +31,7 @@ public:
 
     /**
      * @brief Update the timer -- always shows remaining time, no description, no line.
-     * @param sec Seconds remaining in the current phase, clamped to 59:59.
+     * @param sec Seconds remaining in the current phase, clamped to 99:59.
      */
     void setPhaseTime(std::time_t sec);
 

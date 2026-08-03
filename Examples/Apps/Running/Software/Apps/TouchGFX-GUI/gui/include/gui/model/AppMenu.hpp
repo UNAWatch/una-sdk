@@ -83,9 +83,9 @@ struct Root {
         // 2-part time picker (shared by RunTime / RestTime screens)
         // Items are built at runtime -- no fixed enum.
         struct TimePicker {
-            static constexpr uint16_t kMaxMin   = 5;    ///< Max minutes: 0..5
+            static constexpr uint16_t kMaxMin   = 60;   ///< Max minutes: 0..60
             static constexpr uint16_t kStepMin  = 1;
-            static constexpr uint16_t kCountMin = kMaxMin / kStepMin + 1; // 6
+            static constexpr uint16_t kCountMin = kMaxMin / kStepMin + 1; // 61
 
             static constexpr uint16_t kMaxSec   = 55;   ///< Max seconds: 0..55 (step 5)
             static constexpr uint16_t kStepSec  = 5;
