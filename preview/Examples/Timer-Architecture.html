@@ -1,0 +1,699 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timer - Countdown Timer &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/version-selector.js?v=50f89983"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cycling - Cycling Activity Tracking" href="Cycling-Architecture.html" />
+    <link rel="prev" title="Alarm - Alarm Clock" href="Alarm-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Timer - Countdown Timer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#command-handling">Command Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#firing-and-gui-launch">Firing and GUI launch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alerts">Alerts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#home-screen-widget">Home-screen widget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service-lifecycle-and-app-startup">Service Lifecycle and App Startup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#timermanager">TimerManager</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#countdown-state-machine">Countdown state machine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#observer">Observer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recents-persistence">Recents persistence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shared-types">Shared Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-message-system">Custom Message System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screens">Screens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reusable-containers">Reusable containers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-handling">Input Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testability">Testability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-build">Simulator Build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Timer - Countdown Timer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/Timer-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="timer-countdown-timer">
+<h1>Timer - Countdown Timer<a class="headerlink" href="#timer-countdown-timer" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Timer app is a <strong>Utility</strong>-type application that counts a fixed duration down to zero and raises an alert when it expires. It is a multi-screen app: the user picks or dials a duration, watches it run, and acknowledges the alert, moving between purpose-built screens for each step.</p>
+<p>It splits into a background <strong>service</strong> that owns the countdown and a <strong>GUI</strong> that renders it. The two stay traffic-free while counting: the kernel hands both processes the same monotonic millisecond tick, so the service sends a single snapshot on each state change and the GUI extrapolates the live <code class="docutils literal notranslate"><span class="pre">MM:SS</span></code> locally against its own clock. There is no periodic “current time” message.</p>
+<p>Around that countdown the app does four things:</p>
+<ul class="simple">
+<li><p><strong>It fires.</strong> On expiry the service plays an alert (buzzer / vibro / backlight) and, if the GUI is closed, <strong>launches it</strong> to show the alert.</p></li>
+<li><p><strong>It persists.</strong> Manually entered timers are remembered across launches in a small JSON file.</p></li>
+<li><p><strong>It surfaces on the home screen.</strong> While the app is backgrounded and a countdown is live, the service pushes <code class="docutils literal notranslate"><span class="pre">MM:SS</span></code> and a draining progress bar to the kernel home screen through the widget IPC.</p></li>
+<li><p><strong>It sleeps on a deadline.</strong> The service’s message wait is bounded by the remaining time (and the widget’s next-second boundary), so it wakes to fire and to tick the home widget, then returns to low power.</p></li>
+</ul>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p>Seven fixed presets (1, 3, 5, 10, 15, 30 min, 1 h) plus a custom duration entered on a sphere-wheel picker, up to <code class="docutils literal notranslate"><span class="pre">99:59</span></code></p></li>
+<li><p>Start, pause, resume, reset, stop, and repeat, driven by the four hardware buttons (L1/L2/R1/R2)</p></li>
+<li><p>Three alert effects: beep + vibrate, vibrate only, beep only</p></li>
+<li><p>The fired alert re-indicates periodically and auto-acknowledges (Done) after about a minute if left untouched</p></li>
+<li><p>Recents: the last three manually started timers, de-duplicated newest-first and persisted as JSON</p></li>
+<li><p>Background counting: the service keeps timing (and drives the home widget) while the GUI is closed, and re-entering the app re-attaches to it</p></li>
+<li><p>The service ends itself once the GUI is gone <strong>and</strong> no countdown is armed <strong>and</strong> no fire is pending, so an idle Timer holds no resident thread</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>The app is structured as two independent components: a service that owns the countdown state and a GUI that renders it. Communication between them uses the UNA SDK kernel messaging system.</p>
+<section id="high-level-components">
+<h3>High-Level Components<a class="headerlink" href="#high-level-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service Layer</strong>: The single source of truth for the countdown; applies commands, fires on expiry, plays alerts, drives the home widget, and persists recents</p></li>
+<li><p><strong>GUI Layer</strong>: TouchGFX-based multi-screen front end; extrapolates the running time and navigates between screens by state</p></li>
+<li><p><strong>SDK Integration</strong>: Kernel, messaging, monotonic system clock, home-screen widget IPC, buzzer/vibro/backlight, JSON, GUI capabilities</p></li>
+</ol>
+</section>
+<section id="component-interaction">
+<h3>Component Interaction<a class="headerlink" href="#component-interaction" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                start / control (pause/resume/reset/stop/repeat) / recents-save
+        [GUI] ────────────────────────────────────────────────────────► [Service]
+          ▲                                                                  │
+          │   state snapshot / fired / recents                              │
+          └──────────────────────────────────────────────────────────────────┘
+          │                                                                  │
+   [Kernel tick] ──► both processes read the same getTimeMs()                │
+                                                                             ▼
+                                              [buzzer / vibro / backlight] + [home widget]
+</pre></div>
+</div>
+<p>The state snapshot is <strong>not</strong> sent periodically: the service publishes a full <code class="docutils literal notranslate"><span class="pre">TimerManager::State</span></code> in response to an event — a command, the GUI coming up, or a fire — and the GUI recomputes the displayed remainder every frame from the shared tick (<code class="docutils literal notranslate"><span class="pre">endTick</span> <span class="pre">-</span> <span class="pre">now</span></code> while running, the frozen remainder while paused). The outbound edge on the right is the countdown’s payoff: at expiry the service drives hardware alerts and, when backgrounded, the home widget, and it launches the GUI to deliver a fire that happened while the app was closed.</p>
+</section>
+</section>
+<section id="service-backend">
+<h2>Service Backend<a class="headerlink" href="#service-backend" title="Link to this heading"></a></h2>
+<p>The service backend is implemented in <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code>. It owns a <code class="docutils literal notranslate"><span class="pre">TimerManager</span></code> and answers every command with a fresh snapshot, while <code class="docutils literal notranslate"><span class="pre">run()</span></code> doubles as the countdown clock and the home-widget pump.</p>
+<section id="core-classes-and-structures">
+<h3>Core Classes and Structures<a class="headerlink" href="#core-classes-and-structures" title="Link to this heading"></a></h3>
+<section id="service-class">
+<h4>Service Class<a class="headerlink" href="#service-class" title="Link to this heading"></a></h4>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Service</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimerManager</span><span class="o">::</span><span class="n">Callback</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">Service</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Service</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGuiStarted</span><span class="p">;</span>
+<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w">  </span><span class="n">mGuiSender</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TimerManager</span><span class="w">          </span><span class="n">mTimerManager</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">HomeWidget</span><span class="w">       </span><span class="n">mWidget</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">mPendingFired</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">   </span><span class="c1">// fire waiting for the GUI it launched</span>
+<span class="w">    </span><span class="n">Timer</span><span class="w">    </span><span class="n">mPendingTimer</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">mPendingFiredTick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">mWidgetActive</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">  </span><span class="c1">// home widget currently claimed</span>
+<span class="w">    </span><span class="kt">int32_t</span><span class="w">  </span><span class="n">mLastWidgetSec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w">     </span><span class="c1">// last MM:SS pushed (dedup)</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">run()</span></code> blocks on the message queue with a <strong>computed timeout</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sleepTime = mTimerManager.execute(now)   // ms to expiry while RUNNING, else &quot;no timeout&quot;
+pumpWidget(now, sleepTime)               // may shorten it to the next whole second
+</pre></div>
+</div>
+<p>so the loop wakes exactly when it must — to fire the countdown, to tick the home widget’s <code class="docutils literal notranslate"><span class="pre">MM:SS</span></code>, or when a command arrives — and otherwise lets the chip sleep. It reacts to three kernel lifecycle messages plus the app’s own commands:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> — forced exit; silences any active alert (<code class="docutils literal notranslate"><span class="pre">stopEffect()</span></code>), drops the home widget, detaches the callback, and returns</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> — the GUI is up; publishes the current state and recents, and delivers a pending background fire</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> — the GUI is gone; the loop keeps running only if something still needs it (see lifecycle)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TIMER_START</span></code> / <code class="docutils literal notranslate"><span class="pre">TIMER_CONTROL</span></code> / <code class="docutils literal notranslate"><span class="pre">TIMER_RECENTS_SAVE</span></code> — the app’s own commands</p></li>
+</ul>
+</section>
+</section>
+<section id="command-handling">
+<h3>Command Handling<a class="headerlink" href="#command-handling" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">handleControl()</span></code> reads the kernel tick once, applies the matching transition to the <code class="docutils literal notranslate"><span class="pre">TimerManager</span></code>, and publishes:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">TimerCmd</span></code></p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PAUSE</span></code></p></td>
+<td><p>Freeze the countdown, keep the remainder</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RESUME</span></code></p></td>
+<td><p>Resume from the frozen remainder</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RESET</span></code></p></td>
+<td><p>Reload the full duration (re-arms only when running; otherwise restores the time without changing state)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">STOP</span></code></p></td>
+<td><p>Silence the alert and return to <code class="docutils literal notranslate"><span class="pre">IDLE</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">REPEAT</span></code></p></td>
+<td><p>Silence the alert and re-arm the full duration, held paused</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">REPLAY_ALERT</span></code></p></td>
+<td><p>Re-play the fired alert effect only; state unchanged, no snapshot</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">TIMER_START</span></code> arms a fresh countdown; <code class="docutils literal notranslate"><span class="pre">TIMER_RECENTS_SAVE</span></code> overwrites the persisted recents. Every path except <code class="docutils literal notranslate"><span class="pre">REPLAY_ALERT</span></code> ends in a snapshot to the GUI (only when the GUI is up).</p>
+</section>
+<section id="firing-and-gui-launch">
+<h3>Firing and GUI launch<a class="headerlink" href="#firing-and-gui-launch" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">TimerManager</span></code> calls back into the service when the countdown reaches zero:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::onFired</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Timer</span><span class="o">&amp;</span><span class="w"> </span><span class="n">timer</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">playEffect</span><span class="p">(</span><span class="n">timer</span><span class="p">.</span><span class="n">effect</span><span class="p">);</span><span class="w">                 </span><span class="c1">// backlight + buzzer/vibro pattern</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGuiStarted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">fired</span><span class="p">(</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span><span class="w">        </span><span class="c1">// GUI is up -&gt; fired in-app</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Launch the GUI, then deliver the fire once it signals it is running.</span>
+<span class="w">        </span><span class="c1">// (RequestAppRunGui)</span>
+<span class="w">        </span><span class="n">mPendingFired</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="n">mPendingTimer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">timer</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mPendingFiredTick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>A fire raised while the GUI is closed launches it and parks the delivery in <code class="docutils literal notranslate"><span class="pre">mPendingFired</span></code> until the GUI signals <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>. That wait is <strong>bounded</strong>: if the launch is dropped or the GUI never signals, the pending delivery expires after ten seconds so the service can go idle and exit rather than blocking forever.</p>
+</section>
+<section id="alerts">
+<h3>Alerts<a class="headerlink" href="#alerts" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">playEffect()</span></code> raises the backlight (auto-off) and sends a repeating buzzer and/or vibro pattern chosen by the timer’s <code class="docutils literal notranslate"><span class="pre">Effect</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">Timer::Effect</span></code></p></th>
+<th class="head"><p>Buzzer</p></th>
+<th class="head"><p>Vibro</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP_AND_VIBRO</span></code></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EFFECT_VIBRO</span></code></p></td>
+<td><p></p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EFFECT_BEEP</span></code></p></td>
+<td><p>✓</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">stopEffect()</span></code> sends empty buzzer and vibro play messages, which silence both. It runs on <code class="docutils literal notranslate"><span class="pre">STOP</span></code>, on <code class="docutils literal notranslate"><span class="pre">REPEAT</span></code>, and on a forced app exit so a firing alert never outlives the app.</p>
+</section>
+<section id="home-screen-widget">
+<h3>Home-screen widget<a class="headerlink" href="#home-screen-widget" title="Link to this heading"></a></h3>
+<p>While the app is <strong>backgrounded</strong> and a countdown is <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code> or <code class="docutils literal notranslate"><span class="pre">PAUSED</span></code>, <code class="docutils literal notranslate"><span class="pre">pumpWidget()</span></code> claims the kernel’s single home-widget slot and pushes the live reading:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">mWidget</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">WIDGET_SHOW_TEXT</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">WIDGET_SHOW_PERCENT</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">WIDGET_PROGRESS_FROM_END</span><span class="p">,</span>
+<span class="w">               </span><span class="n">percent</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;MM:SS&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">WIDGET_PROGRESS_FROM_END</span></code> pins the bar fill to its end, so it <strong>drains from the start</strong> as the count runs down.</p></li>
+<li><p>The push is de-duplicated on the shown second (<code class="docutils literal notranslate"><span class="pre">mLastWidgetSec</span></code>), so a paused countdown pushes once and a running one once per second — <code class="docutils literal notranslate"><span class="pre">pumpWidget()</span></code> shortens the loop’s <code class="docutils literal notranslate"><span class="pre">sleepTime</span></code> to the next whole-second boundary so the reading ticks crisply.</p></li>
+<li><p>With the GUI open the user already sees the Running screen, so the widget is released; closing the app (countdown still going) brings it back. <code class="docutils literal notranslate"><span class="pre">STOP</span></code>/expiry release it too.</p></li>
+</ul>
+</section>
+<section id="service-lifecycle-and-app-startup">
+<h3>Service Lifecycle and App Startup<a class="headerlink" href="#service-lifecycle-and-app-startup" title="Link to this heading"></a></h3>
+<p>The Timer service is <strong>not</strong> an autostart service (<code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span> <span class="pre">Off</span></code>); it is launched when the user opens the app or when a background fire re-launches the GUI. The kernel does not stop a service when its GUI closes, so the service must end <strong>itself</strong> once it has nothing left to do:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Nothing keeps us alive: no GUI, no armed/paused countdown, no pending fire.</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mTimerManager</span><span class="p">.</span><span class="n">hasActiveTimers</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mPendingFired</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">now</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">startTime</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">kStartupGraceMs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// 5 s grace after launch</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span><span class="w">                                 </span><span class="c1">// exit the run loop</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>A short startup grace keeps the service alive just after launch so the GUI has time to appear; after that, an idle Timer with the GUI closed exits and frees its thread. A live or paused countdown, or a fire still waiting for its GUI, keeps it resident.</p>
+</section>
+</section>
+<section id="timermanager">
+<h2>TimerManager<a class="headerlink" href="#timermanager" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">TimerManager</span></code> (in <code class="docutils literal notranslate"><span class="pre">TimerManager.hpp</span></code> / <code class="docutils literal notranslate"><span class="pre">TimerManager.cpp</span></code>) owns the single active countdown and the recents store. It is driven over a <strong>caller-supplied</strong> millisecond tick — the tick is passed into every control call rather than read internally, which keeps the state logic host-testable.</p>
+<section id="countdown-state-machine">
+<h3>Countdown state machine<a class="headerlink" href="#countdown-state-machine" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TimerState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">IDLE</span><span class="p">,</span><span class="w"> </span><span class="n">RUNNING</span><span class="p">,</span><span class="w"> </span><span class="n">PAUSED</span><span class="p">,</span><span class="w"> </span><span class="n">FIRED</span><span class="w"> </span><span class="p">};</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Transition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start(dur,</span> <span class="pre">effect,</span> <span class="pre">now)</span></code></p></td>
+<td><p>arm a fresh countdown → <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pause(now)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RUNNING</span></code> → <code class="docutils literal notranslate"><span class="pre">PAUSED</span></code>, banking the remainder</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">resume(now)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PAUSED</span></code> → <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code> from the remainder</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reset(now)</span></code></p></td>
+<td><p>reload the full duration; re-arms <strong>only</strong> when already <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code>, otherwise restores the remainder and keeps the state</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stop()</span></code></p></td>
+<td><p>any → <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>, remainder cleared</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">repeat(now)</span></code></p></td>
+<td><p>reload the full duration, held <code class="docutils literal notranslate"><span class="pre">PAUSED</span></code> (resume from the Running screen)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">execute(now)</span></code></p></td>
+<td><p>while <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code>, expire once <code class="docutils literal notranslate"><span class="pre">now</span> <span class="pre">-</span> <span class="pre">endTick</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> → <code class="docutils literal notranslate"><span class="pre">FIRED</span></code> and fire the observer; returns ms to the next required call, or “no timeout” when <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>/<code class="docutils literal notranslate"><span class="pre">PAUSED</span></code>/<code class="docutils literal notranslate"><span class="pre">FIRED</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The wrap-safe expiry test (<code class="docutils literal notranslate"><span class="pre">static_cast&lt;int32_t&gt;(now</span> <span class="pre">-</span> <span class="pre">endTick)</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>) stays correct across the 32-bit tick wrap. <code class="docutils literal notranslate"><span class="pre">reset()</span></code> deliberately refuses to turn a stopped or fired timer into a running one — a guarantee the Service relies on so a stray <code class="docutils literal notranslate"><span class="pre">RESET</span></code> can never silently restart a countdown with an alert still playing.</p>
+</section>
+<section id="observer">
+<h3>Observer<a class="headerlink" href="#observer" title="Link to this heading"></a></h3>
+<p>The Service implements <code class="docutils literal notranslate"><span class="pre">TimerManager::Callback</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">onFired(timer)</span></code> — the countdown reached zero (drives the alert + GUI launch above)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">onRecentsChanged(list)</span></code> — the recents list changed on load or save (forwarded to the GUI)</p></li>
+</ul>
+</section>
+<section id="recents-persistence">
+<h3>Recents persistence<a class="headerlink" href="#recents-persistence" title="Link to this heading"></a></h3>
+<p>The last <code class="docutils literal notranslate"><span class="pre">Timer::kMaxRecents</span></code> (3) manually entered timers are stored as JSON in <code class="docutils literal notranslate"><span class="pre">timer.json</span></code>, using the SDK JSON stream reader/writer:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;recents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;sec&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;beep_vibro&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Entries are validated on load (duration <code class="docutils literal notranslate"><span class="pre">&lt;=</span> <span class="pre">99:59</span></code>, effect one of <code class="docutils literal notranslate"><span class="pre">beep_vibro</span></code> / <code class="docutils literal notranslate"><span class="pre">vibro</span></code> / <code class="docutils literal notranslate"><span class="pre">beep</span></code>) and capped to three. A timer’s <strong>identity is its duration</strong> (<code class="docutils literal notranslate"><span class="pre">Timer::operator==</span></code> compares <code class="docutils literal notranslate"><span class="pre">durationSec</span></code> only): the wheel shows only the time, so two timers of the same length are one entry, with the effect carried alongside as a last-used detail.</p>
+</section>
+</section>
+<section id="shared-types">
+<h2>Shared Types<a class="headerlink" href="#shared-types" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Timer</span></code> and <code class="docutils literal notranslate"><span class="pre">TimerState</span></code> live in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Timer.hpp</span></code> and are shared verbatim by the service and the GUI:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">Timer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">durationSec</span><span class="p">;</span><span class="w">                 </span><span class="c1">// 0 .. kMaxDurationSec (99:59)</span>
+<span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="nc">Effect</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">EFFECT_BEEP_AND_VIBRO</span><span class="p">,</span><span class="w"> </span><span class="n">EFFECT_VIBRO</span><span class="p">,</span><span class="w"> </span><span class="n">EFFECT_BEEP</span><span class="p">,</span><span class="w"> </span><span class="n">EFFECT_COUNT</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">Effect</span><span class="w">   </span><span class="n">effect</span><span class="p">;</span>
+<span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="nc">Action</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ACTION_START</span><span class="p">,</span><span class="w"> </span><span class="n">ACTION_EDIT</span><span class="p">,</span><span class="w"> </span><span class="n">ACTION_DELETE</span><span class="p">,</span><span class="w"> </span><span class="n">ACTION_COUNT</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">kMaxDurationSec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">99</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">59</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w">   </span><span class="n">kMaxRecents</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">   </span><span class="c1">// single source of truth</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Timer</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">             </span><span class="c1">// identity: duration only</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">kMaxRecents</span></code> is the <strong>single source of truth</strong> for the recents cap: both the persistence layer (<code class="docutils literal notranslate"><span class="pre">TimerManager</span></code>) and the IPC message capacity (<code class="docutils literal notranslate"><span class="pre">CustomMessage</span></code>) derive from it, so they cannot drift apart.</p>
+</section>
+<section id="custom-message-system">
+<h2>Custom Message System<a class="headerlink" href="#custom-message-system" title="Link to this heading"></a></h2>
+<p>All service↔GUI messages are declared in <code class="docutils literal notranslate"><span class="pre">Libs/Header/Commands.hpp</span></code> as <code class="docutils literal notranslate"><span class="pre">constexpr</span> <span class="pre">SDK::MessageType::Type</span></code> constants. Every message struct inherits from <code class="docutils literal notranslate"><span class="pre">SDK::MessageBase</span></code> and is wrapped in <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">pack(push,</span> <span class="pre">4)</span></code> for pool alignment.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// GUI --&gt; Service</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="n">TIMER_START</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="n">TIMER_CONTROL</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span><span class="w">   </span><span class="c1">// carries a TimerCmd</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="n">TIMER_RECENTS_SAVE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Service --&gt; GUI</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="n">TIMER_STATE</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000010</span><span class="p">;</span><span class="w">   </span><span class="c1">// live countdown snapshot</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="n">TIMER_FIRED</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000011</span><span class="p">;</span><span class="w">   </span><span class="c1">// expiry (background flag)</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="n">TIMER_RECENTS</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000012</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The live snapshot carries what the GUI needs to extrapolate locally — <code class="docutils literal notranslate"><span class="pre">endTick</span></code> for the running case, the frozen <code class="docutils literal notranslate"><span class="pre">remainingMs</span></code> for paused — plus the duration and effect:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">TimerStateMsg</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">       </span><span class="n">state</span><span class="p">;</span><span class="w">        </span><span class="c1">// TimerState</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w">      </span><span class="n">endTick</span><span class="p">;</span><span class="w">      </span><span class="c1">// absolute expiry tick (RUNNING)</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w">      </span><span class="n">remainingMs</span><span class="p">;</span><span class="w">  </span><span class="c1">// frozen remainder (PAUSED)</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w">      </span><span class="n">durationSec</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Timer</span><span class="o">::</span><span class="n">Effect</span><span class="w"> </span><span class="n">effect</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">TimerFired</span></code> adds a <code class="docutils literal notranslate"><span class="pre">background</span></code> flag (true when the fire happened while the GUI was closed), and the two recents messages carry a fixed three-entry <code class="docutils literal notranslate"><span class="pre">RecentEntry[]</span></code> by value. A <code class="docutils literal notranslate"><span class="pre">Sender</span></code> helper allocates, fills, sends, and releases each pool message for both directions.</p>
+<p><strong>Message summary</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Trigger</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TIMER_START</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>User starts a preset/custom timer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TIMER_CONTROL</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>Pause / resume / reset / stop / repeat / replay-alert</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TIMER_RECENTS_SAVE</span></code></p></td>
+<td><p>GUI → Service</p></td>
+<td><p>Recents list changed (add/remove)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TIMER_STATE</span></code></p></td>
+<td><p>Service → GUI</p></td>
+<td><p>After any command; on GUI start; startup routing</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TIMER_FIRED</span></code></p></td>
+<td><p>Service → GUI</p></td>
+<td><p>Countdown reached zero</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TIMER_RECENTS</span></code></p></td>
+<td><p>Service → GUI</p></td>
+<td><p>Recents loaded or saved</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Link to this heading"></a></h2>
+<p>The GUI is built with TouchGFX and follows the Model-View-Presenter pattern, with several screens navigated by state.</p>
+<section id="project-structure">
+<h3>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Timer/Software/Apps/TouchGFX-GUI/
+├── *.touchgfx        # TouchGFX Designer project
+├── gui/              # Custom GUI code (Model, screens, containers)
+├── generated/        # Auto-generated TouchGFX code
+└── simulator/        # Simulator build
+</pre></div>
+</div>
+</section>
+<section id="model">
+<h3>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Model</span></code> is the GUI-side mirror of the state the service owns. It is never polled: it stores the last snapshot and computes the live remainder on demand (<code class="docutils literal notranslate"><span class="pre">getRemainingMs()</span></code> → <code class="docutils literal notranslate"><span class="pre">endTick</span> <span class="pre">-</span> <span class="pre">now</span></code> while running, frozen while paused, <code class="docutils literal notranslate"><span class="pre">0</span></code> when fired, full duration when idle).</p>
+<p>Beyond mirroring, the Model owns the <strong>selection and list state</strong> that the multi-screen flow needs:</p>
+<ul class="simple">
+<li><p><strong>Presets &amp; recents</strong>: seven fixed presets (<code class="docutils literal notranslate"><span class="pre">{60,</span> <span class="pre">180,</span> <span class="pre">300,</span> <span class="pre">600,</span> <span class="pre">900,</span> <span class="pre">1800,</span> <span class="pre">3600}</span></code> s) built at construction, plus the recents mirror. <code class="docutils literal notranslate"><span class="pre">startTimer()</span></code> adds a custom or modified-preset timer to recents (an unchanged preset is already in the list, so it is not duplicated); <code class="docutils literal notranslate"><span class="pre">addRecent()</span></code> is move-to-front with de-dup, capped to three, and persists via the service.</p></li>
+<li><p><strong>Startup routing</strong>: the app opens on a blank <strong>Startup</strong> screen; the first <code class="docutils literal notranslate"><span class="pre">TIMER_STATE</span></code> routes to the <strong>Running</strong> screen if a countdown is already live (a warm re-entry or cold start into a running timer) or to <strong>Main</strong> otherwise, so Main’s “New” face never flashes first. A cold-start fire arrives as <code class="docutils literal notranslate"><span class="pre">TIMER_FIRED</span></code> and routes straight to <strong>Fired</strong>.</p></li>
+<li><p><strong>Selection restore</strong>: after a Menu action (edit/delete) the Model can ask Main to re-select the edited timer, falling back to the item that took its slot when it was deleted.</p></li>
+<li><p><strong>Capabilities</strong> (<code class="docutils literal notranslate"><span class="pre">setCapabilities()</span></code>): enables the USB charging screen; music control is off.</p></li>
+<li><p><strong>Idle timeout</strong>: a 30-second inactivity timer (<code class="docutils literal notranslate"><span class="pre">kScreenTimeoutSteps</span></code>) closes the app; any button press resets it, and a hold keeps it awake for the whole press.</p></li>
+</ul>
+</section>
+<section id="screens">
+<h3>Screens<a class="headerlink" href="#screens" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Screen</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Startup</strong></p></td>
+<td><p>Blank landing frame; immediately routed away by the first service message (avoids a launch flash)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Main</strong></p></td>
+<td><p>Orbit-wheel of <code class="docutils literal notranslate"><span class="pre">New</span></code>, then presets, then recents; pick one to open its Menu</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Edit</strong> (Set Timer)</p></td>
+<td><p>Enter a custom duration on sphere-wheel pickers and choose the effect</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Menu</strong></p></td>
+<td><p>Per-timer actions: Start / Edit / Delete (Delete offered for recents only, not presets)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Running</strong></p></td>
+<td><p>Live countdown with pause/resume/reset controls</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Fired</strong></p></td>
+<td><p>Alert screen: Done / Repeat; re-indicates periodically and auto-Done after ~1 min</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Deleted</strong></p></td>
+<td><p>Brief confirmation after removing a recent</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Alert</strong></p></td>
+<td><p>Effect preview/selection</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reusable-containers">
+<h3>Reusable containers<a class="headerlink" href="#reusable-containers" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>OrbitMenu</strong> — a “sphere” wheel: rows shrink and curve toward a large centre value, computed each frame from one scalar scroll position; navigation is discrete (<code class="docutils literal notranslate"><span class="pre">selectNext()/selectPrev()</span></code>). Used for the Main list.</p></li>
+<li><p><strong>SpherePicker</strong> — the curved value picker used on the Edit screen for minutes/seconds.</p></li>
+<li><p><strong>CountdownTimer</strong> — a self-registering tick widget that counts frames down and fires a callback at zero.</p></li>
+<li><p><strong>ScrollIndicator</strong> — the bezel rail/handle that accompanies scrollable lists.</p></li>
+<li><p><strong>Buttons</strong> — the four watch-bezel arc indicators (L1/L2/R1/R2), each in one of five colours (hidden, white, amber, red, teal).</p></li>
+<li><p><strong>Title</strong> — the screen heading.</p></li>
+</ul>
+<blockquote>
+<div><p>Note: containers that register themselves with TouchGFX (<code class="docutils literal notranslate"><span class="pre">OrbitMenu</span></code>, <code class="docutils literal notranslate"><span class="pre">SpherePicker</span></code>, <code class="docutils literal notranslate"><span class="pre">CountdownTimer</span></code>, <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code>) unregister in their destructors — the <code class="docutils literal notranslate"><span class="pre">FrontendHeap</span></code> partition is reused, so a stale timer-widget pointer would otherwise be ticked after the object is gone.</p>
+</div></blockquote>
+</section>
+<section id="input-handling">
+<h3>Input Handling<a class="headerlink" href="#input-handling" title="Link to this heading"></a></h3>
+<p>The app is button-driven; the four buttons change meaning per screen (e.g. on Running: R1 pause/resume, L2 reset, R2 exit). In the simulator the buttons map to keys <strong><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">=</span> <span class="pre">L1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">=</span> <span class="pre">L2</span></code>, <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">=</span> <span class="pre">R1</span></code>, <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">=</span> <span class="pre">R2</span></code></strong>.</p>
+</section>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Timer/Software/Apps/Timer-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Timer&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">&quot;Timer&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Utility&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_AUTOSTART</span><span class="w"> </span><span class="s">Off</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1D74A3F0CFF98D3&quot;</span><span class="p">)</span>
+
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The app is <strong>not</strong> autostarted — it is launched on demand from the menu (or re-launched by the service to deliver a background fire).</p>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p>The service pulls in the common and app-system SDK groups plus <strong>JSON</strong> (for recents persistence); the GUI pulls in the common and GUI groups plus the generated TouchGFX sources:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_APPSYSTEM</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_JSON</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">TOUCHGFX_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_GUI</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+
+<span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>: UNA SDK common, GUI, and app-system sources; the JSON stream reader/writer; the kernel and messaging systems; the home-widget IPC (<code class="docutils literal notranslate"><span class="pre">SDK::HomeWidget</span></code>); buzzer/vibro/backlight request messages. No sensor or FIT sources.</p>
+<p><strong>App Libraries</strong> (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Timer.hpp</span></code> — the shared <code class="docutils literal notranslate"><span class="pre">Timer</span></code> struct, <code class="docutils literal notranslate"><span class="pre">TimerState</span></code>, and the recents cap (single source of truth)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TimerManager</span></code> — the countdown state machine and JSON recents store (host-testable over an injected tick)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — the service↔GUI message contract and <code class="docutils literal notranslate"><span class="pre">Sender</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — the service entry point, message loop, alerts, and home-widget pump</p></li>
+</ul>
+</section>
+<section id="testability">
+<h3>Testability<a class="headerlink" href="#testability" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">TimerManager</span></code> takes the current tick as a parameter on every control call rather than reading it internally, so its state machine and recents logic can be exercised on the host over an injected clock.</p>
+</section>
+<section id="simulator-build">
+<h3>Simulator Build<a class="headerlink" href="#simulator-build" title="Link to this heading"></a></h3>
+<p>The TouchGFX project includes a Visual Studio simulator build in <code class="docutils literal notranslate"><span class="pre">simulator/msvs/Application.vcxproj</span></code>. In the simulator the buttons map to keys <code class="docutils literal notranslate"><span class="pre">1=L1</span> <span class="pre">2=L2</span> <span class="pre">3=R1</span> <span class="pre">4=R2</span></code>.</p>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for the full development environment and toolchain.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The Timer app pairs a small countdown state machine with everything a real countdown needs: it fires, it alerts, it persists, and it reaches out to the home screen. The service owns the state and stays silent between transitions; the GUI derives the live <code class="docutils literal notranslate"><span class="pre">MM:SS</span></code> from a shared monotonic clock and navigates a handful of state-driven screens; and the two are bridged by a compact, allocation-free message contract.</p>
+<p>Key architectural strengths:</p>
+<ul class="simple">
+<li><p><strong>Deadline-bounded sleep</strong>: the service’s message wait is sized to the remaining time and the widget’s next second, so it wakes only to fire, tick, or handle a command — and sleeps otherwise</p></li>
+<li><p><strong>Fire-and-launch</strong>: a background expiry plays the alert and launches the GUI to deliver it, with a bounded wait so a dropped launch can never pin the service alive</p></li>
+<li><p><strong>Home-screen presence</strong>: a backgrounded countdown surfaces <code class="docutils literal notranslate"><span class="pre">MM:SS</span></code> and a draining bar through the widget IPC, de-duplicated to one push per second</p></li>
+<li><p><strong>Single source of truth</strong>: the recents cap is defined once and derived by both the store and the IPC layer, so persistence and message capacity cannot drift</p></li>
+<li><p><strong>State-derived UI</strong>: screens and button meanings follow the countdown state, and the countdown logic stays host-testable behind an injected clock</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Alarm-Architecture.html" class="btn btn-neutral float-left" title="Alarm - Alarm Clock" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Cycling-Architecture.html" class="btn btn-neutral float-right" title="Cycling - Cycling Activity Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

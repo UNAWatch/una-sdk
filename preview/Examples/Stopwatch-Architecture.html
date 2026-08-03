@@ -62,6 +62,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer-Architecture.html">Timer - Countdown Timer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
@@ -178,10 +179,9 @@
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">();</span>
 
 <span class="k">private</span><span class="o">:</span>
-<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w">           </span><span class="o">&amp;</span><span class="n">mKernel</span><span class="p">;</span>
-<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w">  </span><span class="n">mSender</span><span class="p">;</span>
-<span class="w">    </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">Core</span><span class="w">        </span><span class="n">mStopwatch</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w">                   </span><span class="n">mGuiStarted</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="w">     </span><span class="o">&amp;</span><span class="n">mKernel</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">Core</span><span class="w">  </span><span class="n">mStopwatch</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">             </span><span class="n">mGuiStarted</span><span class="p">;</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleCommand</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">);</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">publish</span><span class="p">();</span>
@@ -317,7 +317,18 @@
 <span class="w">              </span><span class="s">&quot;StopwatchState must fit the largest kernel message pool block&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>The remaining messages are empty commands. A <code class="docutils literal notranslate"><span class="pre">Sender</span></code> helper allocates, fills, sends, and releases each message for both directions.</p>
+<p><code class="docutils literal notranslate"><span class="pre">StopwatchState</span></code> also carries a constructor that fills the snapshot, so publishing is a single call:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">StopwatchState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mStopwatch</span><span class="p">.</span><span class="n">state</span><span class="p">());</span>
+</pre></div>
+</div>
+<p>The remaining messages are empty commands, which need no arguments at all — the
+GUI sends them the same way:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">startStopwatch</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">StopwatchStart</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;</span></code> allocates the message from the kernel pool, forwards any arguments to the
+message’s constructor, sends it, and releases it, returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the send
+failed. There is no per-app sender class.</p>
 <p><strong>Message summary</strong>:</p>
 <table class="docutils align-default">
 <thead>
@@ -492,7 +503,7 @@
 <p><strong>App Libraries</strong> (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Stopwatch.hpp</span></code> — state struct, timekeeping arithmetic, and the <code class="docutils literal notranslate"><span class="pre">Core</span></code> transition logic (header-only, host-testable)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — the service↔GUI message contract and <code class="docutils literal notranslate"><span class="pre">Sender</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — the service↔GUI message contract</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — the service entry point and message loop</p></li>
 </ul>
 </section>

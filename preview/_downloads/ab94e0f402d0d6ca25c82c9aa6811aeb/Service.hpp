@@ -18,7 +18,6 @@ public:
 
 private:
     SDK::Kernel&             mKernel;
-    CustomMessage::GUISender mSender;
     bool                     mGUIStarted;
     SDK::Sensor::Connection  mSensorHR;
     SDK::Sensor::Connection  mSensorGPS;

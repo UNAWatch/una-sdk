@@ -174,9 +174,6 @@ private:
     CustomMessage::ActivityType mActivityType;
     CustomMessage::DisplayMode mDisplayMode;
 
-    // Communication
-    CustomMessage::GUISender mSender;
-
     // Methods
     void loadSettings();
     void saveSettings();
@@ -260,9 +257,10 @@ The Service's main loop processes custom messages:
 ```cpp
 case CustomMessage::GET_SETTINGS: {
     LOG_INFO("Received GET_SETTINGS request\n");
-    mSender.updateSettings(mDecimalCounter,
-                          static_cast<int>(mActivityType),
-                          static_cast<int>(mDisplayMode));
+    SDK::send_msg<CustomMessage::SettingsValues>(
+        mKernel, mDecimalCounter,
+        static_cast<int>(mActivityType),
+        static_cast<int>(mDisplayMode));
 } break;
 
 case CustomMessage::SET_SETTINGS: {
@@ -296,20 +294,22 @@ The GUI follows TouchGFX's MVP pattern:
 
 ```cpp
 void Model::requestSettings() {
-    if (auto req = SDK::make_msg<CustomMessage::GetSettings>(mKernel)) {
-        req.send();
-    }
+    SDK::send_msg<CustomMessage::GetSettings>(mKernel);
 }
 
 void Model::updateSettings(float decimalCounter, CustomMessage::ActivityType activityType, CustomMessage::DisplayMode displayMode) {
-    if (auto req = SDK::make_msg<CustomMessage::SetSettings>(mKernel)) {
-        req->decimalCounter = static_cast<int>(decimalCounter * 10);  // Convert to int
-        req->activityType = static_cast<int>(activityType);
-        req->displayMode = static_cast<int>(displayMode);
-        req.send();
-    }
+    SDK::send_msg<CustomMessage::SetSettings>(mKernel,
+                                             static_cast<int>(decimalCounter * 10),  // Convert to int
+                                             static_cast<int>(activityType),
+                                             static_cast<int>(displayMode));
 }
 ```
+
+`SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...`
+to the message's constructor, sends it, and releases it — returning `false` if allocation or the
+send failed. Each message fills its own fields in that constructor, so there is no sender class to
+write. Use `SDK::make_msg<T>` instead when you need to inspect a reply (`msg.send(timeout) &&
+msg.ok()`).
 
 #### Message Receiving
 

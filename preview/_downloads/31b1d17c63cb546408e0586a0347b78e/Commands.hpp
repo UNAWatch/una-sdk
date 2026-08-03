@@ -4,8 +4,6 @@
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
-#include "SDK/Messages/MessageGuard.hpp"
-#include "SDK/Kernel/Kernel.hpp"
 
 #include <array>
 #include <cstdint>
@@ -45,6 +43,13 @@ namespace CustomMessage {
             , heartRate()
             , trustLevel()
         {}
+
+        explicit HRValues(float heartRate, float trustLevel)
+            : HRValues()
+        {
+            this->heartRate  = heartRate;
+            this->trustLevel = trustLevel;
+        }
     };
 
     // Service --> GUI
@@ -61,6 +66,15 @@ namespace CustomMessage {
             , longitude()
             , altitude()
         {}
+
+        explicit LocationValues(uint64_t timestamp, double latitude, double longitude, double altitude)
+            : LocationValues()
+        {
+            this->timestamp = timestamp;
+            this->latitude  = latitude;
+            this->longitude = longitude;
+            this->altitude  = altitude;
+        }
     };
 
     // Service --> GUI
@@ -73,6 +87,13 @@ namespace CustomMessage {
             , timestamp()
             , elevation()
         {}
+
+        explicit ElevationValues(uint64_t timestamp, float elevation)
+            : ElevationValues()
+        {
+            this->timestamp = timestamp;
+            this->elevation = elevation;
+        }
     };
 
     // Service --> GUI
@@ -89,6 +110,15 @@ namespace CustomMessage {
             , y()
             , z()
         {}
+
+        explicit AccelerometerValues(uint64_t timestamp, float x, float y, float z)
+            : AccelerometerValues()
+        {
+            this->timestamp = timestamp;
+            this->x         = x;
+            this->y         = y;
+            this->z         = z;
+        }
     };
 
     // Service --> GUI
@@ -101,6 +131,13 @@ namespace CustomMessage {
             , timestamp()
             , steps()
         {}
+
+        explicit StepCounterValues(uint64_t timestamp, uint32_t steps)
+            : StepCounterValues()
+        {
+            this->timestamp = timestamp;
+            this->steps     = steps;
+        }
     };
 
     // Service --> GUI
@@ -113,6 +150,13 @@ namespace CustomMessage {
             , timestamp()
             , floors()
         {}
+
+        explicit FloorsValues(uint64_t timestamp, uint32_t floors)
+            : FloorsValues()
+        {
+            this->timestamp = timestamp;
+            this->floors    = floors;
+        }
     };
 
     // Service --> GUI
@@ -125,6 +169,13 @@ namespace CustomMessage {
             , timestamp()
             , heading()
         {}
+
+        explicit CompassValues(uint64_t timestamp, float heading)
+            : CompassValues()
+        {
+            this->timestamp = timestamp;
+            this->heading   = heading;
+        }
     };
 
     struct StatsValues : public SDK::MessageBase {
@@ -144,6 +195,18 @@ namespace CustomMessage {
             , txByteRate(0)
             , rxByteRate(0)
         {}
+
+        explicit StatsValues(float serviceCpuPct, float guiCpuPct, float txMsgRate,
+                 float rxMsgRate, float txByteRate, float rxByteRate)
+            : StatsValues()
+        {
+            this->serviceCpuPct = serviceCpuPct;
+            this->guiCpuPct     = guiCpuPct;
+            this->txMsgRate     = txMsgRate;
+            this->rxMsgRate     = rxMsgRate;
+            this->txByteRate    = txByteRate;
+            this->rxByteRate    = rxByteRate;
+        }
     };
 
     constexpr SDK::MessageType::Type RTC_VALUES = 0x00000009;
@@ -155,6 +218,12 @@ namespace CustomMessage {
             : SDK::MessageBase(RTC_VALUES)
             , time(0)
         {}
+
+        explicit RtcValues(uint32_t time)
+            : RtcValues()
+        {
+            this->time = time;
+        }
     };
 
     // Service --> GUI
@@ -165,6 +234,12 @@ namespace CustomMessage {
             : SDK::MessageBase(BATTERY_VALUES)
             , level(0.0f)
         {}
+
+        explicit BatteryValues(float level)
+            : BatteryValues()
+        {
+            this->level = level;
+        }
     };
 
     // Service --> GUI
@@ -177,169 +252,13 @@ namespace CustomMessage {
             , timestamp(0)
             , pressure(0.0f)
         {}
-    };
 
-
-    ///////////////////////////////////////
-    //// Wrappers
-    ///////////////////////////////////////
-
-    class GUISender {
-    public:
-        GUISender(const SDK::Kernel& kernel) : mKernel(kernel)
-        {}
-
-        virtual ~GUISender() = default;
-
-        // Service --> GUI
-        bool updateHeartRate(float value, float trustLevel)
+        explicit PressureValues(uint64_t timestamp, float pressure)
+            : PressureValues()
         {
-            if (auto req = SDK::make_msg<CustomMessage::HRValues>(mKernel)) {
-                req->heartRate  = value;
-                req->trustLevel = trustLevel;
-
-                return req.send();
-            }
-
-            return false;
+            this->timestamp = timestamp;
+            this->pressure  = pressure;
         }
-
-        // Service --> GUI
-        bool updateLocation(uint64_t timestamp, double latitude, double longitude, double altitude)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::LocationValues>(mKernel)) {
-                req->timestamp = timestamp;
-                req->latitude  = latitude;
-                req->longitude = longitude;
-                req->altitude  = altitude;
-
-                return req.send();
-            }
-
-            return false;
-        }
-
-        // Service --> GUI
-        bool updateElevation(uint64_t timestamp, float elevation)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::ElevationValues>(mKernel)) {
-                req->timestamp = timestamp;
-                req->elevation = elevation;
-
-                return req.send();
-            }
-
-            return false;
-        }
-
-        // Service --> GUI
-        bool updateAccelerometer(uint64_t timestamp, float x, float y, float z)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::AccelerometerValues>(mKernel)) {
-                req->timestamp = timestamp;
-                req->x = x;
-                req->y = y;
-                req->z = z;
-
-                return req.send();
-            }
-
-            return false;
-        }
-
-        // Service --> GUI
-        bool updateStepCounter(uint64_t timestamp, uint32_t steps)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::StepCounterValues>(mKernel)) {
-                req->timestamp = timestamp;
-                req->steps = steps;
-
-                return req.send();
-            }
-
-            return false;
-        }
-
-        // Service --> GUI
-        bool updateFloors(uint64_t timestamp, uint32_t floors)
-        {
-            if (auto req = SDK::make_msg<CustomMessage::FloorsValues>(mKernel)) {
-                req->timestamp = timestamp;
-                req->floors = floors;
-
-                return req.send();
-            }
-
-            return false;
-        }
-
-        // Service --> GUI
-    bool updateCompass(uint64_t timestamp, float heading)
-    {
-        if (auto req = SDK::make_msg<CustomMessage::CompassValues>(mKernel)) {
-            req->timestamp = timestamp;
-            req->heading = heading;
-
-            return req.send();
-        }
-
-        return false;
-    }
-
-    bool updateStats(float serviceCpuPct, float guiCpuPct, float txMsgRate, float rxMsgRate, float txByteRate, float rxByteRate)
-    {
-        if (auto req = SDK::make_msg<CustomMessage::StatsValues>(mKernel)) {
-            req->serviceCpuPct = serviceCpuPct;
-            req->guiCpuPct = guiCpuPct;
-            req->txMsgRate = txMsgRate;
-            req->rxMsgRate = rxMsgRate;
-            req->txByteRate = txByteRate;
-            req->rxByteRate = rxByteRate;
-
-            return req.send();
-        }
-
-        return false;
-    }
-
-    bool updateRtc(uint32_t time)
-    {
-        if (auto req = SDK::make_msg<CustomMessage::RtcValues>(mKernel)) {
-            req->time = time;
-
-            return req.send();
-        }
-
-        return false;
-    }
-
-    // Service --> GUI
-    bool updateBattery(float level)
-    {
-        if (auto req = SDK::make_msg<CustomMessage::BatteryValues>(mKernel)) {
-            req->level = level;
-
-            return req.send();
-        }
-
-        return false;
-    }
-
-    // Service --> GUI
-    bool updatePressure(uint64_t timestamp, float pressure)
-    {
-        if (auto req = SDK::make_msg<CustomMessage::PressureValues>(mKernel)) {
-            req->timestamp = timestamp;
-            req->pressure = pressure;
-
-            return req.send();
-        }
-
-        return false;
-    }
-
-private:
-    const SDK::Kernel& mKernel;
     };
 
 } // namespace CustomMessage

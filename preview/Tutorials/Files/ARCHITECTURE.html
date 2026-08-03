@@ -498,6 +498,7 @@ window.runMermaid = runMermaid;</script>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
@@ -762,9 +763,6 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">mActivityType</span><span class="p">;</span>
 <span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">mDisplayMode</span><span class="p">;</span>
 
-<span class="w">    </span><span class="c1">// Communication</span>
-<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">GUISender</span><span class="w"> </span><span class="n">mSender</span><span class="p">;</span>
-
 <span class="w">    </span><span class="c1">// Methods</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">loadSettings</span><span class="p">();</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveSettings</span><span class="p">();</span>
@@ -850,9 +848,10 @@ window.runMermaid = runMermaid;</script>
 <p>The Service’s main loop processes custom messages:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">GET_SETTINGS</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Received GET_SETTINGS request</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">mSender</span><span class="p">.</span><span class="n">updateSettings</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">),</span>
-<span class="w">                          </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SettingsValues</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">        </span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mDecimalCounter</span><span class="p">,</span>
+<span class="w">        </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">),</span>
+<span class="w">        </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
 <span class="p">}</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
 
 <span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">SET_SETTINGS</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -888,21 +887,21 @@ window.runMermaid = runMermaid;</script>
 <section id="message-sending">
 <h4>Message Sending<a class="headerlink" href="#message-sending" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Model::requestSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">GetSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">req</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">GetSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="kt">void</span><span class="w"> </span><span class="nf">Model::updateSettings</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">ActivityType</span><span class="w"> </span><span class="n">activityType</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">DisplayMode</span><span class="w"> </span><span class="n">displayMode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SetSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w">  </span><span class="c1">// Convert to int</span>
-<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">activityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activityType</span><span class="p">);</span>
-<span class="w">        </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">displayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">displayMode</span><span class="p">);</span>
-<span class="w">        </span><span class="n">req</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SetSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">decimalCounter</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w">  </span><span class="c1">// Convert to int</span>
+<span class="w">                                             </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activityType</span><span class="p">),</span>
+<span class="w">                                             </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">displayMode</span><span class="p">));</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> allocates the message from the kernel pool, forwards <code class="docutils literal notranslate"><span class="pre">args...</span></code>
+to the message’s constructor, sends it, and releases it — returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the
+send failed. Each message fills its own fields in that constructor, so there is no sender class to
+write. Use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> instead when you need to inspect a reply (<code class="docutils literal notranslate"><span class="pre">msg.send(timeout)</span> <span class="pre">&amp;&amp;</span> <span class="pre">msg.ok()</span></code>).</p>
 </section>
 <section id="message-receiving">
 <h4>Message Receiving<a class="headerlink" href="#message-receiving" title="Link to this heading"></a></h4>

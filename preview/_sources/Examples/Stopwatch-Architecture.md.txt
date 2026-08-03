@@ -56,10 +56,9 @@ public:
     void run();
 
 private:
-    SDK::Kernel           &mKernel;
-    CustomMessage::Sender  mSender;
-    Stopwatch::Core        mStopwatch;
-    bool                   mGuiStarted;
+    SDK::Kernel     &mKernel;
+    Stopwatch::Core  mStopwatch;
+    bool             mGuiStarted;
 
     void handleCommand(SDK::MessageBase *msg);
     void publish();
@@ -178,7 +177,22 @@ static_assert(sizeof(StopwatchState) <= 256,
               "StopwatchState must fit the largest kernel message pool block");
 ```
 
-The remaining messages are empty commands. A `Sender` helper allocates, fills, sends, and releases each message for both directions.
+`StopwatchState` also carries a constructor that fills the snapshot, so publishing is a single call:
+
+```cpp
+SDK::send_msg<CustomMessage::StopwatchState>(mKernel, mStopwatch.state());
+```
+
+The remaining messages are empty commands, which need no arguments at all — the
+GUI sends them the same way:
+
+```cpp
+bool startStopwatch() { return SDK::send_msg<CustomMessage::StopwatchStart>(mKernel); }
+```
+
+`SDK::send_msg<T>` allocates the message from the kernel pool, forwards any arguments to the
+message's constructor, sends it, and releases it, returning `false` if allocation or the send
+failed. There is no per-app sender class.
 
 **Message summary**:
 
@@ -330,7 +344,7 @@ una_app_build_app()
 
 **App Libraries** (`Libs/`):
 - `Stopwatch.hpp` — state struct, timekeeping arithmetic, and the `Core` transition logic (header-only, host-testable)
-- `Commands.hpp` — the service↔GUI message contract and `Sender`
+- `Commands.hpp` — the service↔GUI message contract
 - `Service` — the service entry point and message loop
 
 ### Host Tests

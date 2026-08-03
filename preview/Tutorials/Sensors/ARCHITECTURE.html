@@ -434,6 +434,7 @@ window.runMermaid = runMermaid;</script>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
@@ -592,13 +593,31 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">COMPASS_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000007</span><span class="p">;</span>
 <span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STATS_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000008</span><span class="p">;</span>
 <span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">RTC_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000009</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BATTERY_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000A</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">PRESSURE_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000B</span><span class="p">;</span>
 
+<span class="w">    </span><span class="c1">// Every message pairs a default constructor, which sets the message type,</span>
+<span class="w">    </span><span class="c1">// with one that fills the fields and delegates to it. That second</span>
+<span class="w">    </span><span class="c1">// constructor is what lets a caller send the message in a single call.</span>
 <span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">HRValues</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">heartRate</span><span class="p">;</span>
 <span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">;</span>
-<span class="w">        </span><span class="n">HRValues</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">HR_VALUES</span><span class="p">),</span><span class="w"> </span><span class="n">heartRate</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">        </span><span class="n">HRValues</span><span class="p">()</span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">HR_VALUES</span><span class="p">)</span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">heartRate</span><span class="p">()</span>
+<span class="w">            </span><span class="p">,</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">()</span>
+<span class="w">        </span><span class="p">{}</span>
+
+<span class="w">        </span><span class="k">explicit</span><span class="w"> </span><span class="n">HRValues</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">heartRate</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">)</span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">HRValues</span><span class="p">()</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">heartRate</span><span class="p">;</span>
+<span class="w">            </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">};</span>
-<span class="w">    </span><span class="c1">// Similar for others:</span>
+
+<span class="w">    </span><span class="c1">// The rest follow the same shape, over these fields:</span>
 <span class="w">    </span><span class="c1">// LocationValues: uint64_t timestamp; double latitude, longitude, altitude;</span>
 <span class="w">    </span><span class="c1">// ElevationValues: uint64_t timestamp; float elevation;</span>
 <span class="w">    </span><span class="c1">// AccelerometerValues: uint64_t timestamp; float x,y,z;</span>
@@ -607,23 +626,16 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="c1">// CompassValues: uint64_t timestamp; float heading;</span>
 <span class="w">    </span><span class="c1">// StatsValues: float serviceCpuPct, guiCpuPct, txMsgRate, rxMsgRate, txByteRate, rxByteRate;</span>
 <span class="w">    </span><span class="c1">// RtcValues: uint32_t time;</span>
+<span class="w">    </span><span class="c1">// BatteryValues: float level;</span>
+<span class="w">    </span><span class="c1">// PressureValues: uint64_t timestamp; float pressure;</span>
+<span class="w">    </span><span class="c1">//   ^ defined, and Model.cpp already handles PRESSURE_VALUES, but the</span>
+<span class="w">    </span><span class="c1">//     service only logs the raw frame today -- it never sends this one.</span>
 <span class="p">}</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">GUISender</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="n">GUISender</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">mKernel</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">updateHeartRate</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">tl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bpm</span><span class="p">;</span>
-<span class="w">            </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tl</span><span class="p">;</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">req</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="c1">// Similar updateLocation(uint64_t ts, double lat, double lon, double alt), etc.</span>
-<span class="p">};</span>
 </pre></div>
 </div>
+<p>Those constructors are what let <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> do the whole send in one call —
+allocate from the kernel pool, forward the arguments to the constructor, send, and release. The app
+needs no sender class of its own.</p>
 </section>
 <section id="step-2-service-subscribe-process-sensors">
 <h3>Step 2: Service - Subscribe &amp; Process Sensors<a class="headerlink" href="#step-2-service-subscribe-process-sensors" title="Link to this heading"></a></h3>
@@ -634,7 +646,6 @@ window.runMermaid = runMermaid;</script>
 <span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorAccelerometer</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">ACCELEROMETER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
 <span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorStepCounter</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">STEP_COUNTER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
 <span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mSensorFloorCounter</span><span class="p">{</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">FLOOR_COUNTER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
-<span class="c1">// CustomMessage::GUISender mSender;</span>
 </pre></div>
 </div>
 <p>In <code class="docutils literal notranslate"><span class="pre">run()</span></code> <a class="reference download internal" download="" href="../../_downloads/1c9f39bd8d71a8f0950a3a824efe3e81/Service.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Service.cpp</span></code></span></a>: connect all (acc.connect(0.1f, 0)), loop getMessage:</p>
@@ -649,18 +660,18 @@ window.runMermaid = runMermaid;</script>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">HeartRate</span><span class="w"> </span><span class="nf">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">mSender</span><span class="p">.</span><span class="n">updateHeartRate</span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">(),</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">(),</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">());</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
-<span class="c1">// Similar for GPS: parser.getLatitude() etc (double), updateLocation(ts, lat,lon,alt);</span>
-<span class="c1">// Altimeter: updateElevation(ts, parser.getAltitude());</span>
-<span class="c1">// Accel: if (nowMs - mLastAccTimeMs &gt;= 100) updateAccelerometer(ts, x,y,z);</span>
-<span class="c1">// Steps: updateStepCounter(ts, parser.getStepCount());</span>
-<span class="c1">// Floors: updateFloors(ts, parser.getFloorsUp());</span>
-<span class="c1">// Compass: compute heading from magnetic X/Y fields, updateCompass(ts, heading);</span>
+<span class="c1">// Similar for GPS:  send_msg&lt;LocationValues&gt;(mKernel, ts, lat, lon, alt);</span>
+<span class="c1">// Altimeter:        send_msg&lt;ElevationValues&gt;(mKernel, ts, parser.getAltitude());</span>
+<span class="c1">// Accel:            if (nowMs - mLastAccTimeMs &gt;= 100) send_msg&lt;AccelerometerValues&gt;(mKernel, ts, x, y, z);</span>
+<span class="c1">// Steps:            send_msg&lt;StepCounterValues&gt;(mKernel, ts, parser.getStepCount());</span>
+<span class="c1">// Floors:           send_msg&lt;FloorsValues&gt;(mKernel, ts, parser.getFloorsUp());</span>
+<span class="c1">// Compass:          compute heading from magnetic X/Y fields, then send_msg&lt;CompassValues&gt;(mKernel, ts, heading);</span>
 </pre></div>
 </div>
-<p>Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec), <code class="docutils literal notranslate"><span class="pre">mSender.updateStats(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">updateRtc(timeMs/1000)</span></code>.</p>
+<p>Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with <code class="docutils literal notranslate"><span class="pre">send_msg&lt;StatsValues&gt;(...)</span></code>, and <code class="docutils literal notranslate"><span class="pre">send_msg&lt;RtcValues&gt;(mKernel,</span> <span class="pre">timeMs/1000)</span></code>.</p>
 </section>
 <section id="step-3-gui-model-receive-messages">
 <h3>Step 3: GUI Model - Receive Messages<a class="headerlink" href="#step-3-gui-model-receive-messages" title="Link to this heading"></a></h3>

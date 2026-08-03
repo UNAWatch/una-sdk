@@ -48,6 +48,7 @@ Next steps:
 
    Examples/Running-Architecture
    Examples/Alarm-Architecture
+   Examples/Timer-Architecture
    Examples/Cycling-Architecture
    Examples/Hiking-Architecture
    Examples/HRMonitor-Architecture
