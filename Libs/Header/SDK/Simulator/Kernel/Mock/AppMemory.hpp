@@ -27,7 +27,7 @@ public:
     virtual void *malloc(size_t size) override
     { 
         void *p = std::malloc(size);
-        printf("malloc %p %d bytes\n", p, size);
+        printf("malloc %p %zu bytes\n", p, size);
         return p;
     }
 
@@ -39,7 +39,7 @@ public:
 
     void* realloc(void* ptr, size_t size) override
     {
-        printf("realloc  %p:%d\n", ptr, size);
+        printf("realloc  %p:%zu\n", ptr, size);
         return std::realloc(ptr, size);
     }
 
