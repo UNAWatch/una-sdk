@@ -496,7 +496,7 @@ bool ActivityWriter::saveSummary(const TrackData& track)
     writer.add("duration", static_cast<uint32_t>(track.duration));
     writer.add("distance", track.distance);
     writer.add("hr_avg", track.hrAvg);
-    writer.add("elevation", track.ascent - track.descent);
+    writer.add("elevation", track.ascent);  // accumulated gain, matching the on-watch summary
     writer.add("activity_type", "running");
     writer.endMap();
 

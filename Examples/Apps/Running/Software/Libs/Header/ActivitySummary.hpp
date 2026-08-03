@@ -37,7 +37,7 @@ struct ActivitySummary {
     time_t time;        ///< Total track time in seconds
     float distance;     ///< Total track distance in m
     float speedAvg;     ///< Average speed in m/s
-    float elevation;    ///< Elevation in m
+    float elevation;    ///< Accumulated elevation gain (ascent) in m
     float paceAvg;      ///< Average pace in s/m
     float hrMax;        ///< Maximum Heart Rate in bpm
     float hrAvg;        ///< Average Heart Rate in bpm

@@ -1057,7 +1057,7 @@ void Service::buildPartialSummary()
     mSummary.time      = mTimeCounter.getValueActive();
     mSummary.distance  = mDistanceCounter.getValueActive();
     mSummary.speedAvg  = speedFromTotals(mSummary.distance, mSummary.time);
-    mSummary.elevation = mAltitudeCounter.getCurrent();
+    mSummary.elevation = mAltitudeCounter.getAscent();
     mSummary.paceAvg   = getPace(mSummary.speedAvg, mSpeedCounter.getMinValid());
     mSummary.hrMax     = mHrCounter.getMaximum();
     mSummary.hrAvg     = mHrCounter.getAverage();
