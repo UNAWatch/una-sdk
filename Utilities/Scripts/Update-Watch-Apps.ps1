@@ -30,8 +30,8 @@
       * The launcher / app list rebuilds only at boot -> reboot the watch after.
       * A .uapp that fails the kernel CRC is silently dropped (app won't appear).
       * D:\Apps also contains "SharedData" (not an app) - never touched, since there
-        is no matching source subfolder. HRMonitor ships in the zip but not on the
-        watch - skipped under the default (update-only).
+        is no matching source subfolder. The zip holds only apps that ship on the
+        watch (HRMonitor, an SDK example, is excluded), so -InstallNew is safe.
 
 .PARAMETER Source
     The una-apps release: either the .zip file or an already-extracted folder
