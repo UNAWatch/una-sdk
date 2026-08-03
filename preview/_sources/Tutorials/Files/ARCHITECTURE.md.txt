@@ -102,18 +102,18 @@ The tutorial defines custom messages in the application-specific range (0x000000
 - **Direction**: GUI → Service
 - **Purpose**: Update settings and persist to file
 - **Structure**: `CustomMessage::SetSettings`
-  - `int decimalCounter` - Counter value (multiplied by 10)
-  - `int activityType` - Activity type enum value
-  - `int displayMode` - Display mode enum value
+  - `int32_t decimalCounter` - Counter value (multiplied by 10)
+  - `int32_t activityType` - Activity type enum value
+  - `int32_t displayMode` - Display mode enum value
 - **Response**: Automatic save to file
 
 #### SETTINGS_VALUES (0x00000004)
 - **Direction**: Service → GUI
 - **Purpose**: Deliver current settings to GUI
 - **Structure**: `CustomMessage::SettingsValues`
-  - `int decimalCounter` - Counter value (multiplied by 10)
-  - `int activityType` - Activity type enum value
-  - `int displayMode` - Display mode enum value
+  - `int32_t decimalCounter` - Counter value (multiplied by 10)
+  - `int32_t activityType` - Activity type enum value
+  - `int32_t displayMode` - Display mode enum value
 
 ### Message Flow Architecture
 
@@ -189,7 +189,7 @@ private:
 ```cpp
 void Service::loadSettings() {
     auto file = mKernel.fs.file("settings.json");
-    if (file && file->open(SDK::Interface::IFile::Mode::READ)) {
+    if (file && file->open(0)) {   // open(bool wMode = false) -- 0 reads
         char buffer[1024];
         size_t bytesRead = file->read(buffer, sizeof(buffer) - 1);
         if (bytesRead > 0) {
@@ -201,9 +201,9 @@ void Service::loadSettings() {
                 int32_t activityType = static_cast<int32_t>(mActivityType);
                 int32_t displayMode = static_cast<int32_t>(mDisplayMode);
 
-                reader.getInt("decimalCounter", decimalCounter);
-                reader.getInt("activityType", activityType);
-                reader.getInt("displayMode", displayMode);
+                reader.get("decimalCounter", decimalCounter);
+                reader.get("activityType", activityType);
+                reader.get("displayMode", displayMode);
 
                 // Validate and convert back to types
                 mDecimalCounter = decimalCounter;
@@ -230,13 +230,13 @@ void Service::loadSettings() {
 ```cpp
 void Service::saveSettings() {
     auto file = mKernel.fs.file("settings.json");
-    if (file && file->open(SDK::Interface::IFile::Mode::WRITE)) {
+    if (file && file->open(1)) {   // open(bool wMode = false) -- 1 writes
         SDK::JsonStreamWriter writer(file.get());
-        writer.startObject();
+        writer.startMap(3);
         writer.add("decimalCounter", mDecimalCounter);
-        writer.add("activityType", static_cast<int>(mActivityType));
-        writer.add("displayMode", static_cast<int>(mDisplayMode));
-        writer.endObject();
+        writer.add("activityType", static_cast<int32_t>(mActivityType));
+        writer.add("displayMode", static_cast<int32_t>(mDisplayMode));
+        writer.endMap();
         file->close();
         LOG_INFO("Settings saved to file\n");
     } else {
@@ -308,8 +308,13 @@ void Model::updateSettings(float decimalCounter, CustomMessage::ActivityType act
 `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...`
 to the message's constructor, sends it, and releases it — returning `false` if allocation or the
 send failed. Each message fills its own fields in that constructor, so there is no sender class to
-write. Use `SDK::make_msg<T>` instead when you need to inspect a reply (`msg.send(timeout) &&
-msg.ok()`).
+write.
+
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — it never waits for a
+reply, and a message that finds no room in the queue is dropped. Use `SDK::make_msg<T>` instead when
+the reply matters: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with
+a timeout and read the result back (`msg.send(timeout) && msg.ok()`). That timeout bounds the wait for
+the reply, not for queue space — no send waits out a full queue.
 
 #### Message Receiving
 

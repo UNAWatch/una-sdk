@@ -438,6 +438,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
 </ul>
@@ -597,8 +598,9 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">PRESSURE_VALUES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000B</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// Every message pairs a default constructor, which sets the message type,</span>
-<span class="w">    </span><span class="c1">// with one that fills the fields and delegates to it. That second</span>
-<span class="w">    </span><span class="c1">// constructor is what lets a caller send the message in a single call.</span>
+<span class="w">    </span><span class="c1">// with one that fills the fields and delegates to it -- the shape every</span>
+<span class="w">    </span><span class="c1">// example app uses, which keeps the type tag in a single initializer. That</span>
+<span class="w">    </span><span class="c1">// second constructor is what lets a caller send the message in a single call.</span>
 <span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">HRValues</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">heartRate</span><span class="p">;</span>
 <span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">trustLevel</span><span class="p">;</span>
@@ -628,14 +630,22 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="c1">// RtcValues: uint32_t time;</span>
 <span class="w">    </span><span class="c1">// BatteryValues: float level;</span>
 <span class="w">    </span><span class="c1">// PressureValues: uint64_t timestamp; float pressure;</span>
-<span class="w">    </span><span class="c1">//   ^ defined, and Model.cpp already handles PRESSURE_VALUES, but the</span>
-<span class="w">    </span><span class="c1">//     service only logs the raw frame today -- it never sends this one.</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">PressureValues</span></code> is the one message the service never sends: the sensor is connected and <code class="docutils literal notranslate"><span class="pre">Model.cpp</span></code>
+handles <code class="docutils literal notranslate"><span class="pre">PRESSURE_VALUES</span></code>, but the service only hex-dumps the raw frame today. Both ends exist, and
+so does <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Pressure</span></code> — wiring it up means giving that branch the same
+parse-then-send shape as the branches below, using <code class="docutils literal notranslate"><span class="pre">parser.getPressure()</span></code>.</p>
 <p>Those constructors are what let <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> do the whole send in one call —
 allocate from the kernel pool, forward the arguments to the constructor, send, and release. The app
 needs no sender class of its own.</p>
+<p><code class="docutils literal notranslate"><span class="pre">send_msg</span></code> is for fire-and-forget sends, and it posts with a zero timeout — it never waits for a
+reply, and a message that finds no room in the queue is dropped. That is the right trade for sensor
+data: the next sample is moments away. Reach for <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;()</span></code> when the reply matters: it
+returns an RAII <code class="docutils literal notranslate"><span class="pre">MessageGuard</span></code> that releases on scope exit, so you can send with a timeout and read
+the result back (<code class="docutils literal notranslate"><span class="pre">msg.send(timeout)</span> <span class="pre">&amp;&amp;</span> <span class="pre">msg.ok()</span></code>). That timeout bounds the wait for the reply, not for
+queue space — no send waits out a full queue.</p>
 </section>
 <section id="step-2-service-subscribe-process-sensors">
 <h3>Step 2: Service - Subscribe &amp; Process Sensors<a class="headerlink" href="#step-2-service-subscribe-process-sensors" title="Link to this heading"></a></h3>
@@ -663,15 +673,17 @@ needs no sender class of its own.</p>
 <span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getBpm</span><span class="p">(),</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getTrustLevel</span><span class="p">());</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
-<span class="c1">// Similar for GPS:  send_msg&lt;LocationValues&gt;(mKernel, ts, lat, lon, alt);</span>
-<span class="c1">// Altimeter:        send_msg&lt;ElevationValues&gt;(mKernel, ts, parser.getAltitude());</span>
-<span class="c1">// Accel:            if (nowMs - mLastAccTimeMs &gt;= 100) send_msg&lt;AccelerometerValues&gt;(mKernel, ts, x, y, z);</span>
-<span class="c1">// Steps:            send_msg&lt;StepCounterValues&gt;(mKernel, ts, parser.getStepCount());</span>
-<span class="c1">// Floors:           send_msg&lt;FloorsValues&gt;(mKernel, ts, parser.getFloorsUp());</span>
-<span class="c1">// Compass:          compute heading from magnetic X/Y fields, then send_msg&lt;CompassValues&gt;(mKernel, ts, heading);</span>
+<span class="c1">// Similar for GPS:  SDK::send_msg&lt;CustomMessage::LocationValues&gt;(mKernel, ts, lat, lon, alt);</span>
+<span class="c1">// Altimeter:        SDK::send_msg&lt;CustomMessage::ElevationValues&gt;(mKernel, ts, parser.getAltitude());</span>
+<span class="c1">// Accel:            if (nowMs - mLastAccTimeMs &gt;= 100) SDK::send_msg&lt;CustomMessage::AccelerometerValues&gt;(mKernel, ts, x, y, z);</span>
+<span class="c1">// Steps:            SDK::send_msg&lt;CustomMessage::StepCounterValues&gt;(mKernel, ts, parser.getStepCount());</span>
+<span class="c1">// Floors:           SDK::send_msg&lt;CustomMessage::FloorsValues&gt;(mKernel, ts, parser.getFloorsUp());</span>
+<span class="c1">// Compass:          compute heading from magnetic X/Y fields, then SDK::send_msg&lt;CustomMessage::CompassValues&gt;(mKernel, ts, heading);</span>
 </pre></div>
 </div>
-<p>Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with <code class="docutils literal notranslate"><span class="pre">send_msg&lt;StatsValues&gt;(...)</span></code>, and <code class="docutils literal notranslate"><span class="pre">send_msg&lt;RtcValues&gt;(mKernel,</span> <span class="pre">timeMs/1000)</span></code>.</p>
+<p>Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with
+<code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;CustomMessage::StatsValues&gt;(...)</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;CustomMessage::RtcValues&gt;(mKernel,</span> <span class="pre">timeMs/1000)</span></code>.</p>
 </section>
 <section id="step-3-gui-model-receive-messages">
 <h3>Step 3: GUI Model - Receive Messages<a class="headerlink" href="#step-3-gui-model-receive-messages" title="Link to this heading"></a></h3>

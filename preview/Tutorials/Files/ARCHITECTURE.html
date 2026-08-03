@@ -502,6 +502,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
 </ul>
@@ -683,9 +684,9 @@ window.runMermaid = runMermaid;</script>
 <li><p><strong>Purpose</strong>: Update settings and persist to file</p></li>
 <li><p><strong>Structure</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::SetSettings</span></code></p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">decimalCounter</span></code> - Counter value (multiplied by 10)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">activityType</span></code> - Activity type enum value</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">displayMode</span></code> - Display mode enum value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">decimalCounter</span></code> - Counter value (multiplied by 10)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">activityType</span></code> - Activity type enum value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">displayMode</span></code> - Display mode enum value</p></li>
 </ul>
 </li>
 <li><p><strong>Response</strong>: Automatic save to file</p></li>
@@ -698,9 +699,9 @@ window.runMermaid = runMermaid;</script>
 <li><p><strong>Purpose</strong>: Deliver current settings to GUI</p></li>
 <li><p><strong>Structure</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::SettingsValues</span></code></p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">decimalCounter</span></code> - Counter value (multiplied by 10)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">activityType</span></code> - Activity type enum value</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">displayMode</span></code> - Display mode enum value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">decimalCounter</span></code> - Counter value (multiplied by 10)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">activityType</span></code> - Activity type enum value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">displayMode</span></code> - Display mode enum value</p></li>
 </ul>
 </li>
 </ul>
@@ -778,7 +779,7 @@ window.runMermaid = runMermaid;</script>
 <h4>Loading Settings (<code class="docutils literal notranslate"><span class="pre">loadSettings()</span></code>)<a class="headerlink" href="#loading-settings-loadsettings" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::loadSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;settings.json&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">file</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IFile</span><span class="o">::</span><span class="n">Mode</span><span class="o">::</span><span class="n">READ</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">file</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// open(bool wMode = false) -- 0 reads</span>
 <span class="w">        </span><span class="kt">char</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
 <span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">bytesRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bytesRead</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -790,9 +791,9 @@ window.runMermaid = runMermaid;</script>
 <span class="w">                </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">activityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">);</span>
 <span class="w">                </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">displayMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">);</span>
 
-<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">getInt</span><span class="p">(</span><span class="s">&quot;decimalCounter&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">);</span>
-<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">getInt</span><span class="p">(</span><span class="s">&quot;activityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">activityType</span><span class="p">);</span>
-<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">getInt</span><span class="p">(</span><span class="s">&quot;displayMode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">displayMode</span><span class="p">);</span>
+<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;decimalCounter&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">);</span>
+<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;activityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">activityType</span><span class="p">);</span>
+<span class="w">                </span><span class="n">reader</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;displayMode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">displayMode</span><span class="p">);</span>
 
 <span class="w">                </span><span class="c1">// Validate and convert back to types</span>
 <span class="w">                </span><span class="n">mDecimalCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decimalCounter</span><span class="p">;</span>
@@ -820,13 +821,13 @@ window.runMermaid = runMermaid;</script>
 <h4>Saving Settings (<code class="docutils literal notranslate"><span class="pre">saveSettings()</span></code>)<a class="headerlink" href="#saving-settings-savesettings" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::saveSettings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;settings.json&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">file</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IFile</span><span class="o">::</span><span class="n">Mode</span><span class="o">::</span><span class="n">WRITE</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">file</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// open(bool wMode = false) -- 1 writes</span>
 <span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">JsonStreamWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">file</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
-<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">startObject</span><span class="p">();</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">startMap</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
 <span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;decimalCounter&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mDecimalCounter</span><span class="p">);</span>
-<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;activityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">));</span>
-<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;displayMode&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
-<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">endObject</span><span class="p">();</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;activityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">));</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;displayMode&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
+<span class="w">        </span><span class="n">writer</span><span class="p">.</span><span class="n">endMap</span><span class="p">();</span>
 <span class="w">        </span><span class="n">file</span><span class="o">-&gt;</span><span class="n">close</span><span class="p">();</span>
 <span class="w">        </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">&quot;Settings saved to file</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
@@ -901,7 +902,12 @@ window.runMermaid = runMermaid;</script>
 <p><code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> allocates the message from the kernel pool, forwards <code class="docutils literal notranslate"><span class="pre">args...</span></code>
 to the message’s constructor, sends it, and releases it — returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the
 send failed. Each message fills its own fields in that constructor, so there is no sender class to
-write. Use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> instead when you need to inspect a reply (<code class="docutils literal notranslate"><span class="pre">msg.send(timeout)</span> <span class="pre">&amp;&amp;</span> <span class="pre">msg.ok()</span></code>).</p>
+write.</p>
+<p><code class="docutils literal notranslate"><span class="pre">send_msg</span></code> is for fire-and-forget sends, and it posts with a zero timeout — it never waits for a
+reply, and a message that finds no room in the queue is dropped. Use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> instead when
+the reply matters: it returns an RAII <code class="docutils literal notranslate"><span class="pre">MessageGuard</span></code> that releases on scope exit, so you can send with
+a timeout and read the result back (<code class="docutils literal notranslate"><span class="pre">msg.send(timeout)</span> <span class="pre">&amp;&amp;</span> <span class="pre">msg.ok()</span></code>). That timeout bounds the wait for
+the reply, not for queue space — no send waits out a full queue.</p>
 </section>
 <section id="message-receiving">
 <h4>Message Receiving<a class="headerlink" href="#message-receiving" title="Link to this heading"></a></h4>

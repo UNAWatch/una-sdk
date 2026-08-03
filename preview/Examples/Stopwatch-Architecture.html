@@ -20,7 +20,9 @@
       <script src="../_static/version-selector.js?v=50f89983"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GlanceHR - Heart Rate Glance" href="GlanceHR-Architecture.html" />
+    <link rel="prev" title="HRMonitor - Heart Rate Monitor" href="HRMonitor-Architecture.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -59,13 +61,54 @@
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Timer-Architecture.html">Timer - Countdown Timer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stopwatch - Interval Timer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-level-components">High-Level Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component-interaction">Component Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#service-backend">Service Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-classes-and-structures">Core Classes and Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#service-class">Service Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#state-structure">State Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#core-class">Core Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#command-handling">Command Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service-lifecycle-and-app-startup">Service Lifecycle and App Startup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-message-system">Custom Message System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-single-screen-mainview">The Single Screen: MainView</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#two-faces-and-the-hour-form">Two faces and the hour form</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lap-list-and-scroll-indicator">Lap list and scroll indicator</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#input-handling">Input Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#host-tests">Host Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-build">Simulator Build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
 </ul>
@@ -312,12 +355,24 @@
 <p><code class="docutils literal notranslate"><span class="pre">StopwatchState</span></code> carries the entire state — including the fixed 50-entry lap array — as a value, keeping the path allocation-free. A compile-time assertion guards the pool budget:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">StopwatchState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+<span class="w">    </span><span class="n">StopwatchState</span><span class="p">()</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">STOPWATCH_STATE</span><span class="p">)</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">{}</span>
+<span class="w">    </span><span class="p">{}</span>
+
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">StopwatchState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Stopwatch</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="o">&amp;</span><span class="n">state</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">StopwatchState</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
 <span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">StopwatchState</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
 <span class="w">              </span><span class="s">&quot;StopwatchState must fit the largest kernel message pool block&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">StopwatchState</span></code> also carries a constructor that fills the snapshot, so publishing is a single call:</p>
+<p>The second constructor fills the snapshot and delegates to the first — the shape every example app
+uses, which keeps the type tag in a single initializer. It is also what makes publishing a single
+call:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">StopwatchState</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mStopwatch</span><span class="p">.</span><span class="n">state</span><span class="p">());</span>
 </pre></div>
 </div>
@@ -329,6 +384,18 @@ GUI sends them the same way:</p>
 <p><code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;</span></code> allocates the message from the kernel pool, forwards any arguments to the
 message’s constructor, sends it, and releases it, returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the send
 failed. There is no per-app sender class.</p>
+<p><code class="docutils literal notranslate"><span class="pre">send_msg</span></code> is for fire-and-forget sends, and it posts with a zero timeout — it never waits for a
+reply, and a message that finds no room in the queue is dropped. <code class="docutils literal notranslate"><span class="pre">MainView</span></code> uses the returned bool for
+exactly one press: pause is the only control whose screen holds a pending state (<code class="docutils literal notranslate"><span class="pre">mPausePending</span></code>), so
+it must know the command left. Start, lap and reset discard it and let the answering snapshot correct
+the display.</p>
+<p>A dropped message is tolerated rather than recovered. <code class="docutils literal notranslate"><span class="pre">publish()</span></code> is itself a zero-timeout send, so a
+snapshot can be lost too, and the GUI only re-requests one on start and resume — a snapshot dropped
+mid-session is corrected by the next command, not immediately. That is an acceptable trade for an
+example, not a pattern to copy into something that must not miss an update. Reach for
+<code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;()</span></code> when the reply matters: it returns an RAII <code class="docutils literal notranslate"><span class="pre">MessageGuard</span></code> that releases on scope
+exit, so you can send with a timeout and read the result back (<code class="docutils literal notranslate"><span class="pre">msg.send(timeout)</span> <span class="pre">&amp;&amp;</span> <span class="pre">msg.ok()</span></code>). That
+timeout bounds the wait for the reply, not for queue space — no send waits out a full queue.</p>
 <p><strong>Message summary</strong>:</p>
 <table class="docutils align-default">
 <thead>
@@ -534,7 +601,10 @@ failed. There is no per-app sender class.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="HRMonitor-Architecture.html" class="btn btn-neutral float-left" title="HRMonitor - Heart Rate Monitor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GlanceHR-Architecture.html" class="btn btn-neutral float-right" title="GlanceHR - Heart Rate Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
