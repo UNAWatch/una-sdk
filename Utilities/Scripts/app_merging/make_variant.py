@@ -77,6 +77,15 @@ def convert_icon_to_abgr2222(png_path: Path) -> bytes:
     return bytes(bmp_data)
 
 
+def uappid_of(uapp_path: Path) -> int:
+    """The uappID (first u64, little-endian) of a built .uapp."""
+    with open(uapp_path, "rb") as f:
+        raw = f.read(8)
+    if len(raw) != 8:
+        raise ValueError(f"{uapp_path} is too short to carry a MainHeader")
+    return struct.unpack("<Q", raw)[0]
+
+
 def icons_from_uapp(uapp_path: Path) -> tuple[bytes, bytes]:
     """Extract both icons from an existing .uapp (real app or alias) at the
     fixed post-MainHeader offsets -- the same copy the kernel's CreateVariant
@@ -97,8 +106,11 @@ def main() -> int:
     parser.add_argument("-name", required=True, help="Variant launcher name (max 15 chars, ASCII)")
     parser.add_argument("-appid", type=parse_appid_64, required=True,
                         help="The variant's OWN unique 16-hex AppID (not the target's)")
-    parser.add_argument("-target_appid", type=parse_appid_64, required=True,
+    parser.add_argument("-target_appid", type=parse_appid_64, default=None,
                         help="16-hex AppID of the base app this variant runs")
+    parser.add_argument("-target_uapp", type=Path, default=None,
+                        help="Read the target AppID out of a built .uapp instead of "
+                             "-target_appid (keeps CI in lockstep with the binary)")
     parser.add_argument("-config", type=Path, required=True,
                         help="Path to the variant config JSON to embed")
     parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()),
@@ -121,6 +133,11 @@ def main() -> int:
         parser.error("-name must fit 15 bytes (NUL-terminated 16-byte field)")
     if not args.name.isascii():
         parser.error("-name must be ASCII (the wildcard fonts cover ASCII only)")
+
+    if (args.target_appid is None) == (args.target_uapp is None):
+        parser.error("provide exactly one of -target_appid / -target_uapp")
+    if args.target_uapp is not None:
+        args.target_appid = uappid_of(args.target_uapp)
     if args.appid == args.target_appid:
         parser.error("-appid must differ from -target_appid (an alias cannot claim "
                      "the target's own identity; the kernel rejects the collision at scan)")
