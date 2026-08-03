@@ -18,8 +18,8 @@ namespace PickerLogic {
 
 // -----------------------------------------------------------------------------
 // Distance: whole.fraction, displayed in km or mi. The fraction step comes from
-// the Menu descriptor (0.05 for intervals, 0.01 for calibrate); the displayed
-// hundredths are derived from it so one template covers both.
+// the Menu descriptor (0.05 for the intervals pickers); the displayed hundredths
+// are derived from it. Calibrate & Save uses DistanceFine below instead.
 // -----------------------------------------------------------------------------
 template<typename Menu>
 struct Distance {
@@ -91,6 +91,133 @@ struct Distance {
 
         p.renderSubtitleSingle(imperial ? T_TEXT_MILES_SUB : T_TEXT_KILOMETERS);
         p.renderValue(leftActive, left, right, ".", up1, up2);
+    }
+};
+
+// -----------------------------------------------------------------------------
+// DistanceFine: whole.tenth.hundredth, displayed in km or mi (Calibrate & Save).
+//
+// Where Distance above has two stages over a fixed fraction step, this keeps the
+// value as one integer count of 0.01 units and lets each stage pick only the step
+// size. Two consequences, both deliberate: a press at the top of a place carries
+// into the place above it (5.99 +0.01 -> 6.00, one press) and the whole range
+// wraps (99.99 +0.01 -> 0.00), so any treadmill-console reading is a few presses
+// away in either direction.
+// -----------------------------------------------------------------------------
+template<typename Menu>
+struct DistanceFine {
+    enum Stage { WHOLE = 0, TENTH, HUNDREDTH };
+
+    /// Number of 0.01-unit steps in the range; the value wraps modulo this.
+    static constexpr uint16_t kRange = Menu::kCountHund;
+
+    // Widening the range past 0..99.99 means widening the value type too: the
+    // descriptor computes kCountHund in uint16_t, so it would silently truncate.
+    static_assert(static_cast<uint32_t>(Menu::kMaxWhole + 1) * 100u <= UINT16_MAX,
+                  "Picker range no longer fits uint16_t -- widen kCountHund and hund together");
+    static_assert(kRange % Menu::kStepWhole == 0,
+                  "The whole-unit step must divide the range, else wrapping skips values");
+
+    Stage    stage    = WHOLE;
+    bool     imperial = false;
+    uint16_t hund     = 0;      ///< Value in hundredths of a display unit.
+
+    void seed(float meters, bool isImperial)
+    {
+        imperial = isImperial;
+        float units = meters / 1000.0f;            // km
+        if (imperial) units = SDK::Utils::kmToMiles(units);
+
+        // Ordered so that anything not provably in range -- negative, over-range,
+        // or NaN, which compares false both ways -- avoids an out-of-range
+        // float->integer cast rather than relying on the comparison to catch it.
+        const float counts = units * 100.0f + 0.5f;
+        if (!(counts >= 1.0f)) {
+            hund = 0;
+        } else if (counts >= static_cast<float>(kRange)) {
+            hund = static_cast<uint16_t>(kRange - 1u);
+        } else {
+            hund = static_cast<uint16_t>(counts);
+        }
+        stage = WHOLE;
+    }
+
+    /// Units-of-0.01 moved by one press at the current stage.
+    uint16_t step() const
+    {
+        switch (stage) {
+        case WHOLE: return Menu::kStepWhole;
+        case TENTH: return Menu::kStepTenth;
+        default:    return Menu::kStepHund;
+        }
+    }
+
+    void inc() { hund = wrapAdd(hund, step()); }
+    void dec() { hund = wrapAdd(hund, static_cast<uint16_t>(kRange - step())); }
+
+    /// Move to the next-finer place; false when already at the finest (= confirm).
+    bool advance()
+    {
+        if (stage == HUNDREDTH) return false;
+        stage = (stage == WHOLE) ? TENTH : HUNDREDTH;
+        return true;
+    }
+
+    /// Step back to the next-coarser place; false when already at the coarsest.
+    bool retreat()
+    {
+        if (stage == WHOLE) return false;
+        stage = (stage == HUNDREDTH) ? TENTH : WHOLE;
+        return true;
+    }
+
+    /// Chosen value in metres.
+    float meters() const
+    {
+        const float units = hund / 100.0f;
+        const float km    = imperial ? SDK::Utils::milesToKm(units) : units;
+        return km * 1000.0f;
+    }
+
+    void render(TwoTonePicker& p) const
+    {
+        char whole[4], fracHi[4], fracLo[4], up1[4], up2[4];
+        std::snprintf(whole, sizeof whole, "%02u", static_cast<unsigned>(hund / 100u));
+        std::snprintf(fracHi, sizeof fracHi, "%u", static_cast<unsigned>((hund / 10u) % 10u));
+        std::snprintf(fracLo, sizeof fracLo, "%u", static_cast<unsigned>(hund % 10u));
+
+        // Wrapping turns the upcoming column into a circular list, so unlike the
+        // clamped pickers both slots are always populated.
+        activePlace(up1, wrapAdd(hund, step()));
+        activePlace(up2, wrapAdd(hund, static_cast<uint16_t>(2u * step())));
+
+        p.renderSubtitleSingle(imperial ? T_TEXT_MILES_SUB : T_TEXT_KILOMETERS);
+        p.renderValue3(segment(), whole, fracHi, fracLo, up1, up2);
+    }
+
+private:
+    static uint16_t wrapAdd(uint16_t value, uint16_t delta)
+    {
+        return static_cast<uint16_t>((value + delta) % kRange);
+    }
+
+    TwoTonePicker::Segment segment() const
+    {
+        switch (stage) {
+        case WHOLE: return TwoTonePicker::SEG_WHOLE;
+        case TENTH: return TwoTonePicker::SEG_FRAC_HI;
+        default:    return TwoTonePicker::SEG_FRAC_LO;
+        }
+    }
+
+    /// Format only the place being edited -- that is all the upcoming column shows.
+    void activePlace(char (&out)[4], uint16_t value) const
+    {
+        switch (stage) {
+        case WHOLE: std::snprintf(out, sizeof out, "%02u", static_cast<unsigned>(value / 100u)); break;
+        case TENTH: std::snprintf(out, sizeof out, "%u", static_cast<unsigned>((value / 10u) % 10u)); break;
+        default:    std::snprintf(out, sizeof out, "%u", static_cast<unsigned>(value % 10u)); break;
+        }
     }
 };
 

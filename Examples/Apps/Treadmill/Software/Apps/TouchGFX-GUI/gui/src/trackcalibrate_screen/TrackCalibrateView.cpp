@@ -21,22 +21,20 @@ void TrackCalibrateView::handleKeyEvent(uint8_t key)
     } else if (key == SDK::GUI::Button::L2) {
         mLogic.inc();
         mLogic.render(picker);
-    } else if (key == SDK::GUI::Button::R1) {     // confirm / advance stage
-        if (!mLogic.atFrac()) {
-            mLogic.toFrac();
+    } else if (key == SDK::GUI::Button::R1) {     // advance a place / confirm
+        if (mLogic.advance()) {
             mLogic.render(picker);
         } else {
             presenter->applyCalibration(mLogic.meters());
             application().gotoTrackSavedScreenNoTransition();
         }
-    } else if (key == SDK::GUI::Button::R2) {     // back / step back
-        if (!mLogic.atFrac()) {
+    } else if (key == SDK::GUI::Button::R2) {     // step back a place / back out
+        if (mLogic.retreat()) {
+            mLogic.render(picker);
+        } else {
             // Back out to the pause menu (Resume / Discard / Save) without
             // saving — the activity is still only paused, not stopped.
             application().gotoTrackActionScreenNoTransition();
-        } else {
-            mLogic.toWhole();
-            mLogic.render(picker);
         }
     }
 }
