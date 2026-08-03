@@ -308,8 +308,12 @@ void Model::updateSettings(float decimalCounter, CustomMessage::ActivityType act
 `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...`
 to the message's constructor, sends it, and releases it — returning `false` if allocation or the
 send failed. Each message fills its own fields in that constructor, so there is no sender class to
-write. Use `SDK::make_msg<T>` instead when you need to inspect a reply (`msg.send(timeout) &&
-msg.ok()`).
+write.
+
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room
+the message is dropped rather than waited for. Use `SDK::make_msg<T>` instead when the reply matters
+*or* when you need to wait for queue space: it returns an RAII `MessageGuard` that releases on scope
+exit, so you can send with a timeout and read the result back (`msg.send(timeout) && msg.ok()`).
 
 #### Message Receiving
 

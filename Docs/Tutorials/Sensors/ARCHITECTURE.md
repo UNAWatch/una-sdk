@@ -73,8 +73,9 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type PRESSURE_VALUES = 0x0000000B;
 
     // Every message pairs a default constructor, which sets the message type,
-    // with one that fills the fields and delegates to it. That second
-    // constructor is what lets a caller send the message in a single call.
+    // with one that fills the fields and delegates to it -- so the message type
+    // is named in exactly one place. That second constructor is what lets a
+    // caller send the message in a single call.
     struct HRValues : public SDK::MessageBase {
         float heartRate;
         float trustLevel;
@@ -104,14 +105,23 @@ namespace CustomMessage {
     // RtcValues: uint32_t time;
     // BatteryValues: float level;
     // PressureValues: uint64_t timestamp; float pressure;
-    //   ^ defined, and Model.cpp already handles PRESSURE_VALUES, but the
-    //     service only logs the raw frame today -- it never sends this one.
 }
 ```
+
+`PressureValues` is the one message the service never sends: the sensor is connected and `Model.cpp`
+handles `PRESSURE_VALUES`, but the service only hex-dumps the raw frame today. Both ends exist, and
+so does `SDK::SensorDataParser::Pressure` — wiring it up means giving that branch the same
+parse-then-send shape as the branches below, using `parser.getPressure()`.
 
 Those constructors are what let `SDK::send_msg<T>(kernel, args...)` do the whole send in one call —
 allocate from the kernel pool, forward the arguments to the constructor, send, and release. The app
 needs no sender class of its own.
+
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room
+the message is dropped rather than waited for. That is the right trade for sensor data: the next
+sample is moments away. Reach for `SDK::make_msg<T>()` when the reply matters *or* when you need to
+wait for queue space: it returns an RAII `MessageGuard` that releases on scope exit, so you can send
+with a timeout and read the result back (`msg.send(timeout) && msg.ok()`).
 
 ### Step 2: Service - Subscribe & Process Sensors
 
@@ -145,15 +155,15 @@ if (mSensorHR.matchesDriver(handle)) {
         SDK::send_msg<CustomMessage::HRValues>(mKernel, parser.getBpm(), parser.getTrustLevel());
     }
 }
-// Similar for GPS:  send_msg<LocationValues>(mKernel, ts, lat, lon, alt);
-// Altimeter:        send_msg<ElevationValues>(mKernel, ts, parser.getAltitude());
-// Accel:            if (nowMs - mLastAccTimeMs >= 100) send_msg<AccelerometerValues>(mKernel, ts, x, y, z);
-// Steps:            send_msg<StepCounterValues>(mKernel, ts, parser.getStepCount());
-// Floors:           send_msg<FloorsValues>(mKernel, ts, parser.getFloorsUp());
-// Compass:          compute heading from magnetic X/Y fields, then send_msg<CompassValues>(mKernel, ts, heading);
+// Similar for GPS:  SDK::send_msg<LocationValues>(mKernel, ts, lat, lon, alt);
+// Altimeter:        SDK::send_msg<ElevationValues>(mKernel, ts, parser.getAltitude());
+// Accel:            if (nowMs - mLastAccTimeMs >= 100) SDK::send_msg<AccelerometerValues>(mKernel, ts, x, y, z);
+// Steps:            SDK::send_msg<StepCounterValues>(mKernel, ts, parser.getStepCount());
+// Floors:           SDK::send_msg<FloorsValues>(mKernel, ts, parser.getFloorsUp());
+// Compass:          compute heading from magnetic X/Y fields, then SDK::send_msg<CompassValues>(mKernel, ts, heading);
 ```
 
-Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with `send_msg<StatsValues>(...)`, and `send_msg<RtcValues>(mKernel, timeMs/1000)`.
+Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with `SDK::send_msg<StatsValues>(...)`, and `SDK::send_msg<RtcValues>(mKernel, timeMs/1000)`.
 
 ### Step 3: GUI Model - Receive Messages
 
