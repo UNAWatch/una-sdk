@@ -187,8 +187,9 @@ static_assert(sizeof(StopwatchState) <= 256,
               "StopwatchState must fit the largest kernel message pool block");
 ```
 
-The second constructor fills the snapshot and delegates to the first, so the message type is named in
-exactly one place. It is also what makes publishing a single call:
+The second constructor fills the snapshot and delegates to the first — the shape every example app
+uses, which keeps the type tag in a single initializer. It is also what makes publishing a single
+call:
 
 ```cpp
 SDK::send_msg<CustomMessage::StopwatchState>(mKernel, mStopwatch.state());
@@ -205,13 +206,20 @@ bool startStopwatch() { return SDK::send_msg<CustomMessage::StopwatchStart>(mKer
 message's constructor, sends it, and releases it, returning `false` if allocation or the send
 failed. There is no per-app sender class.
 
-`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room
-the message is dropped rather than waited for. That is why the commands return the bool: a `false`
-tells the screen the press never left, so it must not show the change as applied. A snapshot lost the
-other way needs no such handling, because the GUI re-requests one on start and resume. Reach for
-`SDK::make_msg<T>()` when the reply matters *or* when you need to wait for queue space: it returns an
-RAII `MessageGuard` that releases on scope exit, so you can send with a timeout and read the result
-back (`msg.send(timeout) && msg.ok()`).
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — it never waits for a
+reply, and a message that finds no room in the queue is dropped. `MainView` uses the returned bool for
+exactly one press: pause is the only control whose screen holds a pending state (`mPausePending`), so
+it must know the command left. Start, lap and reset discard it and let the answering snapshot correct
+the display.
+
+A dropped message is tolerated rather than recovered. `publish()` is itself a zero-timeout send, so a
+snapshot can be lost too, and the GUI only re-requests one on start and resume — a snapshot dropped
+mid-session is corrected by the next command, not immediately. That is an acceptable trade for an
+example, not a pattern to copy into something that must not miss an update. Reach for
+`SDK::make_msg<T>()` when the reply matters: it returns an RAII `MessageGuard` that releases on scope
+exit, so you can send with a timeout and read the result back (`msg.send(timeout) && msg.ok()`). That
+timeout bounds the wait for the reply, not for queue space — the kernel gives every queue push the
+same short deadline, so neither call waits out a full queue.
 
 **Message summary**:
 

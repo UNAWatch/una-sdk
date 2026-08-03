@@ -102,18 +102,18 @@ The tutorial defines custom messages in the application-specific range (0x000000
 - **Direction**: GUI → Service
 - **Purpose**: Update settings and persist to file
 - **Structure**: `CustomMessage::SetSettings`
-  - `int decimalCounter` - Counter value (multiplied by 10)
-  - `int activityType` - Activity type enum value
-  - `int displayMode` - Display mode enum value
+  - `int32_t decimalCounter` - Counter value (multiplied by 10)
+  - `int32_t activityType` - Activity type enum value
+  - `int32_t displayMode` - Display mode enum value
 - **Response**: Automatic save to file
 
 #### SETTINGS_VALUES (0x00000004)
 - **Direction**: Service → GUI
 - **Purpose**: Deliver current settings to GUI
 - **Structure**: `CustomMessage::SettingsValues`
-  - `int decimalCounter` - Counter value (multiplied by 10)
-  - `int activityType` - Activity type enum value
-  - `int displayMode` - Display mode enum value
+  - `int32_t decimalCounter` - Counter value (multiplied by 10)
+  - `int32_t activityType` - Activity type enum value
+  - `int32_t displayMode` - Display mode enum value
 
 ### Message Flow Architecture
 
@@ -310,10 +310,12 @@ to the message's constructor, sends it, and releases it — returning `false` if
 send failed. Each message fills its own fields in that constructor, so there is no sender class to
 write.
 
-`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — if the queue has no room
-the message is dropped rather than waited for. Use `SDK::make_msg<T>` instead when the reply matters
-*or* when you need to wait for queue space: it returns an RAII `MessageGuard` that releases on scope
-exit, so you can send with a timeout and read the result back (`msg.send(timeout) && msg.ok()`).
+`send_msg` is for fire-and-forget sends, and it posts with a zero timeout — it never waits for a
+reply, and a message that finds no room in the queue is dropped. Use `SDK::make_msg<T>` instead when
+the reply matters: it returns an RAII `MessageGuard` that releases on scope exit, so you can send with
+a timeout and read the result back (`msg.send(timeout) && msg.ok()`). That timeout bounds the wait for
+the reply, not for queue space — the kernel gives every queue push the same short deadline, so neither
+call waits out a full queue.
 
 #### Message Receiving
 
