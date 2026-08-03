@@ -1,0 +1,20 @@
+# build
+
+*.vcxproj.user
+*.bak
+
+/build/
+/simulator/msvs/.vs/*
+/simulator/msvs/screenshots/*
+/config/gcc/*
+# app.mk is a required, constant build input (repo-relative touchgfx_path,
+# mirrors target.config) — keep it tracked even though Designer regenerates
+# the rest of config/gcc/.
+!/config/gcc/app.mk
+
+# GUI generated files
+/generated/*.config
+/generated/**/*.txt
+/generated/**/*.cache
+/generated/simulator/**/Makefile
+

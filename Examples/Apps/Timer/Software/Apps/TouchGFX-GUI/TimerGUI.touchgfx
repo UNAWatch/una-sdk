@@ -1,0 +1,949 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Startup",
+        "Components": [],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Startup"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Main",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "orbitMenu",
+            "Y": 44,
+            "Width": 240,
+            "Height": 150,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "OrbitMenu"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "scrollIndicator",
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "ScrollIndicator"
+          },
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 92,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CirclePlus_50x50.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "newText",
+            "X": 60,
+            "Y": 150,
+            "Width": 120,
+            "Height": 40,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Main"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Edit",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "minsHdr",
+            "X": 34,
+            "Y": 52,
+            "Width": 90,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_20",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_MINS"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "secsHdr",
+            "X": 116,
+            "Y": 52,
+            "Width": 90,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_20",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_SECS"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "colon",
+            "X": 108,
+            "Y": 92,
+            "Width": 24,
+            "Height": 50,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_40",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_COLON"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Edit"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Alert",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "pill",
+            "X": 16,
+            "Y": 87,
+            "Width": 220,
+            "Height": 66,
+            "LockPosition": true,
+            "Color": {
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 110.0,
+            "CenterY": 33.0,
+            "Radius": 110.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "orbitMenu",
+            "Y": 44,
+            "Width": 240,
+            "Height": 150,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "OrbitMenu"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "scrollIndicator",
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "ScrollIndicator"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "alertLabel",
+            "X": 80,
+            "Y": 200,
+            "Width": 80,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 230,
+              "Green": 160
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_ALERT"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Alert"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Menu",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "pill",
+            "X": 16,
+            "Y": 87,
+            "Width": 220,
+            "Height": 66,
+            "LockPosition": true,
+            "Color": {
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 110.0,
+            "CenterY": 33.0,
+            "Radius": 110.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "orbitMenu",
+            "Y": 96,
+            "Width": 240,
+            "Height": 150,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "OrbitMenu"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "valueText",
+            "X": 40,
+            "Y": 50,
+            "Width": 160,
+            "Height": 28,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_20",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "playIcon",
+            "X": 190,
+            "Y": 59,
+            "Width": 20,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Play_20x20.png"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "scrollIndicator",
+            "Y": 47,
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "ScrollIndicator"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Menu"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Running",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timeText",
+            "X": 10,
+            "Y": 80,
+            "Width": 220,
+            "Height": 70,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_60",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "pauseIcon",
+            "X": 194,
+            "Y": 59,
+            "Width": 12,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Pause_12x20.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "playIcon",
+            "X": 190,
+            "Y": 59,
+            "Width": 20,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Play_20x20.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "stopIcon",
+            "X": 31,
+            "Y": 59,
+            "Width": 20,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "Stop_20x20.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "resetIcon",
+            "X": 31,
+            "Y": 162,
+            "Width": 18,
+            "Height": 18,
+            "LockPosition": true,
+            "RelativeFilename": "Reset_18x18.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "resetLabel",
+            "X": 54,
+            "Y": 161,
+            "Width": 90,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_18_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_RESET"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Running"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Fired",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 97,
+            "Y": 82,
+            "Width": 55,
+            "Height": 60,
+            "LockPosition": true,
+            "RelativeFilename": "Timer_55x60.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timeText",
+            "X": 12,
+            "Y": 98,
+            "Width": 90,
+            "Height": 34,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_25",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "doneText",
+            "X": 128,
+            "Y": 58,
+            "Width": 80,
+            "Height": 26,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_20_R",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_DONE"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "repeatText",
+            "X": 112,
+            "Y": 155,
+            "Width": 95,
+            "Height": 26,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_20_R",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_REPEAT"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Fired"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Deleted",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 74,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CircleCross_50x50.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "deletedLabel",
+            "X": 20,
+            "Y": 140,
+            "Width": 200,
+            "Height": 34,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_25",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_DELETED"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Deleted"
+            }
+          }
+        ]
+      }
+    ],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "Title",
+        "X": 50,
+        "Width": 140,
+        "Height": 41,
+        "Components": [
+          {
+            "Type": "Line",
+            "Name": "line",
+            "Y": 38,
+            "Width": 140,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "EndX": 140.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "titleText",
+            "X": 10,
+            "Y": 11,
+            "Width": 120,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW_TEXT",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "Buttons",
+        "Y": 47,
+        "Width": 240,
+        "Height": 146,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "bL1",
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 113.0,
+            "LineWidth": 6.0,
+            "StartAngle": 291.0,
+            "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "bL2",
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 113.0,
+            "LineWidth": 6.0,
+            "StartAngle": 232.0,
+            "EndAngle": 249.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "bR2",
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 113.0,
+            "LineWidth": 6.0,
+            "StartAngle": 111.0,
+            "EndAngle": 128.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "bR1",
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 113.0,
+            "LineWidth": 6.0,
+            "StartAngle": 52.0,
+            "EndAngle": 69.0,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "ScrollIndicator",
+        "Y": 47,
+        "Width": 36,
+        "Height": 146,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "rail",
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 232.0,
+            "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "handle",
+            "Width": 36,
+            "Height": 146,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 290.0,
+            "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "handleOvf",
+            "Width": 36,
+            "Height": 146,
+            "Visible": false,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 73.0,
+            "Radius": 112.0,
+            "LineWidth": 8.5,
+            "StartAngle": 290.0,
+            "EndAngle": 308.0,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "OrbitMenu",
+        "Width": 240,
+        "Height": 150,
+        "Components": [],
+        "Interactions": []
+      }
+    ],
+    "Name": "TimerGUI",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Startup",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.1"
+}
