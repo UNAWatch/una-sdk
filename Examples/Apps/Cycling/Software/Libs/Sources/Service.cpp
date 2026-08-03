@@ -74,6 +74,7 @@ Service::Service(SDK::Kernel &kernel)
     mTimeCounter.init();
     mDistanceCounter.init();
     mSpeedCounter.init(0.5f, 300.0f);
+    mSpeedSmoother.init(0.5f, 300.0f);  // same valid range as the raw counter
     mHrCounter.init(20.0f, 300.0f);
     mAltitudeCounter.init(2.0f);
 }
@@ -312,7 +313,13 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         SDK::SensorDataParser::GpsSpeed parser(data[0]);
         if (parser.isDataValid()) {
             mSpeedCounter.add(parser.getSpeed());
-            LOG_DEBUG("Speed:    %.2f m/s\n", parser.getSpeed());
+            // Latched separately for the smoothed live readout, which -- unlike
+            // the counter above -- drops samples taken without a current fix.
+            // isSpeedValid() already excludes dead reckoning.
+            mGpsSpeedMs    = parser.getSpeed();
+            mGpsSpeedValid = parser.isSpeedValid();
+            mGpsSpeedFresh = true;
+            LOG_DEBUG("Speed:    %.2f m/s (valid %u)\n", mGpsSpeedMs, mGpsSpeedValid);
         }
     } else if (mSensorGpsDistance.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsDistance parser(data[0]);
@@ -654,6 +661,9 @@ void Service::startTrack(std::time_t utc)
 
     mDistanceCounter.reset();
     mSpeedCounter.reset();
+    mSpeedSmoother.reset();
+    mGpsSpeedValid = false;
+    mGpsSpeedFresh = false;
     mHrCounter.reset();
     mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
     mHrOpticalBpm = 0;
@@ -718,7 +728,22 @@ void Service::processTrack()
     mTrackData.lapDistance = mDistanceCounter.getLapValueActive();
 
     // Speed, m/s
-    mTrackData.speed       = mSpeedCounter.getCurrent();
+    //
+    // The live speed and pace shown to the user are the rolling-window mean of
+    // the GPS speed, not the latest sample: a single sample's noise moves the
+    // readout far more than any real change of effort does. Fed here rather than
+    // from the GPS_SPEED callback so the window advances once per track tick even
+    // when a sample is missing, which ages a lost fix out of the window instead
+    // of holding it forward. Advanced only while ACTIVE, so the readout freezes
+    // for the duration of a pause. That is a deliberate change:
+    // VariableCounter::add() latches its current value before its own pause
+    // check, so the old readout went on tracking the raw speed of a standing
+    // rider while the activity was paused.
+    if (mTrackState == Track::State::ACTIVE) {
+        mSpeedSmoother.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh);
+        mGpsSpeedFresh = false;
+    }
+    mTrackData.speed       = mSpeedSmoother.getSpeed();
     mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed    = mSpeedCounter.getMaximum();
     mTrackData.avgLapSpeed = speedFromTotals(mTrackData.lapDistance, mTrackData.lapTime);
@@ -726,7 +751,7 @@ void Service::processTrack()
 
     // Pace, s/m
     const float kMinSpeed = mSpeedCounter.getMinValid();
-    mTrackData.pace    = getPace(mTrackData.speed, kMinSpeed);
+    mTrackData.pace    = mSpeedSmoother.getPace();
     mTrackData.lapPace = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
     // HR
@@ -974,6 +999,9 @@ void Service::pauseTrack(bool pause)
         mTimeCounter.resume();
         mDistanceCounter.resume();
         mSpeedCounter.resume();
+        // Drop the pre-pause window: those samples describe the effort before
+        // the break, so blending them into the resumed readout would be wrong.
+        mSpeedSmoother.reset();
         mHrCounter.resume();
         mAltitudeCounter.resume();
 

@@ -10,6 +10,7 @@
 #include "SDK/Metrics/MonotonicTime.hpp"
 #include "SDK/Metrics/MonotonicCounter.hpp"
 #include "SDK/Metrics/VariableCounter.hpp"
+#include "SDK/Metrics/SpeedSmoother.hpp"
 #include "SDK/Metrics/DeltaCounter.hpp"
 #include "SDK/Metrics/ThrottledSample.hpp"
 #include "SDK/Filters/SimpleLPF.hpp"
@@ -43,6 +44,12 @@ private:
 
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
     static constexpr float    skFusionSampleRateHz   = 100.0f;
+
+    /// Window, in 1 Hz track ticks, over which the live pace / speed readout is
+    /// averaged. Ten seconds cuts the GPS speed noise to about a third -- enough
+    /// to hold a target pace by -- while still tracking a real change of effort
+    /// fast enough to be useful inside an interval repeat.
+    static constexpr std::size_t skPaceSmoothingTicks = 10;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -87,6 +94,7 @@ private:
     } mGradeData{};
     float       mGpsSpeedMs       = 0.0f; ///< Latest raw GPS speed (instantaneous source).
     bool        mGpsSpeedValid    = false;
+    bool        mGpsSpeedFresh    = false; ///< A speed sample arrived since the last track tick.
     bool        mGpsDeadReckoning = false;
     std::time_t mLastCalibUtc     = 0;   ///< For per-tick delta_t.
 
@@ -96,6 +104,9 @@ private:
     SDK::Metric::MonotonicCounter<std::time_t>          mTimeCounter;
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
+    /// Smooths the GPS speed for the live pace / speed readout only; the FIT
+    /// records, averages and maxima stay on the raw samples in mSpeedCounter.
+    SDK::Metric::SpeedSmoother<skPaceSmoothingTicks>    mSpeedSmoother;
     SDK::Metric::VariableCounter                        mHrCounter;
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.
