@@ -17,6 +17,8 @@
 #include "SDK/Simulator/OS/OS.hpp"
 #include "touchgfx/Utils.hpp"
 
+#include <cstdio>
+
 // GetTickCount64() is Windows-only. Provide a portable wrapper.
 #ifndef _WIN32
 #include <cstdint>

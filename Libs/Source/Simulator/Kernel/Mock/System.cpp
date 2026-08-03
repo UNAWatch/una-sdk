@@ -5,7 +5,6 @@
 
 // GetTickCount64() and Sleep() are Windows-only. Provide portable replacements.
 #ifndef _WIN32
-#include <cstdint>
 #include <time.h>
 #include <unistd.h>
 static inline uint64_t GetTickCount64()
