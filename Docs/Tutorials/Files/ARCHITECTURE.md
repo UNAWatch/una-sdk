@@ -201,9 +201,9 @@ void Service::loadSettings() {
                 int32_t activityType = static_cast<int32_t>(mActivityType);
                 int32_t displayMode = static_cast<int32_t>(mDisplayMode);
 
-                reader.getInt("decimalCounter", decimalCounter);
-                reader.getInt("activityType", activityType);
-                reader.getInt("displayMode", displayMode);
+                reader.get("decimalCounter", decimalCounter);
+                reader.get("activityType", activityType);
+                reader.get("displayMode", displayMode);
 
                 // Validate and convert back to types
                 mDecimalCounter = decimalCounter;
@@ -232,11 +232,11 @@ void Service::saveSettings() {
     auto file = mKernel.fs.file("settings.json");
     if (file && file->open(SDK::Interface::IFile::Mode::WRITE)) {
         SDK::JsonStreamWriter writer(file.get());
-        writer.startObject();
+        writer.startMap(3);
         writer.add("decimalCounter", mDecimalCounter);
-        writer.add("activityType", static_cast<int>(mActivityType));
-        writer.add("displayMode", static_cast<int>(mDisplayMode));
-        writer.endObject();
+        writer.add("activityType", static_cast<int32_t>(mActivityType));
+        writer.add("displayMode", static_cast<int32_t>(mDisplayMode));
+        writer.endMap();
         file->close();
         LOG_INFO("Settings saved to file\n");
     } else {
