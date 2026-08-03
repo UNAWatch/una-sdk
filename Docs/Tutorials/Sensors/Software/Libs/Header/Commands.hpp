@@ -5,7 +5,6 @@
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
 
-#include <array>
 #include <cstdint>
 
 // Force 4-byte alignment for all message structures
@@ -197,7 +196,7 @@ namespace CustomMessage {
         {}
 
         explicit StatsValues(float serviceCpuPct, float guiCpuPct, float txMsgRate,
-                 float rxMsgRate, float txByteRate, float rxByteRate)
+                             float rxMsgRate, float txByteRate, float rxByteRate)
             : StatsValues()
         {
             this->serviceCpuPct = serviceCpuPct;
