@@ -32,6 +32,48 @@ set(CMAKE_CXX_STANDARD 17)
 # Add this to your CMakeLists.txt is you want verbose compiler log
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# Make the build independent of where the SDK and the app are checked out.
+#
+# __FILE__ reaches .rodata two ways: assert() (no NDEBUG anywhere, so newlib's
+# __assert_func keeps it) and UnaLogger's __FILENAME__, which trims to a basename
+# only at *runtime*. SDK and app sources both compile through absolute paths, so
+# the same source built elsewhere produces different bytes.
+#
+# -fmacro-prefix-map rewrites __FILE__ only: logged basenames are unchanged and
+# debug info keeps real paths, which -ffile-prefix-map would have broken.
+#
+# ABSOLUTE, not REALPATH: the compiler sees the path as CMake spells it
+# ("$ENV{UNA_SDK}/Libs/...", see cmake/una-sdk.cmake) and CMake does not resolve
+# symlinks, so a REALPATH prefix silently stops matching whenever UNA_SDK is
+# reached through one (a symlinked checkout, or macOS /tmp -> /private/tmp).
+get_filename_component(UNA_SDK_ABSPATH "$ENV{UNA_SDK}" ABSOLUTE)
+add_compile_options(
+    $<$<COMPILE_LANGUAGE:C,CXX>:-fmacro-prefix-map=${UNA_SDK_ABSPATH}=/una-sdk>
+)
+
+# App sources live in sibling directories above the project dir, so CMake compiles
+# them absolutely too -- and 7 of the 8 example apps assert in their own sources.
+# Broadest first: where two prefixes both match, GCC applies the one given *last*.
+set(_una_app_prefix_maps "")
+get_filename_component(_una_abs "${CMAKE_SOURCE_DIR}" ABSOLUTE)
+list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app")
+if(DEFINED LIBS_PATH)
+    get_filename_component(_una_abs "${LIBS_PATH}" ABSOLUTE)
+    list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app-libs")
+endif()
+if(DEFINED TOUCHGFX_PATH)
+    get_filename_component(_una_abs "${TOUCHGFX_PATH}" ABSOLUTE)
+    list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app-gui")
+endif()
+foreach(_una_map IN LISTS _una_app_prefix_maps)
+    add_compile_options(
+        $<$<COMPILE_LANGUAGE:C,CXX>:-fmacro-prefix-map=${_una_map}>
+    )
+endforeach()
+unset(_una_abs)
+unset(_una_map)
+unset(_una_app_prefix_maps)
+
 # Common compile options (match CubeIDE exactly)
 add_compile_options(
     -mcpu=cortex-m33
