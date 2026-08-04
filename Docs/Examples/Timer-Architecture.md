@@ -68,7 +68,6 @@ public:
 private:
     SDK::Kernel&          mKernel;
     bool                  mGuiStarted;
-    CustomMessage::Sender  mGuiSender;
     TimerManager          mTimerManager;
     SDK::HomeWidget       mWidget;
 
@@ -120,7 +119,8 @@ void Service::onFired(const Timer& timer)
 {
     playEffect(timer.effect);                 // backlight + buzzer/vibro pattern
     if (mGuiStarted) {
-        mGuiSender.fired(timer, false);        // GUI is up -> fired in-app
+        // GUI is up -> fired in-app
+        SDK::send_msg<CustomMessage::TimerFired>(mKernel, timer, false);
     } else {
         // Launch the GUI, then deliver the fire once it signals it is running.
         // (RequestAppRunGui)
@@ -257,10 +257,30 @@ struct TimerStateMsg : public SDK::MessageBase {
     uint32_t      remainingMs;  // frozen remainder (PAUSED)
     uint16_t      durationSec;
     Timer::Effect effect;
+
+    TimerStateMsg();            // type id + defaults
+    TimerStateMsg(TimerState state, uint32_t endTick, uint32_t remainingMs,
+                  uint16_t durationSec, Timer::Effect effect);   // delegates to the above
 };
 ```
 
-`TimerFired` adds a `background` flag (true when the fire happened while the GUI was closed), and the two recents messages carry a fixed three-entry `RecentEntry[]` by value. A `Sender` helper allocates, fills, sends, and releases each pool message for both directions.
+`TimerFired` adds a `background` flag (true when the fire happened while the GUI was closed), and the two recents messages carry a fixed three-entry `RecentEntry[]` by value.
+
+Each message type owns its field filling: alongside the defaulting default constructor, it has a constructor taking the fields it carries, delegating to that default. Sending is then one call in either direction — `SDK::send_msg<T>(kernel, args...)` allocates the message from the kernel pool, forwards `args...` to the constructor, sends it, and releases it, returning `false` if allocation or the send failed:
+
+```cpp
+// Service --> GUI
+SDK::send_msg<CustomMessage::TimerStateMsg>(mKernel, s.state, s.endTick, s.remainingMs,
+                                            s.durationSec, s.effect);
+SDK::send_msg<CustomMessage::TimerFired>(mKernel, timer, false);
+SDK::send_msg<CustomMessage::TimerRecents>(mKernel, list);
+
+// GUI --> Service
+SDK::send_msg<CustomMessage::TimerStart>(mKernel, timer.durationSec, timer.effect);
+SDK::send_msg<CustomMessage::TimerControl>(mKernel, CustomMessage::TimerCmd::PAUSE);
+```
+
+There is no per-app sender class. See [Alarm-Architecture.md](Alarm-Architecture.md#sending-messages) for the full `send_msg` / `make_msg` contract, including when a reply matters.
 
 **Message summary**:
 
@@ -378,7 +398,7 @@ una_app_build_app()
 
 - `Timer.hpp` — the shared `Timer` struct, `TimerState`, and the recents cap (single source of truth)
 - `TimerManager` — the countdown state machine and JSON recents store (host-testable over an injected tick)
-- `Commands.hpp` — the service↔GUI message contract and `Sender`
+- `Commands.hpp` — the service↔GUI message contract
 - `Service` — the service entry point, message loop, alerts, and home-widget pump
 
 ### Testability

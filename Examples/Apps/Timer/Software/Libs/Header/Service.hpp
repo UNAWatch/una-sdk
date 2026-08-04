@@ -32,7 +32,6 @@ private:
 
     SDK::Kernel&          mKernel;
     bool                  mGuiStarted;
-    CustomMessage::Sender mGuiSender;
     TimerManager          mTimerManager;
     SDK::HomeWidget       mWidget;
 

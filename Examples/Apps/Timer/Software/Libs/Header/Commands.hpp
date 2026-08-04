@@ -4,7 +4,6 @@
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
-#include "SDK/Kernel/Kernel.hpp"
 
 #include "Timer.hpp"
 #include <vector>
@@ -38,6 +37,25 @@ namespace CustomMessage {
         Timer::Effect effect;
     };
 
+    /**
+     * @brief Copy up to kMaxRecents timers into a packed RecentEntry array.
+     * @return The number actually copied, for the message's count field.
+     *
+     * Shared by the two recents messages, which carry the same payload in
+     * opposite directions.
+     */
+    inline uint8_t packRecents(RecentEntry (&entries)[kMaxRecents],
+                               const std::vector<Timer>& list)
+    {
+        const uint8_t count = static_cast<uint8_t>(
+            list.size() < kMaxRecents ? list.size() : kMaxRecents);
+        for (uint8_t i = 0; i < count; ++i) {
+            entries[i].durationSec = list[i].durationSec;
+            entries[i].effect      = list[i].effect;
+        }
+        return count;
+    }
+
     /** @brief Sub-command carried by a TIMER_CONTROL message. */
     enum class TimerCmd : uint8_t {
         PAUSE,
@@ -58,6 +76,13 @@ namespace CustomMessage {
             , durationSec(0)
             , effect(Timer::EFFECT_BEEP_AND_VIBRO)
         {}
+
+        TimerStart(uint16_t durationSec, Timer::Effect effect)
+            : TimerStart()
+        {
+            this->durationSec = durationSec;
+            this->effect      = effect;
+        }
     };
 
     struct TimerControl : public SDK::MessageBase {
@@ -66,6 +91,12 @@ namespace CustomMessage {
             : SDK::MessageBase(TIMER_CONTROL)
             , cmd(TimerCmd::STOP)
         {}
+
+        explicit TimerControl(TimerCmd cmd)
+            : TimerControl()
+        {
+            this->cmd = cmd;
+        }
     };
 
     struct TimerRecentsSave : public SDK::MessageBase {
@@ -76,6 +107,12 @@ namespace CustomMessage {
             , entries{}
             , count(0)
         {}
+
+        explicit TimerRecentsSave(const std::vector<Timer>& list)
+            : TimerRecentsSave()
+        {
+            this->count = packRecents(this->entries, list);
+        }
     };
 
     // -- Service --> GUI ------------------------------------------------------
@@ -98,6 +135,17 @@ namespace CustomMessage {
             , durationSec(0)
             , effect(Timer::EFFECT_BEEP_AND_VIBRO)
         {}
+
+        TimerStateMsg(TimerState state, uint32_t endTick, uint32_t remainingMs,
+                      uint16_t durationSec, Timer::Effect effect)
+            : TimerStateMsg()
+        {
+            this->state       = static_cast<uint8_t>(state);
+            this->endTick     = endTick;
+            this->remainingMs = remainingMs;
+            this->durationSec = durationSec;
+            this->effect      = effect;
+        }
     };
 
     struct TimerFired : public SDK::MessageBase {
@@ -110,6 +158,14 @@ namespace CustomMessage {
             , effect(Timer::EFFECT_BEEP_AND_VIBRO)
             , background(false)
         {}
+
+        TimerFired(const Timer& timer, bool background)
+            : TimerFired()
+        {
+            this->durationSec = timer.durationSec;
+            this->effect      = timer.effect;
+            this->background  = background;
+        }
     };
 
     struct TimerRecents : public SDK::MessageBase {
@@ -120,122 +176,13 @@ namespace CustomMessage {
             , entries{}
             , count(0)
         {}
+
+        explicit TimerRecents(const std::vector<Timer>& list)
+            : TimerRecents()
+        {
+            this->count = packRecents(this->entries, list);
+        }
     };
-
-
-// Helper wrapper: constructs, sends and releases the pool message in one call.
-class Sender {
-public:
-    Sender(const SDK::Kernel &kernel) :
-            mKernel(kernel)
-    {
-    }
-    virtual ~Sender() = default;
-
-    // -- GUI --> Service --------------------------------------------------
-
-    bool start(uint16_t durationSec, Timer::Effect effect)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<TimerStart>();
-        if (msg) {
-            msg->durationSec = durationSec;
-            msg->effect      = effect;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool control(TimerCmd cmd)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<TimerControl>();
-        if (msg) {
-            msg->cmd = cmd;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool pause()  { return control(TimerCmd::PAUSE);  }
-    bool resume() { return control(TimerCmd::RESUME); }
-    bool reset()  { return control(TimerCmd::RESET);  }
-    bool stop()   { return control(TimerCmd::STOP);   }
-    bool repeat() { return control(TimerCmd::REPEAT); }
-    bool replayAlert() { return control(TimerCmd::REPLAY_ALERT); }
-
-    bool saveRecents(const std::vector<Timer>& list)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<TimerRecentsSave>();
-        if (msg) {
-            msg->count = static_cast<uint8_t>(
-                list.size() < kMaxRecents ? list.size() : kMaxRecents);
-            for (uint8_t i = 0; i < msg->count; ++i) {
-                msg->entries[i].durationSec = list[i].durationSec;
-                msg->entries[i].effect      = list[i].effect;
-            }
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    // -- Service --> GUI --------------------------------------------------
-
-    bool sendState(TimerState state, uint32_t endTick, uint32_t remainingMs,
-                   uint16_t durationSec, Timer::Effect effect)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<TimerStateMsg>();
-        if (msg) {
-            msg->state       = static_cast<uint8_t>(state);
-            msg->endTick     = endTick;
-            msg->remainingMs = remainingMs;
-            msg->durationSec = durationSec;
-            msg->effect      = effect;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool fired(const Timer& timer, bool background)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<TimerFired>();
-        if (msg) {
-            msg->durationSec = timer.durationSec;
-            msg->effect      = timer.effect;
-            msg->background  = background;
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-    bool sendRecents(const std::vector<Timer>& list)
-    {
-        bool status = false;
-        auto *msg = mKernel.comm.allocateMessage<TimerRecents>();
-        if (msg) {
-            msg->count = static_cast<uint8_t>(
-                list.size() < kMaxRecents ? list.size() : kMaxRecents);
-            for (uint8_t i = 0; i < msg->count; ++i) {
-                msg->entries[i].durationSec = list[i].durationSec;
-                msg->entries[i].effect      = list[i].effect;
-            }
-            status = mKernel.comm.sendMessage(msg);
-            mKernel.comm.releaseMessage(msg);
-        }
-        return status;
-    }
-
-private:
-    const SDK::Kernel &mKernel;
-};
 
 
 } // namespace CustomMessage

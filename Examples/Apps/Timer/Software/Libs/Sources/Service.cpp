@@ -23,7 +23,6 @@ static constexpr uint32_t kFiredDeliveryTimeoutMs = 10000;
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
         , mGuiStarted(false)
-        , mGuiSender(kernel)
         , mTimerManager(kernel)
         , mWidget(kernel)
 {
@@ -137,13 +136,14 @@ void Service::onStartGUI()
     // routes straight to the Fired screen. A state update sent before it would
     // route the blank Startup screen to Main, flashing it before Fired takes over.
     if (mPendingFired) {
-        mGuiSender.fired(mPendingTimer, true);   // GUI was closed -> background fire
+        // GUI was closed -> background fire
+        SDK::send_msg<CustomMessage::TimerFired>(mKernel, mPendingTimer, true);
         mPendingFired = false;
     }
 
     // Bring the GUI up to date: current countdown, then recents.
     sendStateToGui();
-    mGuiSender.sendRecents(mTimerManager.getRecents());
+    SDK::send_msg<CustomMessage::TimerRecents>(mKernel, mTimerManager.getRecents());
 }
 
 void Service::onStopGUI()
@@ -211,7 +211,8 @@ void Service::sendStateToGui()
         return;
     }
     TimerManager::State s = mTimerManager.getState();
-    mGuiSender.sendState(s.state, s.endTick, s.remainingMs, s.durationSec, s.effect);
+    SDK::send_msg<CustomMessage::TimerStateMsg>(mKernel, s.state, s.endTick, s.remainingMs,
+                                                s.durationSec, s.effect);
 }
 
 void Service::pumpWidget(uint32_t now, uint32_t& sleepTime)
@@ -358,7 +359,8 @@ void Service::onFired(const Timer& timer)
     playEffect(timer.effect);
 
     if (mGuiStarted) {
-        mGuiSender.fired(timer, false);   // GUI is up -> fired in-app
+        // GUI is up -> fired in-app
+        SDK::send_msg<CustomMessage::TimerFired>(mKernel, timer, false);
     } else {
         // Launch the GUI, then deliver the fire once it signals it is running.
         auto *msg = mKernel.comm.allocateMessage<SDK::Message::RequestAppRunGui>();
@@ -375,6 +377,6 @@ void Service::onFired(const Timer& timer)
 void Service::onRecentsChanged(const std::vector<Timer>& list)
 {
     if (mGuiStarted) {
-        mGuiSender.sendRecents(list);
+        SDK::send_msg<CustomMessage::TimerRecents>(mKernel, list);
     }
 }
