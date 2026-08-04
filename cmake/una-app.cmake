@@ -42,6 +42,9 @@ set(CMAKE_CXX_STANDARD 17)
 # -fmacro-prefix-map rewrites __FILE__ only: logged basenames are unchanged and
 # debug info keeps real paths, which -ffile-prefix-map would have broken.
 #
+# Unprobed, unlike -fcyclomatic-complexity below: that one exists only in ST's
+# fork, while -fmacro-prefix-map has been mainline GCC since 8.
+#
 # ABSOLUTE, not REALPATH: the compiler sees the path as CMake spells it
 # ("$ENV{UNA_SDK}/Libs/...", see cmake/una-sdk.cmake) and CMake does not resolve
 # symlinks, so a REALPATH prefix silently stops matching whenever UNA_SDK is
@@ -52,16 +55,20 @@ add_compile_options(
 )
 
 # App sources live in sibling directories above the project dir, so CMake compiles
-# them absolutely too -- and 7 of the 8 example apps assert in their own sources.
+# them absolutely too, and several of the example apps assert in their own sources.
 # Broadest first: where two prefixes both match, GCC applies the one given *last*.
+#
+# Truthy, not DEFINED: get_filename_component("" ABSOLUTE) returns the app's own
+# source dir, so a defined-but-empty LIBS_PATH would emit that as a map *after*
+# the one above and, by that same last-wins rule, relabel the app's own sources.
 set(_una_app_prefix_maps "")
 get_filename_component(_una_abs "${CMAKE_SOURCE_DIR}" ABSOLUTE)
 list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app")
-if(DEFINED LIBS_PATH)
+if(LIBS_PATH)
     get_filename_component(_una_abs "${LIBS_PATH}" ABSOLUTE)
     list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app-libs")
 endif()
-if(DEFINED TOUCHGFX_PATH)
+if(TOUCHGFX_PATH)
     get_filename_component(_una_abs "${TOUCHGFX_PATH}" ABSOLUTE)
     list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app-gui")
 endif()
