@@ -3,6 +3,7 @@
 #include <gui/common/FrontendApplication.hpp>
 
 #include "SDK/Kernel/KernelProviderGUI.hpp"
+#include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
 #include <algorithm>
@@ -14,10 +15,15 @@
 // Preset durations (seconds) shown at the top of the Main list.
 static constexpr uint16_t kPresetSec[] = { 60, 180, 300, 600, 900, 1800, 3600 };
 
+// Every countdown control is the same one-field message; only the sub-command differs.
+static void sendControl(const SDK::Kernel& kernel, CustomMessage::TimerCmd cmd)
+{
+    SDK::send_msg<CustomMessage::TimerControl>(kernel, cmd);
+}
+
 Model::Model()
     : modelListener(nullptr)
     , mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
-    , mSrvSender(mKernel)
 {
     SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
     SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this);
@@ -83,7 +89,7 @@ void Model::exitApp()
 
 void Model::startTimer(const Timer& timer)
 {
-    mSrvSender.start(timer.durationSec, timer.effect);
+    SDK::send_msg<CustomMessage::TimerStart>(mKernel, timer.durationSec, timer.effect);
 
     // Remember custom and modified-preset timers as recents; an unchanged preset
     // is already offered in the list, so it is not duplicated.
@@ -112,12 +118,12 @@ int16_t Model::editTimerIndex() const
     return 0;   // not in either list -> New
 }
 
-void Model::pauseTimer()  { mSrvSender.pause();  }
-void Model::resumeTimer() { mSrvSender.resume(); }
-void Model::resetTimer()  { mSrvSender.reset();  }
-void Model::stopTimer()   { mSrvSender.stop();   }
-void Model::repeatTimer() { mSrvSender.repeat(); }
-void Model::replayAlert() { mSrvSender.replayAlert(); }
+void Model::pauseTimer()  { sendControl(mKernel, CustomMessage::TimerCmd::PAUSE);  }
+void Model::resumeTimer() { sendControl(mKernel, CustomMessage::TimerCmd::RESUME); }
+void Model::resetTimer()  { sendControl(mKernel, CustomMessage::TimerCmd::RESET);  }
+void Model::stopTimer()   { sendControl(mKernel, CustomMessage::TimerCmd::STOP);   }
+void Model::repeatTimer() { sendControl(mKernel, CustomMessage::TimerCmd::REPEAT); }
+void Model::replayAlert() { sendControl(mKernel, CustomMessage::TimerCmd::REPLAY_ALERT); }
 
 uint32_t Model::getRemainingMs() const
 {
@@ -158,7 +164,7 @@ void Model::addRecent(const Timer& timer)
         mRecents.resize(CustomMessage::kMaxRecents);
     }
 
-    mSrvSender.saveRecents(mRecents);
+    SDK::send_msg<CustomMessage::TimerRecentsSave>(mKernel, mRecents);
 }
 
 void Model::removeRecent(const Timer& timer)
@@ -168,7 +174,7 @@ void Model::removeRecent(const Timer& timer)
 
     // A preset (not in recents) leaves the list unchanged -- nothing to persist.
     if (mRecents.size() != before) {
-        mSrvSender.saveRecents(mRecents);
+        SDK::send_msg<CustomMessage::TimerRecentsSave>(mKernel, mRecents);
     }
 }
 
