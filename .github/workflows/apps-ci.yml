@@ -131,7 +131,8 @@ jobs:
     container: xanderhendriks/stm32cubeide:16.0
     env:
       # Workout asserts in its own Libs sources and has a GUI, so one build
-      # exercises the SDK, LIBS_PATH and TOUCHGFX_PATH prefixes together.
+      # exercises the SDK and LIBS_PATH prefixes. The other two need a probe
+      # source injected below -- see the note on that step.
       APP: Workout
     steps:
       - name: Setup GIT
@@ -157,20 +158,41 @@ jobs:
           chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-gcc | head -n 1)
           chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-g++ | head -n 1)
           export UNA_SDK=$GITHUB_WORKSPACE
+          # Two of the four prefixes cover no source in this repo: no app keeps a
+          # .cpp beside its CMakeLists.txt, and the GUI's only __FILE__ strings come
+          # from SDK headers, so /una-app and /una-app-gui are absent from every
+          # app we build. Give each of those roots a translation unit that
+          # materialises __FILE__, in the throwaway copy only, so a dead prefix
+          # becomes observable. The probe is unreferenced, so --gc-sections drops it
+          # before it reaches the .elf -- the check step reads the objects instead.
+          #
+          # A function, not `const char probe[] = __FILE__`: at file scope in C++
+          # that array is const and so has internal linkage, and an unreferenced
+          # static is discarded before it ever reaches the object file.
+          probe='const char* unaPrefixMapProbe() { return __FILE__; }'
           # The two roots differ in depth and in length, so a path that survives
           # into the binary changes its bytes rather than just its contents.
           for root in /tmp/one /tmp/a/rather/deeper/two; do
             mkdir -p "$root"
             cp -a "$GITHUB_WORKSPACE/Examples/Apps/$APP" "$root/"
+            apps="$root/$APP/Software/Apps"
+            # touchgfx.cmake globs gui/src, so the GUI probe needs no edit.
+            printf '%s\n' "$probe" > "$apps/TouchGFX-GUI/gui/src/UnaPrefixMapProbe.cpp"
+            # Nothing globs the project dir, so name that one in SERVICE_SOURCES.
+            printf '%s\n' "$probe" > "$apps/$APP-CMake/UnaPrefixMapProbe.cpp"
+            sed -i 's|^set(SERVICE_SOURCES|set(SERVICE_SOURCES\n    ${CMAKE_CURRENT_SOURCE_DIR}/UnaPrefixMapProbe.cpp|' \
+              "$apps/$APP-CMake/CMakeLists.txt"
             cd "$root/$APP/Software/Apps/$APP-CMake"
             mkdir -p build
             cd build
+            # No CMAKE_BUILD_TYPE on purpose: Release would define NDEBUG, and
+            # every assert path this job looks for would vanish with it.
             cmake ..
             make -j$(nproc)
           done
 
       # Steps in this container run under `sh -e`, not bash, so keep this POSIX.
-      - name: Require identical bytes and no build path in the app
+      - name: Require identical bytes, no build path, and every prefix still live
         run: |
           one=/tmp/one/$APP/Software/Apps/$APP-CMake/build
           two=/tmp/a/rather/deeper/two/$APP/Software/Apps/$APP-CMake/build
@@ -191,17 +213,38 @@ jobs:
               exit 1
             fi
           done
+          # Absence of a host path is only evidence if there was a path to rewrite.
+          # NDEBUG, a folded assert or a respelled prefix can empty the binary of
+          # __FILE__ entirely, and then everything above passes while proving
+          # nothing. So require each rewritten root to still be present.
+          for want in /una-sdk/ /una-app-libs/; do
+            if ! grep -qaF -e "$want" "$a"; then
+              echo "::error::no '$want' string in $APP -- that prefix covers nothing now, so the comparison above proves nothing"
+              exit 1
+            fi
+          done
+          # /una-app and /una-app-gui reach only the probe objects, never the .elf.
+          for want in /una-app/UnaPrefixMapProbe.cpp /una-app-gui/gui/src/UnaPrefixMapProbe.cpp; do
+            hits=$(find "$one" \( -name '*.o' -o -name '*.obj' \) -exec grep -laF -e "$want" {} + | wc -l)
+            if [ "$hits" -eq 0 ]; then
+              echo "::error::no object holds '$want' -- either that prefix stopped matching, or the probe was not compiled (check the sed anchor and the gui/src glob)"
+              exit 1
+            fi
+          done
 
   release:
     runs-on: ubuntu-latest
-    needs: [cmake-build, pack-variants]
+    needs: [cmake-build, pack-variants, reproducible-build]
     # pack-variants is skipped when no variants exist; that must not skip the
     # release with it (skipped needs propagate by default), so spell out the
-    # acceptable results instead.
+    # acceptable results instead. reproducible-build has no matrix and no `if`,
+    # so it always runs and success is the only acceptable result: a published
+    # .uapp that cannot be rebuilt from its source is the thing we are avoiding.
     if: >-
       startsWith(github.ref, 'refs/tags/apps-v') &&
       !cancelled() &&
       needs.cmake-build.result == 'success' &&
+      needs.reproducible-build.result == 'success' &&
       (needs.pack-variants.result == 'success' || needs.pack-variants.result == 'skipped')
     permissions:
       contents: write
