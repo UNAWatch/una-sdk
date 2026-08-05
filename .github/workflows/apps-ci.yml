@@ -158,34 +158,49 @@ jobs:
           chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-gcc | head -n 1)
           chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-g++ | head -n 1)
           export UNA_SDK=$GITHUB_WORKSPACE
-          # Two of the four prefixes cover no source in this repo: no app keeps a
-          # .cpp beside its CMakeLists.txt, and the GUI's only __FILE__ strings come
-          # from SDK headers, so /una-app and /una-app-gui are absent from every
-          # app we build. Give each of those roots a translation unit that
-          # materialises __FILE__, in the throwaway copy only, so a dead prefix
-          # becomes observable. The probe is unreferenced, so --gc-sections drops it
-          # before it reaches the .elf -- the check step reads the objects instead.
+          # Three of the four prefixes are given a translation unit that materialises
+          # __FILE__, in the throwaway copy only, so that a dead prefix becomes
+          # observable rather than merely unwitnessed. /una-app and /una-app-gui have
+          # no witness at all otherwise -- no app keeps a .cpp beside its
+          # CMakeLists.txt, and the GUI's only __FILE__ strings come from SDK headers.
+          # /una-app-libs does have one, but only three discretionary asserts in this
+          # app's own Libs sources: refactoring those away would turn this job red on
+          # every PR and block releases, blaming the prefix for someone else's
+          # cleanup. A probe costs one line and removes the hostage.
           #
-          # A function, not `const char probe[] = __FILE__`: at file scope in C++
-          # that array is const and so has internal linkage, and an unreferenced
-          # static is discarded before it ever reaches the object file.
-          probe='const char* unaPrefixMapProbe() { return __FILE__; }'
+          # /una-sdk is left on incidental coverage: 14 contributors spread across SDK
+          # sources are not going to drain at once, and the SDK is not copied here, so
+          # probing it would mean editing the checkout the other jobs share.
+          #
+          # Each probe is unreferenced, so --gc-sections drops it before it reaches the
+          # .elf -- the check step reads the objects instead. Distinct names because
+          # the project-dir and Libs probes land in the same service .elf and would
+          # otherwise be a duplicate symbol. A function, not
+          # `const char probe[] = __FILE__`: at file scope in C++ that array is const
+          # and so has internal linkage, and an unreferenced static is discarded
+          # before it ever reaches the object file.
+          #
           # The two roots differ in depth and in length, so a path that survives
           # into the binary changes its bytes rather than just its contents.
           for root in /tmp/one /tmp/a/rather/deeper/two; do
             mkdir -p "$root"
             cp -a "$GITHUB_WORKSPACE/Examples/Apps/$APP" "$root/"
-            # Spelled for Workout's layout: several apps use Software/App instead,
-            # so changing APP means revisiting these two paths. Both writes are
-            # redirections, so a wrong layout fails here rather than later.
+            # Spelled for Workout's layout: several apps use Software/App instead, and
+            # not every app keeps its Libs sources in Libs/Sources, so changing APP
+            # means revisiting these paths. All three writes are redirections, so a
+            # wrong layout fails here rather than later.
             apps="$root/$APP/Software/Apps"
-            # touchgfx.cmake globs gui/src, so the GUI probe needs no edit.
-            printf '%s\n' "$probe" > "$apps/TouchGFX-GUI/gui/src/UnaPrefixMapProbe.cpp"
-            # Nothing globs the project dir, so name that one in SERVICE_SOURCES.
-            printf '%s\n' "$probe" > "$apps/$APP-CMake/UnaPrefixMapProbe.cpp"
+            # touchgfx.cmake globs gui/src and libs.cmake globs Libs/Sources, so only
+            # the project-dir probe needs naming in a source list.
+            printf 'const char* unaPrefixMapProbeGui() { return __FILE__; }\n' \
+              > "$apps/TouchGFX-GUI/gui/src/UnaPrefixMapProbe.cpp"
+            printf 'const char* unaPrefixMapProbeLibs() { return __FILE__; }\n' \
+              > "$root/$APP/Software/Libs/Sources/UnaPrefixMapProbe.cpp"
+            printf 'const char* unaPrefixMapProbeApp() { return __FILE__; }\n' \
+              > "$apps/$APP-CMake/UnaPrefixMapProbe.cpp"
             sed -i 's|^set(SERVICE_SOURCES|set(SERVICE_SOURCES\n    ${CMAKE_CURRENT_SOURCE_DIR}/UnaPrefixMapProbe.cpp|' \
               "$apps/$APP-CMake/CMakeLists.txt"
-            cd "$root/$APP/Software/Apps/$APP-CMake"
+            cd "$apps/$APP-CMake"
             mkdir -p build
             cd build
             # No CMAKE_BUILD_TYPE on purpose: Release would define NDEBUG, and
@@ -223,21 +238,31 @@ jobs:
           # Absence of a host path is only evidence if there was a path to rewrite.
           # NDEBUG, a folded assert or a respelled prefix can empty the binary of
           # __FILE__ entirely, and then everything above passes while proving
-          # nothing. So require each rewritten root to still be present.
-          for want in /una-sdk/ /una-app-libs/; do
+          # nothing. So require the rewritten root to still be present.
+          #
+          # This one is sound only *after* the host-path loop above, and only because
+          # of it: this repo is itself named una-sdk, so in CI the workspace is
+          # /__w/una-sdk/una-sdk and an entirely unrewritten SDK path still contains
+          # the substring "/una-sdk/". The preceding loop is what rules that out.
+          # Keep the two in this order, and don't lift this check out on its own.
+          for want in /una-sdk/; do
             if ! grep -qaF -e "$want" "$a"; then
               echo "::error::no '$want' string in $APP -- that prefix covers nothing now, so the comparison above proves nothing"
               exit 1
             fi
           done
-          # /una-app and /una-app-gui reach only the probe objects, never the .elf.
+          # The probed roots reach only the objects, never the .elf. *.obj never
+          # matches in this container -- the Makefile generator emits .o -- and is
+          # here so the same check runs unchanged against a local Ninja build.
           # Both roots, not just the first: they are injected identically today, so
           # one would do, but nothing here enforces that they stay identical.
-          for want in /una-app/UnaPrefixMapProbe.cpp /una-app-gui/gui/src/UnaPrefixMapProbe.cpp; do
+          for want in /una-app/UnaPrefixMapProbe.cpp \
+                      /una-app-libs/Sources/UnaPrefixMapProbe.cpp \
+                      /una-app-gui/gui/src/UnaPrefixMapProbe.cpp; do
             for dir in "$one" "$two"; do
               hits=$(find "$dir" \( -name '*.o' -o -name '*.obj' \) -exec grep -laF -e "$want" {} + | wc -l)
               if [ "$hits" -eq 0 ]; then
-                echo "::error::no object under $dir holds '$want' -- either that prefix stopped matching, or the probe was not compiled (check the sed anchor and the gui/src glob)"
+                echo "::error::no object under $dir holds '$want' -- either that prefix stopped matching, or the probe for it was not compiled (check the injection in the build step: the two globs and the sed anchor)"
                 exit 1
               fi
             done
