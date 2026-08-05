@@ -175,6 +175,9 @@ jobs:
           for root in /tmp/one /tmp/a/rather/deeper/two; do
             mkdir -p "$root"
             cp -a "$GITHUB_WORKSPACE/Examples/Apps/$APP" "$root/"
+            # Spelled for Workout's layout: several apps use Software/App instead,
+            # so changing APP means revisiting these two paths. Both writes are
+            # redirections, so a wrong layout fails here rather than later.
             apps="$root/$APP/Software/Apps"
             # touchgfx.cmake globs gui/src, so the GUI probe needs no edit.
             printf '%s\n' "$probe" > "$apps/TouchGFX-GUI/gui/src/UnaPrefixMapProbe.cpp"
@@ -196,11 +199,15 @@ jobs:
         run: |
           one=/tmp/one/$APP/Software/Apps/$APP-CMake/build
           two=/tmp/a/rather/deeper/two/$APP/Software/Apps/$APP-CMake/build
-          found=$(find "$one" "$two" -maxdepth 1 -name '*.uapp' | wc -l)
-          if [ "$found" -ne 2 ]; then
-            echo "::error::expected one .uapp from each build, found $found -- the checks below would have passed vacuously"
-            exit 1
-          fi
+          # Per directory, not two-across: a 2/0 split also totals two, and would
+          # reach cmp with one empty operand and report it as differing bytes.
+          for dir in "$one" "$two"; do
+            found=$(find "$dir" -maxdepth 1 -name '*.uapp' | wc -l)
+            if [ "$found" -ne 1 ]; then
+              echo "::error::expected exactly one .uapp in $dir, found $found -- the checks below would not have compared what they claim to"
+              exit 1
+            fi
+          done
           a=$(find "$one" -maxdepth 1 -name '*.uapp')
           b=$(find "$two" -maxdepth 1 -name '*.uapp')
           if ! cmp "$a" "$b"; then
@@ -224,12 +231,16 @@ jobs:
             fi
           done
           # /una-app and /una-app-gui reach only the probe objects, never the .elf.
+          # Both roots, not just the first: they are injected identically today, so
+          # one would do, but nothing here enforces that they stay identical.
           for want in /una-app/UnaPrefixMapProbe.cpp /una-app-gui/gui/src/UnaPrefixMapProbe.cpp; do
-            hits=$(find "$one" \( -name '*.o' -o -name '*.obj' \) -exec grep -laF -e "$want" {} + | wc -l)
-            if [ "$hits" -eq 0 ]; then
-              echo "::error::no object holds '$want' -- either that prefix stopped matching, or the probe was not compiled (check the sed anchor and the gui/src glob)"
-              exit 1
-            fi
+            for dir in "$one" "$two"; do
+              hits=$(find "$dir" \( -name '*.o' -o -name '*.obj' \) -exec grep -laF -e "$want" {} + | wc -l)
+              if [ "$hits" -eq 0 ]; then
+                echo "::error::no object under $dir holds '$want' -- either that prefix stopped matching, or the probe was not compiled (check the sed anchor and the gui/src glob)"
+                exit 1
+              fi
+            done
           done
 
   release:
