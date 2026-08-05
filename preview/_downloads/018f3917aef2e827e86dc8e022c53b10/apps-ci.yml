@@ -120,6 +120,78 @@ jobs:
           path: variants-out/${{ matrix.variant }}/*.uapp
           if-no-files-found: error
 
+  # The -fmacro-prefix-map prefixes in cmake/una-app.cmake fail *silently*: give an
+  # app a source root none of them cover, or respell LIBS_PATH, and the build still
+  # succeeds -- it just quietly goes back to baking the checkout path into .rodata.
+  # Nothing else in CI notices, because the matrix above builds every app from the
+  # one path where the SDK prefix happens to cover the app too. So build one app
+  # from two directories outside the SDK and require the bytes to match.
+  reproducible-build:
+    runs-on: ubuntu-latest
+    container: xanderhendriks/stm32cubeide:16.0
+    env:
+      # Workout asserts in its own Libs sources and has a GUI, so one build
+      # exercises the SDK, LIBS_PATH and TOUCHGFX_PATH prefixes together.
+      APP: Workout
+    steps:
+      - name: Setup GIT
+        run: |
+          # See the note in cmake-build: security.ubuntu.com hangs `apt update`.
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i 's#security\.ubuntu\.com/ubuntu#archive.ubuntu.com/ubuntu#g' {} +
+          apt-get update && apt-get install -y git python3-full python3-pip python-is-python3 cmake
+
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Install scripts requirements
+        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
+
+      - name: Build ${{ env.APP }} from two different directories
+        run: |
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-objcopy | head -n 1 | xargs dirname`:$PATH
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name make | head -n 1 | xargs dirname`:$PATH
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name make | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-gcc | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-g++ | head -n 1)
+          export UNA_SDK=$GITHUB_WORKSPACE
+          # The two roots differ in depth and in length, so a path that survives
+          # into the binary changes its bytes rather than just its contents.
+          for root in /tmp/one /tmp/a/rather/deeper/two; do
+            mkdir -p "$root"
+            cp -a "$GITHUB_WORKSPACE/Examples/Apps/$APP" "$root/"
+            cd "$root/$APP/Software/Apps/$APP-CMake"
+            mkdir -p build
+            cd build
+            cmake ..
+            make -j$(nproc)
+          done
+
+      # Steps in this container run under `sh -e`, not bash, so keep this POSIX.
+      - name: Require identical bytes and no build path in the app
+        run: |
+          one=/tmp/one/$APP/Software/Apps/$APP-CMake/build
+          two=/tmp/a/rather/deeper/two/$APP/Software/Apps/$APP-CMake/build
+          found=$(find "$one" "$two" -maxdepth 1 -name '*.uapp' | wc -l)
+          if [ "$found" -ne 2 ]; then
+            echo "::error::expected one .uapp from each build, found $found -- the checks below would have passed vacuously"
+            exit 1
+          fi
+          a=$(find "$one" -maxdepth 1 -name '*.uapp')
+          b=$(find "$two" -maxdepth 1 -name '*.uapp')
+          if ! cmp "$a" "$b"; then
+            echo "::error::$APP built at two paths produced different bytes"
+            exit 1
+          fi
+          for path in /tmp/one /tmp/a/rather/deeper/two "$GITHUB_WORKSPACE"; do
+            if grep -qaF -e "$path" "$a"; then
+              echo "::error::'$path' is baked into $APP -- a -fmacro-prefix-map prefix stopped matching"
+              exit 1
+            fi
+          done
+
   release:
     runs-on: ubuntu-latest
     needs: [cmake-build, pack-variants]
