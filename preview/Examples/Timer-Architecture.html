@@ -238,7 +238,6 @@
 <span class="k">private</span><span class="o">:</span>
 <span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w">          </span><span class="n">mKernel</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="n">mGuiStarted</span><span class="p">;</span>
-<span class="w">    </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Sender</span><span class="w">  </span><span class="n">mGuiSender</span><span class="p">;</span>
 <span class="w">    </span><span class="n">TimerManager</span><span class="w">          </span><span class="n">mTimerManager</span><span class="p">;</span>
 <span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">HomeWidget</span><span class="w">       </span><span class="n">mWidget</span><span class="p">;</span>
 
@@ -305,7 +304,8 @@ pumpWidget(now, sleepTime)               // may shorten it to the next whole sec
 <span class="p">{</span>
 <span class="w">    </span><span class="n">playEffect</span><span class="p">(</span><span class="n">timer</span><span class="p">.</span><span class="n">effect</span><span class="p">);</span><span class="w">                 </span><span class="c1">// backlight + buzzer/vibro pattern</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGuiStarted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">mGuiSender</span><span class="p">.</span><span class="n">fired</span><span class="p">(</span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span><span class="w">        </span><span class="c1">// GUI is up -&gt; fired in-app</span>
+<span class="w">        </span><span class="c1">// GUI is up -&gt; fired in-app</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerFired</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="c1">// Launch the GUI, then deliver the fire once it signals it is running.</span>
 <span class="w">        </span><span class="c1">// (RequestAppRunGui)</span>
@@ -468,10 +468,27 @@ pumpWidget(now, sleepTime)               // may shorten it to the next whole sec
 <span class="w">    </span><span class="kt">uint32_t</span><span class="w">      </span><span class="n">remainingMs</span><span class="p">;</span><span class="w">  </span><span class="c1">// frozen remainder (PAUSED)</span>
 <span class="w">    </span><span class="kt">uint16_t</span><span class="w">      </span><span class="n">durationSec</span><span class="p">;</span>
 <span class="w">    </span><span class="n">Timer</span><span class="o">::</span><span class="n">Effect</span><span class="w"> </span><span class="n">effect</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">TimerStateMsg</span><span class="p">();</span><span class="w">            </span><span class="c1">// type id + defaults</span>
+<span class="w">    </span><span class="n">TimerStateMsg</span><span class="p">(</span><span class="n">TimerState</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">endTick</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">remainingMs</span><span class="p">,</span>
+<span class="w">                  </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">durationSec</span><span class="p">,</span><span class="w"> </span><span class="n">Timer</span><span class="o">::</span><span class="n">Effect</span><span class="w"> </span><span class="n">effect</span><span class="p">);</span><span class="w">   </span><span class="c1">// delegates to the above</span>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">TimerFired</span></code> adds a <code class="docutils literal notranslate"><span class="pre">background</span></code> flag (true when the fire happened while the GUI was closed), and the two recents messages carry a fixed three-entry <code class="docutils literal notranslate"><span class="pre">RecentEntry[]</span></code> by value. A <code class="docutils literal notranslate"><span class="pre">Sender</span></code> helper allocates, fills, sends, and releases each pool message for both directions.</p>
+<p><code class="docutils literal notranslate"><span class="pre">TimerFired</span></code> adds a <code class="docutils literal notranslate"><span class="pre">background</span></code> flag (true when the fire happened while the GUI was closed), and the two recents messages carry a fixed three-entry <code class="docutils literal notranslate"><span class="pre">RecentEntry[]</span></code> by value.</p>
+<p>Each message type owns its field filling: alongside the defaulting default constructor, it has a constructor taking the fields it carries, delegating to that default. Sending is then one call in either direction — <code class="docutils literal notranslate"><span class="pre">SDK::send_msg&lt;T&gt;(kernel,</span> <span class="pre">args...)</span></code> allocates the message from the kernel pool, forwards <code class="docutils literal notranslate"><span class="pre">args...</span></code> to the constructor, sends it, and releases it, returning <code class="docutils literal notranslate"><span class="pre">false</span></code> if allocation or the send failed:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Service --&gt; GUI</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerStateMsg</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">endTick</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">remainingMs</span><span class="p">,</span>
+<span class="w">                                            </span><span class="n">s</span><span class="p">.</span><span class="n">durationSec</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">effect</span><span class="p">);</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerFired</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerRecents</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">list</span><span class="p">);</span>
+
+<span class="c1">// GUI --&gt; Service</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerStart</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">.</span><span class="n">durationSec</span><span class="p">,</span><span class="w"> </span><span class="n">timer</span><span class="p">.</span><span class="n">effect</span><span class="p">);</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerControl</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TimerCmd</span><span class="o">::</span><span class="n">PAUSE</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>There is no per-app sender class. See <a class="reference internal" href="Alarm-Architecture.html#sending-messages"><span class="std std-ref">Alarm-Architecture.md</span></a> for the full <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> / <code class="docutils literal notranslate"><span class="pre">make_msg</span></code> contract, including when a reply matters.</p>
 <p><strong>Message summary</strong>:</p>
 <table class="docutils align-default">
 <thead>
@@ -635,7 +652,7 @@ pumpWidget(now, sleepTime)               // may shorten it to the next whole sec
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Timer.hpp</span></code> — the shared <code class="docutils literal notranslate"><span class="pre">Timer</span></code> struct, <code class="docutils literal notranslate"><span class="pre">TimerState</span></code>, and the recents cap (single source of truth)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">TimerManager</span></code> — the countdown state machine and JSON recents store (host-testable over an injected tick)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — the service↔GUI message contract and <code class="docutils literal notranslate"><span class="pre">Sender</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> — the service↔GUI message contract</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> — the service entry point, message loop, alerts, and home-widget pump</p></li>
 </ul>
 </section>
