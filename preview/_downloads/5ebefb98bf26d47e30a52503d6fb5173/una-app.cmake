@@ -34,10 +34,19 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Make the build independent of where the SDK and the app are checked out.
 #
-# __FILE__ reaches .rodata two ways: assert() (no NDEBUG anywhere, so newlib's
-# __assert_func keeps it) and UnaLogger's __FILENAME__, which trims to a basename
-# only at *runtime*. SDK and app sources both compile through absolute paths, so
-# the same source built elsewhere produces different bytes.
+# __FILE__ reaches .rodata two ways: assert() (nothing here defines NDEBUG, so
+# newlib's __assert_func keeps it) and UnaLogger's __FILENAME__, which trims to a
+# basename only at *runtime*. SDK and app sources both compile through absolute
+# paths, so the same source built elsewhere produces different bytes.
+#
+# Configuring -DCMAKE_BUILD_TYPE=Release would define NDEBUG, which takes the
+# assert channel and only that one -- __FILENAME__ is gated on LOG_LEVEL. It
+# happens to empty a built app of these strings anyway, because assert is today
+# the only channel that contributes any: no translation unit that leaves
+# LOG_MODULE_PRX at its __FILENAME__ default goes on to call LOG_*. That is a
+# coincidence of the current sources, not a property of the flag, so the
+# reproducible-build CI job requires the rewritten prefixes to still be present
+# rather than trusting either channel to stay non-empty.
 #
 # -fmacro-prefix-map rewrites __FILE__ only: logged basenames are unchanged and
 # debug info keeps real paths, which -ffile-prefix-map would have broken.
