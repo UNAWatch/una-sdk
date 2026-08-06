@@ -184,7 +184,11 @@ bool Model::isTrackPaused() const
 
 std::time_t Model::getPausedSeconds() const
 {
-    if (mTrackState != Track::State::PAUSED || mNowSec < mPauseStartSec) {
+    // mPauseStartSec == 0 means the pause began before the clock was available
+    // and has not been adopted yet; report nothing rather than an epoch.
+    if (mTrackState != Track::State::PAUSED
+        || mPauseStartSec == 0
+        || mNowSec < mPauseStartSec) {
         return 0;
     }
     return mNowSec - mPauseStartSec;
@@ -314,6 +318,13 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             const std::time_t nowSec = std::mktime(&forEpoch);
             if (nowSec != static_cast<std::time_t>(-1)) {
                 mNowSec = nowSec;
+
+                // A pause that began before the clock arrived could not latch a
+                // start (see below); adopt the first real timestamp instead, so
+                // it counts from here rather than staying stuck at zero.
+                if (mTrackState == Track::State::PAUSED && mPauseStartSec == 0) {
+                    mPauseStartSec = mNowSec;
+                }
             }
 
             if (dateChanged) {
@@ -349,6 +360,10 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             if (mTrackState != msg->state) {
                 mTrackState = msg->state;
                 if (mTrackState == Track::State::PAUSED) {
+                    // mNowSec is 0 until the first LOCAL_TIME. Latching that and
+                    // then differencing it against a real epoch would report a
+                    // decades-long pause, so leave it unset (0) and let the
+                    // clock handler adopt the first real timestamp instead.
                     mPauseStartSec = mNowSec;
                 }
                 modelListener->onTrackState(mTrackState);
