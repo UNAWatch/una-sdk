@@ -90,7 +90,7 @@ void ActivityWriter::start(const AppInfo& info)
     // event
     mFit->defineMessage(L_EVENT, fit::mesgNum(fit::MesgNum::Event),
         {fit::field::Event::Timestamp, fit::field::Event::EventField,
-         fit::field::Event::EventType});
+         fit::field::Event::EventType, fit::field::Event::Data});
 
     defineRecordMessages();
 
@@ -115,7 +115,9 @@ void ActivityWriter::start(const AppInfo& info)
         {fit::field::Activity::Timestamp, fit::field::Activity::TotalTimerTime,
          fit::field::Activity::LocalTimestamp, fit::field::Activity::NumSessions});
 
-    addMessageEvent(info.timestamp, fit::EventType::Start);
+    // The rider started the activity, so this opening timer event is Manual
+    // regardless of whether auto-pause is enabled for the session.
+    addMessageEvent(info.timestamp, fit::EventType::Start, fit::TimerTrigger::Manual);
 
     // Header + all definitions are on disk: flush and drop the recovery marker.
     // getPosition() here is a clean record boundary, so a crash after this point
@@ -187,17 +189,21 @@ void ActivityWriter::writeFieldDescription(uint8_t devFieldNum, const char* name
         .write();
 }
 
-void ActivityWriter::pause(std::time_t timestamp)
+void ActivityWriter::pause(std::time_t timestamp, bool autoTrigger)
 {
     if (mFit) {
-        addMessageEvent(timestamp, fit::EventType::Stop);
+        addMessageEvent(timestamp, fit::EventType::Stop,
+                        autoTrigger ? fit::TimerTrigger::Auto
+                                    : fit::TimerTrigger::Manual);
     }
 }
 
-void ActivityWriter::resume(std::time_t timestamp)
+void ActivityWriter::resume(std::time_t timestamp, bool autoTrigger)
 {
     if (mFit) {
-        addMessageEvent(timestamp, fit::EventType::Start);
+        addMessageEvent(timestamp, fit::EventType::Start,
+                        autoTrigger ? fit::TimerTrigger::Auto
+                                    : fit::TimerTrigger::Manual);
     }
 }
 
@@ -361,12 +367,17 @@ void ActivityWriter::discard()
     mFile.reset();
 }
 
-void ActivityWriter::addMessageEvent(std::time_t t, fit::EventType type)
+void ActivityWriter::addMessageEvent(std::time_t t, fit::EventType type,
+                                     fit::TimerTrigger trigger)
 {
+    // Field order must match the L_EVENT definition. `data` is uint32 per the
+    // profile; decoders resolve it to the timer_trigger subfield because
+    // `event` is Timer.
     mFit->data(L_EVENT)
         .u32(unixToFitTimestamp(t))
         .u8(static_cast<uint8_t>(fit::Event::Timer))
         .u8(static_cast<uint8_t>(type))
+        .u32(static_cast<uint32_t>(trigger))
         .write();
 }
 

@@ -312,6 +312,10 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
     } else if (mSensorGpsSpeed.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsSpeed parser(data[0]);
         if (parser.isDataValid()) {
+            // These three latches also feed auto-pause (see updateAutoPause),
+            // which needs the same isSpeedValid() gate: a dead-reckoned speed is
+            // extrapolated, so in a tunnel it would otherwise fake the movement
+            // that triggers an auto-resume.
             mGpsSpeedMs    = parser.getSpeed();  // raw instantaneous speed
             mGpsSpeedValid = parser.isSpeedValid();  // already excludes dead reckoning
             mGpsSpeedFresh = true;   // consumed by the pace smoother each tick
@@ -433,12 +437,12 @@ void Service::handleEvent(const CustomMessage::SettingsSave& event)
 
 void Service::handleEvent(const CustomMessage::TrackPause& /*event*/)
 {
-    pauseTrack(true);
+    pauseTrack(true, PauseSource::MANUAL);
 }
 
 void Service::handleEvent(const CustomMessage::TrackResume& /*event*/)
 {
-    pauseTrack(false);
+    pauseTrack(false, PauseSource::MANUAL);
 }
 
 void Service::handleEvent(const CustomMessage::ManualLap& /*event*/)
@@ -494,6 +498,18 @@ void Service::notifyLapEnd()
     backlightOn();
     playBuzzerPattern(150, 3);
     playVibroPattern(SDK::Message::RequestVibroPlay::Effect::ALERT_750MS_100);
+}
+
+void Service::notifyAutoPause(bool paused)
+{
+    // Vibro only, and no forced backlight. Unlike a first fix or a lap end,
+    // auto-pause fires at every traffic light, so a buzzer or a 5 s backlight
+    // pulse each time would be both irritating and a needless battery cost.
+    // The on-screen paused indicator carries the state; this is just the cue to
+    // look. One pulse on pause, two on resume, so they are distinguishable
+    // without looking.
+    playVibroPattern(SDK::Message::RequestVibroPlay::Effect::STRONG_CLICK_100,
+                     paused ? 1 : 2);
 }
 
 void Service::notifyNewActivity()
@@ -679,6 +695,9 @@ void Service::startTrack(std::time_t utc)
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
 
+    mPauseSource = PauseSource::NONE;
+    mAutoPause.reset();
+
     mSummary = ActivitySummary{};
     mSummary.laps.reserve(10);
 
@@ -715,6 +734,11 @@ void Service::processTrack()
     // (processTrack) so it never re-powers sensors after the track ends.
     connectSensors();
 
+    // Evaluate auto-pause before anything else this tick, so that a transition
+    // takes effect on the map point, the FIT record and the auto-lap tests
+    // below rather than one second late.
+    updateAutoPause();
+
     // Creating map
     SDK::TrackMapBuilder::GpsPoint newPoint{ mGps.latitude, mGps.longitude };
     if (mGps.fix && mTrackState == Track::State::ACTIVE) {
@@ -741,11 +765,23 @@ void Service::processTrack()
     // VariableCounter::add() latches its current value before its own pause
     // check, so the old readout went on tracking the raw speed of a standing
     // rider while the activity was paused.
-    if (mTrackState == Track::State::ACTIVE) {
+    const bool moving = (mTrackState == Track::State::ACTIVE);
+    if (moving) {
         mSpeedSmoother.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh);
-        mGpsSpeedFresh = false;
     }
-    mTrackData.speed       = mSpeedSmoother.getSpeed();
+    // Consumed every tick, NOT only while active: updateAutoPause() reads this
+    // latch to tell a tick that brought a sample from one that did not, and it
+    // has to keep doing so while paused in order to notice the rider moving off
+    // again. Left set through a pause it would pin the detector to "always
+    // fresh", so a fix lost while stopped would auto-resume off a frozen speed.
+    mGpsSpeedFresh = false;
+
+    // A paused rider is, by definition, not moving. The smoother deliberately
+    // freezes while paused (see above), which was invisible when a pause always
+    // meant the action overlay was up -- but auto-pause leaves the track face on
+    // screen, where a frozen "20.0 km/h" next to the paused banner reads as a
+    // bug. Report zero instead; the averages and maxima are untouched.
+    mTrackData.speed       = moving ? mSpeedSmoother.getSpeed() : 0.0f;
     mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed    = mSpeedCounter.getMaximum();
     mTrackData.avgLapSpeed = speedFromTotals(mTrackData.lapDistance, mTrackData.lapTime);
@@ -753,7 +789,7 @@ void Service::processTrack()
 
     // Pace, s/m
     const float kMinSpeed = mSpeedCounter.getMinValid();
-    mTrackData.pace    = mSpeedSmoother.getPace();
+    mTrackData.pace    = moving ? mSpeedSmoother.getPace() : 0.0f;  // 0 = "--" while paused
     mTrackData.lapPace = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
     // HR
@@ -913,7 +949,11 @@ void Service::stopTrack(bool discard)
     if (!discard && mSessionNotEmpty) {
 
         if (mTrackState != Track::State::PAUSED) {
-            mActivityWriter.pause(mTimeCounter.getCurrent());
+            // Ending the ride is always the rider's doing, so this closing stop
+            // is Manual even when auto-pause was enabled for the session. Passed
+            // explicitly rather than left to the default: this is the one
+            // pause() caller that does not carry a PauseSource of its own.
+            mActivityWriter.pause(mTimeCounter.getCurrent(), /*autoTrigger=*/false);
         }
 
         if (mLapNotEmpty) {
@@ -963,7 +1003,9 @@ void Service::stopTrack(bool discard)
         mActivityWriter.discard();
     }
 
-    mTrackState = Track::State::INACTIVE;
+    mTrackState  = Track::State::INACTIVE;
+    mPauseSource = PauseSource::NONE;
+    mAutoPause.reset();
     LOG_INFO("Track stopped. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
     LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getValueActive()), static_cast<uint32_t>(mTimeCounter.getValueTotal()));
     LOG_INFO("Distance: %.3f m\n", mDistanceCounter.getValueActive());
@@ -976,28 +1018,60 @@ void Service::stopTrack(bool discard)
     disconnect();
 }
 
-void Service::pauseTrack(bool pause)
+void Service::pauseTrack(bool pause, PauseSource source)
 {
     if (mTrackState == Track::State::INACTIVE) {
         return;
     }
 
-    if (pause && mTrackState == Track::State::ACTIVE) {
-        mTimeCounter.pause();
-        mDistanceCounter.pause();
-        mSpeedCounter.pause();
-        mHrCounter.pause();
-        mAltitudeCounter.pause();
+    if (pause) {
+        if (mTrackState == Track::State::ACTIVE) {
+            mTimeCounter.pause();
+            mDistanceCounter.pause();
+            mSpeedCounter.pause();
+            mHrCounter.pause();
+            mAltitudeCounter.pause();
 
-        mActivityWriter.pause(mTimeCounter.getCurrent());
+            // Pausing the counters also freezes the auto-lap sources: the lap
+            // distance and lap time that processTrack() tests against the alert
+            // targets are the *active* values, so a long wait at a light can no
+            // longer trip a lap on its own.
+            mActivityWriter.pause(mTimeCounter.getCurrent(),
+                                  source == PauseSource::AUTO);
 
-        mTrackState = Track::State::PAUSED;
-        LOG_INFO("Track paused. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
-        SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
+            mTrackState  = Track::State::PAUSED;
+            mPauseSource = source;
+            LOG_INFO("Track paused (%s). UTC: %u\n",
+                     source == PauseSource::AUTO ? "auto" : "manual",
+                     static_cast<uint32_t>(mTimeCounter.getCurrent()));
+            SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
+        } else if (source == PauseSource::MANUAL && mPauseSource == PauseSource::AUTO) {
+            // The rider opened the pause overlay while auto-pause was holding
+            // the track. Hand ownership to them, so moving off again cannot
+            // auto-resume recording underneath the save/discard menu.
+            mPauseSource = PauseSource::MANUAL;
+            LOG_INFO("Auto-pause taken over manually. UTC: %u\n",
+                     static_cast<uint32_t>(mTimeCounter.getCurrent()));
+        }
 
-        buildPartialSummary();
-        SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
-    } else if (!pause && mTrackState == Track::State::PAUSED) {
+        // Only the manual path can reach a screen that shows the summary, and
+        // nothing accumulates while paused, so building it on manual requests
+        // alone keeps it fresh wherever it is visible without paying for it at
+        // every traffic light.
+        if (source == PauseSource::MANUAL) {
+            buildPartialSummary();
+            SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
+        }
+    } else {
+        if (mTrackState != Track::State::PAUSED) {
+            return;
+        }
+
+        // An auto-resume must never lift a pause the rider asked for.
+        if (source == PauseSource::AUTO && mPauseSource != PauseSource::AUTO) {
+            return;
+        }
+
         mTimeCounter.resume();
         mDistanceCounter.resume();
         mSpeedCounter.resume();
@@ -1007,11 +1081,98 @@ void Service::pauseTrack(bool pause)
         mHrCounter.resume();
         mAltitudeCounter.resume();
 
-        mActivityWriter.resume(mTimeCounter.getCurrent());
+        mActivityWriter.resume(mTimeCounter.getCurrent(),
+                               source == PauseSource::AUTO);
 
-        mTrackState = Track::State::ACTIVE;
-        LOG_INFO("Track resumed. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
+        mTrackState  = Track::State::ACTIVE;
+        mPauseSource = PauseSource::NONE;
+        LOG_INFO("Track resumed (%s). UTC: %u\n",
+                 source == PauseSource::AUTO ? "auto" : "manual",
+                 static_cast<uint32_t>(mTimeCounter.getCurrent()));
         SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
+    }
+
+    // Either edge invalidates the dwell evidence gathered for the opposite one.
+    mAutoPause.resetDwell();
+}
+
+void Service::updateAutoPause()
+{
+    if (!mSettings.autoPauseEn) {
+        // Switched off mid-activity while it was holding the track: give the
+        // rider back an active track rather than stranding them paused.
+        if (mTrackState == Track::State::PAUSED && mPauseSource == PauseSource::AUTO) {
+            LOG_INFO("Auto-pause disabled while paused -- resuming\n");
+            // MANUAL: the rider caused this by turning the setting off, so the
+            // FIT records a rider-triggered resume. It also clears the AUTO
+            // guard in pauseTrack() rather than depending on it.
+            pauseTrack(false, PauseSource::MANUAL);
+        }
+        mAutoPause.reset();
+        return;
+    }
+
+    // Freshness: this runs on the 1 Hz track tick and GPS speed arrives at the
+    // same rate, but the two are not phase-locked, so a given tick may see zero
+    // or two samples. Counting ticks-since-a-sample rather than demanding one
+    // per tick tolerates that jitter.
+    // Read the shared latches; do NOT clear mGpsSpeedFresh -- processTrack()
+    // consumes it for the pace smoother after this runs.
+    const bool fresh = mGpsSpeedFresh && mGpsSpeedValid;
+    if (fresh) {
+        mAutoPause.staleSec = 0;
+    } else if (mAutoPause.staleSec < skAutoPauseStaleSec) {
+        ++mAutoPause.staleSec;
+    }
+
+    // No trustworthy speed: hold whatever state we are in. Auto-pausing on a
+    // lost fix would punish riding into a tunnel, and auto-resuming on one
+    // would punish stopping in it.
+    //
+    // staleSec starts saturated (see AutoPauseState), so a track begun before
+    // the first fix -- the rider hits Start in a car park and pedals off while
+    // the GNSS is still acquiring -- holds here instead of acting on
+    // mGpsSpeedMs, which at that point is an initialiser rather than a
+    // measurement. Without that, the detector would read a never-measured
+    // 0 m/s and auto-pause 3 s into every such ride.
+    if (mAutoPause.staleSec >= skAutoPauseStaleSec) {
+        mAutoPause.resetDwell();
+        return;
+    }
+
+    // The dwell counts SAMPLES, not ticks. Advancing it on a tick that brought
+    // no new sample would let one reading plus two dropouts satisfy a
+    // three-sample threshold -- the inverse of the tolerance intended, and
+    // reachable in the field because one obstruction (bridge, underpass) tends
+    // to produce both the bad sample and the dropout that follows it. A gap
+    // tick holds the evidence: it neither advances nor discards it.
+    if (!fresh) {
+        return;
+    }
+
+    if (mTrackState == Track::State::ACTIVE && mPauseSource == PauseSource::NONE) {
+        mAutoPause.aboveSec = 0;
+        if (mGpsSpeedMs < skAutoPauseSpeedMps) {
+            if (++mAutoPause.belowSec >= skAutoPauseDwellSec) {
+                pauseTrack(true, PauseSource::AUTO);
+                notifyAutoPause(true);
+            }
+        } else {
+            mAutoPause.belowSec = 0;
+        }
+    } else if (mTrackState == Track::State::PAUSED && mPauseSource == PauseSource::AUTO) {
+        mAutoPause.belowSec = 0;
+        if (mGpsSpeedMs > skAutoResumeSpeedMps) {
+            if (++mAutoPause.aboveSec >= skAutoPauseDwellSec) {
+                pauseTrack(false, PauseSource::AUTO);
+                notifyAutoPause(false);
+            }
+        } else {
+            mAutoPause.aboveSec = 0;
+        }
+    } else {
+        // Manually paused: the detector stays quiet until the rider resumes.
+        mAutoPause.resetDwell();
     }
 }
 

@@ -31,6 +31,7 @@ public:
     virtual void onGpsFix(bool acquired) override;
     virtual void onAccessoryStatus(uint8_t state, const char* name) override;
 
+    void saveAutoPause(bool state);
     void savePhoneNotif(bool state);
 
 private:

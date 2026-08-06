@@ -24,6 +24,11 @@ public:
     void setGpsFix(bool state);
     void setAccessoryStatus(uint8_t state);
 
+    /// Show or hide the paused banner over the current track face.
+    void setPaused(bool paused);
+    /// Seconds spent in the current pause, rendered in the banner.
+    void setPausedTime(std::time_t seconds);
+
 protected:
 
     virtual void handleKeyEvent(uint8_t key) override;
@@ -39,6 +44,7 @@ protected:
     uint8_t  mHrThresholdCount = 0;
     uint8_t  mAccessoryState = 0;  // last SDK::Accessory::State (engaged?)
     uint8_t  mHrSource       = 0;  // last HR-sample source (steady vs flashing)
+    bool     mPaused         = false;
 };
 
 #endif // TRACKVIEW_HPP

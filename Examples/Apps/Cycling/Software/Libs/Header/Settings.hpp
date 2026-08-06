@@ -51,7 +51,7 @@ struct Settings {
     // Fields
     uint32_t version = kVersion;    ///< Settings version.
 
-    bool autoPauseEn = false; ///< Serialized only; not on settings wheel until auto-pause is implemented.
+    bool     autoPauseEn  = false;  ///< Flag to enable GPS-speed auto pause during activity track.
     bool     phoneNotifEn = true;   ///< Flag to enable receiving phone notification when app is run.
     Alerts::Distance::Id alertDistanceId = Alerts::Distance::ID_OFF;    ///< Distance alert option.
     Alerts::Time::Id     alertTimeId     = Alerts::Time::ID_OFF;        ///< Time alert option.

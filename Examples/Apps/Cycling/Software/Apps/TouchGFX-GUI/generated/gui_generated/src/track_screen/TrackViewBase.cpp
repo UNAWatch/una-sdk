@@ -33,6 +33,10 @@ TrackViewBase::TrackViewBase()
 
     trackFaceTotal.setXY(0, 0);
     add(trackFaceTotal);
+
+    pauseIndicator.setXY(0, 200);
+    pauseIndicator.setVisible(false);
+    add(pauseIndicator);
 }
 
 TrackViewBase::~TrackViewBase()
@@ -48,6 +52,7 @@ void TrackViewBase::setupScreen()
     trackFaceOverview.initialize();
     trackFaceStatus.initialize();
     trackFaceTotal.initialize();
+    pauseIndicator.initialize();
     transitionBegins();
 }
 

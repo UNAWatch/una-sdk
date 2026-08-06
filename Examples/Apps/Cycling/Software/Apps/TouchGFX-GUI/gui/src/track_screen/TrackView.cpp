@@ -20,6 +20,10 @@ void TrackView::setupScreen()
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
     scrollIndicator.setCount(FaceId::ID_COUNT);
+
+    // The banner is an overlay on whichever face is showing, so its visibility
+    // survives face changes and is driven only by the track state.
+    pauseIndicator.setVisible(mPaused);
 }
 
 void TrackView::tearDownScreen()
@@ -156,6 +160,25 @@ void TrackView::setAccessoryStatus(uint8_t state)
 {
     mAccessoryState = state;
     updateHrIcon();
+}
+
+void TrackView::setPaused(bool paused)
+{
+    if (mPaused == paused) {
+        return;
+    }
+    mPaused = paused;
+
+    pauseIndicator.setVisible(paused);
+    pauseIndicator.invalidate();
+}
+
+void TrackView::setPausedTime(std::time_t seconds)
+{
+    if (!mPaused) {
+        return;
+    }
+    pauseIndicator.setTime(seconds);
 }
 
 void TrackView::updateHrIcon()

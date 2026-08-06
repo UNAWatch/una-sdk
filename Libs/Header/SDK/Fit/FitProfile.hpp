@@ -49,6 +49,9 @@ enum class SubSport : uint8_t { Generic = 0, Treadmill = 1, Street = 2, Trail = 
                                 Track = 4, IndoorCycling = 6 };
 enum class Event : uint8_t { Timer = 0 };
 enum class EventType : uint8_t { Start = 0, Stop = 1 };
+/// event.data subfield when event == Timer: what caused the timer transition.
+/// Lets a decoder tell an auto-pause stop/start from one the user asked for.
+enum class TimerTrigger : uint8_t { Manual = 0, Auto = 1, FitnessEquipment = 2 };
 enum class ActivityType : uint8_t { Manual = 0, AutoMultiSport = 1 };
 enum class Intensity : uint8_t { Active = 0, Rest = 1, Warmup = 2, Cooldown = 3, Invalid = 0xFF };
 // 255 (Development) is the reserved value for apps without an allocated
@@ -87,6 +90,11 @@ namespace Event {
     constexpr FitWriter::Field Timestamp{253, BaseType::UInt32};  // date_time, s
     constexpr FitWriter::Field EventField{0, BaseType::Enum};     // event
     constexpr FitWriter::Field EventType{1, BaseType::Enum};      // event_type
+    // The profile's `data` field. Its meaning is chosen by a subfield keyed on
+    // `event`; for event == Timer it resolves to timer_trigger (see
+    // TimerTrigger). Base type is uint32 per the profile even though every
+    // subfield value we write is a small enum.
+    constexpr FitWriter::Field Data{3, BaseType::UInt32};         // data
 }
 
 namespace Record {
