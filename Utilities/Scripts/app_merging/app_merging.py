@@ -120,7 +120,10 @@ logging.basicConfig(level=logging.INFO)
 
 # ---------- args ----------
 parser = argparse.ArgumentParser(description="Merge Service and GUI images with extended MainHeader_t header")
-parser.add_argument("-name", required=True, help="Application name (used in output file)")
+parser.add_argument("-name", required=True, help="Application launcher name (shown on the watch)")
+parser.add_argument("-filename", default=None,
+                    help="Base name for the output .uapp (default: derived from -name). Lets the "
+                         "launcher name change without moving the artifact the phone installs.")
 parser.add_argument("-autostart", action="store_true", help="Set bit 3 (0x08) in flags for autostart")
 parser.add_argument("-glance_capable", action="store_true",
                     help="Set bit 5 (0x20) in flags to mark the app as Glance-capable")
@@ -211,7 +214,10 @@ small_icon   = convert_icon_or_zeros(args.small_icon, SMALL_ICON_SIZE, "Small")
 
 service_size       = len(service_data)
 display_name       = args.name
-file_name_base     = make_file_safe_name(display_name)
+# The artifact name is a release contract (the phone's OTA payload and the CI zip
+# layout key on it), so it is decoupled from the launcher name and only defaults
+# to it.
+file_name_base     = make_file_safe_name(args.filename if args.filename else display_name)
 name_bytes         = display_name.encode('utf-8')[:15].ljust(16, b'\0')
 normal_icon_size   = len(normal_icon)
 small_icon_size    = len(small_icon)
@@ -258,7 +264,15 @@ if args.header:
     header_filename = f"{file_name_base}_{app_version}.h"
     header_path = output_path.parent / header_filename
     macro_guard = '__' + header_path.stem.upper().replace('.', '_').replace('-', '_') + '_H__'
-    array_name = f"{args.name}_merged".replace("-", "_")
+    # make_file_safe_name keeps '.', '-' and non-ASCII word characters, none of
+    # which belong in a C identifier (the macro guard above already folds the
+    # first two), and an identifier may not start with a digit. Matched as
+    # explicit ASCII rather than \W, which is Unicode-aware and would keep
+    # letters like 'e-acute'.
+    ident = re.sub(r'[^A-Za-z0-9_]', '_', file_name_base)
+    if ident[:1].isdigit():
+        ident = f"_{ident}"
+    array_name = f"{ident}_merged"
     with open(header_path, "w") as f:
         f.write(f"#ifndef {macro_guard}\n#define {macro_guard}\n\n#include <stdint.h>\n\n")
         f.write(f"const uint8_t {array_name}[] = {{\n    ")

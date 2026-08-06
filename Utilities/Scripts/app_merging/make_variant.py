@@ -104,6 +104,9 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description="Build a code-less variant-alias .uapp")
     parser.add_argument("-name", required=True, help="Variant launcher name (max 15 chars, ASCII)")
+    parser.add_argument("-filename", default=None,
+                        help="Base name for the output .uapp (default: derived from -name). Lets the "
+                             "launcher name change without moving the artifact the phone installs.")
     parser.add_argument("-appid", type=parse_appid_64, required=True,
                         help="The variant's OWN unique 16-hex AppID (not the target's)")
     parser.add_argument("-target_appid", type=parse_appid_64, default=None,
@@ -190,7 +193,10 @@ def main() -> int:
     final = blob + struct.pack("<I", zlib.crc32(blob) & 0xFFFFFFFF)
 
     args.out.mkdir(parents=True, exist_ok=True)
-    output_path = args.out / f"{make_file_safe_name(args.name)}_{app_version}.uapp"
+    # The artifact name is a release contract (the phone's OTA payload and the CI
+    # zip layout key on it), so it is decoupled from the launcher name.
+    file_name_base = make_file_safe_name(args.filename if args.filename else args.name)
+    output_path = args.out / f"{file_name_base}_{app_version}.uapp"
     output_path.write_bytes(final)
 
     logging.info(f"Name            : {args.name}")

@@ -4,6 +4,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 # App configuration
 set(APP_NAME "Running")
+# Launcher name only. APP_NAME stays "Running" so the targets, ELFs and the
+# .uapp artifact keep the names the OTA flow and the release zip expect.
+set(APP_USER_NAME "Run")
+set(APP_FILE_NAME "Running")
 set(APP_TYPE "Activity")
 set(DEV_ID "UNA")
 set(APP_ID "A12E9F4C8B7D3A65")

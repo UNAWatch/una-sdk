@@ -202,9 +202,29 @@ def main() -> int:
         if "appver" in spec:
             fail(f"{m}: 'appver' is no longer a manifest key -- variants version "
                  "in lockstep with their target app (same release, same version)")
+        # Reject anything unrecognised rather than ignoring it. A misspelled
+        # "filename" would otherwise fall back to the launcher name and quietly
+        # rename the artifact the phone installs, with every check downstream
+        # (including expected_stem below) agreeing on the wrong value.
+        unknown = sorted(set(spec) - {"name", "filename", "appid", "target", "type",
+                                      "min_target_version", "origin", "config", "icons"})
+        if unknown:
+            fail(f"{m}: unrecognised manifest key(s): {', '.join(unknown)}")
+        # An empty or non-string value must not fall through: make_variant.py
+        # would treat it as absent and use the launcher name, while the
+        # expected_stem check below would resolve it to make_file_safe_name's
+        # "variant" fallback -- the two paths would disagree and the failure
+        # would point at the wrong thing.
+        if "filename" in spec and (not isinstance(spec["filename"], str)
+                                   or not spec["filename"].strip()):
+            fail(f"{m}: 'filename' must be a non-empty string when present")
         name = spec["name"]
+        # The launcher name is free to change; the artifact stem is a release
+        # contract (the phone's install/update flow keys on it), so a manifest
+        # can pin it separately. Defaults to the launcher name.
+        file_stem = spec.get("filename", name)
         dirname = m.parent.name
-        print(f"packing variant {name} (from {m})")
+        print(f"packing variant {name} (from {m}) as {make_file_safe_name(file_stem)}_*.uapp")
 
         # The artifact name and upload glob are keyed on the DIRECTORY name,
         # so a directory name that shadows a compiled app would collide with
@@ -243,6 +263,7 @@ def main() -> int:
 
         cmd = [sys.executable, str(SCRIPT_DIR / "make_variant.py"),
                "-name", name,
+               "-filename", file_stem,
                "-appid", spec["appid"],
                "-target_uapp", str(target_uapp),
                "-config", str(m.parent / spec["config"]),
@@ -270,7 +291,7 @@ def main() -> int:
         if version_of(packed[0]) != version_of(target_uapp):
             fail(f"{name}: alias uappVersion 0x{version_of(packed[0]):08X} is not "
                  f"in lockstep with the target's 0x{version_of(target_uapp):08X}")
-        expected_stem = f"{make_file_safe_name(name)}_{target_version}"
+        expected_stem = f"{make_file_safe_name(file_stem)}_{target_version}"
         if packed[0].stem != expected_stem:
             # The u32 check above cannot see pre-release suffixes; the
             # filename carries the full string, so pin it too.

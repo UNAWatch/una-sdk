@@ -326,7 +326,7 @@
         <Translation Language="GB">AVG. HR</Translation>
       </Text>
       <Text Id="TEXT_APP_NAME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">CYCLING</Translation>
+        <Translation Language="GB">BIKE</Translation>
       </Text>
       <Text Id="TEXT_LAPS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">LAPS</Translation>

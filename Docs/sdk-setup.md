@@ -298,7 +298,9 @@ If build files are generated in the wrong directory (e.g., root instead of build
 2. **Customize CMakeLists.txt** (located at MyApp/Software/Apps/MyApp-CMake/CMakeLists.txt):
     Update the following variables to customize your app. These are defined in the CMakeLists.txt and control build parameters, paths, and app metadata. Defaults are provided where applicable.
 
-    - `APP_NAME`: Set to your app's name, e.g., "MyApp". This is used for output filenames and internal references.
+    - `APP_NAME`: Set to your app's name, e.g., "MyApp". This names the build's own outputs and internal
+      references — CMake targets, the ELFs, and the linker scripts. It does **not** name the released
+      `.uapp`: that basename comes from `APP_USER_NAME`, or from `APP_FILE_NAME` when set (see below).
     - `APP_ID`: A unique 16-character uppercase hexadecimal string identifying your app.
       - Generate locally: 
         - Bash/Linux: python -c 'import hashlib; print(hashlib.md5(b"MyApp").hexdigest().upper()[:16])'
@@ -318,7 +320,10 @@ If build files are generated in the wrong directory (e.g., root instead of build
       - `UNA_APP_SERVICE_RAM_LENGTH`: Service RAM, default 500K.
       - `UNA_APP_GUI_STACK_SIZE`: GUI stack, default 10*1024.
       - `UNA_APP_GUI_RAM_LENGTH`: GUI RAM, default 600K.
-    - Other optional: `BUILD_VERSION` (auto-detected from git or script), `APP_USER_NAME` (defaults to APP_NAME).
+    - Other optional: `BUILD_VERSION` (auto-detected from git or script), `APP_USER_NAME` (the name shown
+      on the watch; defaults to APP_NAME), `APP_FILE_NAME` (base name of the built `.uapp`; defaults to
+      being derived from `APP_USER_NAME`). Set `APP_FILE_NAME` when the on-watch name has to change without
+      moving the artifact — the phone's install/update flow and the release zip both key on the file name.
 
     After updating APP_NAME, rename files like the linker script (e.g., from AlarmService.ld to MyAppService.ld) to match, as CMakeLists.txt references "${APP_NAME}Service.ld".
 

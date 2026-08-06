@@ -44,7 +44,10 @@ The script performs comprehensive app packaging:
 7. **Output Generation**: Creates .uapp file and optional .h header
 
 ### Key Parameters
-- `-name`: Application name for output file naming
+- `-name`: Application launcher name (what the watch shows), and the default basis for the output file name
+- `-filename`: Base name for the output `.uapp`, overriding the one derived from `-name`. Use it when the
+  launcher name has to change without moving the artifact — the phone's install/update flow and the release
+  zip both key on the file name
 - `-autostart`: Sets autostart flag in app metadata
 - `-glance_capable`: Marks app as Glance-compatible
 - `-type`: App type (Activity, Utility, Glance, Clockface)

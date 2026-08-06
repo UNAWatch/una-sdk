@@ -170,7 +170,7 @@
     </TextGroup>
     <TextGroup Id="Text">
       <Text Id="TEXT_APP_NAME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">RUNNING</Translation>
+        <Translation Language="GB">RUN</Translation>
       </Text>
       <Text Id="TEXT_TOTAL" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Total</Translation>

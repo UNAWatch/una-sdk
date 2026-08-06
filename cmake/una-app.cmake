@@ -350,6 +350,16 @@ function(una_app_build_app)
         set(APP_USER_NAME ${APP_NAME})
     endif()
 
+    # APP_FILE_NAME pins the .uapp artifact name when the launcher name has to
+    # change independently of it: the phone's OTA flow and the CI release zip
+    # both key on the artifact name. Left undefined, app_merging.py derives it
+    # from APP_USER_NAME as before.
+    set(APP_FILE_NAME_ARGS "")
+    if(DEFINED APP_FILE_NAME)
+        list(APPEND APP_FILE_NAME_ARGS -filename ${APP_FILE_NAME})
+        message("App artifact name pinned to: ${APP_FILE_NAME}")
+    endif()
+
     set(APP_ICON_ARGS "")
     if(NOT DEFINED APP_USE_ICONS)
         set(APP_USE_ICONS On)
@@ -367,7 +377,7 @@ function(una_app_build_app)
 
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} ${APP_FILE_NAME_ARGS} -type ${APP_TYPE} -glance_capable -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )

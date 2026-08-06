@@ -1,5 +1,6 @@
 {
-    "name": "Walking",
+    "name": "Walk",
+    "filename": "Walking",
     "appid": "A1E5D3B7C9F04A82",
     "target": "Hiking",
     "type": "Activity",
