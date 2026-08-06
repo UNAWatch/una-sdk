@@ -439,6 +439,16 @@
             "Height": 240,
             "LockPosition": true,
             "CustomContainerDefinitionName": "TrackFaceTotal"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "pauseIndicator",
+            "Y": 200,
+            "Width": 240,
+            "Height": 34,
+            "Visible": false,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "PauseIndicator"
           }
         ],
         "Interactions": [

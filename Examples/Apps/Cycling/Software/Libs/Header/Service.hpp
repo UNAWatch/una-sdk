@@ -43,6 +43,47 @@ private:
     /// fast enough to be useful.
     static constexpr std::size_t skPaceSmoothingTicks = 10;
 
+    // -- Auto-pause (GPS-speed driven) ----------------------------------------
+    //
+    // The thresholds are hysteretic: the track auto-pauses below
+    // skAutoPauseSpeedMps but only auto-resumes above skAutoResumeSpeedMps, so a
+    // rider hovering around a single threshold cannot flap between states.
+    //
+    // skAutoPauseSpeedMps mirrors the "genuinely moving" floor already used by
+    // mSpeedCounter.init() and by the kernel's grade estimator
+    // (GradeConfig::kMinWindowSpeedMps). Below it, speed is already excluded
+    // from the activity average, so pausing there agrees with what we record.
+    //
+    // skAutoResumeSpeedMps sits deliberately well below the slowest sustained
+    // pedalling (~1.4 m/s / 5 km/h): a rider pulling away up a hill from a
+    // standing start MUST resume, and silently dropping a climb is far worse
+    // than counting a few stopped seconds at a light. It is still ~2.7x above
+    // the stationary GPS noise peak measured on a bench with a fix (~0.33 m/s),
+    // which the dwell requirement then filters further.
+    //
+    // GPS speed arrives at 1 Hz (skSamplePeriod) and updateAutoPause() runs on
+    // the same 1 Hz track tick, so a dwell in seconds is also a dwell in
+    // samples. Three samples tolerates a single glitched or dropped reading.
+    //
+    // The detector reads the mGpsSpeed* latches rather than keeping its own
+    // copy of the sample: those already carry the isSpeedValid() gate it needs.
+    // It must not clear mGpsSpeedFresh -- processTrack() does that after
+    // feeding the pace smoother, so updateAutoPause() has to run before it.
+    //
+    // NOTE: the resume dwell is not free. MonotonicCounter rebases on resume, so
+    // the distance and time accrued while waiting out skAutoPauseDwellSec are
+    // dropped from the active totals rather than deferred -- roughly 3 m per
+    // stop at these values. Shorten the resume side first if that ever shows up
+    // in ride totals.
+    //
+    // These values are provisional: they are derived from bench noise plus
+    // cycling speed ranges, not yet from a logged ride. Every transition is
+    // logged at INFO so a serial capture can confirm or correct them.
+    static constexpr float   skAutoPauseSpeedMps  = 0.5f;  // pause below, m/s (1.8 km/h)
+    static constexpr float   skAutoResumeSpeedMps = 0.9f;  // resume above, m/s (3.2 km/h)
+    static constexpr uint8_t skAutoPauseDwellSec  = 3;     // sustained ticks either way
+    static constexpr uint8_t skAutoPauseStaleSec  = 5;     // hold state after this long with no valid speed
+
     // -- Infrastructure -------------------------------------------------------
 
     SDK::Kernel&          mKernel;
@@ -127,7 +168,53 @@ private:
         TIME,
     };
 
+    /**
+     * @brief Who owns the current pause.
+     *
+     * Auto-pause must never resume a pause the rider asked for: while they sit
+     * on the action overlay deciding whether to save or discard, movement of
+     * the wrist (or the bike being wheeled) must not restart recording.
+     */
+    enum class PauseSource {
+        NONE = 0,   ///< Not paused.
+        MANUAL,     ///< Rider opened the pause/action overlay.
+        AUTO,       ///< Auto-pause detected a stop.
+    };
+
+    /**
+     * @brief Auto-pause detector state, evaluated once per second.
+     *
+     * Kept separate from mSpeedCounter because the counter is deliberately
+     * paused along with the rest of the metrics, whereas the detector has to
+     * keep watching speed *while* paused in order to notice the rider moving
+     * off again.
+     */
+    struct AutoPauseState {
+        /// Ticks since the last valid speed sample. Starts (and resets)
+        /// SATURATED, so the detector treats speed as stale until a real sample
+        /// proves otherwise -- mGpsSpeedMs is an initialiser, not a measurement,
+        /// until then, and acting on it would auto-pause any ride started
+        /// before the first GPS fix.
+        uint8_t staleSec = skAutoPauseStaleSec;
+        uint8_t belowSec = 0;   ///< Consecutive samples under the pause threshold.
+        uint8_t aboveSec = 0;   ///< Consecutive samples over the resume threshold.
+
+        /// Clear the dwell counters only; freshness tracking is unaffected.
+        void resetDwell()
+        {
+            belowSec = 0;
+            aboveSec = 0;
+        }
+
+        void reset()
+        {
+            staleSec = skAutoPauseStaleSec;
+            resetDwell();
+        }
+    } mAutoPause{};
+
     LapDivSource mLapDivSource        = LapDivSource::OFF;
+    PauseSource  mPauseSource         = PauseSource::NONE;
     Track::State mTrackState          = Track::State::INACTIVE;
     bool         mPreviousGpsFixState = false;
     bool         mGpsInitialConnectFailed = false;  ///< GPS_LOCATION subscribe lost the startup ack race; the retry logs the recovery.
@@ -164,7 +251,8 @@ private:
     void processTrack();
     void saveLap(float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
-    void pauseTrack(bool pause);
+    void pauseTrack(bool pause, PauseSource source);
+    void updateAutoPause();
     void buildPartialSummary();
     ActivityWriter::RecordData prepareRecordData();
     LapDivSource getLapDivSource();
@@ -176,6 +264,7 @@ private:
     void requestAccessoryRelease();
     void notifyFirstFix();
     void notifyLapEnd();
+    void notifyAutoPause(bool paused);
     void notifyNewActivity();
     void backlightOn(uint32_t timeoutMs = skBacklightTimeout);
     void playBuzzerPattern(uint16_t beepMs, uint8_t count = 1, uint16_t silenceMs = 100);

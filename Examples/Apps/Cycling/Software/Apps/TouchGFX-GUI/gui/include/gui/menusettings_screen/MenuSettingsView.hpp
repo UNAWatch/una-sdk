@@ -15,6 +15,7 @@ public:
 
     void setGpsFix(bool state);
     void setAccessoryStatus(uint8_t state, const char* name);
+    void setAutoPause(bool state);
     void setPhoneNotif(bool state);
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
@@ -23,6 +24,7 @@ protected:
     using Menu = App::MenuNav::Root::Settings;
 
     bool mGpsFix     = false;
+    bool mAutoPause  = false;
     bool mPhoneNotif = false;
 
     touchgfx::Callback<MenuSettingsView, MainMenuItem&, int16_t>       mUpdateItemCb;

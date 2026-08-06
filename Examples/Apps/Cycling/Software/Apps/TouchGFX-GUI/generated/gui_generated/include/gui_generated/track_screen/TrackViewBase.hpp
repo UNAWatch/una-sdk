@@ -14,6 +14,7 @@
 #include <gui/containers/TrackFaceOverview.hpp>
 #include <gui/containers/TrackFaceStatus.hpp>
 #include <gui/containers/TrackFaceTotal.hpp>
+#include <gui/containers/PauseIndicator.hpp>
 
 class TrackViewBase : public touchgfx::View<TrackPresenter>
 {
@@ -38,6 +39,7 @@ protected:
     TrackFaceOverview trackFaceOverview;
     TrackFaceStatus trackFaceStatus;
     TrackFaceTotal trackFaceTotal;
+    PauseIndicator pauseIndicator;
 
 private:
 

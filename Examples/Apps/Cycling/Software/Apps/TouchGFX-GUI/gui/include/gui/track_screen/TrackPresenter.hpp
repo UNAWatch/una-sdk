@@ -33,6 +33,7 @@ public:
     virtual void onLapChanged(uint8_t lapEnd) override;
     virtual void onGpsFix(bool acquired) override;
     virtual void onAccessoryStatus(uint8_t state, const char* name) override;
+    virtual void onTrackState(const Track::State& state) override;
 
     void saveLap();
 

@@ -99,8 +99,11 @@ public:
     ActivityWriter(const SDK::Kernel& kernel, const char* pathToDir);
 
     void start(const AppInfo& info);
-    void pause(std::time_t timestamp);
-    void resume(std::time_t timestamp);
+    /// @param autoTrigger true when auto-pause drove the transition rather than
+    ///        the rider. Recorded as the timer event's timer_trigger subfield so
+    ///        a decoded activity can tell the two apart.
+    void pause(std::time_t timestamp, bool autoTrigger = false);
+    void resume(std::time_t timestamp, bool autoTrigger = false);
     void addRecord(const RecordData& record);
     void addLap(const LapData& lap);
     /// Finalize the current activity. The return value is the FIT-durability
@@ -161,7 +164,8 @@ private:
     void defineRecordMessages();
     void writeFieldDescription(uint8_t devFieldNum, const char* name,
                                const char* units, SDK::Fit::BaseType baseType);
-    void addMessageEvent(std::time_t t, SDK::Fit::EventType type);
+    void addMessageEvent(std::time_t t, SDK::Fit::EventType type,
+                         SDK::Fit::TimerTrigger trigger);
 
     bool createAndOpenFile(std::time_t utc);
     bool saveSummary(const TrackData& track);

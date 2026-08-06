@@ -98,6 +98,13 @@ public:
     void trackPause();
     void trackResume();
     bool isTrackPaused() const;
+    /// Seconds elapsed in the current pause, 0 when not paused.
+    ///
+    /// Lives here rather than in a presenter because presenters are recreated
+    /// on every screen transition, and because the Model keeps receiving the
+    /// 1 Hz clock regardless of which screen is up -- a pause that spans a
+    /// screen change must keep counting.
+    std::time_t getPausedSeconds() const;
     const Track::Data& getTrackData() const;
     void saveLap();
     void saveTrack();
@@ -151,6 +158,13 @@ private:
     Track::State           mTrackState      {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData       {};
+
+    /// Wall-clock seconds derived from the 1 Hz LOCAL_TIME message, and the
+    /// value it held when the current pause began. Differencing timestamps
+    /// rather than counting ticks keeps the pause duration honest if the
+    /// service coalesces a multi-second gap into one message.
+    std::time_t mNowSec        = 0;
+    std::time_t mPauseStartSec = 0;
 };
 
 #endif // MODEL_HPP

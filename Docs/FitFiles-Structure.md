@@ -771,6 +771,15 @@ battery level/voltage on the battery record variants).
 - `timestamp`: Event time (FIT timestamp)
 - `event`: `Event::Timer` (0)
 - `event_type`: `EventType::Start` (0) or `EventType::Stop` (1)
+- `data` (optional): the profile's polymorphic field 3. When `event` is
+  `Event::Timer` a decoder resolves it to the `timer_trigger` subfield, so it
+  records *what* stopped or started the timer: `TimerTrigger::Manual` (0),
+  `TimerTrigger::Auto` (1) or `TimerTrigger::FitnessEquipment` (2).
+
+  Include it in `defineMessage` only if you write it. Apps without auto-pause
+  omit it and emit the three fields above; the Cycling app includes it so an
+  auto-pause stop/start can be told apart from one the user asked for. Either
+  shape is valid FIT — the definition message tells the decoder which it is.
 
 ### Activity Messages
 **Purpose**: Top-level activity metadata.
@@ -1243,6 +1252,8 @@ void ActivityWriter::start(const AppInfo& info)
     writeFieldDescription(DF_HR_EXTERNAL,     "hr_external",  "bpm", fit::BaseType::UInt8);
 
     // 5. Define the remaining message types up front.
+    //    Append fit::field::Event::Data here if the app reports timer_trigger
+    //    (see Event Messages above); the write below must then supply it too.
     mFit->defineMessage(L_EVENT, fit::mesgNum(fit::MesgNum::Event),
         {fit::field::Event::Timestamp, fit::field::Event::EventField,
          fit::field::Event::EventType});

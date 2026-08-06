@@ -182,6 +182,14 @@ bool Model::isTrackPaused() const
     return mTrackState == Track::State::PAUSED;
 }
 
+std::time_t Model::getPausedSeconds() const
+{
+    if (mTrackState != Track::State::PAUSED || mNowSec < mPauseStartSec) {
+        return 0;
+    }
+    return mNowSec - mPauseStartSec;
+}
+
 const Track::Data& Model::getTrackData() const
 {
     return mTrackData;
@@ -299,6 +307,15 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
                                      newTime.tm_sec   != mTime.tm_sec;
             mTime = newTime;
 
+            // Wall-clock seconds for pause-duration arithmetic. mktime()
+            // normalises a copy (it mutates its argument) and interprets the
+            // fields as local time, which is fine: only differences are used.
+            std::tm forEpoch = newTime;
+            const std::time_t nowSec = std::mktime(&forEpoch);
+            if (nowSec != static_cast<std::time_t>(-1)) {
+                mNowSec = nowSec;
+            }
+
             if (dateChanged) {
                 modelListener->onDate(mTime.tm_year + 1900, mTime.tm_mon + 1,
                                       mTime.tm_mday, mTime.tm_wday);
@@ -331,6 +348,9 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             auto* msg = static_cast<CustomMessage::TrackStateUpd*>(message);
             if (mTrackState != msg->state) {
                 mTrackState = msg->state;
+                if (mTrackState == Track::State::PAUSED) {
+                    mPauseStartSec = mNowSec;
+                }
                 modelListener->onTrackState(mTrackState);
             }
         } break;
