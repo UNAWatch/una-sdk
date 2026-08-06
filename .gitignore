@@ -5,3 +5,8 @@ Docs/Templates/TouchGFX-Widgets/Unpacked
 
 .claude/
 build-host/
+
+# pack_variants.py imports make_variant as a module, so any local or CI run of
+# the variant packer leaves bytecode next to the scripts.
+__pycache__/
+*.pyc

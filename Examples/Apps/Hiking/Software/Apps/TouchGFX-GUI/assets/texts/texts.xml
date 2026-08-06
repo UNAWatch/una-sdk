@@ -314,7 +314,7 @@
         <Translation Language="GB">AVG. HR</Translation>
       </Text>
       <Text Id="TEXT_APP_NAME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">HIKING</Translation>
+        <Translation Language="GB">HIKE</Translation>
       </Text>
       <Text Id="TEXT_HEART_RATE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">HEART RATE</Translation>

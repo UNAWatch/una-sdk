@@ -19,7 +19,8 @@ compiled-app matrix (no `*-CMake` directory) by design.
 
 | Field | Meaning |
 |---|---|
-| `name` | Launcher name (ASCII, max 15 chars) and output file stem |
+| `name` | Launcher name (ASCII, max 15 chars) — what the watch shows. Also the output file stem unless `filename` overrides it |
+| `filename` | *Optional.* Output file stem, when the launcher name has to change without moving the artifact. The phone's install/update flow keys on the file name, so an already-shipped variant pins it here and renames only `name` (and the `name` inside its `config.json`, which drives the in-app title). Defaults to `name` |
 | `appid` | The variant's OWN unique 16-hex uappID — never the target's (see allocation below) |
 | `target` | Directory name of the base app under `Examples/Apps/` (e.g. `Hiking`). The target's uappID is read from its freshly built `.uapp` at pack time, so it can never drift from the binary |
 | `type` | App type — must match the target's (`Activity`/`Utility`/`Clockface`; glance targets are rejected by the kernel) |
@@ -44,9 +45,9 @@ Variant uappIDs live in the same 16-hex namespace as app `APP_ID`s
 
 Current allocations:
 
-| Variant | appid | Target |
-|---|---|---|
-| Walking | `A1E5D3B7C9F04A82` | Hiking (`A1F3C92B7E4D8A10`) |
+| Variant (directory) | Launcher name | appid | Target |
+|---|---|---|---|
+| Walking | Walk | `A1E5D3B7C9F04A82` | Hiking (`A1F3C92B7E4D8A10`) |
 
 ## Local build
 
