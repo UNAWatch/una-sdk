@@ -1020,6 +1020,12 @@ void Service::stopTrack(bool discard)
 
 void Service::pauseTrack(bool pause, PauseSource source)
 {
+    // Any pause/resume request invalidates the dwell evidence gathered for the
+    // opposite edge, including the requests rejected by the guards below: a
+    // blocked auto-resume must not leave its evidence banked for later. Done
+    // first so no early return can skip it.
+    mAutoPause.resetDwell();
+
     if (mTrackState == Track::State::INACTIVE) {
         return;
     }
@@ -1091,9 +1097,6 @@ void Service::pauseTrack(bool pause, PauseSource source)
                  static_cast<uint32_t>(mTimeCounter.getCurrent()));
         SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
     }
-
-    // Either edge invalidates the dwell evidence gathered for the opposite one.
-    mAutoPause.resetDwell();
 }
 
 void Service::updateAutoPause()
