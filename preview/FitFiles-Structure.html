@@ -1260,10 +1260,19 @@ battery level/voltage on the battery record variants).</p>
 <h3>Event Messages<a class="headerlink" href="#event-messages" title="Link to this heading"></a></h3>
 <p><strong>Purpose</strong>: Mark activity state changes.</p>
 <p><strong>Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::Event::*</span></code>, <code class="docutils literal notranslate"><span class="pre">MesgNum::Event</span></code>):</p>
-<ul class="simple">
+<ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">timestamp</span></code>: Event time (FIT timestamp)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">event</span></code>: <code class="docutils literal notranslate"><span class="pre">Event::Timer</span></code> (0)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">event_type</span></code>: <code class="docutils literal notranslate"><span class="pre">EventType::Start</span></code> (0) or <code class="docutils literal notranslate"><span class="pre">EventType::Stop</span></code> (1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data</span></code> (optional): the profile’s polymorphic field 3. When <code class="docutils literal notranslate"><span class="pre">event</span></code> is
+<code class="docutils literal notranslate"><span class="pre">Event::Timer</span></code> a decoder resolves it to the <code class="docutils literal notranslate"><span class="pre">timer_trigger</span></code> subfield, so it
+records <em>what</em> stopped or started the timer: <code class="docutils literal notranslate"><span class="pre">TimerTrigger::Manual</span></code> (0),
+<code class="docutils literal notranslate"><span class="pre">TimerTrigger::Auto</span></code> (1) or <code class="docutils literal notranslate"><span class="pre">TimerTrigger::FitnessEquipment</span></code> (2).</p>
+<p>Include it in <code class="docutils literal notranslate"><span class="pre">defineMessage</span></code> only if you write it. Apps without auto-pause
+omit it and emit the three fields above; the Cycling app includes it so an
+auto-pause stop/start can be told apart from one the user asked for. Either
+shape is valid FIT — the definition message tells the decoder which it is.</p>
+</li>
 </ul>
 </section>
 <section id="activity-messages">
@@ -1801,6 +1810,8 @@ enums in the header (see “Constructor and Initialization”), and the
 <span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_EXTERNAL</span><span class="p">,</span><span class="w">     </span><span class="s">&quot;hr_external&quot;</span><span class="p">,</span><span class="w">  </span><span class="s">&quot;bpm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// 5. Define the remaining message types up front.</span>
+<span class="w">    </span><span class="c1">//    Append fit::field::Event::Data here if the app reports timer_trigger</span>
+<span class="w">    </span><span class="c1">//    (see Event Messages above); the write below must then supply it too.</span>
 <span class="w">    </span><span class="n">mFit</span><span class="o">-&gt;</span><span class="n">defineMessage</span><span class="p">(</span><span class="n">L_EVENT</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">Event</span><span class="p">),</span>
 <span class="w">        </span><span class="p">{</span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Event</span><span class="o">::</span><span class="n">Timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Event</span><span class="o">::</span><span class="n">EventField</span><span class="p">,</span>
 <span class="w">         </span><span class="n">fit</span><span class="o">::</span><span class="n">field</span><span class="o">::</span><span class="n">Event</span><span class="o">::</span><span class="n">EventType</span><span class="p">});</span>
