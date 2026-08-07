@@ -53,6 +53,7 @@ add_executable(una-sdk-host-tests
     sensorlayer/GyroscopeParser_test.cpp
     sensorlayer/SensorConnection_test.cpp
     metrics/MonotonicCounter_test.cpp
+    metrics/DeltaCounter_test.cpp
     metrics/SpeedSmoother_test.cpp
     metrics/VariableCounter_test.cpp
     utils/ClockTime_test.cpp
