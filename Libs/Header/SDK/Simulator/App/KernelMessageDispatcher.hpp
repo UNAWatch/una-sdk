@@ -211,7 +211,11 @@ private:
             }
         };
 
-        bool alertMutedFlag = false;                ///< Global flag to mute all alerts temporarily.
+        /// Mute alerts the watch raises at the user -- phone notifications,
+        /// calls and low battery -- across sound, vibration and the backlight.
+        /// Feedback an app requests during a session it owns (e.g. interval
+        /// phase cues) is deliberately not affected.
+        bool alertMutedFlag = false;
         Notification vibro;                         ///< Vibration notification settings.
         Notification sound;                         ///< Sound notification settings.
         GpsPowerMode gpsPowerMode = GPS_PM_BALANCED;    ///< GPS power consumption mode setting.

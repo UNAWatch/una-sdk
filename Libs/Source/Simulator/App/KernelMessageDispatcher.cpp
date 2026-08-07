@@ -169,28 +169,37 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
 
+        // Not gated on alertMutedFlag: muting covers alerts the watch raises at
+        // the user (phone notifications, calls, low battery), not feedback an
+        // app produces during a session the user started -- interval phase cues
+        // in Running/Treadmill being the motivating case. Mirrors the kernel.
         case SDK::MessageType::REQUEST_BUZZER_PLAY: {
             LOG_DEBUG("Requests buzzer\n");
 
-            if (!mLocalSettings.alertMutedFlag) {
-                //Alerts from GUI
-                    auto* buzzMsg = static_cast<SDK::Message::RequestBuzzerPlay*>(msg);
+            auto* buzzMsg = static_cast<SDK::Message::RequestBuzzerPlay*>(msg);
 
-                if (buzzMsg->notesCount) {
-                    auto melody = std::make_unique<Interface::IBuzzer::Note[]>(buzzMsg->notesCount);
-                    for (uint8_t i = 0; i < buzzMsg->notesCount; i++) {
-                        melody[i].level = (buzzMsg->notes[i].volume / 33);
-                        melody[i].time = buzzMsg->notes[i].time;
-                    }
-                    mBuzzer.play(melody.get(), buzzMsg->notesCount);
-                }
-                else {
-                    mBuzzer.play();
-                }
+            // notesCount arrives from the app unchecked; the message only
+            // carries skMaxNotes entries. Bounded as the kernel does.
+            // Not std::min: skMaxNotes is static const, so binding it to a
+            // const& odr-uses it and there is no definition to link against.
+            uint32_t count = buzzMsg->notesCount;
+            if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes) {
+                LOG_WARNING("buzzer notesCount %lu > %lu, clamped\n",
+                            static_cast<unsigned long>(count),
+                            static_cast<unsigned long>(SDK::Message::RequestBuzzerPlay::skMaxNotes));
+                count = SDK::Message::RequestBuzzerPlay::skMaxNotes;
             }
-            else {
-                LOG_DEBUG("Ignore. Alerts muted\n");
+
+            // An empty melody is passed straight through, as on device. It used
+            // to fall back to mBuzzer.play(), i.e. a default beep -- but apps
+            // send an empty melody to STOP (Alarm's stopRinging()), so the
+            // simulator made a noise where the watch makes none.
+            auto melody = std::make_unique<Interface::IBuzzer::Note[]>(count);
+            for (uint32_t i = 0; i < count; i++) {
+                melody[i].level = (buzzMsg->notes[i].volume / 33);
+                melody[i].time = buzzMsg->notes[i].time;
             }
+            mBuzzer.play(melody.get(), count);
 
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
@@ -198,26 +207,24 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
         case SDK::MessageType::REQUEST_VIBRO_PLAY: {
             LOG_DEBUG("Requests vibro\n");
 
-            if (!mLocalSettings.alertMutedFlag) {
-                //Alerts from GUI
-                    auto* vibroMsg = static_cast<SDK::Message::RequestVibroPlay*>(msg);
+            auto* vibroMsg = static_cast<SDK::Message::RequestVibroPlay*>(msg);
 
-                if (vibroMsg->notesCount) {
-                    auto melody = std::make_unique<Interface::IVibro::Note[]>(vibroMsg->notesCount);
+            // Bounded like the buzzer above.
+            uint32_t count = vibroMsg->notesCount;
+            if (count > SDK::Message::RequestVibroPlay::skMaxNotes) {
+                LOG_WARNING("vibro notesCount %lu > %lu, clamped\n",
+                            static_cast<unsigned long>(count),
+                            static_cast<unsigned long>(SDK::Message::RequestVibroPlay::skMaxNotes));
+                count = SDK::Message::RequestVibroPlay::skMaxNotes;
+            }
 
-                    for (uint8_t i = 0; i < vibroMsg->notesCount; i++) {
-                        melody[i].effect = vibroMsg->notes[i].effect;
-                        melody[i].loop = 0;
-                        melody[i].pause = vibroMsg->notes[i].pause;
-                    }
-                    mVibro.play(melody.get(), vibroMsg->notesCount);
-			    } else {
-                    mVibro.play();
-                }
+            auto melody = std::make_unique<Interface::IVibro::Note[]>(count);
+            for (uint32_t i = 0; i < count; i++) {
+                melody[i].effect = vibroMsg->notes[i].effect;
+                melody[i].loop = 0;
+                melody[i].pause = vibroMsg->notes[i].pause;
             }
-            else {
-                LOG_DEBUG("Ignore. Alerts muted\n");
-            }
+            mVibro.play(melody.get(), count);
 
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
