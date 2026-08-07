@@ -448,7 +448,9 @@ mv<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/&lt;app-name&gt;GUI.t
 <li><p><strong>Customize CMakeLists.txt</strong> (located at MyApp/Software/Apps/MyApp-CMake/CMakeLists.txt):
 Update the following variables to customize your app. These are defined in the CMakeLists.txt and control build parameters, paths, and app metadata. Defaults are provided where applicable.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">APP_NAME</span></code>: Set to your app’s name, e.g., “MyApp”. This is used for output filenames and internal references.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_NAME</span></code>: Set to your app’s name, e.g., “MyApp”. This names the build’s own outputs and internal
+references — CMake targets, the ELFs, and the linker scripts. It does <strong>not</strong> name the released
+<code class="docutils literal notranslate"><span class="pre">.uapp</span></code>: that basename comes from <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code>, or from <code class="docutils literal notranslate"><span class="pre">APP_FILE_NAME</span></code> when set (see below).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">APP_ID</span></code>: A unique 16-character uppercase hexadecimal string identifying your app.</p>
 <ul>
 <li><p>Generate locally:</p>
@@ -480,7 +482,10 @@ Replace “MyApp” with your app name. See <a class="reference internal" href="
 <li><p><code class="docutils literal notranslate"><span class="pre">UNA_APP_GUI_RAM_LENGTH</span></code>: GUI RAM, default 600K.</p></li>
 </ul>
 </li>
-<li><p>Other optional: <code class="docutils literal notranslate"><span class="pre">BUILD_VERSION</span></code> (auto-detected from git or script), <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code> (defaults to APP_NAME).</p></li>
+<li><p>Other optional: <code class="docutils literal notranslate"><span class="pre">BUILD_VERSION</span></code> (auto-detected from git or script), <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code> (the name shown
+on the watch; defaults to APP_NAME), <code class="docutils literal notranslate"><span class="pre">APP_FILE_NAME</span></code> (base name of the built <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>; defaults to
+being derived from <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code>). Set <code class="docutils literal notranslate"><span class="pre">APP_FILE_NAME</span></code> when the on-watch name has to change without
+moving the artifact — the phone’s install/update flow and the release zip both key on the file name.</p></li>
 </ul>
 <p>After updating APP_NAME, rename files like the linker script (e.g., from AlarmService.ld to MyAppService.ld) to match, as CMakeLists.txt references “${APP_NAME}Service.ld”.</p>
 <p>Note: Paths are relative to CMakeLists.txt. You can reorganize folders by updating these paths accordingly. For example, if libs are in a different location, change LIBS_PATH.</p>
