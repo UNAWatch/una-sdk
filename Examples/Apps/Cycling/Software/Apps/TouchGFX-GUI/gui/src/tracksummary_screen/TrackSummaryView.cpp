@@ -42,9 +42,14 @@ void TrackSummaryView::setSummary(const ActivitySummary& s, bool isImperial, boo
         return isImperial ? SDK::Utils::kmToMiles(kmPerHour) : kmPerHour;
     };
 
+    auto elevationConv = [isImperial](float metres) -> float {
+        return isImperial ? SDK::Utils::metersToFeet(metres) : metres;
+    };
+
     const float dist = distConv(s.distance);
     summaryFaceMap.setDistance(dist, isImperial);
     summaryFaceOverview.setDistance(dist, isImperial);
+    summaryFaceOverview.setElevation(elevationConv(s.elevation), isImperial);
     summaryFaceOverview.setAvgSpeed(speedConv(s.speedAvg), isImperial);
     summaryFaceOverview.setTimer(s.time);
     summaryFaceHeartRate.setMaxHR(s.hrMax);
