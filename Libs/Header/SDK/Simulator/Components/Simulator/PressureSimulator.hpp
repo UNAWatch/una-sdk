@@ -54,7 +54,10 @@ namespace Simulator
             return static_cast<float>(mP0 + mNoise(mGenerator));
         }
       
-        float mNoiseLevel = 0.3f;
+        /* 1 sigma, hPa. Altitude comes from the pressure ratio, so the old 0.3
+           was ~2.5 m of noise -- past the apps' 2 m ascent threshold, which made
+           flat rides accumulate gain. ~3 Pa matches a real MS5837. */
+        float mNoiseLevel = 0.03f;
         float mP0 = 1013.25f;
         std::default_random_engine mGenerator;
         std::normal_distribution<double> mNoise;

@@ -116,7 +116,8 @@ public:
     void pause();
 
     /**
-     * @brief Resume tracking after pause.
+     * @brief Resume tracking after pause. Rebases the ascent/descent thresholds onto
+     *        the current value, so the change during the pause is not accumulated.
      */
     void resume();
 
@@ -237,6 +238,9 @@ inline void DeltaCounter::add(float currentValue)
         return;
     }
 
+    /* Re-arm after resetLap(); mLapStartValue stays at the lap boundary */
+    mHasLapData = true;
+
     if (mIsPaused) {
         return;
     }
@@ -291,6 +295,13 @@ inline void DeltaCounter::resume()
     if (!mIsInitialized || !mIsPaused) {
         return;
     }
+
+    /* Rebase the thresholds; the change during the pause must not accumulate */
+    if (mHasData) {
+        mLastValue    = mCurrent;
+        mLapLastValue = mCurrent;
+    }
+
     mIsPaused = false;
 }
 
