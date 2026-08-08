@@ -69,6 +69,9 @@ public:
         InMemoryFile(InMemoryFileSystem& fs, std::string path);
         ~InMemoryFile() override = default;
 
+        /// Repoints the handle. Any open file is closed first: the new path is
+        /// a different file, so an open handle's bookkeeping cannot follow it
+        /// the way rename()'s does.
         void setPath(const char* path) override;
         const char* getPath() const override;
         bool exist() const override;
@@ -115,7 +118,10 @@ public:
      * are reproducible.
      *
      * A listing never reports the same name twice, whatever mix of spellings
-     * and implied/explicit directories produced it.
+     * and implied/explicit directories produced it. Deduplication happens on
+     * the stored name, before it is clipped to ObjectInfo::name, so two names
+     * that differ only past that capacity are the one case that comes back as
+     * a pair of identical entries -- see the name-length note below.
      *
      * readNext() is a cursor over a snapshot taken at open() (and re-taken
      * on an explicit reset=true, matching POSIX rewinddir, which refreshes
@@ -135,7 +141,12 @@ public:
      *    enumeration *and* for lookup alike. This is what lets a test seed
      *    "/App.uapp" and have code that scans "/" and opens "/" + name find
      *    it. A real filesystem would treat a trailing slash as requiring a
-     *    directory.
+     *    directory. (Repeated *interior* separators are not a divergence:
+     *    "a//b" and "a/b" are one object here as they are on POSIX and FatFs.)
+     *  - **A file may be created under a directory that does not exist.**
+     *    Writing "a/b/c.txt" implies "a" and "a/b" rather than failing with
+     *    ENOENT, which is the flip side of implied directories above. mkdir()
+     *    the parents first if a test needs the ENOENT branch.
      *  - **No "." / ".." resolution.** Both are ordinary path segments, so
      *    "a/b" and "a/./b" are different places.
      *  - **Directory rename is not modelled** -- it returns false rather
@@ -165,8 +176,10 @@ public:
 
         /// Creates this one directory, and fails when its parent is missing
         /// or a file already occupies the name -- as the simulator's
-        /// non-recursive ::mkdir does. Use IFileSystem::mkdir() for the
-        /// parents-too behaviour.
+        /// non-recursive ::mkdir does. True when the directory already
+        /// exists, the root included: ::mkdir gives EEXIST there, which the
+        /// simulator reports as success once the target is confirmed to be a
+        /// directory. Use IFileSystem::mkdir() for the parents-too behaviour.
         bool create() override;
         bool open() override;
         bool isOpen() const override;
@@ -198,29 +211,47 @@ public:
     std::unique_ptr<SDK::Interface::IDirectory> dir(const char* path) override;
     /// True for an existing file OR directory: IFileSystem::exist() asks
     /// about filesystem objects, not files specifically. An empty path names
-    /// nothing and is false, as stat("") is; "/" is the root and is true.
+    /// nothing and is false, as FatFs f_stat("") is FR_INVALID_NAME; "/" is
+    /// the root and is true. (The simulator says true for "" because it
+    /// prepends a sandbox root; the device is what this models.)
     bool exist(const char* path) const override;
     /// Removes an existing file, or an existing and empty directory.
     ///
     /// Returns false when there is nothing there to remove, a path removed
     /// earlier included: such an entry lingers in the backing map with its
     /// `exists` flag cleared, and reporting success for work not done is a
-    /// bad thing to write assertions against.
+    /// bad thing to write assertions against. rename() and copy() read the
+    /// same flag.
     bool remove(const char* path) override;
+    /// Moves an existing file. False when the source is missing OR was removed
+    /// earlier (a tombstone is not a source -- the same rule remove() follows),
+    /// and false when the destination cannot hold a file: the root, an
+    /// existing directory, or a path under a file. An existing *file* at the
+    /// destination is overwritten, as std::rename does. Source and destination
+    /// that canonicalise to one key succeed and leave the file alone, also as
+    /// std::rename does.
     bool rename(const char* oldPath, const char* newPath) override;
+    /// As rename(), but leaves the source in place. Copying an object onto
+    /// itself leaves it as it was; the simulator empties it instead, opening
+    /// the destination for truncation before reading the source.
     bool copy(const char* oldPath, const char* newPath) override;
     /// Populates @p item for an existing file or directory. @c name receives
     /// the leaf name, not the path handed in -- the same convention the
     /// simulator's objectInfo() and every readNext() follow.
     bool objectInfo(const char* path, ObjectInfo& item) const override;
 
-    void seedFile(const std::string& path, std::string content);
+    /// Places a file directly, bypassing IFile. False -- and nothing is
+    /// recorded -- when the name cannot hold a file (see canHoldFileAt), so a
+    /// test cannot seed the fake into a state the device cannot reach.
+    bool seedFile(const std::string& path, std::string content);
     std::string readFile(const std::string& path) const;
 
-    /// Canonical lookup key for @p path: leading and trailing '/' stripped,
-    /// so "/a/b", "a/b" and "a/b/" are one object and the root is "". This is
-    /// applied at every entry point, which is what makes a name returned by a
-    /// listing openable as "/" + name. No "." / ".." resolution.
+    /// Canonical lookup key for @p path: runs of '/' collapsed to one, leading
+    /// and trailing ones dropped, so "/a/b", "a/b", "a//b" and "a/b/" are one
+    /// object and the root is "". This is applied at every entry point, which
+    /// is what makes a name returned by a listing openable as "/" + name --
+    /// for any name short enough to survive ObjectInfo::name; a clipped one
+    /// names nothing. No "." / ".." resolution.
     static std::string canonicalPath(const std::string& path);
     /// Directory of a canonical @p path: everything before its last '/', or
     /// "" (the root) when it has none.
@@ -230,6 +261,11 @@ public:
 
     /// True when an existing file sits at @p canonical (already canonicalised).
     bool fileExistsAt(const std::string& canonical) const;
+    /// True when a file may occupy @p canonical: it is not the root, no
+    /// directory already holds the name (EISDIR), and no ancestor is a file
+    /// (ENOTDIR). The mirror of mkdir()'s chain walk -- between them, one name
+    /// can never be both a file and a directory.
+    bool canHoldFileAt(const std::string& canonical) const;
     /// True when @p path is the root, was created via mkdir(), or is implied
     /// by an existing file living under it.
     bool directoryExists(const std::string& path) const;

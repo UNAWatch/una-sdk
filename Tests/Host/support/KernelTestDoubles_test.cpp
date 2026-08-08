@@ -49,6 +49,61 @@ TEST(InMemoryFileSystem, RenameWhileClosedLeavesHandleCountsAlone)
     EXPECT_EQ(fs.openHandles["dir/b.txt"], 0u);
 }
 
+// rename() may keep a handle open, being the same file under a new name, and
+// migrates the count with it. setPath() names a DIFFERENT file, so it closes
+// instead: a handle carried across the change would release a bucket it never
+// took, underflowing size_t and taking the leak instrumentation with it.
+TEST(InMemoryFileSystem, SetPathOnAnOpenFileClosesItRatherThanRetargeting)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("a.txt", "AAA");
+    fs.seedFile("b.txt", "BBB");
+
+    auto f = fs.file("a.txt");
+    ASSERT_TRUE(f->open(/*wMode=*/true));
+    ASSERT_EQ(fs.openHandles["a.txt"], 1u);
+
+    f->setPath("b.txt");
+    EXPECT_FALSE(f->isOpen()) << "the handle no longer refers to what it opened";
+    EXPECT_EQ(fs.openHandles["a.txt"], 0u) << "the old bucket is released, not stranded";
+    EXPECT_EQ(fs.openHandles["b.txt"], 0u) << "and the new path was never opened";
+
+    size_t bw = 0;
+    EXPECT_FALSE(f->write("ZZ", 2, bw)) << "a closed handle cannot write";
+    EXPECT_EQ(fs.readFile("b.txt"), "BBB") << "b.txt must not be touched";
+    EXPECT_EQ(fs.readFile("a.txt"), "AAA");
+
+    EXPECT_FALSE(f->close()) << "already closed";
+    EXPECT_EQ(fs.openHandles["b.txt"], 0u) << "no size_t underflow to SIZE_MAX";
+    EXPECT_EQ(fs.openHandles["a.txt"], 0u);
+}
+
+// close() reports whether it closed something, so EXPECT_TRUE(h->close())
+// has a failing mode: a handle never opened, or one naming a path that does
+// not exist, answers false. The simulator's File::close() and
+// Directory::close() both do.
+TEST(InMemoryFileSystem, ClosingWhatWasNeverOpenedFails)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("a.txt", "x");
+    ASSERT_TRUE(fs.mkdir("d"));
+
+    EXPECT_FALSE(fs.file("a.txt")->close()) << "never opened";
+    EXPECT_FALSE(fs.file("never-seeded.txt")->close());
+    EXPECT_FALSE(fs.dir("d")->close()) << "never opened";
+    EXPECT_FALSE(fs.dir("does-not-exist")->close());
+
+    auto f = fs.file("a.txt");
+    ASSERT_TRUE(f->open());
+    EXPECT_TRUE(f->close()) << "an open handle closes";
+    EXPECT_FALSE(f->close()) << "but not twice";
+
+    auto d = fs.dir("d");
+    ASSERT_TRUE(d->open());
+    EXPECT_TRUE(d->close());
+    EXPECT_FALSE(d->close()) << "but not twice";
+}
+
 // The closeGate fault hook fails an open handle's close() and leaves it open
 // (FatFs f_close semantics: a failed sync keeps the FIL valid and its
 // lock-table entry held); once the gate is lifted, close() drains normally.
@@ -202,6 +257,54 @@ TEST(InMemoryDirectory, AListedNameIsOpenableAsSlashPlusName)
     EXPECT_EQ(fs.readFile(path), contents);
 }
 
+// Both listing guarantees -- a name joins back onto its parent, and a name
+// appears once -- hold up to ObjectInfo::name and stop there. A name too long
+// to survive the copy comes back clipped, so it names nothing, and two names
+// differing only past that capacity come back as one repeated entry. Pinned
+// because the documented rules are stated with this boundary attached, and a
+// test that scans and then opens is the pattern that meets it.
+TEST(InMemoryDirectory, ListingGuaranteesStopAtTheNameCapacity)
+{
+    constexpr size_t kCap = SDK::Interface::IFileSystem::skMaxPathLen; // incl. NUL
+    InMemoryFileSystem fs;
+    const std::string fits(kCap - 1, 'a');       // 255: survives intact
+    const std::string tooLong(kCap, 'b');        // 256: clipped to 255
+    fs.seedFile("d/" + fits, "x");
+    fs.seedFile("d/" + tooLong, "y");
+
+    auto dir = fs.dir("d");
+    ASSERT_TRUE(dir->open());
+    SDK::Interface::IFileSystem::ObjectInfo item{};
+    size_t joinable = 0;
+    size_t clipped = 0;
+    while (dir->readNext(item)) {
+        const std::string name(item.name);
+        EXPECT_EQ(name.size(), kCap - 1) << "both clip or fit at the capacity";
+        if (fs.exist(("d/" + name).c_str())) {
+            ++joinable;
+        } else {
+            ++clipped;
+        }
+    }
+    ASSERT_TRUE(dir->close());
+    EXPECT_EQ(joinable, 1u) << "the name that fits joins back onto its parent";
+    EXPECT_EQ(clipped, 1u) << "the one that does not names nothing";
+
+    // Two names differing only past the capacity: one name, reported twice.
+    InMemoryFileSystem twins;
+    twins.seedFile("d/" + std::string(kCap, 'c') + "ONE", "1");
+    twins.seedFile("d/" + std::string(kCap, 'c') + "TWO", "2");
+    auto twinDir = twins.dir("d");
+    ASSERT_TRUE(twinDir->open());
+    std::vector<std::string> seen;
+    while (twinDir->readNext(item)) {
+        seen.push_back(item.name);
+    }
+    ASSERT_TRUE(twinDir->close());
+    ASSERT_EQ(seen.size(), 2u);
+    EXPECT_EQ(seen[0], seen[1]) << "the one case where a listing repeats a name";
+}
+
 // However a name is arrived at -- two spellings of one file, an implied
 // directory that is also an explicit one -- a listing reports it once.
 TEST(InMemoryDirectory, AListingNeverReportsTheSameNameTwice)
@@ -271,6 +374,11 @@ TEST(InMemoryDirectory, CreateDoesNotInventParents)
 
     EXPECT_TRUE(fs.mkdir("p/q/r")) << "IFileSystem::mkdir does create parents";
     EXPECT_TRUE(fs.exist("p/q"));
+
+    // The root is already a directory, which ::mkdir reports as EEXIST and
+    // the simulator turns into success once it confirms the target is one.
+    EXPECT_TRUE(fs.dir("/")->create()) << "the root exists, so creating it succeeds";
+    EXPECT_TRUE(fs.dir("")->create());
 }
 
 // A name cannot be a file and a directory at once, so mkdir() over an
@@ -288,6 +396,54 @@ TEST(InMemoryDirectory, MkdirRefusesANameAFileAlreadyHolds)
 
     // The parents mkdir() creates are subject to the same rule.
     EXPECT_FALSE(fs.mkdir("a.txt/below"));
+}
+
+// One name is never both a file and a directory, whichever way it is
+// approached: mkdir() and create() refuse a name a file holds, a write-open
+// gets EISDIR on the real backend, and seedFile() cannot plant what IFile
+// cannot open.
+TEST(InMemoryDirectory, AFileCannotShadowADirectory)
+{
+    InMemoryFileSystem fs;
+    ASSERT_TRUE(fs.mkdir("d"));
+    fs.seedFile("d/inner.txt", "child");
+
+    EXPECT_FALSE(fs.file("d")->open(/*wMode=*/true)) << "EISDIR: \"d\" is a directory";
+    EXPECT_FALSE(fs.seedFile("d", "clobber")) << "and seeding cannot do it either";
+
+    // The directory is intact, and nothing reports "d" as a file.
+    EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "d/" }));
+    EXPECT_EQ(listDir(fs, "d"), (std::vector<std::string>{ "inner.txt" }));
+    SDK::Interface::IFileSystem::ObjectInfo item{};
+    ASSERT_TRUE(fs.objectInfo("d", item));
+    EXPECT_TRUE(item.isDir);
+
+    // An implied directory holds the name just as firmly as an mkdir'd one.
+    InMemoryFileSystem implied;
+    implied.seedFile("imp/child.txt", "x");
+    EXPECT_FALSE(implied.file("imp")->open(/*wMode=*/true));
+    EXPECT_FALSE(implied.seedFile("imp", "clobber"));
+
+    // ...and the root is a directory too.
+    EXPECT_FALSE(fs.file("/")->open(/*wMode=*/true));
+}
+
+// The mirror image: nothing may live under a name a file already holds.
+// mkdir() and create() already refuse; a write-open and seedFile() must too.
+TEST(InMemoryDirectory, NothingCanBeCreatedUnderAFile)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("a.txt", "x");
+
+    EXPECT_FALSE(fs.mkdir("a.txt/below"));
+    EXPECT_FALSE(fs.dir("a.txt/below")->create());
+    EXPECT_FALSE(fs.file("a.txt/below/deep.bin")->open(/*wMode=*/true))
+        << "ENOTDIR: an ancestor is a file";
+    EXPECT_FALSE(fs.seedFile("a.txt/below/deep.bin", "y"));
+
+    EXPECT_EQ(fs.readFile("a.txt"), "x") << "the file is untouched";
+    EXPECT_FALSE(fs.dir("a.txt")->open()) << "and never became a directory";
+    EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "a.txt" }));
 }
 
 // Repointing an open handle must not keep serving the old directory's entries
@@ -324,7 +480,8 @@ TEST(InMemoryFileSystem, ExistSeparatesTheRootFromAnEmptyPath)
 {
     InMemoryFileSystem fs;
     EXPECT_TRUE(fs.exist("/")) << "the root exists even when nothing is seeded";
-    EXPECT_FALSE(fs.exist("")) << "an empty path names nothing, as stat(\"\") does not";
+    EXPECT_FALSE(fs.exist(""))
+        << "an empty path names nothing, as FatFs f_stat(\"\") is FR_INVALID_NAME";
     EXPECT_FALSE(fs.exist(nullptr));
 
     SDK::Interface::IFileSystem::ObjectInfo item{};
@@ -483,6 +640,144 @@ TEST(InMemoryFileSystem, RemoveReportsWhetherAnythingWasRemoved)
     EXPECT_FALSE(fs.remove("a.txt")) << "already gone";
     EXPECT_FALSE(fs.remove("never-existed.txt"));
     EXPECT_FALSE(fs.remove(nullptr));
+}
+
+// rename()/copy() follow the same rule remove() does: an entry whose `exists`
+// flag is cleared is a tombstone, not a file. Taking one as a source would
+// claim success for work not done, and would carry the tombstone onto the
+// destination, destroying a live file there.
+TEST(InMemoryFileSystem, RenameAndCopyRefuseAnAlreadyRemovedSource)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("gone.txt", "x");
+    fs.seedFile("live.txt", "IMPORTANT");
+    ASSERT_TRUE(fs.remove("gone.txt"));
+
+    EXPECT_FALSE(fs.rename("gone.txt", "live.txt")) << "a tombstone is not a source";
+    EXPECT_EQ(fs.readFile("live.txt"), "IMPORTANT") << "and must not destroy the destination";
+    EXPECT_TRUE(fs.exist("live.txt"));
+
+    EXPECT_FALSE(fs.copy("gone.txt", "c.txt"));
+    EXPECT_FALSE(fs.exist("c.txt")) << "no tombstone propagated to the destination";
+
+    // A path that never existed at all already failed; the two now agree.
+    EXPECT_FALSE(fs.rename("never.txt", "x.txt"));
+    EXPECT_FALSE(fs.copy("never.txt", "x.txt"));
+}
+
+// A destination that cannot hold a file is refused rather than silently
+// swallowing the source: the root, an existing directory, or a path under a
+// file. An existing *file* is still overwritten, as std::rename does.
+TEST(InMemoryFileSystem, RenameAndCopyRefuseADestinationThatCannotHoldAFile)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("src.txt", "SRC");
+    ASSERT_TRUE(fs.mkdir("d"));
+    fs.seedFile("blocker.txt", "B");
+
+    EXPECT_FALSE(fs.rename("src.txt", "")) << "the root is not a file destination";
+    EXPECT_FALSE(fs.rename("src.txt", "/"));
+    EXPECT_FALSE(fs.rename("src.txt", "d")) << "an existing directory";
+    EXPECT_FALSE(fs.rename("src.txt", "blocker.txt/under")) << "under a file";
+    EXPECT_FALSE(fs.copy("src.txt", ""));
+    EXPECT_FALSE(fs.copy("src.txt", "d"));
+    EXPECT_EQ(fs.readFile("src.txt"), "SRC") << "every refusal left the source alone";
+    EXPECT_EQ(listDir(fs, "/"),
+              (std::vector<std::string>{ "blocker.txt", "d/", "src.txt" }));
+
+    // Overwriting a plain file is still allowed, as std::rename does it.
+    EXPECT_TRUE(fs.rename("src.txt", "blocker.txt"));
+    EXPECT_EQ(fs.readFile("blocker.txt"), "SRC");
+    EXPECT_FALSE(fs.exist("src.txt"));
+}
+
+// Source and destination can name one object through two spellings, which is
+// one key in the backing map. Moving an entry onto itself would leave it
+// unspecified and then erase it, so the call would report success and take
+// the file with it. std::rename succeeds and leaves the file alone.
+TEST(InMemoryFileSystem, RenamingAFileOntoItselfKeepsIt)
+{
+    for (const char* destination : { "a.txt", "/a.txt", "a.txt/", "/a.txt/" }) {
+        InMemoryFileSystem fs;
+        fs.seedFile("a.txt", "PAYLOAD");
+
+        EXPECT_TRUE(fs.rename("a.txt", destination)) << destination;
+        EXPECT_TRUE(fs.exist("a.txt")) << destination << " must not remove the file";
+        EXPECT_EQ(fs.readFile("a.txt"), "PAYLOAD") << destination;
+        EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "a.txt" })) << destination;
+    }
+
+    // The same key reached through a collapsed separator, at depth.
+    InMemoryFileSystem nested;
+    nested.seedFile("d/a.txt", "PAYLOAD");
+    EXPECT_TRUE(nested.rename("d/a.txt", "d//a.txt"));
+    EXPECT_EQ(nested.readFile("d/a.txt"), "PAYLOAD");
+
+    // copy() has the same one-key case. Its contract is that the file is left
+    // as it was -- deliberately unlike the simulator, which truncates the
+    // destination before reading the source and so empties it. Nothing about
+    // the current implementation can violate this, since a self-copy-assign
+    // is a no-op; the assertion is here to pin the contract, not to guard it.
+    InMemoryFileSystem copied;
+    copied.seedFile("a.txt", "PAYLOAD");
+    EXPECT_TRUE(copied.copy("a.txt", "/a.txt"));
+    EXPECT_EQ(copied.readFile("a.txt"), "PAYLOAD");
+}
+
+// Renaming across a rehash of the backing map. Padded to the load-factor
+// boundary so the destination insert is guaranteed to rehash rather than
+// merely able to.
+//
+// This pins the outcome, not the mechanism. rename() must erase by key rather
+// than through the iterator that found the source, because a rehash
+// invalidates every iterator into an unordered_map -- but libstdc++ keeps its
+// nodes across a rehash, so erasing through the stale iterator still happens
+// to work here and no assertion below can see the difference. The rule is
+// upheld by construction; treat this as documentation of the path, not as its
+// guard.
+TEST(InMemoryFileSystem, RenameMovesAnEntryAcrossARehash)
+{
+    InMemoryFileSystem fs;
+    fs.files.max_load_factor(1.0f);
+    fs.seedFile("src.txt", "PAYLOAD");
+    for (size_t n = 0; fs.files.size() < fs.files.bucket_count(); ++n) {
+        fs.seedFile("pad/f" + std::to_string(n) + ".txt", "x");
+    }
+    const size_t bucketsBefore = fs.files.bucket_count();
+    const size_t sizeBefore = fs.files.size();
+
+    ASSERT_TRUE(fs.rename("src.txt", "dst.txt"));
+
+    EXPECT_GT(fs.files.bucket_count(), bucketsBefore) << "the insert did rehash";
+    EXPECT_EQ(fs.files.size(), sizeBefore) << "one entry moved, none gained or lost";
+    EXPECT_EQ(fs.readFile("dst.txt"), "PAYLOAD");
+    EXPECT_FALSE(fs.exist("src.txt"));
+}
+
+// Repeated interior separators are not a divergence: "a//b" and "a/b" are one
+// object, as on POSIX and FatFs. Splitting them apart would leave an empty
+// path segment, which enumerates as an entry with no name -- something no
+// backend can show, and which no caller could join back onto its parent.
+TEST(InMemoryDirectory, RepeatedSeparatorsCollapse)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("a//b.txt", "x");
+
+    EXPECT_TRUE(fs.exist("a//b.txt"));
+    EXPECT_TRUE(fs.exist("a/b.txt")) << "one object, however it is spelled";
+    EXPECT_EQ(fs.readFile("a/b.txt"), "x");
+    EXPECT_EQ(listDir(fs, "a"), (std::vector<std::string>{ "b.txt" }));
+    EXPECT_EQ(listDir(fs, "a//"), (std::vector<std::string>{ "b.txt" }));
+
+    // Every listed name still joins back onto its parent.
+    auto dir = fs.dir("a");
+    ASSERT_TRUE(dir->open());
+    SDK::Interface::IFileSystem::ObjectInfo item{};
+    ASSERT_TRUE(dir->readNext(item));
+    ASSERT_TRUE(dir->close());
+    ASSERT_GT(std::strlen(item.name), 0u) << "a listing never yields an empty name";
+    const std::string joined = std::string("a/") + item.name;
+    EXPECT_TRUE(fs.exist(joined.c_str())) << joined;
 }
 
 TEST(InMemoryDirectory, RemovedFilesDisappearFromListings)

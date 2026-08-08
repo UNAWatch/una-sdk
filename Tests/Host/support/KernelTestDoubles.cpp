@@ -109,6 +109,18 @@ InMemoryFileSystem::InMemoryFile::InMemoryFile(InMemoryFileSystem& fs, std::stri
 
 void InMemoryFileSystem::InMemoryFile::setPath(const char* path)
 {
+    // Repointing closes any open handle, as IDirectory::setPath does. The new
+    // path is a different file, so an open handle's count cannot follow it the
+    // way rename()'s does: it is released here, against the path that earned
+    // it. A handle left open across the change would write to the new path
+    // where the real File keeps writing through the descriptor it opened, and
+    // its close() would decrement a bucket it never incremented.
+    if (mOpen) {
+        --mFs.openHandles[mPath];
+    }
+    mOpen = false;
+    mWriteMode = false;
+    mPos = 0;
     mGivenPath = path != nullptr ? path : "";
     mPath = canonicalPath(mGivenPath);
 }
@@ -163,6 +175,15 @@ size_t InMemoryFileSystem::InMemoryFile::size() const
 
 bool InMemoryFileSystem::InMemoryFile::open(bool wMode, bool override)
 {
+    // A write-open cannot conjure a file where the name is already a directory
+    // (EISDIR), nor under a path whose ancestor is a file (ENOTDIR). Without
+    // this the fake would hold one name as both a file and an openable
+    // directory at once -- the state IFileSystem::mkdir() already refuses to
+    // create from the other direction.
+    if (wMode && !mFs.canHoldFileAt(mPath)) {
+        return false;
+    }
+
     // Injected, file-kind-scoped storage failure: refuse to open a matching path
     // for writing without touching the entry (e.g. the auxiliary ".json" summary
     // fails while the ".fit" is already durable).
@@ -203,14 +224,17 @@ bool InMemoryFileSystem::InMemoryFile::isOpen() const
 
 bool InMemoryFileSystem::InMemoryFile::close()
 {
-    // Injected close failure (FatFs f_close semantics: a sync failure keeps
-    // the FIL valid and its lock-table entry held): the handle stays open.
-    if (mOpen && mFs.closeGate && !mFs.closeGate(mPath)) {
+    // Closing what is not open fails, as the simulator's File::close() does,
+    // so EXPECT_TRUE(f->close()) is an assertion with a failing mode.
+    if (!mOpen) {
         return false;
     }
-    if (mOpen) {
-        --mFs.openHandles[mPath];
+    // Injected close failure (FatFs f_close semantics: a sync failure keeps
+    // the FIL valid and its lock-table entry held): the handle stays open.
+    if (mFs.closeGate && !mFs.closeGate(mPath)) {
+        return false;
     }
+    --mFs.openHandles[mPath];
     mOpen = false;
     return true;
 }
@@ -308,15 +332,23 @@ size_t InMemoryFileSystem::InMemoryFile::getPosition() const
 
 std::string InMemoryFileSystem::canonicalPath(const std::string& path)
 {
-    size_t begin = 0;
-    while (begin < path.size() && path[begin] == '/') {
-        ++begin;
+    // Runs of '/' collapse to one, leading and trailing runs to none, so
+    // "a//b" and "a/b" name one object as they do on POSIX and FatFs. That
+    // keeps a stray separator from splitting a path into an empty segment,
+    // which would enumerate as an entry with no name -- something no backend
+    // can show, and which no caller could join back onto its parent.
+    std::string out;
+    out.reserve(path.size());
+    for (const char c : path) {
+        if (c == '/' && (out.empty() || out.back() == '/')) {
+            continue;
+        }
+        out.push_back(c);
     }
-    size_t end = path.size();
-    while (end > begin && path[end - 1] == '/') {
-        --end;
+    while (!out.empty() && out.back() == '/') {
+        out.pop_back();
     }
-    return path.substr(begin, end - begin);
+    return out;
 }
 
 std::string InMemoryFileSystem::parentOf(const std::string& path)
@@ -338,6 +370,27 @@ bool InMemoryFileSystem::fileExistsAt(const std::string& canonical) const
 {
     auto it = files.find(canonical);
     return it != files.end() && it->second.exists;
+}
+
+bool InMemoryFileSystem::canHoldFileAt(const std::string& canonical) const
+{
+    // The root is a directory, so no file can live *at* it.
+    if (canonical.empty()) {
+        return false;
+    }
+    // A directory already holding the name rules out a file there (EISDIR),
+    // and a file anywhere along the chain rules out anything below it
+    // (ENOTDIR). The mirror of IFileSystem::mkdir()'s chain walk, so the two
+    // agree on which names are already spoken for.
+    if (directoryExists(canonical)) {
+        return false;
+    }
+    for (std::string dir = parentOf(canonical); !dir.empty(); dir = parentOf(dir)) {
+        if (fileExistsAt(dir)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool InMemoryFileSystem::directoryExists(const std::string& path) const
@@ -412,8 +465,13 @@ bool InMemoryFileSystem::InMemoryDirectory::create()
     // Deliberately not mkdir(): the simulator's Directory::create() is a
     // single non-recursive ::mkdir that fails with ENOENT when the parent is
     // missing, and a fake that quietly conjures the parents would hide that.
+    if (mPath.empty()) {
+        // The root. ::mkdir gives EEXIST, which the simulator reports as
+        // success once it confirms the target really is a directory.
+        return true;
+    }
     const std::string parent = parentOf(mPath);
-    if (mPath.empty() || mFs.fileExistsAt(mPath) || !mFs.directoryExists(parent)) {
+    if (mFs.fileExistsAt(mPath) || !mFs.directoryExists(parent)) {
         return false;
     }
     mFs.directories.insert(mPath);
@@ -508,7 +566,13 @@ bool InMemoryFileSystem::InMemoryDirectory::readNext(SDK::Interface::IFileSystem
 
 bool InMemoryFileSystem::InMemoryDirectory::close()
 {
+    // As the simulator's Directory::close(): closing what is not open fails.
+    if (!mOpen) {
+        return false;
+    }
     mOpen = false;
+    mEntries.clear();
+    mCursor = 0;
     return true;
 }
 
@@ -555,8 +619,11 @@ std::unique_ptr<SDK::Interface::IDirectory> InMemoryFileSystem::dir(const char* 
 
 bool InMemoryFileSystem::exist(const char* path) const
 {
-    // An empty path names nothing, as stat("") does not. "/" is the root and
-    // does exist, and canonicalPath() maps both to "", so separate them here.
+    // An empty path names nothing, as FatFs f_stat("") is FR_INVALID_NAME on
+    // device. Note the simulator answers TRUE here -- it prepends a sandbox
+    // root, so "" stats that directory -- and the device is the behaviour
+    // worth modelling. "/" is the root and does exist, and canonicalPath()
+    // maps both to "", so separate them here.
     if (path == nullptr || path[0] == '\0') {
         return false;
     }
@@ -606,12 +673,30 @@ bool InMemoryFileSystem::rename(const char* oldPath, const char* newPath)
     if (oldPath == nullptr || newPath == nullptr) {
         return false;
     }
-    auto it = files.find(canonicalPath(oldPath));
-    if (it == files.end()) {
+    // A removed path lingers in the map as a tombstone -- present, with its
+    // `exists` flag cleared -- and is not a source. Moving one would report
+    // success for work not done, and would carry the tombstone onto the
+    // destination, destroying whatever lives there. remove() reads the flag
+    // for the same reason.
+    const std::string source = canonicalPath(oldPath);
+    auto it = files.find(source);
+    if (it == files.end() || !it->second.exists) {
         return false;
     }
-    files[canonicalPath(newPath)] = std::move(it->second);
-    files.erase(it);
+    const std::string target = canonicalPath(newPath);
+    if (!canHoldFileAt(target)) {
+        return false; // the root, an existing directory, or under a file
+    }
+    // One object under two spellings ("a.txt" and "/a.txt") is the same key,
+    // and moving an entry onto itself would leave it unspecified and then
+    // erase it. std::rename succeeds and leaves the file alone; so does this.
+    if (source == target) {
+        return true;
+    }
+    // Erased by key rather than by iterator: inserting the destination can
+    // rehash, and a rehash invalidates every iterator into the map.
+    files[target] = std::move(it->second);
+    files.erase(source);
     return true;
 }
 
@@ -620,11 +705,26 @@ bool InMemoryFileSystem::copy(const char* oldPath, const char* newPath)
     if (oldPath == nullptr || newPath == nullptr) {
         return false;
     }
-    auto it = files.find(canonicalPath(oldPath));
-    if (it == files.end()) {
+    const std::string source = canonicalPath(oldPath);
+    auto it = files.find(source);
+    if (it == files.end() || !it->second.exists) {
+        return false; // a removed source is not a source; see rename()
+    }
+    const std::string target = canonicalPath(newPath);
+    if (!canHoldFileAt(target)) {
         return false;
     }
-    files[canonicalPath(newPath)] = it->second;
+    // Copying an object onto itself leaves it as it was. The simulator, which
+    // opens the destination for truncation before reading the source, empties
+    // the file instead; that is worth not reproducing.
+    if (source == target) {
+        return true;
+    }
+    // Read into a local before the insert: growing the map can rehash, and
+    // reaching back through `it` afterwards would be reaching through an
+    // invalidated iterator.
+    InMemoryFileEntry entry = it->second;
+    files[target] = std::move(entry);
     return true;
 }
 
@@ -662,9 +762,18 @@ bool InMemoryFileSystem::objectInfo(const char* path, ObjectInfo& item) const
     return true;
 }
 
-void InMemoryFileSystem::seedFile(const std::string& path, std::string content)
+bool InMemoryFileSystem::seedFile(const std::string& path, std::string content)
 {
-    files[canonicalPath(path)] = InMemoryFileEntry{ std::move(content), true };
+    // Seeding is subject to the same rule a write-open is: a name already held
+    // by a directory, or living under a file, cannot also be a file. Without
+    // this a test could seed the fake into a state the device cannot reach and
+    // then write assertions against it.
+    const std::string target = canonicalPath(path);
+    if (!canHoldFileAt(target)) {
+        return false;
+    }
+    files[target] = InMemoryFileEntry{ std::move(content), true };
+    return true;
 }
 
 std::string InMemoryFileSystem::readFile(const std::string& path) const
