@@ -60,6 +60,7 @@ add_executable(una-sdk-host-tests
     utils/ClockTime_test.cpp
     utils/Utils_test.cpp
     utils/CopyUtf8_test.cpp
+    variant/VariantConfig_test.cpp
     support/KernelTestDoubles_test.cpp
     apps/Stopwatch/Stopwatch_test.cpp
     apps/Timer/TimerManager_test.cpp
@@ -78,6 +79,7 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/SensorLayer/SensorConnection.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/AppConfig/AppConfig.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Variant/VariantConfig.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
     "${UNA_SDK_ROOT}/Libs/Source/Simulator/Kernel/Mock/FileSystem.cpp"
