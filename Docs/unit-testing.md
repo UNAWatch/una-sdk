@@ -94,7 +94,9 @@ Worth knowing:
   `IDirectory::create()` does not, matching the simulator's non-recursive
   `::mkdir`. `remove()` on a directory refuses unless it is empty.
 - **A name from a listing is openable as `"/" + name`**, and a listing never
-  reports the same name twice.
+  reports the same name twice — for every name short enough to survive
+  `ObjectInfo::name`. Both guarantees stop at that boundary; see the
+  name-length divergence below.
 - Opening a directory that does not exist fails, so assert on `open()`.
 
 ### Prove the scan is live
@@ -116,14 +118,33 @@ All deliberate. Check these before writing a test that leans on one:
 - **Leading and trailing slashes are not significant.** `/a.txt`, `a.txt` and
   `a.txt/` are one object, at every depth, for lookup as well as enumeration.
   This is what lets a test seed `/App.uapp` and have code that scans `/` find
-  it, but a real filesystem would keep them apart.
+  it, but a real filesystem would keep them apart. Repeated *interior*
+  separators are not a divergence: `a//b` and `a/b` are one object here as
+  they are on POSIX and FatFs.
+- **A file may be created under a directory that does not exist.** Writing
+  `a/b/c.txt` implies `a` and `a/b` rather than failing with `ENOENT` — the
+  flip side of implied directories. `mkdir()` the parents first if a test
+  needs the `ENOENT` branch.
 - **No `.` / `..` resolution.** Both are ordinary path segments, so `a/b` and
   `a/./b` are different places.
 - **Directory rename is not modelled** — it returns false. The simulator's
   does work, so do not read that false as device behaviour.
+- **No hidden/system attributes of their own.** `isHidden` is derived from a
+  leading `.` in the name, as the POSIX simulator does; `isSystem` is always
+  false.
 - **A name longer than `ObjectInfo::name` cannot round-trip**; it comes back
   clipped, as the simulator's `safe_strcpy` would clip it. Real backends cap
-  a single name well below that.
+  a single name well below that. Names are deduplicated *before* clipping, so
+  two names differing only past that capacity come back as two identical
+  entries — the one case where a listing repeats a name.
+
+What the fake refuses, so a test cannot build a state the device cannot
+reach: one name is never both a file and a directory (`mkdir()`,
+`IDirectory::create()`, a write-`open()` and `seedFile()` all enforce this);
+`rename()`/`copy()` will not take a removed path as their source, nor a
+destination that is the root, an existing directory, or under a file; and
+`close()` on a handle that is not open fails, so `EXPECT_TRUE(h->close())` is
+a real assertion.
 
 ## Troubleshooting
 
