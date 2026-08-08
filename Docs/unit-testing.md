@@ -56,6 +56,75 @@ Use `SDK::TestSupport::KernelFixture`:
 - Instantiate serializer with `SettingsSerializer(fixture.kernel, "settings.json")`.
 - Verify load/save behavior without device firmware or simulator runtime.
 
+## Testing Code That Scans A Directory
+
+`InMemoryFileSystem` enumerates what you seed, so code that walks a directory
+(`kernel.fs.dir(path)` then `readNext()`) can be tested directly. Seeding a
+file is enough — the directories along its path are implied, with no `mkdir`
+needed:
+
+```cpp
+KernelFixture fixture;
+fixture.fileSystem.seedFile("Activity/morning.fit", contents);
+fixture.fileSystem.seedFile("Activity/archive/old.fit", contents);
+
+auto dir = fixture.kernel.fs.dir("Activity");
+ASSERT_TRUE(dir->open());
+SDK::Interface::IFileSystem::ObjectInfo item{};
+while (dir->readNext(item)) {
+    // "archive" (isDir true), then "morning.fit" (isDir false)
+}
+dir->close();
+```
+
+Worth knowing:
+
+- **Direct children only.** `Activity/archive/old.fit` shows up as the
+  directory `archive` when listing `Activity`, not as a file — the same shape
+  a real backend reports.
+- **`isDir` is real**, so an `if (item.isDir) continue;` guard is actually
+  exercised rather than silently dead.
+- **Enumeration is sorted by name**, so tests are reproducible. The device
+  enumerates in directory-entry order, so do not write tests that depend on
+  alphabetical order *meaning* anything — only on it being stable.
+- **A snapshot is taken at `open()`.** Files seeded mid-scan do not appear
+  until an explicit `readNext(item, /*reset=*/true)`, which rewinds without
+  reading an entry (and re-snapshots, as POSIX `rewinddir` does).
+- **`mkdir()` creates parents** and succeeds if the directory already exists;
+  `IDirectory::create()` does not, matching the simulator's non-recursive
+  `::mkdir`. `remove()` on a directory refuses unless it is empty.
+- **A name from a listing is openable as `"/" + name`**, and a listing never
+  reports the same name twice.
+- Opening a directory that does not exist fails, so assert on `open()`.
+
+### Prove the scan is live
+
+A test whose expectation is "nothing was found" cannot tell a correct
+decision from a scan that never ran — seed a path the fake resolves
+differently than you assumed and it still passes. Where the expected outcome
+is a negative, assert first that the directory really enumerates what you
+seeded, or pair the test with a positive control that differs in exactly the
+one property under test.
+
+### Divergences from a real backend
+
+All deliberate. Check these before writing a test that leans on one:
+
+- **An implied directory is only as durable as its contents.** A directory
+  that exists solely because a file lives under it stops existing when that
+  file is removed. Call `mkdir()` if a test needs it to outlive its children.
+- **Leading and trailing slashes are not significant.** `/a.txt`, `a.txt` and
+  `a.txt/` are one object, at every depth, for lookup as well as enumeration.
+  This is what lets a test seed `/App.uapp` and have code that scans `/` find
+  it, but a real filesystem would keep them apart.
+- **No `.` / `..` resolution.** Both are ordinary path segments, so `a/b` and
+  `a/./b` are different places.
+- **Directory rename is not modelled** — it returns false. The simulator's
+  does work, so do not read that false as device behaviour.
+- **A name longer than `ObjectInfo::name` cannot round-trip**; it comes back
+  clipped, as the simulator's `safe_strcpy` would clip it. Real backends cap
+  a single name well below that.
+
 ## Troubleshooting
 
 - If `core_json.h` is missing, confirm include path:
