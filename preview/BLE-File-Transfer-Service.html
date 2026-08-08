@@ -1,0 +1,833 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNA Watch — BLE File Transfer Service (FTS) &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="UNA Watch — BLE Services Overview" href="BLE-Services-Overview.html" />
+    <link rel="prev" title="FIT Files Structure" href="FitFiles-Structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">UNA Watch — BLE File Transfer Service (FTS)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#conventions">Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#service-and-characteristics">Service and characteristics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#capability-negotiation">Capability negotiation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-summary">Command summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notification-sizing-read-this-first">Notification sizing — read this first</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#read-a-file">Read a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-a-file">Write a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delete-mkdir-list-move">Delete / MkDir / List / Move</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#read-windowing">Read windowing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-windowing-credit-based-with-recovery">Write windowing (credit-based, with recovery)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#digest-integrity-without-read-back-una-extension">DIGEST — integrity without read-back (UNA extension)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resume">Resume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compatibility-matrix">Compatibility matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">UNA Watch — BLE File Transfer Service (FTS)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/BLE-File-Transfer-Service.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="una-watch-ble-file-transfer-service-fts">
+<h1>UNA Watch — BLE File Transfer Service (FTS)<a class="headerlink" href="#una-watch-ble-file-transfer-service-fts" title="Link to this heading"></a></h1>
+<p>This document is the wire protocol for reading and writing files on a UNA Watch
+over Bluetooth Low Energy. It is what a companion app or integration implements
+against; it does not describe the watch’s internal implementation.</p>
+<p>The base protocol is the <a class="reference external" href="https://github.com/adafruit/Adafruit_CircuitPython_BLE_File_Transfer">Adafruit CircuitPython BLE File Transfer
+protocol</a>
+(service <code class="docutils literal notranslate"><span class="pre">0xFEBB</span></code>). UNA implements that command set and adds a small set of
+backward-compatible <strong>fast-transfer extensions</strong> (protocol version 5): windowed
+reads and writes, a file digest query, and safe resume. A client that only knows
+the classic (version 4) protocol interoperates unchanged.</p>
+<section id="conventions">
+<h2>Conventions<a class="headerlink" href="#conventions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>All multi-byte integers are <strong>little-endian</strong>.</p></li>
+<li><p>All request/response layouts below are <strong>packed</strong> (no padding beyond the
+<code class="docutils literal notranslate"><span class="pre">reserved</span></code> bytes shown). Byte offsets are given for each field.</p></li>
+<li><p><strong>Paths</strong> are UTF-8, not NUL-terminated on the wire; their length is carried in
+a <code class="docutils literal notranslate"><span class="pre">pathLength</span></code> field. Absolute paths, <code class="docutils literal notranslate"><span class="pre">/</span></code>-separated (e.g.
+<code class="docutils literal notranslate"><span class="pre">/Apps/Workout/Activity/202607/activity_...fit</span></code>).</p></li>
+<li><p>Times are <strong>nanoseconds since the Unix epoch</strong> (<code class="docutils literal notranslate"><span class="pre">uint64</span></code>).</p></li>
+</ul>
+</section>
+<section id="service-and-characteristics">
+<h2>Service and characteristics<a class="headerlink" href="#service-and-characteristics" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>UUID</p></th>
+<th class="head"><p>Properties</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>File Transfer Service</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0000FEBB-0000-1000-8000-00805F9B34FB</span></code> (<code class="docutils literal notranslate"><span class="pre">0xFEBB</span></code>)</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>Version</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ADAF0001-4669-6C65-5472-616E73666572</span></code></p></td>
+<td><p>Read</p></td>
+</tr>
+<tr class="row-even"><td><p>Raw Transfer</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ADAF0002-4669-6C65-5472-616E73666572</span></code></p></td>
+<td><p>Write Without Response, Notify</p></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><p><strong>Note.</strong> The characteristic 16-bit IDs are UNA-specific (<code class="docutils literal notranslate"><span class="pre">ADAF0001</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ADAF0002</span></code>) and differ from Adafruit’s upstream (<code class="docutils literal notranslate"><span class="pre">ADAF0100</span></code> / <code class="docutils literal notranslate"><span class="pre">ADAF0200</span></code>). Use
+the UUIDs exactly as listed above — they are what the watch exposes.</p>
+</div></blockquote>
+<p>All operations are a request written to <strong>Raw Transfer</strong> and one or more
+responses delivered as <strong>notifications</strong> on the same characteristic. Enable
+notifications (write the CCCD) before issuing commands.</p>
+<p><strong>Security.</strong> The watch requires a <strong>bonded, encrypted connection</strong> — pair with
+the watch before using FTS. Reads and writes on the characteristics are rejected
+on an unencrypted link.</p>
+</section>
+<section id="capability-negotiation">
+<h2>Capability negotiation<a class="headerlink" href="#capability-negotiation" title="Link to this heading"></a></h2>
+<p>Read the <strong>Version</strong> characteristic — a single <code class="docutils literal notranslate"><span class="pre">uint32</span></code> (little-endian):</p>
+<ul class="simple">
+<li><p><strong>4</strong> — classic protocol only (Adafruit-compatible, stop-and-wait).</p></li>
+<li><p><strong>≥ 5</strong> — UNA fast-transfer extensions are available.</p></li>
+</ul>
+<p>Gating rules for a version-5 client:</p>
+<ul class="simple">
+<li><p><strong>Read windowing</strong> needs no gate — it degrades automatically against a v4
+watch (see <em>Read windowing</em> under the version-5 extensions below).</p></li>
+<li><p><strong>Write windowing</strong> and <strong><code class="docutils literal notranslate"><span class="pre">DIGEST</span></code></strong> MUST be gated on version <strong>≥ 5</strong>.</p></li>
+</ul>
+</section>
+<section id="command-summary">
+<h2>Command summary<a class="headerlink" href="#command-summary" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ID</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Direction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x10</span></code></p></td>
+<td><p>READ</p></td>
+<td><p>request</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x11</span></code></p></td>
+<td><p>READ_DATA</p></td>
+<td><p>response</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x12</span></code></p></td>
+<td><p>READ_PACING</p></td>
+<td><p>request (more)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x20</span></code></p></td>
+<td><p>WRITE</p></td>
+<td><p>request</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x21</span></code></p></td>
+<td><p>WRITE_PACING</p></td>
+<td><p>response</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x22</span></code></p></td>
+<td><p>WRITE_DATA</p></td>
+<td><p>request (data)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x30</span></code> / <code class="docutils literal notranslate"><span class="pre">0x31</span></code></p></td>
+<td><p>DELETE / status</p></td>
+<td><p>request / response</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x40</span></code> / <code class="docutils literal notranslate"><span class="pre">0x41</span></code></p></td>
+<td><p>MKDIR / status</p></td>
+<td><p>request / response</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x50</span></code> / <code class="docutils literal notranslate"><span class="pre">0x51</span></code></p></td>
+<td><p>LISTDIR / entry</p></td>
+<td><p>request / response</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x60</span></code> / <code class="docutils literal notranslate"><span class="pre">0x61</span></code></p></td>
+<td><p>MOVE / status</p></td>
+<td><p>request / response</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x70</span></code> / <code class="docutils literal notranslate"><span class="pre">0x71</span></code></p></td>
+<td><p>DIGEST / status</p></td>
+<td><p>request / response <strong>(UNA extension)</strong></p></td>
+</tr>
+</tbody>
+</table>
+<p>Status codes (the <code class="docutils literal notranslate"><span class="pre">status</span></code> byte in responses):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x01</span></code></p></td>
+<td><p>OK</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x02</span></code></p></td>
+<td><p>ERROR (generic)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x03</span></code></p></td>
+<td><p>ERROR_NO_FILE</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x04</span></code></p></td>
+<td><p>ERROR_PROTOCOL (malformed/wrong length)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x05</span></code></p></td>
+<td><p>ERROR_READ_ONLY</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="notification-sizing-read-this-first">
+<h2>Notification sizing — read this first<a class="headerlink" href="#notification-sizing-read-this-first" title="Link to this heading"></a></h2>
+<p>A GATT notification cannot carry more than the negotiated <strong>ATT payload = MTU −
+3</strong> bytes. Every FTS response has a fixed header, so the usable <em>data</em> per
+notification is smaller still. For <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code> (16-byte header) at MTU 220:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>data per notification ≤ (MTU − 3) − 16 = 201 bytes
+</pre></div>
+</div>
+<p>Do <strong>not</strong> assume one request maps to one notification of the size you asked for.
+A version-5 watch delivers a large read as multiple <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code> notifications (see
+below); each <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code> is self-describing (<code class="docutils literal notranslate"><span class="pre">chunkOffset</span></code>, <code class="docutils literal notranslate"><span class="pre">chunkLength</span></code>), so
+reassemble by offset and never trust a <code class="docutils literal notranslate"><span class="pre">chunkLength</span></code> beyond what the notification
+actually delivered.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="classic-operations-protocol-version-4">
+<h1>Classic operations (protocol version 4)<a class="headerlink" href="#classic-operations-protocol-version-4" title="Link to this heading"></a></h1>
+<section id="read-a-file">
+<h2>Read a file<a class="headerlink" href="#read-a-file" title="Link to this heading"></a></h2>
+<p><strong>READ <code class="docutils literal notranslate"><span class="pre">0x10</span></code></strong> (request):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x10</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>reserved</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>pathLength</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>chunkOffset</p></td>
+<td><p>file offset to start at</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>4</p></td>
+<td><p>chunkSize</p></td>
+<td><p>bytes requested</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>pathLength</p></td>
+<td><p>path</p></td>
+<td><p>UTF-8</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>READ_DATA <code class="docutils literal notranslate"><span class="pre">0x11</span></code></strong> (response, one or more notifications):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x11</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>status</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>reserved</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>chunkOffset</p></td>
+<td><p>offset of this chunk</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>4</p></td>
+<td><p>totalLength</p></td>
+<td><p>total file size</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>4</p></td>
+<td><p>chunkLength</p></td>
+<td><p>bytes of data that follow</p></td>
+</tr>
+<tr class="row-even"><td><p>16</p></td>
+<td><p>chunkLength</p></td>
+<td><p>data</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>READ_PACING <code class="docutils literal notranslate"><span class="pre">0x12</span></code></strong> (request more) — after consuming a chunk, ask for the next:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x12</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>status = <code class="docutils literal notranslate"><span class="pre">0x01</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>reserved</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>chunkOffset</p></td>
+<td><p>next offset = contiguous end (first byte not yet received)</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>4</p></td>
+<td><p>chunkSize</p></td>
+<td><p>bytes requested</p></td>
+</tr>
+</tbody>
+</table>
+<p>Classic flow: send <code class="docutils literal notranslate"><span class="pre">READ</span></code>, receive one <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code>, send <code class="docutils literal notranslate"><span class="pre">READ_PACING</span></code> for the
+next chunk, repeat until <code class="docutils literal notranslate"><span class="pre">chunkOffset</span> <span class="pre">+</span> <span class="pre">chunkLength</span> <span class="pre">==</span> <span class="pre">totalLength</span></code>.</p>
+</section>
+<section id="write-a-file">
+<h2>Write a file<a class="headerlink" href="#write-a-file" title="Link to this heading"></a></h2>
+<p><strong>WRITE <code class="docutils literal notranslate"><span class="pre">0x20</span></code></strong> (request):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x20</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>reserved</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>pathLength</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>offset</p></td>
+<td><p>start offset (<strong>0 for a fresh write</strong>; see <em>Resume</em> below)</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>currentTime</p></td>
+<td><p>ns since epoch (file mtime)</p></td>
+</tr>
+<tr class="row-odd"><td><p>16</p></td>
+<td><p>4</p></td>
+<td><p>totalSize</p></td>
+<td><p>total bytes to be written</p></td>
+</tr>
+<tr class="row-even"><td><p>20</p></td>
+<td><p>pathLength</p></td>
+<td><p>path</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>WRITE_PACING <code class="docutils literal notranslate"><span class="pre">0x21</span></code></strong> (response / ACK):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x21</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>status</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>reserved</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>offset</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>truncatedTime</p></td>
+<td><p>mtime as stored</p></td>
+</tr>
+<tr class="row-odd"><td><p>16</p></td>
+<td><p>4</p></td>
+<td><p>freeSpace</p></td>
+<td><p>bytes still expected (see below)</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>WRITE_DATA <code class="docutils literal notranslate"><span class="pre">0x22</span></code></strong> (request, carries data):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x22</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>status = <code class="docutils literal notranslate"><span class="pre">0x01</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>reserved</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>offset</p></td>
+<td><p>offset of this chunk</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>4</p></td>
+<td><p>dataSize</p></td>
+<td><p>bytes of data that follow</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>dataSize</p></td>
+<td><p>data</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>Classic flow: <code class="docutils literal notranslate"><span class="pre">WRITE</span></code>, then send <code class="docutils literal notranslate"><span class="pre">WRITE_DATA</span></code> chunks in ascending order, waiting
+for a <code class="docutils literal notranslate"><span class="pre">WRITE_PACING</span></code> ACK after each. <code class="docutils literal notranslate"><span class="pre">freeSpace</span> <span class="pre">==</span> <span class="pre">0</span></code> is the terminal ACK.
+<code class="docutils literal notranslate"><span class="pre">bytesAcked</span> <span class="pre">=</span> <span class="pre">totalSize</span> <span class="pre">−</span> <span class="pre">freeSpace</span></code>.</p>
+</section>
+<section id="delete-mkdir-list-move">
+<h2>Delete / MkDir / List / Move<a class="headerlink" href="#delete-mkdir-list-move" title="Link to this heading"></a></h2>
+<p><strong>DELETE <code class="docutils literal notranslate"><span class="pre">0x30</span></code></strong> → <code class="docutils literal notranslate"><span class="pre">0x31</span></code>: request <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength}</span></code> + path;
+response <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">status}</span></code>.</p>
+<p><strong>MKDIR <code class="docutils literal notranslate"><span class="pre">0x40</span></code></strong> → <code class="docutils literal notranslate"><span class="pre">0x41</span></code>: request <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength,</span> <span class="pre">reserved(4),</span> <span class="pre">currentTime(8)}</span></code> + path; response <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">status,</span> <span class="pre">reserved(6),</span> <span class="pre">truncatedTime(8)}</span></code>.</p>
+<p><strong>LISTDIR <code class="docutils literal notranslate"><span class="pre">0x50</span></code></strong> → <code class="docutils literal notranslate"><span class="pre">0x51</span></code>: request <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength}</span></code> + path
+(an absolute directory path, starting with <code class="docutils literal notranslate"><span class="pre">/</span></code>). One <code class="docutils literal notranslate"><span class="pre">0x51</span></code> notification per
+entry, then a terminating entry with <code class="docutils literal notranslate"><span class="pre">entryNumber</span> <span class="pre">==</span> <span class="pre">totalEntries</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pathLength</span> <span class="pre">==</span> <span class="pre">0</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x51</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>status</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>pathLength</p></td>
+<td><p>name length that follows</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>entryNumber</p></td>
+<td><p>0-based</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>4</p></td>
+<td><p>totalEntries</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>4</p></td>
+<td><p>flags</p></td>
+<td><p>bit 0 = directory</p></td>
+</tr>
+<tr class="row-even"><td><p>16</p></td>
+<td><p>8</p></td>
+<td><p>modificationTime</p></td>
+<td><p>ns since epoch</p></td>
+</tr>
+<tr class="row-odd"><td><p>24</p></td>
+<td><p>4</p></td>
+<td><p>fileSize</p></td>
+<td><p>(ignore for directories)</p></td>
+</tr>
+<tr class="row-even"><td><p>28</p></td>
+<td><p>pathLength</p></td>
+<td><p>name</p></td>
+<td><p>entry name (not full path)</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>MOVE <code class="docutils literal notranslate"><span class="pre">0x60</span></code></strong> → <code class="docutils literal notranslate"><span class="pre">0x61</span></code>: request <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">oldPathLength(2),</span> <span class="pre">newPathLength(2)}</span></code> + oldPath + <strong>one separator byte</strong> + newPath; response
+<code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">status}</span></code>. Both paths are absolute (start with <code class="docutils literal notranslate"><span class="pre">/</span></code>).</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="fast-transfer-extensions-protocol-version-5">
+<h1>Fast-transfer extensions (protocol version 5)<a class="headerlink" href="#fast-transfer-extensions-protocol-version-5" title="Link to this heading"></a></h1>
+<p>All of these run on the <strong>same</strong> <code class="docutils literal notranslate"><span class="pre">ADAF0002</span></code> characteristic — no new services or
+characteristics.</p>
+<section id="read-windowing">
+<h2>Read windowing<a class="headerlink" href="#read-windowing" title="Link to this heading"></a></h2>
+<p>Instead of one chunk per round-trip, request a <strong>large <code class="docutils literal notranslate"><span class="pre">chunkSize</span></code></strong> (e.g. 4096).
+The watch answers a single <code class="docutils literal notranslate"><span class="pre">READ_PACING</span></code> with a <strong>burst</strong> of <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code>
+notifications totalling up to <code class="docutils literal notranslate"><span class="pre">chunkSize</span></code>, then waits for the next pacing request.</p>
+<ul class="simple">
+<li><p>Each <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code> is self-describing — <strong>reassemble by <code class="docutils literal notranslate"><span class="pre">chunkOffset</span></code></strong>, not
+arrival order.</p></li>
+<li><p>Pace from the <strong>contiguous end</strong>: the next <code class="docutils literal notranslate"><span class="pre">READ_PACING.chunkOffset</span></code> = the
+first byte you don’t yet have (<code class="docutils literal notranslate"><span class="pre">initialOffset</span> <span class="pre">+</span> <span class="pre">contiguous</span> <span class="pre">bytes</span> <span class="pre">received</span></code>), so
+a dropped notification is re-requested rather than skipped — not the raw count
+of bytes received.</p></li>
+<li><p>Each notification is capped to the payload limit (see <em>Notification sizing</em>
+above); a large <code class="docutils literal notranslate"><span class="pre">chunkSize</span></code> simply arrives as several notifications.</p></li>
+</ul>
+<p><strong>Auto-degrade:</strong> a v4 watch answers a large <code class="docutils literal notranslate"><span class="pre">chunkSize</span></code> with a single packet, so
+a v5 client falls back to classic pacing automatically — no version gate needed.</p>
+<p><strong>Recommended window: 4096 bytes.</strong> Larger adds little (reads are round-trip
+bound).</p>
+</section>
+<section id="write-windowing-credit-based-with-recovery">
+<h2>Write windowing (credit-based, with recovery)<a class="headerlink" href="#write-windowing-credit-based-with-recovery" title="Link to this heading"></a></h2>
+<p>Stream <code class="docutils literal notranslate"><span class="pre">WRITE_DATA</span></code> without waiting per-chunk, bounded by a credit window.</p>
+<ul class="simple">
+<li><p>Keep at most <code class="docutils literal notranslate"><span class="pre">WRITE_WINDOW</span></code> bytes unacked: send back-to-back while
+<code class="docutils literal notranslate"><span class="pre">bytesSent</span> <span class="pre">−</span> <span class="pre">bytesAcked</span> <span class="pre">&lt;</span> <span class="pre">WRITE_WINDOW</span></code>; otherwise wait for an ACK.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">freeSpace</span></code> is a contiguous high-water-mark</strong> (an intentional v5 refinement
+of the classic ACK — it makes loss detectable). <code class="docutils literal notranslate"><span class="pre">bytesAcked</span> <span class="pre">=</span> <span class="pre">totalSize</span> <span class="pre">−</span> <span class="pre">freeSpace</span></code> is the number of bytes held <strong>with no gap</strong> from the write’s start;
+it never advances past a missing chunk. The terminal ACK (<code class="docutils literal notranslate"><span class="pre">freeSpace</span> <span class="pre">==</span> <span class="pre">0</span></code>) is
+therefore only ever sent for a <strong>hole-free</strong> file.</p></li>
+<li><p><strong>Send <code class="docutils literal notranslate"><span class="pre">WRITE_DATA</span></code> in ascending offset order.</strong></p></li>
+<li><p><strong>Loss recovery (go-back-N).</strong> If <code class="docutils literal notranslate"><span class="pre">bytesAcked</span></code> stops advancing while bytes are
+unacked — the window drains to <code class="docutils literal notranslate"><span class="pre">bytesAcked</span></code> with no terminal ACK — a chunk was
+lost. <strong>Rewind <code class="docutils literal notranslate"><span class="pre">bytesSent</span> <span class="pre">=</span> <span class="pre">bytesAcked</span></code> and resume</strong>; retransmits overwrite the
+gap. Arm a short “no ACK progress” timeout to trigger the rewind.</p></li>
+<li><p><strong>Recommended <code class="docutils literal notranslate"><span class="pre">WRITE_WINDOW</span></code>: 2048 bytes</strong> (~10 chunks at MTU 220). Larger
+windows can <em>reduce</em> throughput (more drops → more retransmits) and don’t help
+— writes are round-trip bound. Raise only with digest-verified testing.</p></li>
+</ul>
+<p>Recommended integrity check: after a windowed write, <code class="docutils literal notranslate"><span class="pre">DIGEST</span></code> the file and
+compare (below).</p>
+</section>
+<section id="digest-integrity-without-read-back-una-extension">
+<h2>DIGEST — integrity without read-back (UNA extension)<a class="headerlink" href="#digest-integrity-without-read-back-una-extension" title="Link to this heading"></a></h2>
+<p>Verify a file’s contents without transferring it back over BLE.</p>
+<p><strong>DIGEST <code class="docutils literal notranslate"><span class="pre">0x70</span></code></strong> (request): <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength}</span></code> + path.</p>
+<p><strong>DIGEST_STATUS <code class="docutils literal notranslate"><span class="pre">0x71</span></code></strong> (response, 12 bytes):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Off</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Field</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>command = <code class="docutils literal notranslate"><span class="pre">0x71</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>status</p></td>
+<td><p>OK / ERROR_NO_FILE / ERROR</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>reserved</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>fileSize</p></td>
+<td><p>total bytes hashed</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>4</p></td>
+<td><p>crc32</p></td>
+<td><p>see below</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">crc32</span></code> is <strong>standard CRC-32</strong> (IEEE 802.3 / zlib: reflected poly <code class="docutils literal notranslate"><span class="pre">0xEDB88320</span></code>,
+init <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFF</span></code>, final XOR <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFF</span></code>) over the whole file — identical to
+Java <code class="docutils literal notranslate"><span class="pre">java.util.zip.CRC32</span></code> and Python <code class="docutils literal notranslate"><span class="pre">zlib.crc32</span></code>. Compute the expected value
+with a stock library and compare <code class="docutils literal notranslate"><span class="pre">crc32</span></code> + <code class="docutils literal notranslate"><span class="pre">fileSize</span></code>.</p>
+</section>
+<section id="resume">
+<h2>Resume<a class="headerlink" href="#resume" title="Link to this heading"></a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">WRITE</span></code> with <code class="docutils literal notranslate"><span class="pre">offset</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> <strong>preserves the existing file head</strong> <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">offset)</span></code> and
+overwrites only from <code class="docutils literal notranslate"><span class="pre">offset</span></code> onward. So after a disconnect mid-write you may
+reconnect and continue with <code class="docutils literal notranslate"><span class="pre">WRITE</span> <span class="pre">offset</span> <span class="pre">=</span> <span class="pre">bytesAcked</span></code> — no need to restart from
+0. A fresh <code class="docutils literal notranslate"><span class="pre">WRITE</span> <span class="pre">offset</span> <span class="pre">=</span> <span class="pre">0</span></code> truncates (so a full re-upload also works).</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">bytesAcked</span></code> durability.</strong> ACKs can lead the watch’s flush to storage. On a
+<strong>clean disconnect</strong> the watch flushes before you reconnect, so <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">bytesAcked)</span></code>
+is committed and you can resume at raw <code class="docutils literal notranslate"><span class="pre">bytesAcked</span></code>. If the watch instead
+<strong>reset / lost power</strong> mid-write, only data up to its last internal flush is
+guaranteed — on reconnect, confirm the committed size (<code class="docutils literal notranslate"><span class="pre">LISTDIR</span></code> or <code class="docutils literal notranslate"><span class="pre">DIGEST</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">fileSize</span></code>) before resuming, and a <code class="docutils literal notranslate"><span class="pre">DIGEST</span></code> after any resumed transfer is cheap
+insurance.</p>
+<p><strong>Lost terminal ACK.</strong> If the final <code class="docutils literal notranslate"><span class="pre">WRITE_PACING</span></code> is lost, your normal
+stall→rewind resends the tail and the watch re-acknowledges the completed file
+(<code class="docutils literal notranslate"><span class="pre">freeSpace</span> <span class="pre">==</span> <span class="pre">0</span></code>) — the same loop concludes “done.” After concluding done, drain
+any leftover <code class="docutils literal notranslate"><span class="pre">WRITE_PACING</span></code> notifications before issuing the next command so a
+stale one isn’t mistaken for the next command’s response.</p>
+</section>
+<section id="compatibility-matrix">
+<h2>Compatibility matrix<a class="headerlink" href="#compatibility-matrix" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Client \ Watch</p></th>
+<th class="head"><p>v4 watch</p></th>
+<th class="head"><p>v5 watch</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>v4 client</p></td>
+<td><p>classic</p></td>
+<td><p>classic (v5 features simply unused)</p></td>
+</tr>
+<tr class="row-odd"><td><p>v5 client</p></td>
+<td><p>classic (windowing auto-degrades; gate writes/DIGEST off)</p></td>
+<td><p>full fast transfer</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
+<p><em>Base protocol © Adafruit Industries (MIT), extended by UNA. Report protocol
+issues on this repository.</em></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="FitFiles-Structure.html" class="btn btn-neutral float-left" title="FIT Files Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="BLE-Services-Overview.html" class="btn btn-neutral float-right" title="UNA Watch — BLE Services Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
