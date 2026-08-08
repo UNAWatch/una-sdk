@@ -29,6 +29,10 @@ the classic (version 4) protocol interoperates unchanged.
 | Version | `ADAF0001-4669-6C65-5472-616E73666572` | Read |
 | Raw Transfer | `ADAF0002-4669-6C65-5472-616E73666572` | Write Without Response, Notify |
 
+> **Note.** The characteristic 16-bit IDs are UNA-specific (`ADAF0001` /
+> `ADAF0002`) and differ from Adafruit's upstream (`ADAF0100` / `ADAF0200`). Use
+> the UUIDs exactly as listed above — they are what the watch exposes.
+
 All operations are a request written to **Raw Transfer** and one or more
 responses delivered as **notifications** on the same characteristic. Enable
 notifications (write the CCCD) before issuing commands.
@@ -82,7 +86,7 @@ A GATT notification cannot carry more than the negotiated **ATT payload = MTU �
 3** bytes. Every FTS response has a fixed header, so the usable *data* per
 notification is smaller still. For `READ_DATA` (16-byte header) at MTU 220:
 
-```
+```text
 data per notification ≤ (MTU − 3) − 16 = 201 bytes
 ```
 
@@ -184,8 +188,9 @@ currentTime(8)}` + path; response `{command, status, reserved(6),
 truncatedTime(8)}`.
 
 **LISTDIR `0x50`** → `0x51`: request `{command, reserved, pathLength}` + path
-(must be a directory ending in `/`). One `0x51` notification per entry, then a
-terminating entry with `entryNumber == totalEntries` and `pathLength == 0`:
+(an absolute directory path, starting with `/`). One `0x51` notification per
+entry, then a terminating entry with `entryNumber == totalEntries` and
+`pathLength == 0`:
 
 | Off | Size | Field | Notes |
 |---|---|---|---|
@@ -200,7 +205,8 @@ terminating entry with `entryNumber == totalEntries` and `pathLength == 0`:
 | 28 | pathLength | name | entry name (not full path) |
 
 **MOVE `0x60`** → `0x61`: request `{command, reserved, oldPathLength(2),
-newPathLength(2)}` + oldPath + newPath; response `{command, status}`.
+newPathLength(2)}` + oldPath + **one separator byte** + newPath; response
+`{command, status}`. Both paths are absolute (start with `/`).
 
 ---
 
@@ -234,7 +240,8 @@ Stream `WRITE_DATA` without waiting per-chunk, bounded by a credit window.
 
 - Keep at most `WRITE_WINDOW` bytes unacked: send back-to-back while
   `bytesSent − bytesAcked < WRITE_WINDOW`; otherwise wait for an ACK.
-- **`freeSpace` is a contiguous high-water-mark.** `bytesAcked = totalSize −
+- **`freeSpace` is a contiguous high-water-mark** (an intentional v5 refinement
+  of the classic ACK — it makes loss detectable). `bytesAcked = totalSize −
   freeSpace` is the number of bytes held **with no gap** from the write's start;
   it never advances past a missing chunk. The terminal ACK (`freeSpace == 0`) is
   therefore only ever sent for a **hole-free** file.
