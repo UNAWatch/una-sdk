@@ -8,10 +8,11 @@ recognizes them. The File Transfer Service has its own reference:
 **Security.** The watch requires a **bonded, encrypted connection**. Pair with
 the watch before reading or writing any characteristic.
 
-## Standard services
+## Services
 
-These follow their published specifications exactly — refer to the Bluetooth SIG
-(or Nordic) documents for field formats.
+The standard Bluetooth SIG and Nordic services follow their published
+specifications — refer to those documents for field formats. The File Transfer
+Service is UNA's (Adafruit-based); see its own reference.
 
 | Service | UUID | Source | Purpose |
 |---|---|---|---|
@@ -48,10 +49,15 @@ Reading `0x2A26` is the supported way to discover the watch's firmware version.
 
 Standard `uint8` percentage; subscribe for notifications on level change.
 
-### Nordic UART (`6E400001-…`)
+### Nordic UART (`6E400001-B5A3-F393-E0A9-E50E24DCCA9E`)
 
-A standard Nordic UART Service (serial-style channel). Characteristics:
-`6E400002-…` and `6E400003-…` (one write, one notify).
+A Nordic UART Service (serial-style channel). Note the two data characteristics
+are **swapped relative to Nordic's usual convention**:
+
+| Characteristic | UUID | Direction |
+|---|---|---|
+| Watch → client | `6E400002-B5A3-F393-E0A9-E50E24DCCA9E` | Notify |
+| Client → watch | `6E400003-B5A3-F393-E0A9-E50E24DCCA9E` | Write / Write Without Response |
 
 ---
 
