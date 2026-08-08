@@ -25,9 +25,14 @@ Paths are relative to the app's own root. The whole path, filename included, mus
 `../SharedData/` is the only path that may leave your app's root, and it is a whitelist
 rather than general parent traversal. The kernel resolves `../SharedData` and
 `../SharedData/<name>` to the shared directory, and rejects every other `..` segment
-outright — leading, embedded or trailing. `../SomethingElse/file` does not fail when you
-open it; it never resolves at all. The name is reserved by that rule, so an app cannot
-create a sibling directory that collides with it.
+outright — leading, embedded or trailing. The name is reserved by that rule, so an app
+cannot create a sibling directory that collides with it.
+
+`../SomethingElse/file` is rejected during path resolution, before any filesystem call is
+made. Note where that leaves you: `fs.file()` still hands back a non-null object, and it is
+`open()` that returns `false` — the same `false` you would get for a file that simply is not
+there. A null check will not catch a bad path, and nothing distinguishes "you left the
+sandbox" from "no such file".
 
 Nested paths inside it do work. `../SharedData/maps/uk.map` resolves, and
 `mkdir("../SharedData/maps")` creates both levels.
@@ -148,14 +153,20 @@ Shared files outlive the app that wrote them. `SharedData/` is a sibling of the 
 directories rather than a child of any one of them, so removing an app cannot take it along.
 That is the point — a user's stride calibration should survive reinstalling Running.
 
-Nothing ever collects the garbage. There is no owner, no reference count, and no screen that
-lists shared files. A factory reset clears the directory along with everything else under
-`Apps/`; short of that, whatever you write stays until some app deletes it.
+There is no automatic cleanup. No owner, no reference count, and no screen on the watch that
+lists shared files. Deletion happens only when something explicitly asks for it — an app
+acting on the user's instruction, the way Treadmill's clear-calibration action removes the
+stride store, or a factory reset, which clears the directory along with everything else
+under `Apps/`. Otherwise whatever you write stays.
 
-For a few kilobytes of calibration that costs nothing. For anything large — a downloaded map
-set, say — it means leaving data on the watch with no owner and no way for the user to
-reclaim the space. If your app writes something big, give the user a way to remove it, the
-way Treadmill offers a clear-calibration action.
+A user with a USB cable can delete shared files by hand, since the directory is visible over
+mass storage. That is a reasonable escape hatch for a calibration gone bad. It is not a
+substitute for being able to do it on the watch.
+
+For a few kilobytes of calibration none of this costs anything. For anything large — a
+downloaded map set, say — it means leaving data on the watch that nothing owns and no
+on-device screen can remove. If your app writes something big, give the user a way to
+remove it.
 
 ## In the simulator
 
