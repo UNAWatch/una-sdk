@@ -72,6 +72,14 @@ Next steps:
 
 .. toctree::
    :maxdepth: 4
+   :caption: 📡 BLE Interface
+   :hidden:
+
+   BLE-File-Transfer-Service
+   BLE-Services-Overview
+
+.. toctree::
+   :maxdepth: 4
    :caption: 🎋 Apps Sharing
    :hidden:
 
