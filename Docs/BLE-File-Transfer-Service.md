@@ -47,7 +47,7 @@ Read the **Version** characteristic — a single `uint32` (little-endian):
 Gating rules for a version-5 client:
 
 - **Read windowing** needs no gate — it degrades automatically against a v4
-  watch (see [Read windowing](#read-windowing-v5)).
+  watch (see *Read windowing* under the version-5 extensions below).
 - **Write windowing** and **`DIGEST`** MUST be gated on version **≥ 5**.
 
 ## Command summary
@@ -143,7 +143,7 @@ next chunk, repeat until `chunkOffset + chunkLength == totalLength`.
 | 0 | 1 | command = `0x20` | |
 | 1 | 1 | reserved | 0 |
 | 2 | 2 | pathLength | |
-| 4 | 4 | offset | start offset (**0 for a fresh write**; see [Resume](#resume)) |
+| 4 | 4 | offset | start offset (**0 for a fresh write**; see *Resume* below) |
 | 8 | 8 | currentTime | ns since epoch (file mtime) |
 | 16 | 4 | totalSize | total bytes to be written |
 | 20 | pathLength | path | |
@@ -209,7 +209,7 @@ newPathLength(2)}` + oldPath + newPath; response `{command, status}`.
 All of these run on the **same** `ADAF0002` characteristic — no new services or
 characteristics.
 
-## Read windowing {#read-windowing-v5}
+## Read windowing
 
 Instead of one chunk per round-trip, request a **large `chunkSize`** (e.g. 4096).
 The watch answers a single `READ_PACING` with a **burst** of `READ_DATA`
@@ -219,9 +219,8 @@ notifications totalling up to `chunkSize`, then waits for the next pacing reques
   arrival order.
 - Pace on bytes actually received: the next `READ_PACING.chunkOffset` = total
   bytes received so far.
-- Each notification is capped to the payload limit (see [Notification
-  sizing](#notification-sizing--read-this-first)); a large `chunkSize` simply
-  arrives as several notifications.
+- Each notification is capped to the payload limit (see *Notification sizing*
+  above); a large `chunkSize` simply arrives as several notifications.
 
 **Auto-degrade:** a v4 watch answers a large `chunkSize` with a single packet, so
 a v5 client falls back to classic pacing automatically — no version gate needed.
@@ -272,7 +271,7 @@ init `0xFFFFFFFF`, final XOR `0xFFFFFFFF`) over the whole file — identical to
 Java `java.util.zip.CRC32` and Python `zlib.crc32`. Compute the expected value
 with a stock library and compare `crc32` + `fileSize`.
 
-## Resume {#resume}
+## Resume
 
 A `WRITE` with `offset > 0` **preserves the existing file head** `[0, offset)` and
 overwrites only from `offset` onward. So after a disconnect mid-write you may
