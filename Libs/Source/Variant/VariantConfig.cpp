@@ -54,8 +54,8 @@ bool readFlags(const SDK::Kernel &kernel, const char *path, uint32_t &flags)
 
 Config::Config(const SDK::Kernel &kernel)
 {
-    // Pick the same file the kernel's scan picked (mixed-dir determinism,
-    // design doc section 3.4): any real (non-alias) .uapp in the sandbox
+    // Pick the same file the kernel's scan picked (the mixed-directory
+    // determinism rules): any real (non-alias) .uapp in the sandbox
     // root means the app runs as its classic self; otherwise the first
     // alias-flagged .uapp is this variant's identity. An unreadable
     // candidate counts as a real app, mirroring the kernel's routing.
@@ -66,16 +66,37 @@ Config::Config(const SDK::Kernel &kernel)
             return;
         }
 
-        char candidate[SDK::Interface::IFileSystem::skMaxPathLen] {};
         SDK::Interface::IFileSystem::ObjectInfo item {};
         bool realAppSeen = false;
         while (dir->readNext(item)) {
             if (item.isDir || !hasUappExtension(item.name)) {
                 continue;
             }
-            snprintf(candidate, sizeof(candidate), "/%s", item.name);
+            // Per iteration and zero-initialised, so an entry whose path is
+            // declined below names nothing at all rather than inheriting what
+            // the last one left here.
+            char candidate[SDK::Interface::IFileSystem::skMaxPathLen] {};
+
+            // ObjectInfo::name is as wide as a whole path, so "/" + name need
+            // not fit in one. A name too long to form a path is as unreadable
+            // as one whose flags will not load, and takes the same
+            // conservative branch: a truncated path would name some other
+            // file, and opening the wrong .uapp is worse than opening none.
+            //
+            // Measuring first, rather than recovering the length from
+            // snprintf, is what keeps the path free of anything to truncate --
+            // and with it the -Wformat-truncation that a "/%s" whose source is
+            // as wide as its destination earns at the -Os -Wall app builds use.
+            const size_t nameLen = strlen(item.name);
+            // The path is '/' + name + '\0', so nameLen + 2 bytes.
+            const bool nameFits = nameLen + 2 <= sizeof(candidate);
+            if (nameFits) {
+                candidate[0] = '/';
+                memcpy(&candidate[1], item.name, nameLen + 1); // includes the NUL
+            }
+
             uint32_t flags = 0;
-            if (!readFlags(kernel, candidate, flags) ||
+            if (!nameFits || !readFlags(kernel, candidate, flags) ||
                     (flags & kFlagVariantAlias) == 0) {
                 realAppSeen = true;
                 break;
@@ -168,6 +189,11 @@ Config::Config(const SDK::Kernel &kernel)
     const char *name = nullptr;
     size_t nameLen = 0;
     if (reader.get("name", name, nameLen)) {
+        // Clipping is the right answer here, unlike for the candidate path
+        // above: mName is a display label, so a too-long one shows shortened
+        // rather than failing the launch. snprintf always NUL-terminates.
+        // -Wformat-truncation=2 flags this, which is the intended behaviour
+        // and not a level app builds enable.
         snprintf(mName, sizeof(mName), "%.*s", static_cast<int>(nameLen), name);
     }
 
