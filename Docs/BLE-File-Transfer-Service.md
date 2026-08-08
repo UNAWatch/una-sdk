@@ -132,7 +132,7 @@ actually delivered.
 | 0 | 1 | command = `0x12` | |
 | 1 | 1 | status = `0x01` | |
 | 2 | 2 | reserved | |
-| 4 | 4 | chunkOffset | next offset = bytes received so far |
+| 4 | 4 | chunkOffset | next offset = contiguous end (first byte not yet received) |
 | 8 | 4 | chunkSize | bytes requested |
 
 Classic flow: send `READ`, receive one `READ_DATA`, send `READ_PACING` for the
@@ -223,8 +223,10 @@ notifications totalling up to `chunkSize`, then waits for the next pacing reques
 
 - Each `READ_DATA` is self-describing — **reassemble by `chunkOffset`**, not
   arrival order.
-- Pace on bytes actually received: the next `READ_PACING.chunkOffset` = total
-  bytes received so far.
+- Pace from the **contiguous end**: the next `READ_PACING.chunkOffset` = the
+  first byte you don't yet have (`initialOffset + contiguous bytes received`), so
+  a dropped notification is re-requested rather than skipped — not the raw count
+  of bytes received.
 - Each notification is capped to the payload limit (see *Notification sizing*
   above); a large `chunkSize` simply arrives as several notifications.
 
