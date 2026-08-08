@@ -70,6 +70,7 @@ Next steps:
    TouchGFX-Port-Architecture
    touchgfx-widgets
    FitFiles-Structure
+   shared-data
 
 .. toctree::
    :maxdepth: 4
