@@ -282,11 +282,15 @@ jobs:
   # pull request from a fork.
   warnings:
     needs: [ discover, build ]
-    # Bare always(): this job must reach a conclusion on every run of the workflow.
-    # Branch protection treats a skipped required check as a satisfied one, so every
-    # `if:` that could skip this job is a way to merge without being checked -- which
-    # is why the discover and build results are asserted in steps below instead.
-    if: always()
+    # This job must reach a conclusion whatever discover and build did: branch
+    # protection treats a skipped required check as a satisfied one, so every `if:`
+    # that could skip it is a way to merge unchecked. The results are asserted in
+    # steps below instead of in this condition.
+    #
+    # !cancelled() rather than always(), which also fires on cancellation: a run
+    # superseded by cancel-in-progress would otherwise reach this job, find discover
+    # 'cancelled', and post a failed required check for a push nobody is waiting on.
+    if: ${{ !cancelled() }}
     name: Warning ratchet
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -385,7 +389,7 @@ jobs:
       # every warning into an `error:` line the parser cannot see -- zero warnings
       # found, build broken, and this is what catches it.
       - name: Require every build leg to have succeeded
-        if: always() && needs.build.result != 'success' && needs.build.result != 'skipped'
+        if: ${{ !cancelled() && needs.build.result != 'success' && needs.build.result != 'skipped' }}
         run: |
           echo "::error title=Build incomplete::The simulator build finished '${{ needs.build.result }}'. Warnings from a build that did not complete are not evidence that there are none."
           exit 1
