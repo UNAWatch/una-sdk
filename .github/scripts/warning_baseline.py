@@ -295,7 +295,18 @@ ALLOWED_CFLAG_SUPPRESSIONS = frozenset({"-Wno-error"})
 
 MAKEFILE_SEARCH_ROOTS = ("Examples/Apps", "Docs/Tutorials")
 
+# una/Makefile owns the warning lists, but it is not the only file that reaches the
+# command line. config/gcc/app.mk is included before them and already sets
+# user_cflags in one project; simulator/gcc/Makefile exports into the same sub-make.
+# Both are scanned for suppressions -- checking only una/Makefile would leave `-w`
+# one line away in a file nobody was looking at.
+SUPPRESSION_SCAN_SIBLINGS = ("config/gcc/app.mk", "simulator/gcc/Makefile")
+
 ASSIGN_RE = re.compile(r"^(?P<name>WARN|CXXWARN)\s*[:+?]?=\s*(?P<value>.*)$")
+ANY_ASSIGN_RE = re.compile(
+    r"^(?:override\s+|export\s+)*(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*[:+?]?=\s*(?P<value>.*)$"
+)
+FLAG_VAR_RE = re.compile(r"cflags|cxxflags|compiler_options", re.IGNORECASE)
 
 
 def _logical_lines(text):
@@ -303,11 +314,26 @@ def _logical_lines(text):
     return re.sub(r"\\\n\s*", " ", text).splitlines()
 
 
+def check_suppressions(text):
+    """Problems with any make fragment that assigns to a compiler-flag variable."""
+    problems = []
+    for line in _logical_lines(text):
+        assign = ANY_ASSIGN_RE.match(line.strip())
+        if not assign or not FLAG_VAR_RE.search(assign.group("name")):
+            continue
+        name = assign.group("name")
+        for token in assign.group("value").split():
+            if token == "-w":
+                problems.append(f"{name} disables all warnings with -w")
+            elif token.startswith("-Wno-") and token not in ALLOWED_CFLAG_SUPPRESSIONS:
+                problems.append(f"{name} adds the suppression {token}")
+    return problems
+
+
 def check_makefile_flags(text):
     """Return a list of human-readable problems with one una/Makefile's warning flags."""
     problems = []
     lists = {}
-    cflag_tokens = []
     uses_warn = set()
 
     for line in _logical_lines(text):
@@ -316,8 +342,6 @@ def check_makefile_flags(text):
         if assign:
             lists[assign.group("name")] = assign.group("value").split()
             continue
-        if "user_cflags" in stripped:
-            cflag_tokens += stripped.split()
         for var in ("c_compiler_options_local", "cpp_compiler_options_local"):
             if stripped.startswith(var) and "$(WARN)" in stripped:
                 uses_warn.add(var)
@@ -339,13 +363,7 @@ def check_makefile_flags(text):
     if "-pedantic" not in text:
         problems.append("-pedantic is gone")
 
-    for token in cflag_tokens:
-        if token == "-w":
-            problems.append("user_cflags disables all warnings with -w")
-        elif token.startswith("-Wno-") and token not in ALLOWED_CFLAG_SUPPRESSIONS:
-            problems.append(f"user_cflags adds the suppression {token}")
-
-    return problems
+    return problems + check_suppressions(text)
 
 
 def find_una_makefiles(root):
@@ -368,27 +386,45 @@ def cmd_flags(args):
         print(f"FAIL: no una/Makefile found under {'/, '.join(MAKEFILE_SEARCH_ROOTS)}/ in {root}")
         return 1
 
+    def report(rel, problems):
+        if not problems:
+            return 0
+        print(f"FAIL {rel}")
+        for problem in problems:
+            print(f"  - {problem}")
+        return 1
+
     failures = 0
+    scanned = 0
     for rel in makefiles:
         with open(os.path.join(root, rel), "r", encoding="utf-8", errors="replace") as fh:
-            problems = check_makefile_flags(fh.read())
-        if problems:
-            failures += 1
-            print(f"FAIL {rel}")
-            for problem in problems:
-                print(f"  - {problem}")
+            failures += report(rel, check_makefile_flags(fh.read()))
+        scanned += 1
+
+        project = posixpath.dirname(posixpath.dirname(rel))
+        for sibling in SUPPRESSION_SCAN_SIBLINGS:
+            sib_rel = posixpath.join(project, sibling)
+            sib_abs = os.path.join(root, sib_rel)
+            if not os.path.exists(sib_abs):
+                continue
+            with open(sib_abs, "r", encoding="utf-8", errors="replace") as fh:
+                failures += report(sib_rel, check_suppressions(fh.read()))
+            scanned += 1
 
     if failures:
         print(
-            f"\n{failures} of {len(makefiles)} simulator project(s) weakened their warning "
-            "flags.\nThe baseline counts warnings the build reports; a flag that is no longer\n"
-            "requested reports nothing, which reads as a fix and is then ratcheted away for\n"
-            "good. Retire a warning by removing it from REQUIRED_WARNINGS in this script --\n"
-            "in one reviewable place -- not from one app's Makefile."
+            f"\n{failures} file(s) across {len(makefiles)} simulator project(s) weakened the "
+            "warning flags.\nThe baseline counts warnings the build reports; a flag that is no "
+            "longer requested\nreports nothing, which reads as a fix and is then ratcheted away "
+            "for good. Retire a\nwarning by removing it from REQUIRED_WARNINGS in this script -- "
+            "in one reviewable\nplace -- not from one app's Makefile."
         )
         return 1
 
-    print(f"OK: {len(makefiles)} simulator project(s) still request the required warning flags.")
+    print(
+        f"OK: {len(makefiles)} simulator project(s) still request the required warning flags "
+        f"({scanned} make fragment(s) scanned)."
+    )
     return 0
 
 
@@ -810,6 +846,33 @@ class TestFlagPolicy(unittest.TestCase):
 
     def test_dropping_pedantic_is_caught(self):
         self.assertIn("-pedantic is gone", check_makefile_flags(GOOD_MAKEFILE.replace("-pedantic", "")))
+
+    def test_the_real_app_mk_is_accepted(self):
+        """config/gcc/app.mk legitimately sets user_cflags in one project."""
+        self.assertEqual(
+            check_suppressions("touchgfx_path := ../../ThirdParty/touchgfx\nuser_cflags := -DUSE_BPP=8\n"),
+            [],
+        )
+
+    def test_a_sibling_fragment_smuggling_w_is_caught(self):
+        """app.mk is included before una/Makefile's own flags and survives the += it
+        does; scanning only una/Makefile would leave -w one line away."""
+        self.assertIn(
+            "user_cflags disables all warnings with -w",
+            check_suppressions("user_cflags := -DUSE_BPP=8 -w\n"),
+        )
+
+    def test_a_sibling_fragment_smuggling_a_suppression_is_caught(self):
+        self.assertIn(
+            "CXXFLAGS adds the suppression -Wno-cast-qual",
+            check_suppressions("export CXXFLAGS += -Wno-cast-qual\n"),
+        )
+
+    def test_the_addprefix_line_is_not_mistaken_for_a_suppression(self):
+        self.assertEqual(
+            check_suppressions("cpp_compiler_options_local += -pedantic $(addprefix -W,$(WARN))\n"),
+            [],
+        )
 
 
 class TestCommittedMakefiles(unittest.TestCase):
