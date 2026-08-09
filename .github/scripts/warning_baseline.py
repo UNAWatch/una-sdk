@@ -57,7 +57,7 @@ NO_FLAG = "(unflagged)"
 
 BASELINE_HEADER = """\
 # Tolerated compiler warnings in the gcc simulator build -- see
-# Utilities/Scripts/warning-baseline/warning_baseline.py.
+# .github/scripts/warning_baseline.py.
 #
 # Generated. Do not hand-edit to make a build pass: the number is the count of
 # warning sites of that flag in that file, and raising one is how a warning gets
