@@ -28,15 +28,25 @@ compiled by every app, so a sum would depend on how many projects a run happened
 build. max() makes the baseline a property of the code, which in turn lets a partial
 build (a PR touching one app) be checked against a baseline produced by a full one.
 
+A count is only meaningful if the flags that produce it are still on the command
+line, and nothing in a build log proves that -- una/Makefile compiles with a leading
+`@`, so the flags never reach the log at all. Dropping -Wcast-qual from one app makes
+its warnings vanish, which reads to `check` as a fix and to `update` as a reason to
+delete those keys for good. `flags` closes that: it reads the WARN/CXXWARN lists out
+of every una/Makefile and fails if a required warning is gone, a new suppression
+appeared, or -w turned up in user_cflags.
+
 Subcommands:
   extract  one build log         -> normalized counts (TSV on stdout)
   check    counts vs baseline    -> exit 1 if anything is new or higher
-  update   counts -> baseline    -> rewrite, exit 0 if it changed, 2 if unchanged
+  update   counts -> baseline    -> rewrite; 0 changed, 2 unchanged, 1 increase, 3 collapse
   compare  two baselines         -> exit 1 if the second tolerates more than the first
+  flags    every una/Makefile    -> exit 1 if the warning flags were weakened
   --selftest  run the tests baked into this file, no checkout needed
 """
 
 import argparse
+import io
 import os
 import posixpath
 import re
@@ -53,7 +63,20 @@ FLAG_RE = re.compile(r"\[(-W[A-Za-z0-9=+-]+)\]\s*$")
 # Not our code; upstream's warnings are not ours to ratchet down.
 EXCLUDED_PREFIXES = ("ThirdParty/",)
 
+# GNU make reports its own diagnostics as "Makefile:224: warning: overriding recipe",
+# which is indistinguishable from gcc's shape. Counting those would let a Makefile
+# edit fail the gate, and would bake a non-compiler warning into the baseline.
+IGNORED_BASENAME_RE = re.compile(r"^([Mm]akefile(\..*)?|.*\.mk)$")
+
 NO_FLAG = "(unflagged)"
+
+# A full build that suddenly reports almost nothing is far more likely to be a broken
+# parser or a stripped flag than 40 hand-fixed warnings, and `update` is the one place
+# that can make the mistake permanent. Anything below this fraction of the previous
+# total needs --allow-collapse. Below COLLAPSE_MIN_TOTAL there is nothing left worth
+# guarding, and every honest fix would trip it.
+COLLAPSE_FLOOR = 0.5
+COLLAPSE_MIN_TOTAL = 10
 
 BASELINE_HEADER = """\
 # Tolerated compiler warnings in the gcc simulator build -- see
@@ -88,8 +111,8 @@ def normalize_path(raw, base):
     return resolved
 
 
-def extract(log_path, app_dir, workspace):
-    """Parse one build log into {(path, flag): count} of distinct warning sites."""
+def extract_sites(log_path, app_dir, workspace):
+    """Parse one build log into a set of distinct (path, flag, line, col, msg) sites."""
     workspace = workspace.replace("\\", "/").rstrip("/")
     sites = set()
 
@@ -111,17 +134,49 @@ def extract(log_path, app_dir, workspace):
             path = normalize_path(raw_path, base)
             if path is None:
                 continue
+            if IGNORED_BASENAME_RE.match(posixpath.basename(path)):
+                continue
 
             # A warning in a header is re-emitted once per translation unit that
             # includes it, so dedupe on the site before counting.
-            sites.add((path, match.group("line"), match.group("col"), match.group("msg")))
+            msg = match.group("msg")
+            flag_match = FLAG_RE.search(msg)
+            flag = flag_match.group(1) if flag_match else NO_FLAG
+            sites.add((path, flag, match.group("line"), match.group("col") or "", msg))
 
+    return sites
+
+
+def counts_from_sites(sites):
     counts = {}
-    for path, _line, _col, msg in sites:
-        flag_match = FLAG_RE.search(msg)
-        flag = flag_match.group(1) if flag_match else NO_FLAG
+    for path, flag, _line, _col, _msg in sites:
         counts[(path, flag)] = counts.get((path, flag), 0) + 1
     return counts
+
+
+def extract(log_path, app_dir, workspace):
+    """Parse one build log into {(path, flag): count} of distinct warning sites."""
+    return counts_from_sites(extract_sites(log_path, app_dir, workspace))
+
+
+def write_sites(fh, sites):
+    for path, flag, line, col, msg in sorted(sites):
+        fh.write(f"{path}\t{flag}\t{line}\t{col}\t{msg}\n")
+
+
+def read_sites(paths):
+    """Merge extract --details sidecars into {(path, flag): [(line, col, msg), ...]}."""
+    merged = {}
+    for path in paths:
+        if not os.path.exists(path):
+            continue
+        with open(path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                fields = line.rstrip("\n").split("\t", 4)
+                if len(fields) != 5:
+                    continue
+                merged.setdefault((fields[0], fields[1]), set()).add(tuple(fields[2:]))
+    return merged
 
 
 def read_counts(path):
@@ -162,13 +217,33 @@ def merge(files):
     return merged
 
 
-def format_regressions(regressions):
+MAX_SITES_SHOWN = 6
+
+
+def format_regressions(regressions, details=None):
+    """One line per regressed key, plus the concrete sites when a sidecar has them.
+
+    Without the sites a contributor knows the file and the flag but has to download
+    the build.log artifact to find out which line -- which is most of the cost of
+    reacting to this gate at all.
+    """
     lines = []
     width = max(len(f"{p} [{f}]") for p, f in regressions) if regressions else 0
-    for (path, flag), (observed, allowed) in sorted(regressions.items()):
+    for key, (observed, allowed) in sorted(regressions.items()):
+        path, flag = key
         label = f"{path} [{flag}]"
         lines.append(f"  {label:<{width}}  {allowed} allowed -> {observed} found")
+        for line, col, msg in sorted((details or {}).get(key, []), key=_site_order)[
+            :MAX_SITES_SHOWN
+        ]:
+            where = f"{path}:{line}:{col}" if col else f"{path}:{line}"
+            lines.append(f"      {where}: {msg}")
     return lines
+
+
+def _site_order(site):
+    line, col, _msg = site
+    return (int(line) if line.isdigit() else 0, int(col) if col.isdigit() else 0)
 
 
 def diff_counts(observed, allowed):
@@ -180,14 +255,155 @@ def diff_counts(observed, allowed):
     }
 
 
+# ------------------------------------------------------------------- flag policy
+
+# Every una/Makefile must still ASK for these. Deleting one from the list below is
+# how you legitimately retire a warning -- and it is a diff a reviewer can see, which
+# editing a Makefile in one app out of fifteen is not.
+REQUIRED_WARNINGS = frozenset(
+    {
+        "all",
+        "extra",
+        "format=2",
+        "cast-qual",
+        "write-strings",
+        "init-self",
+        "pointer-arith",
+        "strict-aliasing",
+        "uninitialized",
+        "missing-declarations",
+    }
+)
+REQUIRED_CXX_WARNINGS = frozenset({"non-virtual-dtor", "ctor-dtor-privacy"})
+
+# The suppressions the tree already carries. A new -Wno-* silences warnings just as
+# effectively as deleting the flag that finds them, so the set is closed.
+ALLOWED_SUPPRESSIONS = frozenset(
+    {
+        "no-long-long",
+        "no-unused-parameter",
+        "no-variadic-macros",
+        "no-format-extra-args",
+        "no-conversion",
+        "no-overloaded-virtual",
+    }
+)
+
+# -Wno-error is the documented status quo: the Makefile asks for -Werror and then
+# takes it back, which is why these are warnings and not build failures.
+ALLOWED_CFLAG_SUPPRESSIONS = frozenset({"-Wno-error"})
+
+MAKEFILE_SEARCH_ROOTS = ("Examples/Apps", "Docs/Tutorials")
+
+ASSIGN_RE = re.compile(r"^(?P<name>WARN|CXXWARN)\s*[:+?]?=\s*(?P<value>.*)$")
+
+
+def _logical_lines(text):
+    """Makefile lines with backslash continuations joined."""
+    return re.sub(r"\\\n\s*", " ", text).splitlines()
+
+
+def check_makefile_flags(text):
+    """Return a list of human-readable problems with one una/Makefile's warning flags."""
+    problems = []
+    lists = {}
+    cflag_tokens = []
+    uses_warn = set()
+
+    for line in _logical_lines(text):
+        stripped = line.strip()
+        assign = ASSIGN_RE.match(stripped)
+        if assign:
+            lists[assign.group("name")] = assign.group("value").split()
+            continue
+        if "user_cflags" in stripped:
+            cflag_tokens += stripped.split()
+        for var in ("c_compiler_options_local", "cpp_compiler_options_local"):
+            if stripped.startswith(var) and "$(WARN)" in stripped:
+                uses_warn.add(var)
+
+    for name, required in (("WARN", REQUIRED_WARNINGS), ("CXXWARN", REQUIRED_CXX_WARNINGS)):
+        if name not in lists:
+            problems.append(f"{name} is not defined")
+            continue
+        tokens = set(lists[name])
+        for missing in sorted(required - tokens):
+            problems.append(f"{name} no longer asks for -W{missing}")
+        for token in sorted(tokens):
+            if token.startswith("no-") and token not in ALLOWED_SUPPRESSIONS:
+                problems.append(f"{name} adds the suppression -W{token}")
+
+    for var in ("c_compiler_options_local", "cpp_compiler_options_local"):
+        if var not in uses_warn:
+            problems.append(f"{var} no longer expands $(WARN)")
+    if "-pedantic" not in text:
+        problems.append("-pedantic is gone")
+
+    for token in cflag_tokens:
+        if token == "-w":
+            problems.append("user_cflags disables all warnings with -w")
+        elif token.startswith("-Wno-") and token not in ALLOWED_CFLAG_SUPPRESSIONS:
+            problems.append(f"user_cflags adds the suppression {token}")
+
+    return problems
+
+
+def find_una_makefiles(root):
+    """Every <project>/una/Makefile under the app and tutorial trees, repo-relative."""
+    found = []
+    for base in MAKEFILE_SEARCH_ROOTS:
+        for dirpath, _dirnames, filenames in os.walk(os.path.join(root, base)):
+            if os.path.basename(dirpath) == "una" and "Makefile" in filenames:
+                full = os.path.join(dirpath, "Makefile")
+                found.append(os.path.relpath(full, root).replace(os.sep, "/"))
+    return sorted(found)
+
+
+def cmd_flags(args):
+    root = args.root or REPO_ROOT
+    makefiles = find_una_makefiles(root)
+
+    # Finding none would otherwise pass silently and vouch for nothing.
+    if not makefiles:
+        print(f"FAIL: no una/Makefile found under {'/, '.join(MAKEFILE_SEARCH_ROOTS)}/ in {root}")
+        return 1
+
+    failures = 0
+    for rel in makefiles:
+        with open(os.path.join(root, rel), "r", encoding="utf-8", errors="replace") as fh:
+            problems = check_makefile_flags(fh.read())
+        if problems:
+            failures += 1
+            print(f"FAIL {rel}")
+            for problem in problems:
+                print(f"  - {problem}")
+
+    if failures:
+        print(
+            f"\n{failures} of {len(makefiles)} simulator project(s) weakened their warning "
+            "flags.\nThe baseline counts warnings the build reports; a flag that is no longer\n"
+            "requested reports nothing, which reads as a fix and is then ratcheted away for\n"
+            "good. Retire a warning by removing it from REQUIRED_WARNINGS in this script --\n"
+            "in one reviewable place -- not from one app's Makefile."
+        )
+        return 1
+
+    print(f"OK: {len(makefiles)} simulator project(s) still request the required warning flags.")
+    return 0
+
+
 def cmd_extract(args):
-    counts = extract(args.log, args.app_dir.strip("/"), args.workspace)
+    sites = extract_sites(args.log, args.app_dir.strip("/"), args.workspace)
+    counts = counts_from_sites(sites)
     out = open(args.out, "w", encoding="utf-8") if args.out else sys.stdout
     try:
         write_counts(out, counts)
     finally:
         if args.out:
             out.close()
+    if args.details:
+        with open(args.details, "w", encoding="utf-8") as fh:
+            write_sites(fh, sites)
     total = sum(counts.values())
     print(f"{args.log}: {total} warning site(s) in {len(counts)} file/flag pair(s)", file=sys.stderr)
     return 0
@@ -207,7 +423,7 @@ def cmd_check(args):
 
     new_sites = sum(o - a for o, a in regressions.values())
     print(f"FAIL: {new_sites} new warning site(s) in {len(regressions)} file/flag pair(s):\n")
-    print("\n".join(format_regressions(regressions)))
+    print("\n".join(format_regressions(regressions, read_sites(args.details))))
     print(
         "\nFix the warnings. If a warning is genuinely acceptable, raising its count in\n"
         f"{args.baseline} is a reviewable change -- not a silent one."
@@ -227,6 +443,24 @@ def cmd_update(args):
         print(f"REFUSING to update: {len(regressions)} file/flag pair(s) increased:\n")
         print("\n".join(format_regressions(regressions)))
         return 1
+
+    # A collapse is the one direction the ratchet cannot walk back: once the keys are
+    # gone, restoring the flags that found them fails `check` on every PR, so the gate
+    # ends up blocking its own repair. Make a big drop an explicit decision.
+    old_total, new_total = sum(old.values()), sum(new.values())
+    if (
+        old_total >= COLLAPSE_MIN_TOTAL
+        and new_total < old_total * COLLAPSE_FLOOR
+        and not args.allow_collapse
+    ):
+        print(
+            f"REFUSING to update: {old_total} -> {new_total} warning site(s) is a "
+            f"{100 * (old_total - new_total) // old_total}% drop.\n\n"
+            "A drop that size is more often a build that stopped asking for the flags, or\n"
+            "a parser that stopped recognising the output, than a real fix. Confirm the\n"
+            "warnings are genuinely gone, then re-run with --allow-collapse."
+        )
+        return 3
 
     if new == old:
         print(f"Baseline unchanged ({sum(old.values())} warning site(s)).")
@@ -361,6 +595,22 @@ class TestExtract(SelftestBase):
         moved = self.write("moved.log", SELFTEST_LOG.replace(":30:28:", ":130:28:"))
         self.assertEqual(extract(moved, SELFTEST_APP_DIR, SELFTEST_WORKSPACE), self.counts)
 
+    def test_make_diagnostics_are_not_counted_as_code_warnings(self):
+        """`Makefile:224: warning: overriding recipe` has gcc's exact shape."""
+        log = self.write(
+            "make.log",
+            "Makefile:224: warning: overriding recipe for target 'x'\n"
+            "una/Makefile:12: warning: ignoring old recipe\n"
+            "config/gcc/app.mk:3:1: warning: something [-Wpedantic]\n",
+        )
+        self.assertEqual(extract(log, SELFTEST_APP_DIR, SELFTEST_WORKSPACE), {})
+
+    def test_details_carry_the_line_and_message(self):
+        sites = extract_sites(self.log, SELFTEST_APP_DIR, SELFTEST_WORKSPACE)
+        key = ("Libs/Header/SDK/Simulator/Kernel/Mock/AppMemory.hpp", "-Wformat=")
+        lines = {line for path, flag, line, _col, _msg in sites if (path, flag) == key}
+        self.assertEqual(lines, {"30", "42"})
+
 
 class TestBaselineIO(SelftestBase):
     def test_round_trip_through_the_file_format(self):
@@ -449,6 +699,44 @@ class TestCommands(SelftestBase):
         obs = self.write("o.tsv", "Libs/a.cpp\t-Wformat=\t9\n")
         self.assertEqual(main(["update", "--baseline", self.baseline, "--allow-increase", obs]), 0)
 
+    def test_update_refuses_a_collapse(self):
+        """A near-empty observation is what a stripped flag or a broken parser looks
+        like, and deleting the keys is the one direction the ratchet cannot walk
+        back: restoring the flags afterwards fails `check` on every PR."""
+        big = self.write("big.txt", "Libs/a.cpp\t-Wformat=\t20\n")
+        obs = self.write("o.tsv", "")
+        self.assertEqual(main(["update", "--baseline", big, obs]), 3)
+        self.assertEqual(sum(read_counts(big).values()), 20)
+
+    def test_update_allows_a_collapse_only_when_asked(self):
+        big = self.write("big.txt", "Libs/a.cpp\t-Wformat=\t20\n")
+        obs = self.write("o.tsv", "")
+        self.assertEqual(main(["update", "--baseline", big, "--allow-collapse", obs]), 0)
+        self.assertEqual(read_counts(big), {})
+
+    def test_update_allows_a_drop_that_stays_above_the_floor(self):
+        big = self.write("big.txt", "Libs/a.cpp\t-Wformat=\t20\n")
+        obs = self.write("o.tsv", "Libs/a.cpp\t-Wformat=\t15\n")
+        self.assertEqual(main(["update", "--baseline", big, obs]), 0)
+
+    def test_a_tiny_baseline_is_not_subject_to_the_collapse_floor(self):
+        """Fixing the last two warnings must not need a flag."""
+        obs = self.write("o.tsv", "")
+        self.assertEqual(main(["update", "--baseline", self.baseline, obs]), 0)
+
+    def test_check_names_the_offending_lines_when_details_are_supplied(self):
+        obs = self.write("o.tsv", "Libs/c.cpp\t-Wformat=\t1\n")
+        det = self.write("o.details.tsv", "Libs/c.cpp\t-Wformat=\t7\t3\tformat '%d' expects int\n")
+        out = io.StringIO()
+        real, sys.stdout = sys.stdout, out
+        try:
+            self.assertEqual(
+                main(["check", "--baseline", self.baseline, "--details", det, obs]), 1
+            )
+        finally:
+            sys.stdout = real
+        self.assertIn("Libs/c.cpp:7:3: format '%d' expects int", out.getvalue())
+
     def test_compare_flags_a_hand_raised_baseline(self):
         after = self.write("after.txt", "Libs/a.cpp\t-Wformat=\t5\n")
         self.assertEqual(main(["compare", "--before", self.baseline, "--after", after]), 1)
@@ -466,6 +754,85 @@ class TestCommands(SelftestBase):
         self.assertEqual(
             read_counts(out)[("Libs/Header/SDK/Simulator/Kernel/Mock/AppMemory.hpp", "-Wformat=")], 2
         )
+
+
+GOOD_MAKEFILE = textwrap.dedent(
+    """\
+    WARN = error all extra write-strings init-self cast-qual \\
+           pointer-arith strict-aliasing format=2 uninitialized \\
+           missing-declarations no-long-long no-unused-parameter \\
+           no-variadic-macros no-format-extra-args \\
+           no-conversion no-overloaded-virtual
+    CXXWARN = non-virtual-dtor ctor-dtor-privacy
+
+    c_compiler_options_local   += -pedantic $(addprefix -W,$(WARN))
+    cpp_compiler_options_local += -pedantic $(addprefix -W,$(WARN) $(CXXWARN))
+    override user_cflags += -Wno-error
+    override user_cflags += -DBUILD_VERSION=\\"1.2.3\\"
+    """
+)
+
+
+class TestFlagPolicy(unittest.TestCase):
+    """A count only means something while the flags that produce it are requested."""
+
+    def test_the_tree_as_it_stands_is_accepted(self):
+        self.assertEqual(check_makefile_flags(GOOD_MAKEFILE), [])
+
+    def test_a_dropped_warning_is_caught(self):
+        weakened = GOOD_MAKEFILE.replace(" cast-qual", "")
+        self.assertIn("WARN no longer asks for -Wcast-qual", check_makefile_flags(weakened))
+
+    def test_a_new_suppression_is_caught(self):
+        weakened = GOOD_MAKEFILE.replace("no-long-long", "no-long-long no-cast-qual")
+        self.assertIn("WARN adds the suppression -Wno-cast-qual", check_makefile_flags(weakened))
+
+    def test_a_dropped_cxx_warning_is_caught(self):
+        weakened = GOOD_MAKEFILE.replace("non-virtual-dtor ", "")
+        self.assertIn("CXXWARN no longer asks for -Wnon-virtual-dtor", check_makefile_flags(weakened))
+
+    def test_blanket_w_in_user_cflags_is_caught(self):
+        weakened = GOOD_MAKEFILE.replace("-Wno-error", "-Wno-error -w")
+        self.assertIn("user_cflags disables all warnings with -w", check_makefile_flags(weakened))
+
+    def test_a_suppression_smuggled_into_user_cflags_is_caught(self):
+        weakened = GOOD_MAKEFILE.replace("-Wno-error", "-Wno-error -Wno-reorder")
+        self.assertIn(
+            "user_cflags adds the suppression -Wno-reorder", check_makefile_flags(weakened)
+        )
+
+    def test_detaching_the_list_from_the_command_line_is_caught(self):
+        """Leaving WARN defined but unused would satisfy a naive grep."""
+        weakened = GOOD_MAKEFILE.replace("$(addprefix -W,$(WARN))", "")
+        self.assertIn(
+            "c_compiler_options_local no longer expands $(WARN)", check_makefile_flags(weakened)
+        )
+
+    def test_dropping_pedantic_is_caught(self):
+        self.assertIn("-pedantic is gone", check_makefile_flags(GOOD_MAKEFILE.replace("-pedantic", "")))
+
+
+class TestCommittedMakefiles(unittest.TestCase):
+    """Reads the real tree. Weakening the gate now means editing this file, in a diff
+    that says so, rather than one app's Makefile out of fifteen."""
+
+    def setUp(self):
+        self.makefiles = find_una_makefiles(REPO_ROOT)
+        if not self.makefiles:
+            self.skipTest("no una/Makefile in this checkout")
+
+    def test_the_headline_flags_are_required_by_name(self):
+        for flag in ("all", "extra", "format=2", "cast-qual"):
+            self.assertIn(flag, REQUIRED_WARNINGS, f"-W{flag} was dropped from the policy")
+
+    def test_every_project_still_requests_them(self):
+        offenders = {}
+        for rel in self.makefiles:
+            with open(os.path.join(REPO_ROOT, rel), "r", encoding="utf-8") as fh:
+                problems = check_makefile_flags(fh.read())
+            if problems:
+                offenders[rel] = problems
+        self.assertEqual(offenders, {})
 
 
 class TestCommittedBaseline(unittest.TestCase):
@@ -504,7 +871,14 @@ def run_selftest():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite(
         loader.loadTestsFromTestCase(case)
-        for case in (TestExtract, TestBaselineIO, TestCommands, TestCommittedBaseline)
+        for case in (
+            TestExtract,
+            TestBaselineIO,
+            TestCommands,
+            TestFlagPolicy,
+            TestCommittedMakefiles,
+            TestCommittedBaseline,
+        )
     )
     # The command tests print their own diagnostics; keep that off the test report.
     with open(os.devnull, "w", encoding="utf-8") as devnull:
@@ -536,10 +910,19 @@ def main(argv=None):
     )
     p.add_argument("--workspace", default="", help="absolute repo root to strip from paths")
     p.add_argument("--out", help="write here instead of stdout")
+    p.add_argument("--details", help="also write path/flag/line/col/message sites here")
     p.set_defaults(func=cmd_extract)
 
     p = sub.add_parser("check", help="fail if counts exceed the baseline")
     p.add_argument("--baseline", required=True)
+    # Repeatable rather than nargs="*", which would swallow the positional counts.
+    p.add_argument(
+        "--details",
+        action="append",
+        default=[],
+        metavar="FILE",
+        help="an extract --details sidecar, to name the offending lines in the failure",
+    )
     p.add_argument("counts", nargs="+", help="one or more extract outputs")
     p.set_defaults(func=cmd_check)
 
@@ -550,6 +933,11 @@ def main(argv=None):
         action="store_true",
         help="permit a higher baseline (for the initial seeding only)",
     )
+    p.add_argument(
+        "--allow-collapse",
+        action="store_true",
+        help=f"permit a drop below {int(COLLAPSE_FLOOR * 100)}%% of the current total",
+    )
     p.add_argument("counts", nargs="+", help="one or more extract outputs")
     p.set_defaults(func=cmd_update)
 
@@ -557,6 +945,10 @@ def main(argv=None):
     p.add_argument("--before", required=True)
     p.add_argument("--after", required=True)
     p.set_defaults(func=cmd_compare)
+
+    p = sub.add_parser("flags", help="fail if any una/Makefile weakened its warning flags")
+    p.add_argument("--root", help="repo root to scan (default: this script's checkout)")
+    p.set_defaults(func=cmd_flags)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -8,6 +8,12 @@ name: Linux Simulator
 # NOTE: the baseline commit this workflow pushes to main carries [skip ci], because
 # apps-ci, host-tests and tutorials-ci all trigger on an unfiltered push to main and
 # would otherwise run a full cycle for a one-line generated file.
+#
+# SETUP: making `Warning ratchet` a required check also makes it apply to direct
+# pushes, including the ratchet job's own. github-actions[bot] therefore needs a
+# bypass for main in the repository ruleset; without one the baseline can go up by
+# review but never come back down. The job now fails loudly on that rejection rather
+# than mistaking it for a lost push race.
 
 on:
   pull_request:
@@ -34,6 +40,13 @@ on:
 # ratchet job commits it to main, and a self-trigger would loop. It IS in the
 # pull_request filter: a PR that edits only the baseline is exactly the PR that most
 # needs the gate to run, and the ratchet never pushes on that trigger.
+#
+# Triggering is only half of that, though. Landing in the filter gets the workflow
+# started; it takes a matching entry in the build-all list in `discover` to get any
+# project selected, and with nothing selected the gate has nothing to check and
+# reports success. So the gate's own two files are listed in BOTH places, and the
+# `warnings` job below runs unconditionally rather than being skipped along with the
+# build -- a skipped job satisfies a required check just as a passing one does.
 
 permissions:
   contents: read
@@ -64,13 +77,20 @@ jobs:
         run: |
           set -uo pipefail
 
-          # A project is any dir containing simulator/gcc/Makefile.
+          # A project is any dir containing simulator/gcc/Makefile. `|| true` because
+          # pipefail is on and find exits non-zero for an absent search root -- which
+          # would kill this step, and a dead discover used to leave the gate skipped
+          # (i.e. green). It is caught by the TOTAL check below instead.
           find_projects() {
-            find Examples/Apps Docs/Tutorials -path '*/simulator/gcc/Makefile' 2>/dev/null \
-              | sed 's#/simulator/gcc/Makefile##' | sort
+            { find Examples/Apps Docs/Tutorials -path '*/simulator/gcc/Makefile' 2>/dev/null \
+              || true; } | sed 's#/simulator/gcc/Makefile##' | sort
           }
           TOTAL="$(find_projects | wc -l | tr -d ' ')"
           echo "Discovered $TOTAL simulator project(s)."
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "::error title=No simulator projects::Found no */simulator/gcc/Makefile. Refusing to report a green gate over an empty build."
+            exit 1
+          fi
 
           # push / dispatch build everything; a PR builds only the projects it
           # touches, or everything when it touches shared inputs.
@@ -93,7 +113,11 @@ jobs:
               # "nothing to build" -- fail safe to a full build rather than skip.
               echo "::warning::Could not determine changed files for base ${BASE_SHA}; building all projects."
               BUILD_ALL=true
-            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|\.github/workflows/linux-simulator\.yml)'; then
+            # Shared inputs, plus the gate's own machinery. A PR that edits only the
+            # script or only the baseline used to select nothing, which skipped the
+            # build, the gate AND the script's selftest -- so the one change that can
+            # disable the ratchet outright was the one change it never inspected.
+            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|\.github/(workflows/linux-simulator\.yml|scripts/warning_baseline\.py|warning-baseline\.txt))'; then
               BUILD_ALL=true
             fi
           fi
@@ -211,14 +235,19 @@ jobs:
             --log build.log \
             --app-dir "$APP_DIR" \
             --workspace "$GITHUB_WORKSPACE" \
-            --out "warnings-${{ matrix.project.slug }}.tsv"
+            --out "warnings-${{ matrix.project.slug }}.tsv" \
+            --details "warnings-${{ matrix.project.slug }}.details"
 
+      # The counts drive the gate; the details exist so its failure can name the line
+      # and the message instead of sending the contributor to download build.log.
       - name: Upload warning counts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: warning-counts-${{ matrix.project.slug }}
-          path: warnings-${{ matrix.project.slug }}.tsv
+          path: |
+            warnings-${{ matrix.project.slug }}.tsv
+            warnings-${{ matrix.project.slug }}.details
           if-no-files-found: ignore
           retention-days: 14
 
@@ -253,13 +282,21 @@ jobs:
   # pull request from a fork.
   warnings:
     needs: [ discover, build ]
-    # always(), so a failed build leg still has its warnings checked -- but only once
-    # discover actually produced a selection.
-    if: always() && needs.discover.result == 'success' && needs.discover.outputs.projects != '[]'
+    # Bare always(): this job must reach a conclusion on every run of the workflow.
+    # Branch protection treats a skipped required check as a satisfied one, so every
+    # `if:` that could skip this job is a way to merge without being checked -- which
+    # is why the discover and build results are asserted in steps below instead.
+    if: always()
     name: Warning ratchet
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      - name: Require a usable project selection
+        if: needs.discover.result != 'success'
+        run: |
+          echo "::error title=Selection failed::discover finished '${{ needs.discover.result }}', so the ratchet cannot know which projects should have been built."
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v7
         with:
@@ -268,7 +305,16 @@ jobs:
       - name: Selftest the ratchet itself
         run: python3 .github/scripts/warning_baseline.py --selftest
 
+      # The counts are only evidence while the compiler is still asked for the
+      # warnings. una/Makefile compiles with a leading `@`, so the flags never appear
+      # in build.log and no amount of parsing can confirm them -- read them from the
+      # Makefiles instead. Deleting -Wcast-qual from one app would otherwise pass the
+      # gate as a fix and be ratcheted away on merge.
+      - name: Verify the warning flags are still requested
+        run: python3 .github/scripts/warning_baseline.py flags
+
       - name: Download warning counts
+        if: needs.discover.outputs.projects != '[]'
         uses: actions/download-artifact@v7
         with:
           pattern: warning-counts-*
@@ -277,21 +323,38 @@ jobs:
 
       - name: Compare against the baseline
         id: gate
+        if: needs.discover.outputs.projects != '[]'
+        env:
+          EXPECTED: ${{ needs.discover.outputs.count }}
         run: |
+          set +e                     # see below; the gate's exit status is explicit
           set -uo pipefail
           shopt -s nullglob
           files=(counts/*.tsv)
+          details=()
+          for d in counts/*.details; do details+=(--details "$d"); done
           echo "legs=${#files[@]}" >> "$GITHUB_OUTPUT"
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "::error title=No warning counts::Every build leg failed before producing a log; the ratchet has nothing to check."
+
+          # A missing leg is a project whose warnings nobody looked at. That used to
+          # pass as long as one leg survived, so an unrelated apt-get flake was enough
+          # to wave a new warning through.
+          case "${EXPECTED:-}" in
+            ''|*[!0-9]*)
+              echo "::error title=Unusable project count::discover reported '${EXPECTED:-}' as the project count."
+              exit 1 ;;
+          esac
+          if [ "${#files[@]}" -ne "$EXPECTED" ]; then
+            echo "::error title=Incomplete warning coverage::Got ${#files[@]} count file(s) for ${EXPECTED} selected project(s); the missing ones were never checked. Re-run the failed leg."
             exit 1
           fi
-          echo "Checking ${#files[@]} of ${{ needs.discover.outputs.count }} selected project(s)."
-          # No `set -e` here, so the status has to be captured and re-raised at the
-          # end; without the explicit `exit $rc` a failing gate would exit 0 on the
-          # trailing echo.
+          echo "Checking ${#files[@]} of ${EXPECTED} selected project(s)."
+
+          # GitHub runs `run:` under `bash -e`, which a `set -uo pipefail` line does
+          # not undo: without the `set +e` above, a failing check would abort the step
+          # right here and the annotation and output below would never be emitted.
           python3 .github/scripts/warning_baseline.py check \
-            --baseline .github/warning-baseline.txt "${files[@]}" > /tmp/gate.out 2>&1
+            --baseline .github/warning-baseline.txt \
+            "${details[@]}" "${files[@]}" > /tmp/gate.out 2>&1
           rc=$?
           cat /tmp/gate.out
           if [ $rc -ne 0 ]; then
@@ -304,12 +367,28 @@ jobs:
         run: |
           ok='${{ steps.gate.outcome }}'
           {
-            if [ "$ok" = success ]; then echo "### ✅ Warning ratchet"; else echo "### ❌ Warning ratchet"; fi
+            if [ "$ok" = failure ]; then echo "### ❌ Warning ratchet"; else echo "### ✅ Warning ratchet"; fi
             echo ""
-            echo '```'; cat /tmp/gate.out 2>/dev/null || echo "(no output)"; echo '```'
+            if [ "$ok" = skipped ]; then
+              echo "No simulator project was selected, so there were no warnings to check."
+              echo "The flag policy and the ratchet's own selftest still ran."
+            else
+              echo '```'; cat /tmp/gate.out 2>/dev/null || echo "(no output)"; echo '```'
+            fi
             echo ""
             echo "Coverage: ${{ steps.gate.outputs.legs || 0 }} of ${{ needs.discover.outputs.count }} selected project(s), out of ${{ needs.discover.outputs.total }} in the repo."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Last, so the warning comparison above is always reported first: a build that
+      # died has its warnings checked (that is the point of always()), but it must not
+      # leave a green required check behind. Removing -Wno-error, for instance, turns
+      # every warning into an `error:` line the parser cannot see -- zero warnings
+      # found, build broken, and this is what catches it.
+      - name: Require every build leg to have succeeded
+        if: always() && needs.build.result != 'success' && needs.build.result != 'skipped'
+        run: |
+          echo "::error title=Build incomplete::The simulator build finished '${{ needs.build.result }}'. Warnings from a build that did not complete are not evidence that there are none."
+          exit 1
 
   # Ratchet down on merge. Only ever lowers the baseline, and only from a build that
   # covered every project in the repo -- a partial run would look like a fix and
@@ -343,6 +422,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EXPECTED: ${{ needs.discover.outputs.count }}
         run: |
+          # `bash -e` is GitHub's default and `set -uo pipefail` does not clear it.
+          # With errexit left on, `update`'s exit 2 ("baseline unchanged" -- the usual
+          # outcome of a merge) would kill this step before the `case` below could
+          # read it, and the ratchet would report failure on almost every push.
+          set +e
           set -uo pipefail
           shopt -s nullglob
           files=("$GITHUB_WORKSPACE"/counts/*.tsv)
@@ -358,14 +442,14 @@ jobs:
               echo "::error title=Unusable project count::discover reported '${EXPECTED:-}' as the project count; refusing to rewrite the baseline."
               exit 1 ;;
           esac
-          if [ "${#files[@]}" -ne "$EXPECTED" ]; then
+          if [ "${#files[@]}" -eq 0 ] || [ "${#files[@]}" -ne "$EXPECTED" ]; then
             echo "::error title=Incomplete warning coverage::Got ${#files[@]} count file(s) for ${EXPECTED} project(s); refusing to rewrite the baseline from a partial build."
             exit 1
           fi
 
           for attempt in 1 2 3; do
-            # cd is guarded throughout: there is no `set -e` here, and a silent cd
-            # failure would point the rm/add/commit below at the wrong tree.
+            # cd is guarded throughout: errexit is off above, and a silent cd failure
+            # would point the rm/add/commit below at the wrong tree.
             cd "$GITHUB_WORKSPACE" || exit 1
             rm -rf repo
             git clone --quiet --depth 1 --branch main \
@@ -379,7 +463,11 @@ jobs:
             case $rc in
               0) ;;                                     # changed; commit it
               2) echo "Baseline already matches; nothing to commit."; exit 0 ;;
-              *) echo "::error title=Warning count increased on main::A warning reached main without failing the gate. Refusing to absorb it into the baseline."
+              1) echo "::error title=Warning count increased on main::A warning reached main without failing the gate. Refusing to absorb it into the baseline."
+                 exit 1 ;;
+              3) echo "::error title=Warning count collapsed::The build reported far fewer warnings than the baseline. That is usually a stripped flag or a broken parser, not 40 fixes; deleting the keys cannot be undone without hand-editing the baseline. Confirm, then re-run with --allow-collapse."
+                 exit 1 ;;
+              *) echo "::error title=Baseline update failed::warning_baseline.py update exited ${rc}."
                  exit 1 ;;
             esac
 
@@ -395,7 +483,10 @@ jobs:
                        -m "Generated by .github/workflows/linux-simulator.yml from ${GITHUB_SHA}." \
               || { echo "::error title=Commit failed::update rewrote the baseline but git commit failed."; exit 1; }
 
-            if git push origin main; then
+            push_out="$(git push origin main 2>&1)"
+            push_rc=$?
+            echo "$push_out"
+            if [ $push_rc -eq 0 ]; then
               echo "Baseline lowered."
               {
                 echo "### ⬇️ Warning baseline lowered"
@@ -406,6 +497,20 @@ jobs:
               } >> "$GITHUB_STEP_SUMMARY" || true
               exit 0
             fi
+
+            # Only a lost race is worth retrying. Branch protection is the rejection
+            # this job is most likely to meet -- making `warnings` a required check is
+            # the point of the PR, and required checks apply to direct pushes too, so
+            # the bot needs a ruleset bypass. Retrying that three times and exiting 0
+            # would leave the downward half of the ratchet permanently dead and green.
+            case "$push_out" in
+              *GH006*|*"protected branch"*|*"Protected branch"*|*"required status check"*|*"Required status check"*|*"refusing to allow"*)
+                echo "::error title=Baseline push blocked by branch protection::main rejected the bot's push, so the baseline can never be lowered. Grant github-actions[bot] a bypass for main in the repository ruleset, or drop the ratchet job."
+                exit 1 ;;
+              *"Permission to"*|*"403"*|*"denied"*)
+                echo "::error title=Baseline push denied::The workflow token cannot push to main. Check the job's contents: write permission and any org-level restriction."
+                exit 1 ;;
+            esac
             echo "Push rejected (attempt ${attempt}/3) -- main moved. Recomputing."
           done
 
