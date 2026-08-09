@@ -302,7 +302,7 @@ MAKEFILE_SEARCH_ROOTS = ("Examples/Apps", "Docs/Tutorials")
 # one line away in a file nobody was looking at.
 SUPPRESSION_SCAN_SIBLINGS = ("config/gcc/app.mk", "simulator/gcc/Makefile")
 
-ASSIGN_RE = re.compile(r"^(?P<name>WARN|CXXWARN)\s*[:+?]?=\s*(?P<value>.*)$")
+ASSIGN_RE = re.compile(r"^(?P<name>WARN|CXXWARN)\s*(?P<op>[:+?]?=)\s*(?P<value>.*)$")
 ANY_ASSIGN_RE = re.compile(
     r"^(?:override\s+|export\s+)*(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*[:+?]?=\s*(?P<value>.*)$"
 )
@@ -340,7 +340,17 @@ def check_makefile_flags(text):
         stripped = line.strip()
         assign = ASSIGN_RE.match(stripped)
         if assign:
-            lists[assign.group("name")] = assign.group("value").split()
+            # Follow make's own semantics for the operator. Reading every form as a
+            # replacement would report the first line's flags as missing on an
+            # ordinary `WARN = ...` / `WARN += ...` split, and -- worse -- would let
+            # a suppression on the first line hide behind a clean += on the last.
+            name, tokens = assign.group("name"), assign.group("value").split()
+            if assign.group("op") == "+=":
+                lists.setdefault(name, []).extend(tokens)
+            elif assign.group("op") == "?=":
+                lists.setdefault(name, tokens)   # make ignores ?= once the var is set
+            else:
+                lists[name] = tokens
             continue
         for var in ("c_compiler_options_local", "cpp_compiler_options_local"):
             if stripped.startswith(var) and "$(WARN)" in stripped:
@@ -846,6 +856,28 @@ class TestFlagPolicy(unittest.TestCase):
 
     def test_dropping_pedantic_is_caught(self):
         self.assertIn("-pedantic is gone", check_makefile_flags(GOOD_MAKEFILE.replace("-pedantic", "")))
+
+    def test_flags_split_across_an_append_are_accumulated(self):
+        """`WARN = ...` then `WARN += ...` is ordinary make. Reading only the last
+        assignment reported everything on the first line as missing."""
+        split = GOOD_MAKEFILE.replace(
+            "WARN = error all extra write-strings",
+            "WARN = error all extra\nWARN += write-strings",
+        )
+        self.assertEqual(check_makefile_flags(split), [])
+
+    def test_a_suppression_hidden_behind_a_later_append_is_caught(self):
+        """The bypass the accumulation fixes: put -Wno-pedantic in the first
+        assignment and every required flag in a clean += on the last. make puts the
+        suppression on the command line ahead of the flags, where nothing re-enables
+        it, and reading only the last assignment saw nothing wrong."""
+        hidden = GOOD_MAKEFILE.replace("WARN = error", "WARN = no-pedantic\nWARN += error")
+        self.assertIn("WARN adds the suppression -Wno-pedantic", check_makefile_flags(hidden))
+
+    def test_a_conditional_assignment_does_not_override_an_earlier_one(self):
+        """make ignores ?= once the variable is set, so the check must too."""
+        conditional = GOOD_MAKEFILE + "WARN ?= all\n"
+        self.assertEqual(check_makefile_flags(conditional), [])
 
     def test_the_real_app_mk_is_accepted(self):
         """config/gcc/app.mk legitimately sets user_cflags in one project."""

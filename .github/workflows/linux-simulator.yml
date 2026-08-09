@@ -366,33 +366,39 @@ jobs:
           fi
           exit $rc
 
-      - name: Summary
-        if: always()
-        run: |
-          ok='${{ steps.gate.outcome }}'
-          {
-            if [ "$ok" = failure ]; then echo "### ❌ Warning ratchet"; else echo "### ✅ Warning ratchet"; fi
-            echo ""
-            if [ "$ok" = skipped ]; then
-              echo "No simulator project was selected, so there were no warnings to check."
-              echo "The flag policy and the ratchet's own selftest still ran."
-            else
-              echo '```'; cat /tmp/gate.out 2>/dev/null || echo "(no output)"; echo '```'
-            fi
-            echo ""
-            echo "Coverage: ${{ steps.gate.outputs.legs || 0 }} of ${{ needs.discover.outputs.count }} selected project(s), out of ${{ needs.discover.outputs.total }} in the repo."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      # Last, so the warning comparison above is always reported first: a build that
-      # died has its warnings checked (that is the point of always()), but it must not
-      # leave a green required check behind. Removing -Wno-error, for instance, turns
-      # every warning into an `error:` line the parser cannot see -- zero warnings
-      # found, build broken, and this is what catches it.
+      # Before the summary, so the summary can see the job go red: a build that died
+      # has its warnings checked anyway (the gate above does not need needs.build to
+      # have succeeded), but it must not leave a green required check behind.
+      # Removing -Wno-error, for instance, turns every warning into an `error:` line
+      # the parser cannot see -- zero warnings found, build broken, caught here.
       - name: Require every build leg to have succeeded
         if: ${{ !cancelled() && needs.build.result != 'success' && needs.build.result != 'skipped' }}
         run: |
           echo "::error title=Build incomplete::The simulator build finished '${{ needs.build.result }}'. Warnings from a build that did not complete are not evidence that there are none."
           exit 1
+
+      # Keyed on job.status, not on the gate step: a failure in the selection check,
+      # the selftest or the flag policy leaves steps.gate skipped, and reading that
+      # alone reported a tick and "no project was selected" over a red job.
+      - name: Summary
+        if: always()
+        run: |
+          job='${{ job.status }}'
+          gate='${{ steps.gate.outcome }}'
+          {
+            if [ "$job" = success ]; then echo "### ✅ Warning ratchet"; else echo "### ❌ Warning ratchet"; fi
+            echo ""
+            if [ "$gate" != skipped ]; then
+              echo '```'; cat /tmp/gate.out 2>/dev/null || echo "(no output)"; echo '```'
+            elif [ "$job" = success ]; then
+              echo "No simulator project was selected, so there were no warnings to check."
+              echo "The flag policy and the ratchet's own selftest still ran."
+            else
+              echo "The comparison never ran: an earlier step failed. See the job log."
+            fi
+            echo ""
+            echo "Coverage: ${{ steps.gate.outputs.legs || 0 }} of ${{ needs.discover.outputs.count }} selected project(s), out of ${{ needs.discover.outputs.total }} in the repo."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # Ratchet down on merge. Only ever lowers the baseline, and only from a build that
   # covered every project in the repo -- a partial run would look like a fix and
