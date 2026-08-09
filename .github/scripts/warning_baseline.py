@@ -233,11 +233,18 @@ def format_regressions(regressions, details=None):
         path, flag = key
         label = f"{path} [{flag}]"
         lines.append(f"  {label:<{width}}  {allowed} allowed -> {observed} found")
-        for line, col, msg in sorted((details or {}).get(key, []), key=_site_order)[
-            :MAX_SITES_SHOWN
-        ]:
+
+        sites = sorted((details or {}).get(key, []), key=_site_order)
+        # The key deliberately has no line number, so which of these is the new one
+        # is not knowable -- say so rather than let the list imply it. When the
+        # baseline already tolerates some, every site here is a candidate.
+        if sites and allowed:
+            lines.append(f"      every site for this key -- {allowed} of them predate this change:")
+        for line, col, msg in sites[:MAX_SITES_SHOWN]:
             where = f"{path}:{line}:{col}" if col else f"{path}:{line}"
             lines.append(f"      {where}: {msg}")
+        if len(sites) > MAX_SITES_SHOWN:
+            lines.append(f"      ... and {len(sites) - MAX_SITES_SHOWN} more")
     return lines
 
 
@@ -300,6 +307,12 @@ MAKEFILE_SEARCH_ROOTS = ("Examples/Apps", "Docs/Tutorials")
 # user_cflags in one project; simulator/gcc/Makefile exports into the same sub-make.
 # Both are scanned for suppressions -- checking only una/Makefile would leave `-w`
 # one line away in a file nobody was looking at.
+#
+# The scan reads assignments, not the command line, so it is a tripwire against
+# casual weakening rather than a sandbox: `EXTRA := -w` expanded into a flags
+# variable later still gets through. Closing that properly means observing what gcc
+# is actually invoked with -- `make -n`, or dropping the `@` from the compile rules
+# so the flags reach build.log -- which is a change to the Makefiles, not to CI.
 SUPPRESSION_SCAN_SIBLINGS = ("config/gcc/app.mk", "simulator/gcc/Makefile")
 
 ASSIGN_RE = re.compile(r"^(?P<name>WARN|CXXWARN)\s*(?P<op>[:+?]?=)\s*(?P<value>.*)$")
@@ -782,6 +795,22 @@ class TestCommands(SelftestBase):
         finally:
             sys.stdout = real
         self.assertIn("Libs/c.cpp:7:3: format '%d' expects int", out.getvalue())
+
+    def test_details_do_not_imply_which_site_is_the_new_one(self):
+        """The key has no line number, so a 2 -> 3 regression cannot say which of the
+        three is new. Listing them bare would send someone to fix the wrong one."""
+        regressions = {("Libs/a.cpp", "-Wformat="): (3, 2)}
+        details = {
+            ("Libs/a.cpp", "-Wformat="): {("10", "5", "old"), ("20", "5", "old"), ("30", "5", "new")}
+        }
+        out = "\n".join(format_regressions(regressions, details))
+        self.assertIn("2 of them predate this change", out)
+
+    def test_a_long_site_list_says_how_many_were_hidden(self):
+        key = ("Libs/a.cpp", "-Wformat=")
+        details = {key: {(str(n), "1", "msg") for n in range(MAX_SITES_SHOWN + 3)}}
+        out = "\n".join(format_regressions({key: (MAX_SITES_SHOWN + 3, 0)}, details))
+        self.assertIn("... and 3 more", out)
 
     def test_compare_flags_a_hand_raised_baseline(self):
         after = self.write("after.txt", "Libs/a.cpp\t-Wformat=\t5\n")
