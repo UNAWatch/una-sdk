@@ -107,19 +107,34 @@ private:
     // confirmation is what separates that from braking hard for a junction and
     // rolling through, which the arming sample alone cannot do -- the traces
     // are identical until the rider either puts a foot down or accelerates
-    // away. On the analysed ride the fast path pauses 3 s earlier than the
-    // dwell on every stop from speed, and never fires on a steady slow rider:
-    // their speed is low but not falling. Replaying at 1.5 m/s^2 gave results
-    // identical to 2.5, which means that ride has no samples in the
-    // discriminating band -- so 2.5 is chosen as the conservative end of an
-    // interval this data cannot separate, not as a measured optimum.
+    // away. Across the analysed rides the fast path pauses ~3 s earlier than
+    // the dwell on a stop from speed, and never fires on a steady slow rider:
+    // their speed is low but not falling.
+    //
+    // 2.5 m/s^2 is not a measured optimum. Replaying at 1.5 gave identical
+    // results, i.e. the rides hold no samples in the discriminating band, so
+    // this is the conservative end of an interval the data cannot separate.
+    // Note it is well above any deceleration a rider sustains through
+    // successive samples (0.73 m/s^2 was the highest seen below the ceiling on
+    // a clean ride); what clears it is the single-sample collapse at the top of
+    // a firm stop, which is the signature being matched.
     //
     // Deceleration is measured against the last sample whose value actually
     // changed, aged in ticks. GPS speed repeats its previous value when the
     // receiver has no fresh RMC (30 % of samples on the analysed ride), and a
     // naive first difference would read those as zero deceleration and then as
     // a huge one on the update that follows.
-    static constexpr float   skAutoPauseBrakingCeilMps   = 2.0f;  // only below this, m/s (7.2 km/h)
+    // The ceiling is set by where a stop-from-speed actually lands, not by a
+    // notion of "slow". At 1 Hz the GPS speed on a firm stop does not descend
+    // through every value -- it collapses from riding speed to somewhere around
+    // 8-9 km/h in a single sample, then decays. Five clean rides across three
+    // riders (22 stops, ~3 h) put those landings on both sides of 7.2 km/h, so
+    // a 2.0 m/s ceiling armed on one stop in three hours: dead weight. At
+    // 3.0 m/s it arms on the stops that genuinely collapse from speed -- the
+    // case the field report singled out -- gaining about 3 s on each, for one
+    // extra spurious pause per 3 h. 4.0 m/s doubled the spurious count for no
+    // further gain.
+    static constexpr float   skAutoPauseBrakingCeilMps   = 3.0f;  // only below this, m/s (10.8 km/h)
     static constexpr float   skAutoPauseBrakingDecelMps2 = 2.5f;  // and shedding at least this
     static constexpr uint8_t skAutoPauseDecelMaxAgeTicks = 3;     // beyond this the reference is too old to trust
 
