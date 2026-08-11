@@ -1128,23 +1128,6 @@ void Service::updateAutoPause()
         ++mAutoPause.staleSec;
     }
 
-    // Age the braking reference on every tick, including the ones this function
-    // returns early from, then DROP it once it is older than the cap.
-    //
-    // Clamping the age instead would be actively dangerous: the rate is
-    // reference-minus-current over the age, so a reference eight ticks old
-    // divided by a clamped three overstates the deceleration by 8/3. The first
-    // sample after a long GPS gap -- riding out from under a bridge at 35 km/h,
-    // where the reacquired Doppler sample is characteristically low -- would
-    // then look like a hard stop and fire the fast path while the rider is at
-    // speed. Dropping the reference makes the fast path simply not fire until a
-    // fresh pair exists, which is what the stale-hold above is for.
-    if (mAutoPause.prevAgeTicks < skAutoPauseDecelMaxAgeTicks) {
-        ++mAutoPause.prevAgeTicks;
-    } else {
-        mAutoPause.prevValid = false;
-    }
-
     // No trustworthy speed: hold whatever state we are in. Auto-pausing on a
     // lost fix would punish riding into a tunnel, and auto-resuming on one
     // would punish stopping in it.
@@ -1170,74 +1153,15 @@ void Service::updateAutoPause()
         return;
     }
 
-    // Deceleration since the last CHANGED sample, m/s^2, positive when slowing.
-    // Repeated values are skipped rather than read as zero deceleration: the
-    // receiver republishes its previous speed when it has no fresh RMC.
-    const bool speedChanged = mAutoPause.prevValid
-                              && (mGpsSpeedMs != mAutoPause.prevSpeedMps);
-
-    float decelMps2 = 0.0f;
-    if (mAutoPause.prevValid && mAutoPause.prevAgeTicks > 0) {
-        decelMps2 = (mAutoPause.prevSpeedMps - mGpsSpeedMs)
-                    / static_cast<float>(mAutoPause.prevAgeTicks);
-    }
-    if (!mAutoPause.prevValid || speedChanged) {
-        mAutoPause.prevSpeedMps = mGpsSpeedMs;
-        mAutoPause.prevAgeTicks = 0;
-        mAutoPause.prevValid    = true;
-    }
-
     if (mTrackState == Track::State::ACTIVE && mPauseSource == PauseSource::NONE) {
         mAutoPause.aboveSec = 0;
-
-        // Braking fast path. One sample that is slow AND shedding speed hard
-        // ARMS it; the next sample still being slow CONFIRMS it.
-        //
-        // The arming sample on its own cannot tell a rider stopping from one
-        // braking hard for a junction and rolling through -- the speed trace is
-        // identical until they either put a foot down or accelerate away, and
-        // the arming sample comes before that is knowable. Rolling through
-        // recovers speed on the very next sample, which withholds the
-        // confirmation. Measured on the reference ride, requiring it costs
-        // 0.3 s of the mean gain and still pauses 3 s earlier than the dwell on
-        // a stop from speed.
-        // The confirmation must be NEW evidence, so it requires a changed
-        // sample. A republished value is the same measurement twice: without
-        // this, one changed low glitch could arm the fast path and the
-        // receiver's own repeat of it could then confirm and pause the track.
-        // Refusing to confirm on a repeat costs nothing, because a rider who
-        // really has stopped is caught by the dwell a sample later -- and a
-        // genuine deceleration produces changing values all the way down.
-        //
-        // Arming needs no such guard: an unchanged sample leaves
-        // prevSpeedMps == mGpsSpeedMs, so decelMps2 is 0 and braking is false.
-        const bool braking = (mGpsSpeedMs < skAutoPauseBrakingCeilMps)
-                             && (decelMps2 >= skAutoPauseBrakingDecelMps2);
-        const bool brakingConfirmed = mAutoPause.brakingArmed
-                                      && speedChanged
-                                      && (mGpsSpeedMs < skAutoPauseBrakingCeilMps);
-        mAutoPause.brakingArmed = braking;
-
-        bool pauseNow = false;
         if (mGpsSpeedMs < skAutoPauseSpeedMps) {
-            pauseNow = (++mAutoPause.belowSec >= skAutoPauseDwellSec);
+            if (++mAutoPause.belowSec >= skAutoPauseDwellSec) {
+                pauseTrack(true, PauseSource::AUTO);
+                notifyAutoPause(true);
+            }
         } else {
             mAutoPause.belowSec = 0;
-        }
-
-        // Checked after the dwell, but NOT as an else-branch of the
-        // sub-threshold test: the crispest stops land below the pause threshold
-        // and satisfy the fast path on the same sample, and there is no reason
-        // to trust the evidence less when the rider is slower.
-        if (!pauseNow && brakingConfirmed) {
-            LOG_INFO("Auto-pause: braking fast path (%.2f m/s, -%.2f m/s^2)\n",
-                     mGpsSpeedMs, decelMps2);
-            pauseNow = true;
-        }
-
-        if (pauseNow) {
-            pauseTrack(true, PauseSource::AUTO);
-            notifyAutoPause(true);
         }
     } else if (mTrackState == Track::State::PAUSED && mPauseSource == PauseSource::AUTO) {
         mAutoPause.belowSec = 0;
