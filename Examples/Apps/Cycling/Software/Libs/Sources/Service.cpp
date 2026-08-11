@@ -1173,12 +1173,15 @@ void Service::updateAutoPause()
     // Deceleration since the last CHANGED sample, m/s^2, positive when slowing.
     // Repeated values are skipped rather than read as zero deceleration: the
     // receiver republishes its previous speed when it has no fresh RMC.
+    const bool speedChanged = mAutoPause.prevValid
+                              && (mGpsSpeedMs != mAutoPause.prevSpeedMps);
+
     float decelMps2 = 0.0f;
     if (mAutoPause.prevValid && mAutoPause.prevAgeTicks > 0) {
         decelMps2 = (mAutoPause.prevSpeedMps - mGpsSpeedMs)
                     / static_cast<float>(mAutoPause.prevAgeTicks);
     }
-    if (!mAutoPause.prevValid || mGpsSpeedMs != mAutoPause.prevSpeedMps) {
+    if (!mAutoPause.prevValid || speedChanged) {
         mAutoPause.prevSpeedMps = mGpsSpeedMs;
         mAutoPause.prevAgeTicks = 0;
         mAutoPause.prevValid    = true;
@@ -1198,9 +1201,20 @@ void Service::updateAutoPause()
         // confirmation. Measured on the reference ride, requiring it costs
         // 0.3 s of the mean gain and still pauses 3 s earlier than the dwell on
         // a stop from speed.
+        // The confirmation must be NEW evidence, so it requires a changed
+        // sample. A republished value is the same measurement twice: without
+        // this, one changed low glitch could arm the fast path and the
+        // receiver's own repeat of it could then confirm and pause the track.
+        // Refusing to confirm on a repeat costs nothing, because a rider who
+        // really has stopped is caught by the dwell a sample later -- and a
+        // genuine deceleration produces changing values all the way down.
+        //
+        // Arming needs no such guard: an unchanged sample leaves
+        // prevSpeedMps == mGpsSpeedMs, so decelMps2 is 0 and braking is false.
         const bool braking = (mGpsSpeedMs < skAutoPauseBrakingCeilMps)
                              && (decelMps2 >= skAutoPauseBrakingDecelMps2);
         const bool brakingConfirmed = mAutoPause.brakingArmed
+                                      && speedChanged
                                       && (mGpsSpeedMs < skAutoPauseBrakingCeilMps);
         mAutoPause.brakingArmed = braking;
 
