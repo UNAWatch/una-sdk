@@ -92,51 +92,25 @@ private:
     static constexpr uint8_t skAutoPauseDwellSec  = 2;     // sustained samples either way
     static constexpr uint8_t skAutoPauseStaleSec  = 5;     // hold state after this long with no valid speed
 
-    // -- Braking fast path ----------------------------------------------------
+    // A deceleration-triggered "braking fast path" was tried here and REMOVED.
+    // It aimed at the field report that stopping from a higher speed took
+    // longer, by pausing on one sample that was both slow and shedding speed
+    // hard, confirmed by the next. Replayed over nine rides from three riders
+    // (4.5 h, 32 stops, all recorded with auto-pause off) it did not pay for
+    // itself: it gained 0.44 s of mean latency over the dwell alone while
+    // doubling the false pauses, 4 to 8.
     //
-    // The dwell alone cannot help a rider who stops from speed: they spend the
-    // approach above skAutoPauseSpeedMps, so the detector cannot start counting
-    // until they are almost stationary. On the analysed ride the stops from
-    // 17-27 km/h were the slowest to register, which matches the field report
-    // that stopping from a higher speed took longer.
+    // The two error classes are not comparable. The dwell's false pauses all
+    // occur at 0.4-1.8 km/h, where the rider has effectively stopped and no
+    // distance is lost. The fast path's occurred at 4.0, 6.1, 7.6 and 9.2 km/h
+    // -- pausing a rider who is still moving, losing real distance, and buzzing
+    // at them mid-ride. All four were on the fastest rider, who brakes hard
+    // into junctions and rolls through: the trace of that is identical to a
+    // stop until after the decision has to be made.
     //
-    // So: arm on a sample that is BOTH slow and braking hard, and pause when
-    // the next sample is still slow. A rider under 7 km/h shedding more than
-    // skAutoPauseBrakingDecelMps2, and still slow a second later, is stopping;
-    // waiting for them to coast out the last 5 km/h adds nothing. The
-    // confirmation is what separates that from braking hard for a junction and
-    // rolling through, which the arming sample alone cannot do -- the traces
-    // are identical until the rider either puts a foot down or accelerates
-    // away. Across the analysed rides the fast path pauses ~3 s earlier than
-    // the dwell on a stop from speed, and never fires on a steady slow rider:
-    // their speed is low but not falling.
-    //
-    // 2.5 m/s^2 is not a measured optimum. Replaying at 1.5 gave identical
-    // results, i.e. the rides hold no samples in the discriminating band, so
-    // this is the conservative end of an interval the data cannot separate.
-    // Note it is well above any deceleration a rider sustains through
-    // successive samples (0.73 m/s^2 was the highest seen below the ceiling on
-    // a clean ride); what clears it is the single-sample collapse at the top of
-    // a firm stop, which is the signature being matched.
-    //
-    // Deceleration is measured against the last sample whose value actually
-    // changed, aged in ticks. GPS speed repeats its previous value when the
-    // receiver has no fresh RMC (30 % of samples on the analysed ride), and a
-    // naive first difference would read those as zero deceleration and then as
-    // a huge one on the update that follows.
-    // The ceiling is set by where a stop-from-speed actually lands, not by a
-    // notion of "slow". At 1 Hz the GPS speed on a firm stop does not descend
-    // through every value -- it collapses from riding speed to somewhere around
-    // 8-9 km/h in a single sample, then decays. Five clean rides across three
-    // riders (22 stops, ~3 h) put those landings on both sides of 7.2 km/h, so
-    // a 2.0 m/s ceiling armed on one stop in three hours: dead weight. At
-    // 3.0 m/s it arms on the stops that genuinely collapse from speed -- the
-    // case the field report singled out -- gaining about 3 s on each, for one
-    // extra spurious pause per 3 h. 4.0 m/s doubled the spurious count for no
-    // further gain.
-    static constexpr float   skAutoPauseBrakingCeilMps   = 3.0f;  // only below this, m/s (10.8 km/h)
-    static constexpr float   skAutoPauseBrakingDecelMps2 = 2.5f;  // and shedding at least this
-    static constexpr uint8_t skAutoPauseDecelMaxAgeTicks = 3;     // beyond this the reference is too old to trust
+    // Do not reintroduce it without data that separates those two cases. The
+    // useful part of the exercise was the measurement, not the mechanism: the
+    // whole of the detector's latency is the dwell, so the dwell is the lever.
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -253,35 +227,16 @@ private:
         uint8_t belowSec = 0;   ///< Consecutive samples under the pause threshold.
         uint8_t aboveSec = 0;   ///< Consecutive samples over the resume threshold.
 
-        /// Reference for the braking fast path: the last speed whose value
-        /// actually changed, and how many ticks ago it was taken. Ageing in
-        /// ticks (rather than assuming one) keeps the rate honest; once the
-        /// reference passes skAutoPauseDecelMaxAgeTicks it is dropped outright
-        /// (prevValid = false) rather than divided by a clamped age, which
-        /// would overstate the deceleration instead of discounting it.
-        float   prevSpeedMps = 0.0f;
-        uint8_t prevAgeTicks = 0;
-        bool    prevValid    = false;
-
-        /// The previous sample armed the braking fast path; the next sample
-        /// still being slow confirms it. Dwell-like evidence, so it clears
-        /// wherever the dwell counters do.
-        bool    brakingArmed = false;
-
         /// Clear the dwell counters only; freshness tracking is unaffected.
         void resetDwell()
         {
-            belowSec     = 0;
-            aboveSec     = 0;
-            brakingArmed = false;
+            belowSec = 0;
+            aboveSec = 0;
         }
 
         void reset()
         {
-            staleSec     = skAutoPauseStaleSec;
-            prevSpeedMps = 0.0f;
-            prevAgeTicks = 0;
-            prevValid    = false;
+            staleSec = skAutoPauseStaleSec;
             resetDwell();
         }
     } mAutoPause{};
