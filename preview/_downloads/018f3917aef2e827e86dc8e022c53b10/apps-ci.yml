@@ -102,9 +102,12 @@ jobs:
           path: built-apps
           pattern: app-*
 
-      # No Pillow installed: fine while every variant uses icons: "target"
-      # (the PNG conversion path in make_variant.py imports PIL lazily). The
-      # first custom-PNG-icon variant needs a pip install here.
+      # Pillow feeds make_variant.py's PNG-to-ABGR2222 path, used by any
+      # variant with its own icons (Walking, since its designer icon landed)
+      # rather than icons: "target".
+      - name: Install packing requirements
+        run: python3 -m pip install Pillow
+
       - name: Pack and verify variant ${{ matrix.variant }}
         run: |
           python3 Utilities/Scripts/app_merging/pack_variants.py \
