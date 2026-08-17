@@ -1,0 +1,9 @@
+{
+  "_comment": "Authoritative, append-only map from the SDK ABI (KERNEL_INTERFACE_VERSION, defined in Libs/Header/SDK/Interfaces/IKernel.hpp) to the minimum kernel firmware version that provides it. An app's config.json 'minKernelVersion' is DERIVED from this by min_kernel_version.py -- do not hand-edit that field. Add a new entry whenever KERNEL_INTERFACE_VERSION is bumped and the first kernel release that ships it is cut (the aligned MAJOR.MINOR). RC firmware is internal, so entries use the first STABLE release. ABI 0 and 1 predate the first public kernel release, so they impose no real floor (0.0.0). See the kernel repo Docs/Versioning-and-Releases.md, section 3.3.",
+  "map": {
+    "0": "0.0.0",
+    "1": "0.0.0",
+    "2": "1.0.0",
+    "3": "1.4.0"
+  }
+}
