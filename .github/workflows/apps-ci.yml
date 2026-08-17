@@ -28,6 +28,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Guard the ABI -> minKernelVersion mapping
+        # Fails if KERNEL_INTERFACE_VERSION was bumped without adding an entry to
+        # Utilities/Scripts/app_packer/abi_kernel_map.json, so the derived
+        # minKernelVersion stays trustworthy (see min_kernel_version.py).
+        run: python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
+
       - name: Generate app list
         id: generate
         run: |

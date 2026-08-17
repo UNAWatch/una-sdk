@@ -7,6 +7,7 @@
 | 1.00    | 07.08.2025      | Creating        |      | [Denys Saienko](https://github.com/sdvsaienko) |
 | 1.01    | 23.03.2025     | Removed mentions about signature file as it is not used |      | [Denys Sobchuk](https://github.com/AvatarSD) |
 | 1.02    | 29.06.2026     | Renamed `minSdkVersion` to `minKernelVersion`: the SDK is statically linked into the `.uapp`, so the runtime requirement is on the kernel firmware version (reported over BLE via the DIS Firmware Revision String, UUID 0x2A26), not the build-time SDK version | | Ross Ryles |
+| 1.03    | 17.08.2026     | `minKernelVersion` is now **auto-derived** from the SDK ABI (`KERNEL_INTERFACE_VERSION`) by `Utilities/Scripts/app_packer/min_kernel_version.py` via `abi_kernel_map.json` — do not hand-set it (see *Config File*) | | Ross Ryles |
 
 ## Output Package
 
@@ -32,6 +33,16 @@ This file is intended solely for defining supported features and displaying them
 
 All information needed by the watch is also embedded in the `*.uapp` file.
 
+> **`minKernelVersion` is auto-derived — do not hand-set it.** The compatibility contract is the SDK **ABI** version (`KERNEL_INTERFACE_VERSION`), not a marketing version: an app built against a given SDK requires a kernel whose ABI is at least that value. Each ABI maps to the first kernel firmware release that shipped it, so the requirement is expressed as a minimum firmware version — which is what the mobile app already gates on (compared against the watch firmware from BLE DIS `0x2A26`). Let the packer's resolver produce it:
+>
+> ```bash
+> # print the value for the current SDK, or write it into a config.json
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp config.json
+> ```
+>
+> The `minKernelVersion` values in the examples below are the current derived value (ABI 3 → `1.4.0`).
+
 Simplest `config.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
 
 ```json
@@ -43,7 +54,7 @@ Simplest `config.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
   "icon": "Resources/icon_60x60.png",
   "binary": "Files_0.1.3-16-ed77913-dirty.uapp",
   "appVersion": "0.1.3",
-  "minKernelVersion": "0.1.3",
+  "minKernelVersion": "1.4.0",
   "requiredHardware": [],
   "stravaExport" : false,
   "id": "03AD5A741E38A35F",
@@ -71,7 +82,7 @@ Watch application config example:
   "binary": "running.uapp", // Relative path to the app binary file
   "previews": "assets/previews/", // Relative path to the previews images
   "appVersion": "1.0.3", // Current version of the app
-  "minKernelVersion": "3.0.0", // Minimum watch kernel (firmware) version required to run the app. The SDK is statically linked into the .uapp, so this gates against the runtime kernel, not the build-time SDK. The mobile app reads the watch's firmware version from the BLE DIS Firmware Revision String (UUID 0x2A26).
+  "minKernelVersion": "1.4.0", // AUTO-DERIVED by min_kernel_version.py from the SDK ABI (KERNEL_INTERFACE_VERSION) via abi_kernel_map.json -- do not hand-set. Minimum kernel (firmware) version providing the required ABI; the mobile app compares it against the watch firmware version from BLE DIS Firmware Revision String (UUID 0x2A26).
   "requiredHardware": [ // List of hardware features required for the app to function
     "GPS",
     "ACCELEROMETER",
