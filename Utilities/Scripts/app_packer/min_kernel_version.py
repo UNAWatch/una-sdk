@@ -54,7 +54,9 @@ def read_abi(sdk_root):
 
 def resolve(sdk_root):
     abi = read_abi(sdk_root)
-    mapping = json.loads(MAP_PATH.read_text(encoding="utf-8"))["map"]
+    mapping = json.loads(MAP_PATH.read_text(encoding="utf-8")).get("map")
+    if not isinstance(mapping, dict):
+        sys.exit(f'error: {MAP_PATH.name} must contain a "map" object')
     key = str(abi)
     if key not in mapping:
         sys.exit(
@@ -62,7 +64,11 @@ def resolve(sdk_root):
             f"{MAP_PATH.name}.\n"
             f"       The ABI was bumped without recording the kernel release that ships it.\n"
             f'       Add "{abi}": "<first stable kernel version with this ABI>" to the map.')
-    return abi, mapping[key]
+    min_kernel = mapping[key]
+    if not isinstance(min_kernel, str) or not re.fullmatch(r"\d+\.\d+\.\d+", min_kernel):
+        sys.exit(f"error: {MAP_PATH.name}: invalid version for ABI {abi}: {min_kernel!r} "
+                 f"(expected MAJOR.MINOR.PATCH)")
+    return abi, min_kernel
 
 
 def main():
