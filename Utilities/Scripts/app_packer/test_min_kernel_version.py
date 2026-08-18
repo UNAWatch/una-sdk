@@ -51,15 +51,15 @@ with tempfile.TemporaryDirectory() as tmp:
     expect(r.returncode != 0, "--check missing -> reject")
 
     cfg = write_cfg(tmp, minKernelVersion="1.3.0")
-    run("--stamp", str(cfg))
-    expect(json.loads(cfg.read_text())["minKernelVersion"] == FLOOR, "--stamp raises 1.3.0 -> floor")
+    r = run("--stamp", str(cfg))
+    expect(r.returncode == 0 and json.loads(cfg.read_text())["minKernelVersion"] == FLOOR, "--stamp raises 1.3.0 -> floor")
     cfg = write_cfg(tmp, minKernelVersion="1.5.0")
-    run("--stamp", str(cfg))
-    expect(json.loads(cfg.read_text())["minKernelVersion"] == "1.5.0", "--stamp keeps higher 1.5.0")
+    r = run("--stamp", str(cfg))
+    expect(r.returncode == 0 and json.loads(cfg.read_text())["minKernelVersion"] == "1.5.0", "--stamp keeps higher 1.5.0")
 
     cfg = write_cfg(tmp, minKernelVersion="1.3.0", description="Біг — застосунок")
-    run("--stamp", str(cfg))
-    expect("Біг" in cfg.read_text(encoding="utf-8"), "--stamp preserves non-ASCII (ensure_ascii=False)")
+    r = run("--stamp", str(cfg))
+    expect(r.returncode == 0 and "Біг" in cfg.read_text(encoding="utf-8"), "--stamp preserves non-ASCII (ensure_ascii=False)")
 
     bad = Path(tmp) / "bad.json"
     bad.write_text('{\n  "minKernelVersion": "1.4.0", // comment\n}', encoding="utf-8")
@@ -67,6 +67,12 @@ with tempfile.TemporaryDirectory() as tmp:
     out = r.stdout + r.stderr
     expect(r.returncode != 0 and "invalid JSON" in out and "Traceback" not in out,
            "invalid JSON -> clean error (no traceback)")
+
+    arr = Path(tmp) / "arr.json"
+    arr.write_text("[]", encoding="utf-8")
+    r = run("--check", str(arr))
+    expect(r.returncode != 0 and "Traceback" not in (r.stdout + r.stderr),
+           "non-object config -> clean error (no traceback)")
 
 print()
 if failures:
