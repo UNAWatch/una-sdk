@@ -29,10 +29,12 @@ jobs:
           fetch-depth: 0
 
       - name: Guard the ABI -> minKernelVersion mapping
-        # (a) fail if KERNEL_INTERFACE_VERSION was bumped without an abi_kernel_map.json
-        #     entry; (b) --check the committed example config.json so its derived
-        #     minKernelVersion can't silently go stale. See min_kernel_version.py.
+        # (a) run the resolver self-tests; (b) fail if KERNEL_INTERFACE_VERSION was bumped
+        #     without an abi_kernel_map.json entry (also validates map format + monotonicity);
+        #     (c) --check the committed example config.json so its floor can't silently go
+        #     stale. See min_kernel_version.py.
         run: |
+          python3 Utilities/Scripts/app_packer/test_min_kernel_version.py
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/Output/config.json
 
