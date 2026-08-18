@@ -33,15 +33,15 @@ This file is intended solely for defining supported features and displaying them
 
 All information needed by the watch is also embedded in the `*.uapp` file.
 
-> **`minKernelVersion` is auto-derived — do not hand-set it.** The compatibility contract is the SDK **ABI** version (`KERNEL_INTERFACE_VERSION`), not a marketing version: an app built against a given SDK requires a kernel whose ABI is at least that value. Each ABI maps to the first kernel firmware release that shipped it, so the requirement is expressed as a minimum firmware version — which is what the mobile app already gates on (compared against the watch firmware from BLE DIS `0x2A26`). Let the packer's resolver produce it:
+> **`minKernelVersion` is an ABI-derived floor — let the tooling set it, don't type it below the floor.** The compatibility contract is the SDK **ABI** version (`KERNEL_INTERFACE_VERSION`), not a marketing version: an app built against a given SDK requires a kernel whose ABI is at least that value. Each ABI maps to the **minimum** kernel firmware version that provides it, so the requirement is a floor on the firmware version — which is what the mobile app already gates on (compared against the watch firmware from BLE DIS `0x2A26`). Run the SDK resolver `min_kernel_version.py` to set or verify it:
 >
 > ```bash
-> # print the value for the current SDK, or write it into a config.json
-> python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
-> python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp config.json
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --print          # the current floor
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp config.json   # raise it to the floor
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --check config.json   # verify it is >= the floor
 > ```
 >
-> The `minKernelVersion` values in the examples below are the current derived value (ABI 3 → `1.4.0`).
+> You **may** set a *higher* `minKernelVersion` if your app needs a specific firmware bugfix at the same ABI; you must **not** set it below the floor. `config.json` must be strict JSON — the `//` comments in the annotated example below are illustrative only, and the `minKernelVersion` values shown are illustrative.
 
 Simplest `config.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
 
@@ -82,7 +82,7 @@ Watch application config example:
   "binary": "running.uapp", // Relative path to the app binary file
   "previews": "assets/previews/", // Relative path to the previews images
   "appVersion": "1.0.3", // Current version of the app
-  "minKernelVersion": "1.4.0", // AUTO-DERIVED by min_kernel_version.py from the SDK ABI (KERNEL_INTERFACE_VERSION) via abi_kernel_map.json -- do not hand-set. Minimum kernel (firmware) version providing the required ABI; the mobile app compares it against the watch firmware version from BLE DIS Firmware Revision String (UUID 0x2A26).
+  "minKernelVersion": "1.4.0", // ABI-derived FLOOR (min_kernel_version.py --stamp/--check via abi_kernel_map.json). Minimum kernel firmware providing the required ABI; may be raised for a firmware-bugfix dependency, never lowered. The mobile app compares it against the watch firmware version (BLE DIS 0x2A26).
   "requiredHardware": [ // List of hardware features required for the app to function
     "GPS",
     "ACCELEROMETER",
