@@ -200,7 +200,17 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch &data)
     // fix-less sample reads as latitude 0, longitude 0 -- a point in the Gulf of
     // Guinea -- and the screen briefly shows a confident distance to it.
     if (!parser.isCoordinatesValid()) {
-        return;     // keep the last known position, and "--" until the first fix
+        // The fix is gone (or has not arrived yet). Say so rather than leaving a
+        // stale distance on screen looking live -- the position itself is kept,
+        // so a brief dropout does not lose the target.
+        if (mHasFix) {
+            mHasFix = false;
+            mArrivalAnnounced = false;
+            if (mGUIStarted) {
+                sendNavUpdate();
+            }
+        }
+        return;
     }
 
     mLatitude = parser.getLatitude();

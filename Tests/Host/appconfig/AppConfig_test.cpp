@@ -234,35 +234,55 @@ TEST_F(AppConfigTest, DecodesJsonEscapes)
     EXPECT_EQ(name(cfg), "A\"B\\C\tD");
 }
 
+// The escape tests below must seed the six ASCII characters \, u, 0, 4, 1, 4 --
+// NOT the pre-encoded UTF-8 bytes of the character. Writing "\\uXXXX" in a plain
+// literal and concatenating it with the raw JSON around it makes that explicit:
+// seeding the character itself would exercise plain byte passthrough and leave
+// readHex4/utf8Encode and the surrogate-pair branch untested.
 TEST_F(AppConfigTest, DecodesUnicodeEscapes)
 {
-    // A raw string literal keeps the backslash, so the file really holds the
-    // six characters Д rather than the pre-encoded UTF-8 bytes.
-    seed(R"({"schema":1,"values":{"waypointName":"De Д"}})");
+    seed(R"({"schema":1,"values":{"waypointName":"De )" "\\u0414"
+         R"("}})");
     AppConfig cfg = open();
 
+    // U+0414 decodes to the two UTF-8 bytes D0 94.
     EXPECT_EQ(name(cfg), std::string("De ") + "\xD0\x94");
 }
 
 TEST_F(AppConfigTest, DecodesSurrogatePairs)
 {
-    // 😀 is U+1F600 written as a surrogate pair, which is the only way
-    // JSON can express it: four UTF-8 bytes out.
-    seed(R"({"schema":1,"values":{"waypointName":"😀"}})");
+    // U+1F600 as a surrogate pair, the only way JSON can express it.
+    seed(R"({"schema":1,"values":{"waypointName":")" "\\uD83D\\uDE00"
+         R"("}})");
     AppConfig cfg = open();
 
     EXPECT_EQ(name(cfg), "\xF0\x9F\x98\x80");
 }
 
-TEST_F(AppConfigTest, EscapedValueIsTruncatedByDecodedLength)
+TEST_F(AppConfigTest, LoneSurrogateInvalidatesTheWholeFile)
 {
-    // Eight Д escapes are 48 bytes of JSON but 16 bytes decoded, which is
-    // exactly maxLength: the limit applies to the value, not to its encoding.
-    seed(R"({"schema":1,"values":{"waypointName":)"
-         R"("ДДДДДДДДД"}})");
+    // A high surrogate with no low surrogate is not valid JSON, and coreJSON
+    // rejects the document rather than the one value -- so this is the exception
+    // to "one bad key costs only its own field": every field falls back.
+    seed(R"({"schema":1,"values":{"waypointName":"A)" "\\uD83D"
+         R"(B","arrivalRadiusM":70}})");
     AppConfig cfg = open();
 
-    // The ninth would exceed 16 bytes, so it is dropped whole.
+    EXPECT_FALSE(cfg.isLoaded());
+    EXPECT_EQ(name(cfg), "Waypoint");
+    EXPECT_EQ(cfg.getInt("arrivalRadiusM"), 25);
+}
+
+TEST_F(AppConfigTest, EscapedValueIsTruncatedByDecodedLength)
+{
+    // Nine escapes are 54 bytes of JSON but 18 bytes decoded, so maxLength (16)
+    // truncates: the limit applies to the decoded value, not to its encoding.
+    seed(R"({"schema":1,"values":{"waypointName":")"
+         "\\u0414\\u0414\\u0414\\u0414\\u0414\\u0414\\u0414\\u0414\\u0414"
+         R"("}})");
+    AppConfig cfg = open();
+
+    // Eight two-byte characters fit exactly; the ninth is dropped whole.
     EXPECT_EQ(name(cfg).size(), 16u);
 }
 

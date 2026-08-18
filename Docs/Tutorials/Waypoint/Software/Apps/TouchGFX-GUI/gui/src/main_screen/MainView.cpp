@@ -5,8 +5,9 @@
 
 namespace {
 
-/// Roughly two seconds at the watch's frame rate.
-constexpr int kNoticeTicks = 60;
+/// Two seconds. The frame rate is 10 Hz, so deriving the tick count from
+/// milliseconds avoids guessing at it -- 60 ticks would have been six seconds.
+constexpr int kNoticeTicks = GUI_CONFIG_MS_2_TICKS(2000);
 
 /**
  * @brief   Distance as the shortest string that still reads correctly.

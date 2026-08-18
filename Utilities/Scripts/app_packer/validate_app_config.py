@@ -725,7 +725,10 @@ def parse_field_table(path, errors):
         source = strip_comments(path.read_text(encoding="utf-8", errors="replace"))
     except OSError as exc:
         errors.add(str(path), f"could not be read ({exc})")
-        return {}, None
+        # An empty set, not None: check_bounds unions this into json_names, and
+        # None would raise a TypeError, replacing the collected error report with
+        # a traceback.
+        return {}, set()
 
     entries = {}
     for match in FACTORY_RE.finditer(source):
