@@ -42,6 +42,14 @@ set(UNA_SDK_SOURCES_VARIANT
     "$ENV{UNA_SDK}/Libs/Source/Variant/VariantConfig.cpp"
 )
 
+# Developer-declared configuration fields (SDK::AppConfig). Needs
+# UNA_SDK_SOURCES_JSON and UNA_SDK_INCLUDE_DIRS_JSON in the same link; both are
+# already in the service lists, so a GUI process that reads the configuration
+# itself must add all three. See Docs/app-config-fields.md.
+set(UNA_SDK_SOURCES_APPCONFIG
+    "$ENV{UNA_SDK}/Libs/Source/AppConfig/AppConfig.cpp"
+)
+
 set(UNA_SDK_SOURCES_CALIBRATION
     "$ENV{UNA_SDK}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Calibration/StrideLut.cpp"
@@ -58,6 +66,7 @@ set(UNA_SDK_SOURCES_SERVICE
     "${UNA_SDK_SOURCES_TRACKMAP}"
     "${UNA_SDK_SOURCES_CALIBRATION}"
     "${UNA_SDK_SOURCES_VARIANT}"
+    "${UNA_SDK_SOURCES_APPCONFIG}"
 )
 
 set(UNA_SDK_SOURCES_GUI

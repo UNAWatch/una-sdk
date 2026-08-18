@@ -35,6 +35,7 @@ target_include_directories(sdk_host_test_support PUBLIC
 )
 
 add_executable(una-sdk-host-tests
+    appconfig/AppConfig_test.cpp
     apps/Running/Settings_test.cpp
     apps/Running/SettingsSerializer_test.cpp
     calibration/OutdoorStrideCalibrator_test.cpp
@@ -75,6 +76,7 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitRecordCadence.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Fit/RecordingMarker.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/SensorLayer/SensorConnection.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/AppConfig/AppConfig.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamWriter.cpp"
     "${COREJSON_DIR}/core_json.c"
