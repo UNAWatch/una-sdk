@@ -22,14 +22,14 @@
 namespace Sensor
 {
     ImuStepCounter::ImuStepCounter()
-    : mDriver(*this,
+    : mStepCounterSim(ComponentSimulator::GetInstance().getSteCounter())
+    , mDriver(*this,
               SDK::Sensor::Type::STEP_COUNTER,
               SDK::SensorDataParser::StepCounter::getFieldsNumber(),
               *this,
               Sensor::Driver::Mode::EVENT_BASED)
     , mTimer()
     , mDataMutex()
-    , mStepCounterSim(ComponentSimulator::GetInstance().getSteCounter())
 {
 }
 

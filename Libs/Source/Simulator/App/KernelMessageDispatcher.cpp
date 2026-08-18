@@ -29,8 +29,8 @@ KernelMessageDispatcher::KernelMessageDispatcher(SDK::App::DualAppComm& appComm,
                                                 SDK::Interface::IVibro& vibro,
                                                 SDK::Interface::IBacklight& backlight,
                                                 SDK::Interface::IBuzzer& buzzer)
-    : mAppComm(appComm)
-    , mMessageMgr(messageManager)
+    : mMessageMgr(messageManager)
+    , mAppComm(appComm)
     , mVibro(vibro)
 	, mBacklight(backlight)
 	, mBuzzer(buzzer)
