@@ -33,9 +33,9 @@ namespace Sensor
             *this,
             Sensor::Driver::Mode::EVENT_BASED)
         , mTimer(1000)
-        , mDataMutex()
         , mPrevLevel(0)
         , mBattLevel(ComponentSimulator::GetInstance().getBatteryLevel())
+        , mDataMutex()
 {
 }
 

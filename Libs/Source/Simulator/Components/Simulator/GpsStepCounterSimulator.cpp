@@ -19,22 +19,22 @@
 namespace Simulator {
 
     GpsStepCounterSimulator::GpsStepCounterSimulator()
-        : mGen(std::random_device{}()),
+        : mDataSample(DATA_SAMPLE_COUNT),
+        mRunning(false),
+        mPeriodSendGpsData(990),
+        mLoc{},
         mTimerGpsFix(),
         mTimer(),
+        mCurrentSpeed(mBaseSpeed),
+        mTrackPosition(0.0),
+        mTotalDistanceMeters(0.0f),
+        mDriftX(0), mDriftY(0), mBaseAlt(250.0f), mAltDrift(0),
+        mGen(std::random_device{}()),
         mGpsNoise(0.0f, 1.5f),
         mAltNoise(0.0f, 0.5f),
         mSpeedNoise(0.0f, 0.05f),
-        mPrecisionNoise(0.0f, 1.0f),
         mGpsLoss(0.0f, 1.0f),
-        mCurrentSpeed(mBaseSpeed),
-        mTotalDistanceMeters(0.0f),
-        mDriftX(0), mDriftY(0), mBaseAlt(250.0f), mAltDrift(0),
-        mDataSample(DATA_SAMPLE_COUNT),
-        mRunning(false),
-        mPeriodSendGpsData(990),
-        mTrackPosition(0.0),
-        mLoc{}
+        mPrecisionNoise(0.0f, 1.0f)
     {
         mStart = std::chrono::steady_clock::now();
         mLastTime = mStart;
