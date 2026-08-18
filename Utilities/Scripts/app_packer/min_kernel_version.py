@@ -75,9 +75,17 @@ def load_map(map_path=MAP_PATH):
     """Load + validate the ABI->version map: every value is X.Y.Z, and versions are
     non-decreasing in ascending ABI order (the property 'ABI >= N <=> firmware >= X.Y.Z'
     rests on). The map's *content* is trusted, not machine-verified against firmware."""
-    mapping = json.loads(Path(map_path).read_text(encoding="utf-8")).get("map")
+    name = Path(map_path).name
+    try:
+        data = json.loads(Path(map_path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        sys.exit(f"error: {name}: invalid JSON: {exc}")
+    mapping = data.get("map") if isinstance(data, dict) else None
     if not isinstance(mapping, dict):
-        sys.exit(f'error: {Path(map_path).name} must contain a "map" object')
+        sys.exit(f'error: {name} must contain a "map" object')
+    for key in mapping:
+        if not (isinstance(key, str) and key.isdigit()):
+            sys.exit(f"error: {name}: ABI keys must be non-negative integers, got {key!r}")
     prev = None
     for key in sorted(mapping, key=int):
         ver = _ver(mapping[key])
@@ -106,9 +114,12 @@ def resolve(sdk_root):
 
 def _read_config(path):
     try:
-        return json.loads(Path(path).read_text(encoding="utf-8"))
+        cfg = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         sys.exit(f"error: {path}: invalid JSON: {exc}")
+    if not isinstance(cfg, dict):
+        sys.exit(f"error: {path}: config must be a JSON object")
+    return cfg
 
 
 def main():

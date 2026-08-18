@@ -53,7 +53,7 @@
 
   ![Config](assets/config-json.png)
 
-- Set its `minKernelVersion` with the SDK resolver rather than by hand — it writes the ABI-derived floor (see [App Config JSON](app-config-json.md)):
+- Set its `minKernelVersion` with the SDK resolver rather than by hand — `--stamp` raises it to the ABI-derived floor, keeping any deliberately-higher value you set (see [App Config JSON](app-config-json.md)):
 
   ```bash
   python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp config.json
