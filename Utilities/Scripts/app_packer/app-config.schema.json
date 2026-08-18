@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://developers.unawatch.com/schemas/app-config.schema.json",
+  "title": "UNA Watch app configuration fields",
+  "description": "Schema for the 'configFile' and 'configFields' keys of an app's config.json. See Docs/app-config-fields.md. Other config.json keys are out of scope here and are not constrained. Two rules cannot be expressed in JSON Schema and are enforced by validate_app_config.py instead: field ids must be unique within an app, and 'max' must be >= 'min' / 'maxLength' >= 'minLength' / 'default' must itself satisfy the field's constraints.",
+  "type": "object",
+  "properties": {
+    "configFile": {
+      "description": "Name of the values file the companion app writes into the app's directory on the watch. A bare filename in the sandbox root: no path separators, and never 'config.json'.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,57}\\.json$",
+      "not": { "const": "config.json" }
+    },
+    "configFields": {
+      "description": "Ordered list of configuration fields the companion app asks the user to fill in. Array order is display order.",
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/stringField" },
+          { "$ref": "#/$defs/boolField" },
+          { "$ref": "#/$defs/intField" },
+          { "$ref": "#/$defs/floatField" }
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "description": "A non-empty configFields requires configFile.",
+      "if": {
+        "required": ["configFields"],
+        "properties": { "configFields": { "minItems": 1 } }
+      },
+      "then": { "required": ["configFile"] }
+    },
+    {
+      "description": "configFile is meaningless without fields to put in it.",
+      "if": {
+        "anyOf": [
+          { "not": { "required": ["configFields"] } },
+          {
+            "required": ["configFields"],
+            "properties": { "configFields": { "maxItems": 0 } }
+          }
+        ]
+      },
+      "then": { "not": { "required": ["configFile"] } }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "description": "Identifies the field in the values file and in app code. Stable for the life of the app: changing it discards the user's value.",
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9_]{0,31}$"
+    },
+    "label": {
+      "description": "Short human-readable name shown next to the input. Units belong in 'unit', not here.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "fieldDescription": {
+      "description": "Longer human-readable explanation shown with the input.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "required": {
+      "description": "true means the user must supply a value before the install can complete.",
+      "type": "boolean",
+      "default": false
+    },
+    "unit": {
+      "description": "Presentation-only suffix rendered after the input. Never part of the stored value.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8
+    },
+    "validationMessage": {
+      "description": "Shown when the entered value fails any of this field's constraints. State the rule, e.g. 'Up to 16 letters, digits and spaces.'",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "stringField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "description", "default", "maxLength"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "string" },
+        "label": { "$ref": "#/$defs/label" },
+        "description": { "$ref": "#/$defs/fieldDescription" },
+        "default": { "type": "string" },
+        "required": { "$ref": "#/$defs/required" },
+        "validationMessage": { "$ref": "#/$defs/validationMessage" },
+        "minLength": {
+          "description": "Minimum length in UTF-8 bytes. 1 or more makes an empty value invalid.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 128,
+          "default": 0
+        },
+        "maxLength": {
+          "description": "Maximum length in UTF-8 bytes, not characters. Mandatory: the app sizes its buffer from it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "pattern": {
+          "description": "Regular expression the value must match in full. Restricted dialect: no backreferences, no lookaround, no named groups, no inline flags, no Unicode property escapes. Do not write ^ or $ - matching is always anchored.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "boolField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "description", "default"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "bool" },
+        "label": { "$ref": "#/$defs/label" },
+        "description": { "$ref": "#/$defs/fieldDescription" },
+        "default": { "type": "boolean" },
+        "required": { "$ref": "#/$defs/required" },
+        "validationMessage": { "$ref": "#/$defs/validationMessage" }
+      }
+    },
+    "intField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "description", "default", "min", "max"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "int" },
+        "label": { "$ref": "#/$defs/label" },
+        "description": { "$ref": "#/$defs/fieldDescription" },
+        "default": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "required": { "$ref": "#/$defs/required" },
+        "unit": { "$ref": "#/$defs/unit" },
+        "validationMessage": { "$ref": "#/$defs/validationMessage" },
+        "min": {
+          "description": "Inclusive lower bound. Mandatory: the app clamps to it.",
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "max": {
+          "description": "Inclusive upper bound, >= min.",
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "floatField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "description", "default", "min", "max"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "float" },
+        "label": { "$ref": "#/$defs/label" },
+        "description": { "$ref": "#/$defs/fieldDescription" },
+        "default": { "type": "number" },
+        "required": { "$ref": "#/$defs/required" },
+        "unit": { "$ref": "#/$defs/unit" },
+        "validationMessage": { "$ref": "#/$defs/validationMessage" },
+        "min": {
+          "description": "Inclusive lower bound. Mandatory: the app clamps to it. Values are single-precision on the watch.",
+          "type": "number"
+        },
+        "max": {
+          "description": "Inclusive upper bound, >= min.",
+          "type": "number"
+        }
+      }
+    }
+  }
+}
