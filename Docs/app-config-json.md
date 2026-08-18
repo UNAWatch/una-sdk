@@ -8,6 +8,7 @@
 | 1.01    | 23.03.2025     | Removed mentions about signature file as it is not used |      | [Denys Sobchuk](https://github.com/AvatarSD) |
 | 1.02    | 29.06.2026     | Renamed `minSdkVersion` to `minKernelVersion`: the SDK is statically linked into the `.uapp`, so the runtime requirement is on the kernel firmware version (reported over BLE via the DIS Firmware Revision String, UUID 0x2A26), not the build-time SDK version | | Ross Ryles |
 | 1.03    | 17.08.2026     | `minKernelVersion` is now **auto-derived** from the SDK ABI (`KERNEL_INTERFACE_VERSION`) by `Utilities/Scripts/app_packer/min_kernel_version.py` via `abi_kernel_map.json` — do not hand-set it (see *Config File*) | | Ross Ryles |
+| 1.04    | 18.08.2026     | Added `configFile` and `configFields`: developer-declared configuration the companion app collects from the user and writes to the watch. Summarised under *Configuration Fields*; the full contract is [App Configuration Fields](app-config-fields.md) | | Ross Ryles |
 
 ## Output Package
 
@@ -30,6 +31,8 @@ The package includes the following files:
 The `config.json` configuration file provides general metadata about the application and defines the structure, capabilities, and custom metrics supported by the watch app.
 
 This file is intended solely for defining supported features and displaying them in the mobile application. It should not contain runtime information or settings for the watch and should not be uploaded to the watch during application installation.
+
+That still holds for `configFields` (see *Configuration Fields* below): the declaration stays on the phone. What reaches the watch is a separate values file the companion app generates from the user's answers.
 
 All information needed by the watch is also embedded in the `*.uapp` file.
 
@@ -172,6 +175,49 @@ Watch application config example:
   "stravaExport": true // Whether the activity can be exported to Strava
 }
 ```
+
+## Configuration Fields
+
+An app can ask the companion app to collect configuration from the user — a name, a
+coordinate, a threshold — and deliver it to the watch. Two optional keys declare it:
+
+| Key | Meaning |
+|-----|---------|
+| `configFields` | Ordered array of field definitions. Array order is display order. At most 32. |
+| `configFile` | Bare filename (ending `.json`, no path separators) the companion app writes into the app's directory on the watch. Required when `configFields` is non-empty. |
+
+```json
+"configFile": "app_config.json",
+"configFields": [
+  {
+    "id": "arrivalRadiusM",        // key in the values file and in app code
+    "type": "int",                 // string | bool | int | float
+    "label": "Arrival radius",     // shown next to the input
+    "description": "How close you need to get before the watch counts you as arrived.",
+    "default": 25,                 // pre-filled, and the app's fallback
+    "min": 5,                      // mandatory for int and float
+    "max": 500,
+    "unit": "m",                   // presentation only
+    "required": false,             // must the user supply a value to install?
+    "validationMessage": "Between 5 and 500 metres."
+  }
+]
+```
+
+The companion app writes the user's answers to `2:/Apps/<AppDir>/<configFile>`:
+
+```json
+{ "schema": 1, "values": { "arrivalRadiusM": 60 } }
+```
+
+and the app reads them with `SDK::AppConfig`. Values are read once at launch, so a change
+made on the phone applies the next time the user opens the app.
+
+**[App Configuration Fields](app-config-fields.md) is the full contract** — every attribute
+and its limits, the validation rules and regex dialect, the values-file format, the app-side
+API, write-back from the watch, the install/edit/update/uninstall flows, and the normative
+companion-app specification. `Utilities/Scripts/app_packer/app-config.schema.json` is the
+machine-readable schema, and `validate_app_config.py` enforces it.
 
 ## Activity Data Format
 
