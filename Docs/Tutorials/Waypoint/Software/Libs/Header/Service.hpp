@@ -18,6 +18,8 @@
 #include "SDK/SensorLayer/SensorConnection.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
 
+#include <memory>
+
 class Service
 {
 public:
@@ -43,8 +45,15 @@ private:
     SDK::Kernel             &mKernel;
     SDK::Sensor::Connection  mSensorGPS;
 
-    /// Read once at startup, and again after this app writes to it.
-    SDK::AppConfig           mConfig;
+    /**
+     * @brief   Read once when the service starts, and again after a write-back.
+     *
+     * Created in run(), not in the constructor. SDK::AppConfig logs when a file
+     * is unusable, and in the simulator the service is constructed before
+     * TouchGFX's HAL exists -- which is what the logger writes through, so
+     * logging that early crashes the simulator.
+     */
+    std::unique_ptr<SDK::AppConfig> mConfig;
 
     // -- Configured values -------------------------------------------------
     char    mWaypointName[WaypointConfig::kNameBytes];

@@ -187,29 +187,35 @@ size of the values file.
 
 ## Reading the values
 
-One object, constructed once, at startup:
+One object, created once, at the top of `run()`:
 
 ```cpp
-Service::Service(SDK::Kernel &kernel)
-    : ...
-    , mConfig(mKernel, WaypointConfig::kFileName,
-              WaypointConfig::kFields, WaypointConfig::kFieldCount)
+void Service::run()
 {
+    mConfig.reset(new SDK::AppConfig(mKernel, WaypointConfig::kFileName,
+                                     WaypointConfig::kFields,
+                                     WaypointConfig::kFieldCount));
     loadConfiguration();
+    ...
 }
 
 void Service::loadConfiguration()
 {
-    mConfig.getString("waypointName", mWaypointName, sizeof(mWaypointName));
-    mTargetLatitude = mConfig.getFloat("targetLatitude");
-    mTargetLongitude = mConfig.getFloat("targetLongitude");
-    mArrivalRadiusM = mConfig.getInt("arrivalRadiusM");
-    mVibrateOnArrival = mConfig.getBool("vibrateOnArrival");
+    mConfig->getString("waypointName", mWaypointName, sizeof(mWaypointName));
+    mTargetLatitude = mConfig->getFloat("targetLatitude");
+    mTargetLongitude = mConfig->getFloat("targetLongitude");
+    mArrivalRadiusM = mConfig->getInt("arrivalRadiusM");
+    mVibrateOnArrival = mConfig->getBool("vibrateOnArrival");
 
-    mTargetIsConfigured = mConfig.has("targetLatitude") &&
-            mConfig.has("targetLongitude");
+    mTargetIsConfigured = mConfig->has("targetLatitude") &&
+            mConfig->has("targetLongitude");
 }
 ```
+
+**Not in the constructor**, deliberately. `SDK::AppConfig` logs when a file is unusable, and in
+the simulator the service is constructed before TouchGFX's HAL exists — which is what the
+logger writes through, so logging that early segfaults the simulator before your app draws
+anything. Do the reading on the service thread, in `run()`.
 
 Note what the getters do *not* need: no error handling, no "if the file exists" branch, no
 range checks. Every getter returns either the stored value, clamped to the bounds you
@@ -358,6 +364,18 @@ its GUI closes, so a service that does not end itself keeps running - holding it
 subscriptions open and still firing alerts. Waypoint returns from `run()` on
 `COMMAND_APP_NOTIF_GUI_STOP`; see the [Stopwatch](../../Examples/Stopwatch-Architecture.md)
 notes for the case where staying alive is the right choice.
+
+**The simulator segfaults before drawing anything.** Something logged before TouchGFX's HAL
+existed. The service is constructed early, so anything in a constructor that reaches
+`LOG_*` — directly or through an SDK class — crashes there while working fine on the watch.
+Move it into `run()`.
+
+**The simulator fails to link with `undefined reference` to SDK symbols.** Unlike the CMake
+target, the simulator lists its sources by hand in `simulator/gcc/Makefile` (and
+`simulator/msvs/Application.vcxproj`). Add what you use — this app needed `AppConfig.cpp`,
+`SensorConnection.cpp`, coreJSON and the sensor-layer simulator. An app that uses the sensor
+layer also needs its own `simulator/ConfigurationSimulator.hpp` saying which sensors to
+simulate.
 
 **CI fails with "field table ... but config.json".** The two declarations disagree. The error
 names the field and both values; fix whichever is wrong.

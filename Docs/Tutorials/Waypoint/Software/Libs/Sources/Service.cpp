@@ -64,10 +64,6 @@ float bearingDegrees(float latA, float lonA, float latB, float lonB)
 Service::Service(SDK::Kernel &kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
     , mSensorGPS(SDK::Sensor::Type::GPS_LOCATION, 0, 0)
-    // The configuration file the companion app writes. Read once here; a change
-    // made on the phone is picked up the next time the app starts.
-    , mConfig(mKernel, WaypointConfig::kFileName,
-              WaypointConfig::kFields, WaypointConfig::kFieldCount)
     , mWaypointName {}
     , mTargetLatitude(0.0f)
     , mTargetLongitude(0.0f)
@@ -83,21 +79,24 @@ Service::Service(SDK::Kernel &kernel)
     , mArrivalAnnounced(false)
 {
     (void)kernel;
-    loadConfiguration();
 }
 
 void Service::loadConfiguration()
 {
-    mConfig.getString("waypointName", mWaypointName, sizeof(mWaypointName));
-    mTargetLatitude = mConfig.getFloat("targetLatitude");
-    mTargetLongitude = mConfig.getFloat("targetLongitude");
-    mArrivalRadiusM = mConfig.getInt("arrivalRadiusM");
-    mVibrateOnArrival = mConfig.getBool("vibrateOnArrival");
+    if (!mConfig) {
+        return;
+    }
+
+    mConfig->getString("waypointName", mWaypointName, sizeof(mWaypointName));
+    mTargetLatitude = mConfig->getFloat("targetLatitude");
+    mTargetLongitude = mConfig->getFloat("targetLongitude");
+    mArrivalRadiusM = mConfig->getInt("arrivalRadiusM");
+    mVibrateOnArrival = mConfig->getBool("vibrateOnArrival");
 
     // has() separates "the user chose this" from "this is our default", so the
     // screen can say so instead of navigating confidently to a made-up place.
-    mTargetIsConfigured = mConfig.has("targetLatitude") &&
-            mConfig.has("targetLongitude");
+    mTargetIsConfigured = mConfig->has("targetLatitude") &&
+            mConfig->has("targetLongitude");
 
     LOG_INFO("target '%s' %s, radius %ldm, vibrate %s\n",
              mWaypointName,
@@ -109,6 +108,14 @@ void Service::loadConfiguration()
 void Service::run()
 {
     LOG_INFO("thread started\n");
+
+    // Read the configuration here rather than in the constructor. The file the
+    // companion app wrote is read once, so a change made on the phone applies
+    // the next time this app starts.
+    mConfig.reset(new SDK::AppConfig(mKernel, WaypointConfig::kFileName,
+                                     WaypointConfig::kFields,
+                                     WaypointConfig::kFieldCount));
+    loadConfiguration();
 
     mSensorGPS.connect();
 
@@ -235,6 +242,10 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch &data)
 
 void Service::saveTargetHere()
 {
+    if (!mConfig) {
+        return;
+    }
+
     if (!mHasFix) {
         LOG_WARNING("no fix yet; target unchanged\n");
         SDK::send_msg<CustomMessage::TargetSaved>(mKernel, false, mTargetLatitude,
@@ -245,10 +256,10 @@ void Service::saveTargetHere()
     // Write the new target back into the same file the companion app owns. The
     // setters clamp to the declared bounds, and save() swaps the file in
     // atomically, so an interrupted write cannot lose the previous target.
-    mConfig.setFloat("targetLatitude", mLatitude);
-    mConfig.setFloat("targetLongitude", mLongitude);
+    mConfig->setFloat("targetLatitude", mLatitude);
+    mConfig->setFloat("targetLongitude", mLongitude);
 
-    const bool saved = mConfig.save();
+    const bool saved = mConfig->save();
     if (!saved) {
         LOG_WARNING("could not save the new target\n");
     }
