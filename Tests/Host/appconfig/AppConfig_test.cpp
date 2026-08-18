@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <limits>
 #include <string>
 
 #include "KernelTestDoubles.hpp"
@@ -556,7 +557,8 @@ TEST_F(AppConfigTest, SettersClampAndValidate)
     EXPECT_TRUE(cfg.setFloat("targetLatitude", -1000.0f));
     EXPECT_FLOAT_EQ(cfg.getFloat("targetLatitude"), -90.0f);
 
-    EXPECT_FALSE(cfg.setFloat("targetLatitude", std::nanf("")));
+    EXPECT_FALSE(cfg.setFloat("targetLatitude",
+                              std::numeric_limits<float>::quiet_NaN()));
     EXPECT_FALSE(cfg.setInt("waypointName", 1));       // wrong type
     EXPECT_FALSE(cfg.setInt("noSuchField", 1));        // unknown id
     EXPECT_FALSE(cfg.setString("waypointName", nullptr));

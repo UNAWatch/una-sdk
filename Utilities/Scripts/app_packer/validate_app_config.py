@@ -66,6 +66,9 @@ TYPES = ("string", "bool", "int", "float")
 # means different things across the three regex engines or is outright forbidden,
 # so the scanner whitelists rather than blacklists.
 ALLOWED_LETTER_ESCAPES = frozenset("dDwWsSbBnrt")
+# Precomputed for the error message: an f-string expression may not contain a
+# backslash before Python 3.12, and the CI job runs 3.11.
+ALLOWED_ESCAPES_TEXT = ", ".join("\\" + c for c in sorted(ALLOWED_LETTER_ESCAPES))
 
 COMMON_KEYS = {"id", "type", "label", "description", "default", "required",
                "validationMessage"}
@@ -152,7 +155,7 @@ def check_pattern_dialect(pattern, where, errors):
                 # letter escape outside the documented set is refused for the
                 # same reason.
                 flag(f"'\\{nxt}' is not one of the allowed escapes "
-                     f"({', '.join('\\' + c for c in sorted(ALLOWED_LETTER_ESCAPES))})")
+                     f"({ALLOWED_ESCAPES_TEXT})")
             i += 2
             continue
 
