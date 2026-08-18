@@ -37,6 +37,21 @@ jobs:
           python3 Utilities/Scripts/app_packer/test_min_kernel_version.py
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/Output/config.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Waypoint/Output/config.json
+
+      - name: Validate app configuration declarations
+        # Enforce the configFields contract (Docs/app-config-fields.md): the
+        # declaration itself, and the app's constexpr SDK::AppConfig::Field
+        # table, which repeats the bounds the app clamps to and would otherwise
+        # drift away from config.json unnoticed. The Files tutorial declares no
+        # configuration, so it also covers the "nothing to check" path.
+        run: |
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Waypoint/Output/config.json \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Sources/AppConfigFields.cpp \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Header/AppConfigFields.hpp
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Files/Output/config.json
 
       - name: Generate app list
         id: generate

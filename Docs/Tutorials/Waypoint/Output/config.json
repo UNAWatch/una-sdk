@@ -1,0 +1,71 @@
+{
+  "type": [
+    "utility"
+  ],
+  "name": "Waypoint",
+  "icon": "Resources/icon_60x60.png",
+  "binary": "Waypoint_1.0.0.uapp",
+  "appVersion": "1.0.0",
+  "minKernelVersion": "1.4.0",
+  "requiredHardware": [
+    "GPS"
+  ],
+  "description": "Navigate back to a point you saved earlier. Set the target from your phone, or stand somewhere and save it on the watch.",
+  "id": "F1E2D3C448669788",
+  "configFile": "app_config.json",
+  "configFields": [
+    {
+      "id": "waypointName",
+      "type": "string",
+      "label": "Waypoint name",
+      "description": "Shown on the watch while you navigate. Letters, digits and spaces only.",
+      "default": "Waypoint",
+      "minLength": 1,
+      "maxLength": 16,
+      "pattern": "[A-Za-z0-9 ]+",
+      "validationMessage": "Up to 16 letters, digits and spaces."
+    },
+    {
+      "id": "targetLatitude",
+      "type": "float",
+      "label": "Target latitude",
+      "description": "Latitude of the waypoint in decimal degrees. North is positive.",
+      "default": 51.5072,
+      "min": -90.0,
+      "max": 90.0,
+      "unit": "deg",
+      "required": true,
+      "validationMessage": "Between -90 and 90 degrees."
+    },
+    {
+      "id": "targetLongitude",
+      "type": "float",
+      "label": "Target longitude",
+      "description": "Longitude of the waypoint in decimal degrees. East is positive.",
+      "default": -0.1276,
+      "min": -180.0,
+      "max": 180.0,
+      "unit": "deg",
+      "required": true,
+      "validationMessage": "Between -180 and 180 degrees."
+    },
+    {
+      "id": "arrivalRadiusM",
+      "type": "int",
+      "label": "Arrival radius",
+      "description": "How close you need to get before the watch counts you as arrived.",
+      "default": 25,
+      "min": 5,
+      "max": 500,
+      "unit": "m",
+      "validationMessage": "Between 5 and 500 metres."
+    },
+    {
+      "id": "vibrateOnArrival",
+      "type": "bool",
+      "label": "Vibrate on arrival",
+      "description": "Buzz the watch once when you come within the arrival radius of the target.",
+      "default": true
+    }
+  ]
+}
