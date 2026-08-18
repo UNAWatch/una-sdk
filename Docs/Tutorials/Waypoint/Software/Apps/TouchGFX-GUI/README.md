@@ -6,7 +6,7 @@ These folders are grouped together in the current directory.
 
 Files from the App and target folders, which are the porting level between TouchGFX and the user app, are moved to **Software/Libs/Header/Gui** and **Software/Libs/Source/Gui**
 
-## Copy a GUI project from othe project
+## Copy a GUI project from another project
 
 ## Adding a GUI project to a CubeIDE project:
 

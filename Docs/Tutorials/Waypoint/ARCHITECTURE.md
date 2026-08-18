@@ -262,10 +262,10 @@ void Service::saveTargetHere()
         return;
     }
 
-    mConfig.setFloat("targetLatitude", mLatitude);
-    mConfig.setFloat("targetLongitude", mLongitude);
+    mConfig->setFloat("targetLatitude", mLatitude);
+    mConfig->setFloat("targetLongitude", mLongitude);
 
-    const bool saved = mConfig.save();
+    const bool saved = mConfig->save();
 
     loadConfiguration();    // re-read, so what is in play is what is on disk
     ...
