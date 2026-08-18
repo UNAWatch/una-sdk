@@ -1,9 +1,9 @@
 (tutorials/waypoint/architecture)=
 # Waypoint - Configuration from the Companion App
 
-Some settings are miserable to enter on a 240x240 touchscreen. A latitude, a name, a
-threshold: the user has a phone in their pocket with a keyboard on it, and the companion app
-can ask them once. Waypoint is a small utility app built around that idea. It navigates back
+Some settings are miserable to enter with four buttons. A latitude, a name, a threshold: the
+user has a phone in their pocket with a keyboard on it, and the companion app can ask them
+once. Waypoint is a small utility app built around that idea. It navigates back
 to a coordinate the user sets from their phone, and it can overwrite that coordinate with
 wherever the user is standing.
 

@@ -13,7 +13,7 @@ app asks the user to fill them in when the app is installed, writes the answers 
 file next to the `.uapp` on the watch, and lets the user edit them again at any time. The
 watch app reads that file when it starts, through `SDK::AppConfig`.
 
-This gives an app the settings that are painful to enter on a 240x240 touchscreen — names,
+This gives an app the settings that are painful to enter with four buttons — names,
 coordinates, calibration constants, thresholds — without the app having to build an
 on-watch editor for them.
 
