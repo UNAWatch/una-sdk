@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="App Config JSON" href="app-config-json.html" />
+    <link rel="next" title="App Manifest JSON" href="app-config-json.html" />
     <link rel="prev" title="UNA Watch — BLE Services Overview" href="BLE-Services-Overview.html" /> 
 </head>
 
@@ -59,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -105,7 +106,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Config JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
 <ul>
@@ -194,15 +196,15 @@
 <li><p>Compile the app with the generated <strong>APP_ID</strong> (see <a class="reference internal" href="sdk-setup.html#building-apps-manually"><span class="std std-ref">sdk-setup</span></a> for detailed instructions). Note: Run <code class="docutils literal notranslate"><span class="pre">cmake</span></code> to apply the new APP_ID. Verify in the build output that the ID matches in the <code class="docutils literal notranslate"><span class="pre">app_merging.py</span></code> log: <code class="docutils literal notranslate"><span class="pre">INFO:root:ID</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">:</span> <span class="pre">03AD5A741E38A35F</span></code></p>
 <p><img alt="Build output" src="_images/compiled-app.png" /></p>
 </li>
-<li><p>Create <code class="docutils literal notranslate"><span class="pre">config.json</span></code> file. Detailed instructions are <a class="reference internal" href="app-config-json.html"><span class="std std-doc">here</span></a></p>
+<li><p>Create the <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> file — see <a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Manifest JSON</span></a> for every key it may carry</p>
 <p><img alt="Config" src="_images/config-json.png" /></p>
 </li>
-<li><p>Set its <code class="docutils literal notranslate"><span class="pre">minKernelVersion</span></code> with the SDK resolver rather than by hand — <code class="docutils literal notranslate"><span class="pre">--stamp</span></code> raises it to the ABI-derived floor, keeping any deliberately-higher value you set (see <a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Config JSON</span></a>):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>Utilities/Scripts/app_packer/min_kernel_version.py<span class="w"> </span>--stamp<span class="w"> </span>config.json
+<li><p>Set its <code class="docutils literal notranslate"><span class="pre">minKernelVersion</span></code> with the SDK resolver rather than by hand — <code class="docutils literal notranslate"><span class="pre">--stamp</span></code> raises it to the ABI-derived floor, keeping any deliberately-higher value you set (see <a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Manifest JSON</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>Utilities/Scripts/app_packer/min_kernel_version.py<span class="w"> </span>--stamp<span class="w"> </span>app-manifest.json
 </pre></div>
 </div>
 </li>
-<li><p>Pack the resulting <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code>, <code class="docutils literal notranslate"><span class="pre">icon.png</span></code>, and <code class="docutils literal notranslate"><span class="pre">config.json</span></code> into a <code class="docutils literal notranslate"><span class="pre">*.zip</span></code> archive.</p>
+<li><p>Pack the resulting <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code>, <code class="docutils literal notranslate"><span class="pre">icon.png</span></code>, and <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> into a <code class="docutils literal notranslate"><span class="pre">*.zip</span></code> archive.</p>
 <p><img alt="Archive" src="_images/archive.png" /></p>
 </li>
 <li><p>At the app page, click the <strong>Version</strong> tab.</p>
@@ -236,7 +238,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="BLE-Services-Overview.html" class="btn btn-neutral float-left" title="UNA Watch — BLE Services Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="app-config-json.html" class="btn btn-neutral float-right" title="App Config JSON" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="app-config-json.html" class="btn btn-neutral float-right" title="App Manifest JSON" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

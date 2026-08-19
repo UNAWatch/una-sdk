@@ -40,6 +40,7 @@ Next steps:
    Tutorials/Sensors/ARCHITECTURE
    Tutorials/Files/ARCHITECTURE
    Tutorials/FitFiles/ARCHITECTURE
+   Tutorials/Waypoint/ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4
@@ -85,6 +86,7 @@ Next steps:
 
    deploy
    app-config-json
+   app-config-fields
 
 .. toctree::
    :maxdepth: 4

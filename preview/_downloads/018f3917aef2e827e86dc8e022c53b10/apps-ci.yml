@@ -31,12 +31,32 @@ jobs:
       - name: Guard the ABI -> minKernelVersion mapping
         # (a) run the resolver self-tests; (b) fail if KERNEL_INTERFACE_VERSION was bumped
         #     without an abi_kernel_map.json entry (also validates map format + monotonicity);
-        #     (c) --check the committed example config.json so its floor can't silently go
+        #     (c) --check the committed example app-manifest.json so its floor can't silently go
         #     stale. See min_kernel_version.py.
         run: |
           python3 Utilities/Scripts/app_packer/test_min_kernel_version.py
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
-          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/Output/config.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Waypoint/Output/app-manifest.json
+
+      - name: Validate app configuration declarations
+        # (a) run the validator's own self-tests -- the pattern dialect is the
+        #     part whose failures are silent, since a construct that slips
+        #     through ships a manifest that behaves differently on iOS and
+        #     Android; (b) enforce the configFields contract
+        #     (Docs/app-config-fields.md): the declaration itself, and the app's
+        #     constexpr SDK::AppConfig::Field table, which repeats the bounds the
+        #     app clamps to and would otherwise drift away from
+        #     app-manifest.json unnoticed. The Files tutorial declares no
+        #     configuration, so it also covers the "nothing to check" path.
+        run: |
+          python3 Utilities/Scripts/app_packer/test_validate_app_config.py
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Waypoint/Output/app-manifest.json \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Sources/AppConfigFields.cpp \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Header/AppConfigFields.hpp
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Files/Output/app-manifest.json
 
       - name: Generate app list
         id: generate
