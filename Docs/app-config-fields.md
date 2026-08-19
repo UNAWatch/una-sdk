@@ -507,6 +507,13 @@ This applies to unrecognised keys **inside `values`**. `SDK::AppConfig` rewrites
 itself, so anything a companion app adds alongside `schema` and `values` is dropped the first
 time the watch saves. Keep companion metadata out of this file.
 
+A repeated key is the one thing preservation does *not* carry through verbatim. JSON allows
+`{"a":1,"a":2}` and leaves the winner undefined, and the two sides here would not pick the
+same one: `SDK::AppConfig` reads the first occurrence, a phone-side `JSON.parse` keeps the
+last. So a save writes only the first copy of a repeated key — declared or not — and the file
+afterwards says what the watch acted on. Do not write duplicates in the first place; §9.6
+already forbids it.
+
 ## 5. Reading configuration in the app
 
 ### 5.1 Declare the field table once
@@ -653,7 +660,8 @@ The document it writes contains:
   value — **not** every declared id, so the distinction between "the user chose this" and
   "this is the default" is preserved. A key that was present but unusable (wrong type, `null`,
   a malformed number) is dropped, which quietly cleans up a corrupt entry;
-- every unrecognised key from the previous file, copied through unchanged (section 4.5).
+- every unrecognised key from the previous file, copied through unchanged, except that a
+  repeated key keeps only its first copy (section 4.5).
 
 ### 6.3 Recovering an interrupted write
 
@@ -820,6 +828,10 @@ the cases that must be covered:
 - **Never write an invalid value.** Validation failures block the save.
 - **Never write a key the app does not declare**, and never drop a key that the watch's copy
   had but this version does not declare *except* through the update merge in section 7.3.
+- **Never write a key twice.** JSON permits it and leaves the winner undefined; the
+  watch reads the first copy and a `JSON.parse` on your side keeps the last, so a
+  duplicate is a silent disagreement. A save on the watch collapses one it finds
+  (§4.5), but do not rely on that.
 - **Never trim** whitespace from a string value.
 - **Count string length in UTF-8 bytes**, not characters.
 - **Serialise numbers plainly**: no exponent, no thousands separators, `.` as the decimal

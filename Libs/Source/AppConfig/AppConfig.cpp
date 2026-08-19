@@ -1243,6 +1243,25 @@ bool AppConfig::writeDocument(Interface::IFile &file) const
                     return;     // declared: already emitted above
                 }
             }
+            // Keep only the first of a repeated key. JSON leaves the winner
+            // undefined, and the two sides do not agree on it: this reader takes
+            // the first occurrence, while a phone-side JSON.parse takes the last.
+            // Writing both back would let the watch and the companion app hold
+            // different ideas of a value the companion app owns. Compared as raw
+            // key text, so two spellings of the same key (one escaped) are not
+            // recognised as a pair -- nothing this SDK writes produces those.
+            bool repeated = false;
+            forEachMember(mValues.data, mValues.length,
+                    [&](const char *earlier, size_t earlierLen, const char *,
+                            size_t) {
+                if (earlier < key && earlierLen == keyLen &&
+                        std::memcmp(earlier, key, keyLen) == 0) {
+                    repeated = true;
+                }
+            });
+            if (repeated) {
+                return;
+            }
             if (!separator() || !out.put("\"", 1) || !out.put(key, keyLen) ||
                     !out.put("\":", 2) || !out.put(value, valueLen)) {
                 failed = true;
