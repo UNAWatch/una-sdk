@@ -1,6 +1,7 @@
 {
-  "latest": "sdk-v1.2.0",
+  "latest": "sdk-v1.3.0",
   "versions": [
+    "sdk-v1.3.0",
     "sdk-v1.2.0",
     "preview"
   ]
