@@ -5,10 +5,11 @@
 | Revision | Date of Changes | Matter of Change | Note | Editor |
 |----------|-----------------|------------------|------|--------|
 | 1.00     | 18.08.2026      | Creating: developer-declared configuration fields, the on-watch values file, the app-side reader, and the companion-app specification | | Ross Ryles |
+| 1.01     | 19.08.2026      | The declaration moved with its file: package metadata is now `app-manifest.json` rather than `config.json`, and carries a required `manifest_version` of `1`. Also: `minLength` is enforced by the reader, and one `SDK::AppConfig` per app on one thread | | Ross Ryles |
 
 ## 1. Overview
 
-An app can declare a list of **configuration fields** in its `config.json`. The companion
+An app can declare a list of **configuration fields** in its `app-manifest.json`. The companion
 app asks the user to fill them in when the app is installed, writes the answers to a JSON
 file next to the `.uapp` on the watch, and lets the user edit them again at any time. The
 watch app reads that file when it starts, through `SDK::AppConfig`.
@@ -49,7 +50,7 @@ starts** (section 7.2). It is not a live data feed.
 ### 1.2 Data flow
 
 ```
-   config.json                             Companion app (phone)
+   app-manifest.json                             Companion app (phone)
    +---------------------+                 +----------------------------+
    | "configFile"        |  1. read the    |                            |
    | "configFields": [   |---- package --->| 2. prompt the user         |
@@ -75,13 +76,27 @@ starts** (section 7.2). It is not a live data feed.
                                                          +--> same file
 ```
 
-`config.json` itself is **never** uploaded to the watch — that rule is unchanged (see
-[App Config JSON](app-config-json.md)). The values file is a separate artifact the companion
+`app-manifest.json` itself is **never** uploaded to the watch — that rule is unchanged (see
+[App Manifest JSON](app-config-json.md)). The values file is a separate artifact the companion
 app generates.
 
-## 2. Declaring fields in `config.json`
+## 2. Declaring fields in `app-manifest.json`
 
-Two new keys. Both are optional; an app that wants no configuration declares neither.
+Two keys carry the declaration, and both are optional — an app that wants no configuration
+declares neither. They live in the app's **`app-manifest.json`**, the package metadata file
+the companion app reads (formerly `config.json`; see
+[App Manifest JSON](app-config-json.md)).
+
+Every manifest also declares the format version of the manifest itself:
+
+```json
+"manifest_version": 1
+```
+
+It is **required**, and must be `1`. A reader that finds any other value must refuse the
+manifest rather than guess at a format it was not built for — the same rule the values file's
+`schema` key follows (section 4.2). It versions the manifest format, not the app: `appVersion`
+is the app's own version and is unrelated.
 
 ### 2.1 `configFile`
 
@@ -97,7 +112,7 @@ The name of the values file the companion app creates in the app's directory on 
 | Forbidden when | `configFields` is absent or empty |
 | Pattern | `^[A-Za-z0-9][A-Za-z0-9_.-]{0,57}\.json$` |
 | No path separators | `/` and `\` are rejected, and so is `..` — the file always lands in the app's sandbox root |
-| Must not be | `config.json` (reserved: that is the package metadata file, which never reaches the watch). Compared case-insensitively, because the watch's volume is |
+| Must not be | `app-manifest.json` (reserved: that is the package metadata file, which never reaches the watch). Compared case-insensitively, because the watch's FAT volume is |
 | Length | <= 63 characters, which the pattern above already enforces. `SDK::AppConfig` refuses a longer name and falls back to defaults |
 
 Restricting this to a bare filename is deliberate. The app's sandbox root is the one
@@ -427,7 +442,7 @@ defaults, rather than guess at a format it was not built for. This matches how
 `SDK::Variant::Config` treats an unknown config schema.
 
 The file is **strict JSON**: UTF-8, no BOM, no comments, no trailing commas. (The examples in
-[App Config JSON](app-config-json.md) carry `//` comments for the reader's benefit; real
+[App Manifest JSON](app-config-json.md) carry `//` comments for the reader's benefit; real
 files must not.)
 
 ### 4.3 Value encoding
@@ -496,7 +511,7 @@ time the watch saves. Keep companion metadata out of this file.
 
 ### 5.1 Declare the field table once
 
-`config.json` never reaches the watch, so the app carries its own copy of the field
+`app-manifest.json` never reaches the watch, so the app carries its own copy of the field
 contract — one `constexpr` table, in one place:
 
 ```cpp
@@ -517,9 +532,9 @@ constexpr AppConfig::Field kFields[] = {
 } // namespace
 ```
 
-Each entry repeats what `config.json` declares: the id, the default, and the bounds. That
+Each entry repeats what `app-manifest.json` declares: the id, the default, and the bounds. That
 duplication is intentional and is **checked by CI** — `validate_app_config.py --check-bounds`
-compares this table against `config.json` and fails the build if they disagree
+compares this table against `app-manifest.json` and fails the build if they disagree
 (section 10). Keeping the bounds in the binary is what lets the app clamp a value it should
 never have received.
 
@@ -532,24 +547,35 @@ source as text, so an entry inside an `#if` counts as present whether or not it 
 ### 5.2 Read the values
 
 ```cpp
-Waypoint::Waypoint(const SDK::Kernel &kernel)
+void Service::run()
 {
-    SDK::AppConfig cfg(kernel, "app_config.json", kFields);
+    // Not in the constructor -- see the warning below.
+    mConfig.reset(new SDK::AppConfig(mKernel, "app_config.json", kFields));
 
-    cfg.getString("waypointName", mName, sizeof(mName));
-    mTargetLat = cfg.getFloat("targetLatitude");
-    mTargetLon = cfg.getFloat("targetLongitude");
-    mRadiusM   = cfg.getInt("arrivalRadiusM");
-    mVibrate   = cfg.getBool("vibrateOnArrival");
+    mConfig->getString("waypointName", mName, sizeof(mName));
+    mTargetLat = mConfig->getFloat("targetLatitude");
+    mTargetLon = mConfig->getFloat("targetLongitude");
+    mRadiusM   = mConfig->getInt("arrivalRadiusM");
+    mVibrate   = mConfig->getBool("vibrateOnArrival");
+
+    ...
 }
 ```
+
+**Read the configuration on the service thread, not in a constructor.**
+`SDK::AppConfig` logs when a file is unusable, and in the host simulator an app's
+service is constructed *before* TouchGFX's HAL exists — which is what the SDK logger
+writes through. An `AppConfig` built in a constructor therefore segfaults the simulator
+before the app draws anything, the moment it meets a file it cannot use. It works on the
+watch, which makes it a trap you only find when someone runs the simulator. That is why
+the tutorial holds a `std::unique_ptr<SDK::AppConfig>` and creates it in `run()`.
 
 | Method | Returns |
 |--------|---------|
 | `bool getBool(const char *id) const` | The stored value, or the field's default. |
 | `int32_t getInt(const char *id) const` | The stored value **clamped** to `[min, max]`, or the default. |
 | `float getFloat(const char *id) const` | The stored value **clamped** to `[min, max]`, or the default. Non-finite values (NaN, infinity) are rejected as malformed and yield the default. |
-| `size_t getString(const char *id, char *out, size_t outSize) const` | Copies a NUL-terminated value into `out`, truncated at a UTF-8 boundary to fit both `maxLength` and `outSize`. Returns the byte length written. |
+| `size_t getString(const char *id, char *out, size_t outSize) const` | Copies a NUL-terminated value into `out`, truncated at a UTF-8 boundary to fit both `maxLength` and `outSize`. A stored value shorter than `minLength` is treated as unusable and yields the default, symmetrically with clamping a number into range. Returns the byte length written. |
 | `bool has(const char *id) const` | `true` if the id was present in the file — use it to tell "the user chose this" from "this is the default". |
 | `bool isLoaded() const` | `true` if the file was found, parsed, and had a supported `schema`. |
 
@@ -571,6 +597,7 @@ defaults, never to a failed launch:
 | One key of the wrong type, or `null` | That field only falls back to its default. |
 | One numeric key out of range | That field only is clamped to its declared bounds. |
 | One string longer than `maxLength` | That field only is truncated at a UTF-8 boundary. |
+| One string shorter than `minLength` | That field only falls back to its default, and `has()` reports it absent. |
 
 ### 5.4 In the simulator
 
@@ -604,7 +631,7 @@ if (!cfg.save()) {
 | Method | Behaviour |
 |--------|-----------|
 | `bool setBool/setInt/setFloat(const char *id, T value)` | Validates against the field table, clamping a numeric value into range. Updates the in-memory value and marks the file dirty. Returns `false` for an unknown id. |
-| `bool setString(const char *id, const char *value)` | As above, truncating to `maxLength` at a UTF-8 boundary. |
+| `bool setString(const char *id, const char *value)` | As above, truncating to `maxLength` at a UTF-8 boundary. Returns `false` for a value shorter than `minLength`, so an app cannot write a file that violates its own declaration. |
 | `bool save()` | Writes the file if anything is dirty. Returns `false` if the write failed. |
 | `bool clear(const char *id)` | Removes the id from the file, so the field falls back to its default on the next launch. |
 
@@ -641,6 +668,12 @@ The file has two writers, so the rule is simply **last writer wins**, with one o
 the companion app: it MUST re-read the file over FTS immediately before showing its edit
 screen, so what it displays is what is actually on the watch.
 
+Two writers means the phone and the watch — **not two writers inside one app**. Use one
+`SDK::AppConfig` per app, on one thread: the class is not thread-safe, and two instances would
+share one `<configFile>.tmp` with no locking, where `save()`'s remove-then-rename is not
+reentrant. If both an app's processes need the values, read them in the service and send them
+to the GUI, as the tutorial does.
+
 That leaves one narrow race: the user has the phone's edit screen open *while* the app
 changes the same file on the watch. Whoever saves first loses their change. This is
 accepted — it needs two simultaneous edits of the same app's configuration on two devices —
@@ -657,7 +690,7 @@ changed the file, without transferring it again.
 
 ### 7.1 Install
 
-1. The companion app reads `config.json` from the package.
+1. The companion app reads `app-manifest.json` from the package.
 2. If `configFields` is non-empty, it shows the configuration screen, pre-filled from each
    field's `default`. Required fields must be satisfied before the install can continue.
 3. The `.uapp` is transferred, which creates the app's directory.
@@ -725,9 +758,11 @@ This section is normative for the mobile implementation.
 
 ### 9.1 Reading the declaration
 
-Parse `configFields` from the package's `config.json`. Validate it against
-`Utilities/Scripts/app_packer/app-config.schema.json` and refuse to install a package that
-does not conform — a malformed declaration is a broken package, not something to work
+Check `manifest_version` first: it is required, and `1` is the only value this
+specification covers. Refuse a package that declares anything else rather than parsing on
+regardless. Then parse `configFields` from the package's `app-manifest.json`, validate it
+against `Utilities/Scripts/app_packer/app-config.schema.json`, and refuse to install a
+package that does not conform — a malformed declaration is a broken package, not something to work
 around. Render fields in array order.
 
 ### 9.2 Install flow
@@ -793,7 +828,8 @@ the cases that must be covered:
   characters). Do not `\uXXXX`-escape ordinary non-ASCII text: the 8 KB file limit is
   budgeted assuming you do not, and `validate_app_config.py` computes each app's worst-case
   file size on that basis.
-- **Write `schema: 1`** in every file.
+- **Write `schema: 1`** in every file. (That is the *values* file's version; the
+  manifest's own `manifest_version` is a separate key and stays on the phone.)
 - **Re-read before editing** (section 6.4).
 
 ## 10. Tooling
@@ -803,14 +839,14 @@ rules above:
 
 ```bash
 # Validate a package's declaration
-python Utilities/Scripts/app_packer/validate_app_config.py --check config.json
+python Utilities/Scripts/app_packer/validate_app_config.py --check app-manifest.json
 
-# Cross-check the app's constexpr field table against config.json
-python Utilities/Scripts/app_packer/validate_app_config.py --check config.json \
+# Cross-check the app's constexpr field table against app-manifest.json
+python Utilities/Scripts/app_packer/validate_app_config.py --check app-manifest.json \
     --check-bounds Software/Libs/Sources/AppConfigFields.cpp
 ```
 
-It validates `config.json` against `app-config.schema.json`, applies the rules a JSON Schema
+It validates `app-manifest.json` against `app-config.schema.json`, applies the rules a JSON Schema
 cannot express (the regex subset, `default` satisfying its own constraints, `configFile`
 naming, byte-length limits), and — with `--check-bounds` — parses the `SDK::AppConfig::Field`
 table out of the given source file and compares every id, type, default and bound against

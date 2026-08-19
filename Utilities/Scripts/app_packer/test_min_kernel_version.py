@@ -30,7 +30,7 @@ def expect(cond, msg):
 
 
 def write_cfg(d, **fields):
-    p = Path(d) / "config.json"
+    p = Path(d) / "app-manifest.json"
     p.write_text(json.dumps({"minKernelVersion": None, **fields}, ensure_ascii=False), encoding="utf-8")
     return p
 

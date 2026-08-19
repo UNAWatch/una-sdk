@@ -263,8 +263,9 @@ void Service::saveTargetHere()
 
     if (!mHasFix) {
         LOG_WARNING("no fix yet; target unchanged\n");
-        SDK::send_msg<CustomMessage::TargetSaved>(mKernel, false, mTargetLatitude,
-                                                  mTargetLongitude);
+        SDK::send_msg<CustomMessage::TargetSaved>(
+                mKernel, CustomMessage::SaveOutcome::NoFix, mTargetLatitude,
+                mTargetLongitude);
         return;
     }
 
@@ -280,8 +281,9 @@ void Service::saveTargetHere()
         // would adopt coordinates that never reached the file -- the screen
         // would navigate to a target the next launch will not know about. Keep
         // serving the previous one and report the failure with it.
-        SDK::send_msg<CustomMessage::TargetSaved>(mKernel, false, mTargetLatitude,
-                                                  mTargetLongitude);
+        SDK::send_msg<CustomMessage::TargetSaved>(
+                mKernel, CustomMessage::SaveOutcome::WriteFailed, mTargetLatitude,
+                mTargetLongitude);
         return;
     }
 
@@ -292,8 +294,9 @@ void Service::saveTargetHere()
     mBearingDeg = 0.0f;
     mArrivalAnnounced = false;
 
-    SDK::send_msg<CustomMessage::TargetSaved>(mKernel, true, mTargetLatitude,
-                                              mTargetLongitude);
+    SDK::send_msg<CustomMessage::TargetSaved>(
+            mKernel, CustomMessage::SaveOutcome::Saved, mTargetLatitude,
+            mTargetLongitude);
     sendNavUpdate();
 }
 

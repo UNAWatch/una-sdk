@@ -8,7 +8,7 @@ is >= that SDK's ABI (the on-device check in AppSystem/system.cpp enforces this
 at runtime). Because the ABI increases monotonically and each value maps to the
 minimum kernel firmware version that provides it (abi_kernel_map.json), that
 requirement is a **floor** on the kernel firmware version -- which is what the
-mobile app already gates on: config.json "minKernelVersion", compared against
+mobile app already gates on: app-manifest.json "minKernelVersion", compared against
 the watch's firmware version (BLE DIS 0x2A26).
 
 "minKernelVersion" is a MINIMUM. The ABI gives the floor; a developer MAY declare
@@ -16,14 +16,14 @@ a higher value (e.g. to require a firmware bugfix at the same ABI), but never a
 lower one. So:
 
   --print               print the ABI-derived floor for this SDK (default)
-  --stamp CONFIG_JSON   raise minKernelVersion up to the floor (keeps a higher value)
-  --check CONFIG_JSON   verify minKernelVersion is >= the floor (CI / submission gate)
+  --stamp MANIFEST      raise minKernelVersion up to the floor (keeps a higher value)
+  --check MANIFEST      verify minKernelVersion is >= the floor (CI / submission gate)
 
 It exits non-zero if the SDK's ABI has no mapping entry (the guard that forces
 abi_kernel_map.json to be updated when KERNEL_INTERFACE_VERSION is bumped) or if
 the map is malformed / non-monotonic.
 
-Note: config.json must be strict JSON. The annotated example in
+Note: app-manifest.json must be strict JSON. The annotated example in
 Docs/app-config-json.md uses `//` comments for illustration only.
 """
 import argparse
@@ -127,8 +127,8 @@ def main():
     ap.add_argument("--sdk-root", help="SDK repo root (default: $UNA_SDK, else inferred)")
     group = ap.add_mutually_exclusive_group()
     group.add_argument("--print", action="store_true", help="print the ABI-derived floor (default)")
-    group.add_argument("--stamp", metavar="CONFIG_JSON", help="raise minKernelVersion up to the floor")
-    group.add_argument("--check", metavar="CONFIG_JSON", help="verify minKernelVersion is >= the floor")
+    group.add_argument("--stamp", metavar="MANIFEST", help="raise minKernelVersion up to the floor")
+    group.add_argument("--check", metavar="MANIFEST", help="verify minKernelVersion is >= the floor")
     args = ap.parse_args()
 
     abi, floor = resolve(find_sdk_root(args.sdk_root))

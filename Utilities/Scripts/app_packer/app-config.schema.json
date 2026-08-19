@@ -2,14 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://developers.unawatch.com/schemas/app-config.schema.json",
   "title": "UNA Watch app configuration fields",
-  "description": "Schema for the 'configFile' and 'configFields' keys of an app's config.json. See Docs/app-config-fields.md. Other config.json keys are out of scope here and are not constrained. Two rules cannot be expressed in JSON Schema and are enforced by validate_app_config.py instead: field ids must be unique within an app, and 'max' must be >= 'min' / 'maxLength' >= 'minLength' / 'default' must itself satisfy the field's constraints.",
+  "description": "Schema for the 'configFile' and 'configFields' keys of an app's app-manifest.json. See Docs/app-config-fields.md. Other app-manifest.json keys are out of scope here and are not constrained. Two rules cannot be expressed in JSON Schema and are enforced by validate_app_config.py instead: field ids must be unique within an app, and 'max' must be >= 'min' / 'maxLength' >= 'minLength' / 'default' must itself satisfy the field's constraints.",
   "type": "object",
+  "required": ["manifest_version"],
   "properties": {
+    "manifest_version": {
+      "description": "Version of the app-manifest.json format itself, not of the app. Must be 1. A reader that finds another value must refuse the manifest rather than guess at a format it was not built for.",
+      "const": 1
+    },
     "configFile": {
-      "description": "Name of the values file the companion app writes into the app's directory on the watch. A bare filename in the sandbox root: no path separators, and never 'config.json'.",
+      "description": "Name of the values file the companion app writes into the app's directory on the watch. A bare filename in the sandbox root: no path separators, and never 'app-manifest.json'.",
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,57}\\.json$",
-      "not": { "const": "config.json" }
+      "not": { "const": "app-manifest.json" }
     },
     "configFields": {
       "description": "Ordered list of configuration fields the companion app asks the user to fill in. Array order is display order.",

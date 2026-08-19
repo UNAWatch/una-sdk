@@ -14,17 +14,17 @@ This page is the worked example.
 
 ## What You'll Learn
 
-- How to declare configuration fields in `config.json` - one of each supported type
+- How to declare configuration fields in `app-manifest.json` - one of each supported type
 - How the companion app turns them into a file on the watch, and where it lands
 - How to read those values with `SDK::AppConfig`, and why every read has a default
 - How to tell "the user chose this" from "this is our fallback"
 - How to write a value back from the watch without ever corrupting the file
-- How CI stops your app's idea of a field from drifting away from `config.json`
+- How CI stops your app's idea of a field from drifting away from `app-manifest.json`
 
 ## How configuration reaches the watch
 
 ```text
-   config.json                     Companion app            2:/Apps/Waypoint/
+   app-manifest.json                     Companion app            2:/Apps/Waypoint/
    +----------------------+                                 +-------------------+
    | "configFile"         |  1. reads the package           | Waypoint.uapp     |
    | "configFields": [    |------------------------------>  | app_config.json   | <--+
@@ -40,7 +40,7 @@ This page is the worked example.
                                                                       +--------------+
 ```
 
-`config.json` itself never reaches the watch. Only the values file does.
+`app-manifest.json` itself never reaches the watch. Only the values file does.
 
 ## Getting Started
 
@@ -88,10 +88,12 @@ the path most apps get wrong.
 
 ## Declaring the fields
 
-`Output/config.json` carries two extra keys. `configFile` names the file the companion app
-will write, and `configFields` lists what to ask for. Waypoint declares five fields covering
+`Output/app-manifest.json` carries two extra keys beyond the usual package metadata (which
+now starts with `"manifest_version": 1` - required in every manifest, configuration fields or
+not). `configFile` names the file the companion app will write, and `configFields` lists what
+to ask for. Waypoint declares five fields covering
 all four supported types — two of them floats, for the coordinate pair. Abridged (see
-`Output/config.json` for the full declaration, including `targetLongitude`):
+`Output/app-manifest.json` for the full declaration, including `targetLongitude`):
 
 ```json
 "configFile": "app_config.json",
@@ -156,7 +158,7 @@ Points worth copying:
 
 ## The field table the app carries
 
-`config.json` stays on the phone, so the app repeats the contract in
+`app-manifest.json` stays on the phone, so the app repeats the contract in
 `Software/Libs/Sources/AppConfigFields.cpp`:
 
 ```cpp
@@ -176,7 +178,7 @@ can drift is a bug waiting to happen, so CI compares the two:
 ```bash
 cd $UNA_SDK/Docs/Tutorials/Waypoint
 python $UNA_SDK/Utilities/Scripts/app_packer/validate_app_config.py \
-    --check Output/config.json \
+    --check Output/app-manifest.json \
     --check-bounds Software/Libs/Sources/AppConfigFields.cpp \
     --check-bounds Software/Libs/Header/AppConfigFields.hpp
 ```
@@ -259,19 +261,31 @@ the user can save a spot without typing coordinates at all:
 void Service::saveTargetHere()
 {
     if (!mHasFix) {
-        SDK::send_msg<CustomMessage::TargetSaved>(mKernel, false, ...);
+        SDK::send_msg<CustomMessage::TargetSaved>(
+                mKernel, CustomMessage::SaveOutcome::NoFix, ...);
         return;
     }
 
     mConfig->setFloat("targetLatitude", mLatitude);
     mConfig->setFloat("targetLongitude", mLongitude);
 
-    const bool saved = mConfig->save();
+    if (!mConfig->save()) {
+        // The setters already updated the in-memory values, so re-reading now
+        // would adopt coordinates that never reached the file. Keep serving the
+        // previous target and say so.
+        SDK::send_msg<CustomMessage::TargetSaved>(
+                mKernel, CustomMessage::SaveOutcome::WriteFailed, ...);
+        return;
+    }
 
     loadConfiguration();    // re-read, so what is in play is what is on disk
     ...
 }
 ```
+
+The three outcomes are distinct on purpose. `SaveOutcome` (`Saved`, `NoFix`, `WriteFailed`)
+travels to the GUI instead of a bare `bool`, because "there was nothing to save" and "the
+write failed" need different words on the status line - and only one of them is a fault.
 
 Three things `save()` does that are easy to get wrong by hand:
 
@@ -378,8 +392,8 @@ target, the simulator lists its sources by hand in `simulator/gcc/Makefile` (and
 layer also needs its own `simulator/ConfigurationSimulator.hpp` saying which sensors to
 simulate.
 
-**CI fails with "field table ... but config.json".** The two declarations disagree. The error
+**CI fails with "field table ... but app-manifest.json".** The two declarations disagree. The error
 names the field and both values; fix whichever is wrong.
 
-**"config.json declares configFile X, but the checked sources only name Y".** The app opens a
+**"app-manifest.json declares configFile X, but the checked sources only name Y".** The app opens a
 different filename than it declared. Update `kFileName` or `configFile` so they match.

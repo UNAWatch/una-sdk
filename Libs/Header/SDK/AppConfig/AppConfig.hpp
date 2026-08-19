@@ -2,22 +2,31 @@
  ******************************************************************************
  * @file    AppConfig.hpp
  * @brief   App-side reader and writer for developer-declared config fields.
- * @details An app declares configuration fields in its config.json; the
+ * @details An app declares configuration fields in its app-manifest.json; the
  *          companion app collects values from the user and writes them to a
  *          JSON file in the app's own directory on the watch. This class reads
  *          that file, and can write it back when the user changes a value on
  *          the watch. The contract is documented in
  *          Docs/app-config-fields.md.
  *
- *          config.json never reaches the watch, so the app carries its own copy
+ *          app-manifest.json never reaches the watch, so the app carries its own copy
  *          of the field contract: one constexpr Field table giving each id its
- *          type, default and bounds. CI compares that table against config.json
+ *          type, default and bounds. CI compares that table against app-manifest.json
  *          (validate_app_config.py --check-bounds), which is what makes it safe
  *          to clamp a value the app should never have received.
  *
  *          Nothing here may stop an app from starting. A missing, oversized,
  *          malformed or future-schema file yields the declared defaults; a
  *          single bad key falls back to that field's default alone.
+ *
+ * @note    Use **one instance per app, on one thread**. The class is not
+ *          thread-safe, and two instances writing the same file would share one
+ *          `<configFile>.tmp` with no locking -- the remove-then-rename in
+ *          @ref save is not reentrant. If both processes of an app need the
+ *          values, read them in the service and send them to the GUI.
+ * @note    The @ref Field table passed to the constructor is borrowed, not
+ *          copied: it must outlive this object. A `constexpr` table at file
+ *          scope, as the tutorial uses, always does.
  ******************************************************************************
  *
  ******************************************************************************
@@ -143,7 +152,7 @@ public:
      * @brief   Open and read the app's configuration file.
      * @param   kernel: The app's kernel facade (service or GUI side).
      * @param   fileName: The bare filename declared as "configFile" in
-     *          config.json. Resolved in the app's sandbox root.
+     *          app-manifest.json. Resolved in the app's sandbox root.
      * @param   fields: The app's field table.
      * @param   fieldCount: Number of entries in @p fields, at most
      *          @ref skMaxFields.

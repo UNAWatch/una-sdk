@@ -49,17 +49,17 @@
 
   ![Build output](assets/compiled-app.png)
 
-- Create `config.json` file. Detailed instructions are [here](app-config-json.md) 
+- Create `app-manifest.json` file. Detailed instructions are [here](app-config-json.md) 
 
   ![Config](assets/config-json.png)
 
-- Set its `minKernelVersion` with the SDK resolver rather than by hand — `--stamp` raises it to the ABI-derived floor, keeping any deliberately-higher value you set (see [App Config JSON](app-config-json.md)):
+- Set its `minKernelVersion` with the SDK resolver rather than by hand — `--stamp` raises it to the ABI-derived floor, keeping any deliberately-higher value you set (see [App Manifest JSON](app-config-json.md)):
 
   ```bash
-  python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp config.json
+  python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp app-manifest.json
   ```
 
-- Pack the resulting `*.uapp`, `icon.png`, and `config.json` into a `*.zip` archive.
+- Pack the resulting `*.uapp`, `icon.png`, and `app-manifest.json` into a `*.zip` archive.
 
   ![Archive](assets/archive.png)
 

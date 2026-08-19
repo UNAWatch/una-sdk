@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdio>
 #include <limits>
 #include <string>
 
@@ -654,6 +655,60 @@ TEST_F(AppConfigTest, AStaleTemporaryAlongsideAGoodFileIsRemoved)
     EXPECT_FALSE(fx.fileSystem.exist(kTmpPath));
 }
 
+TEST_F(AppConfigTest, ADuplicatedKeyCollapsesToOneEntryOnSave)
+{
+    // JSON does not forbid a repeated key and leaves the winner undefined. A
+    // hand-edited file or a buggy writer can produce one, so pin both halves of
+    // the behaviour: the reader takes the first occurrence, and a save does not
+    // carry the ambiguity forward for a field this app declares.
+    seed(R"({"schema":1,"values":{"arrivalRadiusM":40,"arrivalRadiusM":41,)"
+         R"("futureField":"a"}})");
+    AppConfig cfg = open();
+
+    ASSERT_TRUE(cfg.isLoaded());
+    EXPECT_EQ(cfg.getInt("arrivalRadiusM"), 40);
+
+    ASSERT_TRUE(cfg.setBool("vibrateOnArrival", false));
+    ASSERT_TRUE(cfg.save());
+
+    const std::string out = contents();
+    EXPECT_EQ(out.find("arrivalRadiusM"), out.rfind("arrivalRadiusM")) << out;
+    EXPECT_NE(out.find(R"("arrivalRadiusM":40)"), std::string::npos) << out;
+
+    AppConfig again = open();
+    ASSERT_TRUE(again.isLoaded());
+    EXPECT_EQ(again.getInt("arrivalRadiusM"), 40);
+}
+
+TEST_F(AppConfigTest, ASecondSaveBuildsOnTheFirst)
+{
+    seed(R"({"schema":1,"values":{"targetLatitude":51.5072,"futureField":"x"}})");
+    AppConfig cfg = open();
+
+    ASSERT_TRUE(cfg.setInt("arrivalRadiusM", 60));
+    ASSERT_TRUE(cfg.save());
+    EXPECT_FALSE(cfg.isDirty());
+
+    ASSERT_TRUE(cfg.setString("waypointName", "Summit"));
+    ASSERT_TRUE(cfg.save());
+    EXPECT_FALSE(cfg.isDirty());
+    EXPECT_FALSE(fx.fileSystem.exist(kTmpPath));
+
+    // Both edits, the untouched phone value and the unknown key all survive the
+    // second pass: the in-memory document is the authority, not whatever the
+    // first save happened to leave on disk.
+    const std::string out = contents();
+    EXPECT_NE(out.find(R"("arrivalRadiusM":60)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("waypointName":"Summit")"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("targetLatitude":51.5072)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("futureField":"x")"), std::string::npos) << out;
+
+    AppConfig again = open();
+    ASSERT_TRUE(again.isLoaded());
+    EXPECT_EQ(again.getInt("arrivalRadiusM"), 60);
+    EXPECT_EQ(name(again), "Summit");
+}
+
 // --- Declaration handling --------------------------------------------------
 
 TEST_F(AppConfigTest, AnEmptyFieldTableIsHarmless)
@@ -677,6 +732,45 @@ TEST_F(AppConfigTest, HasDistinguishesUserValuesFromDefaults)
 
     EXPECT_TRUE(cfg.getBool("vibrateOnArrival"));
     EXPECT_FALSE(cfg.has("waypointName"));
+}
+
+TEST_F(AppConfigTest, FieldsBeyondTheSupportedCountAreDropped)
+{
+    // The present/override/removed sets are 32 bits wide, which is why the
+    // declaration is capped at 32 fields. The template constructor rejects a
+    // longer table at compile time; this is the runtime path, reached only by
+    // an app that passes a count of its own.
+    constexpr size_t kTooMany = AppConfig::skMaxFields + 2;
+    char ids[kTooMany][8] {};
+    AppConfig::Field many[kTooMany] {};
+    for (size_t i = 0; i < kTooMany; ++i) {
+        std::snprintf(ids[i], sizeof(ids[i]), "f%02u", static_cast<unsigned>(i));
+        many[i] = AppConfig::intField(ids[i], 0, 0, 100);
+    }
+
+    seed(R"({"schema":1,"values":{"f00":1,"f31":31,"f32":32,"f33":33}})");
+    AppConfig cfg(fx.kernel, kFileName, many, kTooMany);
+
+    ASSERT_TRUE(cfg.isLoaded());
+    EXPECT_TRUE(cfg.has("f00"));
+    EXPECT_EQ(cfg.getInt("f31"), 31);
+    EXPECT_TRUE(cfg.has("f31"));
+
+    // Past the cap the field does not exist at all, so a setter reports failure
+    // rather than shifting a bit off the end of the sets above.
+    EXPECT_FALSE(cfg.has("f32"));
+    EXPECT_EQ(cfg.getInt("f32"), 0);
+    EXPECT_FALSE(cfg.setInt("f32", 5));
+    EXPECT_FALSE(cfg.isDirty());
+
+    // The dropped keys are still unknown members as far as the writer is
+    // concerned, so a build that does declare them finds the user's answers.
+    ASSERT_TRUE(cfg.setInt("f00", 7));
+    ASSERT_TRUE(cfg.save());
+    const std::string out = contents();
+    EXPECT_NE(out.find(R"("f32":32)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("f33":33)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("f00":7)"), std::string::npos) << out;
 }
 
 } // namespace

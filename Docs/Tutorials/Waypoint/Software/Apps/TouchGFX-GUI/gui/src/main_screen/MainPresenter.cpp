@@ -24,7 +24,8 @@ void MainPresenter::onNavUpdate(const CustomMessage::NavState& nav)
     view.showNav(nav);
 }
 
-void MainPresenter::onTargetSaved(bool saved, float latitude, float longitude)
+void MainPresenter::onTargetSaved(CustomMessage::SaveOutcome outcome,
+                                  float latitude, float longitude)
 {
-    view.showTargetSaved(saved, latitude, longitude);
+    view.showTargetSaved(outcome, latitude, longitude);
 }

@@ -24,8 +24,8 @@ public:
     virtual void onNavUpdate(const CustomMessage::NavState& /*nav*/) {}
 
     /// The outcome of a "save the current position" request.
-    virtual void onTargetSaved(bool /*saved*/, float /*latitude*/,
-                               float /*longitude*/) {}
+    virtual void onTargetSaved(CustomMessage::SaveOutcome /*outcome*/,
+                               float /*latitude*/, float /*longitude*/) {}
 
 protected:
     Model* model;
