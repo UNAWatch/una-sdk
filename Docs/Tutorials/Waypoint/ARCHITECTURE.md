@@ -23,7 +23,7 @@ This page is the worked example.
 
 ## How configuration reaches the watch
 
-```
+```text
    config.json                     Companion app            2:/Apps/Waypoint/
    +----------------------+                                 +-------------------+
    | "configFile"         |  1. reads the package           | Waypoint.uapp     |
@@ -174,7 +174,8 @@ received - from a hand-edited file, a downgrade, or a buggy companion build. Dup
 can drift is a bug waiting to happen, so CI compares the two:
 
 ```bash
-python Utilities/Scripts/app_packer/validate_app_config.py \
+cd $UNA_SDK/Docs/Tutorials/Waypoint
+python $UNA_SDK/Utilities/Scripts/app_packer/validate_app_config.py \
     --check Output/config.json \
     --check-bounds Software/Libs/Sources/AppConfigFields.cpp \
     --check-bounds Software/Libs/Header/AppConfigFields.hpp
@@ -309,7 +310,7 @@ Buttons: **R1** saves the current position as the target, **R2** exits.
 
 The service owns the configuration; the GUI only asks and displays.
 
-```
+```text
    GPS fix                                                    R1 pressed
       |                                                            |
       v                                                            v

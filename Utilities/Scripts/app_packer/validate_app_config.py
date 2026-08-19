@@ -572,7 +572,10 @@ def run_optional_schema_check(config, errors):
         return False
     try:
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
+        # ValueError covers json.JSONDecodeError: this path runs during local
+        # development, which is exactly when the schema file may be mid-edit, and
+        # every other problem in this script is reported rather than raised.
         errors.add(SCHEMA_PATH.name, f"could not be read ({exc})")
         return False
     validator = jsonschema.Draft202012Validator(schema)
@@ -596,7 +599,13 @@ JSON_LITERAL_RE = re.compile(r"\"([A-Za-z0-9_.-]+\.json)\"")
 
 
 def strip_comments(source):
-    """Remove // and /* */ comments so a commented-out entry is not parsed."""
+    """Remove // and /* */ comments so a commented-out entry is not parsed.
+
+    String *and* character literals are copied through verbatim. Character
+    literals matter: a source containing '"' would otherwise be read as the start
+    of a string, swallowing everything to the next quote -- including a field
+    table's id literal, which CI would then report as a missing field.
+    """
     out = []
     i = 0
     n = len(source)
@@ -608,6 +617,18 @@ def strip_comments(source):
         elif two == "/*":
             end = source.find("*/", i + 2)
             i = n if end < 0 else end + 2
+        elif source[i] == "'":
+            j = i + 1
+            while j < n:
+                if source[j] == "\\":
+                    j += 2
+                    continue
+                if source[j] == "'":
+                    j += 1
+                    break
+                j += 1
+            out.append(source[i:j])
+            i = j
         elif source[i] == '"':
             j = i + 1
             while j < n:

@@ -125,6 +125,11 @@ void Service::run()
             switch (msg->getType()) {
             case SDK::MessageType::COMMAND_APP_STOP:
                 LOG_INFO("Force exit from the application\n");
+                // Release the GPS explicitly rather than leaving it to the
+                // Connection destructor: this is the last message before the
+                // app is torn down, so the cleanup belongs here where it is
+                // visible.
+                mSensorGPS.disconnect();
                 // We must release message because this is the last event.
                 mKernel.comm.releaseMessage(msg);
                 return;
@@ -269,9 +274,15 @@ void Service::saveTargetHere()
     mConfig->setFloat("targetLatitude", mLatitude);
     mConfig->setFloat("targetLongitude", mLongitude);
 
-    const bool saved = mConfig->save();
-    if (!saved) {
+    if (!mConfig->save()) {
         LOG_WARNING("could not save the new target\n");
+        // The setters already updated the in-memory values, so re-reading now
+        // would adopt coordinates that never reached the file -- the screen
+        // would navigate to a target the next launch will not know about. Keep
+        // serving the previous one and report the failure with it.
+        SDK::send_msg<CustomMessage::TargetSaved>(mKernel, false, mTargetLatitude,
+                                                  mTargetLongitude);
+        return;
     }
 
     // Re-read so the values in play are exactly what is now on disk.
@@ -281,7 +292,7 @@ void Service::saveTargetHere()
     mBearingDeg = 0.0f;
     mArrivalAnnounced = false;
 
-    SDK::send_msg<CustomMessage::TargetSaved>(mKernel, saved, mTargetLatitude,
+    SDK::send_msg<CustomMessage::TargetSaved>(mKernel, true, mTargetLatitude,
                                               mTargetLongitude);
     sendNavUpdate();
 }
