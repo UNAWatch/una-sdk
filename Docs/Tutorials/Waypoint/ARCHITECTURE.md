@@ -296,7 +296,9 @@ Three things `save()` does that are easy to get wrong by hand:
    `51.5072` as a float would write `51.5071983`, and the user's number would drift a little
    every time the app saved.
 3. **It preserves keys it does not recognise**, so installing an older build of your app does
-   not silently discard a newer version's settings.
+   not silently discard a newer version's settings. The single exception is a key that appears
+   twice: only the first copy is kept, because the watch reads the first and the phone would
+   read the last, and a file that makes them disagree is worse than a tidy one.
 
 The file has two writers now - the phone and the watch - so the rule is last writer wins, and
 the companion app re-reads the file before it shows its edit screen. The only way to lose a

@@ -719,11 +719,13 @@ TEST_F(AppConfigTest, ASmallCallerBufferIsNotATooShortValue)
 TEST_F(AppConfigTest, ADuplicatedKeyCollapsesToOneEntryOnSave)
 {
     // JSON does not forbid a repeated key and leaves the winner undefined. A
-    // hand-edited file or a buggy writer can produce one, so pin both halves of
-    // the behaviour: the reader takes the first occurrence, and a save does not
-    // carry the ambiguity forward for a field this app declares.
+    // hand-edited file or a buggy writer can produce one, and the two sides of
+    // this feature disagree about which copy wins: this reader takes the first,
+    // a phone-side JSON.parse takes the last. So a save must resolve it, for a
+    // declared field and for a preserved undeclared one alike -- the second is
+    // the case that matters, since an undeclared key belongs to the phone.
     seed(R"({"schema":1,"values":{"arrivalRadiusM":40,"arrivalRadiusM":41,)"
-         R"("futureField":"a"}})");
+         R"("futureField":"a","futureField":"b"}})");
     AppConfig cfg = open();
 
     ASSERT_TRUE(cfg.isLoaded());
@@ -736,9 +738,32 @@ TEST_F(AppConfigTest, ADuplicatedKeyCollapsesToOneEntryOnSave)
     EXPECT_EQ(out.find("arrivalRadiusM"), out.rfind("arrivalRadiusM")) << out;
     EXPECT_NE(out.find(R"("arrivalRadiusM":40)"), std::string::npos) << out;
 
+    // The undeclared key keeps its first value and appears once.
+    EXPECT_EQ(out.find("futureField"), out.rfind("futureField")) << out;
+    EXPECT_NE(out.find(R"("futureField":"a")"), std::string::npos) << out;
+    EXPECT_EQ(out.find(R"("futureField":"b")"), std::string::npos) << out;
+
     AppConfig again = open();
     ASSERT_TRUE(again.isLoaded());
     EXPECT_EQ(again.getInt("arrivalRadiusM"), 40);
+}
+
+TEST_F(AppConfigTest, DeduplicationDoesNotDisturbDistinctUnknownKeys)
+{
+    // The dedupe compares whole key text, so keys that merely share a prefix,
+    // or whose text appears inside a neighbouring value, must all survive.
+    seed(R"({"schema":1,"values":{"future":1,"futureField":2,"futures":3,)"
+         R"("note":"future futureField"}})");
+    AppConfig cfg = open();
+
+    ASSERT_TRUE(cfg.setInt("arrivalRadiusM", 30));
+    ASSERT_TRUE(cfg.save());
+
+    const std::string out = contents();
+    EXPECT_NE(out.find(R"("future":1)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("futureField":2)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("futures":3)"), std::string::npos) << out;
+    EXPECT_NE(out.find(R"("note":"future futureField")"), std::string::npos) << out;
 }
 
 TEST_F(AppConfigTest, ASecondSaveBuildsOnTheFirst)
