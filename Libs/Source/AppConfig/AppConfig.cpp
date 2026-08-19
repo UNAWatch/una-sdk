@@ -808,10 +808,13 @@ bool AppConfig::fileString(const Field &field, char *out, size_t outSize,
 
     // A value below the declared minLength is not usable, so the field falls back
     // to its default -- symmetric with clamping a numeric value into range. The
-    // companion app cannot produce one; a hand-edited file can. Note the test is
-    // against the decoded length, and only when the value was not truncated to
-    // fit (truncation already means it was longer than maxLength >= minLength).
-    if (field.minLength > 0 && written < field.minLength) {
+    // companion app cannot produce one; a hand-edited file can. Two subtleties:
+    // the test is against the *decoded* length, and it is skipped when the
+    // caller's own buffer could not have held minLength bytes -- there a short
+    // result is the buffer's doing, not the file's, and the caller asked for a
+    // value truncated to fit rather than a verdict on the stored one.
+    if (field.minLength > 0 && budget >= field.minLength &&
+            written < field.minLength) {
         written = 0;
         out[0] = '\0';
         return false;
@@ -1077,14 +1080,6 @@ bool AppConfig::setString(const char *id, const char *value)
         return false;
     }
 
-    // Refuse a value the app's own declaration forbids, so an app cannot write a
-    // file that violates the contract the companion app is held to.
-    if (field->minLength > 0 && std::strlen(value) < field->minLength) {
-        LOG_WARNING("'%s' needs at least %u bytes\n", id,
-                    static_cast<unsigned>(field->minLength));
-        return false;
-    }
-
     size_t budget = field->maxLength > 0 ? field->maxLength : skMaxStringBytes;
     if (budget > skMaxStringBytes) {
         budget = skMaxStringBytes;
@@ -1103,6 +1098,18 @@ bool AppConfig::setString(const char *id, const char *value)
             --n;
         }
     }
+    // Refuse a value the app's own declaration forbids, so an app cannot write a
+    // file that violates the contract the companion app is held to. Tested after
+    // truncation, because truncation is what decides the stored length: 15 ASCII
+    // bytes followed by a two-byte character clear a check on the input at
+    // maxLength 16, yet store 15.
+    if (field->minLength > 0 && n < field->minLength) {
+        LOG_WARNING("'%s' would store %u bytes but needs at least %u\n", id,
+                    static_cast<unsigned>(n),
+                    static_cast<unsigned>(field->minLength));
+        return false;
+    }
+
     std::memcpy(copy.get(), value, n);
     copy[n] = '\0';
 
