@@ -49,7 +49,7 @@
 
   ![Build output](assets/compiled-app.png)
 
-- Create `app-manifest.json` file. Detailed instructions are [here](app-config-json.md) 
+- Create the `app-manifest.json` file — see [App Manifest JSON](app-config-json.md) for every key it may carry
 
   ![Config](assets/config-json.png)
 

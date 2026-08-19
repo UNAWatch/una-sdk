@@ -38,6 +38,14 @@ constexpr AppConfig::Field kFields[] = {
     AppConfig::boolField("vibrateOnArrival", true),
 };
 
+// Two fields the main table cannot express: one whose minimum and maximum length
+// are equal, so truncation and the minimum collide, and one whose minimum is
+// longer than a small caller buffer.
+constexpr AppConfig::Field kStrictFields[] = {
+    AppConfig::stringField("exactSixteen", "0123456789abcdef", 16, 16),
+    AppConfig::stringField("atLeastEight", "12345678", 8, 32),
+};
+
 class AppConfigTest : public ::testing::Test {
 protected:
     SDK::TestSupport::KernelFixture fx;
@@ -48,6 +56,11 @@ protected:
     }
 
     AppConfig open() { return AppConfig(fx.kernel, kFileName, kFields); }
+
+    AppConfig openStrict()
+    {
+        return AppConfig(fx.kernel, kFileName, kStrictFields);
+    }
 
     std::string contents(const char *path = kPath) const
     {
@@ -653,6 +666,54 @@ TEST_F(AppConfigTest, AStaleTemporaryAlongsideAGoodFileIsRemoved)
 
     EXPECT_EQ(cfg.getInt("arrivalRadiusM"), 40);   // the real file wins
     EXPECT_FALSE(fx.fileSystem.exist(kTmpPath));
+}
+
+TEST_F(AppConfigTest, SetStringRefusesAValueTruncationWouldMakeTooShort)
+{
+    // 15 ASCII bytes then a 2-byte character is 17 bytes in, but maxLength is 16
+    // and the boundary rule drops the pair rather than half of it -- so only 15
+    // bytes would be stored, below the declared minimum of 16. Judging the input
+    // instead of the stored result would accept it and write a file the reader
+    // then refuses.
+    seed(R"({"schema":1,"values":{}})");
+    AppConfig cfg = openStrict();
+
+    EXPECT_FALSE(cfg.setString("exactSixteen", "123456789012345" "\xD0\x94"));
+    EXPECT_FALSE(cfg.isDirty());
+
+    // 16 ASCII bytes is both the minimum and the maximum, so it must pass.
+    EXPECT_TRUE(cfg.setString("exactSixteen", "1234567890123456"));
+    EXPECT_TRUE(cfg.isDirty());
+    ASSERT_TRUE(cfg.save());
+    EXPECT_NE(contents().find(R"("exactSixteen":"1234567890123456")"),
+              std::string::npos) << contents();
+}
+
+TEST_F(AppConfigTest, AStoredValueBelowMinLengthFallsBackToTheDefault)
+{
+    seed(R"({"schema":1,"values":{"atLeastEight":"short"}})");
+    AppConfig cfg = openStrict();
+
+    ASSERT_TRUE(cfg.isLoaded());
+    char buf[64] {};
+    EXPECT_EQ(cfg.getString("atLeastEight", buf, sizeof(buf)), 8u);
+    EXPECT_STREQ(buf, "12345678");          // the declared default
+    EXPECT_FALSE(cfg.has("atLeastEight"));  // unusable counts as absent
+}
+
+TEST_F(AppConfigTest, ASmallCallerBufferIsNotATooShortValue)
+{
+    // The buffer cannot hold minLength bytes, so a short result is the caller's
+    // own doing -- they asked for a value truncated to fit, not a verdict on what
+    // the file holds. Applying the minimum here would hand back the default and
+    // report the stored value as absent.
+    seed(R"({"schema":1,"values":{"atLeastEight":"twelve bytes"}})");
+    AppConfig cfg = openStrict();
+
+    char buf[5] {};
+    EXPECT_EQ(cfg.getString("atLeastEight", buf, sizeof(buf)), 4u);
+    EXPECT_STREQ(buf, "twel");
+    EXPECT_TRUE(cfg.has("atLeastEight"));
 }
 
 TEST_F(AppConfigTest, ADuplicatedKeyCollapsesToOneEntryOnSave)

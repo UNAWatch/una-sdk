@@ -112,7 +112,7 @@ The name of the values file the companion app creates in the app's directory on 
 | Forbidden when | `configFields` is absent or empty |
 | Pattern | `^[A-Za-z0-9][A-Za-z0-9_.-]{0,57}\.json$` |
 | No path separators | `/` and `\` are rejected, and so is `..` — the file always lands in the app's sandbox root |
-| Must not be | `app-manifest.json` (reserved: that is the package metadata file, which never reaches the watch). Compared case-insensitively, because the watch's FAT volume is |
+| Must not be | `app-manifest.json` (reserved: that is the package metadata file, which never reaches the watch). Compared case-insensitively, because the watch's FAT volume is case-insensitive too |
 | Length | <= 63 characters, which the pattern above already enforces. `SDK::AppConfig` refuses a longer name and falls back to defaults |
 
 Restricting this to a bare filename is deliberate. The app's sandbox root is the one
@@ -575,8 +575,8 @@ the tutorial holds a `std::unique_ptr<SDK::AppConfig>` and creates it in `run()`
 | `bool getBool(const char *id) const` | The stored value, or the field's default. |
 | `int32_t getInt(const char *id) const` | The stored value **clamped** to `[min, max]`, or the default. |
 | `float getFloat(const char *id) const` | The stored value **clamped** to `[min, max]`, or the default. Non-finite values (NaN, infinity) are rejected as malformed and yield the default. |
-| `size_t getString(const char *id, char *out, size_t outSize) const` | Copies a NUL-terminated value into `out`, truncated at a UTF-8 boundary to fit both `maxLength` and `outSize`. A stored value shorter than `minLength` is treated as unusable and yields the default, symmetrically with clamping a number into range. Returns the byte length written. |
-| `bool has(const char *id) const` | `true` if the id was present in the file — use it to tell "the user chose this" from "this is the default". |
+| `size_t getString(const char *id, char *out, size_t outSize) const` | Copies a NUL-terminated value into `out`, truncated at a UTF-8 boundary to fit both `maxLength` and `outSize`. A stored value shorter than `minLength` is treated as unusable and yields the default, symmetrically with clamping a number into range — though a buffer of your own that is too small to hold `minLength` bytes is your truncation, not the file's, and still returns what fits. Returns the byte length written. |
+| `bool has(const char *id) const` | `true` if the file supplied a **usable** value for the id — use it to tell "the user chose this" from "this is the default". A key that was present but unusable (wrong JSON type, `null`, malformed number, a string below `minLength`) counts as absent, because the value in play is the default either way. |
 | `bool isLoaded() const` | `true` if the file was found, parsed, and had a supported `schema`. |
 
 Reading an id that is not in the table is a programming error: the getter returns a
