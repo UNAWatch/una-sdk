@@ -1388,7 +1388,7 @@ The port handles various kernel message types for lifecycle management, input pr
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:157-169</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">TouchGFXCommandProcessor::writeDisplayFrameBuffer</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">mIsGuiResumed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">  </span><span class="c1">// Don&#39;t update if suspended or invalid data</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">  </span><span class="c1">// Don't update if suspended or invalid data</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">allocateMessage</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestDisplayUpdate</span><span class="o">&gt;</span><span class="p">();</span>
@@ -1648,8 +1648,8 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="k">public</span><span class="o">:</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">handleButtonPress</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;1&#39;</span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">startMeasurement</span><span class="p">();</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
-<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;2&#39;</span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">stopMeasurement</span><span class="p">();</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">'1'</span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">startMeasurement</span><span class="p">();</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">'2'</span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">stopMeasurement</span><span class="p">();</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">notifyHeartRateChanged</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
@@ -1969,7 +1969,7 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getConfigurationValue</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">);</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">ConfigurationResponse</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="c1">// Nothing retries this for us: the requester will block until it times out.</span>
-<span class="w">        </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Config response for type %d dropped&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">));</span>
+<span class="w">        </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">"Config response for type %d dropped"</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">));</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -2001,7 +2001,7 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">queueMessage</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mMessageQueue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">            </span><span class="c1">// Queue full - handle overflow</span>
-<span class="w">            </span><span class="n">Logger</span><span class="o">::</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Message queue full, dropping message&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="n">Logger</span><span class="o">::</span><span class="n">warning</span><span class="p">(</span><span class="s">"Message queue full, dropping message"</span><span class="p">);</span>
 <span class="w">            </span><span class="c1">// Optionally process oldest message first</span>
 <span class="w">            </span><span class="n">processPendingMessages</span><span class="p">();</span>
 <span class="w">        </span><span class="p">}</span>
@@ -2113,7 +2113,7 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="w">        </span><span class="n">mKernel</span><span class="p">.</span><span class="n">delay</span><span class="p">(</span><span class="n">delay</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Failed to send message after %d attempts&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">maxRetries</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">"Failed to send message after %d attempts"</span><span class="p">,</span><span class="w"> </span><span class="n">maxRetries</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -2191,34 +2191,34 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="nb">project</span><span class="p">(</span><span class="s">MyApp</span><span class="p">)</span>
 
 <span class="c"># UNA SDK setup</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">UNA_SDK</span><span class="w"> </span><span class="s2">&quot;$ENV{UNA_SDK}&quot;</span><span class="w"> </span><span class="s">CACHE</span><span class="w"> </span><span class="s">PATH</span><span class="w"> </span><span class="s2">&quot;UNA SDK root directory&quot;</span><span class="p">)</span>
-<span class="nb">include</span><span class="p">(</span><span class="s2">&quot;${UNA_SDK}/cmake/una.cmake&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">UNA_SDK</span><span class="w"> </span><span class="s2">"$ENV{UNA_SDK}"</span><span class="w"> </span><span class="s">CACHE</span><span class="w"> </span><span class="s">PATH</span><span class="w"> </span><span class="s2">"UNA SDK root directory"</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="s2">"${UNA_SDK}/cmake/una.cmake"</span><span class="p">)</span>
 
 <span class="c"># Application configuration</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1B2C3D4E5F67890&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;MyApp&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"A1B2C3D4E5F67890"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"MyApp"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
 
 <span class="c"># Memory configuration</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_GUI_STACK_SIZE</span><span class="w"> </span><span class="s2">&quot;10*1024&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_GUI_RAM_LENGTH</span><span class="w"> </span><span class="s2">&quot;600K&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_SERVICE_STACK_SIZE</span><span class="w"> </span><span class="s2">&quot;10*1024&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_SERVICE_RAM_LENGTH</span><span class="w"> </span><span class="s2">&quot;500K&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_GUI_STACK_SIZE</span><span class="w"> </span><span class="s2">"10*1024"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_GUI_RAM_LENGTH</span><span class="w"> </span><span class="s2">"600K"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_SERVICE_STACK_SIZE</span><span class="w"> </span><span class="s2">"10*1024"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">UNA_APP_SERVICE_RAM_LENGTH</span><span class="w"> </span><span class="s2">"500K"</span><span class="p">)</span>
 
 <span class="c"># TouchGFX integration</span>
 <span class="nb">include</span><span class="p">(</span><span class="s">touchgfx.cmake</span><span class="p">)</span>
 
 <span class="c"># Source files</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
-<span class="w">    </span><span class="s2">&quot;gui/src/main_screen/MainView.cpp&quot;</span>
-<span class="w">    </span><span class="s2">&quot;gui/src/main_screen/MainPresenter.cpp&quot;</span>
-<span class="w">    </span><span class="s2">&quot;gui/src/model/Model.cpp&quot;</span>
+<span class="w">    </span><span class="s2">"gui/src/main_screen/MainView.cpp"</span>
+<span class="w">    </span><span class="s2">"gui/src/main_screen/MainPresenter.cpp"</span>
+<span class="w">    </span><span class="s2">"gui/src/model/Model.cpp"</span>
 <span class="w">    </span><span class="c"># ... other GUI sources</span>
 <span class="p">)</span>
 
 <span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
-<span class="w">    </span><span class="s2">&quot;Libs/Source/Service.cpp&quot;</span>
-<span class="w">    </span><span class="s2">&quot;Libs/Source/ActivityWriter.cpp&quot;</span>
+<span class="w">    </span><span class="s2">"Libs/Source/Service.cpp"</span>
+<span class="w">    </span><span class="s2">"Libs/Source/ActivityWriter.cpp"</span>
 <span class="w">    </span><span class="c"># ... other service sources</span>
 <span class="p">)</span>
 
@@ -2229,7 +2229,7 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="w">    </span><span class="s">DEV_ID</span><span class="w"> </span><span class="o">${</span><span class="nv">DEV_ID</span><span class="o">}</span>
 <span class="w">    </span><span class="s">GUI_SOURCES</span><span class="w"> </span><span class="o">${</span><span class="nv">GUI_SOURCES</span><span class="o">}</span>
 <span class="w">    </span><span class="s">SERVICE_SOURCES</span><span class="w"> </span><span class="o">${</span><span class="nv">SERVICE_SOURCES</span><span class="o">}</span>
-<span class="w">    </span><span class="s">TOUCHGFX_PROJECT</span><span class="w"> </span><span class="s2">&quot;TouchGFX-GUI&quot;</span>
+<span class="w">    </span><span class="s">TOUCHGFX_PROJECT</span><span class="w"> </span><span class="s2">"TouchGFX-GUI"</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -2241,29 +2241,29 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 
 <span class="c"># Find TouchGFX</span>
 <span class="nb">find_package</span><span class="p">(</span><span class="s">TouchGFX</span><span class="w"> </span><span class="s">REQUIRED</span>
-<span class="w">    </span><span class="s">PATHS</span><span class="w"> </span><span class="s2">&quot;${CMAKE_CURRENT_SOURCE_DIR}/TouchGFX-GUI/env&quot;</span>
+<span class="w">    </span><span class="s">PATHS</span><span class="w"> </span><span class="s2">"${CMAKE_CURRENT_SOURCE_DIR}/TouchGFX-GUI/env"</span>
 <span class="w">    </span><span class="s">NO_DEFAULT_PATH</span>
 <span class="p">)</span>
 
 <span class="c"># Configure TouchGFX</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">TouchGFX_SOURCE_DIR</span><span class="w"> </span><span class="s2">&quot;${CMAKE_CURRENT_SOURCE_DIR}/TouchGFX-GUI&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">TouchGFX_GENERATED_SOURCES_DIR</span><span class="w"> </span><span class="s2">&quot;${TouchGFX_SOURCE_DIR}/generated&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">TouchGFX_USER_CODE_DIR</span><span class="w"> </span><span class="s2">&quot;${TouchGFX_SOURCE_DIR}/gui&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">TouchGFX_SOURCE_DIR</span><span class="w"> </span><span class="s2">"${CMAKE_CURRENT_SOURCE_DIR}/TouchGFX-GUI"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">TouchGFX_GENERATED_SOURCES_DIR</span><span class="w"> </span><span class="s2">"${TouchGFX_SOURCE_DIR}/generated"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">TouchGFX_USER_CODE_DIR</span><span class="w"> </span><span class="s2">"${TouchGFX_SOURCE_DIR}/gui"</span><span class="p">)</span>
 
 <span class="c"># Add TouchGFX library</span>
-<span class="nb">add_subdirectory</span><span class="p">(</span><span class="s2">&quot;${TouchGFX_SOURCE_DIR}&quot;</span><span class="w"> </span><span class="s">TouchGFX</span><span class="p">)</span>
+<span class="nb">add_subdirectory</span><span class="p">(</span><span class="s2">"${TouchGFX_SOURCE_DIR}"</span><span class="w"> </span><span class="s">TouchGFX</span><span class="p">)</span>
 
 <span class="c"># Export variables for main CMakeLists.txt</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">TOUCHGFX_INCLUDES</span>
-<span class="w">    </span><span class="s2">&quot;${TouchGFX_SOURCE_DIR}&quot;</span>
-<span class="w">    </span><span class="s2">&quot;${TouchGFX_GENERATED_SOURCES_DIR}/include&quot;</span>
-<span class="w">    </span><span class="s2">&quot;${TouchGFX_USER_CODE_DIR}/include&quot;</span>
-<span class="w">    </span><span class="s">CACHE</span><span class="w"> </span><span class="s">INTERNAL</span><span class="w"> </span><span class="s2">&quot;TouchGFX include directories&quot;</span>
+<span class="w">    </span><span class="s2">"${TouchGFX_SOURCE_DIR}"</span>
+<span class="w">    </span><span class="s2">"${TouchGFX_GENERATED_SOURCES_DIR}/include"</span>
+<span class="w">    </span><span class="s2">"${TouchGFX_USER_CODE_DIR}/include"</span>
+<span class="w">    </span><span class="s">CACHE</span><span class="w"> </span><span class="s">INTERNAL</span><span class="w"> </span><span class="s2">"TouchGFX include directories"</span>
 <span class="p">)</span>
 
 <span class="nb">set</span><span class="p">(</span><span class="s">TOUCHGFX_SOURCES</span>
 <span class="w">    </span><span class="c"># Generated sources...</span>
-<span class="w">    </span><span class="s">CACHE</span><span class="w"> </span><span class="s">INTERNAL</span><span class="w"> </span><span class="s2">&quot;TouchGFX source files&quot;</span>
+<span class="w">    </span><span class="s">CACHE</span><span class="w"> </span><span class="s">INTERNAL</span><span class="w"> </span><span class="s2">"TouchGFX source files"</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -2292,7 +2292,7 @@ TouchGFX<span class="w"> </span>Designer<span class="w"> </span>MyApp.touchgfx
 <span class="c1"># - Import assets</span>
 
 <span class="c1"># 3. Generate code</span>
-<span class="c1"># Click &quot;Generate Code&quot; in TouchGFX Designer</span>
+<span class="c1"># Click "Generate Code" in TouchGFX Designer</span>
 
 <span class="c1"># 4. Implement custom logic</span>
 <span class="c1"># Extend generated ViewBase classes</span>
@@ -2310,9 +2310,9 @@ rm<span class="w"> </span>-rf<span class="w"> </span>build/
 mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
 
 <span class="c1"># Configure with CMake - generates build files and sets up project</span>
-<span class="c1"># -G &quot;Unix Makefiles&quot;: specifies Makefile generator for Unix systems</span>
+<span class="c1"># -G "Unix Makefiles": specifies Makefile generator for Unix systems</span>
 <span class="c1"># -DUNA_SDK=/path/to/una-sdk: sets SDK path environment variable</span>
-cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span><span class="se">\</span>
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-DUNA_SDK<span class="o">=</span>/path/to/una-sdk<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>../Software/Apps/MyApp-CMake
 
@@ -2332,14 +2332,14 @@ make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</s
 <h4>Image and Font Pipeline<a class="headerlink" href="#image-and-font-pipeline" title="Link to this heading"></a></h4>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># Asset conversion configuration</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">ASSET_CONFIG</span>
-<span class="w">    </span><span class="s2">&quot;image_format=RGB565&quot;</span>
-<span class="w">    </span><span class="s2">&quot;font_format=4bpp&quot;</span>
-<span class="w">    </span><span class="s2">&quot;compression=lz4&quot;</span>
+<span class="w">    </span><span class="s2">"image_format=RGB565"</span>
+<span class="w">    </span><span class="s2">"font_format=4bpp"</span>
+<span class="w">    </span><span class="s2">"compression=lz4"</span>
 <span class="p">)</span>
 
 <span class="c"># TouchGFX asset processing</span>
 <span class="nb">touchgfx_generate_assets</span><span class="p">(</span>
-<span class="w">    </span><span class="s">PROJECT</span><span class="w"> </span><span class="s2">&quot;${CMAKE_CURRENT_SOURCE_DIR}/TouchGFX-GUI&quot;</span>
+<span class="w">    </span><span class="s">PROJECT</span><span class="w"> </span><span class="s2">"${CMAKE_CURRENT_SOURCE_DIR}/TouchGFX-GUI"</span>
 <span class="w">    </span><span class="s">CONFIG</span><span class="w"> </span><span class="o">${</span><span class="nv">ASSET_CONFIG</span><span class="o">}</span>
 <span class="p">)</span>
 </pre></div>
@@ -2445,16 +2445,16 @@ una-package<span class="w"> </span><span class="se">\</span>
 <section id="ota-update-support">
 <h4>OTA Update Support<a class="headerlink" href="#ota-update-support" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;app&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A1B2C3D4E5F67890&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;supported_devices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;UNA Watch-V1&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"app"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A1B2C3D4E5F67890"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MyApp"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"supported_devices"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"UNA Watch-V1"</span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://updates.example.com/myapp/1.0.0&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">225256</span>
+<span class="w">    </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://updates.example.com/myapp/1.0.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"hash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">225256</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -2470,7 +2470,7 @@ una-package<span class="w"> </span><span class="se">\</span>
 
 <span class="c"># Generate build statistics</span>
 <span class="nb">add_custom_command</span><span class="p">(</span><span class="s">TARGET</span><span class="w"> </span><span class="s">MyApp</span><span class="w"> </span><span class="s">POST_BUILD</span>
-<span class="w">    </span><span class="s">COMMAND</span><span class="w"> </span><span class="o">${</span><span class="nv">CMAKE_COMMAND</span><span class="o">}</span><span class="w"> </span><span class="s">-E</span><span class="w"> </span><span class="s">echo</span><span class="w"> </span><span class="s2">&quot;Build completed&quot;</span>
+<span class="w">    </span><span class="s">COMMAND</span><span class="w"> </span><span class="o">${</span><span class="nv">CMAKE_COMMAND</span><span class="o">}</span><span class="w"> </span><span class="s">-E</span><span class="w"> </span><span class="s">echo</span><span class="w"> </span><span class="s2">"Build completed"</span>
 <span class="w">    </span><span class="s">COMMAND</span><span class="w"> </span><span class="s">size</span><span class="w"> </span><span class="o">$&lt;</span><span class="nv">TARGET_FILE:MyApp</span><span class="o">&gt;</span>
 <span class="p">)</span>
 </pre></div>
@@ -2485,7 +2485,7 @@ una-package<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">endFrame</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getTickCount</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mFrameStart</span><span class="p">;</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">duration</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">TARGET_FRAME_TIME</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">Logger</span><span class="o">::</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Frame time exceeded: %d ms&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">duration</span><span class="p">);</span>
+<span class="w">            </span><span class="n">Logger</span><span class="o">::</span><span class="n">warning</span><span class="p">(</span><span class="s">"Frame time exceeded: %d ms"</span><span class="p">,</span><span class="w"> </span><span class="n">duration</span><span class="p">);</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 

@@ -390,51 +390,51 @@
 <section id="core-fit-functionality">
 <h4><strong>Core FIT Functionality</strong><a class="headerlink" href="#core-fit-functionality" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Main ActivityWriter class</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ActivityWriter.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"ActivityWriter.hpp"</span>
 
 <span class="c1">// Native SDK::Fit streaming encoder</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Fit/FitWriter.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Fit/FitWriter.hpp"</span>
 
 <span class="c1">// FIT profile constants (message/field numbers, enums)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Fit/FitProfile.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Fit/FitProfile.hpp"</span>
 
 <span class="c1">// Kernel for file system access</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Kernel/Kernel.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Kernel/Kernel.hpp"</span>
 
 <span class="c1">// File system interface</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Interfaces/IFileSystem.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Interfaces/IFileSystem.hpp"</span>
 </pre></div>
 </div>
 </section>
 <section id="optional-sdk-fit-helpers">
 <h4><strong>Optional SDK::Fit Helpers</strong><a class="headerlink" href="#optional-sdk-fit-helpers" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Base-type identifiers, sizes and invalid sentinels</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Fit/FitBaseType.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Fit/FitBaseType.hpp"</span>
 
 <span class="c1">// FIT CRC-16 (used internally by FitWriter; rarely needed directly)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Fit/FitCrc.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Fit/FitCrc.hpp"</span>
 
 <span class="c1">// Cadence / step_length record-field encoders (running/treadmill)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/Fit/FitRecordCadence.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Fit/FitRecordCadence.hpp"</span>
 </pre></div>
 </div>
 </section>
 <section id="standard-library-headers">
 <h4><strong>Standard Library Headers</strong><a class="headerlink" href="#standard-library-headers" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdint&gt;</span><span class="c1">     // Fixed-width integer types</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdbool&gt;</span><span class="c1">   // Boolean type</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span><span class="c1">    // String manipulation</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cassert&gt;</span><span class="c1">    // Assertions</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span><span class="c1">     // Smart pointers</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="c1">     // String class</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdint&gt;</span><span class="w">     </span><span class="c1">// Fixed-width integer types</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdbool&gt;</span><span class="w">   </span><span class="c1">// Boolean type</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span><span class="w">    </span><span class="c1">// String manipulation</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cassert&gt;</span><span class="w">    </span><span class="c1">// Assertions</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span><span class="w">     </span><span class="c1">// Smart pointers</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="w">     </span><span class="c1">// String class</span>
 </pre></div>
 </div>
 </section>
 <section id="una-sdk-logger-optional-but-recommended">
 <h4><strong>UNA SDK Logger (Optional but Recommended)</strong><a class="headerlink" href="#una-sdk-logger-optional-but-recommended" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#define LOG_MODULE_PRX      &quot;YourModule&quot;</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#define LOG_MODULE_PRX      "YourModule"</span>
 <span class="cp">#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SDK/UnaLogger/Logger.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/UnaLogger/Logger.h"</span>
 </pre></div>
 </div>
 </section>
@@ -513,7 +513,7 @@
 <section id="basic-usage-3-lines-of-code">
 <h3><strong>Basic Usage (3 lines of code)</strong><a class="headerlink" href="#basic-usage-3-lines-of-code" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// 1. Create instance</span>
-<span class="n">ActivityWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/path/to/fit/files&quot;</span><span class="p">);</span>
+<span class="n">ActivityWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="s">"/path/to/fit/files"</span><span class="p">);</span>
 
 <span class="c1">// 2. Start activity</span>
 <span class="n">AppInfo</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="p">,</span><span class="w"> </span><span class="n">devID</span><span class="p">,</span><span class="w"> </span><span class="n">appID</span><span class="p">};</span>
@@ -1093,7 +1093,7 @@ buffering.</p></li>
 <h2>Step-by-Step FIT File Creation<a class="headerlink" href="#step-by-step-fit-file-creation" title="Link to this heading"></a></h2>
 <section id="initialization-phase">
 <h3>1. Initialization Phase<a class="headerlink" href="#initialization-phase" title="Link to this heading"></a></h3>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">ActivityWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/path/to/fit/files&quot;</span><span class="p">);</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">ActivityWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="s">"/path/to/fit/files"</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1492,7 +1492,7 @@ definition order at the tail of the <code class="docutils literal notranslate"><
 </pre></div>
 </div>
 <p><strong>Field Description + data write</strong>:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_TRUST_LEVEL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hr_trust_level&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;percents&quot;</span><span class="p">,</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_TRUST_LEVEL</span><span class="p">,</span><span class="w"> </span><span class="s">"hr_trust_level"</span><span class="p">,</span><span class="w"> </span><span class="s">"percents"</span><span class="p">,</span>
 <span class="w">                      </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
 
 <span class="n">mFit</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">(</span><span class="n">L_RECORD</span><span class="p">)</span>
@@ -1521,8 +1521,8 @@ definition order at the tail of the <code class="docutils literal notranslate"><
 <section id="battery-fields-running-cycling-hiking">
 <h3>Battery Fields (Running, Cycling, Hiking)<a class="headerlink" href="#battery-fields-running-cycling-hiking" title="Link to this heading"></a></h3>
 <p><strong>Field Descriptions</strong> (one redefine of the field_description slot per field):</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_LEVEL</span><span class="p">,</span><span class="w">   </span><span class="s">&quot;batteryLevel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;%&quot;</span><span class="p">,</span><span class="w">  </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
-<span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_VOLTAGE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;battVoltage&quot;</span><span class="p">,</span><span class="w">  </span><span class="s">&quot;mV&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt16</span><span class="p">);</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_LEVEL</span><span class="p">,</span><span class="w">   </span><span class="s">"batteryLevel"</span><span class="p">,</span><span class="w"> </span><span class="s">"%"</span><span class="p">,</span><span class="w">  </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
+<span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_VOLTAGE</span><span class="p">,</span><span class="w"> </span><span class="s">"battVoltage"</span><span class="p">,</span><span class="w">  </span><span class="s">"mV"</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt16</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">writeFieldDescription</span></code> redefines <code class="docutils literal notranslate"><span class="pre">L_FIELD_DESC</span></code> to size the name/units
@@ -1574,7 +1574,7 @@ description for each, then append the values at the tail of the corresponding
 <section id="trust-level-hrmonitor">
 <h3>Trust Level (HRMonitor)<a class="headerlink" href="#trust-level-hrmonitor" title="Link to this heading"></a></h3>
 <p><strong>Setup</strong> – a single uint8 developer field on the record:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_TRUST_LEVEL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hr_trust_level&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;percents&quot;</span><span class="p">,</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_TRUST_LEVEL</span><span class="p">,</span><span class="w"> </span><span class="s">"hr_trust_level"</span><span class="p">,</span><span class="w"> </span><span class="s">"percents"</span><span class="p">,</span>
 <span class="w">                      </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
 
 <span class="n">mFit</span><span class="o">-&gt;</span><span class="n">defineMessage</span><span class="p">(</span><span class="n">L_RECORD</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">mesgNum</span><span class="p">(</span><span class="n">fit</span><span class="o">::</span><span class="n">MesgNum</span><span class="o">::</span><span class="n">Record</span><span class="p">),</span>
@@ -1611,7 +1611,7 @@ description for each, then append the values at the tail of the corresponding
 │                 │ - protocol_version: 32 (2.0)
 │                 │ - profile_version: XXX
 │                 │ - data_size: XXX (updated later)
-│                 │ - data_type: &quot;.FIT&quot;
+│                 │ - data_type: ".FIT"
 │                 │ - crc: XXX (calculated later)
 └─────────────────┘
 ┌─────────────────┐
@@ -1810,11 +1810,11 @@ enums in the header (see “Constructor and Initialization”), and the
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="c1">// 4. field_description for each developer field (label/units survive any profile).</span>
-<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_LEVEL</span><span class="p">,</span><span class="w">   </span><span class="s">&quot;batteryLevel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;%&quot;</span><span class="p">,</span><span class="w">   </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
-<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_VOLTAGE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;battVoltage&quot;</span><span class="p">,</span><span class="w">  </span><span class="s">&quot;mV&quot;</span><span class="p">,</span><span class="w">  </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt16</span><span class="p">);</span>
-<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_SOURCE</span><span class="p">,</span><span class="w">       </span><span class="s">&quot;hr_source&quot;</span><span class="p">,</span><span class="w">    </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
-<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_OPTICAL</span><span class="p">,</span><span class="w">      </span><span class="s">&quot;hr_optical&quot;</span><span class="p">,</span><span class="w">   </span><span class="s">&quot;bpm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
-<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_EXTERNAL</span><span class="p">,</span><span class="w">     </span><span class="s">&quot;hr_external&quot;</span><span class="p">,</span><span class="w">  </span><span class="s">&quot;bpm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_LEVEL</span><span class="p">,</span><span class="w">   </span><span class="s">"batteryLevel"</span><span class="p">,</span><span class="w"> </span><span class="s">"%"</span><span class="p">,</span><span class="w">   </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_BATTERY_VOLTAGE</span><span class="p">,</span><span class="w"> </span><span class="s">"battVoltage"</span><span class="p">,</span><span class="w">  </span><span class="s">"mV"</span><span class="p">,</span><span class="w">  </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt16</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_SOURCE</span><span class="p">,</span><span class="w">       </span><span class="s">"hr_source"</span><span class="p">,</span><span class="w">    </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_OPTICAL</span><span class="p">,</span><span class="w">      </span><span class="s">"hr_optical"</span><span class="p">,</span><span class="w">   </span><span class="s">"bpm"</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_HR_EXTERNAL</span><span class="p">,</span><span class="w">     </span><span class="s">"hr_external"</span><span class="p">,</span><span class="w">  </span><span class="s">"bpm"</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt8</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// 5. Define the remaining message types up front.</span>
 <span class="w">    </span><span class="c1">//    Append fit::field::Event::Data here if the app reports timer_trigger</span>
@@ -2018,7 +2018,7 @@ number; the differences are the field list and the attached developer fields.</p
 <p>FIT files include a 16-bit CRC for data integrity. <strong>You don’t write it
 yourself</strong> – <code class="docutils literal notranslate"><span class="pre">FitWriter::finish()</span></code> computes and appends it. Internally it uses
 the standard FIT nibble-table CRC-16 from <code class="docutils literal notranslate"><span class="pre">SDK/Fit/FitCrc.hpp</span></code>:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">uint16_t</span><span class="w"> </span><span class="nf">fitCrcByte</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">crc</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">byte</span><span class="p">);</span><span class="w">          </span><span class="c1">// fold one byte</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">uint16_t</span><span class="w"> </span><span class="nf">fitCrcByte</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">crc</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="kt">byte</span><span class="p">);</span><span class="w">          </span><span class="c1">// fold one byte</span>
 <span class="kt">uint16_t</span><span class="w"> </span><span class="nf">fitCrcUpdate</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">crc</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w">  </span><span class="c1">// fold a buffer</span>
 </pre></div>
 </div>
@@ -2080,19 +2080,19 @@ activity is still a valid prefix on disk if recording is interrupted before
 </ul>
 <p><strong>Debug Steps</strong>:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Check path validity</span>
-<span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Path: %s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mPath</span><span class="p">);</span>
+<span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">"Path: %s"</span><span class="p">,</span><span class="w"> </span><span class="n">mPath</span><span class="p">);</span>
 
 <span class="c1">// Verify directory creation</span>
-<span class="kt">int</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snprintf</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buff</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;%s/%04u%02u/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mPath</span><span class="p">,</span><span class="w"> </span><span class="n">year</span><span class="p">,</span><span class="w"> </span><span class="n">month</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snprintf</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buff</span><span class="p">),</span><span class="w"> </span><span class="s">"%s/%04u%02u/"</span><span class="p">,</span><span class="w"> </span><span class="n">mPath</span><span class="p">,</span><span class="w"> </span><span class="n">year</span><span class="p">,</span><span class="w"> </span><span class="n">month</span><span class="p">);</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">buff</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">LOG_ERROR</span><span class="p">(</span><span class="s">&quot;Failed to create dir [%s]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buff</span><span class="p">);</span>
+<span class="w">    </span><span class="n">LOG_ERROR</span><span class="p">(</span><span class="s">"Failed to create dir [%s]"</span><span class="p">,</span><span class="w"> </span><span class="n">buff</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="c1">// Check file opening</span>
 <span class="n">mFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">file</span><span class="p">(</span><span class="n">buff</span><span class="p">);</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mFile</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">mFile</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">LOG_ERROR</span><span class="p">(</span><span class="s">&quot;Failed to create file [%s]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buff</span><span class="p">);</span>
+<span class="w">    </span><span class="n">LOG_ERROR</span><span class="p">(</span><span class="s">"Failed to create file [%s]"</span><span class="p">,</span><span class="w"> </span><span class="n">buff</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
@@ -2202,7 +2202,7 @@ profile number – don’t invent one):</p>
 </div>
 </li>
 <li><p><strong>Write a field_description</strong> in <code class="docutils literal notranslate"><span class="pre">start()</span></code> (sizes name/units exactly):</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_NEW_FIELD</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;newField&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;units&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt16</span><span class="p">);</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writeFieldDescription</span><span class="p">(</span><span class="n">DF_NEW_FIELD</span><span class="p">,</span><span class="w"> </span><span class="s">"newField"</span><span class="p">,</span><span class="w"> </span><span class="s">"units"</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">BaseType</span><span class="o">::</span><span class="n">UInt16</span><span class="p">);</span>
 </pre></div>
 </div>
 </li>
@@ -2269,8 +2269,8 @@ profile number – don’t invent one):</p>
 <h3>Using Garmin FIT SDK<a class="headerlink" href="#using-garmin-fit-sdk" title="Link to this heading"></a></h3>
 <p>The official FIT SDK provides parsing capabilities.</p>
 <p><strong>Basic Parsing Example</strong>:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;fit_decode.hpp&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;fit_mesg_listener.hpp&quot;</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">"fit_decode.hpp"</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"fit_mesg_listener.hpp"</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MyListener</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">fit</span><span class="o">::</span><span class="n">MesgListener</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -2287,7 +2287,7 @@ profile number – don’t invent one):</p>
 <span class="n">MyListener</span><span class="w"> </span><span class="n">listener</span><span class="p">;</span>
 <span class="n">decode</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(</span><span class="n">listener</span><span class="p">);</span>
 
-<span class="n">std</span><span class="o">::</span><span class="n">ifstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">&quot;activity.fit&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ios</span><span class="o">::</span><span class="n">binary</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">ifstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">"activity.fit"</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ios</span><span class="o">::</span><span class="n">binary</span><span class="p">);</span>
 <span class="n">decode</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
 </pre></div>
 </div>

@@ -197,6 +197,11 @@
 <li><p>Create <code class="docutils literal notranslate"><span class="pre">config.json</span></code> file. Detailed instructions are <a class="reference internal" href="app-config-json.html"><span class="std std-doc">here</span></a></p>
 <p><img alt="Config" src="_images/config-json.png" /></p>
 </li>
+<li><p>Set its <code class="docutils literal notranslate"><span class="pre">minKernelVersion</span></code> with the SDK resolver rather than by hand — <code class="docutils literal notranslate"><span class="pre">--stamp</span></code> raises it to the ABI-derived floor, keeping any deliberately-higher value you set (see <a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Config JSON</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>Utilities/Scripts/app_packer/min_kernel_version.py<span class="w"> </span>--stamp<span class="w"> </span>config.json
+</pre></div>
+</div>
+</li>
 <li><p>Pack the resulting <code class="docutils literal notranslate"><span class="pre">*.uapp</span></code>, <code class="docutils literal notranslate"><span class="pre">icon.png</span></code>, and <code class="docutils literal notranslate"><span class="pre">config.json</span></code> into a <code class="docutils literal notranslate"><span class="pre">*.zip</span></code> archive.</p>
 <p><img alt="Archive" src="_images/archive.png" /></p>
 </li>

@@ -259,7 +259,7 @@
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">run()</span></code> blocks on the message queue with a <strong>computed timeout</strong>:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sleepTime = mTimerManager.execute(now)   // ms to expiry while RUNNING, else &quot;no timeout&quot;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sleepTime = mTimerManager.execute(now)   // ms to expiry while RUNNING, else "no timeout"
 pumpWidget(now, sleepTime)               // may shorten it to the next whole second
 </pre></div>
 </div>
@@ -355,7 +355,7 @@ pumpWidget(now, sleepTime)               // may shorten it to the next whole sec
 <h3>Home-screen widget<a class="headerlink" href="#home-screen-widget" title="Link to this heading"></a></h3>
 <p>While the app is <strong>backgrounded</strong> and a countdown is <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code> or <code class="docutils literal notranslate"><span class="pre">PAUSED</span></code>, <code class="docutils literal notranslate"><span class="pre">pumpWidget()</span></code> claims the kernel’s single home-widget slot and pushes the live reading:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">mWidget</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">WIDGET_SHOW_TEXT</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">WIDGET_SHOW_PERCENT</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">WIDGET_PROGRESS_FROM_END</span><span class="p">,</span>
-<span class="w">               </span><span class="n">percent</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;MM:SS&quot;</span><span class="p">);</span>
+<span class="w">               </span><span class="n">percent</span><span class="p">,</span><span class="w"> </span><span class="s">"MM:SS"</span><span class="p">);</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -429,7 +429,7 @@ pumpWidget(now, sleepTime)               // may shorten it to the next whole sec
 <section id="recents-persistence">
 <h3>Recents persistence<a class="headerlink" href="#recents-persistence" title="Link to this heading"></a></h3>
 <p>The last <code class="docutils literal notranslate"><span class="pre">Timer::kMaxRecents</span></code> (3) manually entered timers are stored as JSON in <code class="docutils literal notranslate"><span class="pre">timer.json</span></code>, using the SDK JSON stream reader/writer:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;recents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;sec&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;beep_vibro&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">"recents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"sec"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="nt">"effect"</span><span class="p">:</span><span class="w"> </span><span class="s2">"beep_vibro"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Entries are validated on load (duration <code class="docutils literal notranslate"><span class="pre">&lt;=</span> <span class="pre">99:59</span></code>, effect one of <code class="docutils literal notranslate"><span class="pre">beep_vibro</span></code> / <code class="docutils literal notranslate"><span class="pre">vibro</span></code> / <code class="docutils literal notranslate"><span class="pre">beep</span></code>) and capped to three. A timer’s <strong>identity is its duration</strong> (<code class="docutils literal notranslate"><span class="pre">Timer::operator==</span></code> compares <code class="docutils literal notranslate"><span class="pre">durationSec</span></code> only): the wheel shows only the time, so two timers of the same length are one entry, with the effect carried alongside as a last-used detail.</p>
@@ -617,12 +617,12 @@ pumpWidget(now, sleepTime)               // may shorten it to the next whole sec
 <section id="build-system-overview">
 <h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
 <p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Timer/Software/Apps/Timer-CMake/</span></code></p>
-<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Timer&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">&quot;Timer&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Utility&quot;</span><span class="p">)</span>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"Timer"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">"Timer"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Utility"</span><span class="p">)</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">APP_AUTOSTART</span><span class="w"> </span><span class="s">Off</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1D74A3F0CFF98D3&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"A1D74A3F0CFF98D3"</span><span class="p">)</span>
 
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>

@@ -231,7 +231,7 @@ Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html
 <li><p>Ensure the ST toolchain is on your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p></li>
 </ol>
 <p>If you installed <strong>CubeCLT</strong>, the toolchain is typically under:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
 </pre></div>
 </div>
 <p>If <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> is still not found and you installed <strong>CubeIDE</strong>, add the directory that contains <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> to your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> (it is usually a <code class="docutils literal notranslate"><span class="pre">.../plugins/...gnu-tools-for-stm32.../tools/bin</span></code> folder inside the CubeIDE installation).</p>
@@ -243,10 +243,10 @@ git<span class="w"> </span>clone<span class="w"> </span>https://github.com/UNAWa
 <span class="nb">cd</span><span class="w"> </span>una-sdk
 
 <span class="c1"># Export environment for the current shell</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">"</span>
 
 <span class="c1"># Satisfy python dependencies</span>
-python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UNA_SDK</span><span class="s2">/Utilities/Scripts/app_packer/requirements.txt&quot;</span>
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="nv">$UNA_SDK</span><span class="s2">/Utilities/Scripts/app_packer/requirements.txt"</span>
 </pre></div>
 </div>
 </section>
@@ -272,13 +272,13 @@ make<span class="w"> </span>--version<span class="w"> </span><span class="o">||<
 <p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
 <p>This uses the same <strong>Alarm CMake</strong> example flow as Windows: <strong>copy project → create build dir → configure → build</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copy entire project for simplicity</span>
-cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UNA_SDK</span><span class="s2">/Examples/Apps/Alarm/&quot;</span>*<span class="w"> </span>MyAlarm
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="nv">$UNA_SDK</span><span class="s2">/Examples/Apps/Alarm/"</span>*<span class="w"> </span>MyAlarm
 
 <span class="c1"># Create build dir</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>MyAlarm/build
 
 <span class="c1"># Configure</span>
-cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>-S<span class="w"> </span>MyAlarm/Software/Apps/Alarm-CMake<span class="w"> </span>-B<span class="w"> </span>MyAlarm/build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>-S<span class="w"> </span>MyAlarm/Software/Apps/Alarm-CMake<span class="w"> </span>-B<span class="w"> </span>MyAlarm/build
 
 <span class="c1"># Build</span>
 cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
@@ -291,14 +291,14 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <h5>Persist <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> and toolchain <code class="docutils literal notranslate"><span class="pre">PATH</span></code><a class="headerlink" href="#persist-una-sdk-and-toolchain-path" title="Link to this heading"></a></h5>
 <p>If you don’t want to export variables every time, add them to your shell profile.</p>
 <p>For bash:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export UNA_SDK=&quot;$HOME/path/to/una-sdk&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
-<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export UNA_SDK="$HOME/path/to/una-sdk"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
 <span class="nb">source</span><span class="w"> </span>~/.bashrc
 </pre></div>
 </div>
 <p>For zsh:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export UNA_SDK=&quot;$HOME/path/to/una-sdk&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
-<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export UNA_SDK="$HOME/path/to/una-sdk"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
 <span class="nb">source</span><span class="w"> </span>~/.zshrc
 </pre></div>
 </div>
@@ -352,14 +352,14 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
 <div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Copy entire project for simplicity</span>
 <span class="c"># Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).</span>
-<span class="c"># If you get &quot;Container cannot be copied onto existing leaf item&quot; error, restart PowerShell and try again.</span>
-<span class="nb">cp </span><span class="s2">&quot;${env:UNA_SDK}\Examples\Apps\Alarm\*&quot;</span> <span class="n">MyAlarm</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
+<span class="c"># If you get "Container cannot be copied onto existing leaf item" error, restart PowerShell and try again.</span>
+<span class="nb">cp </span><span class="s2">"${env:UNA_SDK}\Examples\Apps\Alarm\*"</span> <span class="n">MyAlarm</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
 
 <span class="c"># Create build dir</span>
 <span class="n">mkdir</span> <span class="n">-p</span> <span class="n">MyAlarm</span><span class="p">\</span><span class="n">build</span>
 
 <span class="c"># Call CMake</span>
-<span class="n">cmake</span> <span class="n">-G</span> <span class="s2">&quot;Unix Makefiles&quot;</span> <span class="n">-S</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">Software</span><span class="p">/</span><span class="n">Apps</span><span class="p">/</span><span class="n">Alarm-CMake</span> <span class="n">-B</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
+<span class="n">cmake</span> <span class="n">-G</span> <span class="s2">"Unix Makefiles"</span> <span class="n">-S</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">Software</span><span class="p">/</span><span class="n">Apps</span><span class="p">/</span><span class="n">Alarm-CMake</span> <span class="n">-B</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
 
 <span class="c"># Build</span>
 <span class="n">cmake</span> <span class="p">-</span><span class="n">-build</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
@@ -370,7 +370,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <h4>Troubleshooting Windows Setup<a class="headerlink" href="#troubleshooting-windows-setup" title="Link to this heading"></a></h4>
 <p>If you encounter errors like “include could not find requested file: /cmake/una-app.cmake” or “/cmake/una-sdk.cmake”, ensure the <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable is set. Run the export script with dot sourcing to apply it to the current shell: <code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">./una-sdk/Utilities/Scripts/export-stm32-tools.ps1</span></code>. Reboot your PC or restart PowerShell if issues persist, as environment variables may not apply immediately.</p>
 <p>If CMake reports “CMAKE_MAKE_PROGRAM is not set”, “CMAKE_C_COMPILER not set”, or “CMAKE_CXX_COMPILER not set”, even after setting environment variables, add the following compiler flags to the CMake command:</p>
-<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">cmake</span> <span class="n">-G</span> <span class="s2">&quot;Unix Makefiles&quot;</span> <span class="n">-DCMAKE_SYSTEM_NAME</span><span class="p">=</span><span class="n">Generic</span> <span class="n">-DCMAKE_C_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-gcc</span> <span class="n">-DCMAKE_CXX_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-g</span><span class="p">++</span> <span class="n">-DCMAKE_TRY_COMPILE_TARGET_TYPE</span><span class="p">=</span><span class="n">STATIC_LIBRARY</span> <span class="n">-DCMAKE_ASM_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-gcc</span> <span class="n">-S</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">Software</span><span class="p">/</span><span class="n">Apps</span><span class="p">/</span><span class="n">Alarm-CMake</span> <span class="n">-B</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">cmake</span> <span class="n">-G</span> <span class="s2">"Unix Makefiles"</span> <span class="n">-DCMAKE_SYSTEM_NAME</span><span class="p">=</span><span class="n">Generic</span> <span class="n">-DCMAKE_C_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-gcc</span> <span class="n">-DCMAKE_CXX_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-g</span><span class="p">++</span> <span class="n">-DCMAKE_TRY_COMPILE_TARGET_TYPE</span><span class="p">=</span><span class="n">STATIC_LIBRARY</span> <span class="n">-DCMAKE_ASM_COMPILER</span><span class="p">=</span><span class="n">arm-none-eabi-gcc</span> <span class="n">-S</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">Software</span><span class="p">/</span><span class="n">Apps</span><span class="p">/</span><span class="n">Alarm-CMake</span> <span class="n">-B</span> <span class="n">MyAlarm</span><span class="p">/</span><span class="n">build</span>
 </pre></div>
 </div>
 <p>Then proceed with the build step: <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">MyAlarm/build</span></code>.</p>
@@ -417,7 +417,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 To create a new app, copy an existing one from Examples/Apps (replace <app-name> with e.g., “Alarm” or “HRMonitor”). There are two ways: an easy way without renaming (no path changes needed) and an optional way to fully rename and reorganize.</p>
 <p><strong>Easy Way (No Renaming, Minimal Changes):</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copy the entire app folder</span>
-cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;&quot;</span><span class="w"> </span>MyApp
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;"</span><span class="w"> </span>MyApp
 
 <span class="c1"># Copy or create icons in MyApp/Resources/ if needed (required: icon_30x30.png, icon_60x60.png)</span>
 </pre></div>
@@ -435,15 +435,15 @@ If you want to match your app name or change folder structure:</p>
 mkdir<span class="w"> </span>-p<span class="w"> </span>MyApp/Software/Apps/MyApp-CMake<span class="w"> </span>MyApp/Software/Libs<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI<span class="w"> </span>MyApp/Resources<span class="w"> </span>MyApp/Output
 
 <span class="c1"># Copy and rename CMake folder contents</span>
-cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Apps/&lt;app-name&gt;-CMake/*&quot;</span><span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Apps/&lt;app-name&gt;-CMake/*"</span><span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/
 <span class="c1"># Rename internal files, e.g.:</span>
 mv<span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/&lt;app-name&gt;Service.ld<span class="w"> </span>MyApp/Software/Apps/MyApp-CMake/MyAppService.ld
 
 <span class="c1"># Copy libs (or move to custom path and update LIBS_PATH in CMakeLists.txt)</span>
-cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Libs/*&quot;</span><span class="w"> </span>MyApp/Software/Libs/
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Libs/*"</span><span class="w"> </span>MyApp/Software/Libs/
 
 <span class="c1"># Copy TouchGFX (skip if not GUI; adjust TOUCHGFX_PATH if moved)</span>
-cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Apps/TouchGFX-GUI/*&quot;</span><span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/
+cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">UNA_SDK</span><span class="si">}</span><span class="s2">/Examples/Apps/&lt;app-name&gt;/Software/Apps/TouchGFX-GUI/*"</span><span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/
 <span class="c1"># Rename TouchGFX project if desired:</span>
 mv<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/&lt;app-name&gt;GUI.touchgfx<span class="w"> </span>MyApp/Software/Apps/TouchGFX-GUI/MyAppGUI.touchgfx
 
@@ -519,7 +519,7 @@ Ensure the <code class="docutils literal notranslate"><span class="pre">UNA_SDK<
 <span class="c1"># Ensure UNA_SDK and other vars are exported</span>
 
 <span class="c1"># Configure (creates build dir)</span>
-cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build
 
 <span class="c1"># Build</span>
 cmake<span class="w"> </span>--build<span class="w"> </span>build

@@ -374,7 +374,7 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
 <span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">StopwatchState</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;StopwatchState must fit the largest kernel message pool block&quot;</span><span class="p">);</span>
+<span class="w">              </span><span class="s">"StopwatchState must fit the largest kernel message pool block"</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The second constructor fills the snapshot and delegates to the first — the shape every example app
@@ -538,11 +538,11 @@ timeout bounds the wait for the reply, not for queue space — no send waits out
 <section id="build-system-overview">
 <h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
 <p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Stopwatch/Software/Apps/Stopwatch-CMake/</span></code></p>
-<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Stopwatch&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">&quot;Stopwatch&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Utility&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A159B1C005CFD2A5&quot;</span><span class="p">)</span>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"Stopwatch"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">"Stopwatch"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Utility"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"A159B1C005CFD2A5"</span><span class="p">)</span>
 
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>

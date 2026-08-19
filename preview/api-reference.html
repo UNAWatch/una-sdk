@@ -1758,7 +1758,7 @@
 <p>This overload copies the provided item into the queue. Use this when the caller still needs to keep and modify its own copy of the object after the call.</p>
 <p>Example usage (caller keeps its own variable): <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MyType</span> <span class="n">msg</span><span class="p">{</span><span class="n">data</span><span class="p">};</span>
 <span class="n">queue</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span> <span class="o">//</span> <span class="n">copy</span>
-<span class="o">//</span> <span class="s1">&#39;msg&#39;</span> <span class="ow">and</span> <span class="s1">&#39;data&#39;</span> <span class="n">can</span> <span class="n">still</span> <span class="n">be</span> <span class="n">used</span><span class="o">/</span><span class="n">modified</span>
+<span class="o">//</span> <span class="s1">'msg'</span> <span class="ow">and</span> <span class="s1">'data'</span> <span class="n">can</span> <span class="n">still</span> <span class="n">be</span> <span class="n">used</span><span class="o">/</span><span class="n">modified</span>
 </pre></div>
 </div>
 </p>
@@ -1782,7 +1782,7 @@
 <p>This overload moves the provided item into the queue. Use this when the item is no longer needed by the caller after the call. This avoids copying and can eliminate heap allocations (e.g. for vectors inside the item).</p>
 <p>Example usage (one-shot event object): <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MyType</span> <span class="n">ev</span><span class="p">{</span><span class="n">data</span><span class="p">};</span>
 <span class="n">queue</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">move</span><span class="p">(</span><span class="n">ev</span><span class="p">));</span> <span class="o">//</span> <span class="n">move</span>
-<span class="o">//</span> <span class="s1">&#39;ev&#39;</span> <span class="ow">is</span> <span class="n">now</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">valid</span> <span class="n">but</span> <span class="n">unspecified</span> <span class="n">state</span>
+<span class="o">//</span> <span class="s1">'ev'</span> <span class="ow">is</span> <span class="n">now</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">valid</span> <span class="n">but</span> <span class="n">unspecified</span> <span class="n">state</span>
 </pre></div>
 </div>
 </p>

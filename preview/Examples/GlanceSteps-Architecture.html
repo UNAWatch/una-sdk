@@ -250,7 +250,7 @@
 </div>
 <p><strong>Glance UI Components:</strong></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">Form</span><span class="w">        </span><span class="n">mGlanceUI</span><span class="p">;</span><span class="w">      </span><span class="c1">// Main glance form</span>
-<span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">ControlText</span><span class="w"> </span><span class="n">mGlanceTitle</span><span class="p">;</span><span class="w">   </span><span class="c1">// &quot;Steps&quot; title</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">ControlText</span><span class="w"> </span><span class="n">mGlanceTitle</span><span class="p">;</span><span class="w">   </span><span class="c1">// "Steps" title</span>
 <span class="n">SDK</span><span class="o">::</span><span class="n">Glance</span><span class="o">::</span><span class="n">ControlText</span><span class="w"> </span><span class="n">mGlanceValue</span><span class="p">;</span><span class="w">   </span><span class="c1">// Step count value display</span>
 </pre></div>
 </div>
@@ -275,15 +275,15 @@
 <span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">StepCounter</span><span class="w"> </span><span class="n">p</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;steps = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getStepCount</span><span class="p">());</span>
+<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">"steps = %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getStepCount</span><span class="p">());</span>
 <span class="w">            </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">newValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getStepCount</span><span class="p">();</span>
 <span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mStepsValue</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">newValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="n">mStepsValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newValue</span><span class="p">;</span>
-<span class="w">                </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;%u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mStepsValue</span><span class="p">);</span>
+<span class="w">                </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"%u"</span><span class="p">,</span><span class="w"> </span><span class="n">mStepsValue</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 
 <span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mDataReceived</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">mStepsValue</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;%u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mStepsValue</span><span class="p">);</span>
+<span class="w">                </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"%u"</span><span class="p">,</span><span class="w"> </span><span class="n">mStepsValue</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 
 <span class="w">            </span><span class="n">mDataReceived</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
@@ -332,12 +332,12 @@
 <span class="w">    </span><span class="c1">// Step counter icon (60x60 pixels)</span>
 <span class="w">    </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">createImage</span><span class="p">().</span><span class="n">init</span><span class="p">({</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">},</span><span class="w"> </span><span class="n">ICON_60X60_ABGR2222</span><span class="p">);</span>
 
-<span class="w">    </span><span class="c1">// Title text &quot;Steps&quot;</span>
+<span class="w">    </span><span class="c1">// Title text "Steps"</span>
 <span class="w">    </span><span class="n">mGlanceTitle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mGlanceUI</span><span class="p">.</span><span class="n">createText</span><span class="p">();</span>
 <span class="w">    </span><span class="n">mGlanceTitle</span><span class="p">.</span><span class="n">pos</span><span class="p">({</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="p">})</span>
 <span class="w">        </span><span class="p">.</span><span class="n">font</span><span class="p">(</span><span class="n">GlanceFont_t</span><span class="o">::</span><span class="n">GLANCE_FONT_POPPINS_SEMIBOLD_20</span><span class="p">)</span>
 <span class="w">        </span><span class="p">.</span><span class="n">color</span><span class="p">(</span><span class="n">GlanceColor_t</span><span class="o">::</span><span class="n">GLANCE_COLOR_TEAL</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Steps&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="s">"Steps"</span><span class="p">)</span>
 <span class="w">        </span><span class="p">.</span><span class="n">alignment</span><span class="p">(</span><span class="n">GlanceAlignH_t</span><span class="o">::</span><span class="n">GLANCE_ALIGN_H_CENTER</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// Step count value display</span>
@@ -345,7 +345,7 @@
 <span class="w">    </span><span class="n">mGlanceValue</span><span class="p">.</span><span class="n">pos</span><span class="p">({</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="w"> </span><span class="p">})</span>
 <span class="w">        </span><span class="p">.</span><span class="n">font</span><span class="p">(</span><span class="n">GlanceFont_t</span><span class="o">::</span><span class="n">GLANCE_FONT_POPPINS_SEMIBOLD_30</span><span class="p">)</span>
 <span class="w">        </span><span class="p">.</span><span class="n">color</span><span class="p">(</span><span class="n">GlanceColor_t</span><span class="o">::</span><span class="n">GLANCE_COLOR_WHITE</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">setText</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
 <span class="w">        </span><span class="p">.</span><span class="n">alignment</span><span class="p">(</span><span class="n">GlanceAlignH_t</span><span class="o">::</span><span class="n">GLANCE_ALIGN_H_CENTER</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
@@ -424,14 +424,14 @@
 <p><strong>Sensor Availability Management:</strong></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::connect</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSensorPedo</span><span class="p">.</span><span class="n">isConnected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Connect to sensors...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">"Connect to sensors...</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 <span class="w">        </span><span class="n">mSensorPedo</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kt">void</span><span class="w"> </span><span class="nf">Service::disconnect</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorPedo</span><span class="p">.</span><span class="n">isConnected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Disconnect from sensors...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">"Disconnect from sensors...</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 <span class="w">        </span><span class="n">mSensorPedo</span><span class="p">.</span><span class="n">disconnect</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
@@ -504,11 +504,11 @@
 <h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
 <p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">GlanceSteps-CMake/</span></code></p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;GlanceSteps&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">&quot;Steps&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Glance&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;8899AABBCCDDEEFF&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"GlanceSteps"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">"Steps"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Glance"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"8899AABBCCDDEEFF"</span><span class="p">)</span>
 
 <span class="c"># Include SDK build scripts</span>
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>

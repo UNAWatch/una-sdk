@@ -209,7 +209,7 @@
 <ol class="arabic">
 <li><p><strong>Verify your environment setup</strong> (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a> for details):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$UNA_SDK</span><span class="w">                   </span><span class="c1"># Should point to SDK root. </span>
-<span class="w">                                </span><span class="c1"># Note for backward compatibility with linux path notation it uses &#39;/&#39;</span>
+<span class="w">                                </span><span class="c1"># Note for backward compatibility with linux path notation it uses '/'</span>
 
 which<span class="w"> </span>arm-none-eabi-gcc<span class="w">         </span><span class="c1"># Should find ST toolchain</span>
 which<span class="w"> </span>cmake<span class="w">                     </span><span class="c1"># Should find CMake</span>
@@ -223,7 +223,7 @@ which<span class="w"> </span>cmake<span class="w">                     </span><s
 </li>
 <li><p><strong>Build the application:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
-cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>../Software/Apps/HelloWorld-CMake
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/HelloWorld-CMake
 make
 </pre></div>
 </div>
@@ -260,7 +260,7 @@ make
 </ul>
 </li>
 <li><p><strong>Rebuild the app</strong> to include your GUI changes:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;Unix Makefiles&quot;</span><span class="w"> </span>/path/to/HelloWorld-CMake<span class="w"> </span><span class="c1"># If artifacts has been changed</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>/path/to/HelloWorld-CMake<span class="w"> </span><span class="c1"># If artifacts has been changed</span>
 make
 </pre></div>
 </div>

@@ -634,19 +634,19 @@ zip both key on the file name</p></li>
 <h3>Usage Examples<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Preview changes (dry run)</strong>:</p>
-<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span><span class="p">.</span><span class="n">exe</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="s2">&quot;Utilities/Scripts/export-stm32-tools.ps1&quot;</span> <span class="n">-DryRun</span>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span><span class="p">.</span><span class="n">exe</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="s2">"Utilities/Scripts/export-stm32-tools.ps1"</span> <span class="n">-DryRun</span>
 </pre></div>
 </div>
 <p>Output shows paths to add and UNA_SDK value.</p>
 </li>
 <li><p><strong>Apply environment setup</strong>:</p>
-<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span><span class="p">.</span><span class="n">exe</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="s2">&quot;Utilities/Scripts/export-stm32-tools.ps1&quot;</span>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span><span class="p">.</span><span class="n">exe</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="s2">"Utilities/Scripts/export-stm32-tools.ps1"</span>
 </pre></div>
 </div>
 <p>Permanently updates PATH and sets UNA_SDK.</p>
 </li>
 <li><p><strong>Run from PowerShell directly</strong>:</p>
-<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="p">&amp;</span> <span class="s2">&quot;Utilities/Scripts/export-stm32-tools.ps1&quot;</span>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="p">&amp;</span> <span class="s2">"Utilities/Scripts/export-stm32-tools.ps1"</span>
 </pre></div>
 </div>
 </li>
@@ -1013,7 +1013,7 @@ zip both key on the file name</p></li>
 </pre></div>
 </div>
 <p>Output:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;cmake_apps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Buttons&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Display&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Touch&quot;</span><span class="p">]}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">"cmake_apps"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Buttons"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Display"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Touch"</span><span class="p">]}</span>
 </pre></div>
 </div>
 </li>
@@ -1027,8 +1027,8 @@ zip both key on the file name</p></li>
 </div>
 </li>
 <li><p><strong>Exclude specific apps via environment</strong>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">APPS_EXCLUDED</span><span class="o">=</span><span class="s2">&quot;OldTutorial</span>
-<span class="s2">DeprecatedApp&quot;</span><span class="w"> </span>python3<span class="w"> </span>.github/scripts/generate-tutorials-app-list.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">APPS_EXCLUDED</span><span class="o">=</span><span class="s2">"OldTutorial</span>
+<span class="s2">DeprecatedApp"</span><span class="w"> </span>python3<span class="w"> </span>.github/scripts/generate-tutorials-app-list.py
 </pre></div>
 </div>
 </li>
@@ -1072,7 +1072,7 @@ zip both key on the file name</p></li>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>.github/scripts/generate-app-list.py
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">APPS_EXCLUDED</span><span class="o">=</span><span class="s2">&quot;BetaApp&quot;</span><span class="w"> </span>python3<span class="w"> </span>.github/scripts/generate-app-list.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">APPS_EXCLUDED</span><span class="o">=</span><span class="s2">"BetaApp"</span><span class="w"> </span>python3<span class="w"> </span>.github/scripts/generate-app-list.py
 </pre></div>
 </div>
 </section>

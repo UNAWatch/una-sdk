@@ -440,9 +440,9 @@ Location:
 <li><p>Find <strong>“TouchGfxPath”:</strong> and update the relative path to
 <code class="docutils literal notranslate"><span class="pre">&lt;una_sdk&gt;/ThirdParty/touchgfx.</span></code>
 Example:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="s">&quot;SelectedStartupLanguage&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;GB&quot;</span><span class="p">,</span>
-<span class="w"> </span><span class="s">&quot;TouchGfxPath&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;touchgfx&quot;</span><span class="p">,</span>
-<span class="w"> </span><span class="s">&quot;UIPath&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="p">,</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="s">"SelectedStartupLanguage"</span><span class="o">:</span><span class="w"> </span><span class="s">"GB"</span><span class="p">,</span>
+<span class="w"> </span><span class="s">"TouchGfxPath"</span><span class="o">:</span><span class="w"> </span><span class="s">"touchgfx"</span><span class="p">,</span>
+<span class="w"> </span><span class="s">"UIPath"</span><span class="o">:</span><span class="w"> </span><span class="s">"."</span><span class="p">,</span>
 </pre></div>
 </div>
 </li>
@@ -462,7 +462,7 @@ See: <a class="reference internal" href="#install-una-sdk-variable"><span class=
 sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>build-essential<span class="w"> </span>libsdl2-dev<span class="w"> </span>libsdl2-image-dev<span class="w"> </span>libjpeg-dev<span class="w"> </span>ruby<span class="w"> </span>ruby-nokogiri
 
 <span class="c1"># Build (UNA_SDK is the absolute path to the repo root)</span>
-<span class="nv">UNA_SDK</span><span class="o">=</span>/absolute/path/to/una-sdk<span class="w"> </span>make<span class="w"> </span>-f<span class="w"> </span>simulator/gcc/Makefile<span class="w"> </span>-j<span class="s2">&quot;</span><span class="k">$(</span>nproc<span class="k">)</span><span class="s2">&quot;</span>
+<span class="nv">UNA_SDK</span><span class="o">=</span>/absolute/path/to/una-sdk<span class="w"> </span>make<span class="w"> </span>-f<span class="w"> </span>simulator/gcc/Makefile<span class="w"> </span>-j<span class="s2">"</span><span class="k">$(</span>nproc<span class="k">)</span><span class="s2">"</span>
 
 <span class="c1"># Run headless (no X display needed)</span>
 <span class="nv">SDL_VIDEODRIVER</span><span class="o">=</span>dummy<span class="w"> </span><span class="nv">SDL_AUDIODRIVER</span><span class="o">=</span>dummy<span class="w"> </span>./build/bin/simulator.out

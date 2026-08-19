@@ -368,7 +368,7 @@
 <span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="n">parser</span><span class="p">.</span><span class="n">getCoordinates</span><span class="p">(</span><span class="n">mGps</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">longitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">altitude</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
-<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">&quot;Location: fix %u, lat %f, lon %f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">longitude</span><span class="p">);</span>
+<span class="w">            </span><span class="n">LOG_DEBUG</span><span class="p">(</span><span class="s">"Location: fix %u, lat %f, lon %f</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">longitude</span><span class="p">);</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="c1">// ... additional sensor handlers</span>
@@ -1039,10 +1039,10 @@
 <h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
 <p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in <code class="docutils literal notranslate"><span class="pre">Hiking/Software/Apps/Hiking-CMake/</span></code></p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">&quot;Hiking&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">&quot;Activity&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">&quot;UNA&quot;</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">&quot;A1F3C92B7E4D8A10&quot;</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"Hiking"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Activity"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"A1F3C92B7E4D8A10"</span><span class="p">)</span>
 
 <span class="c"># Include SDK build scripts</span>
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
