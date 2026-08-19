@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNA Watch — BLE Services Overview &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to Deploy" href="deploy.html" />
+    <link rel="prev" title="UNA Watch — BLE File Transfer Service (FTS)" href="BLE-File-Transfer-Service.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">UNA Watch — BLE Services Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#services">Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#device-information-0x180a">Device Information (<code class="docutils literal notranslate"><span class="pre">0x180A</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#current-time-0x1805">Current Time (<code class="docutils literal notranslate"><span class="pre">0x1805</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#battery-0x180f">Battery (<code class="docutils literal notranslate"><span class="pre">0x180F</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nordic-uart-6e400001-b5a3-f393-e0a9-e50e24dcca9e">Nordic UART (<code class="docutils literal notranslate"><span class="pre">6E400001-B5A3-F393-E0A9-E50E24DCCA9E</span></code>)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">UNA Watch — BLE Services Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/BLE-Services-Overview.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="una-watch-ble-services-overview">
+<h1>UNA Watch — BLE Services Overview<a class="headerlink" href="#una-watch-ble-services-overview" title="Link to this heading"></a></h1>
+<p>This is the map of the GATT services a UNA Watch exposes over Bluetooth Low
+Energy. Most are <strong>standard Bluetooth SIG or vendor services</strong> — any BLE tool
+recognizes them. The File Transfer Service has its own reference:
+<a class="reference internal" href="BLE-File-Transfer-Service.html"><span class="std std-doc">BLE-File-Transfer-Service.md</span></a>.</p>
+<p><strong>Security.</strong> The watch requires a <strong>bonded, encrypted connection</strong>. Pair with
+the watch before reading or writing any characteristic.</p>
+<section id="services">
+<h2>Services<a class="headerlink" href="#services" title="Link to this heading"></a></h2>
+<p>The standard Bluetooth SIG and Nordic services follow their published
+specifications — refer to those documents for field formats. The File Transfer
+Service is UNA’s (Adafruit-based); see its own reference.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Service</p></th>
+<th class="head"><p>UUID</p></th>
+<th class="head"><p>Source</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Device Information</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x180A</span></code></p></td>
+<td><p>Bluetooth SIG</p></td>
+<td><p>Manufacturer, model, serial, firmware/hardware revisions</p></td>
+</tr>
+<tr class="row-odd"><td><p>Current Time</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x1805</span></code></p></td>
+<td><p>Bluetooth SIG</p></td>
+<td><p>Time sync from the phone</p></td>
+</tr>
+<tr class="row-even"><td><p>Battery</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x180F</span></code></p></td>
+<td><p>Bluetooth SIG</p></td>
+<td><p>Battery level</p></td>
+</tr>
+<tr class="row-odd"><td><p>File Transfer</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0xFEBB</span></code></p></td>
+<td><p>Adafruit</p></td>
+<td><p>File read/write, OTA — see its own reference</p></td>
+</tr>
+<tr class="row-even"><td><p>Nordic UART</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6E400001-B5A3-F393-E0A9-E50E24DCCA9E</span></code></p></td>
+<td><p>Nordic</p></td>
+<td><p>Serial-style data channel</p></td>
+</tr>
+</tbody>
+</table>
+<section id="device-information-0x180a">
+<h3>Device Information (<code class="docutils literal notranslate"><span class="pre">0x180A</span></code>)<a class="headerlink" href="#device-information-0x180a" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Characteristic</p></th>
+<th class="head"><p>UUID</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Manufacturer Name</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A29</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Model Number</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A24</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Serial Number</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A25</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Firmware Revision</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A26</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Hardware Revision</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A27</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Reading <code class="docutils literal notranslate"><span class="pre">0x2A26</span></code> is the supported way to discover the watch’s firmware version.</p>
+</section>
+<section id="current-time-0x1805">
+<h3>Current Time (<code class="docutils literal notranslate"><span class="pre">0x1805</span></code>)<a class="headerlink" href="#current-time-0x1805" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Characteristic</p></th>
+<th class="head"><p>UUID</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Current Time</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A2B</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Local Time Information</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A0F</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="battery-0x180f">
+<h3>Battery (<code class="docutils literal notranslate"><span class="pre">0x180F</span></code>)<a class="headerlink" href="#battery-0x180f" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Characteristic</p></th>
+<th class="head"><p>UUID</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Battery Level</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x2A19</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Standard <code class="docutils literal notranslate"><span class="pre">uint8</span></code> percentage; subscribe for notifications on level change.</p>
+</section>
+<section id="nordic-uart-6e400001-b5a3-f393-e0a9-e50e24dcca9e">
+<h3>Nordic UART (<code class="docutils literal notranslate"><span class="pre">6E400001-B5A3-F393-E0A9-E50E24DCCA9E</span></code>)<a class="headerlink" href="#nordic-uart-6e400001-b5a3-f393-e0a9-e50e24dcca9e" title="Link to this heading"></a></h3>
+<p>A Nordic UART Service (serial-style channel). Note the two data characteristics
+are <strong>swapped relative to Nordic’s usual convention</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Characteristic</p></th>
+<th class="head"><p>UUID</p></th>
+<th class="head"><p>Direction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Watch → client</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6E400002-B5A3-F393-E0A9-E50E24DCCA9E</span></code></p></td>
+<td><p>Notify</p></td>
+</tr>
+<tr class="row-odd"><td><p>Client → watch</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6E400003-B5A3-F393-E0A9-E50E24DCCA9E</span></code></p></td>
+<td><p>Write / Write Without Response</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
+<p><em>Bluetooth SIG service/characteristic formats are defined by the Bluetooth SIG;
+the File Transfer Service is based on the Adafruit protocol (see its reference).</em></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="BLE-File-Transfer-Service.html" class="btn btn-neutral float-left" title="UNA Watch — BLE File Transfer Service (FTS)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deploy.html" class="btn btn-neutral float-right" title="How to Deploy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

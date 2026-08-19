@@ -1,0 +1,1396 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App Configuration Fields &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0d76e731" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api-reference.html" />
+    <link rel="prev" title="App Manifest JSON" href="app-config-json.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">App Configuration Fields</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#revision-history">Revision History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overview">1. Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-this-is-not">1.1 What this is <em>not</em></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-flow">1.2 Data flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#declaring-fields-in-app-manifest-json">2. Declaring fields in <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configfile">2.1 <code class="docutils literal notranslate"><span class="pre">configFile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configfields">2.2 <code class="docutils literal notranslate"><span class="pre">configFields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#attributes-common-to-every-field">2.3 Attributes common to every field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#attributes-by-type">2.4 Attributes by type</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bool"><code class="docutils literal notranslate"><span class="pre">bool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#int"><code class="docutils literal notranslate"><span class="pre">int</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#float"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#string"><code class="docutils literal notranslate"><span class="pre">string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-example">2.5 Complete example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#validation">3. Validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#order-of-checks">3.1 Order of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-pattern-dialect">3.2 The <code class="docutils literal notranslate"><span class="pre">pattern</span></code> dialect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-messages">3.3 Error messages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-values-file">4. The values file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#location-and-name">4.1 Location and name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#envelope">4.2 Envelope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-encoding">4.3 Value encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#which-keys-are-present">4.4 Which keys are present</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unknown-keys">4.5 Unknown keys</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-configuration-in-the-app">5. Reading configuration in the app</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#declare-the-field-table-once">5.1 Declare the field table once</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#read-the-values">5.2 Read the values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-happens-when-things-go-wrong">5.3 What happens when things go wrong</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#in-the-simulator">5.4 In the simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-configuration-from-the-app">6. Writing configuration from the app</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#api">6.1 API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-save-writes">6.2 How <code class="docutils literal notranslate"><span class="pre">save()</span></code> writes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recovering-an-interrupted-write">6.3 Recovering an interrupted write</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#both-sides-can-write-the-conflict-rule">6.4 Both sides can write: the conflict rule</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lifecycle">7. Lifecycle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install">7.1 Install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-later">7.2 Editing later</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-the-app">7.3 Updating the app</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#uninstall">7.4 Uninstall</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#limits">8. Limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#companion-app-specification">9. Companion app specification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reading-the-declaration">9.1 Reading the declaration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-flow">9.2 Install flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#edit-flow">9.3 Edit flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-controls">9.4 Input controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-messages">9.5 Default messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rules-that-must-not-be-broken">9.6 Rules that must not be broken</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tooling">10. Tooling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#worked-example">11. Worked example</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">App Configuration Fields</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/app-config-fields.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="app-configuration-fields">
+<h1>App Configuration Fields<a class="headerlink" href="#app-configuration-fields" title="Link to this heading"></a></h1>
+<section id="revision-history">
+<h2>Revision History<a class="headerlink" href="#revision-history" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Revision</p></th>
+<th class="head"><p>Date of Changes</p></th>
+<th class="head"><p>Matter of Change</p></th>
+<th class="head"><p>Note</p></th>
+<th class="head"><p>Editor</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.00</p></td>
+<td><p>18.08.2026</p></td>
+<td><p>Creating: developer-declared configuration fields, the on-watch values file, the app-side reader, and the companion-app specification</p></td>
+<td><p></p></td>
+<td><p>Ross Ryles</p></td>
+</tr>
+<tr class="row-odd"><td><p>1.01</p></td>
+<td><p>19.08.2026</p></td>
+<td><p>The declaration moved with its file: package metadata is now <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> rather than <code class="docutils literal notranslate"><span class="pre">config.json</span></code>, and carries a required <code class="docutils literal notranslate"><span class="pre">manifest_version</span></code> of <code class="docutils literal notranslate"><span class="pre">1</span></code>. Also: <code class="docutils literal notranslate"><span class="pre">minLength</span></code> is enforced by the reader, and one <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> per app on one thread</p></td>
+<td><p></p></td>
+<td><p>Ross Ryles</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="overview">
+<h2>1. Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>An app can declare a list of <strong>configuration fields</strong> in its <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code>. The companion
+app asks the user to fill them in when the app is installed, writes the answers to a JSON
+file next to the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> on the watch, and lets the user edit them again at any time. The
+watch app reads that file when it starts, through <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code>.</p>
+<p>This gives an app the settings that are painful to enter with four buttons — names,
+coordinates, calibration constants, thresholds — without the app having to build an
+on-watch editor for them.</p>
+<p>The feature needs <strong>no kernel firmware change</strong>. It is built entirely from mechanisms that
+already exist:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mechanism</p></th>
+<th class="head"><p>Already provides</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>BLE File Transfer Service</p></td>
+<td><p>Writing and reading arbitrary files under <code class="docutils literal notranslate"><span class="pre">/Apps/&lt;AppDir&gt;/</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SDK::Kernel::fs</span></code></p></td>
+<td><p>Sandbox-rooted file access; <code class="docutils literal notranslate"><span class="pre">&quot;/&quot;</span></code> is the app’s own directory</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SDK::JsonStreamReader</span></code> / <code class="docutils literal notranslate"><span class="pre">JsonStreamWriter</span></code></p></td>
+<td><p>coreJSON-backed parsing and serialisation</p></td>
+</tr>
+</tbody>
+</table>
+<section id="what-this-is-not">
+<h3>1.1 What this is <em>not</em><a class="headerlink" href="#what-this-is-not" title="Link to this heading"></a></h3>
+<p><strong>Not a replacement for on-watch settings.</strong> Config fields are set rarely, from the phone.
+Anything the user changes <em>in the moment</em> — an alert distance mid-run, a timer duration —
+belongs in the app’s own on-watch settings. No value should live in both places.</p>
+<p><strong>Not a place to re-ask for data the kernel already owns.</strong> <code class="docutils literal notranslate"><span class="pre">SDK::Interface::ISettings</span></code>
+already gives every app the user’s unit system (<code class="docutils literal notranslate"><span class="pre">isUnitsImperial()</span></code>), their heart-rate zone
+thresholds (<code class="docutils literal notranslate"><span class="pre">getHrThresholds()</span></code>) and their daily goals (<code class="docutils literal notranslate"><span class="pre">getDailyGoals()</span></code>), and the kernel
+sends profile data such as height to the apps that need it. Declaring a config field for any
+of these duplicates a value the user has already entered once, and the two copies will
+eventually disagree.</p>
+<p><strong>Not secure storage.</strong> The values file is plaintext on a FAT volume that is readable over
+USB mass storage and over BLE. Do not use config fields for passwords, API tokens or
+anything else whose disclosure matters. That is why there is no <code class="docutils literal notranslate"><span class="pre">secret</span></code> field type.</p>
+<p><strong>Not a runtime channel.</strong> A change made on the phone is picked up the <strong>next time the app
+starts</strong> (section 7.2). It is not a live data feed.</p>
+</section>
+<section id="data-flow">
+<h3>1.2 Data flow<a class="headerlink" href="#data-flow" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   <span class="n">app</span><span class="o">-</span><span class="n">manifest</span><span class="o">.</span><span class="n">json</span>                             <span class="n">Companion</span> <span class="n">app</span> <span class="p">(</span><span class="n">phone</span><span class="p">)</span>
+   <span class="o">+---------------------+</span>                 <span class="o">+----------------------------+</span>
+   <span class="o">|</span> <span class="s2">"configFile"</span>        <span class="o">|</span>  <span class="mf">1.</span> <span class="n">read</span> <span class="n">the</span>    <span class="o">|</span>                            <span class="o">|</span>
+   <span class="o">|</span> <span class="s2">"configFields"</span><span class="p">:</span> <span class="p">[</span>   <span class="o">|----</span> <span class="n">package</span> <span class="o">---&gt;|</span> <span class="mf">2.</span> <span class="n">prompt</span> <span class="n">the</span> <span class="n">user</span>         <span class="o">|</span>
+   <span class="o">|</span>    <span class="p">{</span><span class="o">...</span><span class="p">},</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>     <span class="o">|</span>                 <span class="o">|</span> <span class="mf">3.</span> <span class="n">validate</span> <span class="n">the</span> <span class="nb">input</span>      <span class="o">|</span>
+   <span class="o">|</span> <span class="p">]</span>                   <span class="o">|</span>                 <span class="o">|</span>                            <span class="o">|</span>
+   <span class="o">+---------------------+</span>                 <span class="o">+-------------+--------------+</span>
+   <span class="p">(</span><span class="n">stays</span> <span class="n">on</span> <span class="n">the</span> <span class="n">phone</span><span class="p">;</span>                                  <span class="o">|</span>
+    <span class="n">never</span> <span class="n">copied</span> <span class="n">to</span> <span class="n">the</span> <span class="n">watch</span><span class="p">)</span>                <span class="mf">4.</span> <span class="n">FTS</span> <span class="n">WRITE</span> <span class="n">offset</span> <span class="mi">0</span>
+                                                         <span class="o">|</span>
+                                                         <span class="n">v</span>
+                              <span class="mi">2</span><span class="p">:</span><span class="o">/</span><span class="n">Apps</span><span class="o">/&lt;</span><span class="n">AppDir</span><span class="o">&gt;/&lt;</span><span class="n">configFile</span><span class="o">&gt;</span>
+                              <span class="p">{</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"values"</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span> <span class="p">}</span>
+                                                         <span class="o">|</span>
+                                            <span class="mf">5.</span> <span class="n">read</span> <span class="n">once</span> <span class="n">at</span> <span class="n">launch</span>
+                                                         <span class="n">v</span>
+                                             <span class="o">+-------------------------+</span>
+                                             <span class="o">|</span> <span class="n">SDK</span><span class="p">::</span><span class="n">AppConfig</span>          <span class="o">|</span>
+                                             <span class="o">|</span> <span class="p">(</span><span class="n">linked</span> <span class="n">into</span> <span class="n">the</span> <span class="o">.</span><span class="n">uapp</span><span class="p">)</span> <span class="o">|</span>
+                                             <span class="o">+-----------+-------------+</span>
+                                                         <span class="o">|</span>
+                                        <span class="mf">6.</span> <span class="n">optional</span> <span class="n">write</span><span class="o">-</span><span class="n">back</span> <span class="p">(</span><span class="n">section</span> <span class="mi">6</span><span class="p">)</span>
+                                                         <span class="o">|</span>
+                                                         <span class="o">+--&gt;</span> <span class="n">same</span> <span class="n">file</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> itself is <strong>never</strong> uploaded to the watch — that rule is unchanged (see
+<a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Manifest JSON</span></a>). The values file is a separate artifact the companion
+app generates.</p>
+</section>
+</section>
+<section id="declaring-fields-in-app-manifest-json">
+<h2>2. Declaring fields in <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code><a class="headerlink" href="#declaring-fields-in-app-manifest-json" title="Link to this heading"></a></h2>
+<p>Two keys carry the declaration, and both are optional — an app that wants no configuration
+declares neither. They live in the app’s <strong><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code></strong>, the package metadata file
+the companion app reads (formerly <code class="docutils literal notranslate"><span class="pre">config.json</span></code>; see
+<a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Manifest JSON</span></a>).</p>
+<p>Every manifest also declares the format version of the manifest itself:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"manifest_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>It is <strong>required</strong>, and must be <code class="docutils literal notranslate"><span class="pre">1</span></code>. A reader that finds any other value must refuse the
+manifest rather than guess at a format it was not built for — the same rule the values file’s
+<code class="docutils literal notranslate"><span class="pre">schema</span></code> key follows (section 4.2). It versions the manifest format, not the app: <code class="docutils literal notranslate"><span class="pre">appVersion</span></code>
+is the app’s own version and is unrelated.</p>
+<section id="configfile">
+<h3>2.1 <code class="docutils literal notranslate"><span class="pre">configFile</span></code><a class="headerlink" href="#configfile" title="Link to this heading"></a></h3>
+<p>The name of the values file the companion app creates in the app’s directory on the watch.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"configFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app_config.json"</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Rule</p></th>
+<th class="head"><p>Detail</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Required when</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">configFields</span></code> is present and non-empty</p></td>
+</tr>
+<tr class="row-odd"><td><p>Forbidden when</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">configFields</span></code> is absent or empty</p></td>
+</tr>
+<tr class="row-even"><td><p>Pattern</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">^[A-Za-z0-9][A-Za-z0-9_.-]{0,57}\.json$</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>No path separators</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/</span></code> and <code class="docutils literal notranslate"><span class="pre">\</span></code> are rejected, and so is <code class="docutils literal notranslate"><span class="pre">..</span></code> — the file always lands in the app’s sandbox root</p></td>
+</tr>
+<tr class="row-even"><td><p>Must not be</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> (reserved: that is the package metadata file, which never reaches the watch). Compared case-insensitively, because the watch’s FAT volume is case-insensitive too</p></td>
+</tr>
+<tr class="row-odd"><td><p>Length</p></td>
+<td><p>&lt;= 63 characters, which the pattern above already enforces. <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> refuses a longer name and falls back to defaults</p></td>
+</tr>
+</tbody>
+</table>
+<p>Restricting this to a bare filename is deliberate. The app’s sandbox root is the one
+directory both the companion app and <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> can always resolve without extra
+rules, and it stops a malformed or hostile package from reaching outside the app’s own
+directory.</p>
+</section>
+<section id="configfields">
+<h3>2.2 <code class="docutils literal notranslate"><span class="pre">configFields</span></code><a class="headerlink" href="#configfields" title="Link to this heading"></a></h3>
+<p>An ordered array of field definitions. <strong>Array order is display order</strong> in the companion
+app.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"configFields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"waypointName"</span><span class="p">,</span><span class="w">   </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"targetLatitude"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="p">,</span><span class="w">  </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>At most <strong>32</strong> fields (section 8).</p>
+</section>
+<section id="attributes-common-to-every-field">
+<h3>2.3 Attributes common to every field<a class="headerlink" href="#attributes-common-to-every-field" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Rules</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">^[a-z][A-Za-z0-9_]{0,31}$</span></code>. Unique within the app, compared <strong>case-insensitively</strong>: <code class="docutils literal notranslate"><span class="pre">waypointName</span></code> and <code class="docutils literal notranslate"><span class="pre">waypointname</span></code> may not both be declared, because two ids that differ only in case are a bug waiting to happen. This is the key in the values file and the string the app passes to <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code>. Choose it once and never change it — changing an <code class="docutils literal notranslate"><span class="pre">id</span></code> discards the user’s value (section 7.3).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>string</p></td>
+<td><p>One of <code class="docutils literal notranslate"><span class="pre">&quot;string&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;bool&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;float&quot;</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">label</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>string</p></td>
+<td><p>Short human-readable name, &lt;= 32 characters. Shown next to the input. Do not put units in the label — use <code class="docutils literal notranslate"><span class="pre">unit</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>string</p></td>
+<td><p>Longer human-readable explanation, &lt;= 200 characters. Shown under or beside the input. Write it for someone who has never used the app.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">default</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>matches <code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p>The value used when the user has not set one. The companion app pre-fills the input with it, and the app falls back to it when the key is absent. It must itself satisfy every constraint declared on the field.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">required</span></code></p></td>
+<td><p>no (default <code class="docutils literal notranslate"><span class="pre">false</span></code>)</p></td>
+<td><p>bool</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> means the user must supply a value before the install can complete. The input is still pre-filled from <code class="docutils literal notranslate"><span class="pre">default</span></code>, and accepting that pre-filled value counts as supplying one.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">validationMessage</span></code></p></td>
+<td><p>no</p></td>
+<td><p>string</p></td>
+<td><p>&lt;= 120 characters. Shown by the companion app when the entered value fails <strong>any</strong> of this field’s constraints. Write it as the rule rather than as a complaint: <code class="docutils literal notranslate"><span class="pre">&quot;Up</span> <span class="pre">to</span> <span class="pre">16</span> <span class="pre">letters,</span> <span class="pre">digits</span> <span class="pre">and</span> <span class="pre">spaces.&quot;</span></code> If omitted, the companion app shows its own per-constraint default message.</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">default</span></code> is mandatory on purpose: it gives the companion app something to pre-fill, gives
+the app a defined fallback, and — because the app’s field table repeats it (section 5.1) —
+gives CI something to cross-check.</p>
+<p>One further attribute, <code class="docutils literal notranslate"><span class="pre">unit</span></code>, applies only to the numeric types and is described with them:
+a unit on a name or a switch has nothing to label.</p>
+</section>
+<section id="attributes-by-type">
+<h3>2.4 Attributes by type<a class="headerlink" href="#attributes-by-type" title="Link to this heading"></a></h3>
+<section id="bool">
+<h4><code class="docutils literal notranslate"><span class="pre">bool</span></code><a class="headerlink" href="#bool" title="Link to this heading"></a></h4>
+<p>No extra attributes. <code class="docutils literal notranslate"><span class="pre">default</span></code> is <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vibrateOnArrival"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bool"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vibrate on arrival"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Buzz the watch once when you come within the arrival radius of the target."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="int">
+<h4><code class="docutils literal notranslate"><span class="pre">int</span></code><a class="headerlink" href="#int" title="Link to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Rules</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>Integer. Inclusive lower bound.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>Integer. Inclusive upper bound, <code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">min</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unit</span></code></p></td>
+<td><p>no</p></td>
+<td><p>Presentation-only suffix rendered next to the input, &lt;= 8 characters (<code class="docutils literal notranslate"><span class="pre">&quot;m&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;bpm&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;%&quot;</span></code>). Never part of the stored value.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Both bounds are mandatory. A range is what makes the companion app’s validation and the
+app’s clamping (section 5.2) well-defined, and an unbounded integer field is usually one the
+developer has not finished thinking about. Values are 32-bit signed:
+<code class="docutils literal notranslate"><span class="pre">-2147483648</span> <span class="pre">..</span> <span class="pre">2147483647</span></code>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arrivalRadiusM"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Arrival radius"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How close you need to get before the watch counts you as arrived."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"m"</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="float">
+<h4><code class="docutils literal notranslate"><span class="pre">float</span></code><a class="headerlink" href="#float" title="Link to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Rules</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>Number. Inclusive lower bound.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>Number. Inclusive upper bound, <code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">min</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unit</span></code></p></td>
+<td><p>no</p></td>
+<td><p>Presentation-only suffix rendered next to the input, &lt;= 8 characters (<code class="docutils literal notranslate"><span class="pre">&quot;deg&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;kg&quot;</span></code>). Never part of the stored value.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Values are <strong>single-precision</strong> (IEEE-754 binary32) on the watch, matching the rest of the
+platform: the GPS sensor layer reports latitude, longitude and altitude as <code class="docutils literal notranslate"><span class="pre">float</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">SDK::TrackMap::GpsPoint</span></code> stores them as <code class="docutils literal notranslate"><span class="pre">float</span></code>. A config value therefore has exactly the
+same resolution as the sensor data it is compared against. Near +/-180 degrees that is
+roughly 1-2 m of quantisation on a coordinate, which is well inside GPS error. Do not design
+for more precision than that.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"targetLongitude"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Target longitude"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Longitude of the waypoint in decimal degrees. East is positive."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1276</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mf">-180.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mf">180.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"deg"</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="string">
+<h4><code class="docutils literal notranslate"><span class="pre">string</span></code><a class="headerlink" href="#string" title="Link to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Rules</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maxLength</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>1 .. 128. Length in <strong>UTF-8 bytes</strong>, not characters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minLength</span></code></p></td>
+<td><p>no (default <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></td>
+<td><p>0 .. <code class="docutils literal notranslate"><span class="pre">maxLength</span></code>. A value <code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">1</span></code> makes an empty string invalid.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pattern</span></code></p></td>
+<td><p>no</p></td>
+<td><p>Regular expression, &lt;= 256 characters. See section 3.2.</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">maxLength</span></code> is mandatory because the app has to size a buffer for the value, and it is
+counted in bytes because that is the unit both the buffer and the file-size limit are
+measured in. A companion app must count bytes, not characters: a 16-byte field holds 16
+ASCII characters but only 4 four-byte emoji.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"waypointName"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint name"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shown on the watch while you navigate. Letters, digits and spaces only."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"minLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"maxLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"pattern"</span><span class="p">:</span><span class="w"> </span><span class="s2">"[A-Za-z0-9 ]+"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"validationMessage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Up to 16 letters, digits and spaces."</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="complete-example">
+<h3>2.5 Complete example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"utility"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"icon"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Resources/icon_60x60.png"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"binary"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint_1.0.0.uapp"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"appVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"minKernelVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.4.0"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"requiredHardware"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"GPS"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Navigate back to a point you saved earlier."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"configFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app_config.json"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"configFields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"waypointName"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint name"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shown on the watch while you navigate. Letters, digits and spaces only."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"minLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"maxLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"pattern"</span><span class="p">:</span><span class="w"> </span><span class="s2">"[A-Za-z0-9 ]+"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"validationMessage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Up to 16 letters, digits and spaces."</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"targetLatitude"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Target latitude"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Latitude of the waypoint in decimal degrees. North is positive."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mf">51.5072</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mf">-90.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mf">90.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"deg"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"targetLongitude"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Target longitude"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Longitude of the waypoint in decimal degrees. East is positive."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1276</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mf">-180.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mf">180.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"deg"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arrivalRadiusM"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Arrival radius"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How close you need to get before the watch counts you as arrived."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"m"</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vibrateOnArrival"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bool"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vibrate on arrival"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Buzz the watch once when you come within the arrival radius."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="validation">
+<h2>3. Validation<a class="headerlink" href="#validation" title="Link to this heading"></a></h2>
+<p>Validation happens in the companion app, before anything is written. The watch app never
+sees an invalid value that the companion app produced — but it still defends itself
+(section 5.3), because a values file can also arrive from a hand edit over USB, from an
+older or newer build of the companion app, or from a downgraded <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>.</p>
+<section id="order-of-checks">
+<h3>3.1 Order of checks<a class="headerlink" href="#order-of-checks" title="Link to this heading"></a></h3>
+<p>Checks run in this order, and the <strong>first</strong> failure is what gets reported:</p>
+<ol class="arabic simple">
+<li><p><strong>Type</strong> — the entered value is of the declared type.</p></li>
+<li><p><strong>Required</strong> — a <code class="docutils literal notranslate"><span class="pre">required</span></code> field is not empty.</p></li>
+<li><p><strong>Length</strong> — <code class="docutils literal notranslate"><span class="pre">minLength</span></code> / <code class="docutils literal notranslate"><span class="pre">maxLength</span></code>, in UTF-8 bytes.</p></li>
+<li><p><strong>Range</strong> — <code class="docutils literal notranslate"><span class="pre">min</span></code> / <code class="docutils literal notranslate"><span class="pre">max</span></code>, inclusive.</p></li>
+<li><p><strong>Pattern</strong> — the regular expression, as a full match.</p></li>
+</ol>
+<p>A fixed order means the same bad input always produces the same message, on both platforms.</p>
+</section>
+<section id="the-pattern-dialect">
+<h3>3.2 The <code class="docutils literal notranslate"><span class="pre">pattern</span></code> dialect<a class="headerlink" href="#the-pattern-dialect" title="Link to this heading"></a></h3>
+<p>A pattern must behave identically on iOS and Android, so the dialect is a deliberately small
+subset with no constructs whose semantics or performance differ between engines.</p>
+<p><strong>Matching is an implicit full match.</strong> The pattern must match the <strong>entire</strong> value. Do not
+write <code class="docutils literal notranslate"><span class="pre">^</span></code> and <code class="docutils literal notranslate"><span class="pre">$</span></code> — they are unnecessary. Implementations MUST anchor the match themselves:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Platform</p></th>
+<th class="head"><p>Recipe</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>JavaScript</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">RegExp('^(?:'</span> <span class="pre">+</span> <span class="pre">pattern</span> <span class="pre">+</span> <span class="pre">')$').test(value)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Swift / <code class="docutils literal notranslate"><span class="pre">NSRegularExpression</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">firstMatch(...)</span></code> and require the match range to equal the whole string</p></td>
+</tr>
+<tr class="row-even"><td><p>Java / Kotlin</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Pattern.compile(pattern).matcher(value).matches()</span></code> — already a full match</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">(?:...)</span></code> wrapper in the JavaScript recipe is not optional: without it, a top-level
+alternation such as <code class="docutils literal notranslate"><span class="pre">abc|def</span></code> would bind as <code class="docutils literal notranslate"><span class="pre">^abc</span></code> or <code class="docutils literal notranslate"><span class="pre">def$</span></code> and let unintended values
+through.</p>
+<p><strong>Allowed:</strong> literal characters; <code class="docutils literal notranslate"><span class="pre">.</span></code>; character classes <code class="docutils literal notranslate"><span class="pre">[...]</span></code> including ranges and
+negation; the letter escapes <code class="docutils literal notranslate"><span class="pre">\d</span> <span class="pre">\D</span> <span class="pre">\w</span> <span class="pre">\W</span> <span class="pre">\s</span> <span class="pre">\S</span> <span class="pre">\b</span> <span class="pre">\B</span> <span class="pre">\n</span> <span class="pre">\r</span> <span class="pre">\t</span></code> and backslash-escaped
+punctuation (<code class="docutils literal notranslate"><span class="pre">\.</span> <span class="pre">\[</span> <span class="pre">\]</span> <span class="pre">\(</span> <span class="pre">\)</span> <span class="pre">\{</span> <span class="pre">\}</span> <span class="pre">\|</span> <span class="pre">\+</span> <span class="pre">\*</span> <span class="pre">\?</span> <span class="pre">\-</span> <span class="pre">\/</span> <span class="pre">\\</span></code>); groups <code class="docutils literal notranslate"><span class="pre">(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">(?:...)</span></code>;
+alternation <code class="docutils literal notranslate"><span class="pre">|</span></code>; the quantifiers <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">+</span> <span class="pre">?</span> <span class="pre">{n}</span> <span class="pre">{n,}</span> <span class="pre">{n,m}</span></code> and their lazy forms <code class="docutils literal notranslate"><span class="pre">*?</span> <span class="pre">+?</span> <span class="pre">??</span></code>.</p>
+<p>The escape list is a <strong>whitelist</strong>: any other letter after a backslash is refused. <code class="docutils literal notranslate"><span class="pre">\A</span></code> and
+<code class="docutils literal notranslate"><span class="pre">\Z</span></code> are the reason — they are anchors in Python, Java and ICU but <em>literal letters</em> in
+JavaScript, so a pattern using them matches different strings on iOS and Android.</p>
+<p><strong>Forbidden:</strong> backreferences (<code class="docutils literal notranslate"><span class="pre">\1</span></code>, <code class="docutils literal notranslate"><span class="pre">\k&lt;name&gt;</span></code>); lookahead and lookbehind (<code class="docutils literal notranslate"><span class="pre">(?=</span></code>, <code class="docutils literal notranslate"><span class="pre">(?!</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(?&lt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">(?&lt;!</span></code>); named capture groups; inline flags such as <code class="docutils literal notranslate"><span class="pre">(?i)</span></code>; atomic groups and
+possessive quantifiers; Unicode property escapes (<code class="docutils literal notranslate"><span class="pre">\p{...}</span></code>); and the anchors <code class="docutils literal notranslate"><span class="pre">^</span></code> and <code class="docutils literal notranslate"><span class="pre">$</span></code>,
+which are redundant because matching is already a full match. (A <code class="docutils literal notranslate"><span class="pre">^</span></code> immediately inside a
+character class is negation, not an anchor, and remains legal: <code class="docutils literal notranslate"><span class="pre">[^0-9]</span></code>.)</p>
+<p>Two more constructs are refused for the same cross-engine reason:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">]</span></code> immediately after <code class="docutils literal notranslate"><span class="pre">[</span></code>.</strong> <code class="docutils literal notranslate"><span class="pre">[]]</span></code> is a class containing <code class="docutils literal notranslate"><span class="pre">]</span></code> in Python and Java, but an
+empty class followed by a literal <code class="docutils literal notranslate"><span class="pre">]</span></code> in JavaScript. Write <code class="docutils literal notranslate"><span class="pre">[\]]</span></code>.</p></li>
+<li><p><strong>A brace that is not a complete quantifier.</strong> <code class="docutils literal notranslate"><span class="pre">a{,3}</span></code> is a quantifier in Python, literal
+text in JavaScript and a syntax error in Java. Write <code class="docutils literal notranslate"><span class="pre">a{0,3}</span></code>, or <code class="docutils literal notranslate"><span class="pre">a\{,3\}</span></code> for literal
+braces.</p></li>
+</ul>
+<p>Every construct that survives means the same thing in all three engines, and the subset is
+expressible in a linear-time engine, so an implementation <em>may</em> use one.</p>
+<p><strong>Nested unbounded quantifiers are also rejected.</strong> A quantified group whose body is itself
+unbounded — <code class="docutils literal notranslate"><span class="pre">(a+)+</span></code>, <code class="docutils literal notranslate"><span class="pre">(a*)*</span></code>, <code class="docutils literal notranslate"><span class="pre">(\d+)*</span></code>, and the same shapes wrapped in extra parentheses like
+<code class="docutils literal notranslate"><span class="pre">((a+))+</span></code> — backtracks exponentially in the backtracking engines iOS and Android use, with no
+backreference or lookaround involved. A 128-byte input is more than enough to freeze a phone
+on one of those, so <code class="docutils literal notranslate"><span class="pre">validate_app_config.py</span></code> refuses the shape and the developer rewrites it
+(<code class="docutils literal notranslate"><span class="pre">(a+)+</span></code> is just <code class="docutils literal notranslate"><span class="pre">a+</span></code>).</p>
+<p>That check is a safety net, not a proof: other shapes backtrack badly too — <code class="docutils literal notranslate"><span class="pre">(a|a)+</span></code> and
+<code class="docutils literal notranslate"><span class="pre">(a?)*</span></code> among them — and detecting them all is not something a linter can promise. Keep
+patterns simple, and prefer <code class="docutils literal notranslate"><span class="pre">minLength</span></code>/<code class="docutils literal notranslate"><span class="pre">maxLength</span></code> over clever expressions.</p>
+<p>Patterns are <strong>case-sensitive</strong> and are applied to the value exactly as entered. The
+companion app must not trim whitespace — if leading or trailing spaces should be rejected,
+the pattern must say so.</p>
+</section>
+<section id="error-messages">
+<h3>3.3 Error messages<a class="headerlink" href="#error-messages" title="Link to this heading"></a></h3>
+<p>A field’s <code class="docutils literal notranslate"><span class="pre">validationMessage</span></code> is shown for <strong>any</strong> failure on that field. One message per
+field is enough in practice, because a good message states the whole rule
+(<code class="docutils literal notranslate"><span class="pre">&quot;Up</span> <span class="pre">to</span> <span class="pre">16</span> <span class="pre">letters,</span> <span class="pre">digits</span> <span class="pre">and</span> <span class="pre">spaces.&quot;</span></code>) rather than one constraint at a time.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">validationMessage</span></code> is absent, the companion app supplies its own message for the
+constraint that failed (section 9.5), so a field is never reported with a bare “invalid”.</p>
+</section>
+</section>
+<section id="the-values-file">
+<h2>4. The values file<a class="headerlink" href="#the-values-file" title="Link to this heading"></a></h2>
+<section id="location-and-name">
+<h3>4.1 Location and name<a class="headerlink" href="#location-and-name" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span><span class="o">/</span><span class="n">Apps</span><span class="o">/&lt;</span><span class="n">AppDir</span><span class="o">&gt;/&lt;</span><span class="n">configFile</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;AppDir&gt;</span></code> is the app’s directory on the watch — the one the companion app created when it
+transferred the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>. Over BLE FTS the same path is <code class="docutils literal notranslate"><span class="pre">/Apps/&lt;AppDir&gt;/&lt;configFile&gt;</span></code>,
+relative to the file-transfer root. From inside the app, the sandbox makes it simply
+<code class="docutils literal notranslate"><span class="pre">/&lt;configFile&gt;</span></code>.</p>
+</section>
+<section id="envelope">
+<h3>4.2 Envelope<a class="headerlink" href="#envelope" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"waypointName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Trailhead"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"targetLatitude"</span><span class="p">:</span><span class="w"> </span><span class="mf">51.5072</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"targetLongitude"</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1276</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"arrivalRadiusM"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Rules</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">schema</span></code></p></td>
+<td><p>Integer, currently <code class="docutils literal notranslate"><span class="pre">1</span></code>. Identifies the envelope format, not the app’s field set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">values</span></code></p></td>
+<td><p>Object. Keys are field <code class="docutils literal notranslate"><span class="pre">id</span></code>s; values are the user’s answers.</p></td>
+</tr>
+</tbody>
+</table>
+<p>A reader that finds any <code class="docutils literal notranslate"><span class="pre">schema</span></code> other than <code class="docutils literal notranslate"><span class="pre">1</span></code> must ignore the whole file and use its
+defaults, rather than guess at a format it was not built for. This matches how
+<code class="docutils literal notranslate"><span class="pre">SDK::Variant::Config</span></code> treats an unknown config schema.</p>
+<p>The file is <strong>strict JSON</strong>: UTF-8, no BOM, no comments, no trailing commas. (The examples in
+<a class="reference internal" href="app-config-json.html"><span class="std std-doc">App Manifest JSON</span></a> carry <code class="docutils literal notranslate"><span class="pre">//</span></code> comments for the reader’s benefit; real
+files must not.)</p>
+</section>
+<section id="value-encoding">
+<h3>4.3 Value encoding<a class="headerlink" href="#value-encoding" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Declared type</p></th>
+<th class="head"><p>JSON encoding</p></th>
+<th class="head"><p>Reader behaviour</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">string</span></code></p></td>
+<td><p>JSON string</p></td>
+<td><p>Longer than <code class="docutils literal notranslate"><span class="pre">maxLength</span></code> bytes: truncated at a UTF-8 boundary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> / <code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>A number or string here is invalid.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>JSON integer, no fraction and no exponent</p></td>
+<td><p>A fractional number is invalid, not rounded.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>JSON number</p></td>
+<td><p>An integer literal is accepted (<code class="docutils literal notranslate"><span class="pre">51</span></code> means <code class="docutils literal notranslate"><span class="pre">51.0</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+<p>A <strong>reader</strong> must accept any JSON number, exponent notation included, up to <strong>64 characters</strong>
+of number text; anything longer is treated as not set. A <strong>writer</strong> must stay inside that
+limit. The companion app should emit plain decimal, because its values come from a numeric
+keypad and people read this file: no exponent, no thousands separators, <code class="docutils literal notranslate"><span class="pre">.</span></code> as the decimal
+separator, and no fractional part for an <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> is less tidy when the <em>watch</em> writes a value back: it formats with 9
+significant digits, which yields exponent form for magnitudes below <code class="docutils literal notranslate"><span class="pre">1e-4</span></code> or at <code class="docutils literal notranslate"><span class="pre">1e9</span></code> and
+above (<code class="docutils literal notranslate"><span class="pre">0.00005</span></code> is written <code class="docutils literal notranslate"><span class="pre">4.99999987e-05</span></code>). That is valid JSON and every reader must cope
+with it, but it means a companion app cannot assume the file it reads back contains only the
+plain decimals it wrote.</p>
+<p><code class="docutils literal notranslate"><span class="pre">null</span></code>, a wrong JSON type, or a malformed number means the key is treated as <strong>not set</strong>:
+the app falls back to that field’s default. A well-formed number outside the field’s
+<code class="docutils literal notranslate"><span class="pre">min</span></code>..<code class="docutils literal notranslate"><span class="pre">max</span></code> is <strong>clamped</strong>, not discarded (section 5.2) — a value the user plainly meant
+should not silently disappear.</p>
+<p>The two are distinguished by representability, not by range: a number a <code class="docutils literal notranslate"><span class="pre">float</span></code> field cannot
+hold at all (<code class="docutils literal notranslate"><span class="pre">1e40</span></code>, which overflows binary32 to infinity) counts as malformed and falls back
+to the default, whereas <code class="docutils literal notranslate"><span class="pre">120.0</span></code> in a <code class="docutils literal notranslate"><span class="pre">-90</span></code>..<code class="docutils literal notranslate"><span class="pre">90</span></code> field is real and gets clamped to <code class="docutils literal notranslate"><span class="pre">90</span></code>. The
+same applies to an <code class="docutils literal notranslate"><span class="pre">int</span></code> field and a value outside 32-bit range.</p>
+<p><strong>Control characters must not appear in string values.</strong> No phone keyboard produces them in a
+single-line field, and they cost six bytes each once escaped, which is why the 8 KB budget in
+section 8 assumes their absence. <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> still escapes them correctly if a hand-edited
+file contains some.</p>
+</section>
+<section id="which-keys-are-present">
+<h3>4.4 Which keys are present<a class="headerlink" href="#which-keys-are-present" title="Link to this heading"></a></h3>
+<p>The companion app writes the file <strong>whenever the app declares any config fields</strong>, so its
+presence is predictable. It contains only the ids the user actually set, so <strong>key presence
+is not</strong> predictable:</p>
+<ul class="simple">
+<li><p>A <code class="docutils literal notranslate"><span class="pre">required</span></code> field is always present, because the user cannot finish the install without
+it.</p></li>
+<li><p>An optional field the user left alone is <strong>absent</strong>, and the app uses its default.</p></li>
+<li><p>An optional field the user set and then cleared is <strong>removed</strong> from <code class="docutils literal notranslate"><span class="pre">values</span></code>, which is how
+a value is reset to the app’s default.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">values</span></code> may legitimately be an empty object <code class="docutils literal notranslate"><span class="pre">{}</span></code>.</p></li>
+</ul>
+<p>An app must therefore never treat a missing key as an error, and must never require the file
+to exist at all — a user can delete it over USB.</p>
+</section>
+<section id="unknown-keys">
+<h3>4.5 Unknown keys<a class="headerlink" href="#unknown-keys" title="Link to this heading"></a></h3>
+<p>A reader must ignore keys it does not recognise, and a writer must preserve them
+(section 6.2). This is what makes a downgrade survivable: an older <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> that knows fewer
+fields does not destroy the values belonging to the newer one.</p>
+<p>This applies to unrecognised keys <strong>inside <code class="docutils literal notranslate"><span class="pre">values</span></code></strong>. <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> rewrites the envelope
+itself, so anything a companion app adds alongside <code class="docutils literal notranslate"><span class="pre">schema</span></code> and <code class="docutils literal notranslate"><span class="pre">values</span></code> is dropped the first
+time the watch saves. Keep companion metadata out of this file.</p>
+<p>A repeated key is the one thing preservation does <em>not</em> carry through verbatim. JSON allows
+<code class="docutils literal notranslate"><span class="pre">{&quot;a&quot;:1,&quot;a&quot;:2}</span></code> and leaves the winner undefined, and the two sides here would not pick the
+same one: <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> reads the first occurrence, a phone-side <code class="docutils literal notranslate"><span class="pre">JSON.parse</span></code> keeps the
+last. So a save writes only the first copy of a repeated key — declared or not — and the file
+afterwards says what the watch acted on. Do not write duplicates in the first place; §9.6
+already forbids it.</p>
+</section>
+</section>
+<section id="reading-configuration-in-the-app">
+<h2>5. Reading configuration in the app<a class="headerlink" href="#reading-configuration-in-the-app" title="Link to this heading"></a></h2>
+<section id="declare-the-field-table-once">
+<h3>5.1 Declare the field table once<a class="headerlink" href="#declare-the-field-table-once" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> never reaches the watch, so the app carries its own copy of the field
+contract — one <code class="docutils literal notranslate"><span class="pre">constexpr</span></code> table, in one place:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/AppConfig/AppConfig.hpp"</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">AppConfig</span><span class="p">;</span>
+
+<span class="k">constexpr</span><span class="w"> </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">Field</span><span class="w"> </span><span class="n">kFields</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">stringField</span><span class="p">(</span><span class="s">"waypointName"</span><span class="p">,</span><span class="w">     </span><span class="s">"Waypoint"</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">floatField</span><span class="w"> </span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">,</span><span class="w">   </span><span class="mf">51.5072f</span><span class="p">,</span><span class="w"> </span><span class="mf">-90.0f</span><span class="p">,</span><span class="w">  </span><span class="mf">90.0f</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">floatField</span><span class="w"> </span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">,</span><span class="w">  </span><span class="mf">-0.1276f</span><span class="p">,</span><span class="w"> </span><span class="mf">-180.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">180.0f</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">intField</span><span class="w">   </span><span class="p">(</span><span class="s">"arrivalRadiusM"</span><span class="p">,</span><span class="w">   </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">boolField</span><span class="w">  </span><span class="p">(</span><span class="s">"vibrateOnArrival"</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">),</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace</span>
+</pre></div>
+</div>
+<p>Each entry repeats what <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> declares: the id, the default, and the bounds. That
+duplication is intentional and is <strong>checked by CI</strong> — <code class="docutils literal notranslate"><span class="pre">validate_app_config.py</span> <span class="pre">--check-bounds</span></code>
+compares this table against <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> and fails the build if they disagree
+(section 10). Keeping the bounds in the binary is what lets the app clamp a value it should
+never have received.</p>
+<p>The table is a single greppable declaration rather than bounds scattered through call sites,
+so the check does not depend on how the calls happen to be formatted. Two rules keep it
+checkable: use <strong>plain literals</strong> (a named constant or an expression cannot be compared
+against JSON), and keep <strong>preprocessor conditionals out of the table</strong> — the checker reads the
+source as text, so an entry inside an <code class="docutils literal notranslate"><span class="pre">#if</span></code> counts as present whether or not it compiles.</p>
+</section>
+<section id="read-the-values">
+<h3>5.2 Read the values<a class="headerlink" href="#read-the-values" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::run</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Not in the constructor -- see the warning below.</span>
+<span class="w">    </span><span class="n">mConfig</span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">AppConfig</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="s">"app_config.json"</span><span class="p">,</span><span class="w"> </span><span class="n">kFields</span><span class="p">));</span>
+
+<span class="w">    </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getString</span><span class="p">(</span><span class="s">"waypointName"</span><span class="p">,</span><span class="w"> </span><span class="n">mName</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">mName</span><span class="p">));</span>
+<span class="w">    </span><span class="n">mTargetLat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getFloat</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mTargetLon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getFloat</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mRadiusM</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getInt</span><span class="p">(</span><span class="s">"arrivalRadiusM"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mVibrate</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getBool</span><span class="p">(</span><span class="s">"vibrateOnArrival"</span><span class="p">);</span>
+
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Read the configuration on the service thread, not in a constructor.</strong>
+<code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> logs when a file is unusable, and in the host simulator an app’s
+service is constructed <em>before</em> TouchGFX’s HAL exists — which is what the SDK logger
+writes through. An <code class="docutils literal notranslate"><span class="pre">AppConfig</span></code> built in a constructor therefore segfaults the simulator
+before the app draws anything, the moment it meets a file it cannot use. It works on the
+watch, which makes it a trap you only find when someone runs the simulator. That is why
+the tutorial holds a <code class="docutils literal notranslate"><span class="pre">std::unique_ptr&lt;SDK::AppConfig&gt;</span></code> and creates it in <code class="docutils literal notranslate"><span class="pre">run()</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Returns</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">getBool(const</span> <span class="pre">char</span> <span class="pre">*id)</span> <span class="pre">const</span></code></p></td>
+<td><p>The stored value, or the field’s default.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">int32_t</span> <span class="pre">getInt(const</span> <span class="pre">char</span> <span class="pre">*id)</span> <span class="pre">const</span></code></p></td>
+<td><p>The stored value <strong>clamped</strong> to <code class="docutils literal notranslate"><span class="pre">[min,</span> <span class="pre">max]</span></code>, or the default.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">getFloat(const</span> <span class="pre">char</span> <span class="pre">*id)</span> <span class="pre">const</span></code></p></td>
+<td><p>The stored value <strong>clamped</strong> to <code class="docutils literal notranslate"><span class="pre">[min,</span> <span class="pre">max]</span></code>, or the default. Non-finite values (NaN, infinity) are rejected as malformed and yield the default.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">size_t</span> <span class="pre">getString(const</span> <span class="pre">char</span> <span class="pre">*id,</span> <span class="pre">char</span> <span class="pre">*out,</span> <span class="pre">size_t</span> <span class="pre">outSize)</span> <span class="pre">const</span></code></p></td>
+<td><p>Copies a NUL-terminated value into <code class="docutils literal notranslate"><span class="pre">out</span></code>, truncated at a UTF-8 boundary to fit both <code class="docutils literal notranslate"><span class="pre">maxLength</span></code> and <code class="docutils literal notranslate"><span class="pre">outSize</span></code>. A stored value shorter than <code class="docutils literal notranslate"><span class="pre">minLength</span></code> is treated as unusable and yields the default, symmetrically with clamping a number into range — though a buffer of your own that is too small to hold <code class="docutils literal notranslate"><span class="pre">minLength</span></code> bytes is your truncation, not the file’s, and still returns what fits. Returns the byte length written.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">has(const</span> <span class="pre">char</span> <span class="pre">*id)</span> <span class="pre">const</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the file supplied a <strong>usable</strong> value for the id — use it to tell “the user chose this” from “this is the default”. A key that was present but unusable (wrong JSON type, <code class="docutils literal notranslate"><span class="pre">null</span></code>, malformed number, a string below <code class="docutils literal notranslate"><span class="pre">minLength</span></code>) counts as absent, because the value in play is the default either way.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">isLoaded()</span> <span class="pre">const</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the file was found, parsed, and had a supported <code class="docutils literal notranslate"><span class="pre">schema</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Reading an id that is not in the table is a programming error: the getter returns a
+zero/empty value and logs a warning. There is no way to read an undeclared field.</p>
+</section>
+<section id="what-happens-when-things-go-wrong">
+<h3>5.3 What happens when things go wrong<a class="headerlink" href="#what-happens-when-things-go-wrong" title="Link to this heading"></a></h3>
+<p>Nothing in this path may prevent an app from starting. A config problem must degrade to
+defaults, never to a failed launch:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Condition</p></th>
+<th class="head"><p>Result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>File absent</p></td>
+<td><p>All defaults. <code class="docutils literal notranslate"><span class="pre">isLoaded()</span></code> is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>File unreadable, or larger than 8 KB</p></td>
+<td><p>All defaults.</p></td>
+</tr>
+<tr class="row-even"><td><p>Not valid JSON</p></td>
+<td><p>All defaults.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">schema</span></code> missing or not <code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>All defaults.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">values</span></code> missing or not an object</p></td>
+<td><p>All defaults.</p></td>
+</tr>
+<tr class="row-odd"><td><p>One key of the wrong type, or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>That field only falls back to its default.</p></td>
+</tr>
+<tr class="row-even"><td><p>One numeric key out of range</p></td>
+<td><p>That field only is clamped to its declared bounds.</p></td>
+</tr>
+<tr class="row-odd"><td><p>One string longer than <code class="docutils literal notranslate"><span class="pre">maxLength</span></code></p></td>
+<td><p>That field only is truncated at a UTF-8 boundary.</p></td>
+</tr>
+<tr class="row-even"><td><p>One string shorter than <code class="docutils literal notranslate"><span class="pre">minLength</span></code></p></td>
+<td><p>That field only falls back to its default, and <code class="docutils literal notranslate"><span class="pre">has()</span></code> reports it absent.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="in-the-simulator">
+<h3>5.4 In the simulator<a class="headerlink" href="#in-the-simulator" title="Link to this heading"></a></h3>
+<p>The host simulator’s app sandbox is a directory on your PC, so testing configuration means
+dropping a file into it — no phone required:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">simulator</span> <span class="n">working</span> <span class="n">directory</span><span class="o">&gt;/</span><span class="n">app_config</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+<p>Edit it, restart the simulator, and the app picks the values up exactly as it would on the
+watch. Committing a sample file alongside the app is a good way to document what the
+configuration is supposed to look like.</p>
+</section>
+</section>
+<section id="writing-configuration-from-the-app">
+<h2>6. Writing configuration from the app<a class="headerlink" href="#writing-configuration-from-the-app" title="Link to this heading"></a></h2>
+<p>An app may write the values file, so a value that is convenient to capture on the watch —
+“set the target to where I am standing” — does not have to be typed into a phone.</p>
+<section id="api">
+<h3>6.1 API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">.</span><span class="n">setFloat</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">,</span><span class="w">  </span><span class="n">fix</span><span class="p">.</span><span class="n">latitude</span><span class="p">);</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">setFloat</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">,</span><span class="w"> </span><span class="n">fix</span><span class="p">.</span><span class="n">longitude</span><span class="p">);</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cfg</span><span class="p">.</span><span class="n">save</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LOG_WARN</span><span class="p">(</span><span class="s">"Could not save waypoint</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Behaviour</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">setBool/setInt/setFloat(const</span> <span class="pre">char</span> <span class="pre">*id,</span> <span class="pre">T</span> <span class="pre">value)</span></code></p></td>
+<td><p>Validates against the field table, clamping a numeric value into range. Updates the in-memory value and marks the file dirty. Returns <code class="docutils literal notranslate"><span class="pre">false</span></code> for an unknown id.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">setString(const</span> <span class="pre">char</span> <span class="pre">*id,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*value)</span></code></p></td>
+<td><p>As above, truncating to <code class="docutils literal notranslate"><span class="pre">maxLength</span></code> at a UTF-8 boundary. Returns <code class="docutils literal notranslate"><span class="pre">false</span></code> for a value shorter than <code class="docutils literal notranslate"><span class="pre">minLength</span></code>, so an app cannot write a file that violates its own declaration.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">save()</span></code></p></td>
+<td><p>Writes the file if anything is dirty. Returns <code class="docutils literal notranslate"><span class="pre">false</span></code> if the write failed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">clear(const</span> <span class="pre">char</span> <span class="pre">*id)</span></code></p></td>
+<td><p>Removes the id from the file, so the field falls back to its default on the next launch.</p></td>
+</tr>
+</tbody>
+</table>
+<p>A setter changes what the app sees immediately; <code class="docutils literal notranslate"><span class="pre">save()</span></code> is what makes it survive a restart.</p>
+</section>
+<section id="how-save-writes">
+<h3>6.2 How <code class="docutils literal notranslate"><span class="pre">save()</span></code> writes<a class="headerlink" href="#how-save-writes" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">save()</span></code> never truncates the live file in place, because a reset or a flat battery halfway
+through would leave the app with a half-written config and no way back:</p>
+<ol class="arabic simple">
+<li><p>Write the complete new document to <code class="docutils literal notranslate"><span class="pre">&lt;configFile&gt;.tmp</span></code>.</p></li>
+<li><p>Flush and close it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove(&lt;configFile&gt;)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rename(&lt;configFile&gt;.tmp,</span> <span class="pre">&lt;configFile&gt;)</span></code>.</p></li>
+</ol>
+<p>The document it writes contains:</p>
+<ul class="simple">
+<li><p>every id the app explicitly set, or that was already present in the file with a usable
+value — <strong>not</strong> every declared id, so the distinction between “the user chose this” and
+“this is the default” is preserved. A key that was present but unusable (wrong type, <code class="docutils literal notranslate"><span class="pre">null</span></code>,
+a malformed number) is dropped, which quietly cleans up a corrupt entry;</p></li>
+<li><p>every unrecognised key from the previous file, copied through unchanged, except that a
+repeated key keeps only its first copy (section 4.5).</p></li>
+</ul>
+</section>
+<section id="recovering-an-interrupted-write">
+<h3>6.3 Recovering an interrupted write<a class="headerlink" href="#recovering-an-interrupted-write" title="Link to this heading"></a></h3>
+<p>If a reset lands between steps 3 and 4, the values file is missing but <code class="docutils literal notranslate"><span class="pre">&lt;configFile&gt;.tmp</span></code> is
+intact. On load, <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> detects exactly that — no values file, a parseable
+temporary file — and completes the rename before reading. A leftover temporary file that
+does not parse is deleted.</p>
+</section>
+<section id="both-sides-can-write-the-conflict-rule">
+<h3>6.4 Both sides can write: the conflict rule<a class="headerlink" href="#both-sides-can-write-the-conflict-rule" title="Link to this heading"></a></h3>
+<p>The file has two writers, so the rule is simply <strong>last writer wins</strong>, with one obligation on
+the companion app: it MUST re-read the file over FTS immediately before showing its edit
+screen, so what it displays is what is actually on the watch.</p>
+<p>Two writers means the phone and the watch — <strong>not two writers inside one app</strong>. Use one
+<code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> per app, on one thread: the class is not thread-safe, and two instances would
+share one <code class="docutils literal notranslate"><span class="pre">&lt;configFile&gt;.tmp</span></code> with no locking, where <code class="docutils literal notranslate"><span class="pre">save()</span></code>’s remove-then-rename is not
+reentrant. If both an app’s processes need the values, read them in the service and send them
+to the GUI, as the tutorial does.</p>
+<p>That leaves one narrow race: the user has the phone’s edit screen open <em>while</em> the app
+changes the same file on the watch. Whoever saves first loses their change. This is
+accepted — it needs two simultaneous edits of the same app’s configuration on two devices —
+and it is deliberately not defended with revision counters or locking, which would cost far
+more complexity than the case is worth.</p>
+<p>A companion app that wants to notice it anyway can do so for free on FTS version 5 or later
+(<code class="docutils literal notranslate"><span class="pre">DIGEST</span></code> must be gated on that version — see
+<a class="reference internal" href="BLE-File-Transfer-Service.html"><span class="std std-doc">BLE File Transfer Service</span></a>): <code class="docutils literal notranslate"><span class="pre">DIGEST</span></code> returns a CRC-32
+and size for the file, so comparing them against what it last wrote reveals that the watch
+changed the file, without transferring it again.</p>
+</section>
+</section>
+<section id="lifecycle">
+<h2>7. Lifecycle<a class="headerlink" href="#lifecycle" title="Link to this heading"></a></h2>
+<section id="install">
+<h3>7.1 Install<a class="headerlink" href="#install" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>The companion app reads <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> from the package.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">configFields</span></code> is non-empty, it shows the configuration screen, pre-filled from each
+field’s <code class="docutils literal notranslate"><span class="pre">default</span></code>. Required fields must be satisfied before the install can continue.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> is transferred, which creates the app’s directory.</p></li>
+<li><p>The values file is written, containing the ids the user set.</p></li>
+</ol>
+<p>Configuration is collected <em>before</em> the transfer so that abandoning the form costs nothing,
+and written <em>after</em> it because the directory has to exist first.</p>
+</section>
+<section id="editing-later">
+<h3>7.2 Editing later<a class="headerlink" href="#editing-later" title="Link to this heading"></a></h3>
+<p>The user can edit the configuration at any time. The companion app re-reads the file first
+(section 6.4), shows the current values, and writes the whole file back from offset 0 — an
+FTS write at offset 0 truncates, so a shorter document cannot leave stale bytes behind.</p>
+<p>Because the app reads its configuration at launch, the companion app must tell the user that
+changes take effect the <strong>next time they open the app</strong>. An app that is running when the
+file changes carries on with the values it started with.</p>
+</section>
+<section id="updating-the-app">
+<h3>7.3 Updating the app<a class="headerlink" href="#updating-the-app" title="Link to this heading"></a></h3>
+<p>An update may add, remove or re-specify fields. The companion app merges, then always shows
+the configuration screen so the user sees the result:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Case</p></th>
+<th class="head"><p>Behaviour</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Id still declared, same type, value still valid</p></td>
+<td><p>Kept.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Id still declared, but the value now fails validation</p></td>
+<td><p>Reset to the new <code class="docutils literal notranslate"><span class="pre">default</span></code>, and the field is flagged in the UI so the user sees it changed.</p></td>
+</tr>
+<tr class="row-even"><td><p>Id no longer declared</p></td>
+<td><p>Dropped.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Id declared with a different <code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p>Treated as a new field: the old value is dropped.</p></td>
+</tr>
+<tr class="row-even"><td><p>Newly declared id</p></td>
+<td><p>Pre-filled from its <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Then the user confirms, and the merged file is written. This is why an <code class="docutils literal notranslate"><span class="pre">id</span></code> must be stable
+across versions: renaming one is indistinguishable from deleting a field and adding another,
+and the user’s value is lost.</p>
+</section>
+<section id="uninstall">
+<h3>7.4 Uninstall<a class="headerlink" href="#uninstall" title="Link to this heading"></a></h3>
+<p>Uninstalling deletes the app’s directory, and the values file with it. Nothing is retained,
+so a later reinstall starts from the app’s defaults.</p>
+</section>
+</section>
+<section id="limits">
+<h2>8. Limits<a class="headerlink" href="#limits" title="Link to this heading"></a></h2>
+<p>These are hard limits. Tooling rejects anything past them, and <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> is sized for
+them.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Limit</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Why</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fields per app</p></td>
+<td><p>32</p></td>
+<td><p>Keeps the app-side state to a fixed-size table and a 32-bit presence mask.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code> length</p></td>
+<td><p>32 characters</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">label</span></code> length</p></td>
+<td><p>32 characters</p></td>
+<td><p>Fits a phone form row.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code> length</p></td>
+<td><p>200 characters</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">validationMessage</span></code> length</p></td>
+<td><p>120 characters</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unit</span></code> length</p></td>
+<td><p>8 characters</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maxLength</span></code> ceiling for a string field</p></td>
+<td><p>128 bytes</p></td>
+<td><p>Bounds the app’s buffers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pattern</span></code> length</p></td>
+<td><p>256 characters</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">configFile</span></code> length</p></td>
+<td><p>63 characters</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> refuses a longer name and uses defaults.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Number text in the values file</p></td>
+<td><p>64 characters</p></td>
+<td><p>Longer number text is treated as not set.</p></td>
+</tr>
+<tr class="row-even"><td><p>Values file size</p></td>
+<td><p>8192 bytes</p></td>
+<td><p>The reader holds the whole file; matches the existing variant-config cap.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">int</span></code> range</p></td>
+<td><p>-2147483648 .. 2147483647</p></td>
+<td><p>32-bit signed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">float</span></code> precision</p></td>
+<td><p>IEEE-754 binary32</p></td>
+<td><p>Matches the platform’s GPS and track types.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="companion-app-specification">
+<h2>9. Companion app specification<a class="headerlink" href="#companion-app-specification" title="Link to this heading"></a></h2>
+<p>This section is normative for the mobile implementation.</p>
+<section id="reading-the-declaration">
+<h3>9.1 Reading the declaration<a class="headerlink" href="#reading-the-declaration" title="Link to this heading"></a></h3>
+<p>Check <code class="docutils literal notranslate"><span class="pre">manifest_version</span></code> first: it is required, and <code class="docutils literal notranslate"><span class="pre">1</span></code> is the only value this
+specification covers. Refuse a package that declares anything else rather than parsing on
+regardless. Then parse <code class="docutils literal notranslate"><span class="pre">configFields</span></code> from the package’s <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code>, validate it
+against <code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/app_packer/app-config.schema.json</span></code>, and refuse to install a
+package that does not conform — a malformed declaration is a broken package, not something to work
+around. Render fields in array order.</p>
+</section>
+<section id="install-flow">
+<h3>9.2 Install flow<a class="headerlink" href="#install-flow" title="Link to this heading"></a></h3>
+<p>As section 7.1. A field with <code class="docutils literal notranslate"><span class="pre">required:</span> <span class="pre">true</span></code> blocks the install until it is satisfied;
+every other field may be left at its default. Write the values file only after the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>
+transfer has completed, to <code class="docutils literal notranslate"><span class="pre">/Apps/&lt;AppDir&gt;/&lt;configFile&gt;</span></code>, with a single <code class="docutils literal notranslate"><span class="pre">WRITE</span></code> at
+offset 0. On FTS version 5 or later, a <code class="docutils literal notranslate"><span class="pre">DIGEST</span></code> afterwards is cheap insurance that the file
+arrived intact; on earlier versions it is unavailable and must not be sent.</p>
+</section>
+<section id="edit-flow">
+<h3>9.3 Edit flow<a class="headerlink" href="#edit-flow" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Read <code class="docutils literal notranslate"><span class="pre">/Apps/&lt;AppDir&gt;/&lt;configFile&gt;</span></code> from the watch.</p></li>
+<li><p>If it is missing or unparseable, fall back to all defaults rather than showing an error —
+the user’s remedy is the same either way.</p></li>
+<li><p>Pre-fill each field from <code class="docutils literal notranslate"><span class="pre">values</span></code> if the key is present, otherwise from <code class="docutils literal notranslate"><span class="pre">default</span></code>, and
+indicate which fields are still at their default.</p></li>
+<li><p>Offer a per-field “reset to default” action, which removes the key from <code class="docutils literal notranslate"><span class="pre">values</span></code> rather
+than writing the default value.</p></li>
+<li><p><strong>Emptying an optional string field removes its key too</strong> — do not write <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>. Otherwise
+two companion apps would represent “the user cleared this” differently, and the watch can
+tell them apart: an absent key means the app’s default, while <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> is a real value that
+fails any <code class="docutils literal notranslate"><span class="pre">minLength</span></code> of 1 or more. A <code class="docutils literal notranslate"><span class="pre">required</span></code> field cannot be emptied.</p></li>
+<li><p>On save, write the whole document from offset 0.</p></li>
+<li><p>Tell the user the change applies the next time they open the app.</p></li>
+</ol>
+</section>
+<section id="input-controls">
+<h3>9.4 Input controls<a class="headerlink" href="#input-controls" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Type</p></th>
+<th class="head"><p>Control</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">string</span></code></p></td>
+<td><p>Single-line text field. Show a byte counter against <code class="docutils literal notranslate"><span class="pre">maxLength</span></code>; block input past it. Plain keyboard, no autocorrect or autocapitalisation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Switch or checkbox.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>Numeric keypad with no decimal separator. Offer a minus sign only when <code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Decimal keypad. Display the decimal separator in the user’s locale, but always serialise with <code class="docutils literal notranslate"><span class="pre">.</span></code> and no thousands separators or exponent. Offer a minus sign only when <code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Render <code class="docutils literal notranslate"><span class="pre">label</span></code> as the row’s name, <code class="docutils literal notranslate"><span class="pre">description</span></code> as help text below it or behind an info
+control, and <code class="docutils literal notranslate"><span class="pre">unit</span></code> immediately after the input. <code class="docutils literal notranslate"><span class="pre">unit</span></code> is decoration: never append it to
+the stored value.</p>
+</section>
+<section id="default-messages">
+<h3>9.5 Default messages<a class="headerlink" href="#default-messages" title="Link to this heading"></a></h3>
+<p>Used when a field has no <code class="docutils literal notranslate"><span class="pre">validationMessage</span></code>. Wording is the implementation’s own; these are
+the cases that must be covered:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Constraint</p></th>
+<th class="head"><p>Case to cover</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>required</p></td>
+<td><p>The field is empty.</p></td>
+</tr>
+<tr class="row-odd"><td><p>minLength / maxLength</p></td>
+<td><p>Too short, too long (state the limit).</p></td>
+</tr>
+<tr class="row-even"><td><p>min / max</p></td>
+<td><p>Below the minimum, above the maximum (state the bound).</p></td>
+</tr>
+<tr class="row-odd"><td><p>pattern</p></td>
+<td><p>The value does not match the required format.</p></td>
+</tr>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>The text is not a whole number, or not a number.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rules-that-must-not-be-broken">
+<h3>9.6 Rules that must not be broken<a class="headerlink" href="#rules-that-must-not-be-broken" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Never write an invalid value.</strong> Validation failures block the save.</p></li>
+<li><p><strong>Never write a key the app does not declare</strong>, and never drop a key that the watch’s copy
+had but this version does not declare <em>except</em> through the update merge in section 7.3.</p></li>
+<li><p><strong>Never write a key twice.</strong> JSON permits it and leaves the winner undefined; the
+watch reads the first copy and a <code class="docutils literal notranslate"><span class="pre">JSON.parse</span></code> on your side keeps the last, so a
+duplicate is a silent disagreement. A save on the watch collapses one it finds
+(§4.5), but do not rely on that.</p></li>
+<li><p><strong>Never trim</strong> whitespace from a string value.</p></li>
+<li><p><strong>Count string length in UTF-8 bytes</strong>, not characters.</p></li>
+<li><p><strong>Serialise numbers plainly</strong>: no exponent, no thousands separators, <code class="docutils literal notranslate"><span class="pre">.</span></code> as the decimal
+separator, and no fractional part for an <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p></li>
+<li><p><strong>Serialise strings as UTF-8</strong>, escaping only what JSON requires (<code class="docutils literal notranslate"><span class="pre">&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">\</span></code> and control
+characters). Do not <code class="docutils literal notranslate"><span class="pre">\uXXXX</span></code>-escape ordinary non-ASCII text: the 8 KB file limit is
+budgeted assuming you do not, and <code class="docutils literal notranslate"><span class="pre">validate_app_config.py</span></code> computes each app’s worst-case
+file size on that basis.</p></li>
+<li><p><strong>Write <code class="docutils literal notranslate"><span class="pre">schema:</span> <span class="pre">1</span></code></strong> in every file. (That is the <em>values</em> file’s version; the
+manifest’s own <code class="docutils literal notranslate"><span class="pre">manifest_version</span></code> is a separate key and stays on the phone.)</p></li>
+<li><p><strong>Re-read before editing</strong> (section 6.4).</p></li>
+</ul>
+</section>
+</section>
+<section id="tooling">
+<h2>10. Tooling<a class="headerlink" href="#tooling" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/app_packer/validate_app_config.py</span></code> is the single implementation of the
+rules above:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate a package's declaration</span>
+python<span class="w"> </span>Utilities/Scripts/app_packer/validate_app_config.py<span class="w"> </span>--check<span class="w"> </span>app-manifest.json
+
+<span class="c1"># Cross-check the app's constexpr field table against app-manifest.json</span>
+python<span class="w"> </span>Utilities/Scripts/app_packer/validate_app_config.py<span class="w"> </span>--check<span class="w"> </span>app-manifest.json<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--check-bounds<span class="w"> </span>Software/Libs/Sources/AppConfigFields.cpp
+</pre></div>
+</div>
+<p>It validates <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> against <code class="docutils literal notranslate"><span class="pre">app-config.schema.json</span></code>, applies the rules a JSON Schema
+cannot express (the regex subset, <code class="docutils literal notranslate"><span class="pre">default</span></code> satisfying its own constraints, <code class="docutils literal notranslate"><span class="pre">configFile</span></code>
+naming, byte-length limits), and — with <code class="docutils literal notranslate"><span class="pre">--check-bounds</span></code> — parses the <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig::Field</span></code>
+table out of the given source file and compares every id, type, default and bound against
+the declaration.</p>
+<p>The apps CI runs both, so a package cannot reach the store with a declaration its own binary
+disagrees with.</p>
+</section>
+<section id="worked-example">
+<h2>11. Worked example<a class="headerlink" href="#worked-example" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html"><span class="std std-doc">Waypoint tutorial</span></a> is a complete utility app built
+around this feature: it declares five fields covering all four types (two floats, for the
+coordinate pair), navigates to the
+configured coordinate, and writes the file back when the user saves their current position
+as the new target.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="app-config-json.html" class="btn btn-neutral float-left" title="App Manifest JSON" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api-reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

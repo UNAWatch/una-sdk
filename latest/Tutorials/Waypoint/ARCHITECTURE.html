@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waypoint - Configuration from the Companion App &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/version-selector.js?v=50f89983"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Running - Running Activity Tracking" href="../../Examples/Running-Architecture.html" />
+    <link rel="prev" title="FitFiles - FIT File Creation and Sensor Logging Tutorial" href="../FitFiles/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Waypoint - Configuration from the Companion App</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-ll-learn">What You’ll Learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-configuration-reaches-the-watch">How configuration reaches the watch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building">Building</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trying-it-without-a-phone">Trying it without a phone</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#declaring-the-fields">Declaring the fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-field-table-the-app-carries">The field table the app carries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-the-values">Reading the values</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-happens-when-things-go-wrong">What happens when things go wrong</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-a-value-back-from-the-watch">Writing a value back from the watch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-screen">The screen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#message-flow">Message flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Waypoint - Configuration from the Companion App</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/Waypoint/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="waypoint-configuration-from-the-companion-app">
+<span id="tutorials-waypoint-architecture"></span><h1>Waypoint - Configuration from the Companion App<a class="headerlink" href="#waypoint-configuration-from-the-companion-app" title="Link to this heading"></a></h1>
+<p>Some settings are miserable to enter with four buttons. A latitude, a name, a threshold: the
+user has a phone in their pocket with a keyboard on it, and the companion app can ask them
+once. Waypoint is a small utility app built around that idea. It navigates back
+to a coordinate the user sets from their phone, and it can overwrite that coordinate with
+wherever the user is standing.</p>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Waypoint">Project Folder</a></p>
+<p>The full contract behind this tutorial is <a class="reference internal" href="../../app-config-fields.html"><span class="std std-doc">App Configuration Fields</span></a>.
+This page is the worked example.</p>
+<section id="what-you-ll-learn">
+<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>How to declare configuration fields in <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> - one of each supported type</p></li>
+<li><p>How the companion app turns them into a file on the watch, and where it lands</p></li>
+<li><p>How to read those values with <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code>, and why every read has a default</p></li>
+<li><p>How to tell “the user chose this” from “this is our fallback”</p></li>
+<li><p>How to write a value back from the watch without ever corrupting the file</p></li>
+<li><p>How CI stops your app’s idea of a field from drifting away from <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code></p></li>
+</ul>
+</section>
+<section id="how-configuration-reaches-the-watch">
+<h2>How configuration reaches the watch<a class="headerlink" href="#how-configuration-reaches-the-watch" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   app-manifest.json                     Companion app            2:/Apps/Waypoint/
+   +----------------------+                                 +-------------------+
+   | "configFile"         |  1. reads the package           | Waypoint.uapp     |
+   | "configFields": [    |------------------------------&gt;  | app_config.json   | &lt;--+
+   |    waypointName      |  2. asks the user               +-------------------+    |
+   |    targetLatitude    |  3. validates the input                   |              |
+   |    targetLongitude   |  4. writes the values file ---------------+              |
+   |    arrivalRadiusM    |                                           |              |
+   |    vibrateOnArrival  |                                  5. read at launch       |
+   | ]                    |                                           v              |
+   +----------------------+                                    SDK::AppConfig        |
+   (never leaves the phone)                                           |              |
+                                                6. "save my position" |              |
+                                                                      +--------------+
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> itself never reaches the watch. Only the values file does.</p>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>Same as <a class="reference internal" href="../HelloWorld/ARCHITECTURE.html#tutorials-helloworld-architecture"><span class="std std-ref">HelloWorld</span></a>: <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> set, the ST ARM GCC
+toolchain on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, CMake 3.21+, and Python 3. See the <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>.</p>
+<p>Waypoint declares <code class="docutils literal notranslate"><span class="pre">&quot;requiredHardware&quot;:</span> <span class="pre">[&quot;GPS&quot;]</span></code>, so on hardware it needs a watch with GPS.</p>
+</section>
+<section id="building">
+<h3>Building<a class="headerlink" href="#building" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/Waypoint
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/Waypoint-CMake
+make
+</pre></div>
+</div>
+<p>On Windows, generate with Ninja instead - <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">-G</span> <span class="pre">Ninja</span> <span class="pre">../Software/Apps/Waypoint-CMake</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> is produced in the build directory; the final step that copies it into <code class="docutils literal notranslate"><span class="pre">Output/</span></code>
+uses a wildcard that <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">-E</span> <span class="pre">copy</span></code> does not expand on Windows, so copy it across yourself
+if the build stops there.</p>
+</section>
+<section id="trying-it-without-a-phone">
+<h3>Trying it without a phone<a class="headerlink" href="#trying-it-without-a-phone" title="Link to this heading"></a></h3>
+<p>The simulator’s app sandbox is a directory on your PC - the GUI logs its path at startup
+(“Path to files created by app”). Drop a file called <code class="docutils literal notranslate"><span class="pre">app_config.json</span></code> in there:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"waypointName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Trailhead"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"targetLatitude"</span><span class="p">:</span><span class="w"> </span><span class="mf">51.5072</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"targetLongitude"</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1276</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"arrivalRadiusM"</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Restart the simulator and the app reads it exactly as it would on the watch. Delete the file
+and every field falls back to its declared default - which is worth trying, because that is
+the path most apps get wrong.</p>
+</section>
+</section>
+<section id="declaring-the-fields">
+<h2>Declaring the fields<a class="headerlink" href="#declaring-the-fields" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Output/app-manifest.json</span></code> carries two extra keys beyond the usual package metadata (which
+now starts with <code class="docutils literal notranslate"><span class="pre">&quot;manifest_version&quot;:</span> <span class="pre">1</span></code> - required in every manifest, configuration fields or
+not). <code class="docutils literal notranslate"><span class="pre">configFile</span></code> names the file the companion app will write, and <code class="docutils literal notranslate"><span class="pre">configFields</span></code> lists what
+to ask for. Waypoint declares five fields covering
+all four supported types — two of them floats, for the coordinate pair. Abridged (see
+<code class="docutils literal notranslate"><span class="pre">Output/app-manifest.json</span></code> for the full declaration, including <code class="docutils literal notranslate"><span class="pre">targetLongitude</span></code>):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"configFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app_config.json"</span><span class="p">,</span>
+<span class="nt">"configFields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"waypointName"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint name"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shown on the watch while you navigate. Letters, digits and spaces only."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"minLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"maxLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"pattern"</span><span class="p">:</span><span class="w"> </span><span class="s2">"[A-Za-z0-9 ]+"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"validationMessage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Up to 16 letters, digits and spaces."</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"targetLatitude"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Target latitude"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Latitude of the waypoint in decimal degrees. North is positive."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mf">51.5072</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mf">-90.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mf">90.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"deg"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arrivalRadiusM"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Arrival radius"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How close you need to get before the watch counts you as arrived."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"unit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"m"</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vibrateOnArrival"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bool"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vibrate on arrival"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Buzz the watch once when you come within the arrival radius."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Points worth copying:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">min</span></code> and <code class="docutils literal notranslate"><span class="pre">max</span></code> are mandatory</strong> on <code class="docutils literal notranslate"><span class="pre">int</span></code> and <code class="docutils literal notranslate"><span class="pre">float</span></code>. They are what the companion app
+validates against and what the app clamps to, and an unbounded number is usually a field
+nobody has finished thinking about.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">maxLength</span></code> is mandatory</strong> on <code class="docutils literal notranslate"><span class="pre">string</span></code>, in UTF-8 <strong>bytes</strong>, because the app sizes a
+buffer from it.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">default</span></code> is mandatory</strong> everywhere. It pre-fills the phone’s input and it is what the
+app falls back to.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">required:</span> <span class="pre">true</span></code></strong> on the two coordinates means the install cannot finish until the user
+supplies them - a waypoint app with no waypoint is not much use.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">pattern</span></code></strong> is a deliberately small regex dialect and always matches the <em>whole</em> value,
+so no <code class="docutils literal notranslate"><span class="pre">^</span></code> or <code class="docutils literal notranslate"><span class="pre">$</span></code>. See <a class="reference internal" href="../../app-config-fields.html"><span class="std std-doc">the dialect rules</span></a>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">unit</span></code></strong> is decoration the phone renders beside the input. It is never stored in the
+value, so do not put units in <code class="docutils literal notranslate"><span class="pre">label</span></code> too.</p></li>
+</ul>
+</section>
+<section id="the-field-table-the-app-carries">
+<h2>The field table the app carries<a class="headerlink" href="#the-field-table-the-app-carries" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> stays on the phone, so the app repeats the contract in
+<code class="docutils literal notranslate"><span class="pre">Software/Libs/Sources/AppConfigFields.cpp</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">Field</span><span class="w"> </span><span class="n">kFields</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">stringField</span><span class="p">(</span><span class="s">"waypointName"</span><span class="p">,</span><span class="w"> </span><span class="s">"Waypoint"</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">floatField</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">,</span><span class="w"> </span><span class="mf">51.5072f</span><span class="p">,</span><span class="w"> </span><span class="mf">-90.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">90.0f</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">floatField</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.1276f</span><span class="p">,</span><span class="w"> </span><span class="mf">-180.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">180.0f</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">intField</span><span class="p">(</span><span class="s">"arrivalRadiusM"</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AppConfig</span><span class="o">::</span><span class="n">boolField</span><span class="p">(</span><span class="s">"vibrateOnArrival"</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">),</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>This is duplication on purpose: it is what lets the app clamp a value it should never have
+received - from a hand-edited file, a downgrade, or a buggy companion build. Duplication that
+can drift is a bug waiting to happen, so CI compares the two:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/Waypoint
+python<span class="w"> </span><span class="nv">$UNA_SDK</span>/Utilities/Scripts/app_packer/validate_app_config.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--check<span class="w"> </span>Output/app-manifest.json<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--check-bounds<span class="w"> </span>Software/Libs/Sources/AppConfigFields.cpp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--check-bounds<span class="w"> </span>Software/Libs/Header/AppConfigFields.hpp
+</pre></div>
+</div>
+<p>Change <code class="docutils literal notranslate"><span class="pre">500</span></code> to <code class="docutils literal notranslate"><span class="pre">400</span></code> in either place and the build fails with the two values side by side.
+Run it yourself before opening a pull request - it also checks the whole declaration:
+unique ids, <code class="docutils literal notranslate"><span class="pre">default</span></code> satisfying its own constraints, the regex dialect, and the worst-case
+size of the values file.</p>
+</section>
+<section id="reading-the-values">
+<h2>Reading the values<a class="headerlink" href="#reading-the-values" title="Link to this heading"></a></h2>
+<p>One object, created once, at the top of <code class="docutils literal notranslate"><span class="pre">run()</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::run</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">mConfig</span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">AppConfig</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">WaypointConfig</span><span class="o">::</span><span class="n">kFileName</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">WaypointConfig</span><span class="o">::</span><span class="n">kFields</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">WaypointConfig</span><span class="o">::</span><span class="n">kFieldCount</span><span class="p">));</span>
+<span class="w">    </span><span class="n">loadConfiguration</span><span class="p">();</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Service::loadConfiguration</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getString</span><span class="p">(</span><span class="s">"waypointName"</span><span class="p">,</span><span class="w"> </span><span class="n">mWaypointName</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">mWaypointName</span><span class="p">));</span>
+<span class="w">    </span><span class="n">mTargetLatitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getFloat</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mTargetLongitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getFloat</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mArrivalRadiusM</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getInt</span><span class="p">(</span><span class="s">"arrivalRadiusM"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mVibrateOnArrival</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">getBool</span><span class="p">(</span><span class="s">"vibrateOnArrival"</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">mTargetIsConfigured</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">has</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">            </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">has</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Not in the constructor</strong>, deliberately. <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> logs when a file is unusable, and in
+the simulator the service is constructed before TouchGFX’s HAL exists — which is what the
+logger writes through, so logging that early segfaults the simulator before your app draws
+anything. Do the reading on the service thread, in <code class="docutils literal notranslate"><span class="pre">run()</span></code>.</p>
+<p>Note what the getters do <em>not</em> need: no error handling, no “if the file exists” branch, no
+range checks. Every getter returns either the stored value, clamped to the bounds you
+declared, or the field’s default. That is the whole point - a configuration problem can never
+stop the app from starting.</p>
+<p><code class="docutils literal notranslate"><span class="pre">has()</span></code> is the one thing worth thinking about. It answers “did this come from the user?”,
+which is different from “is it non-zero”. Waypoint uses it to avoid navigating confidently
+towards its own placeholder coordinate:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">nav</span><span class="p">.</span><span class="n">targetIsConfigured</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">setStatus</span><span class="p">(</span><span class="s">"Set a target"</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Values are read once, at launch.</strong> A change the user makes on their phone applies the next
+time they open the app. The companion app tells them so; your app does not need to watch the
+file.</p>
+<section id="what-happens-when-things-go-wrong">
+<h3>What happens when things go wrong<a class="headerlink" href="#what-happens-when-things-go-wrong" title="Link to this heading"></a></h3>
+<p>Every one of these degrades to defaults rather than to a crash or a failed launch:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Condition</p></th>
+<th class="head"><p>Result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>No values file at all</p></td>
+<td><p>Every field uses its default; <code class="docutils literal notranslate"><span class="pre">isLoaded()</span></code> is <code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Not valid JSON, or bigger than 8 KB</p></td>
+<td><p>Every field uses its default</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;schema&quot;</span></code> is missing or not <code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Every field uses its default</p></td>
+</tr>
+<tr class="row-odd"><td><p>One value has the wrong JSON type, or is <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>That field alone uses its default</p></td>
+</tr>
+<tr class="row-even"><td><p>One number is outside <code class="docutils literal notranslate"><span class="pre">min</span></code>..<code class="docutils literal notranslate"><span class="pre">max</span></code></p></td>
+<td><p>That field alone is clamped</p></td>
+</tr>
+<tr class="row-odd"><td><p>One string is longer than <code class="docutils literal notranslate"><span class="pre">maxLength</span></code></p></td>
+<td><p>That field alone is truncated, on a character boundary</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="writing-a-value-back-from-the-watch">
+<h2>Writing a value back from the watch<a class="headerlink" href="#writing-a-value-back-from-the-watch" title="Link to this heading"></a></h2>
+<p>Configuration is not one-way. Pressing R1 stores the current position as the new target, so
+the user can save a spot without typing coordinates at all:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::saveTargetHere</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mHasFix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TargetSaved</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">                </span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SaveOutcome</span><span class="o">::</span><span class="n">NoFix</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">setFloat</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">,</span><span class="w"> </span><span class="n">mLatitude</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">setFloat</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">,</span><span class="w"> </span><span class="n">mLongitude</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mConfig</span><span class="o">-&gt;</span><span class="n">save</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// The setters already updated the in-memory values, so re-reading now</span>
+<span class="w">        </span><span class="c1">// would adopt coordinates that never reached the file. Keep serving the</span>
+<span class="w">        </span><span class="c1">// previous target and say so.</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">TargetSaved</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">                </span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">SaveOutcome</span><span class="o">::</span><span class="n">WriteFailed</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">loadConfiguration</span><span class="p">();</span><span class="w">    </span><span class="c1">// re-read, so what is in play is what is on disk</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The three outcomes are distinct on purpose. <code class="docutils literal notranslate"><span class="pre">SaveOutcome</span></code> (<code class="docutils literal notranslate"><span class="pre">Saved</span></code>, <code class="docutils literal notranslate"><span class="pre">NoFix</span></code>, <code class="docutils literal notranslate"><span class="pre">WriteFailed</span></code>)
+travels to the GUI instead of a bare <code class="docutils literal notranslate"><span class="pre">bool</span></code>, because “there was nothing to save” and “the
+write failed” need different words on the status line - and only one of them is a fault.</p>
+<p>Three things <code class="docutils literal notranslate"><span class="pre">save()</span></code> does that are easy to get wrong by hand:</p>
+<ol class="arabic simple">
+<li><p><strong>It never truncates the live file.</strong> The new document goes to <code class="docutils literal notranslate"><span class="pre">app_config.json.tmp</span></code>,
+which is then renamed over the original. A reset mid-write leaves the previous target
+intact, and the next launch finishes the rename.</p></li>
+<li><p><strong>It leaves values it did not change exactly as they were</strong> - byte for byte. Re-serialising
+<code class="docutils literal notranslate"><span class="pre">51.5072</span></code> as a float would write <code class="docutils literal notranslate"><span class="pre">51.5071983</span></code>, and the user’s number would drift a little
+every time the app saved.</p></li>
+<li><p><strong>It preserves keys it does not recognise</strong>, so installing an older build of your app does
+not silently discard a newer version’s settings. The single exception is a key that appears
+twice: only the first copy is kept, because the watch reads the first and the phone would
+read the last, and a file that makes them disagree is worse than a tidy one.</p></li>
+</ol>
+<p>The file has two writers now - the phone and the watch - so the rule is last writer wins, and
+the companion app re-reads the file before it shows its edit screen. The only way to lose a
+change is to edit on both at the same moment.</p>
+</section>
+<section id="the-screen">
+<h2>The screen<a class="headerlink" href="#the-screen" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MainView</span></code> renders four wildcard text areas: name, distance, bearing and a status line. The
+wildcard typographies (<code class="docutils literal notranslate"><span class="pre">TMP_SEMIBOLD_40</span></code> and friends) already carry the full ASCII set, so
+arbitrary runtime text needs no font regeneration:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">snprintf</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">text</span><span class="p">),</span><span class="w"> </span><span class="s">"%d m"</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">nav</span><span class="p">.</span><span class="n">distanceM</span><span class="p">));</span>
+<span class="n">touchgfx</span><span class="o">::</span><span class="n">Unicode</span><span class="o">::</span><span class="n">strncpy</span><span class="p">(</span><span class="n">distanceTextBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">text</span><span class="p">,</span><span class="w"> </span><span class="n">DISTANCETEXT_SIZE</span><span class="p">);</span>
+<span class="n">distanceText</span><span class="p">.</span><span class="n">invalidate</span><span class="p">();</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code> writes <strong>every</strong> wildcard before the screen is shown. A wildcard that is
+never set keeps whatever placeholder the text database holds, and a design-time placeholder
+that ships to users looks exactly like real data.</p>
+<p>Buttons: <strong>R1</strong> saves the current position as the target, <strong>R2</strong> exits.</p>
+</section>
+<section id="message-flow">
+<h2>Message flow<a class="headerlink" href="#message-flow" title="Link to this heading"></a></h2>
+<p>The service owns the configuration; the GUI only asks and displays.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   GPS fix                                                    R1 pressed
+      |                                                            |
+      v                                                            v
+   Service                                                        GUI
+   distance + bearing                              SAVE_TARGET_HERE -&gt;
+      |                                                            |
+      | NAV_UPDATE (NavState: name, distance, bearing, flags)      |
+      +----------------------------------------------------------&gt; |
+                                                                   |
+      &lt;- setFloat + save() + re-read, then TARGET_SAVED ---------- +
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">NavState</span></code> is a plain struct rather than message fields, because a <code class="docutils literal notranslate"><span class="pre">MessageBase</span></code> is
+pool-allocated and non-copyable - the GUI could not keep a copy of the last update to redraw
+from.</p>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../app-config-fields.html"><span class="std std-doc">App Configuration Fields</span></a> - the full contract, including the
+companion-app specification and every limit</p></li>
+<li><p><a class="reference internal" href="../Files/ARCHITECTURE.html"><span class="std std-doc">Files</span></a> - settings the user edits on the watch, which is the
+other half of this story</p></li>
+<li><p><a class="reference internal" href="../Sensors/ARCHITECTURE.html#tutorials-sensors-architecture"><span class="std std-ref">Sensors</span></a> - the rest of the sensor layer this app only dips
+into</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p><strong>Every value is the default.</strong> The app could not use the file. The log names the reason for
+a file that exists but cannot be used — “not valid JSON”, “has no schema”, “over the
+8192-byte limit” — and a <code class="docutils literal notranslate"><span class="pre">schema</span></code> other than <code class="docutils literal notranslate"><span class="pre">1</span></code> lands here by design. A file that simply
+isn’t there is not logged, so check <code class="docutils literal notranslate"><span class="pre">isLoaded()</span></code> if you need to tell “missing” from
+“unusable”.</p>
+<p><strong>One value is the default and the others are fine.</strong> That key is the wrong JSON type for its
+declared field, or <code class="docutils literal notranslate"><span class="pre">null</span></code>, or a number with a fractional part in an <code class="docutils literal notranslate"><span class="pre">int</span></code> field. The companion
+app cannot produce any of those; a hand edit can.</p>
+<p><strong>The value is not what the phone shows.</strong> It was outside <code class="docutils literal notranslate"><span class="pre">min</span></code>..<code class="docutils literal notranslate"><span class="pre">max</span></code> and got clamped, or the
+string was longer than <code class="docutils literal notranslate"><span class="pre">maxLength</span></code> and got truncated. Neither is logged — they happen silently
+inside the getters — so compare the file against your field table if a value looks capped.
+CI keeps the two in step, but a hand-edited file can hold anything.</p>
+<p><strong>A change on the phone did nothing.</strong> Values are read at launch. Close the app and reopen it.</p>
+<p><strong>A confident distance appears before there is a fix.</strong> <code class="docutils literal notranslate"><span class="pre">GpsLocation::isDataValid()</span></code> only
+says the sample is a well-formed GPS record; the fix itself is <code class="docutils literal notranslate"><span class="pre">isCoordinatesValid()</span></code>. Check
+both, or a fix-less sample reads as latitude 0, longitude 0 and you will navigate to the Gulf
+of Guinea.</p>
+<p><strong>The watch keeps alerting after you leave the app.</strong> The kernel does not stop a service when
+its GUI closes, so a service that does not end itself keeps running - holding its sensor
+subscriptions open and still firing alerts. Waypoint returns from <code class="docutils literal notranslate"><span class="pre">run()</span></code> on
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>; see the <a class="reference internal" href="../../Examples/Stopwatch-Architecture.html"><span class="std std-doc">Stopwatch</span></a>
+notes for the case where staying alive is the right choice.</p>
+<p><strong>The simulator segfaults before drawing anything.</strong> Something logged before TouchGFX’s HAL
+existed. The service is constructed early, so anything in a constructor that reaches
+<code class="docutils literal notranslate"><span class="pre">LOG_*</span></code> — directly or through an SDK class — crashes there while working fine on the watch.
+Move it into <code class="docutils literal notranslate"><span class="pre">run()</span></code>.</p>
+<p><strong>The simulator fails to link with <code class="docutils literal notranslate"><span class="pre">undefined</span> <span class="pre">reference</span></code> to SDK symbols.</strong> Unlike the CMake
+target, the simulator lists its sources by hand in <code class="docutils literal notranslate"><span class="pre">simulator/gcc/Makefile</span></code> (and
+<code class="docutils literal notranslate"><span class="pre">simulator/msvs/Application.vcxproj</span></code>). Add what you use — this app needed <code class="docutils literal notranslate"><span class="pre">AppConfig.cpp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SensorConnection.cpp</span></code>, coreJSON and the sensor-layer simulator. An app that uses the sensor
+layer also needs its own <code class="docutils literal notranslate"><span class="pre">simulator/ConfigurationSimulator.hpp</span></code> saying which sensors to
+simulate.</p>
+<p><strong>CI fails with “field table … but app-manifest.json”.</strong> The two declarations disagree. The error
+names the field and both values; fix whichever is wrong.</p>
+<p><strong>“app-manifest.json declares configFile X, but the checked sources only name Y”.</strong> The app opens a
+different filename than it declared. Update <code class="docutils literal notranslate"><span class="pre">kFileName</span></code> or <code class="docutils literal notranslate"><span class="pre">configFile</span></code> so they match.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../FitFiles/ARCHITECTURE.html" class="btn btn-neutral float-left" title="FitFiles - FIT File Creation and Sensor Logging Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../Examples/Running-Architecture.html" class="btn btn-neutral float-right" title="Running - Running Activity Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
