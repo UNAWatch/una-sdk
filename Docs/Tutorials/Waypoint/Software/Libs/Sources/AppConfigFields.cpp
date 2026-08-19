@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file    AppConfigFields.cpp
- * @brief   The app's copy of the configuration contract in its config.json.
+ * @brief   The app's copy of the configuration contract in its app-manifest.json.
  ******************************************************************************
  *
  ******************************************************************************
@@ -13,8 +13,8 @@ namespace WaypointConfig {
 
 using SDK::AppConfig;
 
-// Every value here must match Output/config.json exactly. CI checks it with
-// validate_app_config.py --check <config.json> --check-bounds <this file>.
+// Every value here must match Output/app-manifest.json exactly. CI checks it with
+// validate_app_config.py --check <app-manifest.json> --check-bounds <this file>.
 const AppConfig::Field kFields[] = {
     AppConfig::stringField("waypointName", "Waypoint", 1, 16),
     AppConfig::floatField("targetLatitude", 51.5072f, -90.0f, 90.0f),

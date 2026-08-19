@@ -86,9 +86,9 @@ bool Model::customMessageHandler(SDK::MessageBase *msg)
 
     case CustomMessage::TARGET_SAVED: {
         auto *m = static_cast<CustomMessage::TargetSaved *>(msg);
-        LOG_INFO("target saved: %s\n", m->saved ? "yes" : "no");
+        LOG_INFO("save outcome: %d\n", static_cast<int>(m->outcome));
         if (modelListener) {
-            modelListener->onTargetSaved(m->saved, m->targetLatitude,
+            modelListener->onTargetSaved(m->outcome, m->targetLatitude,
                                          m->targetLongitude);
         }
     } break;

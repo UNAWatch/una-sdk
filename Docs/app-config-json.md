@@ -1,4 +1,4 @@
-# App Config JSON
+# App Manifest JSON
 
 ## Revision History
 
@@ -9,6 +9,7 @@
 | 1.02    | 29.06.2026     | Renamed `minSdkVersion` to `minKernelVersion`: the SDK is statically linked into the `.uapp`, so the runtime requirement is on the kernel firmware version (reported over BLE via the DIS Firmware Revision String, UUID 0x2A26), not the build-time SDK version | | Ross Ryles |
 | 1.03    | 17.08.2026     | `minKernelVersion` is now **auto-derived** from the SDK ABI (`KERNEL_INTERFACE_VERSION`) by `Utilities/Scripts/app_packer/min_kernel_version.py` via `abi_kernel_map.json` — do not hand-set it (see *Config File*) | | Ross Ryles |
 | 1.04    | 18.08.2026     | Added `configFile` and `configFields`: developer-declared configuration the companion app collects from the user and writes to the watch. Summarised under *Configuration Fields*; the full contract is [App Configuration Fields](app-config-fields.md) | | Ross Ryles |
+| 1.05    | 19.08.2026     | Renamed the package metadata file `config.json` -> **`app-manifest.json`**, and added the required `manifest_version` key (must be `1`). The name `config.json` is retired for packages; it still names the *variant* embedded config under `Examples/Apps/Variants/*/`, which is a different artifact | | Ross Ryles |
 
 ## Output Package
 
@@ -19,7 +20,7 @@ The watch application package is generated using the UNA SDK. It is provided as 
 The package includes the following files:
 
 - A binary application file (`*.uapp`)
-- A JSON file with application metadata and configuration (`config.json`)
+- A JSON file with application metadata and configuration (`app-manifest.json`)
 - An icon image (`icon.png`) in PNG format
 - A folder (`previews`) containing application preview images (multiple PNG screenshots)
 - A folder (`assets`) with subdirectories (`icons` and `previews`):
@@ -28,7 +29,7 @@ The package includes the following files:
 
 ### Config File
 
-The `config.json` configuration file provides general metadata about the application and defines the structure, capabilities, and custom metrics supported by the watch app.
+The `app-manifest.json` configuration file provides general metadata about the application and defines the structure, capabilities, and custom metrics supported by the watch app.
 
 This file is intended solely for defining supported features and displaying them in the mobile application. It should not contain runtime information or settings for the watch and should not be uploaded to the watch during application installation.
 
@@ -36,20 +37,31 @@ That still holds for `configFields` (see *Configuration Fields* below): the decl
 
 All information needed by the watch is also embedded in the `*.uapp` file.
 
+Every manifest starts by declaring the format version of the manifest itself:
+
+```json
+"manifest_version": 1
+```
+
+It is **required**, and the only accepted value is `1`. A reader that finds any other value
+must refuse the manifest rather than guess at a format it was not built for. It versions the
+manifest format, not the app — `appVersion` is the app's own version and moves independently.
+
 > **`minKernelVersion` is an ABI-derived floor — let the tooling set it, don't type it below the floor.** The compatibility contract is the SDK **ABI** version (`KERNEL_INTERFACE_VERSION`), not a marketing version: an app built against a given SDK requires a kernel whose ABI is at least that value. Each ABI maps to the **minimum** kernel firmware version that provides it, so the requirement is a floor on the firmware version — which is what the mobile app already gates on (compared against the watch firmware from BLE DIS `0x2A26`). Run the SDK resolver `min_kernel_version.py` to set or verify it:
 >
 > ```bash
 > python3 Utilities/Scripts/app_packer/min_kernel_version.py --print          # the current floor
-> python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp config.json   # raise it to the floor
-> python3 Utilities/Scripts/app_packer/min_kernel_version.py --check config.json   # verify it is >= the floor
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --stamp app-manifest.json   # raise it to the floor
+> python3 Utilities/Scripts/app_packer/min_kernel_version.py --check app-manifest.json   # verify it is >= the floor
 > ```
 >
-> You **may** set a *higher* `minKernelVersion` if your app needs a specific firmware bugfix at the same ABI; you must **not** set it below the floor. `config.json` must be strict JSON — the `//` comments in the annotated example below are illustrative only, and the `minKernelVersion` values shown are illustrative.
+> You **may** set a *higher* `minKernelVersion` if your app needs a specific firmware bugfix at the same ABI; you must **not** set it below the floor. `app-manifest.json` must be strict JSON — the `//` comments in the annotated example below are illustrative only, and the `minKernelVersion` values shown are illustrative.
 
-Simplest `config.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
+Simplest `app-manifest.json` for [Files](Tutorials/Files/ARCHITECTURE.md) Tutorial
 
 ```json
 {
+  "manifest_version": 1,
   "type": [
     "activity"
   ],
@@ -76,6 +88,7 @@ Watch application config example:
 
 ```json
 {
+  "manifest_version": 1, // Format version of this file. Required; must be 1
   "type": [
     "activity", // Type of the app: activity, clockface, glance, or utility
     "glance" // The app can combine several types

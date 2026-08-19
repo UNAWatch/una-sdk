@@ -19,7 +19,8 @@ public:
     void showNav(const CustomMessage::NavState& nav);
 
     /// Report the outcome of an R1 press.
-    void showTargetSaved(bool saved, float latitude, float longitude);
+    void showTargetSaved(CustomMessage::SaveOutcome outcome, float latitude,
+                         float longitude);
 
 protected:
     virtual void handleKeyEvent(uint8_t key) override;

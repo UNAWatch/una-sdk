@@ -65,23 +65,30 @@ struct NavUpdate : public SDK::MessageBase {
     {}
 };
 
+/// Why a SAVE_TARGET_HERE request ended the way it did.
+enum class SaveOutcome : uint8_t {
+    Saved = 0,      ///< Written to the file and re-read.
+    NoFix,          ///< No GPS fix, so there was no position to store.
+    WriteFailed,    ///< There was a fix, but the file could not be written.
+};
+
 /// Service --> GUI: the outcome of a SAVE_TARGET_HERE request.
 struct TargetSaved : public SDK::MessageBase {
-    bool  saved;            ///< False when there was no fix, or the write failed.
-    float targetLatitude;
-    float targetLongitude;
+    SaveOutcome outcome;
+    float       targetLatitude;      ///< The target now in effect.
+    float       targetLongitude;
 
     TargetSaved()
         : SDK::MessageBase(TARGET_SAVED)
-        , saved(false)
+        , outcome(SaveOutcome::NoFix)
         , targetLatitude(0.0f)
         , targetLongitude(0.0f)
     {}
 
-    explicit TargetSaved(bool saved, float latitude, float longitude)
+    explicit TargetSaved(SaveOutcome outcome, float latitude, float longitude)
         : TargetSaved()
     {
-        this->saved = saved;
+        this->outcome = outcome;
         this->targetLatitude = latitude;
         this->targetLongitude = longitude;
     }

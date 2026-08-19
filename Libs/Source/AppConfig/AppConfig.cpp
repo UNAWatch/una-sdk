@@ -308,6 +308,14 @@ public:
         // next launch -- taking every preserved unknown key with it -- so refuse
         // to produce one at all and leave the previous file in place.
         if (mTotal + length > AppConfig::skMaxFileBytes) {
+            if (!mTooBig) {
+                // Logged here rather than only at the end: overflowing part-way
+                // through a field would otherwise leave just the generic
+                // "could not write" from save(), losing the actual reason.
+                LOG_WARNING("the new configuration would exceed the %u-byte "
+                            "limit; not saving\n",
+                            static_cast<unsigned>(AppConfig::skMaxFileBytes));
+            }
             mTooBig = true;
             mOk = false;
             return false;
@@ -797,6 +805,17 @@ bool AppConfig::fileString(const Field &field, char *out, size_t outSize,
         budget = field.maxLength;
     }
     written = decodeJsonString(slice.data, slice.length, out, budget);
+
+    // A value below the declared minLength is not usable, so the field falls back
+    // to its default -- symmetric with clamping a numeric value into range. The
+    // companion app cannot produce one; a hand-edited file can. Note the test is
+    // against the decoded length, and only when the value was not truncated to
+    // fit (truncation already means it was longer than maxLength >= minLength).
+    if (field.minLength > 0 && written < field.minLength) {
+        written = 0;
+        out[0] = '\0';
+        return false;
+    }
     return true;
 }
 
@@ -963,8 +982,13 @@ size_t AppConfig::getString(const char *id, char *out, size_t outSize) const
 
 AppConfig::Slot *AppConfig::slot(size_t index)
 {
+    if (index >= mCount) {
+        return nullptr;
+    }
     if (!mSlots) {
-        mSlots.reset(new (std::nothrow) Slot[skMaxFields]);
+        // Sized to the app's field count, not the 32-field ceiling: four fields
+        // should not cost 32 slots' worth of storage.
+        mSlots.reset(new (std::nothrow) Slot[mCount]);
         if (!mSlots) {
             LOG_WARNING("could not allocate configuration write storage\n");
             return nullptr;
@@ -1050,6 +1074,14 @@ bool AppConfig::setString(const char *id, const char *value)
     }
     Slot *entry = slot(index);
     if (entry == nullptr) {
+        return false;
+    }
+
+    // Refuse a value the app's own declaration forbids, so an app cannot write a
+    // file that violates the contract the companion app is held to.
+    if (field->minLength > 0 && std::strlen(value) < field->minLength) {
+        LOG_WARNING("'%s' needs at least %u bytes\n", id,
+                    static_cast<unsigned>(field->minLength));
         return false;
     }
 
@@ -1214,15 +1246,9 @@ bool AppConfig::writeDocument(Interface::IFile &file) const
         }
     }
 
-    if (!out.put("}}") || !out.finish()) {
-        if (out.tooBig()) {
-            LOG_WARNING("the new configuration would exceed the %u-byte limit; "
-                        "not saving\n",
-                        static_cast<unsigned>(skMaxFileBytes));
-        }
-        return false;
-    }
-    return true;
+    // DocumentWriter reports an overflow where it happens, so a failure here
+    // needs no further diagnosis.
+    return out.put("}}") && out.finish();
 }
 
 bool AppConfig::save()

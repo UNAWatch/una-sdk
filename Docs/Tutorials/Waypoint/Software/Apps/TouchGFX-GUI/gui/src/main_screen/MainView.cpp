@@ -122,12 +122,25 @@ void MainView::showNav(const CustomMessage::NavState& nav)
     }
 }
 
-void MainView::showTargetSaved(bool saved, float latitude, float longitude)
+void MainView::showTargetSaved(CustomMessage::SaveOutcome outcome,
+                               float latitude, float longitude)
 {
     (void)latitude;
     (void)longitude;
 
-    setStatus(saved ? "Target saved" : "No fix yet");
+    // A failed write is not the GPS's fault: say which went wrong, or the user
+    // goes looking for sky when the volume is full.
+    switch (outcome) {
+    case CustomMessage::SaveOutcome::Saved:
+        setStatus("Target saved");
+        break;
+    case CustomMessage::SaveOutcome::NoFix:
+        setStatus("No fix yet");
+        break;
+    case CustomMessage::SaveOutcome::WriteFailed:
+        setStatus("Save failed");
+        break;
+    }
     mNoticeTicks = kNoticeTicks;
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate an app's configuration-field declaration, and the app's copy of it.
 
-An app declares configuration fields in config.json ("configFile" and
+An app declares configuration fields in app-manifest.json ("configFile" and
 "configFields"); the companion app collects values from the user and writes them
 to the declared file next to the .uapp on the watch. The full contract is in
 Docs/app-config-fields.md, and the machine-readable half is
@@ -9,7 +9,7 @@ app-config.schema.json next to this script.
 
 This tool is the single implementation of the rules:
 
-  --check CONFIG_JSON        validate the declaration in a config.json
+  --check MANIFEST           validate the declaration in an app-manifest.json
   --check-bounds SOURCE      additionally compare the app's constexpr
                              SDK::AppConfig::Field table against that
                              declaration (repeatable)
@@ -55,9 +55,15 @@ FLOAT32_MAX = 3.4028234663852886e38
 # the 9 significant digits that round-trip the format. No exponent is allowed.
 FLOAT_TEXT_MAX = 1 + 39 + 1 + 9
 
+MANIFEST_NAME = "app-manifest.json"
+# The manifest format this tool understands. A manifest must declare it, and an
+# unknown value is refused rather than guessed at -- the same rule the values
+# file's "schema" key follows.
+SUPPORTED_MANIFEST_VERSION = 1
+
 ID_RE = re.compile(r"^[a-z][A-Za-z0-9_]{0,31}$")
 CONFIG_FILE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,57}\.json$")
-RESERVED_FILE_NAMES = {"config.json"}
+RESERVED_FILE_NAMES = {"app-manifest.json"}
 
 TYPES = ("string", "bool", "int", "float")
 
@@ -224,6 +230,12 @@ def check_pattern_dialect(pattern, where, errors):
             enclosing_unbounded = group_stack.pop()
             i += 1
             quant, i = read_quantifier(pattern, i)
+            if quant is not None and quant["possessive"]:
+                # Checked here as well as for atoms: '(a)++' is a SyntaxError in
+                # JavaScript, a possessive quantifier in Java, and accepted by
+                # Python 3.11+ -- exactly the divergence this scanner exists to
+                # stop, and it slipped through when only atoms were checked.
+                flag("possessive quantifiers are not allowed")
             if quant is not None and inner_unbounded and quant["unbounded"]:
                 flag("a quantified group whose body is also unbounded "
                      "(such as '(a+)+') can backtrack exponentially; "
@@ -502,44 +514,62 @@ def worst_case_values_size(fields):
     return size
 
 
+def validate_manifest_version(manifest, errors):
+    """A manifest must declare manifest_version, and it must be one we know."""
+    declared = manifest.get("manifest_version")
+    if declared is None:
+        errors.add(MANIFEST_NAME,
+                   f"'manifest_version' is missing; it must be "
+                   f"{SUPPORTED_MANIFEST_VERSION}")
+    elif not is_int(declared):
+        errors.add(MANIFEST_NAME,
+                   f"'manifest_version' must be the integer "
+                   f"{SUPPORTED_MANIFEST_VERSION}, not {declared!r}")
+    elif declared != SUPPORTED_MANIFEST_VERSION:
+        errors.add(MANIFEST_NAME,
+                   f"'manifest_version' is {declared}; this tool understands "
+                   f"{SUPPORTED_MANIFEST_VERSION}. A newer manifest is not "
+                   f"guessed at -- update the SDK")
+
+
 def validate_declaration(config, errors):
     fields = config.get("configFields")
     config_file = config.get("configFile")
 
     if fields is None:
         if config_file is not None:
-            errors.add("config.json", "'configFile' is set but no "
+            errors.add("app-manifest.json", "'configFile' is set but no "
                                       "'configFields' are declared")
         return []
 
     if not isinstance(fields, list):
-        errors.add("config.json", "'configFields' must be an array")
+        errors.add("app-manifest.json", "'configFields' must be an array")
         return []
 
     if not fields:
         if config_file is not None:
-            errors.add("config.json", "'configFile' is set but 'configFields' "
+            errors.add("app-manifest.json", "'configFile' is set but 'configFields' "
                                       "is empty")
         return []
 
     if len(fields) > MAX_FIELDS:
-        errors.add("config.json", f"{len(fields)} configuration fields "
+        errors.add("app-manifest.json", f"{len(fields)} configuration fields "
                                   f"declared, limit is {MAX_FIELDS}")
 
     if config_file is None:
-        errors.add("config.json", "'configFields' is declared but "
+        errors.add("app-manifest.json", "'configFields' is declared but "
                                   "'configFile' is missing: the companion app "
                                   "needs a filename to write")
     elif not isinstance(config_file, str):
-        errors.add("config.json", "'configFile' must be a string")
+        errors.add("app-manifest.json", "'configFile' must be a string")
     else:
         if not CONFIG_FILE_RE.match(config_file):
-            errors.add("config.json", f"'configFile' {config_file!r} must be a "
+            errors.add("app-manifest.json", f"'configFile' {config_file!r} must be a "
                                       f"bare filename ending in .json with no "
                                       f"path separators "
                                       f"(pattern {CONFIG_FILE_RE.pattern})")
         if config_file.lower() in RESERVED_FILE_NAMES:
-            errors.add("config.json", f"'configFile' must not be "
+            errors.add("app-manifest.json", f"'configFile' must not be "
                                       f"{config_file!r}: that name is reserved "
                                       f"for the package metadata, which is "
                                       f"never copied to the watch")
@@ -548,10 +578,12 @@ def validate_declaration(config, errors):
     validated = [f for f in (validate_field(f, i, errors, seen_ids)
                              for i, f in enumerate(fields)) if f]
 
-    if validated and not errors:
+    # Not gated on the run being otherwise clean: a developer should see the size
+    # problem alongside their other errors, not discover it on the next run.
+    if validated:
         worst = worst_case_values_size(validated)
         if worst > MAX_VALUES_FILE_BYTES:
-            errors.add("config.json",
+            errors.add(MANIFEST_NAME,
                        f"these fields could produce a values file of up to "
                        f"{worst} bytes, over the {MAX_VALUES_FILE_BYTES}-byte "
                        f"limit; shorten the string fields' 'maxLength' or "
@@ -580,7 +612,7 @@ def run_optional_schema_check(config, errors):
         return False
     validator = jsonschema.Draft202012Validator(schema)
     for problem in sorted(validator.iter_errors(config), key=lambda e: e.path):
-        location = "/".join(str(p) for p in problem.absolute_path) or "config.json"
+        location = "/".join(str(p) for p in problem.absolute_path) or "app-manifest.json"
         errors.add(f"schema:{location}", problem.message)
     return True
 
@@ -593,7 +625,7 @@ FACTORY_RE = re.compile(
 # Any ".json" string literal in the checked sources. The values file is opened
 # by name somewhere in the app -- at the constructor, or via a constant like
 # kFileName -- so requiring the declared name to appear as a literal catches an
-# app that opens a file its config.json never declared, without depending on how
+# app that opens a file its app-manifest.json never declared, without depending on how
 # the call happens to be written.
 JSON_LITERAL_RE = re.compile(r"\"([A-Za-z0-9_.-]+\.json)\"")
 
@@ -833,11 +865,11 @@ def check_bounds(config, declared_fields, sources, errors):
     declared_by_id = {f["id"]: f for f in declared_fields if isinstance(f.get("id"), str)}
 
     for field_id in sorted(set(declared_by_id) - set(table)):
-        errors.add("field table", f"'{field_id}' is declared in config.json but "
+        errors.add("field table", f"'{field_id}' is declared in app-manifest.json but "
                                   f"missing from the app's field table")
     for field_id in sorted(set(table) - set(declared_by_id)):
         errors.add("field table", f"'{field_id}' is in the app's field table "
-                                  f"but not declared in config.json")
+                                  f"but not declared in app-manifest.json")
 
     for field_id in sorted(set(declared_by_id) & set(table)):
         declared = declared_by_id[field_id]
@@ -845,7 +877,7 @@ def check_bounds(config, declared_fields, sources, errors):
         where = f"field table '{field_id}'"
 
         if declared["type"] != in_code["type"]:
-            errors.add(where, f"declared as '{declared['type']}' in config.json "
+            errors.add(where, f"declared as '{declared['type']}' in app-manifest.json "
                               f"but built as {in_code['type']}Field")
             continue
 
@@ -870,12 +902,12 @@ def check_bounds(config, declared_fields, sources, errors):
                 continue
             if not equal(expected, actual):
                 errors.add(where, f"{key} is {actual!r} in the field table but "
-                                  f"{expected!r} in config.json")
+                                  f"{expected!r} in app-manifest.json")
 
     config_file = config.get("configFile")
     if json_names and isinstance(config_file, str) and config_file not in json_names:
         errors.add("field table",
-                   f"config.json declares configFile {config_file!r}, but the "
+                   f"app-manifest.json declares configFile {config_file!r}, but the "
                    f"checked sources only name "
                    f"{', '.join(repr(n) for n in sorted(json_names))}")
 
@@ -887,8 +919,8 @@ def check_bounds(config, declared_fields, sources, errors):
 def main():
     ap = argparse.ArgumentParser(
         description="Validate an app's configuration-field declaration.")
-    ap.add_argument("--check", metavar="CONFIG_JSON", required=True,
-                    help="config.json to validate")
+    ap.add_argument("--check", metavar="MANIFEST", required=True,
+                    help="app-manifest.json to validate")
     ap.add_argument("--check-bounds", metavar="SOURCE", action="append",
                     default=[],
                     help="C++ source holding the app's SDK::AppConfig::Field "
@@ -907,6 +939,7 @@ def main():
         sys.exit(f"error: {path}: top level must be an object")
 
     errors = Errors()
+    validate_manifest_version(config, errors)
     fields = validate_declaration(config, errors)
     schema_checked = run_optional_schema_check(config, errors)
 

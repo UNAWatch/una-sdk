@@ -38,8 +38,8 @@ public:
 
     // ModelListener
     virtual void onNavUpdate(const CustomMessage::NavState& nav) override;
-    virtual void onTargetSaved(bool saved, float latitude,
-                               float longitude) override;
+    virtual void onTargetSaved(CustomMessage::SaveOutcome outcome,
+                               float latitude, float longitude) override;
 
 private:
     MainPresenter();
