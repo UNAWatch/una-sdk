@@ -3,8 +3,8 @@
 
 #include <gui_generated/ringing_screen/RingingViewBase.hpp>
 #include <gui/ringing_screen/RingingPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 /**
  * @brief Screen displayed while an alarm is ringing.
@@ -36,10 +36,10 @@ protected:
     /** @brief Fired by mPlayTimer to repeat the alarm sound. */
     void onPlay();
 
-    CountdownTimer                   mSnoozeTimer;  ///< Auto-snooze countdown
+    SDK::GUI::CountdownTimer         mSnoozeTimer;  ///< Auto-snooze countdown
     touchgfx::Callback<RingingView>  mSnoozeCb;
 
-    CountdownTimer                   mPlayTimer;    ///< Periodic playback trigger
+    SDK::GUI::CountdownTimer         mPlayTimer;    ///< Periodic playback trigger
     touchgfx::Callback<RingingView>  mPlayCb;
 };
 

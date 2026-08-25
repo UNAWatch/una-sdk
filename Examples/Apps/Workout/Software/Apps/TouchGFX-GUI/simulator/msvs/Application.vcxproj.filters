@@ -1101,12 +1101,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ScrollIndicatorBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp">
       <Filter>SDK\Libs\Source\Timer</Filter>
     </ClCompile>

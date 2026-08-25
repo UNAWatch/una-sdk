@@ -3,8 +3,8 @@
 
 #include <gui_generated/menudistancesaved_screen/MenuDistanceSavedViewBase.hpp>
 #include <gui/menudistancesaved_screen/MenuDistanceSavedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 class MenuDistanceSavedView : public MenuDistanceSavedViewBase
 {
@@ -21,7 +21,7 @@ private:
 
     void onDismiss();
 
-    CountdownTimer                              mDismissTimer;
+    SDK::GUI::CountdownTimer                    mDismissTimer;
     touchgfx::Callback<MenuDistanceSavedView>   mDismissCb;
 };
 

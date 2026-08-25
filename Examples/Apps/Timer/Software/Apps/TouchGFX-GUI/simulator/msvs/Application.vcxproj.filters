@@ -699,12 +699,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\fired_screen\FiredViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\fired_screen</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
     <ClCompile Include="..\..\gui\src\alert_screen\AlertPresenter.cpp">
       <Filter>Source Files\gui\alert_screen</Filter>
     </ClCompile>

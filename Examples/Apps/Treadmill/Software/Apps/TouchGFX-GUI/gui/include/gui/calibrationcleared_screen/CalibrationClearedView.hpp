@@ -3,8 +3,8 @@
 
 #include <gui_generated/calibrationcleared_screen/CalibrationClearedViewBase.hpp>
 #include <gui/calibrationcleared_screen/CalibrationClearedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 /**
  * Brief "Cleared" acknowledgement after clearing calibration data; auto-dismisses
@@ -21,7 +21,7 @@ public:
 private:
     void onDismiss();
 
-    CountdownTimer                            mDismissTimer;
+    SDK::GUI::CountdownTimer                  mDismissTimer;
     touchgfx::Callback<CalibrationClearedView> mDismissCb;
 };
 

@@ -3,9 +3,9 @@
 
 #include <gui_generated/trackintervalsalert_screen/TrackIntervalsAlertViewBase.hpp>
 #include <gui/trackintervalsalert_screen/TrackIntervalsAlertPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
 #include <ctime>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 class TrackIntervalsAlertView : public TrackIntervalsAlertViewBase
 {
@@ -50,7 +50,7 @@ public:
 private:
     void onDismissTimerFired();
 
-    CountdownTimer                              mDismissTimer;
+    SDK::GUI::CountdownTimer                    mDismissTimer;
     touchgfx::Callback<TrackIntervalsAlertView> mDismissTimerCb;
 };
 

@@ -500,7 +500,8 @@ The app uses two categories of containers: ready-made **SDK widgets** from `Temp
 
 #### SDK Widget Containers
 
-Imported from `Templates/TouchGFX-Widgets` and used without modification:
+Imported from `Templates/TouchGFX-Widgets` and used without modification, plus
+header-only widgets included straight from the SDK:
 
 - `Battery` — 4-segment battery level indicator
 - `Buttons` — button arc indicators (L1/L2/R1/R2)
@@ -512,6 +513,8 @@ Imported from `Templates/TouchGFX-Widgets` and used without modification:
 - `PauseIndicator` — full-width pause overlay with elapsed pause time
 - `Title` — screen title with underline
 - `InfoCarousel` — auto-cycling multi-value info panel
+- `SDK::GUI::CountdownTimer` — self-registering countdown that fires a callback at
+  zero. Header-only, from `SDK/GUI/CountdownTimer.hpp`; not a `.tpkg`.
 
 #### App-Specific Containers
 
@@ -551,9 +554,6 @@ void SummaryFaceHeartRate::setAvgHR(float hr);
 // Paginated lap list: 5 rows visible, L1/L2 advance by 3 rows per press
 void SummaryFaceLaps::setLaps(const std::vector<LapSummary>& laps, bool isImperial);
 ```
-
-**Utility**:
-- `CountdownTimer` — self-registering countdown used by auto-dismiss screens (`TrackLapView`, `TrackSavedView`, `TrackDiscardedView`, `MenuDistanceSavedView`, `MenuTimeSavedView`)
 
 ### Input Handling
 

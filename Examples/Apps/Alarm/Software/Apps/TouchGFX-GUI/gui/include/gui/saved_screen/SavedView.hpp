@@ -3,8 +3,8 @@
 
 #include <gui_generated/saved_screen/SavedViewBase.hpp>
 #include <gui/saved_screen/SavedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 /**
  * @brief Confirmation screen shown briefly after an alarm is saved.
@@ -26,7 +26,7 @@ protected:
     /** @brief Fired by mDismissTimer when the display timeout elapses. */
     void onDismiss();
 
-    CountdownTimer                 mDismissTimer;  ///< Auto-dismiss countdown
+    SDK::GUI::CountdownTimer       mDismissTimer;  ///< Auto-dismiss countdown
     touchgfx::Callback<SavedView>  mDismissCb;
 };
 

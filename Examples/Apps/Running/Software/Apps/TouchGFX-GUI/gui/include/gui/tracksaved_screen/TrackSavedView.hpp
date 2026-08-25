@@ -3,8 +3,8 @@
 
 #include <gui_generated/tracksaved_screen/TrackSavedViewBase.hpp>
 #include <gui/tracksaved_screen/TrackSavedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 class TrackSavedView : public TrackSavedViewBase
 {
@@ -17,7 +17,7 @@ public:
 private:
     void onDismiss();
 
-    CountdownTimer                      mDismissTimer;
+    SDK::GUI::CountdownTimer            mDismissTimer;
     touchgfx::Callback<TrackSavedView>  mDismissCb;
 };
 

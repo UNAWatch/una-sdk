@@ -70,7 +70,6 @@
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\SettingsSerializer.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\common\FrontendApplicationBase.cpp"/>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\PolyLine.cpp"/>
     <ClCompile Include="..\..\gui\src\model\Model.cpp"/>
     <ClCompile Include="..\..\generated\simulator\src\video\SoftwareMJPEGDecoder.cpp"/>
@@ -352,7 +351,6 @@
     <ClInclude Include="..\..\gui\include\gui\common\FrontendHeap.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\common\FrontendHeapBase.hpp"/>
     <ClInclude Include="..\..\generated\simulator\include\simulator\video\MJPEGDecoder.hpp"/>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\PolyLine.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\model\AppMenu.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\model\Model.hpp"/>

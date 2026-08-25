@@ -1515,9 +1515,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\ScrollIndicatorBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\gui\src\trackintervalsalert_screen\TrackIntervalsAlertPresenter.cpp">
       <Filter>Source Files\gui\trackintervalsalert_screen</Filter>
     </ClCompile>
@@ -1527,9 +1524,6 @@
     <ClCompile Include="..\..\generated\gui_generated\src\trackintervalsalert_screen\TrackIntervalsAlertViewBase.cpp">
       <Filter>Source Files\generated\gui_generated\trackintervalsalert_screen</Filter>
     </ClCompile>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\trackintervalsalert_screen\TrackIntervalsAlertPresenter.hpp">
       <Filter>Header Files\gui\trackintervalsalert_screen</Filter>
     </ClInclude>

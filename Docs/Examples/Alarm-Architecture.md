@@ -362,11 +362,14 @@ The app uses two categories of containers: ready-made **SDK widgets** from `Temp
 
 #### SDK Widget Containers
 
-Imported from `Templates/TouchGFX-Widgets` and used without modification:
+Imported from `Templates/TouchGFX-Widgets` and used without modification, plus
+header-only widgets included straight from the SDK:
 
 - `Buttons` — button arc indicators (L1/L2/R1/R2)
 - `Title` — screen title with underline
 - `Toggle` — on/off toggle switch
+- `SDK::GUI::CountdownTimer` — self-registering countdown that fires a callback at
+  zero. Header-only, from `SDK/GUI/CountdownTimer.hpp`; not a `.tpkg`.
 
 #### App-Specific Containers
 
@@ -375,8 +378,6 @@ Built specifically for this app and found in `gui/src/containers/`:
 **`TimeWheel`** — dual scroll-wheel for picking hours (0–23) and minutes (0–59). Composed of two independent scroll columns with a highlighted center item (`TimeWheelHoursCenterItem`, `TimeWheelMinutesCenterItem`) and adjacent items (`TimeWheelHoursItem`, `TimeWheelMinutesItem`).
 
 **`OptionWheel`** — generic vertical scroll-wheel for selecting one value from a list. Used for `Repeat` (11 items) and `Effect` (3 items) in `EditView`. Center item rendered by `OptionWheelCenterItem`; adjacent items by `OptionWheelItem`.
-
-**`CountdownTimer`** — self-registering per-frame countdown that fires a callback when it reaches zero. Used by `SavedView` and `DeletedView` for auto-dismiss after a fixed delay.
 
 ### Input Handling
 

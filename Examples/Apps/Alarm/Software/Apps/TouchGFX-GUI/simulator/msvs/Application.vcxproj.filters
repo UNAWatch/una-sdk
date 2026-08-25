@@ -804,12 +804,6 @@
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\ringing_screen\RingingViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\ringing_screen</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\gui\include\gui\common\AlarmLabels.hpp">
       <Filter>Header Files\gui\common</Filter>
     </ClInclude>
