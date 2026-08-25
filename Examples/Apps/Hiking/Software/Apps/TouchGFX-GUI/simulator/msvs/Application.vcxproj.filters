@@ -1236,12 +1236,6 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Timer\Timer.cpp">
       <Filter>SDK\Libs\Source\Timer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gui\src\containers\CountdownTimer.cpp">
-      <Filter>Source Files\gui\containers</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\gui\include\gui\containers\CountdownTimer.hpp">
-      <Filter>Header Files\gui\containers</Filter>
-    </ClInclude>
     <ClCompile Include="..\..\gui\src\containers\TrackFaceOverview.cpp">
       <Filter>Source Files\gui\containers</Filter>
     </ClCompile>

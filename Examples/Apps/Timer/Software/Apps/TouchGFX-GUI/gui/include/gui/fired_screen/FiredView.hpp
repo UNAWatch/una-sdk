@@ -3,8 +3,8 @@
 
 #include <gui_generated/fired_screen/FiredViewBase.hpp>
 #include <gui/fired_screen/FiredPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 /**
  * @brief Fired screen: the countdown reached zero and the alert is sounding.
@@ -38,10 +38,10 @@ protected:
     /** @brief Silence + end the timer and leave the screen (shared by R1 + timeout). */
     void finishDone();
 
-    CountdownTimer                mPlayTimer;    ///< Periodic alert replay.
+    SDK::GUI::CountdownTimer      mPlayTimer;    ///< Periodic alert replay.
     touchgfx::Callback<FiredView> mPlayCb;
 
-    CountdownTimer                mTimeoutTimer; ///< Auto-Done after the max ring time.
+    SDK::GUI::CountdownTimer      mTimeoutTimer; ///< Auto-Done after the max ring time.
     touchgfx::Callback<FiredView> mTimeoutCb;
 };
 

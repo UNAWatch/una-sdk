@@ -3,8 +3,8 @@
 
 #include <gui_generated/tracklap_screen/TrackLapViewBase.hpp>
 #include <gui/tracklap_screen/TrackLapPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 class TrackLapView : public TrackLapViewBase
 {
@@ -28,7 +28,7 @@ private:
 
     bool mIsImperial = false;
 
-    CountdownTimer                      mDismissTimer;
+    SDK::GUI::CountdownTimer            mDismissTimer;
     touchgfx::Callback<TrackLapView>    mDismissCb;
 };
 

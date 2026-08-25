@@ -336,7 +336,7 @@ Beyond mirroring, the Model owns the **selection and list state** that the multi
 
 - **OrbitMenu** — a "sphere" wheel: rows shrink and curve toward a large centre value, computed each frame from one scalar scroll position; navigation is discrete (`selectNext()/selectPrev()`). Used for the Main list.
 - **SpherePicker** — the curved value picker used on the Edit screen for minutes/seconds.
-- **CountdownTimer** — a self-registering tick widget that counts frames down and fires a callback at zero.
+- **CountdownTimer** — a self-registering tick widget that counts frames down and fires a callback at zero. Shared and header-only, from `SDK/GUI/CountdownTimer.hpp`.
 - **ScrollIndicator** — the bezel rail/handle that accompanies scrollable lists.
 - **Buttons** — the four watch-bezel arc indicators (L1/L2/R1/R2), each in one of five colours (hidden, white, amber, red, teal).
 - **Title** — the screen heading.

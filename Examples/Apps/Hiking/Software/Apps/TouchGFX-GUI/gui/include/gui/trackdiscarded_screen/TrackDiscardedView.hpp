@@ -3,8 +3,8 @@
 
 #include <gui_generated/trackdiscarded_screen/TrackDiscardedViewBase.hpp>
 #include <gui/trackdiscarded_screen/TrackDiscardedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 class TrackDiscardedView : public TrackDiscardedViewBase
 {
@@ -17,7 +17,7 @@ public:
 private:
     void onDismiss();
 
-    CountdownTimer                          mDismissTimer;
+    SDK::GUI::CountdownTimer                mDismissTimer;
     touchgfx::Callback<TrackDiscardedView>  mDismissCb;
 };
 

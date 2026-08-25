@@ -3,8 +3,8 @@
 
 #include <gui_generated/menutimesaved_screen/MenuTimeSavedViewBase.hpp>
 #include <gui/menutimesaved_screen/MenuTimeSavedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 class MenuTimeSavedView : public MenuTimeSavedViewBase
 {
@@ -21,7 +21,7 @@ private:
 
     void onDismiss();
 
-    CountdownTimer                          mDismissTimer;
+    SDK::GUI::CountdownTimer                mDismissTimer;
     touchgfx::Callback<MenuTimeSavedView>   mDismissCb;
 };
 

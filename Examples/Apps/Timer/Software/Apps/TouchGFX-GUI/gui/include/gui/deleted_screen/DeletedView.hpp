@@ -3,8 +3,8 @@
 
 #include <gui_generated/deleted_screen/DeletedViewBase.hpp>
 #include <gui/deleted_screen/DeletedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 /**
  * @brief Deleted screen: brief "Deleted" confirmation, then back to Main.
@@ -23,7 +23,7 @@ public:
 private:
     void onDismiss();
 
-    CountdownTimer             mDismissTimer;
+    SDK::GUI::CountdownTimer   mDismissTimer;
     touchgfx::Callback<DeletedView> mDismissCb;
 };
 

@@ -3,8 +3,8 @@
 
 #include <gui_generated/deleted_screen/DeletedViewBase.hpp>
 #include <gui/deleted_screen/DeletedPresenter.hpp>
-#include <gui/containers/CountdownTimer.hpp>
 #include <touchgfx/Callback.hpp>
+#include <SDK/GUI/CountdownTimer.hpp>
 
 /**
  * @brief Confirmation screen shown briefly after an alarm is deleted.
@@ -26,7 +26,7 @@ protected:
     /** @brief Fired by mDismissTimer when the display timeout elapses. */
     void onDismiss();
 
-    CountdownTimer                   mDismissTimer;  ///< Auto-dismiss countdown
+    SDK::GUI::CountdownTimer         mDismissTimer;  ///< Auto-dismiss countdown
     touchgfx::Callback<DeletedView>  mDismissCb;
 };
 
