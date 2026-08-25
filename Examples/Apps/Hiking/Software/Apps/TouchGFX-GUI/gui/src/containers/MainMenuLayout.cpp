@@ -161,12 +161,12 @@ void MainMenuLayout::showSensorRow(bool show)
 
 void MainMenuLayout::setGps(bool fix)
 {
-    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(fix));
+    mSensorRow.setGps(SDK::GUI::SensorStatusRow::gpsState(fix));
 }
 
 void MainMenuLayout::setHr(uint8_t accessoryState)
 {
-    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(accessoryState));
+    mSensorRow.setHr(SDK::GUI::SensorStatusRow::hrState(accessoryState));
 }
 
 // ---- Getters ---------------------------------------------------------------

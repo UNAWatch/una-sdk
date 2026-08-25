@@ -28,7 +28,7 @@ void MainView::setupScreen()
     mSensorRow.setPosition(0, 52, 240, 24);
     mSensorRow.setIcons(BITMAP_SENSORGPSDARK_ID, BITMAP_SENSORGPSLIGHT_ID,
                         BITMAP_SENSORHRDARK_ID, BITMAP_SENSORHRLIGHT_ID);
-    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(mGpsFix));
+    mSensorRow.setGps(SDK::GUI::SensorStatusRow::gpsState(mGpsFix));
 
     updateBackground(menuLayout.getSelectedItem());
 }
@@ -41,13 +41,13 @@ void MainView::tearDownScreen()
 void MainView::setGpsFix(bool state)
 {
     mGpsFix = state;
-    mSensorRow.setGps(SDK::Gui::SensorStatusRow::gpsState(state));
+    mSensorRow.setGps(SDK::GUI::SensorStatusRow::gpsState(state));
     updateBackground(menuLayout.getSelectedItem());
 }
 
 void MainView::setAccessoryStatus(uint8_t state, const char* /*name*/)
 {
-    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(state));
+    mSensorRow.setHr(SDK::GUI::SensorStatusRow::hrState(state));
 }
 
 void MainView::setPositionId(uint16_t id)

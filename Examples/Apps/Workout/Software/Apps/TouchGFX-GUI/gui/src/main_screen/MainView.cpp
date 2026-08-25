@@ -38,7 +38,7 @@ void MainView::tearDownScreen()
 
 void MainView::setAccessoryStatus(uint8_t state, const char* /*name*/)
 {
-    mSensorRow.setHr(SDK::Gui::SensorStatusRow::hrState(state));
+    mSensorRow.setHr(SDK::GUI::SensorStatusRow::hrState(state));
 }
 
 void MainView::setPositionId(uint16_t id)

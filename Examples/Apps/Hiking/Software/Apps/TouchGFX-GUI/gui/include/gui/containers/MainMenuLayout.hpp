@@ -85,7 +85,7 @@ public:
     MainMenu &getMenu();
 
 private:
-    SDK::Gui::SensorStatusRow mSensorRow;
+    SDK::GUI::SensorStatusRow mSensorRow;
 };
 
 #endif // MAINMENULAYOUT_HPP
