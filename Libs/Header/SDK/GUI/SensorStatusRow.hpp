@@ -25,8 +25,8 @@
  ******************************************************************************
  */
 
-#ifndef __SDK_GUI_SENSOR_STATUS_ROW_HPP
-#define __SDK_GUI_SENSOR_STATUS_ROW_HPP
+#ifndef SDK_GUI_SENSOR_STATUS_ROW_HPP
+#define SDK_GUI_SENSOR_STATUS_ROW_HPP
 
 #include <touchgfx/Application.hpp>
 #include <touchgfx/Bitmap.hpp>
@@ -35,9 +35,7 @@
 
 #include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRateEx.hpp"  // HeartRateEx::Source
 
-namespace SDK
-{
-namespace Gui
+namespace SDK::GUI
 {
 
 class SensorStatusRow : public touchgfx::Container
@@ -230,7 +228,6 @@ private:
     }
 };
 
-}  // namespace Gui
-}  // namespace SDK
+} // namespace SDK::GUI
 
-#endif  // __SDK_GUI_SENSOR_STATUS_ROW_HPP
+#endif  // SDK_GUI_SENSOR_STATUS_ROW_HPP

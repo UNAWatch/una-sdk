@@ -33,10 +33,10 @@ public:
     void setBatteryLevel(uint8_t level);
 
     /** @brief Set the external-HR icon state (see SensorStatusRow). */
-    void setHr(SDK::Gui::SensorStatusRow::State state) { mSensorRow.setHr(state); }
+    void setHr(SDK::GUI::SensorStatusRow::State state) { mSensorRow.setHr(state); }
 
 protected:
-    SDK::Gui::SensorStatusRow mSensorRow;
+    SDK::GUI::SensorStatusRow mSensorRow;
 
     // AM/PM suffix drawn next to the time in 12-hour format. Added here (rather
     // than in the generated base) so the layout stays in hand-written code; the

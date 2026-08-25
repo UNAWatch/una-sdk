@@ -26,7 +26,7 @@ protected:
     using Menu = App::MenuNav::Root;
 
     bool mGpsFix = false;
-    SDK::Gui::SensorStatusRow mSensorRow;
+    SDK::GUI::SensorStatusRow mSensorRow;
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};
     MenuItemConfig mCenterItems[Menu::ID_COUNT] {};

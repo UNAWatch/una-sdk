@@ -33,11 +33,11 @@ public:
     void setBatteryLevel(uint8_t level);
 
     /** @brief Set the external-HR icon state (see SensorStatusRow). Treadmill is HR-only. */
-    void setHr(SDK::Gui::SensorStatusRow::State state)  { mSensorRow.setHr(state); }
-    void setGps(SDK::Gui::SensorStatusRow::State state) { mSensorRow.setGps(state); }
+    void setHr(SDK::GUI::SensorStatusRow::State state)  { mSensorRow.setHr(state); }
+    void setGps(SDK::GUI::SensorStatusRow::State state) { mSensorRow.setGps(state); }
 
 protected:
-    SDK::Gui::SensorStatusRow mSensorRow;
+    SDK::GUI::SensorStatusRow mSensorRow;
 
     // AM/PM suffix drawn next to the time in 12-hour format. Added here (rather
     // than in the generated base) so the layout stays in hand-written code; the

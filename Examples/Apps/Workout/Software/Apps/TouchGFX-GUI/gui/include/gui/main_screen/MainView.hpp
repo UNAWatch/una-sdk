@@ -22,7 +22,7 @@ public:
 protected:
     using Menu = App::MenuNav::Root;
 
-    SDK::Gui::SensorStatusRow mSensorRow;
+    SDK::GUI::SensorStatusRow mSensorRow;
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};
     MenuItemConfig mCenterItems[Menu::ID_COUNT] {};

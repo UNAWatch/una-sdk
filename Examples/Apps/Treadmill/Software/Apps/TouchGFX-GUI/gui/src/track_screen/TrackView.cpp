@@ -142,7 +142,7 @@ void TrackView::updateHrIcon()
 {
     // In-activity: icon follows the live HR source, not the raw link state.
     // Treadmill is HR-only — no GPS icon to update.
-    trackFaceStatus.setHr(SDK::Gui::SensorStatusRow::hrStateFromSource(
+    trackFaceStatus.setHr(SDK::GUI::SensorStatusRow::hrStateFromSource(
             mAccessoryState, mHrSource));
 }
 
