@@ -123,9 +123,30 @@ protected:
     float mAnimOutgoingEnd   = 0.0f;  ///< Outgoing handle's target position (slides off rail edge)
     float mAnimIncomingStart = 0.0f;  ///< Incoming handle's start position (slides in from opposite edge)
 
+    float mHandlePos = 0.0f;  ///< Main handle's unclipped arc start; the rendered arc may be clipped
+    float mOvfPos    = 0.0f;  ///< Overflow handle's unclipped arc start; likewise
+
 private:
     void  nextAnimationStep();
     float getStartAngle(uint16_t index) const;
+
+    /**
+     * @brief Render an arc handle, clipped to the rail range [railMin, railMax].
+     *
+     * Keeps the wrap-around slide from drawing a handle past the rail ends
+     * (into empty container space): the outgoing handle shrinks to nothing at
+     * the near end, the incoming grows from the far end. A no-op clamp for the
+     * normal in-rail positions.
+     *
+     * Clipping is presentation only -- the unclipped position stays in
+     * mHandlePos / mOvfPos. An interrupted animation resumes from those, because
+     * a clipped arc reports the rail edge rather than where the handle is.
+     *
+     * @param arc         The handle Circle to update.
+     * @param start       Desired arc start angle (may fall outside the rail).
+     * @param baseVisible Caller's visibility intent before clipping is applied.
+     */
+    void  setClampedArc(touchgfx::Circle& arc, float start, bool baseVisible);
 
     /**
      * @brief Stop any running animation and clean up the overflow handle.

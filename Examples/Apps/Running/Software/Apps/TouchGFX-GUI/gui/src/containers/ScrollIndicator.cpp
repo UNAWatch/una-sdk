@@ -18,6 +18,9 @@ void ScrollIndicator::initialize()
     ScrollIndicatorBase::initialize();
     // Designer-generated base already applies kBig geometry and colours
     // in its constructor, so no explicit setConfig() call is needed here.
+    // It also draws the handle at the top of the rail; mirror that, so an
+    // animation started before the first setCount() has the right origin.
+    mHandlePos = mRailMax - mHandleLen;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,9 +88,24 @@ void ScrollIndicator::setActiveId(uint16_t index)
     mPosition = index;
     const float start = getStartAngle(index);
 
-    handle.setArc(start, start + mHandleLen);
-    handle.invalidate();
+    mHandlePos = start;
+    setClampedArc(handle, start, mCount > 1);
     rail.invalidate();
+}
+
+void ScrollIndicator::setClampedArc(touchgfx::Circle& arc, float start, bool baseVisible)
+{
+    float a = start;
+    float b = start + mHandleLen;
+    a = (a < mRailMin) ? mRailMin : ((a > mRailMax) ? mRailMax : a);
+    b = (b < mRailMin) ? mRailMin : ((b > mRailMax) ? mRailMax : b);
+
+    const bool visible = baseVisible && (b > a);
+    arc.setVisible(visible);
+    if (visible) {
+        arc.setArc(a, b);
+    }
+    arc.invalidate();
 }
 
 void ScrollIndicator::animateToId(int16_t index, int16_t animationSteps)
@@ -119,11 +137,10 @@ void ScrollIndicator::animateToId(int16_t index, int16_t animationSteps)
     if (mAnimationRunning) {
         if (mAnimWrap) {
             // In a wrap-around animation the overflow handle is the one that
-            // visually approaches the target. Snap the main handle to its
-            // current position so the next animation starts from the right spot.
-            float snapPos;
-            handleOvf.getArcStart(snapPos);
-            handle.setArc(snapPos, snapPos + mHandleLen);
+            // visually approaches the target. Hand its position to the main
+            // handle so the next animation starts from the right spot.
+            mHandlePos = mOvfPos;
+            setClampedArc(handle, mHandlePos, mCount > 1);
             handleOvf.setVisible(false);
             handleOvf.invalidate();
             mAnimWrap = false;
@@ -138,8 +155,8 @@ void ScrollIndicator::animateToId(int16_t index, int16_t animationSteps)
     mAnimationCounter  = 0;
     mPosition          = static_cast<uint16_t>(index);
 
-    // Start from the current visual handle position (may be mid-animation)
-    handle.getArcStart(mAnimationStartPos);
+    // Start from the handle's current position (may be mid-animation)
+    mAnimationStartPos = mHandlePos;
     mAnimationEndPos = getStartAngle(static_cast<uint16_t>(index));
 
     if (isWrap) {
@@ -152,6 +169,10 @@ void ScrollIndicator::animateToId(int16_t index, int16_t animationSteps)
             mAnimOutgoingEnd   = mAnimationStartPos + mHandleLen;
             mAnimIncomingStart = mAnimationEndPos   - mHandleLen;
         }
+
+        // Defined from the moment the wrap is armed, so an interrupt landing
+        // before the first tick still reads a real position.
+        mOvfPos = mAnimIncomingStart;
     }
 
     mAnimationRunning = true;
@@ -186,17 +207,17 @@ void ScrollIndicator::nextAnimationStep()
         // Outgoing handle slides toward the rail edge
         pos = mAnimationStartPos + t * (mAnimOutgoingEnd - mAnimationStartPos);
 
-        // Incoming handle appears from the opposite rail edge
+        // Incoming handle appears from the opposite rail edge (clipped to the
+        // rail so it grows out of the edge rather than floating past it).
         const float incomingPos = mAnimIncomingStart + t * (mAnimationEndPos - mAnimIncomingStart);
-        handleOvf.setArc(incomingPos, incomingPos + mHandleLen);
-        handleOvf.setVisible(true);
-        handleOvf.invalidate();
+        mOvfPos = incomingPos;
+        setClampedArc(handleOvf, incomingPos, true);
     } else {
         pos = mAnimationStartPos + t * (mAnimationEndPos - mAnimationStartPos);
     }
 
-    handle.setArc(pos, pos + mHandleLen);
-    handle.invalidate();
+    mHandlePos = pos;
+    setClampedArc(handle, pos, mCount > 1);
     rail.invalidate();
 
     if (mAnimationCounter >= mAnimationDuration) {
