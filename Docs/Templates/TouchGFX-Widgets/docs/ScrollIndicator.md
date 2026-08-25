@@ -90,8 +90,14 @@ scrollIndicator.animateToId(scrollIndicator.getActiveId() + 1, 8);
 ## Notes
 
 - The handle is automatically hidden when `count <= 1`.
-- Starting a new animation while one is in progress snaps the handle to its current visual position before proceeding — no visual glitch.
+- Starting a new animation while one is in progress snaps the handle to the position it has reached before proceeding — no visual glitch.
 - The overflow handle (`handleOvf`) is managed internally and must not be manipulated directly.
+- Handle arcs are clipped to the rail range. During a wrap-around slide the outgoing
+  handle shrinks into the near rail end and the incoming one grows out of the far end,
+  so neither is ever drawn past the rail into empty container space.
+- That clipping is presentation only. The widget tracks the unclipped position
+  internally, so interrupting a slide resumes from where the handle actually was
+  rather than from the rail edge it was drawn at.
 - The timer widget is automatically unregistered when the animation completes or in the destructor.
 
 ## Files Included
