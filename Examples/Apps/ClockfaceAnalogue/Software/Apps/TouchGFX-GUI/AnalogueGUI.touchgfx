@@ -1,0 +1,467 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Main",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "dial",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "RelativeFilename": "Dial_240x240.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "speakerMute",
+            "X": 34,
+            "Y": 108,
+            "Width": 30,
+            "Height": 25,
+            "LockPosition": true,
+            "RelativeFilename": "SpeakerMute_30x25.png"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "battery",
+            "X": 160,
+            "Y": 113,
+            "Width": 45,
+            "Height": 14,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Battery_45x14"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dayText",
+            "X": 76,
+            "Y": 167,
+            "Width": 88,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TEXT_MON",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 128
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dateText",
+            "X": 76,
+            "Y": 185,
+            "Width": 88,
+            "Height": 38,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_26",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_DATE",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "hourStem",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "StartX": 120.0,
+            "StartY": 112.0,
+            "EndX": 120.0,
+            "EndY": 100.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "hourBody",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "StartX": 120.0,
+            "StartY": 100.0,
+            "EndX": 120.0,
+            "EndY": 40.0,
+            "LineWidth": 6.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "minuteStem",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "StartX": 120.0,
+            "StartY": 112.0,
+            "EndX": 120.0,
+            "EndY": 100.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "minuteBody",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "StartX": 120.0,
+            "StartY": 100.0,
+            "EndX": 120.0,
+            "EndY": 25.0,
+            "LineWidth": 6.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "hub",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 7.0,
+            "LineWidth": 2.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "Battery_45x14",
+        "Width": 45,
+        "Height": 14,
+        "Components": [
+          {
+            "Type": "Box",
+            "Name": "s1box",
+            "X": 2,
+            "Width": 7,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s1line1",
+            "Width": 4,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 12.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s1line2",
+            "X": 8,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s2box",
+            "X": 12,
+            "Width": 8,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s2line1",
+            "X": 11,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s2line2",
+            "X": 19,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s3box",
+            "X": 23,
+            "Width": 8,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s3line1",
+            "X": 22,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s3line2",
+            "X": 30,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s4box",
+            "X": 34,
+            "Width": 7,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line1",
+            "X": 33,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line2",
+            "X": 39,
+            "Width": 4,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 12.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line3",
+            "X": 41,
+            "Y": 3,
+            "Width": 4,
+            "Height": 8,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 6.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "Name": "AnalogueGUI",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Main",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.1"
+}
