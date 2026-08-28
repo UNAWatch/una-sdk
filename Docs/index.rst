@@ -54,6 +54,7 @@ Next steps:
    Examples/Hiking-Architecture
    Examples/HRMonitor-Architecture
    Examples/Stopwatch-Architecture
+   Examples/ClockfaceAnalogue-Architecture
    Examples/GlanceHR-Architecture
    Examples/GlanceSteps-Architecture
 

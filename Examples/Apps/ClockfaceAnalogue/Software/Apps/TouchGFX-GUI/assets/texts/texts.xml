@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="texts.xsd" Version="4.26.1">
+  <Languages>
+    <Language Id="GB" />
+  </Languages>
+  <Texts>
+    <TextGroup Id="Template">
+      <Text Id="TMP_MEDIUM_26" Alignment="Center" TypographyId="Poppins_Medium_26">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Day">
+      <Text Id="TEXT_MON" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Mon</Translation>
+      </Text>
+      <Text Id="TEXT_TUE" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Tue</Translation>
+      </Text>
+      <Text Id="TEXT_WED" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Wed</Translation>
+      </Text>
+      <Text Id="TEXT_THU" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Thu</Translation>
+      </Text>
+      <Text Id="TEXT_FRI" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Fri</Translation>
+      </Text>
+      <Text Id="TEXT_SAT" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Sat</Translation>
+      </Text>
+      <Text Id="TEXT_SUN" Alignment="Center" TypographyId="Poppins_Medium_16">
+        <Translation Language="GB">Sun</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Date">
+      <Text Id="WC_DATE" Alignment="Center" TypographyId="Poppins_Medium_26">
+        <Translation Language="GB">00</Translation>
+      </Text>
+    </TextGroup>
+  </Texts>
+  <Typographies>
+    <Typography Id="Poppins_Medium_16" Font="Poppins-Medium.ttf" Size="16" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_26" Font="Poppins-Medium.ttf" Size="26" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="0123456789" EllipsisCharacter="…" />
+  </Typographies>
+</TextDatabase>
