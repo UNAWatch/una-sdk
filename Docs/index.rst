@@ -69,6 +69,7 @@ Next steps:
    Scripts
    TouchGFX-Port-Architecture
    touchgfx-widgets
+   figma-ui-kit
    FitFiles-Structure
 
 .. toctree::
