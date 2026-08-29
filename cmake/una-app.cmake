@@ -322,6 +322,33 @@ function(una_app_build_gui TARGET_NAME)
     )
 endfunction()
 
+# Read a boolean app option: apply the default when the caller left it unset,
+# and reject a value that is neither on nor off.
+#
+# CMake defines a short list of false values and treats everything else as
+# true, so an unrecognised value -- a typo, or a word like "disabled" -- reads
+# as ON. These options decide what goes into the packed header, so a value that
+# cannot be read as a boolean stops the build rather than picking a side.
+# The accepted set is narrower than CMake's: an empty value, NOTFOUND and
+# IGNORE all count as false to CMake, but here they mean a caller wrote the
+# option and got it wrong, so they are rejected rather than read as off.
+function(una_app_bool_option NAME DEFAULT)
+    if(NOT DEFINED ${NAME})
+        set(${NAME} ${DEFAULT} PARENT_SCOPE)
+        return()
+    endif()
+
+    # TOUPPER settles the case, so the list is one entry per value, not per
+    # spelling: On, on and ON all arrive here as ON.
+    string(TOUPPER "${${NAME}}" VALUE)
+    set(ACCEPTED ON OFF TRUE FALSE YES NO Y N 1 0)
+    if(NOT VALUE IN_LIST ACCEPTED)
+        list(JOIN ACCEPTED " " SPELLINGS)
+        message(FATAL_ERROR
+            "${NAME} is '${${NAME}}', which is not a boolean; accepted in any case: ${SPELLINGS}")
+    endif()
+endfunction()
+
 # Main function to build a complete watch app
 function(una_app_build_app)
     set(OUTPUT_COPY_COMMANDS "")
@@ -337,10 +364,8 @@ function(una_app_build_app)
         list(APPEND APP_DEPENDS ${APP_NAME}GUI.elf)
     endif()
     set(APP_AUTOSTART_FLAG "")
-    if(NOT DEFINED APP_AUTOSTART)
-        set(APP_AUTOSTART Off)
-    endif()
-    if(${APP_AUTOSTART} STREQUAL On)
+    una_app_bool_option(APP_AUTOSTART Off)
+    if(APP_AUTOSTART)
         set(APP_AUTOSTART_FLAG "-autostart")
         message("App autostart is ON")
     else()
@@ -366,14 +391,12 @@ function(una_app_build_app)
     # with APP_GLANCE_INTF, which is what a non-Glance app that really does
     # serve glance data should set.
     set(APP_GLANCE_INTF_FLAG "")
-    if(NOT DEFINED APP_GLANCE_INTF)
-        if(${APP_TYPE} STREQUAL Glance)
-            set(APP_GLANCE_INTF On)
-        else()
-            set(APP_GLANCE_INTF Off)
-        endif()
+    if(APP_TYPE STREQUAL "Glance")
+        una_app_bool_option(APP_GLANCE_INTF On)
+    else()
+        una_app_bool_option(APP_GLANCE_INTF Off)
     endif()
-    if(${APP_GLANCE_INTF} STREQUAL On)
+    if(APP_GLANCE_INTF)
         set(APP_GLANCE_INTF_FLAG "-glance_capable")
         message("App glance interface is ON")
     else()
@@ -391,11 +414,9 @@ function(una_app_build_app)
     endif()
 
     set(APP_ICON_ARGS "")
-    if(NOT DEFINED APP_USE_ICONS)
-        set(APP_USE_ICONS On)
-    endif()
+    una_app_bool_option(APP_USE_ICONS On)
 
-    if(${APP_USE_ICONS} STREQUAL On)
+    if(APP_USE_ICONS)
         list(APPEND APP_ICON_ARGS
             -normal_icon ${RESOURCES_PATH}/icon_60x60.png
             -small_icon ${RESOURCES_PATH}/icon_30x30.png
