@@ -112,6 +112,7 @@ This uses the same **Alarm CMake** example flow as Windows: **copy project → c
 
 ```bash
 # Copy entire project for simplicity
+mkdir -p MyAlarm
 cp -r "$UNA_SDK/Examples/Apps/Alarm/"* MyAlarm
 
 # Create build dir
@@ -190,7 +191,7 @@ This section demonstrates how to copy an existing app example (Alarm) and build 
 ```powershell
 # Copy entire project for simplicity
 # Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).
-# If you get "Container cannot be copied onto existing leaf item" error, restart PowerShell and try again.
+mkdir MyAlarm
 cp "${env:UNA_SDK}\Examples\Apps\Alarm\*" MyAlarm -Recurse -Force
 
 # Create build dir
