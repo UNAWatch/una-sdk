@@ -184,6 +184,18 @@ Options:
   `<app-name>\Software\Apps\TouchGFX-GUI\simulator\gcc`
 2. Add header paths to **ADDITIONAL_INCLUDE_PATHS**.
 3. Add source file paths to **ADDITIONAL_SOURCES_UNA**.
+
+The two lists describe the same build, so a file added to one must be added to
+the other. A mismatch is not caught by a normal build: CI builds the GCC side
+only, so a source missing from the vcxproj first shows up as a link error when
+someone opens the project in Visual Studio. The `MSVS Source Sync` workflow
+compares both lists on every pull request that touches either file. To run the
+same check locally (`python` on Windows):
+
+```bash
+python3 .github/scripts/check_msvs_sources.py
+```
+
 ### Transfer Application {#transfer-application}
 If you move the application to another location, you need to update the **TouchGFX library path**.
 1. Open `<name>.touchgfx` in text editor:
@@ -199,6 +211,35 @@ Example:
 
 4. If you move the **una_sdk** folder, you must update UNA_SDK environment variable.
    See: [Install UNA_SDK variable](#install-una-sdk-variable) 
+
+### Regenerate the GUI {#regenerate-gui}
+
+Code generation normally runs from TouchGFX Designer (**Generate Code**, F4). The
+same job runs headlessly with `tgfx`, the command line tool that ships with a
+TouchGFX installation; on Windows it is `<touchgfx-install>\designer\tgfx.exe`.
+Run it from the app's `TouchGFX-GUI` directory:
+
+```bash
+tgfx generate -p <name>.touchgfx
+```
+
+`-p` accepts either the `.touchgfx` file or the directory that holds it. The
+command prints nothing on success unless `-v` is given, and `--clean` forces a
+full regenerate. A run that changes no file content leaves no diff.
+
+Generation rewrites two tracked files, `config/gcc/app.mk` and
+`config/msvs/Application.props`, with paths taken from the machine that ran it.
+Restore them before committing, so that a local installation path does not travel
+into the repository:
+
+```bash
+git checkout -- config/
+```
+
+`Application.props` keeps `TouchGFXEnvPath` behind a `Condition`, so the committed
+value is only a fallback and a `TouchGFXEnvPath` environment variable takes
+precedence. Set that variable when TouchGFX is installed outside the default
+location, otherwise the Visual Studio asset pre-build cannot find the converters.
 
 ## Linux (GCC) {#linux-gcc}
 
