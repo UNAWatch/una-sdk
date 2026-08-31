@@ -236,10 +236,18 @@ into the repository:
 git checkout -- config/gcc/app.mk config/msvs/Application.props
 ```
 
-`Application.props` keeps `TouchGFXEnvPath` behind a `Condition`, so the committed
-value is only a fallback and a `TouchGFXEnvPath` environment variable takes
-precedence. Set that variable when TouchGFX is installed outside the default
-location, otherwise the Visual Studio asset pre-build cannot find the converters.
+Set a `TouchGFXEnvPath` environment variable when TouchGFX is installed somewhere
+other than the path `Application.props` names, otherwise the Visual Studio asset
+pre-build cannot find the converters. The variable only wins where the project
+declares the property conditionally:
+
+```xml
+<TouchGFXEnvPath Condition="'$(TouchGFXEnvPath)' == ''">...</TouchGFXEnvPath>
+```
+
+MSBuild gives a project property precedence over an environment one, so a project
+that pins the path unconditionally ignores the variable and has to be edited
+instead.
 
 ## Linux (GCC) {#linux-gcc}
 
