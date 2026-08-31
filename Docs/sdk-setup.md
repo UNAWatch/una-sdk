@@ -191,7 +191,7 @@ This section demonstrates how to copy an existing app example (Alarm) and build 
 ```powershell
 # Copy entire project for simplicity
 # Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).
-mkdir MyAlarm
+mkdir MyAlarm -Force
 cp "${env:UNA_SDK}\Examples\Apps\Alarm\*" MyAlarm -Recurse -Force
 
 # Create build dir
