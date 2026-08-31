@@ -624,11 +624,14 @@ switchToNextPriorityScreen():
 <p>The app uses two categories of containers: ready-made <strong>SDK widgets</strong> from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> (imported as <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> packages) and <strong>app-specific containers</strong> built for alarm editing.</p>
 <section id="sdk-widget-containers">
 <h4>SDK Widget Containers<a class="headerlink" href="#sdk-widget-containers" title="Link to this heading"></a></h4>
-<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification:</p>
+<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification, plus
+header-only widgets included straight from the SDK:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — button arc indicators (L1/L2/R1/R2)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Title</span></code> — screen title with underline</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Toggle</span></code> — on/off toggle switch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SDK::GUI::CountdownTimer</span></code> — self-registering countdown that fires a callback at
+zero. Header-only, from <code class="docutils literal notranslate"><span class="pre">SDK/GUI/CountdownTimer.hpp</span></code>; not a <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code>.</p></li>
 </ul>
 </section>
 <section id="app-specific-containers">
@@ -636,7 +639,6 @@ switchToNextPriorityScreen():
 <p>Built specifically for this app and found in <code class="docutils literal notranslate"><span class="pre">gui/src/containers/</span></code>:</p>
 <p><strong><code class="docutils literal notranslate"><span class="pre">TimeWheel</span></code></strong> — dual scroll-wheel for picking hours (0–23) and minutes (0–59). Composed of two independent scroll columns with a highlighted center item (<code class="docutils literal notranslate"><span class="pre">TimeWheelHoursCenterItem</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeWheelMinutesCenterItem</span></code>) and adjacent items (<code class="docutils literal notranslate"><span class="pre">TimeWheelHoursItem</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeWheelMinutesItem</span></code>).</p>
 <p><strong><code class="docutils literal notranslate"><span class="pre">OptionWheel</span></code></strong> — generic vertical scroll-wheel for selecting one value from a list. Used for <code class="docutils literal notranslate"><span class="pre">Repeat</span></code> (11 items) and <code class="docutils literal notranslate"><span class="pre">Effect</span></code> (3 items) in <code class="docutils literal notranslate"><span class="pre">EditView</span></code>. Center item rendered by <code class="docutils literal notranslate"><span class="pre">OptionWheelCenterItem</span></code>; adjacent items by <code class="docutils literal notranslate"><span class="pre">OptionWheelItem</span></code>.</p>
-<p><strong><code class="docutils literal notranslate"><span class="pre">CountdownTimer</span></code></strong> — self-registering per-frame countdown that fires a callback when it reaches zero. Used by <code class="docutils literal notranslate"><span class="pre">SavedView</span></code> and <code class="docutils literal notranslate"><span class="pre">DeletedView</span></code> for auto-dismiss after a fixed delay.</p>
 </section>
 </section>
 <section id="input-handling">

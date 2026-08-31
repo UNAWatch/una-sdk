@@ -767,7 +767,8 @@
 <p>The app uses two categories of containers: ready-made <strong>SDK widgets</strong> from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> (imported as <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> packages) and <strong>app-specific containers</strong> built for this app’s data and layout.</p>
 <section id="sdk-widget-containers">
 <h4>SDK Widget Containers<a class="headerlink" href="#sdk-widget-containers" title="Link to this heading"></a></h4>
-<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification:</p>
+<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification, plus
+header-only widgets included straight from the SDK:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Battery</span></code> — 4-segment battery level indicator</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — button arc indicators (L1/L2/R1/R2)</p></li>
@@ -779,6 +780,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">PauseIndicator</span></code> — full-width pause overlay with elapsed pause time</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Title</span></code> — screen title with underline</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">InfoCarousel</span></code> — auto-cycling multi-value info panel</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SDK::GUI::CountdownTimer</span></code> — self-registering countdown that fires a callback at
+zero. Header-only, from <code class="docutils literal notranslate"><span class="pre">SDK/GUI/CountdownTimer.hpp</span></code>; not a <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code>.</p></li>
 </ul>
 </section>
 <section id="app-specific-containers">
@@ -817,10 +820,6 @@
 <span class="kt">void</span><span class="w"> </span><span class="nf">SummaryFaceLaps::setLaps</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">LapSummary</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">laps</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isImperial</span><span class="p">);</span>
 </pre></div>
 </div>
-<p><strong>Utility</strong>:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CountdownTimer</span></code> — self-registering countdown used by auto-dismiss screens (<code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackSavedView</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackDiscardedView</span></code>, <code class="docutils literal notranslate"><span class="pre">MenuDistanceSavedView</span></code>, <code class="docutils literal notranslate"><span class="pre">MenuTimeSavedView</span></code>)</p></li>
-</ul>
 </section>
 </section>
 <section id="input-handling">

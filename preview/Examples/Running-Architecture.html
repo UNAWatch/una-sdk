@@ -904,7 +904,8 @@
 <p>The app uses two categories of containers: ready-made <strong>SDK widgets</strong> from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> (imported as <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code> packages) and <strong>app-specific containers</strong> built for this app’s data and layout.</p>
 <section id="sdk-widget-containers">
 <h4>SDK Widget Containers<a class="headerlink" href="#sdk-widget-containers" title="Link to this heading"></a></h4>
-<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification:</p>
+<p>Imported from <code class="docutils literal notranslate"><span class="pre">Templates/TouchGFX-Widgets</span></code> and used without modification, plus
+header-only widgets included straight from the SDK:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Battery</span></code> — 4-segment battery level indicator</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Buttons</span></code> — button arc indicators (L1/L2/R1/R2)</p></li>
@@ -916,6 +917,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">PauseIndicator</span></code> — full-width pause overlay with elapsed pause time</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Title</span></code> — screen title with underline</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">InfoCarousel</span></code> — auto-cycling multi-value info panel</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SDK::GUI::CountdownTimer</span></code> — self-registering countdown that fires a callback at
+zero. Header-only, from <code class="docutils literal notranslate"><span class="pre">SDK/GUI/CountdownTimer.hpp</span></code>; not a <code class="docutils literal notranslate"><span class="pre">.tpkg</span></code>.</p></li>
 </ul>
 </section>
 <section id="app-specific-containers">
@@ -968,10 +971,6 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">IntervalsTimer</span></code> — combined timer widget used inside <code class="docutils literal notranslate"><span class="pre">TrackFaceIntervals</span></code> and <code class="docutils literal notranslate"><span class="pre">TrackIntervalsAlertView</span></code>; supports time mode (<code class="docutils literal notranslate"><span class="pre">setPhaseTime()</span></code>), distance mode (<code class="docutils literal notranslate"><span class="pre">setPhaseDistance()</span></code>), and alert countdown mode (<code class="docutils literal notranslate"><span class="pre">setRemainingTime()</span></code>); exposes <code class="docutils literal notranslate"><span class="pre">setColor()</span></code> for phase-specific accent colour</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">TimerRing</span></code> — animated ring used for the pre-start countdown on <code class="docutils literal notranslate"><span class="pre">TrackIntervalsCountdownView</span></code></p></li>
-</ul>
-<p><strong>Utility</strong>:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CountdownTimer</span></code> — self-registering countdown used by auto-dismiss screens (<code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackSavedView</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackDiscardedView</span></code>, <code class="docutils literal notranslate"><span class="pre">MenuDistanceSavedView</span></code>, <code class="docutils literal notranslate"><span class="pre">MenuTimeSavedView</span></code>)</p></li>
 </ul>
 </section>
 </section>
