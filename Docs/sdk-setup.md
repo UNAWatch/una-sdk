@@ -307,9 +307,19 @@ If build files are generated in the wrong directory (e.g., root instead of build
         - PowerShell/Windows: python -c "import hashlib; print(hashlib.md5(b'MyApp').hexdigest().upper()[:16])"
       - Alternatively, acquire from the developer portal for published apps as described in [deploy.md](deploy.md).
       Replace "MyApp" with your app name. See [API reference](api-reference.rst) for details.
-    - `DEV_ID`: Device identifier, typically "UNAWatch".
-    - `APP_TYPE`: App type, e.g., "app".
-    - `APP_AUTOSTART`: "On" or "Off" (default "Off") to enable autostart.
+    - `DEV_ID`: developer identifier, passed to the app as a compile definition of the same name,
+      which the app may use as it sees fit. Every example and tutorial sets `"UNA"`.
+    - `APP_TYPE`: one of `Activity`, `Utility`, `Glance` or `Clockface`, spelled exactly. It sets
+      the type in the packed header, and the default for `APP_GLANCE_INTF` below.
+    - `APP_AUTOSTART`: enable autostart, default `Off`. Accepted values are `On`, `Off`, `True`,
+      `False`, `Yes`, `No`, `Y`, `N`, `1` and `0`, in any case; anything else stops the build
+      rather than being read as one or the other.
+    - `APP_GLANCE_INTF`: whether the packed header claims a glance interface (bit 5, `0x20`),
+      default following `APP_TYPE`: on for `Glance`, off for every other type. Most apps never
+      set it; set it only for a non-Glance app that genuinely serves glance data. Accepted
+      values as for `APP_AUTOSTART`.
+    - `APP_USE_ICONS`: whether the app ships launcher icons from `RESOURCES_PATH`, default `On`.
+      The `Glance*` examples set it `Off`. Accepted values as for `APP_AUTOSTART`.
     - Paths (adjust if reorganizing file structure):
       - `LIBS_PATH`: Path to libraries, default "../../Libs".
       - `OUTPUT_PATH`: Path for built files, default "../../../Output".
