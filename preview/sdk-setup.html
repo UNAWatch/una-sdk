@@ -472,9 +472,19 @@ references — CMake targets, the ELFs, and the linker scripts. It does <strong>
 Replace “MyApp” with your app name. See <a class="reference internal" href="api-reference.html"><span class="std std-doc">API reference</span></a> for details.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DEV_ID</span></code>: Device identifier, typically “UNAWatch”.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>: App type, e.g., “app”.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>: “On” or “Off” (default “Off”) to enable autostart.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEV_ID</span></code>: developer identifier, passed to the app as a compile definition of the same name,
+which the app may use as it sees fit. Every example and tutorial sets <code class="docutils literal notranslate"><span class="pre">&quot;UNA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>: one of <code class="docutils literal notranslate"><span class="pre">Activity</span></code>, <code class="docutils literal notranslate"><span class="pre">Utility</span></code>, <code class="docutils literal notranslate"><span class="pre">Glance</span></code> or <code class="docutils literal notranslate"><span class="pre">Clockface</span></code>, spelled exactly. It sets
+the type in the packed header, and the default for <code class="docutils literal notranslate"><span class="pre">APP_GLANCE_INTF</span></code> below.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>: enable autostart, default <code class="docutils literal notranslate"><span class="pre">Off</span></code>. Accepted values are <code class="docutils literal notranslate"><span class="pre">On</span></code>, <code class="docutils literal notranslate"><span class="pre">Off</span></code>, <code class="docutils literal notranslate"><span class="pre">True</span></code>,
+<code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">Yes</span></code>, <code class="docutils literal notranslate"><span class="pre">No</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">N</span></code>, <code class="docutils literal notranslate"><span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">0</span></code>, in any case; anything else stops the build
+rather than being read as one or the other.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_GLANCE_INTF</span></code>: whether the packed header claims a glance interface (bit 5, <code class="docutils literal notranslate"><span class="pre">0x20</span></code>),
+default following <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>: on for <code class="docutils literal notranslate"><span class="pre">Glance</span></code>, off for every other type. Most apps never
+set it; set it only for a non-Glance app that genuinely serves glance data. Accepted
+values as for <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APP_USE_ICONS</span></code>: whether the app ships launcher icons from <code class="docutils literal notranslate"><span class="pre">RESOURCES_PATH</span></code>, default <code class="docutils literal notranslate"><span class="pre">On</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">Glance*</span></code> examples set it <code class="docutils literal notranslate"><span class="pre">Off</span></code>. Accepted values as for <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>.</p></li>
 <li><p>Paths (adjust if reorganizing file structure):</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">LIBS_PATH</span></code>: Path to libraries, default “../../Libs”.</p></li>
