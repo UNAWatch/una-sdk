@@ -216,11 +216,12 @@ Example:
 
 Code generation normally runs from TouchGFX Designer (**Generate Code**, F4). The
 same job runs headlessly with `tgfx`, the command line tool that ships with a
-TouchGFX installation; on Windows it is `<touchgfx-install>\designer\tgfx.exe`.
-Run it from the app's `TouchGFX-GUI` directory:
+TouchGFX installation. Installing TouchGFX does not put it on `PATH`, so call it
+by full path; on Windows that is `<touchgfx-install>\designer\tgfx.exe`. Run it
+from the app's `TouchGFX-GUI` directory:
 
-```bash
-tgfx generate -p <name>.touchgfx
+```powershell
+& "<touchgfx-install>\designer\tgfx.exe" generate -p <name>.touchgfx
 ```
 
 `-p` accepts either the `.touchgfx` file or the directory that holds it. The
@@ -235,6 +236,9 @@ into the repository:
 ```bash
 git checkout -- config/gcc/app.mk config/msvs/Application.props
 ```
+
+That discards every unstaged change in those two files, not only the ones
+generation just made, so commit or stash your own edits to them first.
 
 Set a `TouchGFXEnvPath` environment variable when TouchGFX is installed somewhere
 other than the path `Application.props` names, otherwise the Visual Studio asset
