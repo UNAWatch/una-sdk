@@ -1,0 +1,728 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClockfaceAnalogue - Analogue Clockface &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=0d76e731" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/version-selector.js?v=50f89983"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GlanceHR - Heart Rate Glance" href="GlanceHR-Architecture.html" />
+    <link rel="prev" title="Stopwatch - Interval Timer" href="Stopwatch-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ClockfaceAnalogue - Analogue Clockface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-it-is-not">What it is not</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#components">Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-the-clock-comes-from">Where the clock comes from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-the-charge-level-comes-from">Where the charge level comes from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-service-publishes-it-does-not-decide">The service publishes, it does not decide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-battery-indicator">The battery indicator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-muted-alerts-icon">The muted-alerts icon</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-hands">The hands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-not-a-rotated-bitmap">Why not a rotated bitmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#canvas-buffer">Canvas buffer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#assets">Assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#texts">Texts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#frame-pacing">Frame pacing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#resume">Resume</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulator">Simulator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-setup">Build and Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-system-overview">Build System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-targets">Build Targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#known-gaps">Known gaps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ClockfaceAnalogue - Analogue Clockface</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/ClockfaceAnalogue-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="clockfaceanalogue-analogue-clockface">
+<h1>ClockfaceAnalogue - Analogue Clockface<a class="headerlink" href="#clockfaceanalogue-analogue-clockface" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Analogue</span></code> is a <strong>Clockface</strong>-type application: an analogue face with an hour
+and a minute hand over a printed dial, plus the day, the date, a battery
+indicator and a muted-alerts icon. The kernel hands a clockface app the display
+in place of its built-in home screen, so this is what the user sees when
+nothing else is running.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Directory</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Examples/Apps/ClockfaceAnalogue</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">APP_NAME</span></code> / <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Analogue</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Clockface</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">APP_ID</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">A199D48D5F2BB3D0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Packed flags</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0x03</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Screens</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>Display</p></td>
+<td><p>240 x 240, <code class="docutils literal notranslate"><span class="pre">LCD8bpp_ABGR2222</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The directory prefix is the <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>; the launcher name carries no prefix.</p>
+<section id="what-it-is-not">
+<h3>What it is not<a class="headerlink" href="#what-it-is-not" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>No second hand.</strong> The fastest thing the face draws turns once a minute.</p></li>
+<li><p><strong>No touch, no buttons, no navigation.</strong> A clockface is a display, not a
+screen the user drives.</p></li>
+<li><p><strong>No glance interface.</strong> The app serves no glance data, and the packed image
+says so: flags <code class="docutils literal notranslate"><span class="pre">0x03</span></code>, glance-capable bit clear.</p></li>
+</ul>
+</section>
+</section>
+<section id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Link to this heading"></a></h2>
+<p>Positions are the widget’s top-left corner on the 240 x 240 face. Everything
+here is set in the Designer; none of it is repeated in code.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Widget</p></th>
+<th class="head"><p>Position</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>Detail</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Dial</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Image</span></code></p></td>
+<td><p>0, 0</p></td>
+<td><p>240 x 240</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Dial_240x240.png</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Muted alerts</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Image</span></code></p></td>
+<td><p>34, 108</p></td>
+<td><p>30 x 25</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SpeakerMute_30x25.png</span></code>, hidden unless muted</p></td>
+</tr>
+<tr class="row-even"><td><p>Battery level</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Battery_45x14</span></code></p></td>
+<td><p>160, 113</p></td>
+<td><p>45 x 14</p></td>
+<td><p>four segments</p></td>
+</tr>
+<tr class="row-odd"><td><p>Day name</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TextArea</span></code></p></td>
+<td><p>76, 167</p></td>
+<td><p>88 x 22</p></td>
+<td><p>Poppins Medium 16, <code class="docutils literal notranslate"><span class="pre">192,</span> <span class="pre">128,</span> <span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Day of month</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TextAreaWithOneWildcard</span></code></p></td>
+<td><p>76, 185</p></td>
+<td><p>88 x 38</p></td>
+<td><p>Poppins Medium 26, <code class="docutils literal notranslate"><span class="pre">192,</span> <span class="pre">192,</span> <span class="pre">192</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Hands, hub</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Line</span></code> x4, <code class="docutils literal notranslate"><span class="pre">Circle</span></code></p></td>
+<td><p>0, 0</p></td>
+<td><p>240 x 240</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">192,</span> <span class="pre">192,</span> <span class="pre">192</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The hands and the hub are given the whole face as their widget box so that a
+hand at any angle stays inside it; what is actually rasterised is each stroke’s
+own minimal rect.</p>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<section id="components">
+<h3>Components<a class="headerlink" href="#components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Service</strong> - owns the clock and the charge level, and publishes both. The
+mute state is published from here too.</p></li>
+<li><p><strong>GUI</strong> - TouchGFX. One screen, two images, two text areas, one container
+and five canvas widgets.</p></li>
+<li><p><strong>SDK integration</strong> - the GUI lifecycle callbacks and the custom-message
+handler.</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   [sensor layer] ──EVENT_SENSOR_LAYER_DATA──► Service ◄── clock, once a minute
+                                                  │
+                                       CustomMessage::Time
+                                       CustomMessage::Battery
+                                       CustomMessage::AlertsMuted
+                                                  │
+                                                  ▼
+   [kernel] ──EVENT_GUI_TICK──► frame ──► FrontendApplication::handleTickEvent
+                                                                 │
+                                                          callCustomMessageHandler
+                                                                 │
+                                                                 ▼
+                                                  Model ──► MainPresenter ──► MainView
+                                       (hands, day, date, battery, mute)
+</pre></div>
+</div>
+<p>Both values the face shows are read in the service and pushed to the GUI. The
+GUI reads the clock itself only at the two moments no push is due – when it is
+built and when it resumes – and nothing it shows is sampled on a frame.</p>
+</section>
+<section id="where-the-clock-comes-from">
+<h3>Where the clock comes from<a class="headerlink" href="#where-the-clock-comes-from" title="Link to this heading"></a></h3>
+<p>The clock is <code class="docutils literal notranslate"><span class="pre">time()</span></code> and <code class="docutils literal notranslate"><span class="pre">localtime_r()</span></code>; there is no SDK time interface.</p>
+<p>The face draws nothing finer than a minute, so the service reads the clock once
+a turn round its loop. One reading does both jobs: it is what gets published,
+and it is what says how long of the current minute is left, which is how long
+the service then waits for a message. Publishing happens before the wait rather
+than on the wait expiring, so a message arriving just before a boundary cannot
+swallow that minute; a reading equal to the last one sent is dropped, so an
+early turn costs nothing. Each wait is sized from a fresh reading, so a late
+wake-up cannot accumulate into drift.</p>
+<p>The GUI takes two readings of its own, for the two moments it has to be right
+at and no minute boundary is due: when the <code class="docutils literal notranslate"><span class="pre">Model</span></code> is built, and when the face
+resumes after being off screen. Both are direct calls, so neither waits on the
+service and both are in place before the frame that follows them is drawn.</p>
+<p><code class="docutils literal notranslate"><span class="pre">WallTime</span></code> carries <code class="docutils literal notranslate"><span class="pre">hour</span></code>, <code class="docutils literal notranslate"><span class="pre">minute</span></code>, <code class="docutils literal notranslate"><span class="pre">mday</span></code> and <code class="docutils literal notranslate"><span class="pre">wday</span></code> - everything the face
+draws and nothing finer. Two readings compare equal when all four match, which
+is what lets the screen decide in one test whether anything has to be redrawn.</p>
+<p>The hands are driven from a 12-hour dial, so no 12/24 preference is needed. The
+face shows the day of the month as a bare number, so no date order is needed
+either.</p>
+</section>
+<section id="where-the-charge-level-comes-from">
+<h3>Where the charge level comes from<a class="headerlink" href="#where-the-charge-level-comes-from" title="Link to this heading"></a></h3>
+<p>The charge level comes from the sensor layer:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="n">mBatterySensor</span><span class="p">{</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">BATTERY_LEVEL</span><span class="w"> </span><span class="p">};</span>
+</pre></div>
+</div>
+<p>The sensor is event driven, not periodic. Connecting publishes the current
+level, which is what fills the indicator on boot; after that an event arrives
+when the level changes and at no other time. Nothing polls it and nothing
+samples it on a schedule.</p>
+<p>The service connects once at startup and holds the subscription for the life of
+the app. A face is on screen whenever nothing else is running, so there is no
+moment worth deferring to, and a subscription that only speaks on a change
+costs nothing to keep open.</p>
+</section>
+<section id="the-service-publishes-it-does-not-decide">
+<h3>The service publishes, it does not decide<a class="headerlink" href="#the-service-publishes-it-does-not-decide" title="Link to this heading"></a></h3>
+<p>Everything the service reports leaves it through one publisher each:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">publishTime</span><span class="p">();</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">publishBatteryLevel</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">level</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">publishAlertsMuted</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">muted</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Each drops a value equal to the one it last sent, so a source may call as often
+as it likes and only a real change costs an IPC round trip. <code class="docutils literal notranslate"><span class="pre">handleSensorData</span></code>
+therefore only matches the driver, parses and hands the level on. The <code class="docutils literal notranslate"><span class="pre">Model</span></code>
+filters again on arrival, so an unchanged value produces no callback either.</p>
+<p>All three messages run service to GUI, one-way, and their results are never
+inspected, so <code class="docutils literal notranslate"><span class="pre">customMessageHandler</span></code> returns <code class="docutils literal notranslate"><span class="pre">true</span></code> unconditionally:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">CustomMessage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BATTERY</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">ALERTS_MUTED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TIME</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">Time</span><span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">hour</span><span class="p">,</span><span class="w"> </span><span class="n">minute</span><span class="p">,</span><span class="w"> </span><span class="n">mday</span><span class="p">,</span><span class="w"> </span><span class="n">wday</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">Battery</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">level</span><span class="p">;</span><span class="w"> </span><span class="p">};</span><span class="w">   </span><span class="c1">// 0-100</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">AlertsMuted</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">bool</span><span class="w">    </span><span class="n">muted</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FrontendApplication::handleTickEvent</span></code> drains the queue by calling
+<code class="docutils literal notranslate"><span class="pre">callCustomMessageHandler()</span></code> once per frame. That call is not the frame gate;
+it only moves messages onto the GUI thread.</p>
+</section>
+<section id="the-battery-indicator">
+<h3>The battery indicator<a class="headerlink" href="#the-battery-indicator" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Battery_45x14</span></code> is a reused container: four segments in 25 % bands, teal
+(<code class="docutils literal notranslate"><span class="pre">0x008080</span></code>) when reached, dark grey (<code class="docutils literal notranslate"><span class="pre">0x404040</span></code>) when not, and the first
+segment red (<code class="docutils literal notranslate"><span class="pre">0xC00000</span></code>) below 25 %. At 0 % nothing is lit.</p>
+<p>Its segments sit at fixed coordinates rather than being laid out, so the
+container works at the one size its name gives. A different size is a different
+container.</p>
+</section>
+<section id="the-muted-alerts-icon">
+<h3>The muted-alerts icon<a class="headerlink" href="#the-muted-alerts-icon" title="Link to this heading"></a></h3>
+<p>The icon is on screen only while alerts are silenced. What decides that is
+state, not a call to <code class="docutils literal notranslate"><span class="pre">setVisible</span></code> in the Designer: <code class="docutils literal notranslate"><span class="pre">Model::alertsMuted()</span></code>
+starts false and <code class="docutils literal notranslate"><span class="pre">MainView::setupScreen</span></code> applies it, so the icon starts hidden
+because alerts are not muted. The Designer keeps it visible so it can be
+positioned.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MainView::setAlertsMuted</span></code> uses <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code>, not <code class="docutils literal notranslate"><span class="pre">invalidateContent()</span></code>. The
+latter does nothing on a widget that has just been hidden, which is exactly
+when the area it used to cover has to be repainted.</p>
+<blockquote>
+<div><p><strong>Nothing drives it yet.</strong> The SDK exposes no mute state for an app to read,
+so <code class="docutils literal notranslate"><span class="pre">Service::publishAlertsMuted</span></code> has no caller and the icon stays hidden on a
+real watch. The icon, the message, the filtering and the path that shows and
+hides it are all here and all exercised; attaching a source to that one call
+is the whole of what remains.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="the-hands">
+<h2>The hands<a class="headerlink" href="#the-hands" title="Link to this heading"></a></h2>
+<p>Each hand is two <code class="docutils literal notranslate"><span class="pre">Line</span></code> widgets with <code class="docutils literal notranslate"><span class="pre">ROUND_CAP_ENDING</span></code> - a wide bar and a
+narrow stem that carries on to the hub - and both hands share one <code class="docutils literal notranslate"><span class="pre">Circle</span></code>
+drawn as an open ring. All five are drawn in the Designer pointing at twelve
+o’clock.</p>
+<p><strong>No geometry is written down in code.</strong> <code class="docutils literal notranslate"><span class="pre">MainView::setupScreen</span></code> reads
+<code class="docutils literal notranslate"><span class="pre">hub.getCenter()</span></code> for the pivot and <code class="docutils literal notranslate"><span class="pre">getStart()</span></code> / <code class="docutils literal notranslate"><span class="pre">getEnd()</span></code> for each stroke,
+keeps the endpoints relative to the pivot, and <code class="docutils literal notranslate"><span class="pre">setHandAngle()</span></code> rotates those
+vectors. Length, thickness, cap style, colour and where the bar ends and the
+stem begins all come from the generated <code class="docutils literal notranslate"><span class="pre">MainViewBase</span></code>. Retuning the design is
+an edit in the Designer with no matching edit in code, and moving the hub moves
+what the hands turn about.</p>
+<p>As drawn, measured from the hub in pixels, cap included:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>stem</p></th>
+<th class="head"><p>bar</p></th>
+<th class="head"><p>thickness</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Hour hand</p></td>
+<td><p>7 - 21</p></td>
+<td><p>17 - 83</p></td>
+<td><p>2 / 6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Minute hand</p></td>
+<td><p>7 - 21</p></td>
+<td><p>17 - 98</p></td>
+<td><p>2 / 6</p></td>
+</tr>
+</tbody>
+</table>
+<p>The hub ring spans radius 6 to 8, so each stem ends underneath it and the ring
+stays clear inside.</p>
+<p>Three things the Designer content has to keep, or rotation breaks:</p>
+<ol class="arabic simple">
+<li><p>every <code class="docutils literal notranslate"><span class="pre">Line</span></code> box stays at <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">240,</span> <span class="pre">240)</span></code> - a line is clipped by its own
+box, and a rotated hand leaves a box shaped for a vertical one;</p></li>
+<li><p>the strokes are drawn vertically, pointing up, since that is the zero angle;</p></li>
+<li><p>the hub exists, because it is the only source of the pivot.</p></li>
+</ol>
+<p>Angles come straight off the dial, and screen y grows downwards, so the plain
+rotation matrix already turns clockwise:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">minuteAngle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">minute</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">6.0f</span><span class="p">;</span><span class="w">                        </span><span class="c1">// 360 / 60</span>
+<span class="n">hourAngle</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">hour</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">12</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">30.0f</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">minute</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">;</span><span class="w">  </span><span class="c1">// 360 / 12, plus the creep</span>
+</pre></div>
+</div>
+<p>The hour hand creeps with the minutes rather than jumping on the hour, which is
+what a mechanical movement does and what makes the pair read as one time rather
+than two readings. It also means both hands move on the same event, so the
+redraw test stays a single comparison.</p>
+<p>Measured against the dial at eight exact times, with everything but the hands
+hidden: the angle error stays under <strong>0.15 degrees</strong>, against a minute mark of
+6 degrees. The tip radius holds constant across all angles - minute 97.5 to
+97.9, hour 82.5 to 83.0 - which is also what shows that nothing is being
+clipped.</p>
+<section id="why-not-a-rotated-bitmap">
+<h3>Why not a rotated bitmap<a class="headerlink" href="#why-not-a-rotated-bitmap" title="Link to this heading"></a></h3>
+<p>The obvious alternative is to draw each hand once as artwork and rotate the
+bitmap with the texture mapper. Measured on this display, against the same hand
+drawn as vector strokes, deviation of the hand’s centreline from a straight
+line, in pixels:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>0 deg</p></th>
+<th class="head"><p>2 deg</p></th>
+<th class="head"><p>6 deg</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>vector strokes</p></td>
+<td><p>0.044</p></td>
+<td><p>0.061</p></td>
+<td><p>0.082</p></td>
+</tr>
+<tr class="row-odd"><td><p>bitmap, nearest neighbour</p></td>
+<td><p>0.082</p></td>
+<td><p>0.278</p></td>
+<td><p>0.278</p></td>
+</tr>
+<tr class="row-even"><td><p>bitmap, bilinear</p></td>
+<td><p>0.082</p></td>
+<td><p>0.118</p></td>
+<td><p>0.112</p></td>
+</tr>
+</tbody>
+</table>
+<p>The 0.278 is a quantisation floor rather than an angle effect - it is the same
+at 2 and 6 degrees. Worse is what happens in motion. The hour hand advances
+half a degree a minute, and under nearest-neighbour sampling that step changes
+no pixels at all on one minute and then moves a double step on the next
+(0.000, 0.167, 0.333, 0.167 px), while the vector strokes move on every step.
+A bitmap hand also comes out about 0.15 px fatter, because its anti-aliased
+edge is quantised into the framebuffer’s four levels per channel before any
+rotation happens.</p>
+<p>Pre-rendering one sprite per position does not rescue it either: a thin hand
+rotated 45 degrees has an 82 x 82 bounding box, about 6.7 KB in ABGR2222, which
+does not compress - times sixty minute positions.</p>
+</section>
+<section id="canvas-buffer">
+<h3>Canvas buffer<a class="headerlink" href="#canvas-buffer" title="Link to this heading"></a></h3>
+<p>Rasterising the strokes needs the screen’s canvas buffer, sized by
+<code class="docutils literal notranslate"><span class="pre">CanvasBufferSize</span></code> in the <code class="docutils literal notranslate"><span class="pre">.touchgfx</span></code>. Sweeping all 720 hand positions with
+TouchGFX’s own memory report on peaks at <strong>1872 bytes</strong> and never splits a
+draw, so the <strong>3600</strong> the screen declares covers the worst case. Re-measure
+after retuning a stroke: a wider or longer one costs more outline.</p>
+</section>
+</section>
+<section id="assets">
+<h2>Assets<a class="headerlink" href="#assets" title="Link to this heading"></a></h2>
+<p>The tick ring is one image, not a ring of widgets. Twelve hour marks and
+forty-eight minute dots would otherwise be sixty drawables that never change,
+each with its own invalidation bookkeeping; as a bitmap it is one blit and the
+hands simply repaint over it.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>File</p></th>
+<th class="head"><p>Size</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dial_240x240.png</span></code></p></td>
+<td><p>240 x 240</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SpeakerMute_30x25.png</span></code></p></td>
+<td><p>30 x 25</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="texts">
+<h2>Texts<a class="headerlink" href="#texts" title="Link to this heading"></a></h2>
+<p>The day name is seven static Text IDs, not a wildcard. The set is known at
+build time, so the face swaps the <code class="docutils literal notranslate"><span class="pre">TextArea</span></code>’s typed text instead of writing
+characters into a RAM buffer, and translation stays a text-database job:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// AnalogueLabels.hpp, indexed by std::tm::tm_wday</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">TypedTextId</span><span class="w"> </span><span class="n">kDayLabels</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">T_TEXT_SUN</span><span class="p">,</span><span class="w"> </span><span class="n">T_TEXT_MON</span><span class="p">,</span><span class="w"> </span><span class="n">T_TEXT_TUE</span><span class="p">,</span><span class="w"> </span><span class="n">T_TEXT_WED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">T_TEXT_THU</span><span class="p">,</span><span class="w"> </span><span class="n">T_TEXT_FRI</span><span class="p">,</span><span class="w"> </span><span class="n">T_TEXT_SAT</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Text ID</p></th>
+<th class="head"><p>Typography</p></th>
+<th class="head"><p>Buffer</p></th>
+<th class="head"><p>Content</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TEXT_MON</span></code> … <code class="docutils literal notranslate"><span class="pre">TEXT_SUN</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Poppins_Medium_16</span></code></p></td>
+<td><p>none</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Mon</span></code> … <code class="docutils literal notranslate"><span class="pre">Sun</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TMP_MEDIUM_26</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Poppins_Medium_26</span></code></p></td>
+<td><p>-</p></td>
+<td><p>wildcard template</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">WC_DATE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Poppins_Medium_26</span></code></p></td>
+<td><p>3</p></td>
+<td><p>day of month</p></td>
+</tr>
+</tbody>
+</table>
+<p>The day of month is the one string written at runtime, so it is the one with a
+buffer. The base class binds it once; the face only <code class="docutils literal notranslate"><span class="pre">snprintf</span></code>s into the buffer
+and invalidates. Only <code class="docutils literal notranslate"><span class="pre">Poppins-Medium.ttf</span></code> is shipped, because only it is used.</p>
+</section>
+<section id="frame-pacing">
+<h2>Frame pacing<a class="headerlink" href="#frame-pacing" title="Link to this heading"></a></h2>
+<p>The kernel paces the app with one <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code> per frame. On target,
+<code class="docutils literal notranslate"><span class="pre">OSWrappers::waitForVSync</span></code> blocks in
+<code class="docutils literal notranslate"><span class="pre">TouchGFXCommandProcessor::waitForFrameTick</span></code> until that tick arrives, so one
+TouchGFX frame is one kernel tick and <code class="docutils literal notranslate"><span class="pre">FrontendApplication::handleTickEvent</span></code> is
+the per-frame hook.</p>
+<p>Anything that does need per-frame work belongs in a <code class="docutils literal notranslate"><span class="pre">handleTickEvent</span></code>, not in
+<code class="docutils literal notranslate"><span class="pre">IGuiLifeCycleCallback::onFrame()</span></code>. The two look equivalent and are not:
+<code class="docutils literal notranslate"><span class="pre">onFrame</span></code> is driven from <code class="docutils literal notranslate"><span class="pre">waitForFrameTick</span></code> on target, but the simulator’s
+<code class="docutils literal notranslate"><span class="pre">App::Core::runGuiComm</span></code> calls <code class="docutils literal notranslate"><span class="pre">waitForFrameTick</span></code> as a bare sync primitive and
+never sends an <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>, so a face built on <code class="docutils literal notranslate"><span class="pre">onFrame</span></code> works on hardware
+and sits frozen in the simulator.</p>
+<p>The app holds no notion of the rate, and nothing it shows is sampled per frame.
+<code class="docutils literal notranslate"><span class="pre">MainView</span></code> has no <code class="docutils literal notranslate"><span class="pre">handleTickEvent</span></code> at all: the tick drains the message queue,
+and a tick that brings no message does nothing. What the face draws is decided
+by what arrives - the hands and the date by a <code class="docutils literal notranslate"><span class="pre">Time</span></code> message, the battery
+level by a <code class="docutils literal notranslate"><span class="pre">Battery</span></code> one - so the tick rate costs the app nothing but the drain.</p>
+<p>This is what having no second hand buys, and it does not generalise. A value
+that turns once a second has to be sampled at least twice a second to be shown
+without stumbling, and at that rate it may as well be read on the frame.</p>
+<section id="resume">
+<h3>Resume<a class="headerlink" href="#resume" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Model::onResume()</span></code> only raises a flag. <code class="docutils literal notranslate"><span class="pre">tick()</span></code> acts on it: it takes a reading,
+because the face may have been off screen across a minute boundary and the next
+push would not be due until the one after it, and then invalidates the whole
+screen, because whatever the kernel drew over the face is still in the
+framebuffer when the app comes back.</p>
+<p>Both belong in <code class="docutils literal notranslate"><span class="pre">tick()</span></code> rather than in <code class="docutils literal notranslate"><span class="pre">onResume()</span></code> because <code class="docutils literal notranslate"><span class="pre">tick()</span></code> runs on the
+thread that draws. <code class="docutils literal notranslate"><span class="pre">onResume()</span></code> is dispatched from <code class="docutils literal notranslate"><span class="pre">waitForFrameTick()</span></code>, which
+the simulator drives on a thread of its own while TouchGFX renders on the main
+one, so touching a widget from there would race the render loop. The reading
+still lands before the repaint, so the hands come back already right.</p>
+</section>
+</section>
+<section id="simulator">
+<h2>Simulator<a class="headerlink" href="#simulator" title="Link to this heading"></a></h2>
+<p>The simulator builds the service, the GUI and a simulated sensor layer, so the
+battery path is exercised end to end rather than left until hardware.
+<code class="docutils literal notranslate"><span class="pre">simulator/ConfigurationSimulator.hpp</span></code> configures that layer: only the battery
+sensor is enabled, starting at 78 % and falling 0.2 %/s, so the indicator
+visibly crosses a band about twenty seconds in.</p>
+</section>
+<section id="build-and-setup">
+<h2>Build and Setup<a class="headerlink" href="#build-and-setup" title="Link to this heading"></a></h2>
+<section id="build-system-overview">
+<h3>Build System Overview<a class="headerlink" href="#build-system-overview" title="Link to this heading"></a></h3>
+<p><strong>Primary Build File</strong>: <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in
+<code class="docutils literal notranslate"><span class="pre">ClockfaceAnalogue/Software/Apps/Analogue-CMake/</span></code></p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"Analogue"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">"Analogue"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Clockface"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"A199D48D5F2BB3D0"</span><span class="p">)</span>
+
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
+<span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code> is what packs the image as a clockface and leaves the
+glance-capable bit clear. The app is not autostarted; the kernel gives a
+clockface the display in place of its own home screen.</p>
+</section>
+<section id="build-targets">
+<h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
+<p>The service takes one optional SDK group, the sensor layer, which is where the
+charge level comes from; the GUI takes the common and GUI groups plus the
+generated TouchGFX sources:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SERVICE_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_APPSYSTEM</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_SENSOR</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_service</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">Service.elf</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span><span class="s">GUI_SOURCES</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">TOUCHGFX_SOURCES</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_COMMON</span><span class="o">}</span>
+<span class="w">    </span><span class="o">${</span><span class="nv">UNA_SDK_SOURCES_GUI</span><span class="o">}</span>
+<span class="p">)</span>
+<span class="nb">una_app_build_gui</span><span class="p">(</span><span class="o">${</span><span class="nv">APP_NAME</span><span class="o">}</span><span class="s">GUI.elf</span><span class="p">)</span>
+
+<span class="nb">una_app_build_app</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The face keeps no state and writes no files, so it takes neither the JSON nor
+the file-system group.</p>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p><strong>SDK Components</strong>: common, GUI and app-system sources, and the sensor layer
+for <code class="docutils literal notranslate"><span class="pre">BATTERY_LEVEL</span></code>. No JSON, no FIT, no file system.</p>
+<p><strong>App Libraries</strong> (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Commands.hpp</span></code> - the three service-to-GUI messages and their types</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Service</span></code> - the clock loop, the sensor subscription and the publishers</p></li>
+</ul>
+<p>See <a class="reference internal" href="../sdk-setup.html"><span class="std std-doc">SDK Setup and Build Overview</span></a> for the full development
+environment and toolchain, and <a class="reference internal" href="../Simulator.html"><span class="std std-doc">Simulator</span></a> for the Windows and
+Linux simulator builds.</p>
+</section>
+</section>
+<section id="known-gaps">
+<h2>Known gaps<a class="headerlink" href="#known-gaps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>A change of clock is not seen until the minute turns.</strong> The service is
+asleep until its next boundary, so a clock corrected underneath it – by a
+phone sync, or by hand – reaches the face up to a minute later. Leaving the
+face and returning to it corrects it at once, because resuming asks.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Stopwatch-Architecture.html" class="btn btn-neutral float-left" title="Stopwatch - Interval Timer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GlanceHR-Architecture.html" class="btn btn-neutral float-right" title="GlanceHR - Heart Rate Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
