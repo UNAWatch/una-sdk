@@ -289,8 +289,14 @@
 <h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>The handle is automatically hidden when <code class="docutils literal notranslate"><span class="pre">count</span> <span class="pre">&lt;=</span> <span class="pre">1</span></code>.</p></li>
-<li><p>Starting a new animation while one is in progress snaps the handle to its current visual position before proceeding — no visual glitch.</p></li>
+<li><p>Starting a new animation while one is in progress snaps the handle to the position it has reached before proceeding — no visual glitch.</p></li>
 <li><p>The overflow handle (<code class="docutils literal notranslate"><span class="pre">handleOvf</span></code>) is managed internally and must not be manipulated directly.</p></li>
+<li><p>Handle arcs are clipped to the rail range. During a wrap-around slide the outgoing
+handle shrinks into the near rail end and the incoming one grows out of the far end,
+so neither is ever drawn past the rail into empty container space.</p></li>
+<li><p>That clipping is presentation only. The widget tracks the unclipped position
+internally, so interrupting a slide resumes from where the handle actually was
+rather than from the rail edge it was drawn at.</p></li>
 <li><p>The timer widget is automatically unregistered when the animation completes or in the destructor.</p></li>
 </ul>
 </section>
