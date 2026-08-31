@@ -71,6 +71,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#transfer-application-transfer-application">Transfer Application {#transfer-application}</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regenerate-the-gui-regenerate-gui">Regenerate the GUI {#regenerate-gui}</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#linux-gcc-linux-gcc">Linux (GCC) {#linux-gcc}</a><ul>
@@ -432,6 +433,15 @@ Location:
 <li><p>Add header paths to <strong>ADDITIONAL_INCLUDE_PATHS</strong>.</p></li>
 <li><p>Add source file paths to <strong>ADDITIONAL_SOURCES_UNA</strong>.</p></li>
 </ol>
+<p>The two lists describe the same build, so a file added to one must be added to
+the other. A mismatch is not caught by a normal build: CI builds the GCC side
+only, so a source missing from the vcxproj first shows up as a link error when
+someone opens the project in Visual Studio. The <code class="docutils literal notranslate"><span class="pre">MSVS</span> <span class="pre">Source</span> <span class="pre">Sync</span></code> workflow
+compares both lists on every pull request that touches either file. To run the
+same check locally, from the SDK root (<code class="docutils literal notranslate"><span class="pre">python</span></code> on Windows):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>.github/scripts/check_msvs_sources.py
+</pre></div>
+</div>
 </section>
 </section>
 <section id="transfer-application-transfer-application">
@@ -452,6 +462,39 @@ Example:</p>
 <li><p>If you move the <strong>una_sdk</strong> folder, you must update UNA_SDK environment variable.
 See: <a class="reference internal" href="#install-una-sdk-variable"><span class="xref myst">Install UNA_SDK variable</span></a></p></li>
 </ol>
+</section>
+<section id="regenerate-the-gui-regenerate-gui">
+<h3>Regenerate the GUI {#regenerate-gui}<a class="headerlink" href="#regenerate-the-gui-regenerate-gui" title="Link to this heading"></a></h3>
+<p>Code generation normally runs from TouchGFX Designer (<strong>Generate Code</strong>, F4). The
+same job runs headlessly with <code class="docutils literal notranslate"><span class="pre">tgfx</span></code>, the command line tool that ships with a
+TouchGFX installation. Installing TouchGFX does not put it on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, so call it
+by full path; on Windows that is <code class="docutils literal notranslate"><span class="pre">&lt;touchgfx-install&gt;\designer\tgfx.exe</span></code>. Run it
+from the app’s <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> directory:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="p">&amp;</span> <span class="s2">"&lt;touchgfx-install&gt;\designer\tgfx.exe"</span> <span class="n">generate</span> <span class="n">-p</span> <span class="p">&lt;</span><span class="n">name</span><span class="p">&gt;.</span><span class="n">touchgfx</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">-p</span></code> accepts either the <code class="docutils literal notranslate"><span class="pre">.touchgfx</span></code> file or the directory that holds it. The
+command prints nothing on success unless <code class="docutils literal notranslate"><span class="pre">-v</span></code> is given, and <code class="docutils literal notranslate"><span class="pre">--clean</span></code> forces a
+full regenerate. A run that changes no file content leaves no diff.</p>
+<p>Generation rewrites two tracked files, <code class="docutils literal notranslate"><span class="pre">config/gcc/app.mk</span></code> and
+<code class="docutils literal notranslate"><span class="pre">config/msvs/Application.props</span></code>, with paths taken from the machine that ran it.
+Restore them before committing, so that a local installation path does not travel
+into the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>--<span class="w"> </span>config/gcc/app.mk<span class="w"> </span>config/msvs/Application.props
+</pre></div>
+</div>
+<p>That discards every unstaged change in those two files, not only the ones
+generation just made, so commit or stash your own edits to them first.</p>
+<p>Set a <code class="docutils literal notranslate"><span class="pre">TouchGFXEnvPath</span></code> environment variable when TouchGFX is installed somewhere
+other than the path <code class="docutils literal notranslate"><span class="pre">Application.props</span></code> names, otherwise the Visual Studio asset
+pre-build cannot find the converters. The variable only wins where the project
+declares the property conditionally:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;TouchGFXEnvPath</span><span class="w"> </span><span class="na">Condition=</span><span class="s">"'$(TouchGFXEnvPath)' == ''"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/TouchGFXEnvPath&gt;</span>
+</pre></div>
+</div>
+<p>MSBuild gives a project property precedence over an environment one, so a project
+that pins the path unconditionally ignores the variable and has to be edited
+instead.</p>
 </section>
 </section>
 <section id="linux-gcc-linux-gcc">

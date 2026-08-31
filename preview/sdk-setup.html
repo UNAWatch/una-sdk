@@ -275,6 +275,7 @@ make<span class="w"> </span>--version<span class="w"> </span><span class="o">||<
 <p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
 <p>This uses the same <strong>Alarm CMake</strong> example flow as Windows: <strong>copy project → create build dir → configure → build</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copy entire project for simplicity</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>MyAlarm
 cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="nv">$UNA_SDK</span><span class="s2">/Examples/Apps/Alarm/"</span>*<span class="w"> </span>MyAlarm
 
 <span class="c1"># Create build dir</span>
@@ -355,7 +356,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
 <div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Copy entire project for simplicity</span>
 <span class="c"># Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).</span>
-<span class="c"># If you get "Container cannot be copied onto existing leaf item" error, restart PowerShell and try again.</span>
+<span class="n">mkdir</span> <span class="n">MyAlarm</span> <span class="n">-Force</span>
 <span class="nb">cp </span><span class="s2">"${env:UNA_SDK}\Examples\Apps\Alarm\*"</span> <span class="n">MyAlarm</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
 
 <span class="c"># Create build dir</span>
