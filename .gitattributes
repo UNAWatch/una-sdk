@@ -16,3 +16,4 @@
 *.bmp    binary
 *.ico    binary
 *.fig    binary
+*.tpkg   binary
