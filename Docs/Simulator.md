@@ -190,7 +190,7 @@ the other. A mismatch is not caught by a normal build: CI builds the GCC side
 only, so a source missing from the vcxproj first shows up as a link error when
 someone opens the project in Visual Studio. The `MSVS Source Sync` workflow
 compares both lists on every pull request that touches either file. To run the
-same check locally (`python` on Windows):
+same check locally, from the SDK root (`python` on Windows):
 
 ```bash
 python3 .github/scripts/check_msvs_sources.py
@@ -233,7 +233,7 @@ Restore them before committing, so that a local installation path does not trave
 into the repository:
 
 ```bash
-git checkout -- config/
+git checkout -- config/gcc/app.mk config/msvs/Application.props
 ```
 
 `Application.props` keeps `TouchGFXEnvPath` behind a `Condition`, so the committed
