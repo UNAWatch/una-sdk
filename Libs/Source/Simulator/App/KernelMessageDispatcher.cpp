@@ -88,7 +88,6 @@ void KernelMessageDispatcher::appLifeCycleHandler(SDK::MessageBase* msg)
 
         case SDK::MessageType::REQUEST_APP_RUN_GUI: {
             LOG_DEBUG("Service requests GUI launch\n");
-            bool isGuiWasRun = true;
             bool status = true;
             msg->setResult(status ? SDK::MessageResult::SUCCESS : SDK::MessageResult::FAIL);
             mMessageMgr.signalCompletion(msg);
@@ -124,7 +123,7 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 
             const uint32_t limit = std::min(
                 SDK::Message::RequestSystemSettings::skMaxHearRateTh,
-                static_cast<const uint32_t>(HeartRateZones::kMaxThreshold)
+                static_cast<uint32_t>(HeartRateZones::kMaxThreshold)
             );
 
             for (uint32_t i = 0; i < limit; i++) {
@@ -242,7 +241,6 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 
         case SDK::MessageType::REQUEST_GLANCE_UPDATE: {
             LOG_DEBUG("Requests glance update\n");
-            auto* gl = static_cast<SDK::Message::RequestGlanceUpdate*>(msg);
 
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;
