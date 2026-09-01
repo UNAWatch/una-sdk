@@ -72,6 +72,7 @@ Next steps:
    touchgfx-widgets
    figma-ui-kit
    FitFiles-Structure
+   shared-data
 
 .. toctree::
    :maxdepth: 4
