@@ -40,6 +40,7 @@ namespace SDK::Sensor
         HEART_RATE_METRICS_DAILY = 0x00000042, ///< Aggregated metrics for the current day (e.g., AHR, RHR).
         HEART_RATE_METRICS   = HEART_RATE_METRICS_DAILY, /// Legacy alias of HEART_RATE_METRICS_DAILY.
         HEART_RATE_EX        = 0x00000043, ///< Opt-in multi-source HR: arbitrated + source + raw optical + raw external. 7 fields.
+        RR_INTERVAL          = 0x00000044, ///< EXPERIMENTAL (no firmware producer yet; shape may change). Opt-in beat-to-beat R-R interval (ms), one interval per frame. HRV/DFA source.
         /** @} */
 
         /** @name Pedometer

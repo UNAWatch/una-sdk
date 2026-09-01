@@ -50,6 +50,7 @@ add_executable(una-sdk-host-tests
     apps/Running/ActivityWriter_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
+    sensorlayer/RrIntervalParser_test.cpp
     simulator/FileSystemMock_test.cpp
     sensorlayer/GyroscopeParser_test.cpp
     sensorlayer/SensorConnection_test.cpp

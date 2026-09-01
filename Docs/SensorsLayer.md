@@ -23,6 +23,8 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | Cardio | HEART_BEAT | 0x40 | Beat peak event | No | - |
 | Cardio | HEART_RATE | 0x41 | Current heart rate (bpm) | Yes | BPM (float), TRUST_LEVEL (float) - 2 |
 | Cardio | HEART_RATE_METRICS | 0x42 | Aggregated metrics (AHR, RHR) | Yes | AHR (float bpm), RHR (float bpm) - 2 |
+| Cardio | HEART_RATE_EX | 0x43 | Opt-in multi-source HR (arbitrated + source + raw) | Yes | BPM, TRUST, SOURCE, OPTICAL_BPM, OPTICAL_TRUST, EXTERNAL_BPM, EXTERNAL_TRUST (all float) - 7 |
+| Cardio | RR_INTERVAL | 0x44 | Beat-to-beat R-R interval (experimental) | Yes | RR_MS (float ms), SOURCE (u32 enum), FLAGS (u32 bits) - 3 |
 | Pedometer | STEP_DETECTOR | 0x50 | Step event | Yes | STEP_DETECTED (u32=1) - 1 |
 | Pedometer | STEP_COUNTER | 0x51 | Step count since reboot | Yes | STEP_COUNT (u32) - 1 |
 | Pedometer | FLOOR_COUNTER | 0x60 | Floor counter | Yes | FLOORS_UP (i32), FLOORS_DOWN (i32) - 2 |
@@ -155,6 +157,51 @@ As above, `float bpm = p.getBpm(); float trust = p.getTrustLevel();`
 |-------|------|------|------|
 | 0 | AHR | float | bpm |
 | 1 | RHR | float | bpm |
+
+### HEART_RATE_EX (0x43)
+
+**Parser**: `SDK::SensorDataParser::HeartRateEx`
+
+**Fields**:
+| Index | Name | Type | Unit |
+|-------|------|------|------|
+| 0 | BPM | float | bpm (arbitrated; same value as `HEART_RATE`) |
+| 1 | TRUST_LEVEL | float | - |
+| 2 | SOURCE | float | `Source`: 0 unknown, 1 optical, 2 external strap |
+| 3 | OPTICAL_BPM | float | bpm (raw PPG; 0 when absent/stale/off-wrist) |
+| 4 | OPTICAL_TRUST | float | - |
+| 5 | EXTERNAL_BPM | float | bpm (raw strap; 0 when absent/stale) |
+| 6 | EXTERNAL_TRUST | float | - |
+
+Opt-in. Carries the same arbitrated reading as `HEART_RATE` plus which source it
+came from and the raw per-source values, so an app can label records or log
+separate FIT series. Apps that only need BPM should stay on `HEART_RATE`. See
+[External Sensors](ExternalSensors.md) for the source semantics.
+
+### RR_INTERVAL (0x44)
+
+**Parser**: `SDK::SensorDataParser::RrInterval`
+
+**Fields**:
+| Index | Name | Type | Unit |
+|-------|------|------|------|
+| 0 | RR_MS | float | ms |
+| 1 | SOURCE | u32 | `Source`: 0 unknown, 1 optical, 2 external strap, 3 ECG |
+| 2 | FLAGS | u32 | bit0 discontinuity, bit1 artifact-suspect, bit2 no-skin-contact, bit3 detector-stamped |
+
+Experimental and opt-in. Unlike the other cardio types it carries the individual
+beat-to-beat intervals rather than a rate, which is what HRV metrics (RMSSD, SDNN,
+DFA-alpha1) are computed from. Three things make it unlike the frames above: one
+interval per frame, so iterate `DataBatch::size()`; mixed field types, so read `[0]`
+through `.f` and `[1]`/`[2]` through `.u`; and the frame timestamp is the beat
+instant the interval ends on, so continuity is checked with
+`RrInterval::checkContinuity()` rather than by comparing timestamps by hand.
+
+The consumer contract — the timestamp and continuity rules — is in
+`SensorDataParserRrInterval.hpp`. What a producer owes, and the `0x2A37` field layout
+it has to decode, are in [External Sensors](ExternalSensors.md). There is no
+firmware producer yet, so do not ship
+against `0x44` until there is one.
 
 ### STEP_DETECTOR (0x50)
 
