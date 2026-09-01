@@ -358,9 +358,13 @@ function(una_app_build_app)
         )
     endforeach()
 
-    # Final app merging
+    # Final app merging. The merge needs the GUI ELF packed first, so ask whether
+    # one was built rather than whether TouchGFX built it: a CustomGUI app sets no
+    # TOUCHGFX_PATH, and keying on that left app_merging.py racing the packer.
+    # TOUCHGFX_PATH stays for apps calling this before una_app_build_gui(), where
+    # the target does not exist yet and DEPENDS resolves at generate time.
     set(APP_DEPENDS ${APP_NAME}Service.elf)
-    if(DEFINED TOUCHGFX_PATH)
+    if(TARGET ${APP_NAME}GUI.elf OR DEFINED TOUCHGFX_PATH)
         list(APPEND APP_DEPENDS ${APP_NAME}GUI.elf)
     endif()
     set(APP_AUTOSTART_FLAG "")
