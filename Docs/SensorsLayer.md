@@ -19,7 +19,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | IMU | ACCELEROMETER_RAW | 0x11 | Acceleration raw | Yes | X,Y,Z (int16 raw) - 3 |
 | IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | Yes | X,Y,Z (float) - 3 |
 | IMU | GYROSCOPE_RAW | 0x21 | Angular rate raw | Yes | X,Y,Z (int16 raw) - 3 |
-| IMU | MAGNETIC_FIELD | 0x30 | Magnetic field, corrected | Yes | X,Y,Z (float uT), CALIBRATED (u32) - 4 |
+| IMU | MAGNETIC_FIELD | 0x30 | Magnetic field; corrected only when CALIBRATED | Yes | X,Y,Z (float uT), CALIBRATED (u32) - 4 |
 | IMU | MAGNETIC_FIELD_RAW | 0x31 | Magnetic field, as measured | Yes | X,Y,Z (float uT) - 3 |
 | Cardio | HEART_BEAT | 0x40 | Beat peak event | No | - |
 | Cardio | HEART_RATE | 0x41 | Current heart rate (bpm) | Yes | BPM (float), TRUST_LEVEL (float) - 2 |
