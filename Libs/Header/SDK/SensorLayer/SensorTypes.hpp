@@ -29,7 +29,8 @@ namespace SDK::Sensor
         GYROSCOPE            = 0x00000020, ///< Angular rate (3-axis).
         GYROSCOPE_RAW        = 0x00000021, ///< Angular rate raw samples.
 
-        MAGNETIC_FIELD       = 0x00000030, ///< Magnetic field (3-axis).
+        MAGNETIC_FIELD       = 0x00000030, ///< Magnetic field (3-axis), hard- and soft-iron corrected, plus a calibrated flag.
+        MAGNETIC_FIELD_RAW   = 0x00000031, ///< Magnetic field (3-axis) exactly as measured, with no correction applied.
         /** @} */
 
         /** @name Cardio sensors
