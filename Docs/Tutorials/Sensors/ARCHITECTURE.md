@@ -20,7 +20,7 @@ In this tutorial, we implement a sensors dashboard app that subscribes to availa
 | Accelerometer | X/Y/Z G-forces | connect(0.1f, 0); sender throttled ~100ms |
 | Step Counter | Total steps | Cumulative |
 | Floor Counter | Floors ascended | Cumulative; parser.getFloorsUp() |
-| Magnetometer | X/Y/Z fields (for compass) | Heading computed from X/Y fields |
+| Magnetometer | X/Y/Z fields + calibrated flag | Bearing from parser.getAzimuthDeg(); valid only when calibrated |
 | RTC | Time (sec since boot) | From kernel sys.getTimeMs()/1000; not sensor |
 
 ## Architecture Overview
@@ -161,7 +161,7 @@ if (mSensorHR.matchesDriver(handle)) {
 // Accel:            if (nowMs - mLastAccTimeMs >= 100) SDK::send_msg<CustomMessage::AccelerometerValues>(mKernel, ts, x, y, z);
 // Steps:            SDK::send_msg<CustomMessage::StepCounterValues>(mKernel, ts, parser.getStepCount());
 // Floors:           SDK::send_msg<CustomMessage::FloorsValues>(mKernel, ts, parser.getFloorsUp());
-// Compass:          compute heading from magnetic X/Y fields, then SDK::send_msg<CustomMessage::CompassValues>(mKernel, ts, heading);
+// Compass:          if (parser.isAzimuthValid()) SDK::send_msg<CustomMessage::CompassValues>(mKernel, ts, parser.getAzimuthDeg());
 ```
 
 Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with

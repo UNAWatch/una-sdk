@@ -19,7 +19,8 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | IMU | ACCELEROMETER_RAW | 0x11 | Acceleration raw | Yes | X,Y,Z (int16 raw) - 3 |
 | IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | Yes | X,Y,Z (float) - 3 |
 | IMU | GYROSCOPE_RAW | 0x21 | Angular rate raw | Yes | X,Y,Z (int16 raw) - 3 |
-| IMU | MAGNETIC_FIELD | 0x30 | Magnetic field (3-axis) | No | - |
+| IMU | MAGNETIC_FIELD | 0x30 | Magnetic field; corrected only when CALIBRATED | Yes | X,Y,Z (float uT), CALIBRATED (u32) - 4 |
+| IMU | MAGNETIC_FIELD_RAW | 0x31 | Magnetic field, as measured | Yes | X,Y,Z (float uT) - 3 |
 | Cardio | HEART_BEAT | 0x40 | Beat peak event | No | - |
 | Cardio | HEART_RATE | 0x41 | Current heart rate (bpm) | Yes | BPM (float), TRUST_LEVEL (float) - 2 |
 | Cardio | HEART_RATE_METRICS | 0x42 | Aggregated metrics (AHR, RHR) | Yes | AHR (float bpm), RHR (float bpm) - 2 |
@@ -132,6 +133,69 @@ void processBatch(uint16_t handle, SDK::Sensor::DataBatch& batch) {
 
 **Code Snippet**:
 Similar, `int16_t x = p.getX();` etc.
+
+### MAGNETIC_FIELD (0x30)
+
+**Parser**: `SDK::SensorDataParser::MagneticField`
+
+**Fields**:
+| Index | Name | Type | Unit |
+|-------|------|------|------|
+| 0 | MAG_X | float | uT |
+| 1 | MAG_Y | float | uT |
+| 2 | MAG_Z | float | uT |
+| 3 | MAG_CALIBRATED | u32 | 1 when a correction was applied |
+
+The field is reported in the watch's own axes with whatever hard- and
+soft-iron correction is in force. A watch that has never been calibrated
+still produces samples, and `MAG_CALIBRATED` is how you tell: they carry the
+part's own offsets, which is what a calibration is worked out from and not
+something to take a direction from.
+
+The parser also derives a compass bearing, since that is a function of one
+sample and nothing else. It is degrees clockwise from **magnetic** north - no
+declination is applied - and `getAzimuthDeg()` means nothing unless
+`isAzimuthValid()`.
+
+**Code Snippet**:
+```cpp
+SDK::Sensor::Connection conn(SDK::Sensor::Type::MAGNETIC_FIELD, 0.1f);
+conn.connect();
+
+void processBatch(uint16_t handle, SDK::Sensor::DataBatch& batch) {
+    if (conn.matchesDriver(handle)) {
+        for (uint16_t i = 0; i < batch.size(); ++i) {
+            SDK::SensorDataParser::MagneticField p(batch[i]);
+            if (p.isAzimuthValid()) {
+                float bearing = p.getAzimuthDeg();
+                // Level only. See below for a tilted watch.
+            }
+        }
+    }
+}
+```
+
+`getAzimuthDeg()` assumes the watch is held roughly level. To compensate for
+how it is actually being held, pass gravity in - read it from the
+accelerometer wherever you already read it:
+
+```cpp
+float bearing = 0.0f;
+if (p.getAzimuthDegTilted(ax, ay, az, bearing)) {
+    // Same arithmetic, so a level watch reads the same either way.
+}
+```
+
+### MAGNETIC_FIELD_RAW (0x31)
+
+**Parser**: `SDK::SensorDataParser::MagneticFieldRaw`
+
+**Fields**: X/Y/Z (float uT), the field exactly as measured
+
+No correction is applied and no bearing is offered: a direction taken from an
+uncorrected field is wrong by however far the part's own offsets push it. This
+is what a calibration is derived from, and what shows how large those offsets
+are.
 
 ### HEART_RATE (0x41)
 
@@ -281,10 +345,10 @@ Blood-oxygen saturation derived from the optical PPG path. Delivered as a proces
 
 **Fields**: TOUCH (bool)
 
-For sensors without parsers (e.g. MAGNETIC_FIELD), use DataView:
+For sensors without parsers (e.g. HEART_BEAT), use DataView:
 ```cpp
 SDK::Sensor::DataView view = batch[0];
-float magX = view.f[0]; // Assume layout known from driver docs
+float value = view.f[0]; // Assume layout known from driver docs
 ```
 
 ## Workflow Diagram

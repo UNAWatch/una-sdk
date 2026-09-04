@@ -5,6 +5,7 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserStepCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserFloorCounter.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserBatteryLevel.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserMagneticField.hpp"
 #include "SDK/SensorLayer/SensorDataView.hpp"
 #include "SDK/Messages/SensorLayerMessages.hpp"
 #include "SDK/Messages/MessageGuard.hpp"
@@ -17,10 +18,6 @@
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
 #include "SDK/UnaLogger/Logger.h"
-
-#ifndef M_PI
-#define M_PI    3.14159265358979323846264338327950288   /* pi */
-#endif
 
 Service::Service(SDK::Kernel& kernel)
     : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
@@ -349,18 +346,21 @@ void Service::onSdlNewData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 mTxBytes += sizeof(CustomMessage::FloorsValues);
             }
         } else if (mSensorMagneticField.matchesDriver(handle)) {
-            SDK::Sensor::DataView view(data[0]);
-            float x = view.f[0];
-            float y = view.f[1];
-            float heading = atan2f(y, x) * (180.0f / M_PI);
-            if (heading < 0.0f) heading += 360.0f;
-            auto nowMs = mKernel.sys.getTimeMs();
-            if (nowMs - mLastMagTimeMs >= 100) {
-                // LOG_DEBUG("Compass: %.1f deg (X:%.2f Y:%.2f)\n", heading, x, y);
-                mTxMessages++;
-                SDK::send_msg<CustomMessage::CompassValues>(mKernel, nowMs, heading);
-                mTxBytes += sizeof(CustomMessage::CompassValues);
-                mLastMagTimeMs = nowMs;
+            SDK::SensorDataParser::MagneticField parser(data[0]);
+            // The parser gives the bearing, and says when it cannot: without a
+            // calibration the field still carries the watch's own offsets, and
+            // a direction taken from it is simply wrong. Working the angle out
+            // by hand from X and Y skips that check and answers anyway.
+            if (parser.isAzimuthValid()) {
+                float heading = parser.getAzimuthDeg();
+                auto nowMs = mKernel.sys.getTimeMs();
+                if (nowMs - mLastMagTimeMs >= 100) {
+                    // LOG_DEBUG("Compass: %.1f deg\n", heading);
+                    mTxMessages++;
+                    SDK::send_msg<CustomMessage::CompassValues>(mKernel, nowMs, heading);
+                    mTxBytes += sizeof(CustomMessage::CompassValues);
+                    mLastMagTimeMs = nowMs;
+                }
             }
         } else if (mSensorBattery.matchesDriver(handle)) {
             SDK::SensorDataParser::BatteryLevel parser(data[0]);
