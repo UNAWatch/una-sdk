@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <cstdint>
 #include <cstddef>
+#include <new>
 #include <atomic>
 #include <cstdlib>
 #include <cassert>
@@ -461,6 +462,34 @@ void operator delete(void* ptr, std::size_t) noexcept
  * @note    Marked @c noexcept to match freestanding constraints.
  */
 void operator delete[](void* ptr, std::size_t) noexcept
+{
+    operator delete[](ptr);
+}
+
+/**
+ * Replaces libstdc++'s nothrow forms, whose try/catch pulls the exception
+ * runtime and ARM unwinder into a -fno-exceptions app: one app's GUI blob
+ * carried 152 more symbols and 9,356 more bytes of .text with them, though an
+ * app that also links std::string keeps the runtime regardless. Re-measure by
+ * deleting these four and rebuilding an app that reaches new(std::nothrow),
+ * such as Examples/Apps/Running.
+ */
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept
+{
+    return operator new(size);
+}
+
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
+{
+    return operator new[](size);
+}
+
+void operator delete(void* ptr, const std::nothrow_t&) noexcept
+{
+    operator delete(ptr);
+}
+
+void operator delete[](void* ptr, const std::nothrow_t&) noexcept
 {
     operator delete[](ptr);
 }
