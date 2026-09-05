@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <cstdint>
 #include <cstddef>
+#include <new>
 #include <atomic>
 #include <cstdlib>
 #include <cassert>
@@ -461,6 +462,52 @@ void operator delete(void* ptr, std::size_t) noexcept
  * @note    Marked @c noexcept to match freestanding constraints.
  */
 void operator delete[](void* ptr, std::size_t) noexcept
+{
+    operator delete[](ptr);
+}
+
+/**
+ * @brief   Nothrow new forwarding to @ref operator new.
+ * @param   size Number of bytes to allocate.
+ * @return  Pointer to allocated memory; @c nullptr on failure.
+ * @note    Supplied so the link does not take libstdc++'s version, whose
+ *          try/catch body pulls the exception runtime and ARM unwinder into a
+ *          @c -fno-exceptions app. To re-measure: delete these four and rebuild
+ *          any app reaching @c new(std::nothrow), such as
+ *          @c Examples/Apps/Running, and both come back. One app's GUI blob
+ *          carried 152 further symbols and 9,356 more bytes of @c .text that
+ *          way, but the size is per-app: one that also links @c std::string
+ *          keeps the runtime regardless.
+ */
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept
+{
+    return operator new(size);
+}
+
+/**
+ * @brief   Nothrow array new forwarding to @ref operator new[].
+ * @param   size Number of bytes to allocate.
+ * @return  Pointer to allocated memory; @c nullptr on failure.
+ */
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
+{
+    return operator new[](size);
+}
+
+/**
+ * @brief   Nothrow delete forwarding to @ref operator delete.
+ * @param   ptr Pointer to memory to be freed (nullable).
+ */
+void operator delete(void* ptr, const std::nothrow_t&) noexcept
+{
+    operator delete(ptr);
+}
+
+/**
+ * @brief   Nothrow array delete forwarding to @ref operator delete[].
+ * @param   ptr Pointer to memory to be freed (nullable).
+ */
+void operator delete[](void* ptr, const std::nothrow_t&) noexcept
 {
     operator delete[](ptr);
 }
