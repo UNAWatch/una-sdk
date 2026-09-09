@@ -64,6 +64,7 @@ Next steps:
    :hidden:
 
    sdk-overview
+   service-lifecycle
    SensorsLayer
    architecture-deep-dive
    development-workflow

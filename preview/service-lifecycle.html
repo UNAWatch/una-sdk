@@ -1,0 +1,1208 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Lifecycle &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sensor Layer" href="SensorsLayer.html" />
+    <link rel="prev" title="SDK Overview" href="sdk-overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Service Lifecycle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#revision-history">Revision History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overview">1. Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#promised-and-not-promised">1.1 Promised, and not promised</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#who-needs-this">1.2 Who needs this</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-two-processes">2. The two processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#starting-a-service">3. Starting a service</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#on-demand">3.1 On demand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#autostart">3.2 Autostart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-glances-screen">3.3 The glances screen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#what-a-resident-service-gets">4. What a resident service gets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-still-arrives">4.1 What still arrives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-paces-a-resident-service-nothing">4.2 What paces a resident service — nothing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ending-a-service">5. Ending a service</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-two-ways-out">5.1 The two ways out</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#guard-every-exit-against-startup">5.2 Guard every exit against startup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-asymmetry-that-catches-people">5.3 The asymmetry that catches people</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-patterns-in-the-examples">5.4 The patterns in the examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui-focus-suspend-and-resume">6. GUI focus: suspend and resume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-ends-an-app-whatever-it-wants">7. What ends an app whatever it wants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#memory-and-what-happens-when-it-runs-out">8. Memory, and what happens when it runs out</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choosing-a-design">9. Choosing a design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#behaviour-not-to-rely-on">10. Behaviour not to rely on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#checklist">11. Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">12. See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Service Lifecycle</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/service-lifecycle.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="service-lifecycle">
+<h1>Service Lifecycle<a class="headerlink" href="#service-lifecycle" title="Link to this heading"></a></h1>
+<section id="revision-history">
+<h2>Revision History<a class="headerlink" href="#revision-history" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Revision</p></th>
+<th class="head"><p>Date of Changes</p></th>
+<th class="head"><p>Matter of Change</p></th>
+<th class="head"><p>Note</p></th>
+<th class="head"><p>Editor</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.00</p></td>
+<td><p>09.09.2026</p></td>
+<td><p>Creating: the two-process model, how a service is started, what a resident service receives, how a service must end itself, GUI focus versus the display, and the conditions that stop an app</p></td>
+<td><p></p></td>
+<td><p>Ross Ryles</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="overview">
+<h2>1. Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Every <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> is <strong>two processes</strong>: a <em>service</em> that holds the app’s logic and state, and a
+<em>GUI</em> that draws it. They have <strong>independent lifetimes</strong>, and that makes a <strong>resident
+service</strong> — one that keeps state moving while nothing is on screen — a supported design.</p>
+<p>The two things to take from this document:</p>
+<blockquote>
+<div><p><strong>A service is not stopped because its GUI closed, and it is not stopped for being idle.</strong>
+<strong>Nothing wakes a service because time has passed.</strong></p>
+</div></blockquote>
+<p>The first is why a resident service works. The second is why it is your job to pace it, and
+why <strong>ending the service is your responsibility</strong>.</p>
+<section id="promised-and-not-promised">
+<h3>1.1 Promised, and not promised<a class="headerlink" href="#promised-and-not-promised" title="Link to this heading"></a></h3>
+<p>An app that relies only on the left column keeps working. The right column is how the
+current kernel happens to behave; it is not a promise, and a later release may change it.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Promised</p></th>
+<th class="head"><p>Not promised</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Your service is not stopped when its GUI closes; it receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code></p></td>
+<td><p>That an idle service is never reclaimed. Do not rely on being allowed to stay resident with nothing to do</p></td>
+</tr>
+<tr class="row-odd"><td><p>Your service’s sensor subscriptions survive its GUI closing</p></td>
+<td><p>That a service exceeding its resource budget is left alone</p></td>
+</tr>
+<tr class="row-even"><td><p>Your service keeps receiving what it subscribed to, and messages from its own GUI</p></td>
+<td><p>That any particular message arrives periodically — including any not listed in section 4.1</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> is delivered before an orderly teardown, and you get a grace period to act on it</p></td>
+<td><p>That every teardown is orderly. A reboot or power loss gives no notice at all</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code> starts your service, and only your service, without a GUI</p></td>
+<td><p>Any particular ordering, timing or count of autostarted services</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="who-needs-this">
+<h3>1.2 Who needs this<a class="headerlink" href="#who-needs-this" title="Link to this heading"></a></h3>
+<p>Read it if your app is any of these:</p>
+<ul class="simple">
+<li><p>state must keep moving with nobody looking — an alarm, a timer, a long-running count;</p></li>
+<li><p>something must <em>happen</em> at a time, not merely be <em>known</em> about at a time;</p></li>
+<li><p>the app is started with <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span> <span class="pre">On</span></code>;</p></li>
+<li><p>the app is a <code class="docutils literal notranslate"><span class="pre">Glance</span></code>, whose service runs with no GUI at all;</p></li>
+<li><p>the service holds a sensor subscription that should outlive a screen.</p></li>
+</ul>
+<p>If your app only needs to show the right answer whenever the user opens it, you very likely
+do <strong>not</strong> need a resident service. See section 9.</p>
+</section>
+</section>
+<section id="the-two-processes">
+<h2>2. The two processes<a class="headerlink" href="#the-two-processes" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Service</p></th>
+<th class="head"><p>GUI</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Purpose</p></td>
+<td><p>logic, state, sensors, files</p></td>
+<td><p>drawing, buttons</p></td>
+</tr>
+<tr class="row-odd"><td><p>Started by</p></td>
+<td><p>the user opening the app; <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>; the glances screen</p></td>
+<td><p>the user opening the app; the service’s own <code class="docutils literal notranslate"><span class="pre">REQUEST_APP_RUN_GUI</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Started when the other is not</p></td>
+<td><p>yes — routinely</p></td>
+<td><p>no — the service is always started first</p></td>
+</tr>
+<tr class="row-odd"><td><p>Paced by</p></td>
+<td><p><strong>nothing</strong> (see section 4.2)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>, while it is on screen</p></td>
+</tr>
+<tr class="row-even"><td><p>Ended by</p></td>
+<td><p>returning from <code class="docutils literal notranslate"><span class="pre">run()</span></code>; <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code>; the whole app being torn down</p></td>
+<td><p>returning from <code class="docutils literal notranslate"><span class="pre">run()</span></code> / <code class="docutils literal notranslate"><span class="pre">sys.exit()</span></code>; the service exiting; the whole app being torn down</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ended by the user navigating away</p></td>
+<td><p>no</p></td>
+<td><p><strong>no — it is suspended, not ended.</strong> See section 6</p></td>
+</tr>
+</tbody>
+</table>
+<p>The service is started first, always: no path starts a GUI without its service.</p>
+<pre  class="mermaid">
+        stateDiagram-v2
+    [*] --&gt; ServiceRunning : user opens the app / APP_AUTOSTART / glances screen
+    ServiceRunning --&gt; SrvAndGui : GUI loaded (launch, or REQUEST_APP_RUN_GUI)
+    SrvAndGui --&gt; OnScreen : COMMAND_APP_GUI_RESUME
+    OnScreen --&gt; SrvAndGui : COMMAND_APP_GUI_SUSPEND (user navigated away)
+    SrvAndGui --&gt; ServiceRunning : the GUI exits — service gets COMMAND_APP_NOTIF_GUI_STOP
+    ServiceRunning --&gt; [*] : the service returns from run()
+    OnScreen --&gt; [*] : COMMAND_APP_STOP, or the service exits
+    note right of ServiceRunning
+        A resident service. Nothing here
+        times out today. Leaving this state
+        is the app's own decision.
+    end note
+    note right of SrvAndGui
+        Loaded but off screen. The GUI is
+        NOT unloaded here and gets no ticks.
+    end note
+    </pre></section>
+<section id="starting-a-service">
+<h2>3. Starting a service<a class="headerlink" href="#starting-a-service" title="Link to this heading"></a></h2>
+<section id="on-demand">
+<h3>3.1 On demand<a class="headerlink" href="#on-demand" title="Link to this heading"></a></h3>
+<p>The ordinary case. The user picks the app; the service is loaded and started, then the GUI.
+Once the GUI process has been <strong>loaded</strong> — before it has drawn anything or come on screen —
+the service receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>. That is your cue to send it the current
+state, because a freshly loaded GUI knows nothing.</p>
+<p>Note the order: <strong>there is a window on every single launch during which the service is
+running and the GUI is not.</strong> Any “no GUI, so nobody wants me” exit test must be guarded
+against that window — see section 5.2.</p>
+</section>
+<section id="autostart">
+<h3>3.2 Autostart<a class="headerlink" href="#autostart" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span> <span class="pre">On</span></code> in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> (see <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">sdk-setup.md</span></a>) sets a bit in the
+packed header. The watch reads it and <strong>starts the app’s service — and only the service —</strong>
+at boot, after it has scanned the installed apps, and again on leaving USB mass-storage mode.
+No user action, no GUI, nothing on screen.</p>
+<p>This is the sanctioned form of a resident service. The service runs from boot until it
+returns or one of the conditions in section 7 occurs.</p>
+<p>When such a service needs the user, it asks for its own GUI:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">allocateMessage</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestAppRunGui</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span><span class="w">      </span><span class="c1">// fire-and-forget: the default timeout is 0</span>
+<span class="w">    </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="c1">// Do NOT assume the GUI is usable here. Wait for COMMAND_APP_NOTIF_GUI_RUN, which is the</span>
+<span class="c1">// authoritative signal, and send the GUI its state from that branch.</span>
+</pre></div>
+</div>
+<p>The watch both loads the GUI <strong>and brings it to the screen</strong>, so this is how a background
+service takes the display. Whichever app was on screen is suspended.
+<a class="reference internal" href="Examples/Alarm-Architecture.html"><span class="std std-doc">Alarm</span></a> is the worked example.</p>
+<p>Note the timeout: <code class="docutils literal notranslate"><span class="pre">sendMessage(msg)</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">timeoutMs</span> <span class="pre">=</span> <span class="pre">0</span></code>, which sends without waiting
+and leaves <code class="docutils literal notranslate"><span class="pre">getResult()</span></code> unfilled. Passing a non-zero timeout makes the call block until the
+watch has answered, after which <code class="docutils literal notranslate"><span class="pre">getResult()</span></code> is <code class="docutils literal notranslate"><span class="pre">SUCCESS</span></code>, <code class="docutils literal notranslate"><span class="pre">FAIL</span></code> or <code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code>. Either is
+valid, but even <code class="docutils literal notranslate"><span class="pre">SUCCESS</span></code> only means the GUI process was loaded — treat
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> as the point from which you may talk to it.</p>
+<p>Two limits worth knowing:</p>
+<ul class="simple">
+<li><p>A <strong>variant alias</strong> cannot autostart. The autostart bit is cleared when an alias is
+resolved, so a code-less alias of an autostart app is not itself autostarted.</p></li>
+<li><p>Autostart is not <em>required</em> for residency. Any app started normally may stay resident after
+its GUI closes; <a class="reference internal" href="Examples/Stopwatch-Architecture.html"><span class="std std-doc">Stopwatch</span></a> does exactly that. Autostart
+is specifically about running <strong>before and without</strong> any GUI.</p></li>
+</ul>
+</section>
+<section id="the-glances-screen">
+<h3>3.3 The glances screen<a class="headerlink" href="#the-glances-screen" title="Link to this heading"></a></h3>
+<p>For an app whose <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code> is <code class="docutils literal notranslate"><span class="pre">Glance</span></code>, opening the glances screen starts the <strong>service</strong>
+and never the GUI. The service then receives:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Message</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GLANCE_START</span></code></p></td>
+<td><p>your glance is on screen — configure it and subscribe</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GLANCE_TICK</span></code></p></td>
+<td><p>periodic, while your glance is on screen</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GLANCE_STOP</span></code></p></td>
+<td><p>your glance is off screen</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">EVENT_GLANCE_STOP</span></code> <strong>does not unload you.</strong> It is a notification, and what it means for
+your app is your decision. Exiting is the usual and expected answer — see
+<a class="reference internal" href="Examples/GlanceHR-Architecture.html"><span class="std std-doc">GlanceHR</span></a>, which disconnects its sensors and returns. A
+glance that deliberately keeps a subscription running is a legitimate choice, but then
+nothing else will ask it to stop.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">Glance</span></code> for an app whose service should be started for the glances screen.
+Do not rely on <code class="docutils literal notranslate"><span class="pre">APP_GLANCE_INTF</span></code> alone to achieve it, and do not assume that an app of
+another type will be left alone by the glances screen on every kernel version — see
+section 10.</p>
+</section>
+</section>
+<section id="what-a-resident-service-gets">
+<h2>4. What a resident service gets<a class="headerlink" href="#what-a-resident-service-gets" title="Link to this heading"></a></h2>
+<p>“Resident” here means the service is running and no GUI of its own is loaded — after
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, or from boot under <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>.</p>
+<section id="what-still-arrives">
+<h3>4.1 What still arrives<a class="headerlink" href="#what-still-arrives" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>Still delivered while resident?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Sensor data you subscribed to (<code class="docutils literal notranslate"><span class="pre">EVENT_SENSOR_LAYER_DATA</span></code>)</p></td>
+<td><p><strong>Yes — at the rate you asked for, ungated</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Accessory / external-sensor events</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Your own custom messages from your GUI</p></td>
+<td><p>Yes, when a GUI exists</p></td>
+</tr>
+<tr class="row-odd"><td><p>Lifecycle commands (<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> / <code class="docutils literal notranslate"><span class="pre">_GUI_STOP</span></code>, <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code>)</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code></p></td>
+<td><p>Never — that goes to the GUI process, and only while it is on screen</p></td>
+</tr>
+<tr class="row-odd"><td><p>A periodic wake-up of your own</p></td>
+<td><p><strong>No. Nothing paces a service</strong></p></td>
+</tr>
+</tbody>
+</table>
+<p>Sensor subscriptions belong to the <em>process</em>, not to the screen. A service subscription is
+untouched when the GUI closes, and samples keep arriving at the rate you asked for.</p>
+<blockquote>
+<div><p><strong>Read that as a responsibility, not a licence.</strong> A resident service holding a GPS or
+heart-rate subscription keeps that sensor powered and duty-cycled with nothing on screen.
+Disconnect what you no longer need — a resident service should hold the <em>cheapest</em>
+subscription that still does its job, or none at all.</p>
+</div></blockquote>
+<p><strong>Handle only the message types you asked for, and ignore the rest.</strong> Your service may be
+handed messages this table does not list, and which types those are is not part of the
+contract. A <code class="docutils literal notranslate"><span class="pre">default:</span></code> branch that ignores unknown types — and still releases them — is the
+only forward-compatible shape. Never treat an unrequested message as a clock.</p>
+</section>
+<section id="what-paces-a-resident-service-nothing">
+<h3>4.2 What paces a resident service — nothing<a class="headerlink" href="#what-paces-a-resident-service-nothing" title="Link to this heading"></a></h3>
+<p>There is no periodic message you can rely on, and <strong>time passing is not an event</strong>. Never
+build on an unbounded wait for work that is due at a time:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Correct only for a service that genuinely has nothing to do between messages.</span>
+<span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">);</span><span class="w">   </span><span class="c1">// may block for the life of the app</span>
+</pre></div>
+</div>
+<p>Blocking like that is what lets the chip reach its low-power state with your service still
+resident, so it is the right choice for a service driven purely by events. It is the wrong
+choice the moment something must happen on the clock.</p>
+<p>Use a <strong>bounded wait</strong> and do time-driven work in the timeout branch:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">kTickMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w">   </span><span class="c1">// your pacing choice — see the note below</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Service::run</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">Timer</span><span class="w"> </span><span class="n">guiInitTimeout</span><span class="p">(</span><span class="n">TIMER_SECONDS</span><span class="p">(</span><span class="mi">5</span><span class="p">));</span><span class="w">    </span><span class="c1">// the startup grace, see section 5.2</span>
+<span class="w">    </span><span class="n">guiInitTimeout</span><span class="p">.</span><span class="n">start</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">kTickMs</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_STOP</span><span class="p">:</span>
+<span class="w">                    </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">                    </span><span class="k">return</span><span class="p">;</span><span class="w">                                  </span><span class="c1">// release, then leave</span>
+
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_NOTIF_GUI_RUN</span><span class="p">:</span>
+<span class="w">                    </span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">publish</span><span class="p">();</span><span class="w">                               </span><span class="c1">// a new GUI knows nothing</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_NOTIF_GUI_STOP</span><span class="p">:</span>
+<span class="w">                    </span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">                </span><span class="k">default</span><span class="o">:</span>
+<span class="w">                    </span><span class="n">handle</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span><span class="w">                             </span><span class="c1">// must ignore unknown types</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">releaseMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Timed out: no message arrived. Time-driven work goes here.</span>
+<span class="w">            </span><span class="n">advance</span><span class="p">(</span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">());</span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">guiInitTimeout</span><span class="p">.</span><span class="n">expired</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">hasWorkOutstanding</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">LOG_INFO</span><span class="p">(</span><span class="s">"Nothing to do and no GUI, exiting service</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Two rules for the time-driven part:</p>
+<ul class="simple">
+<li><p><strong>Derive elapsed time from <code class="docutils literal notranslate"><span class="pre">sys.getTimeMs()</span></code>; never accumulate it.</strong> <code class="docutils literal notranslate"><span class="pre">getTimeMs()</span></code> is
+milliseconds since boot and moves monotonically whether or not your loop woke up on
+schedule. Counting your own wake-ups drifts, and drifts worst exactly when the system is
+busy.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">kTickMs</span></code> is a power decision.</strong> It is a wake-up every <code class="docutils literal notranslate"><span class="pre">kTickMs</span></code> for as long as your
+service is resident. Pick the longest period that meets your requirement, and prefer having
+a period at all only if something must <em>happen</em>; if the answer merely has to be correct
+when read, compute it on demand instead.</p></li>
+</ul>
+</section>
+</section>
+<section id="ending-a-service">
+<h2>5. Ending a service<a class="headerlink" href="#ending-a-service" title="Link to this heading"></a></h2>
+<section id="the-two-ways-out">
+<h3>5.1 The two ways out<a class="headerlink" href="#the-two-ways-out" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Return from <code class="docutils literal notranslate"><span class="pre">run()</span></code></strong> (or call <code class="docutils literal notranslate"><span class="pre">sys.exit()</span></code>). This is the app deciding it is done.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code></strong> — the watch tearing the app down. Release the message, free what
+you hold, and return.</p></li>
+</ol>
+<p>Act on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> promptly. The watch waits a grace period for your service to
+acknowledge it by exiting, and <strong>force-terminates the thread if you do not</strong> — which can
+strand resources you were holding. Note also that pending messages are discarded before
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> is delivered, so do not expect to drain a backlog first.</p>
+<blockquote>
+<div><p><strong>Write the exit condition before anything else.</strong> Nothing in the current kernel ends an
+idle service — there is no idle timeout — so a service with no reachable path out of
+<code class="docutils literal notranslate"><span class="pre">run()</span></code> stays until the watch reboots. Do not read that as permission: an app that can
+always exit on its own is the only shape guaranteed to keep working, and a later kernel may
+reclaim a service that never exits or outstays its resource budget.</p>
+</div></blockquote>
+</section>
+<section id="guard-every-exit-against-startup">
+<h3>5.2 Guard every exit against startup<a class="headerlink" href="#guard-every-exit-against-startup" title="Link to this heading"></a></h3>
+<p>The service starts <em>before</em> the GUI on every normal launch, so “no GUI has started” is
+briefly true every single time. An unguarded <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(!mGuiStarted)</span> <span class="pre">return;</span></code> exits during launch
+and the app appears to fail to open. Every example that exits on its own therefore uses a
+startup grace — the activity examples with
+<a class="reference download internal" download="" href="_downloads/10e08072c579a7085af0b4b13ef6d582/Timer.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Timer</span></code></span></a> as shown in section 4.2, Alarm and Timer
+with plain <code class="docutils literal notranslate"><span class="pre">getTimeMs()</span></code> arithmetic. Either is fine.</p>
+<p>Three conditions, all load-bearing: the GUI is not up, the launch window has passed, and your
+own work is finished. Drop any one and you get either a service that exits mid-launch or one
+that never exits at all.</p>
+</section>
+<section id="the-asymmetry-that-catches-people">
+<h3>5.3 The asymmetry that catches people<a class="headerlink" href="#the-asymmetry-that-catches-people" title="Link to this heading"></a></h3>
+<p>Which process exits determines what happens to the other:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>The process that exits</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>The <strong>GUI</strong> returns from <code class="docutils literal notranslate"><span class="pre">run()</span></code></p></td>
+<td><p>The GUI is unloaded. The <strong>service keeps running</strong> and receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>The <strong>service</strong> returns from <code class="docutils literal notranslate"><span class="pre">run()</span></code></p></td>
+<td><p>The <strong>whole app goes</strong>, GUI included.</p></td>
+</tr>
+</tbody>
+</table>
+<p>So a service must not return from <code class="docutils literal notranslate"><span class="pre">run()</span></code> as a way of going quiet while its GUI is loaded: it
+takes the GUI with it. Worse, the GUI is unloaded <strong>without notice</strong> on this path — it does
+not receive <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> and its <code class="docutils literal notranslate"><span class="pre">onStop()</span></code> does not run, so anything it would do on
+the way out is simply lost. Every example checks that the GUI is gone before releasing
+itself.</p>
+<p>That is why the only sound places for a service’s exit test are the
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> branch and the timeout branch.</p>
+</section>
+<section id="the-patterns-in-the-examples">
+<h3>5.4 The patterns in the examples<a class="headerlink" href="#the-patterns-in-the-examples" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Example</p></th>
+<th class="head"><p>Wait</p></th>
+<th class="head"><p>Exits when</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="Examples/Alarm-Architecture.html"><span class="std std-doc">Alarm</span></a></p></td>
+<td><p>bounded</p></td>
+<td><p>after a 5 s grace, no GUI started and no active alarms</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="Examples/Timer-Architecture.html"><span class="std std-doc">Timer</span></a></p></td>
+<td><p>bounded</p></td>
+<td><p>after a startup grace, idle and the GUI closed</p></td>
+</tr>
+<tr class="row-even"><td><p>Activity apps (<a class="reference internal" href="Examples/Running-Architecture.html"><span class="std std-doc">Running</span></a>, <a class="reference internal" href="Examples/Cycling-Architecture.html"><span class="std std-doc">Cycling</span></a>, …)</p></td>
+<td><p>bounded</p></td>
+<td><p>after a 5 s grace, no GUI started</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="Examples/GlanceHR-Architecture.html"><span class="std std-doc">GlanceHR</span></a></p></td>
+<td><p>unbounded</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GLANCE_STOP</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="Examples/Stopwatch-Architecture.html"><span class="std std-doc">Stopwatch</span></a></p></td>
+<td><p>unbounded</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> <strong>and</strong> the clock is not running</p></td>
+</tr>
+</tbody>
+</table>
+<p>Read the activity apps’ condition precisely: the exit is guarded on the GUI never having
+started, <strong>not</strong> on whether an activity is in progress. A recording activity is safe only
+because its GUI does not exit mid-activity. If you copy that pattern into an app whose GUI
+can close while work is outstanding, add the <code class="docutils literal notranslate"><span class="pre">hasWorkOutstanding()</span></code> term yourself.</p>
+<p>Stopwatch is the one to copy for <em>state that outlives the screen</em>: while the clock is running
+it stays resident, and it hands a returning GUI its state on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>. It
+assumes throughout that it is launched together with its GUI, and its only self-exit is
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> — so if your app can be started without a GUI, do not copy its
+unbounded wait. Take an exit condition that cannot depend on a message that may never arrive.</p>
+</section>
+</section>
+<section id="gui-focus-suspend-and-resume">
+<h2>6. GUI focus: suspend and resume<a class="headerlink" href="#gui-focus-suspend-and-resume" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_GUI_SUSPEND</span></code> and <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_GUI_RESUME</span></code> mean <strong>“your GUI is / is no longer the
+thing on screen”</strong>. They are navigation, delivered when the user moves off your app’s screen
+and back onto it.</p>
+<p>They are <strong>not</strong> the display going dark. The backlight is a timed pulse, independent of app
+lifecycle: while the screen is dark with your app still in front, your GUI is still the app on
+screen. The SDK exposes no screen-off signal to an app.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Suspended</p></th>
+<th class="head"><p>On screen</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Loaded in memory</p></td>
+<td><p>yes</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code> / <code class="docutils literal notranslate"><span class="pre">onFrame()</span></code></p></td>
+<td><p><strong>do not rely on receiving them</strong> — see section 10</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Button events</p></td>
+<td><p>no</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Draws to the display</p></td>
+<td><p>no</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>A suspended GUI is not unloaded.</strong> Navigating away from your app suspends its GUI and
+nothing more: the GUI keeps its RAM, and your service does <strong>not</strong> receive
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>. A GUI is unloaded only when it ends itself (<code class="docutils literal notranslate"><span class="pre">sys.exit()</span></code>, which
+is what an app’s own exit control does), when the service exits, or on a teardown from
+section 7. If your app should release itself when the user walks away from it, the GUI has to
+take that decision and exit; no one else will.</p>
+<p><strong>The service is told nothing about focus.</strong> Suspend and resume go to the GUI process only. A
+service cannot distinguish “the user navigated away” from “the user is still looking” — it
+learns only about <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> and <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>. If your
+service needs to know, your GUI must tell it with a custom message.</p>
+<p>Should a GUI handle these? Usually not directly — the SDK’s TouchGFX port consumes both and
+calls <a class="reference download internal" download="" href="_downloads/75aaa2e844a7143ed29f1dc2bb715a03/IGuiLifeCycleCallback.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Interface::IGuiLifeCycleCallback</span></code></span></a>
+<code class="docutils literal notranslate"><span class="pre">onSuspend()</span></code> / <code class="docutils literal notranslate"><span class="pre">onResume()</span></code>. Override those when you want the hooks. The one that reliably
+earns its keep is <code class="docutils literal notranslate"><span class="pre">onResume()</span></code>: recompute from the service’s state on the way back in rather
+than trusting anything cached, the GUI-side counterpart of publishing on
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>.</p>
+<p>The practical consequence of suspend is that <strong>anything paced by GUI ticks may stop until
+resume.</strong> Never put app logic that must keep running in the GUI’s frame handler; that is the
+service’s job.</p>
+</section>
+<section id="what-ends-an-app-whatever-it-wants">
+<h2>7. What ends an app whatever it wants<a class="headerlink" href="#what-ends-an-app-whatever-it-wants" title="Link to this heading"></a></h2>
+<p>Two kinds, and the difference matters.</p>
+<p><strong>Orderly teardown — your service receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> and a grace period:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Condition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Watch shutdown</p></td>
+</tr>
+<tr class="row-odd"><td><p>Low-battery shutdown</p></td>
+</tr>
+<tr class="row-even"><td><p>Factory reset</p></td>
+</tr>
+<tr class="row-odd"><td><p>Entering USB mass-storage mode (autostart services are restarted on the way out)</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>No notice at all — the app simply stops running:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Condition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reboot, including a reboot commanded over BLE and one taken to apply a firmware update</p></td>
+</tr>
+<tr class="row-odd"><td><p>Watchdog reset, or any unexpected reset</p></td>
+</tr>
+<tr class="row-even"><td><p>Power loss and battery removal</p></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><p><strong>Persist as you go.</strong> Because the second list gives you nothing, any state a resident
+service must not lose has to be written when it changes, not on the way out. There is no
+“last chance to save” callback that covers every case.</p>
+</div></blockquote>
+<p>Notably <strong>not</strong> on either list: launching another app, opening the launcher, opening or
+leaving the glances screen, and the screen timing out. None of them stop a resident service.</p>
+<p>One more, and it applies to GUIs only: a GUI that has never produced a frame is unloaded a
+few seconds after it was loaded or last brought on screen. The service survives it and
+receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>. Note “never” — a GUI that drew once and then wedged is
+not covered.</p>
+</section>
+<section id="memory-and-what-happens-when-it-runs-out">
+<h2>8. Memory, and what happens when it runs out<a class="headerlink" href="#memory-and-what-happens-when-it-runs-out" title="Link to this heading"></a></h2>
+<p>RAM is charged in two places, and both can fail:</p>
+<ul class="simple">
+<li><p><strong>At load.</strong> Each process’s code, data, bss and stack are allocated when it is loaded. The
+stack is yours to size with <code class="docutils literal notranslate"><span class="pre">UNA_APP_SERVICE_STACK_SIZE</span></code> (default 10 KB); the rest follows
+from what you built. If there is not enough room, <strong>the launch fails</strong> — an already-running
+service is not evicted to make space for a new app.</p></li>
+<li><p><strong>At runtime.</strong> Each process has its own cap on outstanding allocations. Past it,
+<code class="docutils literal notranslate"><span class="pre">malloc</span></code> and <code class="docutils literal notranslate"><span class="pre">new</span></code> return <code class="docutils literal notranslate"><span class="pre">nullptr</span></code> <strong>for that process alone</strong>. Check for it; on a watch
+this is a condition to handle, not an abstract possibility. This cap is distinct from
+<code class="docutils literal notranslate"><span class="pre">UNA_APP_SERVICE_RAM_LENGTH</span></code>, which is the linker’s address-space budget rather than an
+allocation.</p></li>
+</ul>
+<p>There is no reclaim of a resident service under memory pressure today, so the practical
+consequence is that a service which stays resident when it did not need to makes <strong>later</strong>
+launches fail rather than being cleaned up itself. Treat your resource footprint while
+resident as something you are accountable for, and see the “not promised” column in section
+1.1 before designing around the absence of enforcement.</p>
+</section>
+<section id="choosing-a-design">
+<h2>9. Choosing a design<a class="headerlink" href="#choosing-a-design" title="Link to this heading"></a></h2>
+<p>Both designs below are correct. Pick on this question: <strong>must something happen at a time, or
+must something merely be correct when read?</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Resident service</p></th>
+<th class="head"><p>Recompute on open</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Shape</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>, or stay past <code class="docutils literal notranslate"><span class="pre">_GUI_STOP</span></code>; bounded wait</p></td>
+<td><p>exit once the GUI has closed; on reopen, derive from <code class="docutils literal notranslate"><span class="pre">getTimeMs()</span></code> and persisted state</p></td>
+</tr>
+<tr class="row-odd"><td><p>Costs</p></td>
+<td><p>a wake-up per period; RAM held; sensors held if subscribed</p></td>
+<td><p>nothing while closed</p></td>
+</tr>
+<tr class="row-even"><td><p>Needed for</p></td>
+<td><p>notifications, alerts, writing a file at a moment, a transition the wearer must not miss</p></td>
+<td><p>elapsed time, totals, anything derivable from a stored timestamp</p></td>
+</tr>
+<tr class="row-odd"><td><p>Survives a reboot</p></td>
+<td><p>only what you persisted</p></td>
+<td><p>naturally, since it was already persisted</p></td>
+</tr>
+<tr class="row-even"><td><p>Risk</p></td>
+<td><p>leaks if the exit condition is wrong</p></td>
+<td><p>none</p></td>
+</tr>
+</tbody>
+</table>
+<p>If your app’s state is a function of a start timestamp and the current time, <strong>recompute on
+open</strong>. Persist the timestamp, derive the rest, and let the service exit. That is Stopwatch’s
+own approach to its reading — derived from a shared monotonic clock, never accumulated — and
+it is why a stopped stopwatch costs nothing. It also survives the reboot that would take a
+resident service down without warning. A resident service earns its thread only when
+something must <em>occur</em> while nobody is looking.</p>
+</section>
+<section id="behaviour-not-to-rely-on">
+<h2>10. Behaviour not to rely on<a class="headerlink" href="#behaviour-not-to-rely-on" title="Link to this heading"></a></h2>
+<p>Two behaviours have changed since kernel 1.4.0, or are close enough to the edge of the
+contract that you should not build on them. Neither affects service lifecycle itself.</p>
+<p><strong>GUI ticks while suspended.</strong> On 1.4.0 a GUI that is loaded but off screen still receives
+<code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>. That is incidental, not promised, and it has already changed: treat ticks as
+something you receive <strong>only while on screen</strong>. If your GUI does work in its tick handler that
+must continue while the app is off screen, move that work to the service now — see section 6.</p>
+<p><strong>Which apps the glances screen starts.</strong> Target <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">Glance</span></code> for a glance and give the
+glances screen nothing to do with your app otherwise. On 1.4.0 an app of another type could
+have its service started on a visit to the glances screen depending on the flags its <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>
+carried, so a non-Glance app should not assume it will be left alone there — the more reason
+for every service to have a self-exit that does not depend on a GUI arriving.</p>
+</section>
+<section id="checklist">
+<h2>11. Checklist<a class="headerlink" href="#checklist" title="Link to this heading"></a></h2>
+<p>Before shipping a service that outlives its GUI:</p>
+<ul class="simple">
+<li><p>[ ] There is a reachable path out of <code class="docutils literal notranslate"><span class="pre">run()</span></code> in <strong>every</strong> state the service can be in —
+including “started with no GUI, and none ever arrives”.</p></li>
+<li><p>[ ] That path does not depend on a message that might never be sent.</p></li>
+<li><p>[ ] The exit test is guarded by a startup grace, so a normal launch cannot trip it.</p></li>
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> releases the message and returns without blocking.</p></li>
+<li><p>[ ] Unknown message types are ignored and released, not treated as a clock.</p></li>
+<li><p>[ ] Time-driven work reads <code class="docutils literal notranslate"><span class="pre">sys.getTimeMs()</span></code> rather than counting wake-ups.</p></li>
+<li><p>[ ] The wait period is the longest that meets the requirement.</p></li>
+<li><p>[ ] Sensor subscriptions held while resident are the cheapest that do the job, and are
+dropped when they are not needed.</p></li>
+<li><p>[ ] State that must not be lost is persisted when it changes — a reboot gives no notice.</p></li>
+<li><p>[ ] Allocation failure (<code class="docutils literal notranslate"><span class="pre">nullptr</span></code>) is handled.</p></li>
+<li><p>[ ] The service does not return from <code class="docutils literal notranslate"><span class="pre">run()</span></code> while its own GUI is loaded.</p></li>
+<li><p>[ ] State is published to a returning GUI on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>.</p></li>
+<li><p>[ ] If the app should release itself when the user walks away, the <strong>GUI</strong> exits — being
+navigated away from does not close it.</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>12. See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="Examples/Alarm-Architecture.html"><span class="std std-doc">Alarm</span></a> — autostart service, autonomous GUI launch</p></li>
+<li><p><a class="reference internal" href="Examples/Timer-Architecture.html"><span class="std std-doc">Timer</span></a> — bounded wait, self-release, background fire</p></li>
+<li><p><a class="reference internal" href="Examples/Stopwatch-Architecture.html"><span class="std std-doc">Stopwatch</span></a> — residency tied to state, extrapolated reading</p></li>
+<li><p><a class="reference internal" href="Examples/GlanceHR-Architecture.html"><span class="std std-doc">GlanceHR</span></a> — a service with no GUI at all</p></li>
+<li><p><a class="reference internal" href="sdk-setup.html"><span class="std std-doc">sdk-setup.md</span></a> — <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>, <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>, stack and RAM settings</p></li>
+<li><p><a class="reference internal" href="SensorsLayer.html"><span class="std std-doc">SensorsLayer</span></a> — subscribing, and what a subscription costs</p></li>
+<li><p><a class="reference download internal" download="" href="_downloads/fb79d89791b5afa1baa3fedbc0315f54/CommandMessages.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">CommandMessages.hpp</span></code></span></a> — the lifecycle messages</p></li>
+<li><p><a class="reference download internal" download="" href="_downloads/c6d5b4cd77c746a1ebc1a988af9a616c/IAppComm.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">IAppComm.hpp</span></code></span></a> — <code class="docutils literal notranslate"><span class="pre">getMessage()</span></code> and its timeout</p></li>
+<li><p><a class="reference download internal" download="" href="_downloads/10e08072c579a7085af0b4b13ef6d582/Timer.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Timer.hpp</span></code></span></a> — <code class="docutils literal notranslate"><span class="pre">SDK::Timer</span></code>, for grace periods and deadlines</p></li>
+<li><p><a class="reference download internal" download="" href="_downloads/75aaa2e844a7143ed29f1dc2bb715a03/IGuiLifeCycleCallback.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">IGuiLifeCycleCallback.hpp</span></code></span></a> — GUI hooks</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sdk-overview.html" class="btn btn-neutral float-left" title="SDK Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SensorsLayer.html" class="btn btn-neutral float-right" title="Sensor Layer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
