@@ -54,7 +54,9 @@ public:
     /**
      * @brief Called when the kernel switches display focus to another task.
      * @note  Can be triggered after 'onResume()'.
-     * @note  State: Ticks enabled, no keys, no display.
+     * @note  State: no keys, no display. Do not rely on receiving ticks while
+     *        suspended -- a GUI that is not on screen may be given none. Work
+     *        that must continue off screen belongs in the service.
      */
     virtual void onSuspend() {}
 
