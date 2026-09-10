@@ -49,8 +49,11 @@ private:
      * @brief Re-read the kernel's system settings and publish what changed.
      *
      * The settings are pull-only -- nothing in the SDK reports a change -- so
-     * this is called on the two edges that can follow one: the GUI starting,
-     * and the GUI asking after a resume.
+     * this is called on each of the three occasions that can follow one: the
+     * GUI starting, the GUI asking after a resume, and the loop's own poll.
+     * The poll is bounded to once a minute and is what catches a format
+     * pushed from the phone while the face is on screen, which no event
+     * announces and neither lifecycle edge can see.
      */
     void refreshSystemSettings();
 

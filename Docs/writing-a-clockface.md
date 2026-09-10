@@ -189,16 +189,35 @@ Call it from the **service**, not the GUI, and not from a constructor -- it is a
 blocking round trip that needs the app's message loop running.
 
 **It is pull-only. Nothing tells you it changed.** There is no
-settings-changed event, so re-read it on the two edges that can follow a
+settings-changed event, so re-read it on all three occasions that can follow a
 change:
 
 1. `COMMAND_APP_NOTIF_GUI_RUN` -- your GUI has come up.
 2. An app-private `Refresh` your GUI sends when it resumes.
+3. A poll from the service loop, bounded to once a minute.
 
-The second is the one people miss, and without it the setting never takes
-effect: the kernel **suspends** a face rather than stopping it, so returning
-from Settings brings no lifecycle message -- and Settings is exactly where the
-user just changed the format.
+The second is the one people miss, and without it a setting the user changes
+never takes effect: the kernel **suspends** a face rather than stopping it, so
+returning from Settings brings no lifecycle message -- and Settings is exactly
+where the user just changed the format.
+
+The third covers what neither edge can see: a setting pushed **from the phone**
+while your face is on screen. Bound it against the monotonic tick rather than
+hanging it off the loop's wait expiring --
+
+```cpp
+if ((mKernel.sys.getTimeMs() - mSettingsAt) >= kSettingsPollMs) {
+    refreshSystemSettings();
+}
+```
+
+-- because the loop is message driven: on a face showing a heart rate, samples
+arrive about once a second and the wait almost never expires, while on a face
+with only a pedometer it expires constantly. Neither gives you once a minute.
+
+The request itself is cheap. Its 100 ms figure is a *timeout*; the kernel
+answers on a completion semaphore and normally returns at once, and the
+publishers drop the result when nothing moved.
 
 ### Step 6: The GUI
 
