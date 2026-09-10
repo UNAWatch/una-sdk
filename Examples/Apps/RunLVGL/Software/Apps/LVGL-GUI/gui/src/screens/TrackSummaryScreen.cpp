@@ -50,7 +50,8 @@ void TrackSummaryScreen::buildFaceOverview()
     mTimer = Theme::label(f, F::SemiBold25, "0:00:00", 95, 173, 117);
     Theme::label(f, F::Medium18, "TIMER", 43, 179, 51);
     Theme::hline(f, 25, 166, 190);
-    mAvgPace = Theme::label(f, F::SemiBold25, Strings::kNoValue, 132, 127, 78);
+    // Wider than the design's 78 px box (same centre) so "22:00" fits.
+    mAvgPace = Theme::label(f, F::SemiBold25, Strings::kNoValue, 121, 127, 100);
     Theme::label(f, F::Medium18, "AVG PACE", 39, 133, 100);
     Theme::hline(f, 25, 120, 190);
     mOverviewUnits    = Theme::label(f, F::Medium18, Strings::kKm, 178, 73, 45, LV_TEXT_ALIGN_LEFT);

@@ -25,6 +25,32 @@ constexpr int32_t kLensRadius = 22;   // stands in for the clipped radius-110 ci
 // selection window, and at the bottom window's -kPitch (i.e. hidden above it).
 constexpr int32_t kSelStripRestY = -kPitch;
 constexpr int32_t kOutStripRestY = -2 * kPitch;
+
+// TouchGFX MenuItemConfig geometry.
+constexpr int32_t kToggleTextX = 21;
+constexpr int32_t kToggleTextW = 128;
+constexpr int32_t kToggleX     = 151;
+constexpr int32_t kToggleY     = (kItemH - 30) / 2;
+constexpr int32_t kCenterTipMsgOffsetY  = 3;    // CenterItemLayout::tip
+constexpr int32_t kCenterTipHintOffsetY = -3;
+constexpr int32_t kItemTipMsgOffsetY    = 4;    // ItemLayout::tip
+constexpr int32_t kItemTipHintOffsetY   = -4;
+
+/// Height a label takes for its current text and width.
+int32_t textHeight(lv_obj_t* label)
+{
+    lv_obj_update_layout(label);
+    return lv_obj_get_height(label);
+}
+
+void setHidden(lv_obj_t* obj, bool hidden)
+{
+    if (hidden) {
+        lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_remove_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    }
+}
 } // namespace
 
 WheelMenu::WheelMenu(lv_obj_t* parent, const Item* items, uint16_t count, int16_t itemOffsetY)
@@ -60,9 +86,13 @@ void WheelMenu::buildStrip(Strip& strip, lv_obj_t* window, int32_t restY)
 {
     strip.obj = Theme::container(window, 0, restY, 240, 3 * kPitch);
     for (int k = 0; k < 3; ++k) {
-        lv_obj_t* slot = Theme::container(strip.obj, 0, k * kPitch, 240, kItemH);
-        strip.icon[k]  = lv_image_create(slot);
-        strip.label[k] = Theme::label(slot, Theme::Font::Medium18, "", 0, 0, 240);
+        lv_obj_t* slotObj = Theme::container(strip.obj, 0, k * kPitch, 240, kItemH);
+        Slot& s  = strip.slot[k];
+        s.icon   = lv_image_create(slotObj);
+        s.label  = Theme::label(slotObj, Theme::Font::Medium18, "", 0, 0, 240);
+        s.tip    = Theme::label(slotObj, Theme::Font::Italic18, "", 0, 0, 240);
+        s.toggle = std::make_unique<Widgets::Toggle>(slotObj, kToggleX, kToggleY);
+        s.toggle->setVisible(false);
     }
 }
 
@@ -87,6 +117,11 @@ void WheelMenu::next()
 void WheelMenu::prev()
 {
     slide(-1);
+}
+
+void WheelMenu::refresh()
+{
+    render();
 }
 
 void WheelMenu::setBackground(uint32_t color)
@@ -150,39 +185,88 @@ void WheelMenu::render()
     // Slot 0 = previous, 1 = current, 2 = next, all around the shown item.
     for (int k = 0; k < 3; ++k) {
         const Item& item = mItems[(mShown + mCount + k - 1) % mCount];
-        renderSlot(mSelStrip.label[k], mSelStrip.icon[k], item, true);
-        renderSlot(mOutStrip.label[k], mOutStrip.icon[k], item, false);
+        renderSlot(mSelStrip.slot[k], item, true);
+        renderSlot(mOutStrip.slot[k], item, false);
     }
 }
 
-void WheelMenu::renderSlot(lv_obj_t* label, lv_obj_t* icon, const Item& item, bool center)
+void WheelMenu::renderSlot(Slot& slot, const Item& item, bool center)
 {
-    const lv_font_t*      font    = center ? Theme::font(item.centerFont) : Theme::font(Theme::Font::Medium18);
-    const lv_image_dsc_t* iconSrc = center ? item.centerIcon : item.icon;
-    const IconLayout&     layout  = center ? item.centerLayout : item.itemLayout;
+    using Style = Item::Style;
 
-    lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-    lv_label_set_text(label, item.text ? item.text : "");
+    // Reset to the plain layout, then apply the style, as MainMenuItem::renderStyle does.
+    setHidden(slot.tip, true);
+    setHidden(slot.icon, true);
+    slot.toggle->setVisible(false);
 
-    // TouchGFX's centerTextY: the text box is sized to the text and centred in
-    // the 66 px slot, then nudged by the layout offset for the surrounding item.
-    const int32_t textH = lv_font_get_line_height(font);
-    int32_t y = (kItemH - textH) / 2;
-    if (!center) {
-        y += mItemOffsetY;
+    const lv_font_t* font = center ? Theme::font(item.centerFont) : Theme::font(Theme::Font::Medium18);
+    lv_obj_set_style_text_font(slot.label, font, LV_PART_MAIN);
+    lv_obj_set_style_text_align(slot.label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_set_pos(slot.label, 0, 0);
+    lv_obj_set_width(slot.label, 240);
+    const char* text = (!center && item.itemText) ? item.itemText : item.text;
+    lv_label_set_text(slot.label, text ? text : "");
+
+    // A Toggle item is drawn as text + switch when selected, and as a Tip
+    // reading ON/OFF (amber/teal) in the surrounding slot.
+    Style style = item.style;
+    if (style == Style::Toggle && !center) {
+        style = Style::Tip;
     }
 
-    if (iconSrc) {
-        lv_image_set_src(icon, iconSrc);
-        lv_obj_set_pos(icon, layout.iconX, layout.iconY);
-        lv_obj_remove_flag(icon, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_pos(label, layout.textX, y);
-        lv_obj_set_width(label, layout.textW);
-        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
-    } else {
-        lv_obj_add_flag(icon, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_pos(label, 0, y);
-        lv_obj_set_width(label, 240);
-        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    switch (style) {
+        case Style::Simple: {
+            int32_t y = (kItemH - textHeight(slot.label)) / 2;
+            if (!center) {
+                y += mItemOffsetY;
+            }
+            lv_obj_set_y(slot.label, y);
+            break;
+        }
+
+        case Style::Tip: {
+            const int32_t half = kItemH / 2;
+            const int32_t labelH = textHeight(slot.label);
+            lv_obj_set_y(slot.label, (half - labelH) / 2 + (center ? kCenterTipMsgOffsetY : kItemTipMsgOffsetY));
+
+            const bool    fromToggle = item.style == Style::Toggle;
+            const char*   tipText    = fromToggle ? (item.toggleState ? "ON" : "OFF") : (item.tip ? item.tip : "");
+            const uint32_t tipColor  = center ? Color::WHITE
+                                      : fromToggle ? (item.toggleState ? Color::YELLOW_DARK : Color::TEAL)
+                                                   : item.tipColor;
+            lv_label_set_text(slot.tip, tipText);
+            lv_obj_set_style_text_color(slot.tip, Theme::rgb(tipColor), LV_PART_MAIN);
+            lv_obj_set_pos(slot.tip, 0, 0);
+            lv_obj_set_width(slot.tip, 240);
+            const int32_t tipH = textHeight(slot.tip);
+            lv_obj_set_y(slot.tip, half + (half - tipH) / 2 + (center ? kCenterTipHintOffsetY : kItemTipHintOffsetY));
+            setHidden(slot.tip, false);
+            break;
+        }
+
+        case Style::Toggle: {
+            lv_obj_set_style_text_align(slot.label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+            lv_obj_set_pos(slot.label, kToggleTextX, 0);
+            lv_obj_set_width(slot.label, kToggleTextW);
+            lv_obj_set_y(slot.label, (kItemH - textHeight(slot.label)) / 2);
+            slot.toggle->setState(item.toggleState);
+            slot.toggle->setVisible(true);
+            break;
+        }
+
+        case Style::Icon: {
+            const lv_image_dsc_t* src    = center ? item.centerIcon : item.icon;
+            const IconLayout&     layout = center ? item.centerLayout : item.itemLayout;
+            if (src) {
+                lv_image_set_src(slot.icon, src);
+                lv_obj_set_pos(slot.icon, layout.iconX, layout.iconY);
+                setHidden(slot.icon, false);
+                lv_obj_set_style_text_align(slot.label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+                lv_obj_set_pos(slot.label, layout.textX, 0);
+                lv_obj_set_width(slot.label, layout.textW);
+            }
+            lv_obj_set_y(slot.label, (kItemH - textHeight(slot.label)) / 2);
+            break;
+        }
     }
 }

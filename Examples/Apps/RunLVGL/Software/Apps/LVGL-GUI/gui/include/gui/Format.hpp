@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <ctime>
 
 #include "SDK/Utils/Utils.hpp"
@@ -134,6 +135,111 @@ inline void heartRate(char* buf, size_t n, float bpm)
 inline const char* units(bool imperial)
 {
     return imperial ? "mi" : "km";
+}
+
+/// fixed(), then left-padded with zeros to at least @p width characters
+/// (the TouchGFX "%05.02f" style used by the interval distance readout).
+inline void fixedPadded(char* buf, size_t n, float value, int decimals, size_t width)
+{
+    char tmp[16];
+    fixed(tmp, sizeof(tmp), value, decimals);
+    const size_t len = strlen(tmp);
+    size_t pad = len < width ? width - len : 0;
+    if (pad + len + 1 > n) {
+        pad = (n > len + 1) ? n - len - 1 : 0;
+    }
+    memset(buf, '0', pad);
+    memcpy(buf + pad, tmp, len + 1);
+}
+
+// --- Intervals menu texts ----------------------------------------------------
+
+/// "Open" for 0, else "x<n>".
+inline void intervalsRepeats(char* buf, size_t n, uint8_t repeats)
+{
+    if (repeats == 0) {
+        snprintf(buf, n, "Open");
+    } else {
+        snprintf(buf, n, "x%u", static_cast<unsigned>(repeats));
+    }
+}
+
+/// "MM:SS" of a phase duration (minutes may exceed 59).
+inline void intervalsTime(char* buf, size_t n, uint32_t seconds)
+{
+    snprintf(buf, n, "%02u:%02u", static_cast<unsigned>(seconds / 60), static_cast<unsigned>(seconds % 60));
+}
+
+/**
+ * Hint under a Run / Rest menu item: "Open", "MM:SS min" or "d.dd km|mi".
+ * Mirrors MenuIntervalsView::setIntervals().
+ */
+inline void intervalsPhaseTip(char* buf, size_t n, Settings::Intervals::Metric metric,
+                              uint32_t timeSec, float distMetres, bool imperial)
+{
+    if (metric == Settings::Intervals::DISTANCE && distMetres >= 0.001f) {
+        char d[12];
+        fixed(d, sizeof(d), distUnits(distMetres, imperial), 2);
+        snprintf(buf, n, "%s %s", d, units(imperial));
+    } else if (metric == Settings::Intervals::TIME && timeSec != 0) {
+        char t[12];
+        intervalsTime(t, sizeof(t), timeSec);
+        snprintf(buf, n, "%s min", t);
+    } else {
+        snprintf(buf, n, "Open");
+    }
+}
+
+/**
+ * Countdown summary line: "<label>: Open", "<label>: MM:SS" or "<label>: d.dd".
+ * Mirrors TrackIntervalsCountdownView::setIntervals() (no unit on the distance).
+ */
+inline void intervalsPhaseSummary(char* buf, size_t n, const char* label, Settings::Intervals::Metric metric,
+                                  uint32_t timeSec, float distMetres, bool imperial)
+{
+    if (metric == Settings::Intervals::DISTANCE && distMetres >= 0.001f) {
+        char d[12];
+        fixed(d, sizeof(d), distUnits(distMetres, imperial), 2);
+        snprintf(buf, n, "%s: %s", label, d);
+    } else if (metric == Settings::Intervals::TIME && timeSec != 0) {
+        char t[12];
+        intervalsTime(t, sizeof(t), timeSec);
+        snprintf(buf, n, "%s: %s", label, t);
+    } else {
+        snprintf(buf, n, "%s: Open", label);
+    }
+}
+
+// --- Lap alert texts ---------------------------------------------------------
+
+/// "OFF", "<n> km" or "<n> mile(s)".
+inline void alertDistance(char* buf, size_t n, Settings::Alerts::Distance::Id id, bool imperial)
+{
+    if (id == Settings::Alerts::Distance::ID_OFF) {
+        snprintf(buf, n, "OFF");
+        return;
+    }
+    const unsigned v = Settings::Alerts::Distance::kValues[id];
+    if (imperial) {
+        snprintf(buf, n, "%u %s", v, v > 1 ? "miles" : "mile");
+    } else {
+        snprintf(buf, n, "%u km", v);
+    }
+}
+
+/// "OFF", "<n> min", or with @p longForm "<n> minute(s)".
+inline void alertTime(char* buf, size_t n, Settings::Alerts::Time::Id id, bool longForm)
+{
+    if (id == Settings::Alerts::Time::ID_OFF) {
+        snprintf(buf, n, "OFF");
+        return;
+    }
+    const unsigned v = Settings::Alerts::Time::kValues[id];
+    if (longForm) {
+        snprintf(buf, n, "%u %s", v, v > 1 ? "minutes" : "minute");
+    } else {
+        snprintf(buf, n, "%u min", v);
+    }
 }
 
 } // namespace Fmt

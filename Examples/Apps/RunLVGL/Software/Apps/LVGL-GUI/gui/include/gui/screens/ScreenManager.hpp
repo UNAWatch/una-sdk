@@ -22,8 +22,28 @@ class Screen;
 
 enum class ScreenId : uint8_t {
     Main,
+    // Intervals configuration
+    MenuIntervals,
+    MenuIntervalsRepeats,
+    MenuIntervalsRun,
+    MenuIntervalsRest,
+    MenuIntervalsRunTime,
+    MenuIntervalsRunDistance,
+    MenuIntervalsRestTime,
+    MenuIntervalsRestDistance,
+    // Settings
+    MenuSettings,
+    MenuAlerts,
+    MenuAlertDistance,
+    MenuAlertTime,
+    MenuAlertDistanceSaved,
+    MenuAlertTimeSaved,
+    // Activity
     TrackStartConfirm,
+    TrackIntervalsCountdown,
     Track,
+    TrackIntervalsAlert,
+    TrackIntervalsCompleted,
     TrackAction,
     TrackHoldConfirm,
     TrackLap,

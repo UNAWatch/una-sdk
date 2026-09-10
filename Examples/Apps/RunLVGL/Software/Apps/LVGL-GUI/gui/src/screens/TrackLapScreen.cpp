@@ -38,7 +38,8 @@ void TrackLapScreen::build()
     mTime = Theme::label(mRoot, F::SemiBold35, "0:00", 122, 82, 100);
     Theme::hline(mRoot, 35, 127, 170);
     Theme::label(mRoot, F::Italic18, "Avg. Pace", 70, 137, 100);
-    mPace = Theme::label(mRoot, F::SemiBold40, Strings::kNoValue, 70, 158, 100);
+    // Full width: a slow pace such as "22:00" is wider than the design's 100 px box.
+    mPace = Theme::label(mRoot, F::SemiBold40, Strings::kNoValue, 0, 158, 240);
     mTitle = std::make_unique<Widgets::Title>(mRoot, "Lap");
 }
 

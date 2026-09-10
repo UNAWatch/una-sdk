@@ -1,12 +1,12 @@
 /**
  ******************************************************************************
  * @file    TrackScreen.hpp
- * @brief   The live activity screen: three faces (totals, lap, status) the
- *          user pages through with L1/L2. R1 opens the action menu, R2 marks
- *          a lap.
+ * @brief   The live activity screen: the totals, lap and status faces, plus the
+ *          intervals face when the workout is in intervals mode. L1/L2 page
+ *          faces, R1 opens the action menu, R2 marks a lap (or advances the
+ *          interval phase).
  *
  * Port of the Run app's TrackView/TrackPresenter and its TrackFace* containers.
- * The intervals face is M2 work; the face set here is the free-run one.
  ******************************************************************************
  */
 
@@ -33,6 +33,8 @@ public:
     void onBatteryLevel(uint8_t level) override;
     void onTime(uint8_t hour, uint8_t minute, uint8_t sec) override;
     void onLapChanged(uint8_t lapEnd) override;
+    void onIntervalsPhaseAlert() override;
+    void onIntervalsWorkoutCompleted() override;
     void onGpsFix(bool acquired) override;
     void onAccessoryStatus(uint8_t state, const char* name) override;
 
@@ -42,17 +44,31 @@ protected:
 private:
     using FaceId = App::MenuNav::TrackView::Id;
 
+    void buildFaceIntervals();
     void buildFaceTotal();
     void buildFaceLap();
     void buildFaceStatus();
     void showFace(uint16_t id);
+    uint16_t firstFace() const;
     void setTime(uint8_t h, uint8_t m);
     void updateHrIcon();
+    void setIntervalsPhase(const Track::IntervalsData& iv);
 
     // Face containers (240 x 240, one visible at a time)
-    lv_obj_t* mFaceTotal  = nullptr;
-    lv_obj_t* mFaceLap    = nullptr;
-    lv_obj_t* mFaceStatus = nullptr;
+    lv_obj_t* mFaceIntervals = nullptr;
+    lv_obj_t* mFaceTotal     = nullptr;
+    lv_obj_t* mFaceLap       = nullptr;
+    lv_obj_t* mFaceStatus    = nullptr;
+
+    // Intervals face
+    std::unique_ptr<Widgets::Title>          mIntervalsTitle;
+    std::unique_ptr<Widgets::IntervalsTimer> mIntervalsTimer;
+    lv_obj_t* mIvRepeats   = nullptr;
+    lv_obj_t* mIvRunIcon   = nullptr;
+    lv_obj_t* mIvPaceIcon  = nullptr;
+    lv_obj_t* mIvHeartIcon = nullptr;
+    lv_obj_t* mIvPace      = nullptr;
+    lv_obj_t* mIvHr        = nullptr;
 
     // Totals face
     lv_obj_t* mPaceValue     = nullptr;
@@ -77,6 +93,7 @@ private:
     std::unique_ptr<Widgets::Buttons>         mButtons;
     std::unique_ptr<Widgets::ScrollIndicator> mIndicator;
 
+    bool     mIntervalsMode = false;
     uint16_t mFaceId        = FaceId::ID_TRACK1;
     bool     mIsImperial    = false;
     bool     mIs12Hour      = false;

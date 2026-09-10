@@ -20,15 +20,16 @@ using namespace SDK::GUI;
 namespace
 {
 // Same items and geometry as MainView::setupItems() in the TouchGFX app.
+using Style = WheelMenu::Item::Style;
 const WheelMenu::Item kItems[App::MenuNav::Root::ID_COUNT] = {
     // ID_START
-    { "Start", Theme::Font::SemiBold35, nullptr, { 20, 3, 87, 153 }, nullptr, { 46, 7, 102, 100 } },
-    // ID_INTERVALS
-    { "Intervals", Theme::Font::SemiBold30,
+    { Style::Simple, "Start", nullptr, Theme::Font::SemiBold35 },
+    // ID_INTERVALS: icon beside left-aligned text, in both slots
+    { Style::Icon, "Intervals", nullptr, Theme::Font::SemiBold30, nullptr, Color::WHITE, false,
       &img_intervals_40x43, { 30, 10, 87, 140 },
       &img_intervals_24x26, { 62, 17, 97, 130 } },
     // ID_SETTINGS
-    { "Settings", Theme::Font::SemiBold30, nullptr, { 20, 3, 87, 153 }, nullptr, { 46, 7, 102, 100 } },
+    { Style::Simple, "Settings" },
 };
 } // namespace
 
@@ -87,8 +88,12 @@ void MainScreen::confirm()
             }
             break;
         case Menu::ID_INTERVALS:
+            // No GPS-fix check here: the intervals menu is always reachable so
+            // the workout can be configured indoors. The check happens on Start.
+            ScreenManager::instance().goTo(ScreenId::MenuIntervals);
+            break;
         case Menu::ID_SETTINGS:
-            LOG_INFO("Menu item %u is not ported yet\n", mMenu->selected());
+            ScreenManager::instance().goTo(ScreenId::MenuSettings);
             break;
         default:
             break;

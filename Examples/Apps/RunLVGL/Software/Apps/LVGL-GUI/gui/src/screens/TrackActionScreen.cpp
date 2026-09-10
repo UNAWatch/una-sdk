@@ -14,11 +14,12 @@ namespace
 {
 constexpr uint32_t kCarouselPeriodMs = 3000;
 
+using Style = WheelMenu::Item::Style;
 const WheelMenu::Item kItems[App::MenuNav::TrackView::Action::ID_COUNT] = {
-    { "Resume" },
-    { "Summary" },
-    { "Save & End" },
-    { "Discard" },
+    { Style::Simple, "Resume" },
+    { Style::Simple, "Summary" },
+    { Style::Simple, "Save & End" },
+    { Style::Simple, "Discard" },
 };
 } // namespace
 

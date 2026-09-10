@@ -13,11 +13,15 @@
 
 #include "lvgl.h"
 
-// Fonts (Poppins, 2 bpp). The 40 and 60 px faces carry digits and punctuation
-// only (60 adds A/P/M for the clock suffix); the rest cover printable ASCII.
+// Fonts (Poppins, 2 bpp). The Light 60, Medium 40 and SemiBold 40 faces carry
+// digits and punctuation only; SemiBold 60 adds A/P/M for the clock suffix and
+// O/p/e/n for the interval timer's "Open"; the rest cover printable ASCII.
 LV_FONT_DECLARE(poppins_italic_18);
+LV_FONT_DECLARE(poppins_italic_20);
+LV_FONT_DECLARE(poppins_light_60);
 LV_FONT_DECLARE(poppins_medium_18);
 LV_FONT_DECLARE(poppins_medium_25);
+LV_FONT_DECLARE(poppins_medium_40);
 LV_FONT_DECLARE(poppins_regular_14);
 LV_FONT_DECLARE(poppins_regular_16);
 LV_FONT_DECLARE(poppins_regular_18);

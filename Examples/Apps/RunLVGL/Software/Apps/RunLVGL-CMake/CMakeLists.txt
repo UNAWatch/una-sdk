@@ -74,6 +74,10 @@ set(GUI_COMPILE_DEFINITIONS
 # LVGL's software renderer recurses deeper than TouchGFX; give the GUI task
 # more stack than the 10 KB default.
 set(GUI_STACK_SIZE "24*1024")
+# The GUI image (LVGL + fonts + icons + screens) is larger than a TouchGFX one;
+# the default 600K linker region is too tight. The kernel allocates only what
+# the image actually needs, so this is a ceiling, not a reservation.
+set(GUI_RAM_LENGTH "900K")
 una_app_build_gui(${APP_NAME}GUI.elf)
 
 # Build the complete app using SDK functions

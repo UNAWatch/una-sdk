@@ -29,16 +29,20 @@ RUN_ASSETS = os.path.join(SDK_ROOT, "Examples", "Apps", "Running", "Software", "
                           "TouchGFX-GUI", "assets")
 
 # Full printable ASCII for text faces; digits and punctuation only for the large
-# value-only faces (the 60 px face also needs A/P/M for the 12-hour clock suffix).
-# SemiBold 35 stays full ASCII: it is also the selected "Start" item's face.
+# value-only faces. The SemiBold 60 face also needs A/P/M for the 12-hour clock
+# suffix and O/p/e/n for the interval timer's "Open" readout. SemiBold 35 stays
+# full ASCII: it is also the selected "Start" item's face.
 ASCII = "0x20-0x7E"
 NUMERIC = "0x20-0x3A"
-CLOCK = "0x20-0x3A,0x41,0x4D,0x50"
+BIG = "0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70"
 
 FONTS = [
     ("Poppins-Italic",   18, ASCII),
+    ("Poppins-Italic",   20, ASCII),
+    ("Poppins-Light",    60, NUMERIC),
     ("Poppins-Medium",   18, ASCII),
     ("Poppins-Medium",   25, ASCII),
+    ("Poppins-Medium",   40, NUMERIC),
     ("Poppins-Regular",  14, ASCII),
     ("Poppins-Regular",  16, ASCII),
     ("Poppins-Regular",  18, ASCII),
@@ -47,7 +51,7 @@ FONTS = [
     ("Poppins-SemiBold", 30, ASCII),
     ("Poppins-SemiBold", 35, ASCII),
     ("Poppins-SemiBold", 40, NUMERIC),
-    ("Poppins-SemiBold", 60, CLOCK),
+    ("Poppins-SemiBold", 60, BIG),
 ]
 
 

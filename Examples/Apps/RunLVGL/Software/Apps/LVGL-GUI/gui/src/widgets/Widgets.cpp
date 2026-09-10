@@ -7,6 +7,7 @@
 
 #include "gui/widgets/Widgets.hpp"
 #include "gui/Assets.hpp"
+#include "gui/Format.hpp"
 
 #include <cstdio>
 
@@ -575,6 +576,236 @@ void Map::setMap(const SDK::TrackMapScreen& map)
     const auto& last  = map.points.back();
     lv_obj_set_pos(mStart, baseX + first.x - 4, baseY + first.y - 4);
     lv_obj_set_pos(mEnd,   baseX + last.x - 4,  baseY + last.y - 4);
+}
+
+void TimerRing::setRemaining(uint32_t permille)
+{
+    if (permille > 1000) {
+        permille = 1000;
+    }
+    const int32_t span = static_cast<int32_t>((kRingSpan * permille + 500) / 1000);
+    if (span <= 0) {
+        lv_obj_add_flag(mProgress, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+    // The end stays at the track's end; the start advances as time drains.
+    Theme::setArc(mProgress, kRingStart + kRingSpan - span, kRingStart + kRingSpan);
+    lv_obj_remove_flag(mProgress, LV_OBJ_FLAG_HIDDEN);
+}
+
+// --- Toggle ------------------------------------------------------------------
+
+Toggle::Toggle(lv_obj_t* parent, int32_t x, int32_t y)
+    : mX(x), mY(y)
+{
+    // TouchGFX: a 30 px round-capped line from (15,15) to (45,15) -> a 60 x 30 pill.
+    mRail = Theme::container(parent, x, y, 60, 30);
+    lv_obj_set_style_bg_opa(mRail, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_radius(mRail, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    mHandle = Theme::dot(parent, x + 15, y + 15, 15, Color::WHITE);
+    setState(false);
+}
+
+void Toggle::setState(bool on)
+{
+    mOn = on;
+    lv_obj_set_style_bg_color(mRail, Theme::rgb(on ? Color::YELLOW_DARK : Color::BLACK), LV_PART_MAIN);
+    lv_obj_set_pos(mHandle, mX + (on ? 30 : 0), mY);
+}
+
+void Toggle::setVisible(bool visible)
+{
+    if (visible) {
+        lv_obj_remove_flag(mRail, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_remove_flag(mHandle, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(mRail, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(mHandle, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+// --- IntervalsTimer ----------------------------------------------------------
+
+namespace
+{
+constexpr std::time_t kMaxIntervalSec = 5999;   // 99:59
+} // namespace
+
+IntervalsTimer::IntervalsTimer(lv_obj_t* parent, int32_t x, int32_t y)
+{
+    lv_obj_t* box = Theme::container(parent, x, y, 190, 91);
+    // The 60 px readout box starts 5 px above the container in the TouchGFX
+    // design; LVGL clips children, so keep the box inside and offset the text.
+    mTimer       = Theme::label(box, Theme::Font::SemiBold60, "00:00", 0, -5, 190);
+    lv_obj_add_flag(box, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+    mDescription = Theme::label(box, Theme::Font::Regular18, "", 0, 60, 190);
+    mLine        = Theme::hline(box, 0, 88, 190, Color::WHITE);
+}
+
+void IntervalsTimer::setPhaseTime(std::time_t sec, Track::IntervalsMetric metric)
+{
+    setTimerClamped(sec);
+    switch (metric) {
+        case Track::IntervalsMetric::TIME_OPEN:      setDescription("Open");      break;
+        case Track::IntervalsMetric::TIME_REMAINING: setDescription("Remaining"); break;
+        case Track::IntervalsMetric::TIME_ELAPSED:   setDescription("Elapsed");   break;
+        default: break;
+    }
+}
+
+void IntervalsTimer::setPhaseDistance(float distInUnits, bool imperial)
+{
+    if (distInUnits < 0.0f) {
+        distInUnits = 0.0f;
+    }
+    // TouchGFX prints "%05.02f" below 100 and "%05.01f" above: five characters,
+    // zero padded on the left.
+    char buf[12];
+    Fmt::fixedPadded(buf, sizeof(buf), distInUnits, distInUnits < 100.0f ? 2 : 1, 5);
+    lv_label_set_text(mTimer, buf);
+    char desc[24];
+    snprintf(desc, sizeof(desc), "%s remaining", Fmt::units(imperial));
+    setDescription(desc);
+}
+
+void IntervalsTimer::setRemainingTime(std::time_t sec)
+{
+    setTimerClamped(sec);
+    setDescription(nullptr);
+}
+
+void IntervalsTimer::setOpen()
+{
+    lv_label_set_text(mTimer, "Open");
+    setDescription(nullptr);
+}
+
+void IntervalsTimer::setColor(uint32_t color)
+{
+    lv_obj_set_style_text_color(mTimer, Theme::rgb(color), LV_PART_MAIN);
+    lv_obj_set_style_text_color(mDescription, Theme::rgb(color), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(mLine, Theme::rgb(color), LV_PART_MAIN);
+}
+
+void IntervalsTimer::setLineVisible(bool visible)
+{
+    if (visible) {
+        lv_obj_remove_flag(mLine, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(mLine, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+void IntervalsTimer::setDescriptionVisible(bool visible)
+{
+    if (visible) {
+        lv_obj_remove_flag(mDescription, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(mDescription, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+void IntervalsTimer::setTimerClamped(std::time_t sec)
+{
+    if (sec < 0) {
+        sec = 0;
+    }
+    if (sec > kMaxIntervalSec) {
+        sec = kMaxIntervalSec;
+    }
+    lv_label_set_text_fmt(mTimer, "%02u:%02u", static_cast<unsigned>(sec / 60), static_cast<unsigned>(sec % 60));
+}
+
+void IntervalsTimer::setDescription(const char* text)
+{
+    if (text) {
+        lv_label_set_text(mDescription, text);
+        lv_obj_remove_flag(mDescription, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(mDescription, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+// --- TwoTonePicker -----------------------------------------------------------
+
+namespace
+{
+constexpr uint32_t kPickerActive   = Color::TEAL;
+constexpr uint32_t kPickerInactive = Color::WHITE;
+} // namespace
+
+TwoTonePicker::TwoTonePicker(lv_obj_t* parent)
+{
+    using F = Theme::Font;
+    mButtons = std::make_unique<Buttons>(parent);
+    // Fixed bezel mapping: left = scroll, R1 = confirm/advance, R2 = skip/back.
+    mButtons->set(Buttons::WHITE, Buttons::WHITE, Buttons::AMBER, Buttons::WHITE);
+
+    mSubLeft  = Theme::label(parent, F::Italic20, "", 5, 58, 110, LV_TEXT_ALIGN_CENTER, kPickerActive);
+    mSubRight = Theme::label(parent, F::Italic20, "", 127, 58, 108, LV_TEXT_ALIGN_CENTER, kPickerInactive);
+    mValLeft  = Theme::label(parent, F::SemiBold60, "", 5, 92, 110, LV_TEXT_ALIGN_RIGHT, kPickerActive);
+    mValSep   = Theme::label(parent, F::Light60, "", 110, 92, 22, LV_TEXT_ALIGN_CENTER, kPickerInactive);
+    mValRight = Theme::label(parent, F::Light60, "", 127, 92, 108, LV_TEXT_ALIGN_LEFT, kPickerInactive);
+    mNext1    = Theme::label(parent, F::Medium40, "", 5, 151, 110, LV_TEXT_ALIGN_RIGHT, kPickerInactive);
+    mNext2    = Theme::label(parent, F::Medium25, "", 5, 193, 110, LV_TEXT_ALIGN_RIGHT, kPickerInactive);
+    mTitle    = std::make_unique<Title>(parent, "");
+}
+
+void TwoTonePicker::setTitle(const char* title)
+{
+    mTitle->setText(title);
+}
+
+void TwoTonePicker::renderSubtitleSingle(const char* label)
+{
+    lv_obj_set_pos(mSubLeft, 20, 58);
+    lv_obj_set_width(mSubLeft, 200);
+    lv_label_set_text(mSubLeft, label);
+    lv_obj_set_style_text_color(mSubLeft, Theme::rgb(kPickerActive), LV_PART_MAIN);
+    lv_label_set_text(mSubRight, "");
+}
+
+void TwoTonePicker::renderSubtitleDual(const char* left, const char* right, bool leftActive)
+{
+    lv_obj_set_pos(mSubLeft, 5, 58);
+    lv_obj_set_width(mSubLeft, 110);
+    lv_label_set_text(mSubLeft, left);
+    lv_obj_set_style_text_color(mSubLeft, Theme::rgb(leftActive ? kPickerActive : kPickerInactive), LV_PART_MAIN);
+    lv_label_set_text(mSubRight, right);
+    lv_obj_set_style_text_color(mSubRight, Theme::rgb(leftActive ? kPickerInactive : kPickerActive), LV_PART_MAIN);
+}
+
+void TwoTonePicker::renderValue(bool leftActive, const char* left, const char* right, const char* sep,
+                                const char* up1, const char* up2)
+{
+    lv_label_set_text(mValSep, sep);
+
+    lv_label_set_text(mValLeft, left);
+    lv_obj_set_style_text_font(mValLeft, Theme::font(leftActive ? Theme::Font::SemiBold60 : Theme::Font::Light60), LV_PART_MAIN);
+    lv_obj_set_style_text_color(mValLeft, Theme::rgb(leftActive ? kPickerActive : kPickerInactive), LV_PART_MAIN);
+
+    lv_label_set_text(mValRight, right);
+    lv_obj_set_style_text_font(mValRight, Theme::font(leftActive ? Theme::Font::Light60 : Theme::Font::SemiBold60), LV_PART_MAIN);
+    lv_obj_set_style_text_color(mValRight, Theme::rgb(leftActive ? kPickerInactive : kPickerActive), LV_PART_MAIN);
+
+    // Upcoming values sit under the active component, pulled towards the centre.
+    if (leftActive) {
+        lv_obj_set_pos(mNext1, 5, 151);
+        lv_obj_set_width(mNext1, 110);
+        lv_obj_set_pos(mNext2, 5, 193);
+        lv_obj_set_width(mNext2, 110);
+        lv_obj_set_style_text_align(mNext1, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+        lv_obj_set_style_text_align(mNext2, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+    } else {
+        lv_obj_set_pos(mNext1, 127, 151);
+        lv_obj_set_width(mNext1, 108);
+        lv_obj_set_pos(mNext2, 127, 193);
+        lv_obj_set_width(mNext2, 108);
+        lv_obj_set_style_text_align(mNext1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+        lv_obj_set_style_text_align(mNext2, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+    }
+    lv_label_set_text(mNext1, up1 ? up1 : "");
+    lv_label_set_text(mNext2, up2 ? up2 : "");
 }
 
 } // namespace Widgets

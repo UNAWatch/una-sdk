@@ -7,14 +7,19 @@
  * Matches the TouchGFX MainMenu/MainMenuLayout geometry: wheel at y = 87,
  * items 66 px tall, 15 px gap, lens at (16, 87) 220 x 66.
  *
+ * Item styles follow MenuItemConfig::Style: Simple (centred text), Tip (text
+ * with a hint line below), Toggle (text with an on/off switch; the item shows
+ * as Tip with ON/OFF when not selected) and Icon (bitmap beside the text).
+ *
  * The slide works the way TouchGFX's ScrollWheelWithSelectionStyle does. Two
  * strips hold the previous, current and next items: one rendered in the large
  * selected style and clipped to the 66 px selection window, the other in the
  * small style and clipped to the area below the gap. Both strips move together
  * by one item pitch over App::Config::kMenuAnimationMs, so the incoming item
  * rises through the gap in small type and appears in the selection window in
- * large type, exactly as on the TouchGFX wheel. Items are described once; the
- * strips are re-rendered from the new selection when the slide lands.
+ * large type, exactly as on the TouchGFX wheel. Items are described once (the
+ * caller may change their text and call refresh()); the strips are re-rendered
+ * from the new selection when the slide lands.
  ******************************************************************************
  */
 
@@ -22,9 +27,11 @@
 #define WHEEL_MENU_HPP
 
 #include <cstdint>
+#include <memory>
 
 #include "lvgl.h"
 
+#include "SDK/GUI/Color.hpp"
 #include "gui/theme/Theme.hpp"
 #include "gui/widgets/Widgets.hpp"
 
@@ -38,18 +45,31 @@ public:
     };
 
     struct Item {
-        const char*          text        = nullptr;
-        Theme::Font          centerFont  = Theme::Font::SemiBold30;
-        const lv_image_dsc_t* centerIcon = nullptr;   ///< icon shown when selected
-        IconLayout           centerLayout { 20, 3, 87, 153 };
-        const lv_image_dsc_t* icon       = nullptr;   ///< icon shown as the next item
-        IconLayout           itemLayout   { 46, 7, 102, 100 };
+        enum class Style : uint8_t { Simple, Tip, Toggle, Icon };
+
+        Style       style      = Style::Simple;
+        const char* text       = nullptr;     ///< main text (may contain '\n')
+        const char* itemText   = nullptr;     ///< text when not selected; nullptr = text
+        Theme::Font centerFont = Theme::Font::SemiBold30;
+
+        // Tip: hint line under the text. For Toggle the hint is ON/OFF.
+        const char* tip      = nullptr;
+        uint32_t    tipColor = SDK::GUI::Color::WHITE;   ///< hint colour when not selected
+
+        // Toggle
+        bool toggleState = false;
+
+        // Icon
+        const lv_image_dsc_t* centerIcon = nullptr;
+        IconLayout            centerLayout { 20, 3, 87, 153 };
+        const lv_image_dsc_t* icon       = nullptr;
+        IconLayout            itemLayout   { 46, 7, 102, 100 };
     };
 
     /**
-     * @param items        Menu entries, kept alive by the caller.
+     * @param items        Menu entries, kept alive (and possibly edited) by the caller.
      * @param count        Number of entries.
-     * @param itemOffsetY  Vertical nudge of the surrounding (next) item's text.
+     * @param itemOffsetY  Vertical nudge of a Simple surrounding item's text.
      */
     WheelMenu(lv_obj_t* parent, const Item* items, uint16_t count, int16_t itemOffsetY = 0);
     ~WheelMenu();
@@ -62,6 +82,8 @@ public:
     /// Slide to the following / preceding item.
     void next();
     void prev();
+    /// Re-render after the caller changed item texts or toggle states.
+    void refresh();
 
     /// The selected item; during a slide, the one being slid to.
     uint16_t selected() const { return mSelected; }
@@ -74,15 +96,20 @@ public:
 
 private:
     /// One strip of three slots: previous, current, next.
+    struct Slot {
+        lv_obj_t* label = nullptr;
+        lv_obj_t* tip   = nullptr;
+        lv_obj_t* icon  = nullptr;
+        std::unique_ptr<Widgets::Toggle> toggle;
+    };
     struct Strip {
         lv_obj_t* obj = nullptr;
-        lv_obj_t* label[3] = {};
-        lv_obj_t* icon[3]  = {};
+        Slot slot[3];
     };
 
     void buildStrip(Strip& strip, lv_obj_t* window, int32_t restY);
     void render();
-    void renderSlot(lv_obj_t* label, lv_obj_t* icon, const Item& item, bool center);
+    void renderSlot(Slot& slot, const Item& item, bool center);
     void slide(int direction);
     void finishSlide();
     static void animExecCb(void* var, int32_t value);

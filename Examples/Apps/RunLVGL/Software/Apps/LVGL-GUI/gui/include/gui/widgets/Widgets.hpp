@@ -16,11 +16,13 @@
 
 #include <cstdint>
 #include <ctime>
+#include <memory>
 #include <vector>
 
 #include "lvgl.h"
 
 #include "SDK/TrackMap/TrackMapScreen.hpp"
+#include "Track.hpp"
 #include "gui/theme/Theme.hpp"
 
 namespace Widgets
@@ -214,12 +216,91 @@ class TimerRing
 public:
     explicit TimerRing(lv_obj_t* parent);
     void setColor(uint32_t color);
-    /// Fill fraction in permille (0..1000) of the track arc.
+    /// FILL: the arc grows from the track's start; @p permille (0..1000) is how much.
     void setProgress(uint32_t permille);
+    /// DRAIN: the arc shrinks towards the track's end; @p permille is how much is left.
+    void setRemaining(uint32_t permille);
 
 private:
     lv_obj_t* mTrack    = nullptr;
     lv_obj_t* mProgress = nullptr;
+};
+
+// -----------------------------------------------------------------------------
+/// Two-state switch, 60 x 30: a pill rail (black off, amber on) and a light knob.
+class Toggle
+{
+public:
+    Toggle(lv_obj_t* parent, int32_t x, int32_t y);
+    void setState(bool on);
+    bool state() const { return mOn; }
+    void setVisible(bool visible);
+
+private:
+    lv_obj_t* mRail   = nullptr;
+    lv_obj_t* mHandle = nullptr;
+    int32_t   mX = 0, mY = 0;
+    bool      mOn = false;
+};
+
+// -----------------------------------------------------------------------------
+/// Interval phase readout, 190 x 91: big MM:SS or distance, a description line
+/// and a divider, all in the phase's accent colour.
+class IntervalsTimer
+{
+public:
+    IntervalsTimer(lv_obj_t* parent, int32_t x, int32_t y);
+
+    /// MM:SS (clamped to 99:59) with "Open" / "Remaining" / "Elapsed" beneath.
+    void setPhaseTime(std::time_t sec, Track::IntervalsMetric metric);
+    /// Distance left with "km remaining" / "mi remaining" beneath.
+    void setPhaseDistance(float distInUnits, bool imperial);
+    /// MM:SS only (alert screens).
+    void setRemainingTime(std::time_t sec);
+    /// "Open" as the main readout (alert screens).
+    void setOpen();
+
+    void setColor(uint32_t color);
+    void setLineVisible(bool visible);
+    void setDescriptionVisible(bool visible);
+
+private:
+    void setTimerClamped(std::time_t sec);
+    void setDescription(const char* text);   ///< nullptr hides it
+
+    lv_obj_t* mTimer       = nullptr;
+    lv_obj_t* mDescription = nullptr;
+    lv_obj_t* mLine        = nullptr;
+};
+
+// -----------------------------------------------------------------------------
+/// Two-stage "two-tone" value picker (whole.fraction or minutes:seconds): the
+/// component being edited is teal SemiBold 60, the other grey Light 60, with the
+/// next two values of the active component listed beneath it.
+class TwoTonePicker
+{
+public:
+    explicit TwoTonePicker(lv_obj_t* parent);
+
+    void setTitle(const char* title);
+    /// One centred teal subtitle (distance pickers).
+    void renderSubtitleSingle(const char* label);
+    /// Two subtitles, one over each column; the active one teal (time picker).
+    void renderSubtitleDual(const char* left, const char* right, bool leftActive);
+    /// The composite value plus the two upcoming values of the active component.
+    void renderValue(bool leftActive, const char* left, const char* right, const char* sep,
+                     const char* up1, const char* up2);
+
+private:
+    std::unique_ptr<Title>   mTitle;
+    std::unique_ptr<Buttons> mButtons;
+    lv_obj_t* mSubLeft  = nullptr;
+    lv_obj_t* mSubRight = nullptr;
+    lv_obj_t* mValLeft  = nullptr;
+    lv_obj_t* mValSep   = nullptr;
+    lv_obj_t* mValRight = nullptr;
+    lv_obj_t* mNext1    = nullptr;
+    lv_obj_t* mNext2    = nullptr;
 };
 
 // -----------------------------------------------------------------------------

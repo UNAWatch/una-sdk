@@ -27,8 +27,11 @@ namespace Theme
 /// The Poppins faces the Run app uses, by weight and pixel size.
 enum class Font : uint8_t {
     Italic18,
+    Italic20,
+    Light60,
     Medium18,
     Medium25,
+    Medium40,
     Regular14,
     Regular16,
     Regular18,
