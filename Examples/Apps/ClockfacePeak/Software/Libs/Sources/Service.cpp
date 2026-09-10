@@ -34,7 +34,12 @@ static constexpr float kMaxTrustLevel = 3.0f;
 /// How long the last trusted rate stays on screen once trust is lost. Long
 /// enough to ride out the dips that wrist movement causes, short enough that a
 /// watch taken off does not keep showing a pulse.
-static constexpr std::time_t kHeartRateHoldSeconds = 10;
+///
+/// Measured against the monotonic OS tick, not the wall clock: the wall clock
+/// is set from the phone over BLE and can jump either way, which would strand a
+/// reading on screen indefinitely on a backward jump and retire one early on a
+/// forward one.
+static constexpr uint32_t kHeartRateHoldMs = 10u * kMsPerSecond;
 
 /** @brief Read the local time, to the minute. */
 static void readLocalTime(std::tm &out)
@@ -49,18 +54,19 @@ static void readLocalTime(std::tm &out)
 }
 
 /** @brief How long until the held heart rate ages out, or zero if none is held. */
-static uint32_t msToHeartRateExpiry(uint16_t bpm, std::time_t heldAt)
+static uint32_t msToHeartRateExpiry(uint16_t bpm, uint32_t heldAt, uint32_t now)
 {
     if (bpm == 0u) {
         return 0;
     }
 
-    const std::time_t age = time(nullptr) - heldAt;
-    if (age >= kHeartRateHoldSeconds) {
+    // Unsigned, so it stays right across the tick's wrap at ~49 days.
+    const uint32_t elapsed = now - heldAt;
+    if (elapsed >= kHeartRateHoldMs) {
         return 0;
     }
 
-    return static_cast<uint32_t>(kHeartRateHoldSeconds - age) * kMsPerSecond;
+    return kHeartRateHoldMs - elapsed;
 }
 
 /** @brief How much of the current minute is left, from a reading already taken. */
@@ -143,7 +149,8 @@ void Service::run()
         // arrive far more often than this and keep resetting it, so it costs no
         // extra wake-ups in the common case.
         uint32_t wait = msToNextMinute(local);
-        const uint32_t hold = msToHeartRateExpiry(mBpm, mBpmAt);
+        const uint32_t hold = msToHeartRateExpiry(mBpm, mBpmAt,
+                                                  mKernel.sys.getTimeMs());
         if ((hold != 0u) && (hold < wait)) {
             wait = hold;
         }
@@ -239,7 +246,8 @@ bool Service::isHeartRateTrusted(float bpm, float trustLevel)
 
 void Service::expireHeartRate()
 {
-    if ((mBpm != 0u) && ((time(nullptr) - mBpmAt) >= kHeartRateHoldSeconds)) {
+    if ((mBpm != 0u) &&
+        ((mKernel.sys.getTimeMs() - mBpmAt) >= kHeartRateHoldMs)) {
         mBpm = 0;
         publishHealth();
     }
@@ -303,14 +311,14 @@ void Service::handleSensorData(uint16_t handle, SDK::Sensor::DataBatch &data)
         // seconds old still reads true, whereas a row that blinks reads broken.
         if (isHeartRateTrusted(bpm, trust)) {
             mBpm = static_cast<uint16_t>(bpm);
-            mBpmAt = time(nullptr);
+            mBpmAt = mKernel.sys.getTimeMs();
         }
 
-        // An untrusted sample carries no information, so it neither updates the
-        // held rate nor retires it. expireHeartRate() owns that, and runs every
-        // turn round the loop whether a sample arrived or not -- including the
-        // startup case, where mBpmAt is zero and the row shows --- until the
-        // first trusted reading.
+        // An untrusted sample carries no information, so it neither updates
+        // the held rate nor retires it. expireHeartRate() owns that, and runs
+        // every turn round the loop whether a sample arrived or not. Before the
+        // first trusted reading there is nothing to hold, so the row shows ---.
+
         expireHeartRate();
         publishHealth();
         return;

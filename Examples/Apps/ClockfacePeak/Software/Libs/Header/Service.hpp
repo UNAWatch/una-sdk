@@ -137,7 +137,7 @@ private:
     uint32_t mSteps;                ///< Latest reading from the sensor layer
     uint32_t mActivityMinutes;
     uint16_t mBpm;                  ///< Last trusted rate, 0 once given up on
-    std::time_t mBpmAt;             ///< When that rate was read, for the hold
+    uint32_t mBpmAt;                ///< Monotonic tick when that rate was read
     uint32_t mSentSteps;            ///< Last health triple sent to the GUI
     uint32_t mSentActivityMinutes;
     uint16_t mSentBpm;
