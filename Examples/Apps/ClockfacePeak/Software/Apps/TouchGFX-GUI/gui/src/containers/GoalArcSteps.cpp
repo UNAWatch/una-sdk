@@ -31,6 +31,11 @@ void GoalArcSteps::setProgress(uint32_t current, uint32_t total)
         filled = ((to - from) * static_cast<float>(pct)) / 100.0f;
     }
 
+    // Circle has no zero-span case: with round caps an arc whose start and
+    // end coincide still draws both caps, which is a full disc of the stroke's
+    // width sitting at the bottom of the track. So an unfilled ring is hidden
+    // rather than drawn empty.
+    progress.setVisible(filled > 0.0f);
     progress.setArc(from, from + filled);
 
     progress.invalidate();

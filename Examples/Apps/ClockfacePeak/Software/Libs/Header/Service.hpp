@@ -57,6 +57,19 @@ private:
      */
     void refreshSystemSettings();
 
+    /**
+     * @brief Re-send everything the GUI draws, whether or not it has changed.
+     *
+     * The publishers below all drop a value equal to the one they last sent,
+     * which is right for a steady stream but wrong after a suspension: the
+     * GUI's custom-message queue is ten deep, a suspended GUI never drains it,
+     * and a full queue rejects the newest message outright. So a value that
+     * moved while the face was off screen can be lost, and the publisher will
+     * not offer it again. Clearing the sent flags is what makes @ref Refresh
+     * mean what it says.
+     */
+    void republishAll();
+
     /** Send the reading on, unless it matches the one last sent. */
     void publishTime(const std::tm &local);
 
@@ -114,7 +127,8 @@ private:
 
     uint32_t mSteps;                ///< Latest reading from the sensor layer
     uint32_t mActivityMinutes;
-    uint16_t mBpm;                  ///< 0 when no sample passed the trust gate
+    uint16_t mBpm;                  ///< Last trusted rate, 0 once given up on
+    std::time_t mBpmAt;             ///< When that rate was read, for the hold
     uint32_t mSentSteps;            ///< Last health triple sent to the GUI
     uint32_t mSentActivityMinutes;
     uint16_t mSentBpm;

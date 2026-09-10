@@ -31,6 +31,11 @@ static constexpr float kMinPlausibleBpm = 20.0f;
 static constexpr float kMinTrustLevel = 1.0f;
 static constexpr float kMaxTrustLevel = 3.0f;
 
+/// How long the last trusted rate stays on screen once trust is lost. Long
+/// enough to ride out the dips that wrist movement causes, short enough that a
+/// watch taken off does not keep showing a pulse.
+static constexpr std::time_t kHeartRateHoldSeconds = 10;
+
 /** @brief Read the local time, to the minute. */
 static void readLocalTime(std::tm &out)
 {
@@ -71,6 +76,7 @@ Service::Service(SDK::Kernel &kernel)
     , mSteps(0)
     , mActivityMinutes(0)
     , mBpm(0)
+    , mBpmAt(0)
     , mSentSteps(0)
     , mSentActivityMinutes(0)
     , mSentBpm(0)
@@ -137,7 +143,7 @@ void Service::run()
             // The GUI resumed. It has been off screen, possibly across a
             // change to the very setting it cannot be told about.
             case CustomMessage::REFRESH:
-                refreshSystemSettings();
+                republishAll();
                 break;
 
             case SDK::MessageType::COMMAND_APP_STOP:
@@ -249,13 +255,40 @@ void Service::handleSensorData(uint16_t handle, SDK::Sensor::DataBatch &data)
         const float bpm   = parser.getBpm();
         const float trust = parser.getTrustLevel();
 
-        // A reading that fails the gate is reported as zero rather than
-        // withheld, so the face can show that it has no rate instead of
-        // holding a stale one on screen indefinitely.
-        mBpm = isHeartRateTrusted(bpm, trust) ? static_cast<uint16_t>(bpm) : 0;
+        // Trust dips transiently whenever the wrist moves, so a sample that
+        // fails the gate means "no new information", not "no rate". Blanking
+        // on it makes the row flicker to --- for a second at every dip, which
+        // is what an earlier version of this face did on the wrist.
+        //
+        // So the last good reading is held, and only a sustained loss gives up
+        // on it. Holding is the right way round to be wrong here: a rate a few
+        // seconds old still reads true, whereas a row that blinks reads broken.
+        if (isHeartRateTrusted(bpm, trust)) {
+            mBpm = static_cast<uint16_t>(bpm);
+            mBpmAt = time(nullptr);
+        } else if ((time(nullptr) - mBpmAt) >= kHeartRateHoldSeconds) {
+            // Also the startup case: mBpmAt is zero until the first trusted
+            // sample, so the row shows --- rather than a held nothing.
+            mBpm = 0;
+        }
+
         publishHealth();
         return;
     }
+}
+
+void Service::republishAll()
+{
+    mTimeSent   = false;
+    mLevelSent  = false;
+    mHealthSent = false;
+    mFormatSent = false;
+    mGoalsSent  = false;
+
+    // The clock is republished by the loop's next turn, which is immediate.
+    publishBatteryLevel(mLevel);
+    publishHealth();
+    refreshSystemSettings();
 }
 
 void Service::refreshSystemSettings()

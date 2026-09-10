@@ -111,7 +111,7 @@ void Service::run()
             // The GUI resumed. It has been off screen, possibly across a
             // change to the very setting it cannot be told about.
             case CustomMessage::REFRESH:
-                refreshSystemSettings();
+                republishAll();
                 break;
 
             case SDK::MessageType::COMMAND_APP_STOP:
@@ -172,6 +172,17 @@ void Service::handleSensorData(uint16_t handle, SDK::Sensor::DataBatch &data)
 
     mSteps = parser.getStepCount();
     publishSteps();
+}
+
+void Service::republishAll()
+{
+    mTimeSent   = false;
+    mStepsSent  = false;
+    mFormatSent = false;
+
+    // The clock is republished by the loop's next turn, which is immediate.
+    publishSteps();
+    refreshSystemSettings();
 }
 
 void Service::refreshSystemSettings()

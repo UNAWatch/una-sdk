@@ -30,6 +30,11 @@ void GoalArcActivity::setProgress(uint32_t current, uint32_t total)
     // The one line that differs from the steps ring: on the right of the face
     // the track's clockwise end is its visual bottom, so the fill grows back
     // from there towards twelve o'clock.
+    // Circle has no zero-span case: with round caps an arc whose start and
+    // end coincide still draws both caps, which is a full disc of the stroke's
+    // width sitting at the bottom of the track. So an unfilled ring is hidden
+    // rather than drawn empty.
+    progress.setVisible(filled > 0.0f);
     progress.setArc(to - filled, to);
 
     progress.invalidate();
