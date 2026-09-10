@@ -375,6 +375,12 @@ void AlarmManager::checkAlarms(uint8_t currentHour, uint8_t currentMinute,
 
     forgetStaleFired(nowMinute);
 
+    // Settle the snooze list first. The alarm scan below skips an alarm that has
+    // a snooze pending, and an entry already past saving would otherwise be
+    // enough to skip it -- for a whole day, since the alarm's minute does not
+    // come round again until tomorrow.
+    settleSnoozes(nowUtc);
+
     for (auto& alarm : mAlarms) {
         if (!alarm.on) continue;
 
@@ -414,43 +420,12 @@ void AlarmManager::checkAlarms(uint8_t currentHour, uint8_t currentMinute,
     // Re-trigger snoozed alarms whose deadline has passed. Comparing absolute
     // timestamps rather than hour/minute equality: an entry that misses its
     // minute must still ring, not sit here for ever suppressing its own alarm.
+    // settleSnoozes() has already dropped or re-anchored everything unringable,
+    // so the only question left here is whether an entry is due.
     auto it = mSnoozedAlarms.begin();
     while (it != mSnoozedAlarms.end()) {
-        if (it->ringsLeft == 0) {
-            // Not reachable through armSnooze(); a hand-edited or truncated
-            // snooze file could still produce it.
-            it = mSnoozedAlarms.erase(it);
-            mSnoozesDirty = true;
-            continue;
-        }
-
-        const std::time_t due = it->nextTriggerAt;
-
-        if (nowUtc + static_cast<std::time_t>(kSnoozedTimeMinutes) * 60 < due) {
-            // The clock stepped backwards past any plausible deadline (a time
-            // sync, or a restore from a stale file). Re-anchor so the entry
-            // cannot outlive its usefulness.
-            LOG_INFO("Clock stepped back; re-anchoring snooze %02d:%02d\n",
-                it->info.timeHours, it->info.timeMinutes);
-            it->nextTriggerAt = snoozeDeadline(nowUtc);
-            mSnoozesDirty = true;
+        if (nowUtc < it->nextTriggerAt) {
             ++it;
-            continue;
-        }
-
-        if (nowUtc < due) {
-            ++it;
-            continue;
-        }
-
-        if (nowUtc - due > kSnoozeLateGraceSec) {
-            // The watch was off, or the clock jumped forward. Ringing now would
-            // ring at the wrong time; drop the entry so nothing stays stuck.
-            LOG_INFO("Snooze %02d:%02d missed its slot by %ld s; dropping it\n",
-                it->info.timeHours, it->info.timeMinutes,
-                static_cast<long>(nowUtc - due));
-            it = mSnoozedAlarms.erase(it);
-            mSnoozesDirty = true;
             continue;
         }
 
@@ -481,6 +456,51 @@ void AlarmManager::checkAlarms(uint8_t currentHour, uint8_t currentMinute,
         if (mObserver) {
             mObserver->onListChanged(mAlarms);
         }
+    }
+}
+
+void AlarmManager::settleSnoozes(std::time_t nowUtc)
+{
+    auto it = mSnoozedAlarms.begin();
+    while (it != mSnoozedAlarms.end()) {
+        if (it->ringsLeft == 0) {
+            // Not reachable through armSnooze(); a hand-edited or truncated
+            // snooze file could still produce it.
+            it = mSnoozedAlarms.erase(it);
+            mSnoozesDirty = true;
+            continue;
+        }
+
+        const std::time_t due = it->nextTriggerAt;
+
+        if (nowUtc + static_cast<std::time_t>(kSnoozedTimeMinutes) * 60 < due) {
+            // The clock stepped backwards past any plausible deadline (a time
+            // sync, or a restore from a stale file). Re-anchor so the entry
+            // cannot outlive its usefulness.
+            LOG_INFO("Clock stepped back; re-anchoring snooze %02d:%02d\n",
+                it->info.timeHours, it->info.timeMinutes);
+            it->nextTriggerAt = snoozeDeadline(nowUtc);
+            mSnoozesDirty = true;
+            ++it;
+            continue;
+        }
+
+        // Note the subtraction is signed: an entry that is not due yet gives a
+        // negative difference and is left alone.
+        if (nowUtc - due > kSnoozeLateGraceSec) {
+            // The watch was off, or the clock jumped forward. Ringing now would
+            // ring at the wrong time; drop the entry so nothing stays stuck --
+            // and drop it before the alarm scan, so it cannot suppress the
+            // alarm it came from.
+            LOG_INFO("Snooze %02d:%02d missed its slot by %ld s; dropping it\n",
+                it->info.timeHours, it->info.timeMinutes,
+                static_cast<long>(nowUtc - due));
+            it = mSnoozedAlarms.erase(it);
+            mSnoozesDirty = true;
+            continue;
+        }
+
+        ++it;
     }
 }
 

@@ -247,6 +247,64 @@ TEST(AlarmManager, ASnoozeMissedByHoursIsDroppedAndTheAlarmKeepsWorking)
     EXPECT_EQ(h.cb.rings, 2);
 }
 
+// A snooze that is already past saving must not suppress the alarm it came
+// from. The alarm scan runs before the snooze sweep, so a spent entry that the
+// sweep is about to drop was still enough to skip the alarm for that minute --
+// and the alarm's minute does not come round again until the next day.
+TEST(AlarmManager, ASpentSnoozeDoesNotSwallowItsAlarmsOwnMinute)
+{
+    Harness h{ alarmAt(7, 0) };
+
+    h.run(at(0, 7, 0, 2));
+    ASSERT_EQ(h.cb.rings, 1);
+
+    // A day later, inside the alarm's own minute, with the snooze from
+    // yesterday still on the books and hours past its deadline.
+    h.run(at(1, 7, 0, 3));
+    EXPECT_EQ(h.cb.rings, 2);
+}
+
+// The same hole, reached the way a user would: the watch is off over the
+// snooze's deadline and comes back inside the alarm's minute the next day.
+TEST(AlarmManager, ASnoozeRestoredStaleDoesNotSwallowTheAlarm)
+{
+    KernelFixture fx;
+
+    {
+        RecordingCallback cb;
+        AlarmManager      mgr{ fx.kernel };
+        mgr.attachCallback(&cb);
+        ASSERT_TRUE(mgr.saveAlarmList({ alarmAt(7, 0) }));
+        mgr.execute(at(0, 7, 0, 2).local, at(0, 7, 0, 2).utc);
+        ASSERT_EQ(cb.rings, 1);
+    }
+
+    RecordingCallback cb2;
+    AlarmManager      mgr2{ fx.kernel };
+    mgr2.attachCallback(&cb2);
+    mgr2.load();
+
+    mgr2.execute(at(1, 7, 0, 5).local, at(1, 7, 0, 5).utc);
+    EXPECT_EQ(cb2.rings, 1);
+}
+
+// A due snooze and an unrelated alarm landing in the same minute both ring.
+TEST(AlarmManager, ASnoozeAndAnotherAlarmInTheSameMinuteBothRing)
+{
+    KernelFixture     fx;
+    RecordingCallback cb;
+    AlarmManager      mgr{ fx.kernel };
+    mgr.attachCallback(&cb);
+    ASSERT_TRUE(mgr.saveAlarmList({ alarmAt(7, 0), alarmAt(7, 5) }));
+
+    mgr.execute(at(0, 7, 0, 2).local, at(0, 7, 0, 2).utc);
+    ASSERT_EQ(cb.rings, 1);
+
+    // 07:05 is both the second alarm's time and the first one's snooze deadline.
+    mgr.execute(at(0, 7, 5, 1).local, at(0, 7, 5, 1).utc);
+    EXPECT_EQ(cb.rings, 3);
+}
+
 TEST(AlarmManager, AClockStepBackwardsReanchorsTheSnooze)
 {
     Harness h{ alarmAt(7, 0) };

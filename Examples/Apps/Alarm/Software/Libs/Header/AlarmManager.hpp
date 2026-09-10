@@ -206,6 +206,14 @@ private:
 
     void checkAlarms(uint8_t currentHour, uint8_t currentMinute,
                      uint8_t currentDay, std::time_t nowUtc);
+    /**
+     * @brief Drop or re-anchor snoozes that can no longer ring on time.
+     *
+     * Runs before the alarm scan: a pending snooze suppresses its own alarm,
+     * so an entry that is past saving has to be gone by then, or it costs the
+     * alarm a whole day.
+     */
+    void settleSnoozes(std::time_t nowUtc);
     std::time_t snoozeDeadline(std::time_t nowUtc) const;
     void armSnooze(const Alarm& alarm, std::time_t nowUtc, bool detached);
     void removeObsoleteSnoozedAlarms();
