@@ -63,13 +63,15 @@ private:
     /**
      * @brief Re-send everything the GUI draws, whether or not it has changed.
      *
-     * The publishers below all drop a value equal to the one they last sent,
-     * which is right for a steady stream but wrong after a suspension: the
-     * GUI's custom-message queue is ten deep, a suspended GUI never drains it,
-     * and a full queue rejects the newest message outright. So a value that
-     * moved while the face was off screen can be lost, and the publisher will
-     * not offer it again. Clearing the sent flags is what makes @ref Refresh
-     * mean what it says.
+     * The publishers below drop a value equal to the one they last *delivered*,
+     * which is right for a steady stream but not enough after a suspension:
+     * the GUI's custom-message queue is ten deep, a suspended GUI never drains
+     * it, and a full queue rejects the newest message outright. A publish that
+     * failed that way is retried -- the flag records the send's result -- but
+     * only when its source next speaks, and a charge level or a step count can
+     * be quiet for many minutes. Clearing the flags here forces the current
+     * value out on resume instead of waiting for one, which is what makes
+     * @ref Refresh mean what it says.
      */
     void republishAll();
 
@@ -82,12 +84,16 @@ private:
      */
     void expireHeartRate();
 
-    /** Send the reading on, unless it matches the one last sent. */
+    /** Send the reading on, unless it matches the one last delivered. */
     void publishTime(const std::tm &local);
 
     // Everything the face shows leaves through one of these. Each drops a
-    // value equal to the one it last sent, so a source may call them as often
-    // as it likes and only a real change costs an IPC round trip.
+    // value equal to the one it last delivered, so a source may call them as
+    // often as it likes and only a real change costs an IPC round trip.
+    //
+    // Delivered, not merely attempted: each takes its sent flag from
+    // send_msg's result, because that fails when the GUI's queue is full and a
+    // value recorded as sent would never be offered again.
 
     /** @brief Tell the GUI the charge level, 0-100. */
     void publishBatteryLevel(uint8_t level);
@@ -109,12 +115,19 @@ private:
     void publishAlertsMuted(bool muted);
 
     /**
-     * @brief Whether a heart-rate sample is worth showing.
+     * @brief Whether a heart-rate sample is worth believing.
      *
      * The parser's own isDataValid() only checks the field count, so it says
-     * nothing about signal quality. The activity apps all gate on the same
-     * pair of conditions, and this face follows them: a trust level of 0 means
-     * no signal, and a bpm at or below 20 is not a human resting rate.
+     * nothing about signal quality. The predicate is the activity apps' -- a
+     * trust level of 0 means no signal, and a bpm at or below 20 is not a
+     * human resting rate -- but note what they use it for: deciding whether a
+     * sample reaches a FIT file. It is not a display filter. Applied per
+     * sample to a row on screen it blanks it on every dip that wrist movement
+     * causes, which is the defect this face shipped with.
+     *
+     * So a sample that fails here is treated as no new information rather than
+     * no reading: the held rate stands, and @ref expireHeartRate is what
+     * eventually gives up on it.
      */
     static bool isHeartRateTrusted(float bpm, float trustLevel);
 

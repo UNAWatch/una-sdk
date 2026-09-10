@@ -60,17 +60,19 @@ private:
     /**
      * @brief Re-send everything the GUI draws, whether or not it has changed.
      *
-     * The publishers below all drop a value equal to the one they last sent,
-     * which is right for a steady stream but wrong after a suspension: the
-     * GUI's custom-message queue is ten deep, a suspended GUI never drains it,
-     * and a full queue rejects the newest message outright. So a value that
-     * moved while the face was off screen can be lost, and the publisher will
-     * not offer it again. Clearing the sent flags is what makes @ref Refresh
-     * mean what it says.
+     * The publishers below drop a value equal to the one they last *delivered*,
+     * which is right for a steady stream but not enough after a suspension:
+     * the GUI's custom-message queue is ten deep, a suspended GUI never drains
+     * it, and a full queue rejects the newest message outright. A publish that
+     * failed that way is retried -- the flag records the send's result -- but
+     * only when its source next speaks, and a charge level or a step count can
+     * be quiet for many minutes. Clearing the flags here forces the current
+     * value out on resume instead of waiting for one, which is what makes
+     * @ref Refresh mean what it says.
      */
     void republishAll();
 
-    /** Send the reading on, unless it matches the one last sent. */
+    /** Send the reading on, unless it matches the one last delivered. */
     void publishTime(const std::tm &local);
 
     /** @brief Tell the GUI the day's step count. */
