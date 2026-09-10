@@ -288,9 +288,10 @@ void Model::onStop()
 // ICustomMessageHandler
 bool Model::customMessageHandler(SDK::MessageBase* message)
 {
-    if (!modelListener) {
-        return true;
-    }
+    // State is always updated; with no screen bound the notifications go to a
+    // listener that ignores them.
+    static ModelListener sNullListener;
+    ModelListener* modelListener = this->modelListener ? this->modelListener : &sNullListener;
 
     switch (message->getType()) {
         case CustomMessage::SETTINGS_UPDATE: {

@@ -6,7 +6,8 @@
  * A Screen owns one LVGL screen object (lv_obj_create(nullptr)), receives the
  * kernel's button codes through LV_EVENT_KEY on that object, and is the
  * Model's listener while it is on display. This plays the role TouchGFX's
- * View + Presenter pair play in the Run app, collapsed into one class.
+ * View + Presenter pair play in the Run app, collapsed into one class:
+ * onShow() is the presenter's activate(), onHide() its deactivate().
  ******************************************************************************
  */
 
@@ -38,8 +39,11 @@ public:
     /// The LVGL screen object, or nullptr before create() / after destroy().
     lv_obj_t* root() const { return mRoot; }
 
-    /// Called after this screen has become the active one.
+    /// Called after this screen has become the active one and the Model is bound.
     virtual void onShow() {}
+
+    /// Called just before the screen is replaced; store navigation state here.
+    virtual void onHide() {}
 
     /// Called with an SDK::GUI::Button code (click, press or release).
     virtual void onKey(uint8_t code) { (void)code; }

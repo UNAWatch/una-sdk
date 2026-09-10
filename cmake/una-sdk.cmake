@@ -134,8 +134,11 @@ set(UNA_SDK_INCLUDE_DIRS_GUI_LVGL
     "${UNA_SDK_LVGL_PATH}"
 )
 
+# LV_LVGL_H_INCLUDE_SIMPLE makes the C files lv_font_conv and LVGLImage.py emit
+# include "lvgl.h" (on the include path above) rather than "lvgl/lvgl.h".
 set(UNA_SDK_DEFINES_GUI_LVGL
     "LV_CONF_PATH=\"${UNA_LVGL_CONF}\""
+    "LV_LVGL_H_INCLUDE_SIMPLE"
 )
 
 # Combined service includes for backward compatibility

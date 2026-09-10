@@ -14,26 +14,19 @@
 
 #include "gui/model/Model.hpp"
 #include "gui/theme/Theme.hpp"
-#include "gui/screens/HelloScreen.hpp"
+#include "gui/screens/ScreenManager.hpp"
 
 namespace
 {
 
 alignas(Model) uint8_t sModelStorage[sizeof(Model)];
-Model*       sModel = nullptr;
-HelloScreen* sHello = nullptr;
+Model* sModel = nullptr;
 
 } // namespace
 
 extern "C" void una_lvgl_app_init(void)
 {
     Theme::init();
-
     sModel = new (sModelStorage) Model();
-
-    sHello = new HelloScreen(*sModel);
-    sHello->create();
-    sModel->bind(sHello);
-    lv_screen_load(sHello->root());
-    sHello->onShow();
+    ScreenManager::instance().start(*sModel, ScreenId::Main);
 }

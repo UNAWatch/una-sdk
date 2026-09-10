@@ -27,6 +27,7 @@
 #include "Settings.hpp"
 #include "ActivitySummary.hpp"
 #include "Track.hpp"
+#include "AppMenu.hpp"
 
 // ---------------------------------------------------------------------------
 // App::Config -- application-level constants (timing, frame rate).
@@ -35,6 +36,7 @@ namespace App::Config
 {
 constexpr uint32_t kFrameRate = SDK::GUI::Config::kFrameRate;
 
+constexpr uint32_t kMenuAnimationMs    = 400;                                    // wheel slide
 constexpr uint32_t kScreenTimeoutSteps = SDK::Utils::secToTicks(30, kFrameRate);  // 30 s
 
 // HR thresholds
@@ -63,6 +65,9 @@ public:
 
     /// The screen that receives model events. Exactly one is bound at a time.
     void bind(ModelListener* listener) { modelListener = listener; }
+
+    /// Remembered menu / face positions, so a screen reopens where it was left.
+    App::MenuNav::Nav& menu() { return mMenu; }
 
     // Controls
     void handleKeyEvent(uint8_t key);
@@ -135,7 +140,8 @@ private:
     bool     mIsRunning  = false;
     uint32_t mIdleTimer  = 0;
 
-    std::tm mTime {};
+    App::MenuNav::Nav mMenu {};
+    std::tm           mTime {};
 
     // Settings (mirrored from Service)
     bool mUnitsImperial = false;
