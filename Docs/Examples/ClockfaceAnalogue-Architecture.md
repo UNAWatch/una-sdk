@@ -20,11 +20,17 @@ nothing else is running.
 
 The directory prefix is the `APP_TYPE`; the launcher name carries no prefix.
 
+> Building your own face? **[Writing a Watch Face](../writing-a-clockface.md)**
+> is the guide: the structure, the platform constraints and the techniques the
+> five shipped faces share.
+
 ### What it is not
 
 - **No second hand.** The fastest thing the face draws turns once a minute.
-- **No touch, no buttons, no navigation.** A clockface is a display, not a
-  screen the user drives.
+- **No buttons, no navigation.** A clockface is a display, not a screen the
+  user drives: the kernel owns the buttons while a face is on screen, so the app
+  receives no `EVENT_BUTTON`. (The watch has no touchscreen at all, so that is a
+  property of the hardware rather than of clockfaces.)
 - **No glance interface.** The app serves no glance data, and the packed image
   says so: flags `0x03`, glance-capable bit clear.
 
