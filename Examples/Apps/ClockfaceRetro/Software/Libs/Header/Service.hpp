@@ -23,8 +23,10 @@
  *
  * The face has no second hand, so the fastest thing it draws turns once a
  * minute; the clock is read once a turn round the loop, which is both what
- * gets published and what sizes the wait. The four sensors it subscribes to
- * are all event driven, so between minute boundaries the thread is blocked.
+ * gets published and what sets the next minute boundary. The wait is that
+ * boundary or a pending heart-rate expiry, whichever falls sooner. The four
+ * sensors it subscribes to are all event driven, so apart from those the
+ * thread is blocked.
  *
  * The clock format is the one thing here that is neither a clock reading nor a
  * sensor event: it is pulled from the kernel's system settings, which push

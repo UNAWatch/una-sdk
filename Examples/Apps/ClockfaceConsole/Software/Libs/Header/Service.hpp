@@ -27,7 +27,7 @@
  *
  * The clock is read once a turn round the loop, which is both what gets
  * published and what sizes the wait; the step sensor is event driven, so
- * between minute boundaries the thread is blocked.
+ * apart from its events the thread is blocked.
  */
 class Service
 {

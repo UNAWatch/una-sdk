@@ -338,13 +338,51 @@ information* rather than *no reading*: hold the last trusted value and only
 give up after a sustained loss.
 
 ```cpp
+// On each sample. A trusted one refreshes the hold; an untrusted one does
+// nothing at all -- it is not evidence of anything.
 if (isTrusted(bpm, trust)) {
-    mBpm = static_cast<uint16_t>(bpm);
-    mBpmAt = time(nullptr);
-} else if ((time(nullptr) - mBpmAt) >= kHoldSeconds) {   // 10 s in the faces
-    mBpm = 0;                                            // and now show ---
+    mBpm   = static_cast<uint16_t>(bpm);
+    mBpmAt = mKernel.sys.getTimeMs();
+}
+expireHeartRate();
+publishHealth();
+
+// Every turn round the loop, sample or no sample.
+void Service::expireHeartRate()
+{
+    if ((mBpm != 0u) && ((mKernel.sys.getTimeMs() - mBpmAt) >= kHoldMs)) {
+        mBpm = 0;                      // and now show ---
+        publishHealth();
+    }
 }
 ```
+
+Two traps in that, both of which the four faces shipped with and had fixed.
+
+**Expire on the loop, not on the sample.** Putting the test in an `else` on the
+sample handler looks natural and cannot work: it only runs when a sample
+arrives, and the case the hold exists for -- the watch taken off -- is exactly
+the one where samples *stop*. The rate would sit on screen indefinitely. Also
+shorten the loop's wait to the pending expiry, or it fires whenever the minute
+next turns rather than when it is due:
+
+```cpp
+uint32_t wait = msToNextMinute(local);
+const uint32_t hold = msToHeartRateExpiry(mBpm, mBpmAt, mKernel.sys.getTimeMs());
+if ((hold != 0u) && (hold < wait)) {
+    wait = hold;
+}
+```
+
+While the watch is worn, samples arrive far more often than the hold and keep
+resetting it, so that costs no extra wake-ups in the common case.
+
+**Time it with `mKernel.sys.getTimeMs()`, not `time()`.** The wall clock is set
+from the phone over BLE and can move either way. A backward jump makes the age
+negative, so the hold never expires and the reading is stranded; a forward one
+retires a good reading early. `getTimeMs()` is the OS tick, monotonic since
+boot, and unsigned arithmetic on it stays correct across its wrap at about 49
+days.
 
 Holding is the right way round to be wrong: a rate a few seconds old still
 reads true, whereas a row that blinks reads broken.
