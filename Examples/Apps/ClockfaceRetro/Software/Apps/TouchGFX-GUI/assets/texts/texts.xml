@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="texts.xsd" Version="4.26.1">
+  <Languages>
+    <Language Id="GB" />
+  </Languages>
+  <Texts>
+    <TextGroup Id="Template">
+      <Text Id="TMP_RETRO_DATE" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_RETRO_CLOCK" Alignment="Left" TypographyId="Doto_Black_63">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_RETRO_METRIC" Alignment="Left" TypographyId="Doto_Black_14">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_RETRO_MINUTES" Alignment="Left" TypographyId="Doto_Black_14">
+        <Translation Language="GB">&lt;&gt; min</Translation>
+      </Text>
+      <Text Id="TMP_RETRO_BPM" Alignment="Left" TypographyId="Doto_Black_14">
+        <Translation Language="GB">&lt;&gt; bpm</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Clock">
+      <Text Id="TEXT_RETRO_COLON" Alignment="Center" TypographyId="Doto_Black_63">
+        <Translation Language="GB">:</Translation>
+      </Text>
+    </TextGroup>
+    <!-- Day, month and meridiem names are read back with TypedText::getText()
+         and written into the date wildcard, so every glyph they can contain has
+         to be in Doto_Black_18's WildcardCharacters as well. They are Texts
+         rather than string literals so that translating them stays a text
+         database job. -->
+    <TextGroup Id="Day">
+      <Text Id="TEXT_SUN" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">SUN</Translation>
+      </Text>
+      <Text Id="TEXT_MON" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">MON</Translation>
+      </Text>
+      <Text Id="TEXT_TUE" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">TUE</Translation>
+      </Text>
+      <Text Id="TEXT_WED" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">WED</Translation>
+      </Text>
+      <Text Id="TEXT_THU" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">THU</Translation>
+      </Text>
+      <Text Id="TEXT_FRI" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">FRI</Translation>
+      </Text>
+      <Text Id="TEXT_SAT" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">SAT</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Month">
+      <Text Id="TEXT_JAN" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">JAN</Translation>
+      </Text>
+      <Text Id="TEXT_FEB" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">FEB</Translation>
+      </Text>
+      <Text Id="TEXT_MAR" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">MAR</Translation>
+      </Text>
+      <Text Id="TEXT_APR" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">APR</Translation>
+      </Text>
+      <Text Id="TEXT_MAY" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">MAY</Translation>
+      </Text>
+      <Text Id="TEXT_JUN" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">JUN</Translation>
+      </Text>
+      <Text Id="TEXT_JUL" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">JUL</Translation>
+      </Text>
+      <Text Id="TEXT_AUG" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">AUG</Translation>
+      </Text>
+      <Text Id="TEXT_SEP" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">SEP</Translation>
+      </Text>
+      <Text Id="TEXT_OCT" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">OCT</Translation>
+      </Text>
+      <Text Id="TEXT_NOV" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">NOV</Translation>
+      </Text>
+      <Text Id="TEXT_DEC" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">DEC</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Meridiem">
+      <Text Id="TEXT_AM" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">AM</Translation>
+      </Text>
+      <Text Id="TEXT_PM" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">PM</Translation>
+      </Text>
+    </TextGroup>
+    <!-- Wildcard seeds. Dashes rather than plausible readings, so a value the
+         face forgets to set shows as missing instead of as data. -->
+    <TextGroup Id="Wildcard">
+      <Text Id="WC_RETRO_DATE" Alignment="Center" TypographyId="Doto_Black_18">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_RETRO_HOUR" Alignment="Left" TypographyId="Doto_Black_63">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="WC_RETRO_MINUTE" Alignment="Left" TypographyId="Doto_Black_63">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="WC_RETRO_STEPS" Alignment="Left" TypographyId="Doto_Black_14">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_RETRO_ACTIVITY" Alignment="Left" TypographyId="Doto_Black_14">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_RETRO_BPM" Alignment="Left" TypographyId="Doto_Black_14">
+        <Translation Language="GB">---</Translation>
+      </Text>
+    </TextGroup>
+  </Texts>
+  <Typographies>
+    <Typography Id="Doto_Black_63" Font="Doto-Black.ttf" Size="63" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="0123456789-" EllipsisCharacter="…" />
+    <Typography Id="Doto_Black_18" Font="Doto-Black.ttf" Size="18" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 |-" EllipsisCharacter="…" />
+    <Typography Id="Doto_Black_14" Font="Doto-Black.ttf" Size="14" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="0123456789,-" EllipsisCharacter="…" />
+  </Typographies>
+</TextDatabase>

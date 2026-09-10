@@ -1,0 +1,291 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Main",
+        "CanvasBufferSize": 0,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "battery",
+            "X": 97,
+            "Y": 11,
+            "Width": 46,
+            "Height": 15,
+            "LockPosition": true,
+            "RelativeFilename": "Battery4_46x15.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dateText",
+            "X": 0,
+            "Y": 33,
+            "Width": 240,
+            "Height": 24,
+            "LockPosition": true,
+            "TextId": "TMP_RETRO_DATE",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_RETRO_DATE",
+              "UseBuffer": true,
+              "BufferSize": 20
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "ruleTop",
+            "X": 28,
+            "Y": 63,
+            "Width": 174,
+            "Height": 1,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "ruleBottom",
+            "X": 28,
+            "Y": 136,
+            "Width": 174,
+            "Height": 1,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hourText",
+            "X": 39,
+            "Y": 58,
+            "Width": 76,
+            "Height": 76,
+            "LockPosition": true,
+            "TextId": "TMP_RETRO_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_RETRO_HOUR",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "colonText",
+            "X": 115,
+            "Y": 58,
+            "Width": 38,
+            "Height": 76,
+            "LockPosition": true,
+            "TextId": "TEXT_RETRO_COLON",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "minuteText",
+            "X": 126,
+            "Y": 58,
+            "Width": 76,
+            "Height": 76,
+            "LockPosition": true,
+            "TextId": "TMP_RETRO_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_RETRO_MINUTE",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "stepsIcon",
+            "X": 77,
+            "Y": 145,
+            "Width": 17,
+            "Height": 23,
+            "LockPosition": true,
+            "RelativeFilename": "StepsIcon_17x23.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "stepsText",
+            "X": 109,
+            "Y": 146,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_RETRO_METRIC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_RETRO_STEPS",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "activityIcon",
+            "X": 72,
+            "Y": 173,
+            "Width": 28,
+            "Height": 17,
+            "LockPosition": true,
+            "RelativeFilename": "ActivityIcon_28x17.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "activityText",
+            "X": 109,
+            "Y": 171,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_RETRO_MINUTES",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_RETRO_ACTIVITY",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "hrIcon",
+            "X": 74,
+            "Y": 200,
+            "Width": 22,
+            "Height": 19,
+            "LockPosition": true,
+            "RelativeFilename": "HrIcon_22x19.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hrText",
+            "X": 109,
+            "Y": 199,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_RETRO_BPM",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_RETRO_BPM",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [],
+    "Name": "RetroGUI",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Main",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.1"
+}
