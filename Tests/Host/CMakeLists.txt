@@ -61,9 +61,11 @@ add_executable(una-sdk-host-tests
     utils/Utils_test.cpp
     utils/CopyUtf8_test.cpp
     support/KernelTestDoubles_test.cpp
+    apps/Alarm/AlarmManager_test.cpp
     apps/Stopwatch/Stopwatch_test.cpp
     apps/Timer/TimerManager_test.cpp
     apps/Timer/Commands_test.cpp
+    "${UNA_SDK_ROOT}/Examples/Apps/Alarm/Software/Libs/Sources/AlarmManager.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Timer/Software/Libs/Sources/TimerManager.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/ActivityWriter.cpp"
@@ -90,6 +92,7 @@ target_include_directories(una-sdk-host-tests PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}"
     "${UNA_SDK_ROOT}/Libs/Header"
     "${COREJSON_DIR}/include"
+    "${UNA_SDK_ROOT}/Examples/Apps/Alarm/Software/Libs/Header"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Header"
     "${UNA_SDK_ROOT}/Examples/Apps/Stopwatch/Software/Libs/Header"
     "${UNA_SDK_ROOT}/Examples/Apps/Timer/Software/Libs/Header"

@@ -2,6 +2,7 @@
 #define ALARM_MANAGER_HPP
 
 #include <cstdint>
+#include <ctime>
 #include <array>
 #include <vector>
 #include <memory>
@@ -18,12 +19,21 @@
  *
  * Responsibilities:
  * - Load / save alarms from / to JSON file on the filesystem
- * - Check every minute (via execute()) whether any alarm is due
+ * - Decide on every execute() whether any alarm is due
  * - Track snoozed alarms and re-trigger them after kSnoozedTimeMinutes
  * - Notify an observer on alarm trigger and on list changes
+ *
+ * @note execute() is **idempotent within a clock minute**: it may be called far
+ *       more often than once a minute (every message the service receives
+ *       restarts its loop, and a resident service is handed other events too),
+ *       and an alarm rings at most once per minute however often it is called.
  */
 class AlarmManager {
 public:
+
+    /// execute() returns this when nothing is armed: no enabled alarm and no
+    /// pending snooze, so the service has no reason to wake on a timer at all.
+    static constexpr uint32_t kNoWork = 0xFFFFFFFFu;
 
     /**
      * @brief Observer interface for alarm events.
@@ -42,7 +52,7 @@ public:
     AlarmManager(const SDK::Kernel& kernel);
     virtual ~AlarmManager();
 
-    /** @brief Load alarms from persistent storage and notify observer. */
+    /** @brief Load alarms and pending snoozes from storage and notify observer. */
     void load();
 
     /** @brief Attach observer to receive alarm and list-change events. */
@@ -52,11 +62,18 @@ public:
     }
 
     /**
-     * @brief Check for due alarms; call once per minute.
-     * @param tmNow Current local time.
-     * @return Milliseconds until the next required call.
+     * @brief Check for due alarms. Safe to call at any rate.
+     *
+     * @param tmNow  Current **local** time; an alarm's hour/minute is matched
+     *               against this, because an alarm is a wall-clock event.
+     * @param nowUtc The same instant as an absolute UTC timestamp. Snooze
+     *               deadlines are measured on this rather than on local
+     *               hour/minute, so a timezone change or a clock step cannot
+     *               make a pending snooze miss its slot and stick.
+     * @return Milliseconds until the next required call, or kNoWork when
+     *         nothing is armed and no timed wake-up is needed.
      */
-    uint32_t execute(const std::tm& tmNow);
+    uint32_t execute(const std::tm& tmNow, std::time_t nowUtc);
 
     /** @brief Return the current alarm list (non-owning reference). */
     const std::vector<Alarm>& getAlarmList();
@@ -67,10 +84,15 @@ public:
      */
     bool saveAlarmList(const std::vector<Alarm>& list);
 
-    /** @brief Remove a specific alarm from the snoozed-alarm tracking list. */
+    /**
+     * @brief Stop a specific alarm: drop any snooze pending for it.
+     *
+     * Stopping does not let the same minute ring again — that is what the
+     * fired-this-minute latch is for; see mFiredAlarms.
+     */
     void disableAlarm(const Alarm& alarm);
 
-    /** @brief Clear the entire snoozed-alarm tracking list. */
+    /** @brief Stop every ringing / snoozed alarm. */
     void disableAllActiveAlarm();
 
     /**
@@ -89,7 +111,7 @@ public:
      */
     void snoozeAllActiveAlarm();
 
-    /** @brief Return true if any enabled or snoozed alarm exists. */
+    /** @brief Return true if any enabled alarm or pending snooze exists. */
     bool hasActiveAlarms() const;
 
 private:
@@ -97,9 +119,18 @@ private:
     // -- Constants ------------------------------------------------------------
 
     static constexpr char    skFilePath[]        = "alarms.json";
+    static constexpr char    skSnoozeFilePath[]  = "snoozes.json";
     static constexpr uint8_t kSnoozedTimeMinutes = 5;
-    static constexpr uint8_t kMaxSnoozeCount     = 5;
+    /// Automatic re-rings per snooze. Matches the count the previous
+    /// decrement-then-test loop actually delivered.
+    static constexpr uint8_t kMaxSnoozeRings     = 4;
     static constexpr size_t  kInitialCount       = 20;
+    /// Cap on tracked snoozes, so a persisted file can never grow unbounded.
+    static constexpr size_t  kMaxSnoozes         = 8;
+    /// A snooze this far past its deadline is dropped rather than rung: the
+    /// watch was off, or the clock stepped forward, and ringing now would be
+    /// ringing at the wrong time.
+    static constexpr std::time_t kSnoozeLateGraceSec = 5 * 60;
 
     // -- State ----------------------------------------------------------------
 
@@ -119,14 +150,45 @@ private:
 
     // -- Snoozed-alarm tracking -----------------------------------------------
 
+    /**
+     * @brief An alarm waiting to ring again after being snoozed.
+     *
+     * Persisted (see skSnoozeFilePath): a reboot, an OTA or a shutdown gives a
+     * service no notice, so a pending snooze has to be written when it changes
+     * or it is silently lost.
+     */
     struct SnoozedAlarm {
-        Alarm   info;
-        uint8_t snoozeCount       = kMaxSnoozeCount;
-        uint8_t nextTriggerHour   = 0;
-        uint8_t nextTriggerMinute = 0;
+        Alarm       info;
+        /// Automatic re-rings still owed. Never 0 for a live entry.
+        uint8_t     ringsLeft     = kMaxSnoozeRings;
+        /// Absolute UTC deadline of the next ring.
+        std::time_t nextTriggerAt = 0;
+        /// The parent alarm's `on` was cleared by its own trigger (a one-time
+        /// alarm), not by the user. Such an entry must outlive `!on`, or the
+        /// snooze the user just asked for is cancelled by the trigger itself.
+        bool        detached      = false;
     };
 
     std::vector<SnoozedAlarm> mSnoozedAlarms;
+    /// Set by anything that changes mSnoozedAlarms; flushed to storage at the
+    /// end of the public call that changed it.
+    bool                      mSnoozesDirty = false;
+
+    /**
+     * @brief An alarm that has already rung in the current clock minute.
+     *
+     * This is a de-duplication latch, not a snooze. Stopping an alarm drops its
+     * snooze, and the snooze is what used to keep checkAlarms() from ringing the
+     * same minute over again — so Stop, pressed inside the ringing minute, made
+     * the alarm ring straight back and left a fresh snooze behind it. The latch
+     * is deliberately not cleared by Stop, and is not persisted.
+     */
+    struct FiredAlarm {
+        Alarm   info;
+        int64_t minute = 0;   ///< Epoch minute in which it rang.
+    };
+
+    std::vector<FiredAlarm> mFiredAlarms;
 
     // -- Helpers --------------------------------------------------------------
 
@@ -136,14 +198,24 @@ private:
     bool     parseJSON(char* buff, uint32_t length, std::vector<Alarm>& alarms);
     void     dump(const std::vector<Alarm>& alarms);
 
+    bool     saveSnoozesToFile();
+    bool     loadSnoozesFromFile();
+    uint32_t createSnoozeJSON(char* buff, uint32_t buffSize);
+    bool     parseSnoozeJSON(char* buff, uint32_t length);
+    void     persistSnoozesIfDirty();
+
     void checkAlarms(uint8_t currentHour, uint8_t currentMinute,
-                     uint8_t currentDay, const std::tm& tmNow);
-    void addSnoozedAlarm(const Alarm& alarm, const std::tm& tmNow);
-    void updateSnoozedTriggerTime(SnoozedAlarm& snoozed, const std::tm& tmNow);
+                     uint8_t currentDay, std::time_t nowUtc);
+    std::time_t snoozeDeadline(std::time_t nowUtc) const;
+    void armSnooze(const Alarm& alarm, std::time_t nowUtc, bool detached);
     void removeObsoleteSnoozedAlarms();
 
+    void markFired(const Alarm& alarm, int64_t nowMinute);
+    bool hasFiredThisMinute(const Alarm& alarm, int64_t nowMinute) const;
+    void forgetStaleFired(int64_t nowMinute);
+
     bool isAlarmDueToday(const Alarm& alarm, uint8_t currentDay) const;
-    bool isSnoozed(const Alarm& alarm) const;
+    bool hasPendingSnooze(const Alarm& alarm) const;
 };
 
 #endif // ALARM_MANAGER_HPP

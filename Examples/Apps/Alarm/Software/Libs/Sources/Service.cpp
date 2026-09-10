@@ -9,19 +9,36 @@
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
 
-static std::tm getLocalTime()
+namespace {
+
+/// How long after startup the service waits for a GUI before deciding nobody
+/// wants it. The service is always started before its GUI, so an unguarded
+/// "no GUI" test would exit during every launch.
+constexpr uint32_t kStartupGraceMs = 5000;
+
+/// The current instant, in both forms AlarmManager needs: local wall-clock for
+/// matching an alarm's hour/minute, and the absolute UTC stamp that snooze
+/// deadlines are measured on.
+struct Instant {
+    std::tm     local;
+    std::time_t utc;
+};
+
+Instant getNow()
 {
-    std::tm tmResult {};
-    std::time_t utc = time(nullptr);
+    Instant now {};
+    now.utc = time(nullptr);
 
 #if defined(_WIN32) || defined(_WIN64)
-    localtime_s(&tmResult, &utc);
+    localtime_s(&now.local, &now.utc);
 #else
-    localtime_r(&utc, &tmResult);
+    localtime_r(&now.utc, &now.local);
 #endif
 
-    return tmResult;
+    return now;
 }
+
+} // namespace
 
 Service::Service(SDK::Kernel &kernel)
         : mKernel(kernel)
@@ -46,7 +63,15 @@ void Service::run()
     uint32_t startTime = mKernel.sys.getTimeMs();
 
     while (true) {
-        uint32_t sleepTime = mAlarmManager.execute(getLocalTime());
+        const Instant now = getNow();
+        uint32_t sleepTime = mAlarmManager.execute(now.local, now.utc);
+
+        // execute() answers kNoWork when nothing is armed, which would park us
+        // on getMessage() for ever. That is what we want once the app is
+        // established, but not before the exit test below has had its say.
+        if (!mGuiStarted && sleepTime > kStartupGraceMs) {
+            sleepTime = kStartupGraceMs;
+        }
 
         SDK::MessageBase *msg;
         if (mKernel.comm.getMessage(msg, sleepTime)) {
@@ -108,9 +133,17 @@ void Service::run()
             mKernel.comm.releaseMessage(msg);
         }
 
+        // Release the service when nothing needs it: no GUI process loaded and
+        // nothing armed. mGuiStarted tracks whether a GUI is *loaded*, not
+        // whether it is on screen, and that is deliberate -- a service that
+        // returns from run() takes its GUI down with it, without notice, so
+        // exiting under a loaded-but-suspended GUI would close the app under
+        // the user. Navigating away therefore leaves this service resident
+        // until the GUI itself exits (it does so on its own idle timeout, which
+        // is what raises COMMAND_APP_NOTIF_GUI_STOP); the cost of that wait is
+        // bounded by execute() asking for no timed wake-ups when idle.
         if (!mGuiStarted) {
-            // Just wait some time to see if GUI starts
-            if (mKernel.sys.getTimeMs() - startTime > 5000) {
+            if (mKernel.sys.getTimeMs() - startTime > kStartupGraceMs) {
                 if (!mAlarmManager.hasActiveAlarms()) {
                     LOG_INFO("No active alarms and GUI not started, exiting service\n");
                     mAlarmManager.attachCallback(nullptr);
