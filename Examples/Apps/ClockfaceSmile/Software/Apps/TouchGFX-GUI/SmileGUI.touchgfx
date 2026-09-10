@@ -1,0 +1,581 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Main",
+        "CanvasBufferSize": 0,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "background",
+            "X": 0,
+            "Y": 0,
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "RelativeFilename": "Background_240x240.png"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "battery",
+            "X": 97,
+            "Y": 209,
+            "Width": 45,
+            "Height": 14,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Battery_45x14"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dateText",
+            "X": 0,
+            "Y": 25,
+            "Width": 240,
+            "Height": 24,
+            "LockPosition": true,
+            "TextId": "TMP_SMILE_DATE",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_SMILE_DATE",
+              "UseBuffer": true,
+              "BufferSize": 20
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hourText",
+            "X": 28,
+            "Y": 37,
+            "Width": 89,
+            "Height": 77,
+            "LockPosition": true,
+            "TextId": "TMP_SMILE_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_SMILE_HOUR",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "colonText",
+            "X": 117,
+            "Y": 37,
+            "Width": 24,
+            "Height": 77,
+            "LockPosition": true,
+            "TextId": "TEXT_SMILE_COLON",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "minuteText",
+            "X": 141,
+            "Y": 37,
+            "Width": 89,
+            "Height": 77,
+            "LockPosition": true,
+            "TextId": "TMP_SMILE_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_SMILE_MINUTE",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "dividerLeft",
+            "X": 89,
+            "Y": 129,
+            "Width": 2,
+            "Height": 68,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "dividerRight",
+            "X": 149,
+            "Y": 129,
+            "Width": 2,
+            "Height": 68,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "stepsIcon",
+            "X": 46,
+            "Y": 122,
+            "Width": 17,
+            "Height": 23,
+            "LockPosition": true,
+            "RelativeFilename": "StepsIcon_17x23.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "activityIcon",
+            "X": 107,
+            "Y": 126,
+            "Width": 27,
+            "Height": 17,
+            "LockPosition": true,
+            "RelativeFilename": "ActivityIcon_27x17.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "hrIcon",
+            "X": 174,
+            "Y": 125,
+            "Width": 22,
+            "Height": 19,
+            "LockPosition": true,
+            "RelativeFilename": "HrIcon_22x19.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "stepsValue",
+            "X": 15,
+            "Y": 157,
+            "Width": 80,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_SMILE_METRIC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_SMILE_STEPS",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "stepsUnit",
+            "X": 15,
+            "Y": 176,
+            "Width": 80,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TEXT_SMILE_STEPS",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "activityValue",
+            "X": 80,
+            "Y": 157,
+            "Width": 80,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_SMILE_METRIC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_SMILE_ACTIVITY",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "activityUnit",
+            "X": 80,
+            "Y": 176,
+            "Width": 80,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TEXT_SMILE_MIN",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hrValue",
+            "X": 145,
+            "Y": 157,
+            "Width": 81,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_SMILE_METRIC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_SMILE_BPM",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hrUnit",
+            "X": 145,
+            "Y": 176,
+            "Width": 81,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TEXT_SMILE_BPM",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "Battery_45x14",
+        "Width": 45,
+        "Height": 14,
+        "Components": [
+          {
+            "Type": "Box",
+            "Name": "s1box",
+            "X": 2,
+            "Width": 7,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s1line1",
+            "Width": 4,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 12.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s1line2",
+            "X": 8,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s2box",
+            "X": 12,
+            "Width": 8,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s2line1",
+            "X": 11,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s2line2",
+            "X": 19,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s3box",
+            "X": 23,
+            "Width": 8,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s3line1",
+            "X": 22,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s3line2",
+            "X": 30,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s4box",
+            "X": 34,
+            "Width": 7,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line1",
+            "X": 33,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line2",
+            "X": 39,
+            "Width": 4,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 12.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line3",
+            "X": 41,
+            "Y": 3,
+            "Width": 4,
+            "Height": 8,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 6.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "Name": "SmileGUI",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Main",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.1"
+}

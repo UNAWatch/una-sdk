@@ -1,0 +1,1 @@
+#include <images/BitmapDatabase.hpp>
