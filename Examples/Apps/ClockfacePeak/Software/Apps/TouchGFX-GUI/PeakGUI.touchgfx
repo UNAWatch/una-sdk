@@ -1,0 +1,653 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Main",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "goalArcSteps",
+            "X": 0,
+            "Y": 0,
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "GoalArcSteps"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "goalArcActivity",
+            "X": 0,
+            "Y": 0,
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "GoalArcActivity"
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "battery",
+            "X": 98,
+            "Y": 8,
+            "Width": 45,
+            "Height": 14,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Battery_45x14"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dateDay",
+            "X": 60,
+            "Y": 51,
+            "Width": 60,
+            "Height": 24,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_DATE",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 128
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_DAY",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dateRest",
+            "X": 120,
+            "Y": 51,
+            "Width": 120,
+            "Height": 24,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_DATE",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_REST",
+              "UseBuffer": true,
+              "BufferSize": 16
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hourText",
+            "X": 28,
+            "Y": 59,
+            "Width": 89,
+            "Height": 77,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_HOUR",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "colonText",
+            "X": 117,
+            "Y": 59,
+            "Width": 24,
+            "Height": 77,
+            "LockPosition": true,
+            "TextId": "TEXT_PEAK_COLON",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "minuteText",
+            "X": 141,
+            "Y": 59,
+            "Width": 89,
+            "Height": 77,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_MINUTE",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "ruleUpper",
+            "X": 53,
+            "Y": 161,
+            "Width": 134,
+            "Height": 2,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "ruleLower",
+            "X": 67,
+            "Y": 196,
+            "Width": 107,
+            "Height": 2,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "stepsIcon",
+            "X": 77,
+            "Y": 133,
+            "Width": 18,
+            "Height": 24,
+            "LockPosition": true,
+            "RelativeFilename": "StepsIcon_18x24.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "stepsText",
+            "X": 109,
+            "Y": 135,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_METRIC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_STEPS",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "activityIcon",
+            "X": 72,
+            "Y": 171,
+            "Width": 30,
+            "Height": 18,
+            "LockPosition": true,
+            "RelativeFilename": "ActivityIcon_30x18.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "activityText",
+            "X": 109,
+            "Y": 170,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_MINUTES",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_ACTIVITY",
+              "UseBuffer": true,
+              "BufferSize": 6
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "hrIcon",
+            "X": 75,
+            "Y": 204,
+            "Width": 23,
+            "Height": 20,
+            "LockPosition": true,
+            "RelativeFilename": "HrIcon_23x20.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hrText",
+            "X": 109,
+            "Y": 205,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_PEAK_BPM",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_PEAK_BPM",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "Battery_45x14",
+        "Width": 45,
+        "Height": 14,
+        "Components": [
+          {
+            "Type": "Box",
+            "Name": "s1box",
+            "X": 2,
+            "Width": 7,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s1line1",
+            "Width": 4,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 12.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s1line2",
+            "X": 8,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s2box",
+            "X": 12,
+            "Width": 8,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s2line1",
+            "X": 11,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s2line2",
+            "X": 19,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s3box",
+            "X": 23,
+            "Width": 8,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s3line1",
+            "X": 22,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s3line2",
+            "X": 30,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Box",
+            "Name": "s4box",
+            "X": 34,
+            "Width": 7,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line1",
+            "X": 33,
+            "Width": 2,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 1.0,
+            "StartY": 1.0,
+            "EndX": 1.0,
+            "EndY": 13.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line2",
+            "X": 39,
+            "Width": 4,
+            "Height": 14,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 12.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "Line",
+            "Name": "s4line3",
+            "X": 41,
+            "Y": 3,
+            "Width": 4,
+            "Height": 8,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "StartX": 2.0,
+            "StartY": 2.0,
+            "EndX": 2.0,
+            "EndY": 6.0,
+            "LineWidth": 4.0,
+            "LineEndingStyle": "Round"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "GoalArcSteps",
+        "Width": 240,
+        "Height": 240,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "background",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 108.66,
+            "LineWidth": 15.16,
+            "StartAngle": 228.85,
+            "EndAngle": 335.25,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "progress",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Green": 192,
+              "Blue": 192
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 108.66,
+            "LineWidth": 15.16,
+            "StartAngle": 228.85,
+            "EndAngle": 228.85,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "GoalArcActivity",
+        "Width": 240,
+        "Height": 240,
+        "Components": [
+          {
+            "Type": "Circle",
+            "Name": "background",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 108.66,
+            "LineWidth": 15.16,
+            "StartAngle": 24.75,
+            "EndAngle": 131.15,
+            "CapPrecision": "Round"
+          },
+          {
+            "Type": "Circle",
+            "Name": "progress",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "Color": {
+              "Red": 192,
+              "Green": 128
+            },
+            "CenterX": 120.0,
+            "CenterY": 120.0,
+            "Radius": 108.66,
+            "LineWidth": 15.16,
+            "StartAngle": 131.15,
+            "EndAngle": 131.15,
+            "CapPrecision": "Round"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "Name": "PeakGUI",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Main",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.1"
+}

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="texts.xsd" Version="4.26.1">
+  <Languages>
+    <Language Id="GB" />
+  </Languages>
+  <Texts>
+    <TextGroup Id="Template">
+      <Text Id="TMP_PEAK_DATE" Alignment="Left" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_PEAK_CLOCK" Alignment="Left" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_PEAK_METRIC" Alignment="Left" TypographyId="Poppins_Medium_14">
+        <Translation Language="GB">&lt;&gt;</Translation>
+      </Text>
+      <Text Id="TMP_PEAK_MINUTES" Alignment="Left" TypographyId="Poppins_Medium_14">
+        <Translation Language="GB">&lt;&gt; min</Translation>
+      </Text>
+      <Text Id="TMP_PEAK_BPM" Alignment="Left" TypographyId="Poppins_Medium_14">
+        <Translation Language="GB">&lt;&gt; bpm</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Clock">
+      <Text Id="TEXT_PEAK_COLON" Alignment="Center" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">:</Translation>
+      </Text>
+    </TextGroup>
+    <!-- Day, month and meridiem names are read back with TypedText::getText()
+         and written into the two date wildcards, so every glyph they can
+         contain is also in Poppins_SemiBold_15's WildcardCharacters. They are
+         Texts rather than string literals so that translating them stays a
+         text database job. -->
+    <TextGroup Id="Day">
+      <Text Id="TEXT_SUN" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Sun</Translation>
+      </Text>
+      <Text Id="TEXT_MON" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Mon</Translation>
+      </Text>
+      <Text Id="TEXT_TUE" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Tue</Translation>
+      </Text>
+      <Text Id="TEXT_WED" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Wed</Translation>
+      </Text>
+      <Text Id="TEXT_THU" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Thu</Translation>
+      </Text>
+      <Text Id="TEXT_FRI" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Fri</Translation>
+      </Text>
+      <Text Id="TEXT_SAT" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Sat</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Month">
+      <Text Id="TEXT_JAN" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Jan</Translation>
+      </Text>
+      <Text Id="TEXT_FEB" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Feb</Translation>
+      </Text>
+      <Text Id="TEXT_MAR" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Mar</Translation>
+      </Text>
+      <Text Id="TEXT_APR" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Apr</Translation>
+      </Text>
+      <Text Id="TEXT_MAY" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">May</Translation>
+      </Text>
+      <Text Id="TEXT_JUN" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Jun</Translation>
+      </Text>
+      <Text Id="TEXT_JUL" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Jul</Translation>
+      </Text>
+      <Text Id="TEXT_AUG" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Aug</Translation>
+      </Text>
+      <Text Id="TEXT_SEP" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Sep</Translation>
+      </Text>
+      <Text Id="TEXT_OCT" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Oct</Translation>
+      </Text>
+      <Text Id="TEXT_NOV" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Nov</Translation>
+      </Text>
+      <Text Id="TEXT_DEC" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">Dec</Translation>
+      </Text>
+    </TextGroup>
+    <TextGroup Id="Meridiem">
+      <Text Id="TEXT_AM" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">AM</Translation>
+      </Text>
+      <Text Id="TEXT_PM" Alignment="Center" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">PM</Translation>
+      </Text>
+    </TextGroup>
+    <!-- Wildcard seeds. Dashes rather than plausible readings, so a value the
+         face forgets to set shows as missing instead of as data. -->
+    <TextGroup Id="Wildcard">
+      <Text Id="WC_PEAK_DAY" Alignment="Left" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_PEAK_REST" Alignment="Left" TypographyId="Poppins_SemiBold_15">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_PEAK_HOUR" Alignment="Left" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="WC_PEAK_MINUTE" Alignment="Left" TypographyId="Poppins_SemiBold_60">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="WC_PEAK_STEPS" Alignment="Left" TypographyId="Poppins_Medium_14">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_PEAK_ACTIVITY" Alignment="Left" TypographyId="Poppins_Medium_14">
+        <Translation Language="GB">---</Translation>
+      </Text>
+      <Text Id="WC_PEAK_BPM" Alignment="Left" TypographyId="Poppins_Medium_14">
+        <Translation Language="GB">---</Translation>
+      </Text>
+    </TextGroup>
+  </Texts>
+  <Typographies>
+    <!-- Poppins-SemiBold.ttf and Poppins-Medium.ttf are the repo's
+         tabular-figures builds, which is what the Figma file calls
+         "UNA_Poppins". They are used for the metric rows and the date as well
+         as the clock, so a step count ticking over cannot reflow the line it
+         sits on. -->
+    <Typography Id="Poppins_SemiBold_60" Font="Poppins-SemiBold.ttf" Size="60" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="0123456789-" EllipsisCharacter="…" />
+    <Typography Id="Poppins_SemiBold_15" Font="Poppins-SemiBold.ttf" Size="15" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 |-" EllipsisCharacter="…" />
+    <Typography Id="Poppins_Medium_14" Font="Poppins-Medium.ttf" Size="14" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="0123456789,-" EllipsisCharacter="…" />
+  </Typographies>
+</TextDatabase>
