@@ -206,14 +206,35 @@ while your face is on screen. Bound it against the monotonic tick rather than
 hanging it off the loop's wait expiring --
 
 ```cpp
+// In the service loop:
 if ((mKernel.sys.getTimeMs() - mSettingsAt) >= kSettingsPollMs) {
     refreshSystemSettings();
+}
+
+void Service::refreshSystemSettings()
+{
+    // Before the request -- not after it, and not only when it succeeds.
+    mSettingsAt = mKernel.sys.getTimeMs();
+
+    if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
+        if (msg.send(kSettingsTimeoutMs) && msg.ok()) {
+            mIs12h = msg->timeFormat;
+        }
+    }
+    publishClockFormat();
 }
 ```
 
 -- because the loop is message driven: on a face showing a heart rate, samples
 arrive about once a second and the wait almost never expires, while on a face
 with only a pedometer it expires constantly. Neither gives you once a minute.
+
+**Stamp the clock before the request.** Stamp it after a successful reply
+instead and a request that times out leaves the condition still true on the
+next turn, so the service issues a fresh blocking request every time round the
+loop for as long as the kernel stays quiet -- the exact opposite of polling once
+a minute, and at the worst possible moment. Stamping first means a failed read
+is retried at the next interval like any other.
 
 The request itself is cheap. Its 100 ms figure is a *timeout*; the kernel
 answers on a completion semaphore and normally returns at once, and the
