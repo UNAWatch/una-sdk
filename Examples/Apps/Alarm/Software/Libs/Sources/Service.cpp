@@ -69,7 +69,14 @@ void Service::run()
         // execute() answers kNoWork when nothing is armed, which would park us
         // on getMessage() for ever. That is what we want once the app is
         // established, but not before the exit test below has had its say.
-        if (!mGuiStarted && sleepTime > kStartupGraceMs) {
+        //
+        // Only kNoWork is capped. Every other value is a real deadline -- the
+        // wait until the next minute, when an alarm can become due -- and
+        // shortening it would make an armed service with no GUI loaded (this
+        // app autostarts, so that is its ordinary resident state) wake every
+        // few seconds to discover nothing, which is the cost this change is
+        // meant to remove.
+        if (!mGuiStarted && sleepTime == AlarmManager::kNoWork) {
             sleepTime = kStartupGraceMs;
         }
 
