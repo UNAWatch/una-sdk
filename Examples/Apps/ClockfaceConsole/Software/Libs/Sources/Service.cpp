@@ -219,9 +219,9 @@ void Service::publishTime(const std::tm &local)
     mMday     = mday;
     mWday     = wday;
     mMon      = mon;
-    mTimeSent = true;
-
-    SDK::send_msg<CustomMessage::Time>(mKernel, hour, minute, mday, wday, mon);
+    // Set from the result, not before it: send_msg fails when the GUI's
+    // queue is full, and a value recorded as sent is never offered again.
+    mTimeSent = SDK::send_msg<CustomMessage::Time>(mKernel, hour, minute, mday, wday, mon);
 }
 
 void Service::publishSteps()
@@ -231,9 +231,7 @@ void Service::publishSteps()
     }
 
     mSentSteps = mSteps;
-    mStepsSent = true;
-
-    SDK::send_msg<CustomMessage::Steps>(mKernel, mSentSteps);
+    mStepsSent = SDK::send_msg<CustomMessage::Steps>(mKernel, mSentSteps);
 }
 
 void Service::publishClockFormat()
@@ -243,7 +241,5 @@ void Service::publishClockFormat()
     }
 
     mSentIs12h  = mIs12h;
-    mFormatSent = true;
-
-    SDK::send_msg<CustomMessage::ClockFormat>(mKernel, mSentIs12h);
+    mFormatSent = SDK::send_msg<CustomMessage::ClockFormat>(mKernel, mSentIs12h);
 }

@@ -48,6 +48,21 @@ static void readLocalTime(std::tm &out)
 #endif
 }
 
+/** @brief How long until the held heart rate ages out, or zero if none is held. */
+static uint32_t msToHeartRateExpiry(uint16_t bpm, std::time_t heldAt)
+{
+    if (bpm == 0u) {
+        return 0;
+    }
+
+    const std::time_t age = time(nullptr) - heldAt;
+    if (age >= kHeartRateHoldSeconds) {
+        return 0;
+    }
+
+    return static_cast<uint32_t>(kHeartRateHoldSeconds - age) * kMsPerSecond;
+}
+
 /** @brief How much of the current minute is left, from a reading already taken. */
 static uint32_t msToNextMinute(const std::tm &local)
 {
@@ -113,8 +128,23 @@ void Service::run()
         readLocalTime(local);
         publishTime(local);
 
+        // The hold has to be able to expire with no further sample to notice
+        // it: a watch taken off stops producing them altogether, and the rate
+        // would otherwise stay on screen for good.
+        expireHeartRate();
+
+        // Wait no longer than the pending expiry, so it lands on time rather
+        // than whenever the minute next turns. While the watch is worn samples
+        // arrive far more often than this and keep resetting it, so it costs no
+        // extra wake-ups in the common case.
+        uint32_t wait = msToNextMinute(local);
+        const uint32_t hold = msToHeartRateExpiry(mBpm, mBpmAt);
+        if ((hold != 0u) && (hold < wait)) {
+            wait = hold;
+        }
+
         SDK::MessageBase *msg;
-        if (!mKernel.comm.getMessage(msg, msToNextMinute(local))) {
+        if (!mKernel.comm.getMessage(msg, wait)) {
             continue;
         }
 
@@ -202,6 +232,14 @@ bool Service::isHeartRateTrusted(float bpm, float trustLevel)
            (trustLevel <= kMaxTrustLevel);
 }
 
+void Service::expireHeartRate()
+{
+    if ((mBpm != 0u) && ((time(nullptr) - mBpmAt) >= kHeartRateHoldSeconds)) {
+        mBpm = 0;
+        publishHealth();
+    }
+}
+
 void Service::handleSensorData(uint16_t handle, SDK::Sensor::DataBatch &data)
 {
     // The batch is built here out of fields the event arrived with, and
@@ -261,12 +299,14 @@ void Service::handleSensorData(uint16_t handle, SDK::Sensor::DataBatch &data)
         if (isHeartRateTrusted(bpm, trust)) {
             mBpm = static_cast<uint16_t>(bpm);
             mBpmAt = time(nullptr);
-        } else if ((time(nullptr) - mBpmAt) >= kHeartRateHoldSeconds) {
-            // Also the startup case: mBpmAt is zero until the first trusted
-            // sample, so the row shows --- rather than a held nothing.
-            mBpm = 0;
         }
 
+        // An untrusted sample carries no information, so it neither updates the
+        // held rate nor retires it. expireHeartRate() owns that, and runs every
+        // turn round the loop whether a sample arrived or not -- including the
+        // startup case, where mBpmAt is zero and the row shows --- until the
+        // first trusted reading.
+        expireHeartRate();
         publishHealth();
         return;
     }
@@ -319,9 +359,9 @@ void Service::publishTime(const std::tm &local)
     mMday     = mday;
     mWday     = wday;
     mMon      = mon;
-    mTimeSent = true;
-
-    SDK::send_msg<CustomMessage::Time>(mKernel, hour, minute, mday, wday, mon);
+    // Set from the result, not before it: send_msg fails when the GUI's
+    // queue is full, and a value recorded as sent is never offered again.
+    mTimeSent = SDK::send_msg<CustomMessage::Time>(mKernel, hour, minute, mday, wday, mon);
 }
 
 void Service::publishBatteryLevel(uint8_t level)
@@ -333,9 +373,7 @@ void Service::publishBatteryLevel(uint8_t level)
     }
 
     mLevel     = level;
-    mLevelSent = true;
-
-    SDK::send_msg<CustomMessage::Battery>(mKernel, mLevel);
+    mLevelSent = SDK::send_msg<CustomMessage::Battery>(mKernel, mLevel);
 }
 
 void Service::publishHealth()
@@ -348,10 +386,8 @@ void Service::publishHealth()
     mSentSteps           = mSteps;
     mSentActivityMinutes = mActivityMinutes;
     mSentBpm             = mBpm;
-    mHealthSent          = true;
-
-    SDK::send_msg<CustomMessage::Health>(mKernel, mSentSteps,
-                                         mSentActivityMinutes, mSentBpm);
+    mHealthSent          = SDK::send_msg<CustomMessage::Health>(
+        mKernel, mSentSteps, mSentActivityMinutes, mSentBpm);
 }
 
 void Service::publishClockFormat()
@@ -361,9 +397,7 @@ void Service::publishClockFormat()
     }
 
     mSentIs12h  = mIs12h;
-    mFormatSent = true;
-
-    SDK::send_msg<CustomMessage::ClockFormat>(mKernel, mSentIs12h);
+    mFormatSent = SDK::send_msg<CustomMessage::ClockFormat>(mKernel, mSentIs12h);
 }
 
 void Service::publishAlertsMuted(bool muted)
@@ -373,7 +407,5 @@ void Service::publishAlertsMuted(bool muted)
     }
 
     mMuted     = muted;
-    mMutedSent = true;
-
-    SDK::send_msg<CustomMessage::AlertsMuted>(mKernel, mMuted);
+    mMutedSent = SDK::send_msg<CustomMessage::AlertsMuted>(mKernel, mMuted);
 }

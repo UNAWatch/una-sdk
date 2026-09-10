@@ -70,6 +70,15 @@ private:
      */
     void republishAll();
 
+    /**
+     * @brief Drop the held heart rate once it has aged out.
+     *
+     * Called every turn round the loop rather than only when a sample arrives,
+     * because the case that matters most -- the watch taken off -- is the one
+     * where samples stop coming.
+     */
+    void expireHeartRate();
+
     /** Send the reading on, unless it matches the one last sent. */
     void publishTime(const std::tm &local);
 

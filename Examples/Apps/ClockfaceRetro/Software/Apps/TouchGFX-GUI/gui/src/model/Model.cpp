@@ -56,11 +56,11 @@ FrontendApplication& Model::application()
 
 void Model::tick()
 {
-    if (!mResumed) {
+    // One atomic test-and-clear, so a resume raised while this runs is
+    // still seen on the next tick rather than dropped.
+    if (!mResumed.exchange(false)) {
         return;
     }
-
-    mResumed = false;
 
     // Taking the reading here rather than in onResume() keeps every touch of a
     // widget on the thread that draws. onResume() is dispatched from

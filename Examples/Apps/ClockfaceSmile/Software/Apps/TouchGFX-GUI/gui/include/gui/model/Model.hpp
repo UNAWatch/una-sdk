@@ -5,6 +5,7 @@
 #include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
 #include "SDK/Interfaces/ICustomMessageHandler.hpp"
 
+#include <atomic>
 #include <cstdint>
 
 /**
@@ -107,7 +108,10 @@ protected:
 
     const SDK::Kernel &mKernel;     ///< Reference to kernel interface
 
-    bool mResumed = false;          ///< Resume seen; handled on the next tick
+    /// Resume seen; handled on the next tick. Atomic because onResume()
+    /// is dispatched from waitForFrameTick() while tick() runs on the
+    /// thread that draws, and a resume must not be lost between the two.
+    std::atomic_bool mResumed { false };
 
     WallTime    mTime {};           ///< Reading the service last reported
     DailyHealth mHealth {};         ///< Readings the service last reported

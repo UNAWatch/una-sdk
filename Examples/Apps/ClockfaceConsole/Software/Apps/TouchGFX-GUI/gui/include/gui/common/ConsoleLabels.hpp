@@ -93,7 +93,9 @@ inline void formatGrouped(touchgfx::Unicode::UnicodeChar *buf,
         // A separator goes after this digit when the number of digits still to
         // come is a non-zero multiple of three.
         const uint8_t remaining = static_cast<uint8_t>(i - 1);
-        if ((remaining != 0u) && ((remaining % 3u) == 0u) && ((out + 1u) < size)) {
+        // Room for the separator AND the digit that must follow it, or the
+        // number truncates to something like "99,999,".
+        if ((remaining != 0u) && ((remaining % 3u) == 0u) && ((out + 2u) < size)) {
             buf[out++] = static_cast<touchgfx::Unicode::UnicodeChar>(',');
         }
     }
