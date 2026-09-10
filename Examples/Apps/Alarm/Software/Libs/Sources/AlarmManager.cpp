@@ -24,7 +24,7 @@ AlarmManager::~AlarmManager()
 
 void AlarmManager::load()
 {
-    loadFromFile(mAlarms);
+    const bool alarmsLoaded = loadFromFile(mAlarms);
 
     LOG_DEBUG("Alarms loaded\n");
     dump(mAlarms);
@@ -32,11 +32,24 @@ void AlarmManager::load()
     // Snoozes outlive a restart, but only as far as their alarm does: one whose
     // alarm has been deleted, or switched off by the user, is not owed a ring.
     loadSnoozesFromFile();
-    const size_t restored = mSnoozedAlarms.size();
-    removeObsoleteSnoozedAlarms();
-    if (mSnoozedAlarms.size() != restored) {
-        mSnoozesDirty = true;
+
+    if (alarmsLoaded) {
+        const size_t restored = mSnoozedAlarms.size();
+        removeObsoleteSnoozedAlarms();
+        if (mSnoozedAlarms.size() != restored) {
+            mSnoozesDirty = true;
+        }
+    } else if (!mSnoozedAlarms.empty()) {
+        // No trustworthy alarm list: mAlarms is empty whether the file is
+        // absent or unreadable, so validating against it would call every
+        // snooze orphaned and persist them as dropped. Keep them instead --
+        // each carries its own time and effect, and one that is no longer
+        // wanted is dropped by the next list save, or by the stale-snooze
+        // grace in settleSnoozes().
+        LOG_ERROR("Alarm list unavailable; keeping %u snooze(s) unvalidated\n",
+            static_cast<unsigned>(mSnoozedAlarms.size()));
     }
+
     LOG_INFO("Restored %u pending snooze(s)\n",
         static_cast<unsigned>(mSnoozedAlarms.size()));
     persistSnoozesIfDirty();
@@ -83,6 +96,23 @@ bool AlarmManager::saveAlarmList(const std::vector<Alarm>& list)
 
     if (status) {
         mAlarms = list;
+
+        // A snooze is armed detached when a one-time alarm's own trigger
+        // switched it off. If the user has since switched that alarm back on,
+        // the snooze belongs to a live alarm again -- re-attach it, so that a
+        // later deliberate "off" cancels it like any other alarm's snooze.
+        for (auto& snoozed : mSnoozedAlarms) {
+            if (!snoozed.detached) {
+                continue;
+            }
+            auto it = std::find(mAlarms.begin(), mAlarms.end(), snoozed.info);
+            if (it != mAlarms.end() && it->on) {
+                LOG_DEBUG("Re-attaching snooze %02d:%02d to its re-enabled alarm\n",
+                    snoozed.info.timeHours, snoozed.info.timeMinutes);
+                snoozed.detached = false;
+                mSnoozesDirty = true;
+            }
+        }
 
         // Drop snoozes the edited list no longer justifies
         removeObsoleteSnoozedAlarms();

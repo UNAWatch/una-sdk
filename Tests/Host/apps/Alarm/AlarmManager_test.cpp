@@ -404,6 +404,46 @@ TEST(AlarmManager, AReTriggerCarriesTheRingingFlag)
     EXPECT_EQ(h.cb.lastAlarm.effect, Alarm::EFFECT_VIBRO);
 }
 
+// Switching a fired one-shot back on (for another day) is not a cancellation:
+// the snooze the user is still owed survives it.
+TEST(AlarmManager, ReEnablingAFiredOneShotKeepsItsPendingSnooze)
+{
+    Harness h{ alarmAt(7, 0, Alarm::REPEAT_NO) };
+
+    h.run(at(0, 7, 0, 2));
+    ASSERT_EQ(h.cb.rings, 1);
+    ASSERT_FALSE(h.mgr.getAlarmList()[0].on);
+
+    std::vector<Alarm> list = h.mgr.getAlarmList();
+    list[0].on = true;
+    ASSERT_TRUE(h.mgr.saveAlarmList(list));
+
+    h.run(at(0, 7, 5, 1));
+    EXPECT_EQ(h.cb.rings, 2);
+}
+
+// ... but once it is back on, it is an ordinary enabled alarm, so a later
+// deliberate "off" cancels the snooze like any other. A detached entry that
+// stayed detached for ever would ignore that second, genuinely user-initiated
+// switch-off.
+TEST(AlarmManager, SwitchingAReEnabledOneShotOffAgainCancelsItsSnooze)
+{
+    Harness h{ alarmAt(7, 0, Alarm::REPEAT_NO) };
+
+    h.run(at(0, 7, 0, 2));
+    ASSERT_EQ(h.cb.rings, 1);
+
+    std::vector<Alarm> list = h.mgr.getAlarmList();
+    list[0].on = true;
+    ASSERT_TRUE(h.mgr.saveAlarmList(list));     // re-attaches the snooze
+
+    list[0].on = false;
+    ASSERT_TRUE(h.mgr.saveAlarmList(list));     // an explicit user "off"
+
+    h.run(at(0, 7, 5, 1));
+    EXPECT_EQ(h.cb.rings, 1);
+}
+
 // The user's own decision to switch an alarm off still cancels its snooze.
 TEST(AlarmManager, SwitchingAnAlarmOffCancelsItsSnooze)
 {
@@ -537,6 +577,38 @@ TEST(AlarmManager, AStoppedSnoozeIsNotResurrectedByARestart)
 
     mgr2.execute(at(0, 7, 5, 1).local, at(0, 7, 5, 1).utc);
     EXPECT_EQ(cb2.rings, 0);
+}
+
+// An unreadable alarm list must not be taken as "the user has no alarms", or
+// load() validates every pending snooze against an empty list, calls them all
+// orphaned, and writes that loss back to storage.
+TEST(AlarmManager, AnUnreadableAlarmListDoesNotDestroyPendingSnoozes)
+{
+    KernelFixture fx;
+
+    {
+        RecordingCallback cb;
+        AlarmManager      mgr{ fx.kernel };
+        mgr.attachCallback(&cb);
+        ASSERT_TRUE(mgr.saveAlarmList({ alarmAt(7, 0) }));
+        mgr.execute(at(0, 7, 0, 2).local, at(0, 7, 0, 2).utc);
+        ASSERT_EQ(cb.rings, 1);
+    }
+
+    // The alarm file comes back unreadable -- a truncated write, a bad sector.
+    fx.fileSystem.seedFile("alarms.json", "{\"alarms\": [ truncated");
+
+    RecordingCallback cb2;
+    AlarmManager      mgr2{ fx.kernel };
+    mgr2.attachCallback(&cb2);
+    mgr2.load();
+
+    EXPECT_TRUE(mgr2.hasActiveAlarms());
+    EXPECT_NE(fx.fileSystem.readFile("snoozes.json").find("time_h"), std::string::npos);
+
+    // The snooze carries its own time and effect, so it is still ringable.
+    mgr2.execute(at(0, 7, 5, 1).local, at(0, 7, 5, 1).utc);
+    EXPECT_EQ(cb2.rings, 1);
 }
 
 TEST(AlarmManager, CorruptSnoozeStorageIsIgnored)
