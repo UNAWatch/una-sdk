@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="GlanceHR - Heart Rate Glance" href="GlanceHR-Architecture.html" />
+    <link rel="next" title="ClockfacePeak - Peak Clockface" href="ClockfacePeak-Architecture.html" />
     <link rel="prev" title="Stopwatch - Interval Timer" href="Stopwatch-Architecture.html" /> 
 </head>
 
@@ -106,6 +106,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#known-gaps">Known gaps</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
 </ul>
@@ -119,6 +123,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../writing-a-clockface.html">Writing a Watch Face</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figma-ui-kit.html">Figma UI Resource Pack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
 </ul>
@@ -212,12 +217,19 @@ nothing else is running.</p>
 </tbody>
 </table>
 <p>The directory prefix is the <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code>; the launcher name carries no prefix.</p>
+<blockquote>
+<div><p>Building your own face? <strong><a class="reference internal" href="../writing-a-clockface.html"><span class="std std-doc">Writing a Watch Face</span></a></strong>
+is the guide: the structure, the platform constraints and the techniques the
+five shipped faces share.</p>
+</div></blockquote>
 <section id="what-it-is-not">
 <h3>What it is not<a class="headerlink" href="#what-it-is-not" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>No second hand.</strong> The fastest thing the face draws turns once a minute.</p></li>
-<li><p><strong>No touch, no buttons, no navigation.</strong> A clockface is a display, not a
-screen the user drives.</p></li>
+<li><p><strong>No buttons, no navigation.</strong> A clockface is a display, not a screen the
+user drives: the kernel owns the buttons while a face is on screen, so the app
+receives no <code class="docutils literal notranslate"><span class="pre">EVENT_BUTTON</span></code>. (The watch has no touchscreen at all, so that is a
+property of the hardware rather than of clockfaces.)</p></li>
 <li><p><strong>No glance interface.</strong> The app serves no glance data, and the packed image
 says so: flags <code class="docutils literal notranslate"><span class="pre">0x03</span></code>, glance-capable bit clear.</p></li>
 </ul>
@@ -700,7 +712,7 @@ face and returning to it corrects it at once, because resuming asks.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Stopwatch-Architecture.html" class="btn btn-neutral float-left" title="Stopwatch - Interval Timer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="GlanceHR-Architecture.html" class="btn btn-neutral float-right" title="GlanceHR - Heart Rate Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ClockfacePeak-Architecture.html" class="btn btn-neutral float-right" title="ClockfacePeak - Peak Clockface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

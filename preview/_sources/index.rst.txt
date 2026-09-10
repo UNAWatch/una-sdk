@@ -55,6 +55,10 @@ Next steps:
    Examples/HRMonitor-Architecture
    Examples/Stopwatch-Architecture
    Examples/ClockfaceAnalogue-Architecture
+   Examples/ClockfacePeak-Architecture
+   Examples/ClockfaceSmile-Architecture
+   Examples/ClockfaceConsole-Architecture
+   Examples/ClockfaceRetro-Architecture
    Examples/GlanceHR-Architecture
    Examples/GlanceSteps-Architecture
 
@@ -71,6 +75,7 @@ Next steps:
    Scripts
    TouchGFX-Port-Architecture
    touchgfx-widgets
+   writing-a-clockface
    figma-ui-kit
    FitFiles-Structure
 

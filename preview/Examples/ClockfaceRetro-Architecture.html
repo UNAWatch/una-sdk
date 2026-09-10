@@ -1,0 +1,276 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClockfaceRetro - Retro Clockface &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/version-selector.js?v=50f89983"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GlanceHR - Heart Rate Glance" href="GlanceHR-Architecture.html" />
+    <link rel="prev" title="ClockfaceConsole - Console Clockface" href="ClockfaceConsole-Architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ClockfaceRetro - Retro Clockface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-it-demonstrates">What it demonstrates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assets">Assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#known-gaps">Known gaps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ClockfaceRetro - Retro Clockface</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Examples/ClockfaceRetro-Architecture.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="clockfaceretro-retro-clockface">
+<h1>ClockfaceRetro - Retro Clockface<a class="headerlink" href="#clockfaceretro-retro-clockface" title="Link to this heading"></a></h1>
+<p>A dot-matrix clock over the day’s steps, active minutes and heart rate, with a
+battery indicator at the top. Whole face in one font.</p>
+<p><img alt="Retro" src="../_images/clockface-retro.png" /></p>
+<p><em>Retro in the app simulator. The step count and active minutes are the design’s sample values, fed in by hand: the simulator cannot serve the daily sensors, so both read zero when you run it yourself.</em></p>
+<blockquote>
+<div><p>New to faces? Start with <strong><a class="reference internal" href="../writing-a-clockface.html"><span class="std std-doc">Writing a Watch Face</span></a></strong>,
+which covers the structure, the platform constraints and the techniques all
+five faces share. This page is only what is particular to Retro.</p>
+</div></blockquote>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Directory</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Examples/Apps/ClockfaceRetro</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">APP_NAME</span></code> / <code class="docutils literal notranslate"><span class="pre">APP_USER_NAME</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Retro</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">APP_ID</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">A1D4E12E57637F8C</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code> size</p></td>
+<td><p>~78 KB</p></td>
+</tr>
+<tr class="row-even"><td><p>Design</p></td>
+<td><p>Figma <code class="docutils literal notranslate"><span class="pre">1317:1176</span></code> (24-hour), <code class="docutils literal notranslate"><span class="pre">1317:1502</span></code> (12-hour)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Font</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Doto-Black.ttf</span></code> at 63 / 18 / 14 px</p></td>
+</tr>
+</tbody>
+</table>
+<section id="what-it-demonstrates">
+<h2>What it demonstrates<a class="headerlink" href="#what-it-demonstrates" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Four sensor subscriptions</strong> in one service – charge, steps, active minutes
+and heart rate – with the three health readings published as one message,
+since they change on the same timescale and the face redraws the block as one.</p></li>
+<li><p><strong>A battery drawn as an image swap</strong> rather than a container: four supplied
+46x15 bitmaps, one per 25 % band. Below the first band the indicator is taken
+down rather than drawn empty, because there is no artwork for an unlit
+battery.</p></li>
+<li><p><strong>A whole face in a single typeface</strong>, which keeps it to ~78 KB despite three
+point sizes.</p></li>
+<li><p><strong>A date line assembled into one wildcard</strong> – <code class="docutils literal notranslate"><span class="pre">WED</span> <span class="pre">22</span> <span class="pre">MAY</span></code>, gaining <code class="docutils literal notranslate"><span class="pre">|AM</span></code> in
+the 12-hour form – from day and month names read back out of the text
+database. This is the case that needs those glyphs declared in
+<code class="docutils literal notranslate"><span class="pre">WildcardCharacters</span></code> as well; see the guide.</p></li>
+</ul>
+</section>
+<section id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Link to this heading"></a></h2>
+<p>The clock is centred at runtime (<code class="docutils literal notranslate"><span class="pre">kSeparator12</span> <span class="pre">=</span> <span class="pre">38</span></code>, <code class="docutils literal notranslate"><span class="pre">kSeparator24</span> <span class="pre">=</span> <span class="pre">11</span></code>);
+everything else is fixed in the Designer. Positions were checked band by band
+against the supplied 240x240 render.</p>
+<p>Doto is monospaced – every glyph 600/1000 em – which is what makes the
+measured centring exact and why the 12-hour form needs no extra padding around
+the colon.</p>
+</section>
+<section id="assets">
+<h2>Assets<a class="headerlink" href="#assets" title="Link to this heading"></a></h2>
+<p>All from the content pack: <code class="docutils literal notranslate"><span class="pre">Battery1..4_46x15.png</span></code> (renamed low-to-full),
+<code class="docutils literal notranslate"><span class="pre">StepsIcon_17x23.png</span></code>, <code class="docutils literal notranslate"><span class="pre">ActivityIcon_28x17.png</span></code>, <code class="docutils literal notranslate"><span class="pre">HrIcon_22x19.png</span></code>, and the
+static <code class="docutils literal notranslate"><span class="pre">Doto-Black.ttf</span></code> – static rather than the variable build because the
+design pins the <code class="docutils literal notranslate"><span class="pre">ROND</span></code> axis to 0 and TouchGFX rasterises a fixed instance
+anyway.</p>
+<blockquote>
+<div><p><strong>The content pack’s folder names are right and its file names are not:</strong>
+<code class="docutils literal notranslate"><span class="pre">Clock</span> <span class="pre">Face</span> <span class="pre">3</span> <span class="pre">Icons/</span></code> holds files named “Watch Face 4”, <code class="docutils literal notranslate"><span class="pre">Clock</span> <span class="pre">Face</span> <span class="pre">4</span> <span class="pre">Icons/</span></code>
+is named “Watch Face 3”, and <code class="docutils literal notranslate"><span class="pre">Clock</span> <span class="pre">Face</span> <span class="pre">5</span> <span class="pre">Icons/</span></code> says “Watch Face 6”.
+Established by matching every icon’s pixel size against the Figma group it
+fills. Trust the folders.</p>
+</div></blockquote>
+</section>
+<section id="known-gaps">
+<h2>Known gaps<a class="headerlink" href="#known-gaps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>A change of clock is not seen until the minute turns</strong>, since the service is
+asleep until its next boundary. Leaving the face and returning corrects it at
+once, because resuming asks.</p></li>
+<li><p>The launcher icons are placeholders in the Analogue icon’s style; the content
+pack carried none.</p></li>
+<li><p>What the simulator cannot feed is listed in the guide, and applies here to
+the step and active-minute rows.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ClockfaceConsole-Architecture.html" class="btn btn-neutral float-left" title="ClockfaceConsole - Console Clockface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GlanceHR-Architecture.html" class="btn btn-neutral float-right" title="GlanceHR - Heart Rate Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,789 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing a Watch Face &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Figma UI Resource Pack" href="figma-ui-kit.html" />
+    <link rel="prev" title="Toggle" href="Templates/TouchGFX-Widgets/docs/Toggle.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writing a Watch Face</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-a-clockface-is-and-is-not">What a clockface is, and is not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-overview">Architecture overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-steps">Implementation steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-the-app-skeleton">Step 1: The app skeleton</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-define-your-messages">Step 2: Define your messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-the-service-the-clock">Step 3: The service - the clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-the-service-sensors">Step 4: The service - sensors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-the-12-and-24-hour-setting">Step 5: The 12- and 24-hour setting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-6-the-gui">Step 6: The GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constraints-that-will-bite-you">Constraints that will bite you</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#messages-over-256-bytes-vanish">Messages over 256 bytes vanish</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-gui-stops-draining-its-queue-while-suspended">The GUI stops draining its queue while suspended</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do-not-subscribe-to-what-you-do-not-draw">Do not subscribe to what you do not draw</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hold-a-heart-rate-do-not-blank-it">Hold a heart rate; do not blank it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-display-has-four-levels-per-channel">The display has four levels per channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invalidation-does-not-follow-from-changing-something">Invalidation does not follow from changing something</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arcs-sweep-clockwise-from-twelve-o-clock">Arcs sweep clockwise from twelve o’clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#size-the-canvas-buffer-then-measure-it">Size the canvas buffer, then measure it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#glyphs-written-into-a-wildcard-need-declaring-twice">Glyphs written into a wildcard need declaring twice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-tabular-figures-for-a-clock">Use tabular figures for a clock</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#techniques-worth-copying">Techniques worth copying</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#centre-a-group-by-measuring-it">Centre a group by measuring it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-two-colour-line-is-two-widgets">A two-colour line is two widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#columns-need-no-layout-at-all">Columns need no layout at all</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-goal-ring-is-a-track-and-a-fill">A goal ring is a track and a fill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#format-numbers-yourself-when-you-must">Format numbers yourself when you must</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#what-the-simulator-cannot-show-you">What the simulator cannot show you</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-shipped-faces">The shipped faces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Writing a Watch Face</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/writing-a-clockface.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-a-watch-face">
+<h1>Writing a Watch Face<a class="headerlink" href="#writing-a-watch-face" title="Link to this heading"></a></h1>
+<p>A <strong>clockface</strong> is a <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> like any other, with one difference: the kernel
+hands it the display in place of its own built-in home screen. So a clockface
+is what the user sees whenever nothing else is running, and that shapes every
+decision in it.</p>
+<p>This page is the guide to building one. Five faces ship as worked examples –
+<a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html"><span class="std std-doc">Analogue</span></a>,
+<a class="reference internal" href="Examples/ClockfacePeak-Architecture.html"><span class="std std-doc">Peak</span></a>,
+<a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html"><span class="std std-doc">Smile</span></a>,
+<a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html"><span class="std std-doc">Console</span></a> and
+<a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html"><span class="std std-doc">Retro</span></a> – and each of those pages
+covers only what is particular to it. Everything general is here.</p>
+<section id="what-a-clockface-is-and-is-not">
+<h2>What a clockface is, and is not<a class="headerlink" href="#what-a-clockface-is-and-is-not" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>The user does not drive it.</strong> The kernel owns the buttons while a face is
+on screen: pressing one opens the top menu or the glance list, it does not
+reach your app. A face receives no <code class="docutils literal notranslate"><span class="pre">EVENT_BUTTON</span></code>, has no navigation, and has
+exactly one screen.</p></li>
+<li><p><strong>It is chosen, not launched.</strong> The user picks a face in
+Settings -&gt; Watch Face. The kernel finds every installed app of
+<code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">&quot;Clockface&quot;</span></code> at boot and lists them, so installing your <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> is
+all it takes to appear. The list holds nine entries including the built-in
+face.</p></li>
+<li><p><strong>It is on screen for hours at a time.</strong> Which makes power the first design
+constraint, not the last: see <a class="reference internal" href="#do-not-subscribe-to-what-you-do-not-draw"><span class="xref myst">Do not subscribe to what you do not
+draw</span></a>.</p></li>
+<li><p><strong>It serves no glance data.</strong> Leave the glance-capable bit clear, which
+<code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">&quot;Clockface&quot;</span></code> does by default.</p></li>
+<li><p><strong>It is suspended, not stopped, when something else takes the screen.</strong> This
+has consequences that are easy to miss – see <a class="reference internal" href="#the-gui-stops-draining-its-queue-while-suspended"><span class="xref myst">The GUI stops draining its
+queue while suspended</span></a>.</p></li>
+</ul>
+</section>
+<section id="architecture-overview">
+<h2>Architecture overview<a class="headerlink" href="#architecture-overview" title="Link to this heading"></a></h2>
+<p>A face is the standard two-process app: a <strong>service</strong> that owns the clock and
+the sensors, and a <strong>GUI</strong> process running TouchGFX, talking over app-private
+<code class="docutils literal notranslate"><span class="pre">CustomMessage</span></code>s.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   [sensor layer] ──EVENT_SENSOR_LAYER_DATA──► Service ◄── clock, once a minute
+                                                  │  ▲
+                       CustomMessage::Time        │  │ CustomMessage::Refresh
+                       ...your values...          │  │ (sent on resume)
+                                                  ▼  │
+   [kernel] ──EVENT_GUI_TICK──► frame ──► FrontendApplication::handleTickEvent
+                                                                 │
+                                                          callCustomMessageHandler
+                                                                 │
+                                                                 ▼
+                                                  Model ──► MainPresenter ──► MainView
+</pre></div>
+</div>
+<p>The service pushes; the GUI draws what arrives. Nothing the face shows is
+sampled per frame, which is what makes a face cost almost nothing when the time
+is not changing.</p>
+</section>
+<section id="implementation-steps">
+<h2>Implementation steps<a class="headerlink" href="#implementation-steps" title="Link to this heading"></a></h2>
+<section id="step-1-the-app-skeleton">
+<h3>Step 1: The app skeleton<a class="headerlink" href="#step-1-the-app-skeleton" title="Link to this heading"></a></h3>
+<p>Copy an existing face. The quickest start is <code class="docutils literal notranslate"><span class="pre">Examples/Apps/ClockfaceAnalogue</span></code>
+(the simplest) or <code class="docutils literal notranslate"><span class="pre">ClockfaceRetro</span></code> (the closest to a typical data face).</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">Software/Apps/&lt;Face&gt;-CMake/CMakeLists.txt</span></code>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"MyFace"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_USER_NAME</span><span class="w"> </span><span class="s2">"MyFace"</span><span class="p">)</span><span class="w">     </span><span class="c"># what Settings and the store show, max 16 chars</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Clockface"</span><span class="p">)</span><span class="w">       </span><span class="c"># this is what makes it a face</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"....16 hex...."</span><span class="p">)</span><span class="w">    </span><span class="c"># must be unique; see Docs/deploy.md</span>
+</pre></div>
+</div>
+<p>Two things catch people out:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Software/Apps/TouchGFX-GUI/una/Makefile</span></code> repeats the app id in a hard-coded
+<code class="docutils literal notranslate"><span class="pre">-DAPP_ID=</span></code> for the simulator build. Change it too, or your simulator and
+your device build disagree.</p></li>
+<li><p>The packer requires <code class="docutils literal notranslate"><span class="pre">Resources/icon_60x60.png</span></code> and <code class="docutils literal notranslate"><span class="pre">icon_30x30.png</span></code>. They are
+not optional unless you set <code class="docutils literal notranslate"><span class="pre">APP_USE_ICONS</span> <span class="pre">Off</span></code>.</p></li>
+</ul>
+<p><strong>What is hand-written and what is not.</strong> Everything under
+<code class="docutils literal notranslate"><span class="pre">Software/Apps/TouchGFX-GUI/generated/</span></code> is tool output from <code class="docutils literal notranslate"><span class="pre">tgfx</span> <span class="pre">generate</span></code>,
+and it <strong>is committed</strong> – do not edit it, do not delete it from the repo. You
+write the <code class="docutils literal notranslate"><span class="pre">.touchgfx</span></code> project, the assets, <code class="docutils literal notranslate"><span class="pre">gui/**</span></code>, and the service under
+<code class="docutils literal notranslate"><span class="pre">Software/Libs/</span></code>.</p>
+</section>
+<section id="step-2-define-your-messages">
+<h3>Step 2: Define your messages<a class="headerlink" href="#step-2-define-your-messages" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Software/Libs/Header/Commands.hpp</span></code>. Ids live in the app-private range
+<code class="docutils literal notranslate"><span class="pre">0x00000000</span></code>-<code class="docutils literal notranslate"><span class="pre">0x0000FFFF</span></code>; the kernel never interprets them. (The header
+itself writes these with digit separators, <code class="docutils literal notranslate"><span class="pre">0x0000_0000</span></code>, which reads more
+easily but is not a C++17 literal – so they are spelled out here, where
+the surrounding text is meant to be copied.)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">TIME</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">STEPS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000004</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Keep each struct <strong>under 256 bytes</strong> and assert it:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Steps</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span><span class="w"> </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="#messages-over-256-bytes-vanish"><span class="xref myst">Messages over 256 bytes vanish</span></a>.</p>
+</section>
+<section id="step-3-the-service-the-clock">
+<h3>Step 3: The service - the clock<a class="headerlink" href="#step-3-the-service-the-clock" title="Link to this heading"></a></h3>
+<p>A face draws nothing finer than a minute, so read the clock once a turn round
+the loop and let that same reading size the wait:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">tm</span><span class="w"> </span><span class="n">local</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">    </span><span class="n">readLocalTime</span><span class="p">(</span><span class="n">local</span><span class="p">);</span><span class="w">       </span><span class="c1">// time() + localtime_r</span>
+<span class="w">    </span><span class="n">publishTime</span><span class="p">(</span><span class="n">local</span><span class="p">);</span><span class="w">         </span><span class="c1">// drops a reading equal to the last</span>
+
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">msToNextMinute</span><span class="p">(</span><span class="n">local</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Publishing <em>before</em> the wait rather than when it expires is what stops a
+message arriving just before a minute boundary from swallowing that minute.
+Sizing each wait from a fresh reading is what stops a late wake-up
+accumulating into drift.</p>
+<p>There is no SDK time interface: the clock is <code class="docutils literal notranslate"><span class="pre">time()</span></code> and <code class="docutils literal notranslate"><span class="pre">localtime_r()</span></code>.</p>
+<p><strong>Give every value one publisher that drops an unchanged value</strong>, so a source
+may call as often as it likes and only a real change costs an IPC round trip:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::publishSteps</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSentOnce</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">mSteps</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">mSent</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mSent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mSteps</span><span class="p">;</span><span class="w"> </span><span class="n">mSentOnce</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Steps</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">mSent</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-the-service-sensors">
+<h3>Step 4: The service - sensors<a class="headerlink" href="#step-4-the-service-sensors" title="Link to this heading"></a></h3>
+<p>Subscribe with <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code>, connect once at startup and hold it:
+a face is on screen whenever nothing else is, so there is no moment worth
+deferring to, and an event-driven subscription that only speaks on a change
+costs nothing to keep open.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type</span></code></p></th>
+<th class="head"><p>Parser under <code class="docutils literal notranslate"><span class="pre">SDK/SensorLayer/DataParsers/</span></code></p></th>
+<th class="head"><p>Getter</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Charge %</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BATTERY_LEVEL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SensorDataParserBatteryLevel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">getCharge()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Steps today</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">STEP_COUNTER_DAILY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SensorDataParserStepCounter</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">getStepCount()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Active minutes today</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ACTIVITY_TIME_DAILY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SensorDataParserActivity</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">getDuration()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Heart rate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SensorDataParserHeartRate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">getBpm()</span></code>, <code class="docutils literal notranslate"><span class="pre">getTrustLevel()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Floors today</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FLOOR_COUNTER_DAILY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SensorDataParserFloorCounter</span></code></p></td>
+<td><p>see header</p></td>
+</tr>
+</tbody>
+</table>
+<p>Read the <strong>newest</strong> sample, and check the size rather than assuming it – a
+batch holds its samples oldest first, and <code class="docutils literal notranslate"><span class="pre">DataBatch</span></code> guards its index with an
+assert that a release build drops:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataView</span><span class="w"> </span><span class="n">newest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+</pre></div>
+</div>
+</section>
+<section id="step-5-the-12-and-24-hour-setting">
+<h3>Step 5: The 12- and 24-hour setting<a class="headerlink" href="#step-5-the-12-and-24-hour-setting" title="Link to this heading"></a></h3>
+<p>Render both forms from the watch’s own setting rather than shipping two faces.
+<code class="docutils literal notranslate"><span class="pre">SDK::Message::RequestSystemSettings</span></code> carries it, and it also carries the daily
+goals, the unit system and the user’s height and weight:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestSystemSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mIs12h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span><span class="w">       </span><span class="c1">// true means 12-hour</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Call it from the <strong>service</strong>, not the GUI, and not from a constructor – it is a
+blocking round trip that needs the app’s message loop running.</p>
+<p><strong>It is pull-only. Nothing tells you it changed.</strong> There is no
+settings-changed event, so re-read it on all three occasions that can follow a
+change:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> – your GUI has come up.</p></li>
+<li><p>An app-private <code class="docutils literal notranslate"><span class="pre">Refresh</span></code> your GUI sends when it resumes.</p></li>
+<li><p>A poll from the service loop, bounded to once a minute.</p></li>
+</ol>
+<p>The second is the one people miss, and without it a setting the user changes
+never takes effect: the kernel <strong>suspends</strong> a face rather than stopping it, so
+returning from Settings brings no lifecycle message – and Settings is exactly
+where the user just changed the format.</p>
+<p>The third covers what neither edge can see: a setting pushed <strong>from the phone</strong>
+while your face is on screen. Bound it against the monotonic tick rather than
+hanging it off the loop’s wait expiring –</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In the service loop:</span>
+<span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mSettingsAt</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">kSettingsPollMs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">refreshSystemSettings</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="n">Service</span><span class="o">::</span><span class="n">refreshSystemSettings</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Before the request -- not after it, and not only when it succeeds.</span>
+<span class="w">    </span><span class="n">mSettingsAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestSystemSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">kSettingsTimeoutMs</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">mIs12h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">publishClockFormat</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>– because the loop is message driven: on a face showing a heart rate, samples
+arrive about once a second and the wait almost never expires, while on a face
+with only a pedometer it expires constantly. Neither gives you once a minute.</p>
+<p><strong>Stamp the clock before the request.</strong> Stamp it after a successful reply
+instead and a request that times out leaves the condition still true on the
+next turn, so the service issues a fresh blocking request every time round the
+loop for as long as the kernel stays quiet – the exact opposite of polling once
+a minute, and at the worst possible moment. Stamping first means a failed read
+is retried at the next interval like any other.</p>
+<p>The request itself is cheap. Its 100 ms figure is a <em>timeout</em>; the kernel
+answers on a completion semaphore and normally returns at once, and the
+publishers drop the result when nothing moved.</p>
+</section>
+<section id="step-6-the-gui">
+<h3>Step 6: The GUI<a class="headerlink" href="#step-6-the-gui" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Model</span></code> / <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code> / <code class="docutils literal notranslate"><span class="pre">MainPresenter</span></code> / <code class="docutils literal notranslate"><span class="pre">MainView</span></code>, as in any app. Two
+rules specific to a face:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Model::onResume</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">mResumed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">        </span><span class="c1">// a flag, and nothing else</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Model::tick</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mResumed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mResumed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">adopt</span><span class="p">(</span><span class="n">now</span><span class="p">());</span><span class="w">                                    </span><span class="c1">// re-read the clock</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">Refresh</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">);</span><span class="w">  </span><span class="c1">// ask for everything again</span>
+<span class="w">    </span><span class="n">application</span><span class="p">().</span><span class="n">invalidate</span><span class="p">();</span><span class="w">                      </span><span class="c1">// repaint the whole screen</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">onResume()</span></code> is not on the drawing thread</strong> – it is dispatched from
+<code class="docutils literal notranslate"><span class="pre">waitForFrameTick()</span></code>. Touch a widget there and you race the render loop. Set
+a flag; act in <code class="docutils literal notranslate"><span class="pre">tick()</span></code>.</p></li>
+<li><p><strong>Repaint everything on resume.</strong> Whatever the kernel drew over your face is
+still in the framebuffer.</p></li>
+<li><p><strong>Re-read the clock on resume.</strong> The face may have been off screen across a
+minute boundary, and the next push is not due until the one after it.</p></li>
+</ul>
+</section>
+</section>
+<section id="constraints-that-will-bite-you">
+<h2>Constraints that will bite you<a class="headerlink" href="#constraints-that-will-bite-you" title="Link to this heading"></a></h2>
+<section id="messages-over-256-bytes-vanish">
+<h3>Messages over 256 bytes vanish<a class="headerlink" href="#messages-over-256-bytes-vanish" title="Link to this heading"></a></h3>
+<p>The kernel’s message pools top out at 256 bytes. A larger request returns
+nullptr and <strong>the send is dropped silently</strong>. The simulator allocates with a
+plain <code class="docutils literal notranslate"><span class="pre">new[]</span></code>, so it will never show you this – your face will work in the
+simulator and render default-constructed values forever on the watch. Guard it
+with a <code class="docutils literal notranslate"><span class="pre">static_assert</span></code>, not a test. See
+<a class="reference internal" href="architecture-deep-dive.html"><span class="std std-doc">architecture-deep-dive</span></a> for the pool layout.</p>
+</section>
+<section id="the-gui-stops-draining-its-queue-while-suspended">
+<h3>The GUI stops draining its queue while suspended<a class="headerlink" href="#the-gui-stops-draining-its-queue-while-suspended" title="Link to this heading"></a></h3>
+<p>Custom messages waiting for the GUI sit in a <strong>ten-deep</strong> queue that is drained
+once per <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>. A suspended face gets no ticks, so nothing drains,
+and once the queue is full <strong>the newest message is rejected outright</strong>.</p>
+<p>If your service publishes anything at even ~1 Hz – a heart rate will – the
+queue fills within about ten seconds of the face leaving the screen. Anything
+that changes after that is lost. And if your publishers dedup on the last value
+sent (they should), they will never offer it again.</p>
+<p>So make <code class="docutils literal notranslate"><span class="pre">Refresh</span></code> mean what it says: clear the sent flags and re-send
+everything, rather than only the settings.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::republishAll</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">mLevelSent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mStepsSent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mFormatSent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">publishBatteryLevel</span><span class="p">(</span><span class="n">mLevel</span><span class="p">);</span>
+<span class="w">    </span><span class="n">publishSteps</span><span class="p">();</span>
+<span class="w">    </span><span class="n">refreshSystemSettings</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="do-not-subscribe-to-what-you-do-not-draw">
+<h3>Do not subscribe to what you do not draw<a class="headerlink" href="#do-not-subscribe-to-what-you-do-not-draw" title="Link to this heading"></a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code> subscription keeps the <strong>optical sensor powered</strong>, and a face is
+on screen for hours. Subscribing “for symmetry” with another face, or leaving a
+subscription behind after dropping a row from the design, is one of the more
+expensive mistakes available here. <code class="docutils literal notranslate"><span class="pre">ClockfaceConsole</span></code> shows a face trimmed to a
+single sensor for exactly this reason.</p>
+</section>
+<section id="hold-a-heart-rate-do-not-blank-it">
+<h3>Hold a heart rate; do not blank it<a class="headerlink" href="#hold-a-heart-rate-do-not-blank-it" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> on the parser is only a field-count check – it tells you
+nothing about signal quality. That leads people to reach for the gate the
+activity apps use:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">bpm</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">trust</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">trust</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="c1">// trust runs 0-3; 0 means no signal</span>
+</pre></div>
+</div>
+<p><strong>Do not use that to decide what to display.</strong> It is a <em>recording</em> gate: in
+<code class="docutils literal notranslate"><span class="pre">Running</span></code>, <code class="docutils literal notranslate"><span class="pre">Cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">Hiking</span></code>, <code class="docutils literal notranslate"><span class="pre">Treadmill</span></code> and <code class="docutils literal notranslate"><span class="pre">Workout</span></code> it decides whether a
+sample is written to the FIT file, and their live readouts are fed
+unconditionally. <code class="docutils literal notranslate"><span class="pre">HRMonitor</span></code> forwards trust to its GUI as an indicator and
+gates nothing; <code class="docutils literal notranslate"><span class="pre">GlanceHR</span></code> has no trust gate at all.</p>
+<p>The reason is that trust dips transiently whenever the wrist moves. Applied per
+sample to a display, the gate blanks the row about once a second – which is
+exactly the defect the four new faces shipped with and had fixed.</p>
+<p>If you do want to filter what you show, treat a failed sample as <em>no new
+information</em> rather than <em>no reading</em>: hold the last trusted value and only
+give up after a sustained loss.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// On each sample. A trusted one refreshes the hold; an untrusted one does</span>
+<span class="c1">// nothing at all -- it is not evidence of anything.</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isTrusted</span><span class="p">(</span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">trust</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mBpm</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">bpm</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mBpmAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">expireHeartRate</span><span class="p">();</span>
+<span class="n">publishHealth</span><span class="p">();</span>
+
+<span class="c1">// Every turn round the loop, sample or no sample.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">Service::expireHeartRate</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mBpm</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0u</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">((</span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mBpmAt</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">kHoldMs</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mBpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                      </span><span class="c1">// and now show ---</span>
+<span class="w">        </span><span class="n">publishHealth</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Two traps in that, both of which the four faces shipped with and had fixed.</p>
+<p><strong>Expire on the loop, not on the sample.</strong> Putting the test in an <code class="docutils literal notranslate"><span class="pre">else</span></code> on the
+sample handler looks natural and cannot work: it only runs when a sample
+arrives, and the case the hold exists for – the watch taken off – is exactly
+the one where samples <em>stop</em>. The rate would sit on screen indefinitely. Also
+shorten the loop’s wait to the pending expiry, or it fires whenever the minute
+next turns rather than when it is due:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msToNextMinute</span><span class="p">(</span><span class="n">local</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">hold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msToHeartRateExpiry</span><span class="p">(</span><span class="n">mBpm</span><span class="p">,</span><span class="w"> </span><span class="n">mBpmAt</span><span class="p">,</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">());</span>
+<span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">hold</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0u</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">hold</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">wait</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hold</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>While the watch is worn, samples arrive far more often than the hold and keep
+resetting it, so that costs no extra wake-ups in the common case.</p>
+<p><strong>Time it with <code class="docutils literal notranslate"><span class="pre">mKernel.sys.getTimeMs()</span></code>, not <code class="docutils literal notranslate"><span class="pre">time()</span></code>.</strong> The wall clock is set
+from the phone over BLE and can move either way. A backward jump makes the age
+negative, so the hold never expires and the reading is stranded; a forward one
+retires a good reading early. <code class="docutils literal notranslate"><span class="pre">getTimeMs()</span></code> is the OS tick, monotonic since
+boot, and unsigned arithmetic on it stays correct across its wrap at about 49
+days.</p>
+<p>Holding is the right way round to be wrong: a rate a few seconds old still
+reads true, whereas a row that blinks reads broken.</p>
+</section>
+<section id="the-display-has-four-levels-per-channel">
+<h3>The display has four levels per channel<a class="headerlink" href="#the-display-has-four-levels-per-channel" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">LCD8bpp_ABGR2222</span></code> – two bits each. So the palette is 0, 85, 170, 255 per
+channel, and <strong>you cannot render a smooth gradient or a blended edge.</strong> Between
+a mid teal and black there is exactly one representable tone, which means an
+antialiased boundary does not ramp: every partially covered pixel lands on that
+one value. On a near-horizontal curve that reads as a dark dashed line.</p>
+<p>Draw hard-edged shapes, and let the steps be steps. <code class="docutils literal notranslate"><span class="pre">dither_algorithm</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code>
+in <code class="docutils literal notranslate"><span class="pre">application.config</span></code> and turning it on affects every image in the app.</p>
+</section>
+<section id="invalidation-does-not-follow-from-changing-something">
+<h3>Invalidation does not follow from changing something<a class="headerlink" href="#invalidation-does-not-follow-from-changing-something" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">setPosition()</span></code> invalidates <strong>nothing</strong>. A widget you move must be
+invalidated before <em>and</em> after, or it leaves a hole where it was.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invalidateContent()</span></code> is a <strong>no-op on an already-hidden widget</strong>, which is
+exactly when the area it used to cover needs repainting. Use <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code>
+when hiding.</p></li>
+<li><p>Canvas widgets (<code class="docutils literal notranslate"><span class="pre">Circle</span></code>, <code class="docutils literal notranslate"><span class="pre">Line</span></code>) invalidate their <em>minimal rect</em>, so a
+240x240 arc container invalidating both its track and its fill repaints the
+whole face. <code class="docutils literal notranslate"><span class="pre">Circle::updateArc()</span></code> invalidates only the delta.</p></li>
+</ul>
+</section>
+<section id="arcs-sweep-clockwise-from-twelve-o-clock">
+<h3>Arcs sweep clockwise from twelve o’clock<a class="headerlink" href="#arcs-sweep-clockwise-from-twelve-o-clock" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Circle::setArc(start,</span> <span class="pre">end)</span></code> goes clockwise from 12. So a ring on the left of
+the face has its <em>start</em> at the bottom and its <em>end</em> at the top, and a ring on
+the right is the other way round – a mirrored pair of progress rings is two
+different fill operations, not one. <code class="docutils literal notranslate"><span class="pre">Peak</span></code> and the kernel’s own
+<code class="docutils literal notranslate"><span class="pre">ActivityBarTop</span></code> / <code class="docutils literal notranslate"><span class="pre">ActivityBarBottom</span></code> both split them for this reason.</p>
+<p>Two more:</p>
+<ul class="simple">
+<li><p><strong>There is no zero-span case.</strong> With round caps, an arc whose start and end
+coincide still draws both caps – a full disc of the stroke’s width. Hide the
+widget when it has nothing to show.</p></li>
+<li><p><strong>Read your angle range off the track, never off the fill.</strong> The fill is what
+you are about to narrow; read the range from it and it shrinks on every call.</p></li>
+</ul>
+</section>
+<section id="size-the-canvas-buffer-then-measure-it">
+<h3>Size the canvas buffer, then measure it<a class="headerlink" href="#size-the-canvas-buffer-then-measure-it" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CanvasBufferSize</span></code> in the <code class="docutils literal notranslate"><span class="pre">.touchgfx</span></code> sizes the buffer every canvas widget
+rasterises through. Too small and a draw silently splits or fails. Two rim
+rings of radius ~108 fit in 3600, which is what the kernel’s home screen
+declares; a face with no canvas widgets can declare <code class="docutils literal notranslate"><span class="pre">0</span></code>. Re-measure with
+TouchGFX’s own memory report after retuning a stroke.</p>
+</section>
+<section id="glyphs-written-into-a-wildcard-need-declaring-twice">
+<h3>Glyphs written into a wildcard need declaring twice<a class="headerlink" href="#glyphs-written-into-a-wildcard-need-declaring-twice" title="Link to this heading"></a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">&lt;Typography&gt;</span></code>’s <code class="docutils literal notranslate"><span class="pre">WildcardCharacters</span></code> lists what gets rasterised for wildcard
+substitution. Static translations contribute their own glyphs automatically –
+wildcards do not.</p>
+<p>So if you read a name back out of the text database and write it into a
+wildcard buffer, which is the natural way to keep day and month names
+translatable:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Unicode</span><span class="o">::</span><span class="n">snprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">SIZE</span><span class="p">,</span><span class="w"> </span><span class="s">"%s %u %s"</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">TypedText</span><span class="p">(</span><span class="n">T_TEXT_WED</span><span class="p">).</span><span class="n">getText</span><span class="p">(),</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">TypedText</span><span class="p">(</span><span class="n">T_TEXT_MAY</span><span class="p">).</span><span class="n">getText</span><span class="p">());</span>
+</pre></div>
+</div>
+<p>then every letter those names can contain must also be in that typography’s
+<code class="docutils literal notranslate"><span class="pre">WildcardCharacters</span></code>, or it renders as the fallback character. This is a
+silent, data-dependent failure: it will look fine in January and wrong in
+August.</p>
+<p>Also: <code class="docutils literal notranslate"><span class="pre">--</span></code> is illegal inside an XML comment, and TouchGFX reports a malformed
+<code class="docutils literal notranslate"><span class="pre">texts.xml</span></code> only as <code class="docutils literal notranslate"><span class="pre">Object</span> <span class="pre">reference</span> <span class="pre">not</span> <span class="pre">set</span> <span class="pre">to</span> <span class="pre">an</span> <span class="pre">instance</span> <span class="pre">of</span> <span class="pre">an</span> <span class="pre">object</span></code>.</p>
+</section>
+<section id="use-tabular-figures-for-a-clock">
+<h3>Use tabular figures for a clock<a class="headerlink" href="#use-tabular-figures-for-a-clock" title="Link to this heading"></a></h3>
+<p>A proportional font gives <code class="docutils literal notranslate"><span class="pre">1</span></code> a narrower advance than <code class="docutils literal notranslate"><span class="pre">8</span></code>, so a clock drawn in
+one shifts as the digits change. This repo’s <code class="docutils literal notranslate"><span class="pre">Poppins-*.ttf</span></code> are tabular builds
+(every digit 661 units) and the <code class="docutils literal notranslate"><span class="pre">Poppins-Non-Tabular-*.ttf</span></code> files are the stock
+metrics – the Figma library calls the tabular ones “UNA_Poppins”. IBM Plex Mono
+and Doto are monospaced throughout.</p>
+<p>Tabular figures also make text measurement exact, which matters if you lay out
+a group by measuring it (below).</p>
+</section>
+</section>
+<section id="techniques-worth-copying">
+<h2>Techniques worth copying<a class="headerlink" href="#techniques-worth-copying" title="Link to this heading"></a></h2>
+<section id="centre-a-group-by-measuring-it">
+<h3>Centre a group by measuring it<a class="headerlink" href="#centre-a-group-by-measuring-it" title="Link to this heading"></a></h3>
+<p>If a design centres a clock rather than pinning digits either side of a fixed
+midpoint, the group moves as its parts change width – between clock formats,
+and between a one- and two-digit hour. Measure and centre, and every case falls
+out of one rule:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int16_t</span><span class="w"> </span><span class="n">hourW</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hourText</span><span class="p">.</span><span class="n">getTextWidth</span><span class="p">();</span><span class="w">      </span><span class="c1">// accounts for the wildcard</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int16_t</span><span class="w"> </span><span class="n">minW</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">minuteText</span><span class="p">.</span><span class="n">getTextWidth</span><span class="p">();</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int16_t</span><span class="w"> </span><span class="n">sepW</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">mIs12h</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">kSeparator12</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">kSeparator24</span><span class="p">;</span>
+
+<span class="kt">int16_t</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">240</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">hourW</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sepW</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">minW</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="n">place</span><span class="p">(</span><span class="n">hourText</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">hourW</span><span class="p">);</span><span class="w">   </span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">hourW</span><span class="p">;</span>
+<span class="n">place</span><span class="p">(</span><span class="n">colonText</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">sepW</span><span class="p">);</span><span class="w">   </span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sepW</span><span class="p">;</span>
+<span class="n">place</span><span class="p">(</span><span class="n">minuteText</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">minW</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Keep the separator a constant per format rather than the colon’s own advance:
+designs usually leave more room around a colon than the glyph occupies, and the
+24-hour form needs a plain gap where no colon is drawn.</p>
+</section>
+<section id="a-two-colour-line-is-two-widgets">
+<h3>A two-colour line is two widgets<a class="headerlink" href="#a-two-colour-line-is-two-widgets" title="Link to this heading"></a></h3>
+<p>One <code class="docutils literal notranslate"><span class="pre">TextArea</span></code> has one colour. A date line with the day name in an accent
+colour is two widgets laid out end to end and centred as a pair – the same
+measure-and-centre technique. <code class="docutils literal notranslate"><span class="pre">Peak</span></code> does this.</p>
+</section>
+<section id="columns-need-no-layout-at-all">
+<h3>Columns need no layout at all<a class="headerlink" href="#columns-need-no-layout-at-all" title="Link to this heading"></a></h3>
+<p>If each value is centred in a fixed box on its column’s centre, a value that
+changes width re-centres itself and there is nothing to lay out. Prefer this to
+measuring whenever the design allows it. <code class="docutils literal notranslate"><span class="pre">Smile</span></code> does this for three columns.</p>
+</section>
+<section id="a-goal-ring-is-a-track-and-a-fill">
+<h3>A goal ring is a track and a fill<a class="headerlink" href="#a-goal-ring-is-a-track-and-a-fill" title="Link to this heading"></a></h3>
+<p>Two <code class="docutils literal notranslate"><span class="pre">Circle</span></code>s with identical geometry: <code class="docutils literal notranslate"><span class="pre">background</span></code> never changes, <code class="docutils literal notranslate"><span class="pre">progress</span></code>
+gets <code class="docutils literal notranslate"><span class="pre">setArc</span></code>. Clamp past the goal to full, and treat a goal of zero as an
+empty ring rather than a full one. <code class="docutils literal notranslate"><span class="pre">Peak</span></code>’s two containers are the worked
+example.</p>
+</section>
+<section id="format-numbers-yourself-when-you-must">
+<h3>Format numbers yourself when you must<a class="headerlink" href="#format-numbers-yourself-when-you-must" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Unicode::snprintf</span></code> has no thousands-grouping flag. If your design groups a
+step count, write the handful of lines – see <code class="docutils literal notranslate"><span class="pre">formatGrouped()</span></code> in any of the
+new faces’ <code class="docutils literal notranslate"><span class="pre">gui/include/gui/common/*Labels.hpp</span></code>.</p>
+</section>
+</section>
+<section id="what-the-simulator-cannot-show-you">
+<h2>What the simulator cannot show you<a class="headerlink" href="#what-the-simulator-cannot-show-you" title="Link to this heading"></a></h2>
+<p>The app simulator runs your real service against a mock kernel, so it exercises
+far more than rendering. But for a face specifically:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STEP_COUNTER_DAILY</span></code></p></td>
+<td><p>not served – the simulated pedometer serves <code class="docutils literal notranslate"><span class="pre">STEP_COUNTER</span></code> (since boot)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ACTIVITY_TIME_DAILY</span></code></p></td>
+<td><p>no simulated sensor at all</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeFormat</span></code></p></td>
+<td><p>never populated by the simulated settings handler, so a face always sees 24-hour</p></td>
+</tr>
+<tr class="row-odd"><td><p>Message pools</p></td>
+<td><p>not simulated: an oversized message succeeds here and fails on the watch</p></td>
+</tr>
+<tr class="row-even"><td><p>Heart rate</p></td>
+<td><p>served, and it does return trust 0 for ~5 % of samples – but at the default period that is roughly one event per 200 s, so a short session will not show you a trust-loss bug</p></td>
+</tr>
+</tbody>
+</table>
+<p>None of these is hard to work around temporarily while you develop a face –
+point a subscription at the non-daily sensor, or bias the simulated trust – but
+none of them will fail for you on its own. Test a face on the watch.</p>
+</section>
+<section id="the-shipped-faces">
+<h2>The shipped faces<a class="headerlink" href="#the-shipped-faces" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+<th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><img alt="Peak" src="_images/clockface-peak.png" /></p></td>
+<td><p><img alt="Smile" src="_images/clockface-smile.png" /></p></td>
+<td><p><img alt="Console" src="_images/clockface-console.png" /></p></td>
+<td><p><img alt="Retro" src="_images/clockface-retro.png" /></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html"><span class="std std-doc">Peak</span></a></strong></p></td>
+<td><p><strong><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html"><span class="std std-doc">Smile</span></a></strong></p></td>
+<td><p><strong><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html"><span class="std std-doc">Console</span></a></strong></p></td>
+<td><p><strong><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html"><span class="std std-doc">Retro</span></a></strong></p></td>
+</tr>
+<tr class="row-even"><td><p>two goal rings, a two-colour date line, targets from system settings</p></td>
+<td><p>a bitmap background from a clipped shape, three fixed columns</p></td>
+<td><p>trimmed to one sensor, and a deliberately off-centre group</p></td>
+<td><p>four sensors, a battery as an image swap, one font throughout</p></td>
+</tr>
+</tbody>
+</table>
+<p><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html"><span class="std std-doc">Analogue</span></a> is the fifth and the
+simplest: rotating canvas hands, and a measured argument for why not a rotated
+bitmap.</p>
+<p>All four screenshots are the app simulator. Their step counts, active minutes
+and goals are the designs’ sample values fed in by hand, because the simulator
+cannot serve the daily sensors – see <a class="reference internal" href="#what-the-simulator-cannot-show-you"><span class="xref myst">what the simulator cannot show
+you</span></a>. The heart rates are the simulated
+sensor’s own.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Templates/TouchGFX-Widgets/docs/Toggle.html" class="btn btn-neutral float-left" title="Toggle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="figma-ui-kit.html" class="btn btn-neutral float-right" title="Figma UI Resource Pack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
