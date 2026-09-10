@@ -98,6 +98,46 @@ set(UNA_SDK_INCLUDE_DIRS_GUI
     "$ENV{UNA_SDK}/Libs/Header/SDK/Port/TouchGFX/generated"
 )
 
+# ---------------------------------------------------------------------------
+# GUI process built on LVGL (ThirdParty/lvgl submodule) instead of TouchGFX.
+#
+# An app selects this by linking UNA_SDK_SOURCES_GUI_LVGL in place of
+# UNA_SDK_SOURCES_GUI, adding UNA_SDK_INCLUDE_DIRS_GUI_LVGL to its include
+# dirs and UNA_SDK_DEFINES_GUI_LVGL to GUI_COMPILE_DEFINITIONS (see
+# una_app_build_gui). The message pump shared with the TouchGFX port,
+# TouchGFXCommandProcessor.cpp, has no TouchGFX dependency.
+#
+# LVGL reads its configuration from the file named by LV_CONF_PATH. Set
+# UNA_LVGL_CONF before including this file to use an app-specific lv_conf.h;
+# the default is the SDK's.
+# ---------------------------------------------------------------------------
+set(UNA_SDK_LVGL_PATH "$ENV{UNA_SDK}/ThirdParty/lvgl")
+
+if(NOT DEFINED UNA_LVGL_CONF)
+    set(UNA_LVGL_CONF "$ENV{UNA_SDK}/Libs/Header/SDK/Port/LVGL/lv_conf.h")
+endif()
+
+# Every LVGL C source is compiled; files for disabled features and other
+# platforms reduce to empty translation units through lv_conf.h.
+file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES CONFIGURE_DEPENDS
+    "${UNA_SDK_LVGL_PATH}/src/*.c"
+)
+
+set(UNA_SDK_SOURCES_GUI_LVGL
+    "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"
+    ${UNA_SDK_LVGL_SOURCES}
+)
+
+set(UNA_SDK_INCLUDE_DIRS_GUI_LVGL
+    "${UNA_SDK_LVGL_PATH}"
+)
+
+set(UNA_SDK_DEFINES_GUI_LVGL
+    "LV_CONF_PATH=\"${UNA_LVGL_CONF}\""
+)
+
 # Combined service includes for backward compatibility
 set(UNA_SDK_INCLUDE_DIRS_SERVICE
     "${UNA_SDK_INCLUDE_DIRS_FIT}"
