@@ -40,13 +40,14 @@ void AlarmManager::load()
             mSnoozesDirty = true;
         }
     } else if (!mSnoozedAlarms.empty()) {
-        // No trustworthy alarm list: mAlarms is empty whether the file is
-        // absent or unreadable, so validating against it would call every
-        // snooze orphaned and persist them as dropped. Keep them instead --
-        // each carries its own time and effect, and one that is no longer
-        // wanted is dropped by the next list save, or by the stale-snooze
-        // grace in settleSnoozes().
-        LOG_ERROR("Alarm list unavailable; keeping %u snooze(s) unvalidated\n",
+        // No trustworthy alarm list, so nothing to judge a snooze against: the
+        // list is empty when the file is absent or unreadable, and incomplete
+        // when a single record failed to parse. Validating against it would
+        // call surviving snoozes orphaned and persist them as dropped. Keep
+        // them instead -- each carries its own time and effect, and one that is
+        // no longer wanted is dropped by the next list save, or by the
+        // stale-snooze grace in settleSnoozes().
+        LOG_ERROR("Alarm list incomplete or unreadable; keeping %u snooze(s) unvalidated\n",
             static_cast<unsigned>(mSnoozedAlarms.size()));
     }
 
@@ -339,6 +340,19 @@ bool AlarmManager::parseJSON(char* buff, uint32_t length, std::vector<Alarm>& al
     }
 
     LOG_DEBUG("Parsed %u alarms\n", static_cast<unsigned>(alarms.size()));
+
+    // Every record above can be skipped on its own, so a syntactically valid
+    // file with one bad field yields a *partial* list. Report that as a failure
+    // rather than as success: the alarms that did parse are still returned and
+    // shown, but the list is not complete enough to judge a pending snooze
+    // orphaned by (see load()).
+    if (alarms.size() != arrayLength) {
+        LOG_ERROR("Parsed only %u of %u alarms; list is incomplete\n",
+            static_cast<unsigned>(alarms.size()),
+            static_cast<unsigned>(arrayLength));
+        return false;
+    }
+
     return true;
 }
 

@@ -611,6 +611,42 @@ TEST(AlarmManager, AnUnreadableAlarmListDoesNotDestroyPendingSnoozes)
     EXPECT_EQ(cb2.rings, 1);
 }
 
+// A file that is valid JSON but carries one bad alarm record parses into a
+// *partial* list. Pruning snoozes against that list would drop the snooze
+// belonging to the record that failed, and persist the loss.
+TEST(AlarmManager, APartiallyParsedAlarmListDoesNotDestroyPendingSnoozes)
+{
+    KernelFixture fx;
+
+    {
+        RecordingCallback cb;
+        AlarmManager      mgr{ fx.kernel };
+        mgr.attachCallback(&cb);
+        ASSERT_TRUE(mgr.saveAlarmList({ alarmAt(7, 0), alarmAt(9, 30) }));
+        mgr.execute(at(0, 7, 0, 2).local, at(0, 7, 0, 2).utc);
+        ASSERT_EQ(cb.rings, 1);
+    }
+
+    // Valid JSON; the 07:00 record now has an out-of-range hour, so the parser
+    // skips just that one.
+    fx.fileSystem.seedFile("alarms.json",
+        "{\"alarms\":["
+        "{\"on\":true,\"time_h\":99,\"time_m\":0,\"repeat\":\"every_day\",\"effect\":\"beep\"},"
+        "{\"on\":true,\"time_h\":9,\"time_m\":30,\"repeat\":\"every_day\",\"effect\":\"beep\"}"
+        "]}");
+
+    RecordingCallback cb2;
+    AlarmManager      mgr2{ fx.kernel };
+    mgr2.attachCallback(&cb2);
+    mgr2.load();
+
+    ASSERT_EQ(mgr2.getAlarmList().size(), 1u);      // only the good record
+    EXPECT_NE(fx.fileSystem.readFile("snoozes.json").find("time_h"), std::string::npos);
+
+    mgr2.execute(at(0, 7, 5, 1).local, at(0, 7, 5, 1).utc);
+    EXPECT_EQ(cb2.rings, 1);
+}
+
 TEST(AlarmManager, CorruptSnoozeStorageIsIgnored)
 {
     KernelFixture fx;
