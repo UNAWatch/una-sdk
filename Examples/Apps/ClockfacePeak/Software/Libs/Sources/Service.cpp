@@ -21,8 +21,19 @@ static constexpr uint32_t kSecondsPerMinute = 60;
 static constexpr uint32_t kMsPerSecond      = 1000;
 
 /// How long to wait for the kernel to answer a settings request. The same
-/// 100 ms every other app that reads them uses.
+/// 100 ms every other app that reads them uses. A timeout, not a cost: the
+/// kernel answers on a completion semaphore and normally returns at once.
 static constexpr uint32_t kSettingsTimeoutMs = 100;
+
+/// How often to re-read the system settings unprompted.
+///
+/// They are pull-only, and the two lifecycle edges the service reads them on
+/// cover the local route to changing them -- Settings suspends the face, so
+/// returning to it resumes and asks. What they do not cover is a change pushed
+/// from the phone while the face is on screen, which no event announces. A
+/// minute is far more often than a user can plausibly change the setting, and
+/// costs one request whose result the publishers drop when nothing moved.
+static constexpr uint32_t kSettingsPollMs = 60u * kMsPerSecond;
 
 /// Below this the reading is not a human heart rate, whatever the sensor says.
 static constexpr float kMinPlausibleBpm = 20.0f;
@@ -102,6 +113,7 @@ Service::Service(SDK::Kernel &kernel)
     , mSentActivityMinutes(0)
     , mSentBpm(0)
     , mHealthSent(false)
+    , mSettingsAt(0)
     , mIs12h(false)
     , mSentIs12h(false)
     , mFormatSent(false)
@@ -153,6 +165,13 @@ void Service::run()
                                                   mKernel.sys.getTimeMs());
         if ((hold != 0u) && (hold < wait)) {
             wait = hold;
+        }
+
+        // Bounded against the monotonic tick rather than hung off the wait
+        // expiring: the loop is message driven, and on a face showing a heart
+        // rate the timeout branch almost never runs.
+        if ((mKernel.sys.getTimeMs() - mSettingsAt) >= kSettingsPollMs) {
+            refreshSystemSettings();
         }
 
         SDK::MessageBase *msg;
@@ -341,6 +360,10 @@ void Service::republishAll()
 
 void Service::refreshSystemSettings()
 {
+    // Stamped whether or not the read succeeds, so a kernel that is not
+    // answering is retried on the next poll rather than on every turn.
+    mSettingsAt = mKernel.sys.getTimeMs();
+
     if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
         if (msg.send(kSettingsTimeoutMs) && msg.ok()) {
             mIs12h        = msg->timeFormat;

@@ -90,6 +90,7 @@ private:
     uint32_t mSentSteps;            ///< Last count sent to the GUI
     bool     mStepsSent;            ///< A count has reached the GUI
 
+    uint32_t mSettingsAt;           ///< Monotonic tick of the last settings read
     bool     mIs12h;                ///< Clock format as last read from settings
     bool     mSentIs12h;            ///< Last format sent to the GUI
     bool     mFormatSent;           ///< A format has reached the GUI

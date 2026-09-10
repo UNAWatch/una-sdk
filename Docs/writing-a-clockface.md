@@ -91,7 +91,10 @@ write the `.touchgfx` project, the assets, `gui/**`, and the service under
 ### Step 2: Define your messages
 
 `Software/Libs/Header/Commands.hpp`. Ids live in the app-private range
-`0x0000_0000`-`0x0000_FFFF`; the kernel never interprets them.
+`0x00000000`-`0x0000FFFF`; the kernel never interprets them. (The header
+itself writes these with digit separators, `0x0000_0000`, which reads more
+easily but is not a C++17 literal -- so they are spelled out here, where
+the surrounding text is meant to be copied.)
 
 ```cpp
 constexpr SDK::MessageType::Type TIME  = 0x00000003;
