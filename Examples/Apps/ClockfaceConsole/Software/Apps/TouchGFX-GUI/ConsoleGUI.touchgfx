@@ -1,0 +1,261 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Main",
+        "CanvasBufferSize": 0,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "weekdayText",
+            "X": 0,
+            "Y": 22,
+            "Width": 240,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_CONSOLE_WEEKDAY",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 128
+            },
+            "Wildcard1": {
+              "TextId": "WC_CONSOLE_WEEKDAY",
+              "UseBuffer": true,
+              "BufferSize": 12
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "dayText",
+            "X": 0,
+            "Y": 29,
+            "Width": 240,
+            "Height": 112,
+            "LockPosition": true,
+            "TextId": "TMP_CONSOLE_DAY",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_CONSOLE_DAY",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "monthText",
+            "X": 0,
+            "Y": 120,
+            "Width": 240,
+            "Height": 28,
+            "LockPosition": true,
+            "TextId": "TMP_CONSOLE_MONTH",
+            "TextRotation": "0",
+            "Color": {
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_CONSOLE_MONTH",
+              "UseBuffer": true,
+              "BufferSize": 5
+            }
+          },
+          {
+            "Type": "Box",
+            "Name": "rule",
+            "X": 33,
+            "Y": 151,
+            "Width": 174,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Red": 64,
+              "Green": 64,
+              "Blue": 64
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hourText",
+            "X": 73,
+            "Y": 155,
+            "Width": 44,
+            "Height": 47,
+            "LockPosition": true,
+            "TextId": "TMP_CONSOLE_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_CONSOLE_HOUR",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "colonText",
+            "X": 117,
+            "Y": 155,
+            "Width": 22,
+            "Height": 47,
+            "LockPosition": true,
+            "TextId": "TEXT_CONSOLE_COLON",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "minuteText",
+            "X": 139,
+            "Y": 155,
+            "Width": 44,
+            "Height": 47,
+            "LockPosition": true,
+            "TextId": "TMP_CONSOLE_CLOCK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_CONSOLE_MINUTE",
+              "UseBuffer": true,
+              "BufferSize": 3
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "meridiemText",
+            "X": 183,
+            "Y": 174,
+            "Width": 34,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TEXT_CONSOLE_AM",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "stepsIcon",
+            "X": 80,
+            "Y": 202,
+            "Width": 17,
+            "Height": 23,
+            "LockPosition": true,
+            "RelativeFilename": "StepsIcon_17x23.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "stepsText",
+            "X": 113,
+            "Y": 206,
+            "Width": 100,
+            "Height": 22,
+            "LockPosition": true,
+            "TextId": "TMP_CONSOLE_STEPS",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "WC_CONSOLE_STEPS",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [],
+    "Name": "ConsoleGUI",
+    "Resolution": {
+      "Width": 240,
+      "Height": 240
+    },
+    "SelectedColorDepth": 8,
+    "StartupScreenName": "Main",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../../../../../../ThirdParty/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      8
+    ],
+    "AvailableLCDs": {
+      "8": "LCD8bpp_ABGR2222"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 240
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD8bpp_ABGR2222": {
+        "Id": "LCD8bpp_ABGR",
+        "Features": [
+          {
+            "Id": "TextureMapperImageFormats",
+            "Features": [
+              {
+                "Id": "ABGR2222",
+                "Features": [
+                  {
+                    "Id": "NearestNeighbor",
+                    "IsEnabled": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "PostGenerateTargetCommandOverride": "",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32U5",
+    "SubFamily": "STM32U575/585",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m33",
+    "OptionalComponentsRoot": "touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": []
+  },
+  "Version": "4.26.1"
+}
