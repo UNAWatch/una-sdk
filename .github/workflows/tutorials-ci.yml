@@ -31,11 +31,18 @@ jobs:
     container: xanderhendriks/stm32cubeide:16.0
     needs: prepare
     strategy:
+      # One tutorial's setup failing is not the others' news, and the default
+      # would cancel them. See the note in apps-ci.yml's cmake-build.
+      fail-fast: false
       matrix:
         app: ${{ fromJson(needs.prepare.outputs.cmake_apps) }}
     steps:
       - name: Setup GIT
-        run: apt update && apt install -y git python3-full python3-pip python-is-python3 cmake
+        run: |
+          # By-Hash keeps `update` self-consistent against a mid-publish
+          # archive; see apps-ci.yml's cmake-build for the full note.
+          apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
+          apt-get install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@v5
