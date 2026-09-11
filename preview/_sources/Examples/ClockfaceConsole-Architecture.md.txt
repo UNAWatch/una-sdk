@@ -35,21 +35,41 @@ That is not tidiness. **A `HEART_RATE` subscription keeps the optical sensor
 powered**, and a face is on screen for hours -- see the guide. This is the
 example to copy when your design drops a row.
 
-### A group centred on the digits, not on the whole thing
+### A date order that swaps rows instead of reversing a line
 
-The clock group carries the meridiem, and the meridiem is deliberately **left
-out of the width the group is centred on**:
+Console follows Settings -> Clock -> Date Format like the other three, but it
+cannot do it the way they do. Its date is not a line -- it is a stack, and the
+day of the month is 112 px of it. There is no day-month sequence to reverse.
+
+So the two labels either side of that number exchange rows and the number stays
+where it is. Day-first reads WEDNESDAY / 03 / AUG, month-first AUG / 03 /
+WEDNESDAY. `layoutDate()` is the whole of it, and each field keeps its own
+height when it moves, because the month is set 4 px larger than the weekday and
+the other's box would clip it.
+
+The general rule is worth taking from this: a face follows the setting, but
+what "month first" means is the design's to decide. A layout that is not a line
+will not answer that on its own -- "a stack has no order to reverse" is an
+argument for asking, not for opting out.
+
+### A group centred as a whole, meridiem included
+
+The clock group carries the meridiem, and the meridiem counts towards the width
+the group is centred on:
 
 ```cpp
-const int16_t total = hourWidth + sepWidth + minuteWidth;   // no meridiem
+int16_t total = hourWidth + sepWidth + minuteWidth;
+if (mStyle.is12h) {
+    total += kMeridiemGap + meridiemText.getTextWidth();
+}
 ```
 
-So the digits stay centred on the face and the `am` / `pm` hangs off to their
-right. That is what the design does, and the reason is above the clock: the day
-of month and the month are both centred, and the clock reads as the third line
-of that stack only if its digits are too. Including the label would shift the
-digits left and break the alignment. Measured against the design's 12-hour
-frame, the digits centre on 121 against its 120.5.
+So the clock is balanced on the face rather than having the label hang off the
+right of centred digits. Measured in the simulator, the 12-hour row's ink spans
+x=56..184, a centre of 120.0 against the face's 119.5; the half pixel is the
+group being an odd 129 wide on an even face. Centring the digits alone and
+letting the label overhang puts that centre on 131.0, which is the arrangement
+the design does not want.
 
 `kSeparator12 = 22`, `kSeparator24 = 6`. IBM Plex Mono is monospaced -- every
 glyph 600/1000 em, so 21.6 px at 36 -- which is why the 12-hour form needs no

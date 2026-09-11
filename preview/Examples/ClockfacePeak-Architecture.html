@@ -74,7 +74,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ClockfacePeak - Peak Clockface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#what-it-demonstrates">What it demonstrates</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#two-goal-rings-and-why-they-are-two-containers">Two goal rings, and why they are two containers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#targets-travel-with-the-clock-format">Targets travel with the clock format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#targets-travel-with-the-presentation-settings">Targets travel with the presentation settings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#a-two-colour-date-line">A two-colour date line</a></li>
 </ul>
 </li>
@@ -235,11 +235,11 @@ nothing to show – see the guide on arcs for why each of those matters.</p>
 <p>The screen declares <code class="docutils literal notranslate"><span class="pre">CanvasBufferSize:</span> <span class="pre">3600</span></code>, matching what the kernel’s home
 screen uses for two rings of much the same size.</p>
 </section>
-<section id="targets-travel-with-the-clock-format">
-<h3>Targets travel with the clock format<a class="headerlink" href="#targets-travel-with-the-clock-format" title="Link to this heading"></a></h3>
+<section id="targets-travel-with-the-presentation-settings">
+<h3>Targets travel with the presentation settings<a class="headerlink" href="#targets-travel-with-the-presentation-settings" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">RequestSystemSettings</span></code> carries <code class="docutils literal notranslate"><span class="pre">steps</span></code> and <code class="docutils literal notranslate"><span class="pre">activityMin</span></code> alongside
-<code class="docutils literal notranslate"><span class="pre">timeFormat</span></code>, and they change on the same terms, so one request fetches all
-three. A target of zero draws an empty ring: an unknown goal is not a met one.</p>
+<code class="docutils literal notranslate"><span class="pre">timeFormat</span></code> and <code class="docutils literal notranslate"><span class="pre">dateMonthFirst</span></code>, and they change on the same terms, so one
+request fetches all four. A target of zero draws an empty ring: an unknown goal is not a met one.</p>
 <p>Both <code class="docutils literal notranslate"><span class="pre">setHealth()</span></code> and <code class="docutils literal notranslate"><span class="pre">setGoals()</span></code> drive the rings, each reading the other half
 from the presenter – a ring is a reading over a target, and either can move
 alone.</p>
@@ -248,7 +248,8 @@ alone.</p>
 <h3>A two-colour date line<a class="headerlink" href="#a-two-colour-date-line" title="Link to this heading"></a></h3>
 <p>The day name is amber, the rest silver, so the line is two widgets measured and
 centred as a pair (<code class="docutils literal notranslate"><span class="pre">layoutDate()</span></code>). <code class="docutils literal notranslate"><span class="pre">Wed</span> <span class="pre">22</span> <span class="pre">May</span></code>, gaining <code class="docutils literal notranslate"> <span class="pre">|</span> <span class="pre">AM</span></code> in the
-12-hour form.</p>
+12-hour form. The weekday keeps the amber half whichever way round the date
+order puts the other two, and re-centring the pair is what absorbs the swap.</p>
 </section>
 </section>
 <section id="layout">

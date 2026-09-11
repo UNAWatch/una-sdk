@@ -53,11 +53,11 @@ nothing to show -- see the guide on arcs for why each of those matters.
 The screen declares `CanvasBufferSize: 3600`, matching what the kernel's home
 screen uses for two rings of much the same size.
 
-### Targets travel with the clock format
+### Targets travel with the presentation settings
 
 `RequestSystemSettings` carries `steps` and `activityMin` alongside
-`timeFormat`, and they change on the same terms, so one request fetches all
-three. A target of zero draws an empty ring: an unknown goal is not a met one.
+`timeFormat` and `dateMonthFirst`, and they change on the same terms, so one
+request fetches all four. A target of zero draws an empty ring: an unknown goal is not a met one.
 
 Both `setHealth()` and `setGoals()` drive the rings, each reading the other half
 from the presenter -- a ring is a reading over a target, and either can move
@@ -67,7 +67,8 @@ alone.
 
 The day name is amber, the rest silver, so the line is two widgets measured and
 centred as a pair (`layoutDate()`). `Wed 22 May`, gaining ` | AM` in the
-12-hour form.
+12-hour form. The weekday keeps the amber half whichever way round the date
+order puts the other two, and re-centring the pair is what absorbs the swap.
 
 ## Layout
 

@@ -76,7 +76,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ClockfaceConsole - Console Clockface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#what-it-demonstrates">What it demonstrates</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#a-face-trimmed-to-one-sensor">A face trimmed to one sensor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#a-group-centred-on-the-digits-not-on-the-whole-thing">A group centred on the digits, not on the whole thing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-date-order-that-swaps-rows-instead-of-reversing-a-line">A date order that swaps rows instead of reversing a line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-group-centred-as-a-whole-meridiem-included">A group centred as a whole, meridiem included</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#three-stacked-parts-that-need-no-layout-at-all">Three stacked parts that need no layout at all</a></li>
 </ul>
 </li>
@@ -204,19 +205,37 @@ match.</p>
 powered</strong>, and a face is on screen for hours – see the guide. This is the
 example to copy when your design drops a row.</p>
 </section>
-<section id="a-group-centred-on-the-digits-not-on-the-whole-thing">
-<h3>A group centred on the digits, not on the whole thing<a class="headerlink" href="#a-group-centred-on-the-digits-not-on-the-whole-thing" title="Link to this heading"></a></h3>
-<p>The clock group carries the meridiem, and the meridiem is deliberately <strong>left
-out of the width the group is centred on</strong>:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int16_t</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hourWidth</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sepWidth</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">minuteWidth</span><span class="p">;</span><span class="w">   </span><span class="c1">// no meridiem</span>
+<section id="a-date-order-that-swaps-rows-instead-of-reversing-a-line">
+<h3>A date order that swaps rows instead of reversing a line<a class="headerlink" href="#a-date-order-that-swaps-rows-instead-of-reversing-a-line" title="Link to this heading"></a></h3>
+<p>Console follows Settings -&gt; Clock -&gt; Date Format like the other three, but it
+cannot do it the way they do. Its date is not a line – it is a stack, and the
+day of the month is 112 px of it. There is no day-month sequence to reverse.</p>
+<p>So the two labels either side of that number exchange rows and the number stays
+where it is. Day-first reads WEDNESDAY / 03 / AUG, month-first AUG / 03 /
+WEDNESDAY. <code class="docutils literal notranslate"><span class="pre">layoutDate()</span></code> is the whole of it, and each field keeps its own
+height when it moves, because the month is set 4 px larger than the weekday and
+the other’s box would clip it.</p>
+<p>The general rule is worth taking from this: a face follows the setting, but
+what “month first” means is the design’s to decide. A layout that is not a line
+will not answer that on its own – “a stack has no order to reverse” is an
+argument for asking, not for opting out.</p>
+</section>
+<section id="a-group-centred-as-a-whole-meridiem-included">
+<h3>A group centred as a whole, meridiem included<a class="headerlink" href="#a-group-centred-as-a-whole-meridiem-included" title="Link to this heading"></a></h3>
+<p>The clock group carries the meridiem, and the meridiem counts towards the width
+the group is centred on:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int16_t</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hourWidth</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sepWidth</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">minuteWidth</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mStyle</span><span class="p">.</span><span class="n">is12h</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">total</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">kMeridiemGap</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meridiemText</span><span class="p">.</span><span class="n">getTextWidth</span><span class="p">();</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<p>So the digits stay centred on the face and the <code class="docutils literal notranslate"><span class="pre">am</span></code> / <code class="docutils literal notranslate"><span class="pre">pm</span></code> hangs off to their
-right. That is what the design does, and the reason is above the clock: the day
-of month and the month are both centred, and the clock reads as the third line
-of that stack only if its digits are too. Including the label would shift the
-digits left and break the alignment. Measured against the design’s 12-hour
-frame, the digits centre on 121 against its 120.5.</p>
+<p>So the clock is balanced on the face rather than having the label hang off the
+right of centred digits. Measured in the simulator, the 12-hour row’s ink spans
+x=56..184, a centre of 120.0 against the face’s 119.5; the half pixel is the
+group being an odd 129 wide on an even face. Centring the digits alone and
+letting the label overhang puts that centre on 131.0, which is the arrangement
+the design does not want.</p>
 <p><code class="docutils literal notranslate"><span class="pre">kSeparator12</span> <span class="pre">=</span> <span class="pre">22</span></code>, <code class="docutils literal notranslate"><span class="pre">kSeparator24</span> <span class="pre">=</span> <span class="pre">6</span></code>. IBM Plex Mono is monospaced – every
 glyph 600/1000 em, so 21.6 px at 36 – which is why the 12-hour form needs no
 extra padding around the colon the way Poppins does.</p>

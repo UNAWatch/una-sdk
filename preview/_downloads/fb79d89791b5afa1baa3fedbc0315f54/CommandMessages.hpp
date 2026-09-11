@@ -212,6 +212,12 @@ struct RequestSystemSettings : public MessageBase {
     uint32_t heightCm;      // User height in centimeters
     float    weightKg;      // User weight in kilograms
 
+    // Appended, not inserted: every field above keeps the offset it had, so an
+    // app built against an older SDK still reads them correctly off a newer
+    // kernel's reply. Defaults to day-first, which is what the faces did before
+    // the field existed, so an older kernel that never writes it is also right.
+    bool     dateMonthFirst;  // Date order: month before day, e.g. "Jul 20"
+
     RequestSystemSettings()
         : MessageBase(MessageType::REQUEST_SYSTEM_SETTINGS)
         , languageId(0)
@@ -224,10 +230,16 @@ struct RequestSystemSettings : public MessageBase {
         , floors(0)
         , heightCm(0)
         , weightKg(0.0f)
+        , dateMonthFirst(false)
     {}
 };
 #if __SIZEOF_POINTER__ == 4
-static_assert(sizeof(RequestSystemSettings) == 64, "RequestSystemSettings size must be 64 bytes");
+// 64 bytes was exactly a pool block (MessagePool's classes are 32/64/128/256),
+// so this field costs a move up to the 128-byte class rather than four bytes.
+// Acceptable for a request this rare -- a clockface polls it once a minute and
+// releases it at once -- but it is why the next field to be added here is free
+// and the one after 128 bytes is not.
+static_assert(sizeof(RequestSystemSettings) == 68, "RequestSystemSettings size must be 68 bytes");
 #endif
 
 /**

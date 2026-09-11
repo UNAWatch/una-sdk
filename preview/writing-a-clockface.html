@@ -96,7 +96,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#step-2-define-your-messages">Step 2: Define your messages</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-3-the-service-the-clock">Step 3: The service - the clock</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-4-the-service-sensors">Step 4: The service - sensors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#step-5-the-12-and-24-hour-setting">Step 5: The 12- and 24-hour setting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-the-two-presentation-settings">Step 5: The two presentation settings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-6-the-gui">Step 6: The GUI</a></li>
 </ul>
 </li>
@@ -104,7 +104,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#messages-over-256-bytes-vanish">Messages over 256 bytes vanish</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-gui-stops-draining-its-queue-while-suspended">The GUI stops draining its queue while suspended</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#do-not-subscribe-to-what-you-do-not-draw">Do not subscribe to what you do not draw</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#hold-a-heart-rate-do-not-blank-it">Hold a heart rate; do not blank it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-trust-gate-is-a-recording-gate">The trust gate is a recording gate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-display-has-four-levels-per-channel">The display has four levels per channel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#invalidation-does-not-follow-from-changing-something">Invalidation does not follow from changing something</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#arcs-sweep-clockwise-from-twelve-o-clock">Arcs sweep clockwise from twelve o’clock</a></li>
@@ -363,18 +363,44 @@ assert that a release build drops:</p>
 </pre></div>
 </div>
 </section>
-<section id="step-5-the-12-and-24-hour-setting">
-<h3>Step 5: The 12- and 24-hour setting<a class="headerlink" href="#step-5-the-12-and-24-hour-setting" title="Link to this heading"></a></h3>
-<p>Render both forms from the watch’s own setting rather than shipping two faces.
-<code class="docutils literal notranslate"><span class="pre">SDK::Message::RequestSystemSettings</span></code> carries it, and it also carries the daily
-goals, the unit system and the user’s height and weight:</p>
+<section id="step-5-the-two-presentation-settings">
+<h3>Step 5: The two presentation settings<a class="headerlink" href="#step-5-the-two-presentation-settings" title="Link to this heading"></a></h3>
+<p>Two settings under Settings -&gt; Clock record how the user wants the time and the
+date written: a 12- or 24-hour clock, and day-first or month-first dates.
+Reading them is what lets one face cover every form instead of one face per
+combination. <code class="docutils literal notranslate"><span class="pre">SDK::Message::RequestSystemSettings</span></code> carries both, along with the
+daily goals, the unit system and the user’s height and weight:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestSystemSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">mIs12h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span><span class="w">       </span><span class="c1">// true means 12-hour</span>
+<span class="w">        </span><span class="n">mIs12h</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span><span class="w">      </span><span class="c1">// true means 12-hour</span>
+<span class="w">        </span><span class="n">mMonthFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">dateMonthFirst</span><span class="p">;</span><span class="w">  </span><span class="c1">// true means "MAY 22", not "22 MAY"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>The date order is the easier of the two to overlook, because ignoring it fails
+silently: the face still reads correctly, just not in the order the user chose,
+so there is no symptom to catch it in testing.</p>
+<p>The kernel’s own face keeps the weekday leading in both orders and swaps only
+the day and the month (<code class="docutils literal notranslate"><span class="pre">gui/src/containers/ClockHome.cpp</span></code>), which is the
+reference if you want a date line that matches the rest of the watch. Build the
+part that moves first, then the line:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">touchgfx</span><span class="o">::</span><span class="n">Unicode</span><span class="o">::</span><span class="n">UnicodeChar</span><span class="w"> </span><span class="n">dayMonth</span><span class="p">[</span><span class="n">DATETEXT_SIZE</span><span class="p">];</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mMonthFirst</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Unicode</span><span class="o">::</span><span class="n">snprintf</span><span class="p">(</span><span class="n">dayMonth</span><span class="p">,</span><span class="w"> </span><span class="n">DATETEXT_SIZE</span><span class="p">,</span><span class="w"> </span><span class="s">"%s %u"</span><span class="p">,</span><span class="w"> </span><span class="n">month</span><span class="p">,</span><span class="w"> </span><span class="n">mday</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Unicode</span><span class="o">::</span><span class="n">snprintf</span><span class="p">(</span><span class="n">dayMonth</span><span class="p">,</span><span class="w"> </span><span class="n">DATETEXT_SIZE</span><span class="p">,</span><span class="w"> </span><span class="s">"%u %s"</span><span class="p">,</span><span class="w"> </span><span class="n">mday</span><span class="p">,</span><span class="w"> </span><span class="n">month</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Size that temporary from the destination buffer, not from the English labels:
+the day and month names come out of the text database, and a translation is
+free to be longer than <code class="docutils literal notranslate"><span class="pre">SEP</span></code>.</p>
+<p>A date that is not a line has no sequence to reverse, so the flag alone does not
+tell you what to draw. Console stacks its date around a 112 px day of the month
+and reads the setting as a swap of the two rows either side of that number,
+leaving the number itself alone: <code class="docutils literal notranslate"><span class="pre">WEDNESDAY</span> <span class="pre">/</span> <span class="pre">03</span> <span class="pre">/</span> <span class="pre">AUG</span></code> against
+<code class="docutils literal notranslate"><span class="pre">AUG</span> <span class="pre">/</span> <span class="pre">03</span> <span class="pre">/</span> <span class="pre">WEDNESDAY</span></code>. One answer among several a stacked layout could take.</p>
 <p>Call it from the <strong>service</strong>, not the GUI, and not from a constructor – it is a
 blocking round trip that needs the app’s message loop running.</p>
 <p><strong>It is pull-only. Nothing tells you it changed.</strong> There is no
@@ -389,8 +415,11 @@ change:</p>
 never takes effect: the kernel <strong>suspends</strong> a face rather than stopping it, so
 returning from Settings brings no lifecycle message – and Settings is exactly
 where the user just changed the format.</p>
-<p>The third covers what neither edge can see: a setting pushed <strong>from the phone</strong>
-while your face is on screen. Bound it against the monotonic tick rather than
+<p>The third covers what neither edge can see: a change that lands while your
+face is on screen. The kernel re-reads <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> – the daily goals, the
+units, the heart-rate zones – when the phone finishes writing it over BLE, and
+<code class="docutils literal notranslate"><span class="pre">local_settings.json</span></code>, which is where these two presentation settings live,
+when a USB session ends. Bound it against the monotonic tick rather than
 hanging it off the loop’s wait expiring –</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// In the service loop:</span>
 <span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mSettingsAt</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">kSettingsPollMs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -404,7 +433,8 @@ hanging it off the loop’s wait expiring –</p>
 
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">RequestSystemSettings</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">kSettingsTimeoutMs</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">mIs12h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span>
+<span class="w">            </span><span class="n">mIs12h</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">timeFormat</span><span class="p">;</span>
+<span class="w">            </span><span class="n">mMonthFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">dateMonthFirst</span><span class="p">;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="n">publishClockFormat</span><span class="p">();</span>
@@ -495,22 +525,21 @@ subscription behind after dropping a row from the design, is one of the more
 expensive mistakes available here. <code class="docutils literal notranslate"><span class="pre">ClockfaceConsole</span></code> shows a face trimmed to a
 single sensor for exactly this reason.</p>
 </section>
-<section id="hold-a-heart-rate-do-not-blank-it">
-<h3>Hold a heart rate; do not blank it<a class="headerlink" href="#hold-a-heart-rate-do-not-blank-it" title="Link to this heading"></a></h3>
+<section id="the-trust-gate-is-a-recording-gate">
+<h3>The trust gate is a recording gate<a class="headerlink" href="#the-trust-gate-is-a-recording-gate" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> on the parser is only a field-count check – it tells you
 nothing about signal quality. That leads people to reach for the gate the
 activity apps use:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">bpm</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">trust</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">trust</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="c1">// trust runs 0-3; 0 means no signal</span>
 </pre></div>
 </div>
-<p><strong>Do not use that to decide what to display.</strong> It is a <em>recording</em> gate: in
+<p>That gate is not a display filter. It is a <em>recording</em> one: in
 <code class="docutils literal notranslate"><span class="pre">Running</span></code>, <code class="docutils literal notranslate"><span class="pre">Cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">Hiking</span></code>, <code class="docutils literal notranslate"><span class="pre">Treadmill</span></code> and <code class="docutils literal notranslate"><span class="pre">Workout</span></code> it decides whether a
 sample is written to the FIT file, and their live readouts are fed
 unconditionally. <code class="docutils literal notranslate"><span class="pre">HRMonitor</span></code> forwards trust to its GUI as an indicator and
 gates nothing; <code class="docutils literal notranslate"><span class="pre">GlanceHR</span></code> has no trust gate at all.</p>
-<p>The reason is that trust dips transiently whenever the wrist moves. Applied per
-sample to a display, the gate blanks the row about once a second – which is
-exactly the defect the four new faces shipped with and had fixed.</p>
+<p>Trust dips transiently whenever the wrist moves, so applied per sample to a
+display the gate blanks the row about once a second.</p>
 <p>If you do want to filter what you show, treat a failed sample as <em>no new
 information</em> rather than <em>no reading</em>: hold the last trusted value and only
 give up after a sustained loss.</p>
@@ -533,7 +562,7 @@ give up after a sustained loss.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Two traps in that, both of which the four faces shipped with and had fixed.</p>
+<p>Two traps in that, both of which cost the four faces here a round of fixes.</p>
 <p><strong>Expire on the loop, not on the sample.</strong> Putting the test in an <code class="docutils literal notranslate"><span class="pre">else</span></code> on the
 sample handler looks natural and cannot work: it only runs when a sample
 arrives, and the case the hold exists for – the watch taken off – is exactly
@@ -701,8 +730,8 @@ far more than rendering. But for a face specifically:</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ACTIVITY_TIME_DAILY</span></code></p></td>
 <td><p>no simulated sensor at all</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeFormat</span></code></p></td>
-<td><p>never populated by the simulated settings handler, so a face always sees 24-hour</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeFormat</span></code>, <code class="docutils literal notranslate"><span class="pre">dateMonthFirst</span></code></p></td>
+<td><p>neither is populated by the simulated settings handler, so a face always sees a 24-hour clock and a day-first date</p></td>
 </tr>
 <tr class="row-odd"><td><p>Message pools</p></td>
 <td><p>not simulated: an oversized message succeeds here and fails on the watch</p></td>
