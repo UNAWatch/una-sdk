@@ -129,7 +129,7 @@ private:
      * human resting rate -- but note what they use it for: deciding whether a
      * sample reaches a FIT file. It is not a display filter. Applied per
      * sample to a row on screen it blanks it on every dip that wrist movement
-     * causes, which is the defect this face shipped with.
+     * causes, which is the flicker the hold below exists to stop.
      *
      * So a sample that fails here is treated as no new information rather than
      * no reading: the held rate stands, and @ref expireHeartRate is what

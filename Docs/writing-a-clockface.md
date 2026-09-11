@@ -209,14 +209,13 @@ Size that temporary from the destination buffer, not from the English labels:
 the day and month names come out of the text database, and a translation is
 free to be longer than `SEP`.
 
-**If your date is not a line, ask what the order means before you decide it.**
-Console stacks its date around a 112 px day of the month, so there is no
-sequence to reverse; it follows the setting by swapping the two rows either
-side of that number and leaving the number alone (`WEDNESDAY / 03 / AUG`
-against `AUG / 03 / WEDNESDAY`). It shipped exempt at first on the reasoning
-that a stack has no order — which was the wrong call, and not one the code
-could have settled. Following the setting is not optional; what it looks like
-is the design's to say.
+**If your date is not a line, the setting still applies — ask your design what
+it means.** Console stacks its date around a 112 px day of the month, so it has
+no sequence to reverse. It follows the setting by swapping the two rows either
+side of that number and leaving the number itself alone: `WEDNESDAY / 03 / AUG`
+against `AUG / 03 / WEDNESDAY`. Following the setting is not optional; what it
+looks like is the design's to say, and a layout that is not a line will not
+answer that question for you.
 
 Call it from the **service**, not the GUI, and not from a constructor -- it is a
 blocking round trip that needs the app's message loop running.

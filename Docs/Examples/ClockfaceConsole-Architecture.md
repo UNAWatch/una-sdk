@@ -48,10 +48,9 @@ height when it moves, because the month is set 4 px larger than the weekday and
 the other's box would clip it.
 
 The general rule is worth taking from this: a face follows the setting, but
-what "month first" means is the design's to decide. Ask, rather than assume
-your layout has an answer -- this one was shipped exempt on the reasoning that
-a stack has no order to reverse, and the designer's answer was that it has two
-rows to swap.
+what "month first" means is the design's to decide. A layout that is not a line
+will not answer that on its own -- "a stack has no order to reverse" is an
+argument for asking, not for opting out.
 
 ### A group centred as a whole, meridiem included
 
@@ -68,9 +67,9 @@ if (mStyle.is12h) {
 So the clock is balanced on the face rather than having the label hang off the
 right of centred digits. Measured in the simulator, the 12-hour row's ink spans
 x=56..184, a centre of 120.0 against the face's 119.5; the half pixel is the
-group being an odd 129 wide on an even face. It shipped the other way first --
-digits centred, label overhanging, a centre of 131.0 -- which is what the
-designer asked to change.
+group being an odd 129 wide on an even face. Centring the digits alone and
+letting the label overhang puts that centre on 131.0, which is the arrangement
+the design does not want.
 
 `kSeparator12 = 22`, `kSeparator24 = 6`. IBM Plex Mono is monospaced -- every
 glyph 600/1000 em, so 21.6 px at 36 -- which is why the 12-hour form needs no
