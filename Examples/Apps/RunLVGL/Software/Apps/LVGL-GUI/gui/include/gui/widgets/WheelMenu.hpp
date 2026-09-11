@@ -92,6 +92,15 @@ public:
     /// Lens colour behind the selected item.
     void setBackground(uint32_t color);
 
+    /**
+     * @brief Called once per slide when it is half way, with the item being
+     *        slid to. The Run app recolours the lens and the button hints at
+     *        this point, not when the key is pressed. Fired at the end instead
+     *        if a slide is cut short.
+     */
+    using SlideMidCallback = void (*)(void* ctx, uint16_t target);
+    void setSlideMidCallback(SlideMidCallback cb, void* ctx) { mMidCb = cb; mMidCtx = ctx; }
+
     Widgets::ScrollIndicator& indicator() { return mIndicator; }
 
 private:
@@ -112,6 +121,7 @@ private:
     void renderSlot(Slot& slot, const Item& item, bool center);
     void slide(int direction);
     void finishSlide();
+    void fireMid();
     static void animExecCb(void* var, int32_t value);
     static void animReadyCb(lv_anim_t* a);
 
@@ -121,7 +131,10 @@ private:
     uint16_t    mShown    = 0;   ///< item the strips are rendered around
     int16_t     mItemOffsetY;
     bool        mSliding  = false;
+    bool        mMidFired = false;
     int         mDirection = 0;
+    SlideMidCallback mMidCb  = nullptr;
+    void*            mMidCtx = nullptr;
 
     lv_obj_t* mLens = nullptr;
     Strip     mSelStrip;   ///< large style, clipped to the selection window

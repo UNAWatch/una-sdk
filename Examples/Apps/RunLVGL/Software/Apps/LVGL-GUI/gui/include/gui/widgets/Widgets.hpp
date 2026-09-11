@@ -74,21 +74,34 @@ public:
     void setConfig(const Config& cfg);
     void setCount(uint16_t count);      ///< resets to position 0; hidden when <= 1
     void setActive(uint16_t index);     ///< instant
-    /// Slide the handle to an item over @p ms. A wrap between the ends jumps.
-    void animateTo(uint16_t index, uint32_t ms);
+    /**
+     * @brief Slide the handle to an item over @p ms.
+     * @param direction  +1 when the wheel moved to the next item, -1 to the
+     *        previous, 0 unknown. With it, a move between the two ends of the
+     *        rail is a wrap: the handle slides off one end while a second
+     *        handle slides in from the other, as the Run app's indicator does.
+     */
+    void animateTo(uint16_t index, uint32_t ms, int direction = 0);
     uint16_t active() const { return mPos; }
 
 private:
     static void animExecCb(void* var, int32_t value);
+    static void animDoneCb(lv_anim_t* a);
     float startAngle(uint16_t index) const;
     void  setHandle(float startDeg);
+    void  setClampedArc(lv_obj_t* arc, float startDeg);
     void  update();
 
-    lv_obj_t* mRail   = nullptr;
-    lv_obj_t* mHandle = nullptr;
+    lv_obj_t* mRail      = nullptr;
+    lv_obj_t* mHandle    = nullptr;
+    lv_obj_t* mHandleOvf = nullptr;   ///< the incoming handle during a wrap
     Config    mCfg;
-    uint16_t  mCount  = 1;
-    uint16_t  mPos    = 0;
+    uint16_t  mCount     = 1;
+    uint16_t  mPos       = 0;
+
+    // Running slide, angles in degrees.
+    float mAnimFrom = 0, mAnimTo = 0, mAnimOutEnd = 0, mAnimInStart = 0;
+    bool  mAnimWrap = false;
 };
 
 // -----------------------------------------------------------------------------
@@ -161,8 +174,22 @@ public:
     HeartRateZone(lv_obj_t* parent, int32_t x, int32_t y);
     void setHR(float bpm, const uint8_t* thresholds, uint8_t thresholdCount);
 
+    /// The arrow under the active zone, drawn as a triangle by an LV_EVENT_DRAW_MAIN
+    /// handler on mArrow. Points are relative to the widget origin.
+    struct Arrow {
+        lv_point_precise_t p[3] = {};
+        lv_color_t         color = {};
+    };
+
 private:
-    lv_obj_t* mZones[kZoneCount] = {};
+    void showZone(int zone);
+
+    int32_t   mX = 0;
+    int32_t   mY = 0;
+    lv_obj_t* mMarker = nullptr;   ///< thick arc over the active segment
+    lv_obj_t* mArrow  = nullptr;   ///< host object for the triangle
+    Arrow     mArrowDsc;
+    int       mActive = -1;
 };
 
 // -----------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 60 px
  * Bpp: 2
- * Opts: --font C:\Users\onedr\co\una-kernel\.claude\worktrees\RunLVGL\SDK\Examples\Apps\Running\Software\Apps\TouchGFX-GUI\assets\fonts\Poppins-SemiBold.ttf --size 60 --bpp 2 --format lvgl --no-compress -r 0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70 -o C:\Users\onedr\co\una-kernel\.claude\worktrees\RunLVGL\SDK\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\assets\fonts\poppins_semibold_60.c
+ * Opts: --font Examples/Apps/Running/Software/Apps/TouchGFX-GUI/assets/fonts/Poppins-SemiBold.ttf --size 60 --bpp 2 --format lvgl --no-compress -r 0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70 -o Examples/Apps/RunLVGL/Software/Apps/LVGL-GUI/assets/fonts/poppins_semibold_60.c
  ******************************************************************************/
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE

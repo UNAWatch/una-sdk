@@ -140,7 +140,8 @@ void WheelMenu::slide(int direction)
     mDirection = direction;
     mSelected  = static_cast<uint16_t>((mShown + mCount + direction) % mCount);
     mSliding   = true;
-    mIndicator.animateTo(mSelected, App::Config::kMenuAnimationMs);
+    mMidFired  = false;
+    mIndicator.animateTo(mSelected, App::Config::kMenuAnimationMs, direction);
 
     lv_anim_t a;
     lv_anim_init(&a);
@@ -160,6 +161,17 @@ void WheelMenu::animExecCb(void* var, int32_t value)
     const int32_t shift = -self->mDirection * value;
     lv_obj_set_y(self->mSelStrip.obj, kSelStripRestY + shift);
     lv_obj_set_y(self->mOutStrip.obj, kOutStripRestY + shift);
+    if (!self->mMidFired && value >= kPitch / 2) {
+        self->fireMid();
+    }
+}
+
+void WheelMenu::fireMid()
+{
+    mMidFired = true;
+    if (mMidCb) {
+        mMidCb(mMidCtx, mSelected);
+    }
 }
 
 void WheelMenu::animReadyCb(lv_anim_t* a)
@@ -170,6 +182,9 @@ void WheelMenu::animReadyCb(lv_anim_t* a)
 void WheelMenu::finishSlide()
 {
     lv_anim_delete(this, nullptr);
+    if (!mMidFired) {
+        fireMid();
+    }
     mSliding = false;
     mShown   = mSelected;
     render();

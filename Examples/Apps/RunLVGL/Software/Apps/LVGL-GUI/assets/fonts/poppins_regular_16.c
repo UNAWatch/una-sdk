@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 16 px
  * Bpp: 2
- * Opts: --font C:\Users\onedr\co\una-kernel\.claude\worktrees\RunLVGL\SDK\Examples\Apps\Running\Software\Apps\TouchGFX-GUI\assets\fonts\Poppins-Regular.ttf --size 16 --bpp 2 --format lvgl --no-compress -r 0x20-0x7E -o C:\Users\onedr\co\una-kernel\.claude\worktrees\RunLVGL\SDK\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\assets\fonts\poppins_regular_16.c
+ * Opts: --font Examples/Apps/Running/Software/Apps/TouchGFX-GUI/assets/fonts/Poppins-Regular.ttf --size 16 --bpp 2 --format lvgl --no-compress -r 0x20-0x7E -o Examples/Apps/RunLVGL/Software/Apps/LVGL-GUI/assets/fonts/poppins_regular_16.c
  ******************************************************************************/
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE

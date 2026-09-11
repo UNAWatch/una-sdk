@@ -41,6 +41,10 @@ MainScreen::MainScreen(Model& model)
 void MainScreen::build()
 {
     mMenu      = std::make_unique<WheelMenu>(mRoot, kItems, Menu::ID_COUNT);
+    // As in MainView::onAnimationMiddle: the lens and R1 hint change half way
+    // through the slide, when the incoming item is about to take the centre.
+    mMenu->setSlideMidCallback(
+        [](void* ctx, uint16_t) { static_cast<MainScreen*>(ctx)->updateBackground(); }, this);
     mButtons   = std::make_unique<Widgets::Buttons>(mRoot);
     mTitle     = std::make_unique<Widgets::Title>(mRoot, Strings::kAppNameUc);
     mSensorRow = std::make_unique<Widgets::SensorStatusRow>(mRoot, 0, 52, 240, 24);
@@ -67,8 +71,8 @@ void MainScreen::onKey(uint8_t code)
 {
     namespace Btn = SDK::GUI::Button;
     switch (code) {
-        case Btn::L1: mMenu->prev(); updateBackground(); break;
-        case Btn::L2: mMenu->next(); updateBackground(); break;
+        case Btn::L1: mMenu->prev(); break;   // lens follows at the slide midpoint
+        case Btn::L2: mMenu->next(); break;
         case Btn::R1: confirm(); break;
         case Btn::R2: mModel.exitApp(); break;
         default: break;

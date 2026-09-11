@@ -43,14 +43,17 @@ BIG = "0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70"
 # and coloured by the GUI. Keys are the lower-cased PNG stem.
 ALPHA_IMAGES = {
     "circlecross_50x50", "circletick_50x50", "crosswhite_17x17", "pause_14x14",
-    "heartratezone1", "heartratezone2", "heartratezone3", "heartratezone4", "heartratezone5",
     "sensorgpslight", "sensorhrlight", "tickgreen_22x17",
 }
 
 # Same shape as another icon in a different colour, or composed in code.
 SKIP_IMAGES = {
     "crossamber_17x17", "tickamber_22x17", "tickred_22x17",
-    "sensorgpsdark", "sensorhrdark", "heartratezonegroup",
+    "sensorgpsdark", "sensorhrdark",
+    # The heart-rate zone bar and its marker are drawn with lv_arc and a
+    # triangle (Widgets.cpp), fitted from these bitmaps.
+    "heartratezonegroup",
+    "heartratezone1", "heartratezone2", "heartratezone3", "heartratezone4", "heartratezone5",
 }
 
 FONTS = [
@@ -72,9 +75,29 @@ FONTS = [
 ]
 
 
-def run(cmd):
+def run(cmd, cwd=None):
     print("  " + " ".join(cmd))
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, cwd=cwd)
+
+
+def sdk_relative(path):
+    """Path relative to the SDK root with forward slashes, so the tools' own
+    records of their arguments read the same on every machine."""
+    return os.path.relpath(path, SDK_ROOT).replace(os.sep, "/")
+
+
+def normalise_newlines(directory):
+    """The converters write native line endings; the committed files use LF so
+    a regeneration on another OS reproduces them byte for byte."""
+    for name in os.listdir(directory):
+        if name.endswith(".c"):
+            path = os.path.join(directory, name)
+            with open(path, "rb") as f:
+                data = f.read()
+            fixed = data.replace(b"\r\n", b"\n")
+            if fixed != data:
+                with open(path, "wb") as f:
+                    f.write(fixed)
 
 
 def main():
@@ -98,9 +121,11 @@ def main():
         if not os.path.isfile(ttf):
             sys.exit(f"font not found: {ttf}")
         print(f"font  {name}")
-        run([npx, "--yes", "lv_font_conv", "--font", ttf, "--size", str(size), "--bpp", "2",
+        # lv_font_conv records its arguments in the file header; run it from
+        # the SDK root with relative paths so that header is reproducible.
+        run([npx, "--yes", "lv_font_conv", "--font", sdk_relative(ttf), "--size", str(size), "--bpp", "2",
              "--format", "lvgl", "--no-compress", "-r", rng,
-             "-o", os.path.join(font_out, f"{name}.c")])
+             "-o", sdk_relative(os.path.join(font_out, f"{name}.c"))], cwd=SDK_ROOT)
 
     script = os.path.join(SDK_ROOT, "ThirdParty", "lvgl", "scripts", "LVGLImage.py")
     for png in sorted(os.listdir(args.image_dir)):
@@ -115,6 +140,9 @@ def main():
         print(f"image {name} ({cf})")
         run([sys.executable, script, "--ofmt", "C", "--cf", cf, "--name", name,
              "-o", image_out, os.path.join(args.image_dir, png)])
+
+    normalise_newlines(font_out)
+    normalise_newlines(image_out)
 
     n_fonts = len([f for f in os.listdir(font_out) if f.endswith(".c")])
     n_images = len([f for f in os.listdir(image_out) if f.endswith(".c")])

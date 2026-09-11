@@ -6,6 +6,8 @@
  */
 
 #include "gui/widgets/Widgets.hpp"
+
+#include <cmath>
 #include "gui/Assets.hpp"
 #include "gui/Format.hpp"
 
@@ -77,10 +79,12 @@ constexpr int32_t kRailWidth  = 9;   // TouchGFX draws 8.5
 ScrollIndicator::ScrollIndicator(lv_obj_t* parent, const Config& cfg)
     : mCfg(cfg)
 {
-    mRail   = Theme::arc(parent, kCx, kCy, kRailRadius, kRailWidth,
-                         static_cast<int32_t>(cfg.railMin), static_cast<int32_t>(cfg.railMax),
-                         Color::GRAY_DARK);
-    mHandle = Theme::arc(parent, kCx, kCy, kRailRadius, kRailWidth, 0, 1, Color::WHITE);
+    mRail      = Theme::arc(parent, kCx, kCy, kRailRadius, kRailWidth,
+                            static_cast<int32_t>(cfg.railMin), static_cast<int32_t>(cfg.railMax),
+                            Color::GRAY_DARK);
+    mHandle    = Theme::arc(parent, kCx, kCy, kRailRadius, kRailWidth, 0, 1, Color::WHITE);
+    mHandleOvf = Theme::arc(parent, kCx, kCy, kRailRadius, kRailWidth, 0, 1, Color::WHITE);
+    lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
     update();
 }
 
@@ -106,42 +110,68 @@ ScrollIndicator::~ScrollIndicator()
 void ScrollIndicator::setActive(uint16_t index)
 {
     lv_anim_delete(this, nullptr);
+    lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
     mPos = (mCount <= 1) ? 0 : (index >= mCount ? mCount - 1 : index);
     update();
 }
 
-void ScrollIndicator::animateTo(uint16_t index, uint32_t ms)
+void ScrollIndicator::animateTo(uint16_t index, uint32_t ms, int direction)
 {
-    if (mCount <= 1 || index >= mCount) {
+    if (mCount <= 1 || index >= mCount || ms == 0) {
         setActive(index);
         return;
     }
     const uint16_t from = mPos;
-    const int      delta = static_cast<int>(index) - static_cast<int>(from);
-    // The TouchGFX indicator slides a second handle in from the far end on a
-    // wrap; here a wrap simply jumps.
-    if (delta > 1 || delta < -1 || ms == 0) {
-        setActive(index);
+    if (index == from) {
         return;
     }
     lv_anim_delete(this, nullptr);
+    lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
+
+    // Item 0 sits at the railMax end and later items step towards railMin, so
+    // moving forward (to a later item) lowers the angle. A wrap is a forward
+    // move that lands on an earlier item, or the reverse: the handle leaves
+    // through one end of the rail while its stand-in enters from the other.
+    const bool forward = direction > 0 || (direction == 0 && index > from);
+    mAnimWrap  = (direction > 0 && index < from) || (direction < 0 && index > from);
+    mAnimFrom  = startAngle(from);
+    mAnimTo    = startAngle(index);
+    if (mAnimWrap) {
+        mAnimOutEnd  = forward ? mAnimFrom - mCfg.handleLen : mAnimFrom + mCfg.handleLen;
+        mAnimInStart = forward ? mAnimTo + mCfg.handleLen : mAnimTo - mCfg.handleLen;
+    }
     mPos = index;
 
-    // Animate the handle's start angle in tenths of a degree.
+    // Linear, like the TouchGFX indicator; the value is the progress in
+    // thousandths so one animation drives both handles.
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, this);
-    lv_anim_set_values(&a, static_cast<int32_t>(startAngle(from) * 10.0f),
-                       static_cast<int32_t>(startAngle(index) * 10.0f));
+    lv_anim_set_values(&a, 0, 1000);
     lv_anim_set_duration(&a, ms);
-    lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
+    lv_anim_set_path_cb(&a, lv_anim_path_linear);
     lv_anim_set_exec_cb(&a, &ScrollIndicator::animExecCb);
+    lv_anim_set_completed_cb(&a, &ScrollIndicator::animDoneCb);
     lv_anim_start(&a);
 }
 
 void ScrollIndicator::animExecCb(void* var, int32_t value)
 {
-    static_cast<ScrollIndicator*>(var)->setHandle(static_cast<float>(value) / 10.0f);
+    auto*       self = static_cast<ScrollIndicator*>(var);
+    const float t    = static_cast<float>(value) / 1000.0f;
+    if (self->mAnimWrap) {
+        self->setClampedArc(self->mHandle, self->mAnimFrom + t * (self->mAnimOutEnd - self->mAnimFrom));
+        self->setClampedArc(self->mHandleOvf, self->mAnimInStart + t * (self->mAnimTo - self->mAnimInStart));
+    } else {
+        self->setHandle(self->mAnimFrom + t * (self->mAnimTo - self->mAnimFrom));
+    }
+}
+
+void ScrollIndicator::animDoneCb(lv_anim_t* a)
+{
+    auto* self = static_cast<ScrollIndicator*>(a->var);
+    lv_obj_add_flag(self->mHandleOvf, LV_OBJ_FLAG_HIDDEN);
+    self->update();
 }
 
 float ScrollIndicator::startAngle(uint16_t index) const
@@ -159,6 +189,20 @@ void ScrollIndicator::setHandle(float startDeg)
 {
     Theme::setArc(mHandle, static_cast<int32_t>(startDeg + 0.5f),
                   static_cast<int32_t>(startDeg + mCfg.handleLen + 0.5f));
+}
+
+void ScrollIndicator::setClampedArc(lv_obj_t* arc, float startDeg)
+{
+    // Cut the handle at the rail ends so it grows out of, or shrinks into, an
+    // end rather than floating past it.
+    const float a = LV_CLAMP(mCfg.railMin, startDeg, mCfg.railMax);
+    const float b = LV_CLAMP(mCfg.railMin, startDeg + mCfg.handleLen, mCfg.railMax);
+    if (b - a < 0.5f) {
+        lv_obj_add_flag(arc, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+    Theme::setArc(arc, static_cast<int32_t>(a + 0.5f), static_cast<int32_t>(b + 0.5f));
+    lv_obj_remove_flag(arc, LV_OBJ_FLAG_HIDDEN);
 }
 
 void ScrollIndicator::update()
@@ -354,31 +398,105 @@ void SensorStatusRow::applyIcons()
 
 // --- HeartRateZone -----------------------------------------------------------
 
-HeartRateZone::HeartRateZone(lv_obj_t* parent, int32_t x, int32_t y)
+namespace
 {
-    // The TouchGFX design draws a 210 x 69 "group" bitmap: five 24-degree
-    // segments of a radius-113 arc, 8 px thick, 2 degrees apart. lv_arc draws
-    // the same bar directly (angles measured from the bitmap), which saves the
-    // 43 KB bitmap; the zone markers with their arrows stay as alpha icons.
-    const lv_image_dsc_t* zoneImgs[kZoneCount] = {
-        &img_heartratezone1, &img_heartratezone2, &img_heartratezone3,
-        &img_heartratezone4, &img_heartratezone5
-    };
-    const uint32_t zoneColors[kZoneCount] = {
-        Color::GRAY, Color::CHARTREUSE, Color::YELLOW, Color::YELLOW_DARK, Color::RED
-    };
-    const int32_t zoneOffsets[kZoneCount][2] = { { 0, 28 }, { 33, 3 }, { 80, 0 }, { 131, 3 }, { 173, 28 } };
-    const int32_t segmentStart[kZoneCount] = { -64, -38, -12, 14, 40 };
-    constexpr int32_t kArcCx = 105, kArcCy = 116, kArcRadius = 113, kArcWidth = 8, kSegmentDeg = 24;
-    for (uint8_t i = 0; i < kZoneCount; ++i) {
-        Theme::arc(parent, x + kArcCx, y + kArcCy, kArcRadius, kArcWidth,
-                   segmentStart[i], segmentStart[i] + kSegmentDeg, zoneColors[i], false);
+
+// Geometry measured from the TouchGFX design's bitmaps (HeartRateZoneGroup and
+// HeartRateZone1..5), in the widget's own coordinates: one circle centred at
+// (105, 116) carries the five-segment bar, the thicker marker over the active
+// segment, and the arrow pointing at it from inside.
+constexpr int32_t kArcCx         = 105;
+constexpr int32_t kArcCy         = 116;
+constexpr int32_t kBarRadius     = 113;   // centre-line radius of the bar
+constexpr int32_t kBarWidth      = 8;
+constexpr int32_t kMarkerRadius  = 111;   // the marker is thicker and reaches further in
+constexpr int32_t kMarkerWidth   = 12;
+constexpr int32_t kSegmentDeg    = 24;    // each zone spans 24 degrees, 2 degrees apart
+constexpr float   kArrowTipR     = 99.0f; // arrow apex, just inside the marker
+constexpr float   kArrowBaseR    = 89.0f;
+constexpr float   kArrowHalfW    = 5.5f;  // half the base width, along the tangent
+constexpr int32_t kSegmentStart[HeartRateZone::kZoneCount] = { -64, -38, -12, 14, 40 };
+constexpr uint32_t kZoneColor[HeartRateZone::kZoneCount] = {
+    Color::GRAY, Color::CHARTREUSE, Color::YELLOW, Color::YELLOW_DARK, Color::RED
+};
+
+/// Draw the arrow: the object's only content is one filled triangle.
+void drawArrowCb(lv_event_t* e)
+{
+    auto* obj   = static_cast<lv_obj_t*>(lv_event_get_target(e));
+    auto* arrow = static_cast<const HeartRateZone::Arrow*>(lv_event_get_user_data(e));
+
+    lv_area_t coords;
+    lv_obj_get_coords(obj, &coords);
+
+    lv_draw_triangle_dsc_t dsc;
+    lv_draw_triangle_dsc_init(&dsc);
+    dsc.color = arrow->color;
+    dsc.opa   = LV_OPA_COVER;
+    for (int i = 0; i < 3; ++i) {
+        dsc.p[i].x = coords.x1 + arrow->p[i].x;
+        dsc.p[i].y = coords.y1 + arrow->p[i].y;
     }
+    lv_draw_triangle(lv_event_get_layer(e), &dsc);
+}
+
+} // namespace
+
+HeartRateZone::HeartRateZone(lv_obj_t* parent, int32_t x, int32_t y)
+    : mX(x)
+    , mY(y)
+{
     for (uint8_t i = 0; i < kZoneCount; ++i) {
-        mZones[i] = Theme::imageTinted(parent, zoneImgs[i], x + zoneOffsets[i][0], y + zoneOffsets[i][1],
-                                       zoneColors[i]);
-        lv_obj_add_flag(mZones[i], LV_OBJ_FLAG_HIDDEN);
+        Theme::arc(parent, x + kArcCx, y + kArcCy, kBarRadius, kBarWidth,
+                   kSegmentStart[i], kSegmentStart[i] + kSegmentDeg, kZoneColor[i], false);
     }
+
+    // One marker and one arrow, re-aimed at whichever zone is active.
+    mMarker = Theme::arc(parent, x + kArcCx, y + kArcCy, kMarkerRadius, kMarkerWidth,
+                         kSegmentStart[0], kSegmentStart[0] + kSegmentDeg, kZoneColor[0], false);
+    lv_obj_add_flag(mMarker, LV_OBJ_FLAG_HIDDEN);
+
+    // The arrow's host covers the whole bar area so any zone's triangle fits.
+    mArrow = Theme::container(parent, x, y, 210, 69);
+    lv_obj_add_event_cb(mArrow, drawArrowCb, LV_EVENT_DRAW_MAIN, &mArrowDsc);
+    lv_obj_add_flag(mArrow, LV_OBJ_FLAG_HIDDEN);
+}
+
+void HeartRateZone::showZone(int zone)
+{
+    if (zone == mActive) {
+        return;
+    }
+    mActive = zone;
+
+    if (zone < 0) {
+        lv_obj_add_flag(mMarker, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(mArrow, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+
+    Theme::setArc(mMarker, kSegmentStart[zone], kSegmentStart[zone] + kSegmentDeg);
+    Theme::setArcColor(mMarker, kZoneColor[zone]);
+    lv_obj_remove_flag(mMarker, LV_OBJ_FLAG_HIDDEN);
+
+    // Triangle on the segment's mid angle: apex towards the bar, base inside.
+    // TouchGFX angles: 0 = 12 o'clock, clockwise. Radial unit vector is
+    // (sin a, -cos a); the tangent is (cos a, sin a).
+    const float a  = (kSegmentStart[zone] + kSegmentDeg / 2.0f) * 3.14159265f / 180.0f;
+    const float rx = sinf(a), ry = -cosf(a);
+    const float tx = cosf(a), ty = sinf(a);
+    const float cx = static_cast<float>(kArcCx), cy = static_cast<float>(kArcCy) + 0.4f;
+    // lv_value_precise_t is integer unless LV_USE_FLOAT is on; round to the pixel grid.
+    auto pt = [](float px, float py) {
+        return lv_point_precise_t { static_cast<lv_value_precise_t>(lroundf(px)),
+                                    static_cast<lv_value_precise_t>(lroundf(py)) };
+    };
+    mArrowDsc.p[0] = pt(cx + kArrowTipR * rx, cy + kArrowTipR * ry);
+    mArrowDsc.p[1] = pt(cx + kArrowBaseR * rx + kArrowHalfW * tx, cy + kArrowBaseR * ry + kArrowHalfW * ty);
+    mArrowDsc.p[2] = pt(cx + kArrowBaseR * rx - kArrowHalfW * tx, cy + kArrowBaseR * ry - kArrowHalfW * ty);
+    mArrowDsc.color = Theme::rgb(kZoneColor[zone]);
+    lv_obj_remove_flag(mArrow, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_invalidate(mArrow);
 }
 
 void HeartRateZone::setHR(float bpm, const uint8_t* thresholds, uint8_t thresholdCount)
@@ -397,13 +515,7 @@ void HeartRateZone::setHR(float bpm, const uint8_t* thresholds, uint8_t threshol
         }
         --active;
     }
-    for (int i = 0; i < kZoneCount; ++i) {
-        if (i == active) {
-            lv_obj_remove_flag(mZones[i], LV_OBJ_FLAG_HIDDEN);
-        } else {
-            lv_obj_add_flag(mZones[i], LV_OBJ_FLAG_HIDDEN);
-        }
-    }
+    showZone(active);
 }
 
 // --- PauseIndicator ----------------------------------------------------------

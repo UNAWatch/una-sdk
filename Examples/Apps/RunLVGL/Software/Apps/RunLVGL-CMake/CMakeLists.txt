@@ -71,6 +71,12 @@ set(GUI_INCLUDE_DIRS
 set(GUI_COMPILE_DEFINITIONS
     ${UNA_SDK_DEFINES_GUI_LVGL}
 )
+# Frame timing in the syslog, one line per 100 kernel ticks (see the LVGL port).
+# For measuring, not for shipping: cmake -DRUNLVGL_FRAME_STATS=ON ...
+option(RUNLVGL_FRAME_STATS "Log frame timing statistics from the GUI process" OFF)
+if(RUNLVGL_FRAME_STATS)
+    list(APPEND GUI_COMPILE_DEFINITIONS UNA_LVGL_FRAME_STATS=1)
+endif()
 # LVGL's software renderer recurses deeper than TouchGFX; give the GUI task
 # more stack than the 10 KB default.
 set(GUI_STACK_SIZE "24*1024")

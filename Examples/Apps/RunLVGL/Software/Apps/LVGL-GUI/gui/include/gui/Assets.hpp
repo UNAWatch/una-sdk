@@ -13,6 +13,12 @@
 
 #include "lvgl.h"
 
+// The generated definitions are C, so the names must not be mangled. GCC
+// leaves global variables unmangled anyway; MSVC (the PC simulator) does not.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Fonts (Poppins, 2 bpp). The Light 60, Medium 40 and SemiBold 40 faces carry
 // digits and punctuation only; SemiBold 60 adds A/P/M for the clock suffix and
 // O/p/e/n for the interval timer's "Open"; the rest cover printable ASCII.
@@ -33,19 +39,14 @@ LV_FONT_DECLARE(poppins_semibold_40);
 LV_FONT_DECLARE(poppins_semibold_60);
 
 // Images. Multi-colour icons are RGB565A8; single-colour ones (ticks, crosses,
-// pause, sensor and heart-rate zone shapes) are A8 alpha masks that the screens
-// tint with Theme::imageTinted(), so one bitmap serves every colour variant.
+// pause and sensor icons) are A8 alpha masks that the screens tint with
+// Theme::imageTinted(), so one bitmap serves every colour variant.
 LV_IMAGE_DECLARE(img_circlecross_50x50);
 LV_IMAGE_DECLARE(img_circletick_50x50);
 LV_IMAGE_DECLARE(img_clock_16x19);
 LV_IMAGE_DECLARE(img_crosswhite_17x17);
 LV_IMAGE_DECLARE(img_heart_30x30);
 LV_IMAGE_DECLARE(img_heart_46x39);
-LV_IMAGE_DECLARE(img_heartratezone1);
-LV_IMAGE_DECLARE(img_heartratezone2);
-LV_IMAGE_DECLARE(img_heartratezone3);
-LV_IMAGE_DECLARE(img_heartratezone4);
-LV_IMAGE_DECLARE(img_heartratezone5);
 LV_IMAGE_DECLARE(img_intervals_24x26);
 LV_IMAGE_DECLARE(img_intervals_40x43);
 LV_IMAGE_DECLARE(img_pace_30x30);
@@ -55,5 +56,9 @@ LV_IMAGE_DECLARE(img_runningman_46x46);
 LV_IMAGE_DECLARE(img_sensorgpslight);
 LV_IMAGE_DECLARE(img_sensorhrlight);
 LV_IMAGE_DECLARE(img_tickgreen_22x17);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // ASSETS_HPP
