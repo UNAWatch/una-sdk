@@ -22,10 +22,10 @@
  *              IGuiLifeCycleCallback it registers here; on resume the active
  *              screen is invalidated so the kernel gets a full frame back.
  *
- * The message pump underneath is SDK::TouchGFXCommandProcessor. Despite its
- * name it has no TouchGFX dependency: it demultiplexes kernel messages, queues
- * button codes and sends frame buffers, which is exactly what any GUI toolkit
- * on this platform needs.
+ * The message pump underneath is SDK::GuiCommandProcessor, shared with the
+ * TouchGFX port: it demultiplexes kernel messages, queues button codes and
+ * sends frame buffers, which is exactly what any GUI toolkit on this platform
+ * needs.
  ******************************************************************************
  */
 
@@ -79,10 +79,34 @@ public:
     void setCustomMessageHandler(Interface::ICustomMessageHandler* handler);
 
     /**
-     * @brief Frame loop. Never returns; the process ends through the kernel's
-     *        COMMAND_APP_STOP or when the app calls sys.exit().
+     * @brief Frame loop: one lv_timer_handler() per kernel tick.
+     *
+     * On the watch this never returns: the process ends inside the kernel's
+     * COMMAND_APP_STOP handling or when the app calls sys.exit(). In the
+     * simulator sys.exit() is a request to stop, and run() returns once the
+     * loop has seen it so the host process can shut down.
      */
-    [[noreturn]] void run();
+    void run();
+
+    /// Make run() return after the current iteration (see sys.exit() above).
+    void stop() { mStopped = true; }
+
+    /**
+     * @brief Host hook run once per loop iteration, before LVGL.
+     *
+     * Unused on the watch. The simulator uses it to pump window events and
+     * show the last frame; it runs on the GUI thread, so it may call into
+     * LVGL and the port.
+     */
+    using FrameHook = void (*)(void* ctx);
+    void setFrameHook(FrameHook hook, void* ctx) { mFrameHook = hook; mFrameHookCtx = ctx; }
+
+    /// The last frame sent to the kernel: kDisplayWidth * kDisplayHeight
+    /// ABGR2222 bytes, row-major.
+    const uint8_t* frame() const;
+
+    /// Number of frames sent so far; a host compares it to detect a new frame.
+    uint32_t frameCount() const { return mFrameCount; }
 
     /// True between onResume() and onSuspend(): the app owns the display.
     bool isResumed() const { return mResumed; }
@@ -108,9 +132,13 @@ private:
     static uint32_t tickCb();
     static void     logCb(lv_log_level_t level, const char* buf);
 
-    lv_display_t*                     mDisplay = nullptr;
-    Interface::IGuiLifeCycleCallback* mApp     = nullptr;
-    bool                              mResumed = false;
+    lv_display_t*                     mDisplay      = nullptr;
+    Interface::IGuiLifeCycleCallback* mApp          = nullptr;
+    bool                              mResumed      = false;
+    bool                              mStopped      = false;
+    FrameHook                         mFrameHook    = nullptr;
+    void*                             mFrameHookCtx = nullptr;
+    uint32_t                          mFrameCount   = 0;
 };
 
 } // namespace SDK::LVGL

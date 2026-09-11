@@ -15,9 +15,19 @@
 #include "SDK/Interfaces/ILogger.hpp"
 
 #include "SDK/Simulator/OS/OS.hpp"
-#include "touchgfx/Utils.hpp"
 
 #include <cstdio>
+
+// The TouchGFX simulators run under WinMain and print through
+// touchgfx_printf(), which makes sure a console exists. A simulator built on
+// another toolkit (see Libs/Source/Simulator/LVGL) defines UNA_SIM_NO_TOUCHGFX
+// and logs through plain stdio instead.
+#ifndef UNA_SIM_NO_TOUCHGFX
+#include "touchgfx/Utils.hpp"
+#define UNA_SIM_LOG_PRINTF touchgfx_printf
+#else
+#define UNA_SIM_LOG_PRINTF std::printf
+#endif
 
 // GetTickCount64() is Windows-only. Provide a portable wrapper.
 #ifndef _WIN32
@@ -127,9 +137,9 @@ private:
         vsnprintf(userMsg, sizeof(userMsg), fmt, args);
 
         if (idx) {
-            touchgfx_printf("%s%s%-36s: %s", timeBuff, levelBuff, meta, userMsg);
+            UNA_SIM_LOG_PRINTF("%s%s%-36s: %s", timeBuff, levelBuff, meta, userMsg);
         } else {
-            touchgfx_printf("%s%s%s", timeBuff, levelBuff, userMsg);
+            UNA_SIM_LOG_PRINTF("%s%s%s", timeBuff, levelBuff, userMsg);
         } 
     }
 };

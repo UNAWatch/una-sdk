@@ -10,7 +10,7 @@
  */
 
 #include "SDK/Simulator/Kernel/Kernel.hpp"
-#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+#include "SDK/Port/GuiCommandProcessor.hpp"
 #include "SDK/GUI/Button.hpp"
 #include <SDK/Messages/MessageGuard.hpp>
 

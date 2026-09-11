@@ -32,7 +32,13 @@ namespace Sensor
     public:
         HeartRate();
         
+        /// HEART_RATE: bpm and trust.
         Sensor::Driver& getDriver();
+
+        /// HEART_RATE_EX: the kernel's arbitrated reading plus the raw optical
+        /// and strap values. The activity apps subscribe to this one; the
+        /// simulator reports the optical source only.
+        Sensor::Driver& getDriverEx();
 
         //// ISensorDriverCtrl
         float       sdcStart(Sensor::Driver* driver, float period)        override;
@@ -48,10 +54,13 @@ namespace Sensor
         static constexpr float    mMinPeriod = 1000.0f; // In ms
 
         Sensor::Driver                  mDriver;
+        Sensor::Driver                  mDriverEx;
         Interface::IHeartRate&          mpHeatRateSim;
         ::Driver::SwTimer               mTimer;
         uint8_t                         mHr;
         uint8_t                         mTrustLevel;
+        bool                            mStarted   = false;   // HEART_RATE connected
+        bool                            mStartedEx = false;   // HEART_RATE_EX connected
     };
 
 } /* namespace Sensor */

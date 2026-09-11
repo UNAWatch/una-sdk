@@ -1,79 +1,25 @@
 /**
  ******************************************************************************
  * @file    TouchGFXCommandProcessor.hpp
- * @date    11-12-2025
- * @author  Denys Saienko <denys.saienko@droid-technologies.com>
- * @brief   Central TouchGFX command processor.
- ******************************************************************************
+ * @brief   Former name of SDK::GuiCommandProcessor, kept as an alias.
  *
+ * The GUI process's kernel message pump never depended on TouchGFX; it was
+ * renamed when the LVGL port started using it too. Existing code that includes
+ * this header and uses SDK::TouchGFXCommandProcessor keeps building. New code
+ * should include SDK/Port/GuiCommandProcessor.hpp and use the new name.
  ******************************************************************************
  */
 
-//TODO: Move this functionality to the Kernel class ?
+#ifndef SDK_PORT_TOUCHGFX_TOUCHGFX_COMMAND_PROCESSOR_HPP
+#define SDK_PORT_TOUCHGFX_TOUCHGFX_COMMAND_PROCESSOR_HPP
 
-#pragma once
-
-#include <cstdint>
-#include <cstddef>
-#include <queue>
-
-#include "SDK/Kernel/Kernel.hpp"
-#include "SDK/Messages/CommandMessages.hpp"
-#include "SDK/Interfaces/IGuiLifeCycleCallback.hpp"
-#include "SDK/Interfaces/ICustomMessageHandler.hpp"
-#include "SDK/Messages/MessageBase.hpp"
-#include "SDK/Tools/FixedQueue.hpp"
+#include "SDK/Port/GuiCommandProcessor.hpp"
 
 namespace SDK
 {
 
-/**
- * @brief Central TouchGFX command processor.
- *
- * Singleton class that manages TouchGFX lifecycle and kernel commands.
- */
-class TouchGFXCommandProcessor
-{
-public:
-    static TouchGFXCommandProcessor& GetInstance()
-    {
-        static TouchGFXCommandProcessor sInstance;
-        return sInstance;
-    }
-
-    void setAppLifeCycleCallback(SDK::Interface::IGuiLifeCycleCallback* cb) { mAppLifeCycleCallback = cb; }
-
-    void setCustomMessageHandler(SDK::Interface::ICustomMessageHandler* h) { mCustomMessageHandler = h; }
-
-    bool waitForFrameTick();
-
-    bool getKeySample(uint8_t &key);
-
-    void writeDisplayFrameBuffer(const uint8_t* data);
-
-    // Called before Model::tick()
-    void callCustomMessageHandler();
-
-private:
-    TouchGFXCommandProcessor();
-    virtual ~TouchGFXCommandProcessor();
-
-    // Prevent copying
-    TouchGFXCommandProcessor(const TouchGFXCommandProcessor&) = delete;
-    TouchGFXCommandProcessor& operator=(const TouchGFXCommandProcessor&) = delete;
-
-    void handleEvent(SDK::Message::EventButton* msg);
-
-    const SDK::Kernel&                            mKernel;
-    bool                                          mStartCallbackCalled;
-    bool                                          mIsGuiResumed;
-    SDK::Interface::IGuiLifeCycleCallback*        mAppLifeCycleCallback;
-    SDK::Interface::ICustomMessageHandler*        mCustomMessageHandler;
-    SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
-    // Button codes are queued, not latched: a single physical press expands to
-    // press/click/release, several of which can arrive between two GUI ticks.
-    SDK::Tools::FixedQueue<uint8_t, 16>           mButtonCodes {};
-};
+using TouchGFXCommandProcessor = GuiCommandProcessor;
 
 } // namespace SDK
 
+#endif // SDK_PORT_TOUCHGFX_TOUCHGFX_COMMAND_PROCESSOR_HPP

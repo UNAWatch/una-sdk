@@ -15,7 +15,7 @@
 #include <cstdlib>
 
 #include "SDK/Kernel/KernelProviderGUI.hpp"
-#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+#include "SDK/Port/GuiCommandProcessor.hpp"
 
 /// Build with -DUNA_LVGL_FRAME_STATS=1 to log, every 100 kernel ticks, how many
 /// frames reached the kernel and how evenly the ticks arrived.
@@ -32,30 +32,45 @@ namespace
 #if UNA_LVGL_FRAME_STATS
 struct FrameStats {
     uint32_t windowStartMs = 0;
+    uint32_t firstFrameNo  = 0;   // kernel tick numbers covered by the window
+    uint32_t lastFrameNo   = 0;
     uint32_t lastTickMs    = 0;
     uint32_t ticks         = 0;
     uint32_t frames        = 0;
     uint32_t minDtMs       = UINT32_MAX;
     uint32_t maxDtMs       = 0;
+    uint32_t zeroDt        = 0;   // ticks that arrived together (a catch-up burst)
+    uint32_t lateDt        = 0;   // gaps of more than 1.5 periods
     uint32_t maxRenderMs   = 0;   // longest lv_timer_handler() call
     uint32_t maxSendMs     = 0;   // longest frame hand-off to the kernel
     uint32_t sumRenderMs   = 0;
 } sStats;
 
-void statsOnTick(uint32_t nowMs)
+void statsOnTick(uint32_t nowMs, uint32_t frameNo)
 {
+    sStats.lastFrameNo = frameNo;
     if (sStats.ticks == 0) {
         sStats.windowStartMs = nowMs;
+        sStats.firstFrameNo  = frameNo;
     } else {
         const uint32_t dt = nowMs - sStats.lastTickMs;
         sStats.minDtMs = LV_MIN(sStats.minDtMs, dt);
         sStats.maxDtMs = LV_MAX(sStats.maxDtMs, dt);
+        if (dt == 0) {
+            ++sStats.zeroDt;
+        }
+        if (dt > 150) {
+            ++sStats.lateDt;
+        }
     }
     sStats.lastTickMs = nowMs;
     if (++sStats.ticks == 100) {
-        LOG_INFO("100 ticks in %u ms (dt %u..%u ms): %u frames sent, render max %u avg %u ms, send max %u ms\n",
+        LOG_INFO("ticks #%u-%u: 100 in %u ms (dt %u..%u ms, %u at 0 ms, %u over 150 ms): %u frames sent, "
+                 "render max %u avg %u ms, send max %u ms\n",
+                 static_cast<unsigned>(sStats.firstFrameNo), static_cast<unsigned>(sStats.lastFrameNo),
                  static_cast<unsigned>(nowMs - sStats.windowStartMs),
                  static_cast<unsigned>(sStats.minDtMs), static_cast<unsigned>(sStats.maxDtMs),
+                 static_cast<unsigned>(sStats.zeroDt), static_cast<unsigned>(sStats.lateDt),
                  static_cast<unsigned>(sStats.frames),
                  static_cast<unsigned>(sStats.maxRenderMs), static_cast<unsigned>(sStats.sumRenderMs / 100u),
                  static_cast<unsigned>(sStats.maxSendMs));
@@ -104,7 +119,7 @@ void Port::init()
     lv_display_set_flush_cb(mDisplay, &Port::flushCb);
     lv_display_set_default(mDisplay);
 
-    SDK::TouchGFXCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
+    SDK::GuiCommandProcessor::GetInstance().setAppLifeCycleCallback(this);
 
     LOG_INFO("LVGL %d.%d.%d ready, %dx%d, stripe %d rows\n",
              LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH,
@@ -113,18 +128,28 @@ void Port::init()
 
 void Port::setCustomMessageHandler(Interface::ICustomMessageHandler* handler)
 {
-    SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(handler);
+    SDK::GuiCommandProcessor::GetInstance().setCustomMessageHandler(handler);
 }
 
 void Port::run()
 {
-    auto& pump = SDK::TouchGFXCommandProcessor::GetInstance();
+    auto& pump = SDK::GuiCommandProcessor::GetInstance();
 
-    for (;;) {
+    while (!mStopped) {
         // Blocks until the kernel's next GUI tick. Lifecycle commands and button
         // events are handled inside; app-private messages are queued.
         if (pump.waitForFrameTick()) {
-            continue;   // Stop path: onStop() has run and sys.exit() is pending.
+            break;      // Stop path: onStop() has run and sys.exit() was called.
+        }
+
+        if (mFrameHook) {
+            mFrameHook(mFrameHookCtx);
+        }
+
+        // The simulator build also wakes on a poll timeout; only a kernel tick
+        // advances the GUI, so the frame rate is the watch's in both places.
+        if (!pump.consumeFrameTick()) {
+            continue;
         }
 
         // Deliver queued service -> GUI messages, then buttons, then let LVGL
@@ -133,7 +158,7 @@ void Port::run()
         dispatchKeys();
 #if UNA_LVGL_FRAME_STATS
         const uint32_t t0 = tickCb();
-        statsOnTick(t0);
+        statsOnTick(t0, pump.lastFrameNumber());
         lv_timer_handler();
         const uint32_t renderMs = tickCb() - t0;
         sStats.maxRenderMs = LV_MAX(sStats.maxRenderMs, renderMs);
@@ -146,7 +171,7 @@ void Port::run()
 
 void Port::dispatchKeys()
 {
-    auto& pump = SDK::TouchGFXCommandProcessor::GetInstance();
+    auto& pump = SDK::GuiCommandProcessor::GetInstance();
 
     uint8_t code = 0;
     while (pump.getKeySample(code)) {
@@ -174,6 +199,12 @@ void Port::onStop()
         mApp->onStop();
     }
     lv_deinit();
+    mStopped = true;
+}
+
+const uint8_t* Port::frame() const
+{
+    return sFrame;
 }
 
 void Port::onFrame()
@@ -229,12 +260,13 @@ void Port::flushCb(lv_display_t* disp, const lv_area_t* area, uint8_t* pxMap)
         // Sends REQUEST_DISPLAY_UPDATE; a no-op while the GUI is suspended.
 #if UNA_LVGL_FRAME_STATS
         const uint32_t t0 = tickCb();
-        SDK::TouchGFXCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
+        SDK::GuiCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
         sStats.maxSendMs = LV_MAX(sStats.maxSendMs, tickCb() - t0);
         ++sStats.frames;
 #else
-        SDK::TouchGFXCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
+        SDK::GuiCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
 #endif
+        ++GetInstance().mFrameCount;
     }
 
     lv_display_flush_ready(disp);
@@ -270,9 +302,22 @@ extern "C" void una_lvgl_assert_failed(const char* file, int line)
  *
  * Weak: an app that defines its own una_lvgl_default_font() returning one of
  * its converted fonts replaces this, and Montserrat 14 then drops out of the
- * link entirely.
+ * link entirely. MSVC (the PC simulator) has no weak symbols; its linker's
+ * /alternatename gives the same "use this unless defined elsewhere" rule.
  */
+#if defined(_MSC_VER)
+extern "C" const lv_font_t* una_lvgl_default_font_fallback(void)
+{
+    return &lv_font_montserrat_14;
+}
+#if defined(_M_IX86)
+#pragma comment(linker, "/alternatename:_una_lvgl_default_font=_una_lvgl_default_font_fallback")
+#else
+#pragma comment(linker, "/alternatename:una_lvgl_default_font=una_lvgl_default_font_fallback")
+#endif
+#else
 extern "C" __attribute__((weak)) const lv_font_t* una_lvgl_default_font(void)
 {
     return &lv_font_montserrat_14;
 }
+#endif

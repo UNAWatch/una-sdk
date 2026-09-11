@@ -72,7 +72,7 @@ set(UNA_SDK_SOURCES_SERVICE
 set(UNA_SDK_SOURCES_GUI
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/STM32TouchController.cpp"
-    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXGPIO.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp"
@@ -105,7 +105,7 @@ set(UNA_SDK_INCLUDE_DIRS_GUI
 # UNA_SDK_SOURCES_GUI, adding UNA_SDK_INCLUDE_DIRS_GUI_LVGL to its include
 # dirs and UNA_SDK_DEFINES_GUI_LVGL to GUI_COMPILE_DEFINITIONS (see
 # una_app_build_gui). The message pump shared with the TouchGFX port,
-# TouchGFXCommandProcessor.cpp, has no TouchGFX dependency.
+# GuiCommandProcessor.cpp, is shared with the TouchGFX port.
 #
 # LVGL reads its configuration from the file named by LV_CONF_PATH. Set
 # UNA_LVGL_CONF before including this file to use an app-specific lv_conf.h;
@@ -125,7 +125,7 @@ file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES CONFIGURE_DEPENDS
 
 set(UNA_SDK_SOURCES_GUI_LVGL
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
-    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"
     ${UNA_SDK_LVGL_SOURCES}
 )

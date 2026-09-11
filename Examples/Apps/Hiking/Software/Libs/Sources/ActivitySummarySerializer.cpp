@@ -34,7 +34,7 @@ bool ActivitySummarySerializer::save(const ActivitySummary& summary)
     const char* slash = strrchr(mPath, '/');
     if (slash) {
         char buff[SDK::Interface::IFileSystem::skMaxPathLen]{ };
-        snprintf(buff, sizeof(buff), "%.*s", static_cast<size_t>(slash - mPath), mPath);
+        snprintf(buff, sizeof(buff), "%.*s", static_cast<int>(slash - mPath), mPath);
         if (!mKernel.fs.mkdir(buff)) {
             return false;
         }

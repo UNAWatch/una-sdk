@@ -16,6 +16,7 @@
 
 #include "SDK/Simulator/Components/Sensors/HeartRate/SensorHeartRate.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRate.hpp"
+#include "SDK/SensorLayer/DataParsers/SensorDataParserHeartRateEx.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserAccelerometerRaw.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
@@ -31,6 +32,10 @@ HeartRate::HeartRate()
               SDK::Sensor::Type::HEART_RATE,
               SDK::SensorDataParser::HeartRate::getFieldsNumber(),
               *this)
+    , mDriverEx(*this,
+                SDK::Sensor::Type::HEART_RATE_EX,
+                SDK::SensorDataParser::HeartRateEx::Field::COUNT,
+                *this)
     , mpHeatRateSim(ComponentSimulator::GetInstance().getHeartRate())
     , mTimer()
     , mHr(0)
@@ -43,9 +48,15 @@ Sensor::Driver& HeartRate::getDriver()
     return mDriver;
 }
 
+Sensor::Driver& HeartRate::getDriverEx()
+{
+    return mDriverEx;
+}
+
 float HeartRate::sdcStart(Sensor::Driver* driver, float period)
 {
-    LOG_INFO("start\n");
+    LOG_INFO("start (%s)\n", driver == &mDriverEx ? "ex" : "plain");
+    (driver == &mDriverEx ? mStartedEx : mStarted) = true;
     mTimer.start(static_cast<uint32_t>(period));
 
     return period;
@@ -53,8 +64,11 @@ float HeartRate::sdcStart(Sensor::Driver* driver, float period)
 
 void HeartRate::sdcStop(Sensor::Driver* driver)
 {
-    LOG_INFO("stop\n");
-    mTimer.stop();
+    LOG_INFO("stop (%s)\n", driver == &mDriverEx ? "ex" : "plain");
+    (driver == &mDriverEx ? mStartedEx : mStarted) = false;
+    if (!mStarted && !mStartedEx) {
+        mTimer.stop();
+    }
 }
 
 float HeartRate::sdcUpdatePeriod(Sensor::Driver* driver, float period)
@@ -89,11 +103,29 @@ void HeartRate::sensorRefresh()
     hr = static_cast<float>(mpHeatRateSim.nextHR());
     trustLevel = static_cast<float>(mpHeatRateSim.getTrustLevel());
 
-    auto& sample = mDriver.getDataSample();
-    sample.setTimestamp(SDK::Simulator::Mock::System::GetTimeMs());
-    sample.f[SDK::SensorDataParser::HeartRate::Field::BPM]         = hr;
-    sample.f[SDK::SensorDataParser::HeartRate::Field::TRUST_LEVEL] = trustLevel;
-    mDriver.pushDataSample();
+    const uint32_t now = SDK::Simulator::Mock::System::GetTimeMs();
+
+    if (mStarted) {
+        auto& sample = mDriver.getDataSample();
+        sample.setTimestamp(now);
+        sample.f[SDK::SensorDataParser::HeartRate::Field::BPM]         = hr;
+        sample.f[SDK::SensorDataParser::HeartRate::Field::TRUST_LEVEL] = trustLevel;
+        mDriver.pushDataSample();
+    }
+
+    if (mStartedEx) {
+        using Ex = SDK::SensorDataParser::HeartRateEx;
+        auto& sample = mDriverEx.getDataSample();
+        sample.setTimestamp(now);
+        sample.f[Ex::Field::BPM]            = hr;
+        sample.f[Ex::Field::TRUST_LEVEL]    = trustLevel;
+        sample.f[Ex::Field::SOURCE]         = static_cast<float>(Ex::Source::OPTICAL);
+        sample.f[Ex::Field::OPTICAL_BPM]    = hr;
+        sample.f[Ex::Field::OPTICAL_TRUST]  = trustLevel;
+        sample.f[Ex::Field::EXTERNAL_BPM]   = 0.0f;
+        sample.f[Ex::Field::EXTERNAL_TRUST] = 0.0f;
+        mDriverEx.pushDataSample();
+    }
 
     LOG_DEBUG("EXIT\n");
 }

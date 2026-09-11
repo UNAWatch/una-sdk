@@ -9,7 +9,7 @@
 #include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 
-#include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
+#include "SDK/Port/GuiCommandProcessor.hpp"
 
 #include <cstring>
 
@@ -43,7 +43,7 @@ namespace App {
 			if (!SDK::Simulator::Mock::SystemGUI::isAppRunning()) {
 				return;
 			}
-			SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+			SDK::GuiCommandProcessor::GetInstance().waitForFrameTick();
 		}
 	}
 
@@ -64,14 +64,14 @@ namespace App {
 		}
 
 		mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_GUI_SUSPEND).release());
-		SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+		SDK::GuiCommandProcessor::GetInstance().waitForFrameTick();
 		OS::Delay(10);
 
 		mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP).release());
 		OS::Delay(10);
 
 		mAppComm.sendToGui(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());
-		SDK::TouchGFXCommandProcessor::GetInstance().waitForFrameTick();
+		SDK::GuiCommandProcessor::GetInstance().waitForFrameTick();
 		OS::Delay(10);
 
 		mAppComm.sendToService(SDK::make_msg(mSrvKernel.getKernel(), SDK::MessageType::COMMAND_APP_STOP).release());

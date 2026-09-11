@@ -91,9 +91,12 @@ For detailed information on the TouchGFX port implementation, see :doc:`TouchGFX
    :project: SDK
    :members:
 
-.. doxygenclass:: SDK::TouchGFXCommandProcessor
+.. doxygenclass:: SDK::GuiCommandProcessor
    :project: SDK
    :members:
+
+``SDK::TouchGFXCommandProcessor`` is an alias of ``SDK::GuiCommandProcessor``,
+kept for existing applications.
 
 Utilities
 ---------
