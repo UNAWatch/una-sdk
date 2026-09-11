@@ -25,7 +25,7 @@ jobs:
         # too, and this job gates the whole workflow.
         run: |
           apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get install -y git jq
+          apt-get -o Acquire::Retries=3 install -y git jq
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -98,9 +98,12 @@ jobs:
           # in that outage was the plain path, which is what says this image had
           # it off. `yes` and not `force`: where a suite does not advertise
           # by-hash, apt falls back to today's behaviour instead of failing.
-          # Retries cover the resets a mirror under load throws.
+          # Retries cover the resets a mirror under load throws, and are repeated
+          # on the install because that is a separate process which inherits
+          # nothing -- and fetching the packages is the longer exposure of the
+          # two. By-Hash is not: it governs index files, not .debs.
           apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get install -y git python3-full python3-pip python-is-python3 cmake
+          apt-get -o Acquire::Retries=3 install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -196,7 +199,7 @@ jobs:
           find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
             -exec sed -i 's#security\.ubuntu\.com/ubuntu#archive.ubuntu.com/ubuntu#g' {} +
           apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get install -y git python3-full python3-pip python-is-python3 cmake
+          apt-get -o Acquire::Retries=3 install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
