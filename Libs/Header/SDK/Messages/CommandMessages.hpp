@@ -194,8 +194,11 @@ static_assert(sizeof(RequestBatteryStatus) == 44, "RequestBatteryStatus size mus
  */
 struct RequestSystemSettings : public MessageBase {
 
-    // Maximum HR thresholds (4 thresholds = 5 zones)
-    static const uint32_t skMaxHearRateTh = 8;
+    // Maximum HR thresholds (6 thresholds = 7 zones), with one slot spare.
+    // Seven rather than eight: the eighth byte carries dateMonthFirst below,
+    // and was free because no reply has ever filled more than six of these and
+    // no app reads past the heartRateCount it is given.
+    static const uint32_t skMaxHearRateTh = 7;
 
     // Response fields
     uint8_t languageId;      // System language
@@ -204,6 +207,7 @@ struct RequestSystemSettings : public MessageBase {
 
     uint8_t heartRateCount;
     uint8_t heartRateTh[skMaxHearRateTh];
+    bool    dateMonthFirst;  // Date order: month before day, e.g. "Jul 20"
 
     uint32_t activityMin;   // target number of active minutes per day.
     uint32_t steps;         // target number of steps per day
@@ -212,12 +216,6 @@ struct RequestSystemSettings : public MessageBase {
     uint32_t heightCm;      // User height in centimeters
     float    weightKg;      // User weight in kilograms
 
-    // Appended, not inserted: every field above keeps the offset it had, so an
-    // app built against an older SDK still reads them correctly off a newer
-    // kernel's reply. Defaults to day-first, which is what the faces did before
-    // the field existed, so an older kernel that never writes it is also right.
-    bool     dateMonthFirst;  // Date order: month before day, e.g. "Jul 20"
-
     RequestSystemSettings()
         : MessageBase(MessageType::REQUEST_SYSTEM_SETTINGS)
         , languageId(0)
@@ -225,21 +223,29 @@ struct RequestSystemSettings : public MessageBase {
         , timeFormat(false)
         , heartRateCount(0)
         , heartRateTh {}
+        , dateMonthFirst(false)
         , activityMin(0)
         , steps(0)
         , floors(0)
         , heightCm(0)
         , weightKg(0.0f)
-        , dateMonthFirst(false)
     {}
 };
 #if __SIZEOF_POINTER__ == 4
-// 64 bytes was exactly a pool block (MessagePool's classes are 32/64/128/256),
-// so this field costs a move up to the 128-byte class rather than four bytes.
-// Acceptable for a request this rare -- a clockface polls it once a minute and
-// releases it at once -- but it is why the next field to be added here is free
-// and the one after 128 bytes is not.
-static_assert(sizeof(RequestSystemSettings) == 68, "RequestSystemSettings size must be 68 bytes");
+// DO NOT GROW THIS STRUCT. The size is part of the ABI, not a detail.
+//
+// A message is allocated from a fixed-size block, and the requester asks for
+// ITS OWN sizeof. So an app built against an older SDK still asks for the size
+// it knew, and a kernel that fills a field past that size writes outside the
+// app's allocation. Growing this one by four bytes corrupted the next
+// allocation and hardfaulted the watch on the next message release; it took
+// down every app that asks for system settings, not just the clockfaces.
+//
+// A new field therefore has to come out of the spare bytes already inside the
+// struct, as dateMonthFirst does, and never off the end. That is true of every
+// message here, and of any change that alters a layout an installed app has
+// already been compiled against.
+static_assert(sizeof(RequestSystemSettings) == 64, "RequestSystemSettings size must be 64 bytes");
 #endif
 
 /**
