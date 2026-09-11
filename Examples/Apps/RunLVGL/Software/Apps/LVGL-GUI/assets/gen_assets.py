@@ -6,8 +6,11 @@ Fonts:  Poppins faces -> LVGL fonts through lv_font_conv, run via npx so Node is
         uncompressed because lv_conf.h builds LVGL without the decompressor. The
         large numeric faces only carry the glyphs the value fields print.
 Images: PNG icons -> lv_image_dsc_t C arrays via LVGL's own LVGLImage.py (needs
-        the pypng and lz4 Python packages). RGB565A8 keeps the icons' alpha
-        while staying compact.
+        the pypng and lz4 Python packages). Single-colour icons are stored as
+        A8 (alpha only, one byte per pixel) and tinted at draw time through
+        LVGL's image recolour; two-colour icons keep RGB565A8. Icons that only
+        differ in colour from another, and the heart-rate zone group (which the
+        GUI composes from the five zone shapes), are not converted at all.
 
 The generated files are committed, so building the app needs neither tool.
 Run this only after changing a font range or an icon:
@@ -35,6 +38,20 @@ RUN_ASSETS = os.path.join(SDK_ROOT, "Examples", "Apps", "Running", "Software", "
 ASCII = "0x20-0x7E"
 NUMERIC = "0x20-0x3A"
 BIG = "0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70"
+
+# Single-colour icons (checked with a PNG colour census): stored as alpha only
+# and coloured by the GUI. Keys are the lower-cased PNG stem.
+ALPHA_IMAGES = {
+    "circlecross_50x50", "circletick_50x50", "crosswhite_17x17", "pause_14x14",
+    "heartratezone1", "heartratezone2", "heartratezone3", "heartratezone4", "heartratezone5",
+    "sensorgpslight", "sensorhrlight", "tickgreen_22x17",
+}
+
+# Same shape as another icon in a different colour, or composed in code.
+SKIP_IMAGES = {
+    "crossamber_17x17", "tickamber_22x17", "tickred_22x17",
+    "sensorgpsdark", "sensorhrdark", "heartratezonegroup",
+}
 
 FONTS = [
     ("Poppins-Italic",   18, ASCII),
@@ -90,9 +107,13 @@ def main():
         if not png.lower().endswith(".png"):
             continue
         stem = os.path.splitext(png)[0]
+        key = stem.lower()
+        if key in SKIP_IMAGES:
+            continue
         name = "img_" + "".join(c if c.isalnum() else "_" for c in stem).lower()
-        print(f"image {name}")
-        run([sys.executable, script, "--ofmt", "C", "--cf", "RGB565A8", "--name", name,
+        cf = "A8" if key in ALPHA_IMAGES else "RGB565A8"
+        print(f"image {name} ({cf})")
+        run([sys.executable, script, "--ofmt", "C", "--cf", cf, "--name", name,
              "-o", image_out, os.path.join(args.image_dir, png)])
 
     n_fonts = len([f for f in os.listdir(font_out) if f.endswith(".c")])

@@ -33,7 +33,8 @@ void TrackResultScreen::build()
 {
     const bool saved = mResult == Result::Saved;
     Theme::label(mRoot, Theme::Font::SemiBold30, saved ? "Saved" : "Discarded", 41, 47, 159);
-    Theme::image(mRoot, saved ? &img_circletick_50x50 : &img_circlecross_50x50, 95, 95);
+    Theme::imageTinted(mRoot, saved ? &img_circletick_50x50 : &img_circlecross_50x50, 95, 95,
+                       SDK::GUI::Color::YELLOW_DARK);
     Theme::label(mRoot, Theme::Font::Medium18,
                  saved ? "Activity has\nbeen saved" : "Activity has\nbeen deleted", 48, 156, 144);
     mTitle = std::make_unique<Widgets::Title>(mRoot, Strings::kAppNameUc);

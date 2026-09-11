@@ -91,6 +91,16 @@ void ScreenManager::switchNow(ScreenId id)
 
     mModel->bind(next);
     next->onShow();
+
+    // Peak use of LVGL's static pool (LV_MEM_SIZE in lv_conf.h), logged per
+    // screen so the pool can be sized to what the app actually needs.
+    lv_mem_monitor_t mon;
+    lv_mem_monitor(&mon);
+    LOG_INFO("LVGL pool: %u/%u B used, peak %u%%, frag %u%%\n",
+             static_cast<unsigned>(mon.total_size - mon.free_size),
+             static_cast<unsigned>(mon.total_size),
+             static_cast<unsigned>(mon.max_used) * 100u / static_cast<unsigned>(mon.total_size),
+             static_cast<unsigned>(mon.frag_pct));
 }
 
 Screen* ScreenManager::create(ScreenId id)

@@ -267,9 +267,10 @@ SensorStatusRow::State SensorStatusRow::hrStateFromSource(uint8_t accessoryState
 SensorStatusRow::SensorStatusRow(lv_obj_t* parent, int32_t x, int32_t y, int32_t w, int32_t h)
     : mW(w), mH(h)
 {
+    // One alpha-only shape per sensor; the dark/light phases are tints.
     mRow = Theme::container(parent, x, y, w, h);
-    mGps = Theme::image(mRow, &img_sensorgpslight, 0, 0);
-    mHr  = Theme::image(mRow, &img_sensorhrlight, 0, 0);
+    mGps = Theme::imageTinted(mRow, &img_sensorgpslight, 0, 0, Color::WHITE);
+    mHr  = Theme::imageTinted(mRow, &img_sensorhrlight, 0, 0, Color::WHITE);
     update();
 }
 
@@ -339,30 +340,43 @@ void SensorStatusRow::layout()
 
 void SensorStatusRow::applyIcons()
 {
-    auto applyOne = [this](lv_obj_t* img, State s, const lv_image_dsc_t* dark, const lv_image_dsc_t* light) {
+    auto applyOne = [this](lv_obj_t* img, State s) {
         if (s == State::Absent) {
             lv_obj_add_flag(img, LV_OBJ_FLAG_HIDDEN);
             return;
         }
         lv_obj_remove_flag(img, LV_OBJ_FLAG_HIDDEN);
-        lv_image_set_src(img, (s == State::Connected || mLight) ? light : dark);
+        Theme::tint(img, (s == State::Connected || mLight) ? Color::WHITE : Color::GRAY_DARK);
     };
-    applyOne(mGps, mGpsState, &img_sensorgpsdark, &img_sensorgpslight);
-    applyOne(mHr,  mHrState,  &img_sensorhrdark,  &img_sensorhrlight);
+    applyOne(mGps, mGpsState);
+    applyOne(mHr,  mHrState);
 }
 
 // --- HeartRateZone -----------------------------------------------------------
 
 HeartRateZone::HeartRateZone(lv_obj_t* parent, int32_t x, int32_t y)
 {
-    Theme::image(parent, &img_heartratezonegroup, x, y);
+    // The TouchGFX design draws a 210 x 69 "group" bitmap: five 24-degree
+    // segments of a radius-113 arc, 8 px thick, 2 degrees apart. lv_arc draws
+    // the same bar directly (angles measured from the bitmap), which saves the
+    // 43 KB bitmap; the zone markers with their arrows stay as alpha icons.
     const lv_image_dsc_t* zoneImgs[kZoneCount] = {
         &img_heartratezone1, &img_heartratezone2, &img_heartratezone3,
         &img_heartratezone4, &img_heartratezone5
     };
+    const uint32_t zoneColors[kZoneCount] = {
+        Color::GRAY, Color::CHARTREUSE, Color::YELLOW, Color::YELLOW_DARK, Color::RED
+    };
     const int32_t zoneOffsets[kZoneCount][2] = { { 0, 28 }, { 33, 3 }, { 80, 0 }, { 131, 3 }, { 173, 28 } };
+    const int32_t segmentStart[kZoneCount] = { -64, -38, -12, 14, 40 };
+    constexpr int32_t kArcCx = 105, kArcCy = 116, kArcRadius = 113, kArcWidth = 8, kSegmentDeg = 24;
     for (uint8_t i = 0; i < kZoneCount; ++i) {
-        mZones[i] = Theme::image(parent, zoneImgs[i], x + zoneOffsets[i][0], y + zoneOffsets[i][1]);
+        Theme::arc(parent, x + kArcCx, y + kArcCy, kArcRadius, kArcWidth,
+                   segmentStart[i], segmentStart[i] + kSegmentDeg, zoneColors[i], false);
+    }
+    for (uint8_t i = 0; i < kZoneCount; ++i) {
+        mZones[i] = Theme::imageTinted(parent, zoneImgs[i], x + zoneOffsets[i][0], y + zoneOffsets[i][1],
+                                       zoneColors[i]);
         lv_obj_add_flag(mZones[i], LV_OBJ_FLAG_HIDDEN);
     }
 }
@@ -402,7 +416,7 @@ PauseIndicator::PauseIndicator(lv_obj_t* parent, int32_t y)
     lv_obj_t* clip = Theme::container(parent, 38, y, 164, 34);
     lv_obj_t* dome = Theme::dot(clip, 82, -82, 116, Color::GRAY_DARK);
     (void)dome;
-    Theme::image(parent, &img_pause_14x14, 76, y + 10);
+    Theme::imageTinted(parent, &img_pause_14x14, 76, y + 10, Color::WHITE);
     mLabel = Theme::label(parent, Theme::Font::Italic18, "", 88, y + 5, 85);
 }
 

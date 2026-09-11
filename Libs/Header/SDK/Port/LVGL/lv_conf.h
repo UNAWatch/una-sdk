@@ -50,7 +50,7 @@
 #define LV_LIMITS_INCLUDE       <limits.h>
 #define LV_STDARG_INCLUDE       <stdarg.h>
 
-#define LV_MEM_SIZE             (96U * 1024U)
+#define LV_MEM_SIZE             (40U * 1024U)
 #define LV_MEM_POOL_EXPAND_SIZE 0
 #define LV_MEM_ADR              0
 
@@ -58,9 +58,12 @@
    HAL SETTINGS
  *====================*/
 
-/* The kernel delivers one GUI tick every 100 ms; LVGL's refresh timer is set to
- * the same period so one lv_timer_handler() call per tick renders one frame. */
-#define LV_DEF_REFR_PERIOD      100
+/* The kernel paces the GUI: it delivers one tick every 100 ms and the port
+ * calls lv_timer_handler() once per tick. LVGL's refresh and animation timers
+ * only run once their period has elapsed, so a period equal to the tick
+ * (100 ms) skips every tick that lands a millisecond early and halves the
+ * frame rate. 1 ms makes each tick render whatever is invalid. */
+#define LV_DEF_REFR_PERIOD      1
 #define LV_DPI_DEF              130
 
 /*=================
@@ -143,18 +146,20 @@
    FONT USAGE
  *==================*/
 
-/* Built-in fonts used until the app's converted fonts land. */
+/* Apps ship their own converted fonts. Montserrat 14 is kept only as the
+ * fallback behind una_lvgl_default_font() below and is dropped from the link
+ * when the app provides that function. */
 #define LV_FONT_MONTSERRAT_8    0
 #define LV_FONT_MONTSERRAT_10   0
 #define LV_FONT_MONTSERRAT_12   0
 #define LV_FONT_MONTSERRAT_14   1
 #define LV_FONT_MONTSERRAT_16   0
 #define LV_FONT_MONTSERRAT_18   0
-#define LV_FONT_MONTSERRAT_20   1
+#define LV_FONT_MONTSERRAT_20   0
 #define LV_FONT_MONTSERRAT_22   0
 #define LV_FONT_MONTSERRAT_24   0
 #define LV_FONT_MONTSERRAT_26   0
-#define LV_FONT_MONTSERRAT_28   1
+#define LV_FONT_MONTSERRAT_28   0
 #define LV_FONT_MONTSERRAT_30   0
 #define LV_FONT_MONTSERRAT_32   0
 #define LV_FONT_MONTSERRAT_34   0
@@ -172,7 +177,13 @@
 #define LV_FONT_UNSCII_8        0
 #define LV_FONT_UNSCII_16       0
 
-#define LV_FONT_DEFAULT         &lv_font_montserrat_14
+/* The default font is whatever the app returns from una_lvgl_default_font():
+ * one of its own converted faces, so no built-in font has to be linked. The
+ * port supplies a weak fallback returning Montserrat 14. LVGL evaluates
+ * LV_FONT_DEFAULT at run time (lv_font_default(), style defaults), so a call
+ * is a valid definition. */
+#define LV_FONT_CUSTOM_DECLARE  const lv_font_t* una_lvgl_default_font(void);
+#define LV_FONT_DEFAULT         una_lvgl_default_font()
 #define LV_FONT_FMT_TXT_LARGE   0
 #define LV_USE_FONT_COMPRESSED  0
 #define LV_USE_FONT_PLACEHOLDER 1

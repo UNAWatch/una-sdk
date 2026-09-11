@@ -34,8 +34,8 @@ void TrackIntervalsCountdownScreen::build()
     mRing = std::make_unique<Widgets::TimerRing>(mRoot);
     mRing->setColor(Color::YELLOW_DARK);
     mRing->setRemaining(1000);
-    Theme::image(mRoot, &img_crosswhite_17x17, 187, 163);
-    Theme::image(mRoot, &img_tickamber_22x17, 186, 60);
+    Theme::imageTinted(mRoot, &img_crosswhite_17x17, 187, 163, SDK::GUI::Color::WHITE);
+    Theme::imageTinted(mRoot, &img_tickgreen_22x17, 186, 60, SDK::GUI::Color::YELLOW_DARK);
     mCount = Theme::label(mRoot, F::SemiBold60, "5", 70, 142, 100);
     mRest  = Theme::label(mRoot, F::Medium18, "", 40, 119, 160);
     mRun   = Theme::label(mRoot, F::Medium18, "", 40, 87, 160);

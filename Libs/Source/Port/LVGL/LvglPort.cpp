@@ -17,11 +17,52 @@
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp"
 
+/// Build with -DUNA_LVGL_FRAME_STATS=1 to log, every 100 kernel ticks, how many
+/// frames reached the kernel and how evenly the ticks arrived.
+#ifndef UNA_LVGL_FRAME_STATS
+#define UNA_LVGL_FRAME_STATS 0
+#endif
+
 namespace SDK::LVGL
 {
 
 namespace
 {
+
+#if UNA_LVGL_FRAME_STATS
+struct FrameStats {
+    uint32_t windowStartMs = 0;
+    uint32_t lastTickMs    = 0;
+    uint32_t ticks         = 0;
+    uint32_t frames        = 0;
+    uint32_t minDtMs       = UINT32_MAX;
+    uint32_t maxDtMs       = 0;
+    uint32_t maxRenderMs   = 0;   // longest lv_timer_handler() call
+    uint32_t maxSendMs     = 0;   // longest frame hand-off to the kernel
+    uint32_t sumRenderMs   = 0;
+} sStats;
+
+void statsOnTick(uint32_t nowMs)
+{
+    if (sStats.ticks == 0) {
+        sStats.windowStartMs = nowMs;
+    } else {
+        const uint32_t dt = nowMs - sStats.lastTickMs;
+        sStats.minDtMs = LV_MIN(sStats.minDtMs, dt);
+        sStats.maxDtMs = LV_MAX(sStats.maxDtMs, dt);
+    }
+    sStats.lastTickMs = nowMs;
+    if (++sStats.ticks == 100) {
+        LOG_INFO("100 ticks in %u ms (dt %u..%u ms): %u frames sent, render max %u avg %u ms, send max %u ms\n",
+                 static_cast<unsigned>(nowMs - sStats.windowStartMs),
+                 static_cast<unsigned>(sStats.minDtMs), static_cast<unsigned>(sStats.maxDtMs),
+                 static_cast<unsigned>(sStats.frames),
+                 static_cast<unsigned>(sStats.maxRenderMs), static_cast<unsigned>(sStats.sumRenderMs / 100u),
+                 static_cast<unsigned>(sStats.maxSendMs));
+        sStats = FrameStats{};
+    }
+}
+#endif
 
 /// The frame the kernel consumes: one ABGR2222 byte per pixel, row-major,
 /// A in bits 7..6, B in 5..4, G in 3..2, R in 1..0. Persistent across frames
@@ -90,7 +131,16 @@ void Port::run()
         // run its timers and render whatever the two invalidated.
         pump.callCustomMessageHandler();
         dispatchKeys();
+#if UNA_LVGL_FRAME_STATS
+        const uint32_t t0 = tickCb();
+        statsOnTick(t0);
         lv_timer_handler();
+        const uint32_t renderMs = tickCb() - t0;
+        sStats.maxRenderMs = LV_MAX(sStats.maxRenderMs, renderMs);
+        sStats.sumRenderMs += renderMs;
+#else
+        lv_timer_handler();
+#endif
     }
 }
 
@@ -177,7 +227,14 @@ void Port::flushCb(lv_display_t* disp, const lv_area_t* area, uint8_t* pxMap)
 
     if (lv_display_flush_is_last(disp)) {
         // Sends REQUEST_DISPLAY_UPDATE; a no-op while the GUI is suspended.
+#if UNA_LVGL_FRAME_STATS
+        const uint32_t t0 = tickCb();
         SDK::TouchGFXCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
+        sStats.maxSendMs = LV_MAX(sStats.maxSendMs, tickCb() - t0);
+        ++sStats.frames;
+#else
+        SDK::TouchGFXCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
+#endif
     }
 
     lv_display_flush_ready(disp);
@@ -206,4 +263,16 @@ extern "C" void una_lvgl_assert_failed(const char* file, int line)
     SDK::KernelProviderGUI::GetInstance().getKernel().log.printf(
         "-E- LVGL assert failed at %s:%d\n", file ? file : "?", line);
     exit(-1);
+}
+
+/**
+ * @brief Fallback for LV_FONT_DEFAULT (see lv_conf.h).
+ *
+ * Weak: an app that defines its own una_lvgl_default_font() returning one of
+ * its converted fonts replaces this, and Montserrat 14 then drops out of the
+ * link entirely.
+ */
+extern "C" __attribute__((weak)) const lv_font_t* una_lvgl_default_font(void)
+{
+    return &lv_font_montserrat_14;
 }

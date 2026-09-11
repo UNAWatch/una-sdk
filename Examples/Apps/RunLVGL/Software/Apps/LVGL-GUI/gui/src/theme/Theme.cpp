@@ -122,13 +122,26 @@ lv_obj_t* image(lv_obj_t* parent, const lv_image_dsc_t* src, int32_t x, int32_t 
     return img;
 }
 
+lv_obj_t* imageTinted(lv_obj_t* parent, const lv_image_dsc_t* src, int32_t x, int32_t y, uint32_t color)
+{
+    lv_obj_t* img = image(parent, src, x, y);
+    lv_obj_set_style_image_recolor_opa(img, LV_OPA_COVER, LV_PART_MAIN);
+    tint(img, color);
+    return img;
+}
+
+void tint(lv_obj_t* img, uint32_t color)
+{
+    lv_obj_set_style_image_recolor(img, rgb(color), LV_PART_MAIN);
+}
+
 lv_obj_t* dot(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, uint32_t color)
 {
     return bar(parent, cx - radius, cy - radius, 2 * radius, 2 * radius, color);
 }
 
 lv_obj_t* arc(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, int32_t width,
-              int32_t startDeg, int32_t endDeg, uint32_t color)
+              int32_t startDeg, int32_t endDeg, uint32_t color, bool rounded)
 {
     // lv_arc draws its arc inside its own box: outer edge at size/2, so size
     // the widget from the centre-line radius plus half the stroke.
@@ -140,7 +153,7 @@ lv_obj_t* arc(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, int32_t 
     lv_obj_set_style_bg_opa(a, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_pad_all(a, 0, LV_PART_MAIN);
     lv_obj_set_style_arc_width(a, width, LV_PART_MAIN);
-    lv_obj_set_style_arc_rounded(a, true, LV_PART_MAIN);
+    lv_obj_set_style_arc_rounded(a, rounded, LV_PART_MAIN);
     lv_obj_set_style_arc_color(a, rgb(color), LV_PART_MAIN);
     lv_obj_set_size(a, 2 * outer, 2 * outer);
     lv_obj_set_pos(a, cx - outer, cy - outer);

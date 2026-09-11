@@ -22,7 +22,7 @@ void TrackStartConfirmScreen::build()
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
                   Widgets::Buttons::AMBER, Widgets::Buttons::WHITE);
     Theme::label(mRoot, Theme::Font::SemiBold20, "Start before\nsignal acquired?", 35, 94, 170);
-    Theme::image(mRoot, &img_tickamber_22x17, 186, 60);
+    Theme::imageTinted(mRoot, &img_tickgreen_22x17, 186, 60, SDK::GUI::Color::YELLOW_DARK);
     mTitle = std::make_unique<Widgets::Title>(mRoot, Strings::kAppNameUc);
 }
 

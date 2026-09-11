@@ -32,7 +32,7 @@ AlertSavedScreen::~AlertSavedScreen()
 void AlertSavedScreen::build()
 {
     Theme::label(mRoot, Theme::Font::SemiBold30, "Saved", 0, 150, 240);
-    Theme::image(mRoot, &img_circletick_50x50, 95, 95);
+    Theme::imageTinted(mRoot, &img_circletick_50x50, 95, 95, SDK::GUI::Color::YELLOW_DARK);
     mMessage = Theme::label(mRoot, Theme::Font::Medium25, "", 60, 53, 120);
     mTitle = std::make_unique<Widgets::Title>(mRoot, mKind == Kind::Distance ? "DISTANCE" : "TIME");
 }

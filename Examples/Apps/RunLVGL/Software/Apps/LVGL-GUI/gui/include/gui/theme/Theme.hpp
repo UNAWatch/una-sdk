@@ -79,13 +79,21 @@ lv_obj_t* vline(lv_obj_t* parent, int32_t x, int32_t y, int32_t h,
 /// Static image at (x, y).
 lv_obj_t* image(lv_obj_t* parent, const lv_image_dsc_t* src, int32_t x, int32_t y);
 
+/// Alpha-only (A8) icon at (x, y) drawn in @p color. The single-colour icons
+/// are stored without colour and tinted here, one byte per pixel.
+lv_obj_t* imageTinted(lv_obj_t* parent, const lv_image_dsc_t* src, int32_t x, int32_t y, uint32_t color);
+
+/// Change the tint of an image made by imageTinted().
+void tint(lv_obj_t* img, uint32_t color);
+
 /// Filled circle of the given radius centred at (cx, cy).
 lv_obj_t* dot(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, uint32_t color);
 
 /// A static arc segment. Angles are TouchGFX-style (0 = 12 o'clock, clockwise);
-/// @p radius is the arc's centre-line radius as in touchgfx::Circle.
+/// @p radius is the arc's centre-line radius as in touchgfx::Circle. Ends are
+/// rounded unless @p rounded is false, which cuts them radially.
 lv_obj_t* arc(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, int32_t width,
-              int32_t startDeg, int32_t endDeg, uint32_t color);
+              int32_t startDeg, int32_t endDeg, uint32_t color, bool rounded = true);
 
 /// Re-aim an arc made by arc() (TouchGFX-style angles).
 void setArc(lv_obj_t* arcObj, int32_t startDeg, int32_t endDeg);

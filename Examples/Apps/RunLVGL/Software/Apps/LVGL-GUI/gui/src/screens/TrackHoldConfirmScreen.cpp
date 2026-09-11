@@ -35,7 +35,8 @@ void TrackHoldConfirmScreen::build()
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
                   finish ? Widgets::Buttons::GREEN : Widgets::Buttons::RED, Widgets::Buttons::NONE);
 
-    Theme::image(mRoot, finish ? &img_tickgreen_22x17 : &img_tickred_22x17, 186, 60);
+    Theme::imageTinted(mRoot, &img_tickgreen_22x17, 186, 60,
+                       finish ? SDK::GUI::Color::CHARTREUSE : SDK::GUI::Color::RED);
     Theme::label(mRoot, Theme::Font::Medium18, finish ? "Hold to\nFinish" : "Hold to\nDiscard", 53, 67, 133);
     mNumber = Theme::label(mRoot, Theme::Font::SemiBold60, "3", 102, 103, 36);
 }
