@@ -173,10 +173,11 @@ const SDK::Sensor::DataView newest = data[data.size() - 1];
 
 ### Step 5: The two presentation settings
 
-The watch has two settings that decide how a face writes the time and the date,
-both under Settings -> Clock. Render every form from them rather than shipping a
-face per combination. `SDK::Message::RequestSystemSettings` carries both, along
-with the daily goals, the unit system and the user's height and weight:
+Two settings under Settings -> Clock record how the user wants the time and the
+date written: a 12- or 24-hour clock, and day-first or month-first dates.
+Reading them is what lets one face cover every form instead of one face per
+combination. `SDK::Message::RequestSystemSettings` carries both, along with the
+daily goals, the unit system and the user's height and weight:
 
 ```cpp
 if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
@@ -187,14 +188,14 @@ if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
 }
 ```
 
-The date order is the one that gets forgotten -- all four shipped faces missed
-it at first, because a face reads perfectly well without it and nothing fails.
-If your face writes a month at all, it has to follow it.
+The date order is the easier of the two to overlook, because ignoring it fails
+silently: the face still reads correctly, just not in the order the user chose,
+so there is no symptom to catch it in testing.
 
-Where the date is a line, the weekday leads in both orders and only the day and
-the month swap. That is what the kernel's own face does with the same setting
-(`gui/src/containers/ClockHome.cpp`), so a face that does otherwise will not
-match the rest of the watch. Build the part that moves first, then the line:
+The kernel's own face keeps the weekday leading in both orders and swaps only
+the day and the month (`gui/src/containers/ClockHome.cpp`), which is the
+reference if you want a date line that matches the rest of the watch. Build the
+part that moves first, then the line:
 
 ```cpp
 touchgfx::Unicode::UnicodeChar dayMonth[DATETEXT_SIZE];
@@ -209,13 +210,11 @@ Size that temporary from the destination buffer, not from the English labels:
 the day and month names come out of the text database, and a translation is
 free to be longer than `SEP`.
 
-**If your date is not a line, the setting still applies — ask your design what
-it means.** Console stacks its date around a 112 px day of the month, so it has
-no sequence to reverse. It follows the setting by swapping the two rows either
-side of that number and leaving the number itself alone: `WEDNESDAY / 03 / AUG`
-against `AUG / 03 / WEDNESDAY`. Following the setting is not optional; what it
-looks like is the design's to say, and a layout that is not a line will not
-answer that question for you.
+A date that is not a line has no sequence to reverse, so the flag alone does not
+tell you what to draw. Console stacks its date around a 112 px day of the month
+and reads the setting as a swap of the two rows either side of that number,
+leaving the number itself alone: `WEDNESDAY / 03 / AUG` against
+`AUG / 03 / WEDNESDAY`. One answer among several a stacked layout could take.
 
 Call it from the **service**, not the GUI, and not from a constructor -- it is a
 blocking round trip that needs the app's message loop running.
@@ -349,7 +348,7 @@ subscription behind after dropping a row from the design, is one of the more
 expensive mistakes available here. `ClockfaceConsole` shows a face trimmed to a
 single sensor for exactly this reason.
 
-### Hold a heart rate; do not blank it
+### The trust gate is a recording gate
 
 `isDataValid()` on the parser is only a field-count check -- it tells you
 nothing about signal quality. That leads people to reach for the gate the
@@ -359,15 +358,14 @@ activity apps use:
 bpm > 20 && trust >= 1 && trust <= 3     // trust runs 0-3; 0 means no signal
 ```
 
-**Do not use that to decide what to display.** It is a *recording* gate: in
+That gate is not a display filter. It is a *recording* one: in
 `Running`, `Cycling`, `Hiking`, `Treadmill` and `Workout` it decides whether a
 sample is written to the FIT file, and their live readouts are fed
 unconditionally. `HRMonitor` forwards trust to its GUI as an indicator and
 gates nothing; `GlanceHR` has no trust gate at all.
 
-The reason is that trust dips transiently whenever the wrist moves. Applied per
-sample to a display, the gate blanks the row about once a second -- which is
-exactly the defect the four new faces shipped with and had fixed.
+Trust dips transiently whenever the wrist moves, so applied per sample to a
+display the gate blanks the row about once a second.
 
 If you do want to filter what you show, treat a failed sample as *no new
 information* rather than *no reading*: hold the last trusted value and only
@@ -393,7 +391,7 @@ void Service::expireHeartRate()
 }
 ```
 
-Two traps in that, both of which the four faces shipped with and had fixed.
+Two traps in that, both of which cost the four faces here a round of fixes.
 
 **Expire on the loop, not on the sample.** Putting the test in an `else` on the
 sample handler looks natural and cannot work: it only runs when a sample
