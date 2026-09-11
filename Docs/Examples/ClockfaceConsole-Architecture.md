@@ -35,6 +35,19 @@ That is not tidiness. **A `HEART_RATE` subscription keeps the optical sensor
 powered**, and a face is on screen for hours -- see the guide. This is the
 example to copy when your design drops a row.
 
+### The one face the date order does not reach
+
+Console is the exception to the rule that a face showing a month must follow
+Settings -> Clock -> Date Format. Its date is not a line but a vertical stack --
+weekday, then the day of the month at 112 px, then the month -- so there is no
+day-month sequence to reverse. The oversized number is the design's subject,
+not a statement about date order, and the month below it is spelled, so nothing
+is ambiguous either way.
+
+Its `ClockFormat` message therefore carries only `is12h`, where the other three
+carry the pair. If your design puts the day and the month in one line, follow
+the setting; if it makes one of them the hero, say so where a reader will look.
+
 ### A group centred on the digits, not on the whole thing
 
 The clock group carries the meridiem, and the meridiem is deliberately **left

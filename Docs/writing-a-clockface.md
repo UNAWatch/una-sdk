@@ -171,19 +171,43 @@ if (data.size() == 0) { return; }
 const SDK::Sensor::DataView newest = data[data.size() - 1];
 ```
 
-### Step 5: The 12- and 24-hour setting
+### Step 5: The two presentation settings
 
-Render both forms from the watch's own setting rather than shipping two faces.
-`SDK::Message::RequestSystemSettings` carries it, and it also carries the daily
-goals, the unit system and the user's height and weight:
+The watch has two settings that decide how a face writes the time and the date,
+both under Settings -> Clock. Render every form from them rather than shipping a
+face per combination. `SDK::Message::RequestSystemSettings` carries both, along
+with the daily goals, the unit system and the user's height and weight:
 
 ```cpp
 if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
     if (msg.send(100) && msg.ok()) {
-        mIs12h = msg->timeFormat;       // true means 12-hour
+        mIs12h      = msg->timeFormat;      // true means 12-hour
+        mMonthFirst = msg->dateMonthFirst;  // true means "MAY 22", not "22 MAY"
     }
 }
 ```
+
+The date order is the one that gets forgotten -- all four shipped faces missed
+it at first, because a face reads perfectly well without it and nothing fails.
+If your face writes a month at all, it has to follow it.
+
+The weekday leads in both orders; only the day and the month swap. That is what
+the kernel's own face does with the same setting
+(`gui/src/containers/ClockHome.cpp`), so a face that does otherwise will not
+match the rest of the watch. Build the part that moves first, then the line:
+
+```cpp
+touchgfx::Unicode::UnicodeChar dayMonth[DATETEXT_SIZE];
+if (mMonthFirst) {
+    Unicode::snprintf(dayMonth, DATETEXT_SIZE, "%s %u", month, mday);
+} else {
+    Unicode::snprintf(dayMonth, DATETEXT_SIZE, "%u %s", mday, month);
+}
+```
+
+Size that temporary from the destination buffer, not from the English labels:
+the day and month names come out of the text database, and a translation is
+free to be longer than `SEP`.
 
 Call it from the **service**, not the GUI, and not from a constructor -- it is a
 blocking round trip that needs the app's message loop running.
@@ -201,8 +225,11 @@ never takes effect: the kernel **suspends** a face rather than stopping it, so
 returning from Settings brings no lifecycle message -- and Settings is exactly
 where the user just changed the format.
 
-The third covers what neither edge can see: a setting pushed **from the phone**
-while your face is on screen. Bound it against the monotonic tick rather than
+The third covers what neither edge can see: a change that lands while your
+face is on screen. The kernel re-reads `settings.json` -- the daily goals, the
+units, the heart-rate zones -- when the phone finishes writing it over BLE, and
+`local_settings.json`, which is where these two presentation settings live,
+when a USB session ends. Bound it against the monotonic tick rather than
 hanging it off the loop's wait expiring --
 
 ```cpp
@@ -218,7 +245,8 @@ void Service::refreshSystemSettings()
 
     if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
         if (msg.send(kSettingsTimeoutMs) && msg.ok()) {
-            mIs12h = msg->timeFormat;
+            mIs12h      = msg->timeFormat;
+            mMonthFirst = msg->dateMonthFirst;
         }
     }
     publishClockFormat();
@@ -526,7 +554,7 @@ far more than rendering. But for a face specifically:
 |---|---|
 | `STEP_COUNTER_DAILY` | not served -- the simulated pedometer serves `STEP_COUNTER` (since boot) |
 | `ACTIVITY_TIME_DAILY` | no simulated sensor at all |
-| `timeFormat` | never populated by the simulated settings handler, so a face always sees 24-hour |
+| `timeFormat`, `dateMonthFirst` | neither is populated by the simulated settings handler, so a face always sees a 24-hour clock and a day-first date |
 | Message pools | not simulated: an oversized message succeeds here and fails on the watch |
 | Heart rate | served, and it does return trust 0 for ~5 % of samples -- but at the default period that is roughly one event per 200 s, so a short session will not show you a trust-loss bug |
 

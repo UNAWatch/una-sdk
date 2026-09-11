@@ -38,13 +38,13 @@ public:
     void setHealth(const DailyHealth &health);
 
     /**
-     * @brief Switch the clock between the 24- and 12-hour forms.
+     * @brief Adopt the clock format and the date order the watch is set to.
      *
      * Redraws the clock and the date line, because both carry the difference:
-     * the clock gains a colon and loses its leading zero, and the date line
-     * gains the meridiem.
+     * the clock gains a colon and loses its leading zero, the date line gains
+     * the meridiem, and the day and month swap places.
      */
-    void setClockFormat(bool is12h);
+    void setClockStyle(const ClockStyle &style);
 
 private:
     /**
@@ -81,8 +81,8 @@ private:
     static const int16_t kSeparator12 = 24;
     static const int16_t kSeparator24 = 5;
 
-    WallTime mShown;    ///< Reading currently on the display
-    bool     mIs12h;    ///< Format the clock is currently drawn in
+    WallTime   mShown;  ///< Reading currently on the display
+    ClockStyle mStyle;  ///< Settings the clock and date are drawn in
 };
 
 #endif // MAINVIEW_HPP

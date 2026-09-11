@@ -32,7 +32,7 @@ void MainPresenter::onHealth(const DailyHealth &health)
     view.setHealth(health);
 }
 
-void MainPresenter::onClockFormat(bool is12h)
+void MainPresenter::onClockStyle(const ClockStyle &style)
 {
-    view.setClockFormat(is12h);
+    view.setClockStyle(style);
 }

@@ -31,9 +31,9 @@ battery indicator at the top. Whole face in one font.
   battery.
 - **A whole face in a single typeface**, which keeps it to ~78 KB despite three
   point sizes.
-- **A date line assembled into one wildcard** -- `WED 22 MAY`, gaining `|AM` in
-  the 12-hour form -- from day and month names read back out of the text
-  database. This is the case that needs those glyphs declared in
+- **A date line assembled into one wildcard** -- `WED 22 MAY`, or `WED SEP 11`
+  where the watch is set month-first, gaining `|AM` in the 12-hour form -- from
+  day and month names read back out of the text database. This is the case that needs those glyphs declared in
   `WildcardCharacters` as well; see the guide.
 
 ## Layout

@@ -34,6 +34,23 @@ struct WallTime
 };
 
 /**
+ * @brief How the watch is set to write the time and the date.
+ *
+ * Settings rather than readings, and the only two the face cannot work out for
+ * itself. They are kept together because the date line depends on both.
+ */
+struct ClockStyle
+{
+    bool is12h;       ///< 12-hour clock with a meridiem, rather than 24-hour
+    bool monthFirst;  ///< Month before the day, e.g. "MAY 22" not "22 MAY"
+
+    bool operator==(const ClockStyle &o) const
+    {
+        return (is12h == o.is12h) && (monthFirst == o.monthFirst);
+    }
+};
+
+/**
  * @brief The day's three readings, as the service last reported them.
  *
  * @c bpm is zero when the service has no reading it trusts; the face draws its
@@ -107,14 +124,15 @@ public:
     DailyGoals goals() const { return mGoals; }
 
     /**
-     * @brief Whether the watch is set to a 12-hour clock.
+     * @brief How the clock and the date are to be written.
      *
-     * Starts false, so the face draws a 24-hour clock until the service has
-     * read the setting. That is the right way round to be wrong: the reading
-     * itself is correct either way, only its presentation is provisional, and
-     * it is corrected within a frame or two of the GUI starting.
+     * Both start false -- a 24-hour clock and a day-first date -- so the face
+     * draws that until the service has read the settings. That is the right way
+     * round to be wrong: the reading itself is correct either way, only its
+     * presentation is provisional, and it is corrected within a frame or two of
+     * the GUI starting.
      */
-    bool is12h() const { return mIs12h; }
+    ClockStyle clockStyle() const { return mStyle; }
 
     /**
      * @brief Whether alerts are silenced, false until the service says so.
@@ -137,7 +155,7 @@ protected:
     DailyHealth mHealth {};         ///< Readings the service last reported
     DailyGoals  mGoals {};          ///< Targets the service last reported
     uint8_t     mBatteryLevel = 0;  ///< Last level the service reported
-    bool        mIs12h        = false;
+    ClockStyle  mStyle {};          ///< Settings the service last reported
     bool        mAlertsMuted  = false;
 
     // IGuiLifeCycleCallback

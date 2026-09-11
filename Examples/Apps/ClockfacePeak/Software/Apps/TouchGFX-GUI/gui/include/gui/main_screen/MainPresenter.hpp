@@ -35,7 +35,7 @@ public:
 
     DailyGoals goals() const { return model->goals(); }
 
-    bool is12h() const { return model->is12h(); }
+    ClockStyle clockStyle() const { return model->clockStyle(); }
 
     bool alertsMuted() const { return model->alertsMuted(); }
 
@@ -44,7 +44,7 @@ public:
     virtual void onBatteryLevel(uint8_t level) override;
     virtual void onHealth(const DailyHealth &health) override;
     virtual void onGoals(const DailyGoals &goals) override;
-    virtual void onClockFormat(bool is12h) override;
+    virtual void onClockStyle(const ClockStyle &style) override;
 
 private:
     MainPresenter();

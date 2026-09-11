@@ -34,7 +34,7 @@ public:
     virtual void onHealth(const DailyHealth &health) { (void)health; }
 
     /** @brief The watch's 12/24-hour setting changed, or arrived for the first time. */
-    virtual void onClockFormat(bool is12h) { (void)is12h; }
+    virtual void onClockStyle(const ClockStyle &style) { (void)style; }
 
     /** @brief The mute state changed. */
     virtual void onAlertsMuted(bool muted) { (void)muted; }

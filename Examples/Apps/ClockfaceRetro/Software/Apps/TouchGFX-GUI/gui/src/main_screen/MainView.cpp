@@ -18,7 +18,7 @@ static const char kNoReading[] = "---";
 
 MainView::MainView()
     : mShown{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }  // nothing on screen yet, so the first reading draws
-    , mIs12h(false)
+    , mStyle{ false, false }
 {
 
 }
@@ -29,9 +29,9 @@ void MainView::setupScreen()
 
     // The Designer leaves every wildcard on its placeholder, so the real
     // readings go up before the first frame rather than after the first tick.
-    // The order matters only in that the clock format decides how the clock
-    // and the date read, so it is adopted before either is written.
-    mIs12h = presenter->is12h();
+    // The order matters only in that these two settings decide how the clock
+    // and the date read, so they are adopted before either is written.
+    mStyle = presenter->clockStyle();
 
     setTime(presenter->currentTime());
     setHealth(presenter->health());
@@ -56,7 +56,7 @@ void MainView::layoutClock()
 {
     const int16_t hourWidth   = static_cast<int16_t>(hourText.getTextWidth());
     const int16_t minuteWidth = static_cast<int16_t>(minuteText.getTextWidth());
-    const int16_t colonWidth  = mIs12h
+    const int16_t colonWidth  = mStyle.is12h
                               ? static_cast<int16_t>(colonText.getTextWidth())
                               : kGap24;
 
@@ -75,13 +75,13 @@ void MainView::layoutClock()
     // invalidate(), not invalidateContent(): the latter does nothing on a
     // widget that has just been hidden, which is exactly when the area it used
     // to cover has to be repainted.
-    colonText.setVisible(mIs12h);
+    colonText.setVisible(mStyle.is12h);
     colonText.invalidate();
 }
 
 void MainView::updateClockText()
 {
-    if (mIs12h) {
+    if (mStyle.is12h) {
         // 12, not 0, and no leading zero -- both are what the design shows,
         // and dropping the zero is what makes the group narrower and so
         // re-centres it.
@@ -102,20 +102,32 @@ void MainView::updateDateText()
     const touchgfx::TypedText day(App::Labels::kDayLabels[mShown.wday % 7u]);
     const touchgfx::TypedText month(App::Labels::kMonthLabels[mShown.mon % 12u]);
 
-    if (mIs12h) {
+    // The weekday leads whichever way round the rest goes, so the setting
+    // moves only the two parts after it. Sized from the destination rather
+    // than from the English labels: these names come from the text database.
+    touchgfx::Unicode::UnicodeChar dayMonth[DATETEXT_SIZE];
+    if (mStyle.monthFirst) {
+        Unicode::snprintf(dayMonth, DATETEXT_SIZE, "%s %u",
+                          month.getText(),
+                          static_cast<unsigned>(mShown.mday));
+    } else {
+        Unicode::snprintf(dayMonth, DATETEXT_SIZE, "%u %s",
+                          static_cast<unsigned>(mShown.mday),
+                          month.getText());
+    }
+
+    if (mStyle.is12h) {
         const touchgfx::TypedText meridiem(
             App::Labels::kMeridiemLabels[mShown.hour >= 12u ? 1 : 0]);
 
-        Unicode::snprintf(dateTextBuffer, DATETEXT_SIZE, "%s %u %s|%s",
+        Unicode::snprintf(dateTextBuffer, DATETEXT_SIZE, "%s %s|%s",
                           day.getText(),
-                          static_cast<unsigned>(mShown.mday),
-                          month.getText(),
+                          dayMonth,
                           meridiem.getText());
     } else {
-        Unicode::snprintf(dateTextBuffer, DATETEXT_SIZE, "%s %u %s",
+        Unicode::snprintf(dateTextBuffer, DATETEXT_SIZE, "%s %s",
                           day.getText(),
-                          static_cast<unsigned>(mShown.mday),
-                          month.getText());
+                          dayMonth);
     }
 
     dateText.invalidate();
@@ -138,13 +150,13 @@ void MainView::setTime(const WallTime &time)
     updateDateText();
 }
 
-void MainView::setClockFormat(bool is12h)
+void MainView::setClockStyle(const ClockStyle &style)
 {
-    if (is12h == mIs12h) {
+    if (style == mStyle) {
         return;
     }
 
-    mIs12h = is12h;
+    mStyle = style;
 
     updateClockText();
     layoutClock();

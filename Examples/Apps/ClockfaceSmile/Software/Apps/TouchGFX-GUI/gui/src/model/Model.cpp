@@ -157,10 +157,11 @@ bool Model::customMessageHandler(SDK::MessageBase *message)
 
         case CustomMessage::CLOCK_FORMAT: {
             auto *msg = static_cast<CustomMessage::ClockFormat*>(message);
-            if (mIs12h != msg->is12h) {
-                mIs12h = msg->is12h;
+            const ClockStyle style { msg->is12h, msg->monthFirst };
+            if (!(mStyle == style)) {
+                mStyle = style;
                 if (modelListener) {
-                    modelListener->onClockFormat(mIs12h);
+                    modelListener->onClockStyle(mStyle);
                 }
             }
         } break;

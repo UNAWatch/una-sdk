@@ -33,7 +33,7 @@ public:
 
     DailyHealth health() const { return model->health(); }
 
-    bool is12h() const { return model->is12h(); }
+    ClockStyle clockStyle() const { return model->clockStyle(); }
 
     bool alertsMuted() const { return model->alertsMuted(); }
 
@@ -41,7 +41,7 @@ public:
     virtual void onTime(const WallTime &time) override;
     virtual void onBatteryLevel(uint8_t level) override;
     virtual void onHealth(const DailyHealth &health) override;
-    virtual void onClockFormat(bool is12h) override;
+    virtual void onClockStyle(const ClockStyle &style) override;
 
 private:
     MainPresenter();
