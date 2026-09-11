@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     container: xanderhendriks/stm32cubeide:16.0
     needs: prepare
+    # A backstop only; see apps-ci.yml's cmake-build.
+    timeout-minutes: 30
     strategy:
       # One tutorial's setup failing is not the others' news, and the default
       # would cancel them. See the note in apps-ci.yml's cmake-build.
@@ -39,10 +41,14 @@ jobs:
     steps:
       - name: Setup GIT
         run: |
-          # By-Hash keeps `update` self-consistent against a mid-publish
-          # archive; see apps-ci.yml's cmake-build for the full note.
-          apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get -o Acquire::Retries=3 install -y git python3-full python3-pip python-is-python3 cmake
+          # Same image and the same ~87 MB of packages as apps-ci.yml's
+          # cmake-build, so the same two measures: the Azure mirror for
+          # throughput, and By-Hash so a mid-publish archive stays
+          # self-consistent. See that job for the full note.
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i -E 's#(https?://)(security|archive)\.ubuntu\.com/ubuntu#\1azure.archive.ubuntu.com/ubuntu#g' {} +
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@v5

@@ -19,13 +19,12 @@ jobs:
       variants: ${{ steps.generate.outputs.variants }}
     steps:
       - name: Setup GIT
-        # Debian base image (python:3.11-slim) — not affected by the Ubuntu security
-        # mirror; the cmake-build job repoints security.ubuntu.com for that reason.
-        # By-Hash and the retries apply anyway: deb.debian.org can be mid-publish
-        # too, and this job gates the whole workflow.
+        # Debian base image (python:3.11-slim), so none of the Ubuntu mirror
+        # rewriting in cmake-build applies here. By-Hash does: deb.debian.org
+        # can be mid-publish too, and this job gates the whole workflow.
         run: |
-          apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get -o Acquire::Retries=3 install -y git jq
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git jq
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -73,6 +72,14 @@ jobs:
     runs-on: ubuntu-latest
     container: xanderhendriks/stm32cubeide:16.0
     needs: prepare
+    # A backstop, not a budget. The compile itself is seconds and setup on a
+    # healthy mirror is a minute or two; this is only here so a degraded mirror
+    # fails the job instead of sitting on a runner for GitHub's six-hour
+    # default, which is what happened on 2026-09-11 (one job at 56 minutes,
+    # another at 49, both spending it all in apt). Deliberately far above a
+    # normal run: the aim is to bound a pathological one, not to police
+    # variance. host-tests, linux-simulator and msvs-source-sync all set one.
+    timeout-minutes: 30
     strategy:
       # One app's setup failing says nothing about the other twenty-three, and
       # the default would cancel all of them. A mirror hiccup used to cost the
@@ -84,26 +91,27 @@ jobs:
     steps:
       - name: Setup GIT
         run: |
-          # security.ubuntu.com has a history of outages that hang `apt update` for the
-          # whole job (a bounded timeout doesn't reliably help — apt won't cap a blackholed
-          # multi-IP host). Repoint the security pocket at the main archive, which carries
-          # -security too and stays up, so setup never depends on that CDN.
+          # Both pockets go to the Azure mirror, which is the one GitHub's own
+          # runner images use and sits in the same datacentre as the runners.
+          # This step pulls ~87 MB of packages; from archive.ubuntu.com on
+          # 2026-09-11 that ran at 28.9 kB/s and took 50 minutes, in a job whose
+          # actual compile is seconds. security.ubuntu.com had already been
+          # repointed here for its own outages, which left every job depending
+          # on the one host -- so when it degraded there was nothing else to use.
+          # The scheme is matched and carried through so an already-Azure source
+          # cannot be rewritten a second time.
           find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
-            -exec sed -i 's#security\.ubuntu\.com/ubuntu#archive.ubuntu.com/ubuntu#g' {} +
+            -exec sed -i -E 's#(https?://)(security|archive)\.ubuntu\.com/ubuntu#\1azure.archive.ubuntu.com/ubuntu#g' {} +
           # A mid-publish archive can serve a Release and a Packages.gz that
           # disagree, failing update with "Hash Sum mismatch" (2026-09-11: the
           # pair was even the opposite way round on different nodes). By-Hash
           # fetches each index at the digest its Release names, so the two
-          # cannot disagree. It is asked for explicitly because the failing URL
-          # in that outage was the plain path, which is what says this image had
-          # it off. `yes` and not `force`: where a suite does not advertise
-          # by-hash, apt falls back to today's behaviour instead of failing.
-          # Retries cover the resets a mirror under load throws, and are repeated
-          # on the install because that is a separate process which inherits
-          # nothing -- and fetching the packages is the longer exposure of the
-          # two. By-Hash is not: it governs index files, not .debs.
-          apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get -o Acquire::Retries=3 install -y git python3-full python3-pip python-is-python3 cmake
+          # cannot disagree. `yes` and not `force`: where a suite does not
+          # advertise by-hash, apt falls back to today's behaviour rather than
+          # failing. It is an index-integrity setting only -- it says nothing
+          # about .debs, and nothing about throughput.
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -140,6 +148,8 @@ jobs:
   pack-variants:
     runs-on: ubuntu-latest
     needs: [prepare, cmake-build]
+    # Packing is seconds; this only bounds a wedged download or upload.
+    timeout-minutes: 15
     if: needs.prepare.outputs.variants != '[]'
     strategy:
       # As in cmake-build: one variant's failure is not the others' news.
@@ -186,6 +196,8 @@ jobs:
   reproducible-build:
     runs-on: ubuntu-latest
     container: xanderhendriks/stm32cubeide:16.0
+    # As in cmake-build, and this one builds the same app twice.
+    timeout-minutes: 30
     env:
       # Workout asserts in its own Libs sources and has a GUI, so one build
       # exercises the SDK and LIBS_PATH prefixes. The other two need a probe
@@ -194,12 +206,12 @@ jobs:
     steps:
       - name: Setup GIT
         run: |
-          # See the notes in cmake-build: security.ubuntu.com hangs `apt update`,
-          # and a mid-publish archive needs By-Hash to stay self-consistent.
+          # See the notes in cmake-build: the Azure mirror for throughput, and
+          # By-Hash so a mid-publish archive stays self-consistent.
           find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
-            -exec sed -i 's#security\.ubuntu\.com/ubuntu#archive.ubuntu.com/ubuntu#g' {} +
-          apt-get -o Acquire::By-Hash=yes -o Acquire::Retries=3 update
-          apt-get -o Acquire::Retries=3 install -y git python3-full python3-pip python-is-python3 cmake
+            -exec sed -i -E 's#(https?://)(security|archive)\.ubuntu\.com/ubuntu#\1azure.archive.ubuntu.com/ubuntu#g' {} +
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git python3-full python3-pip python-is-python3 cmake
 
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
