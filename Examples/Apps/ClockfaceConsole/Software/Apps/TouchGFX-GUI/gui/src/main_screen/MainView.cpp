@@ -6,7 +6,7 @@ static const int16_t kFaceWidth = 240;
 
 MainView::MainView()
     : mShown{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }  // nothing on screen yet, so the first reading draws
-    , mIs12h(false)
+    , mStyle{ false, false }
 {
 
 }
@@ -17,9 +17,11 @@ void MainView::setupScreen()
 
     // The Designer leaves every wildcard on its placeholder, so the real
     // readings go up before the first frame rather than after the first tick.
-    // The clock format is adopted first, because it decides how the clock
-    // reads and whether the meridiem is on screen at all.
-    mIs12h = presenter->is12h();
+    // Both presentation settings are adopted first: one decides how the clock
+    // reads and whether the meridiem is on screen at all, the other which row
+    // the weekday and the month are on.
+    mStyle = presenter->clockStyle();
+    layoutDate();
 
     setTime(presenter->currentTime());
     setSteps(presenter->steps());
@@ -44,14 +46,17 @@ void MainView::layoutClock()
 {
     const int16_t hourWidth   = static_cast<int16_t>(hourText.getTextWidth());
     const int16_t minuteWidth = static_cast<int16_t>(minuteText.getTextWidth());
-    const int16_t sepWidth    = mIs12h ? kSeparator12 : kSeparator24;
+    const int16_t sepWidth    = mStyle.is12h ? kSeparator12 : kSeparator24;
 
-    // The meridiem is deliberately left out of the width the group is centred
-    // on, so the digits stay centred on the face and the label hangs off to
-    // their right. That is what the design does, and the reason is above the
-    // clock: the day of month and the month are both centred, and the clock
-    // reads as the third line of that stack only if its digits are too.
-    const int16_t total = static_cast<int16_t>(hourWidth + sepWidth + minuteWidth);
+    // The meridiem counts towards the width the group is centred on, so the
+    // clock is balanced as a whole rather than having the label hang off the
+    // right of centred digits. It is only on screen in the 12-hour form, so in
+    // the 24-hour one there is nothing to add.
+    int16_t total = static_cast<int16_t>(hourWidth + sepWidth + minuteWidth);
+    if (mStyle.is12h) {
+        total = static_cast<int16_t>(
+            total + kMeridiemGap + meridiemText.getTextWidth());
+    }
 
     int16_t x = static_cast<int16_t>((kFaceWidth - total) / 2);
 
@@ -72,15 +77,26 @@ void MainView::layoutClock()
     // invalidate(), not invalidateContent(): the latter does nothing on a
     // widget that has just been hidden, which is exactly when the area it used
     // to cover has to be repainted.
-    colonText.setVisible(mIs12h);
+    colonText.setVisible(mStyle.is12h);
     colonText.invalidate();
-    meridiemText.setVisible(mIs12h);
+    meridiemText.setVisible(mStyle.is12h);
     meridiemText.invalidate();
+}
+
+void MainView::layoutDate()
+{
+    // Only the row changes: each field keeps its own height, because the month
+    // is set 4 px larger than the weekday and would be clipped by the other's.
+    const int16_t weekdayY = mStyle.monthFirst ? kDateBottomY : kDateTopY;
+    const int16_t monthY   = mStyle.monthFirst ? kDateTopY : kDateBottomY;
+
+    place(weekdayText, 0, weekdayY, kFaceWidth, kWeekdayHeight);
+    place(monthText, 0, monthY, kFaceWidth, kMonthHeight);
 }
 
 void MainView::updateClockText()
 {
-    if (mIs12h) {
+    if (mStyle.is12h) {
         // 12, not 0, and no leading zero -- both are what the design shows,
         // and dropping the zero is what makes the group narrower and so
         // re-centres it.
@@ -134,13 +150,19 @@ void MainView::setTime(const WallTime &time)
     updateDateText();
 }
 
-void MainView::setClockFormat(bool is12h)
+void MainView::setClockStyle(const ClockStyle &style)
 {
-    if (is12h == mIs12h) {
+    if (style == mStyle) {
         return;
     }
 
-    mIs12h = is12h;
+    const bool rowsMoved = (style.monthFirst != mStyle.monthFirst);
+
+    mStyle = style;
+
+    if (rowsMoved) {
+        layoutDate();
+    }
 
     updateClockText();
     layoutClock();

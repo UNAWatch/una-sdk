@@ -84,24 +84,31 @@ struct Steps : public SDK::MessageBase {
 };
 
 /**
- * @brief Whether the watch is set to a 12-hour clock.
+ * @brief How the watch is set to write the time and the date.
  *
- * Read from the kernel's system settings, which are pull-only: there is no
- * event when the user changes the setting, so the service re-reads them when
- * the GUI starts and whenever the GUI asks with @ref Refresh.
+ * Both are read from the kernel's system settings, which are pull-only: there
+ * is no event when either changes, so the service re-reads them when the GUI
+ * starts, whenever the GUI asks with @ref Refresh, and on a slow poll.
+ *
+ * The date order reaches this face differently from the other three. They
+ * write a line and reverse two of its parts; this one stacks the date, so the
+ * order swaps the two outer rows and leaves the day of the month alone.
  */
 struct ClockFormat : public SDK::MessageBase {
     bool is12h;
+    bool monthFirst;
 
     ClockFormat()
         : SDK::MessageBase(CLOCK_FORMAT)
         , is12h(false)
+        , monthFirst(false)
     {}
 
-    explicit ClockFormat(bool is12h)
+    ClockFormat(bool is12h, bool monthFirst)
         : ClockFormat()
     {
-        this->is12h = is12h;
+        this->is12h      = is12h;
+        this->monthFirst = monthFirst;
     }
 };
 

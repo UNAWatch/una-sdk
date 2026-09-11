@@ -28,6 +28,11 @@
  * The clock is read once a turn round the loop, which is both what gets
  * published and what sizes the wait; the step sensor is event driven, so
  * apart from its events the thread is blocked.
+ *
+ * The clock format and the date order are the two things here that are neither
+ * a clock reading nor a sensor event: they are pulled from the kernel's system
+ * settings, which push nothing when they change. See
+ * @ref refreshSystemSettings.
  */
 class Service
 {
@@ -51,9 +56,11 @@ private:
      * The settings are pull-only -- nothing in the SDK reports a change -- so
      * this is called on each of the three occasions that can follow one: the
      * GUI starting, the GUI asking after a resume, and the loop's own poll.
-     * The poll is bounded to once a minute and is what catches a format
-     * pushed from the phone while the face is on screen, which no event
-     * announces and neither lifecycle edge can see.
+     * The poll is bounded to once a minute and is what catches a change made
+     * while the face is on screen, which no event announces and neither
+     * lifecycle edge can see. The kernel re-reads settings.json when the phone
+     * finishes writing it over BLE, and local_settings.json -- which is where
+     * the clock format and the date order live -- when a USB session ends.
      */
     void refreshSystemSettings();
 
@@ -97,7 +104,9 @@ private:
 
     uint32_t mSettingsAt;           ///< Monotonic tick of the last settings read
     bool     mIs12h;                ///< Clock format as last read from settings
+    bool     mMonthFirst;           ///< Date order as last read from settings
     bool     mSentIs12h;            ///< Last format sent to the GUI
+    bool     mSentMonthFirst;       ///< Last date order sent to the GUI
     bool     mFormatSent;           ///< A format has reached the GUI
 };
 

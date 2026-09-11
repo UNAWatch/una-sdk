@@ -31,12 +31,12 @@ public:
 
     uint32_t steps() const { return model->steps(); }
 
-    bool is12h() const { return model->is12h(); }
+    ClockStyle clockStyle() const { return model->clockStyle(); }
 
     // ModelListener
     virtual void onTime(const WallTime &time) override;
     virtual void onSteps(uint32_t steps) override;
-    virtual void onClockFormat(bool is12h) override;
+    virtual void onClockStyle(const ClockStyle &style) override;
 
 private:
     MainPresenter();

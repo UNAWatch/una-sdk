@@ -34,12 +34,13 @@ public:
     void setSteps(uint32_t steps);
 
     /**
-     * @brief Switch the clock between the 24- and 12-hour forms.
+     * @brief Adopt the clock format and the date order the watch is set to.
      *
      * The clock gains a colon and loses its leading zero, and the meridiem
-     * label beside it comes and goes with the format.
+     * label beside it comes and goes with the format. The date order swaps the
+     * two outer rows of the date stack.
      */
-    void setClockFormat(bool is12h);
+    void setClockStyle(const ClockStyle &style);
 
 private:
     /**
@@ -56,6 +57,18 @@ private:
      * gap the design leaves in its place.
      */
     void layoutClock();
+
+    /**
+     * @brief Put the weekday and the month on the rows the date order asks for.
+     *
+     * The day of the month never moves. It is the design's subject -- 112 px of
+     * it -- and the other two are labels either side, so month-first swaps them
+     * around it rather than reversing a sequence: AUG, then 03, then WEDNESDAY.
+     *
+     * Each keeps its own height because they are not the same size (the month
+     * is 20 px against the weekday's 16), so only the row changes.
+     */
+    void layoutDate();
 
     /** Move a text area, repainting what it leaves as well as where it lands. */
     static void place(touchgfx::TextArea &area, int16_t x, int16_t y,
@@ -80,13 +93,20 @@ private:
     /// The gap the design leaves between the minute and the meridiem.
     static const int16_t kMeridiemGap = 2;
 
+    /// The two rows the weekday and the month exchange, and the height each
+    /// keeps wherever it lands. From the design, where the weekday is on top.
+    static const int16_t kDateTopY = 22;
+    static const int16_t kDateBottomY = 120;
+    static const int16_t kWeekdayHeight = 22;
+    static const int16_t kMonthHeight = 28;
+
     /// The room the design leaves between hour and minute: the colon takes its
     /// own cell in the 12-hour form, and a plain gap in the 24-hour one.
     static const int16_t kSeparator12 = 22;
     static const int16_t kSeparator24 = 6;
 
-    WallTime mShown;    ///< Reading currently on the display
-    bool     mIs12h;    ///< Format the clock is currently drawn in
+    WallTime   mShown;  ///< Reading currently on the display
+    ClockStyle mStyle;  ///< Settings the clock and date are drawn in
 };
 
 #endif // MAINVIEW_HPP

@@ -31,7 +31,7 @@ public:
     virtual void onSteps(uint32_t steps) { (void)steps; }
 
     /** @brief The watch's 12/24-hour setting changed, or arrived for the first time. */
-    virtual void onClockFormat(bool is12h) { (void)is12h; }
+    virtual void onClockStyle(const ClockStyle &style) { (void)style; }
 
 protected:
     Model* model;

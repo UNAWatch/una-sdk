@@ -69,7 +69,9 @@ Service::Service(SDK::Kernel &kernel)
     , mStepsSent(false)
     , mSettingsAt(0)
     , mIs12h(false)
+    , mMonthFirst(false)
     , mSentIs12h(false)
+    , mSentMonthFirst(false)
     , mFormatSent(false)
 {
 }
@@ -212,7 +214,8 @@ void Service::refreshSystemSettings()
 
     if (auto msg = SDK::make_msg<SDK::Message::RequestSystemSettings>(mKernel)) {
         if (msg.send(kSettingsTimeoutMs) && msg.ok()) {
-            mIs12h = msg->timeFormat;
+            mIs12h      = msg->timeFormat;
+            mMonthFirst = msg->dateMonthFirst;
         }
     }
 
@@ -259,10 +262,13 @@ void Service::publishSteps()
 
 void Service::publishClockFormat()
 {
-    if (mFormatSent && (mIs12h == mSentIs12h)) {
+    if (mFormatSent && (mIs12h == mSentIs12h) &&
+            (mMonthFirst == mSentMonthFirst)) {
         return;
     }
 
-    mSentIs12h  = mIs12h;
-    mFormatSent = SDK::send_msg<CustomMessage::ClockFormat>(mKernel, mSentIs12h);
+    mSentIs12h      = mIs12h;
+    mSentMonthFirst = mMonthFirst;
+    mFormatSent     = SDK::send_msg<CustomMessage::ClockFormat>(
+        mKernel, mSentIs12h, mSentMonthFirst);
 }

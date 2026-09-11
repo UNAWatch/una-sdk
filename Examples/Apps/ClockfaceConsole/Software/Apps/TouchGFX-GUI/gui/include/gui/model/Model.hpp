@@ -34,6 +34,23 @@ struct WallTime
 };
 
 class FrontendApplication;
+/**
+ * @brief How the watch is set to write the time and the date.
+ *
+ * Settings rather than readings, and the only two the face cannot work out for
+ * itself. They are kept together because they arrive from the same read.
+ */
+struct ClockStyle
+{
+    bool is12h;       ///< 12-hour clock with a meridiem, rather than 24-hour
+    bool monthFirst;  ///< Month above the day of the month, rather than below
+
+    bool operator==(const ClockStyle &o) const
+    {
+        return (is12h == o.is12h) && (monthFirst == o.monthFirst);
+    }
+};
+
 class ModelListener;
 
 /**
@@ -72,7 +89,7 @@ public:
      * itself is correct either way, only its presentation is provisional, and
      * it is corrected within a frame or two of the GUI starting.
      */
-    bool is12h() const { return mIs12h; }
+    ClockStyle clockStyle() const { return mStyle; }
 
 protected:
     ModelListener *modelListener;   ///< Pointer to model listener
@@ -86,7 +103,7 @@ protected:
 
     WallTime mTime {};              ///< Reading the service last reported
     uint32_t mSteps = 0;            ///< Count the service last reported
-    bool     mIs12h = false;
+    ClockStyle mStyle {};
 
     // IGuiLifeCycleCallback
     void onStart()   override;
