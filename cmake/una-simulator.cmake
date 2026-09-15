@@ -60,6 +60,7 @@ set(UNA_SDK_SOURCES_SIMULATOR_SERVICE
     "$ENV{UNA_SDK}/Libs/Source/Timer/Timer.cpp"
     "$ENV{UNA_SDK}/Libs/Source/UnaLogger/Logger.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Wrappers/StdLibWrappers.c"
+    ${UNA_SDK_SOURCES_APPCONFIG}
     ${UNA_SDK_SOURCES_CALIBRATION}
     ${UNA_SDK_SOURCES_FIT}
     ${UNA_SDK_SOURCES_JSON}

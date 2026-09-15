@@ -54,33 +54,38 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          # The LVGL GUI variants are built from the LVGL submodule (ThirdParty/lvgl).
+          submodules: recursive
 
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
 
       - name: Build ${{ matrix.app }}
+        # A tutorial may carry more than one app project (a TouchGFX GUI and
+        # an LVGL GUI over the same service); every *-CMake directory is built.
         run: |
           echo "Setup environment"
           . ./Utilities/Scripts/build-cube/find-cube.sh
           export UNA_SDK=$GITHUB_WORKSPACE
-          CMAKE_PATH="Docs/Tutorials/${{ matrix.app }}"
-          CMAKE_ROOT=$(find "$CMAKE_PATH" -type f -name "CMakeLists.txt" | head -1 | xargs dirname)
-          if [ -z "$CMAKE_ROOT" ] || [ ! -d "$CMAKE_ROOT" ]; then
-            echo "No CMakeLists.txt found under $CMAKE_PATH"
+          PROJECTS=$(python3 .github/scripts/generate-tutorials-app-list.py --app "${{ matrix.app }}")
+          if [ -z "$PROJECTS" ]; then
+            echo "No *-CMake project found under Docs/Tutorials/${{ matrix.app }}"
             exit 1
           fi
-          cd "$CMAKE_ROOT"
-          mkdir -p build
-          cd build
-          echo "Build"
-          cmake ..
-          make -j$(nproc)
+          for CMAKE_ROOT in $PROJECTS; do
+            echo "Build $CMAKE_ROOT"
+            mkdir -p "$CMAKE_ROOT/build"
+            (cd "$CMAKE_ROOT/build" && cmake .. && make -j$(nproc))
+          done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app }}-output
-          path: Docs/Tutorials/${{ matrix.app }}/Output/
+          # The TouchGFX build's Output/ and the LVGL build's OutputLVGL/.
+          path: |
+            Docs/Tutorials/${{ matrix.app }}/Output/
+            Docs/Tutorials/${{ matrix.app }}/OutputLVGL/
 
   release:
     runs-on: ubuntu-latest

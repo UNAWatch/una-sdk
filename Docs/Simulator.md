@@ -255,10 +255,11 @@ instead.
 
 ## LVGL simulator {#lvgl-simulator}
 
-Apps whose GUI is built on LVGL rather than TouchGFX (see the
-[RunLVGL tutorial](Tutorials/RunLVGL/ARCHITECTURE.md)) simulate through the same mock
-kernel, but with a plain CMake project instead of the Designer-generated Visual Studio
-solution and gcc Makefile. `SDK::Simulator::LvglHost` (`Libs/Source/Simulator/LVGL`)
+Apps whose GUI is built on LVGL rather than TouchGFX (the tutorials' `LVGL-GUI`
+variants, starting with [HelloWorld](Tutorials/HelloWorld/ARCHITECTURE.md), and the
+[RunLVGL](Tutorials/RunLVGL/ARCHITECTURE.md) activity app) simulate through the same mock
+kernel, but with a plain CMake project (`LVGL-GUI/simulator/CMakeLists.txt`) instead of
+the Designer-generated Visual Studio solution and gcc Makefile. `SDK::Simulator::LvglHost` (`Libs/Source/Simulator/LVGL`)
 stands in for the kernel's display, ticks and buttons: an SDL2 window shows the frames
 the LVGL port sends, a thread posts `EVENT_GUI_TICK` at the watch's frame rate, and keys
 1-4 become the kernel's press, click and release events. `cmake/una-simulator.cmake`

@@ -1,0 +1,10 @@
+{
+  "fonts": [],
+  "images": [
+    {
+      "name": "img_guy_transparent",
+      "file": "../../TouchGFX-GUI/assets/images/guy-transparent.png",
+      "format": "RGB565A8"
+    }
+  ]
+}

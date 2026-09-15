@@ -1,0 +1,12 @@
+{
+  "fonts": [
+    {
+      "name": "poppins_regular_18",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-Regular.ttf",
+      "size": 18,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    }
+  ],
+  "images": []
+}

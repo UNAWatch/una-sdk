@@ -1,0 +1,40 @@
+{
+  "fonts": [
+    {
+      "name": "poppins_semibold_20",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-SemiBold.ttf",
+      "size": 20,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    },
+    {
+      "name": "poppins_semibold_25",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-SemiBold.ttf",
+      "size": 25,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    },
+    {
+      "name": "poppins_semibold_30",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-SemiBold.ttf",
+      "size": 30,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    },
+    {
+      "name": "poppins_semibold_40",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-SemiBold.ttf",
+      "size": 40,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    },
+    {
+      "name": "poppins_regular_18",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-Regular.ttf",
+      "size": 18,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    }
+  ],
+  "images": []
+}
