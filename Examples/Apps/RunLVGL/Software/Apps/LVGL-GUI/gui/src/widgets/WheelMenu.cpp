@@ -15,11 +15,19 @@ namespace
 constexpr int32_t kWheelY     = 87;
 constexpr int32_t kWheelH     = 132;
 constexpr int32_t kItemH      = 66;
-constexpr int32_t kItemGap    = 15;
-constexpr int32_t kPitch      = kItemH + kItemGap;   // 81: one item step
+// The TouchGFX wheel is configured with setSelectedItemMargin(0, 15), but the
+// rendered wheel places the next item directly under the selected one: its
+// text sits 66 px below the selected item's, not 81 (measured against the
+// TouchGFX simulator). One item step is therefore the item height.
+constexpr int32_t kItemGap    = 0;
+constexpr int32_t kPitch      = kItemH + kItemGap;   // 66: one item step
 constexpr int32_t kLensX      = 16;
 constexpr int32_t kLensW      = 220;
-constexpr int32_t kLensRadius = 22;   // stands in for the clipped radius-110 circle
+// The TouchGFX MainMenuBackground is a radius-110 circle centred at (110, 33)
+// of the 220 x 66 lens container, so only a 66 px band of it shows and the
+// left and right edges are shallow arcs. Reproduced the same way here.
+constexpr int32_t kLensDiscRadius = 110;
+constexpr int32_t kLensDiscCy     = 33;
 
 // Strip rest positions: slot 1 (the current item) lands at the top of the
 // selection window, and at the bottom window's -kPitch (i.e. hidden above it).
@@ -59,10 +67,9 @@ WheelMenu::WheelMenu(lv_obj_t* parent, const Item* items, uint16_t count, int16_
     , mItemOffsetY(itemOffsetY)
     , mIndicator(parent, Widgets::ScrollIndicator::kBig)
 {
-    mLens = Theme::container(parent, kLensX, kWheelY, kLensW, kItemH);
-    lv_obj_set_style_bg_opa(mLens, LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_bg_color(mLens, Theme::rgb(Color::TEAL_DARK), LV_PART_MAIN);
-    lv_obj_set_style_radius(mLens, kLensRadius, LV_PART_MAIN);
+    // The lens: a clipping container the size of the band, with the disc inside.
+    mLens     = Theme::container(parent, kLensX, kWheelY, kLensW, kItemH);
+    mLensDisc = Theme::dot(mLens, kLensW / 2, kLensDiscCy, kLensDiscRadius, Color::TEAL_DARK);
 
     // The wheel area, then the two windows the strips are clipped to: the
     // selection window at the top, and below the gap the rest of the wheel.
@@ -126,7 +133,7 @@ void WheelMenu::refresh()
 
 void WheelMenu::setBackground(uint32_t color)
 {
-    lv_obj_set_style_bg_color(mLens, Theme::rgb(color), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(mLensDisc, Theme::rgb(color), LV_PART_MAIN);
 }
 
 void WheelMenu::slide(int direction)

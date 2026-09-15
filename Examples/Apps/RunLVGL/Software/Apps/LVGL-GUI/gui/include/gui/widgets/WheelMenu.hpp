@@ -5,7 +5,7 @@
  *          teal lens, the next item peeking below, and a position indicator.
  *
  * Matches the TouchGFX MainMenu/MainMenuLayout geometry: wheel at y = 87,
- * items 66 px tall, 15 px gap, lens at (16, 87) 220 x 66.
+ * items 66 px tall and stacked without a gap, lens at (16, 87) 220 x 66.
  *
  * Item styles follow MenuItemConfig::Style: Simple (centred text), Tip (text
  * with a hint line below), Toggle (text with an on/off switch; the item shows
@@ -136,7 +136,8 @@ private:
     SlideMidCallback mMidCb  = nullptr;
     void*            mMidCtx = nullptr;
 
-    lv_obj_t* mLens = nullptr;
+    lv_obj_t* mLens     = nullptr;   ///< clipping band behind the selected item
+    lv_obj_t* mLensDisc = nullptr;   ///< the radius-110 disc showing through it
     Strip     mSelStrip;   ///< large style, clipped to the selection window
     Strip     mOutStrip;   ///< small style, clipped to the area below the gap
     Widgets::ScrollIndicator mIndicator;

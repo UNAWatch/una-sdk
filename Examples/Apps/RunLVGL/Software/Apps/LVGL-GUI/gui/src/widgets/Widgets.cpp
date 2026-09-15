@@ -26,8 +26,10 @@ namespace
 {
 constexpr int32_t kButtonRadius = 113;
 constexpr int32_t kButtonWidth  = 6;
-// TouchGFX arc bounds per button: L1, L2, R1, R2.
-constexpr int32_t kButtonArcs[4][2] = { { 291, 308 }, { 232, 249 }, { 52, 69 }, { 111, 128 } };
+// TouchGFX arc bounds per button: L1, L2, R1, R2. R2's upper end is drawn one
+// degree short of the TouchGFX 111: LVGL's rounded cap there rendered with a
+// kink towards the screen centre, and TouchGFX's own cap ends a pixel earlier.
+constexpr int32_t kButtonArcs[4][2] = { { 291, 308 }, { 232, 249 }, { 52, 69 }, { 112, 128 } };
 
 uint32_t buttonColor(Buttons::Color c)
 {
