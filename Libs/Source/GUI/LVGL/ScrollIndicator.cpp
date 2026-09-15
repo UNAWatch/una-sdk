@@ -46,6 +46,9 @@ void ScrollIndicator::setConfig(const Config& cfg)
 
 void ScrollIndicator::setCount(uint16_t count)
 {
+    // A slide in progress would move the handle on from its old endpoints.
+    lv_anim_delete(this, nullptr);
+    lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
     mCount = (count == 0) ? 1 : count;
     mPos   = 0;
     update();

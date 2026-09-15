@@ -36,7 +36,7 @@ Before building HelloWorld, you need to set up the UNA SDK environment. Follow t
 
 **For the LVGL GUI:**
 - The LVGL submodule checked out once: `git submodule update --init ThirdParty/lvgl` (from the SDK root)
-- Node.js and Python, only if you regenerate the converted fonts (see [Assets](tutorials/helloworld/lvgl-assets))
+- Node.js and Python, only if you regenerate the converted fonts (see [Assets](#lvgl-assets))
 
 ### Building and Running HelloWorld
 
@@ -69,7 +69,6 @@ Before building HelloWorld, you need to set up the UNA SDK environment. Follow t
 
 The app will start and show a basic GUI demonstrating the UNA app framework. This HelloWorld focuses on the core architecture - the service-GUI communication pattern that all UNA apps use. The two builds install side by side on the watch (`D:\Apps\HelloWorld\` and `D:\Apps\HelloWorldLVGL\`) and appear in the launcher as **HelloWorld** and **HelloWorldLVGL**.
 
-(tutorials/helloworld/running-on-simulator)=
 ### Running on Simulator
 
 **TouchGFX** (Windows only):
@@ -83,7 +82,8 @@ The app will start and show a basic GUI demonstrating the UNA app framework. Thi
 
 ```powershell
 # Windows, Visual Studio (32-bit: it reuses the SDL2 shipped with TouchGFX;
-# use the generator name for your Visual Studio version)
+# use the generator name for your Visual Studio version: "Visual Studio 18 2026"
+# needs CMake 4.2 or newer, "Visual Studio 17 2022" works with the 3.21 minimum)
 cd $env:UNA_SDK\Docs\Tutorials\HelloWorld\Software\Apps\LVGL-GUI\simulator
 cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
 cmake --build build --config Debug
@@ -126,7 +126,7 @@ If you want to explore or modify the GUI design:
 
 ### Working with the LVGL GUI (Optional)
 
-There is no designer: the screen is code. `gui/src/screens/MainScreen.cpp` creates the label and the button hint with the SDK's drawing helpers (`SDK/GUI/LVGL/Draw.hpp`), which take the same coordinates a TouchGFX Designer shows, so a layout can be copied across. Edit it, rebuild, run. Adding a font or an icon means adding it to `assets/assets.json` and regenerating (see [Assets](tutorials/helloworld/lvgl-assets)).
+There is no designer: the screen is code. `gui/src/screens/MainScreen.cpp` creates the label and the button hint with the SDK's drawing helpers (`SDK/GUI/LVGL/Draw.hpp`), which take the same coordinates a TouchGFX Designer shows, so a layout can be copied across. Edit it, rebuild, run. Adding a font or an icon means adding it to `assets/assets.json` and regenerating (see [Assets](#lvgl-assets)).
 
 ## HelloWorld App Overview
 
@@ -229,7 +229,6 @@ MainScreen::MainScreen(Model& model) : mModel(model)
 
 Every object is created on `mRoot`, and LVGL deletes them with it. The `Draw` helpers and `Buttons` are part of the SDK (`Libs/Header/SDK/GUI/LVGL/`) and are what the activity apps use, so a tutorial screen looks like a shipped one.
 
-(tutorials/helloworld/lvgl-assets)=
 ### LVGL assets
 
 LVGL needs fonts as C arrays. `LVGL-GUI/assets/assets.json` lists them, here one entry: Poppins Regular at 18 px, printable ASCII, 2 bits per pixel, taken from the TTF the TouchGFX GUI already ships in `TouchGFX-GUI/assets/fonts`. The converted file is committed, so building needs no converter. To add a font or an icon, add an entry and run:

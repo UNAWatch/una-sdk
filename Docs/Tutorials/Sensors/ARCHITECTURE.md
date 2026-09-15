@@ -237,7 +237,7 @@ Most of either package is the service, which links the sensor layer and the FIT 
 4. Open `Application.vcxproj` in Visual Studio
 5. Press **F5** to start debugging and run the simulator
 
-**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](tutorials/helloworld/running-on-simulator)); the executable is `SensorsLVGLSimulator`. Which sensors the mock kernel simulates, and how, is set in `simulator/ConfigurationSimulator.hpp`.
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `SensorsLVGLSimulator`. Which sensors the mock kernel simulates, and how, is set in `simulator/ConfigurationSimulator.hpp`.
 
 The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.
 

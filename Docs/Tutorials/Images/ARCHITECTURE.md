@@ -5,7 +5,7 @@ Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you h
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Images)
 
-As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The image pipelines differ the most: TouchGFX Designer converts images at generate time, LVGL's are converted by a script from a manifest. See [The Same Image in Two Toolkits](tutorials/images/two-toolkits).
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The image pipelines differ the most: TouchGFX Designer converts images at generate time, LVGL's are converted by a script from a manifest. See [The Same Image in Two Toolkits](#the-same-image-in-two-toolkits).
 
 ## What You'll Learn
 
@@ -77,7 +77,7 @@ The app will start and display imported images on screen, demonstrating the comp
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](tutorials/helloworld/running-on-simulator)); the executable is `ImagesLVGLSimulator`.
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `ImagesLVGLSimulator`.
 
 In either simulator, use keyboard keys to interact:
 - **1** = L1 (Toggle between Image and ScalableImage modes)
@@ -114,7 +114,6 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 - Images are stored in flash memory for efficient access
 - TouchGFX handles image decompression and display
 
-(tutorials/images/two-toolkits)=
 ## The Same Image in Two Toolkits
 
 | Piece | TouchGFX (`TouchGFX-GUI`) | LVGL (`LVGL-GUI`) |

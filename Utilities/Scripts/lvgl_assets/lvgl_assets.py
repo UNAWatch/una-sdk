@@ -46,6 +46,9 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SDK_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 LVGL_IMAGE_SCRIPT = os.path.join(SDK_ROOT, "ThirdParty", "lvgl", "scripts", "LVGLImage.py")
+# Pinned: a different converter release could lay the tables out differently,
+# and the committed files must regenerate byte for byte.
+LV_FONT_CONV_VERSION = "1.5.3"
 
 
 def run(cmd, cwd=None):
@@ -87,7 +90,7 @@ def convert_fonts(fonts, base, out_dir):
             sys.exit(f"font not found: {ttf}")
         name = font["name"]
         print(f"font  {name}")
-        run([npx, "--yes", "lv_font_conv",
+        run([npx, "--yes", f"lv_font_conv@{LV_FONT_CONV_VERSION}",
              "--font", sdk_relative(ttf),
              "--size", str(font["size"]),
              "--bpp", str(font.get("bpp", 2)),

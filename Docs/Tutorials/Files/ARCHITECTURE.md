@@ -13,7 +13,7 @@ The Files tutorial showcases advanced UNA SDK concepts including:
 - **File System Integration**: Using SDK's IFileSystem interface
 - **Error Recovery**: Graceful handling of corrupted files and I/O errors
 
-As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The service and the messages are the whole point of this tutorial and are shared; the [GUI Layer Implementation](tutorials/files/gui-layer) section shows each toolkit's side.
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The service and the messages are the whole point of this tutorial and are shared; the [GUI Layer Implementation](#gui-layer-implementation) section shows each toolkit's side.
 
 ## Getting Started
 
@@ -48,7 +48,7 @@ The two builds appear in the launcher as **Files** and **FilesLVGL**, and each k
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](tutorials/helloworld/running-on-simulator)); the executable is `FilesLVGLSimulator`.
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `FilesLVGLSimulator`.
 
 In either simulator, use keyboard keys to interact with the settings:
 - **1** = L1 (Increment selected setting value)
@@ -296,7 +296,6 @@ case CustomMessage::SET_SETTINGS: {
 } break;
 ```
 
-(tutorials/files/gui-layer)=
 ## GUI Layer Implementation
 
 ### Model-View-Presenter Architecture

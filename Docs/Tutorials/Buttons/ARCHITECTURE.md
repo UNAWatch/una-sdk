@@ -6,7 +6,7 @@ Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Buttons)
 
-As in HelloWorld, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. Follow the toolkit you chose; the [Two Toolkits](tutorials/buttons/two-toolkits) section shows the two side by side.
+As in HelloWorld, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. Follow the toolkit you chose; the [Two Toolkits](#the-same-behaviour-in-two-toolkits) section shows the two side by side.
 
 ## What You'll Learn
 
@@ -36,7 +36,6 @@ Before building the Buttons app, you need to set up the UNA SDK environment. Fol
 **For the LVGL GUI:**
 - The LVGL submodule checked out once: `git submodule update --init ThirdParty/lvgl` (from the SDK root)
 
-(tutorials/buttons/building)=
 ### Building and Running Buttons
 
 1. **Verify your environment setup** (see [toolchain setup](toolchain-setup) for details):
@@ -78,7 +77,7 @@ The app will start and display an initial black screen. Use the hardware buttons
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](tutorials/helloworld/running-on-simulator)); the executable is `ButtonsLVGLSimulator`.
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `ButtonsLVGLSimulator`.
 
 In either simulator, use keyboard keys to simulate hardware buttons:
 - **1** = L1 (Black screen)
@@ -120,7 +119,6 @@ TouchGFX: after changing a widget's properties (like color), `invalidate()` is c
 
 LVGL: changing a style property marks the object dirty and LVGL redraws it on the next frame; there is no `invalidate()` to call.
 
-(tutorials/buttons/two-toolkits)=
 ## The Same Behaviour in Two Toolkits
 
 | Piece | TouchGFX (`TouchGFX-GUI/gui`) | LVGL (`LVGL-GUI/gui`) |
@@ -235,7 +233,7 @@ The steps below create the TouchGFX GUI. For the LVGL GUI, copy HelloWorld's `LV
    lastKeyPressed = key;
    box1.invalidate();
    ```
-7. **Compile code** using [SDK setup](../../sdk-setup.md) instructions, as shown in [Building and Running Buttons](tutorials/buttons/building). The build ends with the packed application:
+7. **Compile code** using [SDK setup](../../sdk-setup.md) instructions, as shown in [Building and Running Buttons](#building-and-running-buttons). The build ends with the packed application:
 ``` 
 INFO:root:Name           : Buttons
 INFO:root:ID             : F1E2D3C448669782

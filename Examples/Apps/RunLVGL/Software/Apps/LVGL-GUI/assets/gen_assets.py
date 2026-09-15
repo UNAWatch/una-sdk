@@ -35,6 +35,10 @@ RUN_ASSETS = os.path.join(SDK_ROOT, "Examples", "Apps", "Running", "Software", "
 # value-only faces. The SemiBold 60 face also needs A/P/M for the 12-hour clock
 # suffix and O/p/e/n for the interval timer's "Open" readout. SemiBold 35 stays
 # full ASCII: it is also the selected "Start" item's face.
+# Pinned: a different converter release could lay the tables out differently,
+# and the committed files must regenerate byte for byte.
+LV_FONT_CONV_VERSION = "1.5.3"
+
 ASCII = "0x20-0x7E"
 NUMERIC = "0x20-0x3A"
 BIG = "0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70"
@@ -123,7 +127,7 @@ def main():
         print(f"font  {name}")
         # lv_font_conv records its arguments in the file header; run it from
         # the SDK root with relative paths so that header is reproducible.
-        run([npx, "--yes", "lv_font_conv", "--font", sdk_relative(ttf), "--size", str(size), "--bpp", "2",
+        run([npx, "--yes", f"lv_font_conv@{LV_FONT_CONV_VERSION}", "--font", sdk_relative(ttf), "--size", str(size), "--bpp", "2",
              "--format", "lvgl", "--no-compress", "-r", rng,
              "-o", sdk_relative(os.path.join(font_out, f"{name}.c"))], cwd=SDK_ROOT)
 

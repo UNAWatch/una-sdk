@@ -6,7 +6,7 @@ Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamen
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/ScrollMenu)
 
-As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The menu is the first widget that differs substantially between the two: TouchGFX composes it from Designer containers and a `ScrollWheelWithSelectionStyle`, LVGL uses the SDK's `WheelMenu`. See [The Same Menu in Two Toolkits](tutorials/scrollmenu/two-toolkits).
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The menu is the first widget that differs substantially between the two: TouchGFX composes it from Designer containers and a `ScrollWheelWithSelectionStyle`, LVGL uses the SDK's `WheelMenu`. See [The Same Menu in Two Toolkits](#the-same-menu-in-two-toolkits).
 
 ## What You'll Learn
 
@@ -77,7 +77,7 @@ The app will start and display an initial menu with three items. Use the hardwar
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](tutorials/helloworld/running-on-simulator)); the executable is `ScrollMenuLVGLSimulator`.
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `ScrollMenuLVGLSimulator`.
 
 In either simulator, use keyboard keys to simulate hardware buttons:
 - **1** = L1 (Previous menu item)
@@ -127,7 +127,6 @@ TouchGFX: after performing actions that change the menu display (such as updatin
 
 LVGL: the wheel's `refresh()` re-renders its slots from the item table, and LVGL redraws what changed on the next frame.
 
-(tutorials/scrollmenu/two-toolkits)=
 ## The Same Menu in Two Toolkits
 
 | Piece | TouchGFX (`TouchGFX-GUI/gui`) | LVGL (`LVGL-GUI/gui`) |

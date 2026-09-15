@@ -3,6 +3,8 @@
 #
 # Windows (Visual Studio; uses the SDL2 shipped with TouchGFX, which is 32-bit):
 #   cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
+#   (that generator needs CMake 4.2 or newer; with an older CMake use
+#   "Visual Studio 17 2022")
 #   cmake --build build --config Debug
 # Linux (needs libsdl2-dev):
 #   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug

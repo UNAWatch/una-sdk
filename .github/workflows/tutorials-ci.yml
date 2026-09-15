@@ -63,13 +63,17 @@ jobs:
       - name: Build ${{ matrix.app }}
         # A tutorial may carry more than one app project (a TouchGFX GUI and
         # an LVGL GUI over the same service); every *-CMake directory is built.
+        env:
+          # Through the environment, not expanded into the script: the value
+          # is a directory name from the checkout.
+          APP: ${{ matrix.app }}
         run: |
           echo "Setup environment"
           . ./Utilities/Scripts/build-cube/find-cube.sh
           export UNA_SDK=$GITHUB_WORKSPACE
-          PROJECTS=$(python3 .github/scripts/generate-tutorials-app-list.py --app "${{ matrix.app }}")
+          PROJECTS=$(python3 .github/scripts/generate-tutorials-app-list.py --app "$APP")
           if [ -z "$PROJECTS" ]; then
-            echo "No *-CMake project found under Docs/Tutorials/${{ matrix.app }}"
+            printf 'No *-CMake project found under Docs/Tutorials/%s\n' "$APP"
             exit 1
           fi
           for CMAKE_ROOT in $PROJECTS; do

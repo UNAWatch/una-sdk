@@ -118,6 +118,9 @@ file(TO_CMAKE_PATH "$ENV{UNA_SDK}/ThirdParty/lvgl" UNA_SDK_LVGL_PATH)
 if(NOT DEFINED UNA_LVGL_CONF)
     set(UNA_LVGL_CONF "$ENV{UNA_SDK}/Libs/Header/SDK/Port/LVGL/lv_conf.h")
 endif()
+# Forward slashes: the value is emitted inside the LV_CONF_PATH string literal,
+# where a backslash from a Windows-style path would be an escape.
+file(TO_CMAKE_PATH "${UNA_LVGL_CONF}" UNA_LVGL_CONF)
 
 # Every LVGL C source is compiled; files for disabled features and other
 # platforms reduce to empty translation units through lv_conf.h.

@@ -37,7 +37,7 @@ git submodule update --init ThirdParty/lvgl
 ```
 
 The converted fonts and images are committed, so building the app needs neither Node
-nor Python. Regenerating them does; see [Assets](tutorials/runlvgl/assets).
+nor Python. Regenerating them does; see [Assets](#assets).
 
 ### Building for the Watch
 
@@ -66,7 +66,8 @@ SDK's mock kernel, with the display in an SDL2 window. Unlike the TouchGFX simul
 it is a plain CMake project and builds on Windows and Linux.
 
 Windows, with Visual Studio (32-bit, because it reuses the SDL2 that TouchGFX ships; use
-the generator name for your Visual Studio version, e.g. `"Visual Studio 17 2022"`):
+the generator name for your Visual Studio version: `"Visual Studio 18 2026"` needs CMake 4.2
+or newer, `"Visual Studio 17 2022"` works with the 3.21 minimum):
 
 ```powershell
 $env:UNA_SDK = "C:/path/to/una-sdk"
@@ -329,7 +330,6 @@ subclasses for `Title` and `SensorStatusRow` that fill in Run's font and icons, 
   lines of code and no bitmaps, which is the general lesson for LVGL on this platform:
   shapes are cheap, pixels are not.
 
-(tutorials/runlvgl/assets)=
 ### Assets
 
 `assets/gen_assets.py` converts Run's Poppins TTFs and PNG icons into LVGL C arrays, and
