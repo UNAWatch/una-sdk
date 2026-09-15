@@ -104,14 +104,16 @@ set(UNA_SDK_INCLUDE_DIRS_GUI
 # An app selects this by linking UNA_SDK_SOURCES_GUI_LVGL in place of
 # UNA_SDK_SOURCES_GUI, adding UNA_SDK_INCLUDE_DIRS_GUI_LVGL to its include
 # dirs and UNA_SDK_DEFINES_GUI_LVGL to GUI_COMPILE_DEFINITIONS (see
-# una_app_build_gui). The message pump shared with the TouchGFX port,
-# GuiCommandProcessor.cpp, is shared with the TouchGFX port.
+# una_app_build_gui). The message pump, GuiCommandProcessor.cpp, is shared
+# with the TouchGFX port.
 #
 # LVGL reads its configuration from the file named by LV_CONF_PATH. Set
 # UNA_LVGL_CONF before including this file to use an app-specific lv_conf.h;
 # the default is the SDK's.
 # ---------------------------------------------------------------------------
-set(UNA_SDK_LVGL_PATH "$ENV{UNA_SDK}/ThirdParty/lvgl")
+# Forward slashes: the glob below is re-run by the generated glob check, where
+# a backslash from a Windows-style UNA_SDK would be read as an escape.
+file(TO_CMAKE_PATH "$ENV{UNA_SDK}/ThirdParty/lvgl" UNA_SDK_LVGL_PATH)
 
 if(NOT DEFINED UNA_LVGL_CONF)
     set(UNA_LVGL_CONF "$ENV{UNA_SDK}/Libs/Header/SDK/Port/LVGL/lv_conf.h")
@@ -123,10 +125,26 @@ file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES CONFIGURE_DEPENDS
     "${UNA_SDK_LVGL_PATH}/src/*.c"
 )
 
+# Drawing helpers and the widgets the UNA activity apps share, built from
+# LVGL primitives (headers under Libs/Header/SDK/GUI/LVGL/). Also used by
+# the PC simulator (una-simulator.cmake).
+set(UNA_SDK_SOURCES_GUI_LVGL_WIDGETS
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Battery.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Buttons.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Draw.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/ScrollIndicator.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/SensorStatusRow.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/TimerRing.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Title.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Toggle.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/WheelMenu.cpp"
+)
+
 set(UNA_SDK_SOURCES_GUI_LVGL
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"
+    ${UNA_SDK_SOURCES_GUI_LVGL_WIDGETS}
     ${UNA_SDK_LVGL_SOURCES}
 )
 

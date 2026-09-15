@@ -7,6 +7,7 @@
 
 #include "gui/screens/MenuIntervalsMetricScreen.hpp"
 #include "gui/screens/ScreenManager.hpp"
+#include "gui/Assets.hpp"
 #include "gui/Format.hpp"
 
 using Style = WheelMenu::Item::Style;
@@ -32,8 +33,8 @@ MenuIntervalsMetricScreen::MenuIntervalsMetricScreen(Model& model, Phase phase)
 
 void MenuIntervalsMetricScreen::build()
 {
-    mItems[Menu::ID_TIME]     = { Style::Tip,    "Time",     nullptr, Theme::Font::SemiBold25, mTimeTip };
-    mItems[Menu::ID_DISTANCE] = { Style::Tip,    "Distance", nullptr, Theme::Font::SemiBold25, mDistTip };
+    mItems[Menu::ID_TIME]     = { Style::Tip,    "Time",     nullptr, &poppins_semibold_25, mTimeTip };
+    mItems[Menu::ID_DISTANCE] = { Style::Tip,    "Distance", nullptr, &poppins_semibold_25, mDistTip };
     mItems[Menu::ID_OPEN]     = { Style::Simple, "Open" };
 
     mMenu      = std::make_unique<WheelMenu>(mRoot, mItems, Menu::ID_COUNT);

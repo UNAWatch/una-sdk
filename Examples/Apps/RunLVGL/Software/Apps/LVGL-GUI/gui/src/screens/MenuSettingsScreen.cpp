@@ -7,6 +7,7 @@
 
 #include "gui/screens/MenuSettingsScreen.hpp"
 #include "gui/screens/ScreenManager.hpp"
+#include "gui/Assets.hpp"
 
 using Style = WheelMenu::Item::Style;
 
@@ -18,7 +19,7 @@ MenuSettingsScreen::MenuSettingsScreen(Model& model)
 void MenuSettingsScreen::build()
 {
     mItems[Menu::ID_ALERTS]      = { Style::Simple, "Lap Alerts" };
-    mItems[Menu::ID_PHONE_NOTIF] = { Style::Toggle, "Phone\nNotif.", "Phone Notif.", Theme::Font::SemiBold25 };
+    mItems[Menu::ID_PHONE_NOTIF] = { Style::Toggle, "Phone\nNotif.", "Phone Notif.", &poppins_semibold_25 };
 
     mMenu      = std::make_unique<WheelMenu>(mRoot, mItems, Menu::ID_COUNT);
     mButtons   = std::make_unique<Widgets::Buttons>(mRoot);

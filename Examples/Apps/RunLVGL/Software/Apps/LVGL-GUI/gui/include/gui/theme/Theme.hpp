@@ -1,11 +1,12 @@
 /**
  ******************************************************************************
  * @file    Theme.hpp
- * @brief   Palette, fonts and drawing helpers shared by every RunLVGL screen.
+ * @brief   The Run app's fonts, plus the SDK's LVGL drawing helpers.
  *
- * LVGL is built without a stock theme (lv_conf.h), so widgets start unstyled
- * and the screens compose their look from these helpers. Coordinates given to
- * the helpers are the TouchGFX Run app's, so the two apps lay out identically.
+ * The helpers themselves live in the SDK (SDK/GUI/LVGL/Draw.hpp) and are
+ * pulled into this namespace so the screens write Theme::label(...) and
+ * Theme::arc(...). What is the app's own is the set of Poppins faces and the
+ * label() overload that takes one of them by name.
  *
  * Colours come from the SDK's 64-colour palette (SDK/GUI/Color.hpp): the
  * display keeps two bits per channel, so those values render exactly.
@@ -20,6 +21,7 @@
 #include "lvgl.h"
 
 #include "SDK/GUI/Color.hpp"
+#include "SDK/GUI/LVGL/Draw.hpp"
 
 namespace Theme
 {
@@ -45,60 +47,33 @@ enum class Font : uint8_t {
 
 const lv_font_t* font(Font f);
 
-/// SDK palette value (0xRRGGBB) to an LVGL colour.
-inline lv_color_t rgb(uint32_t c) { return lv_color_hex(c); }
+// The SDK's drawing helpers, under the app's name for them.
+using SDK::LVGL::Draw::rgb;
+using SDK::LVGL::Draw::arcAngle;
+using SDK::LVGL::Draw::init;
+using SDK::LVGL::Draw::applyScreen;
+using SDK::LVGL::Draw::setHidden;
+using SDK::LVGL::Draw::container;
+using SDK::LVGL::Draw::label;
+using SDK::LVGL::Draw::hline;
+using SDK::LVGL::Draw::vline;
+using SDK::LVGL::Draw::box;
+using SDK::LVGL::Draw::image;
+using SDK::LVGL::Draw::imageTinted;
+using SDK::LVGL::Draw::tint;
+using SDK::LVGL::Draw::dot;
+using SDK::LVGL::Draw::arc;
+using SDK::LVGL::Draw::setArc;
+using SDK::LVGL::Draw::setArcColor;
 
-/// Convert a TouchGFX arc angle (0 = 12 o'clock, clockwise) to LVGL's
-/// (0 = 3 o'clock, clockwise).
-inline int32_t arcAngle(int32_t touchgfxDeg) { return (touchgfxDeg + 270) % 360; }
-
-/// Build the shared styles. Call once after lv_init(), before any screen.
-void init();
-
-/// Black full-screen background with no padding, border or scrollbars.
-void applyScreen(lv_obj_t* screen);
-
-/// Plain container: transparent, no padding/border, clips its children.
-lv_obj_t* container(lv_obj_t* parent, int32_t x, int32_t y, int32_t w, int32_t h);
-
-/// Single-line label in a text box, like a TouchGFX TextArea: the box is
-/// positioned at (x, y) with width w, and the text is aligned within it.
-lv_obj_t* label(lv_obj_t* parent, Font f, const char* text,
-                int32_t x, int32_t y, int32_t w,
-                lv_text_align_t align = LV_TEXT_ALIGN_CENTER,
-                uint32_t color = SDK::GUI::Color::WHITE);
-
-/// Horizontal 3 px divider with rounded ends.
-lv_obj_t* hline(lv_obj_t* parent, int32_t x, int32_t y, int32_t w,
-                uint32_t color = SDK::GUI::Color::TEAL);
-
-/// Vertical 3 px divider with rounded ends.
-lv_obj_t* vline(lv_obj_t* parent, int32_t x, int32_t y, int32_t h,
-                uint32_t color = SDK::GUI::Color::TEAL);
-
-/// Static image at (x, y).
-lv_obj_t* image(lv_obj_t* parent, const lv_image_dsc_t* src, int32_t x, int32_t y);
-
-/// Alpha-only (A8) icon at (x, y) drawn in @p color. The single-colour icons
-/// are stored without colour and tinted here, one byte per pixel.
-lv_obj_t* imageTinted(lv_obj_t* parent, const lv_image_dsc_t* src, int32_t x, int32_t y, uint32_t color);
-
-/// Change the tint of an image made by imageTinted().
-void tint(lv_obj_t* img, uint32_t color);
-
-/// Filled circle of the given radius centred at (cx, cy).
-lv_obj_t* dot(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, uint32_t color);
-
-/// A static arc segment. Angles are TouchGFX-style (0 = 12 o'clock, clockwise);
-/// @p radius is the arc's centre-line radius as in touchgfx::Circle. Ends are
-/// rounded unless @p rounded is false, which cuts them radially.
-lv_obj_t* arc(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, int32_t width,
-              int32_t startDeg, int32_t endDeg, uint32_t color, bool rounded = true);
-
-/// Re-aim an arc made by arc() (TouchGFX-style angles).
-void setArc(lv_obj_t* arcObj, int32_t startDeg, int32_t endDeg);
-
-void setArcColor(lv_obj_t* arcObj, uint32_t color);
+/// Draw::label() with one of the app's faces.
+inline lv_obj_t* label(lv_obj_t* parent, Font f, const char* text,
+                       int32_t x, int32_t y, int32_t w,
+                       lv_text_align_t align = LV_TEXT_ALIGN_CENTER,
+                       uint32_t color = SDK::GUI::Color::WHITE)
+{
+    return SDK::LVGL::Draw::label(parent, font(f), text, x, y, w, align, color);
+}
 
 } // namespace Theme
 

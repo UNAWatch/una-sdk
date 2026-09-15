@@ -7,6 +7,7 @@
 
 #include "gui/screens/MenuIntervalsScreen.hpp"
 #include "gui/screens/ScreenManager.hpp"
+#include "gui/Assets.hpp"
 #include "gui/theme/Theme.hpp"
 #include "gui/Format.hpp"
 
@@ -20,13 +21,13 @@ MenuIntervalsScreen::MenuIntervalsScreen(Model& model)
 void MenuIntervalsScreen::build()
 {
     // Same items and fonts as MenuIntervalsView::setupItems().
-    mItems[Menu::ID_START]     = { Style::Simple, "Start",     nullptr,     Theme::Font::SemiBold35 };
-    mItems[Menu::ID_REPEATS]   = { Style::Tip,    "Repeats",   nullptr,     Theme::Font::SemiBold25, mRepeatsTip };
-    mItems[Menu::ID_RUN]       = { Style::Tip,    "Run",       nullptr,     Theme::Font::SemiBold25, mRunTip };
-    mItems[Menu::ID_REST]      = { Style::Tip,    "Rest",      nullptr,     Theme::Font::SemiBold25, mRestTip };
-    mItems[Menu::ID_WARM_UP]   = { Style::Toggle, "Warm Up",   nullptr,     Theme::Font::SemiBold25 };
-    mItems[Menu::ID_COOL_DOWN] = { Style::Toggle, "Cool\nDown", "Cool Down", Theme::Font::SemiBold25 };
-    mItems[Menu::ID_LAST_REST] = { Style::Toggle, "Last\nRest", "Last Rest", Theme::Font::SemiBold25 };
+    mItems[Menu::ID_START]     = { Style::Simple, "Start",     nullptr,     &poppins_semibold_35 };
+    mItems[Menu::ID_REPEATS]   = { Style::Tip,    "Repeats",   nullptr,     &poppins_semibold_25, mRepeatsTip };
+    mItems[Menu::ID_RUN]       = { Style::Tip,    "Run",       nullptr,     &poppins_semibold_25, mRunTip };
+    mItems[Menu::ID_REST]      = { Style::Tip,    "Rest",      nullptr,     &poppins_semibold_25, mRestTip };
+    mItems[Menu::ID_WARM_UP]   = { Style::Toggle, "Warm Up",   nullptr,     &poppins_semibold_25 };
+    mItems[Menu::ID_COOL_DOWN] = { Style::Toggle, "Cool\nDown", "Cool Down", &poppins_semibold_25 };
+    mItems[Menu::ID_LAST_REST] = { Style::Toggle, "Last\nRest", "Last Rest", &poppins_semibold_25 };
 
     mMenu      = std::make_unique<WheelMenu>(mRoot, mItems, Menu::ID_COUNT);
     mButtons   = std::make_unique<Widgets::Buttons>(mRoot);

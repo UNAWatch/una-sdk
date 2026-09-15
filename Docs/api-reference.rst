@@ -83,9 +83,11 @@ The Sensor Layer provides type-safe access to hardware sensors and data parsers.
 UI Framework
 ------------
 
-Interfaces for building user interfaces using TouchGFX or the lightweight Glance system.
+Interfaces for building user interfaces using TouchGFX or LVGL, or the lightweight
+Glance system.
 
-For detailed information on the TouchGFX port implementation, see :doc:`TouchGFX-Port-Architecture`.
+For detailed information on the TouchGFX port implementation, see :doc:`TouchGFX-Port-Architecture`;
+for the LVGL port, see :doc:`Tutorials/RunLVGL/ARCHITECTURE`.
 
 .. doxygenclass:: SDK::Interface::IGlance
    :project: SDK
@@ -97,6 +99,49 @@ For detailed information on the TouchGFX port implementation, see :doc:`TouchGFX
 
 ``SDK::TouchGFXCommandProcessor`` is an alias of ``SDK::GuiCommandProcessor``,
 kept for existing applications.
+
+LVGL Widgets
+~~~~~~~~~~~~
+
+Drawing helpers and the widgets the UNA activity apps share, built from LVGL
+primitives (``SDK/GUI/LVGL/``). Fonts and images are the app's: a widget that
+draws text or an icon takes it as a ``const lv_font_t*`` or ``const lv_image_dsc_t*``.
+
+.. doxygennamespace:: SDK::LVGL::Draw
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::Buttons
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::Title
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::ScrollIndicator
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::SensorStatusRow
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::Battery
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::TimerRing
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::Toggle
+   :project: SDK
+   :members:
+
+.. doxygenclass:: SDK::LVGL::WheelMenu
+   :project: SDK
+   :members:
 
 Utilities
 ---------

@@ -204,8 +204,9 @@ Software/Apps/LVGL-GUI/
     Strings.hpp               text constants
     model/                    Model, ModelListener, menu navigation state
     screens/                  Screen base, ScreenManager, one class per screen
-    theme/Theme.hpp           palette, fonts, drawing helpers
-    widgets/                  Buttons, Title, Battery, HeartRateZone, WheelMenu, ...
+    theme/Theme.hpp           the app's fonts, plus the SDK's drawing helpers
+    widgets/                  HeartRateZone, InfoCarousel, Map, ... and the SDK widgets
+                              with Run's font and icons filled in
   gui/src/
     GuiApp.cpp                una_lvgl_app_init(): model + first screen
     ...                       implementations of the above
@@ -281,21 +282,35 @@ hint, because Start is greyed out without a fix. Compare it with Run's `MainView
 
 ### Theme
 
-`Theme` holds what TouchGFX Designer would have generated: the palette (the SDK's
+The drawing helpers live in the SDK, in `SDK/GUI/LVGL/Draw.hpp` (namespace
+`SDK::LVGL::Draw`): `label`, `hline`, `vline`, `box`, `image`, `imageTinted`, `dot`,
+`arc`, `container`, plus `init()` for the shared styles and `applyScreen()` for a black,
+unscrollable screen. They take TouchGFX coordinates and angles (arcs measured from 12
+o'clock, clockwise; `arcAngle()` converts to LVGL's 3 o'clock origin) and the SDK's
 64-colour `SDK::GUI::Color` values, which the two-bits-per-channel display renders
-exactly), the fifteen Poppins faces by weight and size, and small drawing helpers:
-`label`, `hline`, `vline`, `image`, `imageTinted`, `dot`, `arc`, `container`. The
-helpers take TouchGFX coordinates and angles (arcs measured from 12 o'clock, clockwise;
-`arcAngle()` converts to LVGL's 3 o'clock origin), so screens can be laid out straight
-from the Run app's Designer values and the two apps match to the pixel.
+exactly, so screens can be laid out straight from a TouchGFX Designer's values and the two
+toolkits match to the pixel.
+
+The app's `Theme` namespace adds what is Run's own: the fifteen Poppins faces by weight
+and size (`Theme::Font`, `Theme::font()`), a `label()` overload that takes one of them,
+and using-declarations that make the SDK helpers available as `Theme::arc(...)` and so
+on. The SDK owns no fonts or images, so every helper and widget that draws text or an
+icon takes it as a `const lv_font_t*` or `const lv_image_dsc_t*` from the app.
 
 ### Widgets
 
-`Widgets.hpp` collects the composite widgets Run had as TouchGFX custom containers:
-`Buttons`, `Title`, `Battery`, `ScrollIndicator`, `SensorStatusRow`, `HeartRateZone`,
-`PauseIndicator`, `InfoCarousel`, `TimerRing`, `Map`, `Toggle`, `IntervalsTimer` and
-`TwoTonePicker`. Each is a small class that creates LVGL objects on a parent and keeps
-the handles it needs to update. Two are worth reading for technique:
+The widgets every UNA activity app shares are part of the SDK, under
+`SDK/GUI/LVGL/` in namespace `SDK::LVGL`: `Buttons` (the bezel hints), `Title`,
+`ScrollIndicator`, `SensorStatusRow`, `Battery`, `TimerRing`, `Toggle` and `WheelMenu`.
+Each is a small class that creates LVGL objects on a parent and keeps the handles it
+needs to update; where one draws text or an icon, the constructor takes the font or
+image from the app (`Title` takes its face, `SensorStatusRow` its two A8 glyphs,
+`WheelMenu` a `Fonts` struct and, per item, an optional face for the selected slot).
+RunLVGL's `Widgets.hpp` re-exports them under its `Widgets` namespace, with two-line
+subclasses for `Title` and `SensorStatusRow` that fill in Run's font and icons, and its
+`WheelMenu.hpp` does the same for the wheel's fonts and slide time. The rest of
+`Widgets.hpp` is Run's own: `HeartRateZone`, `PauseIndicator`, `InfoCarousel`, `Map`,
+`IntervalsTimer` and `TwoTonePicker`. Two are worth reading for technique:
 
 - **`WheelMenu`** reproduces the scroll wheel's 400 ms slide the way TouchGFX's
   `ScrollWheelWithSelectionStyle` does: two strips of three slots, one in the large

@@ -7,6 +7,7 @@
 
 #include "gui/screens/MenuAlertsScreen.hpp"
 #include "gui/screens/ScreenManager.hpp"
+#include "gui/Assets.hpp"
 #include "gui/Format.hpp"
 
 using namespace SDK::GUI;
@@ -19,8 +20,8 @@ MenuAlertsScreen::MenuAlertsScreen(Model& model)
 
 void MenuAlertsScreen::build()
 {
-    mItems[Menu::ID_DISTANCE] = { Style::Tip, "Distance", nullptr, Theme::Font::SemiBold30, mDistanceTip };
-    mItems[Menu::ID_TIME]     = { Style::Tip, "Time",     nullptr, Theme::Font::SemiBold30, mTimeTip };
+    mItems[Menu::ID_DISTANCE] = { Style::Tip, "Distance", nullptr, &poppins_semibold_30, mDistanceTip };
+    mItems[Menu::ID_TIME]     = { Style::Tip, "Time",     nullptr, &poppins_semibold_30, mTimeTip };
 
     mMenu      = std::make_unique<WheelMenu>(mRoot, mItems, Menu::ID_COUNT);
     mButtons   = std::make_unique<Widgets::Buttons>(mRoot);

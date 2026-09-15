@@ -72,6 +72,7 @@ set(UNA_SDK_SOURCES_SIMULATOR_SERVICE
 set(UNA_SDK_SOURCES_SIMULATOR_LVGL
     "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Simulator/LVGL/LvglHost.cpp"
+    ${UNA_SDK_SOURCES_GUI_LVGL_WIDGETS}
     ${UNA_SDK_LVGL_SOURCES}
 )
 
