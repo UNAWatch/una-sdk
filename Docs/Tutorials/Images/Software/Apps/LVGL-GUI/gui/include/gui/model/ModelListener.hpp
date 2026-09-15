@@ -3,8 +3,9 @@
  * @file    ModelListener.hpp
  * @brief   Events the Model raises towards the active screen.
  *
- * Images's model has nothing to report yet; later tutorials add virtual
- * methods here (sensor values, file results) that the screen overrides.
+ * Images's model reports only the kernel's frame tick, which drives the
+ * jump; later tutorials add methods here (sensor values, file results)
+ * that the screen overrides.
  ******************************************************************************
  */
 
@@ -20,6 +21,10 @@ public:
     virtual ~ModelListener() = default;
 
     void bind(Model* m) { model = m; }
+
+    /// One call per kernel frame (10 Hz on the watch): the TouchGFX
+    /// handleTickEvent(), delivered through the model.
+    virtual void onFrame() {}
 
 protected:
     Model* model;

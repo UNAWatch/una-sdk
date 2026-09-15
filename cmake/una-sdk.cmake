@@ -111,8 +111,8 @@ set(UNA_SDK_INCLUDE_DIRS_GUI
 # UNA_LVGL_CONF before including this file to use an app-specific lv_conf.h;
 # the default is the SDK's.
 # ---------------------------------------------------------------------------
-# Forward slashes: the glob below is re-run by the generated glob check, where
-# a backslash from a Windows-style UNA_SDK would be read as an escape.
+# Forward slashes: in the glob below a backslash from a Windows-style UNA_SDK
+# would be read as an escape.
 file(TO_CMAKE_PATH "$ENV{UNA_SDK}/ThirdParty/lvgl" UNA_SDK_LVGL_PATH)
 
 if(NOT DEFINED UNA_LVGL_CONF)
@@ -123,9 +123,13 @@ endif()
 file(TO_CMAKE_PATH "${UNA_LVGL_CONF}" UNA_LVGL_CONF)
 
 # Every LVGL C source is compiled; files for disabled features and other
-# platforms reduce to empty translation units through lv_conf.h.
+# platforms reduce to empty translation units through lv_conf.h. The list is
+# taken at configure time only (no CONFIGURE_DEPENDS): the submodule is
+# pinned, so the set changes only with a submodule bump, after which cmake is
+# re-run. This file is included by every CMake app, TouchGFX ones too, and a
+# re-checked glob would cost each of their builds a scan of LVGL's tree.
 if(EXISTS "${UNA_SDK_LVGL_PATH}/lvgl.h")
-    file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES CONFIGURE_DEPENDS
+    file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES
         "${UNA_SDK_LVGL_PATH}/src/*.c"
     )
 else()

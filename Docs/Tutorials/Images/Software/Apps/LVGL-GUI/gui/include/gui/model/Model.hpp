@@ -41,6 +41,7 @@ protected:
 
     // IGuiLifeCycleCallback: the kernel's lifecycle, forwarded by the port.
     void onStart() override;
+    void onFrame() override;
     void onResume() override;
     void onSuspend() override;
     void onStop() override;

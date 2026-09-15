@@ -54,20 +54,16 @@ inline uint32_t abgr2222ToRgba32(uint8_t px)
 
 } // namespace
 
-LvglHost* LvglHost::sInstance = nullptr;
-
 LvglHost::LvglHost(SDK::App::DualAppComm& comm, const SDK::Kernel& kernel, const Options& options)
     : mComm(comm)
     , mKernel(kernel)
     , mOptions(options)
 {
-    sInstance = this;
 }
 
 LvglHost::~LvglHost()
 {
     shutdown();
-    sInstance = nullptr;
 }
 
 bool LvglHost::init()
@@ -105,7 +101,7 @@ bool LvglHost::init()
     SDK::LVGL::Port::GetInstance().setFrameHook(&LvglHost::frameHook, this);
     Mock::SystemGUI::SetStopHandler(&LvglHost::stopFromSystem);
 
-    LOG_INFO("Window %dx%d (x%d). Keys: 1=L1 2=L2 3=R1 4=R2, Esc quits.\n",
+    LOG_INFO("Window %dx%d (x%d). Keys: 1=L1 2=L2 3=R1 4=R2 (q/w/e/r press, a/s/d/f release), Esc quits.\n",
              SDK::LVGL::kDisplayWidth, SDK::LVGL::kDisplayHeight, scale);
     return true;
 }
@@ -164,6 +160,9 @@ void LvglHost::shutdown()
 void LvglHost::frameHook(void* ctx)
 {
     auto* self = static_cast<LvglHost*>(ctx);
+    // The GUI thread is running again; the tick thread may post once more.
+    // (It may run for a button event too, so at most one extra tick queues.)
+    self->mTickPending = false;
     self->pumpEvents();
     self->present(false);
 }
@@ -190,7 +189,8 @@ void LvglHost::pumpEvents()
                     break;
                 }
                 const int32_t key = e.key.keysym.sym;
-                Btn::Id id;
+                Btn::Id    id;
+                Btn::Event event;
                 if (key == SDLK_ESCAPE) {
                     requestStop();
                 } else if (keyToButton(key, id)) {
@@ -198,6 +198,10 @@ void LvglHost::pumpEvents()
                     mPressed[i]     = true;
                     mPressedAtMs[i] = mKernel.sys.getTimeMs();
                     sendButton(id, Btn::Event::PRESS);
+                } else if (keyToRawEvent(key, id, event)) {
+                    // One press or release, no click: the rows a TouchGFX
+                    // simulator feeds straight through as codes.
+                    sendButton(id, event);
                 } else if (key > 0 && key < 0x80) {
                     // Simulator-only keys, e.g. '5' raises a wrist-motion event.
                     Instance::SensorLayer::getInstance().handlerButtons(static_cast<uint8_t>(key));
@@ -262,12 +266,15 @@ void LvglHost::requestStop()
     if (mStopRequested) {
         return;
     }
-    mStopRequested = true;
     // Same order as the kernel: the GUI is taken off screen, then stopped.
     // The port handles COMMAND_APP_STOP by calling sys.exit(), which reaches
-    // stopFromSystem() and ends run().
-    sendToGui(SDK::MessageType::COMMAND_APP_GUI_SUSPEND);
-    sendToGui(SDK::MessageType::COMMAND_APP_STOP);
+    // stopFromSystem() and ends run(). The request is latched only once both
+    // commands are queued: after a stall the queue may be full, and the next
+    // Escape or close must then be able to try again.
+    if (sendToGui(SDK::MessageType::COMMAND_APP_GUI_SUSPEND) &&
+        sendToGui(SDK::MessageType::COMMAND_APP_STOP)) {
+        mStopRequested = true;
+    }
 }
 
 // --- kernel emulation --------------------------------------------------------
@@ -278,6 +285,12 @@ void LvglHost::tickThread()
     uint32_t frame = 0;
     while (mTicking) {
         std::this_thread::sleep_for(period);
+        if (mTickPending) {
+            // The GUI thread has not run since the last tick (a breakpoint, a
+            // window drag on Windows); more ticks would only fill the queue
+            // and crowd out the stop commands.
+            continue;
+        }
         auto msg = SDK::make_msg<SDK::Message::EventGuiTick>(mKernel);
         if (!msg) {
             continue;
@@ -287,16 +300,19 @@ void LvglHost::tickThread()
         if (!mComm.sendToGui(msg.get())) {
             continue;   // the guard releases it
         }
+        mTickPending = true;
         msg.release();  // the GUI releases it after handling
     }
 }
 
-void LvglHost::sendToGui(SDK::MessageType::Type type)
+bool LvglHost::sendToGui(SDK::MessageType::Type type)
 {
     auto msg = SDK::make_msg(mKernel, type);
     if (msg && mComm.sendToGui(msg.get())) {
         msg.release();
+        return true;
     }
+    return false;
 }
 
 void LvglHost::sendToService(SDK::MessageType::Type type)
@@ -323,13 +339,33 @@ void LvglHost::sendButton(Btn::Id id, Btn::Event event)
 
 bool LvglHost::keyToButton(int32_t key, Btn::Id& id)
 {
-    // Same key layout as the TouchGFX simulators: 1=L1 2=L2 3=R1 4=R2.
+    // The click row of SDK/GUI/Button.hpp: 1=L1 2=L2 3=R1 4=R2. Here a key
+    // stands for the physical button, so its down and up become PRESS and
+    // RELEASE (and a CLICK when short), where a TouchGFX simulator would pass
+    // the digit through as the click code alone.
     // Button ids follow the hardware: SW1=L1, SW2=R1, SW3=L2, SW4=R2.
     switch (key) {
         case SDLK_1: id = Btn::Id::SW1; return true;
         case SDLK_2: id = Btn::Id::SW3; return true;
         case SDLK_3: id = Btn::Id::SW2; return true;
         case SDLK_4: id = Btn::Id::SW4; return true;
+        default:     return false;
+    }
+}
+
+bool LvglHost::keyToRawEvent(int32_t key, Btn::Id& id, Btn::Event& event)
+{
+    // The press row (q w e r) and the release row (a s d f) of Button.hpp,
+    // one column per button in the order L1 L2 R1 R2.
+    switch (key) {
+        case SDLK_q: id = Btn::Id::SW1; event = Btn::Event::PRESS;   return true;
+        case SDLK_w: id = Btn::Id::SW3; event = Btn::Event::PRESS;   return true;
+        case SDLK_e: id = Btn::Id::SW2; event = Btn::Event::PRESS;   return true;
+        case SDLK_r: id = Btn::Id::SW4; event = Btn::Event::PRESS;   return true;
+        case SDLK_a: id = Btn::Id::SW1; event = Btn::Event::RELEASE; return true;
+        case SDLK_s: id = Btn::Id::SW3; event = Btn::Event::RELEASE; return true;
+        case SDLK_d: id = Btn::Id::SW2; event = Btn::Event::RELEASE; return true;
+        case SDLK_f: id = Btn::Id::SW4; event = Btn::Event::RELEASE; return true;
         default:     return false;
     }
 }

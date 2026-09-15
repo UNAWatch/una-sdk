@@ -23,6 +23,10 @@
  *
  * Fonts are the app's: pass the faces for the selected item, the surrounding
  * items and the hint line. Each Item may override the selected face.
+ *
+ * Teardown in either order: destroying the menu leaves its objects to the
+ * parent; deleting the parent first stops a running slide (the menu watches
+ * LV_EVENT_DELETE) and turns later calls into no-ops.
  ******************************************************************************
  */
 
@@ -72,7 +76,7 @@ public:
         // Toggle
         bool toggleState = false;
 
-        // Icon
+        // Icon. An A8 (alpha-only) bitmap is drawn white; other formats as they are.
         const lv_image_dsc_t* centerIcon = nullptr;
         IconLayout            centerLayout { 20, 3, 87, 153 };
         const lv_image_dsc_t* icon       = nullptr;
@@ -145,6 +149,7 @@ private:
     void fireMid();
     static void animExecCb(void* var, int32_t value);
     static void animReadyCb(lv_anim_t* a);
+    static void deleteCb(lv_event_t* e);
 
     const Item* mItems;
     uint16_t    mCount;

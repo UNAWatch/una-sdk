@@ -26,6 +26,8 @@ public:
 
     void onShow() override;
     void onKey(uint8_t code) override;
+    void onIdleTimeout() override;
+    void onSuspend() override;
 
 protected:
     void build() override;
@@ -36,6 +38,7 @@ private:
     static void animExecCb(void* var, int32_t value);
     static void animReadyCb(lv_anim_t* a);
     void setCountdown(uint32_t number);
+    void cancel();
 
     Model::HoldConfirmMode mMode  = Model::HoldConfirmMode::Discard;
     bool                   mFired = false;

@@ -34,7 +34,8 @@ cmake --build "$here/build-linux" -j"$(nproc)"
 ls -l "$here/build/bin/RunLVGLSimulator"
 
 echo "=== simulator: headless smoke run (3 s) ==="
-( cd "$here/build/bin" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 3s ./RunLVGLSimulator || [ $? -eq 124 ] ) | tail -n 12
+( cd "$here/build/bin" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 3s ./RunLVGLSimulator \
+    || [ $? -eq 124 ] ) | tail -n 12
 
 echo "=== assets: regenerate and compare with the committed files ==="
 # A plain content comparison rather than git status: inside a container the

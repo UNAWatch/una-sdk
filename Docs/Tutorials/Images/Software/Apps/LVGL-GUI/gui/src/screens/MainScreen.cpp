@@ -49,9 +49,6 @@ MainScreen::MainScreen(Model& model)
 
 MainScreen::~MainScreen()
 {
-    if (mJumpTimer) {
-        lv_timer_delete(mJumpTimer);
-    }
     mModel.bind(nullptr);
     lv_obj_delete(mRoot);
 }
@@ -75,9 +72,7 @@ void MainScreen::onKey(uint8_t code)
             // the TouchGFX app.
             if (!mScaledMode) {
                 mJumpTick = 0;
-                if (!mJumpTimer) {
-                    mJumpTimer = lv_timer_create(&MainScreen::jumpTickCb, 100, this);
-                }
+                mJumping  = true;
             }
             break;
         case Btn::R2:
@@ -94,17 +89,20 @@ void MainScreen::showMode()
     Draw::setHidden(mScaled, !mScaledMode);
 }
 
-void MainScreen::jumpTickCb(lv_timer_t* t)
+void MainScreen::onFrame()
 {
-    // One step per 100 ms, the watch's frame period: the same sine-wave offset
-    // the TouchGFX view computes in handleTickEvent().
-    auto* self = static_cast<MainScreen*>(lv_timer_get_user_data(t));
-    self->mJumpTick++;
-    const float   phase  = self->mJumpTick * 0.1f;
+    if (!mJumping) {
+        return;
+    }
+    // One step per kernel frame: the same sine-wave offset the TouchGFX view
+    // computes in handleTickEvent(). (A timer at the frame period would skip
+    // frames: LVGL runs it only once a full period has elapsed since its last
+    // run, and the ticks arrive a few milliseconds apart from one another.)
+    mJumpTick++;
+    const float   phase  = mJumpTick * 0.1f;
     const int32_t offset = static_cast<int32_t>(sinf(phase) * 30.0f);
-    lv_obj_set_y(self->mPlainBox, kY + offset);
-    if (self->mJumpTick > kJumpTicks) {
-        lv_timer_delete(self->mJumpTimer);
-        self->mJumpTimer = nullptr;
+    lv_obj_set_y(mPlainBox, kY + offset);
+    if (mJumpTick > kJumpTicks) {
+        mJumping = false;
     }
 }

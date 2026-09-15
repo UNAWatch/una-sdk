@@ -9,6 +9,10 @@
  * when connected and alternates white and dark grey every 500 ms while
  * searching, so one bitmap per sensor serves both phases. Pass nullptr for a
  * sensor the app does not show.
+ *
+ * Teardown in either order: destroying the row leaves its objects to the
+ * parent; deleting the parent first stops the blink (the row watches
+ * LV_EVENT_DELETE) and turns later setGps()/setHr() calls into no-ops.
  ******************************************************************************
  */
 
@@ -77,6 +81,7 @@ public:
 
 private:
     static void tickCb(lv_timer_t* t);
+    static void deleteCb(lv_event_t* e);
     void update();
     void layout();
     void applyIcons();

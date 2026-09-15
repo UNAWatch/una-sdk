@@ -127,7 +127,8 @@ def main():
         print(f"font  {name}")
         # lv_font_conv records its arguments in the file header; run it from
         # the SDK root with relative paths so that header is reproducible.
-        run([npx, "--yes", f"lv_font_conv@{LV_FONT_CONV_VERSION}", "--font", sdk_relative(ttf), "--size", str(size), "--bpp", "2",
+        run([npx, "--yes", f"lv_font_conv@{LV_FONT_CONV_VERSION}",
+             "--font", sdk_relative(ttf), "--size", str(size), "--bpp", "2",
              "--format", "lvgl", "--no-compress", "-r", rng,
              "-o", sdk_relative(os.path.join(font_out, f"{name}.c"))], cwd=SDK_ROOT)
 

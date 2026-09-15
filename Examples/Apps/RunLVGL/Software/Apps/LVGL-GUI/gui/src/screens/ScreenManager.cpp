@@ -51,8 +51,14 @@ void ScreenManager::goTo(ScreenId id)
 {
     mPending = id;
     if (!mPendingSet) {
+        if (lv_async_call(&ScreenManager::asyncCb, this) != LV_RESULT_OK) {
+            // LVGL's pool had no room for the request. Leave the flag clear
+            // so the next goTo() tries again rather than waiting for a call
+            // that will never come.
+            LOG_ERROR("Switch to screen %u could not be scheduled\n", static_cast<unsigned>(id));
+            return;
+        }
         mPendingSet = true;
-        lv_async_call(&ScreenManager::asyncCb, this);
     }
 }
 
@@ -78,8 +84,9 @@ void ScreenManager::switchNow(ScreenId id)
     }
 
     // Build and show the new screen, then free the old one: the same order
-    // as the TouchGFX MVP application, with the memory of only one screen's
-    // widgets held while both exist.
+    // as the TouchGFX MVP application. Both widget trees exist for the
+    // duration of the switch, so the pool must hold the largest such pair;
+    // the peak logged below is what to size it by.
     next->create();
     lv_screen_load(next->root());
     mCurrent = next;

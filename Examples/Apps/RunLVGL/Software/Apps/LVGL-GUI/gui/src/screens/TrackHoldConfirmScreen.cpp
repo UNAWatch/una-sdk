@@ -59,10 +59,33 @@ void TrackHoldConfirmScreen::onShow()
 void TrackHoldConfirmScreen::onKey(uint8_t code)
 {
     // Releasing R1 before the countdown completes cancels back to the menu.
-    if (code == SDK::GUI::Button::R1_RELEASE && !mFired) {
-        lv_anim_delete(this, nullptr);
-        ScreenManager::instance().goTo(ScreenId::TrackAction);
+    if (code == SDK::GUI::Button::R1_RELEASE) {
+        cancel();
     }
+}
+
+void TrackHoldConfirmScreen::onIdleTimeout()
+{
+    // As the TouchGFX presenter: back to the action menu, not through the hold.
+    cancel();
+}
+
+void TrackHoldConfirmScreen::onSuspend()
+{
+    // The release cannot reach this screen while the GUI is suspended (the
+    // pump drops button codes until resume) and the countdown runs on the
+    // wall clock, so left alone it would complete by itself on resume. A
+    // suspend mid-hold therefore cancels, like a release would have.
+    cancel();
+}
+
+void TrackHoldConfirmScreen::cancel()
+{
+    if (mFired) {
+        return;
+    }
+    lv_anim_delete(this, nullptr);
+    ScreenManager::instance().goTo(ScreenId::TrackAction);
 }
 
 void TrackHoldConfirmScreen::animExecCb(void* var, int32_t value)

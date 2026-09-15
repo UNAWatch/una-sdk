@@ -453,12 +453,15 @@ void TwoTonePicker::renderValue(bool leftActive, const char* left, const char* r
 {
     lv_label_set_text(mValSep, sep);
 
+    const auto leftFont  = Theme::font(leftActive ? Theme::Font::SemiBold60 : Theme::Font::Light60);
+    const auto rightFont = Theme::font(leftActive ? Theme::Font::Light60 : Theme::Font::SemiBold60);
+
     lv_label_set_text(mValLeft, left);
-    lv_obj_set_style_text_font(mValLeft, Theme::font(leftActive ? Theme::Font::SemiBold60 : Theme::Font::Light60), LV_PART_MAIN);
+    lv_obj_set_style_text_font(mValLeft, leftFont, LV_PART_MAIN);
     lv_obj_set_style_text_color(mValLeft, Theme::rgb(leftActive ? kPickerActive : kPickerInactive), LV_PART_MAIN);
 
     lv_label_set_text(mValRight, right);
-    lv_obj_set_style_text_font(mValRight, Theme::font(leftActive ? Theme::Font::Light60 : Theme::Font::SemiBold60), LV_PART_MAIN);
+    lv_obj_set_style_text_font(mValRight, rightFont, LV_PART_MAIN);
     lv_obj_set_style_text_color(mValRight, Theme::rgb(leftActive ? kPickerInactive : kPickerActive), LV_PART_MAIN);
 
     // Upcoming values sit under the active component, pulled towards the centre.

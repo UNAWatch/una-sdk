@@ -26,7 +26,8 @@ Model::Model()
 
 #if defined(SIMULATOR)
     LOG_INFO("Application is running through simulator!\n");
-    LOG_INFO("Keys: 1 = L1 (value up), 2 = L2 (value down), 3 = R1 (save, next setting), 4 = R2 (save, exit), Esc = close\n");
+    LOG_INFO("Keys: 1 = L1 (value up), 2 = L2 (value down), 3 = R1 (save, next setting), "
+             "4 = R2 (save, exit), Esc = close\n");
 #endif
 }
 

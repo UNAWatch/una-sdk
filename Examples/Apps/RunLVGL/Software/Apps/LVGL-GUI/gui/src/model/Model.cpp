@@ -278,6 +278,9 @@ void Model::onResume()
 void Model::onSuspend()
 {
     mIsRunning = false;
+    if (modelListener) {
+        modelListener->onSuspend();
+    }
 }
 
 void Model::onStop()

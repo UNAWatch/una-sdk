@@ -43,7 +43,8 @@ private:
     static void keyEventCb(lv_event_t* e);
 
     void showMode();
-    static void jumpTickCb(lv_timer_t* t);
+    /// One jump step per kernel frame while the jump runs.
+    void onFrame() override;
 
     Model&    mModel;
     lv_obj_t* mRoot = nullptr;
@@ -51,7 +52,7 @@ private:
     lv_obj_t*   mPlainBox  = nullptr;   ///< clips the plain image to 100 x 100
     lv_obj_t*   mPlain     = nullptr;   ///< the image at its own size
     lv_obj_t*   mScaled    = nullptr;   ///< the image stretched to 120 x 120
-    lv_timer_t* mJumpTimer = nullptr;   ///< runs while the jump animates
+    bool        mJumping   = false;     ///< the jump is animating
     int         mJumpTick  = 0;
     bool        mScaledMode = true;
 

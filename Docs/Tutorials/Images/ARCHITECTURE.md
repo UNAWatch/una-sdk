@@ -15,7 +15,7 @@ As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL
 - Using bitmap IDs (TouchGFX) or image descriptors (LVGL) to reference and display images in code
 - Programmatically adding images without using designer-generated backgrounds
 - Mode switching between Image and ScalableImage using L1 button
-- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp) (TouchGFX) or an `lv_timer` (LVGL)
+- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp) (TouchGFX) or `onFrame()` (LVGL)
 - Understanding the TouchGFX image pipeline in UNA applications. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Best practices for image optimization and management
 
@@ -124,7 +124,7 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 | Plain image, clipped to 100 x 100 | `touchgfx::Image` with `setPosition(70, y, 100, 100)` | `lv_image` inside a 100 x 100 `Draw::container` |
 | Scaled to 120 x 120 | `touchgfx::ScalableImage` with `BILINEAR_INTERPOLATION` | `lv_image_set_scale_x/y()` in 1/256 steps with the pivot at the top-left corner, anti-aliased |
 | Show one or the other | `setVisible()` + `invalidate()` on both | `Draw::setHidden()` on both |
-| Jump animation | `handleTickEvent()` every frame, 60 ticks of `sin(phase) * 30` | an `lv_timer` at 100 ms running the same sum, deleted when it ends |
+| Jump animation | `handleTickEvent()` every frame, 60 ticks of `sin(phase) * 30` | `onFrame()`, the kernel's frame tick forwarded by the model, running the same sum for the same 60 frames |
 
 The LVGL screen's setup, from `LVGL-GUI/gui/src/screens/MainScreen.cpp`:
 

@@ -43,6 +43,14 @@ void Model::onStart()
     LOG_INFO("called\n");
 }
 
+void Model::onFrame()
+{
+    // The kernel's tick, once per frame; the screen animates from it.
+    if (modelListener) {
+        modelListener->onFrame();
+    }
+}
+
 void Model::onResume()
 {
     // The port has already invalidated the screen, so the kernel gets a full

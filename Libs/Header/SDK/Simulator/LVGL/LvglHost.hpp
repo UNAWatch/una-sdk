@@ -15,7 +15,10 @@
  *             so the GUI renders at the watch's frame rate.
  *   buttons - keys 1..4 are the watch buttons L1, L2, R1, R2. A key down is a
  *             PRESS, a key up a RELEASE, and a hold shorter than the kernel's
- *             500 ms is a CLICK first, the same order the kernel emits.
+ *             500 ms is a CLICK first, the same order the kernel emits. The
+ *             press row q w e r and the release row a s d f of
+ *             SDK/GUI/Button.hpp send that one event, as they do in the
+ *             TouchGFX simulators (the L1+R2 chord 'z' has no key here).
  *             Escape or closing the window stops the app.
  *   lifecycle - the resume/suspend/stop commands the kernel sends around a
  *             GUI's life, and the matching notifications to the service.
@@ -84,12 +87,12 @@ private:
     void requestStop();
     void tickThread();
 
-    void sendToGui(SDK::MessageType::Type type);
+    bool sendToGui(SDK::MessageType::Type type);
     void sendToService(SDK::MessageType::Type type);
     void sendButton(SDK::Message::EventButton::Id id, SDK::Message::EventButton::Event event);
     static bool keyToButton(int32_t key, SDK::Message::EventButton::Id& id);
-
-    static LvglHost* sInstance;
+    static bool keyToRawEvent(int32_t key, SDK::Message::EventButton::Id& id,
+                              SDK::Message::EventButton::Event& event);
 
     SDK::App::DualAppComm& mComm;
     const SDK::Kernel&     mKernel;
@@ -101,6 +104,7 @@ private:
 
     std::thread       mTickThread;
     std::atomic<bool> mTicking { false };
+    std::atomic<bool> mTickPending { false };   ///< a tick is queued that the GUI thread has not seen
     bool              mSdlReady = false;   ///< SDL_Init() succeeded; SDL_Quit() owed
     bool              mStarted  = false;   ///< start() told the processes the GUI runs
 

@@ -26,6 +26,7 @@ SensorStatusRow::SensorStatusRow(lv_obj_t* parent, int32_t x, int32_t y, int32_t
 {
     // One alpha-only shape per sensor; the dark/light phases are tints.
     mRow = Draw::container(parent, x, y, w, h);
+    lv_obj_add_event_cb(mRow, &SensorStatusRow::deleteCb, LV_EVENT_DELETE, this);
     if (mGpsIcon) {
         mGps = Draw::imageTinted(mRow, mGpsIcon, 0, 0, Color::WHITE);
     }
@@ -40,10 +41,29 @@ SensorStatusRow::~SensorStatusRow()
     if (mTimer) {
         lv_timer_delete(mTimer);
     }
+    if (mRow) {
+        // The objects outlive this widget; they must not call back into it.
+        lv_obj_remove_event_cb_with_user_data(mRow, &SensorStatusRow::deleteCb, this);
+    }
+}
+
+void SensorStatusRow::deleteCb(lv_event_t* e)
+{
+    // The parent went first: stop the blink and forget the objects, so the
+    // widget's remaining calls do nothing.
+    auto* self = static_cast<SensorStatusRow*>(lv_event_get_user_data(e));
+    if (self->mTimer) {
+        lv_timer_delete(self->mTimer);
+        self->mTimer = nullptr;
+    }
+    self->mRow = self->mGps = self->mHr = nullptr;
 }
 
 void SensorStatusRow::setGps(State s)
 {
+    if (!mRow) {
+        return;
+    }
     if (!mGps) {
         s = State::Absent;
     }
@@ -55,6 +75,9 @@ void SensorStatusRow::setGps(State s)
 
 void SensorStatusRow::setHr(State s)
 {
+    if (!mRow) {
+        return;
+    }
     if (!mHr) {
         s = State::Absent;
     }

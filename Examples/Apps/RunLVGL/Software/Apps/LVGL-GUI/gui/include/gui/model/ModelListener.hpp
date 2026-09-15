@@ -5,7 +5,9 @@
  *
  * Same contract as the TouchGFX Run app's ModelListener, without the TouchGFX
  * headers: the Model binds exactly one listener (the screen on display) and
- * calls these as service messages arrive.
+ * calls these as service messages arrive. onSuspend() is the one addition:
+ * a screen with a hold or countdown in progress cancels it there, since no
+ * button release can reach it while the GUI is off screen.
  ******************************************************************************
  */
 
@@ -29,6 +31,7 @@ public:
     void bind(Model* m) { model = m; }
 
     virtual void onIdleTimeout() {}
+    virtual void onSuspend() {}
     virtual void onGpsFix(bool acquired) { (void)acquired; }
     virtual void onBatteryLevel(uint8_t level) { (void)level; }
     virtual void onDate(uint16_t year, uint8_t month, uint8_t day, uint8_t wday)

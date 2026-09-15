@@ -206,7 +206,7 @@ Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes T
 LVGL, in [`MainScreen.hpp`](Software/Apps/LVGL-GUI/gui/include/gui/screens/MainScreen.hpp), [`MainScreen.cpp`](Software/Apps/LVGL-GUI/gui/src/screens/MainScreen.cpp): the same members, the same three format functions and the same key handling, with these differences:
 
 - The three text areas are labels made with `Draw::label()` at the design's positions; a label grows to the lines it holds, and `lv_label_set_text()` replaces `Unicode::strncpy` + `invalidate()`.
-- There is no per-frame `handleTickEvent()`. An `lv_timer` at 100 ms (the watch's frame period) calls the three refresh functions, so the display updates at the same rate.
+- The per-frame `handleTickEvent()` becomes `onFrame()`: the model forwards the kernel's frame tick to the screen through `ModelListener`, and the screen calls its three refresh functions there, once per frame, as the TouchGFX view does.
 - The body's face is switched with `lv_obj_set_style_text_font()`: Poppins Regular 9 for the group views, Regular 18 for one sensor at a time.
 - The fonts come from `assets/assets.json`, at 2 bits per pixel like every LVGL face on this platform: the display has two bits per colour channel, so finer anti-aliasing cannot be shown. The body faces also carry the degree sign for the compass line.
 

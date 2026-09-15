@@ -27,6 +27,8 @@ public:
     void onShow() override;
     void onHide() override;
     void onKey(uint8_t code) override;
+    /// Idle on a menu screen leaves the app, as the TouchGFX presenter does.
+    void onIdleTimeout() override { mModel.exitApp(); }
     void onGpsFix(bool acquired) override;
     void onAccessoryStatus(uint8_t state, const char* name) override;
 

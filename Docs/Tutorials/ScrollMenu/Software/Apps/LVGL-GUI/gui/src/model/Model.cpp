@@ -24,7 +24,8 @@ Model::Model()
 
 #if defined(SIMULATOR)
     LOG_INFO("Application is running through simulator!\n");
-    LOG_INFO("Keys: 1 = L1 (previous item), 2 = L2 (next item), 3 = R1 (act on the item), 4 = R2 (exit), Esc = close\n");
+    LOG_INFO("Keys: 1 = L1 (previous item), 2 = L2 (next item), 3 = R1 (act on the item), "
+             "4 = R2 (exit), Esc = close\n");
 #endif
 }
 

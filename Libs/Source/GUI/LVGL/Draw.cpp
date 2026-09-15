@@ -149,6 +149,12 @@ lv_obj_t* arc(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, int32_t 
 
 void setArc(lv_obj_t* arcObj, int32_t startDeg, int32_t endDeg)
 {
+    // A span of a full turn or more is the whole ring. Folding both ends into
+    // 0..359 would make them equal, which lv_arc draws as nothing.
+    if (endDeg - startDeg >= 360) {
+        lv_arc_set_bg_angles(arcObj, 0, 360);
+        return;
+    }
     lv_arc_set_bg_angles(arcObj, arcAngle(startDeg), arcAngle(endDeg));
 }
 

@@ -5,8 +5,8 @@
  *          middle at a chosen level of detail, link statistics at the bottom.
  *
  * The screen stores the latest value of every sensor as the model reports
- * it, and rewrites its three labels ten times a second from a timer, the
- * way the TouchGFX view does from handleTickEvent().
+ * it, and rewrites its three labels once per frame from onFrame(), the way
+ * the TouchGFX view does from handleTickEvent().
  ******************************************************************************
  */
 
@@ -35,7 +35,8 @@ public:
     /// The LVGL screen object, to pass to lv_screen_load().
     lv_obj_t* root() const { return mRoot; }
 
-    // ModelListener: store the values; the timer draws them.
+    // ModelListener: store the values; onFrame() draws them.
+    void onFrame() override;
     void updateHR(float hr, float tl) override;
     void updateGPS(float lat, float lon, float alt) override;
     void updateElevation(float elevation) override;
@@ -56,7 +57,6 @@ private:
     /// Called with an SDK::GUI::Button code (click, press or release).
     void onKey(uint8_t code);
     static void keyEventCb(lv_event_t* e);
-    static void refreshCb(lv_timer_t* t);
 
     void refreshDisplay();
     void refreshStats();
@@ -67,7 +67,6 @@ private:
     lv_obj_t*   mHeader  = nullptr;   ///< battery, frame count, time
     lv_obj_t*   mBody    = nullptr;   ///< sensor readings
     lv_obj_t*   mStats   = nullptr;   ///< CPU and message rates
-    lv_timer_t* mRefresh = nullptr;
 
     VerbosityLevel mVerbosity = FULL;
 

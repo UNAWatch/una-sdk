@@ -12,7 +12,13 @@
  * display renders exactly.
  *
  * Every helper creates its objects on the parent it is given, and the parent
- * owns them: deleting the parent deletes them.
+ * owns them: deleting the parent deletes them. The widget classes beside this
+ * file are C++ objects over such LVGL objects, and either may go first:
+ * destroying the widget leaves its objects to the parent, and deleting the
+ * parent first is noticed by the widgets that run a timer or an animation
+ * (SensorStatusRow, WheelMenu, ScrollIndicator), which stop it and ignore
+ * later calls. Destroying the widget before its parent is the natural order
+ * and what the in-tree apps do.
  ******************************************************************************
  */
 
@@ -39,8 +45,12 @@ namespace Draw
 inline lv_color_t rgb(uint32_t c) { return lv_color_hex(c); }
 
 /// Convert a TouchGFX arc angle (0 = 12 o'clock, clockwise) to LVGL's
-/// (0 = 3 o'clock, clockwise).
-inline int32_t arcAngle(int32_t touchgfxDeg) { return (touchgfxDeg + 270) % 360; }
+/// (0 = 3 o'clock, clockwise), folded into 0..359 for any input.
+inline int32_t arcAngle(int32_t touchgfxDeg)
+{
+    const int32_t a = (touchgfxDeg + 270) % 360;
+    return a < 0 ? a + 360 : a;
+}
 
 /// Build the shared styles. Call once after lv_init(), before any screen.
 void init();
@@ -86,9 +96,10 @@ void tint(lv_obj_t* img, uint32_t color);
 /// Filled circle of the given radius centred at (cx, cy).
 lv_obj_t* dot(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, uint32_t color);
 
-/// A static arc segment. Angles are TouchGFX-style (0 = 12 o'clock, clockwise);
-/// @p radius is the arc's centre-line radius as in touchgfx::Circle. Ends are
-/// rounded unless @p rounded is false, which cuts them radially.
+/// A static arc segment. Angles are TouchGFX-style (0 = 12 o'clock, clockwise)
+/// and may lie outside 0..359; a span of 360 or more is the full ring. @p radius
+/// is the arc's centre-line radius as in touchgfx::Circle. Ends are rounded
+/// unless @p rounded is false, which cuts them radially.
 lv_obj_t* arc(lv_obj_t* parent, int32_t cx, int32_t cy, int32_t radius, int32_t width,
               int32_t startDeg, int32_t endDeg, uint32_t color, bool rounded = true);
 

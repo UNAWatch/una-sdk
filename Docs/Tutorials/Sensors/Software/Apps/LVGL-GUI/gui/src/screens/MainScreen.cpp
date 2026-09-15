@@ -39,16 +39,12 @@ MainScreen::MainScreen(Model& model)
     mButtons->set(SDK::LVGL::Buttons::NONE, SDK::LVGL::Buttons::NONE,
                   SDK::LVGL::Buttons::NONE, SDK::LVGL::Buttons::AMBER);
 
-    // Redraw at the frame rate, as the TouchGFX view does in handleTickEvent().
-    mRefresh = lv_timer_create(&MainScreen::refreshCb, 100, this);
-
     bind(&mModel);
     mModel.bind(this);
 }
 
 MainScreen::~MainScreen()
 {
-    lv_timer_delete(mRefresh);
     mModel.bind(nullptr);
     lv_obj_delete(mRoot);
 }
@@ -59,13 +55,16 @@ void MainScreen::keyEventCb(lv_event_t* e)
     self->onKey(static_cast<uint8_t>(lv_event_get_key(e)));
 }
 
-void MainScreen::refreshCb(lv_timer_t* t)
+void MainScreen::onFrame()
 {
-    auto* self = static_cast<MainScreen*>(lv_timer_get_user_data(t));
-    self->refreshDisplay();
-    self->refreshStats();
-    self->refreshBattery();
-    self->mFrameCounter++;
+    // Once per kernel frame, as the TouchGFX view redraws in handleTickEvent().
+    // A timer at the frame period would skip frames: LVGL runs it only when a
+    // full period has elapsed since it last ran, and the ticks arrive a few
+    // milliseconds apart from one another.
+    refreshDisplay();
+    refreshStats();
+    refreshBattery();
+    mFrameCounter++;
 }
 
 // ModelListener

@@ -39,6 +39,7 @@ protected:
 
     // IGuiLifeCycleCallback
     void onStart() override;
+    void onFrame() override;
     void onResume() override;
     void onSuspend() override;
     void onStop() override;

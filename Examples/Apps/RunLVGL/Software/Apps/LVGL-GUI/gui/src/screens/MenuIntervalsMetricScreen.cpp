@@ -95,7 +95,8 @@ void MenuIntervalsMetricScreen::confirm()
             ScreenManager::instance().goTo(run ? ScreenId::MenuIntervalsRunTime : ScreenId::MenuIntervalsRestTime);
             break;
         case Menu::ID_DISTANCE:
-            ScreenManager::instance().goTo(run ? ScreenId::MenuIntervalsRunDistance : ScreenId::MenuIntervalsRestDistance);
+            ScreenManager::instance().goTo(run ? ScreenId::MenuIntervalsRunDistance
+                                               : ScreenId::MenuIntervalsRestDistance);
             break;
         case Menu::ID_OPEN: {
             Settings sett = mModel.getSettings();

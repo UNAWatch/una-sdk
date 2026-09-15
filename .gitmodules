@@ -1,3 +1,6 @@
 [submodule "ThirdParty/lvgl"]
 	path = ThirdParty/lvgl
 	url = https://github.com/lvgl/lvgl.git
+	# Pinned to a release tag; nobody needs LVGL's history, so a clone
+	# (`git submodule update --init`, actions/checkout) fetches depth 1.
+	shallow = true

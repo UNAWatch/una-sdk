@@ -39,8 +39,10 @@ uint32_t buttonColor(Buttons::Color c)
 Buttons::Buttons(lv_obj_t* parent)
 {
     for (int i = 0; i < 4; ++i) {
+        // Recoloured by apply() before it is shown. (Spelled out: inside this
+        // class, Color is the Buttons::Color enum.)
         mArc[i] = Draw::arc(parent, kCx, kCy, kButtonRadius, kButtonWidth,
-                            kButtonArcs[i][0], kButtonArcs[i][1], Color::WHITE);
+                            kButtonArcs[i][0], kButtonArcs[i][1], SDK::GUI::Color::WHITE);
         lv_obj_add_flag(mArc[i], LV_OBJ_FLAG_HIDDEN);
     }
 }

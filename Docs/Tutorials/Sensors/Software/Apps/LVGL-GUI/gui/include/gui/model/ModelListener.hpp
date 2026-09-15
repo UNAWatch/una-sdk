@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    ModelListener.hpp
  * @brief   Events the Model raises towards the active screen: one per sensor
- *          message the service sends.
+ *          message the service sends, plus the kernel's frame tick.
  ******************************************************************************
  */
 
@@ -20,6 +20,10 @@ public:
     virtual ~ModelListener() = default;
 
     void bind(Model* m) { model = m; }
+
+    /// One call per kernel frame (10 Hz on the watch): the TouchGFX
+    /// handleTickEvent(), delivered through the model.
+    virtual void onFrame() {}
 
     virtual void updateHR(float hr, float tl) { (void)hr; (void)tl; }
     virtual void updateGPS(float lat, float lon, float alt) { (void)lat; (void)lon; (void)alt; }

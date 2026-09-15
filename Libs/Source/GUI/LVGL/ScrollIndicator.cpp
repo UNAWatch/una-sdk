@@ -29,16 +29,36 @@ ScrollIndicator::ScrollIndicator(lv_obj_t* parent, const Config& cfg)
     mHandle    = Draw::arc(parent, kCx, kCy, kRailRadius, kRailWidth, 0, 1, Color::WHITE);
     mHandleOvf = Draw::arc(parent, kCx, kCy, kRailRadius, kRailWidth, 0, 1, Color::WHITE);
     lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_event_cb(mRail, &ScrollIndicator::deleteCb, LV_EVENT_DELETE, this);
     update();
 }
 
 ScrollIndicator::~ScrollIndicator()
 {
     lv_anim_delete(this, nullptr);
+    if (mRail) {
+        // The arcs outlive this widget; they must not call back into it.
+        lv_obj_remove_event_cb_with_user_data(mRail, &ScrollIndicator::deleteCb, this);
+    }
+}
+
+void ScrollIndicator::deleteCb(lv_event_t* e)
+{
+    // The parent went first: end any slide and forget the arcs, so the
+    // widget's remaining calls do nothing.
+    auto* self = static_cast<ScrollIndicator*>(lv_event_get_user_data(e));
+    lv_anim_delete(self, nullptr);
+    self->mRail = self->mHandle = self->mHandleOvf = nullptr;
 }
 
 void ScrollIndicator::setConfig(const Config& cfg)
 {
+    if (!mRail) {
+        return;
+    }
+    // A slide in progress would keep interpolating the old rail's endpoints.
+    lv_anim_delete(this, nullptr);
+    lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
     mCfg = cfg;
     Draw::setArc(mRail, static_cast<int32_t>(cfg.railMin), static_cast<int32_t>(cfg.railMax));
     update();
@@ -46,6 +66,9 @@ void ScrollIndicator::setConfig(const Config& cfg)
 
 void ScrollIndicator::setCount(uint16_t count)
 {
+    if (!mRail) {
+        return;
+    }
     // A slide in progress would move the handle on from its old endpoints.
     lv_anim_delete(this, nullptr);
     lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
@@ -56,6 +79,9 @@ void ScrollIndicator::setCount(uint16_t count)
 
 void ScrollIndicator::setActive(uint16_t index)
 {
+    if (!mRail) {
+        return;
+    }
     lv_anim_delete(this, nullptr);
     lv_obj_add_flag(mHandleOvf, LV_OBJ_FLAG_HIDDEN);
     mPos = (mCount <= 1) ? 0 : (index >= mCount ? mCount - 1 : index);
@@ -64,6 +90,9 @@ void ScrollIndicator::setActive(uint16_t index)
 
 void ScrollIndicator::animateTo(uint16_t index, uint32_t ms, int direction)
 {
+    if (!mRail) {
+        return;
+    }
     if (mCount <= 1 || index >= mCount || ms == 0) {
         setActive(index);
         return;
@@ -154,6 +183,9 @@ void ScrollIndicator::setClampedArc(lv_obj_t* arc, float startDeg)
 
 void ScrollIndicator::update()
 {
+    if (!mRail) {
+        return;
+    }
     if (mCount <= 1) {
         lv_obj_add_flag(mHandle, LV_OBJ_FLAG_HIDDEN);
         return;

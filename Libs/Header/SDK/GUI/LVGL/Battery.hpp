@@ -20,8 +20,9 @@ class Battery
 {
 public:
     Battery(lv_obj_t* parent, int32_t x, int32_t y);
-    /// Segments light at 25 % steps; below 25 % the first segment is red.
-    void setLevel(uint8_t percent);
+    /// Segments light at 25 % steps. The first is red from 1 to 24 % and
+    /// grey at 0 %, as in the TouchGFX gauge.
+    void setLevel(uint8_t level);
 
 private:
     lv_obj_t* mSeg[4] = {};

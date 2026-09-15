@@ -38,10 +38,11 @@ MainScreen::MainScreen(Model& model)
     const WheelMenu::Fonts fonts = { &poppins_semibold_30, &poppins_medium_18, &poppins_italic_18 };
     mMenu = std::make_unique<WheelMenu>(mRoot, mItems, ITEM_COUNT, fonts);
 
-    // Only R2 (exit) is hinted, as in the TouchGFX design.
+    // R1 (act on the item) amber and R2 (exit) white: what the TouchGFX app
+    // shows, where the Menu container's own hints draw over the view's.
     mButtons = std::make_unique<SDK::LVGL::Buttons>(mRoot);
     mButtons->set(SDK::LVGL::Buttons::NONE, SDK::LVGL::Buttons::NONE,
-                  SDK::LVGL::Buttons::NONE, SDK::LVGL::Buttons::AMBER);
+                  SDK::LVGL::Buttons::AMBER, SDK::LVGL::Buttons::WHITE);
 
     bind(&mModel);
     mModel.bind(this);

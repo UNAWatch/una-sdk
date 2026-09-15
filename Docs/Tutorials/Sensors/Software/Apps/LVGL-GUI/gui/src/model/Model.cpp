@@ -42,6 +42,14 @@ void Model::onStart()
     LOG_INFO("called\n");
 }
 
+void Model::onFrame()
+{
+    // The kernel's tick, once per frame; the screen redraws from it.
+    if (modelListener) {
+        modelListener->onFrame();
+    }
+}
+
 void Model::onResume()
 {
     LOG_INFO("called\n");

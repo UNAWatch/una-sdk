@@ -67,6 +67,7 @@ WheelMenu::WheelMenu(lv_obj_t* parent, const Item* items, uint16_t count, const 
     // The lens: a clipping container the size of the band, with the disc inside.
     mLens     = Draw::container(parent, kLensX, kWheelY, kLensW, kItemH);
     mLensDisc = Draw::dot(mLens, kLensW / 2, kLensDiscCy, kLensDiscRadius, Color::TEAL_DARK);
+    lv_obj_add_event_cb(mLens, &WheelMenu::deleteCb, LV_EVENT_DELETE, this);
 
     // The wheel area, then the two windows the strips are clipped to: the
     // selection window at the top, and below it the rest of the wheel.
@@ -84,6 +85,23 @@ WheelMenu::WheelMenu(lv_obj_t* parent, const Item* items, uint16_t count, const 
 WheelMenu::~WheelMenu()
 {
     lv_anim_delete(this, nullptr);
+    if (mLens) {
+        // The objects outlive this widget; they must not call back into it.
+        lv_obj_remove_event_cb_with_user_data(mLens, &WheelMenu::deleteCb, this);
+    }
+}
+
+void WheelMenu::deleteCb(lv_event_t* e)
+{
+    // The parent went first: end any slide and forget the objects, so the
+    // widget's remaining calls do nothing. The indicator watches for itself.
+    auto* self = static_cast<WheelMenu*>(lv_event_get_user_data(e));
+    lv_anim_delete(self, nullptr);
+    self->mSliding  = false;
+    self->mLens     = nullptr;
+    self->mLensDisc = nullptr;
+    self->mSelStrip = Strip{};
+    self->mOutStrip = Strip{};
 }
 
 void WheelMenu::buildStrip(Strip& strip, lv_obj_t* window, int32_t restY)
@@ -102,7 +120,7 @@ void WheelMenu::buildStrip(Strip& strip, lv_obj_t* window, int32_t restY)
 
 void WheelMenu::select(uint16_t index)
 {
-    if (mCount == 0) {
+    if (mCount == 0 || !mLens) {
         return;
     }
     if (mSliding) {
@@ -130,12 +148,14 @@ void WheelMenu::refresh()
 
 void WheelMenu::setBackground(uint32_t color)
 {
-    lv_obj_set_style_bg_color(mLensDisc, Draw::rgb(color), LV_PART_MAIN);
+    if (mLensDisc) {
+        lv_obj_set_style_bg_color(mLensDisc, Draw::rgb(color), LV_PART_MAIN);
+    }
 }
 
 void WheelMenu::slide(int direction)
 {
-    if (mCount <= 1) {
+    if (mCount <= 1 || !mLens) {
         return;
     }
     if (mSliding) {
@@ -189,6 +209,9 @@ void WheelMenu::animReadyCb(lv_anim_t* a)
 
 void WheelMenu::finishSlide()
 {
+    if (!mLens) {
+        return;
+    }
     lv_anim_delete(this, nullptr);
     if (!mMidFired) {
         fireMid();
@@ -202,7 +225,7 @@ void WheelMenu::finishSlide()
 
 void WheelMenu::render()
 {
-    if (mCount == 0) {
+    if (mCount == 0 || !mLens) {
         return;
     }
     // Slot 0 = previous, 1 = current, 2 = next, all around the shown item.
@@ -283,6 +306,14 @@ void WheelMenu::renderSlot(Slot& slot, const Item& item, bool center)
             const IconLayout&     layout = center ? item.centerLayout : item.itemLayout;
             if (src) {
                 lv_image_set_src(slot.icon, src);
+                // An alpha-only icon has no colour of its own: tint it white,
+                // as Draw::imageTinted does. Coloured bitmaps are left alone.
+                const bool alphaOnly = src->header.cf == LV_COLOR_FORMAT_A8;
+                lv_obj_set_style_image_recolor_opa(slot.icon, alphaOnly ? LV_OPA_COVER : LV_OPA_TRANSP,
+                                                   LV_PART_MAIN);
+                if (alphaOnly) {
+                    lv_obj_set_style_image_recolor(slot.icon, Draw::rgb(Color::WHITE), LV_PART_MAIN);
+                }
                 lv_obj_set_pos(slot.icon, layout.iconX, layout.iconY);
                 Draw::setHidden(slot.icon, false);
                 lv_obj_set_style_text_align(slot.label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);

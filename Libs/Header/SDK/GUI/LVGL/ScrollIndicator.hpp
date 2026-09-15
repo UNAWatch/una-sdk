@@ -4,6 +4,10 @@
  * @brief   Arc position indicator on the left bezel: a rail and a sliding
  *          handle, as the UNA activity apps show beside a menu or a set of
  *          swipeable faces.
+ *
+ * Teardown in either order: destroying the indicator leaves its arcs to the
+ * parent; deleting the parent first stops a running slide (the indicator
+ * watches LV_EVENT_DELETE) and turns later calls into no-ops.
  ******************************************************************************
  */
 
@@ -52,6 +56,7 @@ public:
 private:
     static void animExecCb(void* var, int32_t value);
     static void animDoneCb(lv_anim_t* a);
+    static void deleteCb(lv_event_t* e);
     float startAngle(uint16_t index) const;
     void  setHandle(float startDeg);
     void  setClampedArc(lv_obj_t* arc, float startDeg);

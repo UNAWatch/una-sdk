@@ -262,7 +262,9 @@ void Port::flushCb(lv_display_t* disp, const lv_area_t* area, uint8_t* pxMap)
     }
 
     if (lv_display_flush_is_last(disp)) {
-        // Sends REQUEST_DISPLAY_UPDATE; a no-op while the GUI is suspended.
+        // Sends REQUEST_DISPLAY_UPDATE; a no-op while the GUI is suspended,
+        // and the frame count stands still then too, so a host that presents
+        // on it shows only the frames the watch would.
 #if UNA_LVGL_FRAME_STATS
         const uint32_t t0 = tickCb();
         SDK::GuiCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
@@ -271,7 +273,9 @@ void Port::flushCb(lv_display_t* disp, const lv_area_t* area, uint8_t* pxMap)
 #else
         SDK::GuiCommandProcessor::GetInstance().writeDisplayFrameBuffer(sFrame);
 #endif
-        ++GetInstance().mFrameCount;
+        if (GetInstance().mResumed) {
+            ++GetInstance().mFrameCount;
+        }
     }
 
     lv_display_flush_ready(disp);
