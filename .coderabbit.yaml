@@ -14,3 +14,9 @@ reviews:
     - "!Examples/Apps/*/Software/Apps/TouchGFX-GUI/generated/**"
     - "!Libs/Header/SDK/Port/TouchGFX/generated/**"
     - "!Libs/Source/Port/TouchGFX/generated/**"
+    # LVGL fonts and images converted from the source TTFs and PNGs by
+    # Utilities/Scripts/lvgl_assets (generated, "do not edit").
+    - "!Docs/Tutorials/*/Software/Apps/LVGL-GUI/assets/fonts/*.c"
+    - "!Docs/Tutorials/*/Software/Apps/LVGL-GUI/assets/images/*.c"
+    - "!Examples/Apps/*/Software/Apps/LVGL-GUI/assets/fonts/*.c"
+    - "!Examples/Apps/*/Software/Apps/LVGL-GUI/assets/images/*.c"
