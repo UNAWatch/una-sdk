@@ -345,10 +345,11 @@ Blood-oxygen saturation derived from the optical PPG path. Delivered as a proces
 
 **Fields**: TOUCH (bool)
 
-For sensors without parsers (e.g. HEART_BEAT), use DataView:
+For a sensor without a parser, read its fields through DataView, by the
+layout its driver documents:
 ```cpp
 SDK::Sensor::DataView view = batch[0];
-float value = view.f[0]; // Assume layout known from driver docs
+float value = view.f[0]; // index and type come from that layout
 ```
 
 ## Workflow Diagram
