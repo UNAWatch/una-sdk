@@ -261,10 +261,13 @@ variants, starting with [HelloWorld](Tutorials/HelloWorld/ARCHITECTURE.md), and 
 kernel, but with a plain CMake project (`LVGL-GUI/simulator/CMakeLists.txt`) instead of
 the Designer-generated Visual Studio solution and gcc Makefile. `SDK::Simulator::LvglHost` (`Libs/Source/Simulator/LVGL`)
 stands in for the kernel's display, ticks and buttons: an SDL2 window shows the frames
-the LVGL port sends, a thread posts `EVENT_GUI_TICK` at the watch's frame rate, and keys
-1-4 become the kernel's press, click and release events (the `q`/`w`/`e`/`r` press row and
-`a`/`s`/`d`/`f` release row of `SDK/GUI/Button.hpp` send single events, as in the TouchGFX
-simulators). `cmake/una-simulator.cmake`
+the LVGL port sends, a thread posts `EVENT_GUI_TICK` at the watch's frame rate, and the
+keyboard stands in for the buttons. Keys 1-4 are the physical buttons L1, L2, R1, R2:
+key down sends the press event, key up sends the release, and a key up within 500 ms
+sends a click first, the sequence the kernel emits. The `q`/`w`/`e`/`r` row sends one
+press and the `a`/`s`/`d`/`f` row one release for the same four buttons, the way the
+TouchGFX simulators pass those codes from `SDK/GUI/Button.hpp` straight through (the
+`z` chord has no key). `cmake/una-simulator.cmake`
 provides the source lists and `una_simulator_link_sdl2()`, which uses an installed SDL2
 where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
 TouchGFX (configure with `-A Win32`). The sensor simulation, mock file system and
