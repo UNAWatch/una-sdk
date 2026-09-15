@@ -76,11 +76,18 @@ jobs:
             printf 'No *-CMake project found under Docs/Tutorials/%s\n' "$APP"
             exit 1
           fi
-          for CMAKE_ROOT in $PROJECTS; do
+          # One project per line from the script; read whole lines so a
+          # path is never split on whitespace.
+          while IFS= read -r CMAKE_ROOT; do
+            [ -n "$CMAKE_ROOT" ] || continue
+            if [ ! -d "$CMAKE_ROOT" ]; then
+              printf 'Missing CMake project: %s\n' "$CMAKE_ROOT" >&2
+              exit 1
+            fi
             echo "Build $CMAKE_ROOT"
             mkdir -p "$CMAKE_ROOT/build"
-            (cd "$CMAKE_ROOT/build" && cmake .. && make -j$(nproc))
-          done
+            (cd "$CMAKE_ROOT/build" && cmake .. && make -j"$(nproc)")
+          done <<< "$PROJECTS"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
