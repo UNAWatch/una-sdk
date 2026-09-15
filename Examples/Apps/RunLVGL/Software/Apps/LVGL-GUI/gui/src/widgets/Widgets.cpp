@@ -137,7 +137,9 @@ void HeartRateZone::setHR(float bpm, const uint8_t* thresholds, uint8_t threshol
         thresholdCount = kZoneCount;
     }
     // Highest threshold the HR exceeds selects the zone; below all: none.
-    int active = kZoneCount - 1;
+    // Threshold i is the entry to zone i, so the walk starts at the zone of
+    // the highest supplied threshold.
+    int active = thresholdCount - 1;
     for (int i = thresholdCount - 1; i >= 0; --i) {
         if (bpm > thresholds[i]) {
             break;
