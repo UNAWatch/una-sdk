@@ -108,6 +108,41 @@ TEST(MagneticFieldParser, TiltedAndLevelAgreeWhenTheWatchIsLevel)
     EXPECT_NEAR(tilted, p.getAzimuthDeg(), 0.01f);
 }
 
+// The refusal past the calibration check: gravity that cannot say which way
+// is down must not write a bearing either.
+TEST(MagneticFieldParser, ATiltedRefusalLeavesTheBearingAlone)
+{
+    MagData m;
+    fill(m, 0.0f, kStrong, 0.0f, true);
+
+    MagneticField p = parse(m);
+
+    float degrees = -1.0f;
+    EXPECT_FALSE(p.getAzimuthDegTilted(0.0f, 0.0f, 0.0f, degrees));
+    EXPECT_FLOAT_EQ(degrees, -1.0f) << "wrote a bearing it had refused to give";
+}
+
+// The sign of gravity is a contract nothing can check at run time, because a
+// watch lying face-down is a real attitude. The accelerometer reads az
+// positive face-up; a vector pointing down, passed instead, mirrors the
+// bearing rather than turning it round, so it does not look wrong.
+TEST(MagneticFieldParser, GravityIsTheAccelerometerReadingNotTheDownVector)
+{
+    MagData m;
+    fill(m, 10.0f, 20.0f, -40.0f, true);
+
+    MagneticField p = parse(m);
+
+    float faceUp = 0.0f;
+    ASSERT_TRUE(p.getAzimuthDegTilted(0.0f, 0.0f, 1.0f, faceUp));
+    EXPECT_NEAR(faceUp, 333.435f, 0.01f);
+    EXPECT_NEAR(faceUp, p.getAzimuthDeg(), 0.01f);
+
+    float faceDown = 0.0f;
+    ASSERT_TRUE(p.getAzimuthDegTilted(0.0f, 0.0f, -1.0f, faceDown));
+    EXPECT_NEAR(faceDown, 206.565f, 0.01f) << "face-down is not the mirror image";
+}
+
 // -----------------------------------------------------------------------------
 // The arithmetic, exercised directly
 // -----------------------------------------------------------------------------
@@ -188,8 +223,9 @@ TEST(MagneticFieldParser, TiltingTheWatchDoesNotMoveTheBearing)
         level = MagneticField::bearingDeg(xh, yh);
     }
 
-    // Pitch the watch nose-down by an angle: both the field and gravity rotate
-    // in the watch's axes by the same rotation about X.
+    // Tilt the watch about X - a roll, in levelProject()'s terms, where pitch
+    // is about Y: both the field and gravity rotate in the watch's axes by the
+    // same rotation.
     for (int degrees = -40; degrees <= 40; degrees += 10) {
         const float a = static_cast<float>(degrees) * 3.14159265f / 180.0f;
         const float c = std::cos(a);
@@ -362,4 +398,21 @@ TEST(MagneticFieldParser, EdgeOnHasNoBearing)
 
     EXPECT_FALSE(MagneticField::levelProject(0.0f, kStrong, 0.0f,
                                              -1.0f, 0.0f, 0.0f, xh, yh));
+}
+
+// Where the edge-on gate falls, not only that it exists: either side of a
+// square of cos(pitch) of 0.03, about 80 degrees of pitch. Gravity has unit
+// length, so that square is exactly what is set here.
+TEST(MagneticFieldParser, TheEdgeOnGateFallsWhereItSays)
+{
+    auto project = [](float cosPitchSq) {
+        float xh = 0.0f;
+        float yh = 0.0f;
+        return MagneticField::levelProject(0.0f, kStrong, 0.0f,
+                                           -std::sqrt(1.0f - cosPitchSq), 0.0f,
+                                           std::sqrt(cosPitchSq), xh, yh);
+    };
+
+    EXPECT_TRUE(project(0.04f)) << "refused just inside the gate";
+    EXPECT_FALSE(project(0.02f)) << "accepted just outside the gate";
 }

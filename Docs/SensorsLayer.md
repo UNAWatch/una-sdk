@@ -19,7 +19,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | IMU | ACCELEROMETER_RAW | 0x11 | Acceleration raw | Yes | X,Y,Z (int16 raw) - 3 |
 | IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | Yes | X,Y,Z (float) - 3 |
 | IMU | GYROSCOPE_RAW | 0x21 | Angular rate raw | Yes | X,Y,Z (int16 raw) - 3 |
-| IMU | MAGNETIC_FIELD | 0x30 | Magnetic field; corrected only when CALIBRATED | Yes | X,Y,Z (float uT), CALIBRATED (u32) - 4 |
+| IMU | MAGNETIC_FIELD | 0x30 | Magnetic field; corrected only when MAG_CALIBRATED | Yes | X,Y,Z (float uT), MAG_CALIBRATED (u32) - 4 |
 | IMU | MAGNETIC_FIELD_RAW | 0x31 | Magnetic field, as measured | Yes | X,Y,Z (float uT) - 3 |
 | Cardio | HEART_BEAT | 0x40 | Beat peak event | No | - |
 | Cardio | HEART_RATE | 0x41 | Current heart rate (bpm) | Yes | BPM (float), TRUST_LEVEL (float) - 2 |
@@ -185,6 +185,17 @@ if (p.getAzimuthDegTilted(ax, ay, az, bearing)) {
     // Same arithmetic, so a level watch reads the same either way.
 }
 ```
+
+`ax, ay, az` are the X, Y, Z of an `ACCELEROMETER` sample taken close in time
+to this one, passed as they are. That is the accelerometer's own reading, not
+a vector pointing down: a watch lying face-up at rest reads Z positive. Passed
+the other way round, the bearing comes out mirrored, and nothing can catch
+that, because face-down is a real attitude.
+
+The arithmetic behind both bearings is public, for a field that did not arrive
+in one of these samples - one from your own fusion, say:
+`MagneticField::levelProject()`, `hasDirection()` and `bearingDeg()` are
+static and take plain values.
 
 ### MAGNETIC_FIELD_RAW (0x31)
 

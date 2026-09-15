@@ -108,11 +108,14 @@ public:
     /**
      * @brief   Bearing clockwise from magnetic north, corrected for how the
      *          watch is being held.
-     * @param   ax, ay, az: Gravity in the watch's axes, as the accelerometer
-     *          reports it. Any unit: only the direction is used. Take it from
-     *          a sample close in time to this one - a bearing compensated with
-     *          gravity from a second ago is a bearing for how the watch was
-     *          held a second ago.
+     * @param   ax, ay, az: The accelerometer's own reading, in the watch's
+     *          axes - not a vector pointing down. A watch lying face-up at
+     *          rest reads az positive. Passed the other way round the bearing
+     *          comes out mirrored, and nothing here can catch that, because
+     *          face-down is a real attitude. Any unit: only the direction is
+     *          used. Take it from a sample close in time to this one - a
+     *          bearing compensated with gravity from a second ago is a bearing
+     *          for how the watch was held a second ago.
      * @param   degrees: The bearing, untouched unless this returns true.
      * @retval  'false' when there is no trustworthy bearing: no calibration,
      *          too little horizontal field, or gravity that cannot say which
@@ -148,8 +151,9 @@ public:
 
     /**
      * @brief   Whether a field has a horizontal component worth a bearing.
-     * @note    Static and free of the sample, so the arithmetic can be
-     *          exercised directly rather than through a constructed view.
+     * @note    Static and free of the sample, and part of the API: it serves a
+     *          field that did not arrive in a MagneticField sample, such as one
+     *          from a caller's own fusion.
      */
     static bool hasDirection(float x, float y)
     {
@@ -166,8 +170,11 @@ public:
      *          that what comes out can be read by the same bearingDeg() as a
      *          level sample. Held flat it is the identity - (xh, yh) come back
      *          as (x, y) - which is why the two bearings agree there.
+     * @note    Static, and part of the API for the same reason as
+     *          hasDirection().
      * @param   x, y, z:    Corrected field, microtesla.
-     * @param   ax, ay, az: Gravity in the same axes. Any unit.
+     * @param   ax, ay, az: The accelerometer's reading in the same axes, as
+     *          getAzimuthDegTilted() takes it: az positive face-up. Any unit.
      * @param   xh, yh:     Level-frame horizontal field, untouched unless this
      *                      returns true.
      * @retval  'false' when gravity cannot say which way is down: too small to
