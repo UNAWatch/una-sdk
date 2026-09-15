@@ -4,7 +4,8 @@
  * @brief   Simulated sensor settings for the Sensors LVGL PC simulator.
  *
  * Read by the SDK's simulated sensor layer (SDK/Libs/Source/Simulator).
- * Sensors uses no sensors, so the values only need to exist.
+ * Sensors reads every simulated sensor, so these values are the readings
+ * the screen shows.
  ******************************************************************************
  */
 

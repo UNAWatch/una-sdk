@@ -60,8 +60,8 @@ Before starting the Import Images tutorial, you need to set up the UNA SDK envir
     cmake -G "Unix Makefiles" ../Software/Apps/Images-CMake
     make
 
-    # LVGL GUI
-    mkdir build-lvgl && cd build-lvgl
+    # LVGL GUI (from the tutorial directory again)
+    cd .. && mkdir build-lvgl && cd build-lvgl
     cmake -G "Unix Makefiles" ../Software/Apps/ImagesLVGL-CMake
     make
     ```
@@ -121,7 +121,7 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 |---|---|---|
 | Import | Designer's Images tab; converted at **Generate Code** into `generated/images/` | one entry in `assets/assets.json`; converted by `lvgl_assets.py` into `assets/images/img_guy_transparent.c` (committed) |
 | Reference in code | `BITMAP_GUY_TRANSPARENT_ID` from `BitmapDatabase.hpp` | `img_guy_transparent`, an `lv_image_dsc_t` declared in `gui/Assets.hpp` |
-| Pixel format | Designer setting (RGB565 with alpha here) | `"format": "RGB565A8"` in the manifest (`A8` for a single-colour icon tinted at draw time) |
+| Pixel format | Designer setting (RGB565 with alpha here) | `"format": "RGB565A8"` in the manifest: RGB565 colour followed by a separate 8-bit alpha plane. A single-colour icon uses `"A8"`, alpha only, and is tinted at draw time |
 | Plain image, clipped to 100 x 100 | `touchgfx::Image` with `setPosition(70, y, 100, 100)` | `lv_image` inside a 100 x 100 `Draw::container` |
 | Scaled to 120 x 120 | `touchgfx::ScalableImage` with `BILINEAR_INTERPOLATION` | `lv_image_set_scale_x/y()` in 1/256 steps with the pivot at the top-left corner, anti-aliased |
 | Show one or the other | `setVisible()` + `invalidate()` on both | `Draw::setHidden()` on both |

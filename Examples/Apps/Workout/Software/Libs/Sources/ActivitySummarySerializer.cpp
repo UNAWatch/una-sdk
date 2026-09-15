@@ -122,7 +122,7 @@ bool ActivitySummarySerializer::load(ActivitySummary& summary)
     }
 
     size_t read = 0;
-    bool status = (file->read(buffer, fileSize, read) || read != fileSize);
+    bool status = file->read(buffer, fileSize, read) && (read == fileSize);
 
     file->close();
     file.reset();

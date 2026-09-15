@@ -125,7 +125,8 @@ private:
     void onResume() override;
     void onSuspend() override;
 
-    /// Post every queued button code to the active screen as LV_EVENT_KEY.
+    /// Post the next queued button code to the active screen as LV_EVENT_KEY:
+    /// one per frame, as TouchGFX samples them.
     void dispatchKeys();
 
     static void     flushCb(lv_display_t* disp, const lv_area_t* area, uint8_t* pxMap);

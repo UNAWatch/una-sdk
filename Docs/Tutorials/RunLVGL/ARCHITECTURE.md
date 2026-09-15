@@ -37,7 +37,7 @@ git submodule update --init ThirdParty/lvgl
 ```
 
 The converted fonts and images are committed, so building the app needs neither Node
-nor Python. Regenerating them does; see [Assets](#assets).
+nor Python. Regenerating them does; see [Assets](tutorials/runlvgl/assets).
 
 ### Building for the Watch
 
@@ -52,8 +52,8 @@ make
 
 On Windows without Docker, use Ninja and the ST toolchain from STM32CubeIDE on `PATH`;
 the CMake generator is the only difference (`cmake -G Ninja ..`). The final copy step
-into `Software/Output` uses a glob that fails under CMake's `-E copy`; the `.uapp` is
-still produced in the build directory and can be copied by hand.
+into the app's `Output/` directory uses a glob that fails under CMake's `-E copy`; the
+`.uapp` is still produced in the build directory and can be copied by hand.
 
 Install `RunLVGL_<version>.uapp` into `D:\Apps\RunLVGL\` on the watch with
 `Utilities/Scripts/Update-Watch-Apps.ps1`, or by copying it there. The app appears in
@@ -92,7 +92,8 @@ Keys are the watch buttons: **1** = L1 (up), **2** = L2 (down), **3** = R1 (sele
 than 500 ms is also a click, the same events the kernel emits. **5** raises a simulated
 wrist-motion event and **Esc** closes the app. Run the executable from `build/bin`: the
 mock file system is `../../../../../Output` relative to the working directory, which
-resolves to `Software/Output`, so recorded activities land next to the `.uapp` output.
+resolves to `Software/Output`, the simulator's sandbox (ignored by git); recorded
+activities land there.
 The simulated GPS gets a fix after four seconds and the heart rate starts a few seconds
 later; both are configured in `simulator/ConfigurationSimulator.hpp`.
 
@@ -122,9 +123,10 @@ implements the GUI's side of it, and both ports use it unchanged.
 Two constraints are worth knowing before choosing a toolkit. The GUI process runs in
 a fixed RAM region reserved when it is loaded (`GUI_RAM_LENGTH` in the app's CMake), so
 a toolkit's working memory is best kept on a static pool of known size inside it. And
-the app's C library is the kernel's export table rather than a full libc; RunLVGL does
-not rely on `float` formatting from it and formats every number as integers
-(`gui/include/gui/Format.hpp`).
+the app's C library is the kernel's export table rather than a full libc. RunLVGL formats
+every number with integer arithmetic (`gui/include/gui/Format.hpp`), which makes its
+output independent of that table's `printf` support; the tutorial GUIs format with
+`%.1f` through the same table, as their TouchGFX originals do.
 
 ## The LVGL Port
 
@@ -172,7 +174,10 @@ still paces the loop, so this adds no work.
 
 Each `SDK::GUI::Button` code the kernel delivers (click `'1'`..`'4'`, press
 `'q'`..`'r'`, release `'a'`..`'f'`) is posted to the active LVGL screen as an
-`LV_EVENT_KEY` event. No LVGL input device or group is involved: the focus-navigation
+`LV_EVENT_KEY` event, one code per frame as TouchGFX samples them. That pacing matters:
+a press often switches screens, and the switch happens at the end of the frame, so the
+click and release queued behind it must wait for the next frames to reach the new screen
+rather than the one being left. No LVGL input device or group is involved: the focus-navigation
 model of an LVGL keypad group does not fit four buttons whose meaning each screen
 defines, so screens read the code with `lv_event_get_key()` and decide themselves.
 
@@ -324,6 +329,7 @@ subclasses for `Title` and `SensorStatusRow` that fill in Run's font and icons, 
   lines of code and no bitmaps, which is the general lesson for LVGL on this platform:
   shapes are cheap, pixels are not.
 
+(tutorials/runlvgl/assets)=
 ### Assets
 
 `assets/gen_assets.py` converts Run's Poppins TTFs and PNG icons into LVGL C arrays, and

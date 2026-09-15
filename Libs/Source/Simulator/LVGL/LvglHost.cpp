@@ -77,6 +77,7 @@ bool LvglHost::init()
         LOG_ERROR("SDL_Init failed: %s\n", SDL_GetError());
         return false;
     }
+    mSdlReady = true;   // whatever fails below, shutdown() releases SDL
 
     const int scale = mOptions.scale > 0 ? mOptions.scale : 1;
     mWindow = SDL_CreateWindow(mOptions.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -116,6 +117,7 @@ void LvglHost::start()
     sendToGui(SDK::MessageType::COMMAND_APP_GUI_RESUME);
 
     mTicking    = true;
+    mStarted    = true;
     mTickThread = std::thread(&LvglHost::tickThread, this);
 }
 
@@ -130,8 +132,11 @@ void LvglHost::shutdown()
         mTickThread.join();
     }
 
-    if (mWindow) {
-        // The GUI has already stopped (run() returned); now the service.
+    if (mStarted) {
+        // The GUI has already stopped (run() returned); now the service. Only
+        // once start() told it the GUI was running: an init() that failed
+        // never did, and the service thread was never started.
+        mStarted = false;
         sendToService(SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP);
         sendToService(SDK::MessageType::COMMAND_APP_STOP);
     }
@@ -147,6 +152,9 @@ void LvglHost::shutdown()
     if (mWindow) {
         SDL_DestroyWindow(mWindow);
         mWindow = nullptr;
+    }
+    if (mSdlReady) {
+        mSdlReady = false;
         SDL_Quit();
     }
 }

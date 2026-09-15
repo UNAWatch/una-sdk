@@ -31,8 +31,8 @@ mkdir build && cd build
 cmake -G "Unix Makefiles" ../Software/Apps/Files-CMake
 make
 
-# LVGL GUI
-mkdir build-lvgl && cd build-lvgl
+# LVGL GUI (from the tutorial directory again)
+cd .. && mkdir build-lvgl && cd build-lvgl
 cmake -G "Unix Makefiles" ../Software/Apps/FilesLVGL-CMake
 make
 ```

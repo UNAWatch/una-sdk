@@ -101,6 +101,8 @@ private:
 
     std::thread       mTickThread;
     std::atomic<bool> mTicking { false };
+    bool              mSdlReady = false;   ///< SDL_Init() succeeded; SDL_Quit() owed
+    bool              mStarted  = false;   ///< start() told the processes the GUI runs
 
     uint32_t mShownFrame    = 0;
     bool     mStopRequested = false;

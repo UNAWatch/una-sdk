@@ -3,9 +3,9 @@
  * @file    Format.hpp
  * @brief   Value formatting shared by the Run screens.
  *
- * The TouchGFX app formats through touchgfx::Unicode; here plain snprintf
- * would need a float-capable libc, which the kernel's export table does not
- * promise. Every decimal is therefore produced with integer arithmetic.
+ * The TouchGFX app formats through touchgfx::Unicode. Here every decimal is
+ * produced with integer arithmetic, which keeps the output independent of
+ * the float formatting in the kernel's C library export table.
  * Behaviour matches the Run app face for face: "---" below the display
  * minimums, pace rounded to the nearest second, and the same precision steps.
  ******************************************************************************
@@ -141,15 +141,21 @@ inline const char* units(bool imperial)
 /// (the TouchGFX "%05.02f" style used by the interval distance readout).
 inline void fixedPadded(char* buf, size_t n, float value, int decimals, size_t width)
 {
+    if (n == 0) {
+        return;
+    }
     char tmp[16];
     fixed(tmp, sizeof(tmp), value, decimals);
-    const size_t len = strlen(tmp);
+    size_t len = strlen(tmp);
     size_t pad = len < width ? width - len : 0;
+    // Fit pad + text + terminator in n: drop the padding first, then the text.
     if (pad + len + 1 > n) {
         pad = (n > len + 1) ? n - len - 1 : 0;
+        len = n - pad - 1;
     }
     memset(buf, '0', pad);
-    memcpy(buf + pad, tmp, len + 1);
+    memcpy(buf + pad, tmp, len);
+    buf[pad + len] = '\0';
 }
 
 // --- Intervals menu texts ----------------------------------------------------

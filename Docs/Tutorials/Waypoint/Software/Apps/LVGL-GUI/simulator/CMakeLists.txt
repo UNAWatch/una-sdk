@@ -8,7 +8,7 @@
 #   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 #   cmake --build build
 # Run from build/bin so the mock file system lands in ../../../../../Output,
-# i.e. Software/Output next to the .uapp output.
+# i.e. this tutorial's Software/Output (ignored by Docs/Tutorials/.gitignore).
 cmake_minimum_required(VERSION 3.21)
 
 if("$ENV{UNA_SDK}" STREQUAL "")

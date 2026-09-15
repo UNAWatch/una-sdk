@@ -4,7 +4,8 @@
  * @brief   Simulated sensor settings for the Waypoint LVGL PC simulator.
  *
  * Read by the SDK's simulated sensor layer (SDK/Libs/Source/Simulator).
- * Waypoint uses no sensors, so the values only need to exist.
+ * Waypoint navigates by the simulated GPS: a fix after the search time, then
+ * a runner circling a track at the speed below.
  ******************************************************************************
  */
 

@@ -171,17 +171,22 @@ void Port::run()
 
 void Port::dispatchKeys()
 {
-    auto& pump = SDK::GuiCommandProcessor::GetInstance();
-
+    // One code per frame, as TouchGFX samples them. A press often asks for a
+    // screen switch, which the app performs at the end of this frame (see
+    // lv_async_call); delivering the click and release queued behind it in
+    // the same frame would hand them to the screen being left, and a screen
+    // that waits for the release (hold to confirm) would never see it.
+    auto&   pump = SDK::GuiCommandProcessor::GetInstance();
     uint8_t code = 0;
-    while (pump.getKeySample(code)) {
-        lv_obj_t* screen = lv_screen_active();
-        if (!screen) {
-            continue;
-        }
-        uint32_t key = code;
-        lv_obj_send_event(screen, LV_EVENT_KEY, &key);
+    if (!pump.getKeySample(code)) {
+        return;
     }
+    lv_obj_t* screen = lv_screen_active();
+    if (!screen) {
+        return;
+    }
+    uint32_t key = code;
+    lv_obj_send_event(screen, LV_EVENT_KEY, &key);
 }
 
 // --- IGuiLifeCycleCallback -------------------------------------------------
@@ -274,7 +279,16 @@ void Port::flushCb(lv_display_t* disp, const lv_area_t* area, uint8_t* pxMap)
 
 uint32_t Port::tickCb()
 {
-    return SDK::KernelProviderGUI::GetInstance().getKernel().sys.getTimeMs();
+    // LVGL expects a tick that wraps at 2^32. The kernel clock returns to 0
+    // short of that (after about 48 days), which lv_tick_elaps() would read
+    // as a huge step that ends every animation and fires every timer at
+    // once, so accumulate the clock's deltas into a tick of our own.
+    static uint32_t sLast = 0;
+    static uint32_t sTick = 0;
+    const uint32_t  now   = SDK::KernelProviderGUI::GetInstance().getKernel().sys.getTimeMs();
+    sTick += (now >= sLast) ? (now - sLast) : now;
+    sLast = now;
+    return sTick;
 }
 
 void Port::logCb(lv_log_level_t level, const char* buf)

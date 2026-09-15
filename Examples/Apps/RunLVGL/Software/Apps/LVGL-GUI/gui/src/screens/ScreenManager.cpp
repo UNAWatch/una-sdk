@@ -85,7 +85,9 @@ void ScreenManager::switchNow(ScreenId id)
     mCurrent = next;
 
     if (old) {
-        old->destroy();
+        // ~Screen() runs the derived destructors (which stop timers and
+        // animations) before it deletes the LVGL tree, so a widget destructor
+        // may still touch its objects.
         delete old;
     }
 

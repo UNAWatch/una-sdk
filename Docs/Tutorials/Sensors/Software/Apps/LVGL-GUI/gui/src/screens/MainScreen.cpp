@@ -111,55 +111,67 @@ void MainScreen::onKey(uint8_t code)
     }
 }
 
+namespace
+{
+/// Appends to a fixed buffer, never past its end. Once full, further appends
+/// are dropped, so a long value cannot push later lines off into memory.
+class LineBuffer
+{
+public:
+    LineBuffer(char* buf, size_t size) : mBuf(buf), mSize(size) { mBuf[0] = '\0'; }
+
+    template <typename... Args>
+    void add(const char* fmt, Args... args)
+    {
+        if (mLen + 1 >= mSize) {
+            return;
+        }
+        const int n = snprintf(mBuf + mLen, mSize - mLen, fmt, args...);
+        if (n > 0) {
+            mLen = (static_cast<size_t>(n) < mSize - mLen) ? mLen + n : mSize - 1;
+        }
+    }
+
+private:
+    char*  mBuf;
+    size_t mSize;
+    size_t mLen = 0;
+};
+} // namespace
+
 void MainScreen::refreshDisplay()
 {
-    char buffer[256];
-    int  len = 0;
+    char       buffer[256];
+    LineBuffer text(buffer, sizeof(buffer));
 
     if (mVerbosity <= FULL) {
         // Group display
         if (mVerbosity >= BASIC) {
-            len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\n", mHr);
-            len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", static_cast<unsigned long>(mSteps));
+            text.add("HR: %.0f BPM\n", mHr);
+            text.add("Steps: %lu\n", static_cast<unsigned long>(mSteps));
         }
         if (mVerbosity >= DETAILED) {
-            len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.2f, %.2f, %.0f\n", mGpsLat, mGpsLon, mGpsAlt);
-            len += snprintf(buffer + len, sizeof(buffer) - len, "Elev: %.1f m\n", mElevation);
-            len += snprintf(buffer + len, sizeof(buffer) - len, "Acc: %.2f, %.2f, %.2f\n", mAccX, mAccY, mAccZ);
-            len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", static_cast<unsigned long>(mFloors));
+            text.add("GPS: %.2f, %.2f, %.0f\n", mGpsLat, mGpsLon, mGpsAlt);
+            text.add("Elev: %.1f m\n", mElevation);
+            text.add("Acc: %.2f, %.2f, %.2f\n", mAccX, mAccY, mAccZ);
+            text.add("Floors: %lu\n", static_cast<unsigned long>(mFloors));
         }
         if (mVerbosity >= FULL) {
-            len += snprintf(buffer + len, sizeof(buffer) - len, "Compass: %.0f\xC2\xB0\n", mHeading);
+            text.add("Compass: %.0f\xC2\xB0\n", mHeading);
         }
     } else {
         // Per-sensor detailed display
         switch (mVerbosity) {
-            case HR:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "HR: %.0f BPM\nTL: %.0f\n", mHr, mHrTl);
-                break;
-            case GPS:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "GPS: %.6f, %.6f\nAlt: %.1f m\n", mGpsLat, mGpsLon, mGpsAlt);
-                break;
-            case ALT:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "Elevation: %.1f m\n", mElevation);
-                break;
-            case ACC:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "Accelerometer:\nX: %.2f G\nY: %.2f G\nZ: %.2f G\n", mAccX, mAccY, mAccZ);
-                break;
-            case STEP:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", static_cast<unsigned long>(mSteps));
-                break;
-            case FLOOR:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "Floors: %lu\n", static_cast<unsigned long>(mFloors));
-                break;
-            case MAG:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "Compass: %.0f\n", mHeading);
-                break;
-            default:
-                break;
+            case HR:    text.add("HR: %.0f BPM\nTL: %.0f\n", mHr, mHrTl); break;
+            case GPS:   text.add("GPS: %.6f, %.6f\nAlt: %.1f m\n", mGpsLat, mGpsLon, mGpsAlt); break;
+            case ALT:   text.add("Elevation: %.1f m\n", mElevation); break;
+            case ACC:   text.add("Accelerometer:\nX: %.2f G\nY: %.2f G\nZ: %.2f G\n", mAccX, mAccY, mAccZ); break;
+            case STEP:  text.add("Steps: %lu\n", static_cast<unsigned long>(mSteps)); break;
+            case FLOOR: text.add("Floors: %lu\n", static_cast<unsigned long>(mFloors)); break;
+            case MAG:   text.add("Compass: %.0f\n", mHeading); break;
+            default:    break;
         }
     }
-    (void)len;
 
     // A single sensor gets the large face; the group views the small one.
     lv_obj_set_style_text_font(mBody, mVerbosity > FULL ? &poppins_regular_18 : &poppins_regular_9, LV_PART_MAIN);

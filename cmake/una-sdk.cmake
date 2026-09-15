@@ -121,9 +121,18 @@ endif()
 
 # Every LVGL C source is compiled; files for disabled features and other
 # platforms reduce to empty translation units through lv_conf.h.
-file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES CONFIGURE_DEPENDS
-    "${UNA_SDK_LVGL_PATH}/src/*.c"
-)
+if(EXISTS "${UNA_SDK_LVGL_PATH}/lvgl.h")
+    file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES CONFIGURE_DEPENDS
+        "${UNA_SDK_LVGL_PATH}/src/*.c"
+    )
+else()
+    # The submodule is not checked out. A TouchGFX app never reads this list;
+    # an LVGL app that does fails at configure time with this file name in
+    # the error, instead of at link time with hundreds of undefined lv_*.
+    set(UNA_SDK_LVGL_SOURCES
+        "${UNA_SDK_LVGL_PATH}/LVGL-SUBMODULE-NOT-CHECKED-OUT--run--git-submodule-update--init-ThirdParty-lvgl.c"
+    )
+endif()
 
 # Drawing helpers and the widgets the UNA activity apps share, built from
 # LVGL primitives (headers under Libs/Header/SDK/GUI/LVGL/). Also used by

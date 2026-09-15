@@ -61,8 +61,8 @@ Before building HelloWorld, you need to set up the UNA SDK environment. Follow t
    cmake -G "Unix Makefiles" ../Software/Apps/HelloWorld-CMake
    make
 
-   # LVGL GUI
-   mkdir build-lvgl && cd build-lvgl
+   # LVGL GUI (from the tutorial directory again)
+   cd .. && mkdir build-lvgl && cd build-lvgl
    cmake -G "Unix Makefiles" ../Software/Apps/HelloWorldLVGL-CMake
    make
    ```
