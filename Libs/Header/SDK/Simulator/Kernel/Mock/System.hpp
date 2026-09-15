@@ -34,6 +34,15 @@ namespace SDK::Simulator::Mock
 
         static bool isAppRunning();
 
+        /**
+         * @brief   Register the function exit() calls to end the GUI main loop.
+         *
+         * The TouchGFX simulators leave this unset and exit() stops the TouchGFX
+         * HAL directly. A simulator built on another toolkit registers the
+         * function that ends its own loop (see the LVGL simulator host).
+         */
+        static void SetStopHandler(void (*handler)());
+
         void     exit(int status = 0) override;
         uint32_t getTimeMs()          override;
         void     delay(uint32_t ms)   override;
@@ -41,6 +50,7 @@ namespace SDK::Simulator::Mock
 
 	private:
         static bool mAppRunning;
+        static void (*mStopHandler)();
     };
 
     class SystemService : public SDK::Interface::ISystem

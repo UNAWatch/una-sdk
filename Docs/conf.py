@@ -37,6 +37,9 @@ myst_enable_extensions = [
     "attrs_inline",
 ]
 myst_linkify_fuzzy_links = False
+# Heading anchors (#the-heading-text), so a link that works on GitHub also
+# resolves here.
+myst_heading_anchors = 4
 myst_fence_as_directive = ["mermaid"]
 
 # Breathe configuration

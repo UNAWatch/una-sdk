@@ -72,7 +72,7 @@ set(UNA_SDK_SOURCES_SERVICE
 set(UNA_SDK_SOURCES_GUI
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/STM32TouchController.cpp"
-    "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXGPIO.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/TouchGFXHAL.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/generated/OSWrappers.cpp"
@@ -96,6 +96,83 @@ set(UNA_SDK_INCLUDE_DIRS_JSON
 set(UNA_SDK_INCLUDE_DIRS_GUI
     "$ENV{UNA_SDK}/Libs/Header/SDK/Port/TouchGFX"
     "$ENV{UNA_SDK}/Libs/Header/SDK/Port/TouchGFX/generated"
+)
+
+# ---------------------------------------------------------------------------
+# GUI process built on LVGL (ThirdParty/lvgl submodule) instead of TouchGFX.
+#
+# An app selects this by linking UNA_SDK_SOURCES_GUI_LVGL in place of
+# UNA_SDK_SOURCES_GUI, adding UNA_SDK_INCLUDE_DIRS_GUI_LVGL to its include
+# dirs and UNA_SDK_DEFINES_GUI_LVGL to GUI_COMPILE_DEFINITIONS (see
+# una_app_build_gui). The message pump, GuiCommandProcessor.cpp, is shared
+# with the TouchGFX port.
+#
+# LVGL reads its configuration from the file named by LV_CONF_PATH. Set
+# UNA_LVGL_CONF before including this file to use an app-specific lv_conf.h;
+# the default is the SDK's.
+# ---------------------------------------------------------------------------
+# Forward slashes: in the glob below a backslash from a Windows-style UNA_SDK
+# would be read as an escape.
+file(TO_CMAKE_PATH "$ENV{UNA_SDK}/ThirdParty/lvgl" UNA_SDK_LVGL_PATH)
+
+if(NOT DEFINED UNA_LVGL_CONF)
+    set(UNA_LVGL_CONF "$ENV{UNA_SDK}/Libs/Header/SDK/Port/LVGL/lv_conf.h")
+endif()
+# Forward slashes: the value is emitted inside the LV_CONF_PATH string literal,
+# where a backslash from a Windows-style path would be an escape.
+file(TO_CMAKE_PATH "${UNA_LVGL_CONF}" UNA_LVGL_CONF)
+
+# Every LVGL C source is compiled; files for disabled features and other
+# platforms reduce to empty translation units through lv_conf.h. The list is
+# taken at configure time only (no CONFIGURE_DEPENDS): the submodule is
+# pinned, so the set changes only with a submodule bump, after which cmake is
+# re-run. This file is included by every CMake app, TouchGFX ones too, and a
+# re-checked glob would cost each of their builds a scan of LVGL's tree.
+if(EXISTS "${UNA_SDK_LVGL_PATH}/lvgl.h")
+    file(GLOB_RECURSE UNA_SDK_LVGL_SOURCES
+        "${UNA_SDK_LVGL_PATH}/src/*.c"
+    )
+else()
+    # The submodule is not checked out. A TouchGFX app never reads this list;
+    # an LVGL app that does fails at configure time with this file name in
+    # the error, instead of at link time with hundreds of undefined lv_*.
+    set(UNA_SDK_LVGL_SOURCES
+        "${UNA_SDK_LVGL_PATH}/LVGL-SUBMODULE-NOT-CHECKED-OUT--run--git-submodule-update--init-ThirdParty-lvgl.c"
+    )
+endif()
+
+# Drawing helpers and the widgets the UNA activity apps share, built from
+# LVGL primitives (headers under Libs/Header/SDK/GUI/LVGL/). Also used by
+# the PC simulator (una-simulator.cmake).
+set(UNA_SDK_SOURCES_GUI_LVGL_WIDGETS
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Battery.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Buttons.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Draw.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/ScrollIndicator.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/SensorStatusRow.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/TimerRing.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Title.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/Toggle.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/GUI/LVGL/WheelMenu.cpp"
+)
+
+set(UNA_SDK_SOURCES_GUI_LVGL
+    "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"
+    ${UNA_SDK_SOURCES_GUI_LVGL_WIDGETS}
+    ${UNA_SDK_LVGL_SOURCES}
+)
+
+set(UNA_SDK_INCLUDE_DIRS_GUI_LVGL
+    "${UNA_SDK_LVGL_PATH}"
+)
+
+# LV_LVGL_H_INCLUDE_SIMPLE makes the C files lv_font_conv and LVGLImage.py emit
+# include "lvgl.h" (on the include path above) rather than "lvgl/lvgl.h".
+set(UNA_SDK_DEFINES_GUI_LVGL
+    "LV_CONF_PATH=\"${UNA_LVGL_CONF}\""
+    "LV_LVGL_H_INCLUDE_SIMPLE"
 )
 
 # Combined service includes for backward compatibility

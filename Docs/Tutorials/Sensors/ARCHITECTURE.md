@@ -10,6 +10,8 @@ In this tutorial, we implement a sensors dashboard app that subscribes to availa
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Sensors)
 
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI (`Software/Apps/TouchGFX-GUI`, built by `Sensors-CMake`) and an **LVGL** GUI (`Software/Apps/LVGL-GUI`, built by `SensorsLVGL-CMake`) over the same service. Steps 1 and 2 below are the service and apply to both; steps 3 and 4 show each toolkit's side.
+
 ## List of Implemented Sensors
 
 | Sensor | Description | Notes |
@@ -170,7 +172,7 @@ Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with
 
 ### Step 3: GUI Model - Receive Messages
 
-In [`Model.cpp`](Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp), implement `customMessageHandler`:
+In `Model.cpp` ([TouchGFX](Software/Apps/TouchGFX-GUI/gui/src/model/Model.cpp), [LVGL](Software/Apps/LVGL-GUI/gui/src/model/Model.cpp)), implement `customMessageHandler`:
 
 ```cpp
 case CustomMessage::HR_VALUES: {
@@ -181,9 +183,11 @@ case CustomMessage::HR_VALUES: {
 // etc. for Elevation, Accelerometer, StepCounter, Floors, Compass, Stats, RTC
 ```
 
-### Step 4: MainView - Display & Controls
+The handler is the same code in both GUIs. What differs is one line in the constructor: the TouchGFX model registers with `SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this)`, the LVGL model with `SDK::LVGL::Port::GetInstance().setCustomMessageHandler(this)`. `ModelListener` declares one `update...()` virtual per message; the screen overrides them.
 
-In [`MainView.hpp`](Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp), [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
+### Step 4: MainView / MainScreen - Display & Controls
+
+TouchGFX, in [`MainView.hpp`](Software/Apps/TouchGFX-GUI/gui/include/gui/main_screen/MainView.hpp), [`MainView.cpp`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp):
 
 Store data in members, `updateHR(float hr, float tl)` etc. store values.
 
@@ -199,23 +203,41 @@ Header: `refreshBattery()` "Battery: %.1f%%" `text_header`
 
 Stats: `refreshStats()` "CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f" `text_stats`
 
+LVGL, in [`MainScreen.hpp`](Software/Apps/LVGL-GUI/gui/include/gui/screens/MainScreen.hpp), [`MainScreen.cpp`](Software/Apps/LVGL-GUI/gui/src/screens/MainScreen.cpp): the same members, the same three format functions and the same key handling, with these differences:
+
+- The three text areas are labels made with `Draw::label()` at the design's positions; a label grows to the lines it holds, and `lv_label_set_text()` replaces `Unicode::strncpy` + `invalidate()`.
+- The per-frame `handleTickEvent()` becomes `onFrame()`: the model forwards the kernel's frame tick to the screen through `ModelListener`, and the screen calls its three refresh functions there, once per frame, as the TouchGFX view does.
+- The body's face is switched with `lv_obj_set_style_text_font()`: Poppins Regular 9 for the group views, Regular 18 for one sensor at a time.
+- The fonts come from `assets/assets.json`, at 2 bits per pixel like every LVGL face on this platform: the display has two bits per colour channel, so finer anti-aliasing cannot be shown. The body faces also carry the degree sign for the compass line.
+
+### Size on the watch
+
+| Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
+|---|---|---|---|
+| Sensors (TouchGFX) | 553 KB | 223 KB | 73 KB |
+| SensorsLVGL | 489 KB | 164 KB | 139 KB |
+
+Most of either package is the service, which links the sensor layer and the FIT writer.
+
 ### Additional Notes
 
 - **Battery**: Battery level retrieval implemented using SDK::Sensor::BATTERY_LEVEL
 - **Altimeter**: Uses altitude from barometric sensor; pressure not available in parser
 - **Max Frequency**: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.
 - **RTC**: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.
-- Build with [`CMakeLists.txt`](Software/Apps/Sensors-CMake/CMakeLists.txt).
+- Build with [`Sensors-CMake/CMakeLists.txt`](Software/Apps/Sensors-CMake/CMakeLists.txt) (TouchGFX GUI) or [`SensorsLVGL-CMake/CMakeLists.txt`](Software/Apps/SensorsLVGL-CMake/CMakeLists.txt) (LVGL GUI); the two appear in the launcher as **Sensors** and **SensorsLVGL**.
 
 ### Running on Simulator
 
-To test the Sensors app on the simulator (Windows only):
+**TouchGFX** (Windows only):
 
 1. Build the app following the [SDK setup](../../sdk-setup.md) instructions.
 2. Open `Sensors.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
 3. Navigate to `Sensors\Software\Apps\TouchGFX-GUI\simulator\msvs`
 4. Open `Application.vcxproj` in Visual Studio
 5. Press **F5** to start debugging and run the simulator
+
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `SensorsLVGLSimulator`. Which sensors the mock kernel simulates, and how, is set in `simulator/ConfigurationSimulator.hpp`.
 
 The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.
 

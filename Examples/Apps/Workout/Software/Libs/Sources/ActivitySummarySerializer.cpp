@@ -34,7 +34,7 @@ bool ActivitySummarySerializer::save(const ActivitySummary& summary)
     const char* slash = strrchr(mPath, '/');
     if (slash) {
         char buff[SDK::Interface::IFileSystem::skMaxPathLen]{ };
-        snprintf(buff, sizeof(buff), "%.*s", static_cast<size_t>(slash - mPath), mPath);
+        snprintf(buff, sizeof(buff), "%.*s", static_cast<int>(slash - mPath), mPath);
         // Create dir
         if (!mKernel.fs.mkdir(buff)) {
             return false;
@@ -122,7 +122,7 @@ bool ActivitySummarySerializer::load(ActivitySummary& summary)
     }
 
     size_t read = 0;
-    bool status = (file->read(buffer, fileSize, read) || read != fileSize);
+    bool status = file->read(buffer, fileSize, read) && (read == fileSize);
 
     file->close();
     file.reset();
@@ -144,14 +144,18 @@ bool ActivitySummarySerializer::load(ActivitySummary& summary)
 
 #if defined(SIMULATOR)
 #if defined(_USE_32BIT_TIME_T)
-    uint32_t tmp;
+    uint32_t tmp = 0;
 #else
-    uint64_t tmp;
+    uint64_t tmp = 0;
 #endif
-    reader.get("time", tmp);
-    summary.time = static_cast<time_t>(tmp);
-    reader.get("utc", tmp);
-    summary.utc = static_cast<time_t>(tmp);
+    // get() leaves its output alone when the key is missing, so assign only
+    // on success: a missing "utc" must not inherit "time".
+    if (reader.get("time", tmp)) {
+        summary.time = static_cast<time_t>(tmp);
+    }
+    if (reader.get("utc", tmp)) {
+        summary.utc = static_cast<time_t>(tmp);
+    }
 #else
     reader.get("time", summary.time);
     reader.get("utc", summary.utc);

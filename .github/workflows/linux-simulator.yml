@@ -5,6 +5,7 @@ on:
     paths:
       - 'Libs/**'
       - 'ThirdParty/**'
+      - 'cmake/**'
       - 'Examples/Apps/**'
       - 'Docs/Tutorials/**'
       - '.github/workflows/linux-simulator.yml'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'Libs/**'
       - 'ThirdParty/**'
+      - 'cmake/**'
       - 'Examples/Apps/**'
       - 'Docs/Tutorials/**'
       - '.github/workflows/linux-simulator.yml'
@@ -46,10 +48,16 @@ jobs:
         run: |
           set -uo pipefail
 
-          # A project is any dir containing simulator/gcc/Makefile.
+          # Two kinds of simulator project, each printed as "<dir> <kind>":
+          #   make   a TouchGFX GUI, built by simulator/gcc/Makefile
+          #   cmake  an LVGL GUI, built by simulator/CMakeLists.txt
           find_projects() {
-            find Examples/Apps Docs/Tutorials -path '*/simulator/gcc/Makefile' 2>/dev/null \
-              | sed 's#/simulator/gcc/Makefile##' | sort
+            {
+              find Examples/Apps Docs/Tutorials -path '*/simulator/gcc/Makefile' 2>/dev/null \
+                | sed 's#/simulator/gcc/Makefile# make#'
+              find Examples/Apps Docs/Tutorials -path '*/simulator/CMakeLists.txt' 2>/dev/null \
+                | sed 's#/simulator/CMakeLists.txt# cmake#'
+            } | sort
           }
           TOTAL="$(find_projects | wc -l | tr -d ' ')"
           echo "Discovered $TOTAL simulator project(s)."
@@ -75,13 +83,13 @@ jobs:
               # "nothing to build" -- fail safe to a full build rather than skip.
               echo "::warning::Could not determine changed files for base ${BASE_SHA}; building all projects."
               BUILD_ALL=true
-            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|\.github/workflows/linux-simulator\.yml)'; then
+            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|cmake/|\.github/workflows/linux-simulator\.yml)'; then
               BUILD_ALL=true
             fi
           fi
 
           SEL='[]'
-          while IFS= read -r d; do
+          while IFS=' ' read -r d kind; do
             [ -n "$d" ] || continue
             name="$(printf '%s' "$d" | cut -d/ -f3)"     # Examples/Apps/<name> or Docs/Tutorials/<name>
             root="$(printf '%s' "$d" | cut -d/ -f1-3)"   # app/tutorial root (covers its Libs/Sources)
@@ -93,7 +101,9 @@ jobs:
             fi
             if $take; then
               slug="$(printf '%s' "$d" | tr '/' '-')"   # unique artifact key (leaf names can collide)
-              SEL="$(printf '%s' "$SEL" | jq -c --arg n "$name" --arg d "$d" --arg s "$slug" '. + [{name:$n, dir:$d, slug:$s}]')"
+              SEL="$(printf '%s' "$SEL" \
+                | jq -c --arg n "$name" --arg d "$d" --arg s "$slug" --arg k "$kind" \
+                     '. + [{name:$n, dir:$d, slug:$s, kind:$k}]')"
             fi
           done < <(find_projects)
 
@@ -104,13 +114,13 @@ jobs:
             echo ""
             echo "- event: \`$EVENT\`  | build-all: \`$BUILD_ALL\`"
             echo "- selected $(printf '%s' "$SEL" | jq 'length') of $TOTAL project(s):"
-            printf '%s' "$SEL" | jq -r '.[].dir | "  - `" + . + "`"'
+            printf '%s' "$SEL" | jq -r '.[] | "  - `" + .dir + "` (" + .kind + ")"'
           } >> "$GITHUB_STEP_SUMMARY"
 
   build:
     needs: discover
     if: needs.discover.outputs.projects != '[]'
-    name: build (${{ matrix.project.name }})
+    name: build (${{ matrix.project.name }}, ${{ matrix.project.kind }})
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -119,54 +129,85 @@ jobs:
         project: ${{ fromJson(needs.discover.outputs.projects) }}
     env:
       APP_DIR: ${{ matrix.project.dir }}
+      KIND: ${{ matrix.project.kind }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
+          # The LVGL simulators build LVGL from the submodule (ThirdParty/lvgl,
+          # shallow per .gitmodules).
+          submodules: ${{ matrix.project.kind == 'cmake' }}
 
       - name: Install simulator build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri
+            libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri ninja-build
 
       - name: Build simulator
         id: build
+        shell: bash
         run: |
+          set -o pipefail
           cd "$APP_DIR"
-          UNA_SDK="$GITHUB_WORKSPACE" make -f simulator/gcc/Makefile -j"$(nproc)" 2>&1 \
-            | tee "$GITHUB_WORKSPACE/build.log"
-          exit "${PIPESTATUS[0]}"
+          export UNA_SDK="$GITHUB_WORKSPACE"
+          if [ "$KIND" = cmake ]; then
+            # Configure in a scratch dir; the project places its binary in
+            # simulator/build/bin whatever the build dir, so the mock file
+            # system path resolves the same as for a developer's build.
+            { cmake -S simulator -B simulator/build-ci -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+                && cmake --build simulator/build-ci -j"$(nproc)"; } 2>&1 \
+              | tee "$GITHUB_WORKSPACE/build.log"
+          else
+            make -f simulator/gcc/Makefile -j"$(nproc)" 2>&1 \
+              | tee "$GITHUB_WORKSPACE/build.log"
+          fi
 
       - name: Headless smoke run
         id: smoke
         if: steps.build.outcome == 'success'
+        shell: bash
         run: |
           cd "$APP_DIR"
+          if [ "$KIND" = cmake ]; then
+            BIN_DIR=simulator/build/bin
+            EXE="$(find "$BIN_DIR" -maxdepth 1 -type f -perm -u+x | head -n 1)"
+            EXE="./$(basename "$EXE")"
+          else
+            BIN_DIR=build/bin
+            EXE=./simulator.out
+          fi
           # Dummy SDL drivers => headless. The sim is a GUI loop that never exits,
           # so the watchdog reaps it; success = a boot marker, not the exit code.
+          # Run from the binary's directory, where the mock file system lands.
+          cd "$BIN_DIR"
           set +e
           SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
-            timeout 20 ./build/bin/simulator.out > "$GITHUB_WORKSPACE/sim.log" 2>&1
+            timeout 20 "$EXE" > "$GITHUB_WORKSPACE/sim.log" 2>&1
           echo "exit=$?"
           echo "----- first 30 lines of sim.log -----"; head -30 "$GITHUB_WORKSPACE/sim.log" || true
+          # The service logs this on COMMAND_APP_NOTIF_GUI_RUN, in every app.
           grep -q "GUI is now running" "$GITHUB_WORKSPACE/sim.log" \
             && echo "BOOT OK" || { echo "BOOT FAILED: marker not found"; exit 1; }
 
       - name: Write PASS/FAIL summary
         if: always()
+        env:
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          PROJECT_NAME: ${{ matrix.project.name }}
         run: |
-          b='${{ steps.build.outcome }}'; s='${{ steps.smoke.outcome }}'
+          b="$BUILD_OUTCOME"; s="$SMOKE_OUTCOME"
           icon() { [ "$1" = success ] && echo '✅' || { [ "$1" = skipped ] && echo '⏭️' || echo '❌'; }; }
           {
-            echo "### ${{ matrix.project.name }} — _(informational, non-gating)_"
+            echo "### $PROJECT_NAME ($KIND) — _(informational, non-gating)_"
             echo "| Stage | Result |"
             echo "|-------|--------|"
             echo "| Build | $(icon "$b") \`$b\` |"
             echo "| Headless boot | $(icon "$s") \`$s\` |"
             echo ""
-            echo "\`${{ matrix.project.dir }}\`"
+            echo "\`$APP_DIR\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload logs and binary
@@ -178,5 +219,6 @@ jobs:
             build.log
             sim.log
             ${{ matrix.project.dir }}/build/bin/simulator.out
+            ${{ matrix.project.dir }}/simulator/build/bin/*
           if-no-files-found: ignore
           retention-days: 14

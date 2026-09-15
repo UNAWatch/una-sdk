@@ -6,9 +6,11 @@ Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamen
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/ScrollMenu)
 
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The menu is the first widget that differs substantially between the two: TouchGFX composes it from Designer containers and a `ScrollWheelWithSelectionStyle`, LVGL uses the SDK's `WheelMenu`. See [The Same Menu in Two Toolkits](#the-same-menu-in-two-toolkits).
+
 ## What You'll Learn
 
-- How to implement GUI applications with TouchGFX
+- How to implement GUI applications with TouchGFX or LVGL
 - Handling hardware button events for menu navigation
 - Understanding the UNA app framework for interactive applications
 
@@ -28,8 +30,11 @@ Before building the ScrollMenu app, you need to set up the UNA SDK environment. 
 - ARM GCC toolchain in PATH
 - CMake and build tools
 
-**For GUI development/modification:**
+**For the TouchGFX GUI:**
 - TouchGFX Designer installed (see [toolchain setup](toolchain-setup))
+
+**For the LVGL GUI:**
+- The LVGL submodule checked out once: `git submodule update --init ThirdParty/lvgl` (from the SDK root)
 
 ### Building and Running ScrollMenu
 
@@ -48,29 +53,37 @@ Before building the ScrollMenu app, you need to set up the UNA SDK environment. 
    cd $UNA_SDK/Docs/Tutorials/ScrollMenu
    ```
 
-3. **Build the application:**
+3. **Build the application** with the GUI of your choice:
    ```bash
+   # TouchGFX GUI
    mkdir build && cd build
    cmake -G "Unix Makefiles" ../Software/Apps/ScrollMenu-CMake
    make
+
+   # LVGL GUI (from the tutorial directory again)
+   cd .. && mkdir build-lvgl && cd build-lvgl
+   cmake -G "Unix Makefiles" ../Software/Apps/ScrollMenuLVGL-CMake
+   make
    ```
 
-The app will start and display an initial menu with three items. Use the hardware buttons to navigate the menu and perform actions, demonstrating menu navigation patterns.
+The app will start and display an initial menu with three items. Use the hardware buttons to navigate the menu and perform actions, demonstrating menu navigation patterns. The two builds appear in the launcher as **ScrollMenu** and **ScrollMenuLVGL**.
 
 ### Running on Simulator
 
-To test the app on the simulator (Windows only):
+**TouchGFX** (Windows only):
 
 1. Open `ScrollMenu.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
 2. Navigate to `ScrollMenu\Software\Apps\TouchGFX-GUI\simulator\msvs`
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-In the simulator, use keyboard keys to simulate hardware buttons:
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `ScrollMenuLVGLSimulator`.
+
+In either simulator, use keyboard keys to simulate hardware buttons:
 - **1** = L1 (Previous menu item)
 - **2** = L2 (Next menu item)
 - **3** = R1 (Perform action on selected item)
-- **4** = R2 (Double-press to exit)
+- **4** = R2 (Exit)
 
 The simulator will display the scrollable menu with Counter, Increase, Decrease items. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
 
@@ -78,13 +91,13 @@ The simulator will display the scrollable menu with Counter, Increase, Decrease 
 
 ### Navigation Flow
 - Start with menu displaying Counter, Increase, Decrease items
-- Press left button (L1) → Select previous menu item
-- Press top left button (L2) → Select next menu item
+- Press top left button (L1) → Select previous menu item
+- Press bottom left button (L2) → Select next menu item
 - Press top right button (R1) → Perform action on selected item:
   - Counter: Reset counter to 0
   - Increase: Increment counter
   - Decrease: Decrement counter
-- Double-press bottom right button (R2) → Exit the app
+- Press bottom right button (R2) → Exit the app
 
 ### Architecture Components
 
@@ -92,15 +105,16 @@ The simulator will display the scrollable menu with Counter, Increase, Decrease 
 - Manages the application lifecycle
 - Handles communication with the GUI layer
 - Minimal implementation since no sensors are used
+- One copy in `Software/Libs`, linked by both `ScrollMenu-CMake` and `ScrollMenuLVGL-CMake`
 
 #### The GUI Layer (Frontend)
-- Built with TouchGFX framework
+- Built with TouchGFX or LVGL
 - Handles button events and screen transitions
 - Updates the display based on user input
 - Manages screen state and visual elements
 
 #### Button Event Handling
-The app responds to hardware button presses through the `handleKeyEvent` method in `MainView.cpp`. L1 and L2 buttons navigate the menu by selecting previous or next items. R1 button performs the action associated with the currently selected menu item, such as resetting, incrementing, or decrementing the counter. R2 button detects double-presses to exit the application.
+The app responds to hardware button presses through the `handleKeyEvent` method in `MainView.cpp` (TouchGFX) or `onKey` in `MainScreen.cpp` (LVGL). L1 and L2 buttons navigate the menu by selecting previous or next items. R1 button performs the action associated with the currently selected menu item, such as resetting, incrementing, or decrementing the counter. R2 exits the application.
 
 #### Menu Item Management
 The menu displays items with different appearances for selected and unselected states:
@@ -109,9 +123,63 @@ The menu displays items with different appearances for selected and unselected s
 - When updating dynamic content (like the counter value), both selected and unselected versions of the item are updated to maintain consistency when scrolling
 
 #### Screen Updates
-After performing actions that change the menu display (such as updating the counter value), the `invalidate()` method is called on the menu and its items to refresh the display, ensuring changes are visible to the user.
+TouchGFX: after performing actions that change the menu display (such as updating the counter value), the `invalidate()` method is called on the menu and its items to refresh the display, ensuring changes are visible to the user.
+
+LVGL: the wheel's `refresh()` re-renders its slots from the item table, and LVGL redraws what changed on the next frame.
+
+## The Same Menu in Two Toolkits
+
+| Piece | TouchGFX (`TouchGFX-GUI/gui`) | LVGL (`LVGL-GUI/gui`) |
+|---|---|---|
+| The menu | `Menu` custom container: a `ScrollWheelWithSelectionStyle`, a background image, `Title`, `SideBarBig`, `Buttons` | `SDK::LVGL::WheelMenu` (`SDK/GUI/LVGL/WheelMenu.hpp`): lens, two item strips, `ScrollIndicator` |
+| Item appearance | `MenuItemSelected` / `MenuItemNotSelected` containers, one pair per item, copied into the wheel's drawables | one `WheelMenu::Item` per entry: style, text, optional font, tip, toggle state, icons |
+| Item texts | text keys `T_COUNTER`, `T_INCREASE`, `T_DECREASE` from Designer's Texts tab | plain `const char*` in the item table |
+| Fonts | typographies `Poppins_SemiBold_30`, `Poppins_Medium_18`, `Poppins_Italic_18` | the same three faces, converted by `lvgl_assets.py` and passed as `WheelMenu::Fonts` |
+| Navigate | `menu1.selectPrev()` / `menu1.selectNext()` (wheel + side bar animate together) | `mMenu->prev()` / `mMenu->next()` (the widget slides and moves its indicator) |
+| Which item | `menu1.getSelectedItem()` | `mMenu->selected()` |
+| Change the counter's text | `config(buffer)` on both the selected and not-selected copies, then `invalidate()` on the menu and items | the item's `text` points at a buffer the screen rewrites, then `mMenu->refresh()` |
+| The lens behind the selection | `Background_TealDark.png` bitmap | drawn by the widget (`setBackground()` recolours it) |
+| The scroll indicator | `SideBarBig` container with a rail bitmap and two `Circle` arcs | drawn by the widget's `ScrollIndicator` with `lv_arc` |
+
+The LVGL screen in full, less the boilerplate shared with the earlier tutorials:
+
+```cpp
+using SDK::LVGL::WheelMenu;
+using Style = WheelMenu::Item::Style;
+
+mItems[COUNTER]  = { Style::Simple, mCounterText };   // a buffer, so it can show the count
+mItems[INCREASE] = { Style::Simple, "Increase" };
+mItems[DECREASE] = { Style::Simple, "Decrease" };
+
+const WheelMenu::Fonts fonts = { &poppins_semibold_30, &poppins_medium_18, &poppins_italic_18 };
+mMenu = std::make_unique<WheelMenu>(mRoot, mItems, ITEM_COUNT, fonts);
+
+// ... in onKey():
+case Btn::L1: mMenu->prev(); break;
+case Btn::L2: mMenu->next(); break;
+case Btn::R1:
+    switch (mMenu->selected()) {
+        case COUNTER:  mCounter = 0; break;
+        case INCREASE: mCounter++;   break;
+        case DECREASE: mCounter--;   break;
+    }
+    snprintf(mCounterText, sizeof(mCounterText), "Counter: %d", mCounter);
+    mMenu->refresh();
+    break;
+```
+
+`WheelMenu` keeps a pointer to the item table for as long as it lives, so the table is a member of the screen, not a local. It is the same widget the RunLVGL activity app builds its menus from; `Item::Style` also offers `Tip` (a hint line under the text), `Toggle` (an on/off switch) and `Icon` (a bitmap beside the text), and `setSlideMidCallback()` reports the moment the incoming item takes the centre.
+
+### Size on the watch
+
+| Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
+|---|---|---|---|
+| ScrollMenu (TouchGFX) | 295 KB | 275 KB | 88 KB |
+| ScrollMenuLVGL | 188 KB | 179 KB | 139 KB |
 
 ## ScrollMenu app creation process
+
+The steps below create the TouchGFX GUI. For the LVGL GUI, copy HelloWorld's `LVGL-GUI` and `HelloWorldLVGL-CMake`, rename them, change `APP_NAME` and `APP_ID`, add the three fonts to `assets/assets.json` and regenerate, and write `MainScreen.cpp` as shown above.
 
 1. **Copy HelloWorld tutorial**
 2. **Change naming**: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in [Creating New Apps](https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps) gives commmands for generating your own APP ID programatically from the name. 
@@ -222,42 +290,37 @@ After performing actions that change the menu display (such as updating the coun
           }
 
           if (key == Gui::Config::Button::R2) {
-              if (lastKeyPressed == key) presenter->exit();
+              presenter->exit();
           }
-          lastKeyPressed = key;
       }
       ```
 8. **Compile code** using [SDK setup](../../sdk-setup.md) instructions.
 
 ## Understanding Menu Navigation
 
-The ScrollMenu app demonstrates how to handle hardware button events for menu navigation in TouchGFX applications. Key concepts include:
+The ScrollMenu app demonstrates how to handle hardware button events for menu navigation. Key concepts include:
 
 ### Button Event Processing
-- Button presses are captured in the `handleKeyEvent(uint8_t key)` method
+- Button presses are captured in the `handleKeyEvent(uint8_t key)` method (TouchGFX) or the `LV_EVENT_KEY` handler (LVGL)
 - L1 and L2 buttons navigate the menu (select previous/next item)
 - R1 button performs the action associated with the selected menu item
-- R2 button detects double-presses for app exit
+- R2 button exits the app
 
 ### Menu State Management
 - The app maintains current menu selection state
 - Menu items display dynamic content (counter value)
-- The `invalidate()` call ensures the display refreshes after changes
-
-### Exit Handling
-- Double-press detection for the R2 button implements app exit
-- State tracking with `lastKeyPressed` prevents accidental exits
+- TouchGFX needs `invalidate()` calls to refresh the display after changes; the LVGL wheel is re-rendered with `refresh()`
 
 ## Common Patterns and Best Practices
 
 ### Button Handling
 - Map button IDs to meaningful actions consistently
 - Use state variables to track multi-press sequences
-- Always call `invalidate()` after visual changes
+- In TouchGFX, always call `invalidate()` after visual changes
 
 ### UI Updates
 - Keep event handlers lightweight to maintain responsiveness
-- Use appropriate TouchGFX widgets for different content types
+- Use appropriate widgets for different content types
 - Consider user feedback for button presses (visual/audio)
 
 ### Code Organization
@@ -272,19 +335,17 @@ The ScrollMenu app demonstrates how to handle hardware button events for menu na
 
 ## Key Code Insights for New Developers
 
-### MainView.cpp Structure
-- `handleKeyEvent()` is the central point for user input
-- Menu navigation uses `menu1.selectPrev()` and `menu1.selectNext()`
-- Menu actions update counter and refresh display with `invalidate()` calls
+### MainView.cpp / MainScreen.cpp Structure
+- `handleKeyEvent()` / `onKey()` is the central point for user input
+- Menu navigation uses `menu1.selectPrev()` / `menu1.selectNext()` or `mMenu->prev()` / `mMenu->next()`
+- Menu actions update the counter and refresh the display
 
 ### Menu Configuration
-- Menu is configured in `setupScreen()` with item texts and count
-- The Menu widget manages item selection and display
-- Menu items can be configured with text using `config()` method
+- TouchGFX: the menu is configured in `setupScreen()` with item texts and count; items are configured with `config()`
+- LVGL: the menu is built in the screen's constructor from an item table and a `Fonts` struct
 
 ### State Tracking
-- Use member variables like `counter` and `lastKeyPressed` to maintain app state
-- Track sequences like double-presses for special actions
+- Use member variables like `counter` to maintain app state
 - Update menu item text dynamically based on state changes
 
 ## Next Steps
@@ -292,7 +353,7 @@ The ScrollMenu app demonstrates how to handle hardware button events for menu na
 1. **Run the ScrollMenu app** - Build and test the menu navigation
 2. **Modify menu items** - Experiment with different menu actions
 3. **Add new menu items** - Extend the app with additional menu options
-4. **Explore TouchGFX widgets** - Add text, images, or other elements
+4. **Explore the widgets** - Add text, images, or other elements; in LVGL try the `Tip` and `Toggle` item styles
 5. **Study advanced examples** - Look at apps with more complex navigation
 
 ## Troubleshooting
@@ -300,6 +361,7 @@ The ScrollMenu app demonstrates how to handle hardware button events for menu na
 ### Build Issues
 - Ensure TouchGFX Designer is properly installed
 - Check that all project files are generated correctly
+- For the LVGL build, check that `ThirdParty/lvgl` is populated
 - Verify CMake configuration matches your environment
 
 ### Runtime Issues
@@ -308,7 +370,7 @@ The ScrollMenu app demonstrates how to handle hardware button events for menu na
 - Test on actual hardware for button responsiveness
 
 ### Common Mistakes
-- Forgetting to call `invalidate()` after UI changes
+- Forgetting to call `invalidate()` after UI changes (TouchGFX)
 - Incorrect button ID constants
 - Not handling all button states appropriately
 

@@ -9,30 +9,48 @@ This comprehensive tutorial demonstrates a complete settings management system f
 The Files tutorial showcases advanced UNA SDK concepts including:
 - **Persistent Settings Storage**: JSON file operations with automatic save/load
 - **Inter-Process Communication**: Custom message passing between GUI and Service layers
-- **TouchGFX MVP Architecture**: Model-View-Presenter pattern implementation
+- **GUI Architecture**: TouchGFX's Model-View-Presenter pattern, and the LVGL model-and-screen equivalent
 - **File System Integration**: Using SDK's IFileSystem interface
 - **Error Recovery**: Graceful handling of corrupted files and I/O errors
+
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The service and the messages are the whole point of this tutorial and are shared; the [GUI Layer Implementation](#gui-layer-implementation) section shows each toolkit's side.
 
 ## Getting Started
 
 ### Prerequisites
 
-Before building the Files app, you need to set up the UNA SDK environment. Follow the [toolchain setup](../../sdk-setup.md) for complete installation instructions, including:
+Before building the Files app, you need to set up the UNA SDK environment. Follow the [toolchain setup](../../sdk-setup.md) for complete installation instructions: `UNA_SDK` set, the ST ARM GCC toolchain on `PATH`, CMake 3.21+ and Python 3. The TouchGFX GUI needs TouchGFX Designer to modify or simulate; the LVGL GUI needs the LVGL submodule (`git submodule update --init ThirdParty/lvgl`).
 
 ### Building and Running Files
 
-See [toolchain setup](../../sdk-setup.md) for details)
+```bash
+cd $UNA_SDK/Docs/Tutorials/Files
+
+# TouchGFX GUI
+mkdir build && cd build
+cmake -G "Unix Makefiles" ../Software/Apps/Files-CMake
+make
+
+# LVGL GUI (from the tutorial directory again)
+cd .. && mkdir build-lvgl && cd build-lvgl
+cmake -G "Unix Makefiles" ../Software/Apps/FilesLVGL-CMake
+make
+```
+
+The two builds appear in the launcher as **Files** and **FilesLVGL**, and each keeps its own `settings.json` in its own app directory.
 
 ### Running on Simulator
 
-To test the app on the simulator (Windows only):
+**TouchGFX** (Windows only):
 
 1. Open `Files.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
 2. Navigate to `Files\Software\Apps\TouchGFX-GUI\simulator\msvs`
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-In the simulator, use keyboard keys to interact with the settings:
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `FilesLVGLSimulator`.
+
+In either simulator, use keyboard keys to interact with the settings:
 - **1** = L1 (Increment selected setting value)
 - **2** = L2 (Decrement selected setting value)
 - **3** = R1 (Save settings and select next setting)
@@ -282,11 +300,13 @@ case CustomMessage::SET_SETTINGS: {
 
 ### Model-View-Presenter Architecture
 
-The GUI follows TouchGFX's MVP pattern:
+The TouchGFX GUI follows TouchGFX's MVP pattern:
 
 - **Model** (`Model.hpp/cpp`): Handles business logic and Service communication
 - **View** (`MainView.hpp/cpp`): Manages UI rendering and user input
 - **Presenter** (`MainPresenter.hpp/cpp`): Bridges Model and View
+
+The LVGL GUI (`Software/Apps/LVGL-GUI`) has the same **Model**, registered with `SDK::LVGL::Port` instead of the TouchGFX command processor, and one **MainScreen** class that plays both the View's and the Presenter's parts: it owns the LVGL objects, handles the button codes, and is the model's `ModelListener`. The message code below is identical in both.
 
 ### Model Implementation
 
@@ -512,6 +532,46 @@ void MainView::handleKeyEvent(uint8_t key) {
 }
 ```
 
+### The LVGL Screen
+
+`LVGL-GUI/gui/src/screens/MainScreen.cpp` does what `MainView` and `MainPresenter` do together. Three rows, each a dash marker and a value label at the design's positions:
+
+```cpp
+for (int i = 0; i < SETTING_COUNT; ++i) {
+    Draw::label(mRoot, &poppins_semibold_35, "-", 40, kRowY[i], 20, LV_TEXT_ALIGN_LEFT);
+    mValue[i] = Draw::label(mRoot, &poppins_medium_25, "", 74, kRowY[i], 160, LV_TEXT_ALIGN_LEFT);
+}
+// ...
+updateSettingsDisplay();     // the defaults, until the service answers
+mModel.requestSettings();
+```
+
+The display update writes the three labels and colours the selected one red:
+
+```cpp
+void MainScreen::updateSettingsDisplay()
+{
+    snprintf(counter, sizeof(counter), "%ld", static_cast<long>(mDecimalCounter));
+    lv_label_set_text(mValue[STG1], counter);
+    lv_label_set_text(mValue[STG2], activityName(mActivityType));
+    lv_label_set_text(mValue[STG3], displayName(mDisplayMode));
+    for (int i = 0; i < SETTING_COUNT; ++i) {
+        lv_obj_set_style_text_color(mValue[i], Draw::rgb(i == mSelected ? Color::RED : Color::WHITE), LV_PART_MAIN);
+    }
+}
+```
+
+There is no `resizeToCurrentText()` or `invalidate()`: an LVGL label sizes itself to its text, and a changed text or colour is redrawn on the next frame. The key handling is `onKey()` with the same four cases as `handleKeyEvent()`; the model calls (`requestSettings()`, `updateSettings()`, `exitApp()`) are made directly, since there is no presenter in between. The service answer arrives through `onSettingsUpdate()`, which `MainScreen` overrides from `ModelListener`.
+
+The two fonts, Poppins SemiBold 35 (only the dash) and Medium 25, are converted from the TTFs the TouchGFX GUI ships by `Utilities/Scripts/lvgl_assets/lvgl_assets.py` from `LVGL-GUI/assets/assets.json`.
+
+### Size on the watch
+
+| Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
+|---|---|---|---|
+| Files (TouchGFX) | 243 KB | 222 KB | 72 KB |
+| FilesLVGL | 178 KB | 162 KB | 139 KB |
+
 ## Button Control Scheme
 
 The tutorial uses physical buttons for user interaction with a selectable settings system:
@@ -529,20 +589,21 @@ The system cycles through three selectable settings:
 2. **Activity Type** (STG2): Cycles through RUNNING, CYCLING, SWIMMING, WALKING
 3. **Display Mode** (STG3): Cycles through SIMPLE, DETAILED, COMPACT
 
-The currently selected setting is highlighted with red text color, while unselected settings appear in green. After saving with R1, the selection automatically advances to the next setting.
+The currently selected setting is highlighted with red text color, while unselected settings appear in white. After saving with R1, the selection automatically advances to the next setting.
 
 ## Build System Integration
 
 ### CMake Configuration
 
-The tutorial uses the standard UNA SDK build system:
+The tutorial uses the standard UNA SDK build system, once per GUI. `Files-CMake/CMakeLists.txt`:
 
 ```cmake
 # App configuration
 set(APP_NAME "Files")
 set(APP_TYPE "Activity")
 set(DEV_ID "UNA")
-set(APP_ID "F1E2D3C448669786")
+set(APP_ID "03AD5A741E38A35F")
+set(TOUCHGFX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI")
 
 # Include SDK build tools
 include($ENV{UNA_SDK}/cmake/una-app.cmake)
@@ -553,6 +614,8 @@ una_app_build_service(${APP_NAME}Service.elf)
 una_app_build_gui(${APP_NAME}GUI.elf)
 una_app_build_app()
 ```
+
+`FilesLVGL-CMake/CMakeLists.txt` differs in the name and id, in `GUI_PATH` pointing at `LVGL-GUI` instead of `TOUCHGFX_PATH`, and in linking the `UNA_SDK_*_GUI_LVGL` source lists for the GUI process. Both include the same `Software/Libs/libs.cmake` for the service.
 
 ## Error Handling and Recovery
 
@@ -584,8 +647,8 @@ una_app_build_app()
 - Asynchronous message passing
 - Request-response patterns
 
-### 3. MVP Architecture
-- Separation of concerns (Model/View/Presenter)
+### 3. GUI Architecture
+- Separation of concerns (Model/View/Presenter in TouchGFX, Model/Screen in LVGL)
 - Event-driven UI updates
 - Clean interface design
 

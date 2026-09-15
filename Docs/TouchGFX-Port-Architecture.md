@@ -73,7 +73,10 @@ The TouchGFXHAL serves as the main hardware abstraction layer, extending the Tou
 
 #### TouchGFXCommandProcessor
 The TouchGFXCommandProcessor acts as the central command processor and lifecycle manager, implementing a singleton pattern to handle kernel message processing, GUI lifecycle management, and frame synchronization.
-- **Location**: `Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp`, `Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp`
+
+> **Renamed.** The class is `SDK::GuiCommandProcessor` (`Libs/Header/SDK/Port/GuiCommandProcessor.hpp`, `Libs/Source/Port/GuiCommandProcessor.cpp`): it has no TouchGFX dependency and the LVGL port uses it unchanged. `SDK::TouchGFXCommandProcessor` remains as an alias, and the old header and source paths keep working, so the rest of this document still applies under the old name.
+
+- **Location**: `Libs/Source/Port/GuiCommandProcessor.cpp`, `Libs/Header/SDK/Port/GuiCommandProcessor.hpp` (aliases: `Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp`, `Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp`)
 - **Purpose**: Central command processor and lifecycle manager (singleton pattern)
 - **Key Responsibilities**:
   - Kernel message processing and routing

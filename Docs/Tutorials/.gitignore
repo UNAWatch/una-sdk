@@ -1,0 +1,3 @@
+# The LVGL simulators' mock file system: each writes the files its app
+# creates (settings.json, app_config.json, ...) to <tutorial>/Software/Output.
+*/Software/Output/

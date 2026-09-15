@@ -41,6 +41,7 @@ Next steps:
    Tutorials/Files/ARCHITECTURE
    Tutorials/FitFiles/ARCHITECTURE
    Tutorials/Waypoint/ARCHITECTURE
+   Tutorials/RunLVGL/ARCHITECTURE
 
 .. toctree::
    :maxdepth: 4

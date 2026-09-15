@@ -253,6 +253,27 @@ MSBuild gives a project property precedence over an environment one, so a projec
 that pins the path unconditionally ignores the variable and has to be edited
 instead.
 
+## LVGL simulator {#lvgl-simulator}
+
+Apps whose GUI is built on LVGL rather than TouchGFX (the tutorials' `LVGL-GUI`
+variants, starting with [HelloWorld](Tutorials/HelloWorld/ARCHITECTURE.md), and the
+[RunLVGL](Tutorials/RunLVGL/ARCHITECTURE.md) activity app) simulate through the same mock
+kernel, but with a plain CMake project (`LVGL-GUI/simulator/CMakeLists.txt`) instead of
+the Designer-generated Visual Studio solution and gcc Makefile. `SDK::Simulator::LvglHost` (`Libs/Source/Simulator/LVGL`)
+stands in for the kernel's display, ticks and buttons: an SDL2 window shows the frames
+the LVGL port sends, a thread posts `EVENT_GUI_TICK` at the watch's frame rate, and the
+keyboard stands in for the buttons. Keys 1-4 are the physical buttons L1, L2, R1, R2:
+key down sends the press event, key up sends the release, and a key up within 500 ms
+sends a click first, the sequence the kernel emits. The `q`/`w`/`e`/`r` row sends one
+press and the `a`/`s`/`d`/`f` row one release for the same four buttons, the way the
+TouchGFX simulators pass those codes from `SDK/GUI/Button.hpp` straight through (the
+`z` chord has no key). `cmake/una-simulator.cmake`
+provides the source lists and `una_simulator_link_sdl2()`, which uses an installed SDL2
+where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
+TouchGFX (configure with `-A Win32`). The sensor simulation, mock file system and
+keyboard mapping above apply unchanged. `.github/workflows/linux-simulator.yml` builds
+these CMake simulators on Linux and smoke-runs them headlessly, beside the TouchGFX ones.
+
 ## Linux (GCC) {#linux-gcc}
 
 The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.

@@ -1,7 +1,11 @@
 
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
-#include <platform/hal/simulator/sdl2/HALSDL2.hpp>
 #include <cstdint>
+
+// Only the TouchGFX simulators stop their HAL from here; see SetStopHandler().
+#ifndef UNA_SIM_NO_TOUCHGFX
+#include <platform/hal/simulator/sdl2/HALSDL2.hpp>
+#endif
 
 // GetTickCount64() and Sleep() are Windows-only. Provide portable replacements.
 #ifndef _WIN32
@@ -27,6 +31,7 @@ static inline void Sleep(uint32_t ms)
 namespace SDK::Simulator::Mock
 {
     bool SystemGUI::mAppRunning = true;
+    void (*SystemGUI::mStopHandler)() = nullptr;
 
     System::System()
     {
@@ -51,13 +56,24 @@ namespace SDK::Simulator::Mock
         return mAppRunning;
 	}
 
+    void SystemGUI::SetStopHandler(void (*handler)())
+    {
+        mStopHandler = handler;
+    }
+
     void SystemGUI::exit(int status)
     {
         LOG_DEBUG("status = %d\n", status);
 
         mAppRunning = false;
 
+        if (mStopHandler) {
+            mStopHandler();
+            return;
+        }
+#ifndef UNA_SIM_NO_TOUCHGFX
         static_cast<touchgfx::HALSDL2*>(touchgfx::HAL::getInstance())->stopApplication();
+#endif
     }
 
     uint32_t SystemGUI::getTimeMs()

@@ -31,6 +31,7 @@ namespace Instance {
 #if defined(HEAT_RATE_SIM_ENABLE) && (HEAT_RATE_SIM_ENABLE == 1)
         sm.regDriver(&mSensorHRMetrics.getDriver());
         sm.regDriver(&mSensorHR.getDriver());
+        sm.regDriver(&mSensorHR.getDriverEx());
 #endif //HEAT_RATE_SIM_ENABLE
 
 #if defined(PRESSURE_SIM_ENABLE) && (PRESSURE_SIM_ENABLE == 1)

@@ -1,0 +1,22 @@
+{
+  "manifest_version": 1,
+  "type": [
+    "activity"
+  ],
+  "name": "Files Tutorial (LVGL)",
+  "icon": "Resources/icon_60x60.png",
+  "binary": "FilesLVGL_1.0.0.uapp",
+  "appVersion": "1.0.0",
+  "minKernelVersion": "1.4.0",
+  "requiredHardware": [],
+  "stravaExport": false,
+  "id": "78BECF8090961B80",
+  "supportsLaps": false,
+  "supportsDistance": false,
+  "supportsTrack": false,
+  "supportsHeartbeat": false,
+  "supportsElevation": false,
+  "supportsStep": false,
+  "supportsSpeed": "none",
+  "customMeasures": []
+}

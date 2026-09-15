@@ -1,0 +1,19 @@
+{
+  "fonts": [
+    {
+      "name": "poppins_semibold_35",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-SemiBold.ttf",
+      "size": 35,
+      "range": "0x20,0x2D",
+      "bpp": 2
+    },
+    {
+      "name": "poppins_medium_25",
+      "file": "../../TouchGFX-GUI/assets/fonts/Poppins-Medium.ttf",
+      "size": 25,
+      "range": "0x20-0x7E",
+      "bpp": 2
+    }
+  ],
+  "images": []
+}
