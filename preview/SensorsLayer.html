@@ -448,6 +448,8 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l2"><a class="reference internal" href="#sensors">Sensors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#accelerometer-0x10">ACCELEROMETER (0x10)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#accelerometer-raw-0x11">ACCELEROMETER_RAW (0x11)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#magnetic-field-0x30">MAGNETIC_FIELD (0x30)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#magnetic-field-raw-0x31">MAGNETIC_FIELD_RAW (0x31)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#heart-rate-0x41">HEART_RATE (0x41)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#heart-rate-metrics-0x42">HEART_RATE_METRICS (0x42)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-detector-0x50">STEP_DETECTOR (0x50)</a></li>
@@ -592,186 +594,193 @@ window.runMermaid = runMermaid;</script>
 <tr class="row-even"><td><p>IMU</p></td>
 <td><p>MAGNETIC_FIELD</p></td>
 <td><p>0x30</p></td>
-<td><p>Magnetic field (3-axis)</p></td>
-<td><p>No</p></td>
-<td><p>-</p></td>
+<td><p>Magnetic field; corrected only when MAG_CALIBRATED</p></td>
+<td><p>Yes</p></td>
+<td><p>X,Y,Z (float uT), MAG_CALIBRATED (u32) - 4</p></td>
 </tr>
-<tr class="row-odd"><td><p>Cardio</p></td>
+<tr class="row-odd"><td><p>IMU</p></td>
+<td><p>MAGNETIC_FIELD_RAW</p></td>
+<td><p>0x31</p></td>
+<td><p>Magnetic field, as measured</p></td>
+<td><p>Yes</p></td>
+<td><p>X,Y,Z (float uT) - 3</p></td>
+</tr>
+<tr class="row-even"><td><p>Cardio</p></td>
 <td><p>HEART_BEAT</p></td>
 <td><p>0x40</p></td>
 <td><p>Beat peak event</p></td>
 <td><p>No</p></td>
 <td><p>-</p></td>
 </tr>
-<tr class="row-even"><td><p>Cardio</p></td>
+<tr class="row-odd"><td><p>Cardio</p></td>
 <td><p>HEART_RATE</p></td>
 <td><p>0x41</p></td>
 <td><p>Current heart rate (bpm)</p></td>
 <td><p>Yes</p></td>
 <td><p>BPM (float), TRUST_LEVEL (float) - 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>Cardio</p></td>
+<tr class="row-even"><td><p>Cardio</p></td>
 <td><p>HEART_RATE_METRICS</p></td>
 <td><p>0x42</p></td>
 <td><p>Aggregated metrics (AHR, RHR)</p></td>
 <td><p>Yes</p></td>
 <td><p>AHR (float bpm), RHR (float bpm) - 2</p></td>
 </tr>
-<tr class="row-even"><td><p>Pedometer</p></td>
+<tr class="row-odd"><td><p>Pedometer</p></td>
 <td><p>STEP_DETECTOR</p></td>
 <td><p>0x50</p></td>
 <td><p>Step event</p></td>
 <td><p>Yes</p></td>
 <td><p>STEP_DETECTED (u32=1) - 1</p></td>
 </tr>
-<tr class="row-odd"><td><p>Pedometer</p></td>
+<tr class="row-even"><td><p>Pedometer</p></td>
 <td><p>STEP_COUNTER</p></td>
 <td><p>0x51</p></td>
 <td><p>Step count since reboot</p></td>
 <td><p>Yes</p></td>
 <td><p>STEP_COUNT (u32) - 1</p></td>
 </tr>
-<tr class="row-even"><td><p>Pedometer</p></td>
+<tr class="row-odd"><td><p>Pedometer</p></td>
 <td><p>FLOOR_COUNTER</p></td>
 <td><p>0x60</p></td>
 <td><p>Floor counter</p></td>
 <td><p>Yes</p></td>
 <td><p>FLOORS_UP (i32), FLOORS_DOWN (i32) - 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>Ambient</p></td>
+<tr class="row-even"><td><p>Ambient</p></td>
 <td><p>AMBIENT_TEMPERATURE</p></td>
 <td><p>0x70</p></td>
 <td><p>Ambient temperature</p></td>
 <td><p>Yes</p></td>
 <td><p>TEMP (float °C?) - 1</p></td>
 </tr>
-<tr class="row-even"><td><p>Ambient</p></td>
+<tr class="row-odd"><td><p>Ambient</p></td>
 <td><p>PRESSURE</p></td>
 <td><p>0x80</p></td>
 <td><p>Atmospheric pressure</p></td>
 <td><p>Yes</p></td>
 <td><p>PRESS (float Pa), PRESS_SEA_LEVEL (float Pa) - 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>Ambient</p></td>
+<tr class="row-even"><td><p>Ambient</p></td>
 <td><p>ALTIMETER</p></td>
 <td><p>0x90</p></td>
 <td><p>Altimeter</p></td>
 <td><p>Yes</p></td>
 <td><p>ALTITUDE (float m) - 1</p></td>
 </tr>
-<tr class="row-even"><td><p>Wrist</p></td>
+<tr class="row-odd"><td><p>Wrist</p></td>
 <td><p>WRIST_MOTION</p></td>
 <td><p>0xA0</p></td>
 <td><p>Wrist-motion event</p></td>
 <td><p>Yes</p></td>
 <td><p>WRIST_MOTION (u32=1) - 1</p></td>
 </tr>
-<tr class="row-odd"><td><p>Motion</p></td>
+<tr class="row-even"><td><p>Motion</p></td>
 <td><p>MOTION_DETECT</p></td>
 <td><p>0xB0</p></td>
 <td><p>Motion states (NO_MOTION, MOTION, SIG_MOTION)</p></td>
 <td><p>Yes</p></td>
 <td><p>ID (u32 enum) - 1</p></td>
 </tr>
-<tr class="row-even"><td><p>Motion</p></td>
+<tr class="row-odd"><td><p>Motion</p></td>
 <td><p>ACTIVITY_RECOGNITION</p></td>
 <td><p>0xC0</p></td>
 <td><p>Activity classification (STILL, WALKING, RUNNING, UNKNOWN)</p></td>
 <td><p>Yes</p></td>
 <td><p>ID (u32 enum), CONFIDENCE (u8 %) - 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>Motion</p></td>
+<tr class="row-even"><td><p>Motion</p></td>
 <td><p>GESTURE_RECOGNITION</p></td>
 <td><p>0xD0</p></td>
 <td><p>Discrete gesture events</p></td>
 <td><p>No</p></td>
 <td><p>-</p></td>
 </tr>
-<tr class="row-even"><td><p>Daily</p></td>
+<tr class="row-odd"><td><p>Daily</p></td>
 <td><p>ACTIVITY</p></td>
 <td><p>0xE0</p></td>
 <td><p>Active minutes (minutes)</p></td>
 <td><p>Yes</p></td>
 <td><p>DURATION (u32 ms) - 1</p></td>
 </tr>
-<tr class="row-odd"><td><p>Optical</p></td>
+<tr class="row-even"><td><p>Optical</p></td>
 <td><p>PPG</p></td>
 <td><p>0xF0</p></td>
 <td><p>Photoplethysmogram</p></td>
 <td><p>No</p></td>
 <td><p>-</p></td>
 </tr>
-<tr class="row-even"><td><p>Optical</p></td>
+<tr class="row-odd"><td><p>Optical</p></td>
 <td><p>SPO2</p></td>
 <td><p>0xF1</p></td>
 <td><p>Blood-oxygen saturation (SpO2)</p></td>
 <td><p>Yes</p></td>
 <td><p>SATURATION (float %), TRUST_LEVEL (float) - 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>Optical</p></td>
+<tr class="row-even"><td><p>Optical</p></td>
 <td><p>ECG</p></td>
 <td><p>0x100</p></td>
 <td><p>Electrocardiogram</p></td>
 <td><p>No</p></td>
 <td><p>-</p></td>
 </tr>
-<tr class="row-even"><td><p>GPS</p></td>
+<tr class="row-odd"><td><p>GPS</p></td>
 <td><p>GPS_LOCATION</p></td>
 <td><p>0x110</p></td>
 <td><p>GNSS location</p></td>
 <td><p>Yes</p></td>
 <td><p>PRECISION (f m), COORDS_VALID (bool), LAT (f deg), LON (f deg), ALT (f m) - 5</p></td>
 </tr>
-<tr class="row-odd"><td><p>GPS</p></td>
+<tr class="row-even"><td><p>GPS</p></td>
 <td><p>GPS_SPEED</p></td>
 <td><p>0x111</p></td>
 <td><p>GNSS speed</p></td>
 <td><p>Yes</p></td>
 <td><p>SPEED (f m/s) - 1</p></td>
 </tr>
-<tr class="row-even"><td><p>GPS</p></td>
+<tr class="row-odd"><td><p>GPS</p></td>
 <td><p>GPS_DISTANCE</p></td>
 <td><p>0x112</p></td>
 <td><p>GNSS distance/odometer</p></td>
 <td><p>Yes</p></td>
 <td><p>DISTANCE (f m) - 1</p></td>
 </tr>
-<tr class="row-odd"><td><p>Battery</p></td>
+<tr class="row-even"><td><p>Battery</p></td>
 <td><p>BATTERY_LEVEL</p></td>
 <td><p>0x120</p></td>
 <td><p>Charge level (%)</p></td>
 <td><p>Yes</p></td>
 <td><p>LEVEL (f 0-100) - 1</p></td>
 </tr>
-<tr class="row-even"><td><p>Battery</p></td>
+<tr class="row-odd"><td><p>Battery</p></td>
 <td><p>BATTERY_CHARGING</p></td>
 <td><p>0x121</p></td>
 <td><p>Charging state</p></td>
 <td><p>Yes</p></td>
 <td><p>CONNECTED (u32 bool), CHARGING (u32 bool) - 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>Battery</p></td>
+<tr class="row-even"><td><p>Battery</p></td>
 <td><p>BATTERY_METRICS</p></td>
 <td><p>0x122</p></td>
 <td><p>Voltage/current/capacity</p></td>
 <td><p>Yes</p></td>
 <td><p>VOLTAGE (f V), CURRENT (f mA), AVG_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh) - 5</p></td>
 </tr>
-<tr class="row-even"><td><p>Fusion</p></td>
+<tr class="row-odd"><td><p>Fusion</p></td>
 <td><p>FUSION</p></td>
 <td><p>0x130</p></td>
 <td><p>Fused IMU</p></td>
 <td><p>Yes</p></td>
 <td><p>ACCEL_X,Y,Z + GYRO_X,Y,Z (float) - 6</p></td>
 </tr>
-<tr class="row-odd"><td><p>Fusion</p></td>
+<tr class="row-even"><td><p>Fusion</p></td>
 <td><p>FUSION_RAW</p></td>
 <td><p>0x131</p></td>
 <td><p>Raw fusion inputs</p></td>
 <td><p>Yes</p></td>
 <td><p>ACCEL_X,Y,Z + GYRO_X,Y,Z (int16 raw) - 6</p></td>
 </tr>
-<tr class="row-even"><td><p>Touch</p></td>
+<tr class="row-odd"><td><p>Touch</p></td>
 <td><p>TOUCH_DETECT</p></td>
 <td><p>0x140</p></td>
 <td><p>Touch/worn/unworn</p></td>
@@ -881,6 +890,95 @@ window.runMermaid = runMermaid;</script>
 <p><strong>Fields</strong>: X/Y/Z (int16_t raw)</p>
 <p><strong>Code Snippet</strong>:
 Similar, <code class="docutils literal notranslate"><span class="pre">int16_t</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">p.getX();</span></code> etc.</p>
+</section>
+<section id="magnetic-field-0x30">
+<h3>MAGNETIC_FIELD (0x30)<a class="headerlink" href="#magnetic-field-0x30" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::MagneticField</span></code></p>
+<p><strong>Fields</strong>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>MAG_X</p></td>
+<td><p>float</p></td>
+<td><p>uT</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>MAG_Y</p></td>
+<td><p>float</p></td>
+<td><p>uT</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>MAG_Z</p></td>
+<td><p>float</p></td>
+<td><p>uT</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>MAG_CALIBRATED</p></td>
+<td><p>u32</p></td>
+<td><p>1 when a correction was applied</p></td>
+</tr>
+</tbody>
+</table>
+<p>The field is reported in the watch’s own axes with whatever hard- and
+soft-iron correction is in force. A watch that has never been calibrated
+still produces samples, and <code class="docutils literal notranslate"><span class="pre">MAG_CALIBRATED</span></code> is how you tell: they carry the
+part’s own offsets, which is what a calibration is worked out from and not
+something to take a direction from.</p>
+<p>The parser also derives a compass bearing, since that is a function of one
+sample and nothing else. It is degrees clockwise from <strong>magnetic</strong> north - no
+declination is applied - and <code class="docutils literal notranslate"><span class="pre">getAzimuthDeg()</span></code> means nothing unless
+<code class="docutils literal notranslate"><span class="pre">isAzimuthValid()</span></code>.</p>
+<p><strong>Code Snippet</strong>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="nf">conn</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">MAGNETIC_FIELD</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1f</span><span class="p">);</span>
+<span class="n">conn</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">processBatch</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">batch</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">MagneticField</span><span class="w"> </span><span class="n">p</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">isAzimuthValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kt">float</span><span class="w"> </span><span class="n">bearing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getAzimuthDeg</span><span class="p">();</span>
+<span class="w">                </span><span class="c1">// Level only. See below for a tilted watch.</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">getAzimuthDeg()</span></code> assumes the watch is held roughly level. To compensate for
+how it is actually being held, pass gravity in - read it from the
+accelerometer wherever you already read it:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">float</span><span class="w"> </span><span class="n">bearing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">getAzimuthDegTilted</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span><span class="w"> </span><span class="n">ay</span><span class="p">,</span><span class="w"> </span><span class="n">az</span><span class="p">,</span><span class="w"> </span><span class="n">bearing</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Same arithmetic, so a level watch reads the same either way.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ax,</span> <span class="pre">ay,</span> <span class="pre">az</span></code> are the X, Y, Z of an <code class="docutils literal notranslate"><span class="pre">ACCELEROMETER</span></code> sample taken close in time
+to this one, passed as they are. That is the accelerometer’s own reading, not
+a vector pointing down: a watch lying face-up at rest reads Z positive. Passed
+the other way round, the bearing comes out mirrored, and nothing can catch
+that, because face-down is a real attitude.</p>
+<p>The arithmetic behind both bearings is public, for a field that did not arrive
+in one of these samples - one from your own fusion, say:
+<code class="docutils literal notranslate"><span class="pre">MagneticField::levelProject()</span></code>, <code class="docutils literal notranslate"><span class="pre">hasDirection()</span></code> and <code class="docutils literal notranslate"><span class="pre">bearingDeg()</span></code> are
+static and take plain values.</p>
+</section>
+<section id="magnetic-field-raw-0x31">
+<h3>MAGNETIC_FIELD_RAW (0x31)<a class="headerlink" href="#magnetic-field-raw-0x31" title="Link to this heading"></a></h3>
+<p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::MagneticFieldRaw</span></code></p>
+<p><strong>Fields</strong>: X/Y/Z (float uT), the field exactly as measured</p>
+<p>No correction is applied and no bearing is offered: a direction taken from an
+uncorrected field is wrong by however far the part’s own offsets push it. This
+is what a calibration is derived from, and what shows how large those offsets
+are.</p>
 </section>
 <section id="heart-rate-0x41">
 <h3>HEART_RATE (0x41)<a class="headerlink" href="#heart-rate-0x41" title="Link to this heading"></a></h3>
@@ -1052,9 +1150,10 @@ As above, <code class="docutils literal notranslate"><span class="pre">float</sp
 <h3>TOUCH_DETECT (0x140)<a class="headerlink" href="#touch-detect-0x140" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Touch</span></code></p>
 <p><strong>Fields</strong>: TOUCH (bool)</p>
-<p>For sensors without parsers (e.g. MAGNETIC_FIELD), use DataView:</p>
+<p>For a sensor without a parser, read its fields through DataView, by the
+layout its driver documents:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataView</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
-<span class="kt">float</span><span class="w"> </span><span class="n">magX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w"> </span><span class="c1">// Assume layout known from driver docs</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w"> </span><span class="c1">// index and type come from that layout</span>
 </pre></div>
 </div>
 </section>

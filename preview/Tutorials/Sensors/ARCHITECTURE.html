@@ -558,8 +558,8 @@ window.runMermaid = runMermaid;</script>
 <td><p>Cumulative; parser.getFloorsUp()</p></td>
 </tr>
 <tr class="row-even"><td><p>Magnetometer</p></td>
-<td><p>X/Y/Z fields (for compass)</p></td>
-<td><p>Heading computed from X/Y fields</p></td>
+<td><p>X/Y/Z fields + calibrated flag</p></td>
+<td><p>Bearing from parser.getAzimuthDeg(); valid only when calibrated</p></td>
 </tr>
 <tr class="row-odd"><td><p>RTC</p></td>
 <td><p>Time (sec since boot)</p></td>
@@ -697,7 +697,7 @@ queue space — no send waits out a full queue.</p>
 <span class="c1">// Accel:            if (nowMs - mLastAccTimeMs &gt;= 100) SDK::send_msg&lt;CustomMessage::AccelerometerValues&gt;(mKernel, ts, x, y, z);</span>
 <span class="c1">// Steps:            SDK::send_msg&lt;CustomMessage::StepCounterValues&gt;(mKernel, ts, parser.getStepCount());</span>
 <span class="c1">// Floors:           SDK::send_msg&lt;CustomMessage::FloorsValues&gt;(mKernel, ts, parser.getFloorsUp());</span>
-<span class="c1">// Compass:          compute heading from magnetic X/Y fields, then SDK::send_msg&lt;CustomMessage::CompassValues&gt;(mKernel, ts, heading);</span>
+<span class="c1">// Compass:          if (parser.isAzimuthValid()) SDK::send_msg&lt;CustomMessage::CompassValues&gt;(mKernel, ts, parser.getAzimuthDeg());</span>
 </pre></div>
 </div>
 <p>Track stats every 1s (simplistic CPU% = ms/10, rates=counts/sec) with
