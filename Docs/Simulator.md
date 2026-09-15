@@ -253,6 +253,20 @@ MSBuild gives a project property precedence over an environment one, so a projec
 that pins the path unconditionally ignores the variable and has to be edited
 instead.
 
+## LVGL simulator {#lvgl-simulator}
+
+Apps whose GUI is built on LVGL rather than TouchGFX (see the
+[RunLVGL tutorial](Tutorials/RunLVGL/ARCHITECTURE.md)) simulate through the same mock
+kernel, but with a plain CMake project instead of the Designer-generated Visual Studio
+solution and gcc Makefile. `SDK::Simulator::LvglHost` (`Libs/Source/Simulator/LVGL`)
+stands in for the kernel's display, ticks and buttons: an SDL2 window shows the frames
+the LVGL port sends, a thread posts `EVENT_GUI_TICK` at the watch's frame rate, and keys
+1-4 become the kernel's press, click and release events. `cmake/una-simulator.cmake`
+provides the source lists and `una_simulator_link_sdl2()`, which uses an installed SDL2
+where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
+TouchGFX (configure with `-A Win32`). The sensor simulation, mock file system and
+keyboard mapping above apply unchanged.
+
 ## Linux (GCC) {#linux-gcc}
 
 The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.
