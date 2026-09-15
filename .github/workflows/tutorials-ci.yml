@@ -77,8 +77,9 @@ jobs:
             exit 1
           fi
           # One project per line from the script; read whole lines so a
-          # path is never split on whitespace.
-          while IFS= read -r CMAKE_ROOT; do
+          # path is never split on whitespace. (POSIX sh: the container's
+          # default shell is not bash.)
+          printf '%s\n' "$PROJECTS" | while IFS= read -r CMAKE_ROOT; do
             [ -n "$CMAKE_ROOT" ] || continue
             if [ ! -d "$CMAKE_ROOT" ]; then
               printf 'Missing CMake project: %s\n' "$CMAKE_ROOT" >&2
@@ -87,7 +88,7 @@ jobs:
             echo "Build $CMAKE_ROOT"
             mkdir -p "$CMAKE_ROOT/build"
             (cd "$CMAKE_ROOT/build" && cmake .. && make -j"$(nproc)")
-          done <<< "$PROJECTS"
+          done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
