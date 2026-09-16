@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RunLVGL - Building a Watch App GUI with LVGL &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/version-selector.js?v=50f89983"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Running - Running Activity Tracking" href="../../Examples/Running-Architecture.html" />
+    <link rel="prev" title="Waypoint - Configuration from the Companion App" href="../Waypoint/ARCHITECTURE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RunLVGL - Building a Watch App GUI with LVGL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-ll-learn">What You’ll Learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-for-the-watch">Building for the Watch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-on-the-simulator">Running on the Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#why-lvgl-works-on-a-touchgfx-kernel">Why LVGL Works on a TouchGFX Kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-lvgl-port">The LVGL Port</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#display">Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tick-and-frame-loop">Tick and Frame Loop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buttons">Buttons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lifecycle">Lifecycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory">Memory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-runlvgl-gui">The RunLVGL GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#entry-point">Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-and-the-service-contract">Model and the Service Contract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screens-and-navigation">Screens and Navigation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#theme">Theme</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#widgets">Widgets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assets">Assets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#memory-and-performance">Memory and Performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-differs-from-the-touchgfx-run-app">What Differs from the TouchGFX Run App</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-to-go-next">Where to Go Next</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">RunLVGL - Building a Watch App GUI with LVGL</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Tutorials/RunLVGL/ARCHITECTURE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="runlvgl-building-a-watch-app-gui-with-lvgl">
+<span id="tutorials-runlvgl-architecture"></span><h1>RunLVGL - Building a Watch App GUI with LVGL<a class="headerlink" href="#runlvgl-building-a-watch-app-gui-with-lvgl" title="Link to this heading"></a></h1>
+<p>RunLVGL is the Run activity app with its GUI process rewritten on <a class="reference external" href="https://lvgl.io">LVGL</a>
+instead of TouchGFX. It has the same screens, fonts, icons, menus and workout flow as
+Run, records the same FIT activities, and runs on the same kernel with no kernel
+changes. It exists so that developers who prefer LVGL can see a complete, shipping-grade
+app built with it, and use its port and simulator for their own apps.</p>
+<p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Examples/Apps/RunLVGL">Project Folder</a></p>
+<section id="what-you-ll-learn">
+<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>What the kernel gives a GUI process, and why the toolkit is the app’s choice</p></li>
+<li><p>How the SDK’s LVGL port turns LVGL’s rendering into kernel frames, ticks and buttons</p></li>
+<li><p>How the RunLVGL GUI is organised: model, screens, widgets, theme and assets</p></li>
+<li><p>How to build for the watch on Windows or Linux, and run the PC simulator</p></li>
+<li><p>Where the memory goes in an LVGL GUI process, and how to keep it small</p></li>
+</ul>
+<p>This tutorial assumes you have read the earlier tutorials, in particular
+<a class="reference internal" href="../HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld</span></a> for the service/GUI split and the
+<a class="reference internal" href="../Sensors/ARCHITECTURE.html"><span class="std std-doc">Sensors</span></a> tutorial for the sensor layer the service uses.
+The service half of RunLVGL is a copy of Run’s and is not covered again here; see
+<a class="reference internal" href="../../Examples/Running-Architecture.html"><span class="std std-doc">Running - Fitness Tracking</span></a>.</p>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>Everything in the <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>, plus the LVGL submodule. LVGL is a
+git submodule of the SDK, pinned to a release tag (v9.5.0), so check it out once:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>
+git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>ThirdParty/lvgl
+</pre></div>
+</div>
+<p>The converted fonts and images are committed, so building the app needs neither Node
+nor Python. Regenerating them does; see <a class="reference internal" href="#assets">Assets</a>.</p>
+</section>
+<section id="building-for-the-watch">
+<h3>Building for the Watch<a class="headerlink" href="#building-for-the-watch" title="Link to this heading"></a></h3>
+<p>The same recipe as every other app:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Examples/Apps/RunLVGL/Software/Apps/RunLVGL-CMake
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make
+</pre></div>
+</div>
+<p>On Windows without Docker, use Ninja and the ST toolchain from STM32CubeIDE on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>;
+the CMake generator is the only difference (<code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">-G</span> <span class="pre">Ninja</span> <span class="pre">..</span></code>). The final copy step
+into the app’s <code class="docutils literal notranslate"><span class="pre">Output/</span></code> directory uses a glob that fails under CMake’s <code class="docutils literal notranslate"><span class="pre">-E</span> <span class="pre">copy</span></code>; the
+<code class="docutils literal notranslate"><span class="pre">.uapp</span></code> is still produced in the build directory and can be copied by hand.</p>
+<p>Install <code class="docutils literal notranslate"><span class="pre">RunLVGL_&lt;version&gt;.uapp</span></code> into <code class="docutils literal notranslate"><span class="pre">D:\Apps\RunLVGL\</span></code> on the watch with
+<code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/Update-Watch-Apps.ps1</span></code>, or by copying it there. The app appears in
+the launcher as <strong>RunLVGL</strong>.</p>
+</section>
+<section id="running-on-the-simulator">
+<h3>Running on the Simulator<a class="headerlink" href="#running-on-the-simulator" title="Link to this heading"></a></h3>
+<p>RunLVGL has a PC simulator that runs the real service and GUI processes against the
+SDK’s mock kernel, with the display in an SDL2 window. Unlike the TouchGFX simulators,
+it is a plain CMake project and builds on Windows and Linux.</p>
+<p>Windows, with Visual Studio (32-bit, because it reuses the SDL2 that TouchGFX ships; use
+the generator name for your Visual Studio version: <code class="docutils literal notranslate"><span class="pre">&quot;Visual</span> <span class="pre">Studio</span> <span class="pre">18</span> <span class="pre">2026&quot;</span></code> needs CMake 4.2
+or newer, <code class="docutils literal notranslate"><span class="pre">&quot;Visual</span> <span class="pre">Studio</span> <span class="pre">17</span> <span class="pre">2022&quot;</span></code> works with the 3.21 minimum):</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="nv">$env:UNA_SDK</span> <span class="p">=</span> <span class="s2">"C:/path/to/una-sdk"</span>
+<span class="nb">cd </span><span class="nv">$env:UNA_SDK</span><span class="p">\</span><span class="n">Examples</span><span class="p">\</span><span class="n">Apps</span><span class="p">\</span><span class="n">RunLVGL</span><span class="p">\</span><span class="n">Software</span><span class="p">\</span><span class="n">Apps</span><span class="p">\</span><span class="n">LVGL-GUI</span><span class="p">\</span><span class="n">simulator</span>
+<span class="n">cmake</span> <span class="n">-S</span> <span class="p">.</span> <span class="n">-B</span> <span class="n">build</span> <span class="n">-G</span> <span class="s2">"Visual Studio 18 2026"</span> <span class="n">-A</span> <span class="n">Win32</span>
+<span class="n">cmake</span> <span class="p">-</span><span class="n">-build</span> <span class="n">build</span> <span class="p">-</span><span class="n">-config</span> <span class="n">Debug</span>
+<span class="n">build</span><span class="p">\</span><span class="n">bin</span><span class="p">\</span><span class="n">RunLVGLSimulator</span><span class="p">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+<p>Linux (Debian/Ubuntu):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>cmake<span class="w"> </span>ninja-build<span class="w"> </span>libsdl2-dev
+<span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span>/path/to/una-sdk
+<span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Examples/Apps/RunLVGL/Software/Apps/LVGL-GUI/simulator
+cmake<span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-G<span class="w"> </span>Ninja<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
+cmake<span class="w"> </span>--build<span class="w"> </span>build
+<span class="o">(</span><span class="nb">cd</span><span class="w"> </span>build/bin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./RunLVGLSimulator<span class="o">)</span>
+</pre></div>
+</div>
+<p>Keys are the watch buttons: <strong>1</strong> = L1 (up), <strong>2</strong> = L2 (down), <strong>3</strong> = R1 (select),
+<strong>4</strong> = R2 (back). Holding a key is a press, releasing it a release, and a hold shorter
+than 500 ms is also a click, the same events the kernel emits. <strong>5</strong> raises a simulated
+wrist-motion event and <strong>Esc</strong> closes the app. Run the executable from <code class="docutils literal notranslate"><span class="pre">build/bin</span></code>: the
+mock file system is <code class="docutils literal notranslate"><span class="pre">../../../../../Output</span></code> relative to the working directory, which
+resolves to <code class="docutils literal notranslate"><span class="pre">Software/Output</span></code>, the simulator’s sandbox (ignored by git); recorded
+activities land there.
+The simulated GPS gets a fix after four seconds and the heart rate starts a few seconds
+later; both are configured in <code class="docutils literal notranslate"><span class="pre">simulator/ConfigurationSimulator.hpp</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">simulator/linux-check.sh</span></code> reproduces the Linux build, a headless smoke run
+(<code class="docutils literal notranslate"><span class="pre">SDL_VIDEODRIVER=dummy</span></code>) and the asset regeneration in an Ubuntu container, and is
+what the Linux checks for this app are based on.</p>
+</section>
+</section>
+<section id="why-lvgl-works-on-a-touchgfx-kernel">
+<h2>Why LVGL Works on a TouchGFX Kernel<a class="headerlink" href="#why-lvgl-works-on-a-touchgfx-kernel" title="Link to this heading"></a></h2>
+<p>The kernel does not know which toolkit draws an app’s screens. A GUI process is an ELF
+loaded into SRAM that talks to the kernel through messages, and the contract is small:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>The kernel provides</p></th>
+<th class="head"><p>Form</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A frame tick</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>, 10 per second</p></td>
+</tr>
+<tr class="row-odd"><td><p>Button input</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EVENT_BUTTON</span></code> with press, click and release for each of the four buttons</p></td>
+</tr>
+<tr class="row-even"><td><p>Lifecycle</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_GUI_RESUME</span></code>, <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_GUI_SUSPEND</span></code>, <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Service messages</p></td>
+<td><p>Any app-defined message type, forwarded from the service process</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>The GUI provides</strong></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Frames</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">REQUEST_DISPLAY_UPDATE</span></code> with a pointer to a 240 x 240 buffer of one ABGR2222 byte per pixel, row-major</p></td>
+</tr>
+</tbody>
+</table>
+<p>The kernel copies the buffer into its own surface and composites it. Nothing in that
+contract mentions TouchGFX. <code class="docutils literal notranslate"><span class="pre">SDK::GuiCommandProcessor</span></code> (called <code class="docutils literal notranslate"><span class="pre">TouchGFXCommandProcessor</span></code>
+before this app existed; the old name remains as an alias) is the message pump that
+implements the GUI’s side of it, and both ports use it unchanged.</p>
+<p>Two constraints are worth knowing before choosing a toolkit. The GUI process runs in
+a fixed RAM region reserved when it is loaded (<code class="docutils literal notranslate"><span class="pre">GUI_RAM_LENGTH</span></code> in the app’s CMake), so
+a toolkit’s working memory is best kept on a static pool of known size inside it. And
+the app’s C library is the kernel’s export table rather than a full libc. RunLVGL formats
+every number with integer arithmetic (<code class="docutils literal notranslate"><span class="pre">gui/include/gui/Format.hpp</span></code>), which makes its
+output independent of that table’s <code class="docutils literal notranslate"><span class="pre">printf</span></code> support; the tutorial GUIs format with
+<code class="docutils literal notranslate"><span class="pre">%.1f</span></code> through the same table, as their TouchGFX originals do.</p>
+</section>
+<section id="the-lvgl-port">
+<h2>The LVGL Port<a class="headerlink" href="#the-lvgl-port" title="Link to this heading"></a></h2>
+<p>The port lives in the SDK so any app can use it:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>File</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/LVGL/lv_conf.h</span></code></p></td>
+<td><p>LVGL configuration for the watch</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/LVGL/LvglPort.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/LVGL/LvglPort.cpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Port</span></code>: display, tick, buttons, lifecycle, frame loop</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp</span></code></p></td>
+<td><p>The GUI process entry point</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/GuiCommandProcessor.cpp</span></code></p></td>
+<td><p>The kernel message pump shared with the TouchGFX port</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cmake/una-sdk.cmake</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UNA_SDK_SOURCES_GUI_LVGL</span></code>, <code class="docutils literal notranslate"><span class="pre">UNA_SDK_INCLUDE_DIRS_GUI_LVGL</span></code>, <code class="docutils literal notranslate"><span class="pre">UNA_SDK_DEFINES_GUI_LVGL</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>An app selects LVGL in its CMake by using those three variables in place of the
+TouchGFX ones and pointing <code class="docutils literal notranslate"><span class="pre">GUI_PATH</span></code> at its GUI source tree; compare
+<code class="docutils literal notranslate"><span class="pre">RunLVGL-CMake/CMakeLists.txt</span></code> with <code class="docutils literal notranslate"><span class="pre">Running-CMake/CMakeLists.txt</span></code>.</p>
+<section id="display">
+<h3>Display<a class="headerlink" href="#display" title="Link to this heading"></a></h3>
+<p>LVGL renders in RGB565 into a 30-row stripe buffer (14 KB) in <code class="docutils literal notranslate"><span class="pre">PARTIAL</span></code> render mode.
+Each flushed stripe is packed into a persistent 57.6 KB ABGR2222 frame, keeping the top
+two bits of each channel, which is the same quantisation the TouchGFX port’s
+<code class="docutils literal notranslate"><span class="pre">LCD8bpp_ABGR2222</span></code> applies, so both toolkits produce identical colours from identical
+input. When LVGL reports the last stripe of a frame (<code class="docutils literal notranslate"><span class="pre">lv_display_flush_is_last</span></code>), the
+frame is sent with <code class="docutils literal notranslate"><span class="pre">REQUEST_DISPLAY_UPDATE</span></code>. Because the frame persists, LVGL’s partial
+redraws compose correctly onto the previous content, and only the invalidated areas are
+re-rendered each frame.</p>
+</section>
+<section id="tick-and-frame-loop">
+<h3>Tick and Frame Loop<a class="headerlink" href="#tick-and-frame-loop" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">lv_tick_set_cb</span></code> reads the kernel’s millisecond clock, so animations are time-based and
+correct even when ticks arrive unevenly. The frame loop in <code class="docutils literal notranslate"><span class="pre">Port::run()</span></code> blocks on the
+message pump until the next <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>, delivers queued service messages, posts
+button codes, then calls <code class="docutils literal notranslate"><span class="pre">lv_timer_handler()</span></code> once. LVGL therefore renders at most one
+frame per kernel tick, which is the watch’s 10 Hz.</p>
+<p>One configuration choice matters here. LVGL’s refresh and animation timers only run
+when at least their period has elapsed, and the default period is 100 ms. With the
+kernel tick also at 100 ms, any tick that lands a millisecond early was skipped and the
+frame waited for the next one, halving the frame rate during animations. <code class="docutils literal notranslate"><span class="pre">lv_conf.h</span></code>
+sets <code class="docutils literal notranslate"><span class="pre">LV_DEF_REFR_PERIOD</span></code> to 1 so that every tick renders whatever is invalid; the tick
+still paces the loop, so this adds no work.</p>
+</section>
+<section id="buttons">
+<h3>Buttons<a class="headerlink" href="#buttons" title="Link to this heading"></a></h3>
+<p>Each <code class="docutils literal notranslate"><span class="pre">SDK::GUI::Button</span></code> code the kernel delivers (click <code class="docutils literal notranslate"><span class="pre">'1'</span></code>..<code class="docutils literal notranslate"><span class="pre">'4'</span></code>, press
+<code class="docutils literal notranslate"><span class="pre">'q'</span></code>..<code class="docutils literal notranslate"><span class="pre">'r'</span></code>, release <code class="docutils literal notranslate"><span class="pre">'a'</span></code>..<code class="docutils literal notranslate"><span class="pre">'f'</span></code>) is posted to the active LVGL screen as an
+<code class="docutils literal notranslate"><span class="pre">LV_EVENT_KEY</span></code> event, one code per frame as TouchGFX samples them. That pacing matters:
+a press often switches screens, and the switch happens at the end of the frame, so the
+click and release queued behind it must wait for the next frames to reach the new screen
+rather than the one being left. No LVGL input device or group is involved: the focus-navigation
+model of an LVGL keypad group does not fit four buttons whose meaning each screen
+defines, so screens read the code with <code class="docutils literal notranslate"><span class="pre">lv_event_get_key()</span></code> and decide themselves.</p>
+</section>
+<section id="lifecycle">
+<h3>Lifecycle<a class="headerlink" href="#lifecycle" title="Link to this heading"></a></h3>
+<p>The port registers itself as the pump’s <code class="docutils literal notranslate"><span class="pre">IGuiLifeCycleCallback</span></code> and forwards
+start/stop/resume/suspend/frame to the app’s <code class="docutils literal notranslate"><span class="pre">Model</span></code>. On resume it invalidates the
+active screen so the kernel receives a full frame, since another GUI may have owned the
+display meanwhile. On stop it calls <code class="docutils literal notranslate"><span class="pre">lv_deinit()</span></code>.</p>
+</section>
+<section id="memory">
+<h3>Memory<a class="headerlink" href="#memory" title="Link to this heading"></a></h3>
+<p>LVGL uses its built-in allocator on a static pool, <code class="docutils literal notranslate"><span class="pre">LV_MEM_SIZE</span></code>, sized by measurement:
+<code class="docutils literal notranslate"><span class="pre">ScreenManager</span></code> logs the pool’s use and peak on every screen switch, and RunLVGL’s peak
+over a full session was about 25 KB, so the pool is 40 KB. No stock theme is compiled;
+the app styles its widgets itself, which is smaller and closer to the design.</p>
+</section>
+</section>
+<section id="the-runlvgl-gui">
+<h2>The RunLVGL GUI<a class="headerlink" href="#the-runlvgl-gui" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Software</span><span class="o">/</span><span class="n">Apps</span><span class="o">/</span><span class="n">LVGL</span><span class="o">-</span><span class="n">GUI</span><span class="o">/</span>
+  <span class="n">lvgl</span><span class="o">-</span><span class="n">gui</span><span class="o">.</span><span class="n">cmake</span>              <span class="n">sources</span> <span class="ow">and</span> <span class="n">include</span> <span class="n">dirs</span> <span class="p">(</span><span class="n">globbed</span><span class="p">)</span>
+  <span class="n">assets</span><span class="o">/</span><span class="n">gen_assets</span><span class="o">.</span><span class="n">py</span>        <span class="n">font</span> <span class="ow">and</span> <span class="n">image</span> <span class="n">converter</span> <span class="p">(</span><span class="n">see</span> <span class="n">Assets</span><span class="p">)</span>
+  <span class="n">assets</span><span class="o">/</span><span class="n">fonts</span><span class="o">/*.</span><span class="n">c</span>            <span class="mi">15</span> <span class="n">Poppins</span> <span class="n">faces</span><span class="p">,</span> <span class="mi">2</span> <span class="n">bpp</span>
+  <span class="n">assets</span><span class="o">/</span><span class="n">images</span><span class="o">/*.</span><span class="n">c</span>           <span class="mi">15</span> <span class="n">icons</span>
+  <span class="n">gui</span><span class="o">/</span><span class="n">include</span><span class="o">/</span><span class="n">gui</span><span class="o">/</span>
+    <span class="n">Assets</span><span class="o">.</span><span class="n">hpp</span>                <span class="n">LV_FONT_DECLARE</span> <span class="o">/</span> <span class="n">LV_IMAGE_DECLARE</span> <span class="k">for</span> <span class="n">the</span> <span class="n">above</span>
+    <span class="n">Format</span><span class="o">.</span><span class="n">hpp</span>                <span class="n">integer</span><span class="o">-</span><span class="n">only</span> <span class="n">number</span> <span class="n">formatting</span> <span class="p">(</span><span class="n">pace</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">Strings</span><span class="o">.</span><span class="n">hpp</span>               <span class="n">text</span> <span class="n">constants</span>
+    <span class="n">model</span><span class="o">/</span>                    <span class="n">Model</span><span class="p">,</span> <span class="n">ModelListener</span><span class="p">,</span> <span class="n">menu</span> <span class="n">navigation</span> <span class="n">state</span>
+    <span class="n">screens</span><span class="o">/</span>                  <span class="n">Screen</span> <span class="n">base</span><span class="p">,</span> <span class="n">ScreenManager</span><span class="p">,</span> <span class="n">one</span> <span class="k">class</span><span class="w"> </span><span class="nc">per</span> <span class="n">screen</span>
+    <span class="n">theme</span><span class="o">/</span><span class="n">Theme</span><span class="o">.</span><span class="n">hpp</span>           <span class="n">the</span> <span class="n">app</span><span class="s1">'s fonts, plus the SDK'</span><span class="n">s</span> <span class="n">drawing</span> <span class="n">helpers</span>
+    <span class="n">widgets</span><span class="o">/</span>                  <span class="n">HeartRateZone</span><span class="p">,</span> <span class="n">InfoCarousel</span><span class="p">,</span> <span class="n">Map</span><span class="p">,</span> <span class="o">...</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">SDK</span> <span class="n">widgets</span>
+                              <span class="k">with</span> <span class="n">Run</span><span class="s1">'s font and icons filled in</span>
+  <span class="n">gui</span><span class="o">/</span><span class="n">src</span><span class="o">/</span>
+    <span class="n">GuiApp</span><span class="o">.</span><span class="n">cpp</span>                <span class="n">una_lvgl_app_init</span><span class="p">():</span> <span class="n">model</span> <span class="o">+</span> <span class="n">first</span> <span class="n">screen</span>
+    <span class="o">...</span>                       <span class="n">implementations</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span>
+  <span class="n">simulator</span><span class="o">/</span>                  <span class="n">PC</span> <span class="n">simulator</span> <span class="n">project</span> <span class="p">(</span><span class="n">CMake</span><span class="p">)</span> <span class="ow">and</span> <span class="n">its</span> <span class="n">sensor</span> <span class="n">config</span>
+</pre></div>
+</div>
+<section id="entry-point">
+<h3>Entry Point<a class="headerlink" href="#entry-point" title="Link to this heading"></a></h3>
+<p>The SDK’s LVGL <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> binds the kernel, initialises the port, then calls one hook
+the app defines:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">extern</span><span class="w"> </span><span class="s">"C"</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">una_lvgl_app_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">Theme</span><span class="o">::</span><span class="n">init</span><span class="p">();</span>
+<span class="w">    </span><span class="n">sModel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="p">(</span><span class="n">sModelStorage</span><span class="p">)</span><span class="w"> </span><span class="n">Model</span><span class="p">();</span>
+<span class="w">    </span><span class="n">ScreenManager</span><span class="o">::</span><span class="n">instance</span><span class="p">().</span><span class="n">start</span><span class="p">(</span><span class="o">*</span><span class="n">sModel</span><span class="p">,</span><span class="w"> </span><span class="n">ScreenId</span><span class="o">::</span><span class="n">Main</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Objects are constructed here rather than as globals so nothing touches the kernel
+before <code class="docutils literal notranslate"><span class="pre">main()</span></code> has bound it. The same file defines <code class="docutils literal notranslate"><span class="pre">una_lvgl_default_font()</span></code>, which
+<code class="docutils literal notranslate"><span class="pre">lv_conf.h</span></code> routes <code class="docutils literal notranslate"><span class="pre">LV_FONT_DEFAULT</span></code> through; returning one of the app’s own faces keeps
+LVGL’s built-in Montserrat fonts out of the link.</p>
+</section>
+<section id="model-and-the-service-contract">
+<h3>Model and the Service Contract<a class="headerlink" href="#model-and-the-service-contract" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Model</span></code> is the GUI’s single point of contact with the service and the kernel. It
+implements <code class="docutils literal notranslate"><span class="pre">IGuiLifeCycleCallback</span></code> (the port’s lifecycle events) and
+<code class="docutils literal notranslate"><span class="pre">ICustomMessageHandler</span></code> (the service’s messages), keeps the last known state (time,
+battery, GPS fix, settings, track data, activity summary) and exposes commands
+(<code class="docutils literal notranslate"><span class="pre">trackStart</span></code>, <code class="docutils literal notranslate"><span class="pre">trackPause</span></code>, <code class="docutils literal notranslate"><span class="pre">saveLap</span></code>, <code class="docutils literal notranslate"><span class="pre">saveSettings</span></code>, <code class="docutils literal notranslate"><span class="pre">exitApp</span></code>, …) that send the
+matching messages to the service.</p>
+<p>The message types in <code class="docutils literal notranslate"><span class="pre">Software/Libs/Header/Commands.hpp</span></code> are unchanged from Run:
+<code class="docutils literal notranslate"><span class="pre">SettingsUpd</span></code>, <code class="docutils literal notranslate"><span class="pre">Time</span></code>, <code class="docutils literal notranslate"><span class="pre">Battery</span></code>, <code class="docutils literal notranslate"><span class="pre">GpsFix</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackStateUpd</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackDataUpd</span></code>,
+<code class="docutils literal notranslate"><span class="pre">LapEnded</span></code>, <code class="docutils literal notranslate"><span class="pre">Summary</span></code>, <code class="docutils literal notranslate"><span class="pre">IntervalsPhaseAlert</span></code>, <code class="docutils literal notranslate"><span class="pre">IntervalsWorkoutCompleted</span></code> and
+<code class="docutils literal notranslate"><span class="pre">AccessoryStatusUpd</span></code> flow from service to GUI; <code class="docutils literal notranslate"><span class="pre">SettingsSave</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackStart</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TrackStop</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackPause</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackResume</span></code>, <code class="docutils literal notranslate"><span class="pre">ManualLap</span></code> and <code class="docutils literal notranslate"><span class="pre">IntervalsNextPhase</span></code> flow
+back. This is the point of the exercise: the service does not know or care which toolkit
+renders its state, and the whole GUI could be swapped again without touching it.</p>
+<p>Exactly one screen is bound to the model at a time (<code class="docutils literal notranslate"><span class="pre">Model::bind</span></code>). The model
+forwards each incoming message to the bound screen through <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code>, a set of
+virtual callbacks with empty defaults (<code class="docutils literal notranslate"><span class="pre">onGpsFix</span></code>, <code class="docutils literal notranslate"><span class="pre">onBatteryLevel</span></code>, <code class="docutils literal notranslate"><span class="pre">onTrackData</span></code>,
+<code class="docutils literal notranslate"><span class="pre">onLapChanged</span></code>, <code class="docutils literal notranslate"><span class="pre">onIntervalsPhaseAlert</span></code>, …), so a screen overrides only what it shows.
+State updates are always applied to the model first, whether or not a screen is bound,
+so a screen created later reads current values.</p>
+</section>
+<section id="screens-and-navigation">
+<h3>Screens and Navigation<a class="headerlink" href="#screens-and-navigation" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Screen</span></code> owns one LVGL screen object. <code class="docutils literal notranslate"><span class="pre">create()</span></code> makes the object, styles it as the
+black background and calls the subclass’s <code class="docutils literal notranslate"><span class="pre">build()</span></code>, which populates it with widgets;
+<code class="docutils literal notranslate"><span class="pre">destroy()</span></code> deletes the object and everything on it. Key events reach <code class="docutils literal notranslate"><span class="pre">onKey(code)</span></code>;
+<code class="docutils literal notranslate"><span class="pre">onShow()</span></code> and <code class="docutils literal notranslate"><span class="pre">onHide()</span></code> bracket the time a screen is active and are where it restores
+and stores navigation state (which menu item was selected, which face was showing).</p>
+<p><code class="docutils literal notranslate"><span class="pre">ScreenManager::goTo(ScreenId)</span></code> switches screens. The switch is deferred with
+<code class="docutils literal notranslate"><span class="pre">lv_async_call</span></code> so it can be requested from inside an event or a message handler, and
+runs as: hide and unbind the old screen, create and load the new one, destroy the old
+one, bind and show the new one. Screens are therefore built on entry and destroyed on
+exit, which is the same policy as the TouchGFX MVP application; the two widget trees
+coexist only for the duration of a switch, and the pool is sized for the largest such
+pair (<code class="docutils literal notranslate"><span class="pre">ScreenManager</span></code> logs the pool’s peak after every switch). The <code class="docutils literal notranslate"><span class="pre">ScreenId</span></code> enum in
+<code class="docutils literal notranslate"><span class="pre">ScreenManager.hpp</span></code> lists every
+screen, and <code class="docutils literal notranslate"><span class="pre">ScreenManager::create()</span></code> is the one place that maps ids to classes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MainScreen</span></code> is the smallest complete example. Its <code class="docutils literal notranslate"><span class="pre">build()</span></code> creates a <code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code> with
+the three items (Start, Intervals, Settings), the button hints, the title and the sensor
+status row; <code class="docutils literal notranslate"><span class="pre">onShow()</span></code> restores the remembered menu position and asks the model for the
+current GPS and accessory state; <code class="docutils literal notranslate"><span class="pre">onKey()</span></code> maps L1/L2 to the wheel, R1 to <code class="docutils literal notranslate"><span class="pre">confirm()</span></code>
+and R2 to <code class="docutils literal notranslate"><span class="pre">exitApp()</span></code>; and <code class="docutils literal notranslate"><span class="pre">onGpsFix()</span></code> recolours the lens and shows or hides the R1
+hint, because Start is greyed out without a fix. Compare it with Run’s <code class="docutils literal notranslate"><span class="pre">MainView</span></code> and
+<code class="docutils literal notranslate"><span class="pre">MainPresenter</span></code> to see the same behaviour expressed in the two toolkits.</p>
+</section>
+<section id="theme">
+<h3>Theme<a class="headerlink" href="#theme" title="Link to this heading"></a></h3>
+<p>The drawing helpers live in the SDK, in <code class="docutils literal notranslate"><span class="pre">SDK/GUI/LVGL/Draw.hpp</span></code> (namespace
+<code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Draw</span></code>): <code class="docutils literal notranslate"><span class="pre">label</span></code>, <code class="docutils literal notranslate"><span class="pre">hline</span></code>, <code class="docutils literal notranslate"><span class="pre">vline</span></code>, <code class="docutils literal notranslate"><span class="pre">box</span></code>, <code class="docutils literal notranslate"><span class="pre">image</span></code>, <code class="docutils literal notranslate"><span class="pre">imageTinted</span></code>, <code class="docutils literal notranslate"><span class="pre">dot</span></code>,
+<code class="docutils literal notranslate"><span class="pre">arc</span></code>, <code class="docutils literal notranslate"><span class="pre">container</span></code>, plus <code class="docutils literal notranslate"><span class="pre">init()</span></code> for the shared styles and <code class="docutils literal notranslate"><span class="pre">applyScreen()</span></code> for a black,
+unscrollable screen. They take TouchGFX coordinates and angles (arcs measured from 12
+o’clock, clockwise; <code class="docutils literal notranslate"><span class="pre">arcAngle()</span></code> converts to LVGL’s 3 o’clock origin) and the SDK’s
+64-colour <code class="docutils literal notranslate"><span class="pre">SDK::GUI::Color</span></code> values, which the two-bits-per-channel display renders
+exactly, so screens can be laid out straight from a TouchGFX Designer’s values and the two
+toolkits match to the pixel.</p>
+<p>The app’s <code class="docutils literal notranslate"><span class="pre">Theme</span></code> namespace adds what is Run’s own: the fifteen Poppins faces by weight
+and size (<code class="docutils literal notranslate"><span class="pre">Theme::Font</span></code>, <code class="docutils literal notranslate"><span class="pre">Theme::font()</span></code>), a <code class="docutils literal notranslate"><span class="pre">label()</span></code> overload that takes one of them,
+and using-declarations that make the SDK helpers available as <code class="docutils literal notranslate"><span class="pre">Theme::arc(...)</span></code> and so
+on. The SDK owns no fonts or images, so every helper and widget that draws text or an
+icon takes it as a <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">lv_font_t*</span></code> or <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">lv_image_dsc_t*</span></code> from the app.</p>
+</section>
+<section id="widgets">
+<h3>Widgets<a class="headerlink" href="#widgets" title="Link to this heading"></a></h3>
+<p>The widgets every UNA activity app shares are part of the SDK, under
+<code class="docutils literal notranslate"><span class="pre">SDK/GUI/LVGL/</span></code> in namespace <code class="docutils literal notranslate"><span class="pre">SDK::LVGL</span></code>: <code class="docutils literal notranslate"><span class="pre">Buttons</span></code> (the bezel hints), <code class="docutils literal notranslate"><span class="pre">Title</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code>, <code class="docutils literal notranslate"><span class="pre">SensorStatusRow</span></code>, <code class="docutils literal notranslate"><span class="pre">Battery</span></code>, <code class="docutils literal notranslate"><span class="pre">TimerRing</span></code>, <code class="docutils literal notranslate"><span class="pre">Toggle</span></code> and <code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code>.
+Each is a small class that creates LVGL objects on a parent and keeps the handles it
+needs to update; where one draws text or an icon, the constructor takes the font or
+image from the app (<code class="docutils literal notranslate"><span class="pre">Title</span></code> takes its face, <code class="docutils literal notranslate"><span class="pre">SensorStatusRow</span></code> its two A8 glyphs,
+<code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code> a <code class="docutils literal notranslate"><span class="pre">Fonts</span></code> struct and, per item, an optional face for the selected slot).
+RunLVGL’s <code class="docutils literal notranslate"><span class="pre">Widgets.hpp</span></code> re-exports them under its <code class="docutils literal notranslate"><span class="pre">Widgets</span></code> namespace, with two-line
+subclasses for <code class="docutils literal notranslate"><span class="pre">Title</span></code> and <code class="docutils literal notranslate"><span class="pre">SensorStatusRow</span></code> that fill in Run’s font and icons, and its
+<code class="docutils literal notranslate"><span class="pre">WheelMenu.hpp</span></code> does the same for the wheel’s fonts and slide time. The rest of
+<code class="docutils literal notranslate"><span class="pre">Widgets.hpp</span></code> is Run’s own: <code class="docutils literal notranslate"><span class="pre">HeartRateZone</span></code>, <code class="docutils literal notranslate"><span class="pre">PauseIndicator</span></code>, <code class="docutils literal notranslate"><span class="pre">InfoCarousel</span></code>, <code class="docutils literal notranslate"><span class="pre">Map</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IntervalsTimer</span></code> and <code class="docutils literal notranslate"><span class="pre">TwoTonePicker</span></code>. Two are worth reading for technique:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code></strong> reproduces the scroll wheel’s 400 ms slide the way TouchGFX’s
+<code class="docutils literal notranslate"><span class="pre">ScrollWheelWithSelectionStyle</span></code> does: two strips of three slots, one in the large
+selected style clipped to the selection window and one in the small style clipped to
+the area below, moved together by one item pitch with <code class="docutils literal notranslate"><span class="pre">lv_anim</span></code>. It reports its slide
+midpoint so the screen can recolour the lens when the incoming item takes the centre,
+as Run does.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">HeartRateZone</span></code></strong> draws the five-segment zone bar and the active-zone marker with
+<code class="docutils literal notranslate"><span class="pre">lv_arc</span></code> objects and one triangle drawn in an <code class="docutils literal notranslate"><span class="pre">LV_EVENT_DRAW_MAIN</span></code> handler, with
+geometry fitted from Run’s bitmaps. It replaced about 50 KB of images with about 100
+lines of code and no bitmaps, which is the general lesson for LVGL on this platform:
+shapes are cheap, pixels are not.</p></li>
+</ul>
+</section>
+<section id="assets">
+<h3>Assets<a class="headerlink" href="#assets" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">assets/gen_assets.py</span></code> converts Run’s Poppins TTFs and PNG icons into LVGL C arrays, and
+the outputs are committed:</p>
+<ul class="simple">
+<li><p>Fonts through <code class="docutils literal notranslate"><span class="pre">lv_font_conv</span></code> (run via <code class="docutils literal notranslate"><span class="pre">npx</span></code>, so Node is needed) at 2 bits per pixel,
+uncompressed. Faces used only for numbers carry digits and punctuation only, which
+keeps all fifteen faces to about 80 KB; the one exception is documented in the script
+(the selected Start item uses a face that must stay full ASCII).</p></li>
+<li><p>Images through LVGL’s own <code class="docutils literal notranslate"><span class="pre">LVGLImage.py</span></code> (needs the <code class="docutils literal notranslate"><span class="pre">pypng</span></code> and <code class="docutils literal notranslate"><span class="pre">lz4</span></code> Python packages).
+Multi-colour icons are <code class="docutils literal notranslate"><span class="pre">RGB565A8</span></code>; single-colour icons (ticks, crosses, pause, sensor
+glyphs) are <code class="docutils literal notranslate"><span class="pre">A8</span></code> alpha masks tinted at draw time with <code class="docutils literal notranslate"><span class="pre">Theme::imageTinted()</span></code>, so one
+bitmap serves every colour variant. Do not use indexed formats to save space: LVGL v9
+decodes them to 32-bit ARGB in the pool at draw time.</p></li>
+</ul>
+<p>The generator runs the converters with SDK-relative paths and normalises the output to
+LF, so a regeneration on Windows or Linux reproduces the committed files byte for byte.
+Declarations in <code class="docutils literal notranslate"><span class="pre">Assets.hpp</span></code> sit inside <code class="docutils literal notranslate"><span class="pre">extern</span> <span class="pre">&quot;C&quot;</span></code>, which MSVC needs to link C-defined
+symbols from C++.</p>
+</section>
+</section>
+<section id="memory-and-performance">
+<h2>Memory and Performance<a class="headerlink" href="#memory-and-performance" title="Link to this heading"></a></h2>
+<p>The GUI process is loaded whole into SRAM, so its size is the number that matters:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>RunLVGL</p></th>
+<th class="head"><p>Run (TouchGFX)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code> file</p></td>
+<td><p>~408 KB</p></td>
+<td><p>~529 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>GUI process RAM as loaded</p></td>
+<td><p>~452 KB</p></td>
+<td><p>~493 KB</p></td>
+</tr>
+<tr class="row-even"><td><p>of which code and assets</p></td>
+<td><p>~308 KB</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>of which static data</p></td>
+<td><p>~139 KB: 40 KB LVGL pool, 58 KB frame, 14 KB stripe, the rest LVGL and app state</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>The kernel needs one contiguous block for the whole process, so watch the headroom in
+the kernel’s <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">Heap</span></code> log lines when other apps are resident. <code class="docutils literal notranslate"><span class="pre">GUI_RAM_LENGTH</span></code> and
+<code class="docutils literal notranslate"><span class="pre">GUI_STACK_SIZE</span></code> in the app’s CMake set the region and the GUI task’s stack; LVGL’s
+software renderer recurses deeper than TouchGFX and needs the 24 KB stack RunLVGL gives
+it.</p>
+<p>Rendering a full-screen animation frame takes about 40 ms of the 100 ms period on the
+watch’s Cortex-M33. Configuring the app with <code class="docutils literal notranslate"><span class="pre">-DRUNLVGL_FRAME_STATS=ON</span></code> logs one line per
+100 kernel ticks with tick spacing, frames sent, render time and hand-off time, which is
+how the numbers in this section were measured.</p>
+<p>Pitfalls met while writing this app, so you do not have to:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LV_IMAGE_DECLARE()</span></code> has no trailing semicolon in its expansion while
+<code class="docutils literal notranslate"><span class="pre">LV_FONT_DECLARE()</span></code> has; a missing <code class="docutils literal notranslate"><span class="pre">;</span></code> produces a cascade of unrelated errors.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lv_obj_remove_flag(obj,</span> <span class="pre">A</span> <span class="pre">|</span> <span class="pre">B)</span></code> needs <code class="docutils literal notranslate"><span class="pre">static_cast&lt;lv_obj_flag_t&gt;</span></code> in C++.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lv_point_precise_t</span></code> is integer unless <code class="docutils literal notranslate"><span class="pre">LV_USE_FLOAT</span></code> is on; round before assigning.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LV_FONT_DEFAULT</span></code> must be a font you ship; the <code class="docutils literal notranslate"><span class="pre">una_lvgl_default_font()</span></code> hook exists so
+Montserrat can be left out of the link.</p></li>
+<li><p>Weak symbols do not exist on MSVC; the port uses <code class="docutils literal notranslate"><span class="pre">/alternatename</span></code> for the same effect
+in the simulator build.</p></li>
+</ul>
+</section>
+<section id="what-differs-from-the-touchgfx-run-app">
+<h2>What Differs from the TouchGFX Run App<a class="headerlink" href="#what-differs-from-the-touchgfx-run-app" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Run (TouchGFX)</p></th>
+<th class="head"><p>RunLVGL</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Layout</p></td>
+<td><p>TouchGFX Designer, generated base classes</p></td>
+<td><p>Code, using the same coordinates</p></td>
+</tr>
+<tr class="row-odd"><td><p>Screens</p></td>
+<td><p>View + Presenter per screen, generated <code class="docutils literal notranslate"><span class="pre">ViewBase</span></code></p></td>
+<td><p>One <code class="docutils literal notranslate"><span class="pre">Screen</span></code> subclass per screen</p></td>
+</tr>
+<tr class="row-even"><td><p>Text and fonts</p></td>
+<td><p>Designer text database, generated typed texts</p></td>
+<td><p>Plain strings, fonts converted once</p></td>
+</tr>
+<tr class="row-odd"><td><p>Animations</p></td>
+<td><p>TouchGFX animated widgets and <code class="docutils literal notranslate"><span class="pre">handleTickEvent</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lv_anim</span></code> and time-based LVGL timers</p></td>
+</tr>
+<tr class="row-even"><td><p>Simulator</p></td>
+<td><p>Visual Studio project generated by Designer, Windows only for the IDE flow</p></td>
+<td><p>One CMake project, Windows and Linux</p></td>
+</tr>
+<tr class="row-odd"><td><p>Service</p></td>
+<td><p>Identical</p></td>
+<td><p>Identical</p></td>
+</tr>
+</tbody>
+</table>
+<p>The service, the FIT file format, the settings format and the message contract are the
+same. A recording made with RunLVGL carries RunLVGL’s own APP_ID in its FIT file, and
+its settings live in RunLVGL’s own directory, so the two apps keep their data apart.</p>
+</section>
+<section id="where-to-go-next">
+<h2>Where to Go Next<a class="headerlink" href="#where-to-go-next" title="Link to this heading"></a></h2>
+<p>To start your own LVGL app, copy <code class="docutils literal notranslate"><span class="pre">RunLVGL-CMake/CMakeLists.txt</span></code> and the <code class="docutils literal notranslate"><span class="pre">GuiApp.cpp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Screen</span></code>, <code class="docutils literal notranslate"><span class="pre">ScreenManager</span></code>, <code class="docutils literal notranslate"><span class="pre">Theme</span></code> and <code class="docutils literal notranslate"><span class="pre">Model</span></code> skeletons, keep the port as it is, and
+write your screens. The simulator project needs only the app’s source lists and its
+<code class="docutils literal notranslate"><span class="pre">ConfigurationSimulator.hpp</span></code>. For the kernel-side details of what a GUI process may do,
+see the <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a>, most of which
+describes the shared message pump and applies to LVGL unchanged, and
+<a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a> for the mock kernel the simulator runs on.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Waypoint/ARCHITECTURE.html" class="btn btn-neutral float-left" title="Waypoint - Configuration from the Companion App" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../Examples/Running-Architecture.html" class="btn btn-neutral float-right" title="Running - Running Activity Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

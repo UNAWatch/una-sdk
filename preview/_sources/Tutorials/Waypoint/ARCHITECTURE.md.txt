@@ -53,10 +53,14 @@ Waypoint declares `"requiredHardware": ["GPS"]`, so on hardware it needs a watch
 
 ### Building
 
+As in the earlier tutorials there are two GUIs over the one service: `Waypoint-CMake` builds
+the TouchGFX GUI, `WaypointLVGL-CMake` the LVGL one (which needs the LVGL submodule,
+`git submodule update --init ThirdParty/lvgl`).
+
 ```bash
 cd $UNA_SDK/Docs/Tutorials/Waypoint
 mkdir build && cd build
-cmake -G "Unix Makefiles" ../Software/Apps/Waypoint-CMake
+cmake -G "Unix Makefiles" ../Software/Apps/Waypoint-CMake        # or ../Software/Apps/WaypointLVGL-CMake
 make
 ```
 
@@ -68,7 +72,8 @@ if the build stops there.
 ### Trying it without a phone
 
 The simulator's app sandbox is a directory on your PC - the GUI logs its path at startup
-("Path to files created by app"). Drop a file called `app_config.json` in there:
+("Path to files created by app"; the LVGL simulator's is `Software/Output`, relative to its
+`build/bin` working directory). Drop a file called `app_config.json` in there:
 
 ```json
 {
@@ -91,7 +96,9 @@ the path most apps get wrong.
 `Output/app-manifest.json` carries two extra keys beyond the usual package metadata (which
 now starts with `"manifest_version": 1` - required in every manifest, configuration fields or
 not). `configFile` names the file the companion app will write, and `configFields` lists what
-to ask for. Waypoint declares five fields covering
+to ask for. A manifest describes one app, so the LVGL build has its own,
+`OutputLVGL/app-manifest.json`, with its own name and id and the same five fields; CI checks
+both against the field table below. Waypoint declares five fields covering
 all four supported types — two of them floats, for the coordinate pair. Abridged (see
 `Output/app-manifest.json` for the full declaration, including `targetLongitude`):
 
@@ -320,7 +327,23 @@ distanceText.invalidate();
 never set keeps whatever placeholder the text database holds, and a design-time placeholder
 that ships to users looks exactly like real data.
 
+The LVGL screen (`LVGL-GUI/gui/src/screens/MainScreen.cpp`) is the same four rows as
+`Draw::label()` objects, written with `lv_label_set_text()`. It has no placeholder problem to
+guard against, since a label starts empty, but its constructor still draws the model's last
+`NavState` so a screen created after the first fix shows it at once. Two details differ in
+kind rather than in wording:
+
+- The distance face is chosen by string length with `lv_obj_set_style_text_font()`, from three
+  converted Poppins SemiBold sizes, where TouchGFX picks among three typographies.
+- The two-second save confirmation is a one-shot `lv_timer` that restores the status line when
+  it fires, where the TouchGFX view counts ticks in `handleTickEvent()`.
+
 Buttons: **R1** saves the current position as the target, **R2** exits.
+
+| Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
+|---|---|---|---|
+| Waypoint (TouchGFX) | 258 KB | 219 KB | 71 KB |
+| WaypointLVGL | 229 KB | 194 KB | 139 KB |
 
 ## Message flow
 
@@ -388,11 +411,12 @@ existed. The service is constructed early, so anything in a constructor that rea
 Move it into `run()`.
 
 **The simulator fails to link with `undefined reference` to SDK symbols.** Unlike the CMake
-target, the simulator lists its sources by hand in `simulator/gcc/Makefile` (and
+target, the TouchGFX simulator lists its sources by hand in `simulator/gcc/Makefile` (and
 `simulator/msvs/Application.vcxproj`). Add what you use — this app needed `AppConfig.cpp`,
-`SensorConnection.cpp`, coreJSON and the sensor-layer simulator. An app that uses the sensor
-layer also needs its own `simulator/ConfigurationSimulator.hpp` saying which sensors to
-simulate.
+`SensorConnection.cpp`, coreJSON and the sensor-layer simulator. The LVGL simulator takes
+its SDK sources from `cmake/una-simulator.cmake`, which already lists them. An app that uses
+the sensor layer also needs its own `simulator/ConfigurationSimulator.hpp` saying which
+sensors to simulate.
 
 **CI fails with "field table ... but app-manifest.json".** The two declarations disagree. The error
 names the field and both values; fix whichever is wrong.

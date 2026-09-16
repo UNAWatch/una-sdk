@@ -40,7 +40,9 @@ jobs:
           python3 Utilities/Scripts/app_packer/test_min_kernel_version.py
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/OutputLVGL/app-manifest.json
           python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Waypoint/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Waypoint/OutputLVGL/app-manifest.json
 
       - name: Validate app configuration declarations
         # (a) run the validator's own self-tests -- the pattern dialect is the
@@ -58,8 +60,15 @@ jobs:
             --check Docs/Tutorials/Waypoint/Output/app-manifest.json \
             --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Sources/AppConfigFields.cpp \
             --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Header/AppConfigFields.hpp
+          # The LVGL build of Waypoint shares the service, so the same field table.
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Waypoint/OutputLVGL/app-manifest.json \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Sources/AppConfigFields.cpp \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Header/AppConfigFields.hpp
           python3 Utilities/Scripts/app_packer/validate_app_config.py \
             --check Docs/Tutorials/Files/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Files/OutputLVGL/app-manifest.json
 
       - name: Generate app list
         id: generate
@@ -117,6 +126,8 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
+          # RunLVGL's GUI is built from the LVGL submodule (ThirdParty/lvgl).
+          submodules: recursive
 
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt

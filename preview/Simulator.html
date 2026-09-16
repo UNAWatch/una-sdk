@@ -74,6 +74,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#regenerate-the-gui-regenerate-gui">Regenerate the GUI {#regenerate-gui}</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#lvgl-simulator-lvgl-simulator">LVGL simulator {#lvgl-simulator}</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#linux-gcc-linux-gcc">Linux (GCC) {#linux-gcc}</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#build-and-run">Build and run</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#what-makes-the-linux-build-work">What makes the Linux build work</a></li>
@@ -92,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -503,6 +505,27 @@ declares the property conditionally:</p>
 that pins the path unconditionally ignores the variable and has to be edited
 instead.</p>
 </section>
+</section>
+<section id="lvgl-simulator-lvgl-simulator">
+<h2>LVGL simulator {#lvgl-simulator}<a class="headerlink" href="#lvgl-simulator-lvgl-simulator" title="Link to this heading"></a></h2>
+<p>Apps whose GUI is built on LVGL rather than TouchGFX (the tutorials’ <code class="docutils literal notranslate"><span class="pre">LVGL-GUI</span></code>
+variants, starting with <a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld</span></a>, and the
+<a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html"><span class="std std-doc">RunLVGL</span></a> activity app) simulate through the same mock
+kernel, but with a plain CMake project (<code class="docutils literal notranslate"><span class="pre">LVGL-GUI/simulator/CMakeLists.txt</span></code>) instead of
+the Designer-generated Visual Studio solution and gcc Makefile. <code class="docutils literal notranslate"><span class="pre">SDK::Simulator::LvglHost</span></code> (<code class="docutils literal notranslate"><span class="pre">Libs/Source/Simulator/LVGL</span></code>)
+stands in for the kernel’s display, ticks and buttons: an SDL2 window shows the frames
+the LVGL port sends, a thread posts <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code> at the watch’s frame rate, and the
+keyboard stands in for the buttons. Keys 1-4 are the physical buttons L1, L2, R1, R2:
+key down sends the press event, key up sends the release, and a key up within 500 ms
+sends a click first, the sequence the kernel emits. The <code class="docutils literal notranslate"><span class="pre">q</span></code>/<code class="docutils literal notranslate"><span class="pre">w</span></code>/<code class="docutils literal notranslate"><span class="pre">e</span></code>/<code class="docutils literal notranslate"><span class="pre">r</span></code> row sends one
+press and the <code class="docutils literal notranslate"><span class="pre">a</span></code>/<code class="docutils literal notranslate"><span class="pre">s</span></code>/<code class="docutils literal notranslate"><span class="pre">d</span></code>/<code class="docutils literal notranslate"><span class="pre">f</span></code> row one release for the same four buttons, the way the
+TouchGFX simulators pass those codes from <code class="docutils literal notranslate"><span class="pre">SDK/GUI/Button.hpp</span></code> straight through (the
+<code class="docutils literal notranslate"><span class="pre">z</span></code> chord has no key). <code class="docutils literal notranslate"><span class="pre">cmake/una-simulator.cmake</span></code>
+provides the source lists and <code class="docutils literal notranslate"><span class="pre">una_simulator_link_sdl2()</span></code>, which uses an installed SDL2
+where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
+TouchGFX (configure with <code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">Win32</span></code>). The sensor simulation, mock file system and
+keyboard mapping above apply unchanged. <code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds
+these CMake simulators on Linux and smoke-runs them headlessly, beside the TouchGFX ones.</p>
 </section>
 <section id="linux-gcc-linux-gcc">
 <h2>Linux (GCC) {#linux-gcc}<a class="headerlink" href="#linux-gcc-linux-gcc" title="Link to this heading"></a></h2>

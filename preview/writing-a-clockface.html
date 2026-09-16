@@ -60,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -204,13 +205,13 @@ Settings -&gt; Watch Face. The kernel finds every installed app of
 all it takes to appear. The list holds nine entries including the built-in
 face.</p></li>
 <li><p><strong>It is on screen for hours at a time.</strong> Which makes power the first design
-constraint, not the last: see <a class="reference internal" href="#do-not-subscribe-to-what-you-do-not-draw"><span class="xref myst">Do not subscribe to what you do not
-draw</span></a>.</p></li>
+constraint, not the last: see <a class="reference internal" href="#do-not-subscribe-to-what-you-do-not-draw">Do not subscribe to what you do not
+draw</a>.</p></li>
 <li><p><strong>It serves no glance data.</strong> Leave the glance-capable bit clear, which
 <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">&quot;Clockface&quot;</span></code> does by default.</p></li>
 <li><p><strong>It is suspended, not stopped, when something else takes the screen.</strong> This
-has consequences that are easy to miss – see <a class="reference internal" href="#the-gui-stops-draining-its-queue-while-suspended"><span class="xref myst">The GUI stops draining its
-queue while suspended</span></a>.</p></li>
+has consequences that are easy to miss – see <a class="reference internal" href="#the-gui-stops-draining-its-queue-while-suspended">The GUI stops draining its
+queue while suspended</a>.</p></li>
 </ul>
 </section>
 <section id="architecture-overview">
@@ -278,7 +279,7 @@ the surrounding text is meant to be copied.)</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Steps</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span><span class="w"> </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>See <a class="reference internal" href="#messages-over-256-bytes-vanish"><span class="xref myst">Messages over 256 bytes vanish</span></a>.</p>
+<p>See <a class="reference internal" href="#messages-over-256-bytes-vanish">Messages over 256 bytes vanish</a>.</p>
 </section>
 <section id="step-3-the-service-the-clock">
 <h3>Step 3: The service - the clock<a class="headerlink" href="#step-3-the-service-the-clock" title="Link to this heading"></a></h3>
@@ -778,8 +779,8 @@ simplest: rotating canvas hands, and a measured argument for why not a rotated
 bitmap.</p>
 <p>All four screenshots are the app simulator. Their step counts, active minutes
 and goals are the designs’ sample values fed in by hand, because the simulator
-cannot serve the daily sensors – see <a class="reference internal" href="#what-the-simulator-cannot-show-you"><span class="xref myst">what the simulator cannot show
-you</span></a>. The heart rates are the simulated
+cannot serve the daily sensors – see <a class="reference internal" href="#what-the-simulator-cannot-show-you">what the simulator cannot show
+you</a>. The heart rates are the simulated
 sensor’s own.</p>
 </section>
 </section>

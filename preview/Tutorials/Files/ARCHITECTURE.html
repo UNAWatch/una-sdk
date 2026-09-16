@@ -467,6 +467,8 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l4"><a class="reference internal" href="#button-event-handling">Button Event Handling</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#the-lvgl-screen">The LVGL Screen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#size-on-the-watch">Size on the watch</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#button-control-scheme">Button Control Scheme</a><ul>
@@ -486,7 +488,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l2"><a class="reference internal" href="#key-learning-concepts">Key Learning Concepts</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#persistent-storage">1. Persistent Storage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inter-process-communication">2. Inter-Process Communication</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mvp-architecture">3. MVP Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui-architecture">3. GUI Architecture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#error-recovery">4. Error Recovery</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#user-experience">5. User Experience</a></li>
 </ul>
@@ -496,6 +498,7 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -588,31 +591,46 @@ window.runMermaid = runMermaid;</script>
 <ul class="simple">
 <li><p><strong>Persistent Settings Storage</strong>: JSON file operations with automatic save/load</p></li>
 <li><p><strong>Inter-Process Communication</strong>: Custom message passing between GUI and Service layers</p></li>
-<li><p><strong>TouchGFX MVP Architecture</strong>: Model-View-Presenter pattern implementation</p></li>
+<li><p><strong>GUI Architecture</strong>: TouchGFX’s Model-View-Presenter pattern, and the LVGL model-and-screen equivalent</p></li>
 <li><p><strong>File System Integration</strong>: Using SDK’s IFileSystem interface</p></li>
 <li><p><strong>Error Recovery</strong>: Graceful handling of corrupted files and I/O errors</p></li>
 </ul>
+<p>As in the earlier tutorials, the app comes with a <strong>TouchGFX</strong> GUI and an <strong>LVGL</strong> GUI over the same service. The service and the messages are the whole point of this tutorial and are shared; the <a class="reference internal" href="#gui-layer-implementation">GUI Layer Implementation</a> section shows each toolkit’s side.</p>
 </section>
 <section id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
 <section id="prerequisites">
 <h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
-<p>Before building the Files app, you need to set up the UNA SDK environment. Follow the <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for complete installation instructions, including:</p>
+<p>Before building the Files app, you need to set up the UNA SDK environment. Follow the <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for complete installation instructions: <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> set, the ST ARM GCC toolchain on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, CMake 3.21+ and Python 3. The TouchGFX GUI needs TouchGFX Designer to modify or simulate; the LVGL GUI needs the LVGL submodule (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">ThirdParty/lvgl</span></code>).</p>
 </section>
 <section id="building-and-running-files">
 <h3>Building and Running Files<a class="headerlink" href="#building-and-running-files" title="Link to this heading"></a></h3>
-<p>See <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for details)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/Files
+
+<span class="c1"># TouchGFX GUI</span>
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/Files-CMake
+make
+
+<span class="c1"># LVGL GUI (from the tutorial directory again)</span>
+<span class="nb">cd</span><span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>build-lvgl<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build-lvgl
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/FilesLVGL-CMake
+make
+</pre></div>
+</div>
+<p>The two builds appear in the launcher as <strong>Files</strong> and <strong>FilesLVGL</strong>, and each keeps its own <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> in its own app directory.</p>
 </section>
 <section id="running-on-simulator">
 <h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
-<p>To test the app on the simulator (Windows only):</p>
+<p><strong>TouchGFX</strong> (Windows only):</p>
 <ol class="arabic simple">
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Files.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
 <li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">Files\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
 <li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
 </ol>
-<p>In the simulator, use keyboard keys to interact with the settings:</p>
+<p><strong>LVGL</strong> (Windows and Linux): a CMake project in <code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI/simulator</span></code>, built the same way as HelloWorld’s (see <a class="reference internal" href="../HelloWorld/ARCHITECTURE.html#running-on-simulator"><span class="std std-ref">that tutorial</span></a>); the executable is <code class="docutils literal notranslate"><span class="pre">FilesLVGLSimulator</span></code>.</p>
+<p>In either simulator, use keyboard keys to interact with the settings:</p>
 <ul class="simple">
 <li><p><strong>1</strong> = L1 (Increment selected setting value)</p></li>
 <li><p><strong>2</strong> = L2 (Decrement selected setting value)</p></li>
@@ -895,12 +913,13 @@ window.runMermaid = runMermaid;</script>
 <h2>GUI Layer Implementation<a class="headerlink" href="#gui-layer-implementation" title="Link to this heading"></a></h2>
 <section id="model-view-presenter-architecture">
 <h3>Model-View-Presenter Architecture<a class="headerlink" href="#model-view-presenter-architecture" title="Link to this heading"></a></h3>
-<p>The GUI follows TouchGFX’s MVP pattern:</p>
+<p>The TouchGFX GUI follows TouchGFX’s MVP pattern:</p>
 <ul class="simple">
 <li><p><strong>Model</strong> (<code class="docutils literal notranslate"><span class="pre">Model.hpp/cpp</span></code>): Handles business logic and Service communication</p></li>
 <li><p><strong>View</strong> (<code class="docutils literal notranslate"><span class="pre">MainView.hpp/cpp</span></code>): Manages UI rendering and user input</p></li>
 <li><p><strong>Presenter</strong> (<code class="docutils literal notranslate"><span class="pre">MainPresenter.hpp/cpp</span></code>): Bridges Model and View</p></li>
 </ul>
+<p>The LVGL GUI (<code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI</span></code>) has the same <strong>Model</strong>, registered with <code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Port</span></code> instead of the TouchGFX command processor, and one <strong>MainScreen</strong> class that plays both the View’s and the Presenter’s parts: it owns the LVGL objects, handles the button codes, and is the model’s <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code>. The message code below is identical in both.</p>
 </section>
 <section id="model-implementation">
 <h3>Model Implementation<a class="headerlink" href="#model-implementation" title="Link to this heading"></a></h3>
@@ -1125,6 +1144,58 @@ the reply, not for queue space — no send waits out a full queue.</p>
 </div>
 </section>
 </section>
+<section id="the-lvgl-screen">
+<h3>The LVGL Screen<a class="headerlink" href="#the-lvgl-screen" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">LVGL-GUI/gui/src/screens/MainScreen.cpp</span></code> does what <code class="docutils literal notranslate"><span class="pre">MainView</span></code> and <code class="docutils literal notranslate"><span class="pre">MainPresenter</span></code> do together. Three rows, each a dash marker and a value label at the design’s positions:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SETTING_COUNT</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Draw</span><span class="o">::</span><span class="n">label</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">poppins_semibold_35</span><span class="p">,</span><span class="w"> </span><span class="s">"-"</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span><span class="w"> </span><span class="n">kRowY</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="n">LV_TEXT_ALIGN_LEFT</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mValue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Draw</span><span class="o">::</span><span class="n">label</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">poppins_medium_25</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="mi">74</span><span class="p">,</span><span class="w"> </span><span class="n">kRowY</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="mi">160</span><span class="p">,</span><span class="w"> </span><span class="n">LV_TEXT_ALIGN_LEFT</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="c1">// ...</span>
+<span class="n">updateSettingsDisplay</span><span class="p">();</span><span class="w">     </span><span class="c1">// the defaults, until the service answers</span>
+<span class="n">mModel</span><span class="p">.</span><span class="n">requestSettings</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The display update writes the three labels and colours the selected one red:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">MainScreen::updateSettingsDisplay</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">counter</span><span class="p">),</span><span class="w"> </span><span class="s">"%ld"</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mDecimalCounter</span><span class="p">));</span>
+<span class="w">    </span><span class="n">lv_label_set_text</span><span class="p">(</span><span class="n">mValue</span><span class="p">[</span><span class="n">STG1</span><span class="p">],</span><span class="w"> </span><span class="n">counter</span><span class="p">);</span>
+<span class="w">    </span><span class="n">lv_label_set_text</span><span class="p">(</span><span class="n">mValue</span><span class="p">[</span><span class="n">STG2</span><span class="p">],</span><span class="w"> </span><span class="n">activityName</span><span class="p">(</span><span class="n">mActivityType</span><span class="p">));</span>
+<span class="w">    </span><span class="n">lv_label_set_text</span><span class="p">(</span><span class="n">mValue</span><span class="p">[</span><span class="n">STG3</span><span class="p">],</span><span class="w"> </span><span class="n">displayName</span><span class="p">(</span><span class="n">mDisplayMode</span><span class="p">));</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SETTING_COUNT</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">lv_obj_set_style_text_color</span><span class="p">(</span><span class="n">mValue</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">Draw</span><span class="o">::</span><span class="n">rgb</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">mSelected</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">Color</span><span class="o">::</span><span class="n">RED</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Color</span><span class="o">::</span><span class="n">WHITE</span><span class="p">),</span><span class="w"> </span><span class="n">LV_PART_MAIN</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>There is no <code class="docutils literal notranslate"><span class="pre">resizeToCurrentText()</span></code> or <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code>: an LVGL label sizes itself to its text, and a changed text or colour is redrawn on the next frame. The key handling is <code class="docutils literal notranslate"><span class="pre">onKey()</span></code> with the same four cases as <code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code>; the model calls (<code class="docutils literal notranslate"><span class="pre">requestSettings()</span></code>, <code class="docutils literal notranslate"><span class="pre">updateSettings()</span></code>, <code class="docutils literal notranslate"><span class="pre">exitApp()</span></code>) are made directly, since there is no presenter in between. The service answer arrives through <code class="docutils literal notranslate"><span class="pre">onSettingsUpdate()</span></code>, which <code class="docutils literal notranslate"><span class="pre">MainScreen</span></code> overrides from <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code>.</p>
+<p>The two fonts, Poppins SemiBold 35 (only the dash) and Medium 25, are converted from the TTFs the TouchGFX GUI ships by <code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/lvgl_assets/lvgl_assets.py</span></code> from <code class="docutils literal notranslate"><span class="pre">LVGL-GUI/assets/assets.json</span></code>.</p>
+</section>
+<section id="size-on-the-watch">
+<h3>Size on the watch<a class="headerlink" href="#size-on-the-watch" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Build</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code></p></th>
+<th class="head"><p>GUI code (text)</p></th>
+<th class="head"><p>GUI RAM (bss)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Files (TouchGFX)</p></td>
+<td><p>243 KB</p></td>
+<td><p>222 KB</p></td>
+<td><p>72 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>FilesLVGL</p></td>
+<td><p>178 KB</p></td>
+<td><p>162 KB</p></td>
+<td><p>139 KB</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 <section id="button-control-scheme">
 <h2>Button Control Scheme<a class="headerlink" href="#button-control-scheme" title="Link to this heading"></a></h2>
@@ -1143,19 +1214,20 @@ the reply, not for queue space — no send waits out a full queue.</p>
 <li><p><strong>Activity Type</strong> (STG2): Cycles through RUNNING, CYCLING, SWIMMING, WALKING</p></li>
 <li><p><strong>Display Mode</strong> (STG3): Cycles through SIMPLE, DETAILED, COMPACT</p></li>
 </ol>
-<p>The currently selected setting is highlighted with red text color, while unselected settings appear in green. After saving with R1, the selection automatically advances to the next setting.</p>
+<p>The currently selected setting is highlighted with red text color, while unselected settings appear in white. After saving with R1, the selection automatically advances to the next setting.</p>
 </section>
 </section>
 <section id="build-system-integration">
 <h2>Build System Integration<a class="headerlink" href="#build-system-integration" title="Link to this heading"></a></h2>
 <section id="cmake-configuration">
 <h3>CMake Configuration<a class="headerlink" href="#cmake-configuration" title="Link to this heading"></a></h3>
-<p>The tutorial uses the standard UNA SDK build system:</p>
+<p>The tutorial uses the standard UNA SDK build system, once per GUI. <code class="docutils literal notranslate"><span class="pre">Files-CMake/CMakeLists.txt</span></code>:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># App configuration</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">APP_NAME</span><span class="w"> </span><span class="s2">"Files"</span><span class="p">)</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">APP_TYPE</span><span class="w"> </span><span class="s2">"Activity"</span><span class="p">)</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">DEV_ID</span><span class="w"> </span><span class="s2">"UNA"</span><span class="p">)</span>
-<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"F1E2D3C448669786"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"03AD5A741E38A35F"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">TOUCHGFX_PATH</span><span class="w"> </span><span class="s2">"${CMAKE_CURRENT_SOURCE_DIR}/../TouchGFX-GUI"</span><span class="p">)</span>
 
 <span class="c"># Include SDK build tools</span>
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-app.cmake</span><span class="p">)</span>
@@ -1167,6 +1239,7 @@ the reply, not for queue space — no send waits out a full queue.</p>
 <span class="nb">una_app_build_app</span><span class="p">()</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">FilesLVGL-CMake/CMakeLists.txt</span></code> differs in the name and id, in <code class="docutils literal notranslate"><span class="pre">GUI_PATH</span></code> pointing at <code class="docutils literal notranslate"><span class="pre">LVGL-GUI</span></code> instead of <code class="docutils literal notranslate"><span class="pre">TOUCHGFX_PATH</span></code>, and in linking the <code class="docutils literal notranslate"><span class="pre">UNA_SDK_*_GUI_LVGL</span></code> source lists for the GUI process. Both include the same <code class="docutils literal notranslate"><span class="pre">Software/Libs/libs.cmake</span></code> for the service.</p>
 </section>
 </section>
 <section id="error-handling-and-recovery">
@@ -1215,10 +1288,10 @@ the reply, not for queue space — no send waits out a full queue.</p>
 <li><p>Request-response patterns</p></li>
 </ul>
 </section>
-<section id="mvp-architecture">
-<h3>3. MVP Architecture<a class="headerlink" href="#mvp-architecture" title="Link to this heading"></a></h3>
+<section id="gui-architecture">
+<h3>3. GUI Architecture<a class="headerlink" href="#gui-architecture" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Separation of concerns (Model/View/Presenter)</p></li>
+<li><p>Separation of concerns (Model/View/Presenter in TouchGFX, Model/Screen in LVGL)</p></li>
 <li><p>Event-driven UI updates</p></li>
 <li><p>Clean interface design</p></li>
 </ul>

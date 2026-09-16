@@ -54,33 +54,50 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          # The LVGL GUI variants are built from the LVGL submodule (ThirdParty/lvgl).
+          submodules: recursive
 
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
 
       - name: Build ${{ matrix.app }}
+        # A tutorial may carry more than one app project (a TouchGFX GUI and
+        # an LVGL GUI over the same service); every *-CMake directory is built.
+        env:
+          # Through the environment, not expanded into the script: the value
+          # is a directory name from the checkout.
+          APP: ${{ matrix.app }}
         run: |
           echo "Setup environment"
           . ./Utilities/Scripts/build-cube/find-cube.sh
           export UNA_SDK=$GITHUB_WORKSPACE
-          CMAKE_PATH="Docs/Tutorials/${{ matrix.app }}"
-          CMAKE_ROOT=$(find "$CMAKE_PATH" -type f -name "CMakeLists.txt" | head -1 | xargs dirname)
-          if [ -z "$CMAKE_ROOT" ] || [ ! -d "$CMAKE_ROOT" ]; then
-            echo "No CMakeLists.txt found under $CMAKE_PATH"
+          PROJECTS=$(python3 .github/scripts/generate-tutorials-app-list.py --app "$APP")
+          if [ -z "$PROJECTS" ]; then
+            printf 'No *-CMake project found under Docs/Tutorials/%s\n' "$APP"
             exit 1
           fi
-          cd "$CMAKE_ROOT"
-          mkdir -p build
-          cd build
-          echo "Build"
-          cmake ..
-          make -j$(nproc)
+          # One project per line from the script; read whole lines so a
+          # path is never split on whitespace. (POSIX sh: the container's
+          # default shell is not bash.)
+          printf '%s\n' "$PROJECTS" | while IFS= read -r CMAKE_ROOT; do
+            [ -n "$CMAKE_ROOT" ] || continue
+            if [ ! -d "$CMAKE_ROOT" ]; then
+              printf 'Missing CMake project: %s\n' "$CMAKE_ROOT" >&2
+              exit 1
+            fi
+            echo "Build $CMAKE_ROOT"
+            mkdir -p "$CMAKE_ROOT/build"
+            (cd "$CMAKE_ROOT/build" && cmake .. && make -j"$(nproc)")
+          done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app }}-output
-          path: Docs/Tutorials/${{ matrix.app }}/Output/
+          # The TouchGFX build's Output/ and the LVGL build's OutputLVGL/.
+          path: |
+            Docs/Tutorials/${{ matrix.app }}/Output/
+            Docs/Tutorials/${{ matrix.app }}/OutputLVGL/
 
   release:
     runs-on: ubuntu-latest

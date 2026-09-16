@@ -79,12 +79,18 @@ If `arm-none-eabi-gcc` is still not found and you installed **CubeIDE**, add the
 git clone https://github.com/UNAWatch/una-sdk.git
 cd una-sdk
 
+# The LVGL GUI toolkit is a git submodule; only apps with an LVGL GUI need it
+git submodule update --init ThirdParty/lvgl
+
 # Export environment for the current shell
 export UNA_SDK="$PWD"
 
 # Satisfy python dependencies
 python3 -m pip install -r "$UNA_SDK/Utilities/Scripts/app_packer/requirements.txt"
 ```
+
+GitHub's release "Source code" archives do not contain submodules, so an SDK taken
+from one builds the TouchGFX apps but not the LVGL ones; clone the repository for those.
 
 ##### Verify your environment
 
@@ -171,6 +177,9 @@ If you installed `gcc-arm-none-eabi` from your distro repositories and builds fa
 git clone git@github.com:UNAWatch/una-sdk.git
 # Or use HTTPS
 git clone https://github.com/UNAWatch/una-sdk.git
+
+# The LVGL GUI toolkit is a git submodule; only apps with an LVGL GUI need it
+git -C una-sdk submodule update --init ThirdParty/lvgl
 
 # Export environment (persistent)
 # If you encounter a security error (e.g., running scripts is disabled), run this first:

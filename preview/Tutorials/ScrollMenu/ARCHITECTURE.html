@@ -74,11 +74,14 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#the-same-menu-in-two-toolkits">The Same Menu in Two Toolkits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#size-on-the-watch">Size on the watch</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#scrollmenu-app-creation-process">ScrollMenu app creation process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#understanding-menu-navigation">Understanding Menu Navigation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#button-event-processing">Button Event Processing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#menu-state-management">Menu State Management</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#exit-handling">Exit Handling</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#common-patterns-and-best-practices">Common Patterns and Best Practices</a><ul>
@@ -89,7 +92,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#key-code-insights-for-new-developers">Key Code Insights for New Developers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mainview-cpp-structure">MainView.cpp Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mainview-cpp-mainscreen-cpp-structure">MainView.cpp / MainScreen.cpp Structure</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#menu-configuration">Menu Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#state-tracking">State Tracking</a></li>
 </ul>
@@ -108,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -194,10 +198,11 @@
 <span id="tutorials-scrollmenu-architecture"></span><h1>ScrollMenu - Creating Scrollable Lists and Menus<a class="headerlink" href="#scrollmenu-creating-scrollable-lists-and-menus" title="Link to this heading"></a></h1>
 <p>Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamental concepts of menu navigation on the UNA Watch platform. This tutorial focuses on building an application with a scrollable menu using hardware buttons, providing a foundation for more complex user interfaces.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/ScrollMenu">Project Folder</a></p>
+<p>As in the earlier tutorials, the app comes with a <strong>TouchGFX</strong> GUI and an <strong>LVGL</strong> GUI over the same service. The menu is the first widget that differs substantially between the two: TouchGFX composes it from Designer containers and a <code class="docutils literal notranslate"><span class="pre">ScrollWheelWithSelectionStyle</span></code>, LVGL uses the SDK’s <code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code>. See <a class="reference internal" href="#the-same-menu-in-two-toolkits">The Same Menu in Two Toolkits</a>.</p>
 <section id="what-you-ll-learn">
 <h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>How to implement GUI applications with TouchGFX</p></li>
+<li><p>How to implement GUI applications with TouchGFX or LVGL</p></li>
 <li><p>Handling hardware button events for menu navigation</p></li>
 <li><p>Understanding the UNA app framework for interactive applications</p></li>
 </ul>
@@ -219,9 +224,13 @@
 <li><p>ARM GCC toolchain in PATH</p></li>
 <li><p>CMake and build tools</p></li>
 </ul>
-<p><strong>For GUI development/modification:</strong></p>
+<p><strong>For the TouchGFX GUI:</strong></p>
 <ul class="simple">
 <li><p>TouchGFX Designer installed (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>)</p></li>
+</ul>
+<p><strong>For the LVGL GUI:</strong></p>
+<ul class="simple">
+<li><p>The LVGL submodule checked out once: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">ThirdParty/lvgl</span></code> (from the SDK root)</p></li>
 </ul>
 </section>
 <section id="building-and-running-scrollmenu">
@@ -241,31 +250,38 @@ which<span class="w"> </span>cmake<span class="w">                     </span><s
 </pre></div>
 </div>
 </li>
-<li><p><strong>Build the application:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+<li><p><strong>Build the application</strong> with the GUI of your choice:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># TouchGFX GUI</span>
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
 cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/ScrollMenu-CMake
+make
+
+<span class="c1"># LVGL GUI (from the tutorial directory again)</span>
+<span class="nb">cd</span><span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>build-lvgl<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build-lvgl
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/ScrollMenuLVGL-CMake
 make
 </pre></div>
 </div>
 </li>
 </ol>
-<p>The app will start and display an initial menu with three items. Use the hardware buttons to navigate the menu and perform actions, demonstrating menu navigation patterns.</p>
+<p>The app will start and display an initial menu with three items. Use the hardware buttons to navigate the menu and perform actions, demonstrating menu navigation patterns. The two builds appear in the launcher as <strong>ScrollMenu</strong> and <strong>ScrollMenuLVGL</strong>.</p>
 </section>
 <section id="running-on-simulator">
 <h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
-<p>To test the app on the simulator (Windows only):</p>
+<p><strong>TouchGFX</strong> (Windows only):</p>
 <ol class="arabic simple">
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">ScrollMenu.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
 <li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">ScrollMenu\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
 <li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
 </ol>
-<p>In the simulator, use keyboard keys to simulate hardware buttons:</p>
+<p><strong>LVGL</strong> (Windows and Linux): a CMake project in <code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI/simulator</span></code>, built the same way as HelloWorld’s (see <a class="reference internal" href="../HelloWorld/ARCHITECTURE.html#running-on-simulator"><span class="std std-ref">that tutorial</span></a>); the executable is <code class="docutils literal notranslate"><span class="pre">ScrollMenuLVGLSimulator</span></code>.</p>
+<p>In either simulator, use keyboard keys to simulate hardware buttons:</p>
 <ul class="simple">
 <li><p><strong>1</strong> = L1 (Previous menu item)</p></li>
 <li><p><strong>2</strong> = L2 (Next menu item)</p></li>
 <li><p><strong>3</strong> = R1 (Perform action on selected item)</p></li>
-<li><p><strong>4</strong> = R2 (Double-press to exit)</p></li>
+<li><p><strong>4</strong> = R2 (Exit)</p></li>
 </ul>
 <p>The simulator will display the scrollable menu with Counter, Increase, Decrease items. For detailed simulator setup and button mapping, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
 </section>
@@ -276,8 +292,8 @@ make
 <h3>Navigation Flow<a class="headerlink" href="#navigation-flow" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Start with menu displaying Counter, Increase, Decrease items</p></li>
-<li><p>Press left button (L1) → Select previous menu item</p></li>
-<li><p>Press top left button (L2) → Select next menu item</p></li>
+<li><p>Press top left button (L1) → Select previous menu item</p></li>
+<li><p>Press bottom left button (L2) → Select next menu item</p></li>
 <li><p>Press top right button (R1) → Perform action on selected item:</p>
 <ul>
 <li><p>Counter: Reset counter to 0</p></li>
@@ -285,7 +301,7 @@ make
 <li><p>Decrease: Decrement counter</p></li>
 </ul>
 </li>
-<li><p>Double-press bottom right button (R2) → Exit the app</p></li>
+<li><p>Press bottom right button (R2) → Exit the app</p></li>
 </ul>
 </section>
 <section id="architecture-components">
@@ -296,12 +312,13 @@ make
 <li><p>Manages the application lifecycle</p></li>
 <li><p>Handles communication with the GUI layer</p></li>
 <li><p>Minimal implementation since no sensors are used</p></li>
+<li><p>One copy in <code class="docutils literal notranslate"><span class="pre">Software/Libs</span></code>, linked by both <code class="docutils literal notranslate"><span class="pre">ScrollMenu-CMake</span></code> and <code class="docutils literal notranslate"><span class="pre">ScrollMenuLVGL-CMake</span></code></p></li>
 </ul>
 </section>
 <section id="the-gui-layer-frontend">
 <h4>The GUI Layer (Frontend)<a class="headerlink" href="#the-gui-layer-frontend" title="Link to this heading"></a></h4>
 <ul class="simple">
-<li><p>Built with TouchGFX framework</p></li>
+<li><p>Built with TouchGFX or LVGL</p></li>
 <li><p>Handles button events and screen transitions</p></li>
 <li><p>Updates the display based on user input</p></li>
 <li><p>Manages screen state and visual elements</p></li>
@@ -309,7 +326,7 @@ make
 </section>
 <section id="button-event-handling">
 <h4>Button Event Handling<a class="headerlink" href="#button-event-handling" title="Link to this heading"></a></h4>
-<p>The app responds to hardware button presses through the <code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code> method in <code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code>. L1 and L2 buttons navigate the menu by selecting previous or next items. R1 button performs the action associated with the currently selected menu item, such as resetting, incrementing, or decrementing the counter. R2 button detects double-presses to exit the application.</p>
+<p>The app responds to hardware button presses through the <code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code> method in <code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code> (TouchGFX) or <code class="docutils literal notranslate"><span class="pre">onKey</span></code> in <code class="docutils literal notranslate"><span class="pre">MainScreen.cpp</span></code> (LVGL). L1 and L2 buttons navigate the menu by selecting previous or next items. R1 button performs the action associated with the currently selected menu item, such as resetting, incrementing, or decrementing the counter. R2 exits the application.</p>
 </section>
 <section id="menu-item-management">
 <h4>Menu Item Management<a class="headerlink" href="#menu-item-management" title="Link to this heading"></a></h4>
@@ -322,12 +339,113 @@ make
 </section>
 <section id="screen-updates">
 <h4>Screen Updates<a class="headerlink" href="#screen-updates" title="Link to this heading"></a></h4>
-<p>After performing actions that change the menu display (such as updating the counter value), the <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> method is called on the menu and its items to refresh the display, ensuring changes are visible to the user.</p>
+<p>TouchGFX: after performing actions that change the menu display (such as updating the counter value), the <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> method is called on the menu and its items to refresh the display, ensuring changes are visible to the user.</p>
+<p>LVGL: the wheel’s <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> re-renders its slots from the item table, and LVGL redraws what changed on the next frame.</p>
 </section>
+</section>
+</section>
+<section id="the-same-menu-in-two-toolkits">
+<h2>The Same Menu in Two Toolkits<a class="headerlink" href="#the-same-menu-in-two-toolkits" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Piece</p></th>
+<th class="head"><p>TouchGFX (<code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI/gui</span></code>)</p></th>
+<th class="head"><p>LVGL (<code class="docutils literal notranslate"><span class="pre">LVGL-GUI/gui</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>The menu</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Menu</span></code> custom container: a <code class="docutils literal notranslate"><span class="pre">ScrollWheelWithSelectionStyle</span></code>, a background image, <code class="docutils literal notranslate"><span class="pre">Title</span></code>, <code class="docutils literal notranslate"><span class="pre">SideBarBig</span></code>, <code class="docutils literal notranslate"><span class="pre">Buttons</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::WheelMenu</span></code> (<code class="docutils literal notranslate"><span class="pre">SDK/GUI/LVGL/WheelMenu.hpp</span></code>): lens, two item strips, <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Item appearance</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MenuItemSelected</span></code> / <code class="docutils literal notranslate"><span class="pre">MenuItemNotSelected</span></code> containers, one pair per item, copied into the wheel’s drawables</p></td>
+<td><p>one <code class="docutils literal notranslate"><span class="pre">WheelMenu::Item</span></code> per entry: style, text, optional font, tip, toggle state, icons</p></td>
+</tr>
+<tr class="row-even"><td><p>Item texts</p></td>
+<td><p>text keys <code class="docutils literal notranslate"><span class="pre">T_COUNTER</span></code>, <code class="docutils literal notranslate"><span class="pre">T_INCREASE</span></code>, <code class="docutils literal notranslate"><span class="pre">T_DECREASE</span></code> from Designer’s Texts tab</p></td>
+<td><p>plain <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">char*</span></code> in the item table</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fonts</p></td>
+<td><p>typographies <code class="docutils literal notranslate"><span class="pre">Poppins_SemiBold_30</span></code>, <code class="docutils literal notranslate"><span class="pre">Poppins_Medium_18</span></code>, <code class="docutils literal notranslate"><span class="pre">Poppins_Italic_18</span></code></p></td>
+<td><p>the same three faces, converted by <code class="docutils literal notranslate"><span class="pre">lvgl_assets.py</span></code> and passed as <code class="docutils literal notranslate"><span class="pre">WheelMenu::Fonts</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Navigate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">menu1.selectPrev()</span></code> / <code class="docutils literal notranslate"><span class="pre">menu1.selectNext()</span></code> (wheel + side bar animate together)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mMenu-&gt;prev()</span></code> / <code class="docutils literal notranslate"><span class="pre">mMenu-&gt;next()</span></code> (the widget slides and moves its indicator)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Which item</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">menu1.getSelectedItem()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mMenu-&gt;selected()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Change the counter’s text</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">config(buffer)</span></code> on both the selected and not-selected copies, then <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> on the menu and items</p></td>
+<td><p>the item’s <code class="docutils literal notranslate"><span class="pre">text</span></code> points at a buffer the screen rewrites, then <code class="docutils literal notranslate"><span class="pre">mMenu-&gt;refresh()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>The lens behind the selection</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Background_TealDark.png</span></code> bitmap</p></td>
+<td><p>drawn by the widget (<code class="docutils literal notranslate"><span class="pre">setBackground()</span></code> recolours it)</p></td>
+</tr>
+<tr class="row-even"><td><p>The scroll indicator</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SideBarBig</span></code> container with a rail bitmap and two <code class="docutils literal notranslate"><span class="pre">Circle</span></code> arcs</p></td>
+<td><p>drawn by the widget’s <code class="docutils literal notranslate"><span class="pre">ScrollIndicator</span></code> with <code class="docutils literal notranslate"><span class="pre">lv_arc</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The LVGL screen in full, less the boilerplate shared with the earlier tutorials:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">LVGL</span><span class="o">::</span><span class="n">WheelMenu</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Style</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WheelMenu</span><span class="o">::</span><span class="n">Item</span><span class="o">::</span><span class="n">Style</span><span class="p">;</span>
+
+<span class="n">mItems</span><span class="p">[</span><span class="n">COUNTER</span><span class="p">]</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Style</span><span class="o">::</span><span class="n">Simple</span><span class="p">,</span><span class="w"> </span><span class="n">mCounterText</span><span class="w"> </span><span class="p">};</span><span class="w">   </span><span class="c1">// a buffer, so it can show the count</span>
+<span class="n">mItems</span><span class="p">[</span><span class="n">INCREASE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Style</span><span class="o">::</span><span class="n">Simple</span><span class="p">,</span><span class="w"> </span><span class="s">"Increase"</span><span class="w"> </span><span class="p">};</span>
+<span class="n">mItems</span><span class="p">[</span><span class="n">DECREASE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Style</span><span class="o">::</span><span class="n">Simple</span><span class="p">,</span><span class="w"> </span><span class="s">"Decrease"</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">WheelMenu</span><span class="o">::</span><span class="n">Fonts</span><span class="w"> </span><span class="n">fonts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&amp;</span><span class="n">poppins_semibold_30</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">poppins_medium_18</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">poppins_italic_18</span><span class="w"> </span><span class="p">};</span>
+<span class="n">mMenu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">WheelMenu</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="n">mItems</span><span class="p">,</span><span class="w"> </span><span class="n">ITEM_COUNT</span><span class="p">,</span><span class="w"> </span><span class="n">fonts</span><span class="p">);</span>
+
+<span class="c1">// ... in onKey():</span>
+<span class="k">case</span><span class="w"> </span><span class="no">Btn</span><span class="o">::</span><span class="no">L1</span><span class="p">:</span><span class="w"> </span><span class="n">mMenu</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">();</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="k">case</span><span class="w"> </span><span class="no">Btn</span><span class="o">::</span><span class="no">L2</span><span class="p">:</span><span class="w"> </span><span class="n">mMenu</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">();</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="k">case</span><span class="w"> </span><span class="no">Btn</span><span class="o">::</span><span class="no">R1</span><span class="p">:</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">mMenu</span><span class="o">-&gt;</span><span class="n">selected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">COUNTER</span><span class="p">:</span><span class="w">  </span><span class="n">mCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">INCREASE</span><span class="p">:</span><span class="w"> </span><span class="n">mCounter</span><span class="o">++</span><span class="p">;</span><span class="w">   </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">DECREASE</span><span class="p">:</span><span class="w"> </span><span class="n">mCounter</span><span class="o">--</span><span class="p">;</span><span class="w">   </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">mCounterText</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">mCounterText</span><span class="p">),</span><span class="w"> </span><span class="s">"Counter: %d"</span><span class="p">,</span><span class="w"> </span><span class="n">mCounter</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mMenu</span><span class="o">-&gt;</span><span class="n">refresh</span><span class="p">();</span>
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code> keeps a pointer to the item table for as long as it lives, so the table is a member of the screen, not a local. It is the same widget the RunLVGL activity app builds its menus from; <code class="docutils literal notranslate"><span class="pre">Item::Style</span></code> also offers <code class="docutils literal notranslate"><span class="pre">Tip</span></code> (a hint line under the text), <code class="docutils literal notranslate"><span class="pre">Toggle</span></code> (an on/off switch) and <code class="docutils literal notranslate"><span class="pre">Icon</span></code> (a bitmap beside the text), and <code class="docutils literal notranslate"><span class="pre">setSlideMidCallback()</span></code> reports the moment the incoming item takes the centre.</p>
+<section id="size-on-the-watch">
+<h3>Size on the watch<a class="headerlink" href="#size-on-the-watch" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Build</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code></p></th>
+<th class="head"><p>GUI code (text)</p></th>
+<th class="head"><p>GUI RAM (bss)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ScrollMenu (TouchGFX)</p></td>
+<td><p>295 KB</p></td>
+<td><p>275 KB</p></td>
+<td><p>88 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>ScrollMenuLVGL</p></td>
+<td><p>188 KB</p></td>
+<td><p>179 KB</p></td>
+<td><p>139 KB</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 <section id="scrollmenu-app-creation-process">
 <h2>ScrollMenu app creation process<a class="headerlink" href="#scrollmenu-app-creation-process" title="Link to this heading"></a></h2>
+<p>The steps below create the TouchGFX GUI. For the LVGL GUI, copy HelloWorld’s <code class="docutils literal notranslate"><span class="pre">LVGL-GUI</span></code> and <code class="docutils literal notranslate"><span class="pre">HelloWorldLVGL-CMake</span></code>, rename them, change <code class="docutils literal notranslate"><span class="pre">APP_NAME</span></code> and <code class="docutils literal notranslate"><span class="pre">APP_ID</span></code>, add the three fonts to <code class="docutils literal notranslate"><span class="pre">assets/assets.json</span></code> and regenerate, and write <code class="docutils literal notranslate"><span class="pre">MainScreen.cpp</span></code> as shown above.</p>
 <ol class="arabic">
 <li><p><strong>Copy HelloWorld tutorial</strong></p></li>
 <li><p><strong>Change naming</strong>: Rename project directory, cmake directory and name of the project in CMakeLists.txt; Also change APP_ID to something else. Step 2 in <a class="reference external" href="https://www.developers.unawatch.com/latest/sdk-setup.html#creating-new-apps">Creating New Apps</a> gives commmands for generating your own APP ID programatically from the name.</p></li>
@@ -455,9 +573,8 @@ make
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Gui</span><span class="o">::</span><span class="n">Config</span><span class="o">::</span><span class="n">Button</span><span class="o">::</span><span class="n">R2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">exit</span><span class="p">();</span>
+<span class="w">        </span><span class="n">presenter</span><span class="o">-&gt;</span><span class="n">exit</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="n">lastKeyPressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">key</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -469,14 +586,14 @@ make
 </section>
 <section id="understanding-menu-navigation">
 <h2>Understanding Menu Navigation<a class="headerlink" href="#understanding-menu-navigation" title="Link to this heading"></a></h2>
-<p>The ScrollMenu app demonstrates how to handle hardware button events for menu navigation in TouchGFX applications. Key concepts include:</p>
+<p>The ScrollMenu app demonstrates how to handle hardware button events for menu navigation. Key concepts include:</p>
 <section id="button-event-processing">
 <h3>Button Event Processing<a class="headerlink" href="#button-event-processing" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Button presses are captured in the <code class="docutils literal notranslate"><span class="pre">handleKeyEvent(uint8_t</span> <span class="pre">key)</span></code> method</p></li>
+<li><p>Button presses are captured in the <code class="docutils literal notranslate"><span class="pre">handleKeyEvent(uint8_t</span> <span class="pre">key)</span></code> method (TouchGFX) or the <code class="docutils literal notranslate"><span class="pre">LV_EVENT_KEY</span></code> handler (LVGL)</p></li>
 <li><p>L1 and L2 buttons navigate the menu (select previous/next item)</p></li>
 <li><p>R1 button performs the action associated with the selected menu item</p></li>
-<li><p>R2 button detects double-presses for app exit</p></li>
+<li><p>R2 button exits the app</p></li>
 </ul>
 </section>
 <section id="menu-state-management">
@@ -484,14 +601,7 @@ make
 <ul class="simple">
 <li><p>The app maintains current menu selection state</p></li>
 <li><p>Menu items display dynamic content (counter value)</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> call ensures the display refreshes after changes</p></li>
-</ul>
-</section>
-<section id="exit-handling">
-<h3>Exit Handling<a class="headerlink" href="#exit-handling" title="Link to this heading"></a></h3>
-<ul class="simple">
-<li><p>Double-press detection for the R2 button implements app exit</p></li>
-<li><p>State tracking with <code class="docutils literal notranslate"><span class="pre">lastKeyPressed</span></code> prevents accidental exits</p></li>
+<li><p>TouchGFX needs <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> calls to refresh the display after changes; the LVGL wheel is re-rendered with <code class="docutils literal notranslate"><span class="pre">refresh()</span></code></p></li>
 </ul>
 </section>
 </section>
@@ -502,14 +612,14 @@ make
 <ul class="simple">
 <li><p>Map button IDs to meaningful actions consistently</p></li>
 <li><p>Use state variables to track multi-press sequences</p></li>
-<li><p>Always call <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> after visual changes</p></li>
+<li><p>In TouchGFX, always call <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> after visual changes</p></li>
 </ul>
 </section>
 <section id="ui-updates">
 <h3>UI Updates<a class="headerlink" href="#ui-updates" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Keep event handlers lightweight to maintain responsiveness</p></li>
-<li><p>Use appropriate TouchGFX widgets for different content types</p></li>
+<li><p>Use appropriate widgets for different content types</p></li>
 <li><p>Consider user feedback for button presses (visual/audio)</p></li>
 </ul>
 </section>
@@ -532,27 +642,25 @@ make
 </section>
 <section id="key-code-insights-for-new-developers">
 <h2>Key Code Insights for New Developers<a class="headerlink" href="#key-code-insights-for-new-developers" title="Link to this heading"></a></h2>
-<section id="mainview-cpp-structure">
-<h3>MainView.cpp Structure<a class="headerlink" href="#mainview-cpp-structure" title="Link to this heading"></a></h3>
+<section id="mainview-cpp-mainscreen-cpp-structure">
+<h3>MainView.cpp / MainScreen.cpp Structure<a class="headerlink" href="#mainview-cpp-mainscreen-cpp-structure" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code> is the central point for user input</p></li>
-<li><p>Menu navigation uses <code class="docutils literal notranslate"><span class="pre">menu1.selectPrev()</span></code> and <code class="docutils literal notranslate"><span class="pre">menu1.selectNext()</span></code></p></li>
-<li><p>Menu actions update counter and refresh display with <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> calls</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code> / <code class="docutils literal notranslate"><span class="pre">onKey()</span></code> is the central point for user input</p></li>
+<li><p>Menu navigation uses <code class="docutils literal notranslate"><span class="pre">menu1.selectPrev()</span></code> / <code class="docutils literal notranslate"><span class="pre">menu1.selectNext()</span></code> or <code class="docutils literal notranslate"><span class="pre">mMenu-&gt;prev()</span></code> / <code class="docutils literal notranslate"><span class="pre">mMenu-&gt;next()</span></code></p></li>
+<li><p>Menu actions update the counter and refresh the display</p></li>
 </ul>
 </section>
 <section id="menu-configuration">
 <h3>Menu Configuration<a class="headerlink" href="#menu-configuration" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Menu is configured in <code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code> with item texts and count</p></li>
-<li><p>The Menu widget manages item selection and display</p></li>
-<li><p>Menu items can be configured with text using <code class="docutils literal notranslate"><span class="pre">config()</span></code> method</p></li>
+<li><p>TouchGFX: the menu is configured in <code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code> with item texts and count; items are configured with <code class="docutils literal notranslate"><span class="pre">config()</span></code></p></li>
+<li><p>LVGL: the menu is built in the screen’s constructor from an item table and a <code class="docutils literal notranslate"><span class="pre">Fonts</span></code> struct</p></li>
 </ul>
 </section>
 <section id="state-tracking">
 <h3>State Tracking<a class="headerlink" href="#state-tracking" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Use member variables like <code class="docutils literal notranslate"><span class="pre">counter</span></code> and <code class="docutils literal notranslate"><span class="pre">lastKeyPressed</span></code> to maintain app state</p></li>
-<li><p>Track sequences like double-presses for special actions</p></li>
+<li><p>Use member variables like <code class="docutils literal notranslate"><span class="pre">counter</span></code> to maintain app state</p></li>
 <li><p>Update menu item text dynamically based on state changes</p></li>
 </ul>
 </section>
@@ -563,7 +671,7 @@ make
 <li><p><strong>Run the ScrollMenu app</strong> - Build and test the menu navigation</p></li>
 <li><p><strong>Modify menu items</strong> - Experiment with different menu actions</p></li>
 <li><p><strong>Add new menu items</strong> - Extend the app with additional menu options</p></li>
-<li><p><strong>Explore TouchGFX widgets</strong> - Add text, images, or other elements</p></li>
+<li><p><strong>Explore the widgets</strong> - Add text, images, or other elements; in LVGL try the <code class="docutils literal notranslate"><span class="pre">Tip</span></code> and <code class="docutils literal notranslate"><span class="pre">Toggle</span></code> item styles</p></li>
 <li><p><strong>Study advanced examples</strong> - Look at apps with more complex navigation</p></li>
 </ol>
 </section>
@@ -574,6 +682,7 @@ make
 <ul class="simple">
 <li><p>Ensure TouchGFX Designer is properly installed</p></li>
 <li><p>Check that all project files are generated correctly</p></li>
+<li><p>For the LVGL build, check that <code class="docutils literal notranslate"><span class="pre">ThirdParty/lvgl</span></code> is populated</p></li>
 <li><p>Verify CMake configuration matches your environment</p></li>
 </ul>
 </section>
@@ -588,7 +697,7 @@ make
 <section id="common-mistakes">
 <h3>Common Mistakes<a class="headerlink" href="#common-mistakes" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Forgetting to call <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> after UI changes</p></li>
+<li><p>Forgetting to call <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> after UI changes (TouchGFX)</p></li>
 <li><p>Incorrect button ID constants</p></li>
 <li><p>Not handling all button states appropriately</p></li>
 </ul>

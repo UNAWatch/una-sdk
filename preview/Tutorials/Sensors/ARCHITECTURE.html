@@ -422,7 +422,8 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-define-custom-messages">Step 1: Define Custom Messages</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-2-service-subscribe-process-sensors">Step 2: Service - Subscribe &amp; Process Sensors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-3-gui-model-receive-messages">Step 3: GUI Model - Receive Messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#step-4-mainview-display-controls">Step 4: MainView - Display &amp; Controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-mainview-mainscreen-display-controls">Step 4: MainView / MainScreen - Display &amp; Controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#size-on-the-watch">Size on the watch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#additional-notes">Additional Notes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
 </ul>
@@ -432,6 +433,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -523,6 +525,7 @@ window.runMermaid = runMermaid;</script>
 <li><p><strong>Bottom</strong>: Stats (Service/GUI CPU%, TX/RX msg rates, bytes/sec)</p></li>
 </ul>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Sensors">Project Folder</a></p>
+<p>As in the earlier tutorials, the app comes with a <strong>TouchGFX</strong> GUI (<code class="docutils literal notranslate"><span class="pre">Software/Apps/TouchGFX-GUI</span></code>, built by <code class="docutils literal notranslate"><span class="pre">Sensors-CMake</span></code>) and an <strong>LVGL</strong> GUI (<code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI</span></code>, built by <code class="docutils literal notranslate"><span class="pre">SensorsLVGL-CMake</span></code>) over the same service. Steps 1 and 2 below are the service and apply to both; steps 3 and 4 show each toolkit’s side.</p>
 <section id="list-of-implemented-sensors">
 <h2>List of Implemented Sensors<a class="headerlink" href="#list-of-implemented-sensors" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
@@ -706,7 +709,7 @@ queue space — no send waits out a full queue.</p>
 </section>
 <section id="step-3-gui-model-receive-messages">
 <h3>Step 3: GUI Model - Receive Messages<a class="headerlink" href="#step-3-gui-model-receive-messages" title="Link to this heading"></a></h3>
-<p>In <a class="reference download internal" download="" href="../../_downloads/6d32ca734da0edec981d43d1d8d28b9f/Model.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Model.cpp</span></code></span></a>, implement <code class="docutils literal notranslate"><span class="pre">customMessageHandler</span></code>:</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">Model.cpp</span></code> (<a class="reference download internal" download="" href="../../_downloads/6d32ca734da0edec981d43d1d8d28b9f/Model.cpp"><span class="xref download myst">TouchGFX</span></a>, <a class="reference download internal" download="" href="../../_downloads/87687ca682b4569b42ce62ceec6f3b08/Model.cpp"><span class="xref download myst">LVGL</span></a>), implement <code class="docutils literal notranslate"><span class="pre">customMessageHandler</span></code>:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">HR_VALUES</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HRValues</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
 <span class="w">    </span><span class="n">modelListener</span><span class="o">-&gt;</span><span class="n">updateHR</span><span class="p">(</span><span class="n">m</span><span class="o">-&gt;</span><span class="n">heartRate</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">-&gt;</span><span class="n">trustLevel</span><span class="p">);</span>
@@ -715,10 +718,11 @@ queue space — no send waits out a full queue.</p>
 <span class="c1">// etc. for Elevation, Accelerometer, StepCounter, Floors, Compass, Stats, RTC</span>
 </pre></div>
 </div>
+<p>The handler is the same code in both GUIs. What differs is one line in the constructor: the TouchGFX model registers with <code class="docutils literal notranslate"><span class="pre">SDK::TouchGFXCommandProcessor::GetInstance().setCustomMessageHandler(this)</span></code>, the LVGL model with <code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Port::GetInstance().setCustomMessageHandler(this)</span></code>. <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code> declares one <code class="docutils literal notranslate"><span class="pre">update...()</span></code> virtual per message; the screen overrides them.</p>
 </section>
-<section id="step-4-mainview-display-controls">
-<h3>Step 4: MainView - Display &amp; Controls<a class="headerlink" href="#step-4-mainview-display-controls" title="Link to this heading"></a></h3>
-<p>In <a class="reference download internal" download="" href="../../_downloads/396c6be73433ff9a7b4cd709d58824a5/MainView.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.hpp</span></code></span></a>, <a class="reference download internal" download="" href="../../_downloads/8ac8fd2c9e89e76186edb3a2b001afc6/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code></span></a>:</p>
+<section id="step-4-mainview-mainscreen-display-controls">
+<h3>Step 4: MainView / MainScreen - Display &amp; Controls<a class="headerlink" href="#step-4-mainview-mainscreen-display-controls" title="Link to this heading"></a></h3>
+<p>TouchGFX, in <a class="reference download internal" download="" href="../../_downloads/396c6be73433ff9a7b4cd709d58824a5/MainView.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.hpp</span></code></span></a>, <a class="reference download internal" download="" href="../../_downloads/8ac8fd2c9e89e76186edb3a2b001afc6/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainView.cpp</span></code></span></a>:</p>
 <p>Store data in members, <code class="docutils literal notranslate"><span class="pre">updateHR(float</span> <span class="pre">hr,</span> <span class="pre">float</span> <span class="pre">tl)</span></code> etc. store values.</p>
 <p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent</span></code>: L1: verbosity++ % VERB_LEVEL_MAX, L2: verbosity– % VERB_LEVEL_MAX (BASIC/DETAILED/FULL/HR/GPS/ALT/ACC/STEP/FLOOR/MAG), R1: TODO GPS toggle, R2: presenter-&gt;exit()</p>
 <p><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code> every tick: <code class="docutils literal notranslate"><span class="pre">refreshDisplay()</span></code> <code class="docutils literal notranslate"><span class="pre">refreshStats()</span></code> <code class="docutils literal notranslate"><span class="pre">refreshBattery()</span></code></p>
@@ -726,6 +730,38 @@ queue space — no send waits out a full queue.</p>
 <p>Unicode::strncpy(text_bodyBuffer, buffer, TEXT_BODY_SIZE); invalidate</p>
 <p>Header: <code class="docutils literal notranslate"><span class="pre">refreshBattery()</span></code> “Battery: %.1f%%” <code class="docutils literal notranslate"><span class="pre">text_header</span></code></p>
 <p>Stats: <code class="docutils literal notranslate"><span class="pre">refreshStats()</span></code> “CPU S: %.1f%% G: %.1f%%\nMsg Tx: %.0f Rx: %.0f\nBytes Tx: %.0f Rx: %.0f” <code class="docutils literal notranslate"><span class="pre">text_stats</span></code></p>
+<p>LVGL, in <a class="reference download internal" download="" href="../../_downloads/2e9d5faf79039726c4ceb5f1b91382da/MainScreen.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainScreen.hpp</span></code></span></a>, <a class="reference download internal" download="" href="../../_downloads/e61c4cbc4b470c1fd88d6c78327d5af7/MainScreen.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">MainScreen.cpp</span></code></span></a>: the same members, the same three format functions and the same key handling, with these differences:</p>
+<ul class="simple">
+<li><p>The three text areas are labels made with <code class="docutils literal notranslate"><span class="pre">Draw::label()</span></code> at the design’s positions; a label grows to the lines it holds, and <code class="docutils literal notranslate"><span class="pre">lv_label_set_text()</span></code> replaces <code class="docutils literal notranslate"><span class="pre">Unicode::strncpy</span></code> + <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code>.</p></li>
+<li><p>The per-frame <code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code> becomes <code class="docutils literal notranslate"><span class="pre">onFrame()</span></code>: the model forwards the kernel’s frame tick to the screen through <code class="docutils literal notranslate"><span class="pre">ModelListener</span></code>, and the screen calls its three refresh functions there, once per frame, as the TouchGFX view does.</p></li>
+<li><p>The body’s face is switched with <code class="docutils literal notranslate"><span class="pre">lv_obj_set_style_text_font()</span></code>: Poppins Regular 9 for the group views, Regular 18 for one sensor at a time.</p></li>
+<li><p>The fonts come from <code class="docutils literal notranslate"><span class="pre">assets/assets.json</span></code>, at 2 bits per pixel like every LVGL face on this platform: the display has two bits per colour channel, so finer anti-aliasing cannot be shown. The body faces also carry the degree sign for the compass line.</p></li>
+</ul>
+</section>
+<section id="size-on-the-watch">
+<h3>Size on the watch<a class="headerlink" href="#size-on-the-watch" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Build</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code></p></th>
+<th class="head"><p>GUI code (text)</p></th>
+<th class="head"><p>GUI RAM (bss)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Sensors (TouchGFX)</p></td>
+<td><p>553 KB</p></td>
+<td><p>223 KB</p></td>
+<td><p>73 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>SensorsLVGL</p></td>
+<td><p>489 KB</p></td>
+<td><p>164 KB</p></td>
+<td><p>139 KB</p></td>
+</tr>
+</tbody>
+</table>
+<p>Most of either package is the service, which links the sensor layer and the FIT writer.</p>
 </section>
 <section id="additional-notes">
 <h3>Additional Notes<a class="headerlink" href="#additional-notes" title="Link to this heading"></a></h3>
@@ -734,12 +770,12 @@ queue space — no send waits out a full queue.</p>
 <li><p><strong>Altimeter</strong>: Uses altitude from barometric sensor; pressure not available in parser</p></li>
 <li><p><strong>Max Frequency</strong>: period=0,count=0 except Accel connect(0.1f, 0); sender Accel throttle 100ms.</p></li>
 <li><p><strong>RTC</strong>: Kernel sys.getTimeMs()/1000 (seconds since boot), not SDK::Sensor::RTC.</p></li>
-<li><p>Build with <a class="reference download internal" download="" href="../../_downloads/41e1bdb69103b1e12f92ceb841a33cee/CMakeLists.txt"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code></span></a>.</p></li>
+<li><p>Build with <a class="reference download internal" download="" href="../../_downloads/41e1bdb69103b1e12f92ceb841a33cee/CMakeLists.txt"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Sensors-CMake/CMakeLists.txt</span></code></span></a> (TouchGFX GUI) or <a class="reference download internal" download="" href="../../_downloads/1a8ef36efaf179a8ea01ad9b474f1069/CMakeLists.txt"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SensorsLVGL-CMake/CMakeLists.txt</span></code></span></a> (LVGL GUI); the two appear in the launcher as <strong>Sensors</strong> and <strong>SensorsLVGL</strong>.</p></li>
 </ul>
 </section>
 <section id="running-on-simulator">
 <h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
-<p>To test the Sensors app on the simulator (Windows only):</p>
+<p><strong>TouchGFX</strong> (Windows only):</p>
 <ol class="arabic simple">
 <li><p>Build the app following the <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">SDK setup</span></a> instructions.</p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Sensors.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
@@ -747,6 +783,7 @@ queue space — no send waits out a full queue.</p>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
 <li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
 </ol>
+<p><strong>LVGL</strong> (Windows and Linux): a CMake project in <code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI/simulator</span></code>, built the same way as HelloWorld’s (see <a class="reference internal" href="../HelloWorld/ARCHITECTURE.html#running-on-simulator"><span class="std std-ref">that tutorial</span></a>); the executable is <code class="docutils literal notranslate"><span class="pre">SensorsLVGLSimulator</span></code>. Which sensors the mock kernel simulates, and how, is set in <code class="docutils literal notranslate"><span class="pre">simulator/ConfigurationSimulator.hpp</span></code>.</p>
 <p>The simulator provides simulated sensor data for all implemented sensors. Use L1/L2 buttons to cycle through verbosity levels and view different sensor data displays.</p>
 <p>For detailed sensor simulation configuration and features, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
 </section>

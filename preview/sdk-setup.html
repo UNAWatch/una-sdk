@@ -96,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -252,6 +253,9 @@ Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/UNAWatch/una-sdk.git
 <span class="nb">cd</span><span class="w"> </span>una-sdk
 
+<span class="c1"># The LVGL GUI toolkit is a git submodule; only apps with an LVGL GUI need it</span>
+git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>ThirdParty/lvgl
+
 <span class="c1"># Export environment for the current shell</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">"</span>
 
@@ -259,6 +263,8 @@ git<span class="w"> </span>clone<span class="w"> </span>https://github.com/UNAWa
 python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><span class="nv">$UNA_SDK</span><span class="s2">/Utilities/Scripts/app_packer/requirements.txt"</span>
 </pre></div>
 </div>
+<p>GitHub’s release “Source code” archives do not contain submodules, so an SDK taken
+from one builds the TouchGFX apps but not the LVGL ones; clone the repository for those.</p>
 </section>
 <section id="verify-your-environment">
 <h5>Verify your environment<a class="headerlink" href="#verify-your-environment" title="Link to this heading"></a></h5>
@@ -344,6 +350,9 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nv">@github</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="n">UNAWatch</span><span class="p">/</span><span class="n">una-sdk</span><span class="p">.</span><span class="n">git</span>
 <span class="c"># Or use HTTPS</span>
 <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">UNAWatch</span><span class="p">/</span><span class="n">una-sdk</span><span class="p">.</span><span class="n">git</span>
+
+<span class="c"># The LVGL GUI toolkit is a git submodule; only apps with an LVGL GUI need it</span>
+<span class="n">git</span> <span class="n">-C</span> <span class="n">una-sdk</span> <span class="n">submodule</span> <span class="n">update</span> <span class="p">-</span><span class="n">-init</span> <span class="n">ThirdParty</span><span class="p">/</span><span class="n">lvgl</span>
 
 <span class="c"># Export environment (persistent)</span>
 <span class="c"># If you encounter a security error (e.g., running scripts is disabled), run this first:</span>

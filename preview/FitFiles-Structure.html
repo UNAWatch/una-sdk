@@ -60,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -326,34 +327,34 @@
 <section id="phase-1-foundations-essential-read-first">
 <h4><strong>Phase 1: Foundations (Essential - Read First)</strong><a class="headerlink" href="#phase-1-foundations-essential-read-first" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
-<li><p><strong><a class="reference internal" href="#introduction-to-fit"><span class="xref myst">Introduction to FIT</span></a></strong> - Understand what FIT is and why it’s used</p></li>
-<li><p><strong><a class="reference internal" href="#fit-file-format-basics"><span class="xref myst">FIT File Format Basics</span></a></strong> - Learn binary format, data types, and scaling</p></li>
-<li><p><strong><a class="reference internal" href="#activitywriter-class-overview"><span class="xref myst">ActivityWriter Class Overview</span></a></strong> - Get familiar with the main class</p></li>
-<li><p><strong><a class="reference internal" href="#data-structures-in-activitywriter"><span class="xref myst">Data Structures in ActivityWriter</span></a></strong> - Understand the data you work with</p></li>
+<li><p><strong><a class="reference internal" href="#introduction-to-fit">Introduction to FIT</a></strong> - Understand what FIT is and why it’s used</p></li>
+<li><p><strong><a class="reference internal" href="#fit-file-format-basics">FIT File Format Basics</a></strong> - Learn binary format, data types, and scaling</p></li>
+<li><p><strong><a class="reference internal" href="#activitywriter-class-overview">ActivityWriter Class Overview</a></strong> - Get familiar with the main class</p></li>
+<li><p><strong><a class="reference internal" href="#data-structures-in-activitywriter">Data Structures in ActivityWriter</a></strong> - Understand the data you work with</p></li>
 </ol>
 </section>
 <section id="phase-2-implementation-core-development">
 <h4><strong>Phase 2: Implementation (Core Development)</strong><a class="headerlink" href="#phase-2-implementation-core-development" title="Link to this heading"></a></h4>
 <ol class="arabic simple" start="5">
-<li><p><strong><a class="reference internal" href="#sdkfit-encoder-deep-dive"><span class="xref myst">SDK::Fit Encoder Deep Dive</span></a></strong> - Learn the encoder that does the work</p></li>
-<li><p><strong><a class="reference internal" href="#step-by-step-fit-file-creation"><span class="xref myst">Step-by-Step FIT File Creation</span></a></strong> - Follow the file creation process</p></li>
-<li><p><strong><a class="reference internal" href="#code-usage-examples-and-walkthroughs"><span class="xref myst">Code Usage Examples and Walkthroughs</span></a></strong> - Study real code examples</p></li>
+<li><p><strong><a class="reference internal" href="#sdk-fit-encoder-deep-dive">SDK::Fit Encoder Deep Dive</a></strong> - Learn the encoder that does the work</p></li>
+<li><p><strong><a class="reference internal" href="#step-by-step-fit-file-creation">Step-by-Step FIT File Creation</a></strong> - Follow the file creation process</p></li>
+<li><p><strong><a class="reference internal" href="#code-usage-examples-and-walkthroughs">Code Usage Examples and Walkthroughs</a></strong> - Study real code examples</p></li>
 </ol>
 </section>
 <section id="phase-3-customization-when-you-need-to-modify">
 <h4><strong>Phase 3: Customization (When You Need to Modify)</strong><a class="headerlink" href="#phase-3-customization-when-you-need-to-modify" title="Link to this heading"></a></h4>
 <ol class="arabic simple" start="8">
-<li><p><strong><a class="reference internal" href="#activity-specific-variations"><span class="xref myst">Activity-Specific Variations</span></a></strong> - See how different activities are implemented</p></li>
-<li><p><strong><a class="reference internal" href="#developer-fields-implementation"><span class="xref myst">Developer Fields Implementation</span></a></strong> - Add custom data fields</p></li>
-<li><p><strong><a class="reference internal" href="#extending-activitywriter-for-new-activities"><span class="xref myst">Extending ActivityWriter for New Activities</span></a></strong> - Create new activity types</p></li>
+<li><p><strong><a class="reference internal" href="#activity-specific-variations">Activity-Specific Variations</a></strong> - See how different activities are implemented</p></li>
+<li><p><strong><a class="reference internal" href="#developer-fields-implementation">Developer Fields Implementation</a></strong> - Add custom data fields</p></li>
+<li><p><strong><a class="reference internal" href="#extending-activitywriter-for-new-activities">Extending ActivityWriter for New Activities</a></strong> - Create new activity types</p></li>
 </ol>
 </section>
 <section id="phase-4-advanced-topics-as-needed">
 <h4><strong>Phase 4: Advanced Topics (As Needed)</strong><a class="headerlink" href="#phase-4-advanced-topics-as-needed" title="Link to this heading"></a></h4>
 <ol class="arabic simple" start="11">
-<li><p><strong><a class="reference internal" href="#advanced-topics-and-best-practices"><span class="xref myst">Advanced Topics and Best Practices</span></a></strong> - Performance and edge cases</p></li>
-<li><p><strong><a class="reference internal" href="#troubleshooting-common-issues"><span class="xref myst">Troubleshooting Common Issues</span></a></strong> - Debug problems</p></li>
-<li><p><strong><a class="reference internal" href="#fit-file-parsing-and-validation"><span class="xref myst">FIT File Parsing and Validation</span></a></strong> - Test and validate files</p></li>
+<li><p><strong><a class="reference internal" href="#advanced-topics-and-best-practices">Advanced Topics and Best Practices</a></strong> - Performance and edge cases</p></li>
+<li><p><strong><a class="reference internal" href="#troubleshooting-common-issues">Troubleshooting Common Issues</a></strong> - Debug problems</p></li>
+<li><p><strong><a class="reference internal" href="#fit-file-parsing-and-validation">FIT File Parsing and Validation</a></strong> - Test and validate files</p></li>
 </ol>
 </section>
 </section>
@@ -549,197 +550,197 @@
 <section id="table-of-contents">
 <h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="#fit-files-structure"><span class="xref myst">FIT Files Structure</span></a></p>
+<li><p><a class="reference internal" href="#fit-files-structure">FIT Files Structure</a></p>
 <ul>
-<li><p><a class="reference internal" href="#how-to-read-this-document"><span class="xref myst">How to Read This Document</span></a></p>
+<li><p><a class="reference internal" href="#how-to-read-this-document">How to Read This Document</a></p>
 <ul>
-<li><p><a class="reference internal" href="#for-new-developers-getting-started-guide"><span class="xref myst">For New Developers: Getting Started Guide</span></a></p>
+<li><p><a class="reference internal" href="#for-new-developers-getting-started-guide">For New Developers: Getting Started Guide</a></p>
 <ul>
-<li><p><a class="reference internal" href="#phase-1-foundations-essential---read-first"><span class="xref myst"><strong>Phase 1: Foundations (Essential - Read First)</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#phase-2-implementation-core-development"><span class="xref myst"><strong>Phase 2: Implementation (Core Development)</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#phase-3-customization-when-you-need-to-modify"><span class="xref myst"><strong>Phase 3: Customization (When You Need to Modify)</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#phase-4-advanced-topics-as-needed"><span class="xref myst"><strong>Phase 4: Advanced Topics (As Needed)</strong></span></a></p></li>
+<li><p><a class="reference internal" href="#phase-1-foundations-essential-read-first"><strong>Phase 1: Foundations (Essential - Read First)</strong></a></p></li>
+<li><p><a class="reference internal" href="#phase-2-implementation-core-development"><strong>Phase 2: Implementation (Core Development)</strong></a></p></li>
+<li><p><a class="reference internal" href="#phase-3-customization-when-you-need-to-modify"><strong>Phase 3: Customization (When You Need to Modify)</strong></a></p></li>
+<li><p><a class="reference internal" href="#phase-4-advanced-topics-as-needed"><strong>Phase 4: Advanced Topics (As Needed)</strong></a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#key-sections-for-different-tasks"><span class="xref myst">Key Sections for Different Tasks</span></a></p></li>
-<li><p><a class="reference internal" href="#essential-headers-and-includes"><span class="xref myst">Essential Headers and Includes</span></a></p>
+<li><p><a class="reference internal" href="#key-sections-for-different-tasks">Key Sections for Different Tasks</a></p></li>
+<li><p><a class="reference internal" href="#essential-headers-and-includes">Essential Headers and Includes</a></p>
 <ul>
-<li><p><a class="reference internal" href="#core-fit-functionality"><span class="xref myst"><strong>Core FIT Functionality</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#optional-sdkfit-helpers"><span class="xref myst"><strong>Optional SDK::Fit Helpers</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#standard-library-headers"><span class="xref myst"><strong>Standard Library Headers</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#una-sdk-logger-optional-but-recommended"><span class="xref myst"><strong>UNA SDK Logger (Optional but Recommended)</strong></span></a></p></li>
+<li><p><a class="reference internal" href="#core-fit-functionality"><strong>Core FIT Functionality</strong></a></p></li>
+<li><p><a class="reference internal" href="#optional-sdk-fit-helpers"><strong>Optional SDK::Fit Helpers</strong></a></p></li>
+<li><p><a class="reference internal" href="#standard-library-headers"><strong>Standard Library Headers</strong></a></p></li>
+<li><p><a class="reference internal" href="#una-sdk-logger-optional-but-recommended"><strong>UNA SDK Logger (Optional but Recommended)</strong></a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#quick-start-checklist"><span class="xref myst">Quick Start Checklist</span></a></p></li>
-<li><p><a class="reference internal" href="#navigation-tips"><span class="xref myst">Navigation Tips</span></a></p></li>
+<li><p><a class="reference internal" href="#quick-start-checklist">Quick Start Checklist</a></p></li>
+<li><p><a class="reference internal" href="#navigation-tips">Navigation Tips</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#-getting-started-where-to-find-activitywriter"><span class="xref myst">🚀 Getting Started: Where to Find ActivityWriter</span></a></p>
+<li><p><a class="reference internal" href="#getting-started-where-to-find-activitywriter">🚀 Getting Started: Where to Find ActivityWriter</a></p>
 <ul>
-<li><p><a class="reference internal" href="#location-in-una-sdk"><span class="xref myst"><strong>Location in UNA SDK</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#available-implementations"><span class="xref myst"><strong>Available Implementations</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#quick-copy-steps"><span class="xref myst"><strong>Quick Copy Steps</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#basic-usage-3-lines-of-code"><span class="xref myst"><strong>Basic Usage (3 lines of code)</strong></span></a></p></li>
-<li><p><a class="reference internal" href="#need-help"><span class="xref myst"><strong>Need Help?</strong></span></a></p></li>
+<li><p><a class="reference internal" href="#location-in-una-sdk"><strong>Location in UNA SDK</strong></a></p></li>
+<li><p><a class="reference internal" href="#available-implementations"><strong>Available Implementations</strong></a></p></li>
+<li><p><a class="reference internal" href="#quick-copy-steps"><strong>Quick Copy Steps</strong></a></p></li>
+<li><p><a class="reference internal" href="#basic-usage-3-lines-of-code"><strong>Basic Usage (3 lines of code)</strong></a></p></li>
+<li><p><a class="reference internal" href="#need-help"><strong>Need Help?</strong></a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#table-of-contents"><span class="xref myst">Table of Contents</span></a></p></li>
-<li><p><a class="reference internal" href="#introduction-to-fit"><span class="xref myst">Introduction to FIT</span></a></p>
+<li><p><a class="reference internal" href="#table-of-contents">Table of Contents</a></p></li>
+<li><p><a class="reference internal" href="#introduction-to-fit">Introduction to FIT</a></p>
 <ul>
-<li><p><a class="reference internal" href="#what-is-fit"><span class="xref myst">What is FIT?</span></a></p></li>
-<li><p><a class="reference internal" href="#key-concepts-for-beginners"><span class="xref myst">Key Concepts for Beginners</span></a></p></li>
-<li><p><a class="reference internal" href="#fit-protocol-versions"><span class="xref myst">FIT Protocol Versions</span></a></p></li>
-<li><p><a class="reference internal" href="#why-fit-in-una-sdk"><span class="xref myst">Why FIT in UNA SDK?</span></a></p></li>
-<li><p><a class="reference internal" href="#prerequisites-for-understanding"><span class="xref myst">Prerequisites for Understanding</span></a></p></li>
+<li><p><a class="reference internal" href="#what-is-fit">What is FIT?</a></p></li>
+<li><p><a class="reference internal" href="#key-concepts-for-beginners">Key Concepts for Beginners</a></p></li>
+<li><p><a class="reference internal" href="#fit-protocol-versions">FIT Protocol Versions</a></p></li>
+<li><p><a class="reference internal" href="#why-fit-in-una-sdk">Why FIT in UNA SDK?</a></p></li>
+<li><p><a class="reference internal" href="#prerequisites-for-understanding">Prerequisites for Understanding</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#fit-file-format-basics"><span class="xref myst">FIT File Format Basics</span></a></p>
+<li><p><a class="reference internal" href="#fit-file-format-basics">FIT File Format Basics</a></p>
 <ul>
-<li><p><a class="reference internal" href="#file-structure-overview"><span class="xref myst">File Structure Overview</span></a></p></li>
-<li><p><a class="reference internal" href="#byte-order-and-endianness"><span class="xref myst">Byte Order and Endianness</span></a></p></li>
-<li><p><a class="reference internal" href="#message-encoding"><span class="xref myst">Message Encoding</span></a></p></li>
-<li><p><a class="reference internal" href="#data-types-in-fit"><span class="xref myst">Data Types in FIT</span></a></p></li>
-<li><p><a class="reference internal" href="#scaling-and-units"><span class="xref myst">Scaling and Units</span></a></p></li>
+<li><p><a class="reference internal" href="#file-structure-overview">File Structure Overview</a></p></li>
+<li><p><a class="reference internal" href="#byte-order-and-endianness">Byte Order and Endianness</a></p></li>
+<li><p><a class="reference internal" href="#message-encoding">Message Encoding</a></p></li>
+<li><p><a class="reference internal" href="#data-types-in-fit">Data Types in FIT</a></p></li>
+<li><p><a class="reference internal" href="#scaling-and-units">Scaling and Units</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#activitywriter-class-overview"><span class="xref myst">ActivityWriter Class Overview</span></a></p>
+<li><p><a class="reference internal" href="#activitywriter-class-overview">ActivityWriter Class Overview</a></p>
 <ul>
-<li><p><a class="reference internal" href="#class-purpose-and-architecture"><span class="xref myst">Class Purpose and Architecture</span></a></p></li>
-<li><p><a class="reference internal" href="#constructor-and-initialization"><span class="xref myst">Constructor and Initialization</span></a></p></li>
-<li><p><a class="reference internal" href="#public-interface-methods"><span class="xref myst">Public Interface Methods</span></a></p></li>
-<li><p><a class="reference internal" href="#data-structures-in-activitywriter"><span class="xref myst">Data Structures in ActivityWriter</span></a></p>
+<li><p><a class="reference internal" href="#class-purpose-and-architecture">Class Purpose and Architecture</a></p></li>
+<li><p><a class="reference internal" href="#constructor-and-initialization">Constructor and Initialization</a></p></li>
+<li><p><a class="reference internal" href="#public-interface-methods">Public Interface Methods</a></p></li>
+<li><p><a class="reference internal" href="#data-structures-in-activitywriter">Data Structures in ActivityWriter</a></p>
 <ul>
-<li><p><a class="reference internal" href="#appinfo-struct"><span class="xref myst">AppInfo Struct</span></a></p></li>
-<li><p><a class="reference internal" href="#recorddata-struct"><span class="xref myst">RecordData Struct</span></a></p></li>
-<li><p><a class="reference internal" href="#lapdata-and-trackdata-structs"><span class="xref myst">LapData and TrackData Structs</span></a></p></li>
+<li><p><a class="reference internal" href="#appinfo-struct">AppInfo Struct</a></p></li>
+<li><p><a class="reference internal" href="#recorddata-struct">RecordData Struct</a></p></li>
+<li><p><a class="reference internal" href="#lapdata-and-trackdata-structs">LapData and TrackData Structs</a></p></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#sdkfit-encoder-deep-dive"><span class="xref myst">SDK::Fit Encoder Deep Dive</span></a></p>
+<li><p><a class="reference internal" href="#sdk-fit-encoder-deep-dive">SDK::Fit Encoder Deep Dive</a></p>
 <ul>
-<li><p><a class="reference internal" href="#what-is-sdkfit"><span class="xref myst">What is SDK::Fit?</span></a></p></li>
-<li><p><a class="reference internal" href="#fitwriter-lifecycle"><span class="xref myst">FitWriter Lifecycle</span></a></p></li>
-<li><p><a class="reference internal" href="#defining-messages"><span class="xref myst">Defining Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#writing-data-records"><span class="xref myst">Writing Data Records</span></a></p></li>
-<li><p><a class="reference internal" href="#fitprofile-constants"><span class="xref myst">FitProfile Constants</span></a></p></li>
-<li><p><a class="reference internal" href="#internal-mechanics"><span class="xref myst">Internal Mechanics</span></a></p></li>
+<li><p><a class="reference internal" href="#what-is-sdk-fit">What is SDK::Fit?</a></p></li>
+<li><p><a class="reference internal" href="#fitwriter-lifecycle">FitWriter Lifecycle</a></p></li>
+<li><p><a class="reference internal" href="#defining-messages">Defining Messages</a></p></li>
+<li><p><a class="reference internal" href="#writing-data-records">Writing Data Records</a></p></li>
+<li><p><a class="reference internal" href="#fitprofile-constants">FitProfile Constants</a></p></li>
+<li><p><a class="reference internal" href="#internal-mechanics">Internal Mechanics</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#step-by-step-fit-file-creation"><span class="xref myst">Step-by-Step FIT File Creation</span></a></p>
+<li><p><a class="reference internal" href="#step-by-step-fit-file-creation">Step-by-Step FIT File Creation</a></p>
 <ul>
-<li><p><a class="reference internal" href="#1-initialization-phase"><span class="xref myst">1. Initialization Phase</span></a></p></li>
-<li><p><a class="reference internal" href="#2-start-activity"><span class="xref myst">2. Start Activity</span></a></p></li>
-<li><p><a class="reference internal" href="#3-record-data-points"><span class="xref myst">3. Record Data Points</span></a></p></li>
-<li><p><a class="reference internal" href="#4-add-laps"><span class="xref myst">4. Add Laps</span></a></p></li>
-<li><p><a class="reference internal" href="#5-handle-pausesresumes"><span class="xref myst">5. Handle Pauses/Resumes</span></a></p></li>
-<li><p><a class="reference internal" href="#6-stop-and-finalize"><span class="xref myst">6. Stop and Finalize</span></a></p></li>
-<li><p><a class="reference internal" href="#file-naming-convention"><span class="xref myst">File Naming Convention</span></a></p></li>
+<li><p><a class="reference internal" href="#initialization-phase">1. Initialization Phase</a></p></li>
+<li><p><a class="reference internal" href="#start-activity">2. Start Activity</a></p></li>
+<li><p><a class="reference internal" href="#record-data-points">3. Record Data Points</a></p></li>
+<li><p><a class="reference internal" href="#add-laps">4. Add Laps</a></p></li>
+<li><p><a class="reference internal" href="#handle-pauses-resumes">5. Handle Pauses/Resumes</a></p></li>
+<li><p><a class="reference internal" href="#stop-and-finalize">6. Stop and Finalize</a></p></li>
+<li><p><a class="reference internal" href="#file-naming-convention">File Naming Convention</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#message-types-and-fields-in-detail"><span class="xref myst">Message Types and Fields in Detail</span></a></p>
+<li><p><a class="reference internal" href="#message-types-and-fields-in-detail">Message Types and Fields in Detail</a></p>
 <ul>
-<li><p><a class="reference internal" href="#file-id-message"><span class="xref myst">File ID Message</span></a></p></li>
-<li><p><a class="reference internal" href="#developer-data-id-message"><span class="xref myst">Developer Data ID Message</span></a></p></li>
-<li><p><a class="reference internal" href="#field-description-messages"><span class="xref myst">Field Description Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#record-messages"><span class="xref myst">Record Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#lap-messages"><span class="xref myst">Lap Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#session-messages"><span class="xref myst">Session Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#event-messages"><span class="xref myst">Event Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#activity-messages"><span class="xref myst">Activity Messages</span></a></p></li>
+<li><p><a class="reference internal" href="#file-id-message">File ID Message</a></p></li>
+<li><p><a class="reference internal" href="#developer-data-id-message">Developer Data ID Message</a></p></li>
+<li><p><a class="reference internal" href="#field-description-messages">Field Description Messages</a></p></li>
+<li><p><a class="reference internal" href="#record-messages">Record Messages</a></p></li>
+<li><p><a class="reference internal" href="#lap-messages">Lap Messages</a></p></li>
+<li><p><a class="reference internal" href="#session-messages">Session Messages</a></p></li>
+<li><p><a class="reference internal" href="#event-messages">Event Messages</a></p></li>
+<li><p><a class="reference internal" href="#activity-messages">Activity Messages</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#message-types-and-fields"><span class="xref myst">Message Types and Fields</span></a></p>
+<li><p><a class="reference internal" href="#message-types-and-fields">Message Types and Fields</a></p>
 <ul>
-<li><p><a class="reference internal" href="#file-id-message-1"><span class="xref myst">File ID Message</span></a></p></li>
-<li><p><a class="reference internal" href="#developer-data-id-message-1"><span class="xref myst">Developer Data ID Message</span></a></p></li>
-<li><p><a class="reference internal" href="#field-description-messages-1"><span class="xref myst">Field Description Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#record-messages-1"><span class="xref myst">Record Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#lap-messages-1"><span class="xref myst">Lap Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#session-messages-1"><span class="xref myst">Session Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#event-messages-1"><span class="xref myst">Event Messages</span></a></p></li>
-<li><p><a class="reference internal" href="#activity-messages-1"><span class="xref myst">Activity Messages</span></a></p></li>
+<li><p><a class="reference internal" href="#id1">File ID Message</a></p></li>
+<li><p><a class="reference internal" href="#id2">Developer Data ID Message</a></p></li>
+<li><p><a class="reference internal" href="#id3">Field Description Messages</a></p></li>
+<li><p><a class="reference internal" href="#id4">Record Messages</a></p></li>
+<li><p><a class="reference internal" href="#id5">Lap Messages</a></p></li>
+<li><p><a class="reference internal" href="#id6">Session Messages</a></p></li>
+<li><p><a class="reference internal" href="#id7">Event Messages</a></p></li>
+<li><p><a class="reference internal" href="#id8">Activity Messages</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#activity-specific-variations"><span class="xref myst">Activity-Specific Variations</span></a></p>
+<li><p><a class="reference internal" href="#activity-specific-variations">Activity-Specific Variations</a></p>
 <ul>
-<li><p><a class="reference internal" href="#running-examplesappsrunning"><span class="xref myst">Running (Examples/Apps/Running/)</span></a></p></li>
-<li><p><a class="reference internal" href="#cycling-examplesappscycling"><span class="xref myst">Cycling (Examples/Apps/Cycling/)</span></a></p></li>
-<li><p><a class="reference internal" href="#hiking-examplesappshiking"><span class="xref myst">Hiking (Examples/Apps/Hiking/)</span></a></p></li>
-<li><p><a class="reference internal" href="#hrmonitor-examplesappshrmonitor"><span class="xref myst">HRMonitor (Examples/Apps/HRMonitor/)</span></a></p></li>
+<li><p><a class="reference internal" href="#running-examples-apps-running">Running (Examples/Apps/Running/)</a></p></li>
+<li><p><a class="reference internal" href="#cycling-examples-apps-cycling">Cycling (Examples/Apps/Cycling/)</a></p></li>
+<li><p><a class="reference internal" href="#hiking-examples-apps-hiking">Hiking (Examples/Apps/Hiking/)</a></p></li>
+<li><p><a class="reference internal" href="#hrmonitor-examples-apps-hrmonitor">HRMonitor (Examples/Apps/HRMonitor/)</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#developer-fields-implementation"><span class="xref myst">Developer Fields Implementation</span></a></p>
+<li><p><a class="reference internal" href="#developer-fields-implementation">Developer Fields Implementation</a></p>
 <ul>
-<li><p><a class="reference internal" href="#overview"><span class="xref myst">Overview</span></a></p></li>
-<li><p><a class="reference internal" href="#battery-fields-running-cycling-hiking"><span class="xref myst">Battery Fields (Running, Cycling, Hiking)</span></a></p></li>
-<li><p><a class="reference internal" href="#developer-fields-on-lap--session"><span class="xref myst">Developer Fields on Lap / Session</span></a></p></li>
-<li><p><a class="reference internal" href="#trust-level-hrmonitor"><span class="xref myst">Trust Level (HRMonitor)</span></a></p></li>
-<li><p><a class="reference internal" href="#best-practices-for-developer-fields"><span class="xref myst">Best Practices for Developer Fields</span></a></p></li>
+<li><p><a class="reference internal" href="#overview">Overview</a></p></li>
+<li><p><a class="reference internal" href="#battery-fields-running-cycling-hiking">Battery Fields (Running, Cycling, Hiking)</a></p></li>
+<li><p><a class="reference internal" href="#developer-fields-on-lap-session">Developer Fields on Lap / Session</a></p></li>
+<li><p><a class="reference internal" href="#trust-level-hrmonitor">Trust Level (HRMonitor)</a></p></li>
+<li><p><a class="reference internal" href="#best-practices-for-developer-fields">Best Practices for Developer Fields</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#visual-representations-and-diagrams"><span class="xref myst">Visual Representations and Diagrams</span></a></p>
+<li><p><a class="reference internal" href="#visual-representations-and-diagrams">Visual Representations and Diagrams</a></p>
 <ul>
-<li><p><a class="reference internal" href="#complete-fit-file-structure"><span class="xref myst">Complete FIT File Structure</span></a></p></li>
-<li><p><a class="reference internal" href="#message-definition-structure"><span class="xref myst">Message Definition Structure</span></a></p></li>
-<li><p><a class="reference internal" href="#record-message-variants-tree"><span class="xref myst">Record Message Variants Tree</span></a></p></li>
-<li><p><a class="reference internal" href="#activitywriter-method-flow"><span class="xref myst">ActivityWriter Method Flow</span></a></p></li>
+<li><p><a class="reference internal" href="#complete-fit-file-structure">Complete FIT File Structure</a></p></li>
+<li><p><a class="reference internal" href="#message-definition-structure">Message Definition Structure</a></p></li>
+<li><p><a class="reference internal" href="#record-message-variants-tree">Record Message Variants Tree</a></p></li>
+<li><p><a class="reference internal" href="#activitywriter-method-flow">ActivityWriter Method Flow</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#code-usage-examples-and-walkthroughs"><span class="xref myst">Code Usage Examples and Walkthroughs</span></a></p>
+<li><p><a class="reference internal" href="#code-usage-examples-and-walkthroughs">Code Usage Examples and Walkthroughs</a></p>
 <ul>
-<li><p><a class="reference internal" href="#constructor-deep-dive"><span class="xref myst">Constructor Deep Dive</span></a></p></li>
-<li><p><a class="reference internal" href="#start-method-walkthrough"><span class="xref myst">start() Method Walkthrough</span></a></p></li>
-<li><p><a class="reference internal" href="#definerecordmessages---record-variants"><span class="xref myst">defineRecordMessages() - Record Variants</span></a></p></li>
-<li><p><a class="reference internal" href="#addrecord---variant-selection-and-data-write"><span class="xref myst">addRecord() - Variant Selection and Data Write</span></a></p></li>
-<li><p><a class="reference internal" href="#stop-method---finalization"><span class="xref myst">stop() Method - Finalization</span></a></p></li>
+<li><p><a class="reference internal" href="#constructor-deep-dive">Constructor Deep Dive</a></p></li>
+<li><p><a class="reference internal" href="#start-method-walkthrough">start() Method Walkthrough</a></p></li>
+<li><p><a class="reference internal" href="#definerecordmessages-record-variants">defineRecordMessages() - Record Variants</a></p></li>
+<li><p><a class="reference internal" href="#addrecord-variant-selection-and-data-write">addRecord() - Variant Selection and Data Write</a></p></li>
+<li><p><a class="reference internal" href="#stop-method-finalization">stop() Method - Finalization</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#advanced-topics-and-best-practices"><span class="xref myst">Advanced Topics and Best Practices</span></a></p>
+<li><p><a class="reference internal" href="#advanced-topics-and-best-practices">Advanced Topics and Best Practices</a></p>
 <ul>
-<li><p><a class="reference internal" href="#fit-timestamp-handling"><span class="xref myst">FIT Timestamp Handling</span></a></p></li>
-<li><p><a class="reference internal" href="#data-scaling-and-precision"><span class="xref myst">Data Scaling and Precision</span></a></p></li>
-<li><p><a class="reference internal" href="#gps-coordinate-conversion"><span class="xref myst">GPS Coordinate Conversion</span></a></p></li>
-<li><p><a class="reference internal" href="#crc-calculation-and-validation"><span class="xref myst">CRC Calculation and Validation</span></a></p></li>
-<li><p><a class="reference internal" href="#file-header-management"><span class="xref myst">File Header Management</span></a></p></li>
-<li><p><a class="reference internal" href="#memory-management-and-performance"><span class="xref myst">Memory Management and Performance</span></a></p></li>
+<li><p><a class="reference internal" href="#fit-timestamp-handling">FIT Timestamp Handling</a></p></li>
+<li><p><a class="reference internal" href="#data-scaling-and-precision">Data Scaling and Precision</a></p></li>
+<li><p><a class="reference internal" href="#gps-coordinate-conversion">GPS Coordinate Conversion</a></p></li>
+<li><p><a class="reference internal" href="#crc-calculation-and-validation">CRC Calculation and Validation</a></p></li>
+<li><p><a class="reference internal" href="#file-header-management">File Header Management</a></p></li>
+<li><p><a class="reference internal" href="#memory-management-and-performance">Memory Management and Performance</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#troubleshooting-common-issues"><span class="xref myst">Troubleshooting Common Issues</span></a></p>
+<li><p><a class="reference internal" href="#troubleshooting-common-issues">Troubleshooting Common Issues</a></p>
 <ul>
-<li><p><a class="reference internal" href="#file-creation-failures"><span class="xref myst">File Creation Failures</span></a></p></li>
-<li><p><a class="reference internal" href="#invalid-fit-files"><span class="xref myst">Invalid FIT Files</span></a></p></li>
-<li><p><a class="reference internal" href="#data-scaling-errors"><span class="xref myst">Data Scaling Errors</span></a></p></li>
-<li><p><a class="reference internal" href="#developer-field-problems"><span class="xref myst">Developer Field Problems</span></a></p></li>
-<li><p><a class="reference internal" href="#payload--definition-mismatch"><span class="xref myst">Payload / Definition Mismatch</span></a></p></li>
-<li><p><a class="reference internal" href="#memory-issues"><span class="xref myst">Memory Issues</span></a></p></li>
+<li><p><a class="reference internal" href="#file-creation-failures">File Creation Failures</a></p></li>
+<li><p><a class="reference internal" href="#invalid-fit-files">Invalid FIT Files</a></p></li>
+<li><p><a class="reference internal" href="#data-scaling-errors">Data Scaling Errors</a></p></li>
+<li><p><a class="reference internal" href="#developer-field-problems">Developer Field Problems</a></p></li>
+<li><p><a class="reference internal" href="#payload-definition-mismatch">Payload / Definition Mismatch</a></p></li>
+<li><p><a class="reference internal" href="#memory-issues">Memory Issues</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#extending-activitywriter-for-new-activities"><span class="xref myst">Extending ActivityWriter for New Activities</span></a></p>
+<li><p><a class="reference internal" href="#extending-activitywriter-for-new-activities">Extending ActivityWriter for New Activities</a></p>
 <ul>
-<li><p><a class="reference internal" href="#adding-a-new-sport-type"><span class="xref myst">Adding a New Sport Type</span></a></p></li>
-<li><p><a class="reference internal" href="#adding-new-developer-fields"><span class="xref myst">Adding New Developer Fields</span></a></p></li>
-<li><p><a class="reference internal" href="#creating-new-record-variants"><span class="xref myst">Creating New Record Variants</span></a></p></li>
-<li><p><a class="reference internal" href="#best-practices-for-extensions"><span class="xref myst">Best Practices for Extensions</span></a></p></li>
+<li><p><a class="reference internal" href="#adding-a-new-sport-type">Adding a New Sport Type</a></p></li>
+<li><p><a class="reference internal" href="#adding-new-developer-fields">Adding New Developer Fields</a></p></li>
+<li><p><a class="reference internal" href="#creating-new-record-variants">Creating New Record Variants</a></p></li>
+<li><p><a class="reference internal" href="#best-practices-for-extensions">Best Practices for Extensions</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#fit-file-parsing-and-validation"><span class="xref myst">FIT File Parsing and Validation</span></a></p>
+<li><p><a class="reference internal" href="#fit-file-parsing-and-validation">FIT File Parsing and Validation</a></p>
 <ul>
-<li><p><a class="reference internal" href="#using-garmin-fit-sdk"><span class="xref myst">Using Garmin FIT SDK</span></a></p></li>
-<li><p><a class="reference internal" href="#third-party-libraries"><span class="xref myst">Third-Party Libraries</span></a></p></li>
-<li><p><a class="reference internal" href="#validation-tools"><span class="xref myst">Validation Tools</span></a></p></li>
-<li><p><a class="reference internal" href="#common-parsing-errors"><span class="xref myst">Common Parsing Errors</span></a></p></li>
-<li><p><a class="reference internal" href="#debugging-fit-files"><span class="xref myst">Debugging FIT Files</span></a></p></li>
+<li><p><a class="reference internal" href="#using-garmin-fit-sdk">Using Garmin FIT SDK</a></p></li>
+<li><p><a class="reference internal" href="#third-party-libraries">Third-Party Libraries</a></p></li>
+<li><p><a class="reference internal" href="#validation-tools">Validation Tools</a></p></li>
+<li><p><a class="reference internal" href="#common-parsing-errors">Common Parsing Errors</a></p></li>
+<li><p><a class="reference internal" href="#debugging-fit-files">Debugging FIT Files</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#references-and-resources"><span class="xref myst">References and Resources</span></a></p>
+<li><p><a class="reference internal" href="#references-and-resources">References and Resources</a></p>
 <ul>
-<li><p><a class="reference internal" href="#official-documentation"><span class="xref myst">Official Documentation</span></a></p></li>
-<li><p><a class="reference internal" href="#key-fit-documents"><span class="xref myst">Key FIT Documents</span></a></p></li>
-<li><p><a class="reference internal" href="#community-resources"><span class="xref myst">Community Resources</span></a></p></li>
-<li><p><a class="reference internal" href="#una-sdk-specific"><span class="xref myst">UNA SDK Specific</span></a></p></li>
-<li><p><a class="reference internal" href="#books-and-tutorials"><span class="xref myst">Books and Tutorials</span></a></p></li>
-<li><p><a class="reference internal" href="#version-history"><span class="xref myst">Version History</span></a></p></li>
+<li><p><a class="reference internal" href="#official-documentation">Official Documentation</a></p></li>
+<li><p><a class="reference internal" href="#key-fit-documents">Key FIT Documents</a></p></li>
+<li><p><a class="reference internal" href="#community-resources">Community Resources</a></p></li>
+<li><p><a class="reference internal" href="#una-sdk-specific">UNA SDK Specific</a></p></li>
+<li><p><a class="reference internal" href="#books-and-tutorials">Books and Tutorials</a></p></li>
+<li><p><a class="reference internal" href="#version-history">Version History</a></p></li>
 </ul>
 </li>
 </ul>

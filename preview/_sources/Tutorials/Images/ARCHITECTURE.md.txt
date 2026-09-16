@@ -5,15 +5,17 @@ Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you h
 
 [Project Folder](https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Images)
 
+As in the earlier tutorials, the app comes with a **TouchGFX** GUI and an **LVGL** GUI over the same service. The image pipelines differ the most: TouchGFX Designer converts images at generate time, LVGL's are converted by a script from a manifest. See [The Same Image in Two Toolkits](#the-same-image-in-two-toolkits).
+
 ## What You'll Learn
 
 - How to create and prepare graphic assets for UNA apps
-- The process of importing images into TouchGFX Designer
+- The process of importing images into TouchGFX Designer, or listing them in the LVGL asset manifest
 - How images are converted and stored in the UNA SDK
-- Using bitmap IDs to reference and display images in code
+- Using bitmap IDs (TouchGFX) or image descriptors (LVGL) to reference and display images in code
 - Programmatically adding images without using designer-generated backgrounds
 - Mode switching between Image and ScalableImage using L1 button
-- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp)
+- Tick-based jump animation triggered by R1 button via [`handleTickEvent()`](Software/Apps/TouchGFX-GUI/gui/src/main_screen/MainView.cpp) (TouchGFX) or `onFrame()` (LVGL)
 - Understanding the TouchGFX image pipeline in UNA applications. For detailed information about the TouchGFX port implementation, see [TouchGFX Port Architecture](../../TouchGFX-Port-Architecture.md)
 - Best practices for image optimization and management
 
@@ -32,7 +34,7 @@ Before starting the Import Images tutorial, you need to set up the UNA SDK envir
 - `UNA_SDK` environment variable pointing to SDK root
 - ARM GCC toolchain in PATH
 - CMake and build tools
-- TouchGFX Designer for GUI development
+- TouchGFX Designer for the TouchGFX GUI; for the LVGL GUI, the LVGL submodule (`git submodule update --init ThirdParty/lvgl`) and, to convert images, Python with the `pypng` and `lz4` packages
 - Image editing software (Paint, GIMP, Photoshop, etc.)
 
 ### Building and Running Import Images
@@ -51,27 +53,36 @@ Before starting the Import Images tutorial, you need to set up the UNA SDK envir
     cd $UNA_SDK/Docs/Tutorials/Images
     ```
 
-3. **Build the application:**
+3. **Build the application** with the GUI of your choice:
     ```bash
+    # TouchGFX GUI
     mkdir build && cd build
     cmake -G "Unix Makefiles" ../Software/Apps/Images-CMake
     make
+
+    # LVGL GUI (from the tutorial directory again)
+    cd .. && mkdir build-lvgl && cd build-lvgl
+    cmake -G "Unix Makefiles" ../Software/Apps/ImagesLVGL-CMake
+    make
     ```
 
-The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps.
+The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps. The two builds appear in the launcher as **Images** and **ImagesLVGL**.
 
 ### Running on Simulator
 
-To test the app on the simulator (Windows only):
+**TouchGFX** (Windows only):
 
 1. Open `Images.touchgfx` in TouchGFX Designer and click **Generate Code (F4)** (do this once).
 2. Navigate to `Images\Software\Apps\TouchGFX-GUI\simulator\msvs`
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-In the simulator, use keyboard keys to interact:
+**LVGL** (Windows and Linux): a CMake project in `Software/Apps/LVGL-GUI/simulator`, built the same way as HelloWorld's (see [that tutorial](../HelloWorld/ARCHITECTURE.md#running-on-simulator)); the executable is `ImagesLVGLSimulator`.
+
+In either simulator, use keyboard keys to interact:
 - **1** = L1 (Toggle between Image and ScalableImage modes)
 - **3** = R1 (Trigger jump animation when in Image mode)
+- **4** = R2 (Exit)
 
 The simulator will display the imported character image with scaling and animation capabilities. For detailed simulator setup and button mapping, see [Simulator](../../Simulator.md).
 
@@ -102,6 +113,50 @@ The Images tutorial demonstrates programmatic image display and interactivity in
 - Each image gets a unique ID in [`BitmapDatabase.hpp`](Software/Apps/TouchGFX-GUI/generated/images/include/images/BitmapDatabase.hpp)
 - Images are stored in flash memory for efficient access
 - TouchGFX handles image decompression and display
+
+## The Same Image in Two Toolkits
+
+| Piece | TouchGFX (`TouchGFX-GUI`) | LVGL (`LVGL-GUI`) |
+|---|---|---|
+| Import | Designer's Images tab; converted at **Generate Code** into `generated/images/` | one entry in `assets/assets.json`; converted by `lvgl_assets.py` into `assets/images/img_guy_transparent.c` (committed) |
+| Reference in code | `BITMAP_GUY_TRANSPARENT_ID` from `BitmapDatabase.hpp` | `img_guy_transparent`, an `lv_image_dsc_t` declared in `gui/Assets.hpp` |
+| Pixel format | Designer setting (RGB565 with alpha here) | `"format": "RGB565A8"` in the manifest: RGB565 colour followed by a separate 8-bit alpha plane. A single-colour icon uses `"A8"`, alpha only, and is tinted at draw time |
+| Plain image, clipped to 100 x 100 | `touchgfx::Image` with `setPosition(70, y, 100, 100)` | `lv_image` inside a 100 x 100 `Draw::container` |
+| Scaled to 120 x 120 | `touchgfx::ScalableImage` with `BILINEAR_INTERPOLATION` | `lv_image_set_scale_x/y()` in 1/256 steps with the pivot at the top-left corner, anti-aliased |
+| Show one or the other | `setVisible()` + `invalidate()` on both | `Draw::setHidden()` on both |
+| Jump animation | `handleTickEvent()` every frame, 60 ticks of `sin(phase) * 30` | `onFrame()`, the kernel's frame tick forwarded by the model, running the same sum for the same 60 frames |
+
+The LVGL screen's setup, from `LVGL-GUI/gui/src/screens/MainScreen.cpp`:
+
+```cpp
+// The plain image at its own size (76 x 115) inside a 100 x 100 clipping box.
+mPlainBox = Draw::container(mRoot, kX, kY, kPlainSize, kPlainSize);
+mPlain    = Draw::image(mPlainBox, &img_guy_transparent, 0, 0);
+
+// The scaled image: two factors, because 76 x 115 is stretched over 120 x 120.
+mScaled = Draw::image(mRoot, &img_guy_transparent, kX, kY);
+lv_image_set_scale_x(mScaled, kScaledSize * 256 / img_guy_transparent.header.w);
+lv_image_set_scale_y(mScaled, kScaledSize * 256 / img_guy_transparent.header.h);
+lv_image_set_pivot(mScaled, 0, 0);
+lv_image_set_antialias(mScaled, true);
+```
+
+An image's width and height are in its descriptor (`header.w`, `header.h`), so the code never repeats them. LVGL v9 keeps `RGB565A8` and `A8` images as they are in flash; indexed formats are decoded to 32-bit ARGB in RAM at draw time and are not a saving on the watch.
+
+To add an image to the LVGL GUI: drop the PNG anywhere under the tutorial (the manifest path is relative to `assets.json`), add an entry with a name and format, run
+
+```bash
+python $UNA_SDK/Utilities/Scripts/lvgl_assets/lvgl_assets.py Software/Apps/LVGL-GUI/assets/assets.json
+```
+
+and declare the name in `gui/include/gui/Assets.hpp` with `LV_IMAGE_DECLARE`.
+
+### Size on the watch
+
+| Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
+|---|---|---|---|
+| Images (TouchGFX) | 234 KB | 220 KB | 71 KB |
+| ImagesLVGL | 204 KB | 195 KB | 139 KB |
 
 ## Image Import Process
 
@@ -200,7 +255,7 @@ const uint16_t BITMAP_GUY_TRANSPARENT_ID = 0;
 // Additional bitmap IDs for other images...
 ```
 
-### Using Images in TouchGFX Widgets\n\n**Suggested additional screenshots:**\n- Static scaled image display\n- Image during custom jump animation (triggered by R1 button)\n- Toggle between scaled and animated modes\n\n
+### Using Images in TouchGFX Widgets
 
 TouchGFX provides several ways to display images:
 
@@ -284,6 +339,7 @@ Images in UNA apps are stored in flash memory and loaded into RAM as needed:
 - Ensure TouchGFX project is synchronized with CMake build
 - Check for missing image files in assets directory
 - Verify bitmap database is regenerated after changes
+- For the LVGL build, check that `ThirdParty/lvgl` is populated and that every name in `Assets.hpp` has a generated file under `assets/images/`
 - Clean build directory and rebuild if issues persist
 
 ### Performance Issues

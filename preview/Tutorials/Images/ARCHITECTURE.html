@@ -70,6 +70,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#image-management-in-una-sdk">Image Management in UNA SDK</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#the-same-image-in-two-toolkits">The Same Image in Two Toolkits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#size-on-the-watch">Size on the watch</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#image-import-process">Image Import Process</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-create-your-image-asset">Step 1: Create Your Image Asset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-2-import-into-touchgfx-designer">Step 2: Import into TouchGFX Designer</a></li>
@@ -79,7 +83,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#code-details">Code Details</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#understanding-bitmap-ids">Understanding Bitmap IDs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-images-in-touchgfx-widgets-n-nsuggested-additional-screenshots-n-static-scaled-image-display-n-image-during-custom-jump-animation-triggered-by-r1-button-n-toggle-between-scaled-and-animated-modes-n-n">Using Images in TouchGFX Widgets\n\n<strong>Suggested additional screenshots:</strong>\n- Static scaled image display\n- Image during custom jump animation (triggered by R1 button)\n- Toggle between scaled and animated modes\n\n</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-images-in-touchgfx-widgets">Using Images in TouchGFX Widgets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#image-memory-management">Image Memory Management</a></li>
 </ul>
 </li>
@@ -104,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -190,16 +195,17 @@
 <span id="tutorials-images-architecture"></span><h1>Images - Working with Graphics and Assets<a class="headerlink" href="#images-working-with-graphics-and-assets" title="Link to this heading"></a></h1>
 <p>Welcome to the UNA SDK tutorial series! The Import Images tutorial teaches you how to import and display graphic assets in UNA Watch applications. This tutorial focuses on the complete workflow of creating images (such as drawing in Paint), importing them into TouchGFX Designer, and displaying them on screen through the UNA app framework.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Images">Project Folder</a></p>
+<p>As in the earlier tutorials, the app comes with a <strong>TouchGFX</strong> GUI and an <strong>LVGL</strong> GUI over the same service. The image pipelines differ the most: TouchGFX Designer converts images at generate time, LVGL’s are converted by a script from a manifest. See <a class="reference internal" href="#the-same-image-in-two-toolkits">The Same Image in Two Toolkits</a>.</p>
 <section id="what-you-ll-learn">
 <h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>How to create and prepare graphic assets for UNA apps</p></li>
-<li><p>The process of importing images into TouchGFX Designer</p></li>
+<li><p>The process of importing images into TouchGFX Designer, or listing them in the LVGL asset manifest</p></li>
 <li><p>How images are converted and stored in the UNA SDK</p></li>
-<li><p>Using bitmap IDs to reference and display images in code</p></li>
+<li><p>Using bitmap IDs (TouchGFX) or image descriptors (LVGL) to reference and display images in code</p></li>
 <li><p>Programmatically adding images without using designer-generated backgrounds</p></li>
 <li><p>Mode switching between Image and ScalableImage using L1 button</p></li>
-<li><p>Tick-based jump animation triggered by R1 button via <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code></span></a></p></li>
+<li><p>Tick-based jump animation triggered by R1 button via <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code></span></a> (TouchGFX) or <code class="docutils literal notranslate"><span class="pre">onFrame()</span></code> (LVGL)</p></li>
 <li><p>Understanding the TouchGFX image pipeline in UNA applications. For detailed information about the TouchGFX port implementation, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a></p></li>
 <li><p>Best practices for image optimization and management</p></li>
 </ul>
@@ -221,7 +227,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> environment variable pointing to SDK root</p></li>
 <li><p>ARM GCC toolchain in PATH</p></li>
 <li><p>CMake and build tools</p></li>
-<li><p>TouchGFX Designer for GUI development</p></li>
+<li><p>TouchGFX Designer for the TouchGFX GUI; for the LVGL GUI, the LVGL submodule (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">ThirdParty/lvgl</span></code>) and, to convert images, Python with the <code class="docutils literal notranslate"><span class="pre">pypng</span></code> and <code class="docutils literal notranslate"><span class="pre">lz4</span></code> packages</p></li>
 <li><p>Image editing software (Paint, GIMP, Photoshop, etc.)</p></li>
 </ul>
 </section>
@@ -242,29 +248,37 @@ which<span class="w"> </span>cmake<span class="w">                     </span><s
 </pre></div>
 </div>
 </li>
-<li><p><strong>Build the application:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+<li><p><strong>Build the application</strong> with the GUI of your choice:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># TouchGFX GUI</span>
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
 cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/Images-CMake
+make
+
+<span class="c1"># LVGL GUI (from the tutorial directory again)</span>
+<span class="nb">cd</span><span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>build-lvgl<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build-lvgl
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/ImagesLVGL-CMake
 make
 </pre></div>
 </div>
 </li>
 </ol>
-<p>The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps.</p>
+<p>The app will start and display imported images on screen, demonstrating the complete image import workflow in UNA apps. The two builds appear in the launcher as <strong>Images</strong> and <strong>ImagesLVGL</strong>.</p>
 </section>
 <section id="running-on-simulator">
 <h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
-<p>To test the app on the simulator (Windows only):</p>
+<p><strong>TouchGFX</strong> (Windows only):</p>
 <ol class="arabic simple">
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Images.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
 <li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">Images\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
 <li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
 </ol>
-<p>In the simulator, use keyboard keys to interact:</p>
+<p><strong>LVGL</strong> (Windows and Linux): a CMake project in <code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI/simulator</span></code>, built the same way as HelloWorld’s (see <a class="reference internal" href="../HelloWorld/ARCHITECTURE.html#running-on-simulator"><span class="std std-ref">that tutorial</span></a>); the executable is <code class="docutils literal notranslate"><span class="pre">ImagesLVGLSimulator</span></code>.</p>
+<p>In either simulator, use keyboard keys to interact:</p>
 <ul class="simple">
 <li><p><strong>1</strong> = L1 (Toggle between Image and ScalableImage modes)</p></li>
 <li><p><strong>3</strong> = R1 (Trigger jump animation when in Image mode)</p></li>
+<li><p><strong>4</strong> = R2 (Exit)</p></li>
 </ul>
 <p>The simulator will display the imported character image with scaling and animation capabilities. For detailed simulator setup and button mapping, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
 </section>
@@ -307,6 +321,90 @@ make
 <li><p>Images are stored in flash memory for efficient access</p></li>
 <li><p>TouchGFX handles image decompression and display</p></li>
 </ul>
+</section>
+</section>
+<section id="the-same-image-in-two-toolkits">
+<h2>The Same Image in Two Toolkits<a class="headerlink" href="#the-same-image-in-two-toolkits" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Piece</p></th>
+<th class="head"><p>TouchGFX (<code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code>)</p></th>
+<th class="head"><p>LVGL (<code class="docutils literal notranslate"><span class="pre">LVGL-GUI</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Import</p></td>
+<td><p>Designer’s Images tab; converted at <strong>Generate Code</strong> into <code class="docutils literal notranslate"><span class="pre">generated/images/</span></code></p></td>
+<td><p>one entry in <code class="docutils literal notranslate"><span class="pre">assets/assets.json</span></code>; converted by <code class="docutils literal notranslate"><span class="pre">lvgl_assets.py</span></code> into <code class="docutils literal notranslate"><span class="pre">assets/images/img_guy_transparent.c</span></code> (committed)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reference in code</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BITMAP_GUY_TRANSPARENT_ID</span></code> from <code class="docutils literal notranslate"><span class="pre">BitmapDatabase.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">img_guy_transparent</span></code>, an <code class="docutils literal notranslate"><span class="pre">lv_image_dsc_t</span></code> declared in <code class="docutils literal notranslate"><span class="pre">gui/Assets.hpp</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Pixel format</p></td>
+<td><p>Designer setting (RGB565 with alpha here)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;format&quot;:</span> <span class="pre">&quot;RGB565A8&quot;</span></code> in the manifest: RGB565 colour followed by a separate 8-bit alpha plane. A single-colour icon uses <code class="docutils literal notranslate"><span class="pre">&quot;A8&quot;</span></code>, alpha only, and is tinted at draw time</p></td>
+</tr>
+<tr class="row-odd"><td><p>Plain image, clipped to 100 x 100</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">touchgfx::Image</span></code> with <code class="docutils literal notranslate"><span class="pre">setPosition(70,</span> <span class="pre">y,</span> <span class="pre">100,</span> <span class="pre">100)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lv_image</span></code> inside a 100 x 100 <code class="docutils literal notranslate"><span class="pre">Draw::container</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Scaled to 120 x 120</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">touchgfx::ScalableImage</span></code> with <code class="docutils literal notranslate"><span class="pre">BILINEAR_INTERPOLATION</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lv_image_set_scale_x/y()</span></code> in 1/256 steps with the pivot at the top-left corner, anti-aliased</p></td>
+</tr>
+<tr class="row-odd"><td><p>Show one or the other</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">setVisible()</span></code> + <code class="docutils literal notranslate"><span class="pre">invalidate()</span></code> on both</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Draw::setHidden()</span></code> on both</p></td>
+</tr>
+<tr class="row-even"><td><p>Jump animation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code> every frame, 60 ticks of <code class="docutils literal notranslate"><span class="pre">sin(phase)</span> <span class="pre">*</span> <span class="pre">30</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">onFrame()</span></code>, the kernel’s frame tick forwarded by the model, running the same sum for the same 60 frames</p></td>
+</tr>
+</tbody>
+</table>
+<p>The LVGL screen’s setup, from <code class="docutils literal notranslate"><span class="pre">LVGL-GUI/gui/src/screens/MainScreen.cpp</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// The plain image at its own size (76 x 115) inside a 100 x 100 clipping box.</span>
+<span class="n">mPlainBox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Draw</span><span class="o">::</span><span class="n">container</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="n">kX</span><span class="p">,</span><span class="w"> </span><span class="n">kY</span><span class="p">,</span><span class="w"> </span><span class="n">kPlainSize</span><span class="p">,</span><span class="w"> </span><span class="n">kPlainSize</span><span class="p">);</span>
+<span class="n">mPlain</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">Draw</span><span class="o">::</span><span class="n">image</span><span class="p">(</span><span class="n">mPlainBox</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">img_guy_transparent</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// The scaled image: two factors, because 76 x 115 is stretched over 120 x 120.</span>
+<span class="n">mScaled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Draw</span><span class="o">::</span><span class="n">image</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">img_guy_transparent</span><span class="p">,</span><span class="w"> </span><span class="n">kX</span><span class="p">,</span><span class="w"> </span><span class="n">kY</span><span class="p">);</span>
+<span class="n">lv_image_set_scale_x</span><span class="p">(</span><span class="n">mScaled</span><span class="p">,</span><span class="w"> </span><span class="n">kScaledSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">256</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">img_guy_transparent</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+<span class="n">lv_image_set_scale_y</span><span class="p">(</span><span class="n">mScaled</span><span class="p">,</span><span class="w"> </span><span class="n">kScaledSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">256</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">img_guy_transparent</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">h</span><span class="p">);</span>
+<span class="n">lv_image_set_pivot</span><span class="p">(</span><span class="n">mScaled</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">lv_image_set_antialias</span><span class="p">(</span><span class="n">mScaled</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>An image’s width and height are in its descriptor (<code class="docutils literal notranslate"><span class="pre">header.w</span></code>, <code class="docutils literal notranslate"><span class="pre">header.h</span></code>), so the code never repeats them. LVGL v9 keeps <code class="docutils literal notranslate"><span class="pre">RGB565A8</span></code> and <code class="docutils literal notranslate"><span class="pre">A8</span></code> images as they are in flash; indexed formats are decoded to 32-bit ARGB in RAM at draw time and are not a saving on the watch.</p>
+<p>To add an image to the LVGL GUI: drop the PNG anywhere under the tutorial (the manifest path is relative to <code class="docutils literal notranslate"><span class="pre">assets.json</span></code>), add an entry with a name and format, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span><span class="nv">$UNA_SDK</span>/Utilities/Scripts/lvgl_assets/lvgl_assets.py<span class="w"> </span>Software/Apps/LVGL-GUI/assets/assets.json
+</pre></div>
+</div>
+<p>and declare the name in <code class="docutils literal notranslate"><span class="pre">gui/include/gui/Assets.hpp</span></code> with <code class="docutils literal notranslate"><span class="pre">LV_IMAGE_DECLARE</span></code>.</p>
+<section id="size-on-the-watch">
+<h3>Size on the watch<a class="headerlink" href="#size-on-the-watch" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Build</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code></p></th>
+<th class="head"><p>GUI code (text)</p></th>
+<th class="head"><p>GUI RAM (bss)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Images (TouchGFX)</p></td>
+<td><p>234 KB</p></td>
+<td><p>220 KB</p></td>
+<td><p>71 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>ImagesLVGL</p></td>
+<td><p>204 KB</p></td>
+<td><p>195 KB</p></td>
+<td><p>139 KB</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 <section id="image-import-process">
@@ -414,8 +512,8 @@ make
 </pre></div>
 </div>
 </section>
-<section id="using-images-in-touchgfx-widgets-n-nsuggested-additional-screenshots-n-static-scaled-image-display-n-image-during-custom-jump-animation-triggered-by-r1-button-n-toggle-between-scaled-and-animated-modes-n-n">
-<h3>Using Images in TouchGFX Widgets\n\n<strong>Suggested additional screenshots:</strong>\n- Static scaled image display\n- Image during custom jump animation (triggered by R1 button)\n- Toggle between scaled and animated modes\n\n<a class="headerlink" href="#using-images-in-touchgfx-widgets-n-nsuggested-additional-screenshots-n-static-scaled-image-display-n-image-during-custom-jump-animation-triggered-by-r1-button-n-toggle-between-scaled-and-animated-modes-n-n" title="Link to this heading"></a></h3>
+<section id="using-images-in-touchgfx-widgets">
+<h3>Using Images in TouchGFX Widgets<a class="headerlink" href="#using-images-in-touchgfx-widgets" title="Link to this heading"></a></h3>
 <p>TouchGFX provides several ways to display images:</p>
 <p><strong>No Background:</strong>
 The demo has no background image or box. All content is added programmatically in <a class="reference download internal" download="" href="../../_downloads/9659db3910be64f9914017ade440960f/MainView.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code></span></a>.</p>
@@ -522,6 +620,7 @@ Demo uses <code class="docutils literal notranslate"><span class="pre">handleTic
 <li><p>Ensure TouchGFX project is synchronized with CMake build</p></li>
 <li><p>Check for missing image files in assets directory</p></li>
 <li><p>Verify bitmap database is regenerated after changes</p></li>
+<li><p>For the LVGL build, check that <code class="docutils literal notranslate"><span class="pre">ThirdParty/lvgl</span></code> is populated and that every name in <code class="docutils literal notranslate"><span class="pre">Assets.hpp</span></code> has a generated file under <code class="docutils literal notranslate"><span class="pre">assets/images/</span></code></p></li>
 <li><p>Clean build directory and rebuild if issues persist</p></li>
 </ul>
 </section>

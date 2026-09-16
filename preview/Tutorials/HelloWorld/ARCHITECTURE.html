@@ -58,13 +58,23 @@
 <li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-and-running-helloworld">Building and Running HelloWorld</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#running-on-simulator">Running on Simulator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#working-with-touchgfx-gui-optional">Working with TouchGFX GUI (Optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-the-touchgfx-gui-optional">Working with the TouchGFX GUI (Optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-the-lvgl-gui-optional">Working with the LVGL GUI (Optional)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#helloworld-app-overview">HelloWorld App Overview</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-service-layer-backend">The Service Layer (Backend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-gui-layer-frontend">The GUI Layer (Frontend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#communication-between-layers">Communication Between Layers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#project-layout">Project Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-same-screen-in-two-toolkits">The Same Screen in Two Toolkits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#entry-point">Entry point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buttons">Buttons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-lvgl-screen-in-full">The LVGL screen in full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lvgl-assets">LVGL assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#size-on-the-watch">Size on the watch</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#understanding-the-commented-code">Understanding the Commented Code</a></li>
@@ -96,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -182,6 +193,7 @@
 <span id="tutorials-helloworld-architecture"></span><h1>HelloWorld - Introduction to UNA App Architecture<a class="headerlink" href="#helloworld-introduction-to-una-app-architecture" title="Link to this heading"></a></h1>
 <p>Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA Watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/HelloWorld">Project Folder</a></p>
+<p>HelloWorld comes with two GUIs that show the same screen: one built with <strong>TouchGFX</strong>, one with <strong>LVGL</strong>. The service, the message contract and the build system are the same for both; only the GUI process differs. Pick the toolkit you prefer and follow that column through the series. The two are shown side by side so you can also compare them.</p>
 <section id="what-you-ll-learn">
 <h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -189,6 +201,7 @@
 <li><p>The basic structure of a UNA Watch application</p></li>
 <li><p>How service and GUI layers communicate</p></li>
 <li><p>How to build and run apps on simulator and hardware</p></li>
+<li><p>How the same GUI is expressed in TouchGFX and in LVGL</p></li>
 <li><p>Understanding the UNA app framework fundamentals</p></li>
 </ul>
 </section>
@@ -209,9 +222,14 @@
 <li><p>ARM GCC toolchain in PATH</p></li>
 <li><p>CMake and build tools</p></li>
 </ul>
-<p><strong>For GUI development/modification:</strong></p>
+<p><strong>For the TouchGFX GUI:</strong></p>
 <ul class="simple">
-<li><p>TouchGFX Designer installed (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>)</p></li>
+<li><p>TouchGFX Designer installed (see <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>) if you want to modify the design or run the TouchGFX simulator</p></li>
+</ul>
+<p><strong>For the LVGL GUI:</strong></p>
+<ul class="simple">
+<li><p>The LVGL submodule checked out once: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">ThirdParty/lvgl</span></code> (from the SDK root)</p></li>
+<li><p>Node.js and Python, only if you regenerate the converted fonts (see <a class="reference internal" href="#lvgl-assets">Assets</a>)</p></li>
 </ul>
 </section>
 <section id="building-and-running-helloworld">
@@ -231,30 +249,53 @@ which<span class="w"> </span>cmake<span class="w">                     </span><s
 </pre></div>
 </div>
 </li>
-<li><p><strong>Build the application:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+<li><p><strong>Build the application</strong> with the GUI of your choice. Each is its own CMake project and produces its own <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># TouchGFX GUI</span>
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
 cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/HelloWorld-CMake
+make
+
+<span class="c1"># LVGL GUI (from the tutorial directory again)</span>
+<span class="nb">cd</span><span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>build-lvgl<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build-lvgl
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/HelloWorldLVGL-CMake
 make
 </pre></div>
 </div>
 </li>
 </ol>
-<p>The app will start and show a basic GUI demonstrating the UNA app framework. This HelloWorld focuses on the core architecture - the service-GUI communication pattern that all UNA apps use.</p>
+<p>The app will start and show a basic GUI demonstrating the UNA app framework. This HelloWorld focuses on the core architecture - the service-GUI communication pattern that all UNA apps use. The two builds install side by side on the watch (<code class="docutils literal notranslate"><span class="pre">D:\Apps\HelloWorld\</span></code> and <code class="docutils literal notranslate"><span class="pre">D:\Apps\HelloWorldLVGL\</span></code>) and appear in the launcher as <strong>HelloWorld</strong> and <strong>HelloWorldLVGL</strong>.</p>
 </section>
 <section id="running-on-simulator">
 <h3>Running on Simulator<a class="headerlink" href="#running-on-simulator" title="Link to this heading"></a></h3>
-<p>To test the app on the simulator (Windows only):</p>
+<p><strong>TouchGFX</strong> (Windows only):</p>
 <ol class="arabic simple">
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">HelloWorld.touchgfx</span></code> in TouchGFX Designer and click <strong>Generate Code (F4)</strong> (do this once).</p></li>
 <li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">HelloWorld\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">Application.vcxproj</span></code> in Visual Studio</p></li>
 <li><p>Press <strong>F5</strong> to start debugging and run the simulator</p></li>
 </ol>
-<p>The simulator will display the HelloWorld GUI. Since HelloWorld has minimal interactive elements, it primarily demonstrates the app startup and basic framework.</p>
+<p><strong>LVGL</strong> (Windows and Linux): the simulator is a plain CMake project in <code class="docutils literal notranslate"><span class="pre">Software/Apps/LVGL-GUI/simulator</span></code>. It runs the real service and GUI processes against the SDK’s mock kernel, with the display in an SDL2 window.</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Windows, Visual Studio (32-bit: it reuses the SDL2 shipped with TouchGFX;</span>
+<span class="c"># use the generator name for your Visual Studio version: "Visual Studio 18 2026"</span>
+<span class="c"># needs CMake 4.2 or newer, "Visual Studio 17 2022" works with the 3.21 minimum)</span>
+<span class="nb">cd </span><span class="nv">$env:UNA_SDK</span><span class="p">\</span><span class="n">Docs</span><span class="p">\</span><span class="n">Tutorials</span><span class="p">\</span><span class="n">HelloWorld</span><span class="p">\</span><span class="n">Software</span><span class="p">\</span><span class="n">Apps</span><span class="p">\</span><span class="n">LVGL-GUI</span><span class="p">\</span><span class="n">simulator</span>
+<span class="n">cmake</span> <span class="n">-S</span> <span class="p">.</span> <span class="n">-B</span> <span class="n">build</span> <span class="n">-G</span> <span class="s2">"Visual Studio 18 2026"</span> <span class="n">-A</span> <span class="n">Win32</span>
+<span class="n">cmake</span> <span class="p">-</span><span class="n">-build</span> <span class="n">build</span> <span class="p">-</span><span class="n">-config</span> <span class="n">Debug</span>
+<span class="n">build</span><span class="p">\</span><span class="n">bin</span><span class="p">\</span><span class="n">HelloWorldLVGLSimulator</span><span class="p">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Linux (Debian/Ubuntu: sudo apt-get install build-essential cmake ninja-build libsdl2-dev)</span>
+<span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/HelloWorld/Software/Apps/LVGL-GUI/simulator
+cmake<span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-G<span class="w"> </span>Ninja<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
+cmake<span class="w"> </span>--build<span class="w"> </span>build
+<span class="o">(</span><span class="nb">cd</span><span class="w"> </span>build/bin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./HelloWorldLVGLSimulator<span class="o">)</span>
+</pre></div>
+</div>
+<p>In either simulator the keyboard keys <strong>1</strong>, <strong>2</strong>, <strong>3</strong> and <strong>4</strong> are the watch buttons L1, L2, R1 and R2. HelloWorld only reacts to R2, which exits the app. Since HelloWorld has minimal interactive elements, it primarily demonstrates the app startup and basic framework.</p>
 <p>For detailed simulator setup and features, see <a class="reference internal" href="../../Simulator.html"><span class="std std-doc">Simulator</span></a>.</p>
 </section>
-<section id="working-with-touchgfx-gui-optional">
-<h3>Working with TouchGFX GUI (Optional)<a class="headerlink" href="#working-with-touchgfx-gui-optional" title="Link to this heading"></a></h3>
+<section id="working-with-the-touchgfx-gui-optional">
+<h3>Working with the TouchGFX GUI (Optional)<a class="headerlink" href="#working-with-the-touchgfx-gui-optional" title="Link to this heading"></a></h3>
 <p>If you want to explore or modify the GUI design:</p>
 <ol class="arabic">
 <li><p><strong>Install TouchGFX Designer</strong> (see <a class="reference internal" href="../../sdk-setup.html"><span class="std std-doc">toolchain setup</span></a> for installation)</p></li>
@@ -276,7 +317,10 @@ make
 </div>
 </li>
 </ol>
-<p><strong>Note</strong>: HelloWorld has a minimal GUI. For learning GUI development, study the more complex examples like Cycling or HRMonitor apps, or see the <a class="reference internal" href="../../sdk-setup.html#toolchain-setup"><span class="std std-ref">toolchain setup</span></a>.</p>
+</section>
+<section id="working-with-the-lvgl-gui-optional">
+<h3>Working with the LVGL GUI (Optional)<a class="headerlink" href="#working-with-the-lvgl-gui-optional" title="Link to this heading"></a></h3>
+<p>There is no designer: the screen is code. <code class="docutils literal notranslate"><span class="pre">gui/src/screens/MainScreen.cpp</span></code> creates the label and the button hint with the SDK’s drawing helpers (<code class="docutils literal notranslate"><span class="pre">SDK/GUI/LVGL/Draw.hpp</span></code>), which take the same coordinates a TouchGFX Designer shows, so a layout can be copied across. Edit it, rebuild, run. Adding a font or an icon means adding it to <code class="docutils literal notranslate"><span class="pre">assets/assets.json</span></code> and regenerating (see <a class="reference internal" href="#lvgl-assets">Assets</a>).</p>
 </section>
 </section>
 <section id="helloworld-app-overview">
@@ -290,11 +334,12 @@ make
 <li><p>Manages app lifecycle (start/stop)</p></li>
 <li><p>Communicates with the GUI through messages</p></li>
 </ul>
+<p>The service is one copy of the code, <code class="docutils literal notranslate"><span class="pre">Software/Libs</span></code>, shared by both GUI builds: <code class="docutils literal notranslate"><span class="pre">HelloWorld-CMake</span></code> and <code class="docutils literal notranslate"><span class="pre">HelloWorldLVGL-CMake</span></code> each link it with their GUI. Compare the two <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>: the service half is identical, and the GUI half differs in three lines (<code class="docutils literal notranslate"><span class="pre">TOUCHGFX_PATH</span></code> becomes <code class="docutils literal notranslate"><span class="pre">GUI_PATH</span></code>, and the <code class="docutils literal notranslate"><span class="pre">UNA_SDK_*_GUI</span></code> variables become <code class="docutils literal notranslate"><span class="pre">UNA_SDK_*_GUI_LVGL</span></code>).</p>
 </section>
 <section id="the-gui-layer-frontend">
 <h3>The GUI Layer (Frontend)<a class="headerlink" href="#the-gui-layer-frontend" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Built with TouchGFX framework. For detailed information about the TouchGFX port implementation, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a></p></li>
+<li><p>Built with TouchGFX or LVGL. For the TouchGFX port, see <a class="reference internal" href="../../TouchGFX-Port-Architecture.html"><span class="std std-doc">TouchGFX Port Architecture</span></a>; for the LVGL port, see the <a class="reference internal" href="../RunLVGL/ARCHITECTURE.html"><span class="std std-doc">RunLVGL tutorial</span></a></p></li>
 <li><p>Displays information to the user</p></li>
 <li><p>Receives updates from the service</p></li>
 <li><p>Handles user interactions</p></li>
@@ -307,6 +352,144 @@ make
 <li><p>Service sends data to GUI via custom messages</p></li>
 <li><p>GUI can send commands back to service</p></li>
 </ul>
+<p>The kernel does not know which toolkit a GUI process uses. It hands the process a 240 x 240 frame buffer, button codes and a 10 Hz tick, and each toolkit’s port in the SDK turns those into its own rendering and events.</p>
+</section>
+</section>
+<section id="project-layout">
+<h2>Project Layout<a class="headerlink" href="#project-layout" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HelloWorld</span><span class="o">/</span>
+  <span class="n">ARCHITECTURE</span><span class="o">.</span><span class="n">md</span>                       <span class="n">this</span> <span class="n">page</span>
+  <span class="n">Resources</span><span class="o">/</span>                            <span class="n">launcher</span> <span class="n">icons</span> <span class="p">(</span><span class="n">shared</span><span class="p">)</span>
+  <span class="n">Output</span><span class="o">/</span><span class="p">,</span> <span class="n">OutputLVGL</span><span class="o">/</span>                  <span class="n">where</span> <span class="n">each</span> <span class="n">build</span> <span class="n">puts</span> <span class="n">its</span> <span class="o">.</span><span class="n">uapp</span> <span class="p">(</span><span class="ow">and</span><span class="p">,</span> <span class="k">for</span> <span class="n">apps</span> <span class="n">that</span>
+                                        <span class="n">have</span> <span class="n">one</span><span class="p">,</span> <span class="n">its</span> <span class="n">app</span><span class="o">-</span><span class="n">manifest</span><span class="o">.</span><span class="n">json</span><span class="p">)</span>
+  <span class="n">Software</span><span class="o">/</span>
+    <span class="n">Libs</span><span class="o">/</span>                               <span class="n">the</span> <span class="n">service</span> <span class="p">(</span><span class="n">shared</span><span class="p">)</span>
+      <span class="n">Header</span><span class="o">/</span><span class="n">Service</span><span class="o">.</span><span class="n">hpp</span>
+      <span class="n">Sources</span><span class="o">/</span><span class="n">Service</span><span class="o">.</span><span class="n">cpp</span>
+      <span class="n">libs</span><span class="o">.</span><span class="n">cmake</span>
+    <span class="n">Apps</span><span class="o">/</span>
+      <span class="n">HelloWorld</span><span class="o">-</span><span class="n">CMake</span><span class="o">/</span><span class="n">CMakeLists</span><span class="o">.</span><span class="n">txt</span>       <span class="o">.</span><span class="n">uapp</span> <span class="k">with</span> <span class="n">the</span> <span class="n">TouchGFX</span> <span class="n">GUI</span>
+      <span class="n">HelloWorldLVGL</span><span class="o">-</span><span class="n">CMake</span><span class="o">/</span><span class="n">CMakeLists</span><span class="o">.</span><span class="n">txt</span>   <span class="o">.</span><span class="n">uapp</span> <span class="k">with</span> <span class="n">the</span> <span class="n">LVGL</span> <span class="n">GUI</span>
+      <span class="n">TouchGFX</span><span class="o">-</span><span class="n">GUI</span><span class="o">/</span>                         <span class="n">TouchGFX</span> <span class="n">GUI</span> <span class="n">process</span>
+        <span class="n">HelloWorld</span><span class="o">.</span><span class="n">touchgfx</span>                 <span class="n">the</span> <span class="n">Designer</span> <span class="n">project</span>
+        <span class="n">gui</span><span class="o">/</span><span class="n">include</span><span class="o">/</span><span class="n">gui</span><span class="o">/</span><span class="p">,</span> <span class="n">gui</span><span class="o">/</span><span class="n">src</span><span class="o">/</span>          <span class="n">model</span><span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">presenter</span><span class="p">,</span> <span class="n">containers</span>
+        <span class="n">generated</span><span class="o">/</span>                          <span class="n">Designer</span> <span class="n">output</span> <span class="p">(</span><span class="n">do</span> <span class="ow">not</span> <span class="n">edit</span><span class="p">)</span>
+        <span class="n">simulator</span><span class="o">/</span><span class="n">msvs</span><span class="p">,</span> <span class="n">simulator</span><span class="o">/</span><span class="n">gcc</span>       <span class="n">Visual</span> <span class="n">Studio</span> <span class="ow">and</span> <span class="n">gcc</span> <span class="n">simulator</span> <span class="n">projects</span>
+      <span class="n">LVGL</span><span class="o">-</span><span class="n">GUI</span><span class="o">/</span>                             <span class="n">LVGL</span> <span class="n">GUI</span> <span class="n">process</span>
+        <span class="n">lvgl</span><span class="o">-</span><span class="n">gui</span><span class="o">.</span><span class="n">cmake</span>                      <span class="n">sources</span> <span class="ow">and</span> <span class="n">include</span> <span class="n">dirs</span>
+        <span class="n">assets</span><span class="o">/</span><span class="n">assets</span><span class="o">.</span><span class="n">json</span>                  <span class="n">fonts</span> <span class="ow">and</span> <span class="n">images</span> <span class="n">to</span> <span class="n">convert</span>
+        <span class="n">assets</span><span class="o">/</span><span class="n">fonts</span><span class="o">/*.</span><span class="n">c</span>                    <span class="n">converted</span> <span class="n">font</span> <span class="p">(</span><span class="n">committed</span><span class="p">)</span>
+        <span class="n">gui</span><span class="o">/</span><span class="n">include</span><span class="o">/</span><span class="n">gui</span><span class="o">/</span><span class="p">,</span> <span class="n">gui</span><span class="o">/</span><span class="n">src</span><span class="o">/</span>          <span class="n">model</span><span class="p">,</span> <span class="n">screen</span><span class="p">,</span> <span class="n">entry</span> <span class="n">point</span>
+        <span class="n">simulator</span><span class="o">/</span><span class="n">CMakeLists</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">main</span><span class="o">.</span><span class="n">cpp</span>  <span class="n">CMake</span> <span class="n">simulator</span> <span class="n">project</span>
+</pre></div>
+</div>
+</section>
+<section id="the-same-screen-in-two-toolkits">
+<h2>The Same Screen in Two Toolkits<a class="headerlink" href="#the-same-screen-in-two-toolkits" title="Link to this heading"></a></h2>
+<p>The screen is a “Hello World” label with a hint arc beside the R2 button, and R2 exits. Here is how each toolkit expresses the pieces.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Piece</p></th>
+<th class="head"><p>TouchGFX (<code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI/gui</span></code>)</p></th>
+<th class="head"><p>LVGL (<code class="docutils literal notranslate"><span class="pre">LVGL-GUI/gui</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Owner of the model and screen</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FrontendHeap</span></code> (generated singleton)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GuiApp.cpp</span></code>: <code class="docutils literal notranslate"><span class="pre">una_lvgl_app_init()</span></code> constructs <code class="docutils literal notranslate"><span class="pre">Model</span></code> and <code class="docutils literal notranslate"><span class="pre">MainScreen</span></code>, then <code class="docutils literal notranslate"><span class="pre">lv_screen_load()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Model</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Model</span></code> registers with <code class="docutils literal notranslate"><span class="pre">TouchGFXCommandProcessor</span></code> and implements <code class="docutils literal notranslate"><span class="pre">IGuiLifeCycleCallback</span></code>; also a <code class="docutils literal notranslate"><span class="pre">UIEventListener</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Model</span></code> registers with <code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Port</span></code> and implements <code class="docutils literal notranslate"><span class="pre">IGuiLifeCycleCallback</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Screen</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MainView</span></code> (widgets, key handling) + <code class="docutils literal notranslate"><span class="pre">MainPresenter</span></code> (talks to the model)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MainScreen</span></code>: one class owning an LVGL screen object</p></td>
+</tr>
+<tr class="row-odd"><td><p>The label</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TextArea</span></code> placed in Designer, text from <code class="docutils literal notranslate"><span class="pre">texts.xml</span></code>, font from the typography table</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Draw::label(root,</span> <span class="pre">&amp;poppins_regular_18,</span> <span class="pre">&quot;Hello</span> <span class="pre">World&quot;,</span> <span class="pre">19,</span> <span class="pre">98,</span> <span class="pre">203)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>The button hint</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ButtonsSet</span></code> custom container with twelve bitmaps, <code class="docutils literal notranslate"><span class="pre">setR2(WHITE)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Buttons</span></code>, <code class="docutils literal notranslate"><span class="pre">set(NONE,</span> <span class="pre">NONE,</span> <span class="pre">NONE,</span> <span class="pre">WHITE)</span></code>: arcs drawn by LVGL, no bitmaps</p></td>
+</tr>
+<tr class="row-odd"><td><p>Button input</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MainView::handleKeyEvent(uint8_t</span> <span class="pre">key)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">LV_EVENT_KEY</span></code> on the screen object; <code class="docutils literal notranslate"><span class="pre">MainScreen::onKey(uint8_t</span> <span class="pre">code)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Exit</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">presenter-&gt;exit()</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">model-&gt;exitApp()</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">mKernel.sys.exit()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mModel.exitApp()</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">mKernel.sys.exit()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Fonts</p></td>
+<td><p>Designer converts the TTF at generate time</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">assets/assets.json</span></code> + <code class="docutils literal notranslate"><span class="pre">lvgl_assets.py</span></code> convert it to a C file, committed</p></td>
+</tr>
+</tbody>
+</table>
+<p>What is the same: the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class and its lifecycle callbacks, the button codes (<code class="docutils literal notranslate"><span class="pre">SDK::GUI::Button</span></code>), the colours (<code class="docutils literal notranslate"><span class="pre">SDK::GUI::Color</span></code>), the service, and the kernel messages.</p>
+<section id="entry-point">
+<h3>Entry point<a class="headerlink" href="#entry-point" title="Link to this heading"></a></h3>
+<p>TouchGFX: <code class="docutils literal notranslate"><span class="pre">FrontendHeap::getInstance()</span></code> is created by the SDK’s TouchGFX entry point; its constructor builds the model and shows the start screen chosen in Designer.</p>
+<p>LVGL: the SDK’s entry point (<code class="docutils literal notranslate"><span class="pre">Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp</span></code>) initialises the port and calls the app’s <code class="docutils literal notranslate"><span class="pre">una_lvgl_app_init()</span></code>. HelloWorld’s version, in <code class="docutils literal notranslate"><span class="pre">GuiApp.cpp</span></code>, builds the shared styles, the model and the screen, and loads the screen. It also defines <code class="docutils literal notranslate"><span class="pre">una_lvgl_default_font()</span></code>, which names the font LVGL falls back to, so LVGL’s built-in font stays out of the binary.</p>
+</section>
+<section id="buttons">
+<h3>Buttons<a class="headerlink" href="#buttons" title="Link to this heading"></a></h3>
+<p>The kernel delivers each button as a click code (<code class="docutils literal notranslate"><span class="pre">'1'</span></code>..<code class="docutils literal notranslate"><span class="pre">'4'</span></code>) plus a press code when it goes down and a release code when it comes up (<code class="docutils literal notranslate"><span class="pre">SDK/GUI/Button.hpp</span></code>). TouchGFX passes them to the view’s <code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code>. The LVGL port posts them as <code class="docutils literal notranslate"><span class="pre">LV_EVENT_KEY</span></code> events to the active screen; <code class="docutils literal notranslate"><span class="pre">MainScreen</span></code> registers one event callback on its screen object and switches on the code. HelloWorld acts on the R2 click only.</p>
+</section>
+<section id="the-lvgl-screen-in-full">
+<h3>The LVGL screen in full<a class="headerlink" href="#the-lvgl-screen-in-full" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">MainScreen</span><span class="o">::</span><span class="n">MainScreen</span><span class="p">(</span><span class="n">Model</span><span class="o">&amp;</span><span class="w"> </span><span class="n">model</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">mModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">mRoot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lv_obj_create</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span><span class="w">                 </span><span class="c1">// a screen object</span>
+<span class="w">    </span><span class="n">Draw</span><span class="o">::</span><span class="n">applyScreen</span><span class="p">(</span><span class="n">mRoot</span><span class="p">);</span><span class="w">                       </span><span class="c1">// black, unscrollable</span>
+<span class="w">    </span><span class="n">lv_obj_add_event_cb</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">MainScreen</span><span class="o">::</span><span class="n">keyEventCb</span><span class="p">,</span><span class="w"> </span><span class="n">LV_EVENT_KEY</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">Draw</span><span class="o">::</span><span class="n">label</span><span class="p">(</span><span class="n">mRoot</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">poppins_regular_18</span><span class="p">,</span><span class="w"> </span><span class="s">"Hello World"</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w"> </span><span class="mi">98</span><span class="p">,</span><span class="w"> </span><span class="mi">203</span><span class="p">,</span>
+<span class="w">                </span><span class="n">LV_TEXT_ALIGN_CENTER</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">GUI</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">WHITE</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">mButtons</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">LVGL</span><span class="o">::</span><span class="n">Buttons</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mRoot</span><span class="p">);</span>
+<span class="w">    </span><span class="n">mButtons</span><span class="o">-&gt;</span><span class="n">set</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">LVGL</span><span class="o">::</span><span class="n">Buttons</span><span class="o">::</span><span class="n">NONE</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">LVGL</span><span class="o">::</span><span class="n">Buttons</span><span class="o">::</span><span class="n">NONE</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">SDK</span><span class="o">::</span><span class="n">LVGL</span><span class="o">::</span><span class="n">Buttons</span><span class="o">::</span><span class="n">NONE</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">LVGL</span><span class="o">::</span><span class="n">Buttons</span><span class="o">::</span><span class="n">WHITE</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Every object is created on <code class="docutils literal notranslate"><span class="pre">mRoot</span></code>, and LVGL deletes them with it. The <code class="docutils literal notranslate"><span class="pre">Draw</span></code> helpers and <code class="docutils literal notranslate"><span class="pre">Buttons</span></code> are part of the SDK (<code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/GUI/LVGL/</span></code>) and are what the activity apps use, so a tutorial screen looks like a shipped one.</p>
+</section>
+<section id="lvgl-assets">
+<h3>LVGL assets<a class="headerlink" href="#lvgl-assets" title="Link to this heading"></a></h3>
+<p>LVGL needs fonts as C arrays. <code class="docutils literal notranslate"><span class="pre">LVGL-GUI/assets/assets.json</span></code> lists them, here one entry: Poppins Regular at 18 px, printable ASCII, 2 bits per pixel, taken from the TTF the TouchGFX GUI already ships in <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI/assets/fonts</span></code>. The converted file is committed, so building needs no converter. To add a font or an icon, add an entry and run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span><span class="nv">$UNA_SDK</span>/Utilities/Scripts/lvgl_assets/lvgl_assets.py<span class="w"> </span>Software/Apps/LVGL-GUI/assets/assets.json
+</pre></div>
+</div>
+<p>Fonts go through <code class="docutils literal notranslate"><span class="pre">lv_font_conv</span></code> (run with <code class="docutils literal notranslate"><span class="pre">npx</span></code>, so Node.js is needed); images through LVGL’s own <code class="docutils literal notranslate"><span class="pre">LVGLImage.py</span></code> (needs the <code class="docutils literal notranslate"><span class="pre">pypng</span></code> and <code class="docutils literal notranslate"><span class="pre">lz4</span></code> Python packages). Declare each generated symbol in <code class="docutils literal notranslate"><span class="pre">gui/include/gui/Assets.hpp</span></code>.</p>
+</section>
+<section id="size-on-the-watch">
+<h3>Size on the watch<a class="headerlink" href="#size-on-the-watch" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Build</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code></p></th>
+<th class="head"><p>GUI code (text)</p></th>
+<th class="head"><p>GUI RAM (bss)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>HelloWorld (TouchGFX)</p></td>
+<td><p>228 KB</p></td>
+<td><p>214 KB</p></td>
+<td><p>71 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>HelloWorldLVGL</p></td>
+<td><p>167 KB</p></td>
+<td><p>158 KB</p></td>
+<td><p>139 KB</p></td>
+</tr>
+</tbody>
+</table>
+<p>LVGL is linked from source, so the GUI carries only the parts it uses; its RAM is dominated by the frame buffer and the 40 KB object pool set in the SDK’s <code class="docutils literal notranslate"><span class="pre">lv_conf.h</span></code>. The TouchGFX library is prebuilt, and its RAM is the frame buffer plus the Designer-generated heap.</p>
 </section>
 </section>
 <section id="understanding-the-commented-code">
@@ -329,7 +512,7 @@ make
 <section id="apptypes-events-gui-service">
 <h3>AppTypes Events (GUI → Service)<a class="headerlink" href="#apptypes-events-gui-service" title="Link to this heading"></a></h3>
 <p>Used for commands and configuration. The GUI sends events through the <code class="docutils literal notranslate"><span class="pre">IGuiBackend</span></code> interface, which the service implements to receive commands.</p>
-<p>These patterns form the foundation of all UNA app communication. Future tutorials will show how to implement specific features using these systems.</p>
+<p>These patterns form the foundation of all UNA app communication, and they are the same whichever toolkit draws the screen. Future tutorials will show how to implement specific features using these systems.</p>
 </section>
 </section>
 <section id="common-patterns-and-best-practices">
@@ -374,7 +557,7 @@ make
 <li><p><strong>Explore the code structure</strong> - Look at Service.cpp and Model.cpp to understand the messaging flow</p></li>
 <li><p><strong>Check the commented examples</strong> - Review the commented HR and FIT code to see what’s available</p></li>
 <li><p><strong>Continue to the next tutorial</strong> - Learn how to enable heart rate monitoring and data logging</p></li>
-<li><p><strong>Study other example apps</strong> - Look at Alarm or Cycling apps for different patterns</p></li>
+<li><p><strong>Study other example apps</strong> - Look at Alarm or Cycling apps for different patterns, or <a class="reference internal" href="../RunLVGL/ARCHITECTURE.html"><span class="std std-doc">RunLVGL</span></a> for a complete activity app with an LVGL GUI</p></li>
 </ol>
 </section>
 <section id="troubleshooting">
@@ -384,6 +567,7 @@ make
 <ul class="simple">
 <li><p>Ensure all SDK paths are correctly configured</p></li>
 <li><p>Check that TouchGFX is properly installed</p></li>
+<li><p>For the LVGL build, check that <code class="docutils literal notranslate"><span class="pre">ThirdParty/lvgl</span></code> is populated (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">ThirdParty/lvgl</span></code>)</p></li>
 <li><p>Verify CMake finds all required dependencies</p></li>
 </ul>
 </section>

@@ -21,7 +21,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Running - Running Activity Tracking" href="../../Examples/Running-Architecture.html" />
+    <link rel="next" title="RunLVGL - Building a Watch App GUI with LVGL" href="../RunLVGL/ARCHITECTURE.html" />
     <link rel="prev" title="FitFiles - FIT File Creation and Sensor Logging Tutorial" href="../FitFiles/ARCHITECTURE.html" /> 
 </head>
 
@@ -81,6 +81,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -214,9 +215,12 @@ toolchain on <code class="docutils literal notranslate"><span class="pre">PATH</
 </section>
 <section id="building">
 <h3>Building<a class="headerlink" href="#building" title="Link to this heading"></a></h3>
+<p>As in the earlier tutorials there are two GUIs over the one service: <code class="docutils literal notranslate"><span class="pre">Waypoint-CMake</span></code> builds
+the TouchGFX GUI, <code class="docutils literal notranslate"><span class="pre">WaypointLVGL-CMake</span></code> the LVGL one (which needs the LVGL submodule,
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">ThirdParty/lvgl</span></code>).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Docs/Tutorials/Waypoint
 mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
-cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/Waypoint-CMake
+cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>../Software/Apps/Waypoint-CMake<span class="w">        </span><span class="c1"># or ../Software/Apps/WaypointLVGL-CMake</span>
 make
 </pre></div>
 </div>
@@ -228,7 +232,8 @@ if the build stops there.</p>
 <section id="trying-it-without-a-phone">
 <h3>Trying it without a phone<a class="headerlink" href="#trying-it-without-a-phone" title="Link to this heading"></a></h3>
 <p>The simulator’s app sandbox is a directory on your PC - the GUI logs its path at startup
-(“Path to files created by app”). Drop a file called <code class="docutils literal notranslate"><span class="pre">app_config.json</span></code> in there:</p>
+(“Path to files created by app”; the LVGL simulator’s is <code class="docutils literal notranslate"><span class="pre">Software/Output</span></code>, relative to its
+<code class="docutils literal notranslate"><span class="pre">build/bin</span></code> working directory). Drop a file called <code class="docutils literal notranslate"><span class="pre">app_config.json</span></code> in there:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -250,7 +255,9 @@ the path most apps get wrong.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Output/app-manifest.json</span></code> carries two extra keys beyond the usual package metadata (which
 now starts with <code class="docutils literal notranslate"><span class="pre">&quot;manifest_version&quot;:</span> <span class="pre">1</span></code> - required in every manifest, configuration fields or
 not). <code class="docutils literal notranslate"><span class="pre">configFile</span></code> names the file the companion app will write, and <code class="docutils literal notranslate"><span class="pre">configFields</span></code> lists what
-to ask for. Waypoint declares five fields covering
+to ask for. A manifest describes one app, so the LVGL build has its own,
+<code class="docutils literal notranslate"><span class="pre">OutputLVGL/app-manifest.json</span></code>, with its own name and id and the same five fields; CI checks
+both against the field table below. Waypoint declares five fields covering
 all four supported types — two of them floats, for the coordinate pair. Abridged (see
 <code class="docutils literal notranslate"><span class="pre">Output/app-manifest.json</span></code> for the full declaration, including <code class="docutils literal notranslate"><span class="pre">targetLongitude</span></code>):</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"configFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app_config.json"</span><span class="p">,</span>
@@ -480,7 +487,39 @@ arbitrary runtime text needs no font regeneration:</p>
 <p><code class="docutils literal notranslate"><span class="pre">setupScreen()</span></code> writes <strong>every</strong> wildcard before the screen is shown. A wildcard that is
 never set keeps whatever placeholder the text database holds, and a design-time placeholder
 that ships to users looks exactly like real data.</p>
+<p>The LVGL screen (<code class="docutils literal notranslate"><span class="pre">LVGL-GUI/gui/src/screens/MainScreen.cpp</span></code>) is the same four rows as
+<code class="docutils literal notranslate"><span class="pre">Draw::label()</span></code> objects, written with <code class="docutils literal notranslate"><span class="pre">lv_label_set_text()</span></code>. It has no placeholder problem to
+guard against, since a label starts empty, but its constructor still draws the model’s last
+<code class="docutils literal notranslate"><span class="pre">NavState</span></code> so a screen created after the first fix shows it at once. Two details differ in
+kind rather than in wording:</p>
+<ul class="simple">
+<li><p>The distance face is chosen by string length with <code class="docutils literal notranslate"><span class="pre">lv_obj_set_style_text_font()</span></code>, from three
+converted Poppins SemiBold sizes, where TouchGFX picks among three typographies.</p></li>
+<li><p>The two-second save confirmation is a one-shot <code class="docutils literal notranslate"><span class="pre">lv_timer</span></code> that restores the status line when
+it fires, where the TouchGFX view counts ticks in <code class="docutils literal notranslate"><span class="pre">handleTickEvent()</span></code>.</p></li>
+</ul>
 <p>Buttons: <strong>R1</strong> saves the current position as the target, <strong>R2</strong> exits.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Build</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">.uapp</span></code></p></th>
+<th class="head"><p>GUI code (text)</p></th>
+<th class="head"><p>GUI RAM (bss)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Waypoint (TouchGFX)</p></td>
+<td><p>258 KB</p></td>
+<td><p>219 KB</p></td>
+<td><p>71 KB</p></td>
+</tr>
+<tr class="row-odd"><td><p>WaypointLVGL</p></td>
+<td><p>229 KB</p></td>
+<td><p>194 KB</p></td>
+<td><p>139 KB</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="message-flow">
 <h2>Message flow<a class="headerlink" href="#message-flow" title="Link to this heading"></a></h2>
@@ -541,11 +580,12 @@ existed. The service is constructed early, so anything in a constructor that rea
 <code class="docutils literal notranslate"><span class="pre">LOG_*</span></code> — directly or through an SDK class — crashes there while working fine on the watch.
 Move it into <code class="docutils literal notranslate"><span class="pre">run()</span></code>.</p>
 <p><strong>The simulator fails to link with <code class="docutils literal notranslate"><span class="pre">undefined</span> <span class="pre">reference</span></code> to SDK symbols.</strong> Unlike the CMake
-target, the simulator lists its sources by hand in <code class="docutils literal notranslate"><span class="pre">simulator/gcc/Makefile</span></code> (and
+target, the TouchGFX simulator lists its sources by hand in <code class="docutils literal notranslate"><span class="pre">simulator/gcc/Makefile</span></code> (and
 <code class="docutils literal notranslate"><span class="pre">simulator/msvs/Application.vcxproj</span></code>). Add what you use — this app needed <code class="docutils literal notranslate"><span class="pre">AppConfig.cpp</span></code>,
-<code class="docutils literal notranslate"><span class="pre">SensorConnection.cpp</span></code>, coreJSON and the sensor-layer simulator. An app that uses the sensor
-layer also needs its own <code class="docutils literal notranslate"><span class="pre">simulator/ConfigurationSimulator.hpp</span></code> saying which sensors to
-simulate.</p>
+<code class="docutils literal notranslate"><span class="pre">SensorConnection.cpp</span></code>, coreJSON and the sensor-layer simulator. The LVGL simulator takes
+its SDK sources from <code class="docutils literal notranslate"><span class="pre">cmake/una-simulator.cmake</span></code>, which already lists them. An app that uses
+the sensor layer also needs its own <code class="docutils literal notranslate"><span class="pre">simulator/ConfigurationSimulator.hpp</span></code> saying which
+sensors to simulate.</p>
 <p><strong>CI fails with “field table … but app-manifest.json”.</strong> The two declarations disagree. The error
 names the field and both values; fix whichever is wrong.</p>
 <p><strong>“app-manifest.json declares configFile X, but the checked sources only name Y”.</strong> The app opens a
@@ -558,7 +598,7 @@ different filename than it declared. Update <code class="docutils literal notran
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../FitFiles/ARCHITECTURE.html" class="btn btn-neutral float-left" title="FitFiles - FIT File Creation and Sensor Logging Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../Examples/Running-Architecture.html" class="btn btn-neutral float-right" title="Running - Running Activity Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../RunLVGL/ARCHITECTURE.html" class="btn btn-neutral float-right" title="RunLVGL - Building a Watch App GUI with LVGL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -418,6 +418,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -714,23 +715,23 @@ window.runMermaid = runMermaid;</script>
 <section id="table-of-contents">
 <h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
-<li><p><a class="reference internal" href="#overview"><span class="xref myst">Overview</span></a></p></li>
-<li><p><a class="reference internal" href="#definitions-and-terminology"><span class="xref myst">Definitions and Terminology</span></a></p></li>
-<li><p><a class="reference internal" href="#structural-architecture"><span class="xref myst">Structural Architecture</span></a></p></li>
-<li><p><a class="reference internal" href="#api-structure"><span class="xref myst">API Structure</span></a></p></li>
-<li><p><a class="reference internal" href="#behavioral-architecture"><span class="xref myst">Behavioral Architecture</span></a></p>
+<li><p><a class="reference internal" href="#overview">Overview</a></p></li>
+<li><p><a class="reference internal" href="#definitions-and-terminology">Definitions and Terminology</a></p></li>
+<li><p><a class="reference internal" href="#structural-architecture">Structural Architecture</a></p></li>
+<li><p><a class="reference internal" href="#api-structure">API Structure</a></p></li>
+<li><p><a class="reference internal" href="#behavioral-architecture">Behavioral Architecture</a></p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#initialization-flow"><span class="xref myst">Initialization Flow</span></a></p></li>
-<li><p><a class="reference internal" href="#rendering-flow"><span class="xref myst">Rendering Flow</span></a></p></li>
-<li><p><a class="reference internal" href="#input-handling"><span class="xref myst">Input Handling</span></a></p></li>
-<li><p><a class="reference internal" href="#lifecycle-management"><span class="xref myst">Lifecycle Management</span></a></p></li>
-<li><p><a class="reference internal" href="#data-flows"><span class="xref myst">Data Flows</span></a></p></li>
+<li><p><a class="reference internal" href="#initialization-flow">Initialization Flow</a></p></li>
+<li><p><a class="reference internal" href="#rendering-flow">Rendering Flow</a></p></li>
+<li><p><a class="reference internal" href="#input-handling">Input Handling</a></p></li>
+<li><p><a class="reference internal" href="#lifecycle-management">Lifecycle Management</a></p></li>
+<li><p><a class="reference internal" href="#data-flows">Data Flows</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#una-specific-system-integration-points"><span class="xref myst">UNA-Specific System Integration Points</span></a></p></li>
-<li><p><a class="reference internal" href="#application-architecture-guidelines"><span class="xref myst">Application Architecture Guidelines</span></a></p></li>
-<li><p><a class="reference internal" href="#custom-message-communication"><span class="xref myst">Custom Message Communication</span></a></p></li>
-<li><p><a class="reference internal" href="#project-structure-and-build-integration"><span class="xref myst">Project Structure and Build Integration</span></a></p></li>
+<li><p><a class="reference internal" href="#una-specific-system-integration-points">UNA-Specific System Integration Points</a></p></li>
+<li><p><a class="reference internal" href="#application-architecture-guidelines">Application Architecture Guidelines</a></p></li>
+<li><p><a class="reference internal" href="#custom-message-communication">Custom Message Communication</a></p></li>
+<li><p><a class="reference internal" href="#project-structure-and-build-integration">Project Structure and Build Integration</a></p></li>
 </ol>
 </section>
 <section id="overview">
@@ -797,8 +798,11 @@ window.runMermaid = runMermaid;</script>
 <section id="touchgfxcommandprocessor">
 <h4>TouchGFXCommandProcessor<a class="headerlink" href="#touchgfxcommandprocessor" title="Link to this heading"></a></h4>
 <p>The TouchGFXCommandProcessor acts as the central command processor and lifecycle manager, implementing a singleton pattern to handle kernel message processing, GUI lifecycle management, and frame synchronization.</p>
+<blockquote>
+<div><p><strong>Renamed.</strong> The class is <code class="docutils literal notranslate"><span class="pre">SDK::GuiCommandProcessor</span></code> (<code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/GuiCommandProcessor.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/GuiCommandProcessor.cpp</span></code>): it has no TouchGFX dependency and the LVGL port uses it unchanged. <code class="docutils literal notranslate"><span class="pre">SDK::TouchGFXCommandProcessor</span></code> remains as an alias, and the old header and source paths keep working, so the rest of this document still applies under the old name.</p>
+</div></blockquote>
 <ul class="simple">
-<li><p><strong>Location</strong>: <code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp</span></code>, <code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp</span></code></p></li>
+<li><p><strong>Location</strong>: <code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/GuiCommandProcessor.cpp</span></code>, <code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/GuiCommandProcessor.hpp</span></code> (aliases: <code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp</span></code>, <code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp</span></code>)</p></li>
 <li><p><strong>Purpose</strong>: Central command processor and lifecycle manager (singleton pattern)</p></li>
 <li><p><strong>Key Responsibilities</strong>:</p>
 <ul>

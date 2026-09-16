@@ -415,6 +415,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -525,6 +526,24 @@ window.runMermaid = runMermaid;</script>
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessorE">SDK::GuiCommandProcessor (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv">SDK::GuiCommandProcessor::callCustomMessageHandler (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor16consumeFrameTickEv">SDK::GuiCommandProcessor::consumeFrameTick (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t">SDK::GuiCommandProcessor::getKeySample (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK19GuiCommandProcessor15lastFrameNumberEv">SDK::GuiCommandProcessor::lastFrameNumber (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE">SDK::GuiCommandProcessor::setAppLifeCycleCallback (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE">SDK::GuiCommandProcessor::setCustomMessageHandler (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor16waitForFrameTickEv">SDK::GuiCommandProcessor::waitForFrameTick (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t">SDK::GuiCommandProcessor::writeDisplayFrameBuffer (C++ function)</a>
+</li>
       <li><a href="api-reference.html#_CPPv4N3SDK9Interface8IAppCommE">SDK::Interface::IAppComm (C++ class)</a>
 </li>
       <li><a href="api-reference.html#_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args">SDK::Interface::IAppComm::allocateMessage (C++ function)</a>
@@ -617,6 +636,136 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api-reference.html#_CPPv4N3SDK16JsonStreamReader8validateEv">SDK::JsonStreamReader::validate (C++ function)</a>
 </li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL7BatteryE">SDK::LVGL::Battery (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL7Battery8setLevelE7uint8_t">SDK::LVGL::Battery::setLevel (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL7ButtonsE">SDK::LVGL::Buttons (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4DrawE">SDK::LVGL::Draw (C++ type)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw11applyScreenEP8lv_obj_t">SDK::LVGL::Draw::applyScreen (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3arcEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t7int32_t7int32_t8uint32_tb">SDK::LVGL::Draw::arc (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw8arcAngleE7int32_t">SDK::LVGL::Draw::arcAngle (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3boxEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t8uint32_t7int32_t">SDK::LVGL::Draw::box (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw9containerEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t">SDK::LVGL::Draw::container (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3dotEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::dot (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5hlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::hline (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5imageEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t">SDK::LVGL::Draw::image (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw11imageTintedEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::imageTinted (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw4initEv">SDK::LVGL::Draw::init (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5labelEP8lv_obj_tPK9lv_font_tPKc7int32_t7int32_t7int32_t15lv_text_align_t8uint32_t">SDK::LVGL::Draw::label (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3rgbE8uint32_t">SDK::LVGL::Draw::rgb (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw6setArcEP8lv_obj_t7int32_t7int32_t">SDK::LVGL::Draw::setArc (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw11setArcColorEP8lv_obj_t8uint32_t">SDK::LVGL::Draw::setArcColor (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw9setHiddenEP8lv_obj_tb">SDK::LVGL::Draw::setHidden (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw4tintEP8lv_obj_t8uint32_t">SDK::LVGL::Draw::tint (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5vlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::vline (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicatorE">SDK::LVGL::ScrollIndicator (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator9animateToE8uint16_t8uint32_ti">SDK::LVGL::ScrollIndicator::animateTo (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6ConfigE">SDK::LVGL::ScrollIndicator::Config (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6Config9handleLenE">SDK::LVGL::ScrollIndicator::Config::handleLen (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMaxE">SDK::LVGL::ScrollIndicator::Config::railMax (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMinE">SDK::LVGL::ScrollIndicator::Config::railMin (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator4kBigE">SDK::LVGL::ScrollIndicator::kBig (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6kSmallE">SDK::LVGL::ScrollIndicator::kSmall (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator9setActiveE8uint16_t">SDK::LVGL::ScrollIndicator::setActive (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator8setCountE8uint16_t">SDK::LVGL::ScrollIndicator::setCount (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRowE">SDK::LVGL::SensorStatusRow (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow8gpsStateEb">SDK::LVGL::SensorStatusRow::gpsState (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow7hrStateE7uint8_t">SDK::LVGL::SensorStatusRow::hrState (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow17hrStateFromSourceE7uint8_t7uint8_t">SDK::LVGL::SensorStatusRow::hrStateFromSource (C++ function)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow15SensorStatusRowEP8lv_obj_t7int32_t7int32_t7int32_t7int32_tPK14lv_image_dsc_tPK14lv_image_dsc_t">SDK::LVGL::SensorStatusRow::SensorStatusRow (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9TimerRingE">SDK::LVGL::TimerRing (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9TimerRing11setProgressE8uint32_t">SDK::LVGL::TimerRing::setProgress (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9TimerRing12setRemainingE8uint32_t">SDK::LVGL::TimerRing::setRemaining (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL5TitleE">SDK::LVGL::Title (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL5Title5TitleEP8lv_obj_tPK9lv_font_tPKc">SDK::LVGL::Title::Title (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL6ToggleE">SDK::LVGL::Toggle (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenuE">SDK::LVGL::WheelMenu (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5FontsE">SDK::LVGL::WheelMenu::Fonts (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5Fonts6centerE">SDK::LVGL::WheelMenu::Fonts::center (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5Fonts4itemE">SDK::LVGL::WheelMenu::Fonts::item (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5Fonts3tipE">SDK::LVGL::WheelMenu::Fonts::tip (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu10IconLayoutE">SDK::LVGL::WheelMenu::IconLayout (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5iconYE">SDK::LVGL::WheelMenu::IconLayout::iconY (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5textWE">SDK::LVGL::WheelMenu::IconLayout::textW (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4ItemE">SDK::LVGL::WheelMenu::Item (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item10centerFontE">SDK::LVGL::WheelMenu::Item::centerFont (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item8itemTextE">SDK::LVGL::WheelMenu::Item::itemText (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item4textE">SDK::LVGL::WheelMenu::Item::text (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item8tipColorE">SDK::LVGL::WheelMenu::Item::tipColor (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu19kDefaultAnimationMsE">SDK::LVGL::WheelMenu::kDefaultAnimationMs (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4nextEv">SDK::LVGL::WheelMenu::next (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu7refreshEv">SDK::LVGL::WheelMenu::refresh (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu6selectE8uint16_t">SDK::LVGL::WheelMenu::select (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK4LVGL9WheelMenu8selectedEv">SDK::LVGL::WheelMenu::selected (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu14setAnimationMsE8uint32_t">SDK::LVGL::WheelMenu::setAnimationMs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu13setBackgroundE8uint32_t">SDK::LVGL::WheelMenu::setBackground (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu16SlideMidCallbackE">SDK::LVGL::WheelMenu::SlideMidCallback (C++ type)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu9WheelMenuEP8lv_obj_tPK4Item8uint16_tRK5Fonts7int16_t">SDK::LVGL::WheelMenu::WheelMenu (C++ function)</a>
+</li>
       <li><a href="api-reference.html#_CPPv4N3SDK11MessageBaseE">SDK::MessageBase (C++ class)</a>
 </li>
       <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase12getProcessIdEv">SDK::MessageBase::getProcessId (C++ function)</a>
@@ -633,8 +782,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase13needsResponseEv">SDK::MessageBase::needsResponse (C++ function)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api-reference.html#_CPPv4N3SDK11MessageBasedlEPv">SDK::MessageBase::operator delete (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK11MessageBasedlEPvPv">[1]</a>
 </li>
       <li><a href="api-reference.html#_CPPv4N3SDK11MessageBasenwE6size_t">SDK::MessageBase::operator new (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK11MessageBasenwE6size_tPv">[1]</a>
@@ -742,8 +889,6 @@ window.runMermaid = runMermaid;</script>
       <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser9HeartRate9HeartRateEKN3SDK6Sensor8DataViewE">SDK::SensorDataParser::HeartRate::HeartRate (C++ function)</a>
 </li>
       <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser9HeartRate11isDataValidEv">SDK::SensorDataParser::HeartRate::isDataValid (C++ function)</a>
-</li>
-      <li><a href="api-reference.html#_CPPv4N3SDK24TouchGFXCommandProcessorE">SDK::TouchGFXCommandProcessor (C++ class)</a>
 </li>
   </ul></td>
 </tr></table>

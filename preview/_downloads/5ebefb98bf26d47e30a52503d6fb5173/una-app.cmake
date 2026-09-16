@@ -81,6 +81,12 @@ if(TOUCHGFX_PATH)
     get_filename_component(_una_abs "${TOUCHGFX_PATH}" ABSOLUTE)
     list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app-gui")
 endif()
+# GUI_PATH is the toolkit-neutral name for the GUI process directory; apps not
+# built on TouchGFX (for example LVGL) set it instead of TOUCHGFX_PATH.
+if(GUI_PATH)
+    get_filename_component(_una_abs "${GUI_PATH}" ABSOLUTE)
+    list(APPEND _una_app_prefix_maps "${_una_abs}=/una-app-gui")
+endif()
 foreach(_una_map IN LISTS _una_app_prefix_maps)
     add_compile_options(
         $<$<COMPILE_LANGUAGE:C,CXX>:-fmacro-prefix-map=${_una_map}>
@@ -299,6 +305,11 @@ function(una_app_build_gui TARGET_NAME)
 
     target_include_directories(${TARGET_NAME} PRIVATE ${GUI_INCLUDE_DIRS})
 
+    # Optional toolkit defines (for example LV_CONF_PATH for an LVGL GUI).
+    if(DEFINED GUI_COMPILE_DEFINITIONS)
+        target_compile_definitions(${TARGET_NAME} PRIVATE ${GUI_COMPILE_DEFINITIONS})
+    endif()
+
     target_link_libraries(${TARGET_NAME} PRIVATE
         -Wl,--start-group
         -l:libstdc++.a
@@ -360,7 +371,7 @@ function(una_app_build_app)
 
     # Final app merging
     set(APP_DEPENDS ${APP_NAME}Service.elf)
-    if(DEFINED TOUCHGFX_PATH)
+    if(DEFINED TOUCHGFX_PATH OR DEFINED GUI_PATH)
         list(APPEND APP_DEPENDS ${APP_NAME}GUI.elf)
     endif()
     set(APP_AUTOSTART_FLAG "")

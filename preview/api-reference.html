@@ -60,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
 <ul>
@@ -234,7 +235,29 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#ui-framework">UI Framework</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#_CPPv4N3SDK24TouchGFXCommandProcessorE"><code class="docutils literal notranslate"><span class="pre">SDK::TouchGFXCommandProcessor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessorE"><code class="docutils literal notranslate"><span class="pre">SDK::GuiCommandProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE"><code class="docutils literal notranslate"><span class="pre">setAppLifeCycleCallback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE"><code class="docutils literal notranslate"><span class="pre">setCustomMessageHandler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor16waitForFrameTickEv"><code class="docutils literal notranslate"><span class="pre">waitForFrameTick()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor16consumeFrameTickEv"><code class="docutils literal notranslate"><span class="pre">consumeFrameTick()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4NK3SDK19GuiCommandProcessor15lastFrameNumberEv"><code class="docutils literal notranslate"><span class="pre">lastFrameNumber()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t"><code class="docutils literal notranslate"><span class="pre">getKeySample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t"><code class="docutils literal notranslate"><span class="pre">writeDisplayFrameBuffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv"><code class="docutils literal notranslate"><span class="pre">callCustomMessageHandler()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lvgl-widgets">LVGL Widgets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL4DrawE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Draw</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL7ButtonsE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Buttons</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL5TitleE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Title</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL15ScrollIndicatorE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::ScrollIndicator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL15SensorStatusRowE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::SensorStatusRow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL7BatteryE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Battery</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL9TimerRingE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::TimerRing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL6ToggleE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Toggle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N3SDK4LVGL9WheelMenuE"><code class="docutils literal notranslate"><span class="pre">SDK::LVGL::WheelMenu</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a><ul>
@@ -309,8 +332,12 @@
 <li><p><a class="reference internal" href="#core-sdk-interfaces" id="id1">Core SDK Interfaces</a></p></li>
 <li><p><a class="reference internal" href="#application-communication-ipc" id="id2">Application Communication (IPC)</a></p></li>
 <li><p><a class="reference internal" href="#sensor-layer" id="id3">Sensor Layer</a></p></li>
-<li><p><a class="reference internal" href="#ui-framework" id="id4">UI Framework</a></p></li>
-<li><p><a class="reference internal" href="#utilities" id="id5">Utilities</a></p></li>
+<li><p><a class="reference internal" href="#ui-framework" id="id4">UI Framework</a></p>
+<ul>
+<li><p><a class="reference internal" href="#lvgl-widgets" id="id5">LVGL Widgets</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#utilities" id="id6">Utilities</a></p></li>
 </ul>
 </nav>
 <section id="core-sdk-interfaces">
@@ -1739,22 +1766,529 @@
 </section>
 <section id="ui-framework">
 <h2><a class="toc-backref" href="#id4" role="doc-backlink">UI Framework</a><a class="headerlink" href="#ui-framework" title="Link to this heading"></a></h2>
-<p>Interfaces for building user interfaces using TouchGFX or the lightweight Glance system.</p>
-<p>For detailed information on the TouchGFX port implementation, see <a class="reference internal" href="TouchGFX-Port-Architecture.html"><span class="doc">TouchGFX Port Architecture</span></a>.</p>
+<p>Interfaces for building user interfaces using TouchGFX or LVGL, or the lightweight
+Glance system.</p>
+<p>For detailed information on the TouchGFX port implementation, see <a class="reference internal" href="TouchGFX-Port-Architecture.html"><span class="doc">TouchGFX Port Architecture</span></a>;
+for the LVGL port, see <a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html"><span class="doc">RunLVGL - Building a Watch App GUI with LVGL</span></a>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>doxygenclass: Cannot find class “SDK::Interface::IGlance” in doxygen xml output for project “SDK” from directory: _build/doxygen/xml</p>
 </div>
 <dl class="cpp class">
-<dt class="sig sig-object cpp" id="_CPPv4N3SDK24TouchGFXCommandProcessorE">
-<span id="_CPPv3N3SDK24TouchGFXCommandProcessorE"></span><span id="_CPPv2N3SDK24TouchGFXCommandProcessorE"></span><span id="SDK::TouchGFXCommandProcessor"></span><span class="target" id="classSDK_1_1TouchGFXCommandProcessor"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TouchGFXCommandProcessor</span></span></span><a class="headerlink" href="#_CPPv4N3SDK24TouchGFXCommandProcessorE" title="Link to this definition"></a><br /></dt>
-<dd><p>Central TouchGFX command processor. </p>
-<p>Singleton class that manages TouchGFX lifecycle and kernel commands. </p>
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessorE">
+<span id="_CPPv3N3SDK19GuiCommandProcessorE"></span><span id="_CPPv2N3SDK19GuiCommandProcessorE"></span><span id="SDK::GuiCommandProcessor"></span><span class="target" id="classSDK_1_1GuiCommandProcessor"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GuiCommandProcessor</span></span></span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessorE" title="Link to this definition"></a><br /></dt>
+<dd><p>Kernel message pump and lifecycle hub of a GUI process. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE">
+<span id="_CPPv3N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE"></span><span id="_CPPv2N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE"></span><span id="SDK::GuiCommandProcessor::setAppLifeCycleCallback__SDK::Interface::IGuiLifeCycleCallbackP"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1acb314b527923954d2dd87db6f091f9f5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setAppLifeCycleCallback</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">SDK</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Interface</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">IGuiLifeCycleCallback</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">cb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE" title="Link to this definition"></a><br /></dt>
+<dd><p>The object told about start/stop/resume/suspend and each frame tick. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE">
+<span id="_CPPv3N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE"></span><span id="_CPPv2N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE"></span><span id="SDK::GuiCommandProcessor::setCustomMessageHandler__SDK::Interface::ICustomMessageHandlerP"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a9869ea5539dff0142bf386f46f4e5bd3"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setCustomMessageHandler</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">SDK</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Interface</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ICustomMessageHandler</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">h</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE" title="Link to this definition"></a><br /></dt>
+<dd><p>The object given the app-private (service -&gt; GUI) messages. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor16waitForFrameTickEv">
+<span id="_CPPv3N3SDK19GuiCommandProcessor16waitForFrameTickEv"></span><span id="_CPPv2N3SDK19GuiCommandProcessor16waitForFrameTickEv"></span><span id="SDK::GuiCommandProcessor::waitForFrameTick"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a08159e002f5b183d1746b482a8365cd3"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">waitForFrameTick</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor16waitForFrameTickEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Process kernel messages until the next frame tick. </p>
+<p>Blocks on the GUI’s queue, handling lifecycle commands, button events and queueing app-private messages on the way. Returns false when the toolkit may render a frame (an EVENT_GUI_TICK arrived, or in the simulator build the 50 ms poll ran out), and true when the kernel has stopped the process: onStop() has run and sys.exit() was called. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor16consumeFrameTickEv">
+<span id="_CPPv3N3SDK19GuiCommandProcessor16consumeFrameTickEv"></span><span id="_CPPv2N3SDK19GuiCommandProcessor16consumeFrameTickEv"></span><span id="SDK::GuiCommandProcessor::consumeFrameTick"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a96304ce2dfd89ddc1fe6d2b797b439a9"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">consumeFrameTick</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor16consumeFrameTickEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Whether an EVENT_GUI_TICK arrived since the last call. </p>
+<p>On the watch <a class="reference internal" href="#classSDK_1_1GuiCommandProcessor_1a08159e002f5b183d1746b482a8365cd3"><span class="std std-ref">waitForFrameTick()</span></a> only returns on a tick, so this is always true after it. The simulator build also returns from <a class="reference internal" href="#classSDK_1_1GuiCommandProcessor_1a08159e002f5b183d1746b482a8365cd3"><span class="std std-ref">waitForFrameTick()</span></a> on a poll timeout; a toolkit that renders one frame per kernel tick uses this to tell the two apart. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3SDK19GuiCommandProcessor15lastFrameNumberEv">
+<span id="_CPPv3NK3SDK19GuiCommandProcessor15lastFrameNumberEv"></span><span id="_CPPv2NK3SDK19GuiCommandProcessor15lastFrameNumberEv"></span><span id="SDK::GuiCommandProcessor::lastFrameNumberC"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a2e7648f40e879fa497efac3887784642"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lastFrameNumber</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3SDK19GuiCommandProcessor15lastFrameNumberEv" title="Link to this definition"></a><br /></dt>
+<dd><p>frameNumber carried by the most recent EVENT_GUI_TICK (the kernel’s running tick count), for correlating app-side and kernel-side timing logs. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t">
+<span id="_CPPv3N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t"></span><span id="_CPPv2N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t"></span><span id="SDK::GuiCommandProcessor::getKeySample__uint8_tR"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a9ec20ad5ee17e1390dbe91942e63af35"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getKeySample</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Pop the next queued SDK::GUI::Button code; false when there is none. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t">
+<span id="_CPPv3N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t"></span><span id="_CPPv2N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t"></span><span id="SDK::GuiCommandProcessor::writeDisplayFrameBuffer__uint8_tCP"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a65de5acf58870a92bdb90fbce7895a62"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">writeDisplayFrameBuffer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Send a finished frame (one ABGR2222 byte per pixel) to the kernel. Ignored while the GUI is suspended. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv">
+<span id="_CPPv3N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv"></span><span id="_CPPv2N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv"></span><span id="SDK::GuiCommandProcessor::callCustomMessageHandler"></span><span class="target" id="classSDK_1_1GuiCommandProcessor_1a25564f275446e1939f951cce214b0842"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">callCustomMessageHandler</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Deliver the queued app-private messages to the custom message handler. Call between frames, never from inside <a class="reference internal" href="#classSDK_1_1GuiCommandProcessor_1a08159e002f5b183d1746b482a8365cd3"><span class="std std-ref">waitForFrameTick()</span></a>. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">SDK::TouchGFXCommandProcessor</span></code> is an alias of <code class="docutils literal notranslate"><span class="pre">SDK::GuiCommandProcessor</span></code>,
+kept for existing applications.</p>
+<section id="lvgl-widgets">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">LVGL Widgets</a><a class="headerlink" href="#lvgl-widgets" title="Link to this heading"></a></h3>
+<p>Drawing helpers and the widgets the UNA activity apps share, built from LVGL
+primitives (<code class="docutils literal notranslate"><span class="pre">SDK/GUI/LVGL/</span></code>). Fonts and images are the app’s: a widget that
+draws text or an icon takes it as a <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">lv_font_t*</span></code> or <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">lv_image_dsc_t*</span></code>.</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4DrawE">
+<span id="_CPPv3N3SDK4LVGL4DrawE"></span><span id="_CPPv2N3SDK4LVGL4DrawE"></span><span id="SDK::LVGL::Draw"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Draw</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4DrawE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw3rgbE8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw3rgbE8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw3rgbE8uint32_t"></span><span id="SDK::LVGL::Draw::rgb__uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a26e3e868c2f928f3aee80295c1b9e89a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">lv_color_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rgb</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw3rgbE8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>SDK palette value (0xRRGGBB) to an LVGL colour. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw8arcAngleE7int32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw8arcAngleE7int32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw8arcAngleE7int32_t"></span><span id="SDK::LVGL::Draw::arcAngle__int32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1ad008bc5dc44dfc48b9d344f424ed0774"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">arcAngle</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">touchgfxDeg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw8arcAngleE7int32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Convert a TouchGFX arc angle (0 = 12 o’clock, clockwise) to LVGL’s (0 = 3 o’clock, clockwise), folded into 0..359 for any input. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw4initEv">
+<span id="_CPPv3N3SDK4LVGL4Draw4initEv"></span><span id="_CPPv2N3SDK4LVGL4Draw4initEv"></span><span id="SDK::LVGL::Draw::init"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a824e19405a5d0b312759ae9b4d71bfa1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">init</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw4initEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Build the shared styles. Call once after lv_init(), before any screen. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw11applyScreenEP8lv_obj_t">
+<span id="_CPPv3N3SDK4LVGL4Draw11applyScreenEP8lv_obj_t"></span><span id="_CPPv2N3SDK4LVGL4Draw11applyScreenEP8lv_obj_t"></span><span id="SDK::LVGL::Draw::applyScreen__lv_obj_tP"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a07854b365d471363448b9bc70fc69428"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">applyScreen</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">screen</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw11applyScreenEP8lv_obj_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Black full-screen background with no padding, border or scrollbars. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw9setHiddenEP8lv_obj_tb">
+<span id="_CPPv3N3SDK4LVGL4Draw9setHiddenEP8lv_obj_tb"></span><span id="_CPPv2N3SDK4LVGL4Draw9setHiddenEP8lv_obj_tb"></span><span id="SDK::LVGL::Draw::setHidden__lv_obj_tP.b"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a4c9e60a1f3c09d0c989d21e661117a6e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setHidden</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">obj</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hidden</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw9setHiddenEP8lv_obj_tb" title="Link to this definition"></a><br /></dt>
+<dd><p>Show or hide an object. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw9containerEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw9containerEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw9containerEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t"></span><span id="SDK::LVGL::Draw::container__lv_obj_tP.int32_t.int32_t.int32_t.int32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1ac83bc52f1b50db608e12ac69af04a504"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">container</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">w</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">h</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw9containerEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Plain container: transparent, no padding/border, clips its children. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw5labelEP8lv_obj_tPK9lv_font_tPKc7int32_t7int32_t7int32_t15lv_text_align_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw5labelEP8lv_obj_tPK9lv_font_tPKc7int32_t7int32_t7int32_t15lv_text_align_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw5labelEP8lv_obj_tPK9lv_font_tPKc7int32_t7int32_t7int32_t15lv_text_align_t8uint32_t"></span><span id="SDK::LVGL::Draw::label__lv_obj_tP.lv_font_tCP.cCP.int32_t.int32_t.int32_t.lv_text_align_t.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a71baf606544456b4652bd6283469a0c6"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">label</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_font_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">font</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">text</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">w</span></span>, <span class="n"><span class="pre">lv_text_align_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">align</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">LV_TEXT_ALIGN_CENTER</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">SDK</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">GUI</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Color</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">WHITE</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw5labelEP8lv_obj_tPK9lv_font_tPKc7int32_t7int32_t7int32_t15lv_text_align_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Single-line label in a text box, like a TouchGFX TextArea: the box is positioned at (x, y) with width w, and the text is aligned within it. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw5hlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw5hlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw5hlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t"></span><span id="SDK::LVGL::Draw::hline__lv_obj_tP.int32_t.int32_t.int32_t.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1ab7a86f8e7642c8d24fcf33053de7cedb"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">hline</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">w</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">SDK</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">GUI</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Color</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TEAL</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw5hlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Horizontal 3 px divider with rounded ends. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw5vlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw5vlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw5vlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t"></span><span id="SDK::LVGL::Draw::vline__lv_obj_tP.int32_t.int32_t.int32_t.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1aeec4d42164ac4e058643b18f00026c9a"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">vline</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">h</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">SDK</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">GUI</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Color</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TEAL</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw5vlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Vertical 3 px divider with rounded ends. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw3boxEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t8uint32_t7int32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw3boxEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t8uint32_t7int32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw3boxEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t8uint32_t7int32_t"></span><span id="SDK::LVGL::Draw::box__lv_obj_tP.int32_t.int32_t.int32_t.int32_t.uint32_t.int32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1abaee786e07be34b9662e6bc0c7687efc"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">box</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">w</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">h</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">radius</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw3boxEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t8uint32_t7int32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Filled rectangle with rounded corners (LV_RADIUS_CIRCLE for a pill). </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw5imageEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw5imageEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw5imageEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t"></span><span id="SDK::LVGL::Draw::image__lv_obj_tP.lv_image_dsc_tCP.int32_t.int32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1aade8cc42b56b16b7500fcb4f1c7cf1a9"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">image</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_image_dsc_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">src</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw5imageEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Static image at (x, y). </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw11imageTintedEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw11imageTintedEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw11imageTintedEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t8uint32_t"></span><span id="SDK::LVGL::Draw::imageTinted__lv_obj_tP.lv_image_dsc_tCP.int32_t.int32_t.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a3332179af5f4625a310712beb1891c3e"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">imageTinted</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_image_dsc_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">src</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw11imageTintedEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Alpha-only (A8) icon at (x, y) drawn in <code class="docutils literal notranslate"><span class="pre">color</span></code>. Single-colour icons are stored without colour, one byte per pixel, and tinted here. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw4tintEP8lv_obj_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw4tintEP8lv_obj_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw4tintEP8lv_obj_t8uint32_t"></span><span id="SDK::LVGL::Draw::tint__lv_obj_tP.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1ad4ac43a078469a0229c7f2a4bd8ffe3b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tint</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">img</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw4tintEP8lv_obj_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Change the tint of an image made by <a class="reference internal" href="#namespaceSDK_1_1LVGL_1_1Draw_1a3332179af5f4625a310712beb1891c3e"><span class="std std-ref">imageTinted()</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw3dotEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw3dotEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw3dotEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t"></span><span id="SDK::LVGL::Draw::dot__lv_obj_tP.int32_t.int32_t.int32_t.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1ab456f16277762046afed19a4d4f287e8"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">dot</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cx</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cy</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">radius</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw3dotEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Filled circle of the given radius centred at (cx, cy). </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw3arcEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t7int32_t7int32_t8uint32_tb">
+<span id="_CPPv3N3SDK4LVGL4Draw3arcEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t7int32_t7int32_t8uint32_tb"></span><span id="_CPPv2N3SDK4LVGL4Draw3arcEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t7int32_t7int32_t8uint32_tb"></span><span id="SDK::LVGL::Draw::arc__lv_obj_tP.int32_t.int32_t.int32_t.int32_t.int32_t.int32_t.uint32_t.b"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a68cd3109557da1280b8e927e0fda2a89"></span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">arc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cx</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cy</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">radius</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">width</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">startDeg</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">endDeg</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rounded</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">true</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw3arcEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t7int32_t7int32_t8uint32_tb" title="Link to this definition"></a><br /></dt>
+<dd><p>A static arc segment. Angles are TouchGFX-style (0 = 12 o’clock, clockwise) and may lie outside 0..359; a span of 360 or more is the full ring. <code class="docutils literal notranslate"><span class="pre">radius</span></code> is the arc’s centre-line radius as in touchgfx::Circle. Ends are rounded unless <code class="docutils literal notranslate"><span class="pre">rounded</span></code> is false, which cuts them radially. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw6setArcEP8lv_obj_t7int32_t7int32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw6setArcEP8lv_obj_t7int32_t7int32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw6setArcEP8lv_obj_t7int32_t7int32_t"></span><span id="SDK::LVGL::Draw::setArc__lv_obj_tP.int32_t.int32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a2b9e1b5cb44b902ac96e819ed08895d0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setArc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arcObj</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">startDeg</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">endDeg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw6setArcEP8lv_obj_t7int32_t7int32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Re-aim an arc made by <a class="reference internal" href="#namespaceSDK_1_1LVGL_1_1Draw_1a68cd3109557da1280b8e927e0fda2a89"><span class="std std-ref">arc()</span></a> (TouchGFX-style angles). </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL4Draw11setArcColorEP8lv_obj_t8uint32_t">
+<span id="_CPPv3N3SDK4LVGL4Draw11setArcColorEP8lv_obj_t8uint32_t"></span><span id="_CPPv2N3SDK4LVGL4Draw11setArcColorEP8lv_obj_t8uint32_t"></span><span id="SDK::LVGL::Draw::setArcColor__lv_obj_tP.uint32_t"></span><span class="target" id="namespaceSDK_1_1LVGL_1_1Draw_1a60c838b079f4b944fc645c3c4658594d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setArcColor</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arcObj</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL4Draw11setArcColorEP8lv_obj_t8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL7ButtonsE">
+<span id="_CPPv3N3SDK4LVGL7ButtonsE"></span><span id="_CPPv2N3SDK4LVGL7ButtonsE"></span><span id="SDK::LVGL::Buttons"></span><span class="target" id="classSDK_1_1LVGL_1_1Buttons"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Buttons</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL7ButtonsE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL5TitleE">
+<span id="_CPPv3N3SDK4LVGL5TitleE"></span><span id="_CPPv2N3SDK4LVGL5TitleE"></span><span id="SDK::LVGL::Title"></span><span class="target" id="classSDK_1_1LVGL_1_1Title"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Title</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL5TitleE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL5Title5TitleEP8lv_obj_tPK9lv_font_tPKc">
+<span id="_CPPv3N3SDK4LVGL5Title5TitleEP8lv_obj_tPK9lv_font_tPKc"></span><span id="_CPPv2N3SDK4LVGL5Title5TitleEP8lv_obj_tPK9lv_font_tPKc"></span><span id="SDK::LVGL::Title::Title__lv_obj_tP.lv_font_tCP.cCP"></span><span class="target" id="classSDK_1_1LVGL_1_1Title_1a7e4fec1aec8ffee0039057709b191f3b"></span><span class="sig-name descname"><span class="n"><span class="pre">Title</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_font_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">font</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">text</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL5Title5TitleEP8lv_obj_tPK9lv_font_tPKc" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>font</strong> – The title face; the activity apps use an italic 18 px. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicatorE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicatorE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicatorE"></span><span id="SDK::LVGL::ScrollIndicator"></span><span class="target" id="classSDK_1_1LVGL_1_1ScrollIndicator"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScrollIndicator</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicatorE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator8setCountE8uint16_t">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator8setCountE8uint16_t"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator8setCountE8uint16_t"></span><span id="SDK::LVGL::ScrollIndicator::setCount__uint16_t"></span><span class="target" id="classSDK_1_1LVGL_1_1ScrollIndicator_1a567d1c48061ed538165497e3b05186a5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setCount</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator8setCountE8uint16_t" title="Link to this definition"></a><br /></dt>
+<dd><p>resets to position 0; hidden when &lt;= 1 </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator9setActiveE8uint16_t">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator9setActiveE8uint16_t"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator9setActiveE8uint16_t"></span><span id="SDK::LVGL::ScrollIndicator::setActive__uint16_t"></span><span class="target" id="classSDK_1_1LVGL_1_1ScrollIndicator_1a724bd9f9ee1f33900cf811279a648ac3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setActive</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">index</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator9setActiveE8uint16_t" title="Link to this definition"></a><br /></dt>
+<dd><p>instant </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator9animateToE8uint16_t8uint32_ti">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator9animateToE8uint16_t8uint32_ti"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator9animateToE8uint16_t8uint32_ti"></span><span id="SDK::LVGL::ScrollIndicator::animateTo__uint16_t.uint32_t.i"></span><span class="target" id="classSDK_1_1LVGL_1_1ScrollIndicator_1a71dce7aae8bb23262f7989b7cf5ecf00"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">animateTo</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">index</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">direction</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator9animateToE8uint16_t8uint32_ti" title="Link to this definition"></a><br /></dt>
+<dd><p>Slide the handle to an item over <code class="docutils literal notranslate"><span class="pre">ms</span></code>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> – +1 when the list moved to the next item, -1 to the previous, 0 unknown. With it, a move between the two ends of the rail is a wrap: the handle slides off one end while a second handle slides in from the other. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-attributes">Public Static Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator4kBigE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator4kBigE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator4kBigE"></span><span id="SDK::LVGL::ScrollIndicator::kBig__Config"></span><span class="target" id="classSDK_1_1LVGL_1_1ScrollIndicator_1ab35f516dacd43c41fa2e817a09b69b72"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6ConfigE" title="SDK::LVGL::ScrollIndicator::Config"><span class="n"><span class="pre">Config</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">kBig</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="m"><span class="pre">18.0f</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">232.0f</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">308.0f</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator4kBigE" title="Link to this definition"></a><br /></dt>
+<dd><p>The rail beside a menu wheel. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator6kSmallE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator6kSmallE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator6kSmallE"></span><span id="SDK::LVGL::ScrollIndicator::kSmall__Config"></span><span class="target" id="classSDK_1_1LVGL_1_1ScrollIndicator_1aeaaa82f93c686a40bcdae5e2f67d8ecb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6ConfigE" title="SDK::LVGL::ScrollIndicator::Config"><span class="n"><span class="pre">Config</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">kSmall</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="m"><span class="pre">10.0f</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">252.0f</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">288.0f</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6kSmallE" title="Link to this definition"></a><br /></dt>
+<dd><p>The shorter rail beside a set of faces. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator6ConfigE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator6ConfigE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator6ConfigE"></span><span id="SDK::LVGL::ScrollIndicator::Config"></span><span class="target" id="structSDK_1_1LVGL_1_1ScrollIndicator_1_1Config"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Config</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6ConfigE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator6Config9handleLenE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator6Config9handleLenE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator6Config9handleLenE"></span><span id="SDK::LVGL::ScrollIndicator::Config::handleLen__float"></span><span class="target" id="structSDK_1_1LVGL_1_1ScrollIndicator_1_1Config_1a621ff9a72277a6c26ebac2fe90960759"></span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">handleLen</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6Config9handleLenE" title="Link to this definition"></a><br /></dt>
+<dd><p>handle span, degrees </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMinE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator6Config7railMinE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator6Config7railMinE"></span><span id="SDK::LVGL::ScrollIndicator::Config::railMin__float"></span><span class="target" id="structSDK_1_1LVGL_1_1ScrollIndicator_1_1Config_1ac72eedd8bb47445f5d3e9885d8cdc130"></span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">railMin</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMinE" title="Link to this definition"></a><br /></dt>
+<dd><p>rail low bound (TouchGFX angle, 0 = 12 o’clock) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMaxE">
+<span id="_CPPv3N3SDK4LVGL15ScrollIndicator6Config7railMaxE"></span><span id="_CPPv2N3SDK4LVGL15ScrollIndicator6Config7railMaxE"></span><span id="SDK::LVGL::ScrollIndicator::Config::railMax__float"></span><span class="target" id="structSDK_1_1LVGL_1_1ScrollIndicator_1_1Config_1a247d69c0de2433a590779136f84cedca"></span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">railMax</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMaxE" title="Link to this definition"></a><br /></dt>
+<dd><p>rail high bound </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15SensorStatusRowE">
+<span id="_CPPv3N3SDK4LVGL15SensorStatusRowE"></span><span id="_CPPv2N3SDK4LVGL15SensorStatusRowE"></span><span id="SDK::LVGL::SensorStatusRow"></span><span class="target" id="classSDK_1_1LVGL_1_1SensorStatusRow"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SensorStatusRow</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15SensorStatusRowE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15SensorStatusRow15SensorStatusRowEP8lv_obj_t7int32_t7int32_t7int32_t7int32_tPK14lv_image_dsc_tPK14lv_image_dsc_t">
+<span id="_CPPv3N3SDK4LVGL15SensorStatusRow15SensorStatusRowEP8lv_obj_t7int32_t7int32_t7int32_t7int32_tPK14lv_image_dsc_tPK14lv_image_dsc_t"></span><span id="_CPPv2N3SDK4LVGL15SensorStatusRow15SensorStatusRowEP8lv_obj_t7int32_t7int32_t7int32_t7int32_tPK14lv_image_dsc_tPK14lv_image_dsc_t"></span><span id="SDK::LVGL::SensorStatusRow::SensorStatusRow__lv_obj_tP.int32_t.int32_t.int32_t.int32_t.lv_image_dsc_tCP.lv_image_dsc_tCP"></span><span class="target" id="classSDK_1_1LVGL_1_1SensorStatusRow_1ac2f703c7cd4af9ad317912e69233e7a2"></span><span class="sig-name descname"><span class="n"><span class="pre">SensorStatusRow</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">w</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">h</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_image_dsc_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">gpsIcon</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_image_dsc_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hrIcon</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15SensorStatusRow15SensorStatusRowEP8lv_obj_t7int32_t7int32_t7int32_t7int32_tPK14lv_image_dsc_tPK14lv_image_dsc_t" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x, y, w, h</strong> – The row’s box; icons are bottom-aligned and centred in it, as a pair or singly. </p></li>
+<li><p><strong>gpsIcon</strong> – A8 GPS glyph, or nullptr. </p></li>
+<li><p><strong>hrIcon</strong> – A8 heart glyph, or nullptr. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15SensorStatusRow8gpsStateEb">
+<span id="_CPPv3N3SDK4LVGL15SensorStatusRow8gpsStateEb"></span><span id="_CPPv2N3SDK4LVGL15SensorStatusRow8gpsStateEb"></span><span id="SDK::LVGL::SensorStatusRow::gpsState__b"></span><span class="target" id="classSDK_1_1LVGL_1_1SensorStatusRow_1ad61466b84e50c127e18108cd6a7bd5ae"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">State</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">gpsState</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fix</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15SensorStatusRow8gpsStateEb" title="Link to this definition"></a><br /></dt>
+<dd><p>A GPS activity is acquiring until it has a fix, so it is never Absent here. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15SensorStatusRow7hrStateE7uint8_t">
+<span id="_CPPv3N3SDK4LVGL15SensorStatusRow7hrStateE7uint8_t"></span><span id="_CPPv2N3SDK4LVGL15SensorStatusRow7hrStateE7uint8_t"></span><span id="SDK::LVGL::SensorStatusRow::hrState__uint8_t"></span><span class="target" id="classSDK_1_1LVGL_1_1SensorStatusRow_1a8d420417520d18b8d258d4d70bccf1f1"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">State</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hrState</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">accessoryState</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15SensorStatusRow7hrStateE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Map an SDK::Accessory::State value to the heart icon’s state: UNAVAILABLE(0)/IDLE(1) -&gt; Absent, SEARCHING(2)/CONNECTING(3)/LOST(5) -&gt; Searching, CONNECTED(4) -&gt; Connected. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL15SensorStatusRow17hrStateFromSourceE7uint8_t7uint8_t">
+<span id="_CPPv3N3SDK4LVGL15SensorStatusRow17hrStateFromSourceE7uint8_t7uint8_t"></span><span id="_CPPv2N3SDK4LVGL15SensorStatusRow17hrStateFromSourceE7uint8_t7uint8_t"></span><span id="SDK::LVGL::SensorStatusRow::hrStateFromSource__uint8_t.uint8_t"></span><span class="target" id="classSDK_1_1LVGL_1_1SensorStatusRow_1a6c738b6a4489c6f38a8f078f6d858663"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">State</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hrStateFromSource</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">accessoryState</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hrSource</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL15SensorStatusRow17hrStateFromSourceE7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd><p>In-activity variant: steady only while the link is CONNECTED and the strap is the live heart-rate source (SDK::SensorDataParser::HeartRateEx::Source); anything else while external HR is engaged animates as searching. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL7BatteryE">
+<span id="_CPPv3N3SDK4LVGL7BatteryE"></span><span id="_CPPv2N3SDK4LVGL7BatteryE"></span><span id="SDK::LVGL::Battery"></span><span class="target" id="classSDK_1_1LVGL_1_1Battery"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Battery</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL7BatteryE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL7Battery8setLevelE7uint8_t">
+<span id="_CPPv3N3SDK4LVGL7Battery8setLevelE7uint8_t"></span><span id="_CPPv2N3SDK4LVGL7Battery8setLevelE7uint8_t"></span><span id="SDK::LVGL::Battery::setLevel__uint8_t"></span><span class="target" id="classSDK_1_1LVGL_1_1Battery_1ad64c8ea526fb52778a6bd7be84d36136"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLevel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">level</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL7Battery8setLevelE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Segments light at 25 % steps. The first is red from 1 to 24 % and grey at 0 %, as in the TouchGFX gauge. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9TimerRingE">
+<span id="_CPPv3N3SDK4LVGL9TimerRingE"></span><span id="_CPPv2N3SDK4LVGL9TimerRingE"></span><span id="SDK::LVGL::TimerRing"></span><span class="target" id="classSDK_1_1LVGL_1_1TimerRing"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TimerRing</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9TimerRingE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9TimerRing11setProgressE8uint32_t">
+<span id="_CPPv3N3SDK4LVGL9TimerRing11setProgressE8uint32_t"></span><span id="_CPPv2N3SDK4LVGL9TimerRing11setProgressE8uint32_t"></span><span id="SDK::LVGL::TimerRing::setProgress__uint32_t"></span><span class="target" id="classSDK_1_1LVGL_1_1TimerRing_1a7cbcf489cad68f1a318245e45c249222"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">permille</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9TimerRing11setProgressE8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>FILL: the arc grows from the track’s start; <code class="docutils literal notranslate"><span class="pre">permille</span></code> (0..1000) is how much. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9TimerRing12setRemainingE8uint32_t">
+<span id="_CPPv3N3SDK4LVGL9TimerRing12setRemainingE8uint32_t"></span><span id="_CPPv2N3SDK4LVGL9TimerRing12setRemainingE8uint32_t"></span><span id="SDK::LVGL::TimerRing::setRemaining__uint32_t"></span><span class="target" id="classSDK_1_1LVGL_1_1TimerRing_1aa4bb39d335aaa266056fc1a156bc6309"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setRemaining</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">permille</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9TimerRing12setRemainingE8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>DRAIN: the arc shrinks towards the track’s end; <code class="docutils literal notranslate"><span class="pre">permille</span></code> is how much is left. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL6ToggleE">
+<span id="_CPPv3N3SDK4LVGL6ToggleE"></span><span id="_CPPv2N3SDK4LVGL6ToggleE"></span><span id="SDK::LVGL::Toggle"></span><span class="target" id="classSDK_1_1LVGL_1_1Toggle"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Toggle</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL6ToggleE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenuE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenuE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenuE"></span><span id="SDK::LVGL::WheelMenu"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">WheelMenu</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenuE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu16SlideMidCallbackE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu16SlideMidCallbackE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu16SlideMidCallbackE"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1a7dee867ce50163b1250afb7ef316ad53"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SlideMidCallback</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu16SlideMidCallbackE" title="Link to this definition"></a><br /></dt>
+<dd><p>Called once per slide when it is half way, with the item being slid to. The activity apps recolour the lens and the button hints at this point, not when the key is pressed. Fired at the end instead if a slide is cut short. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu9WheelMenuEP8lv_obj_tPK4Item8uint16_tRK5Fonts7int16_t">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu9WheelMenuEP8lv_obj_tPK4Item8uint16_tRK5Fonts7int16_t"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu9WheelMenuEP8lv_obj_tPK4Item8uint16_tRK5Fonts7int16_t"></span><span id="SDK::LVGL::WheelMenu::WheelMenu__lv_obj_tP.ItemCP.uint16_t.FontsCR.int16_t"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1abd60af195671566215501e45dce3b5c5"></span><span class="sig-name descname"><span class="n"><span class="pre">WheelMenu</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">lv_obj_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">parent</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3SDK4LVGL9WheelMenu4ItemE" title="SDK::LVGL::WheelMenu::Item"><span class="n"><span class="pre">Item</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">items</span></span>, <span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3SDK4LVGL9WheelMenu5FontsE" title="SDK::LVGL::WheelMenu::Fonts"><span class="n"><span class="pre">Fonts</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">fonts</span></span>, <span class="n"><span class="pre">int16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">itemOffsetY</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu9WheelMenuEP8lv_obj_tPK4Item8uint16_tRK5Fonts7int16_t" title="Link to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> – Menu entries, kept alive (and possibly edited) by the caller. </p></li>
+<li><p><strong>count</strong> – Number of entries. </p></li>
+<li><p><strong>fonts</strong> – Faces for the selected item, the others and the hint line. </p></li>
+<li><p><strong>itemOffsetY</strong> – Vertical nudge of a Simple surrounding item’s text. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu6selectE8uint16_t">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu6selectE8uint16_t"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu6selectE8uint16_t"></span><span id="SDK::LVGL::WheelMenu::select__uint16_t"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1a74581c295881e1c6010802f0642b26e3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">select</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">index</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu6selectE8uint16_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Jump to an item with no animation. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu4nextEv">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu4nextEv"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu4nextEv"></span><span id="SDK::LVGL::WheelMenu::next"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1ad9b79e6b438704b6bc494630319f3947"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">next</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu4nextEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Slide to the following / preceding item. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu7refreshEv">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu7refreshEv"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu7refreshEv"></span><span id="SDK::LVGL::WheelMenu::refresh"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1a625a192e1b642150441dc659efd6dcd5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">refresh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu7refreshEv" title="Link to this definition"></a><br /></dt>
+<dd><p>Re-render after the caller changed item texts or toggle states. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3SDK4LVGL9WheelMenu8selectedEv">
+<span id="_CPPv3NK3SDK4LVGL9WheelMenu8selectedEv"></span><span id="_CPPv2NK3SDK4LVGL9WheelMenu8selectedEv"></span><span id="SDK::LVGL::WheelMenu::selectedC"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1ac543e97458f4d63b4e9bd6623699f05f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">selected</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3SDK4LVGL9WheelMenu8selectedEv" title="Link to this definition"></a><br /></dt>
+<dd><p>The selected item; during a slide, the one being slid to. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu13setBackgroundE8uint32_t">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu13setBackgroundE8uint32_t"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu13setBackgroundE8uint32_t"></span><span id="SDK::LVGL::WheelMenu::setBackground__uint32_t"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1a54fcf5e787418121b99a8142ba4679e6"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setBackground</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">color</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu13setBackgroundE8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Lens colour behind the selected item. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu14setAnimationMsE8uint32_t">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu14setAnimationMsE8uint32_t"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu14setAnimationMsE8uint32_t"></span><span id="SDK::LVGL::WheelMenu::setAnimationMs__uint32_t"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1acd12e2bfc81901b21f9d3b19fe5a7b42"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setAnimationMs</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu14setAnimationMsE8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Duration of a slide; 0 makes <a class="reference internal" href="#classSDK_1_1LVGL_1_1WheelMenu_1ad9b79e6b438704b6bc494630319f3947"><span class="std std-ref">next()</span></a>/prev() jump. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-attributes">Public Static Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu19kDefaultAnimationMsE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu19kDefaultAnimationMsE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu19kDefaultAnimationMsE"></span><span id="SDK::LVGL::WheelMenu::kDefaultAnimationMs__uint32_t"></span><span class="target" id="classSDK_1_1LVGL_1_1WheelMenu_1a46abf64e653eb19b8f72058ba1083b44"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">kDefaultAnimationMs</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">400</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu19kDefaultAnimationMsE" title="Link to this definition"></a><br /></dt>
+<dd><p>Slide time the activity apps use. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu5FontsE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu5FontsE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu5FontsE"></span><span id="SDK::LVGL::WheelMenu::Fonts"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Fonts"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Fonts</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu5FontsE" title="Link to this definition"></a><br /></dt>
+<dd><p>The faces the wheel renders with. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu5Fonts6centerE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu5Fonts6centerE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu5Fonts6centerE"></span><span id="SDK::LVGL::WheelMenu::Fonts::center__lv_font_tCP"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Fonts_1a34aa2e7ace838458c38dd0bf90816cf7"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_font_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">center</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu5Fonts6centerE" title="Link to this definition"></a><br /></dt>
+<dd><p>selected item text (the activity apps: SemiBold 30) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu5Fonts4itemE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu5Fonts4itemE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu5Fonts4itemE"></span><span id="SDK::LVGL::WheelMenu::Fonts::item__lv_font_tCP"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Fonts_1aa5acc6ec5359ebfd4971952ecf6a036a"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_font_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">item</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu5Fonts4itemE" title="Link to this definition"></a><br /></dt>
+<dd><p>surrounding items’ text (Medium 18) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu5Fonts3tipE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu5Fonts3tipE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu5Fonts3tipE"></span><span id="SDK::LVGL::WheelMenu::Fonts::tip__lv_font_tCP"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Fonts_1aa0258adcfdff5bfc2a208f43d1ee035f"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_font_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">tip</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu5Fonts3tipE" title="Link to this definition"></a><br /></dt>
+<dd><p>hint line of a Tip item (Italic 18) </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu10IconLayoutE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu10IconLayoutE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu10IconLayoutE"></span><span id="SDK::LVGL::WheelMenu::IconLayout"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1IconLayout"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IconLayout</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu10IconLayoutE" title="Link to this definition"></a><br /></dt>
+<dd><p>Icon-style geometry for one slot (TouchGFX ItemLayout::icon). </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5iconYE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu10IconLayout5iconYE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu10IconLayout5iconYE"></span><span id="SDK::LVGL::WheelMenu::IconLayout::iconY__int16_t"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1IconLayout_1a2e1af421f127e6bf7ec8be435b9314f4"></span><span class="n"><span class="pre">int16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">iconY</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5iconYE" title="Link to this definition"></a><br /></dt>
+<dd><p>icon position within the 240 x 66 slot </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5textWE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu10IconLayout5textWE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu10IconLayout5textWE"></span><span id="SDK::LVGL::WheelMenu::IconLayout::textW__int16_t"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1IconLayout_1a226f54f0964814e72a597188108381b6"></span><span class="n"><span class="pre">int16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">textW</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5textWE" title="Link to this definition"></a><br /></dt>
+<dd><p>left-aligned text box beside the icon </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu4ItemE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu4ItemE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu4ItemE"></span><span id="SDK::LVGL::WheelMenu::Item"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Item"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Item</span></span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu4ItemE" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu4Item4textE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu4Item4textE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu4Item4textE"></span><span id="SDK::LVGL::WheelMenu::Item::text__cCP"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Item_1a1cdda9ae1319a6ed7addabf1d4d5c16c"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">text</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu4Item4textE" title="Link to this definition"></a><br /></dt>
+<dd><p><p>main text (may contain ‘</p>
+<p>’)</p>
+</p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu4Item8itemTextE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu4Item8itemTextE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu4Item8itemTextE"></span><span id="SDK::LVGL::WheelMenu::Item::itemText__cCP"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Item_1a30a560ad4738caee43ba19aa7317d5bd"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">itemText</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu4Item8itemTextE" title="Link to this definition"></a><br /></dt>
+<dd><p>text when not selected; nullptr = text </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu4Item10centerFontE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu4Item10centerFontE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu4Item10centerFontE"></span><span id="SDK::LVGL::WheelMenu::Item::centerFont__lv_font_tCP"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Item_1aa37f73edde877c825556d2b549ebeb94"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">lv_font_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">centerFont</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu4Item10centerFontE" title="Link to this definition"></a><br /></dt>
+<dd><p>selected face; nullptr = <a class="reference internal" href="#structSDK_1_1LVGL_1_1WheelMenu_1_1Fonts_1a34aa2e7ace838458c38dd0bf90816cf7"><span class="std std-ref">Fonts::center</span></a></p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3SDK4LVGL9WheelMenu4Item8tipColorE">
+<span id="_CPPv3N3SDK4LVGL9WheelMenu4Item8tipColorE"></span><span id="_CPPv2N3SDK4LVGL9WheelMenu4Item8tipColorE"></span><span id="SDK::LVGL::WheelMenu::Item::tipColor__uint32_t"></span><span class="target" id="structSDK_1_1LVGL_1_1WheelMenu_1_1Item_1a9e1dd7cc92fe89bc7d148172de7c4282"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tipColor</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">SDK</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">GUI</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Color</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">WHITE</span></span><a class="headerlink" href="#_CPPv4N3SDK4LVGL9WheelMenu4Item8tipColorE" title="Link to this definition"></a><br /></dt>
+<dd><p>hint colour when not selected </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </section>
+</section>
 <section id="utilities">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Utilities</a><a class="headerlink" href="#utilities" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Utilities</a><a class="headerlink" href="#utilities" title="Link to this heading"></a></h2>
 <p>Common utility classes and helper functions.</p>
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4I0_6size_tE14CircularBuffer">
