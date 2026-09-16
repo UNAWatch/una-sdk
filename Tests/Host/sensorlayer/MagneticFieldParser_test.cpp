@@ -138,9 +138,10 @@ TEST(MagneticFieldParser, GravityIsTheAccelerometerReadingNotTheDownVector)
     EXPECT_NEAR(faceUp, 333.435f, 0.01f);
     EXPECT_NEAR(faceUp, p.getAzimuthDeg(), 0.01f);
 
-    float faceDown = 0.0f;
-    ASSERT_TRUE(p.getAzimuthDegTilted(0.0f, 0.0f, -1.0f, faceDown));
-    EXPECT_NEAR(faceDown, 206.565f, 0.01f) << "face-down is not the mirror image";
+    float downVector = 0.0f;
+    ASSERT_TRUE(p.getAzimuthDegTilted(0.0f, 0.0f, -1.0f, downVector));
+    EXPECT_NEAR(downVector, 360.0f - faceUp, 0.01f)
+            << "the down vector did not mirror the bearing";
 }
 
 // -----------------------------------------------------------------------------
@@ -204,173 +205,191 @@ TEST(MagneticFieldParser, LevelProjectionIsTheIdentityWhenTheWatchIsLevel)
     EXPECT_NEAR(yh, -34.0f, 0.001f);
 }
 
-// The point of the whole exercise: tip the watch and the bearing must not move.
-// The field is fixed in the world; only the watch turns, so the measured field
-// is the world field expressed in the watch's axes.
-TEST(MagneticFieldParser, TiltingTheWatchDoesNotMoveTheBearing)
+// A model of the watch in the world, for the tests below: the answer to every
+// question they ask is then the heading the watch was pointed at, known without
+// any of the arithmetic under test.
+//
+// The world is east, north, up. The field is a northern one: 49 uT at 66.5
+// degrees of inclination, whose vertical part is more than twice the
+// horizontal - the case where tilt turns a level bearing round.
+namespace {
+
+struct Vec3 {
+    float x;
+    float y;
+    float z;
+};
+
+float dot(Vec3 a, Vec3 b)
 {
-    // A field pointing north and downwards, as it does in the northern
-    // hemisphere: 20 uT along +Y, 40 uT into the watch face.
-    const float northUt = 20.0f;
-    const float downUt  = 40.0f;
-
-    float level = 0.0f;
-    {
-        float xh = 0.0f;
-        float yh = 0.0f;
-        ASSERT_TRUE(MagneticField::levelProject(0.0f, northUt, -downUt,
-                                                0.0f, 0.0f, 1.0f, xh, yh));
-        level = MagneticField::bearingDeg(xh, yh);
-    }
-
-    // Tilt the watch about X - a roll, in levelProject()'s terms, where pitch
-    // is about Y: both the field and gravity rotate in the watch's axes by the
-    // same rotation.
-    for (int degrees = -40; degrees <= 40; degrees += 10) {
-        const float a = static_cast<float>(degrees) * 3.14159265f / 180.0f;
-        const float c = std::cos(a);
-        const float s = std::sin(a);
-
-        const float my = (northUt * c) - (-downUt * s);
-        const float mz = (northUt * s) + (-downUt * c);
-
-        const float ay = -s;
-        const float az =  c;
-
-        float xh = 0.0f;
-        float yh = 0.0f;
-        ASSERT_TRUE(MagneticField::levelProject(0.0f, my, mz,
-                                                0.0f, ay, az, xh, yh))
-                << "at " << degrees << " deg";
-
-        EXPECT_NEAR(MagneticField::bearingDeg(xh, yh), level, 0.1f)
-                << "bearing moved when only the watch did, at "
-                << degrees << " deg";
-    }
+    return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
-// The invariant the whole projection rests on, and the one that does not care
-// which Euler convention anyone had in mind: gravity, fed in as if it were the
-// field, must project to nothing. It points straight down by definition, so a
-// transform that puts the horizontal plane where the horizontal plane really
-// is has to leave it no horizontal part at all.
+constexpr float kDegToRad = 3.14159265f / 180.0f;
+
+/// v turned by `deg` about the unit axis k, right-handed.
+Vec3 turn(Vec3 v, Vec3 k, float deg)
+{
+    const float c = std::cos(deg * kDegToRad);
+    const float s = std::sin(deg * kDegToRad);
+    const float d = dot(v, k);
+    const Vec3  kxv{(k.y * v.z) - (k.z * v.y), (k.z * v.x) - (k.x * v.z),
+                    (k.x * v.y) - (k.y * v.x)};
+
+    return {(v.x * c) + (kxv.x * s) + (k.x * d * (1.0f - c)),
+            (v.y * c) + (kxv.y * s) + (k.y * d * (1.0f - c)),
+            (v.z * c) + (kxv.z * s) + (k.z * d * (1.0f - c))};
+}
+
+struct Reading {
+    Vec3 field;     ///< What the magnetometer reads, watch axes.
+    Vec3 gravity;   ///< What the accelerometer reads, watch axes: up.
+};
+
+/// The watch with 12 o'clock pointed at `headingDeg`, then raised by
+/// `raiseDeg` (the arm lifted: a turn about 3-9 o'clock), then the wrist turned
+/// by `rollDeg` about the forearm (12-6 o'clock), positive lowering 3 o'clock.
+Reading watchAt(float headingDeg, float raiseDeg, float rollDeg)
+{
+    const float h = headingDeg * kDegToRad;
+
+    Vec3 x{std::cos(h), -std::sin(h), 0.0f};
+    Vec3 y{std::sin(h), std::cos(h), 0.0f};
+    Vec3 z{0.0f, 0.0f, 1.0f};
+
+    y = turn(y, x, raiseDeg);
+    z = turn(z, x, raiseDeg);
+
+    x = turn(x, y, rollDeg);
+    z = turn(z, y, rollDeg);
+
+    const float inc = 66.5f * kDegToRad;
+    const Vec3  field{0.0f, 49.0f * std::cos(inc), -49.0f * std::sin(inc)};
+    const Vec3  up{0.0f, 0.0f, 1.0f};
+
+    return {{dot(field, x), dot(field, y), dot(field, z)},
+            {dot(up, x), dot(up, y), dot(up, z)}};
+}
+
+bool bearingAt(const Reading& r, float& degrees)
+{
+    float xh = 0.0f;
+    float yh = 0.0f;
+
+    if (!MagneticField::levelProject(r.field.x, r.field.y, r.field.z,
+                                     r.gravity.x, r.gravity.y, r.gravity.z,
+                                     xh, yh)) {
+        return false;
+    }
+
+    if (!MagneticField::hasDirection(xh, yh)) {
+        return false;
+    }
+
+    degrees = MagneticField::bearingDeg(xh, yh);
+    return true;
+}
+
+float angleApart(float a, float b)
+{
+    const float d = std::fmod(std::fabs(a - b), 360.0f);
+    return (d > 180.0f) ? (360.0f - d) : d;
+}
+
+} // namespace
+
+// Where a tilted bearing is taken for granted: the arm raised or lowered, the
+// wrist turned about the forearm, both at once, in every direction. The wrist
+// goes all the way round, so the face on edge and face down are in here too;
+// neither changes where 12 o'clock points.
 //
-// This is what separates a projection built from the angles it extracted from
-// one built from a different composition order. Those two agree exactly while
-// only one of pitch and roll is non-zero, so a test that tilts about a single
-// axis cannot tell them apart - and every direction below has both.
+// Splitting a tilt into two angles and undoing them one at a time passes every
+// case below that has only one of the two - and misses the others by tens of
+// degrees. That is why the grid has both.
+TEST(MagneticFieldParser, ArmRaisedAndWristTurnedKeepTheBearing)
+{
+    int checked = 0;
+
+    for (int heading = 0; heading < 360; heading += 45) {
+        for (int raise = -75; raise <= 75; raise += 15) {
+            for (int roll = -180; roll <= 180; roll += 30) {
+                const Reading r = watchAt(static_cast<float>(heading),
+                                          static_cast<float>(raise),
+                                          static_cast<float>(roll));
+
+                float degrees = -1.0f;
+                ASSERT_TRUE(bearingAt(r, degrees))
+                        << "heading " << heading << " raise " << raise
+                        << " roll " << roll;
+
+                EXPECT_LT(angleApart(degrees, static_cast<float>(heading)), 0.1f)
+                        << "heading " << heading << " raise " << raise
+                        << " roll " << roll;
+
+                checked++;
+            }
+        }
+    }
+
+    EXPECT_EQ(checked, 8 * 11 * 13) << "the grid stopped early";
+}
+
+// The same through the parser, the way an app calls it.
+TEST(MagneticFieldParser, TheTiltedBearingIsTheBearingOfTwelveOClock)
+{
+    const Reading r = watchAt(120.0f, 30.0f, 45.0f);
+
+    MagData m;
+    fill(m, r.field.x, r.field.y, r.field.z, true);
+
+    MagneticField p = parse(m);
+
+    float degrees = -1.0f;
+    ASSERT_TRUE(p.getAzimuthDegTilted(r.gravity.x, r.gravity.y, r.gravity.z,
+                                      degrees));
+    EXPECT_LT(angleApart(degrees, 120.0f), 0.1f);
+
+    // Gravity in any unit: an accelerometer in m/s^2 reads the same bearing.
+    float inMs2 = -1.0f;
+    ASSERT_TRUE(p.getAzimuthDegTilted(r.gravity.x * 9.80665f,
+                                      r.gravity.y * 9.80665f,
+                                      r.gravity.z * 9.80665f, inMs2));
+    EXPECT_NEAR(inMs2, degrees, 0.01f);
+}
+
+// The invariant the whole projection rests on: gravity, fed in as if it were
+// the field, must project to nothing. It points straight up by definition, so
+// a transform that puts the horizontal plane where the horizontal plane really
+// is has to leave it no horizontal part at all.
 TEST(MagneticFieldParser, ProjectingGravityItselfLeavesNothingHorizontal)
 {
     int checked = 0;
 
-    for (int pitchDeg = -70; pitchDeg <= 70; pitchDeg += 10) {
-        for (int rollDeg = -70; rollDeg <= 70; rollDeg += 10) {
-            const float p = static_cast<float>(pitchDeg) * 3.14159265f / 180.0f;
-            const float r = static_cast<float>(rollDeg) * 3.14159265f / 180.0f;
-
-            // Gravity as the watch would read it at this attitude.
-            const float gx = -std::sin(p);
-            const float gy =  std::sin(r) * std::cos(p);
-            const float gz =  std::cos(r) * std::cos(p);
+    for (int raise = -75; raise <= 75; raise += 15) {
+        for (int roll = -180; roll <= 180; roll += 30) {
+            const Reading r = watchAt(0.0f, static_cast<float>(raise),
+                                      static_cast<float>(roll));
+            const Vec3& g = r.gravity;
 
             float xh = 0.0f;
             float yh = 0.0f;
 
-            ASSERT_TRUE(MagneticField::levelProject(gx, gy, gz,
-                                                    gx, gy, gz, xh, yh))
-                    << "at pitch " << pitchDeg << " roll " << rollDeg;
+            ASSERT_TRUE(MagneticField::levelProject(g.x, g.y, g.z,
+                                                    g.x, g.y, g.z, xh, yh))
+                    << "at raise " << raise << " roll " << roll;
 
             EXPECT_NEAR(xh, 0.0f, 1e-4f)
-                    << "gravity leaked into X at pitch " << pitchDeg
-                    << " roll " << rollDeg;
+                    << "gravity leaked into X at raise " << raise
+                    << " roll " << roll;
             EXPECT_NEAR(yh, 0.0f, 1e-4f)
-                    << "gravity leaked into Y at pitch " << pitchDeg
-                    << " roll " << rollDeg;
+                    << "gravity leaked into Y at raise " << raise
+                    << " roll " << roll;
 
             checked++;
         }
     }
 
-    EXPECT_GT(checked, 100) << "the grid stopped early";
-}
-
-// The other half of the same guarantee, and physical rather than algebraic:
-// turning the watch about the vertical is what a bearing is supposed to
-// measure, so at any fixed tilt the reported bearing must follow that turn
-// one for one.
-//
-// The tilt here has both pitch and roll, which is the case the single-axis
-// test above cannot reach. A projection built from a different composition
-// order than the angles it extracted still returns a smoothly varying number
-// here - it simply returns the wrong one, off by an amount that depends on the
-// tilt, so it neither tracks the turn nor agrees with the level reading.
-TEST(MagneticFieldParser, AtAnyTiltTheBearingFollowsATurnAboutTheVertical)
-{
-    // North along +Y and downwards, as in the northern hemisphere.
-    const float worldField[3] = { 0.0f, 20.0f, -40.0f };
-    const float worldUp[3]    = { 0.0f, 0.0f, 1.0f };
-
-    // A tilt held fixed relative to the watch while it is turned underneath.
-    const float pitch = 30.0f * 3.14159265f / 180.0f;
-    const float roll  = 25.0f * 3.14159265f / 180.0f;
-
-    auto toBody = [&](const float v[3], float yaw, float out[3]) {
-        // Turn about the world vertical first, then tilt in the turned frame,
-        // so the turn is a heading change and the tilt is not.
-        const float cy = std::cos(-yaw);
-        const float sy = std::sin(-yaw);
-        float a[3] = { (v[0] * cy) - (v[1] * sy),
-                       (v[0] * sy) + (v[1] * cy),
-                       v[2] };
-
-        const float cp = std::cos(pitch);
-        const float sp = std::sin(pitch);
-        float b[3] = { (a[0] * cp) + (a[2] * sp),
-                       a[1],
-                       -(a[0] * sp) + (a[2] * cp) };
-
-        const float cr = std::cos(roll);
-        const float sr = std::sin(roll);
-        out[0] = b[0];
-        out[1] = (b[1] * cr) - (b[2] * sr);
-        out[2] = (b[1] * sr) + (b[2] * cr);
-    };
-
-    float reference = 0.0f;
-
-    for (int deg = 0; deg <= 180; deg += 15) {
-        const float yaw = static_cast<float>(deg) * 3.14159265f / 180.0f;
-
-        float m[3];
-        float g[3];
-        toBody(worldField, yaw, m);
-        toBody(worldUp, yaw, g);
-
-        float xh = 0.0f;
-        float yh = 0.0f;
-        ASSERT_TRUE(MagneticField::levelProject(m[0], m[1], m[2],
-                                                g[0], g[1], g[2], xh, yh))
-                << "at yaw " << deg;
-
-        const float got = MagneticField::bearingDeg(xh, yh);
-
-        if (deg == 0) {
-            reference = got;
-
-            // Tilt alone must not move it: with the watch level and unturned
-            // the field points along +Y, which is north.
-            EXPECT_NEAR(std::fmod(got + 360.0f, 360.0f), 0.0f, 0.2f)
-                    << "a tilt alone moved the bearing off north";
-            continue;
-        }
-
-        // Turning the watch one way moves the bearing the other.
-        const float expected = std::fmod((reference - static_cast<float>(deg))
-                                         + 720.0f, 360.0f);
-
-        EXPECT_NEAR(std::fmod(got + 360.0f, 360.0f), expected, 0.2f)
-                << "the bearing did not follow the turn at yaw " << deg;
-    }
+    EXPECT_EQ(checked, 11 * 13) << "the grid stopped early";
 }
 
 TEST(MagneticFieldParser, GravityThatSaysNothingIsRefused)
@@ -388,31 +407,54 @@ TEST(MagneticFieldParser, GravityThatSaysNothingIsRefused)
             << "accepted a NaN gravity vector";
 }
 
-// Held edge-on, with the 3 o'clock side pointing at the ground, gravity cannot
-// say how far the watch is rolled about that axis, and a bearing computed
-// anyway would spin freely.
-TEST(MagneticFieldParser, EdgeOnHasNoBearing)
+// With 12 o'clock pointing at the sky or the ground the forearm has no
+// direction on the map, and a bearing computed anyway would spin freely.
+TEST(MagneticFieldParser, TwelveOClockUprightHasNoBearing)
 {
-    float xh = 0.0f;
-    float yh = 0.0f;
+    float degrees = 123.0f;
 
-    EXPECT_FALSE(MagneticField::levelProject(0.0f, kStrong, 0.0f,
-                                             -1.0f, 0.0f, 0.0f, xh, yh));
+    EXPECT_FALSE(bearingAt(watchAt(0.0f, 90.0f, 0.0f), degrees)) << "pointing up";
+    EXPECT_FALSE(bearingAt(watchAt(0.0f, -90.0f, 0.0f), degrees)) << "pointing down";
+    EXPECT_FLOAT_EQ(degrees, 123.0f) << "wrote a bearing it had refused to give";
 }
 
-// Where the edge-on gate falls, not only that it exists: either side of a
-// square of cos(pitch) of 0.03, about 80 degrees of pitch. Gravity has unit
-// length, so that square is exactly what is set here.
-TEST(MagneticFieldParser, TheEdgeOnGateFallsWhereItSays)
+// The watch edge-on with 3 o'clock at the ground still has 12 o'clock level,
+// so it has a bearing; so does a watch lying face down.
+TEST(MagneticFieldParser, EdgeOnAndFaceDownStillHaveABearing)
 {
-    auto project = [](float cosPitchSq) {
+    float degrees = -1.0f;
+
+    ASSERT_TRUE(bearingAt(watchAt(90.0f, 0.0f, 90.0f), degrees)) << "3 o'clock down";
+    EXPECT_LT(angleApart(degrees, 90.0f), 0.1f);
+
+    ASSERT_TRUE(bearingAt(watchAt(90.0f, 0.0f, -90.0f), degrees)) << "3 o'clock up";
+    EXPECT_LT(angleApart(degrees, 90.0f), 0.1f);
+
+    ASSERT_TRUE(bearingAt(watchAt(90.0f, 0.0f, 180.0f), degrees)) << "face down";
+    EXPECT_LT(angleApart(degrees, 90.0f), 0.1f);
+}
+
+// Where the upright gate falls, not only that it exists: either side of a
+// share of 12 o'clock left flat of 0.03 squared, about 10 degrees from upright,
+// whichever way the wrist is turned. Gravity has unit length, so that square
+// is exactly what is set here.
+TEST(MagneticFieldParser, TheUprightGateFallsWhereItSays)
+{
+    auto project = [](float flatSq, float rollDeg) {
+        const float c = std::sqrt(flatSq);
+        const float r = rollDeg * kDegToRad;
         float xh = 0.0f;
         float yh = 0.0f;
-        return MagneticField::levelProject(0.0f, kStrong, 0.0f,
-                                           -std::sqrt(1.0f - cosPitchSq), 0.0f,
-                                           std::sqrt(cosPitchSq), xh, yh);
+        return MagneticField::levelProject(0.0f, 0.0f, kStrong,
+                                           -c * std::sin(r),
+                                           std::sqrt(1.0f - flatSq),
+                                           c * std::cos(r), xh, yh);
     };
 
-    EXPECT_TRUE(project(0.04f)) << "refused just inside the gate";
-    EXPECT_FALSE(project(0.02f)) << "accepted just outside the gate";
+    for (int roll = -180; roll <= 180; roll += 45) {
+        EXPECT_TRUE(project(0.04f, static_cast<float>(roll)))
+                << "refused just inside the gate, roll " << roll;
+        EXPECT_FALSE(project(0.02f, static_cast<float>(roll)))
+                << "accepted just outside the gate, roll " << roll;
+    }
 }

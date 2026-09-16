@@ -18,16 +18,24 @@
  * measurement, and a heading is a way of reading it. getAzimuthDeg() is
  * meaningful only when isAzimuthValid().
  *
+ * Both bearings are the bearing of 12 o'clock. On the wrist 12 o'clock runs
+ * along the forearm, so pointing the arm at something points 12 o'clock at it.
+ *
  * getAzimuthDeg() is not tilt-compensated: it is worked out in the watch's own
  * XY plane, so it is a heading only while the watch is held roughly level.
- * Tilting it rotates part of the horizontal field out of that plane and swings
- * the answer.
+ * Tilting it rotates part of the vertical field into that plane, and where the
+ * field is steep - at 66 degrees of inclination the vertical part is more than
+ * twice the horizontal - a quarter of the way up is enough to turn the answer
+ * round.
  *
  * Compensating for that needs gravity, which no magnetic sample carries, so it
  * is passed in: read the accelerometer wherever you already read it and call
  * getAzimuthDegTilted(). Nothing here subscribes to anything on your behalf,
  * and the two bearings are the same arithmetic - level projection first, then
  * one common last step - so a watch held flat reads the same either way.
+ * Raising the arm and turning the wrist about it, together or apart, leave the
+ * tilted bearing where it was. It has no answer only while 12 o'clock points
+ * nearly straight up or down, where the forearm has no direction on the map.
  *
  * Neither bearing is true north. No declination is applied, so a bearing taken
  * against a map needs the local declination added by whoever knows where the
@@ -106,8 +114,8 @@ public:
     }
 
     /**
-     * @brief   Bearing clockwise from magnetic north, corrected for how the
-     *          watch is being held.
+     * @brief   Bearing of 12 o'clock clockwise from magnetic north, corrected
+     *          for how the watch is being held.
      * @param   ax, ay, az: The accelerometer's own reading, in the watch's
      *          axes - not a vector pointing down. A watch lying face-up at
      *          rest reads az positive. Passed the other way round the bearing
@@ -118,8 +126,9 @@ public:
      *          for how the watch was held a second ago.
      * @param   degrees: The bearing, untouched unless this returns true.
      * @retval  'false' when there is no trustworthy bearing: no calibration,
-     *          too little horizontal field, or gravity that cannot say which
-     *          way is down.
+     *          too little horizontal field, gravity that cannot say which way
+     *          is down, or 12 o'clock pointing too near straight up or down to
+     *          have a direction on the map.
      */
     bool getAzimuthDegTilted(float ax, float ay, float az,
                              float& degrees) const
@@ -165,21 +174,29 @@ public:
 
     /**
      * @brief   Project a field into the horizontal plane using gravity.
-     * @note    This is the whole of tilt compensation: it rotates the measured
-     *          field into the frame the watch would be in if it were level, so
-     *          that what comes out can be read by the same bearingDeg() as a
-     *          level sample. Held flat it is the identity - (xh, yh) come back
-     *          as (x, y) - which is why the two bearings agree there.
+     * @note    This is the whole of tilt compensation. It lays 12 o'clock flat -
+     *          the watch's +Y less its part along gravity - and returns the
+     *          field along that direction as yh, and along the horizontal
+     *          direction a quarter turn clockwise from it (3 o'clock laid flat)
+     *          as xh. What comes out is read by the same bearingDeg() as a
+     *          level sample, and gives the bearing of 12 o'clock. Held flat it
+     *          is the identity - (xh, yh) come back as (x, y) - which is why
+     *          the two bearings agree there.
+     * @note    No angles are taken out of gravity on the way. Splitting a tilt
+     *          into two angles and undoing them one at a time reads 12 o'clock
+     *          only while one of the two is zero; with the arm raised and the
+     *          wrist turned at once it is tens of degrees out.
      * @note    Static, and part of the API for the same reason as
      *          hasDirection().
      * @param   x, y, z:    Corrected field, microtesla.
      * @param   ax, ay, az: The accelerometer's reading in the same axes, as
      *          getAzimuthDegTilted() takes it: az positive face-up. Any unit.
-     * @param   xh, yh:     Level-frame horizontal field, untouched unless this
-     *                      returns true.
-     * @retval  'false' when gravity cannot say which way is down: too small to
-     *          be gravity at all, or leaving the watch so near edge-on that
-     *          the projection is undefined.
+     * @param   xh, yh:     Horizontal field, microtesla, along 3 o'clock and 12
+     *                      o'clock laid flat; untouched unless this returns
+     *                      true.
+     * @retval  'false' when gravity cannot say which way is down, or when
+     *          12 o'clock points so near straight up or down that there is too
+     *          little of it left once laid flat to give a direction.
      */
     static bool levelProject(float x, float y, float z,
                              float ax, float ay, float az,
@@ -187,47 +204,40 @@ public:
     {
         const float magnitude = std::sqrt((ax * ax) + (ay * ay) + (az * az));
 
-        // A NaN fails this, so one is rejected here rather than spreading
-        // through the trigonometry below.
-        if (!(magnitude > 0.0f)) {
-            return false;
-        }
-
         const float nx = ax / magnitude;
         const float ny = ay / magnitude;
         const float nz = az / magnitude;
 
-        // Pitch about Y and roll about X, taken straight from gravity: with
-        // the watch level, gravity lies along Z and both are zero.
-        const float sinPitch = -nx;
-        const float cosPitchSq = 1.0f - (sinPitch * sinPitch);
+        // What is left of 12 o'clock once laid flat, squared: with gravity a
+        // unit vector, 1 - ny^2 = nx^2 + nz^2. Gravity of zero length or with
+        // a NaN in it leaves this a NaN, which fails the test below, so it is
+        // rejected here rather than spreading through the arithmetic.
+        const float flatSq = (nx * nx) + (nz * nz);
 
-        // Edge-on: X is pointing at the ground, the roll axis is along
-        // gravity, and how far the watch is rolled about it is not something
-        // gravity can answer. Reported as no bearing rather than as a number
-        // that spins.
-        if (cosPitchSq < MIN_COS_PITCH_SQ) {
+        // 12 o'clock pointing at the sky or the ground: the forearm has no
+        // direction on the map, and near it noise is divided by a length close
+        // to zero. Reported as no bearing rather than as a number that spins.
+        if (!(flatSq >= MIN_FLAT_SQ)) {
             return false;
         }
 
-        const float cosPitch = std::sqrt(cosPitchSq);
-        const float sinRoll  = ny / cosPitch;
-        const float cosRoll  = nz / cosPitch;
+        const float flat = std::sqrt(flatSq);
 
-        // The rotation the angles above describe, applied in the order they
-        // were taken out of gravity. Getting that order wrong leaves the two
-        // consistent one axis at a time and wrong together, which is why the
-        // test for this feeds gravity itself through and demands zeroes.
-        xh = (x * cosPitch) + (y * sinPitch * sinRoll) + (z * sinPitch * cosRoll);
-        yh = (y * cosRoll) - (z * sinRoll);
+        // The field's part along gravity, taken out of both components. Each
+        // direction is at right angles to gravity, so nothing vertical is
+        // left in either.
+        const float along = (x * nx) + (y * ny) + (z * nz);
+
+        xh = ((x * nz) - (z * nx)) / flat;
+        yh = (y - (ny * along)) / flat;
 
         return true;
     }
 
-    /// How far from edge-on the watch has to be for a projection to mean
-    /// anything, as the square of cos(pitch). 0.03 is about 10 degrees of the
-    /// watch face still facing up.
-    static constexpr float MIN_COS_PITCH_SQ = 0.03f;
+    /// How much of 12 o'clock must be left once laid flat for a projection to
+    /// mean anything, as the square of its share. 0.03 is 12 o'clock about
+    /// 10 degrees from pointing straight up or down.
+    static constexpr float MIN_FLAT_SQ = 0.03f;
 
     /**
      * @brief   Bearing clockwise from magnetic north, degrees in [0, 360).
