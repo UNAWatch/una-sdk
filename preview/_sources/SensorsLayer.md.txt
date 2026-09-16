@@ -153,8 +153,9 @@ part's own offsets, which is what a calibration is worked out from and not
 something to take a direction from.
 
 The parser also derives a compass bearing, since that is a function of one
-sample and nothing else. It is degrees clockwise from **magnetic** north - no
-declination is applied - and `getAzimuthDeg()` means nothing unless
+sample and nothing else. It is the bearing of 12 o'clock - on the wrist, the
+direction the forearm points - in degrees clockwise from **magnetic** north,
+with no declination applied, and `getAzimuthDeg()` means nothing unless
 `isAzimuthValid()`.
 
 **Code Snippet**:
@@ -175,9 +176,12 @@ void processBatch(uint16_t handle, SDK::Sensor::DataBatch& batch) {
 }
 ```
 
-`getAzimuthDeg()` assumes the watch is held roughly level. To compensate for
-how it is actually being held, pass gravity in - read it from the
-accelerometer wherever you already read it:
+`getAzimuthDeg()` assumes the watch is held roughly level. Tilting it brings
+part of the vertical field into the watch's own plane, and where the field is
+steep that part is the larger one: in the UK a quarter of the way up is enough
+to turn the answer round. To compensate for how the watch is actually being
+held, pass gravity in - read it from the accelerometer wherever you already
+read it:
 
 ```cpp
 float bearing = 0.0f;
@@ -191,6 +195,13 @@ to this one, passed as they are. That is the accelerometer's own reading, not
 a vector pointing down: a watch lying face-up at rest reads Z positive. Passed
 the other way round, the bearing comes out mirrored, and nothing can catch
 that, because face-down is a real attitude.
+
+The tilted bearing stays on 12 o'clock however the watch is held: with the arm
+raised or lowered, the wrist turned about the forearm, both at once, the face
+on edge or face down. The one attitude it refuses is 12 o'clock pointing
+within about 10 degrees of straight up or down, where the forearm has no
+direction on the map. Whether a rose can still be read off a face tilted that
+far is a separate question, and one for whatever draws it.
 
 The arithmetic behind both bearings is public, for a field that did not arrive
 in one of these samples - one from your own fusion, say:
