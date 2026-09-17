@@ -1018,10 +1018,19 @@ void Service::saveLap(float autoLapDistanceM)
     // Save lap to the FIT file
     ActivityWriter::LapData fitLap{};
 
-    fitLap.timestamp = mTimeCounter.getCurrent();
+    // Every user stop pauses first -- the GUI pauses on entering the stop menu
+    // and the confirm needs a hold -- so the span between that pause and the
+    // save is UI time, not activity time. End at the pause instant and trim the
+    // same tail from the elapsed span. A mid-activity lap is not paused, so both
+    // calls are no-ops there -- though only the GUI guarantees that: the
+    // ManualLap handler and the intervals phase advance do not check the state.
+    const std::time_t endUtc  = mTimeCounter.getEndValue();
+    const std::time_t tailSec = mTimeCounter.getTrailingPause();
+
+    fitLap.timestamp = endUtc;
     fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
     fitLap.duration  = lapTime;
-    fitLap.elapsed   = mTimeCounter.getLapValueTotal();
+    fitLap.elapsed   = mTimeCounter.getLapValueTotal() - tailSec;
 
     fitLap.distance  = lapDistance;
 
@@ -1073,7 +1082,9 @@ void Service::saveLap(float autoLapDistanceM)
 
 void Service::buildPartialSummary()
 {
-    mSummary.utc       = mTimeCounter.getCurrent();
+    // Same end instant as the FIT session, so the .json summary and the
+    // .fit for one activity do not disagree by the trimmed tail.
+    mSummary.utc       = mTimeCounter.getEndValue();
     mSummary.time      = mTimeCounter.getValueActive();
     mSummary.distance  = mDistanceCounter.getValueActive();
     mSummary.speedAvg  = speedFromTotals(mSummary.distance, mSummary.time);
@@ -1100,10 +1111,9 @@ void Service::stopTrack(bool discard)
             saveLap();
         }
 
-        mBatterySoc.request();
-        mBatteryVoltage.request();
-        ActivityWriter::RecordData fitRecord = prepareRecordData();
-        mActivityWriter.addRecord(fitRecord);
+        // No final record: the activity ends at the pause instant below, so a
+        // record stamped at save time would fall outside the session. The
+        // battery sample it used to carry goes with it.
 
         buildPartialSummary();
 
@@ -1116,10 +1126,14 @@ void Service::stopTrack(bool discard)
         // Save FIT file
         ActivityWriter::TrackData fitTrack{};
 
-        fitTrack.timestamp = mTimeCounter.getCurrent();
+        // The activity ended when the user paused; see saveLap().
+        const std::time_t endUtc  = mTimeCounter.getEndValue();
+        const std::time_t tailSec = mTimeCounter.getTrailingPause();
+
+        fitTrack.timestamp = endUtc;
         fitTrack.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getValueTotal();
         fitTrack.duration  = mTimeCounter.getValueActive();
-        fitTrack.elapsed   = mTimeCounter.getValueTotal();
+        fitTrack.elapsed   = mTimeCounter.getValueTotal() - tailSec;
 
         fitTrack.distance  = mDistanceCounter.getValueActive();
 
@@ -1144,7 +1158,7 @@ void Service::stopTrack(bool discard)
     }
 
     mTrackState = Track::State::INACTIVE;
-    LOG_INFO("Track stopped. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getCurrent()));
+    LOG_INFO("Track stopped. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getEndValue()));
     LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getValueActive()), static_cast<uint32_t>(mTimeCounter.getValueTotal()));
     LOG_INFO("Distance: %.3f m\n", mDistanceCounter.getValueActive());
     LOG_INFO("Speed: %.3f / %.3f m/s\n", speedFromTotals(mDistanceCounter.getValueActive(), mTimeCounter.getValueActive()), mSpeedCounter.getMaximum());

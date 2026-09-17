@@ -135,12 +135,21 @@ public:
     bool isPaused() const;
 
     /**
-     * @brief Value at the moment pause() was called.
+     * @brief Last value that counts as activity.
      *
-     * Only meaningful while isPaused() is true: the active value stopped
-     * advancing at this point, while add() keeps feeding the total.
+     * The value latched by pause() while paused, otherwise the most recent
+     * value added. A pause that is never resumed is not part of the activity,
+     * so this is where the activity ends.
      */
-    T getPauseStartValue() const;
+    T getEndValue() const;
+
+    /**
+     * @brief Span fed into the total since an unresumed pause; T{} while running.
+     *
+     * add() keeps feeding the total across a pause, so this is the tail to trim
+     * from an elapsed span that ends at getEndValue().
+     */
+    T getTrailingPause() const;
 
 private:
     T    mValueActive;        /* Accumulated active value from start (excluding pauses) */
@@ -341,7 +350,16 @@ template<typename T>
 bool MonotonicCounter<T>::isPaused() const { return mIsPaused; }
 
 template<typename T>
-T MonotonicCounter<T>::getPauseStartValue() const { return mPauseStartValue; }
+T MonotonicCounter<T>::getEndValue() const
+{
+    return mIsPaused ? mPauseStartValue : mLastValidValue;
+}
+
+template<typename T>
+T MonotonicCounter<T>::getTrailingPause() const
+{
+    return mLastValidValue - getEndValue();
+}
 
 }  // namespace SDK::Metric
 

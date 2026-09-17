@@ -925,18 +925,16 @@ void Service::saveLap(float autoLapDistanceM)
     ActivityWriter::LapData fitLap{};
 
     // Every user stop pauses first -- the GUI pauses on entering the stop menu
-    // and the confirm needs a hold -- so the span between that pause and the save
-    // is UI time, not activity time. End at the pause instant and trim the same
-    // tail from the elapsed span. No-op for a mid-activity lap, which is never
-    // written while paused.
-    const std::time_t nowUtc  = mTimeCounter.getCurrent();
-    const std::time_t endUtc  = mTimeCounter.isPaused()
-                                    ? mTimeCounter.getPauseStartValue()
-                                    : nowUtc;
-    const std::time_t tailSec = nowUtc - endUtc;
+    // and the confirm needs a hold -- so the span between that pause and the
+    // save is UI time, not activity time. End at the pause instant and trim the
+    // same tail from the elapsed span. A mid-activity lap is not paused, so both
+    // calls are no-ops there -- though only the GUI guarantees that: the
+    // ManualLap handler and the intervals phase advance do not check the state.
+    const std::time_t endUtc  = mTimeCounter.getEndValue();
+    const std::time_t tailSec = mTimeCounter.getTrailingPause();
 
     fitLap.timestamp = endUtc;
-    fitLap.timeStart = nowUtc - mTimeCounter.getLapValueTotal();
+    fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
     fitLap.duration  = lapTime;
     fitLap.elapsed   = mTimeCounter.getLapValueTotal() - tailSec;
 
@@ -990,7 +988,9 @@ void Service::saveLap(float autoLapDistanceM)
 
 void Service::buildPartialSummary()
 {
-    mSummary.utc       = mTimeCounter.getCurrent();
+    // Same end instant as the FIT session, so the .json summary and the
+    // .fit for one activity do not disagree by the trimmed tail.
+    mSummary.utc       = mTimeCounter.getEndValue();
     mSummary.time      = mTimeCounter.getValueActive();
     mSummary.distance  = mDistanceCounter.getValueActive();
     mSummary.speedAvg  = speedFromTotals(mSummary.distance, mSummary.time);
@@ -1040,14 +1040,11 @@ void Service::stopTrack(bool discard)
     // Snapshot the FIT session message and the inputs for the §5.3 delta update.
     mPendingFitTrack = ActivityWriter::TrackData{};
     // The activity ended when the user paused; see saveLap().
-    const std::time_t nowUtc  = mTimeCounter.getCurrent();
-    const std::time_t endUtc  = mTimeCounter.isPaused()
-                                    ? mTimeCounter.getPauseStartValue()
-                                    : nowUtc;
-    const std::time_t tailSec = nowUtc - endUtc;
+    const std::time_t endUtc  = mTimeCounter.getEndValue();
+    const std::time_t tailSec = mTimeCounter.getTrailingPause();
 
     mPendingFitTrack.timestamp = endUtc;
-    mPendingFitTrack.timeStart = nowUtc - mTimeCounter.getValueTotal();
+    mPendingFitTrack.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getValueTotal();
     mPendingFitTrack.duration  = mTimeCounter.getValueActive();
     mPendingFitTrack.elapsed   = mTimeCounter.getValueTotal() - tailSec;
     mPendingFitTrack.distance  = mDistanceCounter.getValueActive();

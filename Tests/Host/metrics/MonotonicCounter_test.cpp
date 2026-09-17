@@ -298,7 +298,7 @@ TEST(MonotonicCounter, MixedAutoAndManualLaps)
 
 // Ending an activity always pauses first: the GUI pauses on entering the stop
 // menu and the confirm needs a hold, so the span between that pause and the
-// save is UI time. getPauseStartValue() is the instant the activity ended, and
+// save is UI time. getEndValue() is the instant the activity ended, and
 // trimming that tail keeps the FIT invariant timeStart + elapsed == timestamp.
 TEST(MonotonicCounter, PauseStartValueBoundsTheTrimmedEnd)
 {
@@ -315,16 +315,16 @@ TEST(MonotonicCounter, PauseStartValueBoundsTheTrimmedEnd)
         c.add(start + t);                  // 23 s of stop menu + hold-to-confirm
     }
 
-    EXPECT_EQ(c.getPauseStartValue(), start + 931) << "activity ended at the pause";
+    EXPECT_EQ(c.getEndValue(), start + 931) << "activity ended at the pause";
+    EXPECT_EQ(c.getTrailingPause(), 23) << "the unresumed tail";
     EXPECT_EQ(c.getCurrent(), start + 954) << "wall clock kept running";
     EXPECT_EQ(c.getValueActive(), 931);
     EXPECT_EQ(c.getValueTotal(), 954) << "total still spans through to the save";
 
     // Exactly what the Services now write for the session and the final lap.
-    const std::time_t nowUtc    = c.getCurrent();
-    const std::time_t endUtc    = c.isPaused() ? c.getPauseStartValue() : nowUtc;
-    const std::time_t tailSec   = nowUtc - endUtc;
-    const std::time_t timeStart = nowUtc - c.getValueTotal();
+    const std::time_t endUtc    = c.getEndValue();
+    const std::time_t tailSec   = c.getTrailingPause();
+    const std::time_t timeStart = c.getCurrent() - c.getValueTotal();
     const std::time_t elapsed   = c.getValueTotal() - tailSec;
 
     EXPECT_EQ(tailSec, 23);
@@ -358,10 +358,9 @@ TEST(MonotonicCounter, MidActivityPauseStaysInElapsed)
         c.add(start + t);                  // 10 s of stop flow
     }
 
-    const std::time_t nowUtc    = c.getCurrent();
-    const std::time_t endUtc    = c.getPauseStartValue();
-    const std::time_t tailSec   = nowUtc - endUtc;
-    const std::time_t timeStart = nowUtc - c.getValueTotal();
+    const std::time_t endUtc    = c.getEndValue();
+    const std::time_t tailSec   = c.getTrailingPause();
+    const std::time_t timeStart = c.getCurrent() - c.getValueTotal();
     const std::time_t elapsed   = c.getValueTotal() - tailSec;
 
     EXPECT_EQ(c.getValueActive(), 200) << "timer time excludes both pauses";
@@ -370,4 +369,30 @@ TEST(MonotonicCounter, MidActivityPauseStaysInElapsed)
     EXPECT_EQ(elapsed, 260) << "the 60 s mid-activity break is still in elapsed";
     EXPECT_EQ(timeStart + elapsed, endUtc) << "start + elapsed == timestamp";
     EXPECT_GT(elapsed, c.getValueActive()) << "elapsed exceeds timer by the real break";
+}
+
+// getEndValue() must not trim anything while the activity is running: a lap
+// closed mid-activity ends at the current value, not at some earlier pause.
+TEST(MonotonicCounter, EndValueIsCurrentWhileRunning)
+{
+    MonotonicCounter<std::time_t> c;
+    c.init();
+
+    const std::time_t start = 1782475200;
+    for (std::time_t t = 0; t <= 120; ++t) {
+        c.add(start + t);
+    }
+    EXPECT_FALSE(c.isPaused());
+    EXPECT_EQ(c.getEndValue(), c.getCurrent());
+    EXPECT_EQ(c.getTrailingPause(), 0) << "nothing to trim while running";
+
+    // A resumed pause leaves no tail either: only an unresumed one counts.
+    c.pause();
+    for (std::time_t t = 121; t <= 140; ++t) {
+        c.add(start + t);
+    }
+    c.resume();
+    c.add(start + 141);
+    EXPECT_EQ(c.getEndValue(), c.getCurrent());
+    EXPECT_EQ(c.getTrailingPause(), 0) << "the pause was resumed";
 }
