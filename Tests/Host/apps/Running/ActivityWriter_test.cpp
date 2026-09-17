@@ -323,3 +323,60 @@ TEST(RunningActivityWriter, StopSucceedsWhenOnlySummaryFails)
     EXPECT_TRUE(r.ok());
     EXPECT_TRUE(r.crcValid()) << "recovered .fit CRC is valid";
 }
+
+// A multi-lap activity must number its laps: message_index is the field a FIT
+// consumer keys laps by, so a constant 0 collapses all of them onto one index.
+TEST(RunningActivityWriter, LapsGetSequentialMessageIndex)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1782475200;  // 2026-06-26 12:00 UTC
+    info.appID     = "running";
+    w.start(info);
+
+    constexpr uint16_t kLaps = 3;
+    for (uint16_t i = 0; i < kLaps; ++i) {
+        ActivityWriter::RecordData rec;
+        rec.timestamp = info.timestamp + i;
+        rec.set(ActivityWriter::RecordData::Field::HEART_RATE);
+        rec.heartRate = 130;
+        w.addRecord(rec);
+
+        ActivityWriter::LapData lap;
+        lap.timestamp = info.timestamp + i + 1;
+        lap.timeStart = info.timestamp + i;
+        lap.duration  = 1;
+        lap.elapsed   = 1;
+        w.addLap(lap);
+    }
+
+    ActivityWriter::TrackData track;
+    track.timestamp = info.timestamp + kLaps;
+    track.timeStart = info.timestamp;
+    track.duration  = kLaps;
+    track.elapsed   = kLaps;
+    ASSERT_TRUE(w.stop(track));
+
+    const std::vector<uint8_t> bytes = findFitFile(fx.fileSystem);
+    ASSERT_FALSE(bytes.empty());
+    testfit::FitReader r(bytes);
+    ASSERT_TRUE(r.ok());
+    EXPECT_TRUE(r.crcValid());
+
+    const auto laps = r.withGlobal(fit::mesgNum(fit::MesgNum::Lap));
+    ASSERT_EQ(laps.size(), static_cast<size_t>(kLaps));
+    for (uint16_t i = 0; i < kLaps; ++i) {
+        EXPECT_EQ(laps[i]->fields.at(fit::field::Lap::MessageIndex.fieldDefNum).u(),
+                  static_cast<uint64_t>(i))
+            << "lap " << i << " message_index";
+    }
+
+    // The session keeps index 0 (one session per file) and counts the laps.
+    const auto sessions = r.withGlobal(fit::mesgNum(fit::MesgNum::Session));
+    ASSERT_EQ(sessions.size(), 1u);
+    EXPECT_EQ(sessions[0]->fields.at(fit::field::Session::MessageIndex.fieldDefNum).u(), 0u);
+    EXPECT_EQ(sessions[0]->fields.at(fit::field::Session::NumLaps.fieldDefNum).u(),
+              static_cast<uint64_t>(kLaps));
+}

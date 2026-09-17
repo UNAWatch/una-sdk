@@ -221,7 +221,7 @@ void ActivityWriter::addLap(const LapData& lap)
         .u32(unixToFitTimestamp(lap.timeStart))
         .u32(static_cast<uint32_t>(lap.elapsed * 1000))
         .u32(static_cast<uint32_t>(lap.duration * 1000))
-        .u16(0)  // message_index
+        .u16(mLapCounter)  // message_index: 0-based, incremented after this write
         .u8(static_cast<uint8_t>(lap.hrAvg))
         .u8(static_cast<uint8_t>(lap.hrMax))
         .u16(static_cast<uint16_t>(lap.calories + 0.5f))
