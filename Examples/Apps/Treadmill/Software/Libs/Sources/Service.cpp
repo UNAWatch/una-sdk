@@ -924,10 +924,21 @@ void Service::saveLap(float autoLapDistanceM)
     // Save lap to the FIT file
     ActivityWriter::LapData fitLap{};
 
-    fitLap.timestamp = mTimeCounter.getCurrent();
-    fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
+    // Every user stop pauses first -- the GUI pauses on entering the stop menu
+    // and the confirm needs a hold -- so the span between that pause and the save
+    // is UI time, not activity time. End at the pause instant and trim the same
+    // tail from the elapsed span. No-op for a mid-activity lap, which is never
+    // written while paused.
+    const std::time_t nowUtc  = mTimeCounter.getCurrent();
+    const std::time_t endUtc  = mTimeCounter.isPaused()
+                                    ? mTimeCounter.getPauseStartValue()
+                                    : nowUtc;
+    const std::time_t tailSec = nowUtc - endUtc;
+
+    fitLap.timestamp = endUtc;
+    fitLap.timeStart = nowUtc - mTimeCounter.getLapValueTotal();
     fitLap.duration  = lapTime;
-    fitLap.elapsed   = mTimeCounter.getLapValueTotal();
+    fitLap.elapsed   = mTimeCounter.getLapValueTotal() - tailSec;
 
     fitLap.distance  = lapDistance;
 
@@ -1016,10 +1027,9 @@ void Service::stopTrack(bool discard)
         saveLap();
     }
 
-    mBatterySoc.request();
-    mBatteryVoltage.request();
-    ActivityWriter::RecordData fitRecord = prepareRecordData();
-    mActivityWriter.addRecord(fitRecord);
+    // No final record: the activity ends at the pause instant below, so a
+    // record stamped at save time would fall outside the session. The
+    // battery sample it used to carry goes with it.
 
     buildPartialSummary();
     if (!mActivitySummarySerializer.save(mSummary)) {
@@ -1029,10 +1039,17 @@ void Service::stopTrack(bool discard)
 
     // Snapshot the FIT session message and the inputs for the §5.3 delta update.
     mPendingFitTrack = ActivityWriter::TrackData{};
-    mPendingFitTrack.timestamp = mTimeCounter.getCurrent();
-    mPendingFitTrack.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getValueTotal();
+    // The activity ended when the user paused; see saveLap().
+    const std::time_t nowUtc  = mTimeCounter.getCurrent();
+    const std::time_t endUtc  = mTimeCounter.isPaused()
+                                    ? mTimeCounter.getPauseStartValue()
+                                    : nowUtc;
+    const std::time_t tailSec = nowUtc - endUtc;
+
+    mPendingFitTrack.timestamp = endUtc;
+    mPendingFitTrack.timeStart = nowUtc - mTimeCounter.getValueTotal();
     mPendingFitTrack.duration  = mTimeCounter.getValueActive();
-    mPendingFitTrack.elapsed   = mTimeCounter.getValueTotal();
+    mPendingFitTrack.elapsed   = mTimeCounter.getValueTotal() - tailSec;
     mPendingFitTrack.distance  = mDistanceCounter.getValueActive();
     mPendingFitTrack.speedAvg  = mSpeedCounter.getAverage();
     mPendingFitTrack.speedMax  = mSpeedCounter.getMaximum();

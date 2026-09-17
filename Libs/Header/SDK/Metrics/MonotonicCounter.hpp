@@ -134,6 +134,14 @@ public:
      */
     bool isPaused() const;
 
+    /**
+     * @brief Value at the moment pause() was called.
+     *
+     * Only meaningful while isPaused() is true: the active value stopped
+     * advancing at this point, while add() keeps feeding the total.
+     */
+    T getPauseStartValue() const;
+
 private:
     T    mValueActive;        /* Accumulated active value from start (excluding pauses) */
     T    mValueTotal;         /* Accumulated total value from start (including pauses) */
@@ -331,6 +339,9 @@ bool MonotonicCounter<T>::isLapValid() const { return mHasLapData; }
 
 template<typename T>
 bool MonotonicCounter<T>::isPaused() const { return mIsPaused; }
+
+template<typename T>
+T MonotonicCounter<T>::getPauseStartValue() const { return mPauseStartValue; }
 
 }  // namespace SDK::Metric
 
