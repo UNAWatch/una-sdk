@@ -940,7 +940,7 @@
 <p>Memory lifecycle:<ol class="loweralpha simple">
 <li><p>Allocated from pool (refCount = 1)</p></li>
 <li><p>Retained when placed in queue (refCount++)</p></li>
-<li><p>Released after processing (refCount&amp;#8212;)</p></li>
+<li><p>Released after processing (refCount–)</p></li>
 <li><p>Returned to pool when refCount reaches 0 </p></li>
 </ol>
 </p>
