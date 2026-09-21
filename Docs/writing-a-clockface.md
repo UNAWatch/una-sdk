@@ -320,12 +320,19 @@ with a `static_assert`, not a test. See
 
 Custom messages waiting for the GUI sit in a **ten-deep** queue that is drained
 once per `EVENT_GUI_TICK`. A suspended face gets no ticks, so nothing drains,
-and once the queue is full **the newest message is rejected outright**.
+and once the queue is full **the oldest message is evicted** to make room -- it
+is failed, answered and released, and the newest always enters the queue.
 
 If your service publishes anything at even ~1 Hz -- a heart rate will -- the
-queue fills within about ten seconds of the face leaving the screen. Anything
-that changes after that is lost. And if your publishers dedup on the last value
-sent (they should), they will never offer it again.
+queue fills within about ten seconds of the face leaving the screen. From then
+on the face only ever sees the last ten messages sent before it resumed, so a
+stream of deltas cannot be reconstructed: the early ones are gone. Send
+self-contained snapshots and this stops mattering, because the newest one is
+always current.
+
+It still bites if your publishers dedup on the last value sent (they should):
+a value that stopped changing while the face was away was published once, got
+evicted, and will never be offered again.
 
 So make `Refresh` mean what it says: clear the sent flags and re-send
 everything, rather than only the settings.

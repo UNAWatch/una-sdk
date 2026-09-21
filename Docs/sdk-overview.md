@@ -282,6 +282,120 @@ REQUEST_SENSOR_LAYER_CONNECT     // Start sensor sampling
 EVENT_SENSOR_LAYER_DATA          // Asynchronous sensor data update
 ```
 
+#### Defining a Custom Message Type
+
+Custom messages use the `0x00000000 - 0x0000FFFF` range and are routed directly
+between an app's service and GUI processes. An ID outside that range is not
+treated as application-specific: it will not reach a custom message handler.
+
+Declare the ID as a `SDK::MessageType::Type` constant — a scoped `enum class`
+will not convert in the constructor or in `switch (msg->getType())` — and derive
+from `MessageBase`:
+
+```cpp
+constexpr SDK::MessageType::Type MY_UPDATE = 0x00000001;
+
+#pragma pack(push, 4)
+struct MyUpdate : public SDK::MessageBase {
+    MyUpdate() : SDK::MessageBase(MY_UPDATE), value(0), flags(0) {}
+
+    uint32_t value;      // plain data only
+    uint8_t  flags;
+};
+#pragma pack(pop)
+
+static_assert(sizeof(MyUpdate) <= 256,
+              "must fit the largest kernel message pool");
+```
+
+The `#pragma pack(push, 4)` matches what the shipping example apps do and what
+`MessageBase` itself uses. It changes nothing for a type whose members are all
+4-byte-aligned or smaller, as above. What it buys is padding: give the type a
+`double` or a 64-bit integer that does not already land on an 8-byte boundary
+and the compiler would otherwise insert four bytes in front of it. A message
+holding `uint32_t` then `uint64_t` is 44 bytes on the watch packed, against 48
+unpacked — worth having against a 256-byte ceiling.
+
+It is not what keeps the watch and simulator layouts agreeing. They cannot agree
+in absolute terms anyway, since `MessageBase` is 32 bytes on one and 40 on the
+other. Measured from the end of the header, though, that same `uint64_t` sits at
+offset 4 on *both* targets with the pragma and at offset 8 on both without it —
+so the packing decides the offset, and the target does not. (That holds for any
+member up to 8-byte alignment; 32 and 40 differ mod 16, so an over-aligned one
+would not follow it.) Nor do the two need to agree: a custom message is only ever
+read by the peer process of the same build.
+
+**Allocate through the SDK, never on the stack or as a static.**
+`MessageBase::operator new` is deleted, so `IAppComm::allocateMessage<T>()` — or
+the `SDK::make_msg` / `SDK::send_msg` helpers — is the only way to obtain a pool
+block.
+
+A stack instance still *compiles*, and nothing traps on it. The receiving
+process reads the message on a later frame, by which time the sender's frame is
+gone — and it does not only read: it writes a result, and decrements the
+reference count, into another thread's dead stack. The kernel may log once per boot that a message was released with no matching
+claim, and even that is suppressed for the rest of the boot if the pool has ever
+reported running out of owner slots. The pool itself ignores the foreign address
+silently. Assume nothing tells you.
+
+**A message type must not declare a destructor, and must not hold a member that
+needs one** — no `std::string`, no container, no owning pointer, nothing with
+cleanup of its own.
+
+This is not a style preference. `allocateMessage<T>()` is a header template, so
+the placement-new that constructs your type is compiled into your application's
+image and the vtable pointer it writes points into that image. The kernel frees
+the image when the process is unloaded, and may destroy the message afterwards —
+during teardown, or when the surviving half of an app releases something its
+peer allocated — so it destroys messages **non-virtually** rather than
+dispatching through a vtable that is no longer there. A destructor you declare
+therefore does not run, and whatever it would have released is leaked.
+
+The compiler cannot warn about this. `MessageBase` has a virtual destructor, so
+`std::is_trivially_destructible` is false for every message type and the trait
+that would express the rule is unusable. It is a contract, not a check.
+
+**Size is checkable, and worth checking.** The largest kernel message pool is
+currently 256 bytes, and `sizeof(T)` includes the `MessageBase` header — 32
+bytes on the watch and 40 in a 64-bit simulator build, so 224 and 216 bytes of
+payload respectively. Size against the smaller of the two and make sure the
+assert holds in both builds. A larger request
+returns `nullptr` and the send is dropped; the simulator allocates with a plain
+`new[]`, so it will never show you this.
+
+The `static_assert` is the one part of the contract a compiler will enforce for
+you. Note it asserts against a literal: the pool sizes live in the firmware, not
+in a constant the SDK exports, so re-check it against the kernel you are
+building for rather than treating 256 as permanent.
+
+**Variable-length data goes in a bounded inline array plus a count**, sized
+against that 256-byte ceiling. That is what the shipping example apps do, and
+for a custom message it is the only form that works. Do not put a pointer in one.
+
+The SDK's own display API does pass a pointer, which is why this needs saying
+rather than assuming: that path is safe for two separate reasons, and a custom
+message has neither. Its buffer is **static**, so the pointer cannot dangle
+however long the message takes to be read — and the send blocks until the kernel
+has copied the frame out, so the contents cannot change underneath the reader.
+
+Making your own buffer static fixes only the first of those. A custom message
+waits for the GUI's next drained frame, which never comes while the GUI is
+suspended, and up to ten can be queued at once — all pointing at the same
+buffer, all seeing whatever it contains when the GUI finally runs, not what it
+contained when each was sent. The pointer stays valid and the data is still
+wrong.
+
+And do not reason "my send blocks, so the storage outlives the read". A send
+with a timeout waits for a *response*, not for delivery. When it times out you
+do not know where the message is — still queued, already in the receiver's
+handler, or evicted by later sends — only that your call has returned. A pointer
+to a local is then a use-after-free if the handler ever runs; a buffer you go on
+to reuse is read intact but stale, reporting whatever you wrote last rather than
+what you sent. Only the evicted case is harmless, and it is the one you cannot
+count on. None of this needs the GUI to be suspended, though suspension is what
+makes it likely — and it is the case you are least likely to test. There is no
+MMU to catch any of it.
+
 #### Message Processing Pattern
 
 ```cpp

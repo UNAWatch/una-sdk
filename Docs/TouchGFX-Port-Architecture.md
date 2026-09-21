@@ -350,8 +350,8 @@ Kernel → EVENT_GUI_TICK Message → TouchGFXCommandProcessor.waitForFrameTick(
 - **Performance Profiling**: Implement profiling methods to measure the percentage of time the app spends sleeping while waiting for messages, such as tracking sleep durations in the message loop.
 
 ### Error Codes and Messages
-- **Queue Full**: Custom message queue reaches capacity (10 messages) - oldest message discarded
-- **Invalid Message Type**: Unknown kernel message received - logged and ignored
+- **Queue Full**: Custom message queue reaches capacity (10 messages) - oldest message is failed, answered and released (see [Queue Lifetime](#queue-lifetime))
+- **Invalid Message Type**: Unknown kernel message received - failed, answered and released, with nothing logged
 - **Display Update Failure**: Frame buffer write fails - check kernel communication
 
 ## Extensibility and Customization Guide
@@ -365,22 +365,119 @@ Kernel → EVENT_GUI_TICK Message → TouchGFXCommandProcessor.waitForFrameTick(
 Custom messages are handled through a queue due to the peculiarities of the TouchGFX frame cycle. All user events that affect the state of screens or their switching must occur between the beginning and end of the frame, that is, when we are NOT in TouchGFXCommandProcessor::waitForFrameTick(). Therefore, direct calls to mCustomMessageHandler->customMessageHandler(msg) are not used; instead, messages are queued and processed at the appropriate time.
 
 ```cpp
-class MyCustomHandler : public ICustomMessageHandler {
+// The Model is the usual handler: it is constructed before the first frame,
+// which is what makes the registration early enough.
+class Model : public SDK::Interface::ICustomMessageHandler {
 public:
-    bool customMessageHandler(MessageBase* msg) override {
+    Model() {
+        SDK::GuiCommandProcessor::GetInstance().setCustomMessageHandler(this);
+    }
+
+    bool customMessageHandler(SDK::MessageBase* msg) override {
         switch (msg->getType()) {
-            case MY_CUSTOM_MESSAGE_TYPE:
-                // Handle custom message
+            case CustomMessage::HEART_RATE_UPDATE:
+                // Copy out what you need; do not keep msg.
                 return true;
             default:
-                return false;
+                return false;   // not ours -- reported to the sender as FAIL
         }
     }
 };
-
-// Register handler
-cmdProc.setCustomMessageHandler(new MyCustomHandler());
 ```
+
+#### Queue Lifetime
+
+The queue holds ten messages, and applies to the LVGL port as well — it lives in
+the toolkit-neutral `GuiCommandProcessor`, not in the TouchGFX layer.
+
+Three things dispose of a custom message besides the handler:
+
+- **No handler registered yet**: a custom message popped before the GUI has
+  called `setCustomMessageHandler()` is never queued at all — it is failed,
+  answered and released immediately, with nothing logged. Register in the
+  `Model` constructor, as the shipping apps do: that runs before the first pop,
+  so the standard layout cannot hit this. Defer registration to a screen's
+  setup and you lose whatever arrived before it.
+
+- **Full queue**: the **oldest** message is evicted to make room. It is failed
+  (`MessageResult::FAIL`), answered and released, and a warning is logged, so a
+  sender waiting on it is not left hanging. The newest message always enters the
+  queue.
+
+  "Answered" only reaches a sender that asked for one: `sendResponse` is a no-op
+  unless the message was sent with a non-zero timeout, which `send_msg` does not
+  do. The case it matters for is the blocking one — a service that sends with a
+  timeout to a suspended GUI can wait up to that timeout per message, because
+  nothing drains the queue until the GUI resumes. Eviction is what cuts the wait
+  short: a message answered on its way out returns to its sender immediately,
+  and only a message that is neither handled nor evicted waits the whole
+  timeout.
+
+  Note a send timeout is **not** a wait for queue space. The push always uses a
+  short fixed timeout of its own; your timeout governs how long you then wait
+  for a response. A send that times out has been queued either way — but by the
+  time it returns the message may still be waiting, already be in the handler,
+  or have been evicted by the sends behind it. The timeout tells you only that
+  no answer came back.
+- **App stop**: on `COMMAND_APP_STOP` everything still queued is failed,
+  answered and released, before `onStop()` runs — so `onStop()` can still send
+  if it needs to.
+
+**The handler does not own the message and must not release it.** The framework
+releases after `customMessageHandler()` returns, whether you handled the message
+or returned `false`. Copy out what you need before returning; do not store the
+pointer, and do not call `releaseMessage()` on it.
+
+The framework takes no reference of its own when it queues the message. The one
+it releases after you return is the single reference the GUI process took when
+it popped the message — the same one you were handed. So releasing it yourself
+is a double release:
+two references, three releases. It always ends with the block back in the pool
+while somebody still holds a pointer to it — only the order changes.
+
+Fire-and-forget: the sender let go as soon as it sent, so your release takes the
+count to zero inside your handler. The message is destroyed and the block
+returned, and the framework then sets a result on it and releases it a second
+time — decrementing a block that is free, or that already belongs to a different
+message, which is then destroyed under its owner.
+
+Sent with a timeout: the sender is blocked and still holds its reference, so the
+count is 2 while your handler runs. Your release takes it to 1, and then either
+thread can finish first. If the framework does, it takes the count to 0,
+deletes the completion semaphore and returns the block, and the waking sender
+releases something already in the pool. If the sender does, it frees the block
+and the framework's release lands on one that has since moved on.
+
+There is no version of this where the block merely leaks.
+
+Your return value is the sender's result: `false` becomes `MessageResult::FAIL`
+for anyone who sent with a timeout. Returning `false` for "not my message type"
+is the normal pattern, so a sender that waits should not read FAIL as an error
+unless it knows the type was its own.
+
+Note the asymmetry with the service side: a service popping messages in its own
+loop **must** release each one. Only the GUI's custom message handler is
+non-owning.
+
+Eviction matters most when the GUI is **suspended**, because the frame tick
+stops and with it the handler. Custom messages sent by the service then pile up,
+and past ten the oldest are dropped. The service is not told that the GUI is
+suspended. So make a message that carries **state** a self-contained snapshot
+rather than a delta — on resume the handler sees only the last ten, and a delta
+stream that lost its early entries cannot be reconstructed, whereas a snapshot
+is simply current.
+
+That is a rule about state, and it does not rescue a message that carries an
+**action**. A dropped `WorkoutCommand` is not superseded by the next one; the
+action simply never happens, and no snapshot can perform it after the fact. A
+command the app cannot afford to lose needs the GUI to say it arrived — see
+[Timeouts](#timeouts) for what that does and does not buy you.
+
+Snapshots alone are not enough once you have more than one message type.
+Eviction is by arrival order and blind to type, so ten heart-rate snapshots will
+evict the single settings message sent while the face was away, and no later
+snapshot brings it back. Have the GUI re-request what it needs on resume — see
+the `Refresh` pattern in [Writing a Clockface](writing-a-clockface.md).
 
 ### Button Customization
 Modify `TouchGFXCommandProcessor::handleEvent()` to change key mappings for custom button handling. Note that adding new physical buttons is unlikely, but users can adjust key mappings for their convenience. Note that adding new physical buttons is unlikely, but users can adjust key mappings for their convenience.
@@ -432,11 +529,11 @@ The UNA SDK extends standard TouchGFX with comprehensive system integration capa
 #### TouchGFXCommandProcessor
 
 The TouchGFXCommandProcessor serves as a singleton command processor that acts as the central hub for UNA kernel integration, providing asynchronous message-based communication, lifecycle event handling, and frame buffer update coordination.
-- **Location**: [`Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-77`](../Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp), [`Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35-76`](../Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp)
+- **Location**: [`Libs/Source/Port/GuiCommandProcessor.cpp`](../Libs/Source/Port/GuiCommandProcessor.cpp), [`Libs/Header/SDK/Port/GuiCommandProcessor.hpp`](../Libs/Header/SDK/Port/GuiCommandProcessor.hpp). `TouchGFXCommandProcessor` is a `using` alias kept for source compatibility; the class is shared with the LVGL port.
 - **Purpose**: Singleton command processor that serves as the central hub for UNA kernel integration
 - **Key Features**:
   - Asynchronous message-based communication with UNA kernel
-  - Fixed-size message queue (capacity: 10 messages, configurable) for custom application messages
+  - Fixed-size message queue (capacity: 10 messages) for custom application messages
   - Lifecycle event handling (start/stop/resume/suspend)
   - Button event processing and sampling
   - Frame buffer update coordination
@@ -450,7 +547,7 @@ TouchGFXCommandProcessor& TouchGFXCommandProcessor::GetInstance() {
 }
 
 // Message processing loop (simplified)
-bool TouchGFXCommandProcessor::waitForFrameTick() {
+bool GuiCommandProcessor::waitForFrameTick() {
     while (true) {
         SDK::MessageBase* msg = nullptr;
         if (!mKernel.comm.getMessage(msg)) {
@@ -495,7 +592,7 @@ struct EventButton : public MessageBase {
 
 **Button Mapping Implementation:**
 ```cpp
-// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp
+// From Libs/Source/Port/GuiCommandProcessor.cpp
 void TouchGFXCommandProcessor::handleEvent(SDK::Message::EventButton* msg) {
     if (!mIsGuiResumed) {
         return;
@@ -539,8 +636,8 @@ struct RequestDisplayUpdate : public MessageBase {
 
 **Frame Buffer Update Implementation:**
 ```cpp
-// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:157-169
-void TouchGFXCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data) {
+// From Libs/Source/Port/GuiCommandProcessor.cpp
+void GuiCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data) {
     if (!data || !mIsGuiResumed) {
         return;  // Don't update if suspended or invalid data
     }
@@ -644,8 +741,8 @@ The port provides lifecycle callback interfaces that enable applications to resp
 
 **Lifecycle State Machine:**
 ```cpp
-// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-32
-TouchGFXCommandProcessor::TouchGFXCommandProcessor()
+// From Libs/Source/Port/GuiCommandProcessor.cpp
+GuiCommandProcessor::GuiCommandProcessor()
     : mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
     , mStartCallbackCalled(false)
     , mIsGuiResumed(false)
@@ -662,11 +759,11 @@ The port supports custom message handling interfaces that allow applications to 
 
 **Message Queue Implementation:**
 ```cpp
-// From Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:73
+// From Libs/Header/SDK/Port/GuiCommandProcessor.hpp
 SDK::Tools::FixedQueue<SDK::MessageBase*, 10> mUserQueue {};
 
 // Queue processing in message loop
-void TouchGFXCommandProcessor::callCustomMessageHandler() {
+void GuiCommandProcessor::callCustomMessageHandler() {
     while (!mUserQueue.empty()) {
         auto v = mUserQueue.pop();
         if (v) {
@@ -699,11 +796,11 @@ void TouchGFXCommandProcessor::callCustomMessageHandler() {
 
 #### Synchronization Optimizations
 - **Kernel-Driven VSync**: Eliminates polling, reduces power consumption
-- **Asynchronous Display Updates**: Non-blocking frame buffer submission
+- **Display Updates**: Frame buffer submission blocks until the kernel has taken the frame (1 s timeout)
 - **Message Prioritization**: Currently, there is no explicit prioritization except for lifecycle events, which use an additional queue separate from user events.
 
 #### Error Handling and Recovery
-- **Queue Overflow Protection**: Oldest messages discarded with logging
+- **Queue Overflow Protection**: Oldest message failed, answered and released (see Queue Lifetime)
 - **Timeout Handling**: Display update messages have 1-second timeout
 - **Graceful Degradation**: GUI suspends on communication failures
 
@@ -814,12 +911,16 @@ bool Service::sendHeartRateUpdate(uint16_t bpm) {
     return SDK::send_msg<HeartRateMessage>(*kernel, bpm, getCurrentTime());
 }
 
-// In Model (GUI)
-void Model::customMessageHandler(MessageBase* msg) {
-    if (msg->getType() == HEART_RATE_MESSAGE_TYPE) {
-        auto* hrMsg = static_cast<HeartRateMessage*>(msg);
-        updateHeartRate(hrMsg->bpm);
+// In Model (GUI). Returns bool: it becomes the sender's MessageResult, and
+// false for "not my type" is the normal answer. Do not release msg -- the
+// framework does that when this returns.
+bool Model::customMessageHandler(SDK::MessageBase* msg) {
+    if (msg->getType() == CustomMessage::HEART_RATE_UPDATE) {
+        auto* hrMsg = static_cast<CustomMessage::HeartRateMessage*>(msg);
+        updateHeartRate(hrMsg->bpm);     // copy out; the message is gone after this
+        return true;
     }
+    return false;
 }
 ```
 
@@ -904,13 +1005,20 @@ namespace CustomMessage {
 // `SDK::MessageType::Type` is a `uint32_t` alias, and `MessageBase` takes one directly, so
 // declare the IDs as constants of that type. A scoped `enum class` would not convert
 // implicitly — neither in the constructor below nor in a `switch (msg->getType())`.
-constexpr SDK::MessageType::Type HEART_RATE_UPDATE   = 0x00010001;
-constexpr SDK::MessageType::Type GPS_LOCATION_UPDATE = 0x00010002;
-constexpr SDK::MessageType::Type BATTERY_STATUS      = 0x00010003;
-constexpr SDK::MessageType::Type WORKOUT_START       = 0x00010004;
-constexpr SDK::MessageType::Type WORKOUT_STOP        = 0x00010005;
+// The IDs must lie inside 0x00000000-0x0000FFFF. Outside that range
+// isApplicationSpecificMessage() is false, so the message never reaches a custom
+// message handler -- it is failed and released instead.
+constexpr SDK::MessageType::Type HEART_RATE_UPDATE   = 0x00000001;
+constexpr SDK::MessageType::Type GPS_LOCATION_UPDATE = 0x00000002;
+constexpr SDK::MessageType::Type BATTERY_STATUS      = 0x00000003;
+constexpr SDK::MessageType::Type WORKOUT_START       = 0x00000004;
+constexpr SDK::MessageType::Type WORKOUT_STOP        = 0x00000005;
 
-// Message structures
+// Message structures. pack(4) as the shipping apps do, and a static_assert
+// against the largest pool -- see "Defining a Custom Message Type" in the SDK
+// overview for why both belong on every message type.
+#pragma pack(push, 4)
+
 struct HeartRateMessage : public SDK::MessageBase {
     uint16_t bpm;
     uint32_t timestamp;
@@ -928,6 +1036,13 @@ struct WorkoutCommand : public SDK::MessageBase {
         : SDK::MessageBase(WORKOUT_START)
         , command(cmd) {}
 };
+
+#pragma pack(pop)
+
+static_assert(sizeof(HeartRateMessage) <= 256,
+              "must fit the largest kernel message pool");
+static_assert(sizeof(WorkoutCommand) <= 256,
+              "must fit the largest kernel message pool");
 
 } // namespace CustomMessage
 ```
@@ -964,15 +1079,37 @@ public:
 };
 ```
 
-Note that `send_msg` posts with a **zero timeout**: if the message queue is full it gives up
-immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
-space — or to read a reply — use `SDK::make_msg<T>` and send it yourself with an explicit timeout:
+The timeout you pass to a send is **not** a wait for queue space. Every push uses
+a short fixed timeout of its own, whatever you pass; your timeout decides how long
+you then block waiting for the receiver to answer. `send_msg` passes zero, so it
+posts and returns without waiting for a reply — which is what telemetry wants.
+
+Use `SDK::make_msg<T>` with an explicit timeout when you need the reply:
 
 ```cpp
 if (auto msg = SDK::make_msg<HeartRateMessage>(mKernel, bpm, getCurrentTime())) {
-    msg.send(100);  // wait up to 100 ms for queue space
+    msg.send(100);  // block up to 100 ms for a response
 }
 ```
+
+Two things to know before doing that. A send that times out has been queued
+regardless — it may still be waiting, the receiver may already be handling it,
+or it may have been evicted since; the timeout tells you nothing about which.
+Anything it points at must stay alive past your call in every one of those
+cases. And the send returns `true` on timeout — the result is `TIMEOUT`, not a
+failure to send. The bool and the result answer different questions, and you
+need both: `false` means the push failed and the message was never queued, which
+is the one case where retrying plainly makes sense; `true` with a `TIMEOUT`
+result means only that it was queued and no answer came back, which is not
+enough to tell you whether re-sending would recover the work or duplicate it.
+
+Do not block the GUI thread on a send to the **service**. The GUI cannot drain
+its own queue while it waits, and the service may itself be blocked sending to
+the GUI — which only completes on a tick the GUI is not running. Blocking on the
+kernel is a different matter, and the port itself does it on every frame that
+redraws: the
+kernel's dispatch thread always drains, and it sends to apps with a zero timeout
+for exactly this reason.
 
 #### GUI-Side Message Handling
 ```cpp
@@ -1011,8 +1148,8 @@ private:
 
 #### Request-Response Pattern
 ```cpp
-constexpr SDK::MessageType::Type CONFIG_REQUEST  = 0x00010006;
-constexpr SDK::MessageType::Type CONFIG_RESPONSE = 0x00010007;
+constexpr SDK::MessageType::Type CONFIG_REQUEST  = 0x00000006;
+constexpr SDK::MessageType::Type CONFIG_RESPONSE = 0x00000007;
 
 // Request message
 struct ConfigurationRequest : public SDK::MessageBase {
@@ -1023,18 +1160,37 @@ struct ConfigurationRequest : public SDK::MessageBase {
         : SDK::MessageBase(CONFIG_REQUEST), type(t) {}
 };
 
-// Response message
+// Response message.
+//
+// The value is a fixed buffer, not a std::string: a message type must not hold
+// anything that needs destruction. The kernel destroys messages non-virtually,
+// so such a member would simply never be cleaned up. See "Defining a Custom
+// Message Type" in the SDK overview.
 struct ConfigurationResponse : public SDK::MessageBase {
-    ConfigurationRequest::ConfigType type;
-    std::string value;
+    static constexpr size_t MAX_VALUE = 64;
 
-    ConfigurationResponse(ConfigurationRequest::ConfigType t, const std::string& val)
-        : SDK::MessageBase(CONFIG_RESPONSE), type(t), value(val) {}
+    ConfigurationRequest::ConfigType type;
+    uint8_t valueLen;
+    char    value[MAX_VALUE];
+
+    ConfigurationResponse(ConfigurationRequest::ConfigType t, const char* val)
+        : SDK::MessageBase(CONFIG_RESPONSE), type(t), valueLen(0), value{}
+    {
+        if (val == nullptr) {
+            return;                       // value[] is already zeroed
+        }
+        while (valueLen < (MAX_VALUE - 1) && val[valueLen] != '\0') {
+            value[valueLen] = val[valueLen];
+            ++valueLen;
+        }
+    }
 };
+static_assert(sizeof(ConfigurationResponse) <= 256,
+              "must fit the largest kernel message pool");
 
 // Service implementation
 void Service::handleConfigRequest(ConfigurationRequest* req) {
-    std::string value = getConfigurationValue(req->type);
+    const char* value = getConfigurationValue(req->type);
     if (!SDK::send_msg<ConfigurationResponse>(mKernel, req->type, value)) {
         // Nothing retries this for us: the requester will block until it times out.
         Logger::error("Config response for type %d dropped", static_cast<int>(req->type));
@@ -1044,74 +1200,97 @@ void Service::handleConfigRequest(ConfigurationRequest* req) {
 
 #### Bulk Data Transfer
 ```cpp
+constexpr SDK::MessageType::Type BULK_DATA_TYPE = 0x00000008;
+
+// The chunk is sized so the whole message fits the largest kernel message pool
+// (256 bytes). A larger message cannot be allocated at all: allocateMessage()
+// returns nullptr and the send is dropped. The simulator allocates with a plain
+// new[], so it will not show you this -- hence the static_assert.
 struct BulkDataMessage : public MessageBase {
-    static const size_t MAX_CHUNK_SIZE = 1024;
+    static constexpr size_t MAX_CHUNK_SIZE = 192;
 
     uint32_t sequenceId;
     uint32_t totalChunks;
     uint16_t chunkSize;
-    uint8_t data[MAX_CHUNK_SIZE];
+    uint8_t  data[MAX_CHUNK_SIZE];
 
     BulkDataMessage(uint32_t seq, uint32_t total, const uint8_t* chunkData, size_t size)
         : MessageBase(BULK_DATA_TYPE)
-        , sequenceId(seq), totalChunks(total), chunkSize(size) {
-        memcpy(data, chunkData, size);
-    }
-};
-```
-
-#### Message Queue Management
-```cpp
-class MessageProcessor {
-public:
-    void queueMessage(MessageBase* msg) {
-        if (!mMessageQueue.push(msg)) {
-            // Queue full - handle overflow
-            Logger::warning("Message queue full, dropping message");
-            // Optionally process oldest message first
-            processPendingMessages();
+        , sequenceId(seq), totalChunks(total)
+        , chunkSize(chunkData == nullptr ? 0U
+                    : static_cast<uint16_t>(size < MAX_CHUNK_SIZE ? size : MAX_CHUNK_SIZE))
+        , data{}
+    {
+        if (chunkSize > 0U) {
+            memcpy(data, chunkData, chunkSize);
         }
     }
+};
+static_assert(sizeof(BulkDataMessage) <= 256,
+              "must fit the largest kernel message pool");
+```
 
-    void processPendingMessages() {
-        while (!mMessageQueue.empty()) {
-            auto msg = mMessageQueue.pop();
-            if (msg && *msg) {
-                processMessage(*msg);
-            }
+#### Do Not Queue Messages Yourself
+
+There is no app-side queue of `MessageBase*` to write. The port already holds
+one (see [Queue Lifetime](#queue-lifetime)), and a second one cannot work: the
+framework releases each message as soon as `customMessageHandler()` returns, so
+any pointer you kept is dangling by the time you come back to it.
+
+Keep the state, not the message:
+
+```cpp
+class HeartRateView {
+public:
+    // Called from customMessageHandler(). Copy out and return.
+    void onHeartRate(const HeartRateMessage* msg) {
+        mBpm   = msg->bpm;
+        mDirty = true;
+    }
+
+    // Called from the frame loop, long after the message is gone.
+    void render() {
+        if (mDirty) {
+            mBpmLabel.setValue(mBpm);   // your own widget
+            mBpmLabel.invalidate();
+            mDirty = false;
         }
     }
 
 private:
-    FixedQueue<MessageBase*, 10> mMessageQueue;
+    touchgfx::TextAreaWithOneWildcard mBpmLabel;
+    uint16_t mBpm = 0;
+    bool     mDirty = false;
 };
 ```
 
 ### Message Timing and Synchronization
 
 #### Frame-Synchronized Updates
+
+Custom messages are delivered **between** frames, never from inside
+`waitForFrameTick()`. That is the whole reason the queue exists: everything that
+changes screen state has to happen while TouchGFX is not rendering.
+
+You do not write this loop — the port does. The application side is one call, in
+the place the toolkit gives you between frames:
+
 ```cpp
-void TouchGFXCommandProcessor::waitForFrameTick() {
-    while (true) {
-        MessageBase* msg = nullptr;
-        if (mKernel.comm.getMessage(msg)) {
-            switch (msg->getType()) {
-                case EVENT_GUI_TICK:
-                    // Process queued custom messages before rendering
-                    callCustomMessageHandler();
-                    return false; // Allow TouchGFX to render
+void FrontendApplication::handleTickEvent() {
+    // Drains the queue and invokes the registered custom message handler.
+    // Safe here: this runs between frames, not inside waitForFrameTick().
+    SDK::GuiCommandProcessor::GetInstance().callCustomMessageHandler();
 
-                case CUSTOM_MESSAGE_TYPE:
-                    // Queue for processing during frame tick
-                    queueCustomMessage(msg);
-                    break;
+    model.tick();   // the app's own per-frame work
 
-                // Handle other message types...
-            }
-        }
-    }
+    FrontendApplicationBase::handleTickEvent();
 }
 ```
+
+`model.tick()` is not optional boilerplate: the clockface resume pattern is
+built on it being called every frame. Compare a shipping app's
+`FrontendApplication.hpp` before writing your own — they also tick the
+simulator kernel under `#if defined(SIMULATOR)`.
 
 #### Rate Limiting
 ```cpp
@@ -1160,22 +1339,47 @@ bool CustomMessageHandler::validateMessage(MessageBase* msg) {
 }
 ```
 
-#### Timeout and Retry Logic
+#### Timeouts
+
+A send does not report a timeout through its return value: it returns `true`
+with the message's result set to `TIMEOUT`, because the message *was* queued —
+the receiver simply has not answered yet. Check the result, not the bool:
+
 ```cpp
-void ReliableMessenger::sendWithRetry(MessageBase* msg, int maxRetries) {
-    for (int attempt = 0; attempt < maxRetries; ++attempt) {
-        if (mKernel.comm.sendMessage(msg, TIMEOUT_MS)) {
-            return; // Success
-        }
-
-        // Exponential backoff
-        uint32_t delay = BASE_DELAY_MS * (1 << attempt);
-        mKernel.delay(delay);
+if (auto msg = SDK::make_msg<CustomMessage::HeartRateMessage>(
+                   mKernel, bpm, getCurrentTime())) {
+    if (!msg.send(100)) {
+        // Never queued: the push itself failed. Nothing is holding it, so
+        // retrying or reporting is legitimate here.
+    } else if (msg->getResult() == SDK::MessageResult::TIMEOUT) {
+        // Queued but unanswered -- the GUI is probably suspended. Where the
+        // message is now you cannot tell: still queued, already in the
+        // handler, or evicted by later sends while the GUI stayed down.
+        // Do NOT re-send it. Drop the attempt and let the next snapshot
+        // carry the state.
     }
-
-    Logger::error("Failed to send message after %d attempts", maxRetries);
 }
 ```
+
+Retrying a timed-out send is the wrong instinct — not because the message is
+safe, but because you cannot tell what became of it. It may still be queued, it
+may be in the handler already, or it may have been evicted by later sends while
+the GUI stayed suspended, which is the situation a timeout usually signals. A
+retry is therefore as likely to duplicate an operation as to recover a lost one.
+
+For periodic state, do not retry: the queue is ten deep and evicts the oldest,
+so a retry loop deepens the backlog it is reacting to, and the next snapshot
+carries the state anyway.
+
+For an action that must not be silently lost, do not build the retry on the
+send's timeout at all — it cannot tell you what you need to know. Have the GUI
+acknowledge with a message of its own and drive the resend from that. Be clear
+about what that buys: it turns "possibly lost" into "possibly applied twice",
+because an acknowledgement can go missing after the command was applied. It is
+at-least-once delivery, not exactly-once. If applying the action twice would be
+wrong, the handler has to be the one that notices — carry an id on the command
+and have the GUI ignore an id it has already acted on. The SDK does not do this
+for you.
 
 ### Performance Considerations
 
@@ -1187,7 +1391,7 @@ void ReliableMessenger::sendWithRetry(MessageBase* msg, int maxRetries) {
 
 #### Memory Management
 - **Message Lifetime**: Ensure proper allocation/deallocation
-- **Buffer Reuse**: Reuse message buffers for similar message types
+- **Message Sizing**: Keep message types small; every one is a pool block, and the largest pool is 256 bytes
 - **Leak Prevention**: Always release allocated messages
 - **Size Optimization**: Minimize message payload sizes
 
