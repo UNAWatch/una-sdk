@@ -69,8 +69,23 @@ void MessageManager::releaseMessage(SDK::MessageBase* msg)
     if (oldCount == 1) {
         // Cleanup completion semaphore if exists
         cleanupCompletionSemaphore(msg);
-        // operator delete is a no-op (pool allocator); this calls the virtual dtor once
-        delete msg;
+
+        // Destroyed the same way the kernel destroys it: NON-VIRTUALLY. On the
+        // watch a message allocated by an app is constructed inside that app's
+        // image, which is freed when the process unloads, so dispatching
+        // through its vtable would jump into freed memory. The rule that falls
+        // out of that -- a message type must not declare a destructor -- only
+        // holds if the simulator agrees. `delete msg` ran the derived
+        // destructor here while the watch did not, so an app that broke the
+        // rule would work in the simulator and lose whatever that destructor
+        // released on the device. That is exactly the divergence a simulator
+        // must not have.
+        msg->MessageBase::~MessageBase();
+
+        // And the storage, which allocateRawMemory took with new uint8_t[].
+        // MessageBase::operator delete is a no-op, so `delete msg` never
+        // returned it: every message the simulator allocated was leaked.
+        delete[] reinterpret_cast<uint8_t*>(msg);
     }
 }
 
