@@ -219,8 +219,31 @@ protected:
     {}
 
     /**
-     * @brief Virtual destructor for proper cleanup of derived classes
-     * @note Actual cleanup handled by kernel infrastructure
+     * @brief Destructor. Present and virtual for layout reasons only.
+     *
+     * A MESSAGE TYPE MUST NOT DECLARE A DESTRUCTOR, and must not hold a member
+     * that needs one -- no std::string, no container, no owning pointer.
+     * Messages are fixed-layout PODs carrying a reference count, and that is
+     * the whole contract.
+     *
+     * The reason is not style. A message allocated by an application is
+     * constructed inside that application's own image, so its vtable lives
+     * there; the kernel frees that image when the process is unloaded, and it
+     * may destroy the message afterwards -- on the teardown path, or when the
+     * surviving half of an app releases something its dead peer allocated.
+     * Dispatching a destructor through that vtable would jump into freed
+     * memory, so the kernel destroys messages NON-VIRTUALLY. A destructor you
+     * declare here therefore does not run, silently, and whatever it was going
+     * to release is simply lost.
+     *
+     * This cannot be enforced with a static_assert: the virtual destructor
+     * below makes every derived type non-trivially-destructible, so the trait
+     * that would express the rule is false for all of them. It is a contract,
+     * checked by review and by the kernel's tests.
+     *
+     * The destructor stays virtual because the vptr is part of the published
+     * object layout (offset 0, see the table below) and removing it would
+     * change the size and shape of every message across the ABI.
      */
     virtual ~MessageBase() = default;
 
