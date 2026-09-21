@@ -44,7 +44,14 @@ void* MessageManager::allocateRawMemory(size_t size)
 
     if (ptr == nullptr) {
         LOG_ERROR("Failed to allocate memory: size %d\n", size);
+        return ptr;
     }
+
+    // Zeroed, as the watch does. Without this a message field the constructor
+    // does not initialise reads as garbage in the simulator and as zero on the
+    // device -- so an app can be correct here and wrong there, or the reverse,
+    // for a reason that has nothing to do with the app.
+    memset(ptr, 0, size);
 
     return ptr;
 }
