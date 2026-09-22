@@ -502,7 +502,10 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#extensibility-and-customization-guide">Extensibility and Customization Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#adding-future-hardware-support">Adding Future Hardware Support</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#custom-message-handling">Custom Message Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-message-handling">Custom Message Handling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#queue-lifetime">Queue Lifetime</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#button-customization">Button Customization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#display-configuration">Display Configuration</a></li>
 </ul>
@@ -589,7 +592,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l3"><a class="reference internal" href="#advanced-message-patterns">Advanced Message Patterns</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#request-response-pattern">Request-Response Pattern</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bulk-data-transfer">Bulk Data Transfer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#message-queue-management">Message Queue Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-not-queue-messages-yourself">Do Not Queue Messages Yourself</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#message-timing-and-synchronization">Message Timing and Synchronization</a><ul>
@@ -599,7 +602,7 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#error-handling-and-reliability">Error Handling and Reliability</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#message-validation">Message Validation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#timeout-and-retry-logic">Timeout and Retry Logic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timeouts">Timeouts</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#performance-considerations">Performance Considerations</a><ul>
@@ -1190,8 +1193,8 @@ window.runMermaid = runMermaid;</script>
 <section id="error-codes-and-messages">
 <h3>Error Codes and Messages<a class="headerlink" href="#error-codes-and-messages" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p><strong>Queue Full</strong>: Custom message queue reaches capacity (10 messages) - oldest message discarded</p></li>
-<li><p><strong>Invalid Message Type</strong>: Unknown kernel message received - logged and ignored</p></li>
+<li><p><strong>Queue Full</strong>: Custom message queue reaches capacity (10 messages) - oldest message is failed, answered and released (see <a class="reference internal" href="#queue-lifetime">Queue Lifetime</a>)</p></li>
+<li><p><strong>Invalid Message Type</strong>: Unknown kernel message received - failed, answered and released, with nothing logged</p></li>
 <li><p><strong>Display Update Failure</strong>: Frame buffer write fails - check kernel communication</p></li>
 </ul>
 </section>
@@ -1209,23 +1212,108 @@ window.runMermaid = runMermaid;</script>
 <section id="custom-message-handling">
 <h3>Custom Message Handling<a class="headerlink" href="#custom-message-handling" title="Link to this heading"></a></h3>
 <p>Custom messages are handled through a queue due to the peculiarities of the TouchGFX frame cycle. All user events that affect the state of screens or their switching must occur between the beginning and end of the frame, that is, when we are NOT in TouchGFXCommandProcessor::waitForFrameTick(). Therefore, direct calls to mCustomMessageHandler-&gt;customMessageHandler(msg) are not used; instead, messages are queued and processed at the appropriate time.</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyCustomHandler</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">ICustomMessageHandler</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// The Model is the usual handler: it is constructed before the first frame,</span>
+<span class="c1">// which is what makes the registration early enough.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">ICustomMessageHandler</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">customMessageHandler</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Model</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">GuiCommandProcessor</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">setCustomMessageHandler</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">customMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">MY_CUSTOM_MESSAGE_TYPE</span><span class="p">:</span>
-<span class="w">                </span><span class="c1">// Handle custom message</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="no">CustomMessage</span><span class="o">::</span><span class="no">HEART_RATE_UPDATE</span><span class="p">:</span>
+<span class="w">                </span><span class="c1">// Copy out what you need; do not keep msg.</span>
 <span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">            </span><span class="k">default</span><span class="o">:</span>
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">   </span><span class="c1">// not ours -- reported to the sender as FAIL</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
-
-<span class="c1">// Register handler</span>
-<span class="n">cmdProc</span><span class="p">.</span><span class="n">setCustomMessageHandler</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MyCustomHandler</span><span class="p">());</span>
 </pre></div>
 </div>
+<section id="queue-lifetime">
+<h4>Queue Lifetime<a class="headerlink" href="#queue-lifetime" title="Link to this heading"></a></h4>
+<p>The queue holds ten messages, and applies to the LVGL port as well — it lives in
+the toolkit-neutral <code class="docutils literal notranslate"><span class="pre">GuiCommandProcessor</span></code>, not in the TouchGFX layer.</p>
+<p>Three things dispose of a custom message besides the handler:</p>
+<ul>
+<li><p><strong>No handler registered yet</strong>: a custom message popped before the GUI has
+called <code class="docutils literal notranslate"><span class="pre">setCustomMessageHandler()</span></code> is never queued at all — it is failed,
+answered and released immediately, with nothing logged. Register in the
+<code class="docutils literal notranslate"><span class="pre">Model</span></code> constructor, as the shipping apps do: that runs before the first pop,
+so the standard layout cannot hit this. Defer registration to a screen’s
+setup and you lose whatever arrived before it.</p></li>
+<li><p><strong>Full queue</strong>: the <strong>oldest</strong> message is evicted to make room. It is failed
+(<code class="docutils literal notranslate"><span class="pre">MessageResult::FAIL</span></code>), answered and released, and a warning is logged, so a
+sender waiting on it is not left hanging. The newest message always enters the
+queue.</p>
+<p>“Answered” only reaches a sender that asked for one: <code class="docutils literal notranslate"><span class="pre">sendResponse</span></code> is a no-op
+unless the message was sent with a non-zero timeout, which <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> does not
+do. The case it matters for is the blocking one — a service that sends with a
+timeout to a suspended GUI can wait up to that timeout per message, because
+nothing drains the queue until the GUI resumes. Eviction is what cuts the wait
+short: a message answered on its way out returns to its sender immediately,
+and only a message that is neither handled nor evicted waits the whole
+timeout.</p>
+<p>Note a send timeout is <strong>not</strong> a wait for queue space. The push always uses a
+short fixed timeout of its own; your timeout governs how long you then wait
+for a response. A send that times out has been queued either way — but by the
+time it returns the message may still be waiting, already be in the handler,
+or have been evicted by the sends behind it. The timeout tells you only that
+no answer came back.</p>
+</li>
+<li><p><strong>App stop</strong>: on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> everything still queued is failed,
+answered and released, before <code class="docutils literal notranslate"><span class="pre">onStop()</span></code> runs — so <code class="docutils literal notranslate"><span class="pre">onStop()</span></code> can still send
+if it needs to.</p></li>
+</ul>
+<p><strong>The handler does not own the message and must not release it.</strong> The framework
+releases after <code class="docutils literal notranslate"><span class="pre">customMessageHandler()</span></code> returns, whether you handled the message
+or returned <code class="docutils literal notranslate"><span class="pre">false</span></code>. Copy out what you need before returning; do not store the
+pointer, and do not call <code class="docutils literal notranslate"><span class="pre">releaseMessage()</span></code> on it.</p>
+<p>The framework takes no reference of its own when it queues the message. The one
+it releases after you return is the single reference the GUI process took when
+it popped the message — the same one you were handed. So releasing it yourself
+is a double release:
+two references, three releases. It always ends with the block back in the pool
+while somebody still holds a pointer to it — only the order changes.</p>
+<p>Fire-and-forget: the sender let go as soon as it sent, so your release takes the
+count to zero inside your handler. The message is destroyed and the block
+returned, and the framework then sets a result on it and releases it a second
+time — decrementing a block that is free, or that already belongs to a different
+message, which is then destroyed under its owner.</p>
+<p>Sent with a timeout: the sender is blocked and still holds its reference, so the
+count is 2 while your handler runs. Your release takes it to 1, and then either
+thread can finish first. If the framework does, it takes the count to 0,
+deletes the completion semaphore and returns the block, and the waking sender
+releases something already in the pool. If the sender does, it frees the block
+and the framework’s release lands on one that has since moved on.</p>
+<p>There is no version of this where the block merely leaks.</p>
+<p>Your return value is the sender’s result: <code class="docutils literal notranslate"><span class="pre">false</span></code> becomes <code class="docutils literal notranslate"><span class="pre">MessageResult::FAIL</span></code>
+for anyone who sent with a timeout. Returning <code class="docutils literal notranslate"><span class="pre">false</span></code> for “not my message type”
+is the normal pattern, so a sender that waits should not read FAIL as an error
+unless it knows the type was its own.</p>
+<p>Note the asymmetry with the service side: a service popping messages in its own
+loop <strong>must</strong> release each one. Only the GUI’s custom message handler is
+non-owning.</p>
+<p>Eviction matters most when the GUI is <strong>suspended</strong>, because the frame tick
+stops and with it the handler. Custom messages sent by the service then pile up,
+and past ten the oldest are dropped. The service is not told that the GUI is
+suspended. So make a message that carries <strong>state</strong> a self-contained snapshot
+rather than a delta — on resume the handler sees only the last ten, and a delta
+stream that lost its early entries cannot be reconstructed, whereas a snapshot
+is simply current.</p>
+<p>That is a rule about state, and it does not rescue a message that carries an
+<strong>action</strong>. A dropped <code class="docutils literal notranslate"><span class="pre">WorkoutCommand</span></code> is not superseded by the next one; the
+action simply never happens, and no snapshot can perform it after the fact. A
+command the app cannot afford to lose needs the GUI to say it arrived — see
+<a class="reference internal" href="#timeouts">Timeouts</a> for what that does and does not buy you.</p>
+<p>Snapshots alone are not enough once you have more than one message type.
+Eviction is by arrival order and blind to type, so ten heart-rate snapshots will
+evict the single settings message sent while the face was away, and no later
+snapshot brings it back. Have the GUI re-request what it needs on resume — see
+the <code class="docutils literal notranslate"><span class="pre">Refresh</span></code> pattern in <a class="reference internal" href="writing-a-clockface.html"><span class="std std-doc">Writing a Clockface</span></a>.</p>
+</section>
 </section>
 <section id="button-customization">
 <h3>Button Customization<a class="headerlink" href="#button-customization" title="Link to this heading"></a></h3>
@@ -1296,12 +1384,12 @@ window.runMermaid = runMermaid;</script>
 <h4>TouchGFXCommandProcessor<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
 <p>The TouchGFXCommandProcessor serves as a singleton command processor that acts as the central hub for UNA kernel integration, providing asynchronous message-based communication, lifecycle event handling, and frame buffer update coordination.</p>
 <ul class="simple">
-<li><p><strong>Location</strong>: <a class="reference download internal" download="" href="_downloads/7a3681180d79f55f68901dd612fc79aa/TouchGFXCommandProcessor.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-77</span></code></span></a>, <a class="reference download internal" download="" href="_downloads/8dd2314ecd78597851f1a8cbed98d862/TouchGFXCommandProcessor.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:35-76</span></code></span></a></p></li>
+<li><p><strong>Location</strong>: <a class="reference download internal" download="" href="_downloads/80a3ddd6263f141369408de6bc2e1a36/GuiCommandProcessor.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/GuiCommandProcessor.cpp</span></code></span></a>, <a class="reference download internal" download="" href="_downloads/188fe70a9fc743c098789eeefb2978ca/GuiCommandProcessor.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/GuiCommandProcessor.hpp</span></code></span></a>. <code class="docutils literal notranslate"><span class="pre">TouchGFXCommandProcessor</span></code> is a <code class="docutils literal notranslate"><span class="pre">using</span></code> alias kept for source compatibility; the class is shared with the LVGL port.</p></li>
 <li><p><strong>Purpose</strong>: Singleton command processor that serves as the central hub for UNA kernel integration</p></li>
 <li><p><strong>Key Features</strong>:</p>
 <ul>
 <li><p>Asynchronous message-based communication with UNA kernel</p></li>
-<li><p>Fixed-size message queue (capacity: 10 messages, configurable) for custom application messages</p></li>
+<li><p>Fixed-size message queue (capacity: 10 messages) for custom application messages</p></li>
 <li><p>Lifecycle event handling (start/stop/resume/suspend)</p></li>
 <li><p>Button event processing and sampling</p></li>
 <li><p>Frame buffer update coordination</p></li>
@@ -1316,7 +1404,7 @@ window.runMermaid = runMermaid;</script>
 <span class="p">}</span>
 
 <span class="c1">// Message processing loop (simplified)</span>
-<span class="kt">bool</span><span class="w"> </span><span class="nf">TouchGFXCommandProcessor::waitForFrameTick</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">GuiCommandProcessor::waitForFrameTick</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
@@ -1359,7 +1447,7 @@ The port handles various kernel message types for lifecycle management, input pr
 </pre></div>
 </div>
 <p><strong>Button Mapping Implementation:</strong></p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/GuiCommandProcessor.cpp</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">TouchGFXCommandProcessor::handleEvent</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Message</span><span class="o">::</span><span class="n">EventButton</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mIsGuiResumed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">return</span><span class="p">;</span>
@@ -1401,8 +1489,8 @@ The port handles various kernel message types for lifecycle management, input pr
 </pre></div>
 </div>
 <p><strong>Frame Buffer Update Implementation:</strong></p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:157-169</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">TouchGFXCommandProcessor::writeDisplayFrameBuffer</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/GuiCommandProcessor.cpp</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">GuiCommandProcessor::writeDisplayFrameBuffer</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">mIsGuiResumed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">  </span><span class="c1">// Don't update if suspended or invalid data</span>
 <span class="w">    </span><span class="p">}</span>
@@ -1522,8 +1610,8 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 </li>
 </ul>
 <p><strong>Lifecycle State Machine:</strong></p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/TouchGFX/TouchGFXCommandProcessor.cpp:25-32</span>
-<span class="n">TouchGFXCommandProcessor</span><span class="o">::</span><span class="n">TouchGFXCommandProcessor</span><span class="p">()</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Source/Port/GuiCommandProcessor.cpp</span>
+<span class="n">GuiCommandProcessor</span><span class="o">::</span><span class="n">GuiCommandProcessor</span><span class="p">()</span>
 <span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">mKernel</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">KernelProviderGUI</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">getKernel</span><span class="p">())</span>
 <span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">mStartCallbackCalled</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
 <span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">mIsGuiResumed</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
@@ -1541,11 +1629,11 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <li><p><strong>Implementation</strong>: <code class="docutils literal notranslate"><span class="pre">customMessageHandler()</span></code> method for processing queued messages</p></li>
 </ul>
 <p><strong>Message Queue Implementation:</strong></p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Header/SDK/Port/TouchGFX/TouchGFXCommandProcessor.hpp:73</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// From Libs/Header/SDK/Port/GuiCommandProcessor.hpp</span>
 <span class="n">SDK</span><span class="o">::</span><span class="n">Tools</span><span class="o">::</span><span class="n">FixedQueue</span><span class="o">&lt;</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mUserQueue</span><span class="w"> </span><span class="p">{};</span>
 
 <span class="c1">// Queue processing in message loop</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">TouchGFXCommandProcessor::callCustomMessageHandler</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">GuiCommandProcessor::callCustomMessageHandler</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mUserQueue</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mUserQueue</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -1586,14 +1674,14 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <h4>Synchronization Optimizations<a class="headerlink" href="#synchronization-optimizations" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Kernel-Driven VSync</strong>: Eliminates polling, reduces power consumption</p></li>
-<li><p><strong>Asynchronous Display Updates</strong>: Non-blocking frame buffer submission</p></li>
+<li><p><strong>Display Updates</strong>: Frame buffer submission blocks until the kernel has taken the frame (1 s timeout)</p></li>
 <li><p><strong>Message Prioritization</strong>: Currently, there is no explicit prioritization except for lifecycle events, which use an additional queue separate from user events.</p></li>
 </ul>
 </section>
 <section id="error-handling-and-recovery">
 <h4>Error Handling and Recovery<a class="headerlink" href="#error-handling-and-recovery" title="Link to this heading"></a></h4>
 <ul class="simple">
-<li><p><strong>Queue Overflow Protection</strong>: Oldest messages discarded with logging</p></li>
+<li><p><strong>Queue Overflow Protection</strong>: Oldest message failed, answered and released (see Queue Lifetime)</p></li>
 <li><p><strong>Timeout Handling</strong>: Display update messages have 1-second timeout</p></li>
 <li><p><strong>Graceful Degradation</strong>: GUI suspends on communication failures</p></li>
 </ul>
@@ -1731,12 +1819,16 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">());</span>
 <span class="p">}</span>
 
-<span class="c1">// In Model (GUI)</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">Model::customMessageHandler</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">HEART_RATE_MESSAGE_TYPE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">hrMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
-<span class="w">        </span><span class="n">updateHeartRate</span><span class="p">(</span><span class="n">hrMsg</span><span class="o">-&gt;</span><span class="n">bpm</span><span class="p">);</span>
+<span class="c1">// In Model (GUI). Returns bool: it becomes the sender's MessageResult, and</span>
+<span class="c1">// false for "not my type" is the normal answer. Do not release msg -- the</span>
+<span class="c1">// framework does that when this returns.</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">Model::customMessageHandler</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HEART_RATE_UPDATE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">hrMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HeartRateMessage</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">        </span><span class="n">updateHeartRate</span><span class="p">(</span><span class="n">hrMsg</span><span class="o">-&gt;</span><span class="n">bpm</span><span class="p">);</span><span class="w">     </span><span class="c1">// copy out; the message is gone after this</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1853,13 +1945,20 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="c1">// `SDK::MessageType::Type` is a `uint32_t` alias, and `MessageBase` takes one directly, so</span>
 <span class="c1">// declare the IDs as constants of that type. A scoped `enum class` would not convert</span>
 <span class="c1">// implicitly — neither in the constructor below nor in a `switch (msg-&gt;getType())`.</span>
-<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">HEART_RATE_UPDATE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010001</span><span class="p">;</span>
-<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">GPS_LOCATION_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010002</span><span class="p">;</span>
-<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BATTERY_STATUS</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010003</span><span class="p">;</span>
-<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">WORKOUT_START</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010004</span><span class="p">;</span>
-<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">WORKOUT_STOP</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010005</span><span class="p">;</span>
+<span class="c1">// The IDs must lie inside 0x00000000-0x0000FFFF. Outside that range</span>
+<span class="c1">// isApplicationSpecificMessage() is false, so the message never reaches a custom</span>
+<span class="c1">// message handler -- it is failed and released instead.</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">HEART_RATE_UPDATE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">GPS_LOCATION_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000002</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BATTERY_STATUS</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000003</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">WORKOUT_START</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000004</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">WORKOUT_STOP</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000005</span><span class="p">;</span>
 
-<span class="c1">// Message structures</span>
+<span class="c1">// Message structures. pack(4) as the shipping apps do, and a static_assert</span>
+<span class="c1">// against the largest pool -- see "Defining a Custom Message Type" in the SDK</span>
+<span class="c1">// overview for why both belong on every message type.</span>
+<span class="cp">#pragma pack(push, 4)</span>
+
 <span class="k">struct</span><span class="w"> </span><span class="nc">HeartRateMessage</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bpm</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">;</span>
@@ -1877,6 +1976,13 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">WORKOUT_START</span><span class="p">)</span>
 <span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">command</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
+
+<span class="cp">#pragma pack(pop)</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">HeartRateMessage</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">WorkoutCommand</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
 
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace CustomMessage</span>
 </pre></div>
@@ -1911,14 +2017,33 @@ are worth checking (see the request-response pattern below).</p>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>Note that <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> posts with a <strong>zero timeout</strong>: if the message queue is full it gives up
-immediately rather than waiting for room. That suits telemetry, but when you need to wait for queue
-space — or to read a reply — use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> and send it yourself with an explicit timeout:</p>
+<p>The timeout you pass to a send is <strong>not</strong> a wait for queue space. Every push uses
+a short fixed timeout of its own, whatever you pass; your timeout decides how long
+you then block waiting for the receiver to answer. <code class="docutils literal notranslate"><span class="pre">send_msg</span></code> passes zero, so it
+posts and returns without waiting for a reply — which is what telemetry wants.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;T&gt;</span></code> with an explicit timeout when you need the reply:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// wait up to 100 ms for queue space</span>
+<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// block up to 100 ms for a response</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>Two things to know before doing that. A send that times out has been queued
+regardless — it may still be waiting, the receiver may already be handling it,
+or it may have been evicted since; the timeout tells you nothing about which.
+Anything it points at must stay alive past your call in every one of those
+cases. And the send returns <code class="docutils literal notranslate"><span class="pre">true</span></code> on timeout — the result is <code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code>, not a
+failure to send. The bool and the result answer different questions, and you
+need both: <code class="docutils literal notranslate"><span class="pre">false</span></code> means the push failed and the message was never queued, which
+is the one case where retrying plainly makes sense; <code class="docutils literal notranslate"><span class="pre">true</span></code> with a <code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code>
+result means only that it was queued and no answer came back, which is not
+enough to tell you whether re-sending would recover the work or duplicate it.</p>
+<p>Do not block the GUI thread on a send to the <strong>service</strong>. The GUI cannot drain
+its own queue while it waits, and the service may itself be blocked sending to
+the GUI — which only completes on a tick the GUI is not running. Blocking on the
+kernel is a different matter, and the port itself does it on every frame that
+redraws: the
+kernel’s dispatch thread always drains, and it sends to apps with a zero timeout
+for exactly this reason.</p>
 </section>
 <section id="gui-side-message-handling">
 <h4>GUI-Side Message Handling<a class="headerlink" href="#gui-side-message-handling" title="Link to this heading"></a></h4>
@@ -1959,8 +2084,8 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <h3>Advanced Message Patterns<a class="headerlink" href="#advanced-message-patterns" title="Link to this heading"></a></h3>
 <section id="request-response-pattern">
 <h4>Request-Response Pattern<a class="headerlink" href="#request-response-pattern" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">CONFIG_REQUEST</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010006</span><span class="p">;</span>
-<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">CONFIG_RESPONSE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00010007</span><span class="p">;</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">CONFIG_REQUEST</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000006</span><span class="p">;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">CONFIG_RESPONSE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000007</span><span class="p">;</span>
 
 <span class="c1">// Request message</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">ConfigurationRequest</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
@@ -1971,18 +2096,37 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_REQUEST</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">};</span>
 
-<span class="c1">// Response message</span>
+<span class="c1">// Response message.</span>
+<span class="c1">//</span>
+<span class="c1">// The value is a fixed buffer, not a std::string: a message type must not hold</span>
+<span class="c1">// anything that needs destruction. The kernel destroys messages non-virtually,</span>
+<span class="c1">// so such a member would simply never be cleaned up. See "Defining a Custom</span>
+<span class="c1">// Message Type" in the SDK overview.</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">ConfigurationResponse</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">ConfigurationRequest</span><span class="o">::</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">type</span><span class="p">;</span>
-<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MAX_VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">ConfigurationResponse</span><span class="p">(</span><span class="n">ConfigurationRequest</span><span class="o">::</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
-<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_RESPONSE</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">value</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="n">ConfigurationRequest</span><span class="o">::</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">type</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">valueLen</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w">    </span><span class="n">value</span><span class="p">[</span><span class="n">MAX_VALUE</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">ConfigurationResponse</span><span class="p">(</span><span class="n">ConfigurationRequest</span><span class="o">::</span><span class="n">ConfigType</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">CONFIG_RESPONSE</span><span class="p">),</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">valueLen</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">value</span><span class="p">{}</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">val</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="p">;</span><span class="w">                       </span><span class="c1">// value[] is already zeroed</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">valueLen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">MAX_VALUE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">[</span><span class="n">valueLen</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">value</span><span class="p">[</span><span class="n">valueLen</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">[</span><span class="n">valueLen</span><span class="p">];</span>
+<span class="w">            </span><span class="o">++</span><span class="n">valueLen</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">ConfigurationResponse</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
 
 <span class="c1">// Service implementation</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleConfigRequest</span><span class="p">(</span><span class="n">ConfigurationRequest</span><span class="o">*</span><span class="w"> </span><span class="n">req</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getConfigurationValue</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">);</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getConfigurationValue</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">);</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SDK</span><span class="o">::</span><span class="n">send_msg</span><span class="o">&lt;</span><span class="n">ConfigurationResponse</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="c1">// Nothing retries this for us: the requester will block until it times out.</span>
 <span class="w">        </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">"Config response for type %d dropped"</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">));</span>
@@ -1993,47 +2137,65 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 </section>
 <section id="bulk-data-transfer">
 <h4>Bulk Data Transfer<a class="headerlink" href="#bulk-data-transfer" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">BulkDataMessage</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MAX_CHUNK_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">BULK_DATA_TYPE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000008</span><span class="p">;</span>
+
+<span class="c1">// The chunk is sized so the whole message fits the largest kernel message pool</span>
+<span class="c1">// (256 bytes). A larger message cannot be allocated at all: allocateMessage()</span>
+<span class="c1">// returns nullptr and the send is dropped. The simulator allocates with a plain</span>
+<span class="c1">// new[], so it will not show you this -- hence the static_assert.</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">BulkDataMessage</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MAX_CHUNK_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">192</span><span class="p">;</span>
 
 <span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sequenceId</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">totalChunks</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">chunkSize</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">MAX_CHUNK_SIZE</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">data</span><span class="p">[</span><span class="n">MAX_CHUNK_SIZE</span><span class="p">];</span>
 
 <span class="w">    </span><span class="n">BulkDataMessage</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">seq</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">total</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">chunkData</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
 <span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">MessageBase</span><span class="p">(</span><span class="n">BULK_DATA_TYPE</span><span class="p">)</span>
-<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">sequenceId</span><span class="p">(</span><span class="n">seq</span><span class="p">),</span><span class="w"> </span><span class="n">totalChunks</span><span class="p">(</span><span class="n">total</span><span class="p">),</span><span class="w"> </span><span class="n">chunkSize</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">memcpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">chunkData</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">sequenceId</span><span class="p">(</span><span class="n">seq</span><span class="p">),</span><span class="w"> </span><span class="n">totalChunks</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">chunkSize</span><span class="p">(</span><span class="n">chunkData</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0U</span>
+<span class="w">                    </span><span class="o">:</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">size</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAX_CHUNK_SIZE</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">MAX_CHUNK_SIZE</span><span class="p">))</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">{}</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">chunkSize</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0U</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">memcpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">chunkData</span><span class="p">,</span><span class="w"> </span><span class="n">chunkSize</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">BulkDataMessage</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
-<section id="message-queue-management">
-<h4>Message Queue Management<a class="headerlink" href="#message-queue-management" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MessageProcessor</span><span class="w"> </span><span class="p">{</span>
+<section id="do-not-queue-messages-yourself">
+<h4>Do Not Queue Messages Yourself<a class="headerlink" href="#do-not-queue-messages-yourself" title="Link to this heading"></a></h4>
+<p>There is no app-side queue of <code class="docutils literal notranslate"><span class="pre">MessageBase*</span></code> to write. The port already holds
+one (see <a class="reference internal" href="#queue-lifetime">Queue Lifetime</a>), and a second one cannot work: the
+framework releases each message as soon as <code class="docutils literal notranslate"><span class="pre">customMessageHandler()</span></code> returns, so
+any pointer you kept is dangling by the time you come back to it.</p>
+<p>Keep the state, not the message:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HeartRateView</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">queueMessage</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mMessageQueue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="c1">// Queue full - handle overflow</span>
-<span class="w">            </span><span class="n">Logger</span><span class="o">::</span><span class="n">warning</span><span class="p">(</span><span class="s">"Message queue full, dropping message"</span><span class="p">);</span>
-<span class="w">            </span><span class="c1">// Optionally process oldest message first</span>
-<span class="w">            </span><span class="n">processPendingMessages</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Called from customMessageHandler(). Copy out and return.</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">onHeartRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">HeartRateMessage</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mBpm</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">bpm</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mDirty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">processPendingMessages</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mMessageQueue</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mMessageQueue</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">processMessage</span><span class="p">(</span><span class="o">*</span><span class="n">msg</span><span class="p">);</span>
-<span class="w">            </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Called from the frame loop, long after the message is gone.</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">render</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mDirty</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">mBpmLabel</span><span class="p">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">mBpm</span><span class="p">);</span><span class="w">   </span><span class="c1">// your own widget</span>
+<span class="w">            </span><span class="n">mBpmLabel</span><span class="p">.</span><span class="n">invalidate</span><span class="p">();</span>
+<span class="w">            </span><span class="n">mDirty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
-<span class="w">    </span><span class="n">FixedQueue</span><span class="o">&lt;</span><span class="n">MessageBase</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mMessageQueue</span><span class="p">;</span>
+<span class="w">    </span><span class="n">touchgfx</span><span class="o">::</span><span class="n">TextAreaWithOneWildcard</span><span class="w"> </span><span class="n">mBpmLabel</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">mBpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w">     </span><span class="n">mDirty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -2043,28 +2205,26 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <h3>Message Timing and Synchronization<a class="headerlink" href="#message-timing-and-synchronization" title="Link to this heading"></a></h3>
 <section id="frame-synchronized-updates">
 <h4>Frame-Synchronized Updates<a class="headerlink" href="#frame-synchronized-updates" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">TouchGFXCommandProcessor::waitForFrameTick</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">EVENT_GUI_TICK</span><span class="p">:</span>
-<span class="w">                    </span><span class="c1">// Process queued custom messages before rendering</span>
-<span class="w">                    </span><span class="n">callCustomMessageHandler</span><span class="p">();</span>
-<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// Allow TouchGFX to render</span>
+<p>Custom messages are delivered <strong>between</strong> frames, never from inside
+<code class="docutils literal notranslate"><span class="pre">waitForFrameTick()</span></code>. That is the whole reason the queue exists: everything that
+changes screen state has to happen while TouchGFX is not rendering.</p>
+<p>You do not write this loop — the port does. The application side is one call, in
+the place the toolkit gives you between frames:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FrontendApplication::handleTickEvent</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Drains the queue and invokes the registered custom message handler.</span>
+<span class="w">    </span><span class="c1">// Safe here: this runs between frames, not inside waitForFrameTick().</span>
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">GuiCommandProcessor</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">callCustomMessageHandler</span><span class="p">();</span>
 
-<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">CUSTOM_MESSAGE_TYPE</span><span class="p">:</span>
-<span class="w">                    </span><span class="c1">// Queue for processing during frame tick</span>
-<span class="w">                    </span><span class="n">queueCustomMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
-<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="n">model</span><span class="p">.</span><span class="n">tick</span><span class="p">();</span><span class="w">   </span><span class="c1">// the app's own per-frame work</span>
 
-<span class="w">                </span><span class="c1">// Handle other message types...</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">FrontendApplicationBase</span><span class="o">::</span><span class="n">handleTickEvent</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">model.tick()</span></code> is not optional boilerplate: the clockface resume pattern is
+built on it being called every frame. Compare a shipping app’s
+<code class="docutils literal notranslate"><span class="pre">FrontendApplication.hpp</span></code> before writing your own — they also tick the
+simulator kernel under <code class="docutils literal notranslate"><span class="pre">#if</span> <span class="pre">defined(SIMULATOR)</span></code>.</p>
 </section>
 <section id="rate-limiting">
 <h4>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Link to this heading"></a></h4>
@@ -2116,23 +2276,43 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 </pre></div>
 </div>
 </section>
-<section id="timeout-and-retry-logic">
-<h4>Timeout and Retry Logic<a class="headerlink" href="#timeout-and-retry-logic" title="Link to this heading"></a></h4>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">ReliableMessenger::sendWithRetry</span><span class="p">(</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">maxRetries</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">attempt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">attempt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">maxRetries</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">attempt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">TIMEOUT_MS</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="c1">// Success</span>
-<span class="w">        </span><span class="p">}</span>
-
-<span class="w">        </span><span class="c1">// Exponential backoff</span>
-<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BASE_DELAY_MS</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">attempt</span><span class="p">);</span>
-<span class="w">        </span><span class="n">mKernel</span><span class="p">.</span><span class="n">delay</span><span class="p">(</span><span class="n">delay</span><span class="p">);</span>
+<section id="timeouts">
+<h4>Timeouts<a class="headerlink" href="#timeouts" title="Link to this heading"></a></h4>
+<p>A send does not report a timeout through its return value: it returns <code class="docutils literal notranslate"><span class="pre">true</span></code>
+with the message’s result set to <code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code>, because the message <em>was</em> queued —
+the receiver simply has not answered yet. Check the result, not the bool:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">make_msg</span><span class="o">&lt;</span><span class="n">CustomMessage</span><span class="o">::</span><span class="n">HeartRateMessage</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">                   </span><span class="n">mKernel</span><span class="p">,</span><span class="w"> </span><span class="n">bpm</span><span class="p">,</span><span class="w"> </span><span class="n">getCurrentTime</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">msg</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Never queued: the push itself failed. Nothing is holding it, so</span>
+<span class="w">        </span><span class="c1">// retrying or reporting is legitimate here.</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getResult</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageResult</span><span class="o">::</span><span class="n">TIMEOUT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Queued but unanswered -- the GUI is probably suspended. Where the</span>
+<span class="w">        </span><span class="c1">// message is now you cannot tell: still queued, already in the</span>
+<span class="w">        </span><span class="c1">// handler, or evicted by later sends while the GUI stayed down.</span>
+<span class="w">        </span><span class="c1">// Do NOT re-send it. Drop the attempt and let the next snapshot</span>
+<span class="w">        </span><span class="c1">// carry the state.</span>
 <span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="n">Logger</span><span class="o">::</span><span class="n">error</span><span class="p">(</span><span class="s">"Failed to send message after %d attempts"</span><span class="p">,</span><span class="w"> </span><span class="n">maxRetries</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>Retrying a timed-out send is the wrong instinct — not because the message is
+safe, but because you cannot tell what became of it. It may still be queued, it
+may be in the handler already, or it may have been evicted by later sends while
+the GUI stayed suspended, which is the situation a timeout usually signals. A
+retry is therefore as likely to duplicate an operation as to recover a lost one.</p>
+<p>For periodic state, do not retry: the queue is ten deep and evicts the oldest,
+so a retry loop deepens the backlog it is reacting to, and the next snapshot
+carries the state anyway.</p>
+<p>For an action that must not be silently lost, do not build the retry on the
+send’s timeout at all — it cannot tell you what you need to know. Have the GUI
+acknowledge with a message of its own and drive the resend from that. Be clear
+about what that buys: it turns “possibly lost” into “possibly applied twice”,
+because an acknowledgement can go missing after the command was applied. It is
+at-least-once delivery, not exactly-once. If applying the action twice would be
+wrong, the handler has to be the one that notices — carry an id on the command
+and have the GUI ignore an id it has already acted on. The SDK does not do this
+for you.</p>
 </section>
 </section>
 <section id="performance-considerations">
@@ -2150,7 +2330,7 @@ space — or to read a reply — use <code class="docutils literal notranslate">
 <h4>Memory Management<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Message Lifetime</strong>: Ensure proper allocation/deallocation</p></li>
-<li><p><strong>Buffer Reuse</strong>: Reuse message buffers for similar message types</p></li>
+<li><p><strong>Message Sizing</strong>: Keep message types small; every one is a pool block, and the largest pool is 256 bytes</p></li>
 <li><p><strong>Leak Prevention</strong>: Always release allocated messages</p></li>
 <li><p><strong>Size Optimization</strong>: Minimize message payload sizes</p></li>
 </ul>

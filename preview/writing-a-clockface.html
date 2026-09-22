@@ -501,11 +501,17 @@ with a <code class="docutils literal notranslate"><span class="pre">static_asser
 <h3>The GUI stops draining its queue while suspended<a class="headerlink" href="#the-gui-stops-draining-its-queue-while-suspended" title="Link to this heading"></a></h3>
 <p>Custom messages waiting for the GUI sit in a <strong>ten-deep</strong> queue that is drained
 once per <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code>. A suspended face gets no ticks, so nothing drains,
-and once the queue is full <strong>the newest message is rejected outright</strong>.</p>
+and once the queue is full <strong>the oldest message is evicted</strong> to make room – it
+is failed, answered and released, and the newest always enters the queue.</p>
 <p>If your service publishes anything at even ~1 Hz – a heart rate will – the
-queue fills within about ten seconds of the face leaving the screen. Anything
-that changes after that is lost. And if your publishers dedup on the last value
-sent (they should), they will never offer it again.</p>
+queue fills within about ten seconds of the face leaving the screen. From then
+on the face only ever sees the last ten messages sent before it resumed, so a
+stream of deltas cannot be reconstructed: the early ones are gone. Send
+self-contained snapshots and this stops mattering, because the newest one is
+always current.</p>
+<p>It still bites if your publishers dedup on the last value sent (they should):
+a value that stopped changing while the face was away was published once, got
+evicted, and will never be offered again.</p>
 <p>So make <code class="docutils literal notranslate"><span class="pre">Refresh</span></code> mean what it says: clear the sent flags and re-send
 everything, rather than only the settings.</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::republishAll</span><span class="p">()</span>

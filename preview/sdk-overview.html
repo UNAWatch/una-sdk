@@ -108,6 +108,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#message-system-architecture">Message System Architecture</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#message-types-and-ranges">Message Types and Ranges</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#key-system-messages">Key System Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#defining-a-custom-message-type">Defining a Custom Message Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#message-processing-pattern">Message Processing Pattern</a></li>
 </ul>
 </li>
@@ -516,6 +517,105 @@
 <span class="n">EVENT_SENSOR_LAYER_DATA</span><span class="w">          </span><span class="c1">// Asynchronous sensor data update</span>
 </pre></div>
 </div>
+</section>
+<section id="defining-a-custom-message-type">
+<h4>Defining a Custom Message Type<a class="headerlink" href="#defining-a-custom-message-type" title="Link to this heading"></a></h4>
+<p>Custom messages use the <code class="docutils literal notranslate"><span class="pre">0x00000000</span> <span class="pre">-</span> <span class="pre">0x0000FFFF</span></code> range and are routed directly
+between an app’s service and GUI processes. An ID outside that range is not
+treated as application-specific: it will not reach a custom message handler.</p>
+<p>Declare the ID as a <code class="docutils literal notranslate"><span class="pre">SDK::MessageType::Type</span></code> constant — a scoped <code class="docutils literal notranslate"><span class="pre">enum</span> <span class="pre">class</span></code>
+will not convert in the constructor or in <code class="docutils literal notranslate"><span class="pre">switch</span> <span class="pre">(msg-&gt;getType())</span></code> — and derive
+from <code class="docutils literal notranslate"><span class="pre">MessageBase</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageType</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">MY_UPDATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000001</span><span class="p">;</span>
+
+<span class="cp">#pragma pack(push, 4)</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">MyUpdate</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MyUpdate</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="p">(</span><span class="n">MY_UPDATE</span><span class="p">),</span><span class="w"> </span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w">      </span><span class="c1">// plain data only</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w">  </span><span class="n">flags</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="cp">#pragma pack(pop)</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">MyUpdate</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"must fit the largest kernel message pool"</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">#pragma</span> <span class="pre">pack(push,</span> <span class="pre">4)</span></code> matches what the shipping example apps do and what
+<code class="docutils literal notranslate"><span class="pre">MessageBase</span></code> itself uses. It changes nothing for a type whose members are all
+4-byte-aligned or smaller, as above. What it buys is padding: give the type a
+<code class="docutils literal notranslate"><span class="pre">double</span></code> or a 64-bit integer that does not already land on an 8-byte boundary
+and the compiler would otherwise insert four bytes in front of it. A message
+holding <code class="docutils literal notranslate"><span class="pre">uint32_t</span></code> then <code class="docutils literal notranslate"><span class="pre">uint64_t</span></code> is 44 bytes on the watch packed, against 48
+unpacked — worth having against a 256-byte ceiling.</p>
+<p>It is not what keeps the watch and simulator layouts agreeing. They cannot agree
+in absolute terms anyway, since <code class="docutils literal notranslate"><span class="pre">MessageBase</span></code> is 32 bytes on one and 40 on the
+other. Measured from the end of the header, though, that same <code class="docutils literal notranslate"><span class="pre">uint64_t</span></code> sits at
+offset 4 on <em>both</em> targets with the pragma and at offset 8 on both without it —
+so the packing decides the offset, and the target does not. (That holds for any
+member up to 8-byte alignment; 32 and 40 differ mod 16, so an over-aligned one
+would not follow it.) Nor do the two need to agree: a custom message is only ever
+read by the peer process of the same build.</p>
+<p><strong>Allocate through the SDK, never on the stack or as a static.</strong>
+<code class="docutils literal notranslate"><span class="pre">MessageBase::operator</span> <span class="pre">new</span></code> is deleted, so <code class="docutils literal notranslate"><span class="pre">IAppComm::allocateMessage&lt;T&gt;()</span></code> — or
+the <code class="docutils literal notranslate"><span class="pre">SDK::make_msg</span></code> / <code class="docutils literal notranslate"><span class="pre">SDK::send_msg</span></code> helpers — is the only way to obtain a pool
+block.</p>
+<p>A stack instance still <em>compiles</em>, and nothing traps on it. The receiving
+process reads the message on a later frame, by which time the sender’s frame is
+gone — and it does not only read: it writes a result, and decrements the
+reference count, into another thread’s dead stack. The kernel may log once per boot that a message was released with no matching
+claim, and even that is suppressed for the rest of the boot if the pool has ever
+reported running out of owner slots. The pool itself ignores the foreign address
+silently. Assume nothing tells you.</p>
+<p><strong>A message type must not declare a destructor, and must not hold a member that
+needs one</strong> — no <code class="docutils literal notranslate"><span class="pre">std::string</span></code>, no container, no owning pointer, nothing with
+cleanup of its own.</p>
+<p>This is not a style preference. <code class="docutils literal notranslate"><span class="pre">allocateMessage&lt;T&gt;()</span></code> is a header template, so
+the placement-new that constructs your type is compiled into your application’s
+image and the vtable pointer it writes points into that image. The kernel frees
+the image when the process is unloaded, and may destroy the message afterwards —
+during teardown, or when the surviving half of an app releases something its
+peer allocated — so it destroys messages <strong>non-virtually</strong> rather than
+dispatching through a vtable that is no longer there. A destructor you declare
+therefore does not run, and whatever it would have released is leaked.</p>
+<p>The compiler cannot warn about this. <code class="docutils literal notranslate"><span class="pre">MessageBase</span></code> has a virtual destructor, so
+<code class="docutils literal notranslate"><span class="pre">std::is_trivially_destructible</span></code> is false for every message type and the trait
+that would express the rule is unusable. It is a contract, not a check.</p>
+<p><strong>Size is checkable, and worth checking.</strong> The largest kernel message pool is
+currently 256 bytes, and <code class="docutils literal notranslate"><span class="pre">sizeof(T)</span></code> includes the <code class="docutils literal notranslate"><span class="pre">MessageBase</span></code> header — 32
+bytes on the watch and 40 in a 64-bit simulator build, so 224 and 216 bytes of
+payload respectively. Size against the smaller of the two and make sure the
+assert holds in both builds. A larger request
+returns <code class="docutils literal notranslate"><span class="pre">nullptr</span></code> and the send is dropped; the simulator allocates with a plain
+<code class="docutils literal notranslate"><span class="pre">new[]</span></code>, so it will never show you this.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">static_assert</span></code> is the one part of the contract a compiler will enforce for
+you. Note it asserts against a literal: the pool sizes live in the firmware, not
+in a constant the SDK exports, so re-check it against the kernel you are
+building for rather than treating 256 as permanent.</p>
+<p><strong>Variable-length data goes in a bounded inline array plus a count</strong>, sized
+against that 256-byte ceiling. That is what the shipping example apps do, and
+for a custom message it is the only form that works. Do not put a pointer in one.</p>
+<p>The SDK’s own display API does pass a pointer, which is why this needs saying
+rather than assuming: that path is safe for two separate reasons, and a custom
+message has neither. Its buffer is <strong>static</strong>, so the pointer cannot dangle
+however long the message takes to be read — and the send blocks until the kernel
+has copied the frame out, so the contents cannot change underneath the reader.</p>
+<p>Making your own buffer static fixes only the first of those. A custom message
+waits for the GUI’s next drained frame, which never comes while the GUI is
+suspended, and up to ten can be queued at once — all pointing at the same
+buffer, all seeing whatever it contains when the GUI finally runs, not what it
+contained when each was sent. The pointer stays valid and the data is still
+wrong.</p>
+<p>And do not reason “my send blocks, so the storage outlives the read”. A send
+with a timeout waits for a <em>response</em>, not for delivery. When it times out you
+do not know where the message is — still queued, already in the receiver’s
+handler, or evicted by later sends — only that your call has returned. A pointer
+to a local is then a use-after-free if the handler ever runs; a buffer you go on
+to reuse is read intact but stale, reporting whatever you wrote last rather than
+what you sent. Only the evicted case is harmless, and it is the one you cannot
+count on. None of this needs the GUI to be suspended, though suspension is what
+makes it likely — and it is the case you are least likely to test. There is no
+MMU to catch any of it.</p>
 </section>
 <section id="message-processing-pattern">
 <h4>Message Processing Pattern<a class="headerlink" href="#message-processing-pattern" title="Link to this heading"></a></h4>
