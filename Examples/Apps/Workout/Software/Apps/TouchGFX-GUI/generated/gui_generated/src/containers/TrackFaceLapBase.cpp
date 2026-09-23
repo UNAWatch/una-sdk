@@ -60,7 +60,7 @@ TrackFaceLapBase::TrackFaceLapBase()
     hrValue.setLinespacing(0);
     Unicode::snprintf(hrValueBuffer, HRVALUE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_8WSQ).getText());
     hrValue.setWildcard(hrValueBuffer);
-    hrValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_40));
+    hrValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_30));
     add(hrValue);
 
     hrText.setPosition(70, 10, 100, 23);

@@ -158,9 +158,6 @@
       <Text Id="TMP_SEMIBOLD_35_L" Alignment="Left" TypographyId="Poppins_SemiBold_35">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
-      <Text Id="TMP_SEMIBOLD_40" Alignment="Center" TypographyId="Poppins_SemiBold_30">
-        <Translation Language="GB">&lt;&gt;</Translation>
-      </Text>
       <Text Id="TMP_SEMIBOLD_40_L" Alignment="Left" TypographyId="Poppins_SemiBold_40">
         <Translation Language="GB">&lt;&gt;</Translation>
       </Text>
