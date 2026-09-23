@@ -1,0 +1,7 @@
+{
+  "_note": "Narrowed fonts and the runtime text that reaches them. Checked by Utilities/Scripts/app_packer/validate_wildcards.py in CI. This lives beside texts.xml rather than inside it because TouchGFX Designer rewrites texts.xml from its own model and does not preserve comments.",
+  "Poppins_SemiBold_60": {
+    "why": "Filled at runtime with digits and a colon only: TrackFaceStatus dayTimeValue \"%u:%02u\", TrackLapView and TrackHoldConfirmationView timeValue \"%u\" / \"%u:%02u\". No translated text reaches this font.",
+    "rendersTextIds": []
+  }
+}

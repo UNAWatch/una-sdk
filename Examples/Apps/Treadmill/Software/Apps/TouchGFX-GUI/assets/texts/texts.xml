@@ -578,8 +578,14 @@
       intervals alert screen - nowhere else.
 
       So: adding a language, or editing the TEXT_OPEN translation, MUST add
-      the new letters here. Nothing in the build catches it; a missing glyph
-      renders as the '?' fallback at 60px.
+      the new letters here. That coupling is DECLARED in
+      wildcard-requirements.json beside this file and checked by apps-ci
+      (Utilities/Scripts/app_packer/validate_wildcards.py), so it fails the
+      build rather than rendering as the '?' fallback at 60px.
+
+      Keep the declaration in step with reality. The check verifies what it
+      is told; it cannot see a new code path for itself. If some other code
+      starts writing into one of these widgets, add the Text id there.
 
       The space is in every set on purpose. It is a zero-width bitmap and one
       GlyphNode, and leaving it out is the easiest way to break this: any

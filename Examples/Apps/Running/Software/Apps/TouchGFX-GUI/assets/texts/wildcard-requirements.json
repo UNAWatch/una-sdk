@@ -1,0 +1,17 @@
+{
+  "_note": "Narrowed fonts and the runtime text that reaches them. Checked by Utilities/Scripts/app_packer/validate_wildcards.py in CI. This lives beside texts.xml rather than inside it because TouchGFX Designer rewrites texts.xml from its own model and does not preserve comments.",
+  "Poppins_SemiBold_60": {
+    "why": "Filled at runtime with digits and separators by the same picker, by TrackFaceStatus dayTimeValue \"%u:%02u\", by TrackLapView and TrackHoldConfirmationView timeValue, and by IntervalsTimer timerText \"%02u:%02u\" / \"%05.02f\" / \"%05.01f\". IntervalsTimer::setOpen additionally writes \"%s\" of TypedText(T_TEXT_OPEN) into timerText, which is the ONLY path that puts letters into this font - hence TEXT_OPEN below. Note SummaryFaceLaps has a widget also called timerText which renders \"Total: h:mm:ss\"; that one is Poppins_Regular_18 and unaffected.",
+    "rendersTextIds": [
+      "TEXT_OPEN"
+    ]
+  },
+  "Poppins_Light_60": {
+    "why": "TwoTonePicker fills valSep / valLeft / valRight / valFracLo / nextVal at runtime from PickerLogic, always std::snprintf \"%02u\" or \"%u\" with a literal \".\" or \":\" separator. Digits only, coupled to no translation.",
+    "rendersTextIds": []
+  },
+  "Poppins_Medium_40": {
+    "why": "TwoTonePicker fills valSep / valLeft / valRight / valFracLo / nextVal at runtime from PickerLogic, always std::snprintf \"%02u\" or \"%u\" with a literal \".\" or \":\" separator. Digits only, coupled to no translation.",
+    "rendersTextIds": []
+  }
+}
