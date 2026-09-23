@@ -61,7 +61,6 @@ KEEP extern const uint32_t indicesGb[] TEXT_LOCATION_FLASH_ATTRIBUTE = {
     349, // T_TMP_SEMIBOLD_35: "<>"
     349, // T_TMP_SEMIBOLD_35_R: "<>"
     349, // T_TMP_SEMIBOLD_35_L: "<>"
-    349, // T_TMP_SEMIBOLD_40: "<>"
     349, // T_TMP_SEMIBOLD_40_L: "<>"
     349, // T_TMP_SEMIBOLD_40_R: "<>"
     349, // T_TMP_SEMIBOLD_60: "<>"

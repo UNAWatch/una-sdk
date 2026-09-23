@@ -81,7 +81,7 @@ SummaryFaceCalBase::SummaryFaceCalBase()
     timerValue.setLinespacing(0);
     Unicode::snprintf(timerValueBuffer, TIMERVALUE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_IYCO).getText());
     timerValue.setWildcard(timerValueBuffer);
-    timerValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_40));
+    timerValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_30));
     add(timerValue);
 
     clockIcon.setXY(45, 62);
