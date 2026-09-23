@@ -70,6 +70,41 @@ jobs:
           python3 Utilities/Scripts/app_packer/validate_app_config.py \
             --check Docs/Tutorials/Files/OutputLVGL/app-manifest.json
 
+      - name: Validate narrowed font wildcard sets
+        # The largest fonts in the activity apps carry deliberately narrow
+        # WildcardCharacters sets, because a glyph bitmap is resident RAM on
+        # the watch. Anything written into one of those wildcards at runtime
+        # that has no glyph is drawn as FallbackCharacter -- on one screen,
+        # with nothing to see at build time.
+        #
+        # WildcardCharacters governs the wildcard ONLY: static translation
+        # text and the fallback glyph are built regardless. So the thing that
+        # needs protecting is the runtime text, which neither this tool nor
+        # the Designer file can see. Each app declares it in
+        # assets/texts/wildcard-requirements.json, and this step checks the
+        # declaration still fits the set.
+        #
+        # --require-manifest is what makes the declaration load-bearing: the
+        # six apps below cannot lose it silently. That matters because the
+        # same information used to live in an XML comment, and TouchGFX
+        # Designer rewrites texts.xml from its own model when it saves.
+        run: |
+          python3 Utilities/Scripts/app_packer/test_validate_wildcards.py
+          python3 Utilities/Scripts/app_packer/validate_wildcards.py \
+            --require-manifest \
+            --check Examples/Apps/Treadmill/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Running/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Hiking/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Cycling/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Workout/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Stopwatch/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml
+          # Every other app too, without requiring a declaration: they have
+          # narrowed fonts that predate this check and no recorded coupling.
+          python3 Utilities/Scripts/app_packer/validate_wildcards.py \
+            $(for f in Examples/Apps/*/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml; do \
+                echo --check "$f"; \
+              done)
+
       - name: Generate app list
         id: generate
         run: |
