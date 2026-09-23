@@ -137,7 +137,7 @@ fontconvert_font_files := $(fontconvert_ttf_lower_files) \
 source_files := $(call find, $(source_paths),*.cpp) $(framework_files) $(ADDITIONAL_SOURCES)
 c_source_files := $(call find, $(source_paths),*.c)
 
-object_files := $(source_files:$(touchgfx_path)/%.cpp=$(object_output_path)/touchgfx/%.o) 
+object_files := $(source_files:$(touchgfx_path)/%.cpp=$(object_output_path)/touchgfx/%.o) \
 $(c_source_files:$(touchgfx_path)/%.c=$(object_output_path)/touchgfx/%.o)
 object_files := $(object_files:%.cpp=$(object_output_path)/%.o)
 object_files := $(object_files:%.c=$(object_output_path)/%.o)
