@@ -58,9 +58,15 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
-# TouchGFX wildcard placeholder in a translation: the literal characters are
-# not drawn, whatever the widget is filled with is.
-PLACEHOLDER = re.compile(r"<\d*>")
+# TouchGFX wildcard placeholder in a translation. Three spellings are
+# allowed - <>, <1> and a named <value> - and in every one only the
+# substituted text is drawn, never the marker. Workout already uses the named
+# form (assets/texts/texts.xml:319), so missing it is not hypothetical: the
+# marker's own letters would be demanded as glyphs nothing renders.
+#
+# Deliberately narrow: the body is a plain identifier, so a translation
+# containing real prose like "a < b > c" is left alone.
+PLACEHOLDER = re.compile(r"<[A-Za-z0-9_]*>")
 
 PRINTABLE_ASCII = set(chr(c) for c in range(0x20, 0x7F))
 
@@ -105,6 +111,29 @@ def check_file(path, require_manifest=False):
             return ["%s: top level must be an object" % manifest_path]
 
     errors = []
+
+    # A declaration that no longer matches a narrowed typography is dead, and
+    # dead silently: the loop below only looks entries UP by typography name,
+    # so a renamed or widened font leaves its declaration orphaned and stops
+    # being protected while CI stays green. Keys starting with '_' are notes.
+    narrowed_names = set()
+    for n, e in typos.items():
+        w = e.get("WildcardCharacters")
+        if w is not None and not PRINTABLE_ASCII.issubset(set(w)):
+            narrowed_names.add(n)
+    for key in sorted(manifest):
+        if key.startswith("_"):
+            continue
+        if key not in narrowed_names:
+            why = ("no typography of that name exists"
+                   if key not in typos else
+                   "that typography is not narrowed, so nothing constrains it")
+            errors.append(
+                "%s: declares '%s' but %s. Remove the entry, or restore the "
+                "narrowing it was written for - as it stands the declaration "
+                "is checked against nothing."
+                % (manifest_path, key, why))
+
     for name, elem in sorted(typos.items()):
         wc = elem.get("WildcardCharacters")
         if wc is None:
@@ -129,7 +158,18 @@ def check_file(path, require_manifest=False):
             errors.append("%s: '%s' needs a 'why' naming the code path that "
                           "renders the declared ids" % (manifest_path, name))
 
-        declared = entry.get("rendersTextIds", [])
+        if "rendersTextIds" not in entry:
+            # Defaulting to [] here would be the whole point of this tool
+            # quietly lost: the declaration would still be present, the check
+            # would still pass, and nothing would be checked. An empty list
+            # has to be written down.
+            errors.append(
+                "%s: '%s' has no 'rendersTextIds'. Write [] if no translated "
+                "text reaches this font - omitting the key would silently "
+                "stop anything being checked." % (manifest_path, name))
+            continue
+
+        declared = entry["rendersTextIds"]
         if not isinstance(declared, list):
             errors.append("%s: '%s'.rendersTextIds must be a list"
                           % (manifest_path, name))

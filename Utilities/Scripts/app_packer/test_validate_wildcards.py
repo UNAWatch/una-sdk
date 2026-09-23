@@ -131,6 +131,54 @@ def _(tmp):
     return len(errs) == 1 and "why" in errs[0]
 
 
+@case("a declaration for a typography that no longer exists fails")
+def _(tmp):
+    # A renamed font would otherwise orphan its declaration silently.
+    m = {"Poppins_Gone_60": {"why": "x", "rendersTextIds": []},
+         "Narrow": {"why": "y", "rendersTextIds": []}}
+    p = build(tmp, "0123456789:", manifest=m)
+    errs = vw.check_file(p)
+    return len(errs) == 1 and "Poppins_Gone_60" in errs[0]
+
+
+@case("a declaration for a font that is no longer narrowed fails")
+def _(tmp):
+    # Widening a set back to full ASCII should not leave a stale declaration
+    # sitting there looking like protection.
+    m = {"Wide": {"why": "x", "rendersTextIds": []},
+         "Narrow": {"why": "y", "rendersTextIds": []}}
+    p = build(tmp, "0123456789:", manifest=m)
+    errs = vw.check_file(p)
+    return len(errs) == 1 and "not narrowed" in errs[0]
+
+
+@case("a '_note' key in the manifest is not treated as a typography")
+def _(tmp):
+    m = {"_note": "free text for humans",
+         "Narrow": {"why": "y", "rendersTextIds": []}}
+    p = build(tmp, "0123456789:", manifest=m)
+    return vw.check_file(p) == []
+
+
+@case("a named <value> placeholder is not mistaken for text")
+def _(tmp):
+    # TouchGFX allows <>, <1> and <name>; only the substitution is drawn.
+    # Workout uses the named form, so treating it as literal would demand
+    # glyphs for '<', 'v', 'a', 'l', 'u', 'e', '>' that nothing renders.
+    p = build(tmp, "0123456789:", runtime_word="<value>", manifest=DECLARED)
+    return vw.check_file(p) == []
+
+
+@case("a declaration that loses rendersTextIds fails, rather than checking nothing")
+def _(tmp):
+    # The hole this tool exists to close: with the key absent, defaulting to
+    # [] would leave the declaration present and the check vacuous.
+    m = {"Narrow": {"why": "code writes T_RUNTIME_WORD here"}}
+    p = build(tmp, "0123456789:", manifest=m)
+    errs = vw.check_file(p)
+    return len(errs) == 1 and "rendersTextIds" in errs[0]
+
+
 def main():
     failed = 0
     for name, fn in CASES:
