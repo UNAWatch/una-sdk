@@ -178,7 +178,7 @@
              
   <section id="una-watch-simulator">
 <h1>UNA-Watch Simulator<a class="headerlink" href="#una-watch-simulator" title="Link to this heading"></a></h1>
-<p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>.<br />
+<p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>. The <a class="reference internal" href="#lvgl-simulator"><span class="xref myst">LVGL simulators</span></a> are plain CMake projects that need a compiler and SDL2 but no IDE.<br />
 Note: If you move the application to another location, you need to update the relative path to <strong>TouchGFX library path</strong>.
 See: <a class="reference internal" href="#transfer-application"><span class="xref myst">Transfer Application</span></a></p>
 <section id="getting-started">
@@ -523,9 +523,17 @@ TouchGFX simulators pass those codes from <code class="docutils literal notransl
 <code class="docutils literal notranslate"><span class="pre">z</span></code> chord has no key). <code class="docutils literal notranslate"><span class="pre">cmake/una-simulator.cmake</span></code>
 provides the source lists and <code class="docutils literal notranslate"><span class="pre">una_simulator_link_sdl2()</span></code>, which uses an installed SDL2
 where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
-TouchGFX (configure with <code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">Win32</span></code>). The sensor simulation, mock file system and
-keyboard mapping above apply unchanged. <code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds
-these CMake simulators on Linux and smoke-runs them headlessly, beside the TouchGFX ones.</p>
+TouchGFX Designer. The build’s architecture must match the SDL2 it links: 32-bit with the
+TouchGFX copy, x64 with a 64-bit installed package. The compiler is whatever CMake
+finds: GCC on Linux and WSL, MSVC on Windows. MSVC comes with the free <em>Build Tools for
+Visual Studio</em> as well as with the IDE, whose “C++ CMake tools for Windows” component
+also brings CMake and Ninja; the Ninja generator drives it from a developer command
+prompt (the x86 one for the 32-bit build), and the Visual Studio generator (<code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">Win32</span></code>)
+works from any shell and also writes a solution to open in the IDE. Neither
+TouchGFX Designer nor Visual Studio is needed when SDL2 is installed. The sensor
+simulation, mock file system and keyboard mapping above apply unchanged.
+<code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds these CMake simulators on Linux and
+smoke-runs them headlessly, beside the TouchGFX ones.</p>
 </section>
 <section id="linux-gcc-linux-gcc">
 <h2>Linux (GCC) {#linux-gcc}<a class="headerlink" href="#linux-gcc-linux-gcc" title="Link to this heading"></a></h2>

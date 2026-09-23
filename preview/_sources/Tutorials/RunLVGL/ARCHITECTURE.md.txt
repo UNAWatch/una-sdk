@@ -65,19 +65,46 @@ RunLVGL has a PC simulator that runs the real service and GUI processes against 
 SDK's mock kernel, with the display in an SDL2 window. Unlike the TouchGFX simulators,
 it is a plain CMake project and builds on Windows and Linux.
 
-Windows, with Visual Studio (32-bit, because it reuses the SDL2 that TouchGFX ships; use
-the generator name for your Visual Studio version: `"Visual Studio 18 2026"` needs CMake 4.2
-or newer, `"Visual Studio 17 2022"` works with the 3.21 minimum):
+It needs a host C++ compiler, CMake, a generator (Ninja, or Visual Studio on Windows)
+and SDL2, and no IDE:
+
+- **Linux, or WSL on Windows:** GCC, CMake, Ninja and the SDL2 development package.
+- **Windows:** the MSVC compiler, which comes with the free *Build Tools for Visual
+  Studio* (the "Desktop development with C++" workload) as well as with the Visual
+  Studio IDE; either is enough. The workload's "C++ CMake tools for Windows" component
+  brings CMake and Ninja, and a developer command prompt puts them on `PATH`; both can
+  also be installed on their own. SDL2 comes from a development package that CMake can
+  find (vcpkg, for example) or, with TouchGFX Designer installed, from the 32-bit copy
+  it ships. The build's architecture must match the SDL2 it links, and it is chosen by
+  the developer environment with the Ninja generator (x86 or x64 prompt) and by `-A`
+  with a Visual Studio generator (`-A Win32` or `-A x64`; Ninja does not take `-A`).
+  With the TouchGFX copy the build is 32-bit, as in the commands below; with an
+  installed 64-bit SDL2 pick the 64-bit option instead. MinGW is untested.
+
+Windows, in an *x86 Native Tools Command Prompt for VS* (a `cmd` window with the
+32-bit MSVC environment loaded; any shell after `vcvarsall.bat x86` is the same):
+
+```bat
+set UNA_SDK=C:/path/to/una-sdk
+cd /d %UNA_SDK%\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\simulator
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+build\bin\RunLVGLSimulator.exe
+```
+
+The Visual Studio generator finds MSVC itself, so it works from any shell, and it also
+writes a solution to open in the IDE (`"Visual Studio 18 2026"` needs CMake 4.2 or newer,
+`"Visual Studio 17 2022"` works with the 3.21 minimum):
 
 ```powershell
 $env:UNA_SDK = "C:/path/to/una-sdk"
 cd $env:UNA_SDK\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\simulator
 cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
 cmake --build build --config Debug
-build\bin\RunLVGLSimulator.exe
+.\build\bin\RunLVGLSimulator.exe
 ```
 
-Linux (Debian/Ubuntu):
+Linux, or WSL (Debian/Ubuntu):
 
 ```bash
 sudo apt-get install build-essential cmake ninja-build libsdl2-dev

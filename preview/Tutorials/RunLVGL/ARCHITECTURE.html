@@ -231,17 +231,42 @@ the launcher as <strong>RunLVGL</strong>.</p>
 <p>RunLVGL has a PC simulator that runs the real service and GUI processes against the
 SDK’s mock kernel, with the display in an SDL2 window. Unlike the TouchGFX simulators,
 it is a plain CMake project and builds on Windows and Linux.</p>
-<p>Windows, with Visual Studio (32-bit, because it reuses the SDL2 that TouchGFX ships; use
-the generator name for your Visual Studio version: <code class="docutils literal notranslate"><span class="pre">&quot;Visual</span> <span class="pre">Studio</span> <span class="pre">18</span> <span class="pre">2026&quot;</span></code> needs CMake 4.2
-or newer, <code class="docutils literal notranslate"><span class="pre">&quot;Visual</span> <span class="pre">Studio</span> <span class="pre">17</span> <span class="pre">2022&quot;</span></code> works with the 3.21 minimum):</p>
+<p>It needs a host C++ compiler, CMake, a generator (Ninja, or Visual Studio on Windows)
+and SDL2, and no IDE:</p>
+<ul class="simple">
+<li><p><strong>Linux, or WSL on Windows:</strong> GCC, CMake, Ninja and the SDL2 development package.</p></li>
+<li><p><strong>Windows:</strong> the MSVC compiler, which comes with the free <em>Build Tools for Visual
+Studio</em> (the “Desktop development with C++” workload) as well as with the Visual
+Studio IDE; either is enough. The workload’s “C++ CMake tools for Windows” component
+brings CMake and Ninja, and a developer command prompt puts them on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>; both can
+also be installed on their own. SDL2 comes from a development package that CMake can
+find (vcpkg, for example) or, with TouchGFX Designer installed, from the 32-bit copy
+it ships. The build’s architecture must match the SDL2 it links, and it is chosen by
+the developer environment with the Ninja generator (x86 or x64 prompt) and by <code class="docutils literal notranslate"><span class="pre">-A</span></code>
+with a Visual Studio generator (<code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">Win32</span></code> or <code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">x64</span></code>; Ninja does not take <code class="docutils literal notranslate"><span class="pre">-A</span></code>).
+With the TouchGFX copy the build is 32-bit, as in the commands below; with an
+installed 64-bit SDL2 pick the 64-bit option instead. MinGW is untested.</p></li>
+</ul>
+<p>Windows, in an <em>x86 Native Tools Command Prompt for VS</em> (a <code class="docutils literal notranslate"><span class="pre">cmd</span></code> window with the
+32-bit MSVC environment loaded; any shell after <code class="docutils literal notranslate"><span class="pre">vcvarsall.bat</span> <span class="pre">x86</span></code> is the same):</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">set</span> <span class="nv">UNA_SDK</span><span class="p">=</span>C:/path/to/una-sdk
+<span class="k">cd</span> /d <span class="nv">%UNA_SDK%</span>\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\simulator
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+build\bin\RunLVGLSimulator.exe
+</pre></div>
+</div>
+<p>The Visual Studio generator finds MSVC itself, so it works from any shell, and it also
+writes a solution to open in the IDE (<code class="docutils literal notranslate"><span class="pre">&quot;Visual</span> <span class="pre">Studio</span> <span class="pre">18</span> <span class="pre">2026&quot;</span></code> needs CMake 4.2 or newer,
+<code class="docutils literal notranslate"><span class="pre">&quot;Visual</span> <span class="pre">Studio</span> <span class="pre">17</span> <span class="pre">2022&quot;</span></code> works with the 3.21 minimum):</p>
 <div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="nv">$env:UNA_SDK</span> <span class="p">=</span> <span class="s2">"C:/path/to/una-sdk"</span>
 <span class="nb">cd </span><span class="nv">$env:UNA_SDK</span><span class="p">\</span><span class="n">Examples</span><span class="p">\</span><span class="n">Apps</span><span class="p">\</span><span class="n">RunLVGL</span><span class="p">\</span><span class="n">Software</span><span class="p">\</span><span class="n">Apps</span><span class="p">\</span><span class="n">LVGL-GUI</span><span class="p">\</span><span class="n">simulator</span>
 <span class="n">cmake</span> <span class="n">-S</span> <span class="p">.</span> <span class="n">-B</span> <span class="n">build</span> <span class="n">-G</span> <span class="s2">"Visual Studio 18 2026"</span> <span class="n">-A</span> <span class="n">Win32</span>
 <span class="n">cmake</span> <span class="p">-</span><span class="n">-build</span> <span class="n">build</span> <span class="p">-</span><span class="n">-config</span> <span class="n">Debug</span>
-<span class="n">build</span><span class="p">\</span><span class="n">bin</span><span class="p">\</span><span class="n">RunLVGLSimulator</span><span class="p">.</span><span class="n">exe</span>
+<span class="p">.\</span><span class="n">build</span><span class="p">\</span><span class="n">bin</span><span class="p">\</span><span class="n">RunLVGLSimulator</span><span class="p">.</span><span class="n">exe</span>
 </pre></div>
 </div>
-<p>Linux (Debian/Ubuntu):</p>
+<p>Linux, or WSL (Debian/Ubuntu):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>cmake<span class="w"> </span>ninja-build<span class="w"> </span>libsdl2-dev
 <span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span>/path/to/una-sdk
 <span class="nb">cd</span><span class="w"> </span><span class="nv">$UNA_SDK</span>/Examples/Apps/RunLVGL/Software/Apps/LVGL-GUI/simulator
