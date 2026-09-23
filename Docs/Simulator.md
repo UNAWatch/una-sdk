@@ -272,9 +272,10 @@ provides the source lists and `una_simulator_link_sdl2()`, which uses an install
 where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
 TouchGFX Designer, in which case the build must be 32-bit. The compiler is whatever CMake
 finds: GCC on Linux and WSL, MSVC on Windows. MSVC comes with the free *Build Tools for
-Visual Studio* as well as with the IDE, and the Ninja generator drives it from a Developer
-Command Prompt (`vcvarsall.bat x86` for the 32-bit build); the Visual Studio generator
-(`-A Win32`) works from any shell and also writes a solution to open in the IDE. Neither
+Visual Studio* as well as with the IDE, whose "C++ CMake tools for Windows" component
+also brings CMake and Ninja; the Ninja generator drives it from a developer command
+prompt (the x86 one for the 32-bit build), and the Visual Studio generator (`-A Win32`)
+works from any shell and also writes a solution to open in the IDE. Neither
 TouchGFX Designer nor Visual Studio is needed when SDL2 is installed. The sensor
 simulation, mock file system and keyboard mapping above apply unchanged.
 `.github/workflows/linux-simulator.yml` builds these CMake simulators on Linux and

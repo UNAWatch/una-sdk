@@ -1,12 +1,14 @@
 # RunLVGL PC simulator: the app's service and LVGL GUI processes running
 # against the SDK's mock kernel, with the display in an SDL2 window.
 #
-# Needs a host C++ compiler, CMake and SDL2; no IDE. Linux or WSL: GCC and
-# libsdl2-dev. Windows: MSVC, from the free Build Tools for Visual Studio or
-# the IDE; without an installed SDL2 the build reuses the 32-bit copy TouchGFX
-# Designer ships and must then be 32-bit (vcvarsall.bat x86, or -A Win32).
+# Needs a host C++ compiler, CMake, Ninja (or a Visual Studio generator) and
+# SDL2; no IDE. Linux or WSL: GCC, ninja-build and libsdl2-dev. Windows: MSVC,
+# from the free Build Tools for Visual Studio or the IDE (its "C++ CMake tools"
+# component brings CMake and Ninja); without an installed SDL2 the build reuses
+# the 32-bit copy TouchGFX Designer ships and must then be 32-bit (an x86
+# developer command prompt, or -A Win32).
 #
-# Linux, WSL, or a Windows Developer Command Prompt:
+# Linux, WSL, or a Windows x86 Native Tools Command Prompt:
 #   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 #   cmake --build build
 # Windows, any shell, also writing a Visual Studio solution ("Visual Studio 18
