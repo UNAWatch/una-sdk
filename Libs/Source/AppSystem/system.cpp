@@ -35,9 +35,9 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <malloc.h>
 #include <inttypes.h>
 
+#include "SDK/AppSystem/AlignedAlloc.hpp"
 #include "SDK/AppSystem/AtExitImpl.hpp"
 #include "SDK/Interfaces/IKernel.hpp"
 
@@ -498,12 +498,13 @@ void operator delete[](void* ptr, const std::nothrow_t&) noexcept
 /**
  * Replaces libstdc++'s aligned forms, whose bad_alloc throw links __cxa_throw
  * and the exception runtime: a Service doing new of an alignas(16) type measured
- * 12,508 bytes of .text with them and 2,852 without. Re-measure by deleting
+ * 12,508 bytes of .text with them and 2,884 without. Re-measure by deleting
  * these and rebuilding such a Service.
  */
 void* operator new(std::size_t size, std::align_val_t align) noexcept
 {
-    return memalign(static_cast<std::size_t>(align), size ? size : 1);
+    return SDK::AppSystem::alignedAlloc(size, static_cast<std::size_t>(align),
+                                        [](std::size_t n) { return _malloc_r(nullptr, n); });
 }
 
 void* operator new[](std::size_t size, std::align_val_t align) noexcept
@@ -523,7 +524,9 @@ void* operator new[](std::size_t size, std::align_val_t align, const std::nothro
 
 void operator delete(void* ptr, std::align_val_t) noexcept
 {
-    free(ptr);
+    if (ptr) {
+        _free_r(nullptr, SDK::AppSystem::alignedRawPointer(ptr));
+    }
 }
 
 void operator delete[](void* ptr, std::align_val_t align) noexcept

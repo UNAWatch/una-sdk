@@ -62,6 +62,7 @@ add_executable(una-sdk-host-tests
     utils/ClockTime_test.cpp
     utils/Utils_test.cpp
     utils/CopyUtf8_test.cpp
+    utils/AlignedAlloc_test.cpp
     support/KernelTestDoubles_test.cpp
     apps/Alarm/AlarmManager_test.cpp
     apps/Stopwatch/Stopwatch_test.cpp
