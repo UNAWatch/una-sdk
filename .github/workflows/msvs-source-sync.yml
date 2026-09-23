@@ -3,7 +3,9 @@ name: MSVS Source Sync
 # Nothing else here builds the MSVS side (that needs MSVC/Windows), so if a
 # source file gets added to the vcxproj or its Makefile but not both, nobody
 # finds out until someone opens Visual Studio. check_msvs_sources.py has the
-# backstory on how many times that's already happened.
+# backstory on how many times that's already happened. check_msvs_configs.py
+# covers the same blind spot for the vcxproj's Release configuration, which
+# drifted from Debug in nearly every project (#288), and for una/Makefile.
 
 on:
   push:
@@ -14,7 +16,10 @@ on:
       - 'Examples/Apps/**/simulator/msvs/Application.vcxproj'
       - 'Docs/Tutorials/**/simulator/gcc/Makefile'
       - 'Docs/Tutorials/**/simulator/msvs/Application.vcxproj'
+      - 'Examples/Apps/**/una/Makefile'
+      - 'Docs/Tutorials/**/una/Makefile'
       - '.github/scripts/check_msvs_sources.py'
+      - '.github/scripts/check_msvs_configs.py'
       - '.github/workflows/msvs-source-sync.yml'
 
 jobs:
@@ -32,3 +37,9 @@ jobs:
 
       - name: Compare Makefile and Application.vcxproj source lists
         run: python3 .github/scripts/check_msvs_sources.py
+
+      - name: Selftest the config checker
+        run: python3 .github/scripts/check_msvs_configs.py --selftest
+
+      - name: Check Release matches Debug, and una/Makefile continuations
+        run: python3 .github/scripts/check_msvs_configs.py
