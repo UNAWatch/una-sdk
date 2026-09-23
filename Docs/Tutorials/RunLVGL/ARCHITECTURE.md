@@ -75,10 +75,11 @@ and SDL2, and no IDE:
   brings CMake and Ninja, and a developer command prompt puts them on `PATH`; both can
   also be installed on their own. SDL2 comes from a development package that CMake can
   find (vcpkg, for example) or, with TouchGFX Designer installed, from the 32-bit copy
-  it ships. The build's architecture must match the SDL2 it links: with the TouchGFX
-  copy it is 32-bit (the x86 developer environment, or `-A Win32` with a Visual Studio
-  generator, as below); with an installed 64-bit SDL2 use the x64 environment or
-  `-A x64` instead. MinGW is untested.
+  it ships. The build's architecture must match the SDL2 it links, and it is chosen by
+  the developer environment with the Ninja generator (x86 or x64 prompt) and by `-A`
+  with a Visual Studio generator (`-A Win32` or `-A x64`; Ninja does not take `-A`).
+  With the TouchGFX copy the build is 32-bit, as in the commands below; with an
+  installed 64-bit SDL2 pick the 64-bit option instead. MinGW is untested.
 
 Windows, in an *x86 Native Tools Command Prompt for VS* (a `cmd` window with the
 32-bit MSVC environment loaded; any shell after `vcvarsall.bat x86` is the same):
