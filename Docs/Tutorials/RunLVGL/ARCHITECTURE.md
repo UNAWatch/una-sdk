@@ -75,15 +75,17 @@ and SDL2, and no IDE:
   brings CMake and Ninja, and a developer command prompt puts them on `PATH`; both can
   also be installed on their own. SDL2 comes from a development package that CMake can
   find (vcpkg, for example) or, with TouchGFX Designer installed, from the 32-bit copy
-  it ships, in which case the build must be 32-bit: the x86 developer environment, or
-  `-A Win32` with a Visual Studio generator. MinGW is untested.
+  it ships. The build's architecture must match the SDL2 it links: with the TouchGFX
+  copy it is 32-bit (the x86 developer environment, or `-A Win32` with a Visual Studio
+  generator, as below); with an installed 64-bit SDL2 use the x64 environment or
+  `-A x64` instead. MinGW is untested.
 
 Windows, in an *x86 Native Tools Command Prompt for VS* (a `cmd` window with the
 32-bit MSVC environment loaded; any shell after `vcvarsall.bat x86` is the same):
 
 ```bat
 set UNA_SDK=C:/path/to/una-sdk
-cd %UNA_SDK%\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\simulator
+cd /d %UNA_SDK%\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\simulator
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 build\bin\RunLVGLSimulator.exe

@@ -78,12 +78,12 @@ The app will start and show a basic GUI demonstrating the UNA app framework. Thi
 3. Open `Application.vcxproj` in Visual Studio
 4. Press **F5** to start debugging and run the simulator
 
-**LVGL** (Windows and Linux): the simulator is a plain CMake project in `Software/Apps/LVGL-GUI/simulator`. It runs the real service and GUI processes against the SDK's mock kernel, with the display in an SDL2 window. It needs a host C++ compiler, CMake, a generator (Ninja, or Visual Studio on Windows) and SDL2, and no IDE: on Linux or WSL, GCC, Ninja and the SDL2 development package; on Windows, MSVC, which the free *Build Tools for Visual Studio* provide as well as the Visual Studio IDE (the "Desktop development with C++" workload's "C++ CMake tools for Windows" component brings CMake and Ninja). Without an installed SDL2 the Windows build reuses the 32-bit copy TouchGFX Designer ships and must therefore be 32-bit.
+**LVGL** (Windows and Linux): the simulator is a plain CMake project in `Software/Apps/LVGL-GUI/simulator`. It runs the real service and GUI processes against the SDK's mock kernel, with the display in an SDL2 window. It needs a host C++ compiler, CMake, a generator (Ninja, or Visual Studio on Windows) and SDL2, and no IDE: on Linux or WSL, GCC, Ninja and the SDL2 development package; on Windows, MSVC, which the free *Build Tools for Visual Studio* provide as well as the Visual Studio IDE (the "Desktop development with C++" workload's "C++ CMake tools for Windows" component brings CMake and Ninja). The build's architecture must match the SDL2 it links: without an installed SDL2 the Windows build reuses the 32-bit copy TouchGFX Designer ships and must therefore be 32-bit, as in the commands below; with an installed 64-bit SDL2 use the x64 developer prompt or `-A x64` instead.
 
 ```bat
 :: Windows, in an "x86 Native Tools Command Prompt for VS" (a cmd window with
 :: the 32-bit MSVC environment loaded; any shell after vcvarsall.bat x86 is the same)
-cd %UNA_SDK%\Docs\Tutorials\HelloWorld\Software\Apps\LVGL-GUI\simulator
+cd /d %UNA_SDK%\Docs\Tutorials\HelloWorld\Software\Apps\LVGL-GUI\simulator
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 build\bin\HelloWorldLVGLSimulator.exe

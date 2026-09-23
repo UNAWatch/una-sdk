@@ -4,9 +4,10 @@
 # Needs a host C++ compiler, CMake, Ninja (or a Visual Studio generator) and
 # SDL2; no IDE. Linux or WSL: GCC, ninja-build and libsdl2-dev. Windows: MSVC,
 # from the free Build Tools for Visual Studio or the IDE (its "C++ CMake tools"
-# component brings CMake and Ninja); without an installed SDL2 the build reuses
-# the 32-bit copy TouchGFX Designer ships and must then be 32-bit (an x86
-# developer command prompt, or -A Win32).
+# component brings CMake and Ninja). The build's architecture must match the
+# SDL2 it links: without an installed SDL2 it reuses the 32-bit copy TouchGFX
+# Designer ships and must then be 32-bit (an x86 developer command prompt, or
+# -A Win32); with an installed 64-bit SDL2 use the x64 prompt or -A x64.
 #
 # Linux, WSL, or a Windows x86 Native Tools Command Prompt:
 #   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug

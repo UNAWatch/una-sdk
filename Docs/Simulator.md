@@ -270,7 +270,8 @@ TouchGFX simulators pass those codes from `SDK/GUI/Button.hpp` straight through 
 `z` chord has no key). `cmake/una-simulator.cmake`
 provides the source lists and `una_simulator_link_sdl2()`, which uses an installed SDL2
 where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
-TouchGFX Designer, in which case the build must be 32-bit. The compiler is whatever CMake
+TouchGFX Designer. The build's architecture must match the SDL2 it links: 32-bit with the
+TouchGFX copy, x64 with a 64-bit installed package. The compiler is whatever CMake
 finds: GCC on Linux and WSL, MSVC on Windows. MSVC comes with the free *Build Tools for
 Visual Studio* as well as with the IDE, whose "C++ CMake tools for Windows" component
 also brings CMake and Ninja; the Ninja generator drives it from a developer command
