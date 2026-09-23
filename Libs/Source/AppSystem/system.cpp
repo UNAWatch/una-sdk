@@ -431,7 +431,7 @@ void operator delete(void* ptr) noexcept
  * @param   size Number of bytes to allocate.
  * @return  Pointer to allocated memory; @c nullptr on failure.
  */
-void* operator new[](std::size_t size)
+void* operator new[](std::size_t size) noexcept
 {
     return operator new(size);
 }
