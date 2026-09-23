@@ -65,19 +65,36 @@ RunLVGL has a PC simulator that runs the real service and GUI processes against 
 SDK's mock kernel, with the display in an SDL2 window. Unlike the TouchGFX simulators,
 it is a plain CMake project and builds on Windows and Linux.
 
-Windows, with Visual Studio (32-bit, because it reuses the SDL2 that TouchGFX ships; use
-the generator name for your Visual Studio version: `"Visual Studio 18 2026"` needs CMake 4.2
-or newer, `"Visual Studio 17 2022"` works with the 3.21 minimum):
+It needs a host C++ compiler, CMake and SDL2, and no IDE:
+
+- **Linux, or WSL on Windows:** GCC, CMake, Ninja and the SDL2 development package.
+- **Windows:** the MSVC compiler, which comes with the free *Build Tools for Visual
+  Studio* (the "Desktop development with C++" workload) as well as with the Visual
+  Studio IDE; either is enough. SDL2 comes from a development package that CMake can
+  find (vcpkg, for example) or, with TouchGFX Designer installed, from the 32-bit copy
+  it ships, in which case the build must be 32-bit: the x86 developer environment, or
+  `-A Win32` with a Visual Studio generator. MinGW is untested.
+
+Windows, from a Developer Command Prompt (or a shell after `vcvarsall.bat x86`):
 
 ```powershell
 $env:UNA_SDK = "C:/path/to/una-sdk"
 cd $env:UNA_SDK\Examples\Apps\RunLVGL\Software\Apps\LVGL-GUI\simulator
-cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
-cmake --build build --config Debug
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
 build\bin\RunLVGLSimulator.exe
 ```
 
-Linux (Debian/Ubuntu):
+The Visual Studio generator works from any shell and also writes a solution to open in
+the IDE (`"Visual Studio 18 2026"` needs CMake 4.2 or newer, `"Visual Studio 17 2022"`
+works with the 3.21 minimum):
+
+```powershell
+cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
+cmake --build build --config Debug
+```
+
+Linux, or WSL (Debian/Ubuntu):
 
 ```bash
 sudo apt-get install build-essential cmake ninja-build libsdl2-dev

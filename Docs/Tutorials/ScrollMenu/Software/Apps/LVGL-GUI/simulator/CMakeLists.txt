@@ -1,14 +1,18 @@
 # ScrollMenu LVGL PC simulator: the app's service and LVGL GUI processes
 # running against the SDK's mock kernel, with the display in an SDL2 window.
 #
-# Windows (Visual Studio; uses the SDL2 shipped with TouchGFX, which is 32-bit):
-#   cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
-#   (that generator needs CMake 4.2 or newer; with an older CMake use
-#   "Visual Studio 17 2022")
-#   cmake --build build --config Debug
-# Linux (needs libsdl2-dev):
+# Needs a host C++ compiler, CMake and SDL2; no IDE. Linux or WSL: GCC and
+# libsdl2-dev. Windows: MSVC, from the free Build Tools for Visual Studio or
+# the IDE; without an installed SDL2 the build reuses the 32-bit copy TouchGFX
+# Designer ships and must then be 32-bit (vcvarsall.bat x86, or -A Win32).
+#
+# Linux, WSL, or a Windows Developer Command Prompt:
 #   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 #   cmake --build build
+# Windows, any shell, also writing a Visual Studio solution ("Visual Studio 18
+# 2026" needs CMake 4.2 or newer; "Visual Studio 17 2022" works with 3.21):
+#   cmake -S . -B build -G "Visual Studio 18 2026" -A Win32
+#   cmake --build build --config Debug
 # Run from build/bin so the mock file system lands in ../../../../../Output,
 # i.e. this tutorial's Software/Output (ignored by Docs/Tutorials/.gitignore).
 cmake_minimum_required(VERSION 3.21)
