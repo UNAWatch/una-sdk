@@ -79,6 +79,7 @@ Next steps:
    writing-a-clockface
    figma-ui-kit
    FitFiles-Structure
+   shared-data
 
 .. toctree::
    :maxdepth: 4
