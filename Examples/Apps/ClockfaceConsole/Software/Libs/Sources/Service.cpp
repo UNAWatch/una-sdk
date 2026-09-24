@@ -17,6 +17,11 @@
 static constexpr uint32_t kSecondsPerMinute = 60;
 static constexpr uint32_t kMsPerSecond      = 1000;
 
+/// Grace period after launch for the GUI to come up. The service is started
+/// just before its GUI, so the no-GUI exit in run() must not trip during a
+/// normal launch.
+static constexpr uint32_t kStartupGraceMs = 5u * kMsPerSecond;
+
 /// How long to wait for the kernel to answer a settings request. The same
 /// 100 ms every other app that reads them uses. A timeout, not a cost: the
 /// kernel answers on a completion semaphore and normally returns at once.
@@ -90,6 +95,9 @@ void Service::run()
     // current count straight away, which is what fills the row on boot.
     connect();
 
+    bool guiStarted = false;
+    const uint32_t startTime = mKernel.sys.getTimeMs();
+
     while (true) {
         // One reading a turn, and it does both jobs: it is what gets published
         // and it is what sizes the wait. Publishing here rather than on the
@@ -107,8 +115,25 @@ void Service::run()
             refreshSystemSettings();
         }
 
+        uint32_t wait = msToNextMinute(local);
+
+        // No GUI yet. One that has not come up by the end of the grace never
+        // will, and neither will the COMMAND_APP_NOTIF_GUI_STOP that normally
+        // ends this service -- so leave once the grace has run out.
+        if (!guiStarted) {
+            const uint32_t elapsed = mKernel.sys.getTimeMs() - startTime;
+            if (elapsed >= kStartupGraceMs) {
+                LOG_INFO("GUI never started, exiting service\n");
+                disconnect();
+                return;
+            }
+            if ((kStartupGraceMs - elapsed) < wait) {
+                wait = kStartupGraceMs - elapsed;
+            }
+        }
+
         SDK::MessageBase *msg;
-        if (!mKernel.comm.getMessage(msg, msToNextMinute(local))) {
+        if (!mKernel.comm.getMessage(msg, wait)) {
             continue;
         }
 
@@ -126,6 +151,7 @@ void Service::run()
             // know yet is the clock format.
             case SDK::MessageType::COMMAND_APP_NOTIF_GUI_RUN:
                 LOG_INFO("GUI is now running\n");
+                guiStarted = true;
                 refreshSystemSettings();
                 break;
 
