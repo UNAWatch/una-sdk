@@ -22,7 +22,7 @@ namespace SDK
         /**
          * @brief Helper class for parsing accelerometer sensor data from DataView
          *
-         * Expected data layout:
+         * Expected data layout, in m/s^2 with gravity included:
          * - [0] Acceleration on X axis
          * - [1] Acceleration on Y axis
          * - [2] Acceleration on Z axis

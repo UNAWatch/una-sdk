@@ -22,7 +22,7 @@ namespace SDK
         /**
          * @brief Helper class for parsing gyroscope sensor data from DataView
          *
-         * Expected data layout:
+         * Expected data layout, in deg/s:
          * - [0] Angular velocity around X axis
          * - [1] Angular velocity around Y axis
          * - [2] Angular velocity around Z axis

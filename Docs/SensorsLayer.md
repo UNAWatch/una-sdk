@@ -15,9 +15,9 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 
 | Category | Type | Hex Value | Description | Parser Available | Fields |
 |----------|------|-----------|-------------|------------------|--------|
-| IMU | ACCELEROMETER | 0x10 | Acceleration (3-axis) | Yes | X,Y,Z (float g) - 3 |
+| IMU | ACCELEROMETER | 0x10 | Acceleration (3-axis) | Yes | X,Y,Z (float m/s^2) - 3 |
 | IMU | ACCELEROMETER_RAW | 0x11 | Acceleration raw | Yes | X,Y,Z (int16 raw) - 3 |
-| IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | Yes | X,Y,Z (float) - 3 |
+| IMU | GYROSCOPE | 0x20 | Angular rate (3-axis) | Yes | X,Y,Z (float deg/s) - 3 |
 | IMU | GYROSCOPE_RAW | 0x21 | Angular rate raw | Yes | X,Y,Z (int16 raw) - 3 |
 | IMU | MAGNETIC_FIELD | 0x30 | Magnetic field; corrected only when MAG_CALIBRATED | Yes | X,Y,Z (float uT), MAG_CALIBRATED (u32) - 4 |
 | IMU | MAGNETIC_FIELD_RAW | 0x31 | Magnetic field, as measured | Yes | X,Y,Z (float uT) - 3 |
@@ -44,7 +44,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | Battery | BATTERY_LEVEL | 0x120 | Charge level (%) | Yes | LEVEL (f 0-100) - 1 |
 | Battery | BATTERY_CHARGING | 0x121 | Charging state | Yes | CONNECTED (u32 bool), CHARGING (u32 bool) - 2 |
 | Battery | BATTERY_METRICS | 0x122 | Voltage/current/capacity | Yes | VOLTAGE (f V), CURRENT (f mA), AVG_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh) - 5 |
-| Fusion | FUSION | 0x130 | Fused IMU | Yes | ACCEL_X,Y,Z + GYRO_X,Y,Z (float) - 6 |
+| Fusion | FUSION | 0x130 | Accelerometer + gyroscope samples | Yes | ACCEL_X,Y,Z (float m/s^2) + GYRO_X,Y,Z (float deg/s) - 6 |
 | Fusion | FUSION_RAW | 0x131 | Raw fusion inputs | Yes | ACCEL_X,Y,Z + GYRO_X,Y,Z (int16 raw) - 6 |
 | Touch | TOUCH_DETECT | 0x140 | Touch/worn/unworn | Yes | TOUCH (u32 bool) - 1 |
 
@@ -102,9 +102,12 @@ Detailed usage for each supported sensor (with parser). For others, use DataView
 **Fields**:
 | Index | Name | Type | Unit |
 |-------|------|------|------|
-| 0 | X | float | g |
-| 1 | Y | float | g |
-| 2 | Z | float | g |
+| 0 | X | float | m/s^2 |
+| 1 | Y | float | m/s^2 |
+| 2 | Z | float | m/s^2 |
+
+The values include gravity: a watch lying still reads about 9.81 on the
+vertical axis. Divide by 9.80665 to get g.
 
 **Code Snippet**:
 ```cpp
