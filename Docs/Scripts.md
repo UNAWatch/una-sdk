@@ -49,7 +49,6 @@ The script performs comprehensive app packaging:
   launcher name has to change without moving the artifact — the phone's install/update flow and the release
   zip both key on the file name
 - `-autostart`: Sets autostart flag in app metadata
-- `-glance_capable`: Marks app as Glance-compatible
 - `-type`: App type (Activity, Utility, Glance, Clockface)
 - `-out`: Custom output directory
 - `-header`: Generate C header file
