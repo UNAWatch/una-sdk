@@ -118,8 +118,10 @@ while (true) {
     readLocalTime(local);       // time() + localtime_r
     publishTime(local);         // drops a reading equal to the last
 
+    uint32_t wait = msToNextMinute(local);
+
     SDK::MessageBase *msg;
-    if (!mKernel.comm.getMessage(msg, msToNextMinute(local))) {
+    if (!mKernel.comm.getMessage(msg, wait)) {
         continue;
     }
     ...
@@ -132,6 +134,63 @@ Sizing each wait from a fresh reading is what stops a late wake-up
 accumulating into drift.
 
 There is no SDK time interface: the clock is `time()` and `localtime_r()`.
+
+**Give the service a way out that does not need a GUI.** The usual exit is on
+`COMMAND_APP_NOTIF_GUI_STOP`: drop the subscriptions and return
+(`COMMAND_APP_STOP`, the kernel's teardown, ends it the same way). But the
+kernel sends `COMMAND_APP_NOTIF_GUI_STOP` only when a GUI that has run goes
+away, so a service whose GUI never came up would never leave on its own, and
+would hold its sensors until something stopped the app from outside. Until
+`COMMAND_APP_NOTIF_GUI_RUN` arrives, cap the wait at what is left of a short
+startup grace and leave when it runs out:
+
+```cpp
+bool guiStarted = false;
+const uint32_t startTime = mKernel.sys.getTimeMs();
+
+while (true) {
+    ...
+    uint32_t wait = msToNextMinute(local);
+
+    if (!guiStarted) {
+        const uint32_t elapsed = mKernel.sys.getTimeMs() - startTime;
+        if (elapsed >= kStartupGraceMs) {
+            disconnect();
+            return;
+        }
+        if ((kStartupGraceMs - elapsed) < wait) {
+            wait = kStartupGraceMs - elapsed;
+        }
+    }
+
+    SDK::MessageBase *msg;
+    if (!mKernel.comm.getMessage(msg, wait)) {
+        continue;
+    }
+
+    switch (msg->getType()) {
+        case SDK::MessageType::COMMAND_APP_NOTIF_GUI_RUN:
+            guiStarted = true;
+            break;
+        ...
+    }
+    ...
+}
+```
+
+The grace is not optional: the service is started just before its GUI, so
+without it the check ends the face during an ordinary load.
+
+This exit assumes the service exists only to feed its GUI, which is true of
+every face shipped here. `APP_AUTOSTART` is allowed on a face but makes little
+sense there. It suits an app whose service gathers something in the
+background for a GUI the user opens now and then to look at and closes again.
+A face is not that: a watch usually wears one, and the kernel already loads
+it, GUI included, at boot. What the flag would add is a service started with
+no GUI, which this check ends five seconds later. If a face really does have
+background work of its own, give that work a say in the exit, as
+[Alarm](Examples/Alarm-Architecture.md) does -- leave when no GUI is up
+**and** nothing is outstanding.
 
 **Give every value one publisher that drops an unchanged value**, so a source
 may call as often as it likes and only a real change costs an IPC round trip:

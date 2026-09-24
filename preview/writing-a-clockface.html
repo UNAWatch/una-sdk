@@ -288,8 +288,10 @@ the loop and let that same reading size the wait:</p>
 <span class="w">    </span><span class="n">readLocalTime</span><span class="p">(</span><span class="n">local</span><span class="p">);</span><span class="w">       </span><span class="c1">// time() + localtime_r</span>
 <span class="w">    </span><span class="n">publishTime</span><span class="p">(</span><span class="n">local</span><span class="p">);</span><span class="w">         </span><span class="c1">// drops a reading equal to the last</span>
 
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msToNextMinute</span><span class="p">(</span><span class="n">local</span><span class="p">);</span>
+
 <span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">;</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">msToNextMinute</span><span class="p">(</span><span class="n">local</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">wait</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">continue</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="p">...</span>
@@ -301,6 +303,59 @@ message arriving just before a minute boundary from swallowing that minute.
 Sizing each wait from a fresh reading is what stops a late wake-up
 accumulating into drift.</p>
 <p>There is no SDK time interface: the clock is <code class="docutils literal notranslate"><span class="pre">time()</span></code> and <code class="docutils literal notranslate"><span class="pre">localtime_r()</span></code>.</p>
+<p><strong>Give the service a way out that does not need a GUI.</strong> The usual exit is on
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>: drop the subscriptions and return
+(<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code>, the kernel’s teardown, ends it the same way). But the
+kernel sends <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> only when a GUI that has run goes
+away, so a service whose GUI never came up would never leave on its own, and
+would hold its sensors until something stopped the app from outside. Until
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> arrives, cap the wait at what is left of a short
+startup grace and leave when it runs out:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="n">guiStarted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">startTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">();</span>
+
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msToNextMinute</span><span class="p">(</span><span class="n">local</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">guiStarted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">startTime</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">elapsed</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">kStartupGraceMs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">disconnect</span><span class="p">();</span>
+<span class="w">            </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">kStartupGraceMs</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">elapsed</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">wait</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kStartupGraceMs</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">elapsed</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="w"> </span><span class="o">*</span><span class="n">msg</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mKernel</span><span class="p">.</span><span class="n">comm</span><span class="p">.</span><span class="n">getMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">wait</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_NOTIF_GUI_RUN</span><span class="p">:</span>
+<span class="w">            </span><span class="n">guiStarted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The grace is not optional: the service is started just before its GUI, so
+without it the check ends the face during an ordinary load.</p>
+<p>This exit assumes the service exists only to feed its GUI, which is true of
+every face shipped here. <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code> is allowed on a face but makes little
+sense there. It suits an app whose service gathers something in the
+background for a GUI the user opens now and then to look at and closes again.
+A face is not that: a watch usually wears one, and the kernel already loads
+it, GUI included, at boot. What the flag would add is a service started with
+no GUI, which this check ends five seconds later. If a face really does have
+background work of its own, give that work a say in the exit, as
+<a class="reference internal" href="Examples/Alarm-Architecture.html"><span class="std std-doc">Alarm</span></a> does – leave when no GUI is up
+<strong>and</strong> nothing is outstanding.</p>
 <p><strong>Give every value one publisher that drops an unchanged value</strong>, so a source
 may call as often as it likes and only a real change costs an IPC round trip:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::publishSteps</span><span class="p">()</span>

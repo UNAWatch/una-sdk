@@ -561,6 +561,12 @@ window.runMermaid = runMermaid;</script>
 <td><p></p></td>
 <td><p>Denys Saienko</p></td>
 </tr>
+<tr class="row-even"><td><p>1.02</p></td>
+<td><p>24.09.2026</p></td>
+<td><p>Self-exit: Stopwatch and the clockfaces leave after a startup grace when no GUI comes up; Stopwatch’s resident branch is rarely taken, since its GUI offers exit only with the clock stopped</p></td>
+<td><p></p></td>
+<td><p>Denys Saienko</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -895,8 +901,8 @@ reclaim a service that never exits or outstays its resource budget.</p>
 briefly true every single time. An unguarded <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(!mGuiStarted)</span> <span class="pre">return;</span></code> exits during launch
 and the app appears to fail to open. Every example that exits on its own therefore uses a
 startup grace — the activity examples with
-<a class="reference download internal" download="" href="_downloads/10e08072c579a7085af0b4b13ef6d582/Timer.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Timer</span></code></span></a> as shown in section 4.2, Alarm and Timer
-with plain <code class="docutils literal notranslate"><span class="pre">getTimeMs()</span></code> arithmetic. Either is fine.</p>
+<a class="reference download internal" download="" href="_downloads/10e08072c579a7085af0b4b13ef6d582/Timer.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">SDK::Timer</span></code></span></a> as shown in section 4.2, Alarm, Timer,
+Stopwatch and the clockfaces with plain <code class="docutils literal notranslate"><span class="pre">getTimeMs()</span></code> arithmetic. Either is fine.</p>
 <p>Three conditions, all load-bearing: the GUI is not up, the launch window has passed, and your
 own work is finished. Drop any one and you get either a service that exits mid-launch or one
 that never exits at all.</p>
@@ -924,8 +930,9 @@ takes the GUI with it. Worse, the GUI is unloaded <strong>without notice</strong
 not receive <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> and its <code class="docutils literal notranslate"><span class="pre">onStop()</span></code> does not run, so anything it would do on
 the way out is simply lost. Every example checks that the GUI is gone before releasing
 itself.</p>
-<p>That is why the only sound places for a service’s exit test are the
-<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> branch and the timeout branch.</p>
+<p>That is why a service’s exit test belongs where the GUI is known to be gone: the
+<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> branch, or a check guarded on no GUI having started, as the
+startup-grace exits in section 5.4 are.</p>
 </section>
 <section id="the-patterns-in-the-examples">
 <h3>5.4 The patterns in the examples<a class="headerlink" href="#the-patterns-in-the-examples" title="Link to this heading"></a></h3>
@@ -954,8 +961,12 @@ itself.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">EVENT_GLANCE_STOP</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="Examples/Stopwatch-Architecture.html"><span class="std std-doc">Stopwatch</span></a></p></td>
-<td><p>unbounded</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> <strong>and</strong> the clock is not running</p></td>
+<td><p>bounded until the GUI runs, then unbounded</p></td>
+<td><p>after a 5 s grace, no GUI started; or <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> <strong>and</strong> the clock is not running</p></td>
+</tr>
+<tr class="row-odd"><td><p>Clockfaces (<a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html"><span class="std std-doc">Analogue</span></a>, <a class="reference internal" href="Examples/ClockfacePeak-Architecture.html"><span class="std std-doc">Peak</span></a>, …)</p></td>
+<td><p>bounded (next minute or sooner)</p></td>
+<td><p>after a 5 s grace, no GUI started; or <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -963,11 +974,14 @@ itself.</p>
 started, <strong>not</strong> on whether an activity is in progress. A recording activity is safe only
 because its GUI does not exit mid-activity. If you copy that pattern into an app whose GUI
 can close while work is outstanding, add the <code class="docutils literal notranslate"><span class="pre">hasWorkOutstanding()</span></code> term yourself.</p>
-<p>Stopwatch is the one to copy for <em>state that outlives the screen</em>: while the clock is running
-it stays resident, and it hands a returning GUI its state on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>. It
-assumes throughout that it is launched together with its GUI, and its only self-exit is
-<code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> — so if your app can be started without a GUI, do not copy its
-unbounded wait. Take an exit condition that cannot depend on a message that may never arrive.</p>
+<p>Stopwatch shows the shape for <em>state that must outlive the screen</em>: a running clock keeps the
+service resident through <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, and a returning GUI is handed the state
+on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>. In Stopwatch that branch is rarely taken, since its GUI offers
+the exit control only once the clock has stopped; copy it when your GUI can close while work
+is outstanding. Its normal exit is <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, a message that never arrives
+if no GUI ever ran, so until the first GUI it waits with a bounded timeout and leaves once a
+startup grace has run out. Copy both halves: an unbounded wait is safe only after a GUI has
+come up to send the message it is waiting for.</p>
 </section>
 </section>
 <section id="gui-focus-suspend-and-resume">

@@ -196,8 +196,8 @@
 <li><p>Lap times shown as durations; the running total kept exact by storing lap boundaries rather than per-lap durations</p></li>
 <li><p>Two time faces (large and compact) chosen by the lap count, plus an hour form that widens the reading to <code class="docutils literal notranslate"><span class="pre">HH:MM:SS</span></code> once the clock passes an hour</p></li>
 <li><p>A readout capped at <code class="docutils literal notranslate"><span class="pre">99:59:59.9</span></code></p></li>
-<li><p>Background counting: the service keeps timing while the GUI is closed or suspended, and re-entering the app picks the time back up</p></li>
-<li><p>The service ends itself once the GUI is gone <strong>and</strong> the clock is not running, so a stopped stopwatch holds no resident thread</p></li>
+<li><p>Counting through a suspended GUI: when the kernel parks the screen (a notification, another app coming forward) the service keeps time, and the screen picks it back up on resume. The exit control is offered only once the clock has stopped, so leaving the app normally ends the count</p></li>
+<li><p>The service ends itself once the GUI is gone <strong>and</strong> the clock is not running, so a stopped stopwatch holds no resident thread; started without a GUI, it exits after a 5 s startup grace</p></li>
 </ul>
 </section>
 <section id="architecture">
@@ -249,7 +249,7 @@
 <span class="p">};</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">run()</span></code> blocks on <code class="docutils literal notranslate"><span class="pre">getMessage()</span></code> with an infinite timeout — there is no polling loop and no timer. It reacts to three kernel lifecycle messages plus the app’s own commands:</p>
+<p><code class="docutils literal notranslate"><span class="pre">run()</span></code> blocks on <code class="docutils literal notranslate"><span class="pre">getMessage()</span></code> with an infinite timeout once the GUI has come up — there is no polling loop and no timer. The one bounded wait is the startup grace before the first GUI (see lifecycle below). It reacts to three kernel lifecycle messages plus the app’s own commands:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> — forced exit; releases the message and returns</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> — the GUI is up; marks <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> and publishes the current state so the screen opens on real data</p></li>
@@ -339,7 +339,7 @@
 <section id="service-lifecycle-and-app-startup">
 <h3>Service Lifecycle and App Startup<a class="headerlink" href="#service-lifecycle-and-app-startup" title="Link to this heading"></a></h3>
 <p>Unlike the Alarm app, the Stopwatch service is <strong>not</strong> an autostart service. It is launched when the user opens the app, and it exists only to keep the clock advancing.</p>
-<p>The kernel does not stop a service when its GUI closes. That is what lets the stopwatch keep counting after the user walks back to the menu — but it also means nothing else will ever reclaim the thread. The service therefore ends <strong>itself</strong> on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, but only when the clock is not running:</p>
+<p>The kernel does not stop a service when its GUI closes, so nothing else will ever reclaim the thread. The service therefore ends <strong>itself</strong> on <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, but only when the clock is not running:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">SDK</span><span class="o">::</span><span class="no">MessageType</span><span class="o">::</span><span class="no">COMMAND_APP_NOTIF_GUI_STOP</span><span class="p">:</span>
 <span class="w">    </span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mStopwatch</span><span class="p">.</span><span class="n">isRunning</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
@@ -349,7 +349,18 @@
 <span class="w">    </span><span class="k">break</span><span class="p">;</span><span class="w">                            </span><span class="c1">// still counting: stay alive, GUI-less</span>
 </pre></div>
 </div>
-<p>So the resident thread is earned only while the clock advances. Close the GUI while paused or cleared, and the service exits and its state is discarded; close it while running, and the service stays alive with no GUI, still timing, until the app is reopened (which re-attaches to the resident service) or the clock is paused and the GUI closed.</p>
+<p>In ordinary use the clock is stopped here: the GUI offers its exit control, the red R2, only once its copy of the state shows the clock paused or cleared — while it runs, R2 takes a lap — so leaving the app ends the service and discards its state. The running branch covers the times that copy is behind, or the GUI goes away by another route. Press R1 to start and then R2 before the service’s reply arrives, and R2 still reads as Exit: the GUI closes just as the START it sent reaches the service. The service then stays alive with no GUI, still timing, and reopening the app re-attaches to it and picks the time back up.</p>
+<p>That exit needs a GUI to have run: a service started without one never receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>. So until the first <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code> the wait is bounded by a startup grace, and the service leaves once the grace has run out if no GUI has appeared by then:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mGuiStarted</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mStopwatch</span><span class="p">.</span><span class="n">isRunning</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mKernel</span><span class="p">.</span><span class="n">sys</span><span class="p">.</span><span class="n">getTimeMs</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">startTime</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">elapsed</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">kStartupGraceMs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">                       </span><span class="c1">// GUI never came up</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">waitMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kStartupGraceMs</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">elapsed</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The grace is not optional: the service is started before its GUI, so without it this check would end the service during an ordinary launch. Once a GUI has run, <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code> exits on this state itself, so the wait goes back to unbounded; should a late command stop the clock after that message, the grace is long past and the service leaves at once — the same rule, no GUI and nothing counting.</p>
 </section>
 </section>
 <section id="custom-message-system">
@@ -610,7 +621,7 @@ timeout bounds the wait for the reply, not for queue space — no send waits out
 <li><p><strong>Zero periodic IPC</strong>: the running time is computed, not messaged; the message path is idle while the clock runs, letting the chip stay in low power</p></li>
 <li><p><strong>Exact totals</strong>: laps stored as boundaries keep the running total free of accumulated rounding</p></li>
 <li><p><strong>Allocation-free path</strong>: the whole state, including the fixed lap array, fits one 256-byte pool block</p></li>
-<li><p><strong>Purposeful lifetime</strong>: the service earns its thread only while the clock advances, and ends itself otherwise — background counting is free, but a stopped stopwatch costs nothing</p></li>
+<li><p><strong>Purposeful lifetime</strong>: the service lives as long as its GUI, or as a running clock that has lost it, and ends itself otherwise — including when no GUI ever appears; a running clock costs no wake-ups, and a stopped stopwatch costs nothing</p></li>
 <li><p><strong>State-derived UI</strong>: one screen with three modes and two faces, each derived from the state rather than tracked, keeps the view logic small and consistent</p></li>
 </ul>
 </section>
