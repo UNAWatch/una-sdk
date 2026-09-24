@@ -27,8 +27,6 @@ covers only what is particular to it. Everything general is here.
 - **It is on screen for hours at a time.** Which makes power the first design
   constraint, not the last: see [Do not subscribe to what you do not
   draw](#do-not-subscribe-to-what-you-do-not-draw).
-- **It serves no glance data.** Leave the glance-capable bit clear, which
-  `APP_TYPE "Clockface"` does by default.
 - **It is suspended, not stopped, when something else takes the screen.** This
   has consequences that are easy to miss -- see [The GUI stops draining its
   queue while suspended](#the-gui-stops-draining-its-queue-while-suspended).

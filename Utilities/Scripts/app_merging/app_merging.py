@@ -125,8 +125,6 @@ parser.add_argument("-filename", default=None,
                     help="Base name for the output .uapp (default: derived from -name). Lets the "
                          "launcher name change without moving the artifact the phone installs.")
 parser.add_argument("-autostart", action="store_true", help="Set bit 3 (0x08) in flags for autostart")
-parser.add_argument("-glance_capable", action="store_true",
-                    help="Set bit 5 (0x20) in flags to mark the app as Glance-capable")
 parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()), help="Application type")
 parser.add_argument("-out", type=str, help="Custom output directory (also the place where Tmp/*.srv and Tmp/*.gui are searched)")
 parser.add_argument("-header", action="store_true", help="Generate .h file with merged binary as C array")
@@ -176,11 +174,10 @@ def convert_icon_or_zeros(icon_path: Path | None, zero_size: int, label: str) ->
     return convert_icon_to_abgr2222(icon_path)
 
 # Flags
+# Bit 5 (0x20) is left clear: an app states that it is a glance with -type alone.
 flags = APP_TYPES[args.type]
 if args.autostart:
     flags |= 0x00000008  # bit 3
-if args.glance_capable:
-    flags |= 0x00000020  # bit 5
 
 # ---------- input discovery under <out>/Tmp ----------
 out_dir = Path(args.out) if args.out else Path("Output")
@@ -255,7 +252,6 @@ log_field("ID", f"{app_id_u64:016X}")
 log_field("App Version", format_semver_u32(app_version_u32))
 log_field("LibC Version", format_semver_u32(libc_version_u32))
 log_field("Flags", f"0x{flags:08X}")
-log_field("Glance-capable", "yes" if args.glance_capable else "no")
 log_field("CRC", f"0x{crc:08X}")
 log_field("Image", f"{output_path} ({len(final_data)} bytes)")
 
