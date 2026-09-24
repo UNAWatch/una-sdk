@@ -25,8 +25,8 @@ REPO_ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file
 SEARCH_ROOTS = ["Examples/Apps", "Docs/Tutorials"]
 
 INHERIT_INCLUDES = "%(AdditionalIncludeDirectories)"
-# A line that ends the .cpp mapping without a continuation.
-UNCONTINUED_OBJECT_FILES = re.compile(r"^object_files := .*touchgfx/%\.o\)\s*$", re.M)
+# The .cpp mapping line of the object_files assignment, whatever follows it.
+OBJECT_FILES_CPP_LINE = re.compile(r"^object_files := .*touchgfx/%\.o\).*$", re.M)
 
 
 def find_projects():
@@ -47,6 +47,15 @@ def item_definition_group(text, config):
     return m.group(1) if m else None
 
 
+def cl_compile(group):
+    """The ClCompile block of an ItemDefinitionGroup, so that settings are never
+    read from a ResourceCompile (or other tool) block that happens to precede it."""
+    if group is None:
+        return None
+    m = re.search(r"<ClCompile>(.*?)</ClCompile>", group, re.S)
+    return m.group(1) if m else None
+
+
 def element(block, name):
     m = re.search(r"<%s>([^<]*)</%s>" % (name, name), block)
     return m.group(1) if m else None
@@ -54,15 +63,16 @@ def element(block, name):
 
 def check_vcxproj(text):
     """Return a list of problems with Release/Debug agreement."""
-    debug = item_definition_group(text, "Debug")
-    release = item_definition_group(text, "Release")
+    debug = cl_compile(item_definition_group(text, "Debug"))
+    release = cl_compile(item_definition_group(text, "Release"))
     if debug is None or release is None:
-        return ["no Debug|Win32 or Release|Win32 ItemDefinitionGroup"]
+        return ["no ClCompile in the Debug|Win32 or Release|Win32 ItemDefinitionGroup"]
 
     problems = []
     debug_defs = element(debug, "PreprocessorDefinitions") or ""
     release_defs = element(release, "PreprocessorDefinitions") or ""
-    expected = debug_defs.replace(";_DEBUG;", ";NDEBUG;")
+    # Swap the _DEBUG entry wherever it sits in the list, not only mid-list.
+    expected = ";".join("NDEBUG" if d == "_DEBUG" else d for d in debug_defs.split(";"))
     if release_defs != expected:
         problems.append("Release PreprocessorDefinitions differ from Debug's:\n"
                         "        Debug:   %s\n        Release: %s" % (debug_defs, release_defs))
@@ -79,8 +89,13 @@ def check_vcxproj(text):
 
 
 def check_makefile(text):
-    if UNCONTINUED_OBJECT_FILES.search(text):
-        return ["object_files := line has lost its trailing backslash"]
+    m = OBJECT_FILES_CPP_LINE.search(text)
+    if m is None:
+        return ["no object_files := line mapping touchgfx/%.o found"]
+    # Make continues a line only on a backslash immediately before the
+    # newline; a space after it ends the line just as surely as no backslash.
+    if not m.group(0).endswith("\\"):
+        return ["object_files := line does not end in a backslash continuation"]
     return []
 
 
@@ -90,6 +105,7 @@ def check_project(project_dir):
                          ("una/Makefile", check_makefile)):
         path = os.path.join(project_dir, rel)
         if not os.path.isfile(path):
+            problems.append("%s: missing" % rel)
             continue
         with open(path, encoding="utf-8-sig") as f:
             problems += ["%s: %s" % (rel, p) for p in checker(f.read())]
@@ -121,6 +137,22 @@ $(c_source_files:$(touchgfx_path)/%.c=$(object_output_path)/touchgfx/%.o)
 _head, _sep, _tail = GOOD_VCXPROJ.rpartition(";../../../../Libs/Header")
 RELEASE_LIBS_HEADER_GONE = _head + _tail
 
+# _DEBUG first in Debug's list; Release either swaps it properly or keeps it.
+DEBUG_FIRST_RELEASE_OK = GOOD_VCXPROJ.replace("WIN32;_DEBUG;", "_DEBUG;WIN32;").replace(
+    "WIN32;NDEBUG;", "NDEBUG;WIN32;")
+DEBUG_FIRST_RELEASE_KEEPS_DEBUG = GOOD_VCXPROJ.replace("WIN32;_DEBUG;", "_DEBUG;WIN32;").replace(
+    "WIN32;NDEBUG;", "_DEBUG;WIN32;")
+
+# Matching ResourceCompile blocks ahead of ClCompile must not mask a ClCompile
+# difference (here, Release losing its identity macro).
+RESOURCE_COMPILE_FIRST = GOOD_VCXPROJ.replace(
+    "    <ClCompile>\n",
+    "    <ResourceCompile>\n"
+    "      <PreprocessorDefinitions>RC;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n"
+    "      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n"
+    "    </ResourceCompile>\n"
+    "    <ClCompile>\n").replace('NDEBUG;APP_ID="X";', "NDEBUG;")
+
 
 def run_selftest():
     """--selftest runs the checks against fixtures here, one per defect #288
@@ -134,16 +166,26 @@ def run_selftest():
          GOOD_VCXPROJ.replace("%(AdditionalIncludeDirectories);$(ApplicationRoot)", "$(ApplicationRoot)"),
          GOOD_MAKEFILE, 1),
         ("Makefile lost its continuation", GOOD_VCXPROJ, GOOD_MAKEFILE.replace(" \\\n", " \n"), 1),
+        ("Makefile has a space after the backslash",
+         GOOD_VCXPROJ, GOOD_MAKEFILE.replace(" \\\n", " \\ \n"), 1),
+        ("_DEBUG first, Release swaps it", DEBUG_FIRST_RELEASE_OK, GOOD_MAKEFILE, 0),
+        ("_DEBUG first, Release keeps it", DEBUG_FIRST_RELEASE_KEEPS_DEBUG, GOOD_MAKEFILE, 1),
+        ("ResourceCompile ahead of ClCompile", RESOURCE_COMPILE_FIRST, GOOD_MAKEFILE, 1),
+        ("missing Application.vcxproj", None, GOOD_MAKEFILE, 1),
+        ("missing una/Makefile", GOOD_VCXPROJ, None, 1),
     ]
     failed = 0
     for name, vcxproj, makefile, expected in cases:
         with tempfile.TemporaryDirectory() as tmp:
-            os.makedirs(os.path.join(tmp, "simulator", "msvs"))
-            os.makedirs(os.path.join(tmp, "una"))
-            with open(os.path.join(tmp, "simulator", "msvs", "Application.vcxproj"), "w") as f:
-                f.write(vcxproj)
-            with open(os.path.join(tmp, "una", "Makefile"), "w") as f:
-                f.write(makefile)
+            # None leaves that file out, as a project missing its scaffolding.
+            for rel, content in (("simulator/msvs/Application.vcxproj", vcxproj),
+                                 ("una/Makefile", makefile)):
+                if content is None:
+                    continue
+                path = os.path.join(tmp, rel)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w") as f:
+                    f.write(content)
             got = len(check_project(tmp))
         ok = got == expected
         failed += not ok
