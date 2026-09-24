@@ -386,32 +386,16 @@ function(una_app_build_app)
         set(APP_USER_NAME ${APP_NAME})
     endif()
 
-    # The packed header states two independent things: the app's type, and
-    # whether it exposes a glance interface (bit 5, 0x20). This flag used to be
-    # passed unconditionally, so every image claimed an interface it had no code
-    # for, and its two statements contradicted each other.
-    #
-    # The firmware resolves an app's role from those flags and has to pick an
-    # order when they disagree. Under the current order the glance bit outranks
-    # the Clockface type, so a watchface was taken for a glance; Activity and
-    # Utility are resolved before the bit is consulted and were unaffected.
-    #
-    # Default follows the type: a Glance app keeps the flag (redundant with its
-    # type, but it is the one place the claim is true, and dropping it would
-    # change bytes for apps already in the field). Everything else must opt in
-    # with APP_GLANCE_INTF, which is what a non-Glance app that really does
-    # serve glance data should set.
-    set(APP_GLANCE_INTF_FLAG "")
-    if(APP_TYPE STREQUAL "Glance")
-        una_app_bool_option(APP_GLANCE_INTF On)
-    else()
-        una_app_bool_option(APP_GLANCE_INTF Off)
-    endif()
-    if(APP_GLANCE_INTF)
-        set(APP_GLANCE_INTF_FLAG "-glance_capable")
-        message("App glance interface is ON")
-    else()
-        message("App glance interface is OFF")
+    # APP_GLANCE_INTF is withdrawn: an app states that it is a glance with
+    # APP_TYPE Glance alone. A project that still sets it On for another type
+    # stops here rather than building an app whose glance never appears.
+    una_app_bool_option(APP_GLANCE_INTF Off)
+    if(APP_GLANCE_INTF AND NOT APP_TYPE STREQUAL "Glance")
+        message(FATAL_ERROR
+            "APP_GLANCE_INTF has been withdrawn: only an app of APP_TYPE Glance is "
+            "started for the glances screen. Remove the option, and set APP_TYPE "
+            "Glance if this app should be one. If it was passed as -DAPP_GLANCE_INTF, "
+            "clear it from the CMake cache too (cmake -U APP_GLANCE_INTF).")
     endif()
 
     # APP_FILE_NAME pins the .uapp artifact name when the launcher name has to
@@ -439,7 +423,7 @@ function(una_app_build_app)
 
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} ${APP_FILE_NAME_ARGS} -type ${APP_TYPE} ${APP_GLANCE_INTF_FLAG} -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
+        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} ${APP_FILE_NAME_ARGS} -type ${APP_TYPE} -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
         ${OUTPUT_COPY_COMMANDS}
         COMMENT "Merging ${APP_NAME} application"
     )

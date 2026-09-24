@@ -555,6 +555,12 @@ window.runMermaid = runMermaid;</script>
 <td><p></p></td>
 <td><p>Ross Ryles</p></td>
 </tr>
+<tr class="row-odd"><td><p>1.01</p></td>
+<td><p>24.09.2026</p></td>
+<td><p>Glance selection: <code class="docutils literal notranslate"><span class="pre">APP_GLANCE_INTF</span></code> withdrawn; the glances-screen caveat applies only to images from an earlier SDK</p></td>
+<td><p></p></td>
+<td><p>Denys Saienko</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -744,9 +750,8 @@ your app is your decision. Exiting is the usual and expected answer — see
 glance that deliberately keeps a subscription running is a legitimate choice, but then
 nothing else will ask it to stop.</p>
 <p>Set <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">Glance</span></code> for an app whose service should be started for the glances screen.
-Do not rely on <code class="docutils literal notranslate"><span class="pre">APP_GLANCE_INTF</span></code> alone to achieve it, and do not assume that an app of
-another type will be left alone by the glances screen on every kernel version — see
-section 10.</p>
+An app of another type is left alone there, unless its image was packed by an earlier SDK
+and runs on kernel 1.4.0 or earlier — see section 10.</p>
 </section>
 </section>
 <section id="what-a-resident-service-gets">
@@ -1138,8 +1143,9 @@ must continue while the app is off screen, move that work to the service now —
 <p><strong>Which apps the glances screen starts.</strong> Target <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span> <span class="pre">Glance</span></code> for a glance and give the
 glances screen nothing to do with your app otherwise. On 1.4.0 an app of another type could
 have its service started on a visit to the glances screen depending on the flags its <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>
-carried, so a non-Glance app should not assume it will be left alone there — the more reason
-for every service to have a self-exit that does not depend on a GUI arriving.</p>
+carried. An image packed by this SDK does not carry that flag, so only images packed by an
+earlier SDK are affected. Either way, give every service a self-exit that does not depend
+on a GUI arriving.</p>
 </section>
 <section id="checklist">
 <h2>11. Checklist<a class="headerlink" href="#checklist" title="Link to this heading"></a></h2>

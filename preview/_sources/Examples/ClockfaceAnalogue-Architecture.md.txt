@@ -31,8 +31,6 @@ The directory prefix is the `APP_TYPE`; the launcher name carries no prefix.
   user drives: the kernel owns the buttons while a face is on screen, so the app
   receives no `EVENT_BUTTON`. (The watch has no touchscreen at all, so that is a
   property of the hardware rather than of clockfaces.)
-- **No glance interface.** The app serves no glance data, and the packed image
-  says so: flags `0x03`, glance-capable bit clear.
 
 ## Layout
 
@@ -376,9 +374,8 @@ include($ENV{UNA_SDK}/cmake/una-app.cmake)
 include($ENV{UNA_SDK}/cmake/una-sdk.cmake)
 ```
 
-`APP_TYPE` is what packs the image as a clockface and leaves the
-glance-capable bit clear. The app is not autostarted; the kernel gives a
-clockface the display in place of its own home screen.
+`APP_TYPE` is what packs the image as a clockface. The app is not autostarted;
+the kernel gives a clockface the display in place of its own home screen.
 
 ### Build Targets
 

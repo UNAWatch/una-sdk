@@ -5,6 +5,7 @@
 | Revision | Date of Changes | Matter of Change | Note | Editor |
 |----------|-----------------|------------------|------|--------|
 | 1.00     | 09.09.2026      | Creating: the two-process model, how a service is started, what a resident service receives, how a service must end itself, GUI focus versus the display, and the conditions that stop an app | | Ross Ryles |
+| 1.01     | 24.09.2026      | Glance selection: `APP_GLANCE_INTF` withdrawn; the glances-screen caveat applies only to images from an earlier SDK | | Denys Saienko |
 
 ## 1. Overview
 
@@ -150,9 +151,8 @@ glance that deliberately keeps a subscription running is a legitimate choice, bu
 nothing else will ask it to stop.
 
 Set `APP_TYPE Glance` for an app whose service should be started for the glances screen.
-Do not rely on `APP_GLANCE_INTF` alone to achieve it, and do not assume that an app of
-another type will be left alone by the glances screen on every kernel version — see
-section 10.
+An app of another type is left alone there, unless its image was packed by an earlier SDK
+and runs on kernel 1.4.0 or earlier — see section 10.
 
 ## 4. What a resident service gets
 
@@ -451,8 +451,9 @@ must continue while the app is off screen, move that work to the service now —
 **Which apps the glances screen starts.** Target `APP_TYPE Glance` for a glance and give the
 glances screen nothing to do with your app otherwise. On 1.4.0 an app of another type could
 have its service started on a visit to the glances screen depending on the flags its `.uapp`
-carried, so a non-Glance app should not assume it will be left alone there — the more reason
-for every service to have a self-exit that does not depend on a GUI arriving.
+carried. An image packed by this SDK does not carry that flag, so only images packed by an
+earlier SDK are affected. Either way, give every service a self-exit that does not depend
+on a GUI arriving.
 
 ## 11. Checklist
 

@@ -231,8 +231,6 @@ five shipped faces share.</p>
 user drives: the kernel owns the buttons while a face is on screen, so the app
 receives no <code class="docutils literal notranslate"><span class="pre">EVENT_BUTTON</span></code>. (The watch has no touchscreen at all, so that is a
 property of the hardware rather than of clockfaces.)</p></li>
-<li><p><strong>No glance interface.</strong> The app serves no glance data, and the packed image
-says so: flags <code class="docutils literal notranslate"><span class="pre">0x03</span></code>, glance-capable bit clear.</p></li>
 </ul>
 </section>
 </section>
@@ -653,9 +651,8 @@ visibly crosses a band about twenty seconds in.</p>
 <span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-sdk.cmake</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code> is what packs the image as a clockface and leaves the
-glance-capable bit clear. The app is not autostarted; the kernel gives a
-clockface the display in place of its own home screen.</p>
+<p><code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code> is what packs the image as a clockface. The app is not autostarted;
+the kernel gives a clockface the display in place of its own home screen.</p>
 </section>
 <section id="build-targets">
 <h3>Build Targets<a class="headerlink" href="#build-targets" title="Link to this heading"></a></h3>
