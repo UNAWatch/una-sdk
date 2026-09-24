@@ -389,13 +389,13 @@ function(una_app_build_app)
     # APP_GLANCE_INTF is withdrawn: an app states that it is a glance with
     # APP_TYPE Glance alone. A project that still sets it On for another type
     # stops here rather than building an app whose glance never appears.
-    if(DEFINED APP_GLANCE_INTF)
-        una_app_bool_option(APP_GLANCE_INTF Off)
-        if(APP_GLANCE_INTF AND NOT APP_TYPE STREQUAL "Glance")
-            message(FATAL_ERROR
-                "APP_GLANCE_INTF is not supported: only an app of APP_TYPE Glance is "
-                "started for the glances screen.")
-        endif()
+    una_app_bool_option(APP_GLANCE_INTF Off)
+    if(APP_GLANCE_INTF AND NOT APP_TYPE STREQUAL "Glance")
+        message(FATAL_ERROR
+            "APP_GLANCE_INTF has been withdrawn: only an app of APP_TYPE Glance is "
+            "started for the glances screen. Remove the option, and set APP_TYPE "
+            "Glance if this app should be one. If it was passed as -DAPP_GLANCE_INTF, "
+            "clear it from the CMake cache too (cmake -U APP_GLANCE_INTF).")
     endif()
 
     # APP_FILE_NAME pins the .uapp artifact name when the launcher name has to
