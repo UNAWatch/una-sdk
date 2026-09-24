@@ -23,12 +23,12 @@ namespace SDK
          * @brief Helper class for parsing fusion sensor data from DataView
          *
          * Expected data layout:
-         * - [0] Accelerometer X axis
-         * - [1] Accelerometer Y axis
-         * - [2] Accelerometer Z axis
-         * - [3] Gyroscope X axis
-         * - [4] Gyroscope Y axis
-         * - [5] Gyroscope Z axis
+         * - [0] Accelerometer X axis, m/s^2
+         * - [1] Accelerometer Y axis, m/s^2
+         * - [2] Accelerometer Z axis, m/s^2
+         * - [3] Gyroscope X axis, deg/s
+         * - [4] Gyroscope Y axis, deg/s
+         * - [5] Gyroscope Z axis, deg/s
          */
         class Fusion
         {

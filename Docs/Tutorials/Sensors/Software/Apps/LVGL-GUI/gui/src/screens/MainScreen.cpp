@@ -164,7 +164,8 @@ void MainScreen::refreshDisplay()
             case HR:    text.add("HR: %.0f BPM\nTL: %.0f\n", mHr, mHrTl); break;
             case GPS:   text.add("GPS: %.6f, %.6f\nAlt: %.1f m\n", mGpsLat, mGpsLon, mGpsAlt); break;
             case ALT:   text.add("Elevation: %.1f m\n", mElevation); break;
-            case ACC:   text.add("Accelerometer:\nX: %.2f G\nY: %.2f G\nZ: %.2f G\n", mAccX, mAccY, mAccZ); break;
+            case ACC:   text.add("Accelerometer:\nX: %.2f m/s2\nY: %.2f m/s2\nZ: %.2f m/s2\n",
+                                 mAccX, mAccY, mAccZ); break;
             case STEP:  text.add("Steps: %lu\n", static_cast<unsigned long>(mSteps)); break;
             case FLOOR: text.add("Floors: %lu\n", static_cast<unsigned long>(mFloors)); break;
             case MAG:   text.add("Compass: %.0f\n", mHeading); break;

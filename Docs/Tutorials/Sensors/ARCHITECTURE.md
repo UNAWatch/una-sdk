@@ -19,7 +19,7 @@ As in the earlier tutorials, the app comes with a **TouchGFX** GUI (`Software/Ap
 | Heart Rate | Live BPM + Trust Level | |
 | GPS Location | Lat/Long/Alt (double) | Always on |
 | Altimeter | Elevation (m) | Barometric pressure based |
-| Accelerometer | X/Y/Z G-forces | connect(0.1f, 0); sender throttled ~100ms |
+| Accelerometer | X/Y/Z acceleration (m/s^2) | connect(0.1f, 0); sender throttled ~100ms |
 | Step Counter | Total steps | Cumulative |
 | Floor Counter | Floors ascended | Cumulative; parser.getFloorsUp() |
 | Magnetometer | X/Y/Z fields + calibrated flag | Bearing from parser.getAzimuthDeg(); valid only when calibrated |
