@@ -12,8 +12,8 @@ Key features include:
 - Lap times shown as durations; the running total kept exact by storing lap boundaries rather than per-lap durations
 - Two time faces (large and compact) chosen by the lap count, plus an hour form that widens the reading to `HH:MM:SS` once the clock passes an hour
 - A readout capped at `99:59:59.9`
-- Background counting: the service keeps timing while the GUI is closed or suspended, and re-entering the app picks the time back up
-- The service ends itself once the GUI is gone **and** the clock is not running, so a stopped stopwatch holds no resident thread
+- Counting through a suspended GUI: when the kernel parks the screen (a notification, another app coming forward) the service keeps time, and the screen picks it back up on resume. The exit control is offered only once the clock has stopped, so leaving the app normally ends the count
+- The service ends itself once the GUI is gone **and** the clock is not running, so a stopped stopwatch holds no resident thread; started without a GUI, it exits after a 5 s startup grace
 
 ## Architecture
 
@@ -65,7 +65,7 @@ private:
 };
 ```
 
-`run()` blocks on `getMessage()` with an infinite timeout — there is no polling loop and no timer. It reacts to three kernel lifecycle messages plus the app's own commands:
+`run()` blocks on `getMessage()` with an infinite timeout once the GUI has come up — there is no polling loop and no timer. The one bounded wait is the startup grace before the first GUI (see lifecycle below). It reacts to three kernel lifecycle messages plus the app's own commands:
 
 - `COMMAND_APP_STOP` — forced exit; releases the message and returns
 - `COMMAND_APP_NOTIF_GUI_RUN` — the GUI is up; marks `mGuiStarted` and publishes the current state so the screen opens on real data
@@ -133,7 +133,7 @@ Two free functions in the same header do the timekeeping arithmetic and are shar
 
 Unlike the Alarm app, the Stopwatch service is **not** an autostart service. It is launched when the user opens the app, and it exists only to keep the clock advancing.
 
-The kernel does not stop a service when its GUI closes. That is what lets the stopwatch keep counting after the user walks back to the menu — but it also means nothing else will ever reclaim the thread. The service therefore ends **itself** on `COMMAND_APP_NOTIF_GUI_STOP`, but only when the clock is not running:
+The kernel does not stop a service when its GUI closes, so nothing else will ever reclaim the thread. The service therefore ends **itself** on `COMMAND_APP_NOTIF_GUI_STOP`, but only when the clock is not running:
 
 ```cpp
 case SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP:
@@ -145,7 +145,21 @@ case SDK::MessageType::COMMAND_APP_NOTIF_GUI_STOP:
     break;                            // still counting: stay alive, GUI-less
 ```
 
-So the resident thread is earned only while the clock advances. Close the GUI while paused or cleared, and the service exits and its state is discarded; close it while running, and the service stays alive with no GUI, still timing, until the app is reopened (which re-attaches to the resident service) or the clock is paused and the GUI closed.
+In ordinary use the clock is stopped here: the GUI offers its exit control, the red R2, only once its copy of the state shows the clock paused or cleared — while it runs, R2 takes a lap — so leaving the app ends the service and discards its state. The running branch covers the times that copy is behind, or the GUI goes away by another route. Press R1 to start and then R2 before the service's reply arrives, and R2 still reads as Exit: the GUI closes just as the START it sent reaches the service. The service then stays alive with no GUI, still timing, and reopening the app re-attaches to it and picks the time back up.
+
+That exit needs a GUI to have run: a service started without one never receives `COMMAND_APP_NOTIF_GUI_STOP`. So until the first `COMMAND_APP_NOTIF_GUI_RUN` the wait is bounded by a startup grace, and the service leaves once the grace has run out if no GUI has appeared by then:
+
+```cpp
+if (!mGuiStarted && !mStopwatch.isRunning()) {
+    const uint32_t elapsed = mKernel.sys.getTimeMs() - startTime;
+    if (elapsed >= kStartupGraceMs) {
+        return;                       // GUI never came up
+    }
+    waitMs = kStartupGraceMs - elapsed;
+}
+```
+
+The grace is not optional: the service is started before its GUI, so without it this check would end the service during an ordinary launch. Once a GUI has run, `COMMAND_APP_NOTIF_GUI_STOP` exits on this state itself, so the wait goes back to unbounded; should a late command stop the clock after that message, the grace is long past and the service leaves at once — the same rule, no GUI and nothing counting.
 
 ## Custom Message System
 
@@ -391,5 +405,5 @@ Key architectural strengths:
 - **Zero periodic IPC**: the running time is computed, not messaged; the message path is idle while the clock runs, letting the chip stay in low power
 - **Exact totals**: laps stored as boundaries keep the running total free of accumulated rounding
 - **Allocation-free path**: the whole state, including the fixed lap array, fits one 256-byte pool block
-- **Purposeful lifetime**: the service earns its thread only while the clock advances, and ends itself otherwise — background counting is free, but a stopped stopwatch costs nothing
+- **Purposeful lifetime**: the service lives as long as its GUI, or as a running clock that has lost it, and ends itself otherwise — including when no GUI ever appears; a running clock costs no wake-ups, and a stopped stopwatch costs nothing
 - **State-derived UI**: one screen with three modes and two faces, each derived from the state rather than tracked, keeps the view logic small and consistent

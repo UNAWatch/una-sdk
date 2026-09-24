@@ -19,11 +19,14 @@
  * @class Service
  * @brief Background half of the app.
  *
- * The kernel does not stop a service when its GUI closes, which is what lets
- * the stopwatch keep counting after the user walks back to the menu. The flip
- * side is that nothing else will ever reclaim the thread, so the service ends
- * itself once the GUI is gone and the clock is not running -- a stopped
- * stopwatch does no work and is not worth a resident thread.
+ * The kernel does not stop a service when its GUI closes, so nothing else
+ * will ever reclaim the thread: the service ends itself once the GUI is gone
+ * and the clock is not running -- a stopped stopwatch does no work and is not
+ * worth a resident thread. The GUI offers its exit only once its copy of the
+ * state shows the clock stopped, so that is the ordinary case; a running clock
+ * outlives the GUI only when that copy was behind -- start, then exit before
+ * the reply arrives -- or the GUI went away some other way. Started without a
+ * GUI, it gives the GUI a startup grace to appear and then exits.
  */
 class Service
 {
