@@ -94,7 +94,6 @@ namespace Simulator {
             }
 
             updateLocation();
-            IGps::LocationInfo loc = getLocation();
         }
     }
     

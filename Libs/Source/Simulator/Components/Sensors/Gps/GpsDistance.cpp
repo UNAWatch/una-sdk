@@ -92,7 +92,6 @@ const char* GpsDistance::sdcGetDescription(Sensor::Driver* driver)
 
 void GpsDistance::sensorRefresh()
 {
-    static float distance = 0.0;
     if (mTimer.check()) {
         LOG_DEBUG("ENTRY\n");
 
