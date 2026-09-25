@@ -569,7 +569,7 @@ window.runMermaid = runMermaid;</script>
 <td><p>0x10</p></td>
 <td><p>Acceleration (3-axis)</p></td>
 <td><p>Yes</p></td>
-<td><p>X,Y,Z (float g) - 3</p></td>
+<td><p>X,Y,Z (float m/s^2) - 3</p></td>
 </tr>
 <tr class="row-odd"><td><p>IMU</p></td>
 <td><p>ACCELEROMETER_RAW</p></td>
@@ -583,7 +583,7 @@ window.runMermaid = runMermaid;</script>
 <td><p>0x20</p></td>
 <td><p>Angular rate (3-axis)</p></td>
 <td><p>Yes</p></td>
-<td><p>X,Y,Z (float) - 3</p></td>
+<td><p>X,Y,Z (float deg/s) - 3</p></td>
 </tr>
 <tr class="row-odd"><td><p>IMU</p></td>
 <td><p>GYROSCOPE_RAW</p></td>
@@ -770,9 +770,9 @@ window.runMermaid = runMermaid;</script>
 <tr class="row-odd"><td><p>Fusion</p></td>
 <td><p>FUSION</p></td>
 <td><p>0x130</p></td>
-<td><p>Fused IMU</p></td>
+<td><p>Accelerometer + gyroscope samples</p></td>
 <td><p>Yes</p></td>
-<td><p>ACCEL_X,Y,Z + GYRO_X,Y,Z (float) - 6</p></td>
+<td><p>ACCEL_X,Y,Z (float m/s^2, gravity included) + GYRO_X,Y,Z (float deg/s) - 6</p></td>
 </tr>
 <tr class="row-even"><td><p>Fusion</p></td>
 <td><p>FUSION_RAW</p></td>
@@ -852,20 +852,22 @@ window.runMermaid = runMermaid;</script>
 <tr class="row-even"><td><p>0</p></td>
 <td><p>X</p></td>
 <td><p>float</p></td>
-<td><p>g</p></td>
+<td><p>m/s^2</p></td>
 </tr>
 <tr class="row-odd"><td><p>1</p></td>
 <td><p>Y</p></td>
 <td><p>float</p></td>
-<td><p>g</p></td>
+<td><p>m/s^2</p></td>
 </tr>
 <tr class="row-even"><td><p>2</p></td>
 <td><p>Z</p></td>
 <td><p>float</p></td>
-<td><p>g</p></td>
+<td><p>m/s^2</p></td>
 </tr>
 </tbody>
 </table>
+<p>The values include gravity: a watch lying still reads about 9.81 on the
+vertical axis. Divide by 9.80665 to get g.</p>
 <p><strong>Code Snippet</strong>:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Connection</span><span class="w"> </span><span class="nf">conn</span><span class="p">(</span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">ACCELEROMETER</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1f</span><span class="p">);</span>
 <span class="n">conn</span><span class="p">.</span><span class="n">connect</span><span class="p">();</span>
