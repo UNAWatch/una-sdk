@@ -22,7 +22,7 @@ namespace SDK
         /**
          * @brief Helper class for parsing fusion sensor data from DataView
          *
-         * Expected data layout:
+         * Expected data layout, with gravity included in the accelerometer axes:
          * - [0] Accelerometer X axis, m/s^2
          * - [1] Accelerometer Y axis, m/s^2
          * - [2] Accelerometer Z axis, m/s^2

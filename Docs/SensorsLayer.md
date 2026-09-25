@@ -44,7 +44,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | Battery | BATTERY_LEVEL | 0x120 | Charge level (%) | Yes | LEVEL (f 0-100) - 1 |
 | Battery | BATTERY_CHARGING | 0x121 | Charging state | Yes | CONNECTED (u32 bool), CHARGING (u32 bool) - 2 |
 | Battery | BATTERY_METRICS | 0x122 | Voltage/current/capacity | Yes | VOLTAGE (f V), CURRENT (f mA), AVG_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh) - 5 |
-| Fusion | FUSION | 0x130 | Accelerometer + gyroscope samples | Yes | ACCEL_X,Y,Z (float m/s^2) + GYRO_X,Y,Z (float deg/s) - 6 |
+| Fusion | FUSION | 0x130 | Accelerometer + gyroscope samples | Yes | ACCEL_X,Y,Z (float m/s^2, gravity included) + GYRO_X,Y,Z (float deg/s) - 6 |
 | Fusion | FUSION_RAW | 0x131 | Raw fusion inputs | Yes | ACCEL_X,Y,Z + GYRO_X,Y,Z (int16 raw) - 6 |
 | Touch | TOUCH_DETECT | 0x140 | Touch/worn/unworn | Yes | TOUCH (u32 bool) - 1 |
 

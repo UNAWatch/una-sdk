@@ -115,7 +115,7 @@ namespace SDK::Sensor
         /** @name Fusion
          *  @{
          */
-        FUSION               = 0x00000130, ///< Accelerometer (m/s^2) + gyroscope (deg/s) samples.
+        FUSION               = 0x00000130, ///< Accelerometer (m/s^2, gravity included) + gyroscope (deg/s) samples.
         FUSION_RAW           = 0x00000131, ///< Raw fusion inputs.
         /** @} */
 
