@@ -84,7 +84,7 @@ struct IntervalsData {
 struct Data {
 
     // Pace, s/m
-    float pace        = 0.0f;   ///< Live pace, smoothed over a rolling window (see SpeedSmoother)
+    float pace        = 0.0f;   ///< Live pace, corrected and smoothed (see GpsSpeedFilter)
     float avgPace     = 0.0f;
     float lapPace     = 0.0f;
 

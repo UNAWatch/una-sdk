@@ -83,7 +83,7 @@ Service::Service(SDK::Kernel &kernel)
     mTimeCounter.init();
     mDistanceCounter.init();
     mSpeedCounter.init(0.5f, 300.0f);
-    mSpeedSmoother.init(0.5f, 300.0f);  // same valid range as the raw counter
+    mSpeedFilter.init(0.5f, 300.0f);    // same valid range as the raw counter
     mHrCounter.init(20.0f, 300.0f);
     mAltitudeCounter.init(2.0f);
     mStepCounter.init();
@@ -321,6 +321,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
 
             if (mGps.fix) { // Do not change position if no fix
                 parser.getCoordinates(mGps.latitude, mGps.longitude, mGps.altitude);
+                mGpsPosFresh = true;    // consumed by the speed filter each tick
             }
             LOG_DEBUG("Location: fix %u, lat %f, lon %f\n", mGps.fix, mGps.latitude, mGps.longitude);
         }
@@ -329,13 +330,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         if (parser.isDataValid()) {
             mGpsSpeedMs    = parser.getSpeed();  // raw instantaneous speed
             mGpsSpeedValid = parser.isSpeedValid();  // already excludes dead reckoning
-            mGpsSpeedFresh = true;   // consumed by the pace smoother each tick
-            // Only feed a current (valid-fix) speed into the aggregated metrics
-            // so acquisition / fix-loss / dead-reckoning readings don't inflate
-            // the max-speed statistics.
-            if (mGpsSpeedValid) {
-                mSpeedCounter.add(mGpsSpeedMs);
-            }
+            mGpsSpeedFresh = true;   // consumed by the speed filter each tick
             LOG_DEBUG("Speed:    %.2f m/s (valid %u)\n", mGpsSpeedMs, mGpsSpeedValid);
         }
     } else if (mSensorGpsDistance.matchesDriver(handle)) {
@@ -613,8 +608,8 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.latitude  = mGps.latitude;
     fitRecord.longitude = mGps.longitude;
 
-    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
-    fitRecord.speed = mSpeedCounter.getCurrent();
+    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.isValid());
+    fitRecord.speed = mSpeedFilter.getSpeed();
 
     fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
     fitRecord.altitude = mAltitudeCounter.getCurrent();
@@ -691,9 +686,10 @@ void Service::startTrack(std::time_t utc)
 
     mDistanceCounter.reset();
     mSpeedCounter.reset();
-    mSpeedSmoother.reset();
+    mSpeedFilter.reset();
     mGpsSpeedValid = false;
     mGpsSpeedFresh = false;
+    mGpsPosFresh   = false;
     mHrCounter.reset();
     mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
     mHrOpticalBpm = 0;
@@ -771,11 +767,21 @@ void Service::processTrack()
     // pause. That is a deliberate change: VariableCounter::add() latches its
     // current value before its own pause check, so the old readout went on
     // tracking the raw speed of a standing runner while the activity was paused.
+    // The counter is fed from here rather than from the sensor callback for two
+    // reasons: every statistic then derives from the corrected speed rather than
+    // the receiver's raw under-read, and the samples arrive at a uniform 1 Hz,
+    // which is what VariableCounter documents it assumes. The INSTANT value goes
+    // in, not the smoothed one, so a lap maximum keeps its peak.
     if (mTrackState == Track::State::ACTIVE) {
-        mSpeedSmoother.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh);
+        mSpeedFilter.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh,
+                          mGps.latitude, mGps.longitude, mGps.fix && mGpsPosFresh);
         mGpsSpeedFresh = false;
+        mGpsPosFresh   = false;
+        if (mSpeedFilter.isValid()) {
+            mSpeedCounter.add(mSpeedFilter.getInstantSpeed());
+        }
     }
-    mTrackData.speed        = mSpeedSmoother.getSpeed();
+    mTrackData.speed        = mSpeedFilter.getSpeed();
     mTrackData.avgSpeed     = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed     = mSpeedCounter.getMaximum();
     mTrackData.avgLapSpeed  = speedFromTotals(mTrackData.lapDistance, mTrackData.lapTime);
@@ -783,7 +789,7 @@ void Service::processTrack()
 
     // Pace, s/m
     const float kMinSpeed  = mSpeedCounter.getMinValid();
-    mTrackData.pace        = mSpeedSmoother.getPace();
+    mTrackData.pace        = mSpeedFilter.getPace();
     mTrackData.avgPace     = getPace(mTrackData.avgSpeed, kMinSpeed);
     mTrackData.lapPace     = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
@@ -1061,7 +1067,7 @@ void Service::pauseTrack(bool pause)
         mSpeedCounter.resume();
         // Drop the pre-pause window: those samples describe the effort before
         // the break, so blending them into the resumed readout would be wrong.
-        mSpeedSmoother.reset();
+        mSpeedFilter.reset();
         mHrCounter.resume();
         mAltitudeCounter.resume();
         mStepCounter.resume();
