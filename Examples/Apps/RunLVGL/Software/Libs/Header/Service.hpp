@@ -10,7 +10,7 @@
 #include "SDK/Metrics/MonotonicTime.hpp"
 #include "SDK/Metrics/MonotonicCounter.hpp"
 #include "SDK/Metrics/VariableCounter.hpp"
-#include "SDK/Metrics/SpeedSmoother.hpp"
+#include "SDK/Metrics/GpsSpeedFilter.hpp"
 #include "SDK/Metrics/DeltaCounter.hpp"
 #include "SDK/Metrics/ThrottledSample.hpp"
 #include "SDK/Filters/SimpleLPF.hpp"
@@ -49,7 +49,9 @@ private:
     /// averaged. Ten seconds cuts the GPS speed noise to about a third -- enough
     /// to hold a target pace by -- while still tracking a real change of effort
     /// fast enough to be useful inside an interval repeat.
-    static constexpr std::size_t skPaceSmoothingTicks = 10;
+    static constexpr std::size_t skSpeedSmoothTicks = 5;
+    static constexpr std::size_t skSpeedScaleTau    = 180;
+    static constexpr std::size_t skSpeedChordTicks  = 5;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -95,6 +97,7 @@ private:
     float       mGpsSpeedMs       = 0.0f; ///< Latest raw GPS speed (instantaneous source).
     bool        mGpsSpeedValid    = false;
     bool        mGpsSpeedFresh    = false; ///< A speed sample arrived since the last track tick.
+    bool        mGpsPosFresh      = false; ///< A position sample arrived since the last track tick.
     bool        mGpsDeadReckoning = false;
     std::time_t mLastCalibUtc     = 0;   ///< For per-tick delta_t.
 
@@ -108,7 +111,9 @@ private:
     /// record series and the maxima stay on the unsmoothed samples in
     /// mSpeedCounter. The averages are not involved either way -- they come
     /// from the distance and time totals, not from a mean of these samples.
-    SDK::Metric::SpeedSmoother<skPaceSmoothingTicks>    mSpeedSmoother;
+    SDK::Metric::GpsSpeedFilter<skSpeedSmoothTicks,
+                                skSpeedScaleTau,
+                                skSpeedChordTicks>      mSpeedFilter;
     SDK::Metric::VariableCounter                        mHrCounter;
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.

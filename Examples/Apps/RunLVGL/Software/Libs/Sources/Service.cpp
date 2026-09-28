@@ -87,7 +87,7 @@ Service::Service(SDK::Kernel &kernel)
     mTimeCounter.init();
     mDistanceCounter.init();
     mSpeedCounter.init(0.5f, 300.0f);
-    mSpeedSmoother.init(0.5f, 300.0f);  // same valid range as the raw counter
+    mSpeedFilter.init(0.5f, 300.0f);    // same valid range as the raw counter
     mHrCounter.init(20.0f, 300.0f);
     mAltitudeCounter.init(2.0f);
 
@@ -340,6 +340,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
 
             if (mGps.fix) { // Do not change position if no fix
                 parser.getCoordinates(mGps.latitude, mGps.longitude, mGps.altitude);
+                mGpsPosFresh = true;    // consumed by the speed filter each tick
             }
             LOG_DEBUG("Location: fix %u, lat %f, lon %f\n", mGps.fix, mGps.latitude, mGps.longitude);
         }
@@ -349,13 +350,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             mGpsSpeedMs       = parser.getSpeed();  // raw instantaneous speed
             mGpsSpeedValid    = parser.isSpeedValid();
             mGpsDeadReckoning = parser.isDeadReckoning();
-            mGpsSpeedFresh    = true;   // consumed by the pace smoother each tick
-            // Only feed a current (valid-fix) speed into the aggregated metrics
-            // so acquisition / fix-loss / dead-reckoning readings don't inflate
-            // the max-speed statistics.
-            if (mGpsSpeedValid) {
-                mSpeedCounter.add(mGpsSpeedMs);
-            }
+            mGpsSpeedFresh    = true;   // consumed by the speed filter each tick
             LOG_DEBUG("Speed:    %.2f m/s (valid %u, dr %u)\n",
                       mGpsSpeedMs, mGpsSpeedValid, mGpsDeadReckoning);
         }
@@ -673,8 +668,8 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.latitude     = mGps.latitude;
     fitRecord.longitude    = mGps.longitude;
 
-    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
-    fitRecord.speed        = mSpeedCounter.getCurrent();
+    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.isValid());
+    fitRecord.speed        = mSpeedFilter.getSpeed();
 
     fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
     fitRecord.altitude     = mAltitudeCounter.getCurrent();
@@ -707,7 +702,8 @@ ActivityWriter::RecordData Service::prepareRecordData()
     // record.step_length values.
     const SDK::Calibration::StrideMath::StepLength stepLen =
         SDK::Calibration::StrideMath::impliedStepLengthM(
-            mGpsSpeedMs, mGpsSpeedValid && !mGpsDeadReckoning,
+            mSpeedFilter.getSpeed(),
+            mSpeedFilter.isValid() && !mGpsDeadReckoning,
             mRunningCadence.cadenceSpm, mRunningCadence.cadenceValid);
     fitRecord.set(ActivityWriter::RecordData::Field::STEP_LENGTH, stepLen.valid);
     fitRecord.stepLengthM = stepLen.meters;
@@ -764,7 +760,7 @@ void Service::startTrack(std::time_t utc)
 
     mDistanceCounter.reset();
     mSpeedCounter.reset();
-    mSpeedSmoother.reset();
+    mSpeedFilter.reset();
     mHrCounter.reset();
     mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
     mHrOpticalBpm = 0;
@@ -781,6 +777,7 @@ void Service::startTrack(std::time_t utc)
     mGradeData = {};
     mGpsSpeedValid    = false;
     mGpsSpeedFresh    = false;
+    mGpsPosFresh      = false;
     mGpsDeadReckoning = false;
     mLastCalibUtc     = 0;
     mCalibrator.load();
@@ -881,11 +878,19 @@ void Service::processTrack()
     // pause. That is a deliberate change: VariableCounter::add() latches its
     // current value before its own pause check, so the old readout went on
     // tracking the raw speed of a standing runner while the activity was paused.
+    // The counter is fed from here rather than from the sensor callback so that
+    // every statistic derives from the corrected speed, at a uniform 1 Hz. The
+    // INSTANT value goes in, not the smoothed one, so a maximum keeps its peak.
     if (mTrackState == Track::State::ACTIVE) {
-        mSpeedSmoother.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh);
+        mSpeedFilter.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh,
+                          mGps.latitude, mGps.longitude, mGps.fix && mGpsPosFresh);
         mGpsSpeedFresh = false;
+        mGpsPosFresh   = false;
+        if (mSpeedFilter.isValid()) {
+            mSpeedCounter.add(mSpeedFilter.getInstantSpeed());
+        }
     }
-    mTrackData.speed = mSpeedSmoother.getSpeed();
+    mTrackData.speed = mSpeedFilter.getSpeed();
 
     mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed    = mSpeedCounter.getMaximum();
@@ -895,7 +900,7 @@ void Service::processTrack()
 
     // Pace, s/m
     const float kMinSpeed = mSpeedCounter.getMinValid();
-    mTrackData.pace = mSpeedSmoother.getPace();
+    mTrackData.pace = mSpeedFilter.getPace();
     mTrackData.avgPace = getPace(mTrackData.avgSpeed, kMinSpeed);
     mTrackData.lapPace = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
@@ -926,8 +931,8 @@ void Service::processTrack()
         // inline at the 1 Hz record-write point and before the FIT write.
         {
             SDK::Calibration::CalibratorSample cs;
-            cs.gps_speed_ms           = mGpsSpeedMs;
-            cs.gps_speed_valid        = mGpsSpeedValid;
+            cs.gps_speed_ms           = mSpeedFilter.getSpeed();
+            cs.gps_speed_valid        = mSpeedFilter.isValid();
             cs.gps_fix_dead_reckoning = mGpsDeadReckoning;
             cs.cadence_spm            = mRunningCadence.cadenceSpm;
             cs.cadence_valid          = mRunningCadence.cadenceValid;
@@ -1209,7 +1214,7 @@ void Service::pauseTrack(bool pause)
         mSpeedCounter.resume();
         // Drop the pre-pause window: those samples describe the effort before
         // the break, so blending them into the resumed readout would be wrong.
-        mSpeedSmoother.reset();
+        mSpeedFilter.reset();
         mHrCounter.resume();
         mAltitudeCounter.resume();
 

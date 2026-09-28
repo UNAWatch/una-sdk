@@ -40,7 +40,7 @@ enum class State {
 struct Data {
 
     // Pace, s/m
-    float pace        = 0.0f;   ///< Live pace, smoothed over a rolling window (see SpeedSmoother)
+    float pace        = 0.0f;   ///< Live pace, corrected and smoothed (see GpsSpeedFilter)
     float lapPace     = 0.0f;
 
     // Distance, m

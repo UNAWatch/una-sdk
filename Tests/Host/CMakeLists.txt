@@ -58,6 +58,7 @@ add_executable(una-sdk-host-tests
     metrics/MonotonicCounter_test.cpp
     metrics/DeltaCounter_test.cpp
     metrics/SpeedSmoother_test.cpp
+    metrics/GpsSpeedFilter_test.cpp
     metrics/VariableCounter_test.cpp
     utils/ClockTime_test.cpp
     utils/Utils_test.cpp
