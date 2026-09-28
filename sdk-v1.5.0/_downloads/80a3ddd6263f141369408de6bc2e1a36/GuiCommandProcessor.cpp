@@ -1,0 +1,309 @@
+/**
+ ******************************************************************************
+ * @file    GuiCommandProcessor.cpp
+ * @brief   The GUI process's kernel message pump (see GuiCommandProcessor.hpp).
+ ******************************************************************************
+ */
+
+#include "SDK/Port/GuiCommandProcessor.hpp"
+
+#define LOG_MODULE_PRX      "GuiCommandProcessor"
+#define LOG_MODULE_LEVEL    LOG_LEVEL_DEBUG
+#include "SDK/UnaLogger/Logger.h"
+
+#include "SDK/Kernel/KernelProviderGUI.hpp"
+#include "SDK/Messages/MessageTypes.hpp"
+#include "SDK/GUI/Button.hpp"
+
+namespace SDK
+{
+
+GuiCommandProcessor::GuiCommandProcessor()
+          : mKernel(SDK::KernelProviderGUI::GetInstance().getKernel())
+          , mStartCallbackCalled(false)
+          , mIsGuiResumed(false)
+          , mAppLifeCycleCallback(nullptr)
+          , mCustomMessageHandler(nullptr)
+{
+}
+
+GuiCommandProcessor::~GuiCommandProcessor()
+{
+}
+
+bool GuiCommandProcessor::waitForFrameTick()
+{
+    // Called once
+    if (mAppLifeCycleCallback && !mStartCallbackCalled) {
+        mStartCallbackCalled = true;
+        mAppLifeCycleCallback->onStart();
+    }
+
+    while (true) {
+        SDK::MessageBase *msg = nullptr;
+        bool messageQueued = false;
+
+#if defined(SIMULATOR)
+        // The simulator has no kernel tick of its own: wake regularly so the
+        // toolkit's host loop keeps running.
+        if(!mKernel.comm.getMessage(msg,50)) {
+            return false;
+#else
+        // Wait for command (blocks until available)
+        if(!mKernel.comm.getMessage(msg)) {
+            continue;
+#endif
+        }
+
+        switch (msg->getType()) {
+
+            case SDK::MessageType::COMMAND_APP_STOP: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
+                // We must release the message here because we are exiting this app.
+                mKernel.comm.releaseMessage(msg);
+
+                // And everything still waiting for the custom handler, for the
+                // same reason. These are the kernel's own pool blocks: it hands
+                // the pointer over and gets them back only when we release
+                // them, and no kernel-side queue drain can see this queue.
+                //
+                // This is the cooperative half of the fix. Kernels that sweep a
+                // dead process's blocks reclaim these anyway, so on a current
+                // kernel parking them here costs latency rather than the block
+                // itself; on an older one it loses them for the life of the
+                // boot. Returning them here is still worth doing for what the
+                // sweep cannot do: the sweep drops the reference without
+                // answering, so a sender blocked in waitCompletion is freed
+                // only by its own timeout, whereas sendResponse below wakes it
+                // immediately.
+                //
+                // Answered rather than dropped, as the eviction path below does,
+                // so a sender waiting on a response is not left hanging. Before
+                // onStop() so the app's own cleanup has the pool back if it
+                // needs to send anything on the way out.
+                uint32_t returned = 0;
+                while (!mUserQueue.empty()) {
+                    auto pending = mUserQueue.pop();
+                    if (pending) {
+                        auto queued = *pending;
+                        queued->setResult(SDK::MessageResult::FAIL);
+                        mKernel.comm.sendResponse(queued);
+                        mKernel.comm.releaseMessage(queued);
+                        ++returned;
+                    }
+                }
+
+                // Only when there was something, so the ordinary stop stays
+                // quiet. This bug went unnoticed precisely because nothing
+                // reported blocks going missing; if it ever recurs, the count
+                // is the first thing anyone will want.
+                if (returned > 0) {
+                    LOG_INFO("Returned %u queued message(s) on stop\n",
+                            static_cast<unsigned>(returned));
+                }
+
+                if (mAppLifeCycleCallback) {
+                    // Cleanup recourses
+                    mAppLifeCycleCallback->onStop();
+                }
+                // Waiting for the kernel to kill this app
+                mKernel.sys.exit(0); // no return
+                return true;
+            } break;
+
+            case SDK::MessageType::EVENT_GUI_TICK: {
+                mLastFrameNumber = static_cast<SDK::Message::EventGuiTick*>(msg)->frameNumber;
+                msg->setResult(SDK::MessageResult::SUCCESS);
+                // We must release the message here because we are exiting this method.
+                mKernel.comm.releaseMessage(msg);
+                mFrameTickPending = true;
+
+                if (mAppLifeCycleCallback) {
+                    mAppLifeCycleCallback->onFrame();
+                }
+                return false; // Let the toolkit render a frame
+            } break;
+
+            case SDK::MessageType::EVENT_BUTTON: {
+                handleEvent(static_cast<SDK::Message::EventButton*>(msg));
+                msg->setResult(SDK::MessageResult::SUCCESS);
+            } break;
+
+            case SDK::MessageType::COMMAND_APP_GUI_RESUME: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
+
+                mIsGuiResumed = true;
+                if (mAppLifeCycleCallback) {
+                    mAppLifeCycleCallback->onResume();
+                }
+            } break;
+
+            case SDK::MessageType::COMMAND_APP_GUI_SUSPEND: {
+                msg->setResult(SDK::MessageResult::SUCCESS);
+                mIsGuiResumed = false;
+                // Drop any pending codes so a half-finished press does not leak
+                // into the next screen when the GUI resumes.
+                mButtonCodes = {};
+                if (mAppLifeCycleCallback) {
+                    mAppLifeCycleCallback->onSuspend();
+                }
+            } break;
+
+            default:
+                if (SDK::isApplicationSpecificMessage(msg->getType()) && mCustomMessageHandler) {
+
+                    // Remove oldest message if queue is full
+                    if (mUserQueue.full()) {
+                        LOG_WARNING("Queue for custom messages is full\n");
+                        auto v = mUserQueue.pop();
+                        if (v) {
+                            auto msg = *v;
+                            msg->setResult(SDK::MessageResult::FAIL);
+                            mKernel.comm.sendResponse(msg);
+                            mKernel.comm.releaseMessage(msg);
+                        }
+                    }
+                    // Try to save message
+                    messageQueued = mUserQueue.push(msg);
+
+                    if (!messageQueued) {
+                        // Answer it here. The shared tail below releases
+                        // without responding, so a sender blocked on this
+                        // would wait out its whole timeout instead of being
+                        // woken. Unreachable today -- the eviction above
+                        // guarantees a slot -- but it is the one path left in
+                        // this function that drops a caller silently.
+                        msg->setResult(SDK::MessageResult::FAIL);
+                        mKernel.comm.sendResponse(msg);
+                    }
+
+                } else {
+                    msg->setResult(SDK::MessageResult::FAIL);
+                    mKernel.comm.sendResponse(msg);
+                }
+                break;
+        }
+
+        if (messageQueued) {
+            // The message must be process and release in callCustomMessageHandler()
+            continue;
+        }
+
+        // Set the result if the message was not processed
+        if (msg->getResult() == SDK::MessageResult::PENDING) {
+            msg->setResult(SDK::MessageResult::FAIL);
+        }
+        // Release message after processing
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+
+bool GuiCommandProcessor::consumeFrameTick()
+{
+    const bool pending = mFrameTickPending;
+    mFrameTickPending = false;
+    return pending;
+}
+
+bool GuiCommandProcessor::getKeySample(uint8_t &key)
+{
+    // Toolkits sample one key per frame; drain the queue one code at a time.
+    auto code = mButtonCodes.pop();
+    if (!code) {
+        return false;
+    }
+    key = *code;
+    return true;
+}
+
+void GuiCommandProcessor::writeDisplayFrameBuffer(const uint8_t* data)
+{
+    if (!data || !mIsGuiResumed) {
+        return;
+    }
+
+    auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestDisplayUpdate>();
+    if (msg) {
+        msg->pBuffer = data;
+        mKernel.comm.sendMessage(msg, 1000);
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+
+void GuiCommandProcessor::callCustomMessageHandler()
+{
+    while (!mUserQueue.empty()) {
+        auto v = mUserQueue.pop();
+
+        if (v) {
+            auto msg = *v;
+            bool result = false;
+            if (mCustomMessageHandler) {
+                result = mCustomMessageHandler->customMessageHandler(msg);
+            }
+            msg->setResult(result ? SDK::MessageResult::SUCCESS : SDK::MessageResult::FAIL);
+            mKernel.comm.sendResponse(msg);
+            mKernel.comm.releaseMessage(msg);
+        }
+    };
+}
+
+namespace
+{
+
+// Click/press/release codes for one logical button, in kernel-id order.
+struct ButtonCodes {
+    uint8_t click;
+    uint8_t press;
+    uint8_t release;
+};
+
+// Map a kernel button id to its GUI codes. The id->position mapping is the same
+// one the click path has always used: SW1->L1, SW2->R1, SW3->L2, SW4->R2.
+bool getButtonCodes(SDK::Message::EventButton::Id id, ButtonCodes &out)
+{
+    namespace Btn = SDK::GUI::Button;
+    using Id = SDK::Message::EventButton::Id;
+
+    switch (id) {
+        case Id::SW1: out = { Btn::L1, Btn::L1_PRESS, Btn::L1_RELEASE }; return true;
+        case Id::SW2: out = { Btn::R1, Btn::R1_PRESS, Btn::R1_RELEASE }; return true;
+        case Id::SW3: out = { Btn::L2, Btn::L2_PRESS, Btn::L2_RELEASE }; return true;
+        case Id::SW4: out = { Btn::R2, Btn::R2_PRESS, Btn::R2_RELEASE }; return true;
+        default: return false;
+    }
+}
+
+} // namespace
+
+void GuiCommandProcessor::handleEvent(SDK::Message::EventButton* msg)
+{
+    if (!mIsGuiResumed) {
+        return;
+    }
+
+    using Event = SDK::Message::EventButton::Event;
+
+    ButtonCodes codes;
+    if (!getButtonCodes(msg->id, codes)) {
+        return;
+    }
+
+    uint8_t code = 0;
+    switch (msg->event) {
+        case Event::CLICK:   code = codes.click;   break;
+        case Event::PRESS:   code = codes.press;   break;
+        case Event::RELEASE: code = codes.release; break;
+        // LONG_PRESS / HOLD_* are intentionally not forwarded: a screen derives
+        // long press from the press/release pair using its own timing.
+        default: return;
+    }
+
+    if (!mButtonCodes.push(code)) {
+        // Queue full: drop the oldest so the most recent input stays responsive.
+        mButtonCodes.pop();
+        mButtonCodes.push(code);
+    }
+}
+
+} // namespace SDK
