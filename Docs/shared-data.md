@@ -44,7 +44,7 @@ Nested paths inside it do work. `../SharedData/maps/uk.map` resolves, and
 | `../SharedData/stride.json` | `OutdoorStrideCalibrator::finalise()` ([`OutdoorStrideCalibrator.hpp:59`](../Libs/Header/SDK/Calibration/OutdoorStrideCalibrator.hpp)) | `StrideLut` ([`StrideLut.hpp:67`](../Libs/Header/SDK/Calibration/StrideLut.hpp)) |
 | `../SharedData/stride.json.bak` | `OutdoorStrideCalibrator`, when the store will not parse ([`OutdoorStrideCalibrator.cpp:222-228`](../Libs/Source/Calibration/OutdoorStrideCalibrator.cpp)) | recovery only |
 | `../SharedData/stride_trace.csv` | Running app, when tracing is on ([`Running/.../Service.cpp:789`](../Examples/Apps/Running/Software/Libs/Sources/Service.cpp)) | diagnostic only |
-| `../SharedData/stride_deleted.json` | Treadmill app, backing up the LUT before a user-initiated clear ([`Treadmill/.../Service.cpp:1177`](../Examples/Apps/Treadmill/Software/Libs/Sources/Service.cpp)) | recovery only |
+| `../SharedData/stride_deleted.json` | Treadmill app, backing up the LUT before a user-initiated clear ([`Treadmill/.../Service.cpp:1191`](../Examples/Apps/Treadmill/Software/Libs/Sources/Service.cpp)) | recovery only |
 
 The last three are conditional — a watch that has never hit a corrupt store, never enabled
 tracing and never cleared its calibration holds only `stride.json`. Expect the others to
