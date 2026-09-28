@@ -81,7 +81,8 @@ public:
         , mMaxValid(0.0f)
         , mIsInitialized(false)
     {
-        clear();
+        clearHistory();
+        clearScale();
     }
 
     ~GpsSpeedFilter() = default;
@@ -103,18 +104,34 @@ public:
         mMinValid      = minValid;
         mMaxValid      = maxValid;
         mIsInitialized = true;
-        clear();
+        clearHistory();
+        clearScale();
         return true;
     }
 
     /**
-     * @brief Discard all history. The range set by init() is preserved.
+     * @brief Discard everything, including the measured scale factor.
      *
-     * Call at track start and on resume from a pause: the samples in hand
-     * describe an effort that is over. The scale factor returns to 1.0, so the
-     * filter behaves as plain smoothing until it has re-measured.
+     * For a track START. The scale returns to 1.0 and the filter behaves as
+     * plain smoothing until it has re-measured, which takes a third of the time
+     * constant in moving ticks.
+     *
+     * Do NOT use this for a pause -- see resetHistory().
      */
-    void reset() { clear(); }
+    void reset() { clearHistory(); clearScale(); }
+
+    /**
+     * @brief Discard the speed and position history but KEEP the scale factor.
+     *
+     * For a resume from a pause. The samples in hand describe an effort that is
+     * over, but the scale factor does not describe the effort -- it describes how
+     * far this receiver's speed is drifting in these conditions, which a stop
+     * does not change. Discarding it would cost a third of the time constant in
+     * moving ticks before the correction applied again, and the readout would
+     * step by however much it had been out when it did. Under an auto-pause that
+     * fires at every junction the filter could seldom leave that warm-up at all.
+     */
+    void resetHistory() { clearHistory(); }
 
     /**
      * @brief Advance one tick.
@@ -283,13 +300,17 @@ private:
         return a;
     }
 
-    void clear()
+    void clearHistory()
     {
         for (std::size_t i = 0; i < kRing; i++) {
             mSpeed[i] = 0.0f; mSpeedOk[i] = false;
             mPosLat[i] = 0.0f; mPosLon[i] = 0.0f; mPosOk[i] = false;
         }
         mHead = 0; mFilled = 0;
+    }
+
+    void clearScale()
+    {
         mScaleNum = 0.0f; mScaleDen = 0.0f; mScaleCount = 0;
         mScale = 1.0f;
         mScaleMeasured = false;

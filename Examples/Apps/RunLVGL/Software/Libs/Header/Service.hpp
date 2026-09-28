@@ -45,10 +45,9 @@ private:
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
     static constexpr float    skFusionSampleRateHz   = 100.0f;
 
-    /// Window, in 1 Hz track ticks, over which the live pace / speed readout is
-    /// averaged. Ten seconds cuts the GPS speed noise to about a third -- enough
-    /// to hold a target pace by -- while still tracking a real change of effort
-    /// fast enough to be useful inside an interval repeat.
+    /// Geometry of the live-speed filter, in 1 Hz track ticks. The Doppler
+    /// smoothing is short because it no longer carries the accuracy: the scale
+    /// correction does, so the window is free to be chosen for responsiveness.
     static constexpr std::size_t skSpeedSmoothTicks = 5;
     static constexpr std::size_t skSpeedScaleTau    = 180;
     static constexpr std::size_t skSpeedChordTicks  = 5;
@@ -107,10 +106,13 @@ private:
     SDK::Metric::MonotonicCounter<std::time_t>          mTimeCounter;
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
-    /// Smooths the GPS speed for the live pace / speed readout only; the FIT
-    /// record series and the maxima stay on the unsmoothed samples in
-    /// mSpeedCounter. The averages are not involved either way -- they come
-    /// from the distance and time totals, not from a mean of these samples.
+    /// Corrects the receiver's Doppler speed against the distance its own
+    /// position track covers, and smooths it. This is the single source for
+    /// everything derived from GPS speed -- the readout, the FIT record series,
+    /// the maxima, the implied step length and the stride calibrator -- so that
+    /// none of them inherit the receiver's environment-dependent under-read.
+    /// The averages are not involved either way: they come from the distance and
+    /// time totals, not from a mean of these samples.
     SDK::Metric::GpsSpeedFilter<skSpeedSmoothTicks,
                                 skSpeedScaleTau,
                                 skSpeedChordTicks>      mSpeedFilter;
