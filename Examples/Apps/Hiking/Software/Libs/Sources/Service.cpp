@@ -1067,7 +1067,11 @@ void Service::pauseTrack(bool pause)
         mSpeedCounter.resume();
         // Drop the pre-pause window: those samples describe the effort before
         // the break, so blending them into the resumed readout would be wrong.
-        mSpeedFilter.reset();
+        // Drop the pre-pause samples: they describe the effort before the break.
+        // The scale factor is NOT dropped -- it describes how far this receiver
+        // is drifting in these conditions, which a stop does not change, and
+        // re-earning it would leave the readout uncorrected meanwhile.
+        mSpeedFilter.resetHistory();
         mHrCounter.resume();
         mAltitudeCounter.resume();
         mStepCounter.resume();

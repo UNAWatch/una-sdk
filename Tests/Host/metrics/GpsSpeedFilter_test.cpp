@@ -370,3 +370,39 @@ TEST(GpsSpeedFilter, StandingStillDoesNotWalkTheScaleUpward)
     EXPECT_NEAR(k, f.getScale(), 0.01f)
         << "a stop must not move the scale factor; got " << f.getScale();
 }
+
+TEST(GpsSpeedFilter, ResetHistoryKeepsTheScaleAcrossAPause)
+{
+    // A pause says nothing about how far the receiver is drifting, so the scale
+    // factor must survive it. Discarding it would leave the readout uncorrected
+    // for a third of the time constant in moving ticks, and step when it caught
+    // up -- and under an auto-pause firing at every junction the filter could
+    // seldom leave that warm-up at all.
+    Filter f = makeFilter();
+    Track t;
+    feed(f, t, 3.0f, 2.85f, 120);
+    const float k = f.getScale();
+    ASSERT_NEAR(3.0f / 2.85f, k, 0.02f);
+
+    f.resetHistory();
+    EXPECT_FLOAT_EQ(k, f.getScale()) << "the scale factor must survive a pause";
+    EXPECT_TRUE(f.isScaleMeasured());
+    EXPECT_FALSE(f.isValid()) << "but the speed samples must not";
+
+    // One tick back and the readout is corrected again immediately.
+    t.advance(3.0f);
+    f.tick(2.85f, true, t.lat(), t.lon(), true);
+    EXPECT_NEAR(3.0f, f.getSpeed(), 0.05f);
+}
+
+TEST(GpsSpeedFilter, ResetStillDiscardsTheScaleForATrackStart)
+{
+    Filter f = makeFilter();
+    Track t;
+    feed(f, t, 3.0f, 2.85f, 120);
+    ASSERT_TRUE(f.isScaleMeasured());
+
+    f.reset();
+    EXPECT_FLOAT_EQ(1.0f, f.getScale()) << "a new track starts from neutral";
+    EXPECT_FALSE(f.isScaleMeasured());
+}

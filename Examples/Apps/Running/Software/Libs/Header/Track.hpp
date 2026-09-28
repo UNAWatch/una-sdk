@@ -78,8 +78,8 @@ struct IntervalsData {
  * The GUI converts to display units as needed.
  *
  * @note This snapshot exists for the GUI only. The live speed and pace it
- *       carries are smoothed for readability; the raw samples still back the
- *       FIT records, session averages and maxima.
+ *       carries are corrected against the position track and smoothed. The
+ *       averages are not: they come from the distance and time totals.
  */
 struct Data {
 
