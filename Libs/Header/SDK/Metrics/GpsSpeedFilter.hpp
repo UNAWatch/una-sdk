@@ -46,15 +46,22 @@ namespace SDK::Metric {
  *     step the worse it is: over these six runs a 1 s step left k reading 0.9%
  *     high, 3 s 0.5% high, and 5 s 0.2% high.
  *
- * Measured over those six runs (8.4 hours, 84 km), against a reference watch:
- * the worst run's speed error improves from -4.4% to +1.2%, the run-to-run
- * spread narrows from 4.7 points to 1.8, and the median time to reflect half a
- * real change of pace is 8.5 s, against 11 s for the 10 s smoothing this
- * replaces.
+ * Measured over those six runs (8.4 hours, 84 km), against a reference watch,
+ * the worst run's speed error improves from -4.4% to +1.2% and the run-to-run
+ * spread narrows from 4.7 points to 1.8.
  *
  * @tparam SmoothTicks Doppler smoothing window, in ticks. Trades display
  *                     steadiness against responsiveness; it no longer affects
- *                     accuracy, because k absorbs the scale.
+ *                     accuracy, because k absorbs the scale. Each extra tick
+ *                     delays the readout by about half a second and steadies it
+ *                     only a little, because the receiver's speed error is
+ *                     correlated over tens of seconds. Measured on the raw
+ *                     receiver speed over twenty 400 m rep transitions, against
+ *                     a reference watch: at 8 ticks the readout reaches half a
+ *                     change of pace within a second of the reference, with an
+ *                     in-rep pace error of 9.6 s/km (sd); 5 ticks leads it by
+ *                     1-2.5 s at 11.1 s/km, 10 ticks trails by up to 1.5 s at
+ *                     8.9 s/km.
  * @tparam ScaleTauTicks Time constant of the exponential average that measures
  *                      k, in ticks. Long enough that k is steady across a change
  *                      of pace. Measured over six runs, shortening it buys
@@ -67,7 +74,7 @@ namespace SDK::Metric {
  * @note tick() is expected once per second, so the tick parameters are also
  *       seconds. Feed it the RAW latched values; it owns the smoothing.
  */
-template <std::size_t SmoothTicks   = 5,
+template <std::size_t SmoothTicks   = 8,
           std::size_t ScaleTauTicks = 180,
           std::size_t ChordTicks    = 5>
 class GpsSpeedFilter {

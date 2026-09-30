@@ -319,7 +319,7 @@ TEST(GpsSpeedFilter, ChordAveragingBeatsPerSecondAgainstPositionNoise)
 TEST(GpsSpeedFilter, DefaultTemplateArgumentsAreTheShippedConfiguration)
 {
     SDK::Metric::GpsSpeedFilter<> f;
-    EXPECT_EQ(5u,   f.getSmoothTicks());
+    EXPECT_EQ(8u,   f.getSmoothTicks());
     EXPECT_EQ(180u, f.getScaleTauTicks());
     EXPECT_EQ(5u,   f.getChordTicks());
     ASSERT_TRUE(f.init(kMinValid, kMaxValid));

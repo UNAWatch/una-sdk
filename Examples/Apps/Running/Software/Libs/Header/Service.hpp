@@ -45,10 +45,11 @@ private:
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
     static constexpr float    skFusionSampleRateHz   = 100.0f;
 
-    /// Geometry of the live-speed filter, in 1 Hz track ticks. The Doppler
-    /// smoothing is short because it no longer carries the accuracy: the scale
-    /// correction does, so the window is free to be chosen for responsiveness.
-    static constexpr std::size_t skSpeedSmoothTicks = 5;
+    /// Geometry of the live-speed filter, in 1 Hz track ticks. The scale
+    /// correction carries the accuracy, so the smoothing window is chosen for
+    /// the display alone: 8 s is steadier than a shorter window and still
+    /// reaches half a change of pace about as soon as a reference watch does.
+    static constexpr std::size_t skSpeedSmoothTicks = 8;
     static constexpr std::size_t skSpeedScaleTau    = 180;
     static constexpr std::size_t skSpeedChordTicks  = 5;
 
