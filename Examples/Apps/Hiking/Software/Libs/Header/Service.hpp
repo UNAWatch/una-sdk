@@ -42,6 +42,8 @@ private:
     /// Geometry of the live-speed filter, in 1 Hz track ticks. The Doppler
     /// smoothing is short because it no longer carries the accuracy: the scale
     /// correction does, so the window is free to be chosen for responsiveness.
+    /// The position chord is 5 s, about 7 m at walking pace: long enough to stay
+    /// clear of the position noise, short enough not to cut corners.
     static constexpr std::size_t skSpeedSmoothTicks = 5;
     static constexpr std::size_t skSpeedScaleTau    = 180;
     static constexpr std::size_t skSpeedChordTicks  = 5;

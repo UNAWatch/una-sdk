@@ -71,6 +71,27 @@ void feed(Filter &f, Track &t, float trueSpeed, float reportedSpeed, int seconds
     }
 }
 
+/**
+ * @brief Laps of a circle of @p radiusM metres, centred on the equator.
+ *
+ * The receiver's speed is along the path, while the filter's position chord
+ * cuts across it, so a circle isolates the chord's corner-cutting from every
+ * other error.
+ */
+template <typename F>
+float scaleOnACircle(F &f, float speedMs, double radiusM, int seconds)
+{
+    const double degPerM = 1.0 / (static_cast<double>(kEarthR) * static_cast<double>(kDegToRad));
+    double angle = 0.0;
+    for (int i = 0; i < seconds; i++) {
+        angle += static_cast<double>(speedMs) / radiusM;
+        f.tick(speedMs, true,
+               static_cast<float>(radiusM * std::sin(angle) * degPerM),
+               static_cast<float>(radiusM * std::cos(angle) * degPerM), true);
+    }
+    return f.getScale();
+}
+
 }  // namespace
 
 TEST(GpsSpeedFilter, InitRejectsInvertedRange)
@@ -321,7 +342,7 @@ TEST(GpsSpeedFilter, DefaultTemplateArgumentsAreTheShippedConfiguration)
     SDK::Metric::GpsSpeedFilter<> f;
     EXPECT_EQ(8u,   f.getSmoothTicks());
     EXPECT_EQ(180u, f.getScaleTauTicks());
-    EXPECT_EQ(5u,   f.getChordTicks());
+    EXPECT_EQ(2u,   f.getChordTicks());
     ASSERT_TRUE(f.init(kMinValid, kMaxValid));
     Track t;
     for (int i = 0; i < 400; i++) {
@@ -406,3 +427,38 @@ TEST(GpsSpeedFilter, ResetStillDiscardsTheScaleForATrackStart)
     EXPECT_FLOAT_EQ(1.0f, f.getScale()) << "a new track starts from neutral";
     EXPECT_FALSE(f.isScaleMeasured());
 }
+
+TEST(GpsSpeedFilter, HasCurrentSampleDropsOnTheFirstTickWithoutAFix)
+{
+    Filter f = makeFilter();
+    Track  t;
+    feed(f, t, 3.0f, 3.0f, 10);
+    ASSERT_TRUE(f.hasCurrentSample());
+
+    feed(f, t, 3.0f, 0.0f, 1, false, false);
+
+    // The display window still holds the samples from before the loss...
+    EXPECT_TRUE(f.isValid());
+    // ...but nothing was measured this tick, so a per-tick consumer must stop.
+    EXPECT_FALSE(f.hasCurrentSample());
+    EXPECT_FLOAT_EQ(0.0f, f.getInstantSpeed());
+}
+
+TEST(GpsSpeedFilter, AShortChordKeepsTheScaleOnACurve)
+{
+    // 10 m/s round a 50 m radius, the tight end of a cycling route. A 5 s chord
+    // spans 50 m of a 314 m circle and reads about 4% short of the path; 2 s
+    // reads under 1% short. Corner-cutting is what this test pins: the noise
+    // side of the trade is ChordAveragingBeatsPerSecondAgainstPositionNoise.
+    SDK::Metric::GpsSpeedFilter<8, 180, 2> chord2;
+    SDK::Metric::GpsSpeedFilter<8, 180, 5> chord5;
+    ASSERT_TRUE(chord2.init(kMinValid, kMaxValid));
+    ASSERT_TRUE(chord5.init(kMinValid, kMaxValid));
+
+    const float k2 = scaleOnACircle(chord2, 10.0f, 50.0, 900);
+    const float k5 = scaleOnACircle(chord5, 10.0f, 50.0, 900);
+
+    EXPECT_NEAR(1.0f, k2, 0.01f);
+    EXPECT_LT(k5, 0.97f);
+}
+
