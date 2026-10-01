@@ -16,9 +16,9 @@ namespace SDK::Metric {
  *        position track covers, and smooths it for display.
  *
  * The AG3335's reported speed over ground reads low while running, by an amount
- * that varies with the environment: measured against a reference watch over six
- * simultaneous recordings it ran 0.4% low on an open road race and 4.4% low
- * under tree cover. The same receiver's POSITION track is sound throughout --
+ * that varies with the environment: measured against a reference watch over
+ * eight simultaneous recordings it ran 0.7% low on an open road race and 5.8%
+ * low under tree cover. The same receiver's POSITION track is sound throughout --
  * its summed path matched the odometer to within 1.2% on every one of those
  * runs, and matched the reference watch's position track to 0.1%. So the
  * information needed to correct the speed is already on the watch.
@@ -36,19 +36,20 @@ namespace SDK::Metric {
  * change of pace, and the filter's step response is that of the Doppler
  * smoothing alone -- correcting the scale costs no responsiveness.
  *
- * Two details that are easy to get wrong and are load-bearing here:
+ * Details that are easy to get wrong and are load-bearing here:
  *
  *   - **k is measured against the raw Doppler, never against this filter's own
  *     output.** Feeding the corrected speed back in would drive k to 1.0 and
  *     the correction would silently disappear.
- *   - **The position distance is measured over @p ChordTicks-second chords, not
- *     per second.** Position noise inflates a summed path, and the shorter the
- *     step the worse it is: over these six runs a 1 s step left k reading 0.9%
- *     high, 3 s 0.5% high, and 5 s 0.2% high.
+ *   - **The position distance is a chord across @p ChordTicks seconds.** A chord
+ *     is shorter than the path on every bend, so a long one reads k low; a very
+ *     short one adds position noise instead. Over those eight runs the corrected
+ *     speed averaged 0.997 of the reference with a 1 s chord, 0.994 with 2 s,
+ *     and 0.989 with 5 s, while k wandered no more with the shorter chords.
  *
- * Measured over those six runs (8.4 hours, 84 km), against a reference watch,
- * the worst run's speed error improves from -4.4% to +1.2% and the run-to-run
- * spread narrows from 4.7 points to 1.8.
+ * Measured over those runs against the reference, the speed moves from 0.942-
+ * 0.993 of the reference uncorrected to 0.984-1.018 corrected, and the RMS
+ * error across runs from 4.3% to 1.1%.
  *
  * @tparam SmoothTicks Doppler smoothing window, in ticks. Trades display
  *                     steadiness against responsiveness; it no longer affects
@@ -69,14 +70,17 @@ namespace SDK::Metric {
  *                      flat from 20 s to 600 s, so a faster k only adds display
  *                      jitter (4.95 s/km at 20 s against 3.91 at 180 s). The
  *                      environment's effect on the receiver moves slowly.
- * @tparam ChordTicks  Chord length for the position distance, in ticks.
+ * @tparam ChordTicks  Chord length for the position distance, in ticks. Choose
+ *                     it as a distance: at running pace 2 ticks is a 5-8 m
+ *                     chord. At walking pace a longer one keeps the chord well
+ *                     above the position noise.
  *
  * @note tick() is expected once per second, so the tick parameters are also
  *       seconds. Feed it the RAW latched values; it owns the smoothing.
  */
 template <std::size_t SmoothTicks   = 8,
           std::size_t ScaleTauTicks = 180,
-          std::size_t ChordTicks    = 5>
+          std::size_t ChordTicks    = 2>
 class GpsSpeedFilter {
     static_assert(SmoothTicks > 0, "GpsSpeedFilter needs a non-empty smoothing window");
     static_assert(ScaleTauTicks > 0, "GpsSpeedFilter needs a positive scale time constant");
@@ -269,8 +273,22 @@ public:
     /** @brief Ticks that have contributed to the scale factor, up to the warm-up. */
     std::size_t getScaleSampleCount() const { return mScaleCount; }
 
-    /** @brief True while the smoothing window holds at least one sample. */
+    /**
+     * @brief True while the smoothing window holds at least one sample.
+     *
+     * Still true for up to SmoothTicks - 1 ticks after the fix is lost, while
+     * the window drains: right for the display, not for anything that needs a
+     * current measurement -- see hasCurrentSample().
+     */
     bool isValid() const { return getSampleCount() > 0; }
+
+    /**
+     * @brief True when the newest tick carried a usable speed.
+     *
+     * The gate for getInstantSpeed() and for anything recorded or calibrated
+     * per tick: it goes false on the first tick without a current fix.
+     */
+    bool hasCurrentSample() const { return mFilled > 0 && mSpeedOk[newest()]; }
 
     /** @brief True once the scale factor has been measured from position. */
     bool isScaleMeasured() const { return mScaleMeasured; }

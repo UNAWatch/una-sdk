@@ -596,8 +596,10 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.latitude  = mGps.latitude;
     fitRecord.longitude = mGps.longitude;
 
-    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.isValid());
-    fitRecord.speed = mSpeedFilter.getSpeed();
+    // The corrected speed of this tick, not the display mean: it lines up with
+    // the heart rate and cadence in the same record and with max_speed.
+    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.hasCurrentSample());
+    fitRecord.speed = mSpeedFilter.getInstantSpeed();
 
     fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
     fitRecord.altitude = mAltitudeCounter.getCurrent();
@@ -768,7 +770,7 @@ void Service::processTrack()
         // Fed from here rather than from the callback so that every statistic
         // derives from the corrected speed, at a uniform 1 Hz. The INSTANT value
         // goes in, not the smoothed one, so a lap maximum keeps its peak.
-        if (mSpeedFilter.isValid()) {
+        if (mSpeedFilter.hasCurrentSample()) {
             mSpeedCounter.add(mSpeedFilter.getInstantSpeed());
         }
     }
@@ -1099,8 +1101,6 @@ void Service::pauseTrack(bool pause, PauseSource source)
         mTimeCounter.resume();
         mDistanceCounter.resume();
         mSpeedCounter.resume();
-        // Drop the pre-pause window: those samples describe the effort before
-        // the break, so blending them into the resumed readout would be wrong.
         // Drop the pre-pause samples: they describe the effort before the break.
         // The scale factor is NOT dropped -- it describes how far this receiver
         // is drifting in these conditions, which a stop does not change, and

@@ -40,9 +40,11 @@ private:
     /// Geometry of the live-speed filter, in 1 Hz track ticks. The Doppler
     /// smoothing is short because it no longer carries the accuracy: the scale
     /// correction does, so the window is free to be chosen for responsiveness.
+    /// The position chord is 2 s, about 20 m at riding speed: a longer one cuts
+    /// bends and reads the scale low.
     static constexpr std::size_t skSpeedSmoothTicks = 5;
     static constexpr std::size_t skSpeedScaleTau    = 180;
-    static constexpr std::size_t skSpeedChordTicks  = 5;
+    static constexpr std::size_t skSpeedChordTicks  = 2;
 
     // -- Auto-pause (GPS-speed driven) ----------------------------------------
     //

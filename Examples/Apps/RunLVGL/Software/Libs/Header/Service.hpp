@@ -49,9 +49,11 @@ private:
     /// correction carries the accuracy, so the smoothing window is chosen for
     /// the display alone: 8 s is steadier than a shorter window and still
     /// reaches half a change of pace about as soon as a reference watch does.
+    /// The position chord is 2 s, 5-8 m at running pace: a longer one cuts the
+    /// corners of the path and reads the scale low.
     static constexpr std::size_t skSpeedSmoothTicks = 8;
     static constexpr std::size_t skSpeedScaleTau    = 180;
-    static constexpr std::size_t skSpeedChordTicks  = 5;
+    static constexpr std::size_t skSpeedChordTicks  = 2;
 
     // -- Infrastructure -------------------------------------------------------
 
