@@ -49,8 +49,8 @@ namespace SDK::Metric {
  *     and 0.989 with 5 s, while k wandered no more with the shorter chords.
  *
  * Measured over those runs against the reference, the speed moves from 0.942-
- * 0.993 of the reference uncorrected to 0.984-1.018 corrected, and the RMS
- * error across runs from 4.3% to 1.1%.
+ * 0.993 of the reference uncorrected to 0.983-1.019 corrected, and the RMS
+ * error across runs from 4.1% to 1.2%.
  *
  * @tparam SmoothTicks Window over the speed as received, in ticks. The receiver
  *                     has already averaged the speed over 10 s, so the window is
@@ -61,7 +61,7 @@ namespace SDK::Metric {
  *                     watch, the readout reached half a change of pace 2.0 s /
  *                     0.5 s (rise / fall) behind the reference at 2 ticks, and
  *                     5.0 s / 3.5 s behind at 8, for an in-rep pace error of
- *                     8.5 against 7.2 s/km (sd). This assumes the receiver's
+ *                     8.7 against 7.7 s/km (sd). This assumes the receiver's
  *                     averaging: a navigation mode that reports an unaveraged
  *                     speed would need a longer window.
  * @tparam ScaleTauTicks Time constant of the exponential average that measures
