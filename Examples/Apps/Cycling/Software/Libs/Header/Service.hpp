@@ -148,6 +148,7 @@ private:
     float mGpsSpeedMs    = 0.0f;  ///< Latest raw GPS speed sample.
     bool  mGpsSpeedValid = false; ///< Sample came from a current, non-dead-reckoned fix.
     bool  mGpsSpeedFresh = false; ///< A speed sample arrived since the last track tick.
+    float mGpsSpeedPeakMs = 0.0f; ///< Highest valid speed sample since the last track tick.
     bool  mGpsPosFresh   = false; ///< A position sample arrived since the last track tick.
 
     // -- Metrics --------------------------------------------------------------

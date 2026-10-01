@@ -99,6 +99,7 @@ private:
     float       mGpsSpeedMs       = 0.0f; ///< Latest raw GPS speed (instantaneous source).
     bool        mGpsSpeedValid    = false;
     bool        mGpsSpeedFresh    = false; ///< A speed sample arrived since the last track tick.
+    float       mGpsSpeedPeakMs   = 0.0f;  ///< Highest valid speed sample since the last track tick.
     bool        mGpsPosFresh      = false; ///< A position sample arrived since the last track tick.
     bool        mGpsDeadReckoning = false;
     std::time_t mLastCalibUtc     = 0;   ///< For per-tick delta_t.

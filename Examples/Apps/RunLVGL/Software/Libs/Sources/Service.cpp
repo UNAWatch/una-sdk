@@ -1,6 +1,7 @@
 
 #include "Service.hpp"
 
+#include <algorithm>
 #include <ctime>
 #include <cmath>
 #include <memory>
@@ -351,6 +352,10 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             mGpsSpeedValid    = parser.isSpeedValid();
             mGpsDeadReckoning = parser.isDeadReckoning();
             mGpsSpeedFresh    = true;   // consumed by the speed filter each tick
+            if (mGpsSpeedValid && mGpsSpeedMs > mGpsSpeedPeakMs &&
+                mGpsSpeedMs <= mSpeedCounter.getMaxValid()) {
+                mGpsSpeedPeakMs = mGpsSpeedMs;   // for the maxima; see processTrack()
+            }
             LOG_DEBUG("Speed:    %.2f m/s (valid %u, dr %u)\n",
                       mGpsSpeedMs, mGpsSpeedValid, mGpsDeadReckoning);
         }
@@ -780,6 +785,7 @@ void Service::startTrack(std::time_t utc)
     mGpsSpeedValid    = false;
     mGpsSpeedFresh    = false;
     mGpsPosFresh      = false;
+    mGpsSpeedPeakMs   = 0.0f;
     mGpsDeadReckoning = false;
     mLastCalibUtc     = 0;
     mCalibrator.load();
@@ -886,12 +892,18 @@ void Service::processTrack()
     if (mTrackState == Track::State::ACTIVE) {
         mSpeedFilter.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh,
                           mGps.latitude, mGps.longitude, mGps.fix && mGpsPosFresh);
-        mGpsSpeedFresh = false;
-        mGpsPosFresh   = false;
         if (mSpeedFilter.hasCurrentSample()) {
-            mSpeedCounter.add(mSpeedFilter.getInstantSpeed());
+            // A tick can see two samples and the filter keeps the newest, so the
+            // maxima take the higher of it and the tick's peak, on the same scale.
+            const float peak = mGpsSpeedPeakMs * mSpeedFilter.getScale();
+            mSpeedCounter.add(std::max(mSpeedFilter.getInstantSpeed(), peak));
         }
     }
+    // Consumed every tick, paused or not, so a sample counts as fresh only on the
+    // tick that follows it -- including the first tick after a resume.
+    mGpsSpeedFresh  = false;
+    mGpsPosFresh    = false;
+    mGpsSpeedPeakMs = 0.0f;
     mTrackData.speed = mSpeedFilter.getSpeed();
 
     mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
