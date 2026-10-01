@@ -1,6 +1,7 @@
 
 #include "Service.hpp"
 
+#include <algorithm>
 #include <ctime>
 #include <cmath>
 #include <memory>
@@ -320,6 +321,10 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             mGpsSpeedMs    = parser.getSpeed();  // raw instantaneous speed
             mGpsSpeedValid = parser.isSpeedValid();  // already excludes dead reckoning
             mGpsSpeedFresh = true;   // consumed by the speed filter each tick
+            if (mGpsSpeedValid && mGpsSpeedMs > mGpsSpeedPeakMs &&
+                mGpsSpeedMs <= mSpeedCounter.getMaxValid()) {
+                mGpsSpeedPeakMs = mGpsSpeedMs;   // for the maxima; see processTrack()
+            }
             LOG_DEBUG("Speed:    %.2f m/s (valid %u)\n", mGpsSpeedMs, mGpsSpeedValid);
         }
     } else if (mSensorGpsDistance.matchesDriver(handle)) {
@@ -680,6 +685,7 @@ void Service::startTrack(std::time_t utc)
     mGpsSpeedValid = false;
     mGpsSpeedFresh = false;
     mGpsPosFresh   = false;
+    mGpsSpeedPeakMs = 0.0f;
     mHrCounter.reset();
     mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
     mHrOpticalBpm = 0;
@@ -771,7 +777,10 @@ void Service::processTrack()
         // derives from the corrected speed, at a uniform 1 Hz. The INSTANT value
         // goes in, not the smoothed one, so a lap maximum keeps its peak.
         if (mSpeedFilter.hasCurrentSample()) {
-            mSpeedCounter.add(mSpeedFilter.getInstantSpeed());
+            // A tick can see two samples and the filter keeps the newest, so the
+            // maxima take the higher of it and the tick's peak, on the same scale.
+            const float peak = mGpsSpeedPeakMs * mSpeedFilter.getScale();
+            mSpeedCounter.add(std::max(mSpeedFilter.getInstantSpeed(), peak));
         }
     }
     // Consumed every tick, NOT only while active: updateAutoPause() reads this
@@ -779,8 +788,9 @@ void Service::processTrack()
     // has to keep doing so while paused in order to notice the rider moving off
     // again. Left set through a pause it would pin the detector to "always
     // fresh", so a fix lost while stopped would auto-resume off a frozen speed.
-    mGpsSpeedFresh = false;
-    mGpsPosFresh   = false;
+    mGpsSpeedFresh  = false;
+    mGpsPosFresh    = false;
+    mGpsSpeedPeakMs = 0.0f;
 
     // A paused rider is, by definition, not moving. The smoother deliberately
     // freezes while paused (see above), which was invisible when a pause always
