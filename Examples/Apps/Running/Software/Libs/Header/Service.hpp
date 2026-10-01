@@ -45,13 +45,12 @@ private:
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
     static constexpr float    skFusionSampleRateHz   = 100.0f;
 
-    /// Geometry of the live-speed filter, in 1 Hz track ticks. The scale
-    /// correction carries the accuracy, so the smoothing window is chosen for
-    /// the display alone: 8 s is steadier than a shorter window and still
-    /// reaches half a change of pace about as soon as a reference watch does.
+    /// Geometry of the live-speed filter, in 1 Hz track ticks. The receiver
+    /// already averages its speed over 10 s, so the window only bridges a tick
+    /// that brings no sample; a longer one would average twice and add lag.
     /// The position chord is 2 s, 5-8 m at running pace: a longer one cuts the
     /// corners of the path and reads the scale low.
-    static constexpr std::size_t skSpeedSmoothTicks = 8;
+    static constexpr std::size_t skSpeedSmoothTicks = 2;
     static constexpr std::size_t skSpeedScaleTau    = 180;
     static constexpr std::size_t skSpeedChordTicks  = 2;
 

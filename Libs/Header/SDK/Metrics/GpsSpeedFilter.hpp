@@ -13,7 +13,7 @@ namespace SDK::Metric {
 
 /**
  * @brief Corrects the receiver's Doppler speed against the distance its own
- *        position track covers, and smooths it for display.
+ *        position track covers, and bridges the ticks that bring no sample.
  *
  * The AG3335's reported speed over ground reads low while running, by an amount
  * that varies with the environment: measured against a reference watch over
@@ -25,8 +25,9 @@ namespace SDK::Metric {
  *
  * The two channels are combined by frequency, which is what makes this cheap:
  *
- *   - the Doppler supplies the SHAPE. It responds quickly and is quiet
- *     second-to-second, but its scale drifts with signal conditions.
+ *   - the Doppler supplies the SHAPE. The receiver reports it already averaged:
+ *     in its Fitness navigation mode the AG3335's speed over ground is the mean
+ *     of its own last 10 velocity solutions. Its scale drifts with conditions.
  *   - the position track supplies the SCALE. It is far too noisy per second to
  *     display, but over a few minutes the distance it covers is accurate.
  *
@@ -51,18 +52,18 @@ namespace SDK::Metric {
  * 0.993 of the reference uncorrected to 0.984-1.018 corrected, and the RMS
  * error across runs from 4.3% to 1.1%.
  *
- * @tparam SmoothTicks Doppler smoothing window, in ticks. Trades display
- *                     steadiness against responsiveness; it no longer affects
- *                     accuracy, because k absorbs the scale. Each extra tick
- *                     delays the readout by about half a second and steadies it
- *                     only a little, because the receiver's speed error is
- *                     correlated over tens of seconds. Measured on the raw
- *                     receiver speed over twenty 400 m rep transitions, against
- *                     a reference watch: at 8 ticks the readout reaches half a
- *                     change of pace within a second of the reference, with an
- *                     in-rep pace error of 9.6 s/km (sd); 5 ticks leads it by
- *                     1-2.5 s at 11.1 s/km, 10 ticks trails by up to 1.5 s at
- *                     8.9 s/km.
+ * @tparam SmoothTicks Window over the speed as received, in ticks. The receiver
+ *                     has already averaged the speed over 10 s, so the window is
+ *                     not there to smooth it: two ticks bridge a tick that brings
+ *                     no sample, since the 1 Hz speed and the tick are not
+ *                     phase-locked. Anything longer averages twice and only adds
+ *                     lag. Over twenty 400 m rep transitions against a reference
+ *                     watch, the readout reached half a change of pace 2.0 s /
+ *                     0.5 s (rise / fall) behind the reference at 2 ticks, and
+ *                     5.0 s / 3.5 s behind at 8, for an in-rep pace error of
+ *                     8.5 against 7.2 s/km (sd). This assumes the receiver's
+ *                     averaging: a navigation mode that reports an unaveraged
+ *                     speed would need a longer window.
  * @tparam ScaleTauTicks Time constant of the exponential average that measures
  *                      k, in ticks. Long enough that k is steady across a change
  *                      of pace. Measured over six runs, shortening it buys
@@ -76,9 +77,9 @@ namespace SDK::Metric {
  *                     above the position noise.
  *
  * @note tick() is expected once per second, so the tick parameters are also
- *       seconds. Feed it the RAW latched values; it owns the smoothing.
+ *       seconds. Feed it the latched values as received.
  */
-template <std::size_t SmoothTicks   = 8,
+template <std::size_t SmoothTicks   = 2,
           std::size_t ScaleTauTicks = 180,
           std::size_t ChordTicks    = 2>
 class GpsSpeedFilter {
@@ -219,17 +220,17 @@ public:
     }
 
     /**
-     * @brief Smoothed, scale-corrected speed in m/s. 0.0 when nothing is known.
+     * @brief Windowed, scale-corrected speed in m/s. 0.0 when nothing is known.
      *
-     * This is the value to display, and to record as the per-record speed.
+     * This is the value to display.
      */
     float getSpeed() const { return meanSpeed() * mScale; }
 
     /**
-     * @brief Latest scale-corrected speed in m/s, without the smoothing.
+     * @brief Latest scale-corrected speed in m/s, without this filter's window.
      *
-     * Use where a peak matters -- a session or lap maximum -- so that the
-     * correction applies without the smoothing flattening the peak.
+     * The value to record per tick and to use where a peak matters -- a session
+     * or lap maximum. It is still the receiver's own 10 s average.
      */
     float getInstantSpeed() const
     {
