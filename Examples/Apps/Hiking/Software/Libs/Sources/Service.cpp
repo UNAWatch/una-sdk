@@ -613,8 +613,8 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.latitude  = mGps.latitude;
     fitRecord.longitude = mGps.longitude;
 
-    // The corrected speed of this tick, not the display mean: it lines up with
-    // the heart rate and cadence in the same record and with max_speed.
+    // The corrected speed of this tick rather than the display window, so the
+    // records agree with max_speed. It is still the receiver's 10 s average.
     fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.hasCurrentSample());
     fitRecord.speed = mSpeedFilter.getInstantSpeed();
 

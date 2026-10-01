@@ -340,7 +340,7 @@ TEST(GpsSpeedFilter, ChordAveragingBeatsPerSecondAgainstPositionNoise)
 TEST(GpsSpeedFilter, DefaultTemplateArgumentsAreTheShippedConfiguration)
 {
     SDK::Metric::GpsSpeedFilter<> f;
-    EXPECT_EQ(8u,   f.getSmoothTicks());
+    EXPECT_EQ(2u,   f.getSmoothTicks());
     EXPECT_EQ(180u, f.getScaleTauTicks());
     EXPECT_EQ(2u,   f.getChordTicks());
     ASSERT_TRUE(f.init(kMinValid, kMaxValid));
@@ -460,5 +460,27 @@ TEST(GpsSpeedFilter, AShortChordKeepsTheScaleOnACurve)
 
     EXPECT_NEAR(1.0f, k2, 0.01f);
     EXPECT_LT(k5, 0.97f);
+}
+
+TEST(GpsSpeedFilter, DefaultWindowBridgesATickWithoutASample)
+{
+    // The 1 Hz speed and the track tick are not phase-locked, so a tick can
+    // arrive with no new sample. The shipped window must carry the readout
+    // across it rather than blank the display for a second.
+    SDK::Metric::GpsSpeedFilter<> f;
+    ASSERT_TRUE(f.init(kMinValid, kMaxValid));
+    Track t;
+    for (int i = 0; i < 20; i++) {
+        t.advance(3.0f);
+        f.tick(3.0f, true, t.lat(), t.lon(), true);
+    }
+    const float before = f.getSpeed();
+
+    t.advance(3.0f);
+    f.tick(0.0f, false, t.lat(), t.lon(), true);   // this tick brought no speed
+
+    EXPECT_FALSE(f.hasCurrentSample());
+    EXPECT_TRUE(f.isValid());
+    EXPECT_NEAR(before, f.getSpeed(), 0.01f);
 }
 

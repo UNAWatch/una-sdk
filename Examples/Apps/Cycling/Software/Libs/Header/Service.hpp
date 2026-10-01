@@ -37,12 +37,12 @@ private:
     static constexpr uint32_t skMapMaxPoints         = 70;
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
 
-    /// Geometry of the live-speed filter, in 1 Hz track ticks. The Doppler
-    /// smoothing is short because it no longer carries the accuracy: the scale
-    /// correction does, so the window is free to be chosen for responsiveness.
+    /// Geometry of the live-speed filter, in 1 Hz track ticks. The receiver
+    /// already averages its speed over 10 s, so the window only bridges a tick
+    /// that brings no sample; a longer one would average twice and add lag.
     /// The position chord is 2 s, about 20 m at riding speed: a longer one cuts
     /// bends and reads the scale low.
-    static constexpr std::size_t skSpeedSmoothTicks = 5;
+    static constexpr std::size_t skSpeedSmoothTicks = 2;
     static constexpr std::size_t skSpeedScaleTau    = 180;
     static constexpr std::size_t skSpeedChordTicks  = 2;
 
