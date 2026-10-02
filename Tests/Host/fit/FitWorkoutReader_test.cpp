@@ -12,10 +12,14 @@
 
 #include "fit/FitBytes.hpp"
 
+#include "FakeFileSystem.hpp"
+#include "SDK/Fit/FitCrc.hpp"
 #include "SDK/Fit/FitWorkoutReader.hpp"
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <cstring>
 #include <memory>
 #include <string>
 
@@ -578,7 +582,289 @@ TEST(FitWorkoutReader, ReusingReaderAndProgramLeavesNothingBehind)
 
 TEST(FitWorkoutReader, ResultNamesAreSet)
 {
-    for (int r = 0; r <= static_cast<int>(Result::NestingTooDeep); ++r) {
+    for (int r = 0; r <= static_cast<int>(Result::ReadError); ++r) {
         EXPECT_STRNE(FitWorkoutReader::resultName(static_cast<Result>(r)), "?");
+    }
+}
+
+// --- Review follow-ups -------------------------------------------------------
+
+TEST(FitWorkoutReader, CharacterSplitAcrossMemoPartsIsDroppedWhenCut)
+{
+    // The description holds 511 bytes. Parts 0-1 give 510, part 2 ends with
+    // the first byte of a 2-byte character, and part 3 starts with its second
+    // byte, which no longer fits. The lead byte must not be left on its own.
+    Fixture f;
+    const auto file = Wkt().fileId().workout("x", 1)
+        .memo(26, 0, 17, 0, std::string(255, 'a'), 255)
+        .memo(26, 0, 17, 1, std::string(255, 'a'), 255)
+        .memo(26, 0, 17, 2, "\xC3", 1)
+        .memo(26, 0, 17, 3, "\xA9more")
+        .step({0, kTime, 1000})
+        .bytes();
+    ASSERT_EQ(f.read(file), Result::Ok);
+    EXPECT_EQ(std::string(f.prog->description), std::string(510, 'a'));
+}
+
+TEST(FitWorkoutReader, StepWithoutAnIndexIsRejected)
+{
+    Wkt w;
+    w.fileId().workout("x", 1);
+    w.b.def(0, 27, {{1, 1, kEnum}, {2, 4, kU32}}).data(0, {FVal::U(kTime), FVal::U(1000)});
+    Fixture f;
+    EXPECT_EQ(f.read(w.bytes()), Result::BadStepIndex);
+}
+
+TEST(FitWorkoutReader, IndexBeyondTheLimitInASmallWorkoutIsABadIndex)
+{
+    Fixture f;
+    EXPECT_EQ(f.read(Wkt().fileId().workout("x", 2).step({0, kTime, 1}).step({150, kTime, 1}).bytes()),
+              Result::BadStepIndex);
+}
+
+TEST(FitWorkoutReader, HeartRateOutsidePlausibleRangesDegrades)
+{
+    Fixture f;
+    const auto file = Wkt().fileId().workout("HR", 2)
+        .step({0, kTime, 60000, kHr, 0, 70000, 70100})  // not a heart rate
+        .step({1, kTime, 60000, kHr, 0, 101, 355})      // 1-255 bpm: the extremes
+        .bytes();
+    ASSERT_EQ(f.read(file), Result::Ok);
+    EXPECT_EQ(f.prog->steps[0].target, Target::Open);
+    EXPECT_TRUE(f.prog->steps[0].degraded);
+    EXPECT_EQ(f.prog->steps[1].hrKind, HeartRateTarget::Bpm);
+    EXPECT_EQ(f.prog->steps[1].hrLow, 1);
+    EXPECT_EQ(f.prog->steps[1].hrHigh, 255);
+}
+
+TEST(FitWorkoutReader, HugeRepeatCountIsClamped)
+{
+    Fixture f;
+    ASSERT_EQ(f.read(Wkt().fileId().workout("x", 3).step({0, kTime, 1}).repeat(1, 0, 0xFFFFFFFEu)
+                         .repeat(2, 0, SDK::Workout::kMaxRepeatCount).bytes()),
+              Result::Ok);
+    EXPECT_EQ(f.prog->steps[1].repeatCount, SDK::Workout::kMaxRepeatCount);
+    EXPECT_TRUE(f.prog->steps[1].degraded);
+    EXPECT_EQ(f.prog->steps[2].repeatCount, SDK::Workout::kMaxRepeatCount);
+    EXPECT_FALSE(f.prog->steps[2].degraded);
+}
+
+TEST(FitWorkoutReader, RepeatStartingAtARepeatIsRejected)
+{
+    // Step 2 repeats [0..1]; step 3 repeats from step 2, so [2..3] overlaps
+    // [0..2] without nesting.
+    Fixture f;
+    EXPECT_EQ(f.read(Wkt().fileId().workout("x", 4).step({0, kTime, 1}).step({1, kTime, 1})
+                         .repeat(2, 0, 2).repeat(3, 2, 2).bytes()),
+              Result::BadRepeat);
+}
+
+TEST(FitWorkoutReader, StepNameIsRead)
+{
+    Wkt w;
+    w.fileId().workout("x", 1);
+    w.b.def(0, 27, {{254, 2, kU16}, {0, 16, kStr}, {1, 1, kEnum}, {2, 4, kU32}})
+        .data(0, {FVal::U(0), FVal::T("Strides"), FVal::U(kTime), FVal::U(20000)});
+    Fixture f;
+    ASSERT_EQ(f.read(w.bytes()), Result::Ok);
+    EXPECT_STREQ(f.prog->steps[0].name, "Strides");
+}
+
+TEST(FitWorkoutReader, SignedAndFloatFieldsCountAsAbsent)
+{
+    // duration_value sent as sint32: absent, so the time step degrades to open.
+    Wkt w;
+    w.fileId().workout("x", 1);
+    w.b.def(0, 27, {{254, 2, kU16}, {1, 1, kEnum}, {2, 4, 0x85}})
+        .data(0, {FVal::U(0), FVal::U(kTime), FVal::U(60000)});
+    Fixture f;
+    ASSERT_EQ(f.read(w.bytes()), Result::Ok);
+    EXPECT_EQ(f.prog->steps[0].end, StepEnd::Open);
+    EXPECT_TRUE(f.prog->steps[0].degraded);
+}
+
+TEST(FitWorkoutReader, MemoWithoutAParentIsIgnoredForSteps)
+{
+    Wkt w;
+    w.fileId().workout("x", 1).step({0, kTime, 1, kOpenTgt, 0, kInv32, kInv32, kActive, "field"});
+    w.b.def(0, 145, {{250, 4, kU32}, {1, 2, kU16}, {3, 1, kU8}, {4, 16, kU8z}})
+        .data(0, {FVal::U(0), FVal::U(27), FVal::U(8), FVal::T("no parent")});
+    Fixture f;
+    ASSERT_EQ(f.read(w.bytes()), Result::Ok);
+    EXPECT_STREQ(f.prog->steps[0].notes, "field");
+}
+
+TEST(FitWorkoutReader, OlderMemoFieldIsAccepted)
+{
+    Wkt w;
+    w.fileId().workout("x", 1, "field text");
+    w.b.def(0, 145, {{250, 4, kU32}, {1, 2, kU16}, {2, 2, kU16}, {3, 1, kU8}, {0, 16, 0x0D}})
+        .data(0, {FVal::U(0), FVal::U(26), FVal::U(0), FVal::U(17), FVal::T("from field 0")});
+    w.step({0, kTime, 1});
+    Fixture f;
+    ASSERT_EQ(f.read(w.bytes()), Result::Ok);
+    EXPECT_STREQ(f.prog->description, "from field 0");
+}
+
+TEST(FitWorkoutReader, MemoForAStepThatNeverArrivesLeavesNothing)
+{
+    Fixture f;
+    ASSERT_EQ(f.read(Wkt().fileId().workout("x", 1).step({0, kTime, 1}).memo(27, 99, 0, 0, "ghost").bytes()),
+              Result::Ok);
+    EXPECT_STREQ(f.prog->steps[99].name, "");
+}
+
+TEST(FitWorkoutReader, HeaderLongerThanFourteenBytes)
+{
+    Fixture f;
+    ASSERT_EQ(f.read(Wkt(true, 16).fileId().workout("x", 1).step({0, kTime, 5000}).bytes()), Result::Ok);
+    EXPECT_EQ(f.prog->steps[0].durationMs, 5000u);
+}
+
+TEST(FitWorkoutReader, ProtocolThreeIsNotDecoded)
+{
+    auto file = easyRun();
+    file[1] = 0x30;
+    file[12] = file[13] = 0;  // header CRC now stale; zero means "not given"
+    Fixture f;
+    EXPECT_EQ(f.read(file), Result::NotFit);
+}
+
+TEST(FitWorkoutReader, RecordStraddlingTheDataEndIsMalformed)
+{
+    // Claim one byte less data than there is: the last record crosses the end.
+    auto file = easyRun();
+    const uint32_t size = file[4] | (file[5] << 8) | (file[6] << 16) | (uint32_t(file[7]) << 24);
+    const uint32_t less = size - 1;
+    for (int i = 0; i < 4; ++i) file[4 + i] = static_cast<uint8_t>(less >> (8 * i));
+    file[12] = file[13] = 0;
+    Fixture f;
+    EXPECT_EQ(f.read(file), Result::Malformed);
+}
+
+TEST(FitWorkoutReader, HugeDataSizeIsNotFit)
+{
+    auto file = easyRun();
+    file[4] = file[5] = file[6] = 0xFF;
+    file[7] = 0xFF;
+    file[12] = file[13] = 0;
+    Fixture f;
+    EXPECT_EQ(f.read(file), Result::NotFit);
+}
+
+TEST(FitWorkoutReader, BytesAfterTheFileCrcAreIgnored)
+{
+    auto file = easyRun();
+    file.insert(file.end(), {1, 2, 3, 4, 5});
+    Fixture f;
+    EXPECT_EQ(f.read(file), Result::Ok);
+}
+
+TEST(FitWorkoutReader, ReadsFromAFile)
+{
+    SDK::Test::FakeFileSystem fs;
+    const auto bytes = easyRun();
+    fs.seedFile("w.fit", std::string(bytes.begin(), bytes.end()));
+    Fixture f;
+    auto file = fs.file("w.fit");
+    ASSERT_EQ(f.reader.read(*file, *f.prog), Result::Ok);
+    EXPECT_EQ(f.prog->steps[0].distanceCm, 650000u);
+    EXPECT_FALSE(file->isOpen());
+
+    auto missing = fs.file("none.fit");
+    EXPECT_EQ(f.reader.read(*missing, *f.prog), Result::ReadError);
+}
+
+namespace {
+// Fails after handing out @p goodBytes bytes.
+class FailingSource : public SDK::Fit::IByteSource {
+public:
+    FailingSource(const std::vector<uint8_t>& d, size_t goodBytes) : mD(d), mGood(goodBytes) {}
+    size_t read(uint8_t* dst, size_t n) override
+    {
+        if (mPos >= mGood) { mFailed = true; return 0; }
+        const size_t k = std::min(n, mGood - mPos);
+        std::memcpy(dst, mD.data() + mPos, k);
+        mPos += k;
+        return k;
+    }
+    bool failed() const override { return mFailed; }
+private:
+    const std::vector<uint8_t>& mD;
+    size_t mGood, mPos = 0;
+    bool   mFailed = false;
+};
+}  // namespace
+
+TEST(FitWorkoutReader, AReadErrorIsReportedAsSuch)
+{
+    const auto file = easyRun();
+    FailingSource src(file, file.size() / 2);
+    FitWorkoutReader reader;
+    auto prog = std::make_unique<Program>();
+    EXPECT_EQ(reader.read(src, *prog), Result::ReadError);
+}
+
+TEST(FitWorkoutReader, MutatedFilesNeverBreakTheProgram)
+{
+    // Seeded mutation smoke test: damaged input may be rejected, but it must
+    // never leave a Program that breaks its own invariants. Most mutations
+    // re-fix the CRCs so they reach the record decoder.
+    const std::vector<std::vector<uint8_t>> seeds = {
+        easyRun(),
+        Wkt().fileId().workout("400s", 8, "desc")
+            .step({0, kOpenDur, kInv32, kOpenTgt, 0, kInv32, kInv32, kWarmup, "wu"})
+            .step({1, kTime, 90000})
+            .step({2, kDistance, 40000, kSpeed, 0, 4082, 4444})
+            .memo(27, 2, 8, 0, "400m at pace")
+            .step({3, kTime, 60000})
+            .repeat(4, 2, 5)
+            .step({5, kTime, 60000})
+            .repeat(6, 2, 2)
+            .step({7, kDistance, 150000, kHr, 0, 240, 255})
+            .bytes(),
+    };
+    uint32_t rng = 12345;
+    const auto next = [&rng]() { rng = rng * 1664525u + 1013904223u; return rng >> 8; };
+    Fixture f;
+    for (int iter = 0; iter < 20000; ++iter) {
+        std::vector<uint8_t> d = seeds[iter % seeds.size()];
+        const int edits = 1 + static_cast<int>(next() % 4);
+        for (int e = 0; e < edits && !d.empty(); ++e) {
+            const size_t at = next() % d.size();
+            switch (next() % 4) {
+            case 0: d[at] = static_cast<uint8_t>(next()); break;
+            case 1: d.insert(d.begin() + static_cast<long>(at), static_cast<uint8_t>(next())); break;
+            case 2: d.erase(d.begin() + static_cast<long>(at)); break;
+            case 3: d.resize(at); break;
+            }
+        }
+        if (next() % 10 < 7 && d.size() >= 16 && d[0] >= 14) {
+            // Re-fix the data size and both CRCs.
+            const uint32_t body = static_cast<uint32_t>(d.size() - d[0] - 2);
+            for (int i = 0; i < 4; ++i) d[4 + i] = static_cast<uint8_t>(body >> (8 * i));
+            const uint16_t hc = SDK::Fit::fitCrcUpdate(0, d.data(), 12);
+            d[12] = static_cast<uint8_t>(hc); d[13] = static_cast<uint8_t>(hc >> 8);
+            const uint16_t fc = SDK::Fit::fitCrcUpdate(0, d.data(), d.size() - 2);
+            d[d.size() - 2] = static_cast<uint8_t>(fc); d[d.size() - 1] = static_cast<uint8_t>(fc >> 8);
+        }
+        if (f.read(d) != Result::Ok) {
+            continue;
+        }
+        const Program& p = *f.prog;
+        ASSERT_GT(p.stepCount, 0);
+        ASSERT_LE(p.stepCount, SDK::Workout::kMaxSteps);
+        ASSERT_EQ(p.name[sizeof(p.name) - 1], '\0');
+        ASSERT_EQ(p.description[sizeof(p.description) - 1], '\0');
+        for (uint16_t i = 0; i < p.stepCount; ++i) {
+            const auto& s = p.steps[i];
+            ASSERT_EQ(s.notes[sizeof(s.notes) - 1], '\0');
+            ASSERT_EQ(s.name[sizeof(s.name) - 1], '\0');
+            if (s.end == StepEnd::Repeat) {
+                ASSERT_LT(s.repeatFrom, i);
+                ASSERT_GE(s.repeatCount, 1u);
+                ASSERT_LE(s.repeatCount, SDK::Workout::kMaxRepeatCount);
+            }
+        }
     }
 }

@@ -30,6 +30,7 @@ size_t FileByteSource::read(uint8_t* dst, size_t n)
 {
     size_t br = 0;
     if (!mFile.read(reinterpret_cast<char*>(dst), n, br)) {
+        mFailed = true;
         return 0;
     }
     return br;
@@ -80,7 +81,8 @@ int8_t slotFor(uint16_t global, uint8_t field)
         if (field == field::MemoGlob::MesgNum.fieldDefNum)     return MemoSlot::Mesg;
         if (field == field::MemoGlob::ParentIndex.fieldDefNum) return MemoSlot::Parent;
         if (field == field::MemoGlob::FieldNum.fieldDefNum)    return MemoSlot::Field;
-        if (field == field::MemoGlob::kDataNum)                return kString;
+        if (field == field::MemoGlob::kDataNum ||
+            field == field::MemoGlob::kMemoNum)                return kString;
         return kNotRead;
     default:
         return kNotRead;
@@ -99,13 +101,22 @@ uint8_t baseSize(uint8_t id)
     }
 }
 
+// True for the base types a numeric field may use: enum, uint8/16/32 and
+// their z forms.
+bool isUnsigned(uint8_t baseType)
+{
+    switch (baseType & 0x1F) {
+    case 0: case 2: case 4: case 6: case 10: case 11: case 12: return true;
+    default:                                                   return false;
+    }
+}
+
 // Decode a 1-, 2- or 4-byte unsigned value. False if the field holds its
-// type's invalid value, or is not a single value of a supported size.
+// type's invalid value, is not an unsigned type, or is not a single value.
 bool decodeUnsigned(const uint8_t* p, uint8_t size, uint8_t baseType, bool bigEndian,
                     uint32_t& out)
 {
-    const uint8_t es = baseSize(baseType);
-    if (es == 0 || es != size || size > 4) {
+    if (!isUnsigned(baseType) || baseSize(baseType) != size) {
         return false;
     }
     uint32_t v = 0;
@@ -133,23 +144,38 @@ size_t textLen(const uint8_t* p, size_t n)
     return k;
 }
 
-// Append @p n bytes to the NUL-terminated text in @p dst (capacity @p cap),
-// truncating on a UTF-8 boundary. Returns the new length.
+// Length of @p s[0, len) without a trailing UTF-8 character that is not
+// complete. The cut may fall in text appended earlier, when a character was
+// split across two memo parts.
+size_t dropIncompleteTail(const char* s, size_t len)
+{
+    size_t lead = len;
+    while (lead > 0 && (static_cast<uint8_t>(s[lead - 1]) & 0xC0) == 0x80) {
+        --lead;
+    }
+    if (lead == 0) {
+        return len;  // only continuation bytes: not UTF-8 we can repair
+    }
+    const uint8_t b    = static_cast<uint8_t>(s[lead - 1]);
+    const size_t  need = b >= 0xF0 ? 4 : b >= 0xE0 ? 3 : b >= 0xC0 ? 2 : 1;
+    return (len - (lead - 1) < need) ? lead - 1 : len;
+}
+
+// Append @p n bytes to the NUL-terminated text in @p dst (capacity @p cap).
+// When the text does not fit it is cut, and a character the cut would split
+// is dropped whole. Returns the new length.
 size_t appendText(char* dst, size_t cap, size_t len, const uint8_t* src, size_t n)
 {
-    if (cap == 0 || len + 1 >= cap) {
-        return len;
+    if (cap == 0) {
+        return 0;
     }
-    const size_t room = cap - 1 - len;
-    size_t k = n < room ? n : room;
-    if (k < n) {
-        // Truncating: don't stop inside a multi-byte UTF-8 character.
-        while (k > 0 && (src[k] & 0xC0) == 0x80) {
-            --k;
-        }
-    }
+    const size_t room = len + 1 < cap ? cap - 1 - len : 0;
+    const size_t k    = n < room ? n : room;
     std::memcpy(dst + len, src, k);
     len += k;
+    if (k < n) {
+        len = dropIncompleteTail(dst, len);
+    }
     dst[len] = '\0';
     return len;
 }
@@ -216,7 +242,7 @@ bool FitWorkoutReader::skipBytes(size_t n)
 FitWorkoutReader::Result FitWorkoutReader::read(SDK::Interface::IFile& file, Program& out)
 {
     if (!file.open(false, false)) {
-        return Result::Truncated;
+        return Result::ReadError;
     }
     FileByteSource src(file);
     const Result r = read(src, out);
@@ -238,7 +264,7 @@ FitWorkoutReader::Result FitWorkoutReader::read(IByteSource& src, Program& out)
     mNumValidStepsSet = false;
     mNumValidSteps = 0;
     mArrived = 0;
-    mTooMany = mDuplicate = false;
+    mTooMany = mDuplicate = mMissingIndex = false;
     std::memset(mSeen, 0, sizeof(mSeen));
     mWktNamePart = mWktDescPart = 0;
     std::memset(mStepNotesPart, 0, sizeof(mStepNotesPart));
@@ -246,8 +272,12 @@ FitWorkoutReader::Result FitWorkoutReader::read(IByteSource& src, Program& out)
     out = Program{};
 
     const Result r = decode(out);
+    const bool readFailed = mSrc->failed();
     mSrc = nullptr;
-    return r == Result::Ok ? validate(out) : r;
+    if (r != Result::Ok) {
+        return readFailed ? Result::ReadError : r;
+    }
+    return validate(out);
 }
 
 FitWorkoutReader::Result FitWorkoutReader::decode(Program& out)
@@ -265,6 +295,8 @@ FitWorkoutReader::Result FitWorkoutReader::decode(Program& out)
     if (!getBytes(hdr + 1, (headerSize < 14 ? headerSize : 14) - 1)) {
         return Result::NotFit;
     }
+    // A protocol major version above 2 may change the record layout, so it
+    // is not decoded.
     if (std::memcmp(hdr + 8, ".FIT", 4) != 0 || (hdr[1] >> 4) > 2) {
         return Result::NotFit;
     }
@@ -280,6 +312,10 @@ FitWorkoutReader::Result FitWorkoutReader::decode(Program& out)
     const uint32_t dataSize = static_cast<uint32_t>(hdr[4]) | (static_cast<uint32_t>(hdr[5]) << 8) |
                               (static_cast<uint32_t>(hdr[6]) << 16) |
                               (static_cast<uint32_t>(hdr[7]) << 24);
+    if (dataSize > UINT32_MAX - headerSize) {
+        return Result::NotFit;
+    }
+    // A data size of 0 is taken literally (no records), never as "unknown".
     const uint32_t dataEnd = headerSize + dataSize;
 
     while (mConsumed < dataEnd) {
@@ -399,8 +435,12 @@ bool FitWorkoutReader::readData(uint8_t localType, Program& out)
             }
             break;
         case mesgNum(MesgNum::MemoGlob):
-            std::memcpy(mMsg.memo, mScratch, n);
-            mMsg.memoLen = static_cast<uint16_t>(n);
+            // The data field wins over the older memo field, in either order.
+            if (it.fieldNum == field::MemoGlob::kDataNum || !mMsg.memoFromData) {
+                std::memcpy(mMsg.memo, mScratch, n);
+                mMsg.memoLen      = static_cast<uint16_t>(n);
+                mMsg.memoFromData = it.fieldNum == field::MemoGlob::kDataNum;
+            }
             break;
         default:
             break;
@@ -438,11 +478,14 @@ void FitWorkoutReader::finishMessage(uint16_t global, Program& out)
         break;
 
     case mesgNum(MesgNum::WorkoutStep): {
-        uint32_t index = mArrived;
-        if (has(StepSlot::Index)) {
-            index = mMsg.value[StepSlot::Index];
-        }
         ++mArrived;
+        // Repeats name their target step by message_index, so a step
+        // without one cannot be placed.
+        if (!has(StepSlot::Index)) {
+            mMissingIndex = true;
+            break;
+        }
+        const uint32_t index = mMsg.value[StepSlot::Index];
         if (index >= SDK::Workout::kMaxSteps) {
             mTooMany = true;
             break;
@@ -482,24 +525,24 @@ void FitWorkoutReader::finishMessage(uint16_t global, Program& out)
 
 void FitWorkoutReader::applyMemo(Program& out)
 {
-    const uint32_t part   = mMsg.value[MemoSlot::Part];
-    const uint16_t mesg   = static_cast<uint16_t>(mMsg.value[MemoSlot::Mesg]);
-    const uint16_t parent = (mMsg.present >> MemoSlot::Parent) & 1u
-                                ? static_cast<uint16_t>(mMsg.value[MemoSlot::Parent])
-                                : 0;
-    const uint8_t  fld    = static_cast<uint8_t>(mMsg.value[MemoSlot::Field]);
+    const uint32_t part      = mMsg.value[MemoSlot::Part];
+    const uint16_t mesg      = static_cast<uint16_t>(mMsg.value[MemoSlot::Mesg]);
+    const bool     hasParent = (mMsg.present >> MemoSlot::Parent) & 1u;
+    const uint16_t parent    = hasParent ? static_cast<uint16_t>(mMsg.value[MemoSlot::Parent]) : 0;
+    const uint8_t  fld       = static_cast<uint8_t>(mMsg.value[MemoSlot::Field]);
 
-    // Where the text goes, and its part counter.
-    char*  dst = nullptr;
-    size_t cap = 0;
-    uint32_t next = 0;
-    uint32_t* wktCounter = nullptr;
+    // Where the text goes, and its part counter. A workout file has one
+    // workout, so its memos need no parent; a step's memo must name its step.
+    char*     dst         = nullptr;
+    size_t    cap         = 0;
+    uint32_t* wktCounter  = nullptr;
     uint8_t*  stepCounter = nullptr;
     if (mesg == mesgNum(MesgNum::Workout) && fld == field::Workout::kWktNameNum) {
         dst = out.name; cap = sizeof(out.name); wktCounter = &mWktNamePart;
     } else if (mesg == mesgNum(MesgNum::Workout) && fld == field::Workout::kWktDescriptionNum) {
         dst = out.description; cap = sizeof(out.description); wktCounter = &mWktDescPart;
-    } else if (mesg == mesgNum(MesgNum::WorkoutStep) && parent < SDK::Workout::kMaxSteps) {
+    } else if (mesg == mesgNum(MesgNum::WorkoutStep) && hasParent &&
+               parent < SDK::Workout::kMaxSteps) {
         if (fld == field::WorkoutStep::kNotesNum) {
             dst = out.steps[parent].notes; cap = sizeof(out.steps[parent].notes);
             stepCounter = &mStepNotesPart[parent];
@@ -511,7 +554,7 @@ void FitWorkoutReader::applyMemo(Program& out)
     if (dst == nullptr) {
         return;
     }
-    next = wktCounter ? *wktCounter : *stepCounter;
+    const uint32_t next = wktCounter ? *wktCounter : *stepCounter;
 
     if (part == 0) {
         // The text starts again from its first part, replacing the field's
@@ -539,13 +582,18 @@ FitWorkoutReader::Result FitWorkoutReader::validate(Program& out)
     if (mFileType != static_cast<uint8_t>(File::Workout)) {
         return Result::NotWorkout;
     }
-    if (mTooMany || (mNumValidStepsSet && mNumValidSteps > kMaxSteps)) {
+    if (mNumValidStepsSet && mNumValidSteps > kMaxSteps) {
         return Result::TooManySteps;
+    }
+    if (mTooMany) {
+        // An index past kMaxSteps: too many steps if the workout says it has
+        // that many (or doesn't say), otherwise just a bad index.
+        return mNumValidStepsSet ? Result::BadStepIndex : Result::TooManySteps;
     }
     if (mArrived == 0) {
         return Result::NoSteps;
     }
-    if (mDuplicate) {
+    if (mDuplicate || mMissingIndex) {
         return Result::BadStepIndex;
     }
     // Every index 0..count-1 present exactly once, and count matching the
@@ -560,6 +608,11 @@ FitWorkoutReader::Result FitWorkoutReader::validate(Program& out)
         }
     }
     out.stepCount = count;
+    // A memo can name a step the file never sends; leave nothing beyond the
+    // last step.
+    for (uint16_t i = count; i < kMaxSteps; ++i) {
+        out.steps[i] = Step{};
+    }
 
     // Interpret each step.
     for (uint16_t i = 0; i < count; ++i) {
@@ -588,7 +641,8 @@ FitWorkoutReader::Result FitWorkoutReader::validate(Program& out)
             s.repeatFrom = static_cast<uint16_t>(r.durationValue);
             if (dt == static_cast<uint8_t>(WktStepDuration::RepeatUntilStepsComplete) &&
                 r.targetValue != kInvalid32 && r.targetValue > 0) {
-                s.repeatCount = r.targetValue;
+                s.repeatCount = r.targetValue <= kMaxRepeatCount ? r.targetValue : kMaxRepeatCount;
+                s.degraded    = r.targetValue > kMaxRepeatCount;
             } else {
                 s.repeatCount = 1;
                 s.degraded    = true;
@@ -628,7 +682,11 @@ FitWorkoutReader::Result FitWorkoutReader::validate(Program& out)
             s.hrZone = static_cast<uint8_t>(r.targetValue);
         } else if (tt == static_cast<uint8_t>(WktStepTarget::HeartRate) && custom && haveLow &&
                    haveHigh && r.customLow > 0 && r.customHigh > 0 &&
-                   ((r.customLow <= 100) == (r.customHigh <= 100))) {
+                   // 1-100 is a percentage; 101-355 is 1-255 bpm. Both bounds
+                   // must be the same kind.
+                   ((r.customLow <= 100 && r.customHigh <= 100) ||
+                    (r.customLow > 100 && r.customHigh > 100 &&
+                     r.customLow <= 355 && r.customHigh <= 355))) {
             const bool     pct = r.customLow <= 100;
             const uint32_t lo  = pct ? r.customLow : r.customLow - 100;
             const uint32_t hi  = pct ? r.customHigh : r.customHigh - 100;
@@ -694,6 +752,7 @@ const char* FitWorkoutReader::resultName(Result r)
     case Result::BadStepIndex:   return "bad step index";
     case Result::BadRepeat:      return "bad repeat";
     case Result::NestingTooDeep: return "repeats nested too deep";
+    case Result::ReadError:      return "read error";
     }
     return "?";
 }

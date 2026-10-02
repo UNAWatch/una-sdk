@@ -26,6 +26,7 @@ namespace SDK::Workout {
 
 constexpr uint16_t kMaxSteps          = 100;  ///< Steps per workout, repeat steps included.
 constexpr uint8_t  kMaxRepeatDepth    = 4;    ///< Repeat blocks nested inside each other.
+constexpr uint32_t kMaxRepeatCount    = 99;   ///< Larger counts are clamped and marked degraded.
 constexpr size_t   kNameBytes         = 64;   ///< Workout name, NUL included.
 constexpr size_t   kDescriptionBytes  = 512;  ///< Workout description, NUL included.
 constexpr size_t   kStepNotesBytes    = 64;   ///< Step notes, NUL included.
@@ -62,27 +63,27 @@ enum class Intensity : uint8_t {
 };
 
 struct Step {
-    StepEnd   end       = StepEnd::Open;
-    Target    target    = Target::Open;
-    Intensity intensity = Intensity::Active;
+    // Members are ordered by size to keep the struct free of padding.
+    uint32_t durationMs    = 0;  ///< StepEnd::Time.
+    uint32_t distanceCm    = 0;  ///< StepEnd::Distance.
+    uint32_t repeatCount   = 0;  ///< StepEnd::Repeat: times the block runs in all, 1 to kMaxRepeatCount.
+    uint32_t speedLowMmps  = 0;  ///< Target::Speed, mm/s.
+    uint32_t speedHighMmps = 0;  ///< Target::Speed, mm/s.
+    uint16_t repeatFrom    = 0;  ///< StepEnd::Repeat: index of the first step of the block.
+    uint16_t hrLow         = 0;  ///< Target::HeartRate: bpm or percent, by hrKind.
+    uint16_t hrHigh        = 0;  ///< Target::HeartRate: bpm or percent, by hrKind.
+
+    StepEnd         end       = StepEnd::Open;
+    Target          target    = Target::Open;
+    Intensity       intensity = Intensity::Active;
+    HeartRateTarget hrKind    = HeartRateTarget::Zone;
+    uint8_t         hrZone    = 0;  ///< HeartRateTarget::Zone, 1-5.
 
     /// True when the file asked for something the watch cannot do and the
     /// step was simplified: an unsupported target became Open, an
-    /// unsupported end became Open, or an unsupported repeat runs its body
-    /// once.
+    /// unsupported end became Open, an unsupported repeat runs its body
+    /// once, or a repeat count was clamped.
     bool degraded = false;
-
-    uint32_t durationMs  = 0;  ///< StepEnd::Time.
-    uint32_t distanceCm  = 0;  ///< StepEnd::Distance.
-    uint16_t repeatFrom  = 0;  ///< StepEnd::Repeat: index of the first step of the block.
-    uint32_t repeatCount = 0;  ///< StepEnd::Repeat: times the block runs in all, at least 1.
-
-    uint32_t        speedLowMmps  = 0;  ///< Target::Speed, mm/s.
-    uint32_t        speedHighMmps = 0;  ///< Target::Speed, mm/s.
-    HeartRateTarget hrKind        = HeartRateTarget::Zone;
-    uint8_t         hrZone        = 0;  ///< HeartRateTarget::Zone, 1-5.
-    uint16_t        hrLow         = 0;  ///< bpm or percent, by hrKind.
-    uint16_t        hrHigh        = 0;  ///< bpm or percent, by hrKind.
 
     char notes[kStepNotesBytes] = {};  ///< UTF-8, may be empty.
     char name[kStepNameBytes]   = {};  ///< UTF-8, may be empty.
@@ -90,16 +91,18 @@ struct Step {
     /// Values exactly as read from the file, for writing the workout back
     /// out. A field the file left out holds its FIT invalid value.
     struct Raw {
-        uint8_t  durationType  = 0xFF;
         uint32_t durationValue = 0xFFFFFFFFu;
-        uint8_t  targetType    = 0xFF;
         uint32_t targetValue   = 0xFFFFFFFFu;
         uint32_t customLow     = 0xFFFFFFFFu;
         uint32_t customHigh    = 0xFFFFFFFFu;
+        uint8_t  durationType  = 0xFF;
+        uint8_t  targetType    = 0xFF;
         uint8_t  intensity     = 0xFF;
     } raw;
 };
 
+/// About 15 KB, nearly all of it the step notes and names. Keep one
+/// long-lived instance, like the reader, never a local.
 struct Program {
     char     name[kNameBytes]               = {};  ///< UTF-8, may be empty.
     char     description[kDescriptionBytes] = {};  ///< UTF-8, may be empty.

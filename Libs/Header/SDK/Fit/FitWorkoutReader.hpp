@@ -14,13 +14,19 @@
  *     target type and value, custom target low and high, intensity, notes.
  *   - memo_glob: long text split into parts. A memo for a field replaces the
  *     field's own, possibly truncated, value. Each text's parts must arrive
- *     in order; parts of different texts may interleave.
+ *     in order; parts of different texts may interleave. A step's memo must
+ *     name its step (parent_index).
  * Every other message and field, and all developer data, is skipped by size.
+ * Numeric fields are read only from unsigned base types (enum, uint8/16/32
+ * and their z forms); a value in any other type counts as absent. Only the
+ * first FIT file in the data is read: anything after its CRC is ignored.
+ * Protocol versions above 2.x are rejected as NotFit.
  *
  * What it checks. A file fails, and the Program must not be used, when:
  *   - it is not a FIT file, or its header or file CRC is wrong;
  *   - it is not a workout file, or has no steps;
- *   - a step's message_index repeats or is outside [0, num_valid_steps - 1];
+ *   - a step has no message_index, or one that repeats or is outside
+ *     [0, num_valid_steps - 1];
  *   - it has more steps than SDK::Workout::kMaxSteps;
  *   - a repeat does not point to an earlier step, two repeat blocks overlap
  *     without one containing the other, or blocks nest deeper than
@@ -31,7 +37,9 @@
  *   - an unsupported target (cadence, power, a speed zone, ...) becomes Open;
  *   - an unsupported end (calories, heart rate, power, ...) becomes Open;
  *   - an unsupported repeat (until time, distance, ...) runs its block once;
- *   - a repeat count of 0 runs its block once.
+ *   - a repeat count of 0 runs its block once;
+ *   - a repeat count above SDK::Workout::kMaxRepeatCount is clamped to it;
+ *   - a heart-rate range outside 1-100 % or 1-255 bpm becomes Open.
  *
  * Units follow the FIT profile: durations in ms, distances in cm, speeds
  * in mm/s. A heart-rate custom value of 100 or less is a percentage of
@@ -57,6 +65,9 @@ public:
     /// end of the data or on an error.
     virtual size_t read(uint8_t* dst, size_t n) = 0;
 
+    /// True once a read has failed, as opposed to reaching the end.
+    virtual bool failed() const { return false; }
+
 protected:
     ~IByteSource() = default;
 };
@@ -79,9 +90,11 @@ class FileByteSource : public IByteSource {
 public:
     explicit FileByteSource(SDK::Interface::IFile& file) : mFile(file) {}
     size_t read(uint8_t* dst, size_t n) override;
+    bool   failed() const override { return mFailed; }
 
 private:
     SDK::Interface::IFile& mFile;
+    bool                   mFailed = false;
 };
 
 /// Holds about 3 KB of working state (record definitions and buffers), so
@@ -102,6 +115,7 @@ public:
         BadStepIndex,    ///< A message_index repeats, is missing or is out of range.
         BadRepeat,       ///< A repeat points forwards or at itself, or blocks overlap.
         NestingTooDeep,  ///< More than SDK::Workout::kMaxRepeatDepth nested blocks.
+        ReadError,       ///< The file could not be opened, or a read failed.
     };
 
     /// Decode the whole of @p src into @p out. @p out is overwritten; on any
@@ -145,6 +159,7 @@ private:
         char     name[SDK::Workout::kStepNameBytes];
         uint8_t  memo[256];
         uint16_t memoLen;
+        bool     memoFromData;  ///< memo holds the data field, not the older memo field.
     };
 
     // Buffered input with a running CRC.
@@ -174,7 +189,7 @@ private:
     bool     mNumValidStepsSet = false;
     uint16_t mNumValidSteps = 0;
     uint16_t mArrived = 0;        ///< workout_step messages seen.
-    bool     mTooMany = false, mDuplicate = false;
+    bool     mTooMany = false, mDuplicate = false, mMissingIndex = false;
     uint8_t  mSeen[(SDK::Workout::kMaxSteps + 7) / 8];
 
     // memo_glob progress per text: the part expected next, 0 while the text
