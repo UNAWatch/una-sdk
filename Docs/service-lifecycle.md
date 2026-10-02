@@ -5,6 +5,8 @@
 | Revision | Date of Changes | Matter of Change | Note | Editor |
 |----------|-----------------|------------------|------|--------|
 | 1.00     | 09.09.2026      | Creating: the two-process model, how a service is started, what a resident service receives, how a service must end itself, GUI focus versus the display, and the conditions that stop an app | | Ross Ryles |
+| 1.01     | 24.09.2026      | Glance selection: `APP_GLANCE_INTF` withdrawn; the glances-screen caveat applies only to images from an earlier SDK | | Denys Saienko |
+| 1.02     | 24.09.2026      | Self-exit: Stopwatch and the clockfaces leave after a startup grace when no GUI comes up; Stopwatch's resident branch is rarely taken, since its GUI offers exit only with the clock stopped | | Denys Saienko |
 
 ## 1. Overview
 
@@ -150,9 +152,8 @@ glance that deliberately keeps a subscription running is a legitimate choice, bu
 nothing else will ask it to stop.
 
 Set `APP_TYPE Glance` for an app whose service should be started for the glances screen.
-Do not rely on `APP_GLANCE_INTF` alone to achieve it, and do not assume that an app of
-another type will be left alone by the glances screen on every kernel version — see
-section 10.
+An app of another type is left alone there, unless its image was packed by an earlier SDK
+and runs on kernel 1.4.0 or earlier — see section 10.
 
 ## 4. What a resident service gets
 
@@ -279,8 +280,8 @@ The service starts *before* the GUI on every normal launch, so "no GUI has start
 briefly true every single time. An unguarded `if (!mGuiStarted) return;` exits during launch
 and the app appears to fail to open. Every example that exits on its own therefore uses a
 startup grace — the activity examples with
-[`SDK::Timer`](../Libs/Header/SDK/Timer/Timer.hpp) as shown in section 4.2, Alarm and Timer
-with plain `getTimeMs()` arithmetic. Either is fine.
+[`SDK::Timer`](../Libs/Header/SDK/Timer/Timer.hpp) as shown in section 4.2, Alarm, Timer,
+Stopwatch and the clockfaces with plain `getTimeMs()` arithmetic. Either is fine.
 
 Three conditions, all load-bearing: the GUI is not up, the launch window has passed, and your
 own work is finished. Drop any one and you get either a service that exits mid-launch or one
@@ -301,8 +302,9 @@ not receive `COMMAND_APP_STOP` and its `onStop()` does not run, so anything it w
 the way out is simply lost. Every example checks that the GUI is gone before releasing
 itself.
 
-That is why the only sound places for a service's exit test are the
-`COMMAND_APP_NOTIF_GUI_STOP` branch and the timeout branch.
+That is why a service's exit test belongs where the GUI is known to be gone: the
+`COMMAND_APP_NOTIF_GUI_STOP` branch, or a check guarded on no GUI having started, as the
+startup-grace exits in section 5.4 are.
 
 ### 5.4 The patterns in the examples
 
@@ -312,18 +314,22 @@ That is why the only sound places for a service's exit test are the
 | [Timer](Examples/Timer-Architecture.md) | bounded | after a startup grace, idle and the GUI closed |
 | Activity apps ([Running](Examples/Running-Architecture.md), [Cycling](Examples/Cycling-Architecture.md), …) | bounded | after a 5 s grace, no GUI started |
 | [GlanceHR](Examples/GlanceHR-Architecture.md) | unbounded | `EVENT_GLANCE_STOP` |
-| [Stopwatch](Examples/Stopwatch-Architecture.md) | unbounded | `COMMAND_APP_NOTIF_GUI_STOP` **and** the clock is not running |
+| [Stopwatch](Examples/Stopwatch-Architecture.md) | bounded until the GUI runs, then unbounded | after a 5 s grace, no GUI started; or `COMMAND_APP_NOTIF_GUI_STOP` **and** the clock is not running |
+| Clockfaces ([Analogue](Examples/ClockfaceAnalogue-Architecture.md), [Peak](Examples/ClockfacePeak-Architecture.md), …) | bounded (next minute or sooner) | after a 5 s grace, no GUI started; or `COMMAND_APP_NOTIF_GUI_STOP` |
 
 Read the activity apps' condition precisely: the exit is guarded on the GUI never having
 started, **not** on whether an activity is in progress. A recording activity is safe only
 because its GUI does not exit mid-activity. If you copy that pattern into an app whose GUI
 can close while work is outstanding, add the `hasWorkOutstanding()` term yourself.
 
-Stopwatch is the one to copy for *state that outlives the screen*: while the clock is running
-it stays resident, and it hands a returning GUI its state on `COMMAND_APP_NOTIF_GUI_RUN`. It
-assumes throughout that it is launched together with its GUI, and its only self-exit is
-`COMMAND_APP_NOTIF_GUI_STOP` — so if your app can be started without a GUI, do not copy its
-unbounded wait. Take an exit condition that cannot depend on a message that may never arrive.
+Stopwatch shows the shape for *state that must outlive the screen*: a running clock keeps the
+service resident through `COMMAND_APP_NOTIF_GUI_STOP`, and a returning GUI is handed the state
+on `COMMAND_APP_NOTIF_GUI_RUN`. In Stopwatch that branch is rarely taken, since its GUI offers
+the exit control only once the clock has stopped; copy it when your GUI can close while work
+is outstanding. Its normal exit is `COMMAND_APP_NOTIF_GUI_STOP`, a message that never arrives
+if no GUI ever ran, so until the first GUI it waits with a bounded timeout and leaves once a
+startup grace has run out. Copy both halves: an unbounded wait is safe only after a GUI has
+come up to send the message it is waiting for.
 
 ## 6. GUI focus: suspend and resume
 
@@ -451,8 +457,9 @@ must continue while the app is off screen, move that work to the service now —
 **Which apps the glances screen starts.** Target `APP_TYPE Glance` for a glance and give the
 glances screen nothing to do with your app otherwise. On 1.4.0 an app of another type could
 have its service started on a visit to the glances screen depending on the flags its `.uapp`
-carried, so a non-Glance app should not assume it will be left alone there — the more reason
-for every service to have a self-exit that does not depend on a GUI arriving.
+carried. An image packed by this SDK does not carry that flag, so only images packed by an
+earlier SDK are affected. Either way, give every service a self-exit that does not depend
+on a GUI arriving.
 
 ## 11. Checklist
 

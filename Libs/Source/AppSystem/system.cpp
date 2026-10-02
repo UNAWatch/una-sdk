@@ -30,12 +30,14 @@
 #include <errno.h>
 #include <cstdint>
 #include <cstddef>
+#include <new>
 #include <atomic>
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
 #include <inttypes.h>
 
+#include "SDK/AppSystem/AlignedAlloc.hpp"
 #include "SDK/AppSystem/AtExitImpl.hpp"
 #include "SDK/Interfaces/IKernel.hpp"
 
@@ -429,7 +431,7 @@ void operator delete(void* ptr) noexcept
  * @param   size Number of bytes to allocate.
  * @return  Pointer to allocated memory; @c nullptr on failure.
  */
-void* operator new[](std::size_t size)
+void* operator new[](std::size_t size) noexcept
 {
     return operator new(size);
 }
@@ -463,4 +465,91 @@ void operator delete(void* ptr, std::size_t) noexcept
 void operator delete[](void* ptr, std::size_t) noexcept
 {
     operator delete[](ptr);
+}
+
+/**
+ * Replaces libstdc++'s nothrow forms, whose try/catch pulls the exception
+ * runtime and ARM unwinder into a -fno-exceptions app: one app's GUI blob
+ * carried 152 more symbols and 9,356 more bytes of .text with them, though an
+ * app that also links std::string keeps the runtime regardless. Re-measure by
+ * deleting these four and rebuilding an app that reaches new(std::nothrow),
+ * such as Examples/Apps/Running.
+ */
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept
+{
+    return operator new(size);
+}
+
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
+{
+    return operator new[](size);
+}
+
+void operator delete(void* ptr, const std::nothrow_t&) noexcept
+{
+    operator delete(ptr);
+}
+
+void operator delete[](void* ptr, const std::nothrow_t&) noexcept
+{
+    operator delete[](ptr);
+}
+
+/**
+ * Replaces libstdc++'s aligned forms, whose bad_alloc throw links __cxa_throw
+ * and the exception runtime: a Service doing new of an alignas(16) type measured
+ * 12,508 bytes of .text with them and 2,884 without. Re-measure by deleting
+ * these and rebuilding such a Service.
+ */
+void* operator new(std::size_t size, std::align_val_t align) noexcept
+{
+    return SDK::AppSystem::alignedAlloc(size, static_cast<std::size_t>(align),
+                                        [](std::size_t n) { return _malloc_r(nullptr, n); });
+}
+
+void* operator new[](std::size_t size, std::align_val_t align) noexcept
+{
+    return operator new(size, align);
+}
+
+void* operator new(std::size_t size, std::align_val_t align, const std::nothrow_t&) noexcept
+{
+    return operator new(size, align);
+}
+
+void* operator new[](std::size_t size, std::align_val_t align, const std::nothrow_t&) noexcept
+{
+    return operator new(size, align);
+}
+
+void operator delete(void* ptr, std::align_val_t) noexcept
+{
+    if (ptr) {
+        _free_r(nullptr, SDK::AppSystem::alignedRawPointer(ptr));
+    }
+}
+
+void operator delete[](void* ptr, std::align_val_t align) noexcept
+{
+    operator delete(ptr, align);
+}
+
+void operator delete(void* ptr, std::size_t, std::align_val_t align) noexcept
+{
+    operator delete(ptr, align);
+}
+
+void operator delete[](void* ptr, std::size_t, std::align_val_t align) noexcept
+{
+    operator delete(ptr, align);
+}
+
+void operator delete(void* ptr, std::align_val_t align, const std::nothrow_t&) noexcept
+{
+    operator delete(ptr, align);
+}
+
+void operator delete[](void* ptr, std::align_val_t align, const std::nothrow_t&) noexcept
+{
+    operator delete(ptr, align);
 }

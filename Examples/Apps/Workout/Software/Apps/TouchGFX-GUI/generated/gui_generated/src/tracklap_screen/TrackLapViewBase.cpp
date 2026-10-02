@@ -31,7 +31,7 @@ TrackLapViewBase::TrackLapViewBase()
     caloriesValue.setLinespacing(0);
     Unicode::snprintf(caloriesValueBuffer, CALORIESVALUE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_WXKL).getText());
     caloriesValue.setWildcard(caloriesValueBuffer);
-    caloriesValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_40));
+    caloriesValue.setTypedText(touchgfx::TypedText(T_TMP_SEMIBOLD_30));
     add(caloriesValue);
 
     caloriesText.setPosition(70, 137, 100, 23);

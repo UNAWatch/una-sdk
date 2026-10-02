@@ -23,10 +23,10 @@ namespace SDK::Sensor
         /** @name IMU sensors
          *  @{
          */
-        ACCELEROMETER        = 0x00000010, ///< Acceleration (3-axis).
+        ACCELEROMETER        = 0x00000010, ///< Acceleration (3-axis), m/s^2, gravity included.
         ACCELEROMETER_RAW    = 0x00000011, ///< Acceleration raw samples (implementation-defined units).
 
-        GYROSCOPE            = 0x00000020, ///< Angular rate (3-axis).
+        GYROSCOPE            = 0x00000020, ///< Angular rate (3-axis), deg/s.
         GYROSCOPE_RAW        = 0x00000021, ///< Angular rate raw samples.
 
         MAGNETIC_FIELD       = 0x00000030, ///< Magnetic field (3-axis) + MAG_CALIBRATED; corrected only when that flag is set.
@@ -115,8 +115,8 @@ namespace SDK::Sensor
         /** @name Fusion
          *  @{
          */
-        FUSION               = 0x00000130, ///< Fused IMU (accel+gyro+mag). +
-        FUSION_RAW           = 0x00000131, ///< Raw fusion inputs. +
+        FUSION               = 0x00000130, ///< Accelerometer (m/s^2, gravity included) + gyroscope (deg/s) samples.
+        FUSION_RAW           = 0x00000131, ///< Raw fusion inputs.
         /** @} */
 
         /** @name Touch

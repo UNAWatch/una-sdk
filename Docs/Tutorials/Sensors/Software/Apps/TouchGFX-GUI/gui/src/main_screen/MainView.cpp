@@ -166,7 +166,8 @@ void MainView::refreshDisplay()
                 len += snprintf(buffer + len, sizeof(buffer) - len, "Elevation: %.1f m\n", elevation);
                 break;
             case ACC:
-                len += snprintf(buffer + len, sizeof(buffer) - len, "Accelerometer:\nX: %.2f G\nY: %.2f G\nZ: %.2f G\n", accX, accY, accZ);
+                len += snprintf(buffer + len, sizeof(buffer) - len,
+                                "Accelerometer:\nX: %.2f m/s2\nY: %.2f m/s2\nZ: %.2f m/s2\n", accX, accY, accZ);
                 break;
             case STEP:
                 len += snprintf(buffer + len, sizeof(buffer) - len, "Steps: %lu\n", steps);

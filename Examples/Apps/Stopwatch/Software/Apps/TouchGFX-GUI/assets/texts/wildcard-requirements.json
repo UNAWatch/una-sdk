@@ -1,0 +1,7 @@
+{
+  "_note": "Narrowed fonts and the runtime text that reaches them. Checked by Utilities/Scripts/app_packer/validate_wildcards.py in CI. This lives beside texts.xml rather than inside it because TouchGFX Designer rewrites texts.xml from its own model and does not preserve comments.",
+  "Poppins_SemiBold_60": {
+    "why": "Filled at runtime by MainView timeMainText from TimeFormat, \"%02u:%02u\" and \"%02u:%02u:%02u\". Digits and a colon only.",
+    "rendersTextIds": []
+  }
+}

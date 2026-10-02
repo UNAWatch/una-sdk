@@ -34,13 +34,13 @@ enum class State {
  * The GUI converts to display units as needed.
  *
  * @note This snapshot exists for the GUI only. The live speed and pace it
- *       carries are smoothed for readability; the raw samples still back the
- *       FIT records, session averages and maxima.
+ *       carries are corrected against the position track and smoothed. The
+ *       averages are not: they come from the distance and time totals.
  */
 struct Data {
 
     // Pace, s/m
-    float pace        = 0.0f;   ///< Live pace, smoothed over a rolling window (see SpeedSmoother)
+    float pace        = 0.0f;   ///< Live pace, corrected and smoothed (see GpsSpeedFilter)
     float lapPace     = 0.0f;
 
     // Distance, m

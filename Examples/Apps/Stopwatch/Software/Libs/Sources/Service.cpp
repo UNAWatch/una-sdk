@@ -11,6 +11,11 @@
 // still running.
 static constexpr uint32_t kWaitForever = 0xFFFFFFFF;
 
+// Grace period after launch for the GUI to come up. The service is started
+// before its GUI, so the no-GUI exit in run() must not trip during a normal
+// launch.
+static constexpr uint32_t kStartupGraceMs = 5000;
+
 Service::Service(SDK::Kernel &kernel)
     : mKernel(kernel)
     , mStopwatch()
@@ -22,9 +27,29 @@ void Service::run()
 {
     LOG_INFO("Started\n");
 
+    const uint32_t startTime = mKernel.sys.getTimeMs();
+
     while (true) {
+        uint32_t waitMs = kWaitForever;
+
+        // No GUI and nothing counting. Normally this means the GUI never came
+        // up, and then the GUI_STOP that is the usual way out will never
+        // arrive either: wait out the startup grace and leave once it has run
+        // out. Once a GUI has run, the GUI_STOP branch below exits on this
+        // state itself; should a late command stop the clock after GUI_STOP,
+        // the grace is long past and the service leaves here at once, which
+        // is the same rule.
+        if (!mGuiStarted && !mStopwatch.isRunning()) {
+            const uint32_t elapsed = mKernel.sys.getTimeMs() - startTime;
+            if (elapsed >= kStartupGraceMs) {
+                LOG_INFO("GUI never started, exiting service\n");
+                return;
+            }
+            waitMs = kStartupGraceMs - elapsed;
+        }
+
         SDK::MessageBase *msg;
-        if (!mKernel.comm.getMessage(msg, kWaitForever)) {
+        if (!mKernel.comm.getMessage(msg, waitMs)) {
             continue;
         }
 
