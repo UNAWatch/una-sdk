@@ -194,6 +194,7 @@ namespace MemoGlob {
     constexpr FitWriter::Field ParentIndex{2, BaseType::UInt16};  // message_index of the parent
     constexpr FitWriter::Field FieldNum{3, BaseType::UInt8};      // field in the parent
     constexpr uint8_t          kDataNum = 4;  // uint8z array, size set by caller
+    constexpr uint8_t          kMemoNum = 0;  // byte array; older form of kDataNum
 }
 
 namespace FieldDescription {
