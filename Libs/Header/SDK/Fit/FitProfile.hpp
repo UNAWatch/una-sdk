@@ -34,6 +34,7 @@ enum class MesgNum : uint16_t {
     Workout          = 26,
     WorkoutStep      = 27,
     Activity         = 34,
+    MemoGlob         = 145,
     FieldDescription = 206,
     DeveloperDataId  = 207,
 };
@@ -42,7 +43,7 @@ constexpr uint16_t mesgNum(MesgNum m) { return static_cast<uint16_t>(m); }
 
 // --- Enum value sets the apps set on enum fields ----------------------------
 
-enum class File : uint8_t { Activity = 4 };
+enum class File : uint8_t { Activity = 4, Workout = 5 };
 enum class Sport : uint8_t { Generic = 0, Running = 1, Cycling = 2, Training = 10,
                              Walking = 11, Hiking = 17 };
 enum class SubSport : uint8_t { Generic = 0, Treadmill = 1, Street = 2, Trail = 3,
@@ -53,7 +54,8 @@ enum class EventType : uint8_t { Start = 0, Stop = 1 };
 /// Lets a decoder tell an auto-pause stop/start from one the user asked for.
 enum class TimerTrigger : uint8_t { Manual = 0, Auto = 1, FitnessEquipment = 2 };
 enum class ActivityType : uint8_t { Manual = 0, AutoMultiSport = 1 };
-enum class Intensity : uint8_t { Active = 0, Rest = 1, Warmup = 2, Cooldown = 3, Invalid = 0xFF };
+enum class Intensity : uint8_t { Active = 0, Rest = 1, Warmup = 2, Cooldown = 3, Recovery = 4,
+                                 Interval = 5, Other = 6, Invalid = 0xFF };
 // 255 (Development) is the reserved value for apps without an allocated
 // manufacturer ID; use it in tutorial/example code. 351 is Una's ID,
 // allocated by Garmin for the FIT SDK — ship activity files with it.
@@ -62,10 +64,14 @@ enum class Manufacturer : uint16_t { Development = 255, Una = 351 };
 enum class Product : uint16_t { UnaWatch = 1 };
 // Human-readable product name written to file_id.product_name.
 constexpr char kProductName[] = "UNA Watch";
+/// How a workout step ends. 7-13 are the other repeat kinds (until time,
+/// distance, calories, heart rate or power); the rest end a step on a
+/// heart-rate, calorie or power condition.
 enum class WktStepDuration : uint8_t {
     Time = 0, Distance = 1, Open = 5, RepeatUntilStepsComplete = 6,
+    RepeatUntilTime = 7, RepeatUntilPowerGreaterThan = 13,
 };
-enum class WktStepTarget : uint8_t { Open = 2 };
+enum class WktStepTarget : uint8_t { Speed = 0, HeartRate = 1, Open = 2 };
 
 /// message_index "invalid" sentinel (uint16).
 constexpr uint16_t kMessageIndexInvalid = 0xFFFFu;
@@ -159,16 +165,35 @@ namespace Workout {
     constexpr FitWriter::Field MessageIndex{254, BaseType::UInt16};
     constexpr FitWriter::Field Sport{4, BaseType::Enum};
     constexpr FitWriter::Field NumValidSteps{6, BaseType::UInt16};
-    constexpr uint8_t          kWktNameNum = 8;  // string, size set by caller
+    constexpr FitWriter::Field SubSport{11, BaseType::Enum};
+    constexpr uint8_t          kWktNameNum        = 8;   // string, size set by caller
+    constexpr uint8_t          kWktDescriptionNum = 17;  // string, size set by caller
 }
 
 namespace WorkoutStep {
     constexpr FitWriter::Field MessageIndex{254, BaseType::UInt16};
     constexpr FitWriter::Field DurationType{1, BaseType::Enum};   // wkt_step_duration
+    // time: scale 1000, s; distance: scale 100, m; repeat: message_index
     constexpr FitWriter::Field DurationValue{2, BaseType::UInt32};
     constexpr FitWriter::Field TargetType{3, BaseType::Enum};     // wkt_step_target
+    // speed/heart rate: zone, 0 = custom; repeat: count
     constexpr FitWriter::Field TargetValue{4, BaseType::UInt32};
+    // speed: scale 1000, m/s; heart rate: <= 100 percent of max, else bpm + 100
+    constexpr FitWriter::Field CustomTargetValueLow{5, BaseType::UInt32};
+    constexpr FitWriter::Field CustomTargetValueHigh{6, BaseType::UInt32};
     constexpr FitWriter::Field Intensity{7, BaseType::Enum};
+    constexpr uint8_t          kWktStepNameNum = 0;  // string, size set by caller
+    constexpr uint8_t          kNotesNum       = 8;  // string, size set by caller
+}
+
+/// Text too long for one string field, split into parts. Each part names the
+/// message and field it belongs to; parts join in part_index order.
+namespace MemoGlob {
+    constexpr FitWriter::Field PartIndex{250, BaseType::UInt32};
+    constexpr FitWriter::Field MesgNum{1, BaseType::UInt16};      // mesg_num of the parent
+    constexpr FitWriter::Field ParentIndex{2, BaseType::UInt16};  // message_index of the parent
+    constexpr FitWriter::Field FieldNum{3, BaseType::UInt8};      // field in the parent
+    constexpr uint8_t          kDataNum = 4;  // uint8z array, size set by caller
 }
 
 namespace FieldDescription {
