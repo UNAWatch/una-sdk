@@ -66,7 +66,7 @@ void SensorListener::onSdlNewData(uint16_t                 handle,
         event->handle = handle;
         event->count  = strideCount;
         event->stride = stride;
-        memcpy((void*) event->data, (void*) dataPtr, strideCount * stride);
+        memcpy((void*) event->data, (const void*) dataPtr, strideCount * stride);
 
         if (!sendMessage(event)) {
             LOG_ERROR("Failed to send data. Handle %u. PID 0x%08X\n", handle, pid);
