@@ -114,12 +114,47 @@ public:
     /** @brief Return true if any enabled alarm or pending snooze exists. */
     bool hasActiveAlarms() const;
 
+    /// What reloadIfChanged() found on disk.
+    enum class Reload : uint8_t {
+        UNCHANGED,    ///< Same bytes as last loaded or saved.
+        RELOADED,     ///< Different and complete: the list in memory was replaced.
+        IN_PROGRESS,  ///< The list is absent but its temporary file is not: a writer is mid-rename.
+        ADOPTED,      ///< Only the temporary file existed for kAdoptTmpAfterPolls polls; renamed and loaded.
+        MISSING,      ///< Neither file exists. The list in memory is kept.
+        UNREADABLE,   ///< Present but too large or not a complete list. The list in memory is kept.
+    };
+
+    /**
+     * @brief Re-read the alarm list if another writer has replaced it since this
+     *        manager last loaded or saved it.
+     *
+     * Cheap enough to call on every wake: the file is at most a 2 KB read and a CRC.
+     * A list that does not parse completely never replaces the one in memory, because a
+     * torn write would otherwise empty it.
+     */
+    Reload reloadIfChanged();
+
+    /// CRC-32 (zlib) and size of the bytes last loaded or saved; size 0 means none yet.
+    uint32_t knownCrc() const { return mKnownCrc; }
+    size_t   knownSize() const { return mKnownSize; }
+
 private:
 
     // -- Constants ------------------------------------------------------------
 
     static constexpr char    skFilePath[]        = "alarms.json";
+    /// A phone writes the list here whole, then renames it over skFilePath.
+    static constexpr char    skTmpFilePath[]     = "alarms.json.tmp";
+    /// This app's own save goes through a different name, so the two writers' halves never mix.
+    static constexpr char    skOwnTmpFilePath[]  = "alarms.json.save";
     static constexpr char    skSnoozeFilePath[]  = "snoozes.json";
+    /// Tells a phone this build re-reads a list written from outside; an older one would
+    /// ignore it and later overwrite it. Its version is that of the contract described in
+    /// Docs/Examples/Alarm-Architecture.md, not of the app.
+    static constexpr char    skSyncMarkerPath[]  = "alarm_sync.json";
+    static constexpr char    skSyncMarker[]      = "{\"version\":1}";
+    /// Polls on which only skTmpFilePath exists before it is taken as an abandoned rename.
+    static constexpr uint8_t kAdoptTmpAfterPolls = 3;
     static constexpr uint8_t kSnoozedTimeMinutes = 5;
     /// Automatic re-rings per snooze. Matches the count the previous
     /// decrement-then-test loop actually delivered.
@@ -138,6 +173,11 @@ private:
     AlarmCallback*          mObserver = nullptr;
     std::vector<Alarm>      mAlarms{};
     char                    mBuffer[2048]{};
+    uint32_t                mKnownCrc  = 0;
+    size_t                  mKnownSize = 0;
+    /// CRC of the last unreadable list, so one torn file is reported once, not every wake.
+    uint32_t                mRejectedCrc = 0;
+    uint8_t                 mTmpOnlyPolls = 0;
 
     // -- JSON key maps (index = enum value) -----------------------------------
 
@@ -194,6 +234,12 @@ private:
 
     bool     saveToFile(const std::vector<Alarm>& alarms);
     bool     loadFromFile(std::vector<Alarm>& alarms);
+    /// Reads @p path whole into mBuffer. Returns its length, or -1 if absent, unreadable or too big.
+    int32_t  readWhole(const char* path);
+    /// Completes a rename a reset or a disconnect interrupted, if one is there to complete.
+    bool     adoptTmpIfAlone();
+    /// Creates skSyncMarkerPath unless it is already there.
+    void     writeSyncMarker();
     uint32_t createJSON(const std::vector<Alarm>& alarms, char* buff, uint32_t buffSize);
     bool     parseJSON(char* buff, uint32_t length, std::vector<Alarm>& alarms);
     void     dump(const std::vector<Alarm>& alarms);

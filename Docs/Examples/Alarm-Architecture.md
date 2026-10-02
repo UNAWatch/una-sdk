@@ -13,7 +13,7 @@ Key features include:
 - Alert effects: buzzer only, vibration only, or buzzer + vibration
 - Snooze: re-triggers after 5 minutes, up to 5 times
 - The app can be launched on-demand (user opens from menu) or automatically when an alarm fires
-- If no active alarms exist and the GUI never starts within 5 seconds, the service exits without launching the display
+- The service stays resident even with nothing armed, so a list written from a phone takes effect without the app being opened (see [Writing the list from a phone](#writing-the-list-from-a-phone))
 
 ## Architecture
 
@@ -104,6 +104,7 @@ struct Alarm {
 
 `AlarmManager` handles all alarm logic independently of the service loop. It is responsible for:
 - Loading and saving the alarm list from a JSON file (`alarms.json`)
+- Re-reading that file when another writer has replaced it (`reloadIfChanged()`)
 - Checking once per minute whether any enabled alarm is due
 - Tracking snoozed alarms and re-triggering them after a 5-minute interval
 - Notifying an observer (`AlarmCallback`) on each alarm fire and on list changes
@@ -182,6 +183,23 @@ Alarms are stored in `alarms.json` in the application's file system. The JSON sc
 
 The internal serialisation buffer is 2048 bytes. A worst-case file with 20 alarms (all using the longest field values: `false`, `23:59`, `"wednesday"`, `"beep_vibro"`) produces ~1612 bytes of compact JSON, which fits comfortably within this limit. If the file exceeds the buffer, loading fails gracefully with an error log.
 
+The live list is never truncated in place. A save writes `alarms.json.save` whole, then removes `alarms.json` and renames the new file over it, so a reset part-way through leaves either the old list or a complete new one. If `alarms.json` is missing at startup while a complete `alarms.json.save` or `alarms.json.tmp` exists, `load()` finishes the interrupted rename; this is AppConfig's recovery rule ([app-config-fields.md](../app-config-fields.md) section 6.3).
+
+### Writing the list from a phone
+
+A phone can replace the alarm list over the BLE File Transfer Service ([BLE-File-Transfer-Service.md](../BLE-File-Transfer-Service.md)) while the app is running. The service calls `reloadIfChanged()` every time it wakes: it reads the file (at most 2 KB) and compares its CRC-32 with the bytes it last loaded or saved. A different list that parses completely replaces the one in memory, drops snoozes the new list no longer has, and is sent to the GUI if one is open. With an alarm armed the service already wakes every minute; with nothing armed it wakes every 60 s (`kIdlePollMs`) for this alone. Either way a phone's list takes effect within a minute.
+
+**Recognising a build that reloads.** `load()` creates `alarm_sync.json`, holding `{"version":1}`, in the app's directory. A build without it reads the list only when its service starts, so a list written to it is ignored and later overwritten by its own next save. A phone must not write to an app whose directory has no `alarm_sync.json`. The version is that of this contract, not of the app.
+
+**Replacing the list.** In the app's directory, `/Apps/Alarm/`:
+
+1. Read `alarms.json` first. The user can edit the list on the watch, and a fired one-time alarm is switched off and saved by the watch, so the phone should merge rather than overwrite. A missing file is an empty list.
+2. Write the new list whole to `alarms.json.tmp` (`WRITE` `0x20`). It must parse completely and hold at most 20 alarms, or the service ignores it and keeps ringing the old list.
+3. Verify it, by `DIGEST` (`0x70`) or by reading it back.
+4. `DELETE` (`0x30`) `alarms.json`, then `MOVE` (`0x60`) `alarms.json.tmp` onto it. `MOVE` refuses an existing target with status `ERROR`, which is why the delete comes first.
+
+A list that does not parse never replaces the one in memory, so a write that tears leaves the old alarms ringing. If the connection drops between the delete and the move, the service finds only `alarms.json.tmp` and adopts it after three consecutive polls on which `alarms.json` is still missing; a phone mid-rename is never raced, because it finishes well within that window. A temporary file that does not parse is deleted instead.
+
 ### Service Lifecycle and App Startup
 
 The Alarm service is configured with `APP_AUTOSTART On`, which instructs the kernel to launch the service automatically at boot. This is essential for time-based alarm detection: the service must be running in the background at all times so it can check the alarm list each minute, even when the GUI is not open.
@@ -204,7 +222,7 @@ The service's `run()` method handles two startup scenarios:
 3. Kernel starts GUI; `COMMAND_APP_NOTIF_GUI_RUN` arrives → `onStartGUI()` sends `ACTIVATED_ALARM` + `ALARM_LIST` to GUI
 4. GUI navigates directly to `RingingView`
 
-**Early exit**: If `mGuiStarted` is still `false` after 5 seconds and `hasActiveAlarms()` returns `false`, the service exits without displaying anything.
+**Staying resident**: The service does not exit when nothing is armed. Nothing restarts a service but a boot, leaving USB mass storage or the user opening the app, so a service that exited on idle could not be armed from a phone. With nothing armed it waits at most `kIdlePollMs` (60 s) for a message, then looks for a new list. It still ends on `COMMAND_APP_STOP`.
 
 ### Effect Playback
 

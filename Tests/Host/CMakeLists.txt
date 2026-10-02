@@ -66,6 +66,7 @@ add_executable(una-sdk-host-tests
     utils/AlignedAlloc_test.cpp
     support/KernelTestDoubles_test.cpp
     apps/Alarm/AlarmManager_test.cpp
+    apps/Alarm/AlarmManagerReload_test.cpp
     apps/Stopwatch/Stopwatch_test.cpp
     apps/Timer/TimerManager_test.cpp
     apps/Timer/Commands_test.cpp

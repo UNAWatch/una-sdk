@@ -310,7 +310,7 @@ startup-grace exits in section 5.4 are.
 
 | Example | Wait | Exits when |
 |---|---|---|
-| [Alarm](Examples/Alarm-Architecture.md) | bounded | after a 5 s grace, no GUI started and no active alarms |
+| [Alarm](Examples/Alarm-Architecture.md) | bounded (next minute, or 60 s with nothing armed) | never on its own: it stays resident so a phone can write its list |
 | [Timer](Examples/Timer-Architecture.md) | bounded | after a startup grace, idle and the GUI closed |
 | Activity apps ([Running](Examples/Running-Architecture.md), [Cycling](Examples/Cycling-Architecture.md), …) | bounded | after a 5 s grace, no GUI started |
 | [GlanceHR](Examples/GlanceHR-Architecture.md) | unbounded | `EVENT_GLANCE_STOP` |

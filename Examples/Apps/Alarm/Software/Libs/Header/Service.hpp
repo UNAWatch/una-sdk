@@ -27,6 +27,9 @@ private:
     Alarm           mActiveAlarm;
     bool            mTimeFormat12h = false;  // cached system clock-format setting
 
+    /** @brief Pick up an alarm list written by another writer, such as a phone. */
+    void pollForExternalChange();
+
     // -- Lifecycle ------------------------------------------------------------
 
     void onStartGUI();

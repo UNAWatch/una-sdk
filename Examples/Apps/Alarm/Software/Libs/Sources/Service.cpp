@@ -11,10 +11,9 @@
 
 namespace {
 
-/// How long after startup the service waits for a GUI before deciding nobody
-/// wants it. The service is always started before its GUI, so an unguarded
-/// "no GUI" test would exit during every launch.
-constexpr uint32_t kStartupGraceMs = 5000;
+/// How often the service looks for a list a phone wrote while nothing is armed.
+/// With an alarm armed it already wakes every minute, and looks then.
+constexpr uint32_t kIdlePollMs = 60000;
 
 /// The current instant, in both forms AlarmManager needs: local wall-clock for
 /// matching an alarm's hour/minute, and the absolute UTC stamp that snooze
@@ -60,24 +59,20 @@ void Service::run()
     mAlarmManager.attachCallback(this);
     mAlarmManager.load();
 
-    uint32_t startTime = mKernel.sys.getTimeMs();
-
     while (true) {
+        pollForExternalChange();
+
         const Instant now = getNow();
         uint32_t sleepTime = mAlarmManager.execute(now.local, now.utc);
 
-        // execute() answers kNoWork when nothing is armed, which would park us
-        // on getMessage() for ever. That is what we want once the app is
-        // established, but not before the exit test below has had its say.
-        //
-        // Only kNoWork is capped. Every other value is a real deadline -- the
-        // wait until the next minute, when an alarm can become due -- and
-        // shortening it would make an armed service with no GUI loaded (this
-        // app autostarts, so that is its ordinary resident state) wake every
-        // few seconds to discover nothing, which is the cost this change is
-        // meant to remove.
-        if (!mGuiStarted && sleepTime == AlarmManager::kNoWork) {
-            sleepTime = kStartupGraceMs;
+        // execute() answers kNoWork when nothing is armed. The service stays
+        // resident anyway, because a phone can write the first alarm at any
+        // time and nothing but a boot, a USB unplug or the user opening the
+        // app would start it again; see the phone section of
+        // Docs/Examples/Alarm-Architecture.md. Every other value is a real
+        // deadline -- the wait until the next minute -- and is not shortened.
+        if (sleepTime == AlarmManager::kNoWork) {
+            sleepTime = kIdlePollMs;
         }
 
         SDK::MessageBase *msg;
@@ -139,25 +134,20 @@ void Service::run()
             // Release message after processing
             mKernel.comm.releaseMessage(msg);
         }
+    }
+}
 
-        // Release the service when nothing needs it: no GUI process loaded and
-        // nothing armed. mGuiStarted tracks whether a GUI is *loaded*, not
-        // whether it is on screen, and that is deliberate -- a service that
-        // returns from run() takes its GUI down with it, without notice, so
-        // exiting under a loaded-but-suspended GUI would close the app under
-        // the user. Navigating away therefore leaves this service resident
-        // until the GUI itself exits (it does so on its own idle timeout, which
-        // is what raises COMMAND_APP_NOTIF_GUI_STOP); the cost of that wait is
-        // bounded by execute() asking for no timed wake-ups when idle.
-        if (!mGuiStarted) {
-            if (mKernel.sys.getTimeMs() - startTime > kStartupGraceMs) {
-                if (!mAlarmManager.hasActiveAlarms()) {
-                    LOG_INFO("No active alarms and GUI not started, exiting service\n");
-                    mAlarmManager.attachCallback(nullptr);
-                    return; // Exit app
-                }
-            }
-        }
+void Service::pollForExternalChange()
+{
+    switch (mAlarmManager.reloadIfChanged()) {
+        case AlarmManager::Reload::RELOADED:
+            LOG_INFO("Alarm list replaced by another writer\n");
+            break;
+        case AlarmManager::Reload::ADOPTED:
+            LOG_INFO("Completed an interrupted replacement of the alarm list\n");
+            break;
+        default:
+            break;
     }
 }
 

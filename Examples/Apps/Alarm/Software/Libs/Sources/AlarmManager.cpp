@@ -7,6 +7,8 @@
 #include "SDK/JSON/JsonStreamReader.hpp"
 #include "SDK/JSON/JsonStreamWriter.hpp"
 
+#include "FileCrc32.hpp"
+
 #include <algorithm>
 
 
@@ -24,6 +26,12 @@ AlarmManager::~AlarmManager()
 
 void AlarmManager::load()
 {
+    writeSyncMarker();
+
+    if (adoptTmpIfAlone()) {
+        LOG_INFO("Completed an interrupted rename of %s\n", skFilePath);
+    }
+
     const bool alarmsLoaded = loadFromFile(mAlarms);
 
     LOG_DEBUG("Alarms loaded\n");
@@ -192,28 +200,38 @@ bool AlarmManager::hasActiveAlarms() const
 
 // -- Private ------------------------------------------------------------------
 
+// Never truncates the live list in place: a reset mid-write would leave a file that
+// does not parse, and an empty list exits the service with every alarm gone.
 bool AlarmManager::saveToFile(const std::vector<Alarm>& alarms)
 {
-    bool rv = false;
-    size_t bw = 0;
-
-    auto file = mKernel.fs.file(skFilePath);
-    if (!file) {
-        LOG_ERROR("Failed to create file object for %s\n", skFilePath);
+    const size_t len = createJSON(alarms, mBuffer, sizeof(mBuffer));
+    if (len == 0) {
+        LOG_ERROR("Failed to save alarms!\n");
         return false;
     }
+    const uint32_t crc = fileCrc32(mBuffer, len);
 
-    size_t len = createJSON(alarms, mBuffer, sizeof(mBuffer));
-    if (len > 0) {
-        if (file->open(true, true)) {
-            if (file->write(mBuffer, len, bw) && bw == len) {
-                rv = true;
-            }
-            file->close();
+    bool rv = false;
+    {
+        auto file = mKernel.fs.file(skOwnTmpFilePath);
+        size_t bw = 0;
+        if (file && file->open(true, true)) {
+            rv = file->write(mBuffer, len, bw) && bw == len;
+            rv = file->flush() && rv;
+            rv = file->close() && rv;
         }
     }
 
-    if (!rv) {
+    if (rv) {
+        mKernel.fs.remove(skFilePath);
+        rv = mKernel.fs.rename(skOwnTmpFilePath, skFilePath);
+    }
+
+    if (rv) {
+        mKnownCrc    = crc;
+        mKnownSize   = len;
+        mRejectedCrc = 0;
+    } else {
         LOG_ERROR("Failed to save alarms!\n");
     }
     return rv;
@@ -221,37 +239,150 @@ bool AlarmManager::saveToFile(const std::vector<Alarm>& alarms)
 
 bool AlarmManager::loadFromFile(std::vector<Alarm>& alarms)
 {
-    bool rv = false;
-    size_t br = 0;
-
-    auto file = mKernel.fs.file(skFilePath);
-    if (!file) {
-        LOG_ERROR("Failed to create file object for %s\n", skFilePath);
-        return false;
-    }
-
-    if (!file->exist()) {
+    if (!mKernel.fs.exist(skFilePath)) {
         LOG_INFO("No saved file with alarms %s\n", skFilePath);
         return false;
     }
 
-    size_t len = file->size();
-    if (len < sizeof(mBuffer)) {
-        if (file->open()) {
-            if (file->read(mBuffer, len, br) && br > 0) {
-                rv = parseJSON(mBuffer, len, alarms);
-            }
-            file->close();
-        }
-    } else {
-        LOG_ERROR("Buffer is too small. Required %u bytes\n", len);
-    }
-
-    if (!rv) {
+    const int32_t len = readWhole(skFilePath);
+    if (len < 0) {
         LOG_ERROR("Can't read alarms file or file is corrupted.\n");
+        return false;
     }
 
-    return rv;
+    const uint32_t crc = fileCrc32(mBuffer, static_cast<size_t>(len));
+    if (!parseJSON(mBuffer, static_cast<uint32_t>(len), alarms)) {
+        mRejectedCrc = crc;
+        LOG_ERROR("Can't read alarms file or file is corrupted.\n");
+        return false;
+    }
+
+    mKnownCrc    = crc;
+    mKnownSize   = static_cast<size_t>(len);
+    mRejectedCrc = 0;
+    return true;
+}
+
+int32_t AlarmManager::readWhole(const char* path)
+{
+    auto file = mKernel.fs.file(path);
+    if (!file || !file->exist()) {
+        return -1;
+    }
+
+    const size_t len = file->size();
+    if (len == 0 || len >= sizeof(mBuffer)) {
+        if (len != 0) {
+            LOG_ERROR("Buffer is too small. Required %u bytes\n", static_cast<unsigned>(len));
+        }
+        return -1;
+    }
+
+    size_t br = 0;
+    if (!file->open()) {
+        return -1;
+    }
+    const bool ok = file->read(mBuffer, len, br) && br == len;
+    file->close();
+    return ok ? static_cast<int32_t>(len) : -1;
+}
+
+void AlarmManager::writeSyncMarker()
+{
+    if (mKernel.fs.exist(skSyncMarkerPath)) {
+        return;
+    }
+    auto file = mKernel.fs.file(skSyncMarkerPath);
+    if (!file || !file->open(true, true)) {
+        LOG_ERROR("Failed to create %s\n", skSyncMarkerPath);
+        return;
+    }
+    const size_t len = sizeof(skSyncMarker) - 1;
+    size_t bw = 0;
+    const bool written = file->write(skSyncMarker, len, bw) && bw == len;
+    if (!file->close() || !written) {
+        LOG_ERROR("Failed to write %s\n", skSyncMarkerPath);
+    }
+}
+
+// AppConfig's recovery rule (app-config-fields.md section 6.3), applied to both writers' temp files.
+bool AlarmManager::adoptTmpIfAlone()
+{
+    if (mKernel.fs.exist(skFilePath)) {
+        return false;
+    }
+
+    for (const char* tmp : { skOwnTmpFilePath, skTmpFilePath }) {
+        if (!mKernel.fs.exist(tmp)) {
+            continue;
+        }
+        std::vector<Alarm> parsed;
+        const int32_t len = readWhole(tmp);
+        if (len < 0 || !parseJSON(mBuffer, static_cast<uint32_t>(len), parsed)) {
+            LOG_ERROR("Discarding %s: not a complete alarm list\n", tmp);
+            mKernel.fs.remove(tmp);
+            continue;
+        }
+        return mKernel.fs.rename(tmp, skFilePath);
+    }
+    return false;
+}
+
+AlarmManager::Reload AlarmManager::reloadIfChanged()
+{
+    bool adopted = false;
+
+    if (!mKernel.fs.exist(skFilePath)) {
+        const bool tmpPresent = mKernel.fs.exist(skTmpFilePath) || mKernel.fs.exist(skOwnTmpFilePath);
+        if (!tmpPresent) {
+            mTmpOnlyPolls = 0;
+            return Reload::MISSING;
+        }
+        if (++mTmpOnlyPolls < kAdoptTmpAfterPolls) {
+            return Reload::IN_PROGRESS;
+        }
+        mTmpOnlyPolls = 0;
+        if (!adoptTmpIfAlone()) {
+            return Reload::UNREADABLE;
+        }
+        adopted = true;
+    } else {
+        mTmpOnlyPolls = 0;
+    }
+
+    const int32_t len = readWhole(skFilePath);
+    if (len < 0) {
+        return Reload::UNREADABLE;
+    }
+
+    const uint32_t crc = fileCrc32(mBuffer, static_cast<size_t>(len));
+    if (crc == mKnownCrc && static_cast<size_t>(len) == mKnownSize) {
+        return adopted ? Reload::ADOPTED : Reload::UNCHANGED;
+    }
+    if (crc == mRejectedCrc) {
+        return Reload::UNREADABLE;
+    }
+
+    std::vector<Alarm> parsed;
+    if (!parseJSON(mBuffer, static_cast<uint32_t>(len), parsed) || parsed.size() > kInitialCount) {
+        LOG_ERROR("Ignoring a changed %s that is not a complete list of at most %u alarms\n",
+            skFilePath, static_cast<unsigned>(kInitialCount));
+        mRejectedCrc = crc;
+        return Reload::UNREADABLE;
+    }
+
+    mAlarms      = std::move(parsed);
+    mKnownCrc    = crc;
+    mKnownSize   = static_cast<size_t>(len);
+    mRejectedCrc = 0;
+
+    removeObsoleteSnoozedAlarms();
+    persistSnoozesIfDirty();
+
+    if (mObserver) {
+        mObserver->onListChanged(mAlarms);
+    }
+    return adopted ? Reload::ADOPTED : Reload::RELOADED;
 }
 
 bool AlarmManager::parseJSON(char* buff, uint32_t length, std::vector<Alarm>& alarms)
