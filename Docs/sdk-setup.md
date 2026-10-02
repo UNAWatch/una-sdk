@@ -54,6 +54,7 @@ sudo apt install -y git python3 python3-pip cmake build-essential
 1) Install the ST toolchain (choose one):
 
 - **STM32CubeCLT** (CLI-first):
+  Download/install from: https://www.st.com/en/development-tools/stm32cubeclt.html
   ```bash
   chmod +x ~/Downloads/STM32CubeCLT_Linux64_v1-*.run
   ~/Downloads/STM32CubeCLT_Linux64_v1-*.run
