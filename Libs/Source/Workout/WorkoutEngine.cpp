@@ -40,7 +40,8 @@ Totals totals(const Program& program)
             if (rep.repeatCount == kRepeatForever) {
                 t.unlimited = true;
             } else {
-                passes *= rep.repeatCount;
+                // A count of 0 runs once, as advance() does.
+                passes *= rep.repeatCount > 0 ? rep.repeatCount : 1;
             }
         }
         t.stepsRun += passes;
