@@ -605,6 +605,10 @@ TEST(WorkoutEngine, RepeatCountZeroRunsOnce)
     const Walk r = runAll(*prog);
     EXPECT_EQ(r.steps, (std::vector<uint16_t>{0, 2}));
     EXPECT_EQ(r.reps[0], "1/1");  // not "1/0", which would read as unlimited
+    // The totals agree with what runs.
+    const Totals t = totals(*prog);
+    EXPECT_EQ(t.stepsRun, 2u);
+    EXPECT_EQ(t.timeMs, 2000u);
 }
 
 TEST(WorkoutEngine, LastStepEndingByItselfReportsTheLap)
