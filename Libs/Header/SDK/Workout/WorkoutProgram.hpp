@@ -27,6 +27,12 @@ namespace SDK::Workout {
 constexpr uint16_t kMaxSteps          = 100;  ///< Steps per workout, repeat steps included.
 constexpr uint8_t  kMaxRepeatDepth    = 4;    ///< Repeat blocks nested inside each other.
 constexpr uint32_t kMaxRepeatCount    = 99;   ///< Larger counts are clamped and marked degraded.
+
+/// Step::repeatCount meaning "repeat until the workout is ended". Only
+/// programs built in the app use it (on-watch Intervals with unlimited
+/// repeats). A FIT workout cannot hold it, so a recording writes the program
+/// without such a step: see fitStepIndex().
+constexpr uint32_t kRepeatForever = 0xFFFFFFFFu;
 constexpr size_t   kNameBytes         = 64;   ///< Workout name, NUL included.
 constexpr size_t   kDescriptionBytes  = 512;  ///< Workout description, NUL included.
 constexpr size_t   kStepNotesBytes    = 64;   ///< Step notes, NUL included.
@@ -66,7 +72,7 @@ struct Step {
     // Members are ordered by size to keep the struct free of padding.
     uint32_t durationMs    = 0;  ///< StepEnd::Time.
     uint32_t distanceCm    = 0;  ///< StepEnd::Distance.
-    uint32_t repeatCount   = 0;  ///< StepEnd::Repeat: times the block runs in all, 1 to kMaxRepeatCount.
+    uint32_t repeatCount   = 0;  ///< StepEnd::Repeat: times the block runs in all, 1 to kMaxRepeatCount, or kRepeatForever.
     uint32_t speedLowMmps  = 0;  ///< Target::Speed, mm/s.
     uint32_t speedHighMmps = 0;  ///< Target::Speed, mm/s.
     uint16_t repeatFrom    = 0;  ///< StepEnd::Repeat: index of the first step of the block.
@@ -112,6 +118,29 @@ struct Program {
     bool     degraded  = false; ///< At least one step is degraded.
     Step     steps[kMaxSteps];
 };
+
+/// The index @p step has in a FIT file written from @p program, which leaves
+/// out every kRepeatForever step. Use it for a lap's wkt_step_index and for a
+/// repeat step's target. Returns false for a kRepeatForever step itself,
+/// which is not written.
+inline bool fitStepIndex(const Program& program, uint16_t step, uint16_t& index)
+{
+    if (step >= program.stepCount) {
+        return false;
+    }
+    uint16_t dropped = 0;
+    for (uint16_t i = 0; i <= step; ++i) {
+        const Step& s = program.steps[i];
+        if (s.end == StepEnd::Repeat && s.repeatCount == kRepeatForever) {
+            if (i == step) {
+                return false;
+            }
+            ++dropped;
+        }
+    }
+    index = static_cast<uint16_t>(step - dropped);
+    return true;
+}
 
 }  // namespace SDK::Workout
 

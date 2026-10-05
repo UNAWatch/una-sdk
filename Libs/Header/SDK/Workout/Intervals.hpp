@@ -21,6 +21,7 @@
 #ifndef SDK_WORKOUT_INTERVALS_HPP
 #define SDK_WORKOUT_INTERVALS_HPP
 
+#include "SDK/Workout/WorkoutEngine.hpp"
 #include "SDK/Workout/WorkoutProgram.hpp"
 
 #include <cstdint>
@@ -35,7 +36,7 @@ struct IntervalsSpec {
         uint32_t distanceCm = 0;
     };
 
-    uint8_t repeats  = 0;     ///< Run-rest cycles; 0 = until the workout is ended.
+    uint8_t repeats  = 0;     ///< Run-rest cycles, up to kMaxRepeatCount; 0 = until the workout is ended.
     Phase   run;
     Phase   rest;
     bool    warmUp   = true;  ///< Open warm-up first.
@@ -56,8 +57,21 @@ struct IntervalsLayout {
 };
 
 /// Fill @p out with the program for @p spec, named "Intervals". Returns the
-/// layout, so the app can tell which kind of step is running.
+/// layout, so the app can tell which kind of step is running. A repeats
+/// value above kMaxRepeatCount is clamped to it.
 IntervalsLayout buildIntervals(const IntervalsSpec& spec, Program& out);
+
+/// The run number an Intervals face shows for the engine's current step:
+/// 0 during the warm-up, 1..repeats on each run and its rest, and the last
+/// run's number during the cool-down. The total to show next to it is
+/// spec.repeats (0 = unlimited).
+///
+/// Engine::Status::rep cannot be used directly: with lastRest false the final
+/// run sits outside the repeat block, and with one repeat there is no block.
+/// For unlimited repeats the number saturates at 65535; clamp it if the face
+/// holds less.
+uint32_t intervalsRepeat(const IntervalsSpec& spec, const IntervalsLayout& layout,
+                         const Engine::Status& status);
 
 }  // namespace SDK::Workout
 

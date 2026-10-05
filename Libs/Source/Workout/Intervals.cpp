@@ -66,14 +66,21 @@ uint16_t addRepeat(Program& p, uint16_t from, uint32_t count)
     s.repeatCount = count;
     s.raw.durationType  = static_cast<uint8_t>(FitDuration::RepeatUntilStepsComplete);
     s.raw.durationValue = from;
+    // For kRepeatForever this is also FIT's invalid value. That is harmless:
+    // such a step is never written (see fitStepIndex()).
     s.raw.targetValue   = count;
     return i;
 }
 
 }  // namespace
 
-IntervalsLayout buildIntervals(const IntervalsSpec& spec, Program& out)
+IntervalsLayout buildIntervals(const IntervalsSpec& specIn, Program& out)
 {
+    IntervalsSpec spec = specIn;
+    if (spec.repeats > kMaxRepeatCount) {
+        spec.repeats = static_cast<uint8_t>(kMaxRepeatCount);
+    }
+
     out = Program{};
     static constexpr char kName[] = "Intervals";
     static_assert(sizeof(kName) <= sizeof(out.name), "name fits");
@@ -121,6 +128,23 @@ IntervalsLayout buildIntervals(const IntervalsSpec& spec, Program& out)
     }
 
     return l;
+}
+
+uint32_t intervalsRepeat(const IntervalsSpec& spec, const IntervalsLayout& layout,
+                         const Engine::Status& status)
+{
+    const uint32_t repeats = spec.repeats > kMaxRepeatCount ? kMaxRepeatCount : spec.repeats;
+    const uint16_t step = status.step;
+    if (step == layout.warmUp) {
+        return 0;
+    }
+    if (step == layout.finalRun || step == layout.coolDown) {
+        // Only reached once every run is done. Unlimited repeats never get
+        // here, since their block never ends.
+        return repeats;
+    }
+    // A run or its rest: the pass of the repeat block, or 1 with no block.
+    return status.rep > 0 ? status.rep : 1;
 }
 
 }  // namespace SDK::Workout

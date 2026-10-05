@@ -342,14 +342,14 @@ TEST(WorkoutEngine, TotalsFlagForever)
     EXPECT_EQ(t.timeMs, 1000u);
 }
 
-// --- Intervals: the same phases as the old state machine ------------------------
+// --- Intervals: the same phases as the Running app's state machine -------------
 
 namespace {
 
-// The Running app's Intervals state machine as it was before the engine
-// (Service.cpp: startIntervalsPhase / advanceIntervalsPhase), reduced to the
-// phase sequence it produces.
-struct OldIntervals {
+// The Running app's Intervals state machine (Service.cpp: startIntervalsPhase,
+// advanceIntervalsPhase, emitIntervalsWorkout, intervalsWktStepIndex), reduced
+// to the phases it runs and the FIT step index each one records.
+struct RunningIntervals {
     enum Phase { WARM_UP, RUN, REST, COOL_DOWN };
     enum Metric { OPEN, TIME, DISTANCE };
     struct Cfg {
@@ -393,6 +393,35 @@ struct OldIntervals {
         case COOL_DOWN: completed = true; break;
         }
     }
+    // The FIT step index the current phase's lap records: the step map
+    // emitIntervalsWorkout() builds, read as intervalsWktStepIndex() does.
+    int wktStepIndex() const
+    {
+        int n = 0;
+        const int warmUpIdx = cfg.warmUp ? n++ : -1;
+        const int runIdx = n++;
+        int restIdx = -1, finalRunIdx = runIdx;
+        if (cfg.repeatsNum == 0) {
+            restIdx = n++;                         // no repeat step is written
+        } else if (cfg.lastRest) {
+            restIdx = n++;
+            if (cfg.repeatsNum >= 2) n++;          // repeat
+        } else if (cfg.repeatsNum >= 2) {
+            restIdx = n++;
+            n++;                                   // repeat
+            finalRunIdx = n++;
+        }
+        const int coolDownIdx = cfg.coolDown ? n++ : -1;
+        switch (phase) {
+        case WARM_UP:   return warmUpIdx;
+        case COOL_DOWN: return coolDownIdx;
+        case REST:      return restIdx;
+        case RUN:
+            return (!cfg.lastRest && cfg.repeatsNum >= 2 && repeat >= cfg.repeatsNum) ? finalRunIdx
+                                                                                      : runIdx;
+        }
+        return -1;
+    }
     // How the current phase ends: "open", "t<seconds>" or "d<metres>".
     std::string end() const
     {
@@ -409,11 +438,11 @@ struct OldIntervals {
     }
 };
 
-IntervalsSpec::Phase specPhase(OldIntervals::Metric m, uint32_t sec, float metres)
+IntervalsSpec::Phase specPhase(RunningIntervals::Metric m, uint32_t sec, float metres)
 {
     IntervalsSpec::Phase p;
-    p.end = m == OldIntervals::TIME ? IntervalsSpec::Phase::End::Time
-          : m == OldIntervals::DISTANCE ? IntervalsSpec::Phase::End::Distance
+    p.end = m == RunningIntervals::TIME ? IntervalsSpec::Phase::End::Time
+          : m == RunningIntervals::DISTANCE ? IntervalsSpec::Phase::End::Distance
           : IntervalsSpec::Phase::End::Open;
     p.timeMs = sec * 1000u;
     p.distanceCm = static_cast<uint32_t>(metres * 100.0f);
@@ -429,22 +458,24 @@ std::string phaseName(int phase)
 int phaseOf(Intensity in)
 {
     switch (in) {
-    case Intensity::Warmup:   return OldIntervals::WARM_UP;
-    case Intensity::Rest:     return OldIntervals::REST;
-    case Intensity::Cooldown: return OldIntervals::COOL_DOWN;
-    default:                  return OldIntervals::RUN;
+    case Intensity::Warmup:   return RunningIntervals::WARM_UP;
+    case Intensity::Rest:     return RunningIntervals::REST;
+    case Intensity::Cooldown: return RunningIntervals::COOL_DOWN;
+    default:                  return RunningIntervals::RUN;
     }
 }
 
-// Phase sequence as "PHASE#repeat:end" entries, ending in "done" or cut at
-// @p limit.
-std::vector<std::string> oldSequence(OldIntervals::Cfg cfg, size_t limit)
+// Phase sequence as "PHASE#repeat/total:end@fitIndex" entries, ending in
+// "done" or cut at @p limit.
+std::vector<std::string> runningSequence(RunningIntervals::Cfg cfg, size_t limit)
 {
-    OldIntervals o{cfg};
+    RunningIntervals o{cfg};
     o.start();
     std::vector<std::string> out;
     while (!o.completed && out.size() < limit) {
-        out.push_back(phaseName(o.phase) + "#" + std::to_string(o.repeat) + ":" + o.end());
+        out.push_back(phaseName(o.phase) + "#" + std::to_string(o.repeat) + "/" +
+                      std::to_string(cfg.repeatsNum) + ":" + o.end() + "@" +
+                      std::to_string(o.wktStepIndex()));
         o.advance();
     }
     if (o.completed) out.push_back("done");
@@ -453,7 +484,7 @@ std::vector<std::string> oldSequence(OldIntervals::Cfg cfg, size_t limit)
 
 // The same from buildIntervals() + Engine. @p manualEvery: end every step by
 // hand (R2), else only the open ones.
-std::vector<std::string> newSequence(OldIntervals::Cfg cfg, size_t limit, bool manualEvery)
+std::vector<std::string> engineSequence(RunningIntervals::Cfg cfg, size_t limit, bool manualEvery)
 {
     IntervalsSpec spec;
     spec.repeats  = cfg.repeatsNum;
@@ -463,22 +494,23 @@ std::vector<std::string> newSequence(OldIntervals::Cfg cfg, size_t limit, bool m
     spec.coolDown = cfg.coolDown;
     spec.lastRest = cfg.lastRest;
     auto prog = std::make_unique<Program>();
-    buildIntervals(spec, *prog);
+    const IntervalsLayout layout = buildIntervals(spec, *prog);
 
     Engine e;
     uint32_t t = 0, d = 0;
     e.start(*prog, t, d);
-    int runs = 0;  // the app's repeat number: runs started so far
     std::vector<std::string> out;
     while (e.status().running && out.size() < limit) {
         const Step& s = prog->steps[e.status().step];
         const int phase = phaseOf(s.intensity);
-        if (phase == OldIntervals::RUN) ++runs;
         std::string end = "open";
         if (s.end == StepEnd::Time) end = "t" + std::to_string(s.durationMs / 1000);
         if (s.end == StepEnd::Distance) end = "d" + std::to_string(s.distanceCm / 100);
-        out.push_back(phaseName(phase) + "#" + std::to_string(phase == OldIntervals::WARM_UP ? 0 : runs) +
-                      ":" + end);
+        uint16_t fitIndex = 0xFFFF;
+        const int fit = fitStepIndex(*prog, e.status().step, fitIndex) ? fitIndex : -2;
+        out.push_back(phaseName(phase) + "#" +
+                      std::to_string(intervalsRepeat(spec, layout, e.status())) + "/" +
+                      std::to_string(spec.repeats) + ":" + end + "@" + std::to_string(fit));
         if (manualEvery || s.end == StepEnd::Open) {
             e.next(t, d);
         } else if (s.end == StepEnd::Time) {
@@ -495,9 +527,9 @@ std::vector<std::string> newSequence(OldIntervals::Cfg cfg, size_t limit, bool m
 
 }  // namespace
 
-TEST(WorkoutEngine, IntervalsMatchTheOldStateMachine)
+TEST(WorkoutEngine, IntervalsMatchTheRunningAppStateMachine)
 {
-    using M = OldIntervals::Metric;
+    using M = RunningIntervals::Metric;
     const struct { M m; uint32_t t; float d; } kEnds[] = {
         {M::OPEN, 0, 0.0f}, {M::TIME, 90, 0.0f}, {M::DISTANCE, 0, 400.0f},
         {M::TIME, 0, 0.0f},        // time selected but zero: open
@@ -509,22 +541,22 @@ TEST(WorkoutEngine, IntervalsMatchTheOldStateMachine)
     for (const auto& run : kEnds)
     for (const auto& rest : kEnds)
     for (int flags = 0; flags < 8; ++flags) {
-        OldIntervals::Cfg cfg{reps, run.m, run.t, run.d, rest.m, rest.t, rest.d,
+        RunningIntervals::Cfg cfg{reps, run.m, run.t, run.d, rest.m, rest.t, rest.d,
                               (flags & 1) != 0, (flags & 2) != 0, (flags & 4) != 0};
         const size_t limit = 60;  // covers 20 repeats; cuts the unlimited ones
-        const auto want = oldSequence(cfg, limit);
+        const auto want = runningSequence(cfg, limit);
         SCOPED_TRACE("repeats " + std::to_string(reps) + " flags " + std::to_string(flags) +
                      " run " + std::to_string(int(run.m)) + " rest " + std::to_string(int(rest.m)));
-        EXPECT_EQ(newSequence(cfg, limit, false), want);
-        EXPECT_EQ(newSequence(cfg, limit, true), want);  // R2 on every phase: same order
+        EXPECT_EQ(engineSequence(cfg, limit, false), want);
+        EXPECT_EQ(engineSequence(cfg, limit, true), want);  // R2 on every phase: same order
         ++cases;
     }
     EXPECT_EQ(cases, 6 * 5 * 5 * 8);
 }
 
-TEST(WorkoutEngine, IntervalsLayoutMatchesTheOldFitSteps)
+TEST(WorkoutEngine, IntervalsLayoutMatchesTheRunningAppFitSteps)
 {
-    // The old recording (Service::emitIntervalsWorkout) wrote these steps.
+    // The Running app's recording (Service::emitIntervalsWorkout) writes these steps.
     auto prog = std::make_unique<Program>();
     IntervalsSpec spec;
     spec.repeats = 4;
@@ -550,4 +582,127 @@ TEST(WorkoutEngine, IntervalsLayoutMatchesTheOldFitSteps)
     EXPECT_EQ(prog->steps[2].raw.durationValue, 60000u);
     EXPECT_EQ(prog->steps[0].raw.intensity, 2);         // warmup
     EXPECT_STREQ(prog->name, "Intervals");
+}
+
+// --- Edge cases --------------------------------------------------------------------
+
+TEST(WorkoutEngine, NestedBlocksSharingAFirstStep)
+{
+    // [A B] x2, the whole of it x3: 12 steps, labels follow the inner block.
+    P prog;
+    prog.time(1000).time(1000).repeat(0, 2).repeat(0, 3);
+    const Walk r = runAll(*prog);
+    EXPECT_EQ(r.steps, (std::vector<uint16_t>{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1}));
+    EXPECT_EQ(r.reps[0], "1/2");
+    EXPECT_EQ(r.reps[2], "2/2");
+    EXPECT_EQ(r.reps[4], "1/2");  // the inner block starts again on the outer pass
+}
+
+TEST(WorkoutEngine, RepeatCountZeroRunsOnce)
+{
+    P prog;
+    prog.time(1000).repeat(0, 0).time(1000);
+    const Walk r = runAll(*prog);
+    EXPECT_EQ(r.steps, (std::vector<uint16_t>{0, 2}));
+    EXPECT_EQ(r.reps[0], "1/1");  // not "1/0", which would read as unlimited
+}
+
+TEST(WorkoutEngine, LastStepEndingByItselfReportsTheLap)
+{
+    P prog;
+    prog.time(1000).dist(5000);
+    Engine e;
+    e.start(*prog, 0, 0);
+    e.update(1000, 0);
+    e.update(3000, 4999, 4000, true);
+    EXPECT_TRUE(e.status().leadIn);
+    EXPECT_EQ(e.update(4000, 5200, 4000, true), Change::Auto);
+    EXPECT_TRUE(e.status().finished);
+    EXPECT_EQ(e.ended().step, 1);
+    EXPECT_EQ(e.ended().how, Change::Auto);
+    EXPECT_EQ(e.ended().distanceCm, 5200u);
+    // Nothing of the finished step is left showing.
+    EXPECT_FALSE(e.status().leadIn);
+    EXPECT_EQ(e.status().remainingCm, 0u);
+    EXPECT_EQ(e.status().stepDistanceCm, 0u);
+}
+
+TEST(WorkoutEngine, StopClearsTheLeadIn)
+{
+    P prog;
+    prog.time(10000);
+    Engine e;
+    e.start(*prog, 0, 0);
+    e.update(8000, 0);
+    ASSERT_TRUE(e.status().leadIn);
+    e.stop();
+    EXPECT_FALSE(e.status().leadIn);
+}
+
+TEST(WorkoutEngine, OneEngineRunsProgramsInTurn)
+{
+    const P first = fourHundreds();
+    P second;
+    second.time(1000).repeat(0, 2);
+    Engine e;
+    e.start(*first, 0, 0);
+    e.next(0, 0);
+    e.next(0, 0);
+    e.next(0, 0);
+    e.start(*second, 500, 500);  // counters from the first must not leak in
+    EXPECT_EQ(e.status().step, 0);
+    EXPECT_EQ(e.status().rep, 1u);
+    EXPECT_EQ(e.status().reps, 2u);
+    EXPECT_EQ(e.update(1500, 500), Change::Auto);
+    EXPECT_EQ(e.status().rep, 2u);
+}
+
+TEST(WorkoutEngine, TotalsBackwardsDoNotEndAStep)
+{
+    P prog;
+    prog.time(1000).time(1000);
+    Engine e;
+    e.start(*prog, 5000, 5000);
+    EXPECT_EQ(e.update(4000, 4000), Change::None);  // behind the step's start
+    EXPECT_EQ(e.status().stepTimeMs, 0u);
+    EXPECT_EQ(e.status().step, 0);
+}
+
+TEST(WorkoutEngine, TotalsDoNotOverflowOnDeepNesting)
+{
+    // One step inside four blocks of 99: 96 million runs of it.
+    P prog;
+    prog.time(1000).repeat(0, 99).repeat(0, 99).repeat(0, 99).repeat(0, 99);
+    const Totals t = totals(*prog);
+    EXPECT_EQ(t.stepsRun, 99ull * 99 * 99 * 99);
+    EXPECT_EQ(t.timeMs, 99ull * 99 * 99 * 99 * 1000);
+}
+
+TEST(WorkoutEngine, FitStepIndexSkipsForeverRepeats)
+{
+    auto prog = std::make_unique<Program>();
+    IntervalsSpec spec;  // repeats 0: warm-up, run, rest, repeat-forever, cool-down
+    const IntervalsLayout l = buildIntervals(spec, *prog);
+    ASSERT_EQ(prog->stepCount, 5);
+    uint16_t i = 0;
+    ASSERT_TRUE(fitStepIndex(*prog, l.rest, i));
+    EXPECT_EQ(i, 2);
+    EXPECT_FALSE(fitStepIndex(*prog, l.repeat, i));  // not written
+    ASSERT_TRUE(fitStepIndex(*prog, l.coolDown, i));
+    EXPECT_EQ(i, 3);                                // where the file has it
+    EXPECT_FALSE(fitStepIndex(*prog, 5, i));        // out of range
+
+    // A program without forever repeats keeps its indexes.
+    const P plain = fourHundreds();
+    ASSERT_TRUE(fitStepIndex(*plain, 7, i));
+    EXPECT_EQ(i, 7);
+}
+
+TEST(WorkoutEngine, IntervalsClampRepeats)
+{
+    auto prog = std::make_unique<Program>();
+    IntervalsSpec spec;
+    spec.repeats = 200;
+    const IntervalsLayout l = buildIntervals(spec, *prog);
+    EXPECT_EQ(prog->steps[l.repeat].repeatCount, kMaxRepeatCount);
 }
