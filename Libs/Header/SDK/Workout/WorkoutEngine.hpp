@@ -31,11 +31,6 @@
 
 namespace SDK::Workout {
 
-/// repeatCount meaning "repeat until the runner moves on". Only programs
-/// built in the app use it (on-watch Intervals with unlimited repeats); a
-/// FIT workout cannot express it, so it must never be written to one.
-constexpr uint32_t kRepeatForever = 0xFFFFFFFFu;
-
 /// Within this long of the end of a time or distance step, Status::leadIn is set.
 constexpr uint32_t kLeadInMs = 5000;
 
@@ -43,12 +38,13 @@ constexpr uint32_t kLeadInMs = 5000;
 /// shows no lead-in.
 constexpr uint32_t kLeadInMinSpeedMmps = 500;
 
-/// What a whole program adds up to, repeats expanded.
+/// What a whole program adds up to, repeats expanded. 64-bit throughout:
+/// four nested blocks of 99 passes already run one step 96 million times.
 struct Totals {
     uint64_t timeMs     = 0;      ///< Sum of the time steps.
     uint64_t distanceCm = 0;      ///< Sum of the distance steps.
-    uint32_t openSteps  = 0;      ///< Open steps run, which add unknown time and distance.
-    uint32_t stepsRun   = 0;      ///< Step instances, repeat steps not counted.
+    uint64_t openSteps  = 0;      ///< Open steps run, which add unknown time and distance.
+    uint64_t stepsRun   = 0;      ///< Step instances, repeat steps not counted.
     bool     unlimited  = false;  ///< A kRepeatForever block: the other totals cover one pass.
 };
 
@@ -84,6 +80,8 @@ public:
 
         /// The innermost repeat block holding the current step: this is pass
         /// rep of reps (reps 0 = kRepeatForever). Both 0 outside any block.
+        /// On-watch Intervals number their runs differently: see
+        /// intervalsRepeat() in Intervals.hpp.
         uint32_t rep  = 0;
         uint32_t reps = 0;
     };
@@ -105,9 +103,12 @@ public:
     /// Does not end the current step: call next() first for that.
     void stop();
 
-    /// Advance with the run's active totals. @p speedMmps is the current
-    /// speed, used only for a distance step's lead-in; pass @p speedValid
-    /// false when there is no current GPS speed.
+    /// Advance with the run's active totals. These are counted from 0 when
+    /// the run starts and never go backwards; never pass a free-running
+    /// clock, which can wrap. (uint32 ms covers 49 days of active time.)
+    /// @p speedMmps is the current speed, used only for a distance step's
+    /// lead-in: GPS speed outdoors, or e.g. a stride-derived speed on a
+    /// treadmill. Pass @p speedValid false when there is none.
     Change update(uint32_t timeMs, uint32_t distanceCm, uint32_t speedMmps = 0,
                   bool speedValid = false);
 
@@ -128,6 +129,7 @@ private:
     // @p counters; count when the program ends.
     uint16_t advance(uint16_t from, uint16_t* counters) const;
     void     enter(uint16_t step, uint32_t timeMs, uint32_t distanceCm);
+    void     clearProgress();
     Change   finishStep(Change how, uint32_t timeMs, uint32_t distanceCm);
     void     refresh(uint32_t timeMs, uint32_t distanceCm, uint32_t speedMmps, bool speedValid);
 

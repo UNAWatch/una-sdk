@@ -43,13 +43,13 @@ Totals totals(const Program& program)
                 passes *= rep.repeatCount;
             }
         }
-        t.stepsRun += static_cast<uint32_t>(passes);
+        t.stepsRun += passes;
         if (s.end == StepEnd::Time) {
             t.timeMs += passes * s.durationMs;
         } else if (s.end == StepEnd::Distance) {
             t.distanceCm += passes * s.distanceCm;
         } else {
-            t.openSteps += static_cast<uint32_t>(passes);
+            t.openSteps += passes;
         }
     }
     return t;
@@ -101,6 +101,16 @@ void Engine::start(const Program& program, uint32_t timeMs, uint32_t distanceCm)
 void Engine::stop()
 {
     mStatus.running = false;
+    clearProgress();
+}
+
+void Engine::clearProgress()
+{
+    mStatus.stepTimeMs     = 0;
+    mStatus.stepDistanceCm = 0;
+    mStatus.remainingMs    = 0;
+    mStatus.remainingCm    = 0;
+    mStatus.leadIn         = false;
 }
 
 void Engine::enter(uint16_t step, uint32_t timeMs, uint32_t distanceCm)
@@ -109,6 +119,12 @@ void Engine::enter(uint16_t step, uint32_t timeMs, uint32_t distanceCm)
     mStatus.step    = step;
     mStepStartMs    = timeMs;
     mStepStartCm    = distanceCm;
+
+    // The repeat counters only change when a step ends, so whether anything
+    // follows is settled for the whole step.
+    uint16_t following = 0;
+    mStatus.lastStep = !peekNext(following);
+
     refresh(timeMs, distanceCm, 0, false);
     if (mStatus.lastStep && mProgram->steps[step].end == StepEnd::Open) {
         mStatus.reachedEnd = true;
@@ -143,14 +159,14 @@ void Engine::refresh(uint32_t timeMs, uint32_t distanceCm, uint32_t speedMmps, b
     for (uint16_t r = static_cast<uint16_t>(st.step + 1); r < mProgram->stepCount; ++r) {
         const Step& rep = mProgram->steps[r];
         if (encloses(rep, r, st.step)) {
-            st.rep  = static_cast<uint32_t>(mCounters[r]) + 1;
-            st.reps = rep.repeatCount == kRepeatForever ? 0 : rep.repeatCount;
+            st.rep = static_cast<uint32_t>(mCounters[r]) + 1;
+            // A count of 0 runs once (as advance() does), so show it as 1.
+            st.reps = rep.repeatCount == kRepeatForever ? 0
+                    : rep.repeatCount == 0              ? 1
+                                                        : rep.repeatCount;
             break;  // the first enclosing block found is the innermost
         }
     }
-
-    uint16_t following = 0;
-    st.lastStep = !peekNext(following);
 }
 
 Engine::Change Engine::finishStep(Change how, uint32_t timeMs, uint32_t distanceCm)
@@ -165,7 +181,7 @@ Engine::Change Engine::finishStep(Change how, uint32_t timeMs, uint32_t distance
         mStatus.running    = false;
         mStatus.finished   = true;
         mStatus.reachedEnd = true;
-        mStatus.leadIn     = false;
+        clearProgress();
         return how;
     }
     enter(following, timeMs, distanceCm);
