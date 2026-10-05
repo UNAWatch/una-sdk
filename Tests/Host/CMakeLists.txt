@@ -49,6 +49,7 @@ add_executable(una-sdk-host-tests
     fit/RecordingMarker_test.cpp
     fit/FitWorkoutReader_test.cpp
     workout/WorkoutEngine_test.cpp
+    workout/TargetGauge_test.cpp
     apps/Running/ActivityWriter_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
@@ -86,6 +87,7 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitWorkoutReader.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Workout/WorkoutEngine.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Workout/Intervals.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Workout/TargetGauge.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/SensorLayer/SensorConnection.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/AppConfig/AppConfig.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/JSON/JsonStreamReader.cpp"
