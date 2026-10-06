@@ -14,15 +14,16 @@ set(UNA_SDK_SOURCES_APPSYSTEM
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/Service/main.cpp"
 )
 
-# Native FIT-format encoder and workout-file reader (SDK::Fit). No external
-# dependency. Apps link with --gc-sections, so an app that never reads a
-# workout carries none of the reader.
+# Native FIT-format encoder, and the workout reader and writer (SDK::Fit). No
+# external dependency. Apps link with --gc-sections, so an app that never
+# reads or writes a workout carries none of that code.
 set(UNA_SDK_SOURCES_FIT
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitCrc.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitWriter.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitRecordCadence.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/RecordingMarker.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitWorkoutReader.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/FitWorkoutWriter.cpp"
 )
 
 # Structured-workout step engine, the on-watch Intervals builder and the
