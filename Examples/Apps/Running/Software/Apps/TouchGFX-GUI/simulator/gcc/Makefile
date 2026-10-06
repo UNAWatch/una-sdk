@@ -84,6 +84,7 @@ Libs/Source/Fit/RecordingMarker.cpp\
 Libs/Source/Fit/FitWorkoutWriter.cpp\
 Libs/Source/Workout/WorkoutEngine.cpp\
 Libs/Source/Workout/Intervals.cpp\
+Libs/Source/Workout/WorkoutAlerts.cpp\
 ../../Libs/Sources/ActivitySummarySerializer.cpp\
 ../../Libs/Sources/ActivityWriter.cpp\
 ../../Libs/Sources/Service.cpp\

@@ -26,13 +26,14 @@ set(UNA_SDK_SOURCES_FIT
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitWorkoutWriter.cpp"
 )
 
-# Structured-workout step engine, the on-watch Intervals builder and the
-# pace and heart-rate target gauges (SDK::Workout). Programs come from
+# Structured-workout step engine, the on-watch Intervals builder, the pace
+# and heart-rate target gauges and the alert timing (SDK::Workout). Programs come from
 # FitWorkoutReader in UNA_SDK_SOURCES_FIT or from buildIntervals().
 set(UNA_SDK_SOURCES_WORKOUT
     "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutEngine.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/Intervals.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/TargetGauge.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutAlerts.cpp"
 )
 
 set(UNA_SDK_SOURCES_JSON
