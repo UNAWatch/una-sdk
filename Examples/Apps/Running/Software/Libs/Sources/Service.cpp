@@ -1328,6 +1328,7 @@ void Service::startIntervals()
     mIntervalsSpec.lastRest = cfg.lastRest;
     mIntervalsLayout = SDK::Workout::buildIntervals(mIntervalsSpec, mProgram);
     mEngine.start(mProgram, 0, 0);
+    mLeadIn.stepStarted();
 
     mTrackData.intervals = Track::IntervalsData{};
     // totalRepeats is the literal number of RUN-REST cycles the user selected.
@@ -1349,13 +1350,20 @@ void Service::processIntervals()
                                     mSpeedFilter.hasCurrentSample());
     if (how != SDK::Workout::Engine::Change::None) {
         onIntervalsStepEnded(how);
-    } else {
-        updateIntervalsData();
+        return;
+    }
+    updateIntervalsData();
+
+    // A beep each second as a timed or measured phase nears its end.
+    if (mLeadIn.tick(mEngine.status())) {
+        playBuzzerPattern(skLeadInBeepMs);
     }
 }
 
 void Service::onIntervalsStepEnded(SDK::Workout::Engine::Change how)
 {
+    mLeadIn.stepStarted();
+
     // The step that ended is recorded as its own lap, before the next begins.
     // An automatic end means its time or distance ran out.
     const SDK::Workout::Engine::Ended& ended = mEngine.ended();

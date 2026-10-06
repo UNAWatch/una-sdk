@@ -18,6 +18,7 @@
 #include "SDK/Calibration/OutdoorStrideCalibrator.hpp"
 
 #include "SDK/Workout/Intervals.hpp"
+#include "SDK/Workout/WorkoutAlerts.hpp"
 #include "SDK/Workout/WorkoutEngine.hpp"
 #include "SDK/Workout/WorkoutProgram.hpp"
 
@@ -63,6 +64,10 @@ private:
     /// the list mid-run.
     static constexpr std::size_t skLapReserve           = 10;
     static constexpr std::size_t skMaxWorkoutLapReserve = 128;
+
+    /// The lead-in's beep each second near the end of a step: shorter than
+    /// the step-change alert's, so the countdown and the change sound apart.
+    static constexpr uint16_t skLeadInBeepMs = 80;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -191,6 +196,7 @@ private:
     SDK::Workout::IntervalsLayout mIntervalsLayout;
     SDK::Workout::Program         mProgram;
     SDK::Workout::Engine          mEngine;
+    SDK::Workout::LeadInAlert     mLeadIn;
 
     // -- Wrist tilt -----------------------------------------------------------
 
