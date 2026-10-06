@@ -805,6 +805,22 @@ TEST(FitWorkoutReader, AReadErrorIsReportedAsSuch)
     EXPECT_EQ(reader.read(src, *prog), Result::ReadError);
 }
 
+TEST(FitWorkoutReader, AnotherFileTypeIsTurnedAwayAfterItsFileId)
+{
+    // The source fails just past file_id: a reader that went on would
+    // report a read error instead.
+    Wkt w;
+    w.fileId(4).workout("x", 3);
+    for (uint16_t i = 0; i < 3; ++i) {
+        w.step({i, kTime, 1000});
+    }
+    const auto file = w.bytes();
+    FailingSource src(file, Wkt().fileId(4).bytes().size() - 2);
+    FitWorkoutReader reader;
+    auto prog = std::make_unique<Program>();
+    EXPECT_EQ(reader.read(src, *prog), Result::NotWorkout);
+}
+
 TEST(FitWorkoutReader, MutatedFilesNeverBreakTheProgram)
 {
     // Seeded mutation smoke test: damaged input may be rejected, but it must

@@ -338,6 +338,11 @@ FitWorkoutReader::Result FitWorkoutReader::decode(Program& out)
         if (mConsumed > dataEnd) {
             return Result::Malformed;
         }
+        // A file whose file_id names another type is turned away here,
+        // without reading the rest of it.
+        if (mFileType != kInvalid8 && mFileType != static_cast<uint8_t>(File::Workout)) {
+            return Result::NotWorkout;
+        }
     }
 
     const uint16_t crc = mCrc;
