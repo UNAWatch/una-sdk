@@ -18,6 +18,7 @@
 #include "SDK/Fit/FitRecordCadence.hpp"
 #include "SDK/Fit/FitWriter.hpp"
 #include "SDK/Fit/RecordingMarker.hpp"
+#include "SDK/Workout/WorkoutProgram.hpp"
 
 /**
  * @class ActivityWriter
@@ -86,20 +87,10 @@ public:
         float       descent   = 0.0f;   // m
         // workout_step this lap belongs to (kMessageIndexInvalid = none)
         uint16_t    wktStepIndex = SDK::Fit::kMessageIndexInvalid;
-    };
-
-    /**
-     * @brief One step of a structured (interval) workout description.
-     *
-     * Encoded into a workout_step message. For a REPEAT step, durationValue is the
-     * message_index of the first step to loop back to and repeatCount the number of
-     * iterations; intensity is left unset.
-     */
-    struct WorkoutStepData {
-        SDK::Fit::Intensity       intensity     = SDK::Fit::Intensity::Invalid;
-        SDK::Fit::WktStepDuration durationType  = SDK::Fit::WktStepDuration::Open;
-        uint32_t                  durationValue = 0;  // TIME: ms; DISTANCE: cm; OPEN: 0; REPEAT: first-step index
-        uint32_t                  repeatCount   = 0;  // REPEAT only -> target_value (iterations)
+        // The workout step's intensity (Invalid outside a workout)
+        SDK::Fit::Intensity  intensity = SDK::Fit::Intensity::Invalid;
+        // What ended the lap
+        SDK::Fit::LapTrigger trigger   = SDK::Fit::LapTrigger::Manual;
     };
 
     struct TrackData {
@@ -123,8 +114,9 @@ public:
     void resume(std::time_t timestamp);
     void addRecord(const RecordData& record);
     void addLap(const LapData& lap);
-    /// Emit the workout + workout_step messages describing a structured workout.
-    void addWorkout(const char* name, const WorkoutStepData* steps, uint8_t count);
+    /// Emit the workout, workout_step and memo_glob messages describing the
+    /// structured workout being followed (see SDK::Fit::writeWorkout()).
+    void addWorkout(const SDK::Workout::Program& program);
     /// Finalize the current activity. The return value is the FIT-durability
     /// contract: true iff the FIT stream + its finish()/flush/close succeeded, so
     /// the .fit is safely on disk (the kernel auto-registers it on close, and
@@ -159,6 +151,7 @@ private:
         L_ACTIVITY,
         L_WORKOUT,
         L_WORKOUT_STEP,
+        L_MEMO_GLOB,
     };
 
     /// Developer field definition numbers (UNA-assigned).
