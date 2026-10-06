@@ -67,7 +67,9 @@ public:
 
         /// The workout counts as done for the schedule: the last step has
         /// ended, or the last step is open and has started. (Whether the
-        /// activity was then saved is the app's business.)
+        /// activity was then saved is the app's business.) next() on the
+        /// last step always sets it, so when the runner ends the workout,
+        /// read it before calling next(): see stop().
         bool reachedEnd = false;
 
         uint16_t step = 0;            ///< Current step's index in the program.
@@ -101,6 +103,11 @@ public:
 
     /// Stop following the program, e.g. when the runner ends the workout.
     /// Does not end the current step: call next() first for that.
+    ///
+    /// When the runner ends the workout, take status().reachedEnd before
+    /// calling next(). next() on the last step sets reachedEnd however much
+    /// of the step is left, so a workout ended early on its last step would
+    /// otherwise look completed.
     void stop();
 
     /// Advance with the run's active totals. These are counted from 0 when
