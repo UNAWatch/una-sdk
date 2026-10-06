@@ -275,6 +275,61 @@ TEST(SpeedGauge, LostSignalHoldsTheValueAndRecoversWithAHoldOff)
     EXPECT_NEAR(g.valueMps(), kMid, 0.05f);
 }
 
+TEST(SpeedGauge, LongGapCatchUpIsAveragedOverTheGap)
+{
+    // A minute without a reading while running at 5 m/s, then the distance
+    // catches up by 300 m in one second.
+    SpeedGauge g;
+    g.startStep(4.5f, 5.5f);
+    uint32_t d = 0;
+    for (int t = 0; t < 60; ++t) {
+        d += 500;
+        g.tick(5.0f, true, d);
+    }
+    for (int t = 0; t < 60; ++t) g.tick(0.0f, false, d);
+    d += 500 * 61;
+    for (int t = 0; t < 60; ++t) {
+        g.tick(5.0f, true, d);
+        EXPECT_NEAR(g.valueMps(), 5.0f, 0.05f) << t;
+        EXPECT_NE(g.zone(), Zone::Above) << t;
+        d += 500;
+    }
+}
+
+TEST(SpeedGauge, GapLongerThanTheHistoryFallsBackToLive)
+{
+    SpeedGauge g;
+    g.startStep(4.5f, 5.5f);
+    uint32_t d = 0;
+    for (int t = 0; t < 30; ++t) {
+        d += 500;
+        g.tick(5.0f, true, d);
+    }
+    for (size_t t = 0; t < SpeedGauge::kHistory + 10; ++t) g.tick(0.0f, false, d);
+    d += 500 * static_cast<uint32_t>(SpeedGauge::kHistory + 11);
+    g.tick(5.0f, true, d);
+    EXPECT_NEAR(g.valueMps(), 5.0f, 1e-4f);
+}
+
+TEST(SpeedGauge, StandingStillWithAReadingStaysInTheWindow)
+{
+    // A stop at a crossing, not paused: the window takes it at face value.
+    SpeedGauge g;
+    g.startStep(kLow, kHigh);
+    uint32_t d = 0;
+    for (int t = 0; t < 100; ++t) {
+        d += 400;
+        g.tick(4.0f, true, d);
+    }
+    for (int t = 0; t < 20; ++t) g.tick(0.0f, true, d);
+    d += 400;
+    g.tick(4.0f, true, d);
+    // The latest second at least 200 m back is 70 s ago, the stop included.
+    const float window = 20000.0f / 100.0f / 70.0f;
+    const float w = std::exp(-121.0f / SpeedGauge::kBlendTauSec);
+    EXPECT_NEAR(g.valueMps(), w * 4.0f + (1.0f - w) * window, 1e-3f);
+}
+
 TEST(SpeedGauge, ResumeKeepsTheWindowButRestartsTheBlend)
 {
     SpeedGauge g;

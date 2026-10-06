@@ -113,10 +113,13 @@ public:
 private:
     void restartStep();
     void restartBlend();
+    void setHadReading(uint32_t second, bool had);
+    bool hadReading(uint32_t second) const;
 
     float          mLow = 0.0f, mHigh = 0.0f;
     bool           mTargeted = false;
     uint32_t       mDist[kHistory] = {};  ///< Step distance at each second, ring.
+    uint32_t       mHadReading[kHistory / 32] = {};  ///< Whether each second had a reading.
     uint32_t       mSeconds = 0;          ///< Active seconds in the step.
     uint32_t       mBlendSec = 0;
     uint8_t        mHoldOff = 0;
