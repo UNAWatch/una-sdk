@@ -102,6 +102,7 @@ void SpeedGauge::restartStep()
 {
     mSeconds = 0;
     mDist[0] = 0;  // the step's start
+    setHadReading(0, true);
     mStepAverage = 0.0f;
     mHadSignal = true;
     restartBlend();
@@ -115,6 +116,19 @@ void SpeedGauge::restartBlend()
     mHyst.reset();
 }
 
+void SpeedGauge::setHadReading(uint32_t second, bool had)
+{
+    const uint32_t i = second % kHistory;
+    const uint32_t bit = 1u << (i % 32);
+    mHadReading[i / 32] = had ? (mHadReading[i / 32] | bit) : (mHadReading[i / 32] & ~bit);
+}
+
+bool SpeedGauge::hadReading(uint32_t second) const
+{
+    const uint32_t i = second % kHistory;
+    return (mHadReading[i / 32] >> (i % 32)) & 1u;
+}
+
 void SpeedGauge::resume()
 {
     restartBlend();
@@ -122,11 +136,12 @@ void SpeedGauge::resume()
 
 void SpeedGauge::tick(float liveMps, bool liveValid, uint32_t stepDistanceCm)
 {
-    // Distance is recorded every active second, signal or not: once the
-    // signal returns the distance catches up, and averages over the gap
-    // come out right.
+    // Distance is recorded every active second, signal or not, along with
+    // whether there was a reading: once the signal returns the distance
+    // catches up, and averages over the gap come out right.
     ++mSeconds;
     mDist[mSeconds % kHistory] = stepDistanceCm;
+    setHadReading(mSeconds, liveValid);
     mStepAverage = static_cast<float>(stepDistanceCm) / 100.0f / static_cast<float>(mSeconds);
 
     if (!liveValid) {
@@ -154,9 +169,17 @@ void SpeedGauge::tick(float liveMps, bool liveValid, uint32_t stepDistanceCm)
             break;
         }
     }
-    // from is at least a second back: reach is at least 1.
-    const float window =
-        static_cast<float>(since(from)) / 100.0f / static_cast<float>(mSeconds - from);
+    // A second without a reading holds the distance from before the gap,
+    // which the catch-up then lands on in one go. Start on the last second
+    // before such a run, so that the gap's time is counted with its distance.
+    while (!hadReading(from) && from > mSeconds - reach) {
+        --from;
+    }
+    // from is at least a second back: reach is at least 1. With no reading
+    // anywhere in the history kept, there is no window to go on.
+    const float window = hadReading(from)
+        ? static_cast<float>(since(from)) / 100.0f / static_cast<float>(mSeconds - from)
+        : liveMps;
 
     ++mBlendSec;
     const float w = std::exp(-static_cast<float>(mBlendSec) / kBlendTauSec);
