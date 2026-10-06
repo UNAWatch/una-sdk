@@ -8,10 +8,12 @@
 #include "ActivityWriter.hpp"
 #include "KernelTestDoubles.hpp"
 #include "SDK/Fit/FitProfile.hpp"
+#include "SDK/Workout/Intervals.hpp"
 #include "fit/FitReader.hpp"
 
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -379,4 +381,103 @@ TEST(RunningActivityWriter, LapsGetSequentialMessageIndex)
     EXPECT_EQ(sessions[0]->fields.at(fit::field::Session::MessageIndex.fieldDefNum).u(), 0u);
     EXPECT_EQ(sessions[0]->fields.at(fit::field::Session::NumLaps.fieldDefNum).u(),
               static_cast<uint64_t>(kLaps));
+}
+
+TEST(RunningActivityWriter, LapsCarryIntensityAndTrigger)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1782475200;
+    info.appID     = "running";
+    w.start(info);
+
+    // A workout step ended by its distance, then a lap-button lap after the
+    // workout, then the lap that ends the activity.
+    ActivityWriter::LapData step;
+    step.timestamp    = info.timestamp + 1;
+    step.timeStart    = info.timestamp;
+    step.wktStepIndex = 3;
+    step.intensity    = fit::Intensity::Rest;
+    step.trigger      = fit::LapTrigger::Distance;
+    w.addLap(step);
+
+    ActivityWriter::LapData free;
+    free.timestamp = info.timestamp + 2;
+    free.timeStart = info.timestamp + 1;
+    w.addLap(free);
+
+    ActivityWriter::LapData last;
+    last.timestamp = info.timestamp + 3;
+    last.timeStart = info.timestamp + 2;
+    last.trigger   = fit::LapTrigger::SessionEnd;
+    w.addLap(last);
+
+    ActivityWriter::TrackData track;
+    track.timestamp = info.timestamp + 3;
+    track.timeStart = info.timestamp;
+    ASSERT_TRUE(w.stop(track));
+
+    testfit::FitReader r(findFitFile(fx.fileSystem));
+    ASSERT_TRUE(r.ok());
+    const auto laps = r.withGlobal(fit::mesgNum(fit::MesgNum::Lap));
+    ASSERT_EQ(laps.size(), 3u);
+    const auto field = [&](size_t lap, const fit::FitWriter::Field& f) {
+        return laps[lap]->fields.at(f.fieldDefNum).u();
+    };
+    EXPECT_EQ(field(0, fit::field::Lap::WktStepIndex), 3u);
+    EXPECT_EQ(field(0, fit::field::Lap::Intensity), static_cast<uint64_t>(fit::Intensity::Rest));
+    EXPECT_EQ(field(0, fit::field::Lap::LapTrigger), static_cast<uint64_t>(fit::LapTrigger::Distance));
+    EXPECT_EQ(field(1, fit::field::Lap::WktStepIndex), fit::kMessageIndexInvalid);
+    EXPECT_EQ(field(1, fit::field::Lap::Intensity), static_cast<uint64_t>(fit::Intensity::Invalid));
+    EXPECT_EQ(field(1, fit::field::Lap::LapTrigger), static_cast<uint64_t>(fit::LapTrigger::Manual));
+    EXPECT_EQ(field(2, fit::field::Lap::LapTrigger), static_cast<uint64_t>(fit::LapTrigger::SessionEnd));
+}
+
+TEST(RunningActivityWriter, WritesTheWorkoutFollowed)
+{
+    SDK::TestSupport::KernelFixture fx;
+    ActivityWriter w(fx.kernel, "Activity");
+
+    ActivityWriter::AppInfo info;
+    info.timestamp = 1782475200;
+    info.appID     = "running";
+    w.start(info);
+
+    // Unlimited repeats: the repeat step cannot be written, so the cool-down
+    // after it moves down by one.
+    SDK::Workout::IntervalsSpec spec;
+    spec.repeats = 0;
+    spec.run.end = SDK::Workout::IntervalsSpec::Phase::End::Distance;
+    spec.run.distanceCm = 40000;
+    spec.rest.end = SDK::Workout::IntervalsSpec::Phase::End::Time;
+    spec.rest.timeMs = 60000;
+    auto program = std::make_unique<SDK::Workout::Program>();
+    SDK::Workout::buildIntervals(spec, *program);
+    w.addWorkout(*program);
+
+    ActivityWriter::TrackData track;
+    track.timestamp = info.timestamp + 1;
+    track.timeStart = info.timestamp;
+    ASSERT_TRUE(w.stop(track));
+
+    testfit::FitReader r(findFitFile(fx.fileSystem));
+    ASSERT_TRUE(r.ok());
+    EXPECT_TRUE(r.crcValid());
+    const auto workouts = r.withGlobal(fit::mesgNum(fit::MesgNum::Workout));
+    ASSERT_EQ(workouts.size(), 1u);
+    EXPECT_EQ(workouts[0]->fields.at(fit::field::Workout::NumValidSteps.fieldDefNum).u(), 4u);
+
+    const auto steps = r.withGlobal(fit::mesgNum(fit::MesgNum::WorkoutStep));
+    ASSERT_EQ(steps.size(), 4u);  // warm-up, run, rest, cool-down
+    const uint8_t intensities[] = {
+        static_cast<uint8_t>(fit::Intensity::Warmup), static_cast<uint8_t>(fit::Intensity::Active),
+        static_cast<uint8_t>(fit::Intensity::Rest), static_cast<uint8_t>(fit::Intensity::Cooldown)};
+    for (size_t i = 0; i < steps.size(); ++i) {
+        EXPECT_EQ(steps[i]->fields.at(fit::field::WorkoutStep::MessageIndex.fieldDefNum).u(), i);
+        EXPECT_EQ(steps[i]->fields.at(fit::field::WorkoutStep::Intensity.fieldDefNum).u(),
+                  intensities[i]);
+    }
+    EXPECT_EQ(steps[1]->fields.at(fit::field::WorkoutStep::DurationValue.fieldDefNum).u(), 40000u);
 }

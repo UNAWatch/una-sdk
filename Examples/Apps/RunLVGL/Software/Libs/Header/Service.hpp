@@ -17,6 +17,10 @@
 
 #include "SDK/Calibration/OutdoorStrideCalibrator.hpp"
 
+#include "SDK/Workout/Intervals.hpp"
+#include "SDK/Workout/WorkoutEngine.hpp"
+#include "SDK/Workout/WorkoutProgram.hpp"
+
 #include "SettingsSerializer.hpp"
 #include "ActivitySummarySerializer.hpp"
 #include "ActivityWriter.hpp"
@@ -53,6 +57,12 @@ private:
     static constexpr std::size_t skSpeedSmoothTicks = 2;
     static constexpr std::size_t skSpeedScaleTau    = 180;
     static constexpr std::size_t skSpeedChordTicks  = 2;
+
+    /// Laps reserved in the summary for a run, plus one per workout step up
+    /// to skMaxWorkoutLapReserve, so that a workout's laps do not reallocate
+    /// the list mid-run.
+    static constexpr std::size_t skLapReserve           = 10;
+    static constexpr std::size_t skMaxWorkoutLapReserve = 128;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -171,22 +181,16 @@ private:
 
     // -- Interval training state ----------------------------------------------
 
-    bool        mIntervalsMode        = false;
-    bool        mIntervalsCompleted   = false; ///< Set after workout completed; blocks further phase processing
-    std::time_t mPhaseStartActiveSec  = 0;     ///< mTimeCounter.getValueActive() at phase start
-    float       mPhaseStartActiveDist = 0.0f;  ///< mDistanceCounter.getValueActive() at phase start
+    bool mIntervalsMode      = false;
+    bool mIntervalsCompleted = false; ///< Set after workout completed; blocks further phase processing
 
-    /// Maps interval phases to workout_step message_index values for the FIT
-    /// workout description (0xFFFF = no associated step).
-    struct IntervalsStepMap {
-        bool     valid       = false;
-        uint16_t warmUpIdx   = 0xFFFF;
-        uint16_t runIdx      = 0xFFFF;
-        uint16_t restIdx     = 0xFFFF;
-        uint16_t finalRunIdx = 0xFFFF; ///< last RUN step when the final rest is skipped
-        uint16_t coolDownIdx = 0xFFFF;
-    };
-    IntervalsStepMap mIntervalsStepMap;
+    /// The intervals settings as a workout program, which mEngine runs step
+    /// by step. The program is about 15 KB: the Service is statically
+    /// allocated, never on a stack.
+    SDK::Workout::IntervalsSpec   mIntervalsSpec;
+    SDK::Workout::IntervalsLayout mIntervalsLayout;
+    SDK::Workout::Program         mProgram;
+    SDK::Workout::Engine          mEngine;
 
     // -- Wrist tilt -----------------------------------------------------------
 
@@ -223,7 +227,14 @@ private:
     void sendInitialInfoToGui();
     void startTrack(std::time_t utc);
     void processTrack();
-    void saveLap(float autoLapDistanceM = 0.0f);
+
+    /// What ended a lap, and the workout step it was, for the FIT lap.
+    struct LapEnd {
+        SDK::Fit::LapTrigger trigger      = SDK::Fit::LapTrigger::Manual;
+        uint16_t             wktStepIndex = SDK::Fit::kMessageIndexInvalid;
+        SDK::Fit::Intensity  intensity    = SDK::Fit::Intensity::Invalid;
+    };
+    void saveLap(const LapEnd& end, float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
     void pauseTrack(bool pause);
     void buildPartialSummary();
@@ -232,16 +243,22 @@ private:
 
     // -- Interval training ----------------------------------------------------
 
-    void startIntervalsPhase(Track::IntervalsPhase phase);
-    void advanceIntervalsPhase(bool manual = false);
+    /// Build the program from the intervals settings and start it.
+    void startIntervals();
     void processIntervals();
-    void onIntervalsPhaseChange(bool alert, bool manual);
+    /// A step ended (@p how says why): close its lap, and alert.
+    void onIntervalsStepEnded(SDK::Workout::Engine::Change how);
+    /// Refresh mTrackData.intervals from the engine's current step.
+    void updateIntervalsData();
+    void onIntervalsPhaseChange();
+    Track::IntervalsPhase intervalsPhase(uint16_t step) const;
 
-    /// Build the workout_step list from the intervals config, emit the workout /
-    /// workout_step messages, and populate mIntervalsStepMap for lap referencing.
-    void emitIntervalsWorkout();
-    /// workout_step message_index for the current interval phase (0xFFFF = none).
-    uint16_t intervalsWktStepIndex() const;
+    /// The lap for workout step @p step, ended by @p trigger.
+    LapEnd workoutLap(uint16_t step, SDK::Fit::LapTrigger trigger) const;
+
+    /// The run's active time and distance, as the workout engine counts them.
+    uint32_t activeTimeMs() const;
+    uint32_t activeDistanceCm() const;
 
     // -- Notifications --------------------------------------------------------
 

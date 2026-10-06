@@ -15,6 +15,9 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWriter.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitRecordCadence.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\RecordingMarker.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWorkoutWriter.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\WorkoutEngine.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\Intervals.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2_icon.cpp"/>

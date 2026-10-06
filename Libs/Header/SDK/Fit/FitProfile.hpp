@@ -72,6 +72,8 @@ enum class WktStepDuration : uint8_t {
     RepeatUntilTime = 7, RepeatUntilPowerGreaterThan = 13,
 };
 enum class WktStepTarget : uint8_t { Speed = 0, HeartRate = 1, Open = 2 };
+/// What ended a lap.
+enum class LapTrigger : uint8_t { Manual = 0, Time = 1, Distance = 2, SessionEnd = 7 };
 
 /// message_index "invalid" sentinel (uint16).
 constexpr uint16_t kMessageIndexInvalid = 0xFFFFu;
@@ -130,6 +132,8 @@ namespace Lap {
     constexpr FitWriter::Field MaxHeartRate{16, BaseType::UInt8};      // bpm
     constexpr FitWriter::Field TotalAscent{21, BaseType::UInt16};      // m
     constexpr FitWriter::Field TotalDescent{22, BaseType::UInt16};     // m
+    constexpr FitWriter::Field Intensity{23, BaseType::Enum};          // intensity
+    constexpr FitWriter::Field LapTrigger{24, BaseType::Enum};         // lap_trigger
     constexpr FitWriter::Field WktStepIndex{71, BaseType::UInt16};     // message_index
 }
 
