@@ -48,6 +48,7 @@ add_executable(una-sdk-host-tests
     fit/FitRoundTrip_test.cpp
     fit/RecordingMarker_test.cpp
     fit/FitWorkoutReader_test.cpp
+    fit/FitWorkoutWriter_test.cpp
     workout/WorkoutEngine_test.cpp
     workout/TargetGauge_test.cpp
     apps/Running/ActivityWriter_test.cpp
@@ -85,6 +86,7 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitRecordCadence.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Fit/RecordingMarker.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Fit/FitWorkoutReader.cpp"
+    "${UNA_SDK_ROOT}/Libs/Source/Fit/FitWorkoutWriter.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Workout/WorkoutEngine.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Workout/Intervals.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Workout/TargetGauge.cpp"
