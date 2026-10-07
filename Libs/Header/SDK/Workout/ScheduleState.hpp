@@ -12,6 +12,10 @@
  * Starting a different scheduled workout replaces the record. The record
  * stays with the workout it was started for, so a run that crosses midnight
  * still completes the day it began on. Completion is never undone.
+ *
+ * A new record is written in full to the same path plus ".tmp", which then
+ * replaces the file. A write that fails leaves the record before in place,
+ * and if the replacement is cut short, load() reads the ".tmp" file.
  ******************************************************************************
  */
 
@@ -50,6 +54,9 @@ public:
 
 private:
     bool save();
+    bool write(const char* path);
+    bool loadFrom(const char* path);
+    bool tempPath(char* buf, size_t cap) const;
     bool isRecord(Ymd date, const char* file) const;
 
     SDK::Interface::IFileSystem& mFs;

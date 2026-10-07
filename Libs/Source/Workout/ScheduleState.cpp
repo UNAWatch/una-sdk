@@ -36,43 +36,59 @@ Ymd parseDate(std::string_view s)
 
 }  // namespace
 
+bool ScheduleState::tempPath(char* buf, size_t cap) const
+{
+    const int n = std::snprintf(buf, cap, "%s.tmp", mPath);
+    return n > 0 && static_cast<size_t>(n) < cap;
+}
+
 void ScheduleState::load()
 {
     mDate = 0;
     mFile[0] = '\0';
     mCompleted = false;
 
-    auto file = mFs.file(mPath);
+    // The ".tmp" file is the record only if replacing the file was cut short.
+    char tmp[SDK::Interface::IFileSystem::skMaxPathLen];
+    if (!loadFrom(mPath) && tempPath(tmp, sizeof(tmp))) {
+        loadFrom(tmp);
+    }
+}
+
+bool ScheduleState::loadFrom(const char* path)
+{
+    auto file = mFs.file(path);
     if (!file || !file->open(false, false)) {
-        return;
+        return false;
     }
     char   buf[kMaxFileBytes];
     size_t n = 0;
     const bool read = file->size() < sizeof(buf) && file->read(buf, sizeof(buf), n);
     file->close();
     if (!read) {
-        return;
+        return false;
     }
 
     SDK::JsonStreamReader json(buf, n);
     if (!json.validate()) {
-        return;
+        return false;
     }
     std::string_view date;
     std::string_view name;
     bool             completed = false;
     if (!json.get("date", date) || !json.get("file", name) || !json.get("completed", completed)
         || name.empty() || name.size() >= sizeof(mFile)) {
-        return;
+        return false;
     }
     const Ymd d = parseDate(date);
     if (d == 0) {
-        return;
+        return false;
     }
     mDate = d;
     std::memcpy(mFile, name.data(), name.size());
     mFile[name.size()] = '\0';
     mCompleted = completed;
+    return true;
 }
 
 bool ScheduleState::isRecord(Ymd date, const char* file) const
@@ -131,7 +147,23 @@ bool ScheduleState::isCompleted(Ymd date, const char* file) const
 
 bool ScheduleState::save()
 {
-    auto file = mFs.file(mPath);
+    // Write the record in full beside the file, then put it in the file's
+    // place: a write that fails never touches the record already saved.
+    char tmp[SDK::Interface::IFileSystem::skMaxPathLen];
+    if (!tempPath(tmp, sizeof(tmp))) {
+        return false;
+    }
+    if (!write(tmp)) {
+        mFs.remove(tmp);
+        return false;
+    }
+    mFs.remove(mPath);  // rename() does not replace an existing file
+    return mFs.rename(tmp, mPath);
+}
+
+bool ScheduleState::write(const char* path)
+{
+    auto file = mFs.file(path);
     if (!file || !file->open(true, true)) {
         return false;
     }

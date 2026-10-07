@@ -343,7 +343,7 @@ TEST(ScheduleState, AFailedSaveChangesNothing)
     st.load();
     ASSERT_TRUE(st.started(20261009, "2026-10-09.fit"));
 
-    fs.failWriteOpenSuffix = ".json";
+    fs.failWriteOpenSuffix = ".tmp";  // saves write a .tmp file first
     EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));
     EXPECT_FALSE(st.completed());
     EXPECT_FALSE(st.isCompleted(20261009, "2026-10-09.fit"));
@@ -355,6 +355,43 @@ TEST(ScheduleState, AFailedSaveChangesNothing)
     ScheduleState again(fs);
     again.load();
     EXPECT_TRUE(again.isCompleted(20261009, "2026-10-09.fit"));
+}
+
+TEST(ScheduleState, AWriteThatFailsKeepsTheRecordOnFile)
+{
+    InMemoryFileSystem fs;
+    {
+        ScheduleState st(fs);
+        st.load();
+        ASSERT_TRUE(st.started(20261009, "2026-10-09.fit"));
+        ASSERT_TRUE(st.completed());
+
+        // Every write fails from here on, part-way through or not.
+        fs.failWritesAfterBytes = fs.bytesWritten;
+        EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));
+    }
+    const std::string tmp = std::string(ScheduleState::kDefaultPath) + ".tmp";
+    EXPECT_FALSE(fs.exist(tmp.c_str()));  // the partial record is not left behind
+    ScheduleState again(fs);
+    again.load();
+    EXPECT_TRUE(again.isCompleted(20261009, "2026-10-09.fit"));
+}
+
+TEST(ScheduleState, AReplacementCutShortIsReadFromTheTempFile)
+{
+    // Power lost after the old file went and before the new one took its
+    // place: only the complete ".tmp" file is left.
+    InMemoryFileSystem fs;
+    const std::string tmp = std::string(ScheduleState::kDefaultPath) + ".tmp";
+    fs.seedFile(tmp, R"({"date":"2026-10-09","file":"2026-10-09.fit","completed":true})");
+    ScheduleState st(fs);
+    st.load();
+    EXPECT_TRUE(st.isCompleted(20261009, "2026-10-09.fit"));
+
+    // The next save puts the record back in its own file.
+    ASSERT_TRUE(st.started(20261010, "2026-10-10.fit"));
+    EXPECT_TRUE(fs.exist(ScheduleState::kDefaultPath));
+    EXPECT_FALSE(fs.exist(tmp.c_str()));
 }
 
 TEST(ScheduleState, AFileThatIsNotARecordReadsAsNone)
