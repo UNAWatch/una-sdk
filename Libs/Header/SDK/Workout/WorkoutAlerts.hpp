@@ -12,6 +12,7 @@
 #ifndef SDK_WORKOUT_ALERTS_HPP
 #define SDK_WORKOUT_ALERTS_HPP
 
+#include "SDK/Workout/TargetGauge.hpp"
 #include "SDK/Workout/WorkoutEngine.hpp"
 
 #include <cstdint>
@@ -49,6 +50,47 @@ public:
 private:
     bool    mStarted = false;
     uint8_t mBeeps   = 0;
+};
+
+/**
+ * When a step's target zone is worth an alert, from a target gauge's zone.
+ *
+ *   - Leaving the band: an alert saying which way, then again every
+ *     kRepeatSec while still outside it, or at once if it crosses to the
+ *     other side.
+ *   - Coming back in after an out-of-band alert: one BackIn alert. A step
+ *     that starts in the band stays quiet, and so does a step that leaves it
+ *     only while alerts are held back.
+ *   - Held back: in the first kQuietStartSec of a step, and while the zone
+ *     is Unknown (the gauge's hold-off, or no target) or NoSignal. An alert
+ *     still outstanding when the signal returns is kept, so coming back in
+ *     afterwards still says so.
+ *
+ * Call stepStarted() on every step change, and tick() once per active tick
+ * with the gauge's zone after its own tick(). Paused seconds are not ticks.
+ */
+class ZoneAlerts {
+public:
+    enum class Alert : uint8_t {
+        None,
+        Above,   ///< Too fast, or heart rate too high.
+        Below,   ///< Too slow, or heart rate too low.
+        BackIn,  ///< Back in the band after an Above or Below alert.
+    };
+
+    static constexpr uint32_t kQuietStartSec = 20;
+    static constexpr uint32_t kRepeatSec     = 30;
+
+    /// A new step has started (also call it when the program starts).
+    void stepStarted();
+
+    /// One active tick with the gauge's zone. The alert to play, if any.
+    Alert tick(Zone zone);
+
+private:
+    uint32_t mStepSec    = 0;
+    uint32_t mSinceAlert = 0;
+    Zone     mAlerted    = Zone::Unknown;  ///< Above or Below while an alert is outstanding.
 };
 
 }  // namespace SDK::Workout
