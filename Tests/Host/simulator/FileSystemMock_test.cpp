@@ -228,6 +228,31 @@ TEST_F(MockFileSystemTest, DirectoryEnumeration)
     d->close();
 }
 
+// ":/" names the volume root, which the simulator keeps in Volume/.
+TEST_F(MockFileSystemTest, VolumeRootPathsLiveInVolume)
+{
+    FileSystem fs(root.c_str());
+    ASSERT_TRUE(fs.mkdir(":/Workouts/Schedule"));
+    EXPECT_TRUE(std::filesystem::is_directory(root + "Volume/Workouts/Schedule"));
+
+    auto f = fs.file(":/Workouts/a.fit");
+    size_t bw = 0;
+    ASSERT_TRUE(f->open(true, true));
+    ASSERT_TRUE(f->write("x", 1, bw));
+    f->close();
+    EXPECT_STREQ(f->getPath(), ":/Workouts/a.fit");
+    EXPECT_TRUE(std::filesystem::exists(root + "Volume/Workouts/a.fit"));
+    EXPECT_TRUE(fs.exist(":/Workouts/a.fit"));
+
+    auto d = fs.dir(":/Workouts");
+    ASSERT_TRUE(d->open());
+    I::IFileSystem::ObjectInfo it{};
+    int seen = 0;
+    while (d->readNext(it)) ++seen;
+    EXPECT_EQ(seen, 2);  // a.fit and Schedule
+    d->close();
+}
+
 TEST_F(MockFileSystemTest, RenameCopyRemove)
 {
     FileSystem fs(root.c_str());
