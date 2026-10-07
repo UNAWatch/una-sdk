@@ -1210,8 +1210,12 @@ void Service::stopTrack(bool discard)
         if (mActivityWriter.stop(fitTrack)) {
             notifyNewActivity();
             // A scheduled workout counts as done only once its activity is
-            // saved, and only if completion was reached.
-            if (mWorkoutReachedEnd && mWorkoutDate != 0 && !mSchedule.completed()) {
+            // saved, and only if completion was reached. started() again
+            // first: if the record could not be saved when the run began,
+            // the one held is still the workout before, and completed()
+            // would mark that one.
+            if (mWorkoutReachedEnd && mWorkoutDate != 0
+                && !(mSchedule.started(mWorkoutDate, mWorkoutFile) && mSchedule.completed())) {
                 LOG_ERROR("Can't save the workout schedule state\n");
             }
         } else {

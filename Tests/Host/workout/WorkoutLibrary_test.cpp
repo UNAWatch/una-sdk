@@ -492,6 +492,32 @@ TEST(ScheduleState, APartTempFileBesideNoRecordIsRemoved)
     EXPECT_TRUE(st.started(20261009, "2026-10-09.fit"));
 }
 
+TEST(ScheduleState, StartingAgainBeforeCompletingMarksTheWorkoutThatRan)
+{
+    // What the service does: started() when the run begins, then started()
+    // and completed() once its activity is saved. If the first started()
+    // could not be saved, the second writes the record, so yesterday's
+    // unfinished workout is not the one marked completed.
+    InMemoryFileSystem fs;
+    ScheduleState st(fs);
+    st.load();
+    ASSERT_TRUE(st.started(20261009, "2026-10-09.fit"));  // yesterday, not finished
+
+    fs.failWritesAfterBytes = fs.bytesWritten;
+    EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));  // today's start, not saved
+    fs.failWritesAfterBytes = static_cast<size_t>(-1);
+
+    ASSERT_TRUE(st.started(20261010, "2026-10-10.fit") && st.completed());
+    ScheduleState again(fs);
+    again.load();
+    EXPECT_TRUE(again.isCompleted(20261010, "2026-10-10.fit"));
+    EXPECT_FALSE(again.isCompleted(20261009, "2026-10-09.fit"));
+
+    // Once saved, starting the same workout again changes nothing.
+    ASSERT_TRUE(again.started(20261010, "2026-10-10.fit"));
+    EXPECT_TRUE(again.isCompleted(20261010, "2026-10-10.fit"));
+}
+
 TEST(ScheduleState, AFileThatIsNotARecordReadsAsNone)
 {
     for (const char* text : {"", "{", "not json", R"({"date":"2026-02-30","file":"a.fit","completed":true})",
