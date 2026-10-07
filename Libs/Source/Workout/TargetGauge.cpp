@@ -102,7 +102,9 @@ void SpeedGauge::restartStep()
 {
     mSeconds = 0;
     mDist[0] = 0;  // the step's start
-    setHadReading(0, true);
+    // If the signal is lost as the step starts, the step's start distance is
+    // from before the gap, like any second in it.
+    setHadReading(0, mHadSignal);
     mStepAverage = 0.0f;
     mHadSignal = true;
     restartBlend();
@@ -175,8 +177,14 @@ void SpeedGauge::tick(float liveMps, bool liveValid, uint32_t stepDistanceCm)
     while (!hadReading(from) && from > mSeconds - reach) {
         --from;
     }
-    // from is at least a second back: reach is at least 1. With no reading
-    // anywhere in the history kept, there is no window to go on.
+    // If no second before the gap is kept (the gap began before the step, or
+    // before the history), start on the first second after it instead: the
+    // catch-up then falls before the window.
+    while (!hadReading(from) && from + 1 < mSeconds) {
+        ++from;
+    }
+    // from is at least a second back: reach is at least 1. On the second the
+    // signal returns there is no such second, and no window to go on.
     const float window = hadReading(from)
         ? static_cast<float>(since(from)) / 100.0f / static_cast<float>(mSeconds - from)
         : liveMps;
