@@ -103,10 +103,10 @@ void SpeedGauge::restartStep()
     mSeconds = 0;
     mDist[0] = 0;  // the step's start
     // If the signal is lost as the step starts, the step's start distance is
-    // from before the gap, like any second in it.
+    // from before the gap, like any second in it. Only a tick with a reading
+    // ends the gap, however many steps start before one.
     setHadReading(0, mHadSignal);
     mStepAverage = 0.0f;
-    mHadSignal = true;
     restartBlend();
 }
 
