@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 using namespace SDK::Workout;
@@ -125,4 +126,103 @@ TEST(LeadInAlert, OpenStepsAndTheEndAreSilent)
     run.engine.next(run.t * 1000u, run.cm);  // the program ends
     run.second(300);
     EXPECT_TRUE(run.beeps.empty());
+}
+
+// --- ZoneAlerts ------------------------------------------------------------------
+
+namespace {
+
+using A = ZoneAlerts::Alert;
+
+// The alerts for @p zones, one per tick, as (tick, alert) for those that fire.
+std::vector<std::pair<uint32_t, A>> alertsFor(const std::vector<Zone>& zones)
+{
+    ZoneAlerts z;
+    z.stepStarted();
+    std::vector<std::pair<uint32_t, A>> out;
+    for (size_t i = 0; i < zones.size(); ++i) {
+        const A a = z.tick(zones[i]);
+        if (a != A::None) {
+            out.emplace_back(static_cast<uint32_t>(i + 1), a);
+        }
+    }
+    return out;
+}
+
+// @p before, then @p n ticks of @p z.
+std::vector<Zone> ticks(Zone z, size_t n, std::vector<Zone> before = {})
+{
+    before.insert(before.end(), n, z);
+    return before;
+}
+
+using Alerts = std::vector<std::pair<uint32_t, A>>;
+
+}  // namespace
+
+TEST(ZoneAlerts, AStepThatStaysInTheBandIsQuiet)
+{
+    EXPECT_TRUE(alertsFor(ticks(Zone::In, 120, ticks(Zone::Unknown, 8))).empty());
+}
+
+TEST(ZoneAlerts, LeavingTheBandAlertsAndRepeatsEveryThirtySeconds)
+{
+    auto zones = ticks(Zone::In, 40, ticks(Zone::Unknown, 8));  // in until 48
+    zones = ticks(Zone::Above, 70, zones);                       // 49 to 118
+    EXPECT_EQ(alertsFor(zones), (Alerts{{49, A::Above}, {79, A::Above}, {109, A::Above}}));
+}
+
+TEST(ZoneAlerts, ComingBackInAfterAnAlertSaysSoOnce)
+{
+    auto zones = ticks(Zone::In, 40, ticks(Zone::Unknown, 8));
+    zones = ticks(Zone::Below, 10, zones);  // 49 to 58
+    zones = ticks(Zone::In, 30, zones);     // 59 on
+    EXPECT_EQ(alertsFor(zones), (Alerts{{49, A::Below}, {59, A::BackIn}}));
+}
+
+TEST(ZoneAlerts, NothingInTheFirstTwentySecondsOfAStep)
+{
+    // Off pace from the start: the first alert comes at 21 s.
+    EXPECT_EQ(alertsFor(ticks(Zone::Below, 30, ticks(Zone::Unknown, 8))),
+              (Alerts{{21, A::Below}}));
+    // A dip out and back within the first 20 s says nothing either way.
+    auto zones = ticks(Zone::Above, 5, ticks(Zone::In, 10));
+    zones = ticks(Zone::In, 30, zones);
+    EXPECT_TRUE(alertsFor(zones).empty());
+}
+
+TEST(ZoneAlerts, CrossingToTheOtherSideAlertsAtOnce)
+{
+    auto zones = ticks(Zone::Above, 25);   // alert at 21
+    zones = ticks(Zone::Below, 5, zones);  // 26 on
+    EXPECT_EQ(alertsFor(zones), (Alerts{{21, A::Above}, {26, A::Below}}));
+}
+
+TEST(ZoneAlerts, NoSignalHoldsAlertsBackButKeepsTheOneOutstanding)
+{
+    auto zones = ticks(Zone::Above, 25);       // alert at 21
+    zones = ticks(Zone::NoSignal, 40, zones);  // 26 to 65: quiet
+    zones = ticks(Zone::Unknown, 5, zones);    // the hold-off after it
+    zones = ticks(Zone::In, 10, zones);        // 71: back in
+    EXPECT_EQ(alertsFor(zones), (Alerts{{21, A::Above}, {71, A::BackIn}}));
+}
+
+TEST(ZoneAlerts, StillOutAfterAGapAlertsAgainOnceThirtySecondsHavePassed)
+{
+    auto zones = ticks(Zone::Above, 25);       // alert at 21
+    zones = ticks(Zone::NoSignal, 10, zones);  // 26 to 35
+    zones = ticks(Zone::Above, 30, zones);     // 36 on; 30 s after 21 is 51
+    EXPECT_EQ(alertsFor(zones), (Alerts{{21, A::Above}, {51, A::Above}}));
+}
+
+TEST(ZoneAlerts, ANewStepStartsQuietAndForgetsTheLast)
+{
+    ZoneAlerts z;
+    z.stepStarted();
+    for (int i = 0; i < 25; ++i) z.tick(Zone::Above);  // alerted at 21
+    z.stepStarted();
+    // On pace in the new step: no "back in" for the old step's alert.
+    for (int i = 0; i < 60; ++i) {
+        EXPECT_EQ(z.tick(Zone::In), A::None) << i;
+    }
 }
