@@ -17,9 +17,13 @@
 
 #include "SDK/Calibration/OutdoorStrideCalibrator.hpp"
 
+#include "SDK/Fit/FitWorkoutReader.hpp"
 #include "SDK/Workout/Intervals.hpp"
+#include "SDK/Workout/ScheduleState.hpp"
+#include "SDK/Workout/TargetGauge.hpp"
 #include "SDK/Workout/WorkoutAlerts.hpp"
 #include "SDK/Workout/WorkoutEngine.hpp"
+#include "SDK/Workout/WorkoutLibrary.hpp"
 #include "SDK/Workout/WorkoutProgram.hpp"
 
 #include "SettingsSerializer.hpp"
@@ -68,6 +72,11 @@ private:
     /// The lead-in's beep each second near the end of a step: shorter than
     /// the step-change alert's, so the countdown and the change sound apart.
     static constexpr uint16_t skLeadInBeepMs = 80;
+
+    /// The gauge arc's outer thirds: 30 s/km beyond a pace band, 15 bpm
+    /// beyond a heart-rate band.
+    static constexpr float skArcMarginSecPerKm = 30.0f;
+    static constexpr float skArcMarginBpm      = 15.0f;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -206,6 +215,30 @@ private:
 
     SDK::Calibration::OutdoorStrideCalibrator mCalibrator;
 
+    // -- Structured workouts --------------------------------------------------
+
+    /// The workout files, listed when the GUI starts and no run is going
+    /// (about 10 KB). A run reads its workout into mProgram, and so do the
+    /// list and the details screen, which only happen before a run.
+    SDK::Workout::Library        mLibrary;
+    SDK::Fit::FitWorkoutReader   mReader;
+    SDK::Workout::ScheduleState  mSchedule;
+
+    bool              mWorkoutMode       = false; ///< A structured workout is running.
+    int16_t           mWorkoutRequested  = CustomMessage::TrackStart::kNoWorkout;
+    bool              mWorkoutReachedEnd = false; ///< Completion reached; ending early after it still counts.
+    SDK::Workout::Ymd mWorkoutDate       = 0;     ///< The running workout's planned day, 0 if not scheduled.
+    char              mWorkoutFile[SDK::Workout::Library::kFileBytes] = {};
+
+    SDK::Workout::SpeedGauge     mSpeedGauge;
+    SDK::Workout::HeartRateGauge mHrGauge;
+    SDK::Workout::ZoneAlerts     mZoneAlerts;
+    float                        mBandLow  = 0.0f; ///< The step's target band, m/s or bpm.
+    float                        mBandHigh = 0.0f;
+
+    /// HR zone thresholds from the system settings; the last is maximum HR.
+    uint8_t mHrThresholds[CustomMessage::kHrThresholdsCount] = {};
+
     // -- Lifecycle ------------------------------------------------------------
 
     void connectGps();
@@ -227,6 +260,8 @@ private:
     void handleEvent(const CustomMessage::TrackResume& event);
     void handleEvent(const CustomMessage::ManualLap& event);
     void handleEvent(const CustomMessage::IntervalsNextPhase& event);
+    void handleEvent(const CustomMessage::WorkoutDetailsRequest& event);
+    void handleEvent(const CustomMessage::WorkoutEnd& event);
 
     // -- Track control --------------------------------------------------------
 
@@ -251,16 +286,43 @@ private:
 
     /// Build the program from the intervals settings and start it.
     void startIntervals();
+    /// R2: end the current interval phase or workout step and start the next.
+    void nextStep();
     void processIntervals();
     /// A step ended (@p how says why): close its lap, and alert.
     void onIntervalsStepEnded(SDK::Workout::Engine::Change how);
     /// Refresh mTrackData.intervals from the engine's current step.
     void updateIntervalsData();
-    void onIntervalsPhaseChange();
+    void notifyStepChange();
     Track::IntervalsPhase intervalsPhase(uint16_t step) const;
 
     /// The lap for workout step @p step, ended by @p trigger.
     LapEnd workoutLap(uint16_t step, SDK::Fit::LapTrigger trigger) const;
+    /// What ended step @p step, as the engine reported it.
+    SDK::Fit::LapTrigger lapTrigger(SDK::Workout::Engine::Change how, uint16_t step) const;
+
+    // -- Structured workouts --------------------------------------------------
+
+    /// List the workouts (unless a run is going) and send the list.
+    void sendWorkoutList();
+    /// Read entry @p index of the list into mProgram.
+    bool readWorkout(uint16_t index);
+    bool startWorkout(uint16_t index);
+    void processWorkout();
+    void onWorkoutStepEnded(SDK::Workout::Engine::Change how);
+    /// Set the gauges and alerts up for the engine's current step.
+    void startWorkoutStep();
+    void endWorkout();
+    void sendWorkoutData();
+    void sendWorkoutStep();
+    void playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert);
+    /// The zone of the current step's target, Unknown with none.
+    SDK::Workout::Zone targetZone() const;
+    /// A heart-rate target as a bpm band, from the watch's HR thresholds.
+    bool hrBand(const SDK::Workout::Step& step, float& low, float& high) const;
+    bool hasTrustedHr() const;
+    /// The watch's local date, or 0 if its clock is not set.
+    SDK::Workout::Ymd localDate();
 
     /// The run's active time and distance, as the workout engine counts them.
     uint32_t activeTimeMs() const;
@@ -275,7 +337,7 @@ private:
     void notifyLapEnd();
     void notifyNewActivity();
     void backlightOn(uint32_t timeoutMs = skBacklightTimeout);
-    void playBuzzerPattern(uint16_t beepMs, uint8_t count = 1, uint16_t silenceMs = 100);
+    void playBuzzerPattern(uint16_t beepMs, uint8_t count = 1, uint16_t silenceMs = 100, uint8_t volume = 100);
     void playVibroPattern(SDK::Message::RequestVibroPlay::Effect effect, uint8_t count = 1, uint16_t silenceMs = 100);
 
     // -- WristTilt callback ---------------------------------------------------
