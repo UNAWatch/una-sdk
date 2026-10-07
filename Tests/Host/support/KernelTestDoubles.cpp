@@ -293,27 +293,29 @@ size_t InMemoryFileSystem::InMemoryFile::getPosition() const
     return mPos;
 }
 
-InMemoryFileSystem::EmptyDirectory::EmptyDirectory(std::string path)
-    : mPath(std::move(path))
+InMemoryFileSystem::InMemoryDirectory::InMemoryDirectory(const InMemoryFileSystem& fs,
+                                                         std::string path)
+    : mFs(fs)
+    , mPath(std::move(path))
 {
 }
 
-void InMemoryFileSystem::EmptyDirectory::setPath(const char* path)
+void InMemoryFileSystem::InMemoryDirectory::setPath(const char* path)
 {
     mPath = path != nullptr ? path : "";
 }
 
-const char* InMemoryFileSystem::EmptyDirectory::getPath() const
+const char* InMemoryFileSystem::InMemoryDirectory::getPath() const
 {
     return mPath.c_str();
 }
 
-bool InMemoryFileSystem::EmptyDirectory::exist() const
+bool InMemoryFileSystem::InMemoryDirectory::exist() const
 {
     return true;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::rename(const char* newPath)
+bool InMemoryFileSystem::InMemoryDirectory::rename(const char* newPath)
 {
     if (newPath == nullptr) {
         return false;
@@ -322,35 +324,71 @@ bool InMemoryFileSystem::EmptyDirectory::rename(const char* newPath)
     return true;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::remove()
+bool InMemoryFileSystem::InMemoryDirectory::remove()
 {
     return true;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::create()
+bool InMemoryFileSystem::InMemoryDirectory::create()
 {
     return true;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::open()
+bool InMemoryFileSystem::InMemoryDirectory::open()
 {
+    mItems.clear();
+    mNext = 0;
+    const std::string prefix = mPath.empty() || mPath.back() == '/' ? mPath : mPath + "/";
+    for (const auto& kv : mFs.files) {
+        const std::string& path = kv.first;
+        if (!kv.second.exists || path.size() <= prefix.size()
+            || path.compare(0, prefix.size(), prefix) != 0) {
+            continue;
+        }
+        const std::string rest  = path.substr(prefix.size());
+        const size_t      slash = rest.find('/');
+        Item item{slash == std::string::npos ? rest : rest.substr(0, slash),
+                  slash != std::string::npos, kv.second.content.size()};
+        bool seen = false;
+        for (const Item& i : mItems) {
+            seen = seen || i.name == item.name;
+        }
+        if (!seen) {
+            mItems.push_back(item);
+        }
+    }
     mOpen = true;
     return true;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::isOpen() const
+bool InMemoryFileSystem::InMemoryDirectory::isOpen() const
 {
     return mOpen;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::readNext(SDK::Interface::IFileSystem::ObjectInfo& item, bool reset)
+bool InMemoryFileSystem::InMemoryDirectory::readNext(SDK::Interface::IFileSystem::ObjectInfo& item, bool reset)
 {
-    (void)item;
-    (void)reset;
-    return false;
+    if (!mOpen) {
+        return false;
+    }
+    if (reset) {
+        mNext = 0;
+        return true;
+    }
+    if (mNext >= mItems.size()) {
+        return false;
+    }
+    const Item& i = mItems[mNext++];
+    item = SDK::Interface::IFileSystem::ObjectInfo{};
+    const size_t n = std::min(i.name.size(), sizeof(item.name) - 1);
+    std::memcpy(item.name, i.name.data(), n);
+    item.name[n] = '\0';
+    item.isDir = i.isDir;
+    item.size  = i.isDir ? 0 : i.size;
+    return true;
 }
 
-bool InMemoryFileSystem::EmptyDirectory::close()
+bool InMemoryFileSystem::InMemoryDirectory::close()
 {
     mOpen = false;
     return true;
@@ -372,7 +410,7 @@ std::unique_ptr<SDK::Interface::IFile> InMemoryFileSystem::file(const char* path
 
 std::unique_ptr<SDK::Interface::IDirectory> InMemoryFileSystem::dir(const char* path)
 {
-    return std::make_unique<EmptyDirectory>(path != nullptr ? path : "");
+    return std::make_unique<InMemoryDirectory>(*this, path != nullptr ? path : "");
 }
 
 bool InMemoryFileSystem::exist(const char* path) const
