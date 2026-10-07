@@ -27,13 +27,17 @@ set(UNA_SDK_SOURCES_FIT
 )
 
 # Structured-workout step engine, the on-watch Intervals builder, the pace
-# and heart-rate target gauges and the alert timing (SDK::Workout). Programs come from
+# and heart-rate target gauges, the alert timing, and the list of workout
+# files with the schedule state (SDK::Workout). ScheduleState needs
+# UNA_SDK_SOURCES_JSON in the same link. Programs come from
 # FitWorkoutReader in UNA_SDK_SOURCES_FIT or from buildIntervals().
 set(UNA_SDK_SOURCES_WORKOUT
     "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutEngine.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/Intervals.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/TargetGauge.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutAlerts.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutLibrary.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/ScheduleState.cpp"
 )
 
 set(UNA_SDK_SOURCES_JSON
