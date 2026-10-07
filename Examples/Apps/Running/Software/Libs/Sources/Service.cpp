@@ -839,6 +839,9 @@ void Service::startTrack(std::time_t utc)
         mWorkoutMode = startWorkout(static_cast<uint16_t>(mWorkoutRequested));
     }
     mTrackData.workoutMode = mWorkoutMode;
+    if (mWorkoutMode) {
+        sendWorkoutSteps();
+    }
 
     // Each workout step is a lap: reserve them all up front.
     std::size_t lapReserve = skLapReserve;
@@ -1755,7 +1758,7 @@ void Service::onWorkoutStepEnded(SDK::Workout::Engine::Change how)
     // Every step change alerts the same way, whether the step ran out or the
     // runner moved on.
     startWorkoutStep();
-    sendWorkoutStep();
+    sendWorkoutSteps();
     notifyStepChange();
     sendWorkoutData();
 }
@@ -1792,11 +1795,6 @@ void Service::sendWorkoutData()
     if (!msg) {
         return;
     }
-    SDK::Workout::stepLabel(s, mIsImperial, msg->label, sizeof(msg->label));
-    uint16_t next = 0;
-    if (mEngine.peekNext(next)) {
-        SDK::Workout::stepLabel(mProgram.steps[next], mIsImperial, msg->next, sizeof(msg->next));
-    }
     msg->remainingMs  = st.remainingMs;
     msg->remainingCm  = st.remainingCm;
     msg->stepTimeMs   = st.stepTimeMs;
@@ -1823,21 +1821,33 @@ void Service::sendWorkoutData()
     msg.send();
 }
 
-void Service::sendWorkoutStep()
+void Service::sendWorkoutSteps()
 {
     const SDK::Workout::Engine::Status& st = mEngine.status();
-    const SDK::Workout::Step&           s  = mProgram.steps[st.step];
+    sendWorkoutStep(&mProgram.steps[st.step], false);
+    uint16_t next = 0;
+    sendWorkoutStep(mEngine.peekNext(next) ? &mProgram.steps[next] : nullptr, true);
+}
 
+void Service::sendWorkoutStep(const SDK::Workout::Step* step, bool next)
+{
     auto msg = SDK::make_msg<CustomMessage::WorkoutStep>(mKernel);
     if (!msg) {
         return;
     }
-    SDK::Workout::stepLabel(s, mIsImperial, msg->label, sizeof(msg->label));
-    SDK::Workout::stepDuration(s, mIsImperial, msg->duration, sizeof(msg->duration));
-    SDK::Workout::stepTarget(s, mIsImperial, msg->target, sizeof(msg->target));
-    msg->rep       = st.rep;
-    msg->reps      = st.reps;
-    msg->intensity = static_cast<uint8_t>(s.intensity);
+    msg->next = next;
+    msg->none = step == nullptr;
+    if (step) {
+        const char* notes = step->notes[0] != '\0' ? step->notes : step->name;
+        std::strncpy(msg->notes, notes, sizeof(msg->notes) - 1);
+        SDK::Workout::stepDuration(*step, mIsImperial, msg->duration, sizeof(msg->duration));
+        SDK::Workout::stepTarget(*step, mIsImperial, msg->target, sizeof(msg->target));
+        msg->intensity = static_cast<uint8_t>(step->intensity);
+        if (!next) {
+            msg->rep  = mEngine.status().rep;
+            msg->reps = mEngine.status().reps;
+        }
+    }
     msg.send();
 }
 

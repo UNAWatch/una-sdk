@@ -315,7 +315,8 @@ private:
     void startWorkoutStep();
     void endWorkout();
     void sendWorkoutData();
-    void sendWorkoutStep();
+    void sendWorkoutSteps();
+    void sendWorkoutStep(const SDK::Workout::Step* step, bool next);
     void playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert);
     /// The zone of the current step's target, Unknown with none.
     SDK::Workout::Zone targetZone() const;
