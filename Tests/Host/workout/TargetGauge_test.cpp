@@ -288,11 +288,58 @@ TEST(SpeedGauge, LongGapCatchUpIsAveragedOverTheGap)
     }
     for (int t = 0; t < 60; ++t) g.tick(0.0f, false, d);
     d += 500 * 61;
-    for (int t = 0; t < 60; ++t) {
-        g.tick(5.0f, true, d);
-        EXPECT_NEAR(g.valueMps(), 5.0f, 0.05f) << t;
-        EXPECT_NE(g.zone(), Zone::Above) << t;
+    // Live reads 5.6, so the value shows where the window starts: on the
+    // gap's average, 5.0, only if it reaches back over the gap.
+    for (int t = 1; t <= 60; ++t) {
+        g.tick(5.6f, true, d);
+        const float w = std::exp(-static_cast<float>(t) / SpeedGauge::kBlendTauSec);
+        EXPECT_NEAR(g.valueMps(), w * 5.6f + (1.0f - w) * 5.0f, 1e-3f) << t;
         d += 500;
+    }
+}
+
+TEST(SpeedGauge, GapAcrossAStepStartStaysOutOfTheNewStep)
+{
+    // In band at 4.26 m/s. The signal goes 5 s before the step ends and
+    // returns 4 s into the next, when its distance catches up by 10 s of
+    // running in one go.
+    SpeedGauge g;
+    g.startStep(kLow, kHigh);
+    uint32_t d = 0;
+    for (int t = 0; t < 115; ++t) {
+        d += 426;
+        g.tick(kMid, true, d);
+    }
+    for (int t = 0; t < 5; ++t) g.tick(0.0f, false, d);
+    g.startStep(kLow, kHigh);
+    for (int t = 0; t < 4; ++t) g.tick(0.0f, false, 0);
+    d = 426 * 10;
+    for (int t = 0; t < 120; ++t) {
+        g.tick(kMid, true, d);
+        EXPECT_NEAR(g.valueMps(), kMid, 0.05f) << t;
+        EXPECT_NE(g.zone(), Zone::Above) << t;
+        d += 426;
+    }
+}
+
+TEST(SpeedGauge, WithNothingBeforeAGapTheWindowStartsAfterIt)
+{
+    // The signal is lost before the step starts, so nothing before the gap
+    // is in the step. Once it returns the window starts on its first second,
+    // so it averages the running since then and leaves out the catch-up.
+    SpeedGauge g;
+    g.startStep(kLow, kHigh);
+    g.tick(0.0f, false, 0);
+    g.startStep(kLow, kHigh);
+    for (int t = 0; t < 10; ++t) g.tick(0.0f, false, 0);
+    uint32_t d = 5000;  // the catch-up
+    g.tick(5.0f, true, d);
+    EXPECT_FLOAT_EQ(g.valueMps(), 5.0f);  // nothing to average yet: live
+    for (int t = 2; t <= 20; ++t) {
+        d += 400;
+        g.tick(5.0f, true, d);
+        const float w = std::exp(-static_cast<float>(t) / SpeedGauge::kBlendTauSec);
+        EXPECT_NEAR(g.valueMps(), w * 5.0f + (1.0f - w) * 4.0f, 1e-3f) << t;
     }
 }
 

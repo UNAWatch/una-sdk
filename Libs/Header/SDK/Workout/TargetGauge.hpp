@@ -96,8 +96,14 @@ public:
     void startStep();
 
     /// One active second. @p liveMps and @p liveValid: the current live
-    /// speed and whether there is a current reading. @p stepDistanceCm: the
-    /// step's distance so far.
+    /// speed and whether there is a reading. @p stepDistanceCm: the step's
+    /// distance so far.
+    ///
+    /// @p liveValid false means the signal is lost: the zone goes to NoSignal,
+    /// and when it returns the blend and the hold-off start again. A second
+    /// that brings no fresh sample is not a loss, so @p liveValid must already
+    /// ride over one: pass GpsSpeedFilter::isValid(), which does, rather than
+    /// hasCurrentSample(), which does not.
     void tick(float liveMps, bool liveValid, uint32_t stepDistanceCm);
 
     /// The run resumed after a pause: start the blend again from live speed
@@ -143,7 +149,9 @@ public:
     /// stays Unknown (NoSignal without a reading).
     void startStep();
 
-    /// One active second. @p valid false when there is no trustworthy reading.
+    /// One active second. @p valid false when there is no trustworthy
+    /// reading. As for SpeedGauge::tick(), a second that only lacks a fresh
+    /// sample must not count as one without a reading.
     void tick(float bpm, bool valid);
 
     /// The run resumed after a pause: hold the zone off.
