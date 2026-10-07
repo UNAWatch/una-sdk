@@ -409,7 +409,6 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             mHrSource     = static_cast<uint8_t>(parser.getSource());
             mHrOpticalBpm = static_cast<uint8_t>(parser.getOpticalBpm());
             mHrExternalBpm= static_cast<uint8_t>(parser.getExternalBpm());
-            mHrAgeSec     = 0;
             LOG_DEBUG("HR %.1f trust %.1f src %u (opt %u ext %u)\n",
                       parser.getBpm(), parser.getTrustLevel(), mHrSource,
                       mHrOpticalBpm, mHrExternalBpm);
@@ -795,7 +794,6 @@ void Service::startTrack(std::time_t utc)
     mSpeedCounter.reset();
     mSpeedFilter.reset();
     mHrCounter.reset();
-    mHrAgeSec = skHrStaleSec + 1;
     mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
     mHrOpticalBpm = 0;
     mHrExternalBpm = 0;
@@ -1718,12 +1716,7 @@ void Service::processWorkout()
     // the distance across a lost fix has come in.
     mSpeedGauge.tick(speedMs, mSpeedFilter.isValid() && mGpsCatchUp.caughtUp(),
                      st.stepDistanceCm);
-    // The last bpm and trust level stay put if samples stop: past
-    // skHrStaleSec without one, the reading counts as lost.
-    if (mHrAgeSec <= skHrStaleSec) {
-        ++mHrAgeSec;
-    }
-    mHrGauge.tick(mHrCounter.getCurrent(), hasTrustedHr() && mHrAgeSec <= skHrStaleSec);
+    mHrGauge.tick(mHrCounter.getCurrent(), hasTrustedHr());
 
     const auto alert = mZoneAlerts.tick(targetZone());
     const bool beep  = mLeadIn.tick(st);

@@ -73,11 +73,6 @@ private:
     /// the step-change alert's, so the countdown and the change sound apart.
     static constexpr uint16_t skLeadInBeepMs = 80;
 
-    /// Workout seconds after the last heart-rate sample before the heart-rate
-    /// gauge counts the reading as lost. Samples come about once a second, in
-    /// batches up to a second late.
-    static constexpr uint8_t skHrStaleSec = 5;
-
     /// The gauge arc's outer thirds: 30 s/km beyond a pace band, 15 bpm
     /// beyond a heart-rate band.
     static constexpr float skArcMarginSecPerKm = 30.0f;
@@ -152,7 +147,6 @@ private:
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.
     uint8_t                                             mHrExternalBpm = 0; ///< Latest raw external (strap) bpm, for the FIT hr_external series.
-    uint8_t                                             mHrAgeSec = skHrStaleSec + 1; ///< Workout seconds since the last HR sample.
     SDK::Filter::SimpleLPF                              mAltitudeFilter;
     SDK::Metric::DeltaCounter                           mAltitudeCounter;
 
