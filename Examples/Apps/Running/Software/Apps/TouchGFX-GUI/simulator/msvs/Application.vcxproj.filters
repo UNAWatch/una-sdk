@@ -646,6 +646,66 @@
     <Filter Include="SDK\Libs\Header\Filters">
       <UniqueIdentifier>{7df059d7-271d-4b32-8096-de7b34e3376c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\gui\workoutdetails_screen">
+      <UniqueIdentifier>2ADF0FFD-4A49-B6D4-AAAA-3DADC8B6994A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\workoutlist_screen">
+      <UniqueIdentifier>2CF65F0F-4751-90F7-5FCB-1B315618EC54</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\workoutdetails_screen">
+      <UniqueIdentifier>5A49CB4C-DBD9-EBD2-787F-0F9736D7EACA</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\workoutlist_screen">
+      <UniqueIdentifier>056D95CB-49C8-0CB6-4B44-82D4D87DC483</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\workoutmenu_screen">
+      <UniqueIdentifier>B2EE189E-8D59-7761-8A6F-523047DF9E5C</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\workoutmenu_screen">
+      <UniqueIdentifier>87EA9A66-00E7-9975-780F-97D42AE7A35F</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\trackworkoutstep_screen">
+      <UniqueIdentifier>01F6657C-4294-AB67-A515-E299D20BCC27</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\trackworkoutstep_screen">
+      <UniqueIdentifier>F1D30B54-5767-9D98-5631-880BCC8C26CA</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\workouttoday_screen">
+      <UniqueIdentifier>BB32A0B2-7502-78FF-2523-E25D19A327A8</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\workouttoday_screen">
+      <UniqueIdentifier>172F9652-9796-725F-38BD-8D3620A2C5EC</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\trackworkoutstep_screen">
+      <UniqueIdentifier>B82451DE-BD73-4410-F9C0-1960108BBB3C</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\trackworkoutstep_screen">
+      <UniqueIdentifier>C3E9B6B9-74C5-BECB-85CD-2730EFC7D4CE</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\workoutdetails_screen">
+      <UniqueIdentifier>729E764D-CB92-8612-863C-F3C0D6ED2C15</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\workoutdetails_screen">
+      <UniqueIdentifier>69AA6D8D-B9D3-0BA8-60C4-6F1AF66D2AF2</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\workouttoday_screen">
+      <UniqueIdentifier>D372EAEA-4BBD-B5BA-B409-D1797AB3935A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\workoutlist_screen">
+      <UniqueIdentifier>53985DE2-54FE-1202-1E93-8144993F51E6</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\workoutlist_screen">
+      <UniqueIdentifier>094A70F0-608B-57C0-4D9E-B5B2ABF66E42</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\workoutmenu_screen">
+      <UniqueIdentifier>75E163A8-3D1B-1846-54E6-58B42A162DF9</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\workoutmenu_screen">
+      <UniqueIdentifier>66D70AC9-C7F3-38DF-AB12-D3256EBD74FC</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\workouttoday_screen">
+      <UniqueIdentifier>9027E38E-6D2D-401E-DFA6-3F40728F76C9</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp">
@@ -1712,6 +1772,123 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TwoTonePickerBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\trackworkoutstep_screen\TrackWorkoutStepPresenter.cpp">
+      <Filter>Source Files\gui\trackworkoutstep_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\trackworkoutstep_screen\TrackWorkoutStepView.cpp">
+      <Filter>Source Files\gui\trackworkoutstep_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackworkoutstep_screen\TrackWorkoutStepViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\trackworkoutstep_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workoutdetails_screen\WorkoutDetailsPresenter.cpp">
+      <Filter>Source Files\gui\workoutdetails_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workoutdetails_screen\WorkoutDetailsView.cpp">
+      <Filter>Source Files\gui\workoutdetails_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\workoutdetails_screen\WorkoutDetailsViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\workoutdetails_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workoutlist_screen\WorkoutListPresenter.cpp">
+      <Filter>Source Files\gui\workoutlist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workoutlist_screen\WorkoutListView.cpp">
+      <Filter>Source Files\gui\workoutlist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\workoutlist_screen\WorkoutListViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\workoutlist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workoutmenu_screen\WorkoutMenuPresenter.cpp">
+      <Filter>Source Files\gui\workoutmenu_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workoutmenu_screen\WorkoutMenuView.cpp">
+      <Filter>Source Files\gui\workoutmenu_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\workoutmenu_screen\WorkoutMenuViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\workoutmenu_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workouttoday_screen\WorkoutTodayPresenter.cpp">
+      <Filter>Source Files\gui\workouttoday_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\workouttoday_screen\WorkoutTodayView.cpp">
+      <Filter>Source Files\gui\workouttoday_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\workouttoday_screen\WorkoutTodayViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\workouttoday_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\trackworkoutstep_screen\TrackWorkoutStepPresenter.hpp">
+      <Filter>Header Files\gui\trackworkoutstep_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\trackworkoutstep_screen\TrackWorkoutStepView.hpp">
+      <Filter>Header Files\gui\trackworkoutstep_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackworkoutstep_screen\TrackWorkoutStepViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\trackworkoutstep_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workoutdetails_screen\WorkoutDetailsPresenter.hpp">
+      <Filter>Header Files\gui\workoutdetails_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workoutdetails_screen\WorkoutDetailsView.hpp">
+      <Filter>Header Files\gui\workoutdetails_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workoutdetails_screen\WorkoutDetailsViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\workoutdetails_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workoutlist_screen\WorkoutListPresenter.hpp">
+      <Filter>Header Files\gui\workoutlist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workoutlist_screen\WorkoutListView.hpp">
+      <Filter>Header Files\gui\workoutlist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workoutlist_screen\WorkoutListViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\workoutlist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workoutmenu_screen\WorkoutMenuPresenter.hpp">
+      <Filter>Header Files\gui\workoutmenu_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workoutmenu_screen\WorkoutMenuView.hpp">
+      <Filter>Header Files\gui\workoutmenu_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workoutmenu_screen\WorkoutMenuViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\workoutmenu_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workouttoday_screen\WorkoutTodayPresenter.hpp">
+      <Filter>Header Files\gui\workouttoday_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\workouttoday_screen\WorkoutTodayView.hpp">
+      <Filter>Header Files\gui\workouttoday_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workouttoday_screen\WorkoutTodayViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\workouttoday_screen</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\containers\WorkoutFaceGauge.cpp">
+      <Filter>Source Files\gui\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\containers\WorkoutFaceStep.cpp">
+      <Filter>Source Files\gui\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\containers\WorkoutStepCard.cpp">
+      <Filter>Source Files\gui\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\common\WorkoutUi.cpp">
+      <Filter>Source Files\gui\common</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutFaceGauge.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutFaceStep.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutLabel.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutStepCard.hpp">
+      <Filter>Header Files\gui\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\common\WorkoutUi.hpp">
+      <Filter>Header Files\gui\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

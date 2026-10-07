@@ -14,6 +14,9 @@ public:
 
     void setIntervals(const Settings::Intervals& inervals, bool isImperial);
 
+    /// The countdown before an armed workout: its name, totals and steps.
+    void setWorkout(const SDK::Workout::Library::Entry& entry, bool isImperial);
+
 protected:
     static const uint32_t kTimeoutSec = 5;
     uint32_t mLastDisplayedSecond = 0;

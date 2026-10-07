@@ -1,4 +1,5 @@
 #include <gui/model/Model.hpp>
+#include <cstring>
 #include "SDK/Messages/MessageGuard.hpp"
 #include <gui/model/ModelListener.hpp>
 #include <gui/common/FrontendApplication.hpp>
@@ -197,7 +198,22 @@ const Track::IntervalsData& Model::getPendingAlertIntervals() const
 // arrives from the Service (~1 s after start).
 void Model::trackStart(bool intervalsMode)
 {
+    // An armed workout is followed unless Intervals were chosen; either way
+    // it is used up by this run.
+    const int16_t workout = intervalsMode ? kNoWorkout : mArmedWorkout;
+    mArmedWorkout = kNoWorkout;
+
     mTrackData.intervalsMode = intervalsMode;
+    mTrackData.workoutMode   = workout != kNoWorkout;
+    if (mTrackData.workoutMode) {
+        mMenu.track.set(App::MenuNav::TrackView::ID_WORKOUT_GAUGE);
+    } else if (intervalsMode) {
+        mMenu.track.set(App::MenuNav::TrackView::ID_INTERVALS);
+    }
+    mStepCard    = false;
+    mWorkoutFace = WorkoutFace{};
+    mWorkoutStep = WorkoutStepInfo{};
+    mWorkoutNext = WorkoutStepInfo{};
 
     if (intervalsMode) {
         const Settings::Intervals& cfg = mSettings.intervals;
@@ -236,7 +252,7 @@ void Model::trackStart(bool intervalsMode)
         }
     }
 
-    SDK::send_msg<CustomMessage::TrackStart>(mKernel, intervalsMode);
+    SDK::send_msg<CustomMessage::TrackStart>(mKernel, intervalsMode, workout);
 }
 
 void Model::intervalsNextPhase()
@@ -292,6 +308,93 @@ bool Model::isTrackSummaryAvailable() const
 const ActivitySummary& Model::getTrackSummary() const
 {
     return *mActivitySummary;
+}
+
+
+// Structured workouts
+
+uint32_t Model::getTodayYmd() const
+{
+    if (mTime.tm_year + 1900 < 2020) {
+        return 0;
+    }
+    return static_cast<uint32_t>(mTime.tm_year + 1900) * 10000u
+         + static_cast<uint32_t>(mTime.tm_mon + 1) * 100u
+         + static_cast<uint32_t>(mTime.tm_mday);
+}
+
+const SDK::Workout::Library* Model::getWorkoutLibrary() const
+{
+    return mWorkoutLibrary;
+}
+
+bool Model::takeTodayPrompt()
+{
+    if (mTodayPrompted || mWorkoutLibrary == nullptr || isTrackActive()
+        || mTodayWorkout == CustomMessage::WorkoutList::kNoToday
+        || mTodayWorkout >= mWorkoutLibrary->size()) {
+        return false;
+    }
+    mTodayPrompted = true;
+    return true;
+}
+
+uint16_t Model::getTodayWorkout() const
+{
+    return mTodayWorkout;
+}
+
+void Model::setChosenWorkout(uint16_t index)
+{
+    mChosenWorkout = index;
+}
+
+uint16_t Model::getChosenWorkout() const
+{
+    return mChosenWorkout;
+}
+
+void Model::armWorkout(int16_t index)
+{
+    mArmedWorkout = index;
+}
+
+int16_t Model::getArmedWorkout() const
+{
+    return mArmedWorkout;
+}
+
+void Model::requestWorkoutDetails(uint16_t index)
+{
+    mWorkoutDetails = nullptr;
+    SDK::send_msg<CustomMessage::WorkoutDetailsRequest>(mKernel, index);
+}
+
+const SDK::Workout::Program* Model::getWorkoutDetails() const
+{
+    return mWorkoutDetails;
+}
+
+void Model::endWorkout()
+{
+    SDK::send_msg<CustomMessage::WorkoutEnd>(mKernel);
+}
+
+const Model::WorkoutFace& Model::getWorkoutFace() const
+{
+    return mWorkoutFace;
+}
+
+const Model::WorkoutStepInfo& Model::getWorkoutStep(bool next) const
+{
+    return next ? mWorkoutNext : mWorkoutStep;
+}
+
+bool Model::takeStepCard()
+{
+    const bool card = mStepCard;
+    mStepCard = false;
+    return card;
 }
 
 
@@ -439,6 +542,58 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
                 mActivitySummary = msg->summary;
                 modelListener->onActivitySummary(*mActivitySummary);
             }
+        } break;
+
+        case CustomMessage::WORKOUT_LIST: {
+            LOG_DEBUG("WORKOUT_LIST\n");
+            auto* msg       = static_cast<CustomMessage::WorkoutList*>(message);
+            mWorkoutLibrary = msg->library;
+            mTodayWorkout   = msg->today;
+            modelListener->onWorkoutList();
+        } break;
+
+        case CustomMessage::WORKOUT_DETAILS: {
+            LOG_DEBUG("WORKOUT_DETAILS\n");
+            auto* msg       = static_cast<CustomMessage::WorkoutDetails*>(message);
+            mWorkoutDetails = msg->program;
+            modelListener->onWorkoutDetails();
+        } break;
+
+        case CustomMessage::WORKOUT_DATA: {
+            auto* msg = static_cast<CustomMessage::WorkoutData*>(message);
+            mWorkoutFace.remainingMs = msg->remainingMs;
+            mWorkoutFace.remainingCm = msg->remainingCm;
+            mWorkoutFace.stepTimeMs  = msg->stepTimeMs;
+            mWorkoutFace.rep         = msg->rep;
+            mWorkoutFace.reps        = msg->reps;
+            mWorkoutFace.value       = msg->value;
+            mWorkoutFace.arc         = msg->arc;
+            mWorkoutFace.stepEnd     = msg->stepEnd;
+            mWorkoutFace.target      = msg->target;
+            mWorkoutFace.zone        = msg->zone;
+            mWorkoutFace.intensity   = msg->intensity;
+            mWorkoutFace.leadIn      = msg->leadIn;
+            modelListener->onWorkoutData(mWorkoutFace);
+        } break;
+
+        case CustomMessage::WORKOUT_STEP: {
+            LOG_DEBUG("WORKOUT_STEP\n");
+            auto* msg = static_cast<CustomMessage::WorkoutStep*>(message);
+            WorkoutStepInfo& step = msg->next ? mWorkoutNext : mWorkoutStep;
+            std::memcpy(step.notes, msg->notes, sizeof(step.notes));
+            step.notes[sizeof(step.notes) - 1] = '\0';
+            std::memcpy(step.duration, msg->duration, sizeof(step.duration));
+            step.duration[sizeof(step.duration) - 1] = '\0';
+            std::memcpy(step.target, msg->target, sizeof(step.target));
+            step.target[sizeof(step.target) - 1] = '\0';
+            step.rep       = msg->rep;
+            step.reps      = msg->reps;
+            step.intensity = msg->intensity;
+            step.none      = msg->none;
+            if (!msg->next) {
+                mStepCard = true;   // the card shows once the Track screen sees it
+            }
+            modelListener->onWorkoutStep(msg->next);
         } break;
 
         case CustomMessage::ACCESSORY_STATUS: {

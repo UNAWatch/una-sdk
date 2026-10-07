@@ -98,6 +98,21 @@ public:
     // TrackIntervalsWorkoutCompleted
     void gotoTrackIntervalsWorkoutCompletedScreenNoTransition();
 
+    // WorkoutToday
+    void gotoWorkoutTodayScreenNoTransition();
+
+    // WorkoutList
+    void gotoWorkoutListScreenNoTransition();
+
+    // WorkoutMenu
+    void gotoWorkoutMenuScreenNoTransition();
+
+    // WorkoutDetails
+    void gotoWorkoutDetailsScreenNoTransition();
+
+    // TrackWorkoutStep
+    void gotoTrackWorkoutStepScreenNoTransition();
+
 protected:
     touchgfx::Callback<FrontendApplicationBase> transitionCallback;
     FrontendHeap& frontendHeap;
@@ -180,6 +195,21 @@ protected:
 
     // TrackIntervalsWorkoutCompleted
     void gotoTrackIntervalsWorkoutCompletedScreenNoTransitionImpl();
+
+    // WorkoutToday
+    void gotoWorkoutTodayScreenNoTransitionImpl();
+
+    // WorkoutList
+    void gotoWorkoutListScreenNoTransitionImpl();
+
+    // WorkoutMenu
+    void gotoWorkoutMenuScreenNoTransitionImpl();
+
+    // WorkoutDetails
+    void gotoWorkoutDetailsScreenNoTransitionImpl();
+
+    // TrackWorkoutStep
+    void gotoTrackWorkoutStepScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATIONBASE_HPP

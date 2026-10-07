@@ -29,6 +29,9 @@ public:
 
     void startTrack();
 
+    /// The countdown is for an armed workout rather than Intervals.
+    bool isWorkout() const;
+
 private:
     TrackIntervalsCountdownPresenter();
 

@@ -64,6 +64,16 @@
 #include <gui/trackintervalsalert_screen/TrackIntervalsAlertPresenter.hpp>
 #include <gui/trackintervalsworkoutcompleted_screen/TrackIntervalsWorkoutCompletedView.hpp>
 #include <gui/trackintervalsworkoutcompleted_screen/TrackIntervalsWorkoutCompletedPresenter.hpp>
+#include <gui/workouttoday_screen/WorkoutTodayView.hpp>
+#include <gui/workouttoday_screen/WorkoutTodayPresenter.hpp>
+#include <gui/workoutlist_screen/WorkoutListView.hpp>
+#include <gui/workoutlist_screen/WorkoutListPresenter.hpp>
+#include <gui/workoutmenu_screen/WorkoutMenuView.hpp>
+#include <gui/workoutmenu_screen/WorkoutMenuPresenter.hpp>
+#include <gui/workoutdetails_screen/WorkoutDetailsView.hpp>
+#include <gui/workoutdetails_screen/WorkoutDetailsPresenter.hpp>
+#include <gui/trackworkoutstep_screen/TrackWorkoutStepView.hpp>
+#include <gui/trackworkoutstep_screen/TrackWorkoutStepPresenter.hpp>
 
 
 /**
@@ -112,7 +122,12 @@ public:
             touchgfx::meta::TypeList< TrackIntervalsCountdownView,
             touchgfx::meta::TypeList< TrackIntervalsAlertView,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedView,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::TypeList< WorkoutTodayView,
+            touchgfx::meta::TypeList< WorkoutListView,
+            touchgfx::meta::TypeList< WorkoutMenuView,
+            touchgfx::meta::TypeList< WorkoutDetailsView,
+            touchgfx::meta::TypeList< TrackWorkoutStepView,
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedViewTypes;
 
     /**
@@ -150,7 +165,12 @@ public:
             touchgfx::meta::TypeList< TrackIntervalsCountdownPresenter,
             touchgfx::meta::TypeList< TrackIntervalsAlertPresenter,
             touchgfx::meta::TypeList< TrackIntervalsWorkoutCompletedPresenter,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::TypeList< WorkoutTodayPresenter,
+            touchgfx::meta::TypeList< WorkoutListPresenter,
+            touchgfx::meta::TypeList< WorkoutMenuPresenter,
+            touchgfx::meta::TypeList< WorkoutDetailsPresenter,
+            touchgfx::meta::TypeList< TrackWorkoutStepPresenter,
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedPresenterTypes;
 
     /**
