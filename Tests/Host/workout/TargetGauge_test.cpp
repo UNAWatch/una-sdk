@@ -615,3 +615,95 @@ TEST(ArcFraction, EdgeCases)
     EXPECT_FLOAT_EQ(arcFraction(std::nanf(""), 225.0f, 245.0f, 30.0f), 0.5f);
     EXPECT_FLOAT_EQ(arcFraction(200.0f, 225.0f, 245.0f, 0.0f), 0.0f);  // no margin
 }
+
+// --- GpsCatchUp ------------------------------------------------------------------
+
+TEST(GpsCatchUp, CaughtUpUntilAFixIsLost)
+{
+    GpsCatchUp c;
+    EXPECT_TRUE(c.caughtUp());
+    c.onLocation(true, 1000);
+    c.onDistance(1500);
+    EXPECT_TRUE(c.caughtUp());
+    c.onLocation(false, 2000);
+    EXPECT_FALSE(c.caughtUp());
+}
+
+TEST(GpsCatchUp, WaitsForTwoDistanceSamplesStampedAfterTheFix)
+{
+    GpsCatchUp c;
+    c.onLocation(false, 1000);
+    c.onDistance(1700);  // still lost: not counted
+    c.onLocation(true, 2000);
+    c.onDistance(1900);  // taken before the fix
+    c.onDistance(2000);  // same stamp: may not have it yet
+    EXPECT_FALSE(c.caughtUp());
+    c.onLocation(true, 2900);  // later fixes don't move the mark
+    c.onDistance(2700);
+    EXPECT_FALSE(c.caughtUp());
+    c.onDistance(3700);
+    EXPECT_TRUE(c.caughtUp());
+}
+
+TEST(GpsCatchUp, ALossBeforeCatchingUpStartsAgain)
+{
+    GpsCatchUp c;
+    c.onLocation(false, 1000);
+    c.onLocation(true, 2000);
+    c.onDistance(2700);
+    c.onLocation(false, 3000);
+    c.onDistance(3700);
+    c.onLocation(true, 4000);
+    c.onDistance(4700);
+    EXPECT_FALSE(c.caughtUp());
+    c.onDistance(5700);
+    EXPECT_TRUE(c.caughtUp());
+}
+
+TEST(GpsCatchUp, AClockThatStartsOverDoesNotHoldItForever)
+{
+    GpsCatchUp c;
+    c.onLocation(false, 4194303000u);
+    c.onLocation(true, 4194303500u);
+    c.onDistance(200);
+    c.onDistance(1200);
+    EXPECT_TRUE(c.caughtUp());
+}
+
+TEST(GpsCatchUp, ResetForgetsALoss)
+{
+    GpsCatchUp c;
+    c.onLocation(false, 1000);
+    c.reset();
+    EXPECT_TRUE(c.caughtUp());
+}
+
+TEST(GpsCatchUp, KeepsALateCatchUpOutOfTheGauge)
+{
+    // In band at 4.26 m/s, with a minute without a fix mid-step. The speed
+    // is valid again on the second the fix returns, but the distance across
+    // the gap comes a second later. Each second: the location at +300 ms,
+    // the distance at +700 ms, the gauge's tick at +900 ms.
+    auto aboveTicks = [](bool hold) {
+        SpeedGauge g;
+        GpsCatchUp c;
+        g.startStep(kLow, kHigh);
+        uint32_t truth = 0, d = 0;
+        int above = 0;
+        for (uint32_t t = 0; t < 400; ++t) {
+            const bool fix = t < 120 || t >= 180;
+            truth += 426;
+            const uint32_t ms = t * 1000;
+            c.onLocation(fix, ms + 300);
+            if (fix && t != 180) {
+                d = truth;  // at 180 the distance hasn't had the fix yet
+            }
+            c.onDistance(ms + 700);
+            g.tick(kMid, fix && (!hold || c.caughtUp()), d);
+            above += g.zone() == Zone::Above;
+        }
+        return above;
+    };
+    EXPECT_GT(aboveTicks(false), 0);  // the failure the hold is for
+    EXPECT_EQ(aboveTicks(true), 0);
+}

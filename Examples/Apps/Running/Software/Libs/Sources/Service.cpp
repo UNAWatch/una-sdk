@@ -357,6 +357,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
                 parser.getCoordinates(mGps.latitude, mGps.longitude, mGps.altitude);
                 mGpsPosFresh = true;    // consumed by the speed filter each tick
             }
+            mGpsCatchUp.onLocation(mGps.fix, parser.getTimestamp());
             LOG_DEBUG("Location: fix %u, lat %f, lon %f\n", mGps.fix, mGps.latitude, mGps.longitude);
         }
     } else if (mSensorGpsSpeed.matchesDriver(handle)) {
@@ -385,6 +386,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         SDK::SensorDataParser::GpsDistance parser(data[0]);
         if (parser.isDataValid()) {
             mDistanceCounter.add(parser.getDistance());
+            mGpsCatchUp.onDistance(parser.getTimestamp());
             LOG_DEBUG("Distance: %.2f m\n", parser.getDistance());
         }
     } else if (mSensorPressure.matchesDriver(handle)) {
@@ -810,6 +812,7 @@ void Service::startTrack(std::time_t utc)
     mGpsPosFresh      = false;
     mGpsSpeedPeakMs   = 0.0f;
     mGpsDeadReckoning = false;
+    mGpsCatchUp.reset();
     mLastCalibUtc     = 0;
     mCalibrator.load();
     if (mSettings.calibTraceEn) {
@@ -1709,8 +1712,10 @@ void Service::processWorkout()
     mWorkoutReachedEnd = mWorkoutReachedEnd || st.reachedEnd;
 
     // The filter's validity rides over a second that brings no fresh sample;
-    // the gauge treats a false as a lost signal.
-    mSpeedGauge.tick(speedMs, mSpeedFilter.isValid(), st.stepDistanceCm);
+    // the gauge treats a false as a lost signal, and so it must stay until
+    // the distance across a lost fix has come in.
+    mSpeedGauge.tick(speedMs, mSpeedFilter.isValid() && mGpsCatchUp.caughtUp(),
+                     st.stepDistanceCm);
     mHrGauge.tick(mHrCounter.getCurrent(), hasTrustedHr());
 
     const auto alert = mZoneAlerts.tick(targetZone());

@@ -209,6 +209,38 @@ void SpeedGauge::tick(float liveMps, bool liveValid, uint32_t stepDistanceCm)
                                   : onPace;
 }
 
+// --- GpsCatchUp ----------------------------------------------------------------
+
+void GpsCatchUp::reset()
+{
+    mState = State::CaughtUp;
+    mAfter = 0;
+}
+
+void GpsCatchUp::onLocation(bool fix, uint32_t stampMs)
+{
+    if (!fix) {
+        mState = State::Lost;
+        mAfter = 0;
+    } else if (mState == State::Lost) {
+        // The distance across the gap is counted from this fix.
+        mState = State::Fixed;
+        mFixMs = stampMs;
+        mAfter = 0;
+    }
+}
+
+void GpsCatchUp::onDistance(uint32_t stampMs)
+{
+    if (mState != State::Fixed) {
+        return;
+    }
+    const bool after = stampMs > mFixMs || mFixMs - stampMs > kWrapSlackMs;
+    if (after && ++mAfter >= kSamplesAfterFix) {
+        reset();
+    }
+}
+
 // --- HeartRateGauge ------------------------------------------------------------
 
 void HeartRateGauge::startStep(float lowBpm, float highBpm)
