@@ -273,6 +273,9 @@ namespace CustomMessage {
      * gauge is in m/s for a speed target and bpm for a heart-rate one; arc
      * is where the value sits on the gauge (0-1, with the band in the middle
      * third, faster or higher to the right).
+     *
+     * Each step is a lap, so the step's average pace and heart rate are the
+     * lap's, in Track::Data (avgLapSpeed, avgLapHR).
      */
     struct WorkoutData : public SDK::MessageBase {
         char     label[SDK::Workout::kStepNotesBytes];  ///< The current step
@@ -286,7 +289,6 @@ namespace CustomMessage {
         float    low;          ///< Target band
         float    high;
         float    arc;
-        float    stepAvgSpeed; ///< Step average, m/s
         uint8_t  stepEnd;      ///< SDK::Workout::StepEnd
         uint8_t  target;       ///< SDK::Workout::Target
         uint8_t  zone;         ///< SDK::Workout::Zone
@@ -306,7 +308,6 @@ namespace CustomMessage {
             , low(0.0f)
             , high(0.0f)
             , arc(0.0f)
-            , stepAvgSpeed(0.0f)
             , stepEnd(0)
             , target(0)
             , zone(0)
