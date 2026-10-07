@@ -89,6 +89,11 @@ void WorkoutDetailsView::setProgram(const SDK::Workout::Program* program, bool i
     mImperial = imperial;
     mRowCount = 0;
     if (mProgram == nullptr) {
+        // The file could not be read: the first page keeps only what the
+        // list knew, and there are no steps to go to.
+        mDesc1.setText("");
+        mDesc2.setText("");
+        mDesc3.setText("");
         return;
     }
 
