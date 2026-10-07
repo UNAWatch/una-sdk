@@ -214,7 +214,13 @@ void WorkoutFaceGauge::set(const Model::WorkoutFace& face, bool imperial, float 
 
     // Value and unit side by side, centred together.
     const int16_t vy = gauge ? kValueY : kValueYNoArc;
+    mValue.setAnchor(120, vy);
+    mValue.setTypography(T_TMP_SEMIBOLD_60_L);
     mValue.setText(value);
+    if (mValue.getWidth() + mUnit.getWidth() + 5 > mValue.availableWidth()) {
+        // An hour or more left, or a long distance: too wide at 60 px.
+        mValue.setTypography(T_TMP_SEMIBOLD_40_L);
+    }
     const int16_t vw = mValue.getWidth();
     const int16_t uw = mUnit.getWidth();
     const int16_t gap = uw > 0 ? 5 : 0;

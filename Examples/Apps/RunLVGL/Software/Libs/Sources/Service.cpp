@@ -519,6 +519,9 @@ void Service::handleEvent(const CustomMessage::TrackStart& event)
 void Service::handleEvent(const CustomMessage::TrackStop& event)
 {
     stopTrack(event.discard);
+    // The list was made at launch: after a run, a completed workout is no
+    // longer today's to offer, and the files may have changed.
+    sendWorkoutList();
 }
 
 void Service::handleEvent(const CustomMessage::SettingsSave& event)

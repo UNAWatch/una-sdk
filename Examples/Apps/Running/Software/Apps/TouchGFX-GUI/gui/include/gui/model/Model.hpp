@@ -146,8 +146,9 @@ public:
         bool     none      = true;  ///< No step (next: nothing follows)
     };
 
-    /// The workout list from the service; null until it arrives. Only valid
-    /// while no run is going (the service rebuilds it between runs).
+    /// The workout list from the service; null until it arrives. The service
+    /// rebuilds it only while no run is going, and sends WORKOUT_LIST again
+    /// when it does.
     const SDK::Workout::Library* getWorkoutLibrary() const;
     /// True once, if today's scheduled workout should be offered at launch.
     bool takeTodayPrompt();

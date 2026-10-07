@@ -27,7 +27,9 @@ void fitWidth(touchgfx::Unicode::UnicodeChar* buf, touchgfx::TypedTextId typogra
 
 /// Lay @p text over two lines, @p width1 and @p width2 pixels wide in the font
 /// of @p typography, breaking between words; what does not fit is cut.
-void wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::UnicodeChar* line1,
+/// Returns how many characters of @p text the first line used, spaces after
+/// it included, so the rest of the text starts there.
+uint16_t wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::UnicodeChar* line1,
              touchgfx::Unicode::UnicodeChar* line2, uint16_t cap, touchgfx::TypedTextId typography,
              int16_t width1, int16_t width2);
 

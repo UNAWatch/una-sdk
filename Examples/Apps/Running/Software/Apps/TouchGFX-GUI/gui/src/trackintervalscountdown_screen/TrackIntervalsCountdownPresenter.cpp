@@ -21,6 +21,10 @@ void TrackIntervalsCountdownPresenter::activate()
 
 bool TrackIntervalsCountdownPresenter::isWorkout() const
 {
+    // Intervals chosen from their menu win over an armed workout.
+    if (model->isPendingIntervalsMode()) {
+        return false;
+    }
     const SDK::Workout::Library* lib = model->getWorkoutLibrary();
     const int16_t armed = model->getArmedWorkout();
     return lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size();

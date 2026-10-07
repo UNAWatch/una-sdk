@@ -60,6 +60,7 @@ void WorkoutStepCard::show(const Model::WorkoutStepInfo& step, bool next)
     }
     mTitle.invalidate();
 
+    mTarget.setTypography(T_TMP_SEMIBOLD_30_L);
     if (step.none) {
         // Nothing follows: the run carries on as a free run.
         mValue.setText("");
