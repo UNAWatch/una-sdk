@@ -35,6 +35,11 @@ public:
     void setPendingIntervalsMode(bool mode);
     void exitApp();
 
+    /// Offer today's scheduled workout, once, when the list arrives.
+    void checkTodayPrompt();
+
+    virtual void onWorkoutList() override;
+
 private:
     MainPresenter();
 

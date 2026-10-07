@@ -42,6 +42,22 @@ void TrackActionView::tearDownScreen()
 
 // ---- Presenter -> View ------------------------------------------------------
 
+void TrackActionView::setWorkoutMode(bool workout)
+{
+    mWorkoutMode = workout;
+    menuLayout.setNumberOfItems(workout ? Menu::ID_COUNT : Menu::ID_COUNT - 1);
+    menuLayout.invalidate();
+}
+
+uint16_t TrackActionView::itemAt(int16_t row) const
+{
+    // Without a workout, End workout's row is left out.
+    if (!mWorkoutMode && row >= Menu::ID_END_WORKOUT) {
+        return static_cast<uint16_t>(row + 1);
+    }
+    return static_cast<uint16_t>(row);
+}
+
 void TrackActionView::setPositionId(uint16_t id)
 {
     menuLayout.selectItem(id);
@@ -100,35 +116,29 @@ void TrackActionView::setElevation(float metres)
 
 // ---- Menu callbacks --------------------------------------------------------
 
+static const TypedTextId sItemIds[App::MenuNav::TrackView::Action::ID_COUNT] = {
+    T_TEXT_RESUME,
+    T_TEXT_END_WORKOUT,
+    T_TEXT_SUMMARY,
+    T_TEXT_SAVE,
+    T_TEXT_DISCARD,
+};
+
 void TrackActionView::updateItem(MainMenuItem& item, int16_t index)
 {
-    static const TypedTextId sIds[Menu::ID_COUNT] = {
-        T_TEXT_RESUME,
-        T_TEXT_SUMMARY,
-        T_TEXT_SAVE,
-        T_TEXT_DISCARD,
-    };
-
-    if (index < 0 || index >= static_cast<int16_t>(Menu::ID_COUNT)) return;
+    if (index < 0 || index >= menuLayout.getNumberOfItems()) return;
 
     MenuItemConfig cfg;
-    cfg.msgId = sIds[index];
+    cfg.msgId = sItemIds[itemAt(index)];
     item.apply(cfg);
 }
 
 void TrackActionView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
 {
-    static const TypedTextId sIds[Menu::ID_COUNT] = {
-        T_TEXT_RESUME,
-        T_TEXT_SUMMARY,
-        T_TEXT_SAVE,
-        T_TEXT_DISCARD,
-    };
-
-    if (index < 0 || index >= static_cast<int16_t>(Menu::ID_COUNT)) return;
+    if (index < 0 || index >= menuLayout.getNumberOfItems()) return;
 
     MenuItemConfig cfg;
-    cfg.msgId = sIds[index];
+    cfg.msgId = sItemIds[itemAt(index)];
     item.apply(cfg);
 }
 
@@ -206,11 +216,15 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         infoCarousel.refresh();
     }
 
-    // Save & End / Discard start a hold-to-confirm: pressing (and holding) R1 opens the
-    // countdown screen immediately; it counts down while R1 stays held and releasing
-    // early returns here. Resume/Summary stay plain taps.
+    // Save & End / Discard / End workout start a hold-to-confirm: pressing (and
+    // holding) R1 opens the countdown screen immediately; it counts down while R1
+    // stays held and releasing early returns here. Resume/Summary stay plain taps.
     if (key == SDK::GUI::Button::R1_PRESS) {
-        switch (menuLayout.getSelectedItem()) {
+        switch (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()))) {
+        case Menu::ID_END_WORKOUT:
+            presenter->setHoldConfirmMode(Model::HoldConfirmMode::EndWorkout);
+            application().gotoTrackHoldConfirmationScreenNoTransition();
+            break;
         case Menu::ID_SAVE:
             presenter->setHoldConfirmMode(Model::HoldConfirmMode::Finish);
             application().gotoTrackHoldConfirmationScreenNoTransition();
@@ -225,7 +239,7 @@ void TrackActionView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::R1) {
-        switch (menuLayout.getSelectedItem()) {
+        switch (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()))) {
         case Menu::ID_RESUME:
             presenter->resumeTrack();
             application().gotoTrackScreenNoTransition();

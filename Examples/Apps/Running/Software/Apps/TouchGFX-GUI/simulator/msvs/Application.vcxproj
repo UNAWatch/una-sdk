@@ -218,6 +218,25 @@
     <ClCompile Include="..\..\generated\gui_generated\src\trackintervalsworkoutcompleted_screen\TrackIntervalsWorkoutCompletedViewBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\TwoTonePicker.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\TwoTonePickerBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackworkoutstep_screen\TrackWorkoutStepPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackworkoutstep_screen\TrackWorkoutStepView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackworkoutstep_screen\TrackWorkoutStepViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\workoutdetails_screen\WorkoutDetailsPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\workoutdetails_screen\WorkoutDetailsView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\workoutdetails_screen\WorkoutDetailsViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\workoutlist_screen\WorkoutListPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\workoutlist_screen\WorkoutListView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\workoutlist_screen\WorkoutListViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\workoutmenu_screen\WorkoutMenuPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\workoutmenu_screen\WorkoutMenuView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\workoutmenu_screen\WorkoutMenuViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\workouttoday_screen\WorkoutTodayPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\workouttoday_screen\WorkoutTodayView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\workouttoday_screen\WorkoutTodayViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\WorkoutFaceGauge.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\WorkoutFaceStep.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\WorkoutStepCard.cpp"/>
+    <ClCompile Include="..\..\gui\src\common\WorkoutUi.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -575,6 +594,26 @@
     <ClInclude Include="..\..\gui\include\gui\containers\PickerLogic.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\TwoTonePicker.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TwoTonePickerBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackworkoutstep_screen\TrackWorkoutStepPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackworkoutstep_screen\TrackWorkoutStepView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackworkoutstep_screen\TrackWorkoutStepViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workoutdetails_screen\WorkoutDetailsPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workoutdetails_screen\WorkoutDetailsView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workoutdetails_screen\WorkoutDetailsViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workoutlist_screen\WorkoutListPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workoutlist_screen\WorkoutListView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workoutlist_screen\WorkoutListViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workoutmenu_screen\WorkoutMenuPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workoutmenu_screen\WorkoutMenuView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workoutmenu_screen\WorkoutMenuViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workouttoday_screen\WorkoutTodayPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\workouttoday_screen\WorkoutTodayView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\workouttoday_screen\WorkoutTodayViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutFaceGauge.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutFaceStep.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutLabel.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\WorkoutStepCard.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\common\WorkoutUi.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

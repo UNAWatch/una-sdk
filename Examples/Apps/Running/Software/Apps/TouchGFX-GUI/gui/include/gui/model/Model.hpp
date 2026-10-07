@@ -72,6 +72,9 @@ public:
     // Date/Time
     void getDate(uint8_t& month, uint8_t& day, uint8_t& weekday);
     void getTime(uint8_t& h, uint8_t& m, uint8_t& s);
+    /// Today's local date as YYYYMMDD, as workout dates are; 0 before the
+    /// clock is known.
+    uint32_t getTodayYmd() const;
 
     // Power
     uint8_t getBatteryLevel() const;
@@ -92,7 +95,7 @@ public:
     uint8_t getAccessoryState() const;
 
     // Hold-to-confirm: which action the shared TrackHoldConfirmation screen performs.
-    enum class HoldConfirmMode { Finish, Discard };
+    enum class HoldConfirmMode { Finish, Discard, EndWorkout };
     void setHoldConfirmMode(HoldConfirmMode mode);
     HoldConfirmMode getHoldConfirmMode() const;
 
@@ -112,6 +115,67 @@ public:
     void discardTrack();
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
+
+    // Structured workouts
+    static constexpr int16_t kNoWorkout = CustomMessage::TrackStart::kNoWorkout;
+
+    /// What the workout faces show, from the latest WORKOUT_DATA.
+    struct WorkoutFace {
+        uint32_t remainingMs = 0;
+        uint32_t remainingCm = 0;
+        uint32_t stepTimeMs  = 0;
+        uint32_t rep         = 0;
+        uint32_t reps        = 0;
+        float    value       = 0.0f;  ///< m/s or bpm; 0 with no target
+        float    arc         = 0.0f;  ///< 0-1 along the gauge
+        uint8_t  stepEnd     = 0;     ///< SDK::Workout::StepEnd
+        uint8_t  target      = 0;     ///< SDK::Workout::Target
+        uint8_t  zone        = 0;     ///< SDK::Workout::Zone
+        uint8_t  intensity   = 0;     ///< SDK::Workout::Intensity
+        bool     leadIn      = false;
+    };
+
+    /// A step for the next-step card and faces, from WORKOUT_STEP.
+    struct WorkoutStepInfo {
+        char     notes[SDK::Workout::kStepNotesBytes] = {};
+        char     duration[24] = {};
+        char     target[32]   = {};
+        uint32_t rep       = 0;
+        uint32_t reps      = 0;
+        uint8_t  intensity = 0;
+        bool     none      = true;  ///< No step (next: nothing follows)
+    };
+
+    /// The workout list from the service; null until it arrives. Only valid
+    /// while no run is going (the service rebuilds it between runs).
+    const SDK::Workout::Library* getWorkoutLibrary() const;
+    /// True once, if today's scheduled workout should be offered at launch.
+    bool takeTodayPrompt();
+    uint16_t getTodayWorkout() const;
+
+    /// The workout the list or the today prompt is showing.
+    void     setChosenWorkout(uint16_t index);
+    uint16_t getChosenWorkout() const;
+
+    /// Where Details goes back to: the today prompt, or the workout's menu.
+    void setDetailsFromToday(bool today) { mDetailsFromToday = today; }
+    bool isDetailsFromToday() const { return mDetailsFromToday; }
+
+    /// The workout the next run follows; kNoWorkout for none.
+    void    armWorkout(int16_t index);
+    int16_t getArmedWorkout() const;
+
+    /// Ask for a workout in full; onWorkoutDetails() follows.
+    void requestWorkoutDetails(uint16_t index);
+    /// The workout asked for, or null if it could not be read. Valid until
+    /// the next request or run.
+    const SDK::Workout::Program* getWorkoutDetails() const;
+
+    void endWorkout();
+    const WorkoutFace&     getWorkoutFace() const;
+    const WorkoutStepInfo& getWorkoutStep(bool next) const;
+    /// True once after a step starts, for the next-step card.
+    bool takeStepCard();
 
 private:
     // Fields required for GUI <-> Service communication
@@ -157,6 +221,19 @@ private:
     Track::State           mTrackState            {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData             {};
+
+    // Structured workouts
+    const SDK::Workout::Library* mWorkoutLibrary = nullptr;
+    const SDK::Workout::Program* mWorkoutDetails = nullptr;
+    uint16_t        mTodayWorkout   = CustomMessage::WorkoutList::kNoToday;
+    bool            mTodayPrompted  = false;
+    uint16_t        mChosenWorkout  = 0;
+    int16_t         mArmedWorkout   = kNoWorkout;
+    bool            mStepCard       = false;
+    bool            mDetailsFromToday = false;
+    WorkoutFace     mWorkoutFace    {};
+    WorkoutStepInfo mWorkoutStep    {};
+    WorkoutStepInfo mWorkoutNext    {};
 };
 
 #endif // MODEL_HPP

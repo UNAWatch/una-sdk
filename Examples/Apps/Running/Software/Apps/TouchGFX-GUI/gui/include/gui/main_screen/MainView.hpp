@@ -21,11 +21,19 @@ public:
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
+    /// The armed workout's name under Start; nullptr when none is armed.
+    void setArmedWorkout(const char* name);
+
+    virtual void handleTickEvent() override;
+
 protected:
     using Menu = App::MenuNav::Root;
 
     bool mGpsFix = false;
     SDK::GUI::SensorStatusRow mSensorRow;
+
+    bool mArmed = false;
+    touchgfx::Unicode::UnicodeChar mArmedName[32] {};
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};
     MenuItemConfig mCenterItems[Menu::ID_COUNT] {};

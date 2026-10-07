@@ -9,6 +9,7 @@ TrackActionPresenter::TrackActionPresenter(TrackActionView& v)
 void TrackActionPresenter::activate()
 {
     view.setUnitsImperial(model->isUnitsImperial());
+    view.setWorkoutMode(model->getTrackData().workoutMode);
     onTrackData(model->getTrackData());
 
     // Reset idle timer

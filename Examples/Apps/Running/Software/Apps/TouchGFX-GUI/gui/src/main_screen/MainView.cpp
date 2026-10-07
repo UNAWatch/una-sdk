@@ -1,5 +1,6 @@
 #include <gui/main_screen/MainView.hpp>
 #include <images/BitmapDatabase.hpp>
+#include <gui/common/WorkoutUi.hpp>
 
 
 MainView::MainView() :
@@ -61,6 +62,28 @@ uint16_t MainView::getPositionId()
     return menuLayout.getSelectedItem();
 }
 
+void MainView::setArmedWorkout(const char* name)
+{
+    mArmed = name != nullptr;
+    MenuItemConfig& start = mCenterItems[Menu::ID_START];
+    if (mArmed) {
+        WorkoutUi::toText(name, mArmedName, sizeof(mArmedName) / sizeof(mArmedName[0]));
+        WorkoutUi::fitWidth(mArmedName, T_TMP_ITALIC_18, 180);
+        start.style   = MenuItemConfig::TIP;
+        start.tipText = mArmedName;
+    } else {
+        start.style   = MenuItemConfig::SIMPLE;
+        start.tipText = nullptr;
+    }
+    menuLayout.invalidate();
+}
+
+void MainView::handleTickEvent()
+{
+    MainViewBase::handleTickEvent();
+    presenter->checkTodayPrompt();
+}
+
 void MainView::setupItems()
 {
     // START
@@ -68,6 +91,10 @@ void MainView::setupItems()
     mCenterItems[Menu::ID_START].msgIdType = T_TMP_SEMIBOLD_35;
 
     mItems[Menu::ID_START].msgId = T_TEXT_START;
+
+    // WORKOUTS
+    mCenterItems[Menu::ID_WORKOUTS].msgId = T_TEXT_WORKOUTS;
+    mItems[Menu::ID_WORKOUTS].msgId       = T_TEXT_WORKOUTS;
 
 
     // INTERVALS
@@ -155,7 +182,10 @@ void MainView::onConfirm()
 
     switch (idx) {
     case Menu::ID_START:
-        if (mGpsFix == true) {
+        if (mGpsFix == true && mArmed) {
+            // A workout starts with the countdown, as Intervals do.
+            application().gotoTrackIntervalsCountdownScreenNoTransition();
+        } else if (mGpsFix == true) {
             presenter->startTrack();
             application().gotoTrackScreenNoTransition();
         } else {
@@ -164,6 +194,9 @@ void MainView::onConfirm()
         }
         break;
 
+    case Menu::ID_WORKOUTS:
+        application().gotoWorkoutListScreenNoTransition();
+        break;
     case Menu::ID_INTERVALS:
         // No GPS-fix check here: the intervals menu is always accessible so the
         // user can configure their workout before heading outside. The fix check

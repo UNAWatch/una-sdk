@@ -128,6 +128,17 @@ void MainMenuLayout::showBackground(bool state)
     background.invalidate();
 }
 
+void MainMenuLayout::setInfoText(const touchgfx::Unicode::UnicodeChar* text)
+{
+    if (text != nullptr) {
+        touchgfx::Unicode::snprintf(infoTextBuffer, INFOTEXT_SIZE, "%s", text);
+        infoText.setVisible(true);
+    } else {
+        infoText.setVisible(false);
+    }
+    infoText.invalidate();
+}
+
 void MainMenuLayout::setInfoMsg(TypedTextId msgId)
 {
     if (msgId != TYPED_TEXT_INVALID) {

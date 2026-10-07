@@ -61,6 +61,16 @@
 #include <gui/trackintervalsalert_screen/TrackIntervalsAlertPresenter.hpp>
 #include <gui/trackintervalsworkoutcompleted_screen/TrackIntervalsWorkoutCompletedView.hpp>
 #include <gui/trackintervalsworkoutcompleted_screen/TrackIntervalsWorkoutCompletedPresenter.hpp>
+#include <gui/workouttoday_screen/WorkoutTodayView.hpp>
+#include <gui/workouttoday_screen/WorkoutTodayPresenter.hpp>
+#include <gui/workoutlist_screen/WorkoutListView.hpp>
+#include <gui/workoutlist_screen/WorkoutListPresenter.hpp>
+#include <gui/workoutmenu_screen/WorkoutMenuView.hpp>
+#include <gui/workoutmenu_screen/WorkoutMenuPresenter.hpp>
+#include <gui/workoutdetails_screen/WorkoutDetailsView.hpp>
+#include <gui/workoutdetails_screen/WorkoutDetailsPresenter.hpp>
+#include <gui/trackworkoutstep_screen/TrackWorkoutStepView.hpp>
+#include <gui/trackworkoutstep_screen/TrackWorkoutStepPresenter.hpp>
 
 using namespace touchgfx;
 
@@ -415,4 +425,69 @@ void FrontendApplicationBase::gotoTrackIntervalsWorkoutCompletedScreenNoTransiti
 void FrontendApplicationBase::gotoTrackIntervalsWorkoutCompletedScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<TrackIntervalsWorkoutCompletedView, TrackIntervalsWorkoutCompletedPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// WorkoutToday
+
+void FrontendApplicationBase::gotoWorkoutTodayScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoWorkoutTodayScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoWorkoutTodayScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<WorkoutTodayView, WorkoutTodayPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// WorkoutList
+
+void FrontendApplicationBase::gotoWorkoutListScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoWorkoutListScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoWorkoutListScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<WorkoutListView, WorkoutListPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// WorkoutMenu
+
+void FrontendApplicationBase::gotoWorkoutMenuScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoWorkoutMenuScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoWorkoutMenuScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<WorkoutMenuView, WorkoutMenuPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// WorkoutDetails
+
+void FrontendApplicationBase::gotoWorkoutDetailsScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoWorkoutDetailsScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoWorkoutDetailsScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<WorkoutDetailsView, WorkoutDetailsPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// TrackWorkoutStep
+
+void FrontendApplicationBase::gotoTrackWorkoutStepScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoTrackWorkoutStepScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoTrackWorkoutStepScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<TrackWorkoutStepView, TrackWorkoutStepPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }

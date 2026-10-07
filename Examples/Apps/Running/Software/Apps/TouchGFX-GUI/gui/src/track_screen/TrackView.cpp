@@ -19,6 +19,13 @@ void TrackView::setupScreen()
     buttons.setR2(Buttons::AMBER);
 
     scrollIndicator.setConfig(ScrollIndicator::kSmall);
+
+    add(mWorkoutGauge);
+    add(mWorkoutStep);
+    add(mWorkoutNext);
+    mWorkoutGauge.setVisible(false);
+    mWorkoutStep.setVisible(false);
+    mWorkoutNext.setVisible(false);
 }
 
 void TrackView::tearDownScreen()
@@ -26,46 +33,79 @@ void TrackView::tearDownScreen()
     TrackViewBase::tearDownScreen();
 }
 
-void TrackView::setIntervalsMode(bool mode)
+const uint16_t* TrackView::faces(uint16_t& count) const
 {
-    mIntervalsMode = mode;
-    uint16_t count = mIntervalsMode ? FaceId::ID_COUNT : (FaceId::ID_COUNT - 1);
+    static const uint16_t kWorkout[] = {
+        FaceId::ID_WORKOUT_GAUGE, FaceId::ID_WORKOUT_STEP, FaceId::ID_WORKOUT_NEXT,
+        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+    };
+    static const uint16_t kIntervals[] = {
+        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+    };
+    static const uint16_t kFree[] = { FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3 };
+
+    switch (mMode) {
+    case Mode::Workout:
+        count = sizeof(kWorkout) / sizeof(kWorkout[0]);
+        return kWorkout;
+    case Mode::Intervals:
+        count = sizeof(kIntervals) / sizeof(kIntervals[0]);
+        return kIntervals;
+    default:
+        count = sizeof(kFree) / sizeof(kFree[0]);
+        return kFree;
+    }
+}
+
+uint16_t TrackView::faceIndex(uint16_t id) const
+{
+    uint16_t count = 0;
+    const uint16_t* list = faces(count);
+    for (uint16_t i = 0; i < count; ++i) {
+        if (list[i] == id) {
+            return i;
+        }
+    }
+    return count;
+}
+
+void TrackView::setMode(Mode mode)
+{
+    mMode = mode;
+    uint16_t count = 0;
+    faces(count);
     scrollIndicator.setCount(count);
 }
 
 void TrackView::setPositionId(uint16_t id)
 {
-    const uint16_t minId = mIntervalsMode ? static_cast<uint16_t>(FaceId::ID_INTERVALS)
-                                          : static_cast<uint16_t>(FaceId::ID_TRACK1);
-    if (id < minId) {
-        id = minId;
+    // A face the run does not have (Intervals ended, a workout completed)
+    // falls back to the first one it has.
+    uint16_t count = 0;
+    const uint16_t* list = faces(count);
+    uint16_t index = faceIndex(id);
+    if (index >= count) {
+        index = 0;
     }
-    if (id >= FaceId::ID_COUNT) {
-        id = FaceId::ID_COUNT - 1;
-    }
+    id = list[index];
     mCurrentFaceId = id;
+    scrollIndicator.setActiveId(index);
 
-    trackFaceIntervals.setVisible(false);
-    trackFaceTotal.setVisible(false);
-    trackFaceLap.setVisible(false);
-    trackFaceStatus.setVisible(false);
-
-    // Visual index: in normal mode shift down by 1 because ID_INTERVALS is not shown.
-    const uint16_t visualIdx = mIntervalsMode ? id : (id - 1u);
-    scrollIndicator.setActiveId(visualIdx);
-
-    switch (id) {
-        case FaceId::ID_INTERVALS:  trackFaceIntervals.setVisible(true);  break;
-        case FaceId::ID_TRACK1:     trackFaceTotal.setVisible(true);      break;
-        case FaceId::ID_TRACK2:     trackFaceLap.setVisible(true);        break;
-        case FaceId::ID_TRACK3:     trackFaceStatus.setVisible(true);     break;
-        default: break;
-    }
+    trackFaceIntervals.setVisible(id == FaceId::ID_INTERVALS);
+    trackFaceTotal.setVisible(id == FaceId::ID_TRACK1);
+    trackFaceLap.setVisible(id == FaceId::ID_TRACK2);
+    trackFaceStatus.setVisible(id == FaceId::ID_TRACK3);
+    mWorkoutGauge.setVisible(id == FaceId::ID_WORKOUT_GAUGE);
+    mWorkoutStep.setVisible(id == FaceId::ID_WORKOUT_STEP);
+    mWorkoutNext.setVisible(id == FaceId::ID_WORKOUT_NEXT);
 
     trackFaceIntervals.invalidate();
     trackFaceTotal.invalidate();
     trackFaceLap.invalidate();
     trackFaceStatus.invalidate();
+    mWorkoutGauge.invalidate();
+    mWorkoutStep.invalidate();
+    mWorkoutNext.invalidate();
 }
 
 uint16_t TrackView::getPositionId()
@@ -103,12 +143,17 @@ void TrackView::setTrackData(const Track::Data& data)
     trackFaceTotal.setDistance(distConv(data.distance), mIsImperial);
     trackFaceTotal.setTimer(data.totalTime);
 
+    mLivePace = paceConv(data.pace);
+    mLapPace  = paceConv(data.lapPace);
+    mLapHr    = data.avgLapHR;
+    mWorkoutStep.setAverages(mLapPace, mLapHr, mHeartRateStep);
+
     trackFaceLap.setPace(paceConv(data.lapPace));
     trackFaceLap.setDistance(distConv(data.lapDistance));
     trackFaceLap.setTimer(data.lapTime);
     trackFaceLap.setHR(data.hr, mHrThresholds, mHrThresholdCount);
 
-    if (mIntervalsMode) {
+    if (mMode == Mode::Intervals) {
         const Track::IntervalsData& iv = data.intervals;
 
         trackFaceIntervals.setPhase(iv.phase, iv.repeat, iv.totalRepeats);
@@ -137,27 +182,37 @@ void TrackView::setBatteryLevel(uint8_t level)
     trackFaceStatus.setBatteryLevel(level);
 }
 
+void TrackView::setWorkoutFace(const Model::WorkoutFace& face)
+{
+    mHeartRateStep = static_cast<SDK::Workout::Target>(face.target) == SDK::Workout::Target::HeartRate;
+    mWorkoutGauge.set(face, mIsImperial, mLivePace);
+    mWorkoutStep.setRepeat(face.rep, face.reps);
+    mWorkoutStep.setAverages(mLapPace, mLapHr, mHeartRateStep);
+}
+
+void TrackView::setWorkoutStep(const Model::WorkoutStepInfo& step)
+{
+    mWorkoutStep.setStep(step);
+    mWorkoutStep.setRepeat(step.rep, step.reps);
+}
+
+void TrackView::setWorkoutNext(const Model::WorkoutStepInfo& step)
+{
+    mWorkoutNext.showNext(step);
+}
+
 void TrackView::handleKeyEvent(uint8_t key)
 {
-    const uint16_t minId = mIntervalsMode ? static_cast<uint16_t>(FaceId::ID_INTERVALS)
-                                          : static_cast<uint16_t>(FaceId::ID_TRACK1);
+    uint16_t count = 0;
+    const uint16_t* list = faces(count);
+    const uint16_t index = faceIndex(mCurrentFaceId);
 
     if (key == SDK::GUI::Button::L1) {
-        uint16_t p = mCurrentFaceId;
-        if (p <= minId) {
-            p = FaceId::ID_COUNT - 1;
-        } else {
-            p--;
-        }
-        setPositionId(p);
+        setPositionId(list[index == 0 || index >= count ? count - 1 : index - 1]);
     }
 
     if (key == SDK::GUI::Button::L2) {
-        uint16_t p = mCurrentFaceId + 1u;
-        if (p >= FaceId::ID_COUNT) {
-            p = minId;
-        }
-        setPositionId(p);
+        setPositionId(list[index + 1 >= count ? 0 : index + 1]);
     }
 
     if (key == SDK::GUI::Button::R1) {
@@ -165,12 +220,12 @@ void TrackView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::R2) {
-        // In an intervals workout the lap button advances to the next phase, on
-        // ANY face — laps are phase-driven, not manual. Gate on the workout mode,
-        // not the currently shown face (which the user can scroll away from). When
-        // the workout completes the Service drops intervalsMode, so R2 then records
-        // a manual lap. A free (non-intervals) run always records a manual lap.
-        if (mIntervalsMode) {
+        // In Intervals or a structured workout the lap button moves to the next
+        // phase or step, on ANY face -- laps are step-driven, not manual. Gate on
+        // the mode, not the face shown (which the user can scroll away from). When
+        // the workout completes the Service drops the mode, so R2 then records a
+        // manual lap. A free run always records a manual lap.
+        if (mMode != Mode::Free) {
             presenter->intervalsNextPhase();
         } else {
             presenter->saveLap();

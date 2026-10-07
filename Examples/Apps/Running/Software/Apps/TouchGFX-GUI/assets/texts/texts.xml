@@ -416,6 +416,96 @@
       <Text Id="TEXT_AVG_DOT_HR" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">AVG. HR</Translation>
       </Text>
+      <Text Id="TEXT_WORKOUTS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Workouts</Translation>
+      </Text>
+      <Text Id="TEXT_WORKOUTS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">WORKOUTS</Translation>
+      </Text>
+      <Text Id="TEXT_TODAY" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Today</Translation>
+      </Text>
+      <Text Id="TEXT_TODAY_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">TODAY</Translation>
+      </Text>
+      <Text Id="TEXT_PAST" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Past</Translation>
+      </Text>
+      <Text Id="TEXT_LIBRARY" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Library</Translation>
+      </Text>
+      <Text Id="TEXT_DETAILS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Details</Translation>
+      </Text>
+      <Text Id="TEXT_SKIP" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Skip</Translation>
+      </Text>
+      <Text Id="TEXT_FREE_RUN" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Free run</Translation>
+      </Text>
+      <Text Id="TEXT_CLEAR_WORKOUT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Clear the workout</Translation>
+      </Text>
+      <Text Id="TEXT_END_WORKOUT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">End workout</Translation>
+      </Text>
+      <Text Id="TEXT_HOLD_TO_END_WORKOUT" Alignment="Center" TypographyId="Poppins_Medium_18">
+        <Translation Language="GB">Hold to&#10;End workout</Translation>
+      </Text>
+      <Text Id="TEXT_NO_WORKOUTS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">No workouts</Translation>
+      </Text>
+      <Text Id="TEXT_COPY_FIT_FILES" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Copy .fit files to</Translation>
+      </Text>
+      <Text Id="TEXT_THE_WORKOUTS_FOLDER" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">the Workouts folder</Translation>
+      </Text>
+      <Text Id="TEXT_NEXT_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">NEXT</Translation>
+      </Text>
+      <Text Id="TEXT_LEFT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">left</Translation>
+      </Text>
+      <Text Id="TEXT_TARGET" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Target</Translation>
+      </Text>
+      <Text Id="TEXT_STEP_AVG" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Step avg</Translation>
+      </Text>
+      <Text Id="TEXT_REP" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Rep</Translation>
+      </Text>
+      <Text Id="TEXT_NO_TARGET" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">No target</Translation>
+      </Text>
+      <Text Id="TEXT_LAST_STEP" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Last step</Translation>
+      </Text>
+      <Text Id="TEXT_THEN_FREE_RUN" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Then a free run</Translation>
+      </Text>
+      <Text Id="TEXT_NO_GPS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">no GPS</Translation>
+      </Text>
+      <Text Id="TEXT_PACE_LC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">pace</Translation>
+      </Text>
+      <Text Id="TEXT_ELAPSED_LC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">elapsed</Translation>
+      </Text>
+      <Text Id="TEXT_STEP_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">STEP</Translation>
+      </Text>
+      <Text Id="TEXT_STEPS_LC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">steps</Translation>
+      </Text>
+      <Text Id="TEXT_DETAILS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">DETAILS</Translation>
+      </Text>
+      <Text Id="TEXT_REPEAT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Repeat</Translation>
+      </Text>
       <Text Id="TEXT_NEW_TEXT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">New Text</Translation>
       </Text>

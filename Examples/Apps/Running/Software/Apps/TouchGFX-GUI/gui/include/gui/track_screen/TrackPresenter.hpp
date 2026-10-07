@@ -35,6 +35,8 @@ public:
     virtual void onIntervalsWorkoutCompleted() override;
     virtual void onGpsFix(bool acquired) override;
     virtual void onAccessoryStatus(uint8_t state, const char* name) override;
+    virtual void onWorkoutData(const Model::WorkoutFace& face) override;
+    virtual void onWorkoutStep(bool next) override;
 
     void saveLap();
     void intervalsNextPhase();
@@ -42,7 +44,10 @@ public:
 private:
     TrackPresenter();
 
+    void updateMode(const Track::Data& data);
+
     TrackView& view;
+    int        mMode = -1;  ///< TrackView::Mode, -1 until set
 };
 
 #endif // TRACKPRESENTER_HPP

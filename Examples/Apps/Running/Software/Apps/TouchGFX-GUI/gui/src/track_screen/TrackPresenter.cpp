@@ -12,12 +12,10 @@ void TrackPresenter::activate()
     // Reset nested action menu position
     model->menu().track.action.reset();
 
-    // Propagate intervals mode before setting the face position so that
-    // setPositionId() can clamp to the valid range and set the scroll indicator count.
-    // If intervalsMode is false and the stored position is ID_INTERVALS (default),
-    // setPositionId() automatically advances to the first valid face (ID_TRACK1).
+    // Set the mode before the face position so that setPositionId() can fall
+    // back to the first face the run has, and the scroll indicator count fits.
     const Track::Data& trackData = model->getTrackData();
-    view.setIntervalsMode(trackData.intervalsMode);
+    updateMode(trackData);
 
     // If returning from a COOL_DOWN alert (auto-advance), force TrackFaceIntervals
     // so the user sees the cool-down phase regardless of which face was previously shown.
@@ -35,6 +33,9 @@ void TrackPresenter::activate()
     view.setTimeFormat(model->is12HourFormat());
 
     onTrackData(model->getTrackData());
+    view.setWorkoutStep(model->getWorkoutStep(false));
+    view.setWorkoutNext(model->getWorkoutStep(true));
+    view.setWorkoutFace(model->getWorkoutFace());
 
     uint8_t hour;
     uint8_t minute;
@@ -45,6 +46,11 @@ void TrackPresenter::activate()
     view.setBatteryLevel(model->getBatteryLevel());
     view.setGpsFix(model->hasGpsFix());
     view.setAccessoryStatus(model->getAccessoryState());
+
+    // A step that started while another screen showed still gets its card.
+    if (model->takeStepCard()) {
+        model->application().gotoTrackWorkoutStepScreenNoTransition();
+    }
 }
 
 void TrackPresenter::deactivate()
@@ -52,9 +58,40 @@ void TrackPresenter::deactivate()
     model->menu().track.set(view.getPositionId());
 }
 
+void TrackPresenter::updateMode(const Track::Data& data)
+{
+    const TrackView::Mode mode = data.workoutMode    ? TrackView::Mode::Workout
+                               : data.intervalsMode  ? TrackView::Mode::Intervals
+                                                     : TrackView::Mode::Free;
+    if (static_cast<int>(mode) != mMode) {
+        mMode = static_cast<int>(mode);
+        view.setMode(mode);
+        view.setPositionId(view.getPositionId());
+    }
+}
+
 void TrackPresenter::onTrackData(const Track::Data& data)
 {
+    // A workout that completes or is ended drops to a free run.
+    updateMode(data);
     view.setTrackData(data);
+}
+
+void TrackPresenter::onWorkoutData(const Model::WorkoutFace& face)
+{
+    view.setWorkoutFace(face);
+}
+
+void TrackPresenter::onWorkoutStep(bool next)
+{
+    if (next) {
+        view.setWorkoutNext(model->getWorkoutStep(true));
+        return;
+    }
+    view.setWorkoutStep(model->getWorkoutStep(false));
+    if (model->takeStepCard()) {
+        model->application().gotoTrackWorkoutStepScreenNoTransition();
+    }
 }
 
 void TrackPresenter::onBatteryLevel(uint8_t lvl)
