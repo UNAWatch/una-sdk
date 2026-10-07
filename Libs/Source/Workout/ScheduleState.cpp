@@ -89,10 +89,23 @@ bool ScheduleState::started(Ymd date, const char* file)
     if (isRecord(date, file)) {
         return true;
     }
+    // If the record cannot be saved, keep the one before: the state held is
+    // always the state on file.
+    const Ymd  oldDate      = mDate;
+    const bool oldCompleted = mCompleted;
+    char       oldFile[sizeof(mFile)];
+    std::memcpy(oldFile, mFile, sizeof(mFile));
+
     mDate = date;
     std::memcpy(mFile, file, len + 1);
     mCompleted = false;
-    return save();
+    if (!save()) {
+        mDate      = oldDate;
+        mCompleted = oldCompleted;
+        std::memcpy(mFile, oldFile, sizeof(mFile));
+        return false;
+    }
+    return true;
 }
 
 bool ScheduleState::completed()
@@ -104,7 +117,11 @@ bool ScheduleState::completed()
         return true;
     }
     mCompleted = true;
-    return save();
+    if (!save()) {
+        mCompleted = false;  // so that a later call tries again
+        return false;
+    }
+    return true;
 }
 
 bool ScheduleState::isCompleted(Ymd date, const char* file) const

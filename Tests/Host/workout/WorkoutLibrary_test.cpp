@@ -336,6 +336,27 @@ TEST(ScheduleState, StartingAnotherReplacesTheRecord)
     EXPECT_TRUE(again.isCompleted(20261010, "2026-10-10.fit"));
 }
 
+TEST(ScheduleState, AFailedSaveChangesNothing)
+{
+    InMemoryFileSystem fs;
+    ScheduleState st(fs);
+    st.load();
+    ASSERT_TRUE(st.started(20261009, "2026-10-09.fit"));
+
+    fs.failWriteOpenSuffix = ".json";
+    EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));
+    EXPECT_FALSE(st.completed());
+    EXPECT_FALSE(st.isCompleted(20261009, "2026-10-09.fit"));
+    EXPECT_FALSE(st.isCompleted(20261010, "2026-10-10.fit"));
+
+    // Once saving works again, completing still writes the record.
+    fs.failWriteOpenSuffix.clear();
+    ASSERT_TRUE(st.completed());
+    ScheduleState again(fs);
+    again.load();
+    EXPECT_TRUE(again.isCompleted(20261009, "2026-10-09.fit"));
+}
+
 TEST(ScheduleState, AFileThatIsNotARecordReadsAsNone)
 {
     for (const char* text : {"", "{", "not json", R"({"date":"2026-02-30","file":"a.fit","completed":true})",
