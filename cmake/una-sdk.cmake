@@ -38,6 +38,7 @@ set(UNA_SDK_SOURCES_WORKOUT
     "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutAlerts.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutLibrary.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Workout/ScheduleState.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/StepLabel.cpp"
 )
 
 set(UNA_SDK_SOURCES_JSON
