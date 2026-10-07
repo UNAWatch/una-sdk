@@ -394,6 +394,73 @@ TEST(ScheduleState, AReplacementCutShortIsReadFromTheTempFile)
     EXPECT_FALSE(fs.exist(tmp.c_str()));
 }
 
+TEST(ScheduleState, LoadPutsALoneTempFileInPlace)
+{
+    InMemoryFileSystem fs;
+    const std::string tmp = std::string(ScheduleState::kDefaultPath) + ".tmp";
+    fs.seedFile(tmp, R"({"date":"2026-10-09","file":"2026-10-09.fit","completed":true})");
+    ScheduleState st(fs);
+    st.load();
+    EXPECT_TRUE(st.isCompleted(20261009, "2026-10-09.fit"));
+    EXPECT_TRUE(fs.exist(ScheduleState::kDefaultPath));
+    EXPECT_FALSE(fs.exist(tmp.c_str()));
+}
+
+TEST(ScheduleState, AFailedRenameKeepsTheNewRecordInTheTempFile)
+{
+    // The old file is removed, then the rename fails: the new record is in
+    // ".tmp", and what is held agrees with what load() reads.
+    InMemoryFileSystem fs;
+    ScheduleState st(fs);
+    st.load();
+    ASSERT_TRUE(st.started(20261009, "2026-10-09.fit"));
+    ASSERT_TRUE(st.completed());
+    fs.failRenames = true;
+    EXPECT_TRUE(st.started(20261010, "2026-10-10.fit"));
+    EXPECT_FALSE(st.isCompleted(20261009, "2026-10-09.fit"));
+
+    ScheduleState again(fs);
+    again.load();
+    EXPECT_FALSE(again.isCompleted(20261009, "2026-10-09.fit"));
+    // Writing over the only record is refused while it cannot be put in place.
+    EXPECT_FALSE(again.completed());
+
+    // Once renames work again the record goes back into its own file.
+    fs.failRenames = false;
+    ScheduleState third(fs);
+    third.load();
+    ASSERT_TRUE(third.completed());
+    EXPECT_TRUE(third.isCompleted(20261010, "2026-10-10.fit"));
+    EXPECT_TRUE(fs.exist(ScheduleState::kDefaultPath));
+    EXPECT_FALSE(fs.exist((std::string(ScheduleState::kDefaultPath) + ".tmp").c_str()));
+}
+
+TEST(ScheduleState, AFailedWriteAfterACutShortReplacementKeepsTheRecord)
+{
+    // Only ".tmp" is left, and the next save's write fails: the record in
+    // ".tmp" must not be written over or removed.
+    InMemoryFileSystem fs;
+    const std::string tmp = std::string(ScheduleState::kDefaultPath) + ".tmp";
+    fs.seedFile(tmp, R"({"date":"2026-10-09","file":"2026-10-09.fit","completed":true})");
+    fs.failRenames = true;  // it cannot be put in place either
+    {
+        ScheduleState st(fs);
+        st.load();
+        ASSERT_TRUE(st.isCompleted(20261009, "2026-10-09.fit"));
+        EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));
+        EXPECT_TRUE(st.isCompleted(20261009, "2026-10-09.fit"));
+    }
+    fs.failRenames = false;
+    fs.failWritesAfterBytes = fs.bytesWritten;
+    {
+        ScheduleState st(fs);  // not loaded: the save itself must look first
+        EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));
+    }
+    ScheduleState again(fs);
+    again.load();
+    EXPECT_TRUE(again.isCompleted(20261009, "2026-10-09.fit"));
+}
+
 TEST(ScheduleState, AFileThatIsNotARecordReadsAsNone)
 {
     for (const char* text : {"", "{", "not json", R"({"date":"2026-02-30","file":"a.fit","completed":true})",

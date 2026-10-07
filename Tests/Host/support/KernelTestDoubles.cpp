@@ -438,13 +438,12 @@ bool InMemoryFileSystem::remove(const char* path)
 
 bool InMemoryFileSystem::rename(const char* oldPath, const char* newPath)
 {
-    if (oldPath == nullptr || newPath == nullptr) {
+    // As on the watch (f_rename), an existing target is not replaced.
+    if (oldPath == nullptr || newPath == nullptr || failRenames || !exist(oldPath)
+        || exist(newPath)) {
         return false;
     }
     auto it = files.find(oldPath);
-    if (it == files.end()) {
-        return false;
-    }
     files[newPath] = std::move(it->second);
     files.erase(it);
     return true;
