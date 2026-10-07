@@ -231,6 +231,7 @@ private:
     char              mWorkoutFile[SDK::Workout::Library::kFileBytes] = {};
 
     SDK::Workout::SpeedGauge     mSpeedGauge;
+    SDK::Workout::GpsCatchUp     mGpsCatchUp;  ///< Holds the speed gauge off until the distance catches up.
     SDK::Workout::HeartRateGauge mHrGauge;
     SDK::Workout::ZoneAlerts     mZoneAlerts;
     float                        mBandLow  = 0.0f; ///< The step's target band, m/s or bpm.

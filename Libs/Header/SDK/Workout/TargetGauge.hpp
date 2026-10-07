@@ -104,6 +104,11 @@ public:
     /// that brings no fresh sample is not a loss, so @p liveValid must already
     /// ride over one: pass GpsSpeedFilter::isValid(), which does, rather than
     /// hasCurrentSample(), which does not.
+    ///
+    /// The first second with @p liveValid true after a loss must already
+    /// carry the distance covered during it, or the window starts before
+    /// that distance and reads it as speed. GPS distance can come back after
+    /// the speed does: hold @p liveValid false until GpsCatchUp::caughtUp().
     void tick(float liveMps, bool liveValid, uint32_t stepDistanceCm);
 
     /// The run resumed after a pause: start the blend again from live speed
@@ -134,6 +139,42 @@ private:
     float          mStepAverage = 0.0f;
     Zone           mZone = Zone::Unknown;
     ZoneHysteresis mHyst{kDeadbandSecPerKm, kDwellTicks};
+};
+
+/**
+ * Whether the GPS distance has caught up with a lost position, for
+ * SpeedGauge::tick(). While the position is lost the distance stands still,
+ * and the first fix after it brings the distance across the whole gap in one
+ * distance sample, which can arrive after the speed is valid again.
+ *
+ * Feed it each location and distance sample as it arrives, with the sample's
+ * stamp. After a location without a fix, it is caught up once two distance
+ * samples stamped after the first location with a fix have come: the first
+ * may have been taken before that fix reached the distance sensor, but the
+ * second, a sample period later, cannot have been.
+ */
+class GpsCatchUp {
+public:
+    /// Distance samples stamped after the fix that end the wait.
+    static constexpr uint8_t  kSamplesAfterFix = 2;
+    /// A stamp this far before the fix is read as the clock having started
+    /// over, so a wait never outlasts it.
+    static constexpr uint32_t kWrapSlackMs = 60000;
+
+    /// Nothing outstanding: caught up.
+    void reset();
+
+    void onLocation(bool fix, uint32_t stampMs);
+    void onDistance(uint32_t stampMs);
+
+    bool caughtUp() const { return mState == State::CaughtUp; }
+
+private:
+    enum class State : uint8_t { CaughtUp, Lost, Fixed };
+
+    State    mState = State::CaughtUp;
+    uint32_t mFixMs = 0;
+    uint8_t  mAfter = 0;
 };
 
 class HeartRateGauge {
