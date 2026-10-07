@@ -36,10 +36,13 @@ public:
     void load();
 
     /// The scheduled workout in @p file, planned for @p date, has started.
-    /// Saves a new record unless this workout already has one.
+    /// Saves a new record unless this workout already has one. If the save
+    /// fails, the record before is kept and false returned.
     bool started(Ymd date, const char* file);
 
     /// The workout last started has been completed, and its activity saved.
+    /// If the save fails, it stays not completed and false is returned, so
+    /// a later call tries again.
     bool completed();
 
     /// True if the workout in @p file, planned for @p date, was completed.
