@@ -322,6 +322,25 @@ TEST(SpeedGauge, GapAcrossAStepStartStaysOutOfTheNewStep)
     }
 }
 
+TEST(SpeedGauge, GapStaysOpenAcrossStepsStartedWithoutATick)
+{
+    // Two steps start with no tick between them while the signal is lost,
+    // as when R2 and a step's end come in the same second. The catch-up
+    // still stays out of the window.
+    SpeedGauge g;
+    g.startStep(kLow, kHigh);
+    g.tick(0.0f, false, 0);
+    g.startStep(kLow, kHigh);
+    g.startStep(kLow, kHigh);
+    for (int t = 0; t < 10; ++t) g.tick(0.0f, false, 0);
+    uint32_t d = 5000;  // the catch-up
+    g.tick(5.0f, true, d);
+    d += 400;
+    g.tick(5.0f, true, d);
+    const float w = std::exp(-2.0f / SpeedGauge::kBlendTauSec);
+    EXPECT_NEAR(g.valueMps(), w * 5.0f + (1.0f - w) * 4.0f, 1e-3f);
+}
+
 TEST(SpeedGauge, WithNothingBeforeAGapTheWindowStartsAfterIt)
 {
     // The signal is lost before the step starts, so nothing before the gap
