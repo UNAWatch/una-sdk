@@ -11,10 +11,9 @@ void TrackIntervalsCountdownPresenter::activate()
 {
     model->resetIdleTimer();
 
-    const SDK::Workout::Library* lib = model->getWorkoutLibrary();
-    const int16_t armed = model->getArmedWorkout();
-    if (lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size()) {
-        view.setWorkout(lib->entry(static_cast<size_t>(armed)), model->isUnitsImperial());
+    if (isWorkout()) {
+        const size_t armed = static_cast<size_t>(model->getArmedWorkout());
+        view.setWorkout(model->getWorkoutLibrary()->entry(armed), model->isUnitsImperial());
     } else {
         view.setIntervals(model->getSettings().intervals, model->isUnitsImperial());
     }
@@ -22,7 +21,9 @@ void TrackIntervalsCountdownPresenter::activate()
 
 bool TrackIntervalsCountdownPresenter::isWorkout() const
 {
-    return model->getArmedWorkout() != Model::kNoWorkout;
+    const SDK::Workout::Library* lib = model->getWorkoutLibrary();
+    const int16_t armed = model->getArmedWorkout();
+    return lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size();
 }
 
 void TrackIntervalsCountdownPresenter::deactivate()
