@@ -19,6 +19,11 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Workout\WorkoutEngine.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Workout\Intervals.cpp"/>
     <ClCompile Include="$(SdkPath)\Libs\Source\Workout\WorkoutAlerts.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWorkoutReader.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\TargetGauge.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\WorkoutLibrary.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\ScheduleState.cpp"/>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\StepLabel.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2.cpp"/>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\hal\simulator\sdl2\HALSDL2_icon.cpp"/>

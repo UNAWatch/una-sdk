@@ -672,6 +672,21 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Workout\WorkoutAlerts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitWorkoutReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\TargetGauge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\WorkoutLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\ScheduleState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\Workout\StepLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
       <Filter>Source Files\TouchGFX\platform\driver\touch</Filter>
     </ClCompile>

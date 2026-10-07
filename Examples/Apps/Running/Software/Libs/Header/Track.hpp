@@ -118,6 +118,7 @@ struct Data {
     float elevation    = 0.0f;
 
     bool intervalsMode = false; ///< true when the track was started in intervals mode
+    bool workoutMode   = false; ///< true while a structured workout runs; WORKOUT_DATA carries its face
 
     // Interval training (populated only when intervalsMode == true)
     IntervalsData intervals {};
