@@ -1802,7 +1802,6 @@ void Service::sendWorkoutData()
     msg->target       = static_cast<uint8_t>(s.target);
     msg->intensity    = static_cast<uint8_t>(s.intensity);
     msg->leadIn       = st.leadIn;
-    msg->stepAvgSpeed = mSpeedGauge.stepAverageMps();
     msg->low          = mBandLow;
     msg->high         = mBandHigh;
     msg->zone         = static_cast<uint8_t>(targetZone());
