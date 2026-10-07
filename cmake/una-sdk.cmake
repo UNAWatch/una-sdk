@@ -90,6 +90,9 @@ set(UNA_SDK_SOURCES_SERVICE
 )
 
 set(UNA_SDK_SOURCES_GUI
+    # Step labels: the workout screens show durations and targets as the
+    # service words them.
+    "$ENV{UNA_SDK}/Libs/Source/Workout/StepLabel.cpp"
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/STM32TouchController.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
