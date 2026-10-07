@@ -14,8 +14,9 @@
  * still completes the day it began on. Completion is never undone.
  *
  * A new record is written in full to the same path plus ".tmp", which then
- * replaces the file. A write that fails leaves the record before in place,
- * and if the replacement is cut short, load() reads the ".tmp" file.
+ * replaces the file. A write that fails leaves the record before in place.
+ * Once the old file is removed the ".tmp" file is the record: if renaming it
+ * fails or is cut short, load() and the next save put it in place first.
  ******************************************************************************
  */
 
@@ -55,6 +56,7 @@ public:
 private:
     bool save();
     bool write(const char* path);
+    bool finishReplacement(const char* tmp);
     bool loadFrom(const char* path);
     bool tempPath(char* buf, size_t cap) const;
     bool isRecord(Ymd date, const char* file) const;

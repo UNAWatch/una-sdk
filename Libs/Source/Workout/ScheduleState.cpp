@@ -48,11 +48,28 @@ void ScheduleState::load()
     mFile[0] = '\0';
     mCompleted = false;
 
-    // The ".tmp" file is the record only if replacing the file was cut short.
+    // The ".tmp" file is the record only if replacing the file was cut short;
+    // if it cannot be put in place, read it where it is.
     char tmp[SDK::Interface::IFileSystem::skMaxPathLen];
-    if (!loadFrom(mPath) && tempPath(tmp, sizeof(tmp))) {
+    if (!tempPath(tmp, sizeof(tmp))) {
+        loadFrom(mPath);
+        return;
+    }
+    finishReplacement(tmp);
+    if (!loadFrom(mPath)) {
         loadFrom(tmp);
     }
+}
+
+bool ScheduleState::finishReplacement(const char* tmp)
+{
+    if (mFs.exist(mPath)) {
+        if (mFs.exist(tmp)) {
+            mFs.remove(tmp);  // left by a save that failed before the swap
+        }
+        return true;
+    }
+    return !mFs.exist(tmp) || mFs.rename(tmp, mPath);
 }
 
 bool ScheduleState::loadFrom(const char* path)
@@ -153,12 +170,24 @@ bool ScheduleState::save()
     if (!tempPath(tmp, sizeof(tmp))) {
         return false;
     }
+    // A ".tmp" file left alone is the only record: put it in place before
+    // writing over it.
+    if (!finishReplacement(tmp)) {
+        return false;
+    }
     if (!write(tmp)) {
         mFs.remove(tmp);
         return false;
     }
-    mFs.remove(mPath);  // rename() does not replace an existing file
-    return mFs.rename(tmp, mPath);
+    // rename() does not replace an existing file, so the old one goes first.
+    // From then on the ".tmp" file is the record, so the save has succeeded:
+    // if the rename fails, load() and the next save finish it.
+    if (mFs.exist(mPath) && !mFs.remove(mPath)) {
+        mFs.remove(tmp);
+        return false;
+    }
+    mFs.rename(tmp, mPath);
+    return true;
 }
 
 bool ScheduleState::write(const char* path)
