@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 #include <cstring>
+#include <utility>
 
 #include "Settings.hpp"
 #include "ActivitySummary.hpp"
@@ -1649,6 +1650,10 @@ bool Service::hrBand(const SDK::Workout::Step& step, float& low, float& high) co
         high = step.hrHigh * maxHr / 100.0f;
         break;
     }
+    // A file may give the ends either way round.
+    if (low > high) {
+        std::swap(low, high);
+    }
     return high > 0.0f;
 }
 
@@ -1662,8 +1667,8 @@ void Service::startWorkoutStep()
     // Both gauges run on every step: an untargeted one still has a value and
     // a step average to show.
     if (s.target == SDK::Workout::Target::Speed && s.speedLowMmps > 0 && s.speedHighMmps > 0) {
-        mBandLow  = static_cast<float>(s.speedLowMmps) / 1000.0f;
-        mBandHigh = static_cast<float>(s.speedHighMmps) / 1000.0f;
+        mBandLow  = static_cast<float>(std::min(s.speedLowMmps, s.speedHighMmps)) / 1000.0f;
+        mBandHigh = static_cast<float>(std::max(s.speedLowMmps, s.speedHighMmps)) / 1000.0f;
         mSpeedGauge.startStep(mBandLow, mBandHigh);
     } else {
         mSpeedGauge.startStep();
