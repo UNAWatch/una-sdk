@@ -377,6 +377,9 @@ const SDK::Workout::Program* Model::getWorkoutDetails() const
 
 void Model::endWorkout()
 {
+    // As trackStart() sets it: the Track screen should not wait for the
+    // service's next update to drop the workout faces.
+    mTrackData.workoutMode = false;
     SDK::send_msg<CustomMessage::WorkoutEnd>(mKernel);
 }
 

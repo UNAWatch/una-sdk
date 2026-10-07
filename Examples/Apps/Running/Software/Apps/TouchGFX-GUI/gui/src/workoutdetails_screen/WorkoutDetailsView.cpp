@@ -118,11 +118,7 @@ void WorkoutDetailsView::setProgram(const SDK::Workout::Program* program, bool i
             WorkoutUi::fitWidth(line->buffer(), T_TMP_MEDIUM_18_L, w);
         } else {
             // wrapTwo lays the first line; what is left carries on below.
-            WorkoutUi::wrapTwo(rest, line->buffer(), after, 48, T_TMP_MEDIUM_18_L, w, 32767);
-            rest += touchgfx::Unicode::strlen(line->buffer());
-            while (*rest == ' ') {
-                ++rest;
-            }
+            rest += WorkoutUi::wrapTwo(rest, line->buffer(), after, 48, T_TMP_MEDIUM_18_L, w, 32767);
         }
         line->place();
     }

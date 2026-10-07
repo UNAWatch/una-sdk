@@ -184,6 +184,7 @@ void MainView::onConfirm()
     case Menu::ID_START:
         if (mGpsFix == true && mArmed) {
             // A workout starts with the countdown, as Intervals do.
+            presenter->setPendingIntervalsMode(false);
             application().gotoTrackIntervalsCountdownScreenNoTransition();
         } else if (mGpsFix == true) {
             presenter->startTrack();

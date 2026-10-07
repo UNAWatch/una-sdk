@@ -63,10 +63,11 @@ void MenuIntervalsPresenter::saveLastRest(bool enable)
 
 void MenuIntervalsPresenter::startIntervals()
 {
+    // The countdown is shared with an armed workout: say this one is Intervals.
+    model->setPendingIntervalsMode(true);
     if (model->hasGpsFix()) {
         model->application().gotoTrackIntervalsCountdownScreenNoTransition();
     } else {
-        model->setPendingIntervalsMode(true);
         model->application().gotoTrackStartConfirmationScreenNoTransition();
     }
 }

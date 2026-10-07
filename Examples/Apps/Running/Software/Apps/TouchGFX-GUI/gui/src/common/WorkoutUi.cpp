@@ -176,7 +176,7 @@ void fitWidth(touchgfx::Unicode::UnicodeChar* buf, touchgfx::TypedTextId typogra
     buf[len + 1] = 0;
 }
 
-void wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::UnicodeChar* line1,
+uint16_t wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::UnicodeChar* line1,
              touchgfx::Unicode::UnicodeChar* line2, uint16_t cap, touchgfx::TypedTextId typography,
              int16_t width1, int16_t width2)
 {
@@ -184,8 +184,9 @@ void wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::Unic
     line2[0] = 0;
     const touchgfx::Font* font = touchgfx::TypedText(typography).getFont();
     if (font == nullptr || cap == 0) {
-        return;
+        return 0;
     }
+    const touchgfx::Unicode::UnicodeChar* start = text;
     while (*text == ' ') {
         ++text;
     }
@@ -203,11 +204,16 @@ void wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::Unic
         }
     }
     if (cut == 0) {
-        // One word too long for the line: cut it there.
+        // One word too long for the line: cut it there, and the rest of the
+        // word is dropped with it.
         touchgfx::Unicode::strncpy(line1, text, static_cast<uint16_t>(cap - 1));
         line1[cap - 1] = 0;
         fitWidth(line1, typography, width1);
-        return;
+        uint16_t used = 0;
+        while (text[used] != 0 && text[used] != ' ') {
+            ++used;
+        }
+        return static_cast<uint16_t>(text - start + used);
     }
     touchgfx::Unicode::strncpy(line1, text, cut);
     line1[cut] = 0;
@@ -218,6 +224,7 @@ void wrapTwo(const touchgfx::Unicode::UnicodeChar* text, touchgfx::Unicode::Unic
     touchgfx::Unicode::strncpy(line2, rest, static_cast<uint16_t>(cap - 1));
     line2[cap - 1] = 0;
     fitWidth(line2, typography, width2);
+    return static_cast<uint16_t>(rest - start);
 }
 
 int16_t lineWidth(int16_t top, int16_t bottom, int16_t margin)
