@@ -278,8 +278,6 @@ namespace CustomMessage {
      * lap's, in Track::Data (avgLapSpeed, avgLapHR).
      */
     struct WorkoutData : public SDK::MessageBase {
-        char     label[SDK::Workout::kStepNotesBytes];  ///< The current step
-        char     next[SDK::Workout::kStepNotesBytes];   ///< The step after it; empty if none
         uint32_t remainingMs;  ///< Time step: time left
         uint32_t remainingCm;  ///< Distance step: distance left
         uint32_t stepTimeMs;   ///< Time in the step so far
@@ -297,8 +295,6 @@ namespace CustomMessage {
 
         WorkoutData()
             : SDK::MessageBase(WORKOUT_DATA)
-            , label{}
-            , next{}
             , remainingMs(0)
             , remainingCm(0)
             , stepTimeMs(0)
@@ -316,23 +312,32 @@ namespace CustomMessage {
         {}
     };
 
-    /// The step that has just started, for the next-step card.
+    /**
+     * A workout step, sent in pairs when a workout starts and at each step
+     * change: first the step that has just started (for the next-step card
+     * and the step face), then the one after it (next set, for the
+     * next-step face; none set if nothing follows).
+     */
     struct WorkoutStep : public SDK::MessageBase {
-        char     label[SDK::Workout::kStepNotesBytes];
+        char     notes[SDK::Workout::kStepNotesBytes];  ///< The step's notes, or else its name; UTF-8, may be empty
         char     duration[24];  ///< e.g. "400 m"; empty for an open step
         char     target[32];    ///< e.g. "3:45-4:05 /km"; empty for no target
-        uint32_t rep;
-        uint32_t reps;
+        uint32_t rep;           ///< The step that started: pass of the innermost repeat; 0 outside one
+        uint32_t reps;          ///< Its passes in all; 0 if unlimited
         uint8_t  intensity;     ///< SDK::Workout::Intensity
+        bool     next;          ///< The step after the current one
+        bool     none;          ///< next only: nothing follows
 
         WorkoutStep()
             : SDK::MessageBase(WORKOUT_STEP)
-            , label{}
+            , notes{}
             , duration{}
             , target{}
             , rep(0)
             , reps(0)
             , intensity(0)
+            , next(false)
+            , none(false)
         {}
     };
 
