@@ -461,6 +461,37 @@ TEST(ScheduleState, AFailedWriteAfterACutShortReplacementKeepsTheRecord)
     EXPECT_TRUE(again.isCompleted(20261009, "2026-10-09.fit"));
 }
 
+TEST(ScheduleState, AWholeTempFileReplacesARecordFileThatCannotBeRead)
+{
+    InMemoryFileSystem fs;
+    const std::string tmp = std::string(ScheduleState::kDefaultPath) + ".tmp";
+    fs.seedFile(ScheduleState::kDefaultPath, "{\"date\":");
+    fs.seedFile(tmp, R"({"date":"2026-10-09","file":"2026-10-09.fit","completed":true})");
+    {
+        // A save that does not load first still keeps the ".tmp" record.
+        ScheduleState st(fs);
+        fs.failWritesAfterBytes = fs.bytesWritten;
+        EXPECT_FALSE(st.started(20261010, "2026-10-10.fit"));
+        fs.failWritesAfterBytes = static_cast<size_t>(-1);
+    }
+    ScheduleState st(fs);
+    st.load();
+    EXPECT_TRUE(st.isCompleted(20261009, "2026-10-09.fit"));
+    EXPECT_FALSE(fs.exist(tmp.c_str()));
+}
+
+TEST(ScheduleState, APartTempFileBesideNoRecordIsRemoved)
+{
+    InMemoryFileSystem fs;
+    const std::string tmp = std::string(ScheduleState::kDefaultPath) + ".tmp";
+    fs.seedFile(tmp, "{\"date\":");
+    ScheduleState st(fs);
+    st.load();
+    EXPECT_FALSE(fs.exist(tmp.c_str()));
+    EXPECT_FALSE(fs.exist(ScheduleState::kDefaultPath));
+    EXPECT_TRUE(st.started(20261009, "2026-10-09.fit"));
+}
+
 TEST(ScheduleState, AFileThatIsNotARecordReadsAsNone)
 {
     for (const char* text : {"", "{", "not json", R"({"date":"2026-02-30","file":"a.fit","completed":true})",

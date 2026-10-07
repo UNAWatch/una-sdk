@@ -63,16 +63,37 @@ void ScheduleState::load()
 
 bool ScheduleState::finishReplacement(const char* tmp)
 {
-    if (mFs.exist(mPath)) {
-        if (mFs.exist(tmp)) {
-            mFs.remove(tmp);  // left by a save that failed before the swap
-        }
+    Record r;
+    if (!mFs.exist(tmp)) {
         return true;
     }
-    return !mFs.exist(tmp) || mFs.rename(tmp, mPath);
+    // A ".tmp" that is not a whole record was cut short while being written,
+    // and one beside a good record is from a save that failed before the
+    // swap: either way the file holds the record.
+    if (!read(tmp, r) || read(mPath, r)) {
+        mFs.remove(tmp);
+        return true;
+    }
+    // The ".tmp" file is the only record: put it in place.
+    if (mFs.exist(mPath) && !mFs.remove(mPath)) {
+        return false;
+    }
+    return mFs.rename(tmp, mPath);
 }
 
 bool ScheduleState::loadFrom(const char* path)
+{
+    Record r;
+    if (!read(path, r)) {
+        return false;
+    }
+    mDate = r.date;
+    std::memcpy(mFile, r.file, sizeof(mFile));
+    mCompleted = r.completed;
+    return true;
+}
+
+bool ScheduleState::read(const char* path, Record& out)
 {
     auto file = mFs.file(path);
     if (!file || !file->open(false, false)) {
@@ -101,10 +122,10 @@ bool ScheduleState::loadFrom(const char* path)
     if (d == 0) {
         return false;
     }
-    mDate = d;
-    std::memcpy(mFile, name.data(), name.size());
-    mFile[name.size()] = '\0';
-    mCompleted = completed;
+    out.date = d;
+    std::memcpy(out.file, name.data(), name.size());
+    out.file[name.size()] = '\0';
+    out.completed = completed;
     return true;
 }
 

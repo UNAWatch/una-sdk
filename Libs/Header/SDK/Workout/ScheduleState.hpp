@@ -17,6 +17,8 @@
  * replaces the file. A write that fails leaves the record before in place.
  * Once the old file is removed the ".tmp" file is the record: if renaming it
  * fails or is cut short, load() and the next save put it in place first.
+ * They do the same when the file cannot be read and ".tmp" holds a whole
+ * record, and otherwise remove ".tmp".
  ******************************************************************************
  */
 
@@ -54,6 +56,14 @@ public:
     bool isCompleted(Ymd date, const char* file) const;
 
 private:
+    struct Record {
+        Ymd  date = 0;
+        char file[Library::kFileBytes] = {};
+        bool completed = false;
+    };
+
+    /// Read the record in @p path into @p out without changing what is held.
+    bool read(const char* path, Record& out);
     bool save();
     bool write(const char* path);
     bool finishReplacement(const char* tmp);
