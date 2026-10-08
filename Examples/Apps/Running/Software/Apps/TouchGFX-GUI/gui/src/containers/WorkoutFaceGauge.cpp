@@ -243,9 +243,6 @@ void WorkoutFaceGauge::set(const Model::WorkoutFace& face, bool imperial, float 
     mCaption.setText(caption);
     if (!gauge) {
         // "pace /km": the caption names the unit of the pace above it.
-        touchgfx::Unicode::UnicodeChar* buf = mCaption.buffer();
-        const uint16_t len = touchgfx::Unicode::strlen(buf);
-        touchgfx::Unicode::snprintf(buf + len, static_cast<uint16_t>(16 - len), imperial ? " /mi" : " /km");
-        mCaption.place();
+        mCaption.append(imperial ? " /mi" : " /km");
     }
 }
