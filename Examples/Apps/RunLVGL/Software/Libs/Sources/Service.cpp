@@ -1841,9 +1841,12 @@ void Service::sendWorkoutData()
     msg->zone         = static_cast<uint8_t>(targetZone());
 
     if (s.target == SDK::Workout::Target::Speed && mBandHigh > 0.0f) {
-        // The arc is laid out on pace, with faster to the right.
-        const auto pace = [](float mps) { return mps > 0.05f ? 1000.0f / mps : 1.0e6f; };
-        msg->value = mSpeedGauge.valueMps();
+        // The arc is laid out on pace, with faster to the right. At or below
+        // the floor the live pace has, the speed goes as 0, which shows no
+        // pace, as the live pace does.
+        const auto  pace  = [](float mps) { return mps > 0.05f ? 1000.0f / mps : 1.0e6f; };
+        const float speed = mSpeedGauge.valueMps();
+        msg->value = speed > mSpeedFilter.getMinValid() ? speed : 0.0f;
         msg->arc   = 1.0f - SDK::Workout::arcFraction(pace(msg->value), pace(mBandHigh),
                                                       pace(mBandLow), skArcMarginSecPerKm);
     } else if (s.target == SDK::Workout::Target::HeartRate && mBandHigh > 0.0f) {
