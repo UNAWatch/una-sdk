@@ -283,7 +283,7 @@ namespace CustomMessage {
         uint32_t stepTimeMs;   ///< Time in the step so far
         uint32_t rep;          ///< Pass of the innermost repeat; 0 outside one
         uint32_t reps;         ///< Its passes in all; 0 if unlimited
-        float    value;        ///< Gauge value; 0 with no target
+        float    value;        ///< Gauge value; 0 with no target, or a speed too low for a pace
         float    low;          ///< Target band
         float    high;
         float    arc;
