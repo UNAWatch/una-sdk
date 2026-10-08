@@ -44,6 +44,11 @@ public:
 #endif
     }
 
+    /// The Track screen, or the step card first if a step started while
+    /// another screen showed: the Track screen would otherwise draw the new
+    /// step for a frame before the card replaced it.
+    void gotoTrackScreenNoTransition();
+
 private:
 };
 
