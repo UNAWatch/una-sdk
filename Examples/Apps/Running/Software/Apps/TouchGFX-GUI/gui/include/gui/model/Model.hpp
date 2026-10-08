@@ -177,6 +177,8 @@ public:
     const WorkoutStepInfo& getWorkoutStep(bool next) const;
     /// True once after a step starts, for the next-step card.
     bool takeStepCard();
+    /// A step card is waiting to be shown; unlike takeStepCard() it stays.
+    bool hasStepCard() const { return mStepCard; }
 
 private:
     // Fields required for GUI <-> Service communication

@@ -49,7 +49,9 @@ void TrackPresenter::activate()
     view.setGpsFix(model->hasGpsFix());
     view.setAccessoryStatus(model->getAccessoryState());
 
-    // A step that started while another screen showed still gets its card.
+    // A step that started while another screen showed gets its card before
+    // this screen (FrontendApplication::gotoTrackScreenNoTransition()). This
+    // catches one that started after that choice was made, in the same tick.
     if (model->takeStepCard()) {
         showStepCard();
     }

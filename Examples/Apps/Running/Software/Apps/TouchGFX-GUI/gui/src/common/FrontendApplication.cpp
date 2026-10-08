@@ -5,3 +5,13 @@ FrontendApplication::FrontendApplication(Model& m, FrontendHeap& heap)
 {
 
 }
+
+void FrontendApplication::gotoTrackScreenNoTransition()
+{
+    if (model.hasStepCard()) {
+        // The card goes back to the Track screen when it is done.
+        gotoTrackWorkoutStepScreenNoTransition();
+    } else {
+        FrontendApplicationBase::gotoTrackScreenNoTransition();
+    }
+}
