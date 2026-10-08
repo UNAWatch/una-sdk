@@ -63,7 +63,7 @@ inline float distUnits(float metres, bool imperial)
     return imperial ? SDK::Utils::kmToMiles(km) : km;
 }
 
-/// "m:ss" (or "h:mm" from one hour) for a pace already in display units.
+/// "m:ss" for a pace already in display units.
 inline void pace(char* buf, size_t n, float paceInUnits)
 {
     if (paceInUnits < App::Display::kMinPace) {
@@ -71,11 +71,8 @@ inline void pace(char* buf, size_t n, float paceInUnits)
         return;
     }
     const auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(paceInUnits + 0.5f));
-    if (hms.h > 0) {
-        snprintf(buf, n, "%u:%02u", hms.h, hms.m);
-    } else {
-        snprintf(buf, n, "%u:%02u", hms.m, hms.s);
-    }
+    // Under an hour: the service sends no pace below 0.5 m/s.
+    snprintf(buf, n, "%u:%02u", hms.m, hms.s);
 }
 
 /// Session distance: two decimals below 100, one above.

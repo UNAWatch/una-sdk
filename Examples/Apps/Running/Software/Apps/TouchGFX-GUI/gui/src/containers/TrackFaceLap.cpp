@@ -32,11 +32,8 @@ void TrackFaceLap::setPace(float pace)
         // Round to the nearest second (matches the lap-alert popup / summary
         // pace; truncating would read a second low for the same grid lap).
         auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(pace + 0.5f));
-        if (hms.h > 0) {
-            Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
-        } else {
-            Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
-        }
+        // Under an hour: the service sends no pace below 0.5 m/s.
+        Unicode::snprintf(lapPaceValueBuffer, LAPPACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
     }
     lapPaceValue.invalidate();
 }

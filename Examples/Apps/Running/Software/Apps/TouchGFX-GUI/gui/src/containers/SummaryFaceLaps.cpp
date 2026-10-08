@@ -127,11 +127,8 @@ void SummaryFaceLaps::scrollListUpdateItem(LapListItem& item, int16_t itemIndex)
         Unicode::snprintf(buf, 32, "---");
     } else {
         auto pac = SDK::Utils::toHMS(pace);
-        if (pac.h > 0) {
-            Unicode::snprintf(buf, 32, "%u:%02u", pac.h, pac.m);
-        } else {
-            Unicode::snprintf(buf, 32, "%u:%02u", pac.m, pac.s);
-        }
+        // Under an hour: the service sends no pace below 0.5 m/s.
+        Unicode::snprintf(buf, 32, "%u:%02u", pac.m, pac.s);
     }
     item.setPace(buf);
 }
