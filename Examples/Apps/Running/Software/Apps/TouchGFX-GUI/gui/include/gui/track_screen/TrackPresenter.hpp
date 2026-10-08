@@ -45,9 +45,11 @@ private:
     TrackPresenter();
 
     void updateMode(const Track::Data& data);
+    void showStepCard();
 
     TrackView& view;
-    int        mMode = -1;  ///< TrackView::Mode, -1 until set
+    int        mMode    = -1;     ///< TrackView::Mode, -1 until set
+    bool       mLeaving = false;  ///< The step card is to replace this screen
 };
 
 #endif // TRACKPRESENTER_HPP
