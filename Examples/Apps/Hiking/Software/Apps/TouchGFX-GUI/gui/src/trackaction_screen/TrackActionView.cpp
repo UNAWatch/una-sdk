@@ -153,11 +153,8 @@ void TrackActionView::onCarouselUpdate(int16_t index)
                 Unicode::snprintf(buf, kBufSize, "---");
             } else {
                 auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(mAvgPaceConv));
-                if (hms.h > 0) {
-                    Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.h, hms.m);
-                } else {
-                    Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.m, hms.s);
-                }
+                // Under an hour: the service sends no pace below 0.5 m/s.
+                Unicode::snprintf(buf, kBufSize, "%u:%02u", hms.m, hms.s);
             }
         }
         break;
