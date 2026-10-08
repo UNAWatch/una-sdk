@@ -75,6 +75,17 @@ public:
         place();
     }
 
+    /// ASCII text added to the end, cut at the buffer's size.
+    void append(const char* ascii)
+    {
+        const uint16_t len = touchgfx::Unicode::strlen(mBuf);
+        if (len + 1 < N) {
+            touchgfx::Unicode::strncpy(mBuf + len, ascii, static_cast<uint16_t>(N - 1 - len));
+            mBuf[N - 1] = 0;
+        }
+        place();
+    }
+
     touchgfx::Unicode::UnicodeChar* buffer() { return mBuf; }
 
     /// Cut to @p maxWidth pixels (0: to the display's width at this line),
