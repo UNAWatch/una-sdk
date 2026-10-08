@@ -17,8 +17,12 @@
  * goes into a lap; the engine only says what happened.
  *
  * At most one step ends per update(), so a step with a zero duration lasts
- * one tick. Distance or time beyond the end of a step is not carried into
- * the next one.
+ * one tick.
+ *
+ * A step that runs out ends exactly at its time or distance, not at the
+ * update that saw it pass: the moment it was reached is interpolated between
+ * that update and the one before, and what was run beyond it counts towards
+ * the next step. A step ended by hand ends where the run is.
  ******************************************************************************
  */
 
@@ -94,6 +98,11 @@ public:
         Change   how  = Change::None;
         uint32_t timeMs = 0;      ///< Active time it ran for.
         uint32_t distanceCm = 0;  ///< Distance it covered.
+        /// The run's active totals where it ended. For a step that ran out
+        /// these trail the totals last passed in by what counts towards the
+        /// next step.
+        uint32_t atTimeMs = 0;
+        uint32_t atDistanceCm = 0;
     };
 
     /// Start @p program at its first step. @p timeMs and @p distanceCm are
@@ -139,11 +148,16 @@ private:
     void     clearProgress();
     Change   finishStep(Change how, uint32_t timeMs, uint32_t distanceCm);
     void     refresh(uint32_t timeMs, uint32_t distanceCm, uint32_t speedMmps, bool speedValid);
+    // Where the current step, which has run out by these totals, reached its
+    // end on the way to them from the last update's.
+    void     endPoint(uint32_t timeMs, uint32_t distanceCm, uint32_t& atMs, uint32_t& atCm) const;
 
     const Program* mProgram = nullptr;
     uint16_t       mCounters[kMaxSteps] = {};  ///< Passes completed, per repeat step.
     uint32_t       mStepStartMs = 0;
     uint32_t       mStepStartCm = 0;
+    uint32_t       mLastMs = 0;  ///< Totals at the last start(), update() or next().
+    uint32_t       mLastCm = 0;
     Status         mStatus;
     Ended          mEnded;
 };
