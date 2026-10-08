@@ -28,6 +28,8 @@ void WorkoutDetailsView::setupScreen()
     menuLayout.setAnimationMiddleCallback(mAnimationMiddleCb);
     menuLayout.getButtons().setR1(Buttons::NONE);   // view only
     menuLayout.getButtons().setR2(Buttons::WHITE);
+    // The steps run from first to last: nothing shows past either end.
+    menuLayout.getMenu().getWheel().setCircular(false);
 
     mName1.init(T_TMP_SEMIBOLD_25_L, SDK::GUI::Color::WHITE);
     mName2.init(T_TMP_SEMIBOLD_25_L, SDK::GUI::Color::WHITE);

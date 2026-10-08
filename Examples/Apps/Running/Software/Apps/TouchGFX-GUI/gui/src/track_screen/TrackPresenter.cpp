@@ -9,6 +9,8 @@ TrackPresenter::TrackPresenter(TrackView& v)
 
 void TrackPresenter::activate()
 {
+    mLeaving = false;
+
     // Reset nested action menu position
     model->menu().track.action.reset();
 
@@ -49,8 +51,16 @@ void TrackPresenter::activate()
 
     // A step that started while another screen showed still gets its card.
     if (model->takeStepCard()) {
-        model->application().gotoTrackWorkoutStepScreenNoTransition();
+        showStepCard();
     }
+}
+
+void TrackPresenter::showStepCard()
+{
+    // The card replaces this screen at the next tick. Until then the faces
+    // are left as they are, so the new step does not show on them first.
+    mLeaving = true;
+    model->application().gotoTrackWorkoutStepScreenNoTransition();
 }
 
 void TrackPresenter::deactivate()
@@ -72,6 +82,9 @@ void TrackPresenter::updateMode(const Track::Data& data)
 
 void TrackPresenter::onTrackData(const Track::Data& data)
 {
+    if (mLeaving) {
+        return;
+    }
     // A workout that completes or is ended drops to a free run.
     updateMode(data);
     view.setTrackData(data);
@@ -79,19 +92,27 @@ void TrackPresenter::onTrackData(const Track::Data& data)
 
 void TrackPresenter::onWorkoutData(const Model::WorkoutFace& face)
 {
+    if (mLeaving) {
+        return;
+    }
     view.setWorkoutFace(face);
 }
 
 void TrackPresenter::onWorkoutStep(bool next)
 {
+    if (mLeaving) {
+        return;
+    }
     if (next) {
         view.setWorkoutNext(model->getWorkoutStep(true));
         return;
     }
-    view.setWorkoutStep(model->getWorkoutStep(false));
+    // activate() shows the new step when the card hands back.
     if (model->takeStepCard()) {
-        model->application().gotoTrackWorkoutStepScreenNoTransition();
+        showStepCard();
+        return;
     }
+    view.setWorkoutStep(model->getWorkoutStep(false));
 }
 
 void TrackPresenter::onBatteryLevel(uint8_t lvl)
