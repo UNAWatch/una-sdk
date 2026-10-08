@@ -191,6 +191,7 @@ private:
     bool         mGpsWanted = false;                 ///< GPS_LOCATION should stay connected (pre-activity + active track); cleared in disconnect() so the retry never re-wakes the GNSS post-activity.
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
+    uint32_t     mLapCarryMs          = 0;      ///< Time the last lap handed to this one.
     Track::Data  mTrackData{};
 
     // -- Interval training state ----------------------------------------------
@@ -275,6 +276,12 @@ private:
         SDK::Fit::LapTrigger trigger      = SDK::Fit::LapTrigger::Manual;
         uint16_t             wktStepIndex = SDK::Fit::kMessageIndexInvalid;
         SDK::Fit::Intensity  intensity    = SDK::Fit::Intensity::Invalid;
+        /// A workout step that ran out ended between two ticks. carryMs is
+        /// the time counted beyond its end, for the next lap; stepM, when
+        /// above 0, is the distance it covered, the rest of the lap's counted
+        /// distance going to the next lap.
+        uint32_t             carryMs      = 0;
+        float                stepM        = 0.0f;
     };
     void saveLap(const LapEnd& end, float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
@@ -299,6 +306,8 @@ private:
 
     /// The lap for workout step @p step, ended by @p trigger.
     LapEnd workoutLap(uint16_t step, SDK::Fit::LapTrigger trigger) const;
+    /// The lap for the step the engine has just ended, from where it ended.
+    LapEnd endedStepLap(SDK::Workout::Engine::Change how) const;
     /// What ended step @p step, as the engine reported it.
     SDK::Fit::LapTrigger lapTrigger(SDK::Workout::Engine::Change how, uint16_t step) const;
 

@@ -825,6 +825,7 @@ void Service::startTrack(std::time_t utc)
 
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
+    mLapCarryMs = 0;
 
     // Intervals mode initialization
     mIntervalsCompleted = false;
@@ -1062,19 +1063,32 @@ void Service::processTrack()
 
 void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
 {
-    const auto  lapTime     = mTimeCounter.getLapValueActive();
+    // The time counter counts whole seconds. A workout step that ran out
+    // ended between two of them: what came after its end (end.carryMs) goes
+    // to the next lap, and this lap gets what the last one handed it.
+    const uint32_t countedMs = static_cast<uint32_t>(mTimeCounter.getLapValueActive()) * 1000u + mLapCarryMs;
+    const uint32_t lapMs     = countedMs > end.carryMs ? countedMs - end.carryMs : 0u;
+    const float    lapTime   = static_cast<float>(lapMs) / 1000.0f;
+    const int32_t  shiftMs   = static_cast<int32_t>(mLapCarryMs) - static_cast<int32_t>(end.carryMs);
+    mLapCarryMs = end.carryMs;
+
     // A distance auto-lap (autoLapDistanceM > 0) is recorded as exactly the
     // target distance; the overshoot is carried into the next lap below. This
     // keeps lap boundaries on the km/mi grid and makes the reported lap pace
-    // agree with the lap duration.
+    // agree with the lap duration. A workout step that ran out does the same
+    // with what was run beyond its end.
     const bool  gridLap     = autoLapDistanceM > 0.0f;
+    const bool  stepLap     = end.stepM > 0.0f;
+    const float counted     = mDistanceCounter.getLapValueActive();
     const float lapDistance = gridLap ? autoLapDistanceM
-                                      : mDistanceCounter.getLapValueActive();
-    const float lapSpeed    = speedFromTotals(lapDistance, static_cast<float>(lapTime));
+                            : stepLap ? std::min(end.stepM, counted)
+                                      : counted;
+    const float lapSpeed    = speedFromTotals(lapDistance, lapTime);
 
-    // Accumulate lap into summary
+    // Accumulate lap into summary. Its whole seconds are rounded, as the
+    // summary rounds the pace, so a 1 km lap's time and pace read the same.
     mSummary.laps.push_back({
-        lapTime,
+        static_cast<std::time_t>((lapMs + 500u) / 1000u),
         lapDistance,
         getPace(lapSpeed, mSpeedCounter.getMinValid())
     });
@@ -1094,7 +1108,9 @@ void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
     fitLap.timestamp = endUtc;
     fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
     fitLap.duration  = lapTime;
-    fitLap.elapsed   = mTimeCounter.getLapValueTotal() - tailSec;
+    fitLap.elapsed   = std::max(static_cast<float>(mTimeCounter.getLapValueTotal() - tailSec)
+                                    + static_cast<float>(shiftMs) / 1000.0f,
+                                0.0f);
 
     fitLap.distance  = lapDistance;
 
@@ -1115,7 +1131,7 @@ void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
     mTrackData.lapNum++;
 
     LOG_INFO("Lap_%u saved. UTC: %u\n", mTrackData.lapNum, static_cast<uint32_t>(mTimeCounter.getCurrent()));
-    LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getLapValueActive()), static_cast<uint32_t>(mTimeCounter.getLapValueTotal()));
+    LOG_INFO("Time: %.3f / %u s\n", lapTime, static_cast<uint32_t>(mTimeCounter.getLapValueTotal()));
     LOG_INFO("Distance: %.3f m\n", lapDistance);
     LOG_INFO("Speed: %.3f / %.3f m/s\n", lapSpeed, mSpeedCounter.getLapMaximum());
     LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getLapAverage(), mHrCounter.getLapMaximum());
@@ -1123,7 +1139,7 @@ void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
 
     // Reset lap counters
     mTimeCounter.resetLap();
-    if (gridLap) {
+    if (gridLap || stepLap) {
         mDistanceCounter.advanceLap(lapDistance);
     } else {
         mDistanceCounter.resetLap();
@@ -1437,9 +1453,8 @@ void Service::onIntervalsStepEnded(SDK::Workout::Engine::Change how)
 
     // The step that ended is recorded as its own lap, before the next begins.
     // An automatic end means its time or distance ran out.
-    const SDK::Workout::Engine::Ended& ended = mEngine.ended();
     if (mLapNotEmpty) {
-        saveLap(workoutLap(ended.step, lapTrigger(how, ended.step)));
+        saveLap(endedStepLap(how));
     }
 
     if (mEngine.status().finished) {
@@ -1527,6 +1542,22 @@ Service::LapEnd Service::workoutLap(uint16_t step, SDK::Fit::LapTrigger trigger)
             default:                                end.intensity = SDK::Fit::Intensity::Active; break;
             }
         }
+    }
+    return end;
+}
+
+Service::LapEnd Service::endedStepLap(SDK::Workout::Engine::Change how) const
+{
+    const SDK::Workout::Engine::Ended& ended = mEngine.ended();
+    LapEnd end = workoutLap(ended.step, lapTrigger(how, ended.step));
+
+    // The engine was given these same totals this tick, and a step that ran
+    // out ended short of them; one ended by hand ends here. Its distance is
+    // the engine's, so a distance step's lap is exactly that distance.
+    if (how == SDK::Workout::Engine::Change::Auto) {
+        const uint32_t nowMs = activeTimeMs();
+        end.carryMs = ended.atTimeMs < nowMs ? nowMs - ended.atTimeMs : 0u;
+        end.stepM   = static_cast<float>(ended.distanceCm) / 100.0f;
     }
     return end;
 }
@@ -1743,9 +1774,8 @@ void Service::onWorkoutStepEnded(SDK::Workout::Engine::Change how)
     mLeadIn.stepStarted();
 
     // The step that ended is recorded as its own lap, before the next begins.
-    const SDK::Workout::Engine::Ended& ended = mEngine.ended();
     if (mLapNotEmpty) {
-        saveLap(workoutLap(ended.step, lapTrigger(how, ended.step)));
+        saveLap(endedStepLap(how));
     }
     mWorkoutReachedEnd = mWorkoutReachedEnd || mEngine.status().reachedEnd;
 

@@ -7,6 +7,7 @@
 
 #include "SDK/Workout/WorkoutEngine.hpp"
 
+#include <algorithm>
 #include <cstring>
 
 namespace SDK::Workout {
@@ -90,6 +91,8 @@ void Engine::start(const Program& program, uint32_t timeMs, uint32_t distanceCm)
     std::memset(mCounters, 0, sizeof(mCounters));
     mStatus = Status{};
     mEnded  = Ended{};
+    mLastMs = timeMs;
+    mLastCm = distanceCm;
     // A repeat must point back to an earlier step, so a valid program never
     // starts with one. Treat either case as nothing to run.
     if (program.stepCount == 0 || program.steps[0].end == StepEnd::Repeat) {
@@ -174,8 +177,10 @@ Engine::Change Engine::finishStep(Change how, uint32_t timeMs, uint32_t distance
 {
     mEnded.step       = mStatus.step;
     mEnded.how        = how;
-    mEnded.timeMs     = timeMs >= mStepStartMs ? timeMs - mStepStartMs : 0;
-    mEnded.distanceCm = distanceCm >= mStepStartCm ? distanceCm - mStepStartCm : 0;
+    mEnded.timeMs       = timeMs >= mStepStartMs ? timeMs - mStepStartMs : 0;
+    mEnded.distanceCm   = distanceCm >= mStepStartCm ? distanceCm - mStepStartCm : 0;
+    mEnded.atTimeMs     = timeMs;
+    mEnded.atDistanceCm = distanceCm;
 
     const uint16_t following = advance(mStatus.step, mCounters);
     if (following >= mProgram->stepCount) {
@@ -201,13 +206,59 @@ Engine::Change Engine::update(uint32_t timeMs, uint32_t distanceCm, uint32_t spe
     const bool done = (s.end == StepEnd::Time && mStatus.stepTimeMs >= s.durationMs) ||
                       (s.end == StepEnd::Distance && mStatus.stepDistanceCm >= s.distanceCm);
     if (!done) {
+        mLastMs = timeMs;
+        mLastCm = distanceCm;
         return Change::None;
     }
-    const Change how = finishStep(Change::Auto, timeMs, distanceCm);
+    uint32_t atMs = timeMs;
+    uint32_t atCm = distanceCm;
+    endPoint(timeMs, distanceCm, atMs, atCm);
+    mLastMs = timeMs;
+    mLastCm = distanceCm;
+
+    // The next step starts where this one ended, so it begins with what was
+    // run beyond that point.
+    const Change how = finishStep(Change::Auto, atMs, atCm);
     if (mStatus.running) {
         refresh(timeMs, distanceCm, speedMmps, speedValid);
     }
     return how;
+}
+
+void Engine::endPoint(uint32_t timeMs, uint32_t distanceCm, uint32_t& atMs, uint32_t& atCm) const
+{
+    const Step& s = mProgram->steps[mStatus.step];
+    const bool  byTime = s.end == StepEnd::Time;
+
+    // The step's own measure ends exactly on its target; the other is taken
+    // the same fraction of the way from the last update. A target already
+    // behind the last update (a step entered with more carried into it than
+    // it lasts) leaves the other measure at the last update: nothing earlier
+    // is known.
+    const uint64_t from = byTime ? mLastMs : mLastCm;
+    const uint64_t to   = byTime ? timeMs : distanceCm;
+    const uint64_t end  = std::min<uint64_t>(
+        to, byTime ? static_cast<uint64_t>(mStepStartMs) + s.durationMs
+                   : static_cast<uint64_t>(mStepStartCm) + s.distanceCm);
+    const uint64_t num = end > from ? end - from : 0;
+    const uint64_t den = to > from ? to - from : 1;
+
+    // a + (b - a) * num / den, rounded. b < a only if the totals went
+    // backwards, which never ends a step; a stands then.
+    const auto between = [num, den](uint32_t a, uint32_t b) -> uint32_t {
+        if (b <= a) {
+            return a;
+        }
+        return static_cast<uint32_t>(a + (static_cast<uint64_t>(b - a) * num + den / 2) / den);
+    };
+
+    if (byTime) {
+        atMs = static_cast<uint32_t>(end);
+        atCm = between(mLastCm, distanceCm);
+    } else {
+        atCm = static_cast<uint32_t>(end);
+        atMs = between(mLastMs, timeMs);
+    }
 }
 
 Engine::Change Engine::next(uint32_t timeMs, uint32_t distanceCm)
@@ -215,6 +266,8 @@ Engine::Change Engine::next(uint32_t timeMs, uint32_t distanceCm)
     if (!mStatus.running) {
         return Change::None;
     }
+    mLastMs = timeMs;
+    mLastCm = distanceCm;
     return finishStep(Change::Manual, timeMs, distanceCm);
 }
 

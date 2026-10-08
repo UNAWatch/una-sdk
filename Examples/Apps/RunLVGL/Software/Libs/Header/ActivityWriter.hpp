@@ -76,8 +76,8 @@ public:
     struct LapData {
         std::time_t timestamp = 0;      // UTC
         std::time_t timeStart = 0;      // UTC
-        std::time_t duration  = 0;      // seconds
-        std::time_t elapsed   = 0;      // seconds
+        float       duration  = 0.0f;   // seconds; a workout step ends between seconds
+        float       elapsed   = 0.0f;   // seconds
         float       distance  = 0.0f;   // m
         float       speedAvg  = 0.0f;   // m/s
         float       speedMax  = 0.0f;   // m/s

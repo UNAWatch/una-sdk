@@ -180,15 +180,78 @@ TEST(WorkoutEngine, EndsAndReportsHow)
     EXPECT_EQ(e.next(1000001, 1000001), Change::None);
 }
 
-TEST(WorkoutEngine, OvershootIsNotCarriedOver)
+TEST(WorkoutEngine, DistanceStepEndsWhereItsDistanceWasReached)
 {
     P prog;
-    prog.dist(40000).dist(40000);
+    prog.dist(100000).time(90000);
     Engine e;
     e.start(*prog, 0, 0);
-    EXPECT_EQ(e.update(100000, 40500), Change::Auto);  // 5 m past the end
+    EXPECT_EQ(e.update(281000, 99800), Change::None);
+    // 1 km came 2 m into the 3.5 m of the next second.
+    EXPECT_EQ(e.update(282000, 100150), Change::Auto);
+    EXPECT_EQ(e.ended().distanceCm, 100000u);
+    EXPECT_EQ(e.ended().timeMs, 281571u);
+    EXPECT_EQ(e.ended().atDistanceCm, 100000u);
+    EXPECT_EQ(e.ended().atTimeMs, 281571u);
+
+    // The rest of that second counts towards the next step.
+    EXPECT_EQ(e.status().stepTimeMs, 429u);
+    EXPECT_EQ(e.status().stepDistanceCm, 150u);
+    EXPECT_EQ(e.status().remainingMs, 89571u);
+}
+
+TEST(WorkoutEngine, TimeStepEndsOnItsTimeAfterACarry)
+{
+    P prog;
+    prog.dist(100000).time(90000).open();
+    Engine e;
+    e.start(*prog, 0, 0);
+    e.update(281000, 99800);
+    ASSERT_EQ(e.update(282000, 100150), Change::Auto);  // the rest starts at 281.571 s
+
+    EXPECT_EQ(e.update(371000, 120000), Change::None);
+    EXPECT_EQ(e.update(372000, 120300), Change::Auto);
+    EXPECT_EQ(e.ended().timeMs, 90000u);
+    EXPECT_EQ(e.ended().atTimeMs, 371571u);
+    // 57.1% of the way from 1200.00 m to 1203.00 m.
+    EXPECT_EQ(e.ended().atDistanceCm, 120171u);
+    EXPECT_EQ(e.ended().distanceCm, 20171u);
+    EXPECT_EQ(e.status().stepTimeMs, 429u);
+    EXPECT_EQ(e.status().stepDistanceCm, 129u);
+}
+
+TEST(WorkoutEngine, StepEndedByHandEndsWhereTheRunIs)
+{
+    P prog;
+    prog.dist(100000).open();
+    Engine e;
+    e.start(*prog, 0, 0);
+    e.update(100000, 30000);
+    EXPECT_EQ(e.next(100500, 30200), Change::Manual);
+    EXPECT_EQ(e.ended().atTimeMs, 100500u);
+    EXPECT_EQ(e.ended().atDistanceCm, 30200u);
+    EXPECT_EQ(e.status().stepTimeMs, 0u);
     EXPECT_EQ(e.status().stepDistanceCm, 0u);
-    EXPECT_EQ(e.status().remainingCm, 40000u);
+}
+
+TEST(WorkoutEngine, CarryLongerThanTheNextStep)
+{
+    // 3.5 m in one update across two 1 m steps: the first ends at 1 m, the
+    // second has run out on entry and ends on its distance at the next
+    // update, its time taken at the last update, the latest known.
+    P prog;
+    prog.dist(100).dist(100).open();
+    Engine e;
+    e.start(*prog, 0, 0);
+    EXPECT_EQ(e.update(1000, 350), Change::Auto);
+    EXPECT_EQ(e.ended().atDistanceCm, 100u);
+    EXPECT_EQ(e.ended().atTimeMs, 286u);
+    EXPECT_EQ(e.status().step, 1);
+    EXPECT_EQ(e.update(1000, 350), Change::Auto);
+    EXPECT_EQ(e.ended().atDistanceCm, 200u);
+    EXPECT_EQ(e.ended().atTimeMs, 1000u);
+    EXPECT_EQ(e.ended().distanceCm, 100u);
+    EXPECT_EQ(e.status().step, 2);
 }
 
 TEST(WorkoutEngine, AtMostOneStepEndsPerUpdate)
@@ -624,7 +687,9 @@ TEST(WorkoutEngine, LastStepEndingByItselfReportsTheLap)
     EXPECT_TRUE(e.status().finished);
     EXPECT_EQ(e.ended().step, 1);
     EXPECT_EQ(e.ended().how, Change::Auto);
-    EXPECT_EQ(e.ended().distanceCm, 5200u);
+    // It ends where its distance was reached, 1 cm into the last second.
+    EXPECT_EQ(e.ended().distanceCm, 5000u);
+    EXPECT_EQ(e.ended().timeMs, 2005u);
     // Nothing of the finished step is left showing.
     EXPECT_FALSE(e.status().leadIn);
     EXPECT_EQ(e.status().remainingCm, 0u);
