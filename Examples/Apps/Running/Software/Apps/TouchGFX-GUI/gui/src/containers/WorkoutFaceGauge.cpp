@@ -12,13 +12,19 @@ namespace
 {
 
 // The arc spans 80 degrees across the top (0 = 12 o'clock, clockwise), in
-// thirds with a small gap between them, clear of the large value below.
+// thirds with a small gap between them, clear of the large value below. Its
+// line is centred on the radius: it covers 100 to 109 px from the centre.
 constexpr float   kArcFrom   = 320.0f;
 constexpr float   kArcSpan   = 80.0f;
 constexpr float   kArcGap    = 2.0f;
-constexpr int16_t kArcRadius = 109;
-constexpr int16_t kDotRadius = 6;
-constexpr int16_t kDotTrack  = 95;   ///< Radius the dot runs along, inside the arc
+constexpr float   kArcRadius = 104.5f;
+constexpr int16_t kArcWidth  = 9;
+
+// The pointer: a triangle inside the arc, its tip towards it.
+constexpr float   kPointerTip   = 97.0f;  ///< Radius of the tip
+constexpr float   kPointerBase  = 85.0f;  ///< Radius of the base
+constexpr float   kPointerHalf  = 6.0f;   ///< Half the base's width
+constexpr int16_t kPointerBox   = 26;     ///< Square the widget takes, around the base-to-tip midpoint
 
 constexpr int16_t kValueY      = 92;  ///< With the arc
 constexpr int16_t kValueYNoArc = 84;
@@ -55,9 +61,9 @@ void setupArc(touchgfx::Circle& c, touchgfx::PainterABGR2222& p, float from, flo
     c.setPosition(0, 0, 240, 240);
     c.setCenter(120, 120);
     c.setRadius(kArcRadius);
-    c.setLineWidth(9);
+    c.setLineWidth(kArcWidth);
     c.setArc(from, to);
-    c.setCapPrecision(10);
+    c.setCapPrecision(180);  // square ends
     c.setPainter(p);
 }
 
@@ -78,14 +84,10 @@ WorkoutFaceGauge::WorkoutFaceGauge()
     add(mBand);
     add(mFast);
 
-    mDot.setPosition(0, 0, 2 * kDotRadius + 2, 2 * kDotRadius + 2);
-    mDot.setCenter(kDotRadius + 1, kDotRadius + 1);
-    mDot.setRadius(kDotRadius);
-    mDot.setLineWidth(0);
-    mDot.setArc(0, 360);
-    mDotPainter.setColor(SDK::GUI::Color::WHITE);
-    mDot.setPainter(mDotPainter);
-    add(mDot);
+    mPointer.setPosition(0, 0, kPointerBox, kPointerBox);
+    mPointerPainter.setColor(SDK::GUI::Color::WHITE);
+    mPointer.setPainter(mPointerPainter);
+    add(mPointer);
 
     mDivider.setPosition(40, 127, 160, 3);
     mDivider.setColor(SDK::GUI::Color::TEAL);
@@ -108,28 +110,42 @@ void WorkoutFaceGauge::setArcVisible(bool visible)
     mSlow.setVisible(visible);
     mBand.setVisible(visible);
     mFast.setVisible(visible);
-    mDot.setVisible(visible);
+    mPointer.setVisible(visible);
     mSlow.invalidate();
     mBand.invalidate();
     mFast.invalidate();
-    mDot.invalidate();
+    mPointer.invalidate();
 }
 
-void WorkoutFaceGauge::placeDot(float arc)
+void WorkoutFaceGauge::placePointer(float arc)
 {
     if (arc < 0.0f) {
         arc = 0.0f;
     } else if (arc > 1.0f) {
         arc = 1.0f;
     }
-    // 0 degrees is 12 o'clock, clockwise.
+    // 0 degrees is 12 o'clock, clockwise: outwards is (sin, -cos) and along
+    // the arc (cos, sin).
     const float deg = kArcFrom + kArcSpan * arc;
     const float rad = deg * 3.14159265f / 180.0f;
-    const int16_t x = static_cast<int16_t>(120.0f + kDotTrack * std::sin(rad));
-    const int16_t y = static_cast<int16_t>(120.0f - kDotTrack * std::cos(rad));
-    mDot.invalidate();
-    mDot.setXY(static_cast<int16_t>(x - kDotRadius - 1), static_cast<int16_t>(y - kDotRadius - 1));
-    mDot.invalidate();
+    const float nx = std::sin(rad);
+    const float ny = -std::cos(rad);
+    const float mid = (kPointerTip + kPointerBase) / 2.0f;
+    const int16_t bx = static_cast<int16_t>(120.0f + mid * nx) - kPointerBox / 2;
+    const int16_t by = static_cast<int16_t>(120.0f + mid * ny) - kPointerBox / 2;
+
+    // Corners in the widget's own frame.
+    const float ox = 120.0f - static_cast<float>(bx);
+    const float oy = 120.0f - static_cast<float>(by);
+    touchgfx::AbstractShape::ShapePoint<float> pts[3] = {
+        { ox + kPointerTip * nx, oy + kPointerTip * ny },
+        { ox + kPointerBase * nx - kPointerHalf * ny, oy + kPointerBase * ny + kPointerHalf * nx },
+        { ox + kPointerBase * nx + kPointerHalf * ny, oy + kPointerBase * ny - kPointerHalf * nx },
+    };
+    mPointer.invalidate();
+    mPointer.setXY(bx, by);
+    mPointer.setShape(pts);
+    mPointer.invalidate();
 }
 
 void WorkoutFaceGauge::formatRemaining(const Model::WorkoutFace& face, bool imperial, char* buf, size_t cap,
@@ -186,10 +202,10 @@ void WorkoutFaceGauge::set(const Model::WorkoutFace& face, bool imperial, float 
         if (zone == SDK::Workout::Zone::NoSignal && target == SDK::Workout::Target::Speed) {
             caption = T_TEXT_NO_GPS;
         }
-        placeDot(face.arc);
+        placePointer(face.arc);
         // Without a signal the whole gauge greys out.
         const bool lost = zone == SDK::Workout::Zone::NoSignal;
-        mDotPainter.setColor(lost ? SDK::GUI::Color::GRAY : SDK::GUI::Color::WHITE);
+        mPointerPainter.setColor(lost ? SDK::GUI::Color::GRAY : SDK::GUI::Color::WHITE);
         mSlowPainter.setColor(lost ? touchgfx::colortype(SDK::GUI::Color::GRAY_DARK)
                                    : WorkoutUi::zoneColor(static_cast<uint8_t>(SDK::Workout::Zone::Below)));
         mBandPainter.setColor(lost ? touchgfx::colortype(SDK::GUI::Color::GRAY)

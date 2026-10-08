@@ -5,6 +5,7 @@
 #include <touchgfx/widgets/Box.hpp>
 #include <touchgfx/widgets/canvas/Circle.hpp>
 #include <touchgfx/widgets/canvas/PainterABGR2222.hpp>
+#include <touchgfx/widgets/canvas/Shape.hpp>
 
 #include <gui/containers/WorkoutLabel.hpp>
 #include <gui/model/Model.hpp>
@@ -15,7 +16,7 @@
  *
  * With a target, an arc across the top shows the band as its middle third
  * and each outer third as the margin beyond it, faster or higher on the
- * right; a dot marks the gauge value, which is also shown large in the
+ * right; a pointer inside it marks the gauge value, which is also shown large in the
  * zone's colour. Without one, the arc is hidden: what is left of the step is
  * the large number and the live pace goes below.
  */
@@ -29,12 +30,13 @@ public:
 
 private:
     void setArcVisible(bool visible);
-    void placeDot(float arc);
+    void placePointer(float arc);
     void formatRemaining(const Model::WorkoutFace& face, bool imperial, char* buf, size_t cap,
                          touchgfx::TypedTextId& caption);
 
-    touchgfx::Circle          mSlow, mBand, mFast, mDot;
-    touchgfx::PainterABGR2222 mSlowPainter, mBandPainter, mFastPainter, mDotPainter;
+    touchgfx::Circle          mSlow, mBand, mFast;
+    touchgfx::Shape<3>        mPointer;
+    touchgfx::PainterABGR2222 mSlowPainter, mBandPainter, mFastPainter, mPointerPainter;
     touchgfx::Box             mDivider;
 
     WorkoutLabel<10> mValue;    ///< Gauge value, or what is left without a target
