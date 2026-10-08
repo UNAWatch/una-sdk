@@ -61,11 +61,8 @@ void TrackLapView::setPace(float secPerM)
         // displayed whole-second duration (pace is a float speed round-trip that
         // lands a hair below the exact value; truncating would drop a second).
         auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(value + 0.5f));
-        if (hms.h > 0) {
-            Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "%u:%02u", hms.h, hms.m);
-        } else {
-            Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
-        }
+        // Under an hour: the service sends no pace below 0.5 m/s.
+        Unicode::snprintf(paceValueBuffer, PACEVALUE_SIZE, "%u:%02u", hms.m, hms.s);
     }
     paceValue.invalidate();
 }

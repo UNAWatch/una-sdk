@@ -37,11 +37,8 @@ void formatPace(float secPerUnit, char* buf, size_t cap)
         return;
     }
     const auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(secPerUnit + 0.5f));
-    if (hms.h > 0) {
-        std::snprintf(buf, cap, "%u:%02u", static_cast<unsigned>(hms.h), static_cast<unsigned>(hms.m));
-    } else {
-        std::snprintf(buf, cap, "%u:%02u", static_cast<unsigned>(hms.m), static_cast<unsigned>(hms.s));
-    }
+    // Under an hour: the service sends no pace below 0.5 m/s.
+    std::snprintf(buf, cap, "%u:%02u", static_cast<unsigned>(hms.m), static_cast<unsigned>(hms.s));
 }
 
 void formatClock(uint32_t ms, bool roundUp, char* buf, size_t cap)
@@ -187,7 +184,8 @@ void WorkoutFaceGauge::set(const Model::WorkoutFace& face, bool imperial, float 
         const touchgfx::colortype color = WorkoutUi::zoneColor(face.zone);
         if (target == SDK::Workout::Target::Speed) {
             const float perUnit = imperial ? 1609.344f : 1000.0f;
-            formatPace(face.value > 0.05f ? perUnit / face.value : 0.0f, value, sizeof(value));
+            // The service floors the speed: 0 means no pace.
+            formatPace(face.value > 0.0f ? perUnit / face.value : 0.0f, value, sizeof(value));
             mUnit.setText(imperial ? "/mi" : "/km");
         } else if (face.value >= App::Display::kMinHR) {
             std::snprintf(value, sizeof(value), "%u", static_cast<unsigned>(face.value + 0.5f));

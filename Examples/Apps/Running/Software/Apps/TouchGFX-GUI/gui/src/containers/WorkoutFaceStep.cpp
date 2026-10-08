@@ -126,11 +126,8 @@ void WorkoutFaceStep::setAverages(float lapPace, float lapHr, bool heartRate)
         std::snprintf(text, sizeof(text), "---");
     } else {
         const auto hms = SDK::Utils::toHMS(static_cast<std::time_t>(lapPace + 0.5f));
-        if (hms.h > 0) {
-            std::snprintf(text, sizeof(text), "%u:%02u", static_cast<unsigned>(hms.h), static_cast<unsigned>(hms.m));
-        } else {
-            std::snprintf(text, sizeof(text), "%u:%02u", static_cast<unsigned>(hms.m), static_cast<unsigned>(hms.s));
-        }
+        // Under an hour: the service sends no pace below 0.5 m/s.
+        std::snprintf(text, sizeof(text), "%u:%02u", static_cast<unsigned>(hms.m), static_cast<unsigned>(hms.s));
     }
     mAvg.setText(text);
 }
