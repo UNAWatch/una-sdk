@@ -105,6 +105,10 @@ void WorkoutDetailsScreen::setProgram(const SDK::Workout::Program* program)
     mRowCount = 0;
     mMenu.reset();
     lv_obj_clean(mMenuBox);
+    // The last workout's rows, now the wheel that pointed into them is gone.
+    mRows.reset();
+    mItems.reset();
+    mText.reset();
     if (mProgram == nullptr) {
         // The file could not be read: the first page keeps only what the
         // list knew, and there are no steps to go to.
