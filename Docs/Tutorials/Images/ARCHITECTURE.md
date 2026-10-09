@@ -156,7 +156,7 @@ and declare the name in `gui/include/gui/Assets.hpp` with `LV_IMAGE_DECLARE`.
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | Images (TouchGFX) | 234 KB | 220 KB | 71 KB |
-| ImagesLVGL | 204 KB | 195 KB | 139 KB |
+| ImagesLVGL | 204 KB | 195 KB | 155 KB |
 
 ## Image Import Process
 

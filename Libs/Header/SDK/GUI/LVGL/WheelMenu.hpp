@@ -8,9 +8,10 @@
  * Geometry follows the TouchGFX apps' MainMenu: wheel at y = 87, items 66 px
  * tall and stacked without a gap, lens at (16, 87) 220 x 66.
  *
- * Item styles: Simple (centred text), Tip (text with a hint line below),
- * Toggle (text with an on/off switch; shown as Tip with ON/OFF when not
- * selected) and Icon (bitmap beside the text).
+ * Item styles: Simple (centred text), Tip (text with a hint line below, which
+ * may differ when the item is not selected), Toggle (text with an on/off
+ * switch; shown as Tip with ON/OFF when not selected) and Icon (bitmap beside
+ * the text).
  *
  * The slide works the way TouchGFX's ScrollWheelWithSelectionStyle does. Two
  * strips hold the previous, current and next items: one rendered in the large
@@ -81,6 +82,12 @@ public:
         IconLayout            centerLayout { 20, 3, 87, 153 };
         const lv_image_dsc_t* icon       = nullptr;
         IconLayout            itemLayout   { 46, 7, 102, 100 };
+
+        // Tip: a different hint when not selected (nullptr = tip), and the
+        // hint's colour when selected. A slot whose hint is empty is drawn as
+        // Simple, so itemTip = "" shows the hint only on the selected item.
+        const char* itemTip        = nullptr;
+        uint32_t    centerTipColor = SDK::GUI::Color::WHITE;
     };
 
     /// Slide time the activity apps use.
@@ -117,6 +124,11 @@ public:
     /// Duration of a slide; 0 makes next()/prev() jump.
     void setAnimationMs(uint32_t ms) { mAnimationMs = ms; }
 
+    /// Whether the wheel wraps from the last item to the first (the default).
+    /// When it does not, next() on the last item and prev() on the first do
+    /// nothing, and no item shows past either end.
+    void setCircular(bool circular);
+
     /**
      * @brief Called once per slide when it is half way, with the item being
      *        slid to. The activity apps recolour the lens and the button hints
@@ -144,6 +156,7 @@ private:
     void buildStrip(Strip& strip, lv_obj_t* window, int32_t restY);
     void render();
     void renderSlot(Slot& slot, const Item& item, bool center);
+    void clearSlot(Slot& slot);
     void slide(int direction);
     void finishSlide();
     void fireMid();
@@ -160,6 +173,7 @@ private:
     uint32_t    mAnimationMs = kDefaultAnimationMs;
     bool        mSliding  = false;
     bool        mMidFired = false;
+    bool        mCircular = true;
     int         mDirection = 0;
     SlideMidCallback mMidCb  = nullptr;
     void*            mMidCtx = nullptr;

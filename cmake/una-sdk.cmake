@@ -180,6 +180,9 @@ set(UNA_SDK_SOURCES_GUI_LVGL_WIDGETS
 )
 
 set(UNA_SDK_SOURCES_GUI_LVGL
+    # Step labels: the workout screens show durations and targets as the
+    # service words them.
+    "$ENV{UNA_SDK}/Libs/Source/Workout/StepLabel.cpp"
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"
