@@ -70,6 +70,10 @@ set(GUI_INCLUDE_DIRS
 )
 set(GUI_COMPILE_DEFINITIONS
     ${UNA_SDK_DEFINES_GUI_LVGL}
+    # A 56 KB LVGL pool, above the SDK's 40 KB: the pool peaks at about 33 KB
+    # while the Track screen, with the workout faces, and the action menu both
+    # exist during a switch. The simulator's CMakeLists.txt sets the same.
+    "LV_MEM_SIZE=(56U*1024U)"
 )
 # Frame timing in the syslog, one line per 100 kernel ticks (see the LVGL port).
 # For measuring, not for shipping: cmake -DRUNLVGL_FRAME_STATS=ON ...

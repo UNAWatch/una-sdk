@@ -253,9 +253,9 @@ Fonts go through `lv_font_conv` (run with `npx`, so Node.js is needed); images t
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | HelloWorld (TouchGFX) | 228 KB | 214 KB | 71 KB |
-| HelloWorldLVGL | 167 KB | 158 KB | 155 KB |
+| HelloWorldLVGL | 167 KB | 158 KB | 139 KB |
 
-LVGL is linked from source, so the GUI carries only the parts it uses; its RAM is dominated by the frame buffer and the 56 KB object pool set in the SDK's `lv_conf.h`. The TouchGFX library is prebuilt, and its RAM is the frame buffer plus the Designer-generated heap.
+LVGL is linked from source, so the GUI carries only the parts it uses; its RAM is dominated by the frame buffer and the 40 KB object pool set in the SDK's `lv_conf.h`. The TouchGFX library is prebuilt, and its RAM is the frame buffer plus the Designer-generated heap.
 
 ## Understanding the Commented Code
 

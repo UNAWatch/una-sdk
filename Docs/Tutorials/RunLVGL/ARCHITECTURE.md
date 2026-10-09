@@ -221,7 +221,8 @@ display meanwhile. On stop it calls `lv_deinit()`.
 LVGL uses its built-in allocator on a static pool, `LV_MEM_SIZE`, sized by measurement:
 `ScreenManager` logs the pool's use and peak on every screen switch. RunLVGL's peak is
 about 33 KB, while the Track screen with the workout faces and the action menu both
-exist during a switch, so the pool is 56 KB. No stock theme is compiled;
+exist during a switch, so the pool is 56 KB, set as `LV_MEM_SIZE` in the app's
+`CMakeLists.txt` over the SDK's 40 KB. No stock theme is compiled;
 the app styles its widgets itself, which is smaller and closer to the design.
 
 ## The RunLVGL GUI
