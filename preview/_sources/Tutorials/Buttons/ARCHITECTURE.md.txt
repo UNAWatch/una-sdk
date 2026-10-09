@@ -162,7 +162,7 @@ Buttons draws no text, so its LVGL GUI has no `assets` directory and no `Assets.
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | Buttons (TouchGFX) | 223 KB | 209 KB | 71 KB |
-| ButtonsLVGL | 172 KB | 162 KB | 155 KB |
+| ButtonsLVGL | 172 KB | 162 KB | 139 KB |
 
 ## Buttons app creation process
 
