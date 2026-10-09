@@ -276,10 +276,11 @@ private:
         SDK::Fit::LapTrigger trigger      = SDK::Fit::LapTrigger::Manual;
         uint16_t             wktStepIndex = SDK::Fit::kMessageIndexInvalid;
         SDK::Fit::Intensity  intensity    = SDK::Fit::Intensity::Invalid;
-        /// A workout step that ran out ended between two ticks. carryMs is
-        /// the time counted beyond its end, for the next lap; stepM, when
-        /// above 0, is the distance it covered, the rest of the lap's counted
-        /// distance going to the next lap.
+        /// A workout step that ran out (ranOut) ended between two ticks.
+        /// carryMs is the time counted beyond its end, for the next lap; stepM
+        /// is the distance it covered, the rest of the lap's counted distance
+        /// going to the next lap.
+        bool                 ranOut       = false;
         uint32_t             carryMs      = 0;
         float                stepM        = 0.0f;
     };
@@ -313,7 +314,9 @@ private:
 
     // -- Structured workouts --------------------------------------------------
 
-    /// List the workouts (unless a run is going) and send the list.
+    /// List the workouts, unless a run is going.
+    void scanWorkouts();
+    /// Send the list, with today's workout unless it was completed.
     void sendWorkoutList();
     /// Read entry @p index of the list into mProgram.
     bool readWorkout(uint16_t index);

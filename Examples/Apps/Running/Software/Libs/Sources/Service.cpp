@@ -492,6 +492,7 @@ void Service::onStartGUI()
     mSensorWristMotion.connect();
 
     sendInitialInfoToGui();
+    scanWorkouts();
     sendWorkoutList();
 }
 
@@ -519,8 +520,8 @@ void Service::handleEvent(const CustomMessage::TrackStart& event)
 void Service::handleEvent(const CustomMessage::TrackStop& event)
 {
     stopTrack(event.discard);
-    // The list was made at launch: after a run, a completed workout is no
-    // longer today's to offer, and the files may have changed.
+    // After a run, a completed workout is no longer today's to offer. The
+    // list itself is left as it is: the GUI may be reading it.
     sendWorkoutList();
 }
 
@@ -1078,7 +1079,7 @@ void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
     // agree with the lap duration. A workout step that ran out does the same
     // with what was run beyond its end.
     const bool  gridLap     = autoLapDistanceM > 0.0f;
-    const bool  stepLap     = end.stepM > 0.0f;
+    const bool  stepLap     = end.ranOut;
     const float counted     = mDistanceCounter.getLapValueActive();
     const float lapDistance = gridLap ? autoLapDistanceM
                             : stepLap ? std::min(end.stepM, counted)
@@ -1556,6 +1557,7 @@ Service::LapEnd Service::endedStepLap(SDK::Workout::Engine::Change how) const
     // the engine's, so a distance step's lap is exactly that distance.
     if (how == SDK::Workout::Engine::Change::Auto) {
         const uint32_t nowMs = activeTimeMs();
+        end.ranOut  = true;
         end.carryMs = ended.atTimeMs < nowMs ? nowMs - ended.atTimeMs : 0u;
         end.stepM   = static_cast<float>(ended.distanceCm) / 100.0f;
     }
@@ -1600,17 +1602,20 @@ SDK::Workout::Ymd Service::localDate()
          + static_cast<SDK::Workout::Ymd>(t.tm_mday);
 }
 
-void Service::sendWorkoutList()
+void Service::scanWorkouts()
 {
     // The GUI keeps a pointer to the list, and the scan reads each file into
-    // mProgram, so the list is only rebuilt while no run is going.
+    // mProgram, so the list is only built while no run is going.
     if (mTrackState == Track::State::INACTIVE) {
         mSchedule.load();
         mLibrary.scan(mKernel.fs, localDate(), mReader, mProgram);
         LOG_INFO("Workouts: %u listed, %u left out of a full list\n",
                  static_cast<unsigned>(mLibrary.size()), static_cast<unsigned>(mLibrary.dropped()));
     }
+}
 
+void Service::sendWorkoutList()
+{
     // Today's workout is offered at launch unless it was completed.
     uint16_t today = CustomMessage::WorkoutList::kNoToday;
     const size_t t = mLibrary.today();

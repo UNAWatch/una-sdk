@@ -220,9 +220,10 @@ namespace CustomMessage {
     };
 
     /**
-     * The structured workouts on the watch, sent when the GUI starts. The
-     * list is the service's and stays valid while the app runs: the service
-     * builds it only before a run. @p today is the workout planned for today
+     * The structured workouts on the watch, sent when the GUI starts and
+     * again after a run. The list is the service's and stays valid while the
+     * GUI runs: the service builds it only when the GUI starts, and sends
+     * the same list after a run. @p today is the workout planned for today
      * to offer at launch, or kNoToday if there is none or it was completed.
      */
     struct WorkoutList : public SDK::MessageBase {
