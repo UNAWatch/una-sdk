@@ -175,7 +175,7 @@ case Btn::R1:
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | ScrollMenu (TouchGFX) | 295 KB | 275 KB | 88 KB |
-| ScrollMenuLVGL | 188 KB | 179 KB | 139 KB |
+| ScrollMenuLVGL | 188 KB | 179 KB | 155 KB |
 
 ## ScrollMenu app creation process
 

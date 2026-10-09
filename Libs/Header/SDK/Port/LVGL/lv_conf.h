@@ -50,7 +50,10 @@
 #define LV_LIMITS_INCLUDE       <limits.h>
 #define LV_STDARG_INCLUDE       <stdarg.h>
 
-#define LV_MEM_SIZE             (40U * 1024U)
+/* Sized by measurement: RunLVGL, the largest in-tree LVGL app, peaks at about
+ * 33 KB while its Track screen, with the workout faces, and the action menu
+ * both exist during a switch. */
+#define LV_MEM_SIZE             (56U * 1024U)
 #define LV_MEM_POOL_EXPAND_SIZE 0
 #define LV_MEM_ADR              0
 

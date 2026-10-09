@@ -146,6 +146,12 @@ void WheelMenu::refresh()
     render();
 }
 
+void WheelMenu::setCircular(bool circular)
+{
+    mCircular = circular;
+    render();
+}
+
 void WheelMenu::setBackground(uint32_t color)
 {
     if (mLensDisc) {
@@ -160,6 +166,9 @@ void WheelMenu::slide(int direction)
     }
     if (mSliding) {
         finishSlide();   // a second press mid-slide lands the first, then starts anew
+    }
+    if (!mCircular && (mShown + direction < 0 || mShown + direction >= mCount)) {
+        return;
     }
     mDirection = direction;
     mSelected  = static_cast<uint16_t>((mShown + mCount + direction) % mCount);
@@ -229,11 +238,26 @@ void WheelMenu::render()
         return;
     }
     // Slot 0 = previous, 1 = current, 2 = next, all around the shown item.
+    // Without wrapping, a slot past either end stays empty.
     for (int k = 0; k < 3; ++k) {
-        const Item& item = mItems[(mShown + mCount + k - 1) % mCount];
+        const int index = mShown + k - 1;
+        if (!mCircular && (index < 0 || index >= mCount)) {
+            clearSlot(mSelStrip.slot[k]);
+            clearSlot(mOutStrip.slot[k]);
+            continue;
+        }
+        const Item& item = mItems[(index + mCount) % mCount];
         renderSlot(mSelStrip.slot[k], item, true);
         renderSlot(mOutStrip.slot[k], item, false);
     }
+}
+
+void WheelMenu::clearSlot(Slot& slot)
+{
+    lv_label_set_text(slot.label, "");
+    Draw::setHidden(slot.tip, true);
+    Draw::setHidden(slot.icon, true);
+    slot.toggle->setVisible(false);
 }
 
 void WheelMenu::renderSlot(Slot& slot, const Item& item, bool center)
@@ -255,10 +279,16 @@ void WheelMenu::renderSlot(Slot& slot, const Item& item, bool center)
     lv_label_set_text(slot.label, text ? text : "");
 
     // A Toggle item is drawn as text + switch when selected, and as a Tip
-    // reading ON/OFF (amber/teal) in the surrounding slot.
+    // reading ON/OFF (amber/teal) in the surrounding slot. A Tip item with no
+    // hint for this slot is drawn as Simple.
     Style style = item.style;
     if (style == Style::Toggle && !center) {
         style = Style::Tip;
+    } else if (style == Style::Tip) {
+        const char* tip = (!center && item.itemTip) ? item.itemTip : item.tip;
+        if (tip == nullptr || tip[0] == '\0') {
+            style = Style::Simple;
+        }
     }
 
     switch (style) {
@@ -277,8 +307,9 @@ void WheelMenu::renderSlot(Slot& slot, const Item& item, bool center)
             lv_obj_set_y(slot.label, (half - labelH) / 2 + (center ? kCenterTipMsgOffsetY : kItemTipMsgOffsetY));
 
             const bool    fromToggle = item.style == Style::Toggle;
-            const char*   tipText    = fromToggle ? (item.toggleState ? "ON" : "OFF") : (item.tip ? item.tip : "");
-            const uint32_t tipColor  = center ? Color::WHITE
+            const char*   tip        = (!center && item.itemTip) ? item.itemTip : item.tip;
+            const char*   tipText    = fromToggle ? (item.toggleState ? "ON" : "OFF") : (tip ? tip : "");
+            const uint32_t tipColor  = center ? (fromToggle ? Color::WHITE : item.centerTipColor)
                                       : fromToggle ? (item.toggleState ? Color::YELLOW_DARK : Color::TEAL)
                                                    : item.tipColor;
             lv_label_set_text(slot.tip, tipText);
