@@ -90,6 +90,7 @@ private:
     WorkoutLabel mAvg;
     WorkoutLabel mRepCaption;
     WorkoutLabel mRep;
+    bool         mHeartRateAvg = false;  ///< The caption reads "Avg HR", not "Avg pace"
 };
 
 /**

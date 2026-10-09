@@ -37,6 +37,7 @@ private:
     WorkoutLabel<8>  mRepCaption;
     WorkoutLabel<12> mRep;
     bool             mHasRepeat = false;
+    bool             mHeartRateAvg = false;  ///< The caption reads "Avg HR", not "Avg pace"
 };
 
 #endif // WORKOUT_FACE_STEP_HPP

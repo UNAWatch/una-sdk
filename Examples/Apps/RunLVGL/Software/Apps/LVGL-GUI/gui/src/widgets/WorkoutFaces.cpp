@@ -292,7 +292,7 @@ WorkoutFaceStep::WorkoutFaceStep(lv_obj_t* parent)
     mAvg.init(mRoot, F::SemiBold30, Color::WHITE);
     mRepCaption.init(mRoot, F::Italic18, Color::WHITE);
     mRep.init(mRoot, F::SemiBold30, Color::WHITE);
-    mAvgCaption.setText("Step avg");
+    mAvgCaption.setText("Avg pace");
     mRepCaption.setText("Rep");
 
     setRepeat(0, 0);
@@ -351,6 +351,11 @@ void WorkoutFaceStep::setRepeat(uint32_t rep, uint32_t reps)
 
 void WorkoutFaceStep::setAverages(float lapPace, float lapHr, bool heartRate)
 {
+    if (heartRate != mHeartRateAvg) {
+        mHeartRateAvg = heartRate;
+        mAvgCaption.setText(heartRate ? "Avg HR" : "Avg pace");
+    }
+
     char text[12];
     if (heartRate) {
         Fmt::heartRate(text, sizeof(text), lapHr);
