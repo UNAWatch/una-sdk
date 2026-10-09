@@ -570,7 +570,7 @@ The two fonts, Poppins SemiBold 35 (only the dash) and Medium 25, are converted 
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | Files (TouchGFX) | 243 KB | 222 KB | 72 KB |
-| FilesLVGL | 178 KB | 162 KB | 139 KB |
+| FilesLVGL | 178 KB | 162 KB | 155 KB |
 
 ## Button Control Scheme
 

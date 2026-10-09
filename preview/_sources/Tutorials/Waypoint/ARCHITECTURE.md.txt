@@ -343,7 +343,7 @@ Buttons: **R1** saves the current position as the target, **R2** exits.
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | Waypoint (TouchGFX) | 258 KB | 219 KB | 71 KB |
-| WaypointLVGL | 229 KB | 194 KB | 139 KB |
+| WaypointLVGL | 229 KB | 194 KB | 155 KB |
 
 ## Message flow
 

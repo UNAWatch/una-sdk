@@ -219,8 +219,9 @@ display meanwhile. On stop it calls `lv_deinit()`.
 ### Memory
 
 LVGL uses its built-in allocator on a static pool, `LV_MEM_SIZE`, sized by measurement:
-`ScreenManager` logs the pool's use and peak on every screen switch, and RunLVGL's peak
-over a full session was about 25 KB, so the pool is 40 KB. No stock theme is compiled;
+`ScreenManager` logs the pool's use and peak on every screen switch. RunLVGL's peak is
+about 33 KB, while the Track screen with the workout faces and the action menu both
+exist during a switch, so the pool is 56 KB. No stock theme is compiled;
 the app styles its widgets itself, which is smaller and closer to the design.
 
 ## The RunLVGL GUI
@@ -235,11 +236,12 @@ Software/Apps/LVGL-GUI/
     Assets.hpp                LV_FONT_DECLARE / LV_IMAGE_DECLARE for the above
     Format.hpp                integer-only number formatting (pace, distance, time)
     Strings.hpp               text constants
+    WorkoutUi.hpp             workout text: file text to ASCII, cut and wrap to fit, totals
     model/                    Model, ModelListener, menu navigation state
     screens/                  Screen base, ScreenManager, one class per screen
     theme/Theme.hpp           the app's fonts, plus the SDK's drawing helpers
-    widgets/                  HeartRateZone, InfoCarousel, Map, ... and the SDK widgets
-                              with Run's font and icons filled in
+    widgets/                  HeartRateZone, InfoCarousel, Map, the workout faces, ... and
+                              the SDK widgets with Run's font and icons filled in
   gui/src/
     GuiApp.cpp                una_lvgl_app_init(): model + first screen
     ...                       implementations of the above
@@ -276,16 +278,19 @@ matching messages to the service.
 
 The message types in `Software/Libs/Header/Commands.hpp` are unchanged from Run:
 `SettingsUpd`, `Time`, `Battery`, `GpsFix`, `TrackStateUpd`, `TrackDataUpd`,
-`LapEnded`, `Summary`, `IntervalsPhaseAlert`, `IntervalsWorkoutCompleted` and
-`AccessoryStatusUpd` flow from service to GUI; `SettingsSave`, `TrackStart`,
-`TrackStop`, `TrackPause`, `TrackResume`, `ManualLap` and `IntervalsNextPhase` flow
-back. This is the point of the exercise: the service does not know or care which toolkit
+`LapEnded`, `Summary`, `IntervalsPhaseAlert`, `IntervalsWorkoutCompleted`,
+`AccessoryStatusUpd`, and for structured workouts `WorkoutList`, `WorkoutDetails`,
+`WorkoutData` and `WorkoutStep`, flow from service to GUI; `SettingsSave`,
+`TrackStart` (which names the armed workout), `TrackStop`, `TrackPause`, `TrackResume`,
+`ManualLap`, `IntervalsNextPhase`, `WorkoutDetailsRequest` and `WorkoutEnd` flow back.
+This is the point of the exercise: the service does not know or care which toolkit
 renders its state, and the whole GUI could be swapped again without touching it.
 
 Exactly one screen is bound to the model at a time (`Model::bind`). The model
 forwards each incoming message to the bound screen through `ModelListener`, a set of
 virtual callbacks with empty defaults (`onGpsFix`, `onBatteryLevel`, `onTrackData`,
-`onLapChanged`, `onIntervalsPhaseAlert`, ...), so a screen overrides only what it shows.
+`onLapChanged`, `onIntervalsPhaseAlert`, `onWorkoutStep`, ...), so a screen overrides
+only what it shows.
 State updates are always applied to the model first, whether or not a screen is bound,
 so a screen created later reads current values.
 
@@ -308,12 +313,17 @@ pair (`ScreenManager` logs the pool's peak after every switch). The `ScreenId` e
 screen, and `ScreenManager::create()` is the one place that maps ids to classes.
 
 `MainScreen` is the smallest complete example. Its `build()` creates a `WheelMenu` with
-the three items (Start, Intervals, Settings), the button hints, the title and the sensor
-status row; `onShow()` restores the remembered menu position and asks the model for the
-current GPS and accessory state; `onKey()` maps L1/L2 to the wheel, R1 to `confirm()`
-and R2 to `exitApp()`; and `onGpsFix()` recolours the lens and shows or hides the R1
-hint, because Start is greyed out without a fix. Compare it with Run's `MainView` and
-`MainPresenter` to see the same behaviour expressed in the two toolkits.
+the four items (Start, Workouts, Intervals, Settings), the button hints, the title and
+the sensor status row; `onShow()` restores the remembered menu position and asks the
+model for the current GPS and accessory state; `onKey()` maps L1/L2 to the wheel, R1 to
+`confirm()` and R2 to `exitApp()`; and `onGpsFix()` recolours the lens and shows or hides
+the R1 hint, because Start is greyed out without a fix. Compare it with Run's `MainView`
+and `MainPresenter` to see the same behaviour expressed in the two toolkits.
+
+The Track screen is reached through `ScreenManager::goTo(ScreenId::Track)` from several
+places. While a step card waits to be shown, `goTo()` sends that request to the card
+instead, and the card goes on to the Track screen when its 3 s are up; this is where the
+TouchGFX app overrides `FrontendApplication::gotoTrackScreenNoTransition()`.
 
 ### Theme
 
@@ -345,19 +355,41 @@ RunLVGL's `Widgets.hpp` re-exports them under its `Widgets` namespace, with two-
 subclasses for `Title` and `SensorStatusRow` that fill in Run's font and icons, and its
 `WheelMenu.hpp` does the same for the wheel's fonts and slide time. The rest of
 `Widgets.hpp` is Run's own: `HeartRateZone`, `PauseIndicator`, `InfoCarousel`, `Map`,
-`IntervalsTimer` and `TwoTonePicker`. Two are worth reading for technique:
+`IntervalsTimer` and `TwoTonePicker`. `WorkoutFaces.hpp` holds the workout faces
+(`WorkoutFaceGauge`, `WorkoutFaceStep`, and `WorkoutStepCard`, which is both the step
+card and the next-step face), and `WorkoutLabel.hpp` a label that stays centred on a
+point as its text changes. Two are worth reading for technique:
 
 - **`WheelMenu`** reproduces the scroll wheel's 400 ms slide the way TouchGFX's
   `ScrollWheelWithSelectionStyle` does: two strips of three slots, one in the large
   selected style clipped to the selection window and one in the small style clipped to
   the area below, moved together by one item pitch with `lv_anim`. It reports its slide
   midpoint so the screen can recolour the lens when the incoming item takes the centre,
-  as Run does.
+  as Run does. An item's hint can differ between the selected slot and the others
+  (`Item::itemTip`), and `setCircular(false)` stops the wheel at its first and last
+  items, as the workout details list does.
 - **`HeartRateZone`** draws the five-segment zone bar and the active-zone marker with
   `lv_arc` objects and one triangle drawn in an `LV_EVENT_DRAW_MAIN` handler, with
   geometry fitted from Run's bitmaps. It replaced about 50 KB of images with about 100
   lines of code and no bitmaps, which is the general lesson for LVGL on this platform:
-  shapes are cheap, pixels are not.
+  shapes are cheap, pixels are not. The workout gauge draws its pointer the same way, on
+  a small host object it moves along the arc.
+
+### Workout Screens
+
+A workout list, a workout's details and the action menu have a number of rows that is
+known only at run time. `WheelMenu` takes a fixed array of items, so these screens fill
+an array sized for the most they can show (64 workouts and a Free run row, 100 steps)
+and keep each row's text in buffers of their own, cut to fit with `WorkoutUi`. The list
+and details screens build their wheel inside a container: when the list changes, or the
+steps arrive after the screen is shown, they destroy the wheel, clean the container and
+build a new one, and hiding the container hides the wheel for the empty list and the
+details' first page.
+
+Text from a workout file is UTF-8 that the fonts cannot all draw. `WorkoutUi::toText()`
+maps it to ASCII (accented letters lose their accents, typographic quotes and dashes
+become plain ones), and `fitWidth()` and `wrapTwo()` cut and wrap it with
+`lv_text_get_size()`, ending cut text with an ellipsis, which the text faces carry.
 
 ### Assets
 
@@ -385,10 +417,10 @@ The GUI process is loaded whole into SRAM, so its size is the number that matter
 
 | | RunLVGL | Run (TouchGFX) |
 |---|---|---|
-| `.uapp` file | ~408 KB | ~529 KB |
-| GUI process RAM as loaded | ~452 KB | ~493 KB |
-| of which code and assets | ~308 KB | |
-| of which static data | ~139 KB: 40 KB LVGL pool, 58 KB frame, 14 KB stripe, the rest LVGL and app state | |
+| `.uapp` file | ~458 KB | ~501 KB |
+| GUI process RAM as loaded | ~516 KB | ~493 KB |
+| of which code and assets | ~329 KB | |
+| of which static data | ~156 KB: 56 KB LVGL pool, 58 KB frame, 14 KB stripe, the rest LVGL and app state | |
 
 The kernel needs one contiguous block for the whole process, so watch the headroom in
 the kernel's `System Heap` log lines when other apps are resident. `GUI_RAM_LENGTH` and

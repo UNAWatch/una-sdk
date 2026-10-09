@@ -215,7 +215,7 @@ LVGL, in [`MainScreen.hpp`](Software/Apps/LVGL-GUI/gui/include/gui/screens/MainS
 | Build | `.uapp` | GUI code (text) | GUI RAM (bss) |
 |---|---|---|---|
 | Sensors (TouchGFX) | 553 KB | 223 KB | 73 KB |
-| SensorsLVGL | 489 KB | 164 KB | 139 KB |
+| SensorsLVGL | 489 KB | 164 KB | 155 KB |
 
 Most of either package is the service, which links the sensor layer and the FIT writer.
 
