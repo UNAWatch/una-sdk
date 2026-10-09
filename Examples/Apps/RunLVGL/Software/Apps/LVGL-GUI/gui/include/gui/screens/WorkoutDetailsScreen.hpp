@@ -66,11 +66,12 @@ private:
     bool     mImperial  = false;
     bool     mFirstPage = true;
     int32_t  mDescY     = 160;  ///< Centre of the description's first line
-    Row      mRows[SDK::Workout::kMaxSteps] {};
     uint16_t mRowCount  = 0;
 
-    WheelMenu::Item mItems[SDK::Workout::kMaxSteps] {};
-    RowText         mText[SDK::Workout::kMaxSteps] {};
+    // One per row, allocated for the workout's rows when it is set.
+    std::unique_ptr<Row[]>             mRows;
+    std::unique_ptr<WheelMenu::Item[]> mItems;
+    std::unique_ptr<RowText[]>         mText;
 
     WorkoutLabel mName1;
     WorkoutLabel mName2;

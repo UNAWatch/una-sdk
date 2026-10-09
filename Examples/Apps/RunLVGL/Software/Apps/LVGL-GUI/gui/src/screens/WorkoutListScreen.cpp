@@ -119,6 +119,8 @@ void WorkoutListScreen::setList(uint16_t position)
     if (mRows > kMaxRows) {
         mRows = kMaxRows;
     }
+    mItems = std::make_unique<WheelMenu::Item[]>(mRows);
+    mText  = std::make_unique<RowText[]>(mRows);
 
     const bool imperial = mModel.isUnitsImperial();
     for (uint16_t row = 0; row < mRows; ++row) {
@@ -159,7 +161,7 @@ void WorkoutListScreen::setList(uint16_t position)
         return;
     }
 
-    mMenu = std::make_unique<WheelMenu>(mMenuBox, mItems, mRows);
+    mMenu = std::make_unique<WheelMenu>(mMenuBox, mItems.get(), mRows);
     // A lone row would wrap round to show again below itself.
     mMenu->setCircular(mRows > 1);
     // The line above the wheel changes half way through the slide.
