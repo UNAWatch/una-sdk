@@ -147,8 +147,8 @@ public:
     };
 
     /// The workout list from the service; null until it arrives. The service
-    /// rebuilds it only while no run is going, and sends WORKOUT_LIST again
-    /// when it does.
+    /// builds it when the GUI starts, and sends WORKOUT_LIST again after a
+    /// run, with the same list, for today's workout.
     const SDK::Workout::Library* getWorkoutLibrary() const;
     /// True once, if today's scheduled workout should be offered at launch.
     bool takeTodayPrompt();
