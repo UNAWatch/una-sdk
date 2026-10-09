@@ -65,6 +65,8 @@ void WorkoutListView::setList(const SDK::Workout::Library* library, bool freeRun
     mEmpty3.invalidate();
 
     if (!empty) {
+        // A lone row would wrap round to show again below itself.
+        menuLayout.getMenu().getWheel().setCircular(rows > 1);
         menuLayout.setNumberOfItems(rows);
     }
     menuLayout.invalidate();
