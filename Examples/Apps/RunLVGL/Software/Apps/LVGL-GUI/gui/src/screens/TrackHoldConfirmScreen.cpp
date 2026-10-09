@@ -26,18 +26,23 @@ void TrackHoldConfirmScreen::build()
 {
     mMode = mModel.getHoldConfirmMode();
     const bool finish = mMode == Model::HoldConfirmMode::Finish;
+    const bool end    = mMode == Model::HoldConfirmMode::EndWorkout;
 
+    // Green to finish, red to discard; amber to end a workout, as the run
+    // goes on, so it is neither.
+    const uint32_t color = finish ? Color::CHARTREUSE : end ? Color::YELLOW_DARK : Color::RED;
     mRing = std::make_unique<Widgets::TimerRing>(mRoot);
-    mRing->setColor(finish ? Color::CHARTREUSE : Color::RED);
+    mRing->setColor(color);
 
-    // R1 confirms (green finish / red discard). No back hint: releasing R1 cancels.
+    // R1 confirms. No back hint: releasing R1 cancels.
     mButtons = std::make_unique<Widgets::Buttons>(mRoot);
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
-                  finish ? Widgets::Buttons::GREEN : Widgets::Buttons::RED, Widgets::Buttons::NONE);
+                  finish ? Widgets::Buttons::GREEN : end ? Widgets::Buttons::AMBER : Widgets::Buttons::RED,
+                  Widgets::Buttons::NONE);
 
-    Theme::imageTinted(mRoot, &img_tickgreen_22x17, 186, 60,
-                       finish ? SDK::GUI::Color::CHARTREUSE : SDK::GUI::Color::RED);
-    Theme::label(mRoot, Theme::Font::Medium18, finish ? "Hold to\nFinish" : "Hold to\nDiscard", 53, 67, 133);
+    Theme::imageTinted(mRoot, &img_tickgreen_22x17, 186, 60, color);
+    Theme::label(mRoot, Theme::Font::Medium18,
+                 finish ? "Hold to\nFinish" : end ? "Hold to\nEnd workout" : "Hold to\nDiscard", 53, 67, 133);
     mNumber = Theme::label(mRoot, Theme::Font::SemiBold60, "3", 102, 103, 36);
 }
 
@@ -111,9 +116,20 @@ void TrackHoldConfirmScreen::animReadyCb(lv_anim_t* a)
         return;
     }
     self->mFired = true;
-    ScreenManager::instance().goTo(self->mMode == Model::HoldConfirmMode::Finish
-                                       ? ScreenId::TrackSaved
-                                       : ScreenId::TrackDiscarded);
+    switch (self->mMode) {
+        case Model::HoldConfirmMode::Finish:
+            ScreenManager::instance().goTo(ScreenId::TrackSaved);
+            break;
+        case Model::HoldConfirmMode::EndWorkout:
+            // The run carries on as a free run; the action menu paused it.
+            self->mModel.endWorkout();
+            self->mModel.trackResume();
+            ScreenManager::instance().goTo(ScreenId::Track);
+            break;
+        default:
+            ScreenManager::instance().goTo(ScreenId::TrackDiscarded);
+            break;
+    }
 }
 
 void TrackHoldConfirmScreen::setCountdown(uint32_t number)

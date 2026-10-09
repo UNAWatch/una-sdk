@@ -31,16 +31,19 @@ SDK_ROOT = os.path.abspath(os.path.join(HERE, *([".."] * 7)))
 RUN_ASSETS = os.path.join(SDK_ROOT, "Examples", "Apps", "Running", "Software", "Apps",
                           "TouchGFX-GUI", "assets")
 
-# Full printable ASCII for text faces; digits and punctuation only for the large
-# value-only faces. The SemiBold 60 face also needs A/P/M for the 12-hour clock
-# suffix and O/p/e/n for the interval timer's "Open" readout. SemiBold 35 stays
-# full ASCII: it is also the selected "Start" item's face.
+# Full printable ASCII for text faces, plus the ellipsis that ends text cut to
+# fit; digits and punctuation only for the large value-only faces. The SemiBold
+# 60 face also needs A/P/M for the 12-hour clock suffix and O/p/e/n for the
+# interval timer's "Open" readout. SemiBold 40 adds i/k/m for the distance left
+# under the workout gauge ("400 m", "1.25 km"). SemiBold 35 stays full ASCII:
+# it is also the selected "Start" item's face.
 # Pinned: a different converter release could lay the tables out differently,
 # and the committed files must regenerate byte for byte.
 LV_FONT_CONV_VERSION = "1.5.3"
 
-ASCII = "0x20-0x7E"
+ASCII = "0x20-0x7E,0x2026"
 NUMERIC = "0x20-0x3A"
+VALUE40 = "0x20-0x3A,0x69,0x6B,0x6D"
 BIG = "0x20-0x3A,0x41,0x4D,0x4F,0x50,0x65,0x6E,0x70"
 
 # Single-colour icons (checked with a PNG colour census): stored as alpha only
@@ -74,7 +77,7 @@ FONTS = [
     ("Poppins-SemiBold", 25, ASCII),
     ("Poppins-SemiBold", 30, ASCII),
     ("Poppins-SemiBold", 35, ASCII),
-    ("Poppins-SemiBold", 40, NUMERIC),
+    ("Poppins-SemiBold", 40, VALUE40),
     ("Poppins-SemiBold", 60, BIG),
 ]
 

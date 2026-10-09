@@ -2,8 +2,9 @@
  ******************************************************************************
  * @file    TrackIntervalsCountdownScreen.hpp
  * @brief   Five-second countdown before an intervals workout, summarising the
- *          configured repeats, run and rest. R1 starts now, R2 cancels; the
- *          ring drains and the workout starts when it empties.
+ *          configured repeats, run and rest, or before an armed workout, with
+ *          its name, totals and steps. R1 starts now, R2 cancels; the ring
+ *          drains and the workout starts when it empties.
  ******************************************************************************
  */
 
@@ -29,10 +30,14 @@ protected:
 
 private:
     static constexpr uint32_t kTimeoutMs = 5000;
+    static constexpr int32_t  kLineW     = 160;  ///< Width of the three summary lines
 
     static void animExecCb(void* var, int32_t value);
     static void animReadyCb(lv_anim_t* a);
     void startTrack();
+    /// The countdown is for an armed workout: one is armed and Intervals
+    /// were not chosen from their menu.
+    bool isWorkout() const;
 
     bool     mStarted = false;
     uint32_t mShownSeconds = 0;

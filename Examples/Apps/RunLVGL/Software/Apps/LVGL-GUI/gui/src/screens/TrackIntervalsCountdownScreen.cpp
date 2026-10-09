@@ -10,6 +10,7 @@
 #include "gui/theme/Theme.hpp"
 #include "gui/Assets.hpp"
 #include "gui/Format.hpp"
+#include "gui/WorkoutUi.hpp"
 
 using namespace SDK::GUI;
 
@@ -42,21 +43,47 @@ void TrackIntervalsCountdownScreen::build()
     mReps  = Theme::label(mRoot, F::Medium18, "", 40, 55, 160);
 }
 
+bool TrackIntervalsCountdownScreen::isWorkout() const
+{
+    // Intervals chosen from their menu win over an armed workout.
+    if (mModel.isPendingIntervalsMode()) {
+        return false;
+    }
+    const SDK::Workout::Library* lib = mModel.getWorkoutLibrary();
+    const int16_t armed = mModel.getArmedWorkout();
+    return lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size();
+}
+
 void TrackIntervalsCountdownScreen::onShow()
 {
     mModel.resetIdleTimer();
 
-    const Settings::Intervals& iv = mModel.getSettings().intervals;
     const bool imperial = mModel.isUnitsImperial();
-    char buf[24];
-    char reps[8];
-    Fmt::intervalsRepeats(reps, sizeof(reps), iv.repeatsNum);
-    snprintf(buf, sizeof(buf), "Reps: %s", reps);
-    lv_label_set_text(mReps, buf);
-    Fmt::intervalsPhaseSummary(buf, sizeof(buf), "Run", iv.runMetric, iv.runTime, iv.runDistance, imperial);
-    lv_label_set_text(mRun, buf);
-    Fmt::intervalsPhaseSummary(buf, sizeof(buf), "Rest", iv.restMetric, iv.restTime, iv.restDistance, imperial);
-    lv_label_set_text(mRest, buf);
+    char buf[64];
+    if (isWorkout()) {
+        // The workout's name, totals and steps.
+        const SDK::Workout::Library::Entry& e =
+            mModel.getWorkoutLibrary()->entry(static_cast<size_t>(mModel.getArmedWorkout()));
+        const lv_font_t* font = Theme::font(Theme::Font::Medium18);
+        WorkoutUi::toText(e.name, buf, sizeof(buf));
+        WorkoutUi::fitWidth(buf, sizeof(buf), font, kLineW);
+        lv_label_set_text(mReps, buf);
+        WorkoutUi::formatTotals(e, imperial, buf, sizeof(buf));
+        WorkoutUi::fitWidth(buf, sizeof(buf), font, kLineW);
+        lv_label_set_text(mRun, buf);
+        snprintf(buf, sizeof(buf), "%u steps", static_cast<unsigned>(e.steps));
+        lv_label_set_text(mRest, buf);
+    } else {
+        const Settings::Intervals& iv = mModel.getSettings().intervals;
+        char reps[8];
+        Fmt::intervalsRepeats(reps, sizeof(reps), iv.repeatsNum);
+        snprintf(buf, sizeof(buf), "Reps: %s", reps);
+        lv_label_set_text(mReps, buf);
+        Fmt::intervalsPhaseSummary(buf, sizeof(buf), "Run", iv.runMetric, iv.runTime, iv.runDistance, imperial);
+        lv_label_set_text(mRun, buf);
+        Fmt::intervalsPhaseSummary(buf, sizeof(buf), "Rest", iv.restMetric, iv.restTime, iv.restDistance, imperial);
+        lv_label_set_text(mRest, buf);
+    }
 
     mShownSeconds = kTimeoutMs / 1000;
     lv_label_set_text_fmt(mCount, "%u", static_cast<unsigned>(mShownSeconds));
@@ -78,7 +105,7 @@ void TrackIntervalsCountdownScreen::onKey(uint8_t code)
         startTrack();
     } else if (code == Btn::R2) {
         lv_anim_delete(this, nullptr);
-        ScreenManager::instance().goTo(ScreenId::MenuIntervals);
+        ScreenManager::instance().goTo(isWorkout() ? ScreenId::Main : ScreenId::MenuIntervals);
     }
 }
 
@@ -108,6 +135,12 @@ void TrackIntervalsCountdownScreen::startTrack()
     }
     mStarted = true;
     lv_anim_delete(this, nullptr);
+    if (isWorkout()) {
+        // The step card for the first step follows from the Track screen.
+        mModel.trackStart(false);
+        ScreenManager::instance().goTo(ScreenId::Track);
+        return;
+    }
     mModel.trackStart(true);
     // With a warm-up the track faces come first; otherwise the RUN alert opens
     // the workout (the model pre-filled its snapshot in trackStart()).

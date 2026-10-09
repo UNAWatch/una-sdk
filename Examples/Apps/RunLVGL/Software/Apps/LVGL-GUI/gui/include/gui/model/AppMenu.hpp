@@ -55,8 +55,21 @@ struct Position {
 // -----------------------------------------------------------------------------
 
 struct Root {
-    enum Id { ID_START = 0, ID_INTERVALS, ID_SETTINGS,
+    enum Id { ID_START = 0, ID_WORKOUTS, ID_INTERVALS, ID_SETTINGS,
               ID_COUNT, ID_DEFAULT = ID_START };
+
+    // The workout list: a Free run row while a workout is armed, then one
+    // row per workout. Built at runtime -- no fixed enum.
+    struct Workouts {
+        static constexpr uint16_t ID_DEFAULT = 0;
+
+        // The menu for one workout (and the today prompt): Start / Details,
+        // plus Skip on the today prompt.
+        struct Menu {
+            enum Id { ID_START = 0, ID_DETAILS, ID_SKIP,
+                      ID_COUNT, ID_DEFAULT = ID_START };
+        };
+    };
 
     struct Intervals {
         enum Id {
@@ -128,12 +141,16 @@ struct Root {
 // TrackView is a destination reached from multiple places (Root::START,
 // Root::Intervals::START), so it is not nested inside Root.
 // TrackAction is always an overlay of TrackView, so it lives inside it.
+// Which faces show depends on the run: a structured workout has its three
+// faces first, Intervals its one, then the faces every run has.
 struct TrackView {
-    enum Id { ID_INTERVALS = 0, ID_TRACK1, ID_TRACK2, ID_TRACK3,
-              ID_COUNT, ID_DEFAULT = ID_INTERVALS };
+    enum Id { ID_WORKOUT_GAUGE = 0, ID_WORKOUT_STEP, ID_WORKOUT_NEXT,
+              ID_INTERVALS, ID_TRACK1, ID_TRACK2, ID_TRACK3,
+              ID_COUNT, ID_DEFAULT = ID_WORKOUT_GAUGE };
 
+    // End workout shows only while a structured workout runs.
     struct Action {
-        enum Id { ID_RESUME = 0, ID_SUMMARY, ID_SAVE, ID_DISCARD,
+        enum Id { ID_RESUME = 0, ID_END_WORKOUT, ID_SUMMARY, ID_SAVE, ID_DISCARD,
                   ID_COUNT, ID_DEFAULT = ID_RESUME };
     };
 };
@@ -169,6 +186,14 @@ struct Nav : Position<Root> {
         void reset()         { Position<Root::Intervals>::reset(); resetChildren(); }
     };
 
+    // Workouts node -- the menu for the chosen workout is a child
+    struct WorkoutsNav : Position<Root::Workouts> {
+        Position<Root::Workouts::Menu> menu;
+
+        void resetChildren() { menu.reset(); }
+        void reset()         { Position<Root::Workouts>::reset(); resetChildren(); }
+    };
+
     // Settings node -- alerts picker is a child
     struct SettingsNav : Position<Root::Settings> {
         Position<Root::Settings::Alerts> alerts;
@@ -178,10 +203,11 @@ struct Nav : Position<Root> {
     };
 
     TrackViewNav  track;      // TrackView page + nested TrackAction
+    WorkoutsNav   workouts;   // Workout list + the chosen workout's menu
     IntervalsNav  intervals;  // Intervals menu + nested run/rest metrics
     SettingsNav   settings;   // Settings menu + nested alerts
 
-    void resetChildren() { track.reset(); intervals.reset(); settings.reset(); }
+    void resetChildren() { track.reset(); workouts.reset(); intervals.reset(); settings.reset(); }
     void reset()         { Position<Root>::reset(); resetChildren(); }
 };
 
