@@ -470,8 +470,11 @@
       <Text Id="TEXT_TARGET" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Target</Translation>
       </Text>
-      <Text Id="TEXT_STEP_AVG" Alignment="Left" TypographyId="Poppins_Regular_18">
-        <Translation Language="GB">Step avg</Translation>
+      <Text Id="TEXT_STEP_AVG_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Avg pace</Translation>
+      </Text>
+      <Text Id="TEXT_STEP_AVG_HR" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Avg HR</Translation>
       </Text>
       <Text Id="TEXT_REP" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Rep</Translation>

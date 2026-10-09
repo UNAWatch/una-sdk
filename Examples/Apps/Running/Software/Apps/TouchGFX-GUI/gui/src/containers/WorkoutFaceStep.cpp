@@ -40,7 +40,7 @@ WorkoutFaceStep::WorkoutFaceStep()
     mAvg.init(T_TMP_SEMIBOLD_30_L, SDK::GUI::Color::WHITE);
     mRepCaption.init(T_TMP_ITALIC_18_L, SDK::GUI::Color::WHITE);
     mRep.init(T_TMP_SEMIBOLD_30_L, SDK::GUI::Color::WHITE);
-    mAvgCaption.setText(T_TEXT_STEP_AVG);
+    mAvgCaption.setText(T_TEXT_STEP_AVG_PACE);
     mRepCaption.setText(T_TEXT_REP);
     add(mAvgCaption);
     add(mAvg);
@@ -115,6 +115,11 @@ void WorkoutFaceStep::setRepeat(uint32_t rep, uint32_t reps)
 
 void WorkoutFaceStep::setAverages(float lapPace, float lapHr, bool heartRate)
 {
+    if (heartRate != mHeartRateAvg) {
+        mHeartRateAvg = heartRate;
+        mAvgCaption.setText(heartRate ? T_TEXT_STEP_AVG_HR : T_TEXT_STEP_AVG_PACE);
+    }
+
     char text[10];
     if (heartRate) {
         if (lapHr < App::Display::kMinHR) {
