@@ -557,7 +557,11 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
 
         case CustomMessage::WORKOUT_DETAILS: {
             LOG_DEBUG("WORKOUT_DETAILS\n");
-            auto* msg       = static_cast<CustomMessage::WorkoutDetails*>(message);
+            auto* msg = static_cast<CustomMessage::WorkoutDetails*>(message);
+            // An answer to an earlier request, for a workout since left.
+            if (msg->index != mChosenWorkout) {
+                break;
+            }
             mWorkoutDetails = msg->program;
             modelListener->onWorkoutDetails();
         } break;
