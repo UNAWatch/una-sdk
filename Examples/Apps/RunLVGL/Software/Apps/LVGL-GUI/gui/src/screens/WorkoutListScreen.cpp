@@ -111,8 +111,12 @@ void WorkoutListScreen::setList(uint16_t position)
     // The wheel is built for a fixed number of rows: start it afresh.
     mMenu.reset();
     lv_obj_clean(mMenuBox);
+    // The last list's rows, now the wheel that pointed into them is gone, so
+    // the old and new rows never exist together.
+    mItems.reset();
+    mText.reset();
 
-    mLibrary    = mModel.getWorkoutLibrary();
+    mLibrary   = mModel.getWorkoutLibrary();
     mFreeRunRow = mModel.getArmedWorkout() != Model::kNoWorkout;
     const size_t workouts = mLibrary != nullptr ? mLibrary->size() : 0;
     mRows = static_cast<uint16_t>(workouts + (mFreeRunRow ? 1 : 0));
