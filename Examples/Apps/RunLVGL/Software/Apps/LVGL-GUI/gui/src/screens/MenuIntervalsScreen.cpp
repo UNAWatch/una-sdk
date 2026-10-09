@@ -110,11 +110,12 @@ void MenuIntervalsScreen::saveToggle(uint16_t index, bool state)
 
 void MenuIntervalsScreen::startIntervals()
 {
+    // The countdown is shared with an armed workout: say this one is Intervals.
+    mModel.setPendingIntervalsMode(true);
     // With a fix, straight to the countdown; without one, via the warning.
     if (mModel.hasGpsFix()) {
         ScreenManager::instance().goTo(ScreenId::TrackIntervalsCountdown);
     } else {
-        mModel.setPendingIntervalsMode(true);
         ScreenManager::instance().goTo(ScreenId::TrackStartConfirm);
     }
 }

@@ -20,8 +20,9 @@ extern "C" {
 #endif
 
 // Fonts (Poppins, 2 bpp). The Light 60, Medium 40 and SemiBold 40 faces carry
-// digits and punctuation only; SemiBold 60 adds A/P/M for the clock suffix and
-// O/p/e/n for the interval timer's "Open"; the rest cover printable ASCII.
+// digits and punctuation only; SemiBold 40 adds i/k/m for the distance under
+// the workout gauge, and SemiBold 60 A/P/M for the clock suffix and O/p/e/n
+// for "Open". The rest cover printable ASCII and the ellipsis (U+2026).
 LV_FONT_DECLARE(poppins_italic_18);
 LV_FONT_DECLARE(poppins_italic_20);
 LV_FONT_DECLARE(poppins_light_60);
