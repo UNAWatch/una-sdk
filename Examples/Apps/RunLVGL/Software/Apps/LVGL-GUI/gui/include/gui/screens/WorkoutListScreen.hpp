@@ -63,8 +63,9 @@ private:
     bool     mFreeRunRow = false;
     uint16_t mRows       = 0;
 
-    WheelMenu::Item mItems[kMaxRows] {};
-    RowText         mText[kMaxRows] {};
+    // One per row, allocated for the list's rows when it is set.
+    std::unique_ptr<WheelMenu::Item[]> mItems;
+    std::unique_ptr<RowText[]>         mText;
 
     lv_obj_t* mMenuBox = nullptr;  ///< Holds the wheel, hidden when there are no workouts
     lv_obj_t* mInfo    = nullptr;

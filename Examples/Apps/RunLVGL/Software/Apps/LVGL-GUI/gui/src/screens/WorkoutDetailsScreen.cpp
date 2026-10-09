@@ -140,15 +140,18 @@ void WorkoutDetailsScreen::setProgram(const SDK::Workout::Program* program)
 
     // Rows in reading order: each repeat heads the steps it repeats, outer
     // repeats first; a repeat step itself comes after its block in the file.
+    // Each step makes one row at most.
     const uint16_t n = mProgram->stepCount;
-    for (uint16_t i = 0; i < n && mRowCount < SDK::Workout::kMaxSteps; ++i) {
+    const uint16_t maxRows = n < SDK::Workout::kMaxSteps ? n : SDK::Workout::kMaxSteps;
+    mRows = std::make_unique<Row[]>(maxRows);
+    for (uint16_t i = 0; i < n && mRowCount < maxRows; ++i) {
         for (uint16_t r = n; r-- > i;) {
             const SDK::Workout::Step& s = mProgram->steps[r];
-            if (s.end == SDK::Workout::StepEnd::Repeat && s.repeatFrom == i && mRowCount < SDK::Workout::kMaxSteps) {
+            if (s.end == SDK::Workout::StepEnd::Repeat && s.repeatFrom == i && mRowCount < maxRows) {
                 mRows[mRowCount++] = Row{ r, true };
             }
         }
-        if (mProgram->steps[i].end != SDK::Workout::StepEnd::Repeat && mRowCount < SDK::Workout::kMaxSteps) {
+        if (mProgram->steps[i].end != SDK::Workout::StepEnd::Repeat && mRowCount < maxRows) {
             mRows[mRowCount++] = Row{ i, false };
         }
     }
@@ -156,6 +159,8 @@ void WorkoutDetailsScreen::setProgram(const SDK::Workout::Program* program)
         return;
     }
 
+    mItems = std::make_unique<WheelMenu::Item[]>(mRowCount);
+    mText  = std::make_unique<RowText[]>(mRowCount);
     for (uint16_t row = 0; row < mRowCount; ++row) {
         RowText& t = mText[row];
         rowText(row, t.itemLabel, t.itemTip, sizeof(t.itemLabel));
@@ -166,7 +171,7 @@ void WorkoutDetailsScreen::setProgram(const SDK::Workout::Program* program)
         mItems[row] = { Style::Tip, t.label, t.itemLabel, nullptr, t.tip, Color::TEAL };
         mItems[row].itemTip = t.itemTip;
     }
-    mMenu = std::make_unique<WheelMenu>(mMenuBox, mItems, mRowCount);
+    mMenu = std::make_unique<WheelMenu>(mMenuBox, mItems.get(), mRowCount);
     // The steps run from first to last: nothing shows past either end.
     mMenu->setCircular(false);
     mMenu->setSlideMidCallback(
