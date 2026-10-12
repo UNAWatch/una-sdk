@@ -235,8 +235,6 @@ void Service::run()
         }
 
 
-        sendAlertRepeat();
-
         // Periodic process
         if (mGuiStarted) {
             // Update time every second
@@ -288,6 +286,10 @@ void Service::run()
                 return; // Exit app
             }
         }
+
+        // After the periodic update, so a step that changed on this pass has
+        // already dropped the last step's repeat.
+        sendAlertRepeat();
     }
 }
 
@@ -1913,36 +1915,29 @@ void Service::sendWorkoutStep(const SDK::Workout::Step* step, bool next)
 
 void Service::playAlertTwice(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count)
 {
-    using Note = SDK::Message::RequestBuzzerPlay::Note;
-    static constexpr uint16_t kGapMs = 1000;
-    // Sent this far into the gap: the main loop can be up to 500 ms late, and
-    // the repeat must reach the kernel before the gap ends.
-    static constexpr uint32_t kRepeatIntoGapMs = 200;
+    static constexpr uint32_t kGapMs = 1000;
 
-    // Both playings do not fit one message, and the kernel's queue holds only
-    // one message's worth of notes. So the first message ends with the gap,
-    // and the repeat follows in a second one sent during that gap: the kernel
-    // plays it straight after, and the gap stays 1 s however late it is sent.
-    if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes - 1u) {
-        count = SDK::Message::RequestBuzzerPlay::skMaxNotes - 1u;
+    // Both playings do not fit one message, so the repeat is a second
+    // message, sent once the first has played and the gap has passed. It is
+    // not sent sooner: a message that arrives while notes are playing cuts
+    // the current note short. The service loop runs at least every 500 ms,
+    // so the gap is 1-1.5 s.
+    if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes) {
+        count = SDK::Message::RequestBuzzerPlay::skMaxNotes;
     }
     if (count == 0) {
         return;
     }
+    playBuzzerNotes(notes, count);
 
-    Note     first[SDK::Message::RequestBuzzerPlay::skMaxNotes];
     uint32_t playMs = 0;
     for (uint8_t i = 0; i < count; ++i) {
-        first[i] = notes[i];
         playMs += notes[i].time;
     }
-    first[count] = {kGapMs, 0, 0, notes[count - 1u].frequency};
-    playBuzzerNotes(first, count + 1u);
-
     mAlertRepeat        = notes;
     mAlertRepeatCount   = count;
     mAlertRepeatFromMs  = mKernel.sys.getTimeMs();
-    mAlertRepeatAfterMs = playMs + kRepeatIntoGapMs;
+    mAlertRepeatAfterMs = playMs + kGapMs;
 }
 
 void Service::sendAlertRepeat()
@@ -1969,7 +1964,7 @@ void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert)
     // from C7 to C6 twice, too fast is short and rises from C8 to C9 twice,
     // and back in range rises through a C7 major triad (4 : 5 : 6). A kernel
     // without pitch support plays every note at its default pitch, so the
-    // rhythms alone still tell them apart. Each plays twice, 1 s apart.
+    // rhythms alone still tell them apart. Each plays twice, about 1 s apart.
     static constexpr uint16_t kLowHz  = 1047;  // C6
     static constexpr uint16_t kHighHz = 8372;  // C9
     static constexpr uint16_t kMidHz  = 4186;  // C8
