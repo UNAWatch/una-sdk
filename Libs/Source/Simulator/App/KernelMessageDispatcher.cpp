@@ -198,6 +198,7 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             for (uint32_t i = 0; i < count; i++) {
                 melody[i].level = (buzzMsg->notes[i].volume / 33);
                 melody[i].time = buzzMsg->notes[i].time;
+                melody[i].frequency = buzzMsg->notes[i].frequency;
             }
             mBuzzer.play(melody.get(), count);
 

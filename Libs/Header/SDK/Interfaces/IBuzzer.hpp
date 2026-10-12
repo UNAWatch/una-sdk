@@ -20,6 +20,7 @@ public:
     struct Note {
         uint32_t time = 100;    ///< Duration in ms
         uint8_t  level = 2;     ///< Sound level 1,2,3, 0 - no sound
+        uint16_t frequency = 0; ///< Pitch in Hz, 0 - the default
     };
 
     /**

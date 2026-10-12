@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Glance/GlanceControl.h"
@@ -382,7 +384,17 @@ struct RequestBuzzerPlay : public MessageBase {
     struct Note {
         uint32_t time = 100;    // Duration in ms
         uint8_t volume = 100;   // 0-100%, 0 - no sound. (Currently supported only 4 levels (0, 33, 66, 100))
+        uint8_t reserved = 0;   // Must be 0
+        // Pitch in Hz, 500-20000; 0, or anything outside that range, plays the
+        // kernel's default. It and reserved fill what was padding, so the
+        // note's size and layout are unchanged; a kernel that predates this
+        // field plays every note at its default.
+        uint16_t frequency = 0;
     };
+#if __SIZEOF_POINTER__ == 4
+    static_assert(sizeof(Note) == 8, "RequestBuzzerPlay::Note size must be 8 bytes");
+    static_assert(offsetof(Note, frequency) == 6, "RequestBuzzerPlay::Note::frequency must fill the old padding");
+#endif
 
     uint32_t notesCount;
     Note notes[skMaxNotes];
