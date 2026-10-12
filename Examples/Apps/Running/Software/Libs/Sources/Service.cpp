@@ -235,6 +235,8 @@ void Service::run()
         }
 
 
+        sendAlertRepeat();
+
         // Periodic process
         if (mGuiStarted) {
             // Update time every second
@@ -653,6 +655,23 @@ void Service::playBuzzerPattern(uint16_t beepMs, uint8_t count, uint16_t silence
             }
         }
         msg->notesCount = n;
+        mKernel.comm.sendMessage(msg);
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+
+void Service::playBuzzerNotes(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count)
+{
+    if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes) {
+        count = SDK::Message::RequestBuzzerPlay::skMaxNotes;
+    }
+
+    auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestBuzzerPlay>();
+    if (msg) {
+        for (uint8_t i = 0; i < count; ++i) {
+            msg->notes[i] = notes[i];
+        }
+        msg->notesCount = count;
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
     }
@@ -1711,6 +1730,7 @@ void Service::startWorkoutStep()
 {
     const SDK::Workout::Step& s = mProgram.steps[mEngine.status().step];
     mZoneAlerts.stepStarted();
+    mAlertRepeat = nullptr;   // the last step's alert does not repeat into this one
     mBandLow  = 0.0f;
     mBandHigh = 0.0f;
 
@@ -1892,21 +1912,108 @@ void Service::sendWorkoutStep(const SDK::Workout::Step* step, bool next)
     msg.send();
 }
 
+void Service::playAlertTwice(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count)
+{
+    using Note = SDK::Message::RequestBuzzerPlay::Note;
+    static constexpr uint16_t kGapMs = 1000;
+    // Sent this far into the gap: the main loop can be up to 500 ms late, and
+    // the repeat must reach the kernel before the gap ends.
+    static constexpr uint32_t kRepeatIntoGapMs = 200;
+
+    // Both playings do not fit one message, and the kernel's queue holds only
+    // one message's worth of notes. So the first message ends with the gap,
+    // and the repeat follows in a second one sent during that gap: the kernel
+    // plays it straight after, and the gap stays 1 s however late it is sent.
+    if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes - 1u) {
+        count = SDK::Message::RequestBuzzerPlay::skMaxNotes - 1u;
+    }
+    if (count == 0) {
+        return;
+    }
+
+    Note     first[SDK::Message::RequestBuzzerPlay::skMaxNotes];
+    uint32_t playMs = 0;
+    for (uint8_t i = 0; i < count; ++i) {
+        first[i] = notes[i];
+        playMs += notes[i].time;
+    }
+    first[count] = {kGapMs, 0, 0, notes[count - 1u].frequency};
+    playBuzzerNotes(first, count + 1u);
+
+    mAlertRepeat        = notes;
+    mAlertRepeatCount   = count;
+    mAlertRepeatFromMs  = mKernel.sys.getTimeMs();
+    mAlertRepeatAfterMs = playMs + kRepeatIntoGapMs;
+}
+
+void Service::sendAlertRepeat()
+{
+    if (mAlertRepeat == nullptr) {
+        return;
+    }
+    // Once the run is paused or stopped, or the workout has ended, the repeat
+    // no longer applies.
+    if (!mWorkoutMode || mTrackState != Track::State::ACTIVE) {
+        mAlertRepeat = nullptr;
+        return;
+    }
+    if (SDK::Timer::elapsed(mKernel.sys.getTimeMs(), mAlertRepeatFromMs) < mAlertRepeatAfterMs) {
+        return;
+    }
+    playBuzzerNotes(mAlertRepeat, mAlertRepeatCount);
+    mAlertRepeat = nullptr;
+}
+
 void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert)
 {
-    // Rhythm and loudness tell them apart: the buzzer plays one pitch.
+    // Pitch, rhythm and loudness tell them apart: too slow is long and falls
+    // from C7 to C6 twice, too fast is short and rises from C8 to C9 twice,
+    // and back in range rises through a C7 major triad (4 : 5 : 6). A kernel
+    // without pitch support plays every note at its default pitch, so the
+    // rhythms alone still tell them apart. Each plays twice, 1 s apart.
+    static constexpr uint16_t kLowHz  = 1047;  // C6
+    static constexpr uint16_t kHighHz = 8372;  // C9
+    static constexpr uint16_t kMidHz  = 4186;  // C8
+    static constexpr uint16_t kRootHz = 2093;  // C7
+    // Each silence keeps the pitch before it, so the buzzer is not retuned for it.
+    static const SDK::Message::RequestBuzzerPlay::Note kBackIn[] = {
+        {120, 100, 0, kRootHz},
+        {30, 0, 0, kRootHz},
+        {120, 100, 0, kRootHz * 5 / 4},
+        {30, 0, 0, kRootHz * 5 / 4},
+        {240, 100, 0, kRootHz * 3 / 2},
+    };
+    static const SDK::Message::RequestBuzzerPlay::Note kBelow[] = {
+        {300, 100, 0, kRootHz},
+        {150, 0, 0, kRootHz},
+        {300, 100, 0, kLowHz},
+        {150, 0, 0, kLowHz},
+        {300, 100, 0, kRootHz},
+        {150, 0, 0, kRootHz},
+        {300, 100, 0, kLowHz},
+    };
+    static const SDK::Message::RequestBuzzerPlay::Note kAbove[] = {
+        {80, 100, 0, kMidHz},
+        {80, 0, 0, kMidHz},
+        {80, 100, 0, kHighHz},
+        {80, 0, 0, kHighHz},
+        {80, 100, 0, kMidHz},
+        {80, 0, 0, kMidHz},
+        {80, 100, 0, kHighHz},
+    };
+
     backlightOn();
     switch (alert) {
     case SDK::Workout::ZoneAlerts::Alert::Above:  // too fast, or heart rate too high
-        playBuzzerPattern(80, 3, 80);
+        playAlertTwice(kAbove, sizeof(kAbove) / sizeof(kAbove[0]));
         playVibroPattern(SDK::Message::RequestVibroPlay::Effect::DOUBLE_CLICK_100);
         break;
     case SDK::Workout::ZoneAlerts::Alert::Below:  // too slow, or heart rate too low
-        playBuzzerPattern(300, 2, 150);
+        playAlertTwice(kBelow, sizeof(kBelow) / sizeof(kBelow[0]));
         playVibroPattern(SDK::Message::RequestVibroPlay::Effect::ALERT_750MS_100);
         break;
-    case SDK::Workout::ZoneAlerts::Alert::BackIn:  // brief and light
-        playBuzzerPattern(40, 2, 60, 66);
+    case SDK::Workout::ZoneAlerts::Alert::BackIn:  // brief and cheerful
+        playAlertTwice(kBackIn, sizeof(kBackIn) / sizeof(kBackIn[0]));
         playVibroPattern(SDK::Message::RequestVibroPlay::Effect::STRONG_CLICK_100);
         break;
     default:

@@ -235,6 +235,11 @@ private:
     SDK::Workout::GpsCatchUp     mGpsCatchUp;  ///< Holds the speed gauge off until the distance catches up.
     SDK::Workout::HeartRateGauge mHrGauge;
     SDK::Workout::ZoneAlerts     mZoneAlerts;
+    /// A zone alert's second playing, until it is sent; see playAlertTwice().
+    const SDK::Message::RequestBuzzerPlay::Note* mAlertRepeat        = nullptr;
+    uint8_t                                      mAlertRepeatCount   = 0;
+    uint32_t                                     mAlertRepeatFromMs  = 0;
+    uint32_t                                     mAlertRepeatAfterMs = 0;
     float                        mBandLow  = 0.0f; ///< The step's target band, m/s or bpm.
     float                        mBandHigh = 0.0f;
 
@@ -330,6 +335,8 @@ private:
     void sendWorkoutSteps();
     void sendWorkoutStep(const SDK::Workout::Step* step, bool next);
     void playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert);
+    void playAlertTwice(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count);
+    void sendAlertRepeat();
     /// The zone of the current step's target, Unknown with none.
     SDK::Workout::Zone targetZone() const;
     /// A heart-rate target as a bpm band, from the watch's HR thresholds.
@@ -352,6 +359,7 @@ private:
     void notifyNewActivity();
     void backlightOn(uint32_t timeoutMs = skBacklightTimeout);
     void playBuzzerPattern(uint16_t beepMs, uint8_t count = 1, uint16_t silenceMs = 100, uint8_t volume = 100);
+    void playBuzzerNotes(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count);
     void playVibroPattern(SDK::Message::RequestVibroPlay::Effect effect, uint8_t count = 1, uint16_t silenceMs = 100);
 
     // -- WristTilt callback ---------------------------------------------------
