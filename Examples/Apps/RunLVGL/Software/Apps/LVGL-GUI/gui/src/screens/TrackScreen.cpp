@@ -15,14 +15,13 @@
 #include <cstring>
 
 #include "SDK/Utils/ClockTime.hpp"
+#include "SDK/Workout/WorkoutProgram.hpp"
 
 using namespace SDK::GUI;
 using F = Theme::Font;
 
 namespace
 {
-constexpr uint16_t kFaceCount = App::MenuNav::TrackView::ID_COUNT;
-
 // Status face clock geometry (TrackFaceStatus.hpp).
 constexpr int32_t kTimeY       = 63;
 constexpr int32_t kMeridiemY   = 105;
@@ -31,7 +30,7 @@ constexpr int32_t kMeridiemGap = 5;
 // Interval phase accents (TrackFaceIntervals).
 constexpr uint32_t kIvNeutral = Color::WHITE;
 constexpr uint32_t kIvRun     = Color::CYAN;
-constexpr uint32_t kIvRest    = Color::YELLOW_DARK;
+constexpr uint32_t kIvRest    = Color::WHITE;  // amber means too slow on a workout
 
 const char* phaseTitle(Track::IntervalsPhase phase)
 {
@@ -69,6 +68,10 @@ void TrackScreen::build()
     buildFaceLap();
     buildFaceTotal();
     buildFaceIntervals();
+
+    mWorkoutGauge = std::make_unique<WorkoutFaceGauge>(mRoot);
+    mWorkoutStep  = std::make_unique<WorkoutFaceStep>(mRoot);
+    mWorkoutNext  = std::make_unique<WorkoutStepCard>(mRoot);
 }
 
 void TrackScreen::buildFaceIntervals()
@@ -131,30 +134,76 @@ void TrackScreen::buildFaceStatus()
     mPercent = Theme::label(f, F::Medium25, "0%", 42, 187, 157);
 }
 
-uint16_t TrackScreen::firstFace() const
+const uint16_t* TrackScreen::faces(uint16_t& count) const
 {
-    return mIntervalsMode ? FaceId::ID_INTERVALS : FaceId::ID_TRACK1;
+    static const uint16_t kWorkout[] = {
+        FaceId::ID_WORKOUT_GAUGE, FaceId::ID_WORKOUT_STEP, FaceId::ID_WORKOUT_NEXT,
+        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+    };
+    static const uint16_t kIntervals[] = {
+        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+    };
+    static const uint16_t kFree[] = { FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3 };
+
+    switch (mMode) {
+        case Mode::Workout:
+            count = sizeof(kWorkout) / sizeof(kWorkout[0]);
+            return kWorkout;
+        case Mode::Intervals:
+            count = sizeof(kIntervals) / sizeof(kIntervals[0]);
+            return kIntervals;
+        default:
+            count = sizeof(kFree) / sizeof(kFree[0]);
+            return kFree;
+    }
+}
+
+uint16_t TrackScreen::faceIndex(uint16_t id) const
+{
+    uint16_t count = 0;
+    const uint16_t* list = faces(count);
+    for (uint16_t i = 0; i < count; ++i) {
+        if (list[i] == id) {
+            return i;
+        }
+    }
+    return count;
+}
+
+void TrackScreen::updateMode(const Track::Data& data)
+{
+    const Mode mode = data.workoutMode   ? Mode::Workout
+                    : data.intervalsMode ? Mode::Intervals
+                                         : Mode::Free;
+    if (mModeSet && mode == mMode) {
+        return;
+    }
+    mModeSet = true;
+    mMode    = mode;
+    uint16_t count = 0;
+    faces(count);
+    mIndicator->setCount(count);
+    // A face the run no longer has (a workout completed or ended) falls back
+    // to the first one it has.
+    showFace(mFaceId);
 }
 
 void TrackScreen::onShow()
 {
+    mLeaving = false;
     mModel.menu().track.action.reset();
 
-    // The intervals face exists only in an intervals workout; the stored face
-    // position (default ID_INTERVALS) is clamped into the valid range.
+    // Set the mode before the face so that showFace() can fall back to the
+    // first face the run has, and the scroll indicator count fits.
     const Track::Data& data = mModel.getTrackData();
-    mIntervalsMode = data.intervalsMode;
-    mIndicator->setCount(mIntervalsMode ? kFaceCount : kFaceCount - 1);
+    mFaceId = mModel.menu().track.get();
+    updateMode(data);
 
     // Coming back from a cool-down alert, show the intervals face regardless of
     // where the user had scrolled, so the cool-down phase is visible.
-    const bool forceIntervals = mIntervalsMode &&
+    const bool forceIntervals = mMode == Mode::Intervals &&
         mModel.getPendingAlertIntervals().phase == Track::IntervalsPhase::COOL_DOWN;
-    uint16_t face = forceIntervals ? static_cast<uint16_t>(FaceId::ID_INTERVALS) : mModel.menu().track.get();
-    if (face < firstFace() || face >= kFaceCount) {
-        face = firstFace();
-    }
-    showFace(face);
+    showFace(forceIntervals ? static_cast<uint16_t>(FaceId::ID_INTERVALS) : mModel.menu().track.get());
 
     mIsImperial       = mModel.isUnitsImperial();
     mIs12Hour         = mModel.is12HourFormat();
@@ -164,12 +213,22 @@ void TrackScreen::onShow()
     memcpy(mHrThresholds, mModel.getHrThresholds(), mHrThresholdCount);
 
     onTrackData(data);
+    setWorkoutStep(mModel.getWorkoutStep(false));
+    mWorkoutNext->showNext(mModel.getWorkoutStep(true));
+    setWorkoutFace(mModel.getWorkoutFace());
     uint8_t h = 0, m = 0, s = 0;
     mModel.getTime(h, m, s);
     setTime(h, m);
     onBatteryLevel(mModel.getBatteryLevel());
     onGpsFix(mModel.hasGpsFix());
     onAccessoryStatus(mModel.getAccessoryState(), "");
+
+    // A step that started while another screen showed gets its card before
+    // this screen (ScreenManager::goTo()). This catches one that started
+    // after that choice was made.
+    if (mModel.takeStepCard()) {
+        showStepCard();
+    }
 }
 
 void TrackScreen::onHide()
@@ -179,33 +238,54 @@ void TrackScreen::onHide()
 
 void TrackScreen::showFace(uint16_t id)
 {
+    uint16_t count = 0;
+    const uint16_t* list = faces(count);
+    uint16_t index = faceIndex(id);
+    if (index >= count) {
+        index = 0;
+    }
+    id      = list[index];
     mFaceId = id;
-    setHidden(mFaceIntervals, id != FaceId::ID_INTERVALS);
-    setHidden(mFaceTotal,     id != FaceId::ID_TRACK1);
-    setHidden(mFaceLap,       id != FaceId::ID_TRACK2);
-    setHidden(mFaceStatus,    id != FaceId::ID_TRACK3);
-    // In a free run the indicator has no slot for the hidden intervals face.
-    mIndicator->setActive(static_cast<uint16_t>(mIntervalsMode ? id : id - 1));
+    setHidden(mFaceIntervals,         id != FaceId::ID_INTERVALS);
+    setHidden(mFaceTotal,             id != FaceId::ID_TRACK1);
+    setHidden(mFaceLap,               id != FaceId::ID_TRACK2);
+    setHidden(mFaceStatus,            id != FaceId::ID_TRACK3);
+    setHidden(mWorkoutGauge->root(),  id != FaceId::ID_WORKOUT_GAUGE);
+    setHidden(mWorkoutStep->root(),   id != FaceId::ID_WORKOUT_STEP);
+    setHidden(mWorkoutNext->root(),   id != FaceId::ID_WORKOUT_NEXT);
+    mIndicator->setActive(index);
+}
+
+void TrackScreen::showStepCard()
+{
+    // The card replaces this screen on the next frame. Until then the faces
+    // are left as they are, so the new step does not show on them first.
+    mLeaving = true;
+    ScreenManager::instance().goTo(ScreenId::TrackWorkoutStep);
 }
 
 void TrackScreen::onKey(uint8_t code)
 {
     namespace Btn = SDK::GUI::Button;
-    const uint16_t minId = firstFace();
+    uint16_t count = 0;
+    const uint16_t* list = faces(count);
+    const uint16_t index = faceIndex(mFaceId);
     switch (code) {
         case Btn::L1:
-            showFace(mFaceId <= minId ? static_cast<uint16_t>(kFaceCount - 1) : static_cast<uint16_t>(mFaceId - 1));
+            showFace(list[index == 0 || index >= count ? count - 1 : index - 1]);
             break;
         case Btn::L2:
-            showFace(mFaceId + 1 >= kFaceCount ? minId : static_cast<uint16_t>(mFaceId + 1));
+            showFace(list[index + 1 >= count ? 0 : index + 1]);
             break;
         case Btn::R1:
             ScreenManager::instance().goTo(ScreenId::TrackAction);
             break;
         case Btn::R2:
-            // In an intervals workout the lap button advances the phase, on any
-            // face; laps are phase-driven. A free run records a manual lap.
-            if (mIntervalsMode) {
+            // In Intervals or a structured workout the lap button moves to the
+            // next phase or step, on any face; laps are step-driven. When the
+            // workout completes the service drops the mode, so R2 then records
+            // a manual lap. A free run always records a manual lap.
+            if (mMode != Mode::Free) {
                 mModel.intervalsNextPhase();
             } else {
                 mModel.saveLap();
@@ -219,6 +299,12 @@ void TrackScreen::onKey(uint8_t code)
 
 void TrackScreen::onTrackData(const Track::Data& data)
 {
+    if (mLeaving) {
+        return;
+    }
+    // A workout that completes or is ended drops to a free run.
+    updateMode(data);
+
     char buf[16];
 
     // Totals face
@@ -241,8 +327,15 @@ void TrackScreen::onTrackData(const Track::Data& data)
     lv_label_set_text(mHrValue, buf);
     mHrZone->setHR(data.hr < App::Display::kMinHR ? 0.0f : data.hr, mHrThresholds, mHrThresholdCount);
 
+    // Workout faces: the live pace under a step with no target, the lap
+    // averages on the step face.
+    mLivePace = Fmt::paceUnits(data.pace, mIsImperial);
+    mLapPace  = Fmt::paceUnits(data.lapPace, mIsImperial);
+    mLapHr    = data.avgLapHR;
+    mWorkoutStep->setAverages(mLapPace, mLapHr, mHeartRateStep);
+
     // Intervals face
-    if (mIntervalsMode) {
+    if (mMode == Mode::Intervals) {
         const Track::IntervalsData& iv = data.intervals;
         setIntervalsPhase(iv);
         if (iv.metric == Track::IntervalsMetric::DISTANCE) {
@@ -284,6 +377,45 @@ void TrackScreen::setIntervalsPhase(const Track::IntervalsData& iv)
         lv_label_set_text_fmt(mIvRepeats, "%u/%u", static_cast<unsigned>(iv.repeat),
                               static_cast<unsigned>(iv.totalRepeats));
     }
+}
+
+void TrackScreen::onWorkoutData(const Model::WorkoutFace& face)
+{
+    if (mLeaving) {
+        return;
+    }
+    setWorkoutFace(face);
+}
+
+void TrackScreen::onWorkoutStep(bool next)
+{
+    if (mLeaving) {
+        return;
+    }
+    if (next) {
+        mWorkoutNext->showNext(mModel.getWorkoutStep(true));
+        return;
+    }
+    // onShow() shows the new step when the card hands back.
+    if (mModel.takeStepCard()) {
+        showStepCard();
+        return;
+    }
+    setWorkoutStep(mModel.getWorkoutStep(false));
+}
+
+void TrackScreen::setWorkoutFace(const Model::WorkoutFace& face)
+{
+    mHeartRateStep = static_cast<SDK::Workout::Target>(face.target) == SDK::Workout::Target::HeartRate;
+    mWorkoutGauge->set(face, mIsImperial, mLivePace);
+    mWorkoutStep->setRepeat(face.rep, face.reps);
+    mWorkoutStep->setAverages(mLapPace, mLapHr, mHeartRateStep);
+}
+
+void TrackScreen::setWorkoutStep(const Model::WorkoutStepInfo& step)
+{
+    mWorkoutStep->setStep(step);
+    mWorkoutStep->setRepeat(step.rep, step.reps);
 }
 
 void TrackScreen::onBatteryLevel(uint8_t level)

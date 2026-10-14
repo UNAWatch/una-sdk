@@ -49,7 +49,8 @@ void TrackIntervalsAlertScreen::onShow()
     uint32_t    color = Color::WHITE;
     switch (iv.phase) {
         case Track::IntervalsPhase::RUN:       title = "RUN";       color = Color::CYAN;        break;
-        case Track::IntervalsPhase::REST:      title = "REST";      color = Color::YELLOW_DARK; break;
+        // Amber means too slow on a workout, so rest is white.
+        case Track::IntervalsPhase::REST:      title = "REST";      color = Color::WHITE; break;
         case Track::IntervalsPhase::COOL_DOWN: title = "COOL DOWN"; break;
         default: break;
     }

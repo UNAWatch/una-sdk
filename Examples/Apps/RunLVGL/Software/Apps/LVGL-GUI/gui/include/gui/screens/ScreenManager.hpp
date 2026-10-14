@@ -22,6 +22,11 @@ class Screen;
 
 enum class ScreenId : uint8_t {
     Main,
+    // Structured workouts
+    WorkoutToday,
+    WorkoutList,
+    WorkoutMenu,
+    WorkoutDetails,
     // Intervals configuration
     MenuIntervals,
     MenuIntervalsRepeats,
@@ -44,6 +49,7 @@ enum class ScreenId : uint8_t {
     Track,
     TrackIntervalsAlert,
     TrackIntervalsCompleted,
+    TrackWorkoutStep,
     TrackAction,
     TrackHoldConfirm,
     TrackLap,
@@ -60,7 +66,8 @@ public:
     /// Bind the model and show the first screen.
     void start(Model& model, ScreenId first);
 
-    /// Request a switch; performed on the next frame.
+    /// Request a switch; performed on the next frame. The Track screen is
+    /// reached through the step card while one waits to be shown.
     void goTo(ScreenId id);
 
 private:

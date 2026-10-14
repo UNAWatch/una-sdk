@@ -17,6 +17,7 @@ constexpr uint32_t kCarouselPeriodMs = 3000;
 using Style = WheelMenu::Item::Style;
 const WheelMenu::Item kItems[App::MenuNav::TrackView::Action::ID_COUNT] = {
     { Style::Simple, "Resume" },
+    { Style::Simple, "End workout" },
     { Style::Simple, "Summary" },
     { Style::Simple, "Save & End" },
     { Style::Simple, "Discard" },
@@ -28,10 +29,27 @@ TrackActionScreen::TrackActionScreen(Model& model)
 {
 }
 
+uint16_t TrackActionScreen::itemAt(uint16_t row) const
+{
+    // Without a workout, End workout's row is left out.
+    if (!mWorkoutMode && row >= Menu::ID_END_WORKOUT) {
+        return static_cast<uint16_t>(row + 1);
+    }
+    return row;
+}
+
 void TrackActionScreen::build()
 {
+    // End workout shows only while a structured workout runs.
+    mWorkoutMode = mModel.getTrackData().workoutMode;
+    uint16_t count = 0;
+    for (uint16_t i = 0; i < Menu::ID_COUNT; ++i) {
+        if (mWorkoutMode || i != Menu::ID_END_WORKOUT) {
+            mItems[count++] = kItems[i];
+        }
+    }
     // Surrounding item text sits 6 px higher than the default (TrackActionView).
-    mMenu    = std::make_unique<WheelMenu>(mRoot, kItems, Menu::ID_COUNT, -6);
+    mMenu    = std::make_unique<WheelMenu>(mRoot, mItems, count, -6);
     mButtons = std::make_unique<Widgets::Buttons>(mRoot);
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
                   Widgets::Buttons::AMBER, Widgets::Buttons::NONE);
@@ -63,24 +81,38 @@ void TrackActionScreen::onKey(uint8_t code)
         case Btn::L1: mMenu->prev(); break;
         case Btn::L2: mMenu->next(); break;
 
-        // Save & End / Discard start a hold-to-confirm the moment R1 goes down;
-        // the countdown screen runs while R1 stays held.
+        // Save & End / Discard / End workout start a hold-to-confirm the
+        // moment R1 goes down; the countdown screen runs while R1 stays held.
         case Btn::R1_PRESS:
-            if (mMenu->selected() == Menu::ID_SAVE) {
-                mModel.setHoldConfirmMode(Model::HoldConfirmMode::Finish);
-                ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
-            } else if (mMenu->selected() == Menu::ID_DISCARD) {
-                mModel.setHoldConfirmMode(Model::HoldConfirmMode::Discard);
-                ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+            switch (itemAt(mMenu->selected())) {
+                case Menu::ID_END_WORKOUT:
+                    mModel.setHoldConfirmMode(Model::HoldConfirmMode::EndWorkout);
+                    ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+                    break;
+                case Menu::ID_SAVE:
+                    mModel.setHoldConfirmMode(Model::HoldConfirmMode::Finish);
+                    ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+                    break;
+                case Menu::ID_DISCARD:
+                    mModel.setHoldConfirmMode(Model::HoldConfirmMode::Discard);
+                    ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+                    break;
+                default:
+                    break;
             }
             break;
 
         case Btn::R1:
-            if (mMenu->selected() == Menu::ID_RESUME) {
-                mModel.trackResume();
-                ScreenManager::instance().goTo(ScreenId::Track);
-            } else if (mMenu->selected() == Menu::ID_SUMMARY) {
-                ScreenManager::instance().goTo(ScreenId::TrackSummary);
+            switch (itemAt(mMenu->selected())) {
+                case Menu::ID_RESUME:
+                    mModel.trackResume();
+                    ScreenManager::instance().goTo(ScreenId::Track);
+                    break;
+                case Menu::ID_SUMMARY:
+                    ScreenManager::instance().goTo(ScreenId::TrackSummary);
+                    break;
+                default:
+                    break;
             }
             break;
 

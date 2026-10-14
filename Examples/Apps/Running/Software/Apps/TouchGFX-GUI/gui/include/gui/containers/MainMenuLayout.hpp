@@ -68,6 +68,7 @@ public:
     void showBackground(bool state);
 
     void setInfoMsg(TypedTextId msgId);
+    void setInfoText(const touchgfx::Unicode::UnicodeChar* text);  ///< nullptr hides it
     void setInfoMsgColor(touchgfx::colortype color);
 
     // ---- Sensor status row (GPS / external HR) -----------------------------

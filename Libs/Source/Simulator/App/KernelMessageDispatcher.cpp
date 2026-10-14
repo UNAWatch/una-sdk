@@ -29,8 +29,8 @@ KernelMessageDispatcher::KernelMessageDispatcher(SDK::App::DualAppComm& appComm,
                                                 SDK::Interface::IVibro& vibro,
                                                 SDK::Interface::IBacklight& backlight,
                                                 SDK::Interface::IBuzzer& buzzer)
-    : mAppComm(appComm)
-    , mMessageMgr(messageManager)
+    : mMessageMgr(messageManager)
+    , mAppComm(appComm)
     , mVibro(vibro)
 	, mBacklight(backlight)
 	, mBuzzer(buzzer)
@@ -88,7 +88,6 @@ void KernelMessageDispatcher::appLifeCycleHandler(SDK::MessageBase* msg)
 
         case SDK::MessageType::REQUEST_APP_RUN_GUI: {
             LOG_DEBUG("Service requests GUI launch\n");
-            bool isGuiWasRun = true;
             bool status = true;
             msg->setResult(status ? SDK::MessageResult::SUCCESS : SDK::MessageResult::FAIL);
             mMessageMgr.signalCompletion(msg);
@@ -124,7 +123,7 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 
             const uint32_t limit = std::min(
                 SDK::Message::RequestSystemSettings::skMaxHearRateTh,
-                static_cast<const uint32_t>(HeartRateZones::kMaxThreshold)
+                static_cast<uint32_t>(HeartRateZones::kMaxThreshold)
             );
 
             for (uint32_t i = 0; i < limit; i++) {
@@ -198,6 +197,7 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
             for (uint32_t i = 0; i < count; i++) {
                 melody[i].level = (buzzMsg->notes[i].volume / 33);
                 melody[i].time = buzzMsg->notes[i].time;
+                melody[i].frequency = buzzMsg->notes[i].frequency;
             }
             mBuzzer.play(melody.get(), count);
 
@@ -242,7 +242,6 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 
         case SDK::MessageType::REQUEST_GLANCE_UPDATE: {
             LOG_DEBUG("Requests glance update\n");
-            auto* gl = static_cast<SDK::Message::RequestGlanceUpdate*>(msg);
 
             mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
         } break;

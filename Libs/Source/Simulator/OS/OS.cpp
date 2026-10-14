@@ -68,7 +68,7 @@ Semaphore::Semaphore(uint32_t max, uint32_t init)
     mSem = CreateSemaphore(nullptr, init, max, nullptr);
 }
 #else
-    : mMax(max), mCount(init), mSem()
+    : mSem(), mMax(max), mCount(init)
 {
     sem_init(&mSem, 0, init);
 }

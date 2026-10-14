@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 25 px
  * Bpp: 2
- * Opts: --font Examples/Apps/Running/Software/Apps/TouchGFX-GUI/assets/fonts/Poppins-Medium.ttf --size 25 --bpp 2 --format lvgl --no-compress -r 0x20-0x7E -o Examples/Apps/RunLVGL/Software/Apps/LVGL-GUI/assets/fonts/poppins_medium_25.c
+ * Opts: --font Examples/Apps/Running/Software/Apps/TouchGFX-GUI/assets/fonts/Poppins-Medium.ttf --size 25 --bpp 2 --format lvgl --no-compress -r 0x20-0x7E,0x2026 -o Examples/Apps/RunLVGL/Software/Apps/LVGL-GUI/assets/fonts/poppins_medium_25.c
  ******************************************************************************/
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
@@ -890,7 +890,11 @@ static LV_ATTRIBUTE_LARGE_CONST const uint8_t glyph_bitmap[] = {
 
     /* U+007E "~" */
     0x2, 0xf8, 0x7, 0xc3, 0xff, 0xeb, 0xd2, 0xfb,
-    0xff, 0xf0, 0xf0, 0xb, 0xe0
+    0xff, 0xf0, 0xf0, 0xb, 0xe0,
+
+    /* U+2026 "…" */
+    0x28, 0xa, 0x1, 0x8b, 0xe2, 0xf8, 0xbe, 0xbf,
+    0x2f, 0xcb, 0xf3, 0xd0, 0xf4, 0x3d
 };
 
 
@@ -994,7 +998,8 @@ static const lv_font_fmt_txt_glyph_dsc_t glyph_dsc[] = {
     {.bitmap_index = 4956, .adv_w = 206, .box_w = 8, .box_h = 28, .ofs_x = 3, .ofs_y = -5},
     {.bitmap_index = 5012, .adv_w = 130, .box_w = 4, .box_h = 23, .ofs_x = 2, .ofs_y = -3},
     {.bitmap_index = 5035, .adv_w = 206, .box_w = 8, .box_h = 28, .ofs_x = 2, .ofs_y = -5},
-    {.bitmap_index = 5091, .adv_w = 221, .box_w = 13, .box_h = 4, .ofs_x = 0, .ofs_y = 6}
+    {.bitmap_index = 5091, .adv_w = 221, .box_w = 13, .box_h = 4, .ofs_x = 0, .ofs_y = 6},
+    {.bitmap_index = 5104, .adv_w = 255, .box_w = 14, .box_h = 4, .ofs_x = 1, .ofs_y = 0}
 };
 
 /*---------------------
@@ -1008,6 +1013,10 @@ static const lv_font_fmt_txt_cmap_t cmaps[] =
 {
     {
         .range_start = 32, .range_length = 95, .glyph_id_start = 1,
+        .unicode_list = NULL, .glyph_id_ofs_list = NULL, .list_length = 0, .type = LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY
+    },
+    {
+        .range_start = 8230, .range_length = 1, .glyph_id_start = 96,
         .unicode_list = NULL, .glyph_id_ofs_list = NULL, .list_length = 0, .type = LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY
     }
 };
@@ -1033,7 +1042,7 @@ static lv_font_fmt_txt_dsc_t font_dsc = {
     .cmaps = cmaps,
     .kern_dsc = NULL,
     .kern_scale = 0,
-    .cmap_num = 1,
+    .cmap_num = 2,
     .bpp = 2,
     .kern_classes = 0,
     .bitmap_format = 0,

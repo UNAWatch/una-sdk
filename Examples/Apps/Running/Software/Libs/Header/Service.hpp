@@ -10,12 +10,21 @@
 #include "SDK/Metrics/MonotonicTime.hpp"
 #include "SDK/Metrics/MonotonicCounter.hpp"
 #include "SDK/Metrics/VariableCounter.hpp"
-#include "SDK/Metrics/SpeedSmoother.hpp"
+#include "SDK/Metrics/GpsSpeedFilter.hpp"
 #include "SDK/Metrics/DeltaCounter.hpp"
 #include "SDK/Metrics/ThrottledSample.hpp"
 #include "SDK/Filters/SimpleLPF.hpp"
 
 #include "SDK/Calibration/OutdoorStrideCalibrator.hpp"
+
+#include "SDK/Fit/FitWorkoutReader.hpp"
+#include "SDK/Workout/Intervals.hpp"
+#include "SDK/Workout/ScheduleState.hpp"
+#include "SDK/Workout/TargetGauge.hpp"
+#include "SDK/Workout/WorkoutAlerts.hpp"
+#include "SDK/Workout/WorkoutEngine.hpp"
+#include "SDK/Workout/WorkoutLibrary.hpp"
+#include "SDK/Workout/WorkoutProgram.hpp"
 
 #include "SettingsSerializer.hpp"
 #include "ActivitySummarySerializer.hpp"
@@ -45,11 +54,29 @@ private:
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
     static constexpr float    skFusionSampleRateHz   = 100.0f;
 
-    /// Window, in 1 Hz track ticks, over which the live pace / speed readout is
-    /// averaged. Ten seconds cuts the GPS speed noise to about a third -- enough
-    /// to hold a target pace by -- while still tracking a real change of effort
-    /// fast enough to be useful inside an interval repeat.
-    static constexpr std::size_t skPaceSmoothingTicks = 10;
+    /// Geometry of the live-speed filter, in 1 Hz track ticks. The receiver
+    /// already averages its speed over 10 s, so the window only bridges a tick
+    /// that brings no sample; a longer one would average twice and add lag.
+    /// The position chord is 2 s, 5-8 m at running pace: a longer one cuts the
+    /// corners of the path and reads the scale low.
+    static constexpr std::size_t skSpeedSmoothTicks = 2;
+    static constexpr std::size_t skSpeedScaleTau    = 180;
+    static constexpr std::size_t skSpeedChordTicks  = 2;
+
+    /// Laps reserved in the summary for a run, plus one per workout step up
+    /// to skMaxWorkoutLapReserve, so that a workout's laps do not reallocate
+    /// the list mid-run.
+    static constexpr std::size_t skLapReserve           = 10;
+    static constexpr std::size_t skMaxWorkoutLapReserve = 128;
+
+    /// The lead-in's beep each second near the end of a step: shorter than
+    /// the step-change alert's, so the countdown and the change sound apart.
+    static constexpr uint16_t skLeadInBeepMs = 80;
+
+    /// The gauge arc's outer thirds: 30 s/km beyond a pace band, 15 bpm
+    /// beyond a heart-rate band.
+    static constexpr float skArcMarginSecPerKm = 30.0f;
+    static constexpr float skArcMarginBpm      = 15.0f;
 
     // -- Infrastructure -------------------------------------------------------
 
@@ -95,6 +122,8 @@ private:
     float       mGpsSpeedMs       = 0.0f; ///< Latest raw GPS speed (instantaneous source).
     bool        mGpsSpeedValid    = false;
     bool        mGpsSpeedFresh    = false; ///< A speed sample arrived since the last track tick.
+    float       mGpsSpeedPeakMs   = 0.0f;  ///< Highest valid speed sample since the last track tick.
+    bool        mGpsPosFresh      = false; ///< A position sample arrived since the last track tick.
     bool        mGpsDeadReckoning = false;
     std::time_t mLastCalibUtc     = 0;   ///< For per-tick delta_t.
 
@@ -104,11 +133,16 @@ private:
     SDK::Metric::MonotonicCounter<std::time_t>          mTimeCounter;
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
-    /// Smooths the GPS speed for the live pace / speed readout only; the FIT
-    /// record series and the maxima stay on the unsmoothed samples in
-    /// mSpeedCounter. The averages are not involved either way -- they come
-    /// from the distance and time totals, not from a mean of these samples.
-    SDK::Metric::SpeedSmoother<skPaceSmoothingTicks>    mSpeedSmoother;
+    /// Corrects the receiver's Doppler speed against the distance its own
+    /// position track covers, and smooths it. This is the single source for
+    /// everything derived from GPS speed -- the readout, the FIT record series,
+    /// the maxima, the implied step length and the stride calibrator -- so that
+    /// none of them inherit the receiver's environment-dependent under-read.
+    /// The averages are not involved either way: they come from the distance and
+    /// time totals, not from a mean of these samples.
+    SDK::Metric::GpsSpeedFilter<skSpeedSmoothTicks,
+                                skSpeedScaleTau,
+                                skSpeedChordTicks>      mSpeedFilter;
     SDK::Metric::VariableCounter                        mHrCounter;
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.
@@ -157,26 +191,22 @@ private:
     bool         mGpsWanted = false;                 ///< GPS_LOCATION should stay connected (pre-activity + active track); cleared in disconnect() so the retry never re-wakes the GNSS post-activity.
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
+    uint32_t     mLapCarryMs          = 0;      ///< Time the last lap handed to this one.
     Track::Data  mTrackData{};
 
     // -- Interval training state ----------------------------------------------
 
-    bool        mIntervalsMode        = false;
-    bool        mIntervalsCompleted   = false; ///< Set after workout completed; blocks further phase processing
-    std::time_t mPhaseStartActiveSec  = 0;     ///< mTimeCounter.getValueActive() at phase start
-    float       mPhaseStartActiveDist = 0.0f;  ///< mDistanceCounter.getValueActive() at phase start
+    bool mIntervalsMode      = false;
+    bool mIntervalsCompleted = false; ///< Set after workout completed; blocks further phase processing
 
-    /// Maps interval phases to workout_step message_index values for the FIT
-    /// workout description (0xFFFF = no associated step).
-    struct IntervalsStepMap {
-        bool     valid       = false;
-        uint16_t warmUpIdx   = 0xFFFF;
-        uint16_t runIdx      = 0xFFFF;
-        uint16_t restIdx     = 0xFFFF;
-        uint16_t finalRunIdx = 0xFFFF; ///< last RUN step when the final rest is skipped
-        uint16_t coolDownIdx = 0xFFFF;
-    };
-    IntervalsStepMap mIntervalsStepMap;
+    /// The intervals settings as a workout program, which mEngine runs step
+    /// by step. The program is about 15 KB: the Service is statically
+    /// allocated, never on a stack.
+    SDK::Workout::IntervalsSpec   mIntervalsSpec;
+    SDK::Workout::IntervalsLayout mIntervalsLayout;
+    SDK::Workout::Program         mProgram;
+    SDK::Workout::Engine          mEngine;
+    SDK::Workout::LeadInAlert     mLeadIn;
 
     // -- Wrist tilt -----------------------------------------------------------
 
@@ -185,6 +215,36 @@ private:
     // -- Outdoor stride calibrator ---------------------------------------
 
     SDK::Calibration::OutdoorStrideCalibrator mCalibrator;
+
+    // -- Structured workouts --------------------------------------------------
+
+    /// The workout files, listed when the GUI starts and no run is going
+    /// (about 10 KB). A run reads its workout into mProgram, and so do the
+    /// list and the details screen, which only happen before a run.
+    SDK::Workout::Library        mLibrary;
+    SDK::Fit::FitWorkoutReader   mReader;
+    SDK::Workout::ScheduleState  mSchedule;
+
+    bool              mWorkoutMode       = false; ///< A structured workout is running.
+    int16_t           mWorkoutRequested  = CustomMessage::TrackStart::kNoWorkout;
+    bool              mWorkoutReachedEnd = false; ///< Completion reached; ending early after it still counts.
+    SDK::Workout::Ymd mWorkoutDate       = 0;     ///< The running workout's planned day, 0 if not scheduled.
+    char              mWorkoutFile[SDK::Workout::Library::kFileBytes] = {};
+
+    SDK::Workout::SpeedGauge     mSpeedGauge;
+    SDK::Workout::GpsCatchUp     mGpsCatchUp;  ///< Holds the speed gauge off until the distance catches up.
+    SDK::Workout::HeartRateGauge mHrGauge;
+    SDK::Workout::ZoneAlerts     mZoneAlerts;
+    /// A zone alert's second playing, until it is sent; see playAlertTwice().
+    const SDK::Message::RequestBuzzerPlay::Note* mAlertRepeat        = nullptr;
+    uint8_t                                      mAlertRepeatCount   = 0;
+    uint32_t                                     mAlertRepeatFromMs  = 0;
+    uint32_t                                     mAlertRepeatAfterMs = 0;
+    float                        mBandLow  = 0.0f; ///< The step's target band, m/s or bpm.
+    float                        mBandHigh = 0.0f;
+
+    /// HR zone thresholds from the system settings; the last is maximum HR.
+    uint8_t mHrThresholds[CustomMessage::kHrThresholdsCount] = {};
 
     // -- Lifecycle ------------------------------------------------------------
 
@@ -207,13 +267,29 @@ private:
     void handleEvent(const CustomMessage::TrackResume& event);
     void handleEvent(const CustomMessage::ManualLap& event);
     void handleEvent(const CustomMessage::IntervalsNextPhase& event);
+    void handleEvent(const CustomMessage::WorkoutDetailsRequest& event);
+    void handleEvent(const CustomMessage::WorkoutEnd& event);
 
     // -- Track control --------------------------------------------------------
 
     void sendInitialInfoToGui();
     void startTrack(std::time_t utc);
     void processTrack();
-    void saveLap(float autoLapDistanceM = 0.0f);
+
+    /// What ended a lap, and the workout step it was, for the FIT lap.
+    struct LapEnd {
+        SDK::Fit::LapTrigger trigger      = SDK::Fit::LapTrigger::Manual;
+        uint16_t             wktStepIndex = SDK::Fit::kMessageIndexInvalid;
+        SDK::Fit::Intensity  intensity    = SDK::Fit::Intensity::Invalid;
+        /// A workout step that ran out (ranOut) ended between two ticks.
+        /// carryMs is the time counted beyond its end, for the next lap; stepM
+        /// is the distance it covered, the rest of the lap's counted distance
+        /// going to the next lap.
+        bool                 ranOut       = false;
+        uint32_t             carryMs      = 0;
+        float                stepM        = 0.0f;
+    };
+    void saveLap(const LapEnd& end, float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
     void pauseTrack(bool pause);
     void buildPartialSummary();
@@ -222,16 +298,56 @@ private:
 
     // -- Interval training ----------------------------------------------------
 
-    void startIntervalsPhase(Track::IntervalsPhase phase);
-    void advanceIntervalsPhase(bool manual = false);
+    /// Build the program from the intervals settings and start it.
+    void startIntervals();
+    /// R2: end the current interval phase or workout step and start the next.
+    void nextStep();
     void processIntervals();
-    void onIntervalsPhaseChange(bool alert, bool manual);
+    /// A step ended (@p how says why): close its lap, and alert.
+    void onIntervalsStepEnded(SDK::Workout::Engine::Change how);
+    /// Refresh mTrackData.intervals from the engine's current step.
+    void updateIntervalsData();
+    void notifyStepChange();
+    Track::IntervalsPhase intervalsPhase(uint16_t step) const;
 
-    /// Build the workout_step list from the intervals config, emit the workout /
-    /// workout_step messages, and populate mIntervalsStepMap for lap referencing.
-    void emitIntervalsWorkout();
-    /// workout_step message_index for the current interval phase (0xFFFF = none).
-    uint16_t intervalsWktStepIndex() const;
+    /// The lap for workout step @p step, ended by @p trigger.
+    LapEnd workoutLap(uint16_t step, SDK::Fit::LapTrigger trigger) const;
+    /// The lap for the step the engine has just ended, from where it ended.
+    LapEnd endedStepLap(SDK::Workout::Engine::Change how) const;
+    /// What ended step @p step, as the engine reported it.
+    SDK::Fit::LapTrigger lapTrigger(SDK::Workout::Engine::Change how, uint16_t step) const;
+
+    // -- Structured workouts --------------------------------------------------
+
+    /// List the workouts, unless a run is going.
+    void scanWorkouts();
+    /// Send the list, with today's workout unless it was completed.
+    void sendWorkoutList();
+    /// Read entry @p index of the list into mProgram.
+    bool readWorkout(uint16_t index);
+    bool startWorkout(uint16_t index);
+    void processWorkout();
+    void onWorkoutStepEnded(SDK::Workout::Engine::Change how);
+    /// Set the gauges and alerts up for the engine's current step.
+    void startWorkoutStep();
+    void endWorkout();
+    void sendWorkoutData();
+    void sendWorkoutSteps();
+    void sendWorkoutStep(const SDK::Workout::Step* step, bool next);
+    void playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert);
+    void playAlertTwice(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count);
+    void sendAlertRepeat();
+    /// The zone of the current step's target, Unknown with none.
+    SDK::Workout::Zone targetZone() const;
+    /// A heart-rate target as a bpm band, from the watch's HR thresholds.
+    bool hrBand(const SDK::Workout::Step& step, float& low, float& high) const;
+    bool hasTrustedHr() const;
+    /// The watch's local date, or 0 if its clock is not set.
+    SDK::Workout::Ymd localDate();
+
+    /// The run's active time and distance, as the workout engine counts them.
+    uint32_t activeTimeMs() const;
+    uint32_t activeDistanceCm() const;
 
     // -- Notifications --------------------------------------------------------
 
@@ -242,7 +358,8 @@ private:
     void notifyLapEnd();
     void notifyNewActivity();
     void backlightOn(uint32_t timeoutMs = skBacklightTimeout);
-    void playBuzzerPattern(uint16_t beepMs, uint8_t count = 1, uint16_t silenceMs = 100);
+    void playBuzzerPattern(uint16_t beepMs, uint8_t count = 1, uint16_t silenceMs = 100, uint8_t volume = 100);
+    void playBuzzerNotes(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count);
     void playVibroPattern(SDK::Message::RequestVibroPlay::Effect effect, uint8_t count = 1, uint16_t silenceMs = 100);
 
     // -- WristTilt callback ---------------------------------------------------

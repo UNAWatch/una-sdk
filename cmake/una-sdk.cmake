@@ -14,12 +14,31 @@ set(UNA_SDK_SOURCES_APPSYSTEM
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/Service/main.cpp"
 )
 
-# Native FIT-format encoder (SDK::Fit). No external dependency.
+# Native FIT-format encoder, and the workout reader and writer (SDK::Fit). No
+# external dependency. Apps link with --gc-sections, so an app that never
+# reads or writes a workout carries none of that code.
 set(UNA_SDK_SOURCES_FIT
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitCrc.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitWriter.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/FitRecordCadence.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Fit/RecordingMarker.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/FitWorkoutReader.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Fit/FitWorkoutWriter.cpp"
+)
+
+# Structured-workout step engine, the on-watch Intervals builder, the pace
+# and heart-rate target gauges, the alert timing, and the list of workout
+# files with the schedule state (SDK::Workout). ScheduleState needs
+# UNA_SDK_SOURCES_JSON in the same link. Programs come from
+# FitWorkoutReader in UNA_SDK_SOURCES_FIT or from buildIntervals().
+set(UNA_SDK_SOURCES_WORKOUT
+    "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutEngine.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/Intervals.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/TargetGauge.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutAlerts.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/WorkoutLibrary.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/ScheduleState.cpp"
+    "$ENV{UNA_SDK}/Libs/Source/Workout/StepLabel.cpp"
 )
 
 set(UNA_SDK_SOURCES_JSON
@@ -61,6 +80,7 @@ set(UNA_SDK_SOURCES_CALIBRATION
 set(UNA_SDK_SOURCES_SERVICE
     "${UNA_SDK_SOURCES_APPSYSTEM}"
     "${UNA_SDK_SOURCES_FIT}"
+    "${UNA_SDK_SOURCES_WORKOUT}"
     "${UNA_SDK_SOURCES_JSON}"
     "${UNA_SDK_SOURCES_SENSOR}"
     "${UNA_SDK_SOURCES_TRACKMAP}"
@@ -70,6 +90,9 @@ set(UNA_SDK_SOURCES_SERVICE
 )
 
 set(UNA_SDK_SOURCES_GUI
+    # Step labels: the workout screens show durations and targets as the
+    # service words them.
+    "$ENV{UNA_SDK}/Libs/Source/Workout/StepLabel.cpp"
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/TouchGFX/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/TouchGFX/STM32TouchController.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
@@ -157,6 +180,9 @@ set(UNA_SDK_SOURCES_GUI_LVGL_WIDGETS
 )
 
 set(UNA_SDK_SOURCES_GUI_LVGL
+    # Step labels: the workout screens show durations and targets as the
+    # service words them.
+    "$ENV{UNA_SDK}/Libs/Source/Workout/StepLabel.cpp"
     "$ENV{UNA_SDK}/Libs/Source/AppSystem/EntryPoint/LVGL/main.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/GuiCommandProcessor.cpp"
     "$ENV{UNA_SDK}/Libs/Source/Port/LVGL/LvglPort.cpp"

@@ -7,6 +7,7 @@
 
 #include "ActivityWriter.hpp"
 
+#include "SDK/Fit/FitWorkoutWriter.hpp"
 #include "SDK/Interfaces/IFileSystem.hpp"
 #include "SDK/JSON/JsonStreamWriter.hpp"
 
@@ -105,7 +106,8 @@ void ActivityWriter::start(const AppInfo& info)
          fit::field::Lap::AvgSpeed, fit::field::Lap::MaxSpeed,
          fit::field::Lap::TotalAscent, fit::field::Lap::TotalDescent,
          fit::field::Lap::AvgHeartRate, fit::field::Lap::MaxHeartRate,
-         fit::field::Lap::WktStepIndex});
+         fit::field::Lap::WktStepIndex, fit::field::Lap::Intensity,
+         fit::field::Lap::LapTrigger});
     mFit->defineMessage(L_SESSION, fit::mesgNum(fit::MesgNum::Session),
         {fit::field::Session::Timestamp, fit::field::Session::StartTime,
          fit::field::Session::TotalElapsedTime, fit::field::Session::TotalTimerTime,
@@ -278,8 +280,8 @@ void ActivityWriter::addLap(const LapData& lap)
     mFit->data(L_LAP)
         .u32(unixToFitTimestamp(lap.timestamp))
         .u32(unixToFitTimestamp(lap.timeStart))
-        .u32(static_cast<uint32_t>(lap.elapsed * 1000))
-        .u32(static_cast<uint32_t>(lap.duration * 1000))
+        .u32(static_cast<uint32_t>(lap.elapsed * 1000.0f + 0.5f))
+        .u32(static_cast<uint32_t>(lap.duration * 1000.0f + 0.5f))
         .u32(static_cast<uint32_t>(lap.distance * 100))
         .u16(mLapCounter)  // message_index: 0-based, incremented after this write
         .u16(static_cast<uint16_t>(lap.speedAvg * 1000))
@@ -289,6 +291,8 @@ void ActivityWriter::addLap(const LapData& lap)
         .u8(static_cast<uint8_t>(lap.hrAvg))
         .u8(static_cast<uint8_t>(lap.hrMax))
         .u16(lap.wktStepIndex)
+        .u8(static_cast<uint8_t>(lap.intensity))
+        .u8(static_cast<uint8_t>(lap.trigger))
         .write();
     mLapCounter++;
 
@@ -300,41 +304,13 @@ void ActivityWriter::addLap(const LapData& lap)
     }
 }
 
-void ActivityWriter::addWorkout(const char* name, const WorkoutStepData* steps, uint8_t count)
+void ActivityWriter::addWorkout(const SDK::Workout::Program& program)
 {
-    if (!mFit || steps == nullptr || count == 0) {
+    if (!mFit) {
         return;
     }
-
-    const uint8_t nameLen = name ? static_cast<uint8_t>(std::strlen(name) + 1) : 1;
-    mFit->defineMessage(L_WORKOUT, fit::mesgNum(fit::MesgNum::Workout),
-        {fit::field::Workout::MessageIndex,
-         {fit::field::Workout::kWktNameNum, fit::BaseType::String, nameLen},
-         fit::field::Workout::NumValidSteps, fit::field::Workout::Sport});
-    mFit->defineMessage(L_WORKOUT_STEP, fit::mesgNum(fit::MesgNum::WorkoutStep),
-        {fit::field::WorkoutStep::MessageIndex, fit::field::WorkoutStep::DurationType,
-         fit::field::WorkoutStep::DurationValue, fit::field::WorkoutStep::TargetType,
-         fit::field::WorkoutStep::TargetValue, fit::field::WorkoutStep::Intensity});
-
-    mFit->data(L_WORKOUT)
-        .u16(0)
-        .str(name ? name : "", nameLen)
-        .u16(count)
-        .u8(static_cast<uint8_t>(fit::Sport::Running))
-        .write();
-
-    for (uint8_t i = 0; i < count; ++i) {
-        const bool repeat = steps[i].durationType == fit::WktStepDuration::RepeatUntilStepsComplete;
-        mFit->data(L_WORKOUT_STEP)
-            .u16(i)
-            .u8(static_cast<uint8_t>(steps[i].durationType))
-            .u32(steps[i].durationValue)
-            .u8(repeat ? static_cast<uint8_t>(fit::baseTypeInvalid(fit::BaseType::Enum))
-                       : static_cast<uint8_t>(fit::WktStepTarget::Open))
-            .u32(repeat ? steps[i].repeatCount : 0u)
-            .u8(repeat ? static_cast<uint8_t>(fit::Intensity::Invalid)
-                       : static_cast<uint8_t>(steps[i].intensity))
-            .write();
+    if (!fit::writeWorkout(*mFit, program, {L_WORKOUT, L_WORKOUT_STEP, L_MEMO_GLOB})) {
+        LOG_ERROR("Failed to write the workout\n");
     }
 }
 

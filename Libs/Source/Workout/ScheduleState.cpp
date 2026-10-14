@@ -1,0 +1,233 @@
+/**
+ ******************************************************************************
+ * @file    ScheduleState.cpp
+ * @brief   Whether the scheduled workout last started was completed.
+ ******************************************************************************
+ */
+
+#include "SDK/Workout/ScheduleState.hpp"
+
+#include "SDK/JSON/JsonStreamReader.hpp"
+#include "SDK/JSON/JsonStreamWriter.hpp"
+
+#include <cstdio>
+#include <cstring>
+#include <memory>
+#include <string_view>
+
+namespace SDK::Workout {
+
+namespace {
+
+// The record is about 70 bytes; anything much larger is not one.
+constexpr size_t kMaxFileBytes = 256;
+
+// "YYYY-MM-DD" from a date, or 0 if @p s is not one.
+Ymd parseDate(std::string_view s)
+{
+    if (s.size() != 10) {
+        return 0;
+    }
+    char name[16];
+    std::memcpy(name, s.data(), 10);
+    std::memcpy(name + 10, ".fit", 5);
+    return scheduleDate(name);
+}
+
+}  // namespace
+
+bool ScheduleState::tempPath(char* buf, size_t cap) const
+{
+    const int n = std::snprintf(buf, cap, "%s.tmp", mPath);
+    return n > 0 && static_cast<size_t>(n) < cap;
+}
+
+void ScheduleState::load()
+{
+    mDate = 0;
+    mFile[0] = '\0';
+    mCompleted = false;
+
+    // The ".tmp" file is the record only if replacing the file was cut short;
+    // if it cannot be put in place, read it where it is.
+    char tmp[SDK::Interface::IFileSystem::skMaxPathLen];
+    if (!tempPath(tmp, sizeof(tmp))) {
+        loadFrom(mPath);
+        return;
+    }
+    finishReplacement(tmp);
+    if (!loadFrom(mPath)) {
+        loadFrom(tmp);
+    }
+}
+
+bool ScheduleState::finishReplacement(const char* tmp)
+{
+    Record r;
+    if (!mFs.exist(tmp)) {
+        return true;
+    }
+    // A ".tmp" that is not a whole record was cut short while being written,
+    // and one beside a good record is from a save that failed before the
+    // swap: either way the file holds the record.
+    if (!read(tmp, r) || read(mPath, r)) {
+        mFs.remove(tmp);
+        return true;
+    }
+    // The ".tmp" file is the only record: put it in place.
+    if (mFs.exist(mPath) && !mFs.remove(mPath)) {
+        return false;
+    }
+    return mFs.rename(tmp, mPath);
+}
+
+bool ScheduleState::loadFrom(const char* path)
+{
+    Record r;
+    if (!read(path, r)) {
+        return false;
+    }
+    mDate = r.date;
+    std::memcpy(mFile, r.file, sizeof(mFile));
+    mCompleted = r.completed;
+    return true;
+}
+
+bool ScheduleState::read(const char* path, Record& out)
+{
+    auto file = mFs.file(path);
+    if (!file || !file->open(false, false)) {
+        return false;
+    }
+    char   buf[kMaxFileBytes];
+    size_t n = 0;
+    const bool read = file->size() < sizeof(buf) && file->read(buf, sizeof(buf), n);
+    file->close();
+    if (!read) {
+        return false;
+    }
+
+    SDK::JsonStreamReader json(buf, n);
+    if (!json.validate()) {
+        return false;
+    }
+    std::string_view date;
+    std::string_view name;
+    bool             completed = false;
+    if (!json.get("date", date) || !json.get("file", name) || !json.get("completed", completed)
+        || name.empty() || name.size() >= sizeof(mFile)) {
+        return false;
+    }
+    const Ymd d = parseDate(date);
+    if (d == 0) {
+        return false;
+    }
+    out.date = d;
+    std::memcpy(out.file, name.data(), name.size());
+    out.file[name.size()] = '\0';
+    out.completed = completed;
+    return true;
+}
+
+bool ScheduleState::isRecord(Ymd date, const char* file) const
+{
+    return date != 0 && date == mDate && std::strcmp(file, mFile) == 0;
+}
+
+bool ScheduleState::started(Ymd date, const char* file)
+{
+    const size_t len = std::strlen(file);
+    if (date == 0 || len >= sizeof(mFile)) {
+        return false;
+    }
+    if (isRecord(date, file)) {
+        return true;
+    }
+    // If the record cannot be saved, keep the one before: the state held is
+    // always the state on file.
+    const Ymd  oldDate      = mDate;
+    const bool oldCompleted = mCompleted;
+    char       oldFile[sizeof(mFile)];
+    std::memcpy(oldFile, mFile, sizeof(mFile));
+
+    mDate = date;
+    std::memcpy(mFile, file, len + 1);
+    mCompleted = false;
+    if (!save()) {
+        mDate      = oldDate;
+        mCompleted = oldCompleted;
+        std::memcpy(mFile, oldFile, sizeof(mFile));
+        return false;
+    }
+    return true;
+}
+
+bool ScheduleState::completed()
+{
+    if (mDate == 0) {
+        return false;
+    }
+    if (mCompleted) {
+        return true;
+    }
+    mCompleted = true;
+    if (!save()) {
+        mCompleted = false;  // so that a later call tries again
+        return false;
+    }
+    return true;
+}
+
+bool ScheduleState::isCompleted(Ymd date, const char* file) const
+{
+    return isRecord(date, file) && mCompleted;
+}
+
+bool ScheduleState::save()
+{
+    // Write the record in full beside the file, then put it in the file's
+    // place: a write that fails never touches the record already saved.
+    char tmp[SDK::Interface::IFileSystem::skMaxPathLen];
+    if (!tempPath(tmp, sizeof(tmp))) {
+        return false;
+    }
+    // A ".tmp" file left alone is the only record: put it in place before
+    // writing over it.
+    if (!finishReplacement(tmp)) {
+        return false;
+    }
+    if (!write(tmp)) {
+        mFs.remove(tmp);
+        return false;
+    }
+    // rename() does not replace an existing file, so the old one goes first.
+    // From then on the ".tmp" file is the record, so the save has succeeded:
+    // if the rename fails, load() and the next save finish it.
+    if (mFs.exist(mPath) && !mFs.remove(mPath)) {
+        mFs.remove(tmp);
+        return false;
+    }
+    mFs.rename(tmp, mPath);
+    return true;
+}
+
+bool ScheduleState::write(const char* path)
+{
+    auto file = mFs.file(path);
+    if (!file || !file->open(true, true)) {
+        return false;
+    }
+    char date[16];
+    std::snprintf(date, sizeof(date), "%04u-%02u-%02u", static_cast<unsigned>(mDate / 10000u),
+                  static_cast<unsigned>(mDate / 100u % 100u), static_cast<unsigned>(mDate % 100u));
+    SDK::JsonStreamWriter json(file.get());
+    json.startMap();
+    json.add("date", date);
+    json.add("file", mFile);
+    json.add("completed", mCompleted);
+    json.endMap();
+    const bool ok = !json.isError();
+    return file->close() && ok;
+}
+
+}  // namespace SDK::Workout

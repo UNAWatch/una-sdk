@@ -35,9 +35,10 @@ void TrackStartConfirmScreen::onKey(uint8_t code)
 {
     namespace Btn = SDK::GUI::Button;
     if (code == Btn::R1) {
-        if (mModel.isPendingIntervalsMode()) {
-            // Intervals were configured and Start chosen without a fix: confirming
-            // goes straight to the countdown, which starts the track itself.
+        if (mModel.isPendingIntervalsMode() || mModel.getArmedWorkout() != Model::kNoWorkout) {
+            // Intervals were configured, or a workout armed, and Start chosen
+            // without a fix: confirming goes straight to the countdown, which
+            // starts the track itself.
             ScreenManager::instance().goTo(ScreenId::TrackIntervalsCountdown);
         } else {
             mModel.trackStart(false);

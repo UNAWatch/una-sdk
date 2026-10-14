@@ -5,6 +5,8 @@ namespace {
 // Arc colours: green for Finish, red for Discard (match the tick glyphs + Buttons palette).
 const touchgfx::colortype kFinishColor  = touchgfx::Color::getColorFromRGB(64, 192, 0);
 const touchgfx::colortype kDiscardColor = touchgfx::Color::getColorFromRGB(192, 0, 0);
+// Amber for End workout: the run goes on, so it is neither finish nor discard.
+const touchgfx::colortype kEndWorkoutColor = touchgfx::Color::getColorFromRGB(192, 128, 0);
 }
 
 TrackHoldConfirmationView::TrackHoldConfirmationView() :
@@ -19,20 +21,24 @@ void TrackHoldConfirmationView::setupScreen()
 
     mMode = presenter->getHoldConfirmMode();
     const bool finish = (mMode == Model::HoldConfirmMode::Finish);
+    const bool end    = (mMode == Model::HoldConfirmMode::EndWorkout);
 
-    // Label ("Hold to Finish" / "Hold to Discard").
+    // Label ("Hold to Finish" / "Hold to Discard" / "Hold to end the workout").
     questionText.setTypedText(touchgfx::TypedText(finish ? T_TEXT_HOLD_TO_FINISH
+                                                  : end  ? T_TEXT_HOLD_TO_END_WORKOUT
                                                          : T_TEXT_HOLD_TO_DISCARD));
     questionText.invalidate();
 
-    // R1 = confirm (green finish / red discard). No R2/back hint: releasing R1 cancels.
+    // R1 = confirm (green finish / amber end workout / red discard). No R2/back
+    // hint: releasing R1 cancels.
     buttons.setL1(Buttons::NONE);
     buttons.setL2(Buttons::NONE);
-    buttons.setR1(finish ? Buttons::GREEN : Buttons::RED);
+    buttons.setR1(finish ? Buttons::GREEN : end ? Buttons::AMBER : Buttons::RED);
     buttons.setR2(Buttons::NONE);
 
     // Confirm tick glyph matches the action colour.
     tick.setBitmap(touchgfx::Bitmap(finish ? BITMAP_TICKGREEN_22X17_ID
+                                    : end  ? BITMAP_TICKAMBER_22X17_ID
                                            : BITMAP_TICKRED_22X17_ID));
     tick.invalidate();
 
@@ -42,7 +48,7 @@ void TrackHoldConfirmationView::setupScreen()
     timerRing.setMode(TimerRing::FILL);
     timerRing.setMaxValue(kHoldMs);
     timerRing.setSpeed(1000);  // 1000 units/s -> kHoldMs ms to fill
-    timerRing.setProgressColor(finish ? kFinishColor : kDiscardColor);
+    timerRing.setProgressColor(finish ? kFinishColor : end ? kEndWorkoutColor : kDiscardColor);
     timerRing.setValueChangedCallback(mTimerValueChangedCb);
     timerRing.setCompleteCallback(mTimerCompleteCb);
     timerRing.setValue(0);
@@ -88,6 +94,10 @@ void TrackHoldConfirmationView::onTimerComplete(int32_t /*value*/)
     mFired = true;
     if (mMode == Model::HoldConfirmMode::Finish) {
         application().gotoTrackSavedScreenNoTransition();
+    } else if (mMode == Model::HoldConfirmMode::EndWorkout) {
+        // The run carries on as a free run.
+        presenter->endWorkout();
+        application().gotoTrackScreenNoTransition();
     } else {
         application().gotoTrackDiscardedScreenNoTransition();
     }

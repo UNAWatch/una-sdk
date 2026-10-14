@@ -16,4 +16,5 @@
 *.bmp    binary
 *.ico    binary
 *.fig    binary
+*.penpot binary
 *.tpkg   binary

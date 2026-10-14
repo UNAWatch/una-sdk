@@ -15,6 +15,26 @@ void MainPresenter::activate()
 
     view.setGpsFix(model->hasGpsFix());
     view.setAccessoryStatus(model->getAccessoryState(), "");
+    onWorkoutList();
+}
+
+void MainPresenter::onWorkoutList()
+{
+    const SDK::Workout::Library* lib = model->getWorkoutLibrary();
+    const int16_t armed = model->getArmedWorkout();
+    if (lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size()) {
+        view.setArmedWorkout(lib->entry(static_cast<size_t>(armed)).name);
+    } else {
+        view.setArmedWorkout(nullptr);
+    }
+}
+
+void MainPresenter::checkTodayPrompt()
+{
+    if (model->getArmedWorkout() == Model::kNoWorkout && model->takeTodayPrompt()) {
+        model->setChosenWorkout(model->getTodayWorkout());
+        model->application().gotoWorkoutTodayScreenNoTransition();
+    }
 }
 
 void MainPresenter::deactivate()

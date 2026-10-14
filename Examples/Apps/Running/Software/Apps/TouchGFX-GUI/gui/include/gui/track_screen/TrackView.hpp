@@ -3,6 +3,9 @@
 
 #include <gui_generated/track_screen/TrackViewBase.hpp>
 #include <gui/track_screen/TrackPresenter.hpp>
+#include <gui/containers/WorkoutFaceGauge.hpp>
+#include <gui/containers/WorkoutFaceStep.hpp>
+#include <gui/containers/WorkoutStepCard.hpp>
 
 class TrackView : public TrackViewBase
 {
@@ -12,7 +15,10 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
-    void setIntervalsMode(bool mode);
+    /// The kind of run decides the faces: a structured workout's three, the
+    /// Intervals one, then those every run has.
+    enum class Mode { Free, Intervals, Workout };
+    void setMode(Mode mode);
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
@@ -25,6 +31,10 @@ public:
     void setGpsFix(bool state);
     void setAccessoryStatus(uint8_t state);
 
+    void setWorkoutFace(const Model::WorkoutFace& face);
+    void setWorkoutStep(const Model::WorkoutStepInfo& step);
+    void setWorkoutNext(const Model::WorkoutStepInfo& step);
+
 protected:
 
     virtual void handleKeyEvent(uint8_t key) override;
@@ -33,7 +43,19 @@ protected:
     // accessory link state (engaged?) and the latest HR-sample source.
     void updateHrIcon();
 
-    bool     mIntervalsMode = false;
+    // The faces of the current mode, in L2 order.
+    const uint16_t* faces(uint16_t& count) const;
+    uint16_t        faceIndex(uint16_t id) const;  ///< Its place in faces(), or count
+
+    WorkoutFaceGauge mWorkoutGauge;
+    WorkoutFaceStep  mWorkoutStep;
+    WorkoutStepCard  mWorkoutNext;
+
+    Mode     mMode          = Mode::Free;
+    bool     mHeartRateStep = false;  ///< The current step's target is a heart rate
+    float    mLivePace      = 0.0f;   ///< s/km or s/mi
+    float    mLapPace       = 0.0f;
+    float    mLapHr         = 0.0f;
     uint16_t mCurrentFaceId = 0;
     bool     mIsImperial    = false;
     bool     mIs12Hour      = false;

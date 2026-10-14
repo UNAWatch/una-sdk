@@ -93,10 +93,12 @@ public:
         size_t mPos = 0;
     };
 
-    class EmptyDirectory : public SDK::Interface::IDirectory {
+    /// Lists the files directly under its path, and the folders their
+    /// paths imply, as they are when open() is called.
+    class InMemoryDirectory : public SDK::Interface::IDirectory {
     public:
-        explicit EmptyDirectory(std::string path);
-        ~EmptyDirectory() override = default;
+        InMemoryDirectory(const InMemoryFileSystem& fs, std::string path);
+        ~InMemoryDirectory() override = default;
 
         void setPath(const char* path) override;
         const char* getPath() const override;
@@ -111,8 +113,16 @@ public:
         bool close() override;
 
     private:
-        std::string mPath;
-        bool mOpen = false;
+        struct Item {
+            std::string name;
+            bool        isDir;
+            size_t      size;
+        };
+        const InMemoryFileSystem& mFs;
+        std::string               mPath;
+        bool                      mOpen = false;
+        std::vector<Item>         mItems;
+        size_t                    mNext = 0;
     };
 
     bool mkdir(const char* path) override;
@@ -146,6 +156,8 @@ public:
     /// creating/touching the entry (simulates a storage error scoped to one file
     /// kind, e.g. the auxiliary ".json" summary). Empty = never fail.
     std::string failWriteOpenSuffix;
+    /// When set, every rename() fails and changes nothing.
+    bool failRenames = false;
     /// Fault hook: when set, consulted before an open handle's close() with the
     /// file path; returning false makes that close() fail and leaves the handle
     /// OPEN (FatFs f_close semantics: a sync failure keeps the FIL valid and

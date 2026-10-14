@@ -8,7 +8,7 @@
 #include "SDK/Metrics/MonotonicTime.hpp"
 #include "SDK/Metrics/MonotonicCounter.hpp"
 #include "SDK/Metrics/VariableCounter.hpp"
-#include "SDK/Metrics/SpeedSmoother.hpp"
+#include "SDK/Metrics/GpsSpeedFilter.hpp"
 #include "SDK/Metrics/DeltaCounter.hpp"
 #include "SDK/Metrics/ThrottledSample.hpp"
 #include "SDK/Filters/SimpleLPF.hpp"
@@ -37,11 +37,14 @@ private:
     static constexpr uint32_t skMapMaxPoints         = 70;
     static constexpr uint32_t skBatteryLogPeriodMs   = 5 * 60 * 1000;
 
-    /// Window, in 1 Hz track ticks, over which the live speed / pace readout is
-    /// averaged. Ten seconds cuts the GPS speed noise to about a third -- enough
-    /// to hold a target speed by -- while still tracking a real change of effort
-    /// fast enough to be useful.
-    static constexpr std::size_t skPaceSmoothingTicks = 10;
+    /// Geometry of the live-speed filter, in 1 Hz track ticks. The receiver
+    /// already averages its speed over 10 s, so the window only bridges a tick
+    /// that brings no sample; a longer one would average twice and add lag.
+    /// The position chord is 2 s, about 20 m at riding speed: a longer one cuts
+    /// bends and reads the scale low.
+    static constexpr std::size_t skSpeedSmoothTicks = 2;
+    static constexpr std::size_t skSpeedScaleTau    = 180;
+    static constexpr std::size_t skSpeedChordTicks  = 2;
 
     // -- Auto-pause (GPS-speed driven) ----------------------------------------
     //
@@ -145,6 +148,8 @@ private:
     float mGpsSpeedMs    = 0.0f;  ///< Latest raw GPS speed sample.
     bool  mGpsSpeedValid = false; ///< Sample came from a current, non-dead-reckoned fix.
     bool  mGpsSpeedFresh = false; ///< A speed sample arrived since the last track tick.
+    float mGpsSpeedPeakMs = 0.0f; ///< Highest valid speed sample since the last track tick.
+    bool  mGpsPosFresh   = false; ///< A position sample arrived since the last track tick.
 
     // -- Metrics --------------------------------------------------------------
 
@@ -152,11 +157,16 @@ private:
     SDK::Metric::MonotonicCounter<std::time_t>          mTimeCounter;
     SDK::Metric::MonotonicCounter<float>                mDistanceCounter;
     SDK::Metric::VariableCounter                        mSpeedCounter;
-    /// Smooths the GPS speed for the live speed / pace readout only; the FIT
-    /// record series and the maxima stay on the unsmoothed samples in
-    /// mSpeedCounter. The averages are not involved either way -- they come
-    /// from the distance and time totals, not from a mean of these samples.
-    SDK::Metric::SpeedSmoother<skPaceSmoothingTicks>    mSpeedSmoother;
+    /// Corrects the receiver's Doppler speed against the distance its own
+    /// position track covers, and smooths it. This is the single source for
+    /// everything derived from GPS speed -- the readout, the FIT record series,
+    /// the maxima, the implied step length and the stride calibrator -- so that
+    /// none of them inherit the receiver's environment-dependent under-read.
+    /// The averages are not involved either way: they come from the distance and
+    /// time totals, not from a mean of these samples.
+    SDK::Metric::GpsSpeedFilter<skSpeedSmoothTicks,
+                                skSpeedScaleTau,
+                                skSpeedChordTicks>      mSpeedFilter;
     SDK::Metric::VariableCounter                        mHrCounter;
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.

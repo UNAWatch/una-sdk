@@ -30,6 +30,13 @@ public:
     /** Which action the hold screen should confirm (set by the action menu). */
     Model::HoldConfirmMode getHoldConfirmMode() const { return model->getHoldConfirmMode(); }
 
+    /// End the structured workout and resume the run, which the action menu paused.
+    void endWorkout()
+    {
+        model->endWorkout();
+        model->trackResume();
+    }
+
     virtual void onIdleTimeout() override { model->application().gotoTrackActionScreenNoTransition(); }
 
 private:

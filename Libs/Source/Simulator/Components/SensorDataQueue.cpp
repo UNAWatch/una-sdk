@@ -110,7 +110,7 @@ void Sensor::DataQueue::reinit(float period, uint32_t latency)
         return;
     }
 
-    const uint8_t* oldQueue    = (uint8_t*)mQueue;
+    uint8_t* oldQueue          = (uint8_t*)mQueue;
     const uint16_t oldCapacity = mCapacity;
 
     // Create a new queue

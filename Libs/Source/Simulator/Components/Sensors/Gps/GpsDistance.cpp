@@ -32,11 +32,11 @@ GpsDistance::GpsDistance()
               SDK::SensorDataParser::GpsDistance::getFieldsNumber(),
               *this)
     , mTimer()
+    , mGps(ComponentSimulator::GetInstance().getGps())
     , mDistance(0.0f)
     , mGpsPoint0()
     , mGpsPoint0Valid(false)
     , mPoints()
-    , mGps(ComponentSimulator::GetInstance().getGps())
 
 {
     mPoints.init(LOG_MODULE_PRX);
@@ -92,7 +92,6 @@ const char* GpsDistance::sdcGetDescription(Sensor::Driver* driver)
 
 void GpsDistance::sensorRefresh()
 {
-    static float distance = 0.0;
     if (mTimer.check()) {
         LOG_DEBUG("ENTRY\n");
 

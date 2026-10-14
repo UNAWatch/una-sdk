@@ -28,7 +28,7 @@ namespace SDK::Simulator::Mock
 
     bool Buzzer::play(Note note)
     {
-        LOG_INFO("note - time = %u ms, level = %u\n", note.time, note.level);
+        LOG_INFO("note - time = %u ms, level = %u, %u Hz\n", note.time, note.level, note.frequency);
         return true;
     }
 
@@ -36,7 +36,8 @@ namespace SDK::Simulator::Mock
     {
         LOG_INFO("melody[%u]\n", len);
         for (uint32_t i = 0; i < len; ++i) {
-            LOG_INFO("[%u] time=%u ms, level=%u\n", i, melody[i].time, melody[i].level);
+            LOG_INFO("[%u] time=%u ms, level=%u, %u Hz\n", i, melody[i].time, melody[i].level,
+                     melody[i].frequency);
         }
         return true;
     }

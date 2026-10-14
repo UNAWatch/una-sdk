@@ -24,12 +24,12 @@ namespace Sensor
 {
 
 GpsSpeed::GpsSpeed()
-    : mGps(ComponentSimulator::GetInstance().getGps())
-    , mDriver(*this,
+    : mDriver(*this,
               SDK::Sensor::Type::GPS_SPEED,
               SDK::SensorDataParser::GpsSpeed::COUNT,
               *this)
     , mTimer()
+    , mGps(ComponentSimulator::GetInstance().getGps())
 {
 }
 

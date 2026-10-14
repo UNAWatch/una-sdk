@@ -67,6 +67,7 @@ target_include_directories(RunLVGLSimulator PRIVATE
 target_compile_definitions(RunLVGLSimulator PRIVATE
     ${UNA_SDK_DEFINES_SIMULATOR}
     ${UNA_SDK_DEFINES_GUI_LVGL}
+    "LV_MEM_SIZE=(56U*1024U)"  # as in RunLVGL-CMake/CMakeLists.txt
     APP_ID="A1B8E3F04C7D925E"
     DEV_ID="UNA Simulator"
     BUILD_VERSION="1.0.0-sim"

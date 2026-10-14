@@ -1,4 +1,6 @@
 #include <gui/trackintervalscountdown_screen/TrackIntervalsCountdownView.hpp>
+#include <gui/common/WorkoutUi.hpp>
+#include <cstdio>
 
 TrackIntervalsCountdownView::TrackIntervalsCountdownView() :
     mTimerValueChangedCb(this, &TrackIntervalsCountdownView::onTimerValueChanged),
@@ -110,6 +112,25 @@ void TrackIntervalsCountdownView::setIntervals(const Settings::Intervals& inerva
     restText.invalidate();
 }
 
+void TrackIntervalsCountdownView::setWorkout(const SDK::Workout::Library::Entry& entry, bool isImperial)
+{
+    WorkoutUi::toText(entry.name, repsTextBuffer, REPSTEXT_SIZE);
+    WorkoutUi::fitWidth(repsTextBuffer, repsText.getTypedText().getId(), repsText.getWidth());
+
+    char totals[32];
+    WorkoutUi::formatTotals(entry, isImperial, totals, sizeof(totals));
+    Unicode::strncpy(runTextBuffer, totals, RUNTEXT_SIZE - 1);
+    runTextBuffer[RUNTEXT_SIZE - 1] = 0;
+    WorkoutUi::fitWidth(runTextBuffer, runText.getTypedText().getId(), runText.getWidth());
+
+    Unicode::snprintf(restTextBuffer, RESTTEXT_SIZE, "%u %s", static_cast<unsigned>(entry.steps),
+                      touchgfx::TypedText(T_TEXT_STEPS_LC).getText());
+
+    repsText.invalidate();
+    runText.invalidate();
+    restText.invalidate();
+}
+
 void TrackIntervalsCountdownView::handleKeyEvent(uint8_t key)
 {
     if (key == SDK::GUI::Button::L1) {
@@ -123,7 +144,11 @@ void TrackIntervalsCountdownView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::R2) {
-        application().gotoMenuIntervalsScreenNoTransition();
+        if (presenter->isWorkout()) {
+            application().gotoMainScreenNoTransition();
+        } else {
+            application().gotoMenuIntervalsScreenNoTransition();
+        }
     }
 }
 

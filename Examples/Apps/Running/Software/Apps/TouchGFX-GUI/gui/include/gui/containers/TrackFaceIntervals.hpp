@@ -73,7 +73,7 @@ public:
 private:
     touchgfx::colortype mColorNeutral = 0xC0C0C0;  ///< WARM_UP / COOL_DOWN
     touchgfx::colortype mColorRun     = 0x40C0C0;  ///< RUN
-    touchgfx::colortype mColorRest    = 0xC08000;  ///< REST
+    touchgfx::colortype mColorRest    = 0xC0C0C0;  ///< REST: white, as amber means too slow on a workout
 
 };
 

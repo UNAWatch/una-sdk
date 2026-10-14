@@ -42,10 +42,21 @@
 namespace SDK::Simulator::Mock
 {
 
+// A path starting ":/" names the root of the volume the apps live on, where
+// the watch keeps folders shared between apps, such as ":/Workouts". The
+// simulator keeps that root in Volume/ under its own.
+static std::string MapPath(const char *path)
+{
+    if (path[0] == ':' && path[1] == '/') {
+        return std::string("Volume/") + (path + 2);
+    }
+    return path;
+}
+
 // Method to add prefix to the path
 static std::string AddPrefix(const char *prefix, const char *path)
 {
-    return std::string(prefix) + path;
+    return std::string(prefix) + MapPath(path);
 }
 
 #ifdef _WIN32
@@ -517,7 +528,7 @@ std::string FileSystem::getRootPath()
 
 bool FileSystem::mkdir(const char *path)
 {
-    std::string directory(path);
+    std::string directory = MapPath(path);
     std::stringstream ss(directory);
     std::string token;
     std::string currentPath;

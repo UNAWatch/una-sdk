@@ -7,6 +7,8 @@
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
+#include "SDK/Workout/WorkoutLibrary.hpp"
+#include "SDK/Workout/WorkoutProgram.hpp"
 
 // Application types
 #include "Settings.hpp"
@@ -35,6 +37,10 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type INTERVALS_PHASE_ALERT      = 0x00000009;
     constexpr SDK::MessageType::Type INTERVALS_WORKOUT_COMPLETED = 0x00000010;
     constexpr SDK::MessageType::Type ACCESSORY_STATUS          = 0x00000012;
+    constexpr SDK::MessageType::Type WORKOUT_LIST              = 0x00000013;
+    constexpr SDK::MessageType::Type WORKOUT_DETAILS           = 0x00000014;
+    constexpr SDK::MessageType::Type WORKOUT_DATA              = 0x00000015;
+    constexpr SDK::MessageType::Type WORKOUT_STEP              = 0x00000016;
 
     // GUI --> Service
     constexpr SDK::MessageType::Type SETTINGS_SAVE         = 0x0000000A;
@@ -43,7 +49,9 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type TRACK_PAUSE           = 0x0000000D;
     constexpr SDK::MessageType::Type TRACK_RESUME          = 0x0000000E;
     constexpr SDK::MessageType::Type MANUAL_LAP            = 0x0000000F;
-    constexpr SDK::MessageType::Type INTERVALS_NEXT_PHASE  = 0x00000011;
+    constexpr SDK::MessageType::Type INTERVALS_NEXT_PHASE  = 0x00000011;  ///< R2: next interval phase or workout step
+    constexpr SDK::MessageType::Type WORKOUT_DETAILS_REQUEST = 0x00000017;
+    constexpr SDK::MessageType::Type WORKOUT_END             = 0x00000018;
 
     // Service <-> GUI
     struct SettingsUpd : public SDK::MessageBase {
@@ -211,6 +219,129 @@ namespace CustomMessage {
         }
     };
 
+    /**
+     * The structured workouts on the watch, sent when the GUI starts and
+     * again after a run. The list is the service's and stays valid while the
+     * GUI runs: the service builds it only when the GUI starts, and sends
+     * the same list after a run. @p today is the workout planned for today
+     * to offer at launch, or kNoToday if there is none or it was completed.
+     */
+    struct WorkoutList : public SDK::MessageBase {
+        static constexpr uint16_t kNoToday = 0xFFFF;
+
+        const SDK::Workout::Library* library;  ///< Non-owning
+        uint16_t                     today;
+
+        WorkoutList()
+            : SDK::MessageBase(WORKOUT_LIST)
+            , library(nullptr)
+            , today(kNoToday)
+        {}
+
+        WorkoutList(const SDK::Workout::Library* library, uint16_t today)
+            : WorkoutList()
+        {
+            this->library = library;
+            this->today   = today;
+        }
+    };
+
+    /**
+     * A workout read in full, in answer to WORKOUT_DETAILS_REQUEST. The
+     * program is the service's: it stays valid until the next request or
+     * the start of a run. nullptr if the file could not be read.
+     */
+    struct WorkoutDetails : public SDK::MessageBase {
+        uint16_t                     index;    ///< In the list
+        const SDK::Workout::Program* program;  ///< Non-owning
+
+        WorkoutDetails()
+            : SDK::MessageBase(WORKOUT_DETAILS)
+            , index(0)
+            , program(nullptr)
+        {}
+
+        WorkoutDetails(uint16_t index, const SDK::Workout::Program* program)
+            : WorkoutDetails()
+        {
+            this->index   = index;
+            this->program = program;
+        }
+    };
+
+    /**
+     * The workout face, every second while a structured workout runs. The
+     * gauge is in m/s for a speed target and bpm for a heart-rate one; arc
+     * is where the value sits on the gauge (0-1, with the band in the middle
+     * third, faster or higher to the right).
+     *
+     * Each step is a lap, so the step's average pace and heart rate are the
+     * lap's, in Track::Data (avgLapSpeed, avgLapHR).
+     */
+    struct WorkoutData : public SDK::MessageBase {
+        uint32_t remainingMs;  ///< Time step: time left
+        uint32_t remainingCm;  ///< Distance step: distance left
+        uint32_t stepTimeMs;   ///< Time in the step so far
+        uint32_t rep;          ///< Pass of the innermost repeat; 0 outside one
+        uint32_t reps;         ///< Its passes in all; 0 if unlimited
+        float    value;        ///< Gauge value; 0 with no target, or a speed too low for a pace
+        float    low;          ///< Target band
+        float    high;
+        float    arc;
+        uint8_t  stepEnd;      ///< SDK::Workout::StepEnd
+        uint8_t  target;       ///< SDK::Workout::Target
+        uint8_t  zone;         ///< SDK::Workout::Zone
+        uint8_t  intensity;    ///< SDK::Workout::Intensity
+        bool     leadIn;       ///< The step ends within about 5 s
+
+        WorkoutData()
+            : SDK::MessageBase(WORKOUT_DATA)
+            , remainingMs(0)
+            , remainingCm(0)
+            , stepTimeMs(0)
+            , rep(0)
+            , reps(0)
+            , value(0.0f)
+            , low(0.0f)
+            , high(0.0f)
+            , arc(0.0f)
+            , stepEnd(0)
+            , target(0)
+            , zone(0)
+            , intensity(0)
+            , leadIn(false)
+        {}
+    };
+
+    /**
+     * A workout step, sent in pairs when a workout starts and at each step
+     * change: first the step that has just started (for the next-step card
+     * and the step face), then the one after it (next set, for the
+     * next-step face; none set if nothing follows).
+     */
+    struct WorkoutStep : public SDK::MessageBase {
+        char     notes[SDK::Workout::kStepNotesBytes];  ///< The step's notes, or else its name; UTF-8, may be empty
+        char     duration[24];  ///< e.g. "400 m"; empty for an open step
+        char     target[32];    ///< e.g. "3:45-4:05 /km"; empty for no target
+        uint32_t rep;           ///< The step that started: pass of the innermost repeat; 0 outside one
+        uint32_t reps;          ///< Its passes in all; 0 if unlimited
+        uint8_t  intensity;     ///< SDK::Workout::Intensity
+        bool     next;          ///< The step after the current one
+        bool     none;          ///< next only: nothing follows
+
+        WorkoutStep()
+            : SDK::MessageBase(WORKOUT_STEP)
+            , notes{}
+            , duration{}
+            , target{}
+            , rep(0)
+            , reps(0)
+            , intensity(0)
+            , next(false)
+            , none(false)
+        {}
+    };
+
     // GUI --> Service
     struct SettingsSave : public SDK::MessageBase {
         // Application settings
@@ -228,14 +359,35 @@ namespace CustomMessage {
     };
 
     struct TrackStart : public SDK::MessageBase {
-        bool intervalsMode = false;
+        static constexpr int16_t kNoWorkout = -1;
+
+        bool    intervalsMode = false;
+        int16_t workout       = kNoWorkout;  ///< Index in the workout list to follow; wins over intervalsMode
         TrackStart() : SDK::MessageBase(TRACK_START) {}
 
-        explicit TrackStart(bool intervalsMode)
+        explicit TrackStart(bool intervalsMode, int16_t workout = kNoWorkout)
             : TrackStart()
         {
             this->intervalsMode = intervalsMode;
+            this->workout       = workout;
         }
+    };
+
+    /// Read a workout from the list in full, for its details screen.
+    struct WorkoutDetailsRequest : public SDK::MessageBase {
+        uint16_t index;
+        WorkoutDetailsRequest() : SDK::MessageBase(WORKOUT_DETAILS_REQUEST), index(0) {}
+
+        explicit WorkoutDetailsRequest(uint16_t index)
+            : WorkoutDetailsRequest()
+        {
+            this->index = index;
+        }
+    };
+
+    /// End workout, from the action menu: the run carries on as a free run.
+    struct WorkoutEnd : public SDK::MessageBase {
+        WorkoutEnd() : SDK::MessageBase(WORKOUT_END) {}
     };
 
     struct IntervalsNextPhase : public SDK::MessageBase {
@@ -268,6 +420,10 @@ namespace CustomMessage {
         ManualLap() : SDK::MessageBase(MANUAL_LAP) {}
     };
 
+
+    // The kernel's largest message block is 256 bytes.
+    static_assert(sizeof(WorkoutData) <= 256, "WorkoutData must fit a message block");
+    static_assert(sizeof(WorkoutStep) <= 256, "WorkoutStep must fit a message block");
 
 } // namespace CustomMessage
 

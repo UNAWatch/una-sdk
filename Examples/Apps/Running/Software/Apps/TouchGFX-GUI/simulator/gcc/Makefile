@@ -81,6 +81,15 @@ Libs/Source/Fit/FitCrc.cpp\
 Libs/Source/Fit/FitWriter.cpp\
 Libs/Source/Fit/FitRecordCadence.cpp\
 Libs/Source/Fit/RecordingMarker.cpp\
+Libs/Source/Fit/FitWorkoutWriter.cpp\
+Libs/Source/Workout/WorkoutEngine.cpp\
+Libs/Source/Workout/Intervals.cpp\
+Libs/Source/Workout/WorkoutAlerts.cpp\
+Libs/Source/Fit/FitWorkoutReader.cpp\
+Libs/Source/Workout/TargetGauge.cpp\
+Libs/Source/Workout/WorkoutLibrary.cpp\
+Libs/Source/Workout/ScheduleState.cpp\
+Libs/Source/Workout/StepLabel.cpp\
 ../../Libs/Sources/ActivitySummarySerializer.cpp\
 ../../Libs/Sources/ActivityWriter.cpp\
 ../../Libs/Sources/Service.cpp\

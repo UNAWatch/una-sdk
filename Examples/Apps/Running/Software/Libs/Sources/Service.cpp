@@ -1,10 +1,12 @@
 
 #include "Service.hpp"
 
+#include <algorithm>
 #include <ctime>
 #include <cmath>
 #include <memory>
 #include <cstring>
+#include <utility>
 
 #include "Settings.hpp"
 #include "ActivitySummary.hpp"
@@ -29,6 +31,7 @@
 #include "SDK/SensorLayer/DataParsers/SensorDataParserGrade.hpp"
 
 #include "SDK/Calibration/StrideMath.hpp"
+#include "SDK/Workout/StepLabel.hpp"
 
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -82,12 +85,12 @@ Service::Service(SDK::Kernel &kernel)
         , mBatteryVoltage(kernel.sys)
         , mWristTiltDetector()
         , mCalibrator(mKernel.fs)
-
+        , mSchedule(mKernel.fs)
 {
     mTimeCounter.init();
     mDistanceCounter.init();
     mSpeedCounter.init(0.5f, 300.0f);
-    mSpeedSmoother.init(0.5f, 300.0f);  // same valid range as the raw counter
+    mSpeedFilter.init(0.5f, 300.0f);    // same valid range as the raw counter
     mHrCounter.init(20.0f, 300.0f);
     mAltitudeCounter.init(2.0f);
 
@@ -96,6 +99,8 @@ Service::Service(SDK::Kernel &kernel)
     mWristTiltDetector.setConfig(config);
 
     mWristTiltDetector.setListener(this);
+
+    std::memcpy(mHrThresholds, CustomMessage::kHrThresholdsDefault, sizeof(mHrThresholds));
 }
 
 Service::~Service()
@@ -197,6 +202,16 @@ void Service::run()
                     handleEvent(*static_cast<CustomMessage::IntervalsNextPhase*>(msg));
                 } break;
 
+                case CustomMessage::WORKOUT_DETAILS_REQUEST:  {
+                    LOG_DEBUG("WORKOUT_DETAILS_REQUEST\n");
+                    handleEvent(*static_cast<CustomMessage::WorkoutDetailsRequest*>(msg));
+                } break;
+
+                case CustomMessage::WORKOUT_END:  {
+                    LOG_DEBUG("WORKOUT_END\n");
+                    handleEvent(*static_cast<CustomMessage::WorkoutEnd*>(msg));
+                } break;
+
                 // Sensors messages
                 case SDK::MessageType::EVENT_SENSOR_LAYER_DATA: {
                     auto event = static_cast<SDK::Message::Sensor::EventData*>(msg);
@@ -271,6 +286,10 @@ void Service::run()
                 return; // Exit app
             }
         }
+
+        // After the periodic update, so a step that changed on this pass has
+        // already dropped the last step's repeat.
+        sendAlertRepeat();
     }
 }
 
@@ -340,7 +359,9 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
 
             if (mGps.fix) { // Do not change position if no fix
                 parser.getCoordinates(mGps.latitude, mGps.longitude, mGps.altitude);
+                mGpsPosFresh = true;    // consumed by the speed filter each tick
             }
+            mGpsCatchUp.onLocation(mGps.fix, parser.getTimestamp());
             LOG_DEBUG("Location: fix %u, lat %f, lon %f\n", mGps.fix, mGps.latitude, mGps.longitude);
         }
     } else if (mSensorGpsSpeed.matchesDriver(handle)) {
@@ -349,12 +370,10 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             mGpsSpeedMs       = parser.getSpeed();  // raw instantaneous speed
             mGpsSpeedValid    = parser.isSpeedValid();
             mGpsDeadReckoning = parser.isDeadReckoning();
-            mGpsSpeedFresh    = true;   // consumed by the pace smoother each tick
-            // Only feed a current (valid-fix) speed into the aggregated metrics
-            // so acquisition / fix-loss / dead-reckoning readings don't inflate
-            // the max-speed statistics.
-            if (mGpsSpeedValid) {
-                mSpeedCounter.add(mGpsSpeedMs);
+            mGpsSpeedFresh    = true;   // consumed by the speed filter each tick
+            if (mGpsSpeedValid && mGpsSpeedMs > mGpsSpeedPeakMs &&
+                mGpsSpeedMs <= mSpeedCounter.getMaxValid()) {
+                mGpsSpeedPeakMs = mGpsSpeedMs;   // for the maxima; see processTrack()
             }
             LOG_DEBUG("Speed:    %.2f m/s (valid %u, dr %u)\n",
                       mGpsSpeedMs, mGpsSpeedValid, mGpsDeadReckoning);
@@ -371,6 +390,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         SDK::SensorDataParser::GpsDistance parser(data[0]);
         if (parser.isDataValid()) {
             mDistanceCounter.add(parser.getDistance());
+            mGpsCatchUp.onDistance(parser.getTimestamp());
             LOG_DEBUG("Distance: %.2f m\n", parser.getDistance());
         }
     } else if (mSensorPressure.matchesDriver(handle)) {
@@ -476,6 +496,8 @@ void Service::onStartGUI()
     mSensorWristMotion.connect();
 
     sendInitialInfoToGui();
+    scanWorkouts();
+    sendWorkoutList();
 }
 
 void Service::onStopGUI()
@@ -492,7 +514,9 @@ void Service::handleEvent(const CustomMessage::TrackStart& event)
     // and the GPS could have already updated the current time.
     mTimeTracker.init();
 
-    mIntervalsMode = event.intervalsMode;
+    // A workout from the list replaces any armed intervals.
+    mWorkoutRequested = event.workout;
+    mIntervalsMode    = event.intervalsMode && event.workout == CustomMessage::TrackStart::kNoWorkout;
 
     startTrack(mTimeTracker.getExpectedUTC());
 }
@@ -500,6 +524,9 @@ void Service::handleEvent(const CustomMessage::TrackStart& event)
 void Service::handleEvent(const CustomMessage::TrackStop& event)
 {
     stopTrack(event.discard);
+    // After a run, a completed workout is no longer today's to offer. The
+    // list itself is left as it is: the GUI may be reading it.
+    sendWorkoutList();
 }
 
 void Service::handleEvent(const CustomMessage::SettingsSave& event)
@@ -525,7 +552,12 @@ void Service::handleEvent(const CustomMessage::TrackResume& /*event*/)
 
 void Service::handleEvent(const CustomMessage::ManualLap& /*event*/)
 {
-    saveLap();
+    // In a workout each step is a lap: the lap button moves to the next.
+    if (mWorkoutMode) {
+        nextStep();
+        return;
+    }
+    saveLap(LapEnd{});
     SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
     notifyLapEnd();
 }
@@ -598,7 +630,7 @@ void Service::backlightOn(uint32_t timeoutMs)
     }
 }
 
-void Service::playBuzzerPattern(uint16_t beepMs, uint8_t count, uint16_t silenceMs)
+void Service::playBuzzerPattern(uint16_t beepMs, uint8_t count, uint16_t silenceMs, uint8_t volume)
 {
     if (count == 0) {
         return;
@@ -615,7 +647,7 @@ void Service::playBuzzerPattern(uint16_t beepMs, uint8_t count, uint16_t silence
     if (msg) {
         uint8_t n = 0;
         for (uint8_t i = 0; i < count; ++i) {
-            msg->notes[n].volume = 100;
+            msg->notes[n].volume = volume;
             msg->notes[n].time = beepMs;
             ++n;
             if (i < count - 1u) {
@@ -625,6 +657,23 @@ void Service::playBuzzerPattern(uint16_t beepMs, uint8_t count, uint16_t silence
             }
         }
         msg->notesCount = n;
+        mKernel.comm.sendMessage(msg);
+        mKernel.comm.releaseMessage(msg);
+    }
+}
+
+void Service::playBuzzerNotes(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count)
+{
+    if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes) {
+        count = SDK::Message::RequestBuzzerPlay::skMaxNotes;
+    }
+
+    auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestBuzzerPlay>();
+    if (msg) {
+        for (uint8_t i = 0; i < count; ++i) {
+            msg->notes[i] = notes[i];
+        }
+        msg->notesCount = count;
         mKernel.comm.sendMessage(msg);
         mKernel.comm.releaseMessage(msg);
     }
@@ -673,13 +722,15 @@ ActivityWriter::RecordData Service::prepareRecordData()
     fitRecord.latitude     = mGps.latitude;
     fitRecord.longitude    = mGps.longitude;
 
-    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedCounter.isValid());
-    fitRecord.speed        = mSpeedCounter.getCurrent();
+    // The corrected speed of this tick rather than the display window, so the
+    // records agree with max_speed. It is still the receiver's 10 s average.
+    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.hasCurrentSample());
+    fitRecord.speed        = mSpeedFilter.getInstantSpeed();
 
     fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
     fitRecord.altitude     = mAltitudeCounter.getCurrent();
 
-    bool hasHeartRate = (mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3);
+    const bool hasHeartRate = hasTrustedHr();
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
     fitRecord.heartRate    = mHrCounter.getCurrent();
     // Tag each record with where the HR came from (none when no valid HR).
@@ -707,7 +758,8 @@ ActivityWriter::RecordData Service::prepareRecordData()
     // record.step_length values.
     const SDK::Calibration::StrideMath::StepLength stepLen =
         SDK::Calibration::StrideMath::impliedStepLengthM(
-            mGpsSpeedMs, mGpsSpeedValid && !mGpsDeadReckoning,
+            mSpeedFilter.getInstantSpeed(),
+            mSpeedFilter.hasCurrentSample() && !mGpsDeadReckoning,
             mRunningCadence.cadenceSpm, mRunningCadence.cadenceValid);
     fitRecord.set(ActivityWriter::RecordData::Field::STEP_LENGTH, stepLen.valid);
     fitRecord.stepLengthM = stepLen.meters;
@@ -749,6 +801,7 @@ void Service::sendInitialInfoToGui()
         }
     }
 
+    std::memcpy(mHrThresholds, hrThresholds, sizeof(mHrThresholds));
     SDK::send_msg<CustomMessage::SettingsUpd>(mKernel, mSettings, mIsImperial, mTimeFormat12h, hrThresholds, CustomMessage::kHrThresholdsCount);
     SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
     SDK::send_msg<CustomMessage::Battery>(mKernel, static_cast<uint8_t>(mBatterySoc.get()));
@@ -764,7 +817,7 @@ void Service::startTrack(std::time_t utc)
 
     mDistanceCounter.reset();
     mSpeedCounter.reset();
-    mSpeedSmoother.reset();
+    mSpeedFilter.reset();
     mHrCounter.reset();
     mHrSource = 0;  // don't carry a prior track's HR source/readings into the new session
     mHrOpticalBpm = 0;
@@ -781,7 +834,10 @@ void Service::startTrack(std::time_t utc)
     mGradeData = {};
     mGpsSpeedValid    = false;
     mGpsSpeedFresh    = false;
+    mGpsPosFresh      = false;
+    mGpsSpeedPeakMs   = 0.0f;
     mGpsDeadReckoning = false;
+    mGpsCatchUp.reset();
     mLastCalibUtc     = 0;
     mCalibrator.load();
     if (mSettings.calibTraceEn) {
@@ -791,28 +847,37 @@ void Service::startTrack(std::time_t utc)
 
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
-
-    mSummary = ActivitySummary{};
-    mSummary.laps.reserve(10);
+    mLapCarryMs = 0;
 
     // Intervals mode initialization
     mIntervalsCompleted = false;
     mTrackData.intervalsMode = mIntervalsMode;
     if (mIntervalsMode) {
-        const Settings::Intervals& cfg = mSettings.intervals;
-        mTrackData.intervals = Track::IntervalsData{};
-        // totalRepeats is the literal number of RUN-REST cycles the user selected.
-        // repeatsNum == 0 means 'Open' (unlimited): totalRepeats stays 0 and the GUI
-        // shows just the current repeat with no total.
-        mTrackData.intervals.totalRepeats = cfg.repeatsNum;
-
-        if (cfg.warmUp) {
-            startIntervalsPhase(Track::IntervalsPhase::WARM_UP);
-        } else {
-            mTrackData.intervals.repeat = 1;
-            startIntervalsPhase(Track::IntervalsPhase::RUN);
-        }
+        startIntervals();
     }
+
+    // A structured workout from the list
+    mWorkoutMode       = false;
+    mWorkoutReachedEnd = false;
+    mWorkoutDate       = 0;
+    mWorkoutFile[0]    = '\0';
+    if (!mIntervalsMode && mWorkoutRequested >= 0) {
+        mWorkoutMode = startWorkout(static_cast<uint16_t>(mWorkoutRequested));
+    }
+    mTrackData.workoutMode = mWorkoutMode;
+    if (mWorkoutMode) {
+        sendWorkoutSteps();
+    }
+
+    // Each workout step is a lap: reserve them all up front.
+    std::size_t lapReserve = skLapReserve;
+    if (mIntervalsMode || mWorkoutMode) {
+        const uint64_t steps = SDK::Workout::totals(mProgram).stepsRun;
+        lapReserve += static_cast<std::size_t>(
+            std::min<uint64_t>(steps, skMaxWorkoutLapReserve));
+    }
+    mSummary = ActivitySummary{};
+    mSummary.laps.reserve(lapReserve);
 
     // Configure TrackMapBuilder
     mTrackMapBuilder.reset();
@@ -820,9 +885,9 @@ void Service::startTrack(std::time_t utc)
     mTrackMapBuilder.setDistanceThreshold(startGpsPoint, skMapDistanceThreshold);
 
     // Determine lap split source. In intervals mode each phase (warm up / run /
-    // rest / cool down) is recorded as its own lap, so the alert-based auto-lap
-    // is disabled to avoid splitting a phase across multiple laps.
-    mLapDivSource = mIntervalsMode ? LapDivSource::OFF : getLapDivSource();
+    // rest / cool down), and in a workout each step, is recorded as its own lap,
+    // so the alert-based auto-lap is disabled to avoid splitting one across laps.
+    mLapDivSource = (mIntervalsMode || mWorkoutMode) ? LapDivSource::OFF : getLapDivSource();
 
     mWristTiltDetector.reset();
 
@@ -835,8 +900,8 @@ void Service::startTrack(std::time_t utc)
     info.appID = APP_ID;
     mActivityWriter.start(info);
 
-    if (mIntervalsMode) {
-        emitIntervalsWorkout();
+    if (mIntervalsMode || mWorkoutMode) {
+        mActivityWriter.addWorkout(mProgram);
     }
 
     mTrackState = Track::State::ACTIVE;
@@ -878,14 +943,29 @@ void Service::processTrack()
     // the window advances once per track tick even when a sample is missing,
     // which ages a lost fix out of the window instead of holding it forward.
     // Advanced only while ACTIVE, so the readout freezes for the duration of a
-    // pause. That is a deliberate change: VariableCounter::add() latches its
-    // current value before its own pause check, so the old readout went on
-    // tracking the raw speed of a standing runner while the activity was paused.
+    // pause rather than tracking the raw speed of a standing runner.
+    //
+    // The counter is fed from here rather than from the sensor callback for two
+    // reasons: every statistic then derives from the corrected speed rather than
+    // the receiver's raw under-read, and the samples arrive at a uniform 1 Hz,
+    // which is what VariableCounter documents it assumes. The INSTANT value goes
+    // in, not the smoothed one, so a lap maximum keeps its peak.
     if (mTrackState == Track::State::ACTIVE) {
-        mSpeedSmoother.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh);
-        mGpsSpeedFresh = false;
+        mSpeedFilter.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh,
+                          mGps.latitude, mGps.longitude, mGps.fix && mGpsPosFresh);
+        if (mSpeedFilter.hasCurrentSample()) {
+            // A tick can see two samples and the filter keeps the newest, so the
+            // maxima take the higher of it and the tick's peak, on the same scale.
+            const float peak = mGpsSpeedPeakMs * mSpeedFilter.getScale();
+            mSpeedCounter.add(std::max(mSpeedFilter.getInstantSpeed(), peak));
+        }
     }
-    mTrackData.speed = mSpeedSmoother.getSpeed();
+    // Consumed every tick, paused or not, so a sample counts as fresh only on the
+    // tick that follows it -- including the first tick after a resume.
+    mGpsSpeedFresh  = false;
+    mGpsPosFresh    = false;
+    mGpsSpeedPeakMs = 0.0f;
+    mTrackData.speed = mSpeedFilter.getSpeed();
 
     mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed    = mSpeedCounter.getMaximum();
@@ -895,7 +975,7 @@ void Service::processTrack()
 
     // Pace, s/m
     const float kMinSpeed = mSpeedCounter.getMinValid();
-    mTrackData.pace = mSpeedSmoother.getPace();
+    mTrackData.pace = mSpeedFilter.getPace();
     mTrackData.avgPace = getPace(mTrackData.avgSpeed, kMinSpeed);
     mTrackData.lapPace = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
@@ -916,6 +996,9 @@ void Service::processTrack()
     if (mIntervalsMode && mTrackState == Track::State::ACTIVE) {
         processIntervals();
     }
+    if (mWorkoutMode && mTrackState == Track::State::ACTIVE) {
+        processWorkout();
+    }
 
     // Update GUI
     SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
@@ -926,8 +1009,8 @@ void Service::processTrack()
         // inline at the 1 Hz record-write point and before the FIT write.
         {
             SDK::Calibration::CalibratorSample cs;
-            cs.gps_speed_ms           = mGpsSpeedMs;
-            cs.gps_speed_valid        = mGpsSpeedValid;
+            cs.gps_speed_ms           = mSpeedFilter.getInstantSpeed();
+            cs.gps_speed_valid        = mSpeedFilter.hasCurrentSample();
             cs.gps_fix_dead_reckoning = mGpsDeadReckoning;
             cs.cadence_spm            = mRunningCadence.cadenceSpm;
             cs.cadence_valid          = mRunningCadence.cadenceValid;
@@ -987,7 +1070,11 @@ void Service::processTrack()
                 SDK::send_msg<CustomMessage::TrackDataUpd>(mKernel, mTrackData);
             }
 
-            saveLap(autoLapDistanceM);
+            LapEnd end;
+            end.trigger = mLapDivSource == LapDivSource::DISTANCE
+                              ? SDK::Fit::LapTrigger::Distance
+                              : SDK::Fit::LapTrigger::Time;
+            saveLap(end, autoLapDistanceM);
             SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
             notifyLapEnd();
         }
@@ -996,21 +1083,34 @@ void Service::processTrack()
 
 }
 
-void Service::saveLap(float autoLapDistanceM)
+void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
 {
-    const auto  lapTime     = mTimeCounter.getLapValueActive();
+    // The time counter counts whole seconds. A workout step that ran out
+    // ended between two of them: what came after its end (end.carryMs) goes
+    // to the next lap, and this lap gets what the last one handed it.
+    const uint32_t countedMs = static_cast<uint32_t>(mTimeCounter.getLapValueActive()) * 1000u + mLapCarryMs;
+    const uint32_t lapMs     = countedMs > end.carryMs ? countedMs - end.carryMs : 0u;
+    const float    lapTime   = static_cast<float>(lapMs) / 1000.0f;
+    const int32_t  shiftMs   = static_cast<int32_t>(mLapCarryMs) - static_cast<int32_t>(end.carryMs);
+    mLapCarryMs = end.carryMs;
+
     // A distance auto-lap (autoLapDistanceM > 0) is recorded as exactly the
     // target distance; the overshoot is carried into the next lap below. This
     // keeps lap boundaries on the km/mi grid and makes the reported lap pace
-    // agree with the lap duration.
+    // agree with the lap duration. A workout step that ran out does the same
+    // with what was run beyond its end.
     const bool  gridLap     = autoLapDistanceM > 0.0f;
+    const bool  stepLap     = end.ranOut;
+    const float counted     = mDistanceCounter.getLapValueActive();
     const float lapDistance = gridLap ? autoLapDistanceM
-                                      : mDistanceCounter.getLapValueActive();
-    const float lapSpeed    = speedFromTotals(lapDistance, static_cast<float>(lapTime));
+                            : stepLap ? std::min(end.stepM, counted)
+                                      : counted;
+    const float lapSpeed    = speedFromTotals(lapDistance, lapTime);
 
-    // Accumulate lap into summary
+    // Accumulate lap into summary. Its whole seconds are rounded, as the
+    // summary rounds the pace, so a 1 km lap's time and pace read the same.
     mSummary.laps.push_back({
-        lapTime,
+        static_cast<std::time_t>((lapMs + 500u) / 1000u),
         lapDistance,
         getPace(lapSpeed, mSpeedCounter.getMinValid())
     });
@@ -1030,7 +1130,9 @@ void Service::saveLap(float autoLapDistanceM)
     fitLap.timestamp = endUtc;
     fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
     fitLap.duration  = lapTime;
-    fitLap.elapsed   = mTimeCounter.getLapValueTotal() - tailSec;
+    fitLap.elapsed   = std::max(static_cast<float>(mTimeCounter.getLapValueTotal() - tailSec)
+                                    + static_cast<float>(shiftMs) / 1000.0f,
+                                0.0f);
 
     fitLap.distance  = lapDistance;
 
@@ -1043,16 +1145,15 @@ void Service::saveLap(float autoLapDistanceM)
     fitLap.ascent    = mAltitudeCounter.getLapAscent();
     fitLap.descent   = mAltitudeCounter.getLapDescent();
 
-    // Link this lap to its workout_step (intervals only; left INVALID otherwise).
-    if (mIntervalsMode && mIntervalsStepMap.valid) {
-        fitLap.wktStepIndex = intervalsWktStepIndex();
-    }
+    fitLap.wktStepIndex = end.wktStepIndex;
+    fitLap.intensity    = end.intensity;
+    fitLap.trigger      = end.trigger;
 
     mActivityWriter.addLap(fitLap);
     mTrackData.lapNum++;
 
     LOG_INFO("Lap_%u saved. UTC: %u\n", mTrackData.lapNum, static_cast<uint32_t>(mTimeCounter.getCurrent()));
-    LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getLapValueActive()), static_cast<uint32_t>(mTimeCounter.getLapValueTotal()));
+    LOG_INFO("Time: %.3f / %u s\n", lapTime, static_cast<uint32_t>(mTimeCounter.getLapValueTotal()));
     LOG_INFO("Distance: %.3f m\n", lapDistance);
     LOG_INFO("Speed: %.3f / %.3f m/s\n", lapSpeed, mSpeedCounter.getLapMaximum());
     LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getLapAverage(), mHrCounter.getLapMaximum());
@@ -1060,7 +1161,7 @@ void Service::saveLap(float autoLapDistanceM)
 
     // Reset lap counters
     mTimeCounter.resetLap();
-    if (gridLap) {
+    if (gridLap || stepLap) {
         mDistanceCounter.advanceLap(lapDistance);
     } else {
         mDistanceCounter.resetLap();
@@ -1108,7 +1209,12 @@ void Service::stopTrack(bool discard)
         }
 
         if (mLapNotEmpty) {
-            saveLap();
+            // The lap that ends the activity: a workout step's, if one is
+            // still running.
+            const LapEnd end = (mIntervalsMode || mWorkoutMode) && mEngine.status().running
+                ? workoutLap(mEngine.status().step, SDK::Fit::LapTrigger::SessionEnd)
+                : LapEnd{SDK::Fit::LapTrigger::SessionEnd};
+            saveLap(end);
         }
 
         // No final record: the activity ends at the pause instant below, so a
@@ -1148,6 +1254,15 @@ void Service::stopTrack(bool discard)
 
         if (mActivityWriter.stop(fitTrack)) {
             notifyNewActivity();
+            // A scheduled workout counts as done only once its activity is
+            // saved, and only if completion was reached. started() again
+            // first: if the record could not be saved when the run began,
+            // the one held is still the workout before, and completed()
+            // would mark that one.
+            if (mWorkoutReachedEnd && mWorkoutDate != 0
+                && !(mSchedule.started(mWorkoutDate, mWorkoutFile) && mSchedule.completed())) {
+                LOG_ERROR("Can't save the workout schedule state\n");
+            }
         } else {
             LOG_ERROR("activity save failed\n");
             // Do NOT notify: the .fit is left unfinished, so the crash-recovery
@@ -1157,7 +1272,8 @@ void Service::stopTrack(bool discard)
         mActivityWriter.discard();
     }
 
-    mTrackState = Track::State::INACTIVE;
+    mTrackState  = Track::State::INACTIVE;
+    mWorkoutMode = false;
     LOG_INFO("Track stopped. UTC: %u\n", static_cast<uint32_t>(mTimeCounter.getEndValue()));
     LOG_INFO("Time: %u / %u s\n", static_cast<uint32_t>(mTimeCounter.getValueActive()), static_cast<uint32_t>(mTimeCounter.getValueTotal()));
     LOG_INFO("Distance: %.3f m\n", mDistanceCounter.getValueActive());
@@ -1207,10 +1323,17 @@ void Service::pauseTrack(bool pause)
         mTimeCounter.resume();
         mDistanceCounter.resume();
         mSpeedCounter.resume();
-        // Drop the pre-pause window: those samples describe the effort before
-        // the break, so blending them into the resumed readout would be wrong.
-        mSpeedSmoother.reset();
+        // Drop the pre-pause samples: they describe the effort before the break.
+        // The scale factor is NOT dropped -- it describes how far this receiver
+        // is drifting in these conditions, which a stop does not change, and
+        // re-earning it would leave the readout uncorrected meanwhile.
+        mSpeedFilter.resetHistory();
         mHrCounter.resume();
+        if (mWorkoutMode) {
+            // Live speed starts again from nothing: blend from it afresh.
+            mSpeedGauge.resume();
+            mHrGauge.resume();
+        }
         mAltitudeCounter.resume();
 
         mActivityWriter.resume(mTimeCounter.getCurrent());
@@ -1245,203 +1368,83 @@ void Service::onWristTilt(uint32_t timestampMs)
 
 
 // =============================================================================
-// Interval training state machine
+// Interval training
 // =============================================================================
 
-void Service::handleEvent(const CustomMessage::IntervalsNextPhase& event)
+void Service::handleEvent(const CustomMessage::IntervalsNextPhase& /*event*/)
 {
-    if (mIntervalsMode && mTrackState == Track::State::ACTIVE) {
-        advanceIntervalsPhase(true);
-    }
+    nextStep();
 }
 
-void Service::emitIntervalsWorkout()
+void Service::nextStep()
 {
-    const Settings::Intervals& cfg = mSettings.intervals;
-
-    auto runDuration = [&](ActivityWriter::WorkoutStepData& s) {
-        if (cfg.runMetric == Settings::Intervals::TIME && cfg.runTime > 0) {
-            s.durationType = SDK::Fit::WktStepDuration::Time;
-            s.durationValue = static_cast<uint32_t>(cfg.runTime) * 1000u;        // ms
-        } else if (cfg.runMetric == Settings::Intervals::DISTANCE && cfg.runDistance > 0.0f) {
-            s.durationType = SDK::Fit::WktStepDuration::Distance;
-            s.durationValue = static_cast<uint32_t>(cfg.runDistance * 100.0f);   // cm
-        } else {
-            s.durationType = SDK::Fit::WktStepDuration::Open;
-            s.durationValue = 0;
-        }
-    };
-    auto restDuration = [&](ActivityWriter::WorkoutStepData& s) {
-        if (cfg.restMetric == Settings::Intervals::TIME && cfg.restTime > 0) {
-            s.durationType = SDK::Fit::WktStepDuration::Time;
-            s.durationValue = static_cast<uint32_t>(cfg.restTime) * 1000u;        // ms
-        } else if (cfg.restMetric == Settings::Intervals::DISTANCE && cfg.restDistance > 0.0f) {
-            s.durationType = SDK::Fit::WktStepDuration::Distance;
-            s.durationValue = static_cast<uint32_t>(cfg.restDistance * 100.0f);   // cm
-        } else {
-            s.durationType = SDK::Fit::WktStepDuration::Open;
-            s.durationValue = 0;
-        }
-    };
-
-    ActivityWriter::WorkoutStepData steps[8];
-    uint8_t n = 0;
-    IntervalsStepMap map{};
-
-    // Warm up
-    if (cfg.warmUp) {
-        steps[n].intensity = SDK::Fit::Intensity::Warmup;
-        steps[n].durationType = SDK::Fit::WktStepDuration::Open;
-        map.warmUpIdx = n;
-        n++;
+    if (mTrackState != Track::State::ACTIVE || !(mIntervalsMode || mWorkoutMode)) {
+        return;
     }
-
-    // Run (first / repeated run)
-    map.runIdx = n;
-    steps[n].intensity = SDK::Fit::Intensity::Active;
-    runDuration(steps[n]);
-    n++;
-
-    if (cfg.repeatsNum == 0) {
-        // 'Open' (unlimited): describe a single run + rest pair, no terminating repeat.
-        map.restIdx = n;
-        steps[n].intensity = SDK::Fit::Intensity::Rest;
-        restDuration(steps[n]);
-        n++;
-        map.finalRunIdx = map.runIdx;
-    } else if (cfg.lastRest) {
-        // Every rep has a rest: repeat the run+rest pair repeatsNum times.
-        map.restIdx = n;
-        steps[n].intensity = SDK::Fit::Intensity::Rest;
-        restDuration(steps[n]);
-        n++;
-        if (cfg.repeatsNum >= 2) {
-            steps[n].durationType = SDK::Fit::WktStepDuration::RepeatUntilStepsComplete;
-            steps[n].durationValue = map.runIdx;            // loop back to the run step
-            steps[n].repeatCount = cfg.repeatsNum;          // total iterations
-            n++;
-        }
-        map.finalRunIdx = map.runIdx;
+    const auto how = mEngine.next(activeTimeMs(), activeDistanceCm());
+    if (how == SDK::Workout::Engine::Change::None) {
+        return;
+    }
+    if (mIntervalsMode) {
+        onIntervalsStepEnded(how);
     } else {
-        // Skip the final rest: repeat run+rest (repeatsNum - 1) times, then a final run.
-        if (cfg.repeatsNum >= 2) {
-            map.restIdx = n;
-            steps[n].intensity = SDK::Fit::Intensity::Rest;
-            restDuration(steps[n]);
-            n++;
-            steps[n].durationType = SDK::Fit::WktStepDuration::RepeatUntilStepsComplete;
-            steps[n].durationValue = map.runIdx;
-            steps[n].repeatCount = static_cast<uint32_t>(cfg.repeatsNum - 1);
-            n++;
-            map.finalRunIdx = n;
-            steps[n].intensity = SDK::Fit::Intensity::Active;
-            runDuration(steps[n]);
-            n++;
-        } else {
-            // repeatsNum == 1 with the rest skipped: a single run, no rest.
-            map.finalRunIdx = map.runIdx;
-        }
+        onWorkoutStepEnded(how);
     }
-
-    // Cool down
-    if (cfg.coolDown) {
-        steps[n].intensity = SDK::Fit::Intensity::Cooldown;
-        steps[n].durationType = SDK::Fit::WktStepDuration::Open;
-        map.coolDownIdx = n;
-        n++;
-    }
-
-    map.valid = true;
-    mIntervalsStepMap = map;
-
-    mActivityWriter.addWorkout("Intervals", steps, n);
 }
 
-uint16_t Service::intervalsWktStepIndex() const
+uint32_t Service::activeTimeMs() const
 {
-    if (!mIntervalsStepMap.valid) {
-        return 0xFFFF;
-    }
-
-    const Track::IntervalsData& iv = mTrackData.intervals;
-    const Settings::Intervals& cfg = mSettings.intervals;
-
-    switch (iv.phase) {
-    case Track::IntervalsPhase::WARM_UP:   return mIntervalsStepMap.warmUpIdx;
-    case Track::IntervalsPhase::COOL_DOWN: return mIntervalsStepMap.coolDownIdx;
-    case Track::IntervalsPhase::REST:      return mIntervalsStepMap.restIdx;
-    case Track::IntervalsPhase::RUN:
-        // The final run uses a standalone step only when the last rest is skipped.
-        if (!cfg.lastRest && cfg.repeatsNum >= 2 && iv.repeat >= cfg.repeatsNum) {
-            return mIntervalsStepMap.finalRunIdx;
-        }
-        return mIntervalsStepMap.runIdx;
-    }
-    return 0xFFFF;
+    return static_cast<uint32_t>(mTimeCounter.getValueActive()) * 1000u;
 }
 
-void Service::startIntervalsPhase(Track::IntervalsPhase phase)
+uint32_t Service::activeDistanceCm() const
 {
-    mPhaseStartActiveSec  = mTimeCounter.getValueActive();
-    mPhaseStartActiveDist = mDistanceCounter.getValueActive();
+    const float meters = mDistanceCounter.getValueActive();
+    return meters > 0.0f ? static_cast<uint32_t>(meters * 100.0f) : 0u;
+}
 
-    Track::IntervalsData& iv   = mTrackData.intervals;
+void Service::startIntervals()
+{
     const Settings::Intervals& cfg = mSettings.intervals;
 
-    LOG_DEBUG("Intervals cfg: repeats=%u warmUp=%u coolDown=%u "
+    LOG_DEBUG("Intervals cfg: repeats=%u warmUp=%u coolDown=%u lastRest=%u "
              "runMetric=%u runTime=%u runDist=%.1f "
              "restMetric=%u restTime=%u restDist=%.1f\n",
-             cfg.repeatsNum, cfg.warmUp, cfg.coolDown,
+             cfg.repeatsNum, cfg.warmUp, cfg.coolDown, cfg.lastRest,
              cfg.runMetric, cfg.runTime, cfg.runDistance,
              cfg.restMetric, cfg.restTime, cfg.restDistance);
 
-    iv.phase = phase;
-
-    switch (phase) {
-    case Track::IntervalsPhase::WARM_UP:
-    case Track::IntervalsPhase::COOL_DOWN:
-        iv.metric        = Track::IntervalsMetric::TIME_OPEN;
-        iv.phaseTimerSec = 0;
-        iv.distRemaining = 0.0f;
-        break;
-
-    case Track::IntervalsPhase::RUN:
-        if (cfg.runMetric == Settings::Intervals::TIME && cfg.runTime > 0) {
-            iv.metric        = Track::IntervalsMetric::TIME_REMAINING;
-            iv.phaseTimerSec = static_cast<time_t>(cfg.runTime);
-            iv.distRemaining = 0.0f;
-        } else if (cfg.runMetric == Settings::Intervals::DISTANCE && cfg.runDistance > 0.0f) {
-            iv.metric        = Track::IntervalsMetric::DISTANCE;
-            iv.phaseTimerSec = 0;
-            iv.distRemaining = cfg.runDistance;
-        } else {
-            iv.metric        = Track::IntervalsMetric::TIME_OPEN;
-            iv.phaseTimerSec = 0;
-            iv.distRemaining = 0.0f;
+    // A zero time or distance leaves the phase open, as before.
+    const auto phase = [](Settings::Intervals::Metric metric, uint32_t timeSec, float distanceM) {
+        using End = SDK::Workout::IntervalsSpec::Phase::End;
+        SDK::Workout::IntervalsSpec::Phase ph;
+        if (metric == Settings::Intervals::TIME && timeSec > 0) {
+            ph.end    = End::Time;
+            ph.timeMs = timeSec * 1000u;
+        } else if (metric == Settings::Intervals::DISTANCE && distanceM > 0.0f) {
+            ph.end        = End::Distance;
+            ph.distanceCm = static_cast<uint32_t>(std::lround(distanceM * 100.0f));
         }
-        break;
+        return ph;
+    };
 
-    case Track::IntervalsPhase::REST:
-        if (cfg.restMetric == Settings::Intervals::TIME && cfg.restTime > 0) {
-            iv.metric        = Track::IntervalsMetric::TIME_REMAINING;
-            iv.phaseTimerSec = static_cast<time_t>(cfg.restTime);
-            iv.distRemaining = 0.0f;
-        } else if (cfg.restMetric == Settings::Intervals::DISTANCE && cfg.restDistance > 0.0f) {
-            iv.metric        = Track::IntervalsMetric::DISTANCE;
-            iv.phaseTimerSec = 0;
-            iv.distRemaining = cfg.restDistance;
-        } else {
-            iv.metric        = Track::IntervalsMetric::TIME_OPEN;
-            iv.phaseTimerSec = 0;
-            iv.distRemaining = 0.0f;
-        }
-        break;
-    }
+    mIntervalsSpec          = SDK::Workout::IntervalsSpec{};
+    mIntervalsSpec.repeats  = cfg.repeatsNum;
+    mIntervalsSpec.run      = phase(cfg.runMetric, cfg.runTime, cfg.runDistance);
+    mIntervalsSpec.rest     = phase(cfg.restMetric, cfg.restTime, cfg.restDistance);
+    mIntervalsSpec.warmUp   = cfg.warmUp;
+    mIntervalsSpec.coolDown = cfg.coolDown;
+    mIntervalsSpec.lastRest = cfg.lastRest;
+    mIntervalsLayout = SDK::Workout::buildIntervals(mIntervalsSpec, mProgram);
+    mEngine.start(mProgram, 0, 0);
+    mLeadIn.stepStarted();
 
-    LOG_DEBUG("Intervals: phase=%u metric=%u repeat=%u/%u\n",
-              static_cast<uint8_t>(iv.phase),
-              static_cast<uint8_t>(iv.metric),
-              iv.repeat, iv.totalRepeats);
+    mTrackData.intervals = Track::IntervalsData{};
+    // totalRepeats is the literal number of RUN-REST cycles the user selected.
+    // repeatsNum == 0 means 'Open' (unlimited): totalRepeats stays 0 and the GUI
+    // shows just the current repeat with no total.
+    mTrackData.intervals.totalRepeats = cfg.repeatsNum;
+    updateIntervalsData();
 }
 
 void Service::processIntervals()
@@ -1450,163 +1453,565 @@ void Service::processIntervals()
         return;
     }
 
-    Track::IntervalsData& iv   = mTrackData.intervals;
-    const Settings::Intervals& cfg = mSettings.intervals;
-
-    const time_t elapsed = mTimeCounter.getValueActive() - mPhaseStartActiveSec;
-    bool autoAdvance = false;
-
-    switch (iv.metric) {
-    case Track::IntervalsMetric::TIME_OPEN:
-        iv.phaseTimerSec = elapsed;
-        break;
-
-    case Track::IntervalsMetric::TIME_ELAPSED:
-        iv.phaseTimerSec = elapsed;
-        break;
-
-    case Track::IntervalsMetric::TIME_REMAINING: {
-        const time_t target = (iv.phase == Track::IntervalsPhase::RUN)
-            ? static_cast<time_t>(cfg.runTime)
-            : static_cast<time_t>(cfg.restTime);
-        iv.phaseTimerSec = (elapsed < target) ? (target - elapsed) : 0;
-        autoAdvance = (elapsed >= target);
-        break;
+    const float speedMs = mSpeedFilter.getSpeed();
+    const uint32_t speedMmps = speedMs > 0.0f ? static_cast<uint32_t>(speedMs * 1000.0f) : 0u;
+    const auto how = mEngine.update(activeTimeMs(), activeDistanceCm(), speedMmps,
+                                    mSpeedFilter.hasCurrentSample());
+    if (how != SDK::Workout::Engine::Change::None) {
+        onIntervalsStepEnded(how);
+        return;
     }
+    updateIntervalsData();
 
-    case Track::IntervalsMetric::DISTANCE: {
-        const float target = (iv.phase == Track::IntervalsPhase::RUN)
-            ? cfg.runDistance
-            : cfg.restDistance;
-        const float done = mDistanceCounter.getValueActive() - mPhaseStartActiveDist;
-        iv.distRemaining = (done < target) ? (target - done) : 0.0f;
-        autoAdvance = (done >= target);
-        break;
-    }
-    }
-
-    if (autoAdvance) {
-        advanceIntervalsPhase();
+    // A beep each second as a timed or measured phase nears its end.
+    if (mLeadIn.tick(mEngine.status())) {
+        playBuzzerPattern(skLeadInBeepMs);
     }
 }
 
-void Service::advanceIntervalsPhase(bool manual)
+void Service::onIntervalsStepEnded(SDK::Workout::Engine::Change how)
 {
-    Track::IntervalsData& iv       = mTrackData.intervals;
-    const Settings::Intervals& cfg = mSettings.intervals;
+    mLeadIn.stepStarted();
 
-    const Track::IntervalsPhase prevPhase = iv.phase;
-    Track::IntervalsPhase nextPhase       = iv.phase;
-    bool completed = false;
-
-    switch (iv.phase) {
-    case Track::IntervalsPhase::WARM_UP:
-        nextPhase = Track::IntervalsPhase::RUN;
-        iv.repeat = 1;
-        break;
-
-    case Track::IntervalsPhase::RUN:
-        if (!cfg.lastRest && cfg.repeatsNum != 0 && iv.repeat >= cfg.repeatsNum) {
-            // User chose to skip the rest after the final interval: go straight
-            // to cool down (or finish if cool down is disabled). Not applicable
-            // to 'Open' repeats (repeatsNum == 0), which have no final interval.
-            if (cfg.coolDown) {
-                nextPhase = Track::IntervalsPhase::COOL_DOWN;
-            } else {
-                completed = true;
-            }
-        } else {
-            // Go to REST; REST decides whether to cycle again or finish.
-            nextPhase = Track::IntervalsPhase::REST;
-        }
-        break;
-
-    case Track::IntervalsPhase::REST:
-        // Semantics: repeatsNum = number of RUN-REST cycles the user selected.
-        //   repeatsNum=N (N>=1)  ->  exactly N cycles
-        //   repeatsNum=0         ->  'Open': cycle indefinitely until the user ends
-        //                            the workout manually (never auto-completes here)
-        if (cfg.repeatsNum == 0 || iv.repeat < cfg.repeatsNum) {
-            iv.repeat++;
-            nextPhase = Track::IntervalsPhase::RUN;
-        } else {
-            if (cfg.coolDown) {
-                nextPhase = Track::IntervalsPhase::COOL_DOWN;
-            } else {
-                completed = true;
-            }
-        }
-        break;
-
-    case Track::IntervalsPhase::COOL_DOWN:
-        completed = true;
-        break;
+    // The step that ended is recorded as its own lap, before the next begins.
+    // An automatic end means its time or distance ran out.
+    if (mLapNotEmpty) {
+        saveLap(endedStepLap(how));
     }
 
-    if (completed) {
+    if (mEngine.status().finished) {
         LOG_INFO("Intervals: workout completed\n");
 
         // The programmed workout is done, but the session keeps running so the
-        // user can record additional manual laps and end it themselves. Close the
-        // final phase as a lap, then drop out of intervals mode so the track
-        // screen reverts to normal faces and R2 records a lap (not a phase advance).
-        if (mLapNotEmpty) {
-            saveLap();
-        }
+        // user can record additional manual laps and end it themselves. Drop out
+        // of intervals mode so the track screen reverts to normal faces and R2
+        // records a lap (not a phase advance).
         mIntervalsCompleted = true;
         mIntervalsMode = false;
         mTrackData.intervalsMode = false;
 
-        // alert=true: user needs notification when workout ends automatically (REST->END).
-        // COOL_DOWN->END is always manual, so alert&&!manual stays false -> no vibro.
-        onIntervalsPhaseChange(true, manual);
+        notifyStepChange();
         SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel);
         return;
     }
 
-    // Record the phase that just finished as its own lap before the next one
-    // begins. The final phase is captured by stopTrack() when the workout ends.
-    if (mLapNotEmpty) {
-        saveLap();
-    }
-
-    startIntervalsPhase(nextPhase);
-
-    const bool isActivePhase = (nextPhase == Track::IntervalsPhase::RUN ||
-                                nextPhase == Track::IntervalsPhase::REST);
-
-    // WARM_UP -> RUN always shows an alert (marks workout start, user needs to see the phase),
-    // even though the transition is manual.
-    // All other transitions show an alert only on auto-advance.
-    const bool isWarmupToRun  = (prevPhase == Track::IntervalsPhase::WARM_UP &&
-                                 nextPhase == Track::IntervalsPhase::RUN);
-
-    const bool showAlertScreen = isWarmupToRun || 
-                                    isActivePhase ||
-                                    (!manual && nextPhase == Track::IntervalsPhase::COOL_DOWN);
-
-    if (showAlertScreen) {
-        SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals);
-    }
-
-    onIntervalsPhaseChange(showAlertScreen, manual);
+    // Every change of phase alerts the same way, whether the phase ran out
+    // or the runner moved on with R2.
+    updateIntervalsData();
+    SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals);
+    notifyStepChange();
 }
 
-void Service::onIntervalsPhaseChange(bool alert, bool manual)
+Track::IntervalsPhase Service::intervalsPhase(uint16_t step) const
 {
-    LOG_DEBUG("Intervals: phase change (phase=%u, alert=%u, manual=%u)\n",
-             static_cast<uint8_t>(mTrackData.intervals.phase),
-             static_cast<uint8_t>(alert),
-             static_cast<uint8_t>(manual));
+    if (step == mIntervalsLayout.warmUp) {
+        return Track::IntervalsPhase::WARM_UP;
+    }
+    if (step == mIntervalsLayout.coolDown) {
+        return Track::IntervalsPhase::COOL_DOWN;
+    }
+    if (step == mIntervalsLayout.rest) {
+        return Track::IntervalsPhase::REST;
+    }
+    return Track::IntervalsPhase::RUN;
+}
 
-    if (alert) {
-        backlightOn(skBacklightTimeout * 2); // covers both the alert screen and the next one
+void Service::updateIntervalsData()
+{
+    const SDK::Workout::Engine::Status& st = mEngine.status();
+    const SDK::Workout::Step&           step = mProgram.steps[st.step];
+    Track::IntervalsData&               iv   = mTrackData.intervals;
+
+    iv.phase = intervalsPhase(st.step);
+    switch (step.end) {
+    case SDK::Workout::StepEnd::Time:
+        iv.metric        = Track::IntervalsMetric::TIME_REMAINING;
+        iv.phaseTimerSec = static_cast<std::time_t>(st.remainingMs / 1000u);
+        iv.distRemaining = 0.0f;
+        break;
+    case SDK::Workout::StepEnd::Distance:
+        iv.metric        = Track::IntervalsMetric::DISTANCE;
+        iv.phaseTimerSec = 0;
+        iv.distRemaining = static_cast<float>(st.remainingCm) / 100.0f;
+        break;
+    default:
+        iv.metric        = Track::IntervalsMetric::TIME_OPEN;
+        iv.phaseTimerSec = static_cast<std::time_t>(st.stepTimeMs / 1000u);
+        iv.distRemaining = 0.0f;
+        break;
     }
 
-    // fire vibro/buzzer - alert screen shown on auto-advance,
-    // user needs active notification to attract attention.
-    if (alert && !manual) {
-        playVibroPattern(SDK::Message::RequestVibroPlay::Effect::SHORT_DOUBLE_CLICK_STRONG_1_100);
-        playBuzzerPattern(150, 2);
+    const uint32_t repeat = SDK::Workout::intervalsRepeat(mIntervalsSpec, mIntervalsLayout, st);
+    iv.repeat = static_cast<uint8_t>(std::min<uint32_t>(repeat, UINT8_MAX));
+}
+
+Service::LapEnd Service::workoutLap(uint16_t step, SDK::Fit::LapTrigger trigger) const
+{
+    LapEnd end;
+    end.trigger = trigger;
+    uint16_t index = 0;
+    if (SDK::Workout::fitStepIndex(mProgram, step, index)) {
+        end.wktStepIndex = index;
+        // As the file gave it; a file that left it out gets the step's kind.
+        const SDK::Workout::Step& s = mProgram.steps[step];
+        if (s.raw.intensity != static_cast<uint8_t>(SDK::Fit::Intensity::Invalid)) {
+            end.intensity = static_cast<SDK::Fit::Intensity>(s.raw.intensity);
+        } else {
+            switch (s.intensity) {
+            case SDK::Workout::Intensity::Rest:     end.intensity = SDK::Fit::Intensity::Rest; break;
+            case SDK::Workout::Intensity::Warmup:   end.intensity = SDK::Fit::Intensity::Warmup; break;
+            case SDK::Workout::Intensity::Cooldown: end.intensity = SDK::Fit::Intensity::Cooldown; break;
+            default:                                end.intensity = SDK::Fit::Intensity::Active; break;
+            }
+        }
+    }
+    return end;
+}
+
+Service::LapEnd Service::endedStepLap(SDK::Workout::Engine::Change how) const
+{
+    const SDK::Workout::Engine::Ended& ended = mEngine.ended();
+    LapEnd end = workoutLap(ended.step, lapTrigger(how, ended.step));
+
+    // The engine was given these same totals this tick, and a step that ran
+    // out ended short of them; one ended by hand ends here. Its distance is
+    // the engine's, so a distance step's lap is exactly that distance.
+    if (how == SDK::Workout::Engine::Change::Auto) {
+        const uint32_t nowMs = activeTimeMs();
+        end.ranOut  = true;
+        end.carryMs = ended.atTimeMs < nowMs ? nowMs - ended.atTimeMs : 0u;
+        end.stepM   = static_cast<float>(ended.distanceCm) / 100.0f;
+    }
+    return end;
+}
+
+SDK::Fit::LapTrigger Service::lapTrigger(SDK::Workout::Engine::Change how, uint16_t step) const
+{
+    // An automatic end means the step's time or distance ran out.
+    if (how != SDK::Workout::Engine::Change::Auto) {
+        return SDK::Fit::LapTrigger::Manual;
+    }
+    return mProgram.steps[step].end == SDK::Workout::StepEnd::Distance
+               ? SDK::Fit::LapTrigger::Distance
+               : SDK::Fit::LapTrigger::Time;
+}
+
+void Service::notifyStepChange()
+{
+    LOG_DEBUG("Step change\n");
+
+    // The alert screen, then the next one: keep the backlight on for both.
+    backlightOn(skBacklightTimeout * 2);
+    playVibroPattern(SDK::Message::RequestVibroPlay::Effect::SHORT_DOUBLE_CLICK_STRONG_1_100);
+    playBuzzerPattern(150, 2);
+}
+
+
+// =============================================================================
+// Structured workouts
+// =============================================================================
+
+SDK::Workout::Ymd Service::localDate()
+{
+    const std::tm t = mTimeTracker.getLocalTime(std::time(nullptr));
+    const int year = t.tm_year + 1900;
+    if (year < 2020) {
+        return 0;  // the clock has not been set
+    }
+    return static_cast<SDK::Workout::Ymd>(year) * 10000u
+         + static_cast<SDK::Workout::Ymd>(t.tm_mon + 1) * 100u
+         + static_cast<SDK::Workout::Ymd>(t.tm_mday);
+}
+
+void Service::scanWorkouts()
+{
+    // The GUI keeps a pointer to the list, and the scan reads each file into
+    // mProgram, so the list is only built while no run is going.
+    if (mTrackState == Track::State::INACTIVE) {
+        mSchedule.load();
+        mLibrary.scan(mKernel.fs, localDate(), mReader, mProgram);
+        LOG_INFO("Workouts: %u listed, %u left out of a full list\n",
+                 static_cast<unsigned>(mLibrary.size()), static_cast<unsigned>(mLibrary.dropped()));
+    }
+}
+
+void Service::sendWorkoutList()
+{
+    // Today's workout is offered at launch unless it was completed.
+    uint16_t today = CustomMessage::WorkoutList::kNoToday;
+    const size_t t = mLibrary.today();
+    if (t != SDK::Workout::Library::kNone
+        && !mSchedule.isCompleted(mLibrary.entry(t).date, mLibrary.entry(t).file)) {
+        today = static_cast<uint16_t>(t);
+    }
+    SDK::send_msg<CustomMessage::WorkoutList>(mKernel, &mLibrary, today);
+}
+
+bool Service::readWorkout(uint16_t index)
+{
+    char path[SDK::Interface::IFileSystem::skMaxPathLen];
+    if (index >= mLibrary.size() || !mLibrary.path(index, path, sizeof(path))) {
+        return false;
+    }
+    auto file = mKernel.fs.file(path);
+    if (!file) {
+        return false;
+    }
+    const auto result = mReader.read(*file, mProgram);
+    if (result != SDK::Fit::FitWorkoutReader::Result::Ok) {
+        LOG_WARNING("Can't read %s: %s\n", path, SDK::Fit::FitWorkoutReader::resultName(result));
+        return false;
+    }
+    return true;
+}
+
+void Service::handleEvent(const CustomMessage::WorkoutDetailsRequest& event)
+{
+    // Only before a run: during one, mProgram holds the workout being run.
+    const bool ok = mTrackState == Track::State::INACTIVE && readWorkout(event.index);
+    SDK::send_msg<CustomMessage::WorkoutDetails>(mKernel, event.index, ok ? &mProgram : nullptr);
+}
+
+bool Service::startWorkout(uint16_t index)
+{
+    // Read again: the file may have changed since the list was made.
+    if (!readWorkout(index)) {
+        LOG_WARNING("Workout %u not started; this is a free run\n", static_cast<unsigned>(index));
+        return false;
+    }
+    mEngine.start(mProgram, 0, 0);
+    mLeadIn.stepStarted();
+    startWorkoutStep();
+
+    const SDK::Workout::Library::Entry& e = mLibrary.entry(index);
+    if (e.date != 0) {
+        mWorkoutDate = e.date;
+        std::memcpy(mWorkoutFile, e.file, sizeof(mWorkoutFile));
+        if (!mSchedule.started(e.date, e.file)) {
+            LOG_ERROR("Can't save the workout schedule state\n");
+        }
+    }
+    LOG_INFO("Workout started: %s\n", mProgram.name);
+    return true;
+}
+
+bool Service::hasTrustedHr() const
+{
+    return mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3;
+}
+
+bool Service::hrBand(const SDK::Workout::Step& step, float& low, float& high) const
+{
+    // Zone n is [threshold n-1, threshold n); the last threshold is maximum HR.
+    const float maxHr = mHrThresholds[CustomMessage::kHrThresholdsCount - 1];
+    switch (step.hrKind) {
+    case SDK::Workout::HeartRateTarget::Zone:
+        if (step.hrZone < 1 || step.hrZone >= CustomMessage::kHrThresholdsCount) {
+            return false;
+        }
+        low  = mHrThresholds[step.hrZone - 1];
+        high = mHrThresholds[step.hrZone];
+        break;
+    case SDK::Workout::HeartRateTarget::Bpm:
+        low  = step.hrLow;
+        high = step.hrHigh;
+        break;
+    case SDK::Workout::HeartRateTarget::PercentMax:
+        low  = step.hrLow * maxHr / 100.0f;
+        high = step.hrHigh * maxHr / 100.0f;
+        break;
+    }
+    // A file may give the ends either way round.
+    if (low > high) {
+        std::swap(low, high);
+    }
+    return high > 0.0f;
+}
+
+void Service::startWorkoutStep()
+{
+    const SDK::Workout::Step& s = mProgram.steps[mEngine.status().step];
+    mZoneAlerts.stepStarted();
+    mAlertRepeat = nullptr;   // the last step's alert does not repeat into this one
+    mBandLow  = 0.0f;
+    mBandHigh = 0.0f;
+
+    // Both gauges run on every step: an untargeted one still has a value and
+    // a step average to show.
+    if (s.target == SDK::Workout::Target::Speed && s.speedLowMmps > 0 && s.speedHighMmps > 0) {
+        mBandLow  = static_cast<float>(std::min(s.speedLowMmps, s.speedHighMmps)) / 1000.0f;
+        mBandHigh = static_cast<float>(std::max(s.speedLowMmps, s.speedHighMmps)) / 1000.0f;
+        mSpeedGauge.startStep(mBandLow, mBandHigh);
+    } else {
+        mSpeedGauge.startStep();
+    }
+
+    float low = 0.0f;
+    float high = 0.0f;
+    if (s.target == SDK::Workout::Target::HeartRate && hrBand(s, low, high)) {
+        mBandLow  = low;
+        mBandHigh = high;
+        mHrGauge.startStep(low, high);
+    } else {
+        mHrGauge.startStep();
+    }
+}
+
+SDK::Workout::Zone Service::targetZone() const
+{
+    switch (mProgram.steps[mEngine.status().step].target) {
+    case SDK::Workout::Target::Speed:     return mSpeedGauge.zone();
+    case SDK::Workout::Target::HeartRate: return mHrGauge.zone();
+    default:                              return SDK::Workout::Zone::Unknown;
+    }
+}
+
+void Service::processWorkout()
+{
+    const float    speedMs   = mSpeedFilter.getSpeed();
+    const uint32_t speedMmps = speedMs > 0.0f ? static_cast<uint32_t>(speedMs * 1000.0f) : 0u;
+    const auto how = mEngine.update(activeTimeMs(), activeDistanceCm(), speedMmps,
+                                    mSpeedFilter.hasCurrentSample());
+    if (how != SDK::Workout::Engine::Change::None) {
+        onWorkoutStepEnded(how);
+        return;
+    }
+    const SDK::Workout::Engine::Status& st = mEngine.status();
+    mWorkoutReachedEnd = mWorkoutReachedEnd || st.reachedEnd;
+
+    // The filter's validity rides over a second that brings no fresh sample;
+    // the gauge treats a false as a lost signal, and so it must stay until
+    // the distance across a lost fix has come in.
+    mSpeedGauge.tick(speedMs, mSpeedFilter.isValid() && mGpsCatchUp.caughtUp(),
+                     st.stepDistanceCm);
+    mHrGauge.tick(mHrCounter.getCurrent(), hasTrustedHr());
+
+    const auto alert = mZoneAlerts.tick(targetZone());
+    const bool beep  = mLeadIn.tick(st);
+    if (alert != SDK::Workout::ZoneAlerts::Alert::None) {
+        playZoneAlert(alert);
+    } else if (beep) {
+        playBuzzerPattern(skLeadInBeepMs);
+    }
+    sendWorkoutData();
+}
+
+void Service::onWorkoutStepEnded(SDK::Workout::Engine::Change how)
+{
+    mLeadIn.stepStarted();
+
+    // The step that ended is recorded as its own lap, before the next begins.
+    if (mLapNotEmpty) {
+        saveLap(endedStepLap(how));
+    }
+    mWorkoutReachedEnd = mWorkoutReachedEnd || mEngine.status().reachedEnd;
+
+    if (mEngine.status().finished) {
+        LOG_INFO("Workout completed\n");
+        // The run carries on as a free run, as after Intervals.
+        endWorkout();
+        notifyStepChange();
+        SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel);
+        return;
+    }
+
+    // Every step change alerts the same way, whether the step ran out or the
+    // runner moved on.
+    startWorkoutStep();
+    sendWorkoutSteps();
+    notifyStepChange();
+    sendWorkoutData();
+}
+
+void Service::handleEvent(const CustomMessage::WorkoutEnd& /*event*/)
+{
+    if (!mWorkoutMode || mTrackState == Track::State::INACTIVE) {
+        return;
+    }
+    // Completion already reached stands; ending before it does not count.
+    // The step in progress ends here as a manual lap. next() is not used: on
+    // the last step it would count the workout as completed.
+    mWorkoutReachedEnd = mWorkoutReachedEnd || mEngine.status().reachedEnd;
+    if (mLapNotEmpty) {
+        saveLap(workoutLap(mEngine.status().step, SDK::Fit::LapTrigger::Manual));
+    }
+    LOG_INFO("Workout ended\n");
+    endWorkout();
+}
+
+void Service::endWorkout()
+{
+    mEngine.stop();
+    mWorkoutMode = false;
+    mTrackData.workoutMode = false;
+}
+
+void Service::sendWorkoutData()
+{
+    const SDK::Workout::Engine::Status& st = mEngine.status();
+    const SDK::Workout::Step&           s  = mProgram.steps[st.step];
+
+    auto msg = SDK::make_msg<CustomMessage::WorkoutData>(mKernel);
+    if (!msg) {
+        return;
+    }
+    msg->remainingMs  = st.remainingMs;
+    msg->remainingCm  = st.remainingCm;
+    msg->stepTimeMs   = st.stepTimeMs;
+    msg->rep          = st.rep;
+    msg->reps         = st.reps;
+    msg->stepEnd      = static_cast<uint8_t>(s.end);
+    msg->target       = static_cast<uint8_t>(s.target);
+    msg->intensity    = static_cast<uint8_t>(s.intensity);
+    msg->leadIn       = st.leadIn;
+    msg->low          = mBandLow;
+    msg->high         = mBandHigh;
+    msg->zone         = static_cast<uint8_t>(targetZone());
+
+    if (s.target == SDK::Workout::Target::Speed && mBandHigh > 0.0f) {
+        // The arc is laid out on pace, with faster to the right. At or below
+        // the floor the live pace has, the speed goes as 0, which shows no
+        // pace, as the live pace does.
+        const auto  pace  = [](float mps) { return mps > 0.05f ? 1000.0f / mps : 1.0e6f; };
+        const float speed = mSpeedGauge.valueMps();
+        msg->value = speed > mSpeedFilter.getMinValid() ? speed : 0.0f;
+        msg->arc   = 1.0f - SDK::Workout::arcFraction(pace(msg->value), pace(mBandHigh),
+                                                      pace(mBandLow), skArcMarginSecPerKm);
+    } else if (s.target == SDK::Workout::Target::HeartRate && mBandHigh > 0.0f) {
+        msg->value = mHrGauge.valueBpm();
+        msg->arc   = SDK::Workout::arcFraction(msg->value, mBandLow, mBandHigh, skArcMarginBpm);
+    }
+    msg.send();
+}
+
+void Service::sendWorkoutSteps()
+{
+    const SDK::Workout::Engine::Status& st = mEngine.status();
+    sendWorkoutStep(&mProgram.steps[st.step], false);
+    uint16_t next = 0;
+    sendWorkoutStep(mEngine.peekNext(next) ? &mProgram.steps[next] : nullptr, true);
+}
+
+void Service::sendWorkoutStep(const SDK::Workout::Step* step, bool next)
+{
+    auto msg = SDK::make_msg<CustomMessage::WorkoutStep>(mKernel);
+    if (!msg) {
+        return;
+    }
+    msg->next = next;
+    msg->none = step == nullptr;
+    if (step) {
+        const char* notes = step->notes[0] != '\0' ? step->notes : step->name;
+        std::strncpy(msg->notes, notes, sizeof(msg->notes) - 1);
+        SDK::Workout::stepDuration(*step, mIsImperial, msg->duration, sizeof(msg->duration));
+        SDK::Workout::stepTarget(*step, mIsImperial, msg->target, sizeof(msg->target));
+        msg->intensity = static_cast<uint8_t>(step->intensity);
+        if (!next) {
+            msg->rep  = mEngine.status().rep;
+            msg->reps = mEngine.status().reps;
+        }
+    }
+    msg.send();
+}
+
+void Service::playAlertTwice(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count)
+{
+    static constexpr uint32_t kGapMs = 1000;
+
+    // Both playings do not fit one message, so the repeat is a second
+    // message, sent once the first has played and the gap has passed. It is
+    // not sent sooner: a message that arrives while notes are playing cuts
+    // the current note short. The service loop runs at least every 500 ms,
+    // so the gap is 1-1.5 s.
+    if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes) {
+        count = SDK::Message::RequestBuzzerPlay::skMaxNotes;
+    }
+    if (count == 0) {
+        return;
+    }
+    playBuzzerNotes(notes, count);
+
+    uint32_t playMs = 0;
+    for (uint8_t i = 0; i < count; ++i) {
+        playMs += notes[i].time;
+    }
+    mAlertRepeat        = notes;
+    mAlertRepeatCount   = count;
+    mAlertRepeatFromMs  = mKernel.sys.getTimeMs();
+    mAlertRepeatAfterMs = playMs + kGapMs;
+}
+
+void Service::sendAlertRepeat()
+{
+    if (mAlertRepeat == nullptr) {
+        return;
+    }
+    // Once the run is paused or stopped, or the workout has ended, the repeat
+    // no longer applies.
+    if (!mWorkoutMode || mTrackState != Track::State::ACTIVE) {
+        mAlertRepeat = nullptr;
+        return;
+    }
+    if (SDK::Timer::elapsed(mKernel.sys.getTimeMs(), mAlertRepeatFromMs) < mAlertRepeatAfterMs) {
+        return;
+    }
+    playBuzzerNotes(mAlertRepeat, mAlertRepeatCount);
+    mAlertRepeat = nullptr;
+}
+
+void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert)
+{
+    // Pitch, rhythm and loudness tell them apart: too slow is long and falls
+    // from C7 to C6 twice, too fast is short and rises from C8 to C9 twice,
+    // and back in range rises through a C7 major triad (4 : 5 : 6). A kernel
+    // without pitch support plays every note at its default pitch, so the
+    // rhythms alone still tell them apart. Each plays twice, about 1 s apart.
+    static constexpr uint16_t kLowHz  = 1047;  // C6
+    static constexpr uint16_t kHighHz = 8372;  // C9
+    static constexpr uint16_t kMidHz  = 4186;  // C8
+    static constexpr uint16_t kRootHz = 2093;  // C7
+    // Each silence keeps the pitch before it, so the buzzer is not retuned for it.
+    static const SDK::Message::RequestBuzzerPlay::Note kBackIn[] = {
+        {120, 100, 0, kRootHz},
+        {30, 0, 0, kRootHz},
+        {120, 100, 0, kRootHz * 5 / 4},
+        {30, 0, 0, kRootHz * 5 / 4},
+        {240, 100, 0, kRootHz * 3 / 2},
+    };
+    static const SDK::Message::RequestBuzzerPlay::Note kBelow[] = {
+        {300, 100, 0, kRootHz},
+        {150, 0, 0, kRootHz},
+        {300, 100, 0, kLowHz},
+        {150, 0, 0, kLowHz},
+        {300, 100, 0, kRootHz},
+        {150, 0, 0, kRootHz},
+        {300, 100, 0, kLowHz},
+    };
+    static const SDK::Message::RequestBuzzerPlay::Note kAbove[] = {
+        {80, 100, 0, kMidHz},
+        {80, 0, 0, kMidHz},
+        {80, 100, 0, kHighHz},
+        {80, 0, 0, kHighHz},
+        {80, 100, 0, kMidHz},
+        {80, 0, 0, kMidHz},
+        {80, 100, 0, kHighHz},
+    };
+
+    backlightOn();
+    switch (alert) {
+    case SDK::Workout::ZoneAlerts::Alert::Above:  // too fast, or heart rate too high
+        playAlertTwice(kAbove, sizeof(kAbove) / sizeof(kAbove[0]));
+        playVibroPattern(SDK::Message::RequestVibroPlay::Effect::DOUBLE_CLICK_100);
+        break;
+    case SDK::Workout::ZoneAlerts::Alert::Below:  // too slow, or heart rate too low
+        playAlertTwice(kBelow, sizeof(kBelow) / sizeof(kBelow[0]));
+        playVibroPattern(SDK::Message::RequestVibroPlay::Effect::ALERT_750MS_100);
+        break;
+    case SDK::Workout::ZoneAlerts::Alert::BackIn:  // brief and cheerful
+        playAlertTwice(kBackIn, sizeof(kBackIn) / sizeof(kBackIn[0]));
+        playVibroPattern(SDK::Message::RequestVibroPlay::Effect::STRONG_CLICK_100);
+        break;
+    default:
+        break;
     }
 }
