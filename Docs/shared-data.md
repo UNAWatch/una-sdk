@@ -55,7 +55,7 @@ other apps to read belongs in `../SharedData/`.
 | Path | Written by | Read by |
 | --- | --- | --- |
 | `../SharedData/stride.json` | `OutdoorStrideCalibrator::finalise()` ([`OutdoorStrideCalibrator.hpp:59`](../Libs/Header/SDK/Calibration/OutdoorStrideCalibrator.hpp)) | `StrideLut` ([`StrideLut.hpp:67`](../Libs/Header/SDK/Calibration/StrideLut.hpp)) |
-| `../SharedData/stride.json.bak` | `OutdoorStrideCalibrator`, when the store will not parse ([`OutdoorStrideCalibrator.cpp:222-228`](../Libs/Source/Calibration/OutdoorStrideCalibrator.cpp)) | recovery only |
+| `../SharedData/stride.json.bak` | `OutdoorStrideCalibrator`, when the store is oversized or will not parse ([`OutdoorStrideCalibrator.cpp:222-228`](../Libs/Source/Calibration/OutdoorStrideCalibrator.cpp)) | recovery only |
 | `../SharedData/stride_trace.csv` | Running app, when tracing is on ([`Running/.../Service.cpp:845`](../Examples/Apps/Running/Software/Libs/Sources/Service.cpp)) | diagnostic only |
 | `../SharedData/stride_deleted.json` | Treadmill app, backing up the LUT before a user-initiated clear ([`Treadmill/.../Service.cpp:1191`](../Examples/Apps/Treadmill/Software/Libs/Sources/Service.cpp)) | recovery only |
 
@@ -154,7 +154,9 @@ single step leaves at least one intact copy. Copy that shape when the file matte
 Be clear-eyed about what the calibration store does *not* do. `OutdoorStrideCalibrator`
 overwrites `stride.json` in place, truncating on open, so a power loss mid-write leaves a
 torn file and no backup. The `.bak` in the table above is written later — on a subsequent
-load, once the store has already failed to parse. That is recovery evidence, not protection.
+load, once the store has proved larger than the calibrator accepts or failed to parse.
+Nothing checks that the copy succeeded, so even then it may be missing. That is recovery
+evidence, not protection.
 `stride_deleted.json` is not protection either: the Treadmill app writes it before an
 explicit user-initiated *clear calibration*, never before a routine save.
 
