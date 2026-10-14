@@ -60,8 +60,7 @@ Use `SDK::TestSupport::KernelFixture`:
 
 `InMemoryFileSystem` enumerates what you seed, so code that walks a directory
 (`kernel.fs.dir(path)` then `readNext()`) can be tested directly. Seeding a
-file is enough — the directories along its path are implied, with no `mkdir`
-needed:
+file implies the directories along its path, with no `mkdir` needed:
 
 ```cpp
 KernelFixture fixture;
@@ -80,74 +79,61 @@ dir->close();
 Worth knowing:
 
 - **Direct children only.** `Activity/archive/old.fit` shows up as the
-  directory `archive` when listing `Activity`, not as a file — the same shape
-  a real backend reports.
-- **`isDir` is real**, so an `if (item.isDir) continue;` guard is actually
-  exercised rather than silently dead.
+  directory `archive` when listing `Activity`.
 - **Enumeration is sorted by name**, so tests are reproducible. The device
-  enumerates in directory-entry order, so do not write tests that depend on
-  alphabetical order *meaning* anything — only on it being stable.
-- **A snapshot is taken at `open()`.** Files seeded mid-scan do not appear
-  until an explicit `readNext(item, /*reset=*/true)`, which rewinds without
-  reading an entry (and re-snapshots, as POSIX `rewinddir` does).
+  makes no such promise, so rely on the order being stable, not on what it is.
 - **`mkdir()` creates parents** and succeeds if the directory already exists;
-  `IDirectory::create()` does not, matching the simulator's non-recursive
-  `::mkdir`. `remove()` on a directory refuses unless it is empty.
+  `IDirectory::create()` does not create parents.
 - **A name from a listing is openable as `"/" + name`**, and a listing never
-  reports the same name twice — for every name short enough to survive
-  `ObjectInfo::name`. Both guarantees stop at that boundary; see the
-  name-length divergence below.
+  reports the same name twice, for every name that fits `ObjectInfo::name`.
 - Opening a directory that does not exist fails, so assert on `open()`.
 
 ### Prove the scan is live
 
 A test whose expectation is "nothing was found" cannot tell a correct
-decision from a scan that never ran — seed a path the fake resolves
-differently than you assumed and it still passes. Where the expected outcome
-is a negative, assert first that the directory really enumerates what you
-seeded, or pair the test with a positive control that differs in exactly the
-one property under test.
+decision from a scan that never ran. Where the expected outcome is a
+negative, assert first that the directory really enumerates what you seeded,
+or pair the test with a positive control that differs in exactly the one
+property under test.
 
 ### Divergences from a real backend
 
-All deliberate. Check these before writing a test that leans on one:
+Check these before writing a test that leans on one:
 
-- **An implied directory is only as durable as its contents.** A directory
-  that exists solely because a file lives under it stops existing when that
-  file is removed. Call `mkdir()` if a test needs it to outlive its children.
-- **Leading and trailing slashes are not significant.** `/a.txt`, `a.txt` and
-  `a.txt/` are one object, at every depth, for lookup as well as enumeration.
-  This is what lets a test seed `/App.uapp` and have code that scans `/` find
-  it, but a real filesystem would keep them apart. Repeated *interior*
-  separators are not a divergence: `a//b` and `a/b` are one object here as
-  they are on POSIX and FatFs.
-- **A file may be created under a directory that does not exist.** Writing
-  `a/b/c.txt` implies `a` and `a/b` rather than failing with `ENOENT` — the
-  flip side of implied directories. `mkdir()` the parents first if a test
-  needs the `ENOENT` branch.
-- **No `.` / `..` resolution.** Both are ordinary path segments, so `a/b` and
-  `a/./b` are different places.
-- **Directory rename is not modelled** — it returns false. The simulator's
-  does work, so do not read that false as device behaviour.
-- **No hidden/system attributes of their own.** `isHidden` is derived from a
-  leading `.` in the name, as the POSIX simulator does; `isSystem` is always
-  false.
-- **A name longer than `ObjectInfo::name` cannot round-trip**; it comes back
-  clipped, as the simulator's `safe_strcpy` would clip it. FatFs on the watch
-  allows 255-character names, exactly what `ObjectInfo::name` holds, so the
-  watch never clips one and only a test can seed a longer name. A full-width
-  name is real, though, and cannot be joined onto any directory within
-  `skMaxPathLen`. Names are deduplicated *before* clipping, so
-  two names differing only past that capacity come back as two identical
-  entries — the one case where a listing repeats a name.
+- **A listing is a snapshot taken at `open()`.** Files seeded mid-scan appear
+  only after `readNext(item, /*reset=*/true)`, which rewinds without reading
+  an entry.
+- **An implied directory is only as durable as its contents.** It stops
+  existing when its last file is removed. Call `mkdir()` if a test needs it
+  to outlive its children.
+- **Leading and trailing slashes are not significant**, and runs of `/`
+  collapse: `/a.txt`, `a.txt`, `a.txt/` are one object, as are `a//b` and
+  `a/b`.
+- **The instrumentation is keyed the same way.** `openHandles`,
+  `flushCounts` and the `closeGate` argument use the path without leading or
+  trailing slashes, so index them as `"Activity/a.fit"`, never
+  `"/Activity/a.fit"`.
+- **Names are case-sensitive.** `Walk.uapp` and `WALK.UAPP` are two files.
+- **A file may be created under a directory that does not exist.** `mkdir()`
+  the parents first if a test needs that failure.
+- **No `.` / `..` resolution.** Both are ordinary path segments.
+- **Directory rename is not modelled**; it returns false.
+- **`isHidden` is derived from a leading `.`** in the name; `isSystem` is
+  always false.
+- **A name longer than `ObjectInfo::name` comes back clipped**, and two names
+  differing only past that length come back as identical entries. FatFs caps
+  a long file name at 255 characters, which fits, so only a test can seed
+  such a name. A 255-character name is real, and cannot be joined onto any
+  directory within `skMaxPathLen`.
 
-What the fake refuses, so a test cannot build a state the device cannot
-reach: one name is never both a file and a directory (`mkdir()`,
+The fake refuses: one name as both a file and a directory (`mkdir()`,
 `IDirectory::create()`, a write-`open()` and `seedFile()` all enforce this);
-`rename()`/`copy()` will not take a removed path as their source, nor a
-destination that is the root, an existing directory, or under a file; and
-`close()` on a handle that is not open fails, so `EXPECT_TRUE(h->close())` is
-a real assertion.
+a removed path as the source of `rename()` or `copy()`; a destination that is
+the root, an existing directory, or under a file; a `rename()` onto an
+existing file, which FatFs `f_rename` also refuses; removing a directory that
+is not empty; and `close()` on a handle that is not open, so
+`EXPECT_TRUE(h->close())` is a real assertion. `failRenames` makes every
+`rename()` fail.
 
 ## Troubleshooting
 
