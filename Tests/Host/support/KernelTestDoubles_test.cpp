@@ -496,6 +496,20 @@ TEST(InMemoryDirectory, AnImpliedDirectorySitsWhereItsOldestContentDoes)
         << "a directory beneath counts as content";
 }
 
+TEST(InMemoryFileSystem, AWriteCannotRecreateAFileWhereADirectoryNowIs)
+{
+    InMemoryFileSystem fs;
+    auto f = fs.file("a");
+    ASSERT_TRUE(f->open(/*wMode=*/true));
+    ASSERT_TRUE(fs.remove("a"));
+    ASSERT_TRUE(fs.mkdir("a"));
+
+    size_t written = 0;
+    EXPECT_FALSE(f->write("z", 1, written));
+    EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "a/" }));
+    EXPECT_FALSE(fs.files.count("a") != 0 && fs.files.at("a").exists);
+}
+
 TEST(InMemoryDirectory, MakingAnImpliedDirectoryExplicitKeepsItsPlace)
 {
     for (const bool viaCreate : { false, true }) {

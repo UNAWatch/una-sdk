@@ -268,6 +268,9 @@ bool InMemoryFileSystem::InMemoryFile::write(const char* buff, size_t btw, size_
         return false;
     }
 
+    if (!mFs.fileExistsAt(mCanonicalPath) && !mFs.canHoldFileAt(mCanonicalPath)) {
+        return false;
+    }
     auto& entry = mFs.files[mCanonicalPath];
     if (!entry.exists) {
         entry.exists = true;
