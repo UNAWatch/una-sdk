@@ -569,6 +569,9 @@ TEST(InMemoryFileSystem, RenameAndCopyRefuseAnAlreadyRemovedSource)
     EXPECT_EQ(fs.readFile("live.txt"), "IMPORTANT") << "and must not destroy the destination";
     EXPECT_TRUE(fs.exist("live.txt"));
 
+    EXPECT_FALSE(fs.rename("gone.txt", "fresh.txt")) << "nor onto a free name";
+    EXPECT_FALSE(fs.exist("fresh.txt"));
+
     EXPECT_FALSE(fs.copy("gone.txt", "c.txt"));
     EXPECT_FALSE(fs.exist("c.txt")) << "no tombstone propagated to the destination";
 
@@ -662,6 +665,10 @@ TEST(InMemoryDirectory, RemoveRefusesANonEmptyDirectory)
     EXPECT_FALSE(fs.remove("d")) << "a populated directory";
 
     ASSERT_TRUE(fs.remove("d/a.txt"));
+    ASSERT_TRUE(fs.mkdir("d/sub"));
+    EXPECT_FALSE(fs.remove("d")) << "a directory holding only a subdirectory";
+
+    ASSERT_TRUE(fs.remove("d/sub"));
     EXPECT_TRUE(fs.remove("d")) << "empty now";
     EXPECT_FALSE(fs.exist("d"));
 }
