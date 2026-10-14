@@ -22,8 +22,8 @@ static constexpr const char *kPath = "../SharedData/stride.json";
 Paths are relative to the app's own root. The whole path, filename included, must fit
 `IFileSystem::skMaxPathLen` (256 bytes).
 
-`../SharedData/` is the only path that may leave your app's root, and it is a whitelist
-rather than general parent traversal. The kernel resolves `../SharedData` and
+`../SharedData/` is the only writable path that may leave your app's root, and it is a
+whitelist rather than general parent traversal. The kernel resolves `../SharedData` and
 `../SharedData/<name>` to the shared directory, and rejects every other `..` segment
 outright — leading, embedded or trailing. The name is reserved by that rule, so an app
 cannot create a sibling directory that collides with it.
@@ -37,13 +37,26 @@ sandbox" from "no such file".
 Nested paths inside it do work. `../SharedData/maps/uk.map` resolves, and
 `mkdir("../SharedData/maps")` creates both levels.
 
+### Read-only folders at the volume root
+
+A path starting `:/` names a folder at the root of the volume the apps live on, beside
+`Apps/` rather than inside it. The kernel offers one: `:/Workouts`, which holds the
+structured workout files that `SDK::Workout::Library` reads
+([`WorkoutLibrary.hpp:38-40`](../Libs/Header/SDK/Workout/WorkoutLibrary.hpp)). It resolves
+`:/Workouts` and `:/Workouts/<name>`, rejects a `..` segment inside them, and rejects any
+other `:/` name.
+
+These folders are read-only to apps. Opening a file in one for writing returns `false`, and
+so do `write()`, `truncate()`, `rename()`, `remove()` and `mkdir()`. Data an app writes for
+other apps to read belongs in `../SharedData/`.
+
 ## Who uses it today
 
 | Path | Written by | Read by |
 | --- | --- | --- |
 | `../SharedData/stride.json` | `OutdoorStrideCalibrator::finalise()` ([`OutdoorStrideCalibrator.hpp:59`](../Libs/Header/SDK/Calibration/OutdoorStrideCalibrator.hpp)) | `StrideLut` ([`StrideLut.hpp:67`](../Libs/Header/SDK/Calibration/StrideLut.hpp)) |
 | `../SharedData/stride.json.bak` | `OutdoorStrideCalibrator`, when the store will not parse ([`OutdoorStrideCalibrator.cpp:222-228`](../Libs/Source/Calibration/OutdoorStrideCalibrator.cpp)) | recovery only |
-| `../SharedData/stride_trace.csv` | Running app, when tracing is on ([`Running/.../Service.cpp:789`](../Examples/Apps/Running/Software/Libs/Sources/Service.cpp)) | diagnostic only |
+| `../SharedData/stride_trace.csv` | Running app, when tracing is on ([`Running/.../Service.cpp:845`](../Examples/Apps/Running/Software/Libs/Sources/Service.cpp)) | diagnostic only |
 | `../SharedData/stride_deleted.json` | Treadmill app, backing up the LUT before a user-initiated clear ([`Treadmill/.../Service.cpp:1191`](../Examples/Apps/Treadmill/Software/Libs/Sources/Service.cpp)) | recovery only |
 
 The last three are conditional — a watch that has never hit a corrupt store, never enabled
@@ -176,10 +189,13 @@ The simulator's filesystem root is `Output/`
 ([`Kernel.cpp:17`](../Libs/Source/Simulator/Kernel/Kernel.cpp)). It passes `..` through to
 the host filesystem instead of clamping it to that root, so `../SharedData/` lands beside
 `Output/` and not inside it. Apps behave correctly. The files are just not where you would
-first look for them.
+first look for them. A `:/` path goes to `Volume/` inside that root, so `:/Workouts` is
+`Output/Volume/Workouts/`
+([`FileSystem.cpp:45-54`](../Libs/Source/Simulator/Kernel/Mock/FileSystem.cpp)).
 
 More importantly, the simulator does not enforce the whitelist at all. It concatenates its
 prefix with your path and hands the result to the host filesystem, so `../anything/at/all`
 works in the simulator and fails on the watch — and the simulator gives you no hint that you
-have left the sandbox. If you invent a new shared path, check it against the rule in *The
+have left the sandbox. Nor does it make `:/` folders read-only: a write there succeeds in
+the simulator and fails on the watch. If you invent a new shared path, check it against the rule in *The
 path* above rather than against what the simulator accepts.
