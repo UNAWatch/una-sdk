@@ -276,12 +276,13 @@ Laps can be triggered automatically based on configurable thresholds:
 - **Distance-based**: Configurable via `MenuDistanceView` (`Settings::Alerts::Distance::Id`)
 - **Time-based**: Configurable via `MenuTimeView` (`Settings::Alerts::Time::Id`)
 - **Manual**: User-initiated via R2 button during tracking
+- **Interval phases**: in intervals mode each phase is its own lap, and the distance and time laps above are off
 
-Lap data includes timing, distance, average pace, HR, and ascent/descent (written to FIT).
+Lap data includes timing, distance, average pace, HR, and ascent/descent (written to FIT). Each FIT lap also records `lap_trigger`: `time` or `distance` for an automatic lap or a phase that ran out, `manual` for R2, and `session_end` for the lap that ends the activity. An interval phase's lap records its workout step (`wkt_step_index`) and `intensity` as well.
 
 ### Interval Training
 
-Interval training is a Running-specific feature that guides the runner through structured workout phases. When started with `intervalsMode = true`, the service drives the phase state machine alongside normal track processing.
+Interval training is a Running-specific feature that guides the runner through structured workout phases. When started with `intervalsMode = true`, the service runs the phases on the SDK's workout step engine (`SDK::Workout::Engine`) alongside normal track processing.
 
 #### Configuration
 
@@ -302,31 +303,31 @@ struct Intervals {
     float    restDistance = 0.0f;    ///< REST phase distance (m), used when metric == DISTANCE
     bool     warmUp       = true;    ///< Prepend WARM_UP phase before first RUN
     bool     coolDown     = true;    ///< Append COOL_DOWN phase after last REST
+    bool     lastRest     = true;    ///< REST after the final RUN; false -> straight to COOL_DOWN
 };
 ```
 
-#### Phase State Machine
+#### Phases
 
-Phases progress in order: `WARM_UP` → `RUN` → `REST` → … → `RUN` → `REST` → `COOL_DOWN`. `WARM_UP` and `COOL_DOWN` are always `TIME_OPEN` (no automatic boundary — the runner advances manually by pressing R2). `RUN` and `REST` use the configured `Metric`:
+Phases progress in order: `WARM_UP` → `RUN` → `REST` → … → `RUN` → `REST` → `COOL_DOWN`. With `lastRest` false the final `RUN` leads straight to `COOL_DOWN`; with `repeatsNum` 0 the `RUN` and `REST` repeat until the runner ends the workout. `WARM_UP` and `COOL_DOWN` are open (the runner advances by pressing R2). `RUN` and `REST` use the configured `Metric`:
 
 - `OPEN` — no automatic advance; runner presses R2 to move to next phase
 - `TIME` — advance automatically when elapsed phase time reaches the configured duration
 - `DISTANCE` — advance automatically when elapsed distance since phase start reaches the configured distance
 
-The service tracks the active-time and active-distance at each phase entry:
+At track start, `startIntervals()` turns the settings into a `SDK::Workout::Program` with `SDK::Workout::buildIntervals()` and starts the engine on it. Every active second, `processIntervals()` passes the engine the run's active time and distance (`Engine::update()`), and R2 (`INTERVALS_NEXT_PHASE`) ends the current phase with `Engine::next()`. Paused seconds are not passed in.
 
-```cpp
-mPhaseStartActiveSec  = mTimeCounter.getValueActive();
-mPhaseStartActiveDist = mDistanceCounter.getValueActive();
-```
-
-`processIntervals()` runs every second inside `processTrack()` and compares current counters against the phase boundary. `advanceIntervalsPhase(bool manual)` moves to the next phase (or marks the workout complete after the final phase).
+`updateIntervalsData()` fills `mTrackData.intervals` from the engine's current step: the phase, from the `IntervalsLayout` that `buildIntervals()` returns; the time or distance remaining, or the time elapsed in an open phase; and the repeat number, from `SDK::Workout::intervalsRepeat()`.
 
 #### Interval Phase Notifications
 
-On every phase change, `onIntervalsPhaseChange(bool alert, bool manual)` is called:
-- If `alert` is true, `SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals)` sends an `INTERVALS_PHASE_ALERT` message to the GUI, which navigates to `TrackIntervalsAlertView` and shows a countdown timer before returning to the track screen.
-- When the entire workout is complete (all repeats done and `COOL_DOWN` phase ended or skipped), `SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel)` sends `INTERVALS_WORKOUT_COMPLETED` and sets `mIntervalsCompleted = true` to block further phase processing.
+When a phase ends, whether it ran out or the runner pressed R2, `onIntervalsStepEnded()`:
+- records the phase that ended as a lap (see Lap Management);
+- if more phases follow, sends `SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals)`, an `INTERVALS_PHASE_ALERT` message for the new phase. The GUI navigates to `TrackIntervalsAlertView` and shows a countdown timer before returning to the track screen;
+- when the last phase has ended, sends `SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel)`, an `INTERVALS_WORKOUT_COMPLETED` message, and leaves intervals mode (`mIntervalsCompleted = true`): the run continues on the normal faces, and R2 records ordinary laps;
+- calls `onIntervalsPhaseChange()`, which turns the backlight on and plays a vibration and a double beep.
+
+Over about the last 5 s of a `TIME` or `DISTANCE` phase the service also beeps once a second, as decided by `SDK::Workout::LeadInAlert`. A distance phase's time to go is estimated from the current speed.
 
 ### WristTiltDetector
 
@@ -368,7 +369,7 @@ Settings are stored in JSON format and include:
 
 #### FIT File Format Implementation
 
-**ActivityWriter** — writes activity data to a FIT file during tracking. Key methods: `start()`, `addRecord()` (called every second), `addLap()`, `pause()`, `resume()`, `stop()`, `discard()`. Each `RecordData` carries an optional-field bitmask so only valid sensor readings are written.
+**ActivityWriter** — writes activity data to a FIT file during tracking. Key methods: `start()`, `addRecord()` (called every second), `addLap()`, `addWorkout()` (the intervals program, written by `SDK::Fit::writeWorkout()` at the start of an intervals run), `pause()`, `resume()`, `stop()`, `discard()`. Each `RecordData` carries an optional-field bitmask so only valid sensor readings are written.
 
 #### Activity Summary Persistence
 

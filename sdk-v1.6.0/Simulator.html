@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNA-Watch Simulator &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="HelloWorld - Introduction to UNA App Architecture" href="Tutorials/HelloWorld/ARCHITECTURE.html" />
+    <link rel="prev" title="SDK Setup and Build Overview" href="sdk-setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">UNA-Watch Simulator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#need-components">Need Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-una-sdk-variable-install-una-sdk-variable">Install UNA_SDK variable {#install-una-sdk-variable}</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-simulator">Start Simulator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#touchgfx-designer">TouchGFX Designer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#visual-studio">Visual Studio</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#simulation">Simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#buttons">Buttons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#buzzer">Buzzer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backlight">Backlight</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vibro">Vibro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sensors">Sensors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#include-header-source-file">Include Header &amp; Source file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#msvs">MSVS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gcc-gcc">GCC {#gcc}</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transfer-application-transfer-application">Transfer Application {#transfer-application}</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regenerate-the-gui-regenerate-gui">Regenerate the GUI {#regenerate-gui}</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lvgl-simulator-lvgl-simulator">LVGL simulator {#lvgl-simulator}</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linux-gcc-linux-gcc">Linux (GCC) {#linux-gcc}</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-and-run">Build and run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-makes-the-linux-build-work">What makes the Linux build work</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">UNA-Watch Simulator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Simulator.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="una-watch-simulator">
+<h1>UNA-Watch Simulator<a class="headerlink" href="#una-watch-simulator" title="Link to this heading"></a></h1>
+<p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>. The <a class="reference internal" href="#lvgl-simulator"><span class="xref myst">LVGL simulators</span></a> are plain CMake projects that need a compiler and SDL2 but no IDE.<br />
+Note: If you move the application to another location, you need to update the relative path to <strong>TouchGFX library path</strong>.
+See: <a class="reference internal" href="#transfer-application"><span class="xref myst">Transfer Application</span></a></p>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="need-components">
+<h3>Need Components<a class="headerlink" href="#need-components" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Download and install <a class="reference external" href="https://www.st.com/en/development-tools/touchgfxdesigner.html#get-software">TouchGFX Designer</a>.</p></li>
+<li><p>If you want to work with UNA Simulator in Visual Studio, then:</p>
+<ul class="simple">
+<li><p>Download and install <a class="reference external" href="https://visualstudio.microsoft.com">Visual Studio</a>.</p></li>
+<li><p>In the Installing window, where you select the required packages, go to <strong>Workloads → Desktop &amp; Mobile</strong> and choose <strong>Desktop development with C++</strong>.</p></li>
+<li><p>In <strong>Installation Details</strong>, for <strong>Desktop development with C++</strong> select <strong>MSVC v143</strong>, then click <strong>Install</strong>.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="install-una-sdk-variable-install-una-sdk-variable">
+<h3>Install UNA_SDK variable {#install-una-sdk-variable}<a class="headerlink" href="#install-una-sdk-variable-install-una-sdk-variable" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Run the PowerShell script <strong>export-stm32-tools.ps1</strong>, located in:<br />
+<code class="docutils literal notranslate"><span class="pre">Utilities\Scripts\export-stm32-tools.ps1</span></code></p></li>
+<li><p>This script sets the UNA_SDK environment variable and configures STM32 tools.</p></li>
+</ol>
+</section>
+<section id="start-simulator">
+<h3>Start Simulator<a class="headerlink" href="#start-simulator" title="Link to this heading"></a></h3>
+<section id="touchgfx-designer">
+<h4>TouchGFX Designer<a class="headerlink" href="#touchgfx-designer" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p>TouchGFX Designer does not support <strong>Debug mode</strong>. If you want to debug the project, use Visual Studio.</p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.touchgfx</span></code>, located in:<br />
+<code class="docutils literal notranslate"><span class="pre">&lt;app_name&gt;\Software\Apps\TouchGFX-GUI</span></code></p></li>
+<li><p>When opening the project for the first time, click <strong>Generate Code (F4)</strong>. This only needs to be done once.</p></li>
+<li><p>Click <strong>Run Simulator (F5)</strong>.</p></li>
+</ol>
+</section>
+<section id="visual-studio">
+<h4>Visual Studio<a class="headerlink" href="#visual-studio" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p>This step only needs to be done <strong>once</strong>. Open the application project in TouchGFX Designer and click <strong>Generate Code (F4)</strong>.</p></li>
+<li><p>Go to:<br />
+<code class="docutils literal notranslate"><span class="pre">&lt;app_name&gt;\Software\Apps\TouchGFX-GUI\simulator\msvs</span></code></p></li>
+<li><p>Open the <strong>Application.vcxproj</strong> file.</p></li>
+<li><p>Start debugging by pressing <strong>F5</strong>.</p></li>
+</ol>
+</section>
+</section>
+<section id="simulation">
+<h3>Simulation<a class="headerlink" href="#simulation" title="Link to this heading"></a></h3>
+<section id="buttons">
+<h4>Buttons<a class="headerlink" href="#buttons" title="Link to this heading"></a></h4>
+<ol class="arabic">
+<li><p>Mechanical buttons in the UNA Simulator are controlled using <strong>keyboard keys</strong>.</p></li>
+<li><p>You can see the mapping in the <strong>Terminal Log</strong>, which shows which number keys correspond to the buttons on the UNA watch.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------</span>
+<span class="o">|</span>   <span class="n">For</span> <span class="n">Simulation</span> <span class="n">Button</span> <span class="n">use</span> <span class="n">keyboard</span> <span class="n">Keys</span><span class="o">.</span>      <span class="o">|</span>
+<span class="o">|</span>       <span class="n">Keys</span> <span class="n">Keyboard</span><span class="p">:</span>                            <span class="o">|</span>
+<span class="o">|</span>       <span class="mi">1</span>   <span class="n">L1</span><span class="p">,</span>                                   <span class="o">|</span>
+<span class="o">|</span>       <span class="mi">2</span>   <span class="n">L2</span><span class="p">,</span>                                   <span class="o">|</span>
+<span class="o">|</span>       <span class="mi">3</span>   <span class="n">R1</span><span class="p">,</span>                                   <span class="o">|</span>
+<span class="o">|</span>       <span class="mi">4</span>   <span class="n">R2</span>                                    <span class="o">|</span>
+<span class="o">|</span>                  <span class="o">/---------</span>\                    <span class="o">|</span>
+<span class="o">|</span>                 <span class="o">/</span>           \                   <span class="o">|</span>
+<span class="o">|</span> <span class="n">BUTTON</span> <span class="n">UP</span>   <span class="n">L1</span> <span class="o">|</span>             <span class="o">|</span> <span class="n">R1</span> <span class="n">BUTTON</span> <span class="n">SELECT</span> <span class="o">|</span>
+<span class="o">|</span>                <span class="o">|</span>     <span class="n">UNA</span>     <span class="o">|</span>                  <span class="o">|</span>
+<span class="o">|</span>                <span class="o">|</span>    <span class="n">WATCH</span>    <span class="o">|</span>                  <span class="o">|</span>
+<span class="o">|</span> <span class="n">BUTTON</span> <span class="n">DOWN</span> <span class="n">L2</span> <span class="o">|</span>             <span class="o">|</span> <span class="n">R2</span> <span class="n">BUTTON</span> <span class="n">BACK</span>   <span class="o">|</span>
+<span class="o">|</span>                 \           <span class="o">/</span>                   <span class="o">|</span>
+<span class="o">|</span>                  \<span class="o">---------/</span>                    <span class="o">|</span>
+<span class="o">---------------------------------------------------</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="buzzer">
+<h4>Buzzer<a class="headerlink" href="#buzzer" title="Link to this heading"></a></h4>
+<ol class="arabic">
+<li><p>Buzzer actions are printed in the terminal as log messages. Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Buzzer</span><span class="o">::</span><span class="n">play</span><span class="o">::</span><span class="mi">39</span><span class="w">               </span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">time</span><span class="o">=</span><span class="mi">150</span><span class="w"> </span><span class="n">ms</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="o">=</span><span class="mi">3</span>
+<span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Buzzer</span><span class="o">::</span><span class="n">play</span><span class="o">::</span><span class="mi">39</span><span class="w">               </span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="n">time</span><span class="o">=</span><span class="mi">100</span><span class="w"> </span><span class="n">ms</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Buzzer</span><span class="o">::</span><span class="n">play</span><span class="o">::</span><span class="mi">39</span><span class="w">               </span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="n">time</span><span class="o">=</span><span class="mi">150</span><span class="w"> </span><span class="n">ms</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="o">=</span><span class="mi">3</span>
+</pre></div>
+</div>
+</li>
+<li><p>Explanation:</p>
+<ul class="simple">
+<li><p><strong>[]</strong> — note array index</p></li>
+<li><p><strong>time</strong> — duration in milliseconds</p></li>
+<li><p><strong>level</strong> — sound level (1–3), 0 means no sound</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="backlight">
+<h4>Backlight<a class="headerlink" href="#backlight" title="Link to this heading"></a></h4>
+<ol class="arabic">
+<li><p>Backlight actions are printed in the terminal as log messages.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Backlight</span><span class="o">::</span><span class="n">on</span><span class="o">::</span><span class="mi">22</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">called</span><span class="p">,</span><span class="w"> </span><span class="n">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span>
+<span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Backlight</span><span class="o">::</span><span class="n">off</span><span class="o">::</span><span class="mi">30</span><span class="w">             </span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="n">backlight</span>
+</pre></div>
+</div>
+</li>
+<li><p>There are two types of log messages:</p>
+<ul class="simple">
+<li><p>turning the backlight on with a timeout in milliseconds</p></li>
+<li><p>turning the backlight off</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="vibro">
+<h4>Vibro<a class="headerlink" href="#vibro" title="Link to this heading"></a></h4>
+<ol class="arabic">
+<li><p>Vibro actions are printed in the terminal as log messages.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Vibro</span><span class="o">::</span><span class="n">play</span><span class="o">::</span><span class="mi">31</span><span class="w">                </span><span class="o">:</span><span class="w"> </span><span class="n">play</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Mock</span><span class="p">.</span><span class="n">Vibro</span><span class="o">::</span><span class="n">play</span><span class="o">::</span><span class="mi">34</span><span class="w">                </span><span class="o">:</span><span class="w">   </span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">effect</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">pause</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>Explanation:</p>
+<ul class="simple">
+<li><p><strong>[]</strong> — note array index</p></li>
+<li><p><strong>effect</strong> — vibration effect ID</p></li>
+<li><p><strong>loop</strong> — number of repetitions</p></li>
+<li><p><strong>pause</strong> — pause between effects</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="sensors">
+<h4>Sensors<a class="headerlink" href="#sensors" title="Link to this heading"></a></h4>
+<p>In the file <strong>ConfigurationSimulator.hpp</strong>, you can enable/disable sensor simulation and configure parameters.
+Location:
+<code class="docutils literal notranslate"><span class="pre">&lt;app-name&gt;\Software\Apps\TouchGFX-GUI\simulator</span></code></p>
+<p>For examples of sensor integration and data handling, see the <a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html"><span class="std std-doc">Sensors Tutorial</span></a>.</p>
+<section id="gps">
+<h5>GPS<a class="headerlink" href="#gps" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p>Simulates <strong>speed, altitude, and distance</strong>.</p></li>
+<li><p>The simulated user moves around a <strong>stadium track</strong>.</p></li>
+<li><p>Includes a timer for <strong>satellite acquisition</strong>.</p></li>
+<li><p>Can simulate <strong>GPS signal loss</strong>.</p></li>
+<li><p>Adds <strong>noise to latitude/longitude</strong>.</p></li>
+</ul>
+<p>Configuration options:</p>
+<ul class="simple">
+<li><p>enable/disable sensor</p></li>
+<li><p>minimum and maximum speed</p></li>
+<li><p>satellite search time</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">//GPS Sensor</span>
+<span class="w"> </span><span class="cp">#define GPS_SIM_ENABLE               1  </span><span class="c1">// 0 - Disable</span>
+<span class="w"> </span><span class="cp">#define GPS_SIM_SPEED_MIN            20 </span><span class="c1">// km/h</span>
+<span class="w"> </span><span class="cp">#define GPS_SIM_SPEED_BASE           25 </span><span class="c1">// km/h</span>
+<span class="w"> </span><span class="cp">#define GPS_SIM_SPEED_MAX            30 </span><span class="c1">// km/h</span>
+<span class="w"> </span><span class="cp">#define GPS_SIM_TIME_SEARCH_SATELLITE 7 </span><span class="c1">// seconds</span>
+</pre></div>
+</div>
+</section>
+<section id="heart-rate">
+<h5>Heart Rate<a class="headerlink" href="#heart-rate" title="Link to this heading"></a></h5>
+<p>Simulates:</p>
+<ul class="simple">
+<li><p><strong>HR</strong> (Heart Rate)</p></li>
+<li><p><strong>AHR</strong> (Average Heart Rate)</p></li>
+<li><p><strong>RHR</strong> (Resting Heart Rate)</p></li>
+<li><p><strong>trust level</strong></p></li>
+</ul>
+<p>Options:</p>
+<ul class="simple">
+<li><p>enable/disable sensor</p></li>
+<li><p>minimum and maximum heart rate</p></li>
+<li><p>training type (<strong>Cycling / Hiking / Running</strong>)</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">//HeartRate Sensor</span>
+<span class="w"> </span><span class="cp">#define HEART_RATE_SIM_ENABLE        1 </span><span class="c1">// 0 - Disable</span>
+<span class="w"> </span><span class="cp">#define HEART_RATE_SIM_MIN_HR        50</span>
+<span class="w"> </span><span class="cp">#define HEART_RATE_SIM_MAX_HR        140</span>
+<span class="w"> </span><span class="cp">#define HEART_RATE_SIM_TYPE_TRAINING 0 </span><span class="c1">// 0 - Cycling, 1 - Hiking, 2 - Running</span>
+</pre></div>
+</div>
+</section>
+<section id="battery-level">
+<h5>Battery Level<a class="headerlink" href="#battery-level" title="Link to this heading"></a></h5>
+<p>Simulates battery voltage drop.</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p>enable/disable sensor</p></li>
+<li><p>initial value</p></li>
+<li><p>decrease step</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">// Battery Level Sensor</span>
+<span class="w"> </span><span class="cp">#define BATT_LEVEL_SIM_ENABLE      1 </span><span class="c1">// 0 - Disable</span>
+<span class="w"> </span><span class="cp">#define BATT_LEVEL_SIM_START_VALUE 100 </span><span class="c1">// 10 - 100%</span>
+<span class="w"> </span><span class="cp">#define BATT_LEVEL_SIM_STEP_VALUE  0.1 </span><span class="c1">//percent</span>
+</pre></div>
+</div>
+</section>
+<section id="pressure">
+<h5>Pressure<a class="headerlink" href="#pressure" title="Link to this heading"></a></h5>
+<p>Simulates Presure value.</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p>enable/disable sensor</p></li>
+<li><p>set value pressure, which changes in a small range</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">// Pressure Sensor</span>
+<span class="w"> </span><span class="cp">#define PRESSURE_SIM_ENABLE       1 </span><span class="c1">// 0 - Disable</span>
+<span class="w"> </span><span class="cp">#define PRESSURE_SIM_PRESS_VALLUE 1020.2</span>
+</pre></div>
+</div>
+</section>
+<section id="imu-wrist-detection">
+<h5>IMU Wrist Detection<a class="headerlink" href="#imu-wrist-detection" title="Link to this heading"></a></h5>
+<p>Simulates <strong>wrist detection</strong>.</p>
+<p>A wrist detection event activates the <strong>backlight for 5 seconds</strong>.</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p>enable/disable sensor</p></li>
+<li><p>change the key used to trigger the event</p></li>
+</ul>
+<p>To simulate a wrist detection event, press <strong>key 5</strong>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">// IMU Writs Sensor</span>
+<span class="w"> </span><span class="cp">#define IMU_WRIST_SIM_ENABLE           1 </span><span class="c1">// 0 - Disable</span>
+<span class="w"> </span><span class="cp">#define IMU_WRIST_SIM_WRIST_DETECT_KEY 5 </span>
+</pre></div>
+</div>
+</section>
+<section id="imu-step-counter">
+<h5>IMU Step Counter<a class="headerlink" href="#imu-step-counter" title="Link to this heading"></a></h5>
+<p>Simulates <strong>Step Counter</strong>. Step Counter get Speed with the GPS Speed module and convert to steps.</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p>enable/disable sensor</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">// IMU StepCounter Sensor</span>
+<span class="w"> </span><span class="cp">#define IMU_STEP_COUNTER_SIM_ENABLE    1 </span><span class="c1">// 0 - Disable</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="include-header-source-file">
+<h3>Include Header &amp; Source file<a class="headerlink" href="#include-header-source-file" title="Link to this heading"></a></h3>
+<section id="msvs">
+<h4>MSVS<a class="headerlink" href="#msvs" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p>Open <strong>Application.vcxproj</strong> in a text editor:
+`&lt;app_name&gt;\Software\Apps\TouchGFX-GUI\simulator\msvs</p></li>
+<li><p>Add header paths to <strong>ClInclude</strong>.</p></li>
+<li><p>Add source file paths to <strong>ClCompile</strong>.</p></li>
+</ol>
+</section>
+<section id="gcc-gcc">
+<h4>GCC {#gcc}<a class="headerlink" href="#gcc-gcc" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p>Open <strong>MakeFile</strong> in text editor:
+<code class="docutils literal notranslate"><span class="pre">&lt;app-name&gt;\Software\Apps\TouchGFX-GUI\simulator\gcc</span></code></p></li>
+<li><p>Add header paths to <strong>ADDITIONAL_INCLUDE_PATHS</strong>.</p></li>
+<li><p>Add source file paths to <strong>ADDITIONAL_SOURCES_UNA</strong>.</p></li>
+</ol>
+<p>The two lists describe the same build, so a file added to one must be added to
+the other. A mismatch is not caught by a normal build: CI builds the GCC side
+only, so a source missing from the vcxproj first shows up as a link error when
+someone opens the project in Visual Studio. The <code class="docutils literal notranslate"><span class="pre">MSVS</span> <span class="pre">Source</span> <span class="pre">Sync</span></code> workflow
+compares both lists on every pull request that touches either file. To run the
+same check locally, from the SDK root (<code class="docutils literal notranslate"><span class="pre">python</span></code> on Windows):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>.github/scripts/check_msvs_sources.py
+</pre></div>
+</div>
+</section>
+</section>
+<section id="transfer-application-transfer-application">
+<h3>Transfer Application {#transfer-application}<a class="headerlink" href="#transfer-application-transfer-application" title="Link to this heading"></a></h3>
+<p>If you move the application to another location, you need to update the <strong>TouchGFX library path</strong>.</p>
+<ol class="arabic">
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.touchgfx</span></code> in text editor:
+<code class="docutils literal notranslate"><span class="pre">&lt;app_name&gt;\Software\Apps\TouchGFX-GUI</span></code></p></li>
+<li><p>Find <strong>“TouchGfxPath”:</strong> and update the relative path to
+<code class="docutils literal notranslate"><span class="pre">&lt;una_sdk&gt;/ThirdParty/touchgfx.</span></code>
+Example:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="s">"SelectedStartupLanguage"</span><span class="o">:</span><span class="w"> </span><span class="s">"GB"</span><span class="p">,</span>
+<span class="w"> </span><span class="s">"TouchGfxPath"</span><span class="o">:</span><span class="w"> </span><span class="s">"touchgfx"</span><span class="p">,</span>
+<span class="w"> </span><span class="s">"UIPath"</span><span class="o">:</span><span class="w"> </span><span class="s">"."</span><span class="p">,</span>
+</pre></div>
+</div>
+</li>
+<li><p>If you move the <strong>una_sdk</strong> folder, you must update UNA_SDK environment variable.
+See: <a class="reference internal" href="#install-una-sdk-variable"><span class="xref myst">Install UNA_SDK variable</span></a></p></li>
+</ol>
+</section>
+<section id="regenerate-the-gui-regenerate-gui">
+<h3>Regenerate the GUI {#regenerate-gui}<a class="headerlink" href="#regenerate-the-gui-regenerate-gui" title="Link to this heading"></a></h3>
+<p>Code generation normally runs from TouchGFX Designer (<strong>Generate Code</strong>, F4). The
+same job runs headlessly with <code class="docutils literal notranslate"><span class="pre">tgfx</span></code>, the command line tool that ships with a
+TouchGFX installation. Installing TouchGFX does not put it on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, so call it
+by full path; on Windows that is <code class="docutils literal notranslate"><span class="pre">&lt;touchgfx-install&gt;\designer\tgfx.exe</span></code>. Run it
+from the app’s <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> directory:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="p">&amp;</span> <span class="s2">"&lt;touchgfx-install&gt;\designer\tgfx.exe"</span> <span class="n">generate</span> <span class="n">-p</span> <span class="p">&lt;</span><span class="n">name</span><span class="p">&gt;.</span><span class="n">touchgfx</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">-p</span></code> accepts either the <code class="docutils literal notranslate"><span class="pre">.touchgfx</span></code> file or the directory that holds it. The
+command prints nothing on success unless <code class="docutils literal notranslate"><span class="pre">-v</span></code> is given, and <code class="docutils literal notranslate"><span class="pre">--clean</span></code> forces a
+full regenerate. A run that changes no file content leaves no diff.</p>
+<p>Generation rewrites two tracked files, <code class="docutils literal notranslate"><span class="pre">config/gcc/app.mk</span></code> and
+<code class="docutils literal notranslate"><span class="pre">config/msvs/Application.props</span></code>, with paths taken from the machine that ran it.
+Restore them before committing, so that a local installation path does not travel
+into the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>--<span class="w"> </span>config/gcc/app.mk<span class="w"> </span>config/msvs/Application.props
+</pre></div>
+</div>
+<p>That discards every unstaged change in those two files, not only the ones
+generation just made, so commit or stash your own edits to them first.</p>
+<p>Set a <code class="docutils literal notranslate"><span class="pre">TouchGFXEnvPath</span></code> environment variable when TouchGFX is installed somewhere
+other than the path <code class="docutils literal notranslate"><span class="pre">Application.props</span></code> names, otherwise the Visual Studio asset
+pre-build cannot find the converters. The variable only wins where the project
+declares the property conditionally:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;TouchGFXEnvPath</span><span class="w"> </span><span class="na">Condition=</span><span class="s">"'$(TouchGFXEnvPath)' == ''"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/TouchGFXEnvPath&gt;</span>
+</pre></div>
+</div>
+<p>MSBuild gives a project property precedence over an environment one, so a project
+that pins the path unconditionally ignores the variable and has to be edited
+instead.</p>
+</section>
+</section>
+<section id="lvgl-simulator-lvgl-simulator">
+<h2>LVGL simulator {#lvgl-simulator}<a class="headerlink" href="#lvgl-simulator-lvgl-simulator" title="Link to this heading"></a></h2>
+<p>Apps whose GUI is built on LVGL rather than TouchGFX (the tutorials’ <code class="docutils literal notranslate"><span class="pre">LVGL-GUI</span></code>
+variants, starting with <a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld</span></a>, and the
+<a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html"><span class="std std-doc">RunLVGL</span></a> activity app) simulate through the same mock
+kernel, but with a plain CMake project (<code class="docutils literal notranslate"><span class="pre">LVGL-GUI/simulator/CMakeLists.txt</span></code>) instead of
+the Designer-generated Visual Studio solution and gcc Makefile. <code class="docutils literal notranslate"><span class="pre">SDK::Simulator::LvglHost</span></code> (<code class="docutils literal notranslate"><span class="pre">Libs/Source/Simulator/LVGL</span></code>)
+stands in for the kernel’s display, ticks and buttons: an SDL2 window shows the frames
+the LVGL port sends, a thread posts <code class="docutils literal notranslate"><span class="pre">EVENT_GUI_TICK</span></code> at the watch’s frame rate, and the
+keyboard stands in for the buttons. Keys 1-4 are the physical buttons L1, L2, R1, R2:
+key down sends the press event, key up sends the release, and a key up within 500 ms
+sends a click first, the sequence the kernel emits. The <code class="docutils literal notranslate"><span class="pre">q</span></code>/<code class="docutils literal notranslate"><span class="pre">w</span></code>/<code class="docutils literal notranslate"><span class="pre">e</span></code>/<code class="docutils literal notranslate"><span class="pre">r</span></code> row sends one
+press and the <code class="docutils literal notranslate"><span class="pre">a</span></code>/<code class="docutils literal notranslate"><span class="pre">s</span></code>/<code class="docutils literal notranslate"><span class="pre">d</span></code>/<code class="docutils literal notranslate"><span class="pre">f</span></code> row one release for the same four buttons, the way the
+TouchGFX simulators pass those codes from <code class="docutils literal notranslate"><span class="pre">SDK/GUI/Button.hpp</span></code> straight through (the
+<code class="docutils literal notranslate"><span class="pre">z</span></code> chord has no key). <code class="docutils literal notranslate"><span class="pre">cmake/una-simulator.cmake</span></code>
+provides the source lists and <code class="docutils literal notranslate"><span class="pre">una_simulator_link_sdl2()</span></code>, which uses an installed SDL2
+where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
+TouchGFX Designer. The build’s architecture must match the SDL2 it links: 32-bit with the
+TouchGFX copy, x64 with a 64-bit installed package. The compiler is whatever CMake
+finds: GCC on Linux and WSL, MSVC on Windows. MSVC comes with the free <em>Build Tools for
+Visual Studio</em> as well as with the IDE, whose “C++ CMake tools for Windows” component
+also brings CMake and Ninja; the Ninja generator drives it from a developer command
+prompt (the x86 one for the 32-bit build), and the Visual Studio generator (<code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">Win32</span></code>)
+works from any shell and also writes a solution to open in the IDE. Neither
+TouchGFX Designer nor Visual Studio is needed when SDL2 is installed. The sensor
+simulation, mock file system and keyboard mapping above apply unchanged.
+<code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds these CMake simulators on Linux and
+smoke-runs them headlessly, beside the TouchGFX ones.</p>
+</section>
+<section id="linux-gcc-linux-gcc">
+<h2>Linux (GCC) {#linux-gcc}<a class="headerlink" href="#linux-gcc-linux-gcc" title="Link to this heading"></a></h2>
+<p>The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.</p>
+<section id="build-and-run">
+<h3>Build and run<a class="headerlink" href="#build-and-run" title="Link to this heading"></a></h3>
+<p>This assumes the SDK is cloned and <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> is exported, per <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">SDK Setup</span></a>. Unlike the firmware build, the desktop simulator does <strong>not</strong> need the ST ARM toolchain; it needs GCC, SDL2, and Ruby.</p>
+<p>From an app’s <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> directory (for example <code class="docutils literal notranslate"><span class="pre">Examples/Apps/Running/Software/Apps/TouchGFX-GUI</span></code>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulator dependencies (Debian/Ubuntu)</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>build-essential<span class="w"> </span>libsdl2-dev<span class="w"> </span>libsdl2-image-dev<span class="w"> </span>libjpeg-dev<span class="w"> </span>ruby<span class="w"> </span>ruby-nokogiri
+
+<span class="c1"># Build (UNA_SDK is the absolute path to the repo root)</span>
+<span class="nv">UNA_SDK</span><span class="o">=</span>/absolute/path/to/una-sdk<span class="w"> </span>make<span class="w"> </span>-f<span class="w"> </span>simulator/gcc/Makefile<span class="w"> </span>-j<span class="s2">"</span><span class="k">$(</span>nproc<span class="k">)</span><span class="s2">"</span>
+
+<span class="c1"># Run headless (no X display needed)</span>
+<span class="nv">SDL_VIDEODRIVER</span><span class="o">=</span>dummy<span class="w"> </span><span class="nv">SDL_AUDIODRIVER</span><span class="o">=</span>dummy<span class="w"> </span>./build/bin/simulator.out
+</pre></div>
+</div>
+<p>The build links <code class="docutils literal notranslate"><span class="pre">touchgfx</span> <span class="pre">SDL2</span> <span class="pre">SDL2_image</span> <span class="pre">jpeg</span> <span class="pre">rt</span> <span class="pre">m</span> <span class="pre">pthread</span> <span class="pre">dl</span></code>. To add your own headers or sources to the Linux build, edit <code class="docutils literal notranslate"><span class="pre">simulator/gcc/Makefile</span></code> (<code class="docutils literal notranslate"><span class="pre">ADDITIONAL_INCLUDE_PATHS</span></code> / <code class="docutils literal notranslate"><span class="pre">ADDITIONAL_SOURCES_UNA</span></code>), as described under <a class="reference internal" href="#gcc"><span class="xref myst">GCC</span></a> above.</p>
+</section>
+<section id="what-makes-the-linux-build-work">
+<h3>What makes the Linux build work<a class="headerlink" href="#what-makes-the-linux-build-work" title="Link to this heading"></a></h3>
+<p>Linux support is spread across the repo rather than in one place:</p>
+<ul class="simple">
+<li><p><strong>SDK (<code class="docutils literal notranslate"><span class="pre">Libs/</span></code>)</strong> — the simulator layer is platform-split with <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code> / <code class="docutils literal notranslate"><span class="pre">#else</span></code>: POSIX <code class="docutils literal notranslate"><span class="pre">GetTickCount64()</span></code> / <code class="docutils literal notranslate"><span class="pre">Sleep()</span></code> shims (via <code class="docutils literal notranslate"><span class="pre">clock_gettime</span></code> and <code class="docutils literal notranslate"><span class="pre">usleep</span></code>), a <code class="docutils literal notranslate"><span class="pre">dirent</span></code>-based FileSystem backend, message-size <code class="docutils literal notranslate"><span class="pre">static_assert</span></code>s guarded to 32-bit (ARM) builds with <code class="docutils literal notranslate"><span class="pre">#if</span> <span class="pre">__SIZEOF_POINTER__</span> <span class="pre">==</span> <span class="pre">4</span></code>, and a C-valid plain <code class="docutils literal notranslate"><span class="pre">strncpy</span></code> in <code class="docutils literal notranslate"><span class="pre">StdLibWrappers.c</span></code>.</p></li>
+<li><p><strong>Vendored TouchGFX tooling (<code class="docutils literal notranslate"><span class="pre">ThirdParty/</span></code>)</strong> — the Linux asset converters carry the execute bit and the <code class="docutils literal notranslate"><span class="pre">textconvert</span></code> Ruby scripts run on modern Ruby. See <a class="reference internal" href="ThirdParty-Local-Patches.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">ThirdParty-Local-Patches.md</span></code></span></a>.</p></li>
+<li><p><strong>Per-app config</strong> — each <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> project tracks <code class="docutils literal notranslate"><span class="pre">config/gcc/app.mk</span></code> (it holds the repo-relative <code class="docutils literal notranslate"><span class="pre">touchgfx_path</span></code> the Linux <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code> hard-includes), adds <code class="docutils literal notranslate"><span class="pre">-no-pie</span></code> to the Linux linker options in <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code>, and guards its <code class="docutils literal notranslate"><span class="pre">Windows.h</span></code> include with <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code>.</p></li>
+<li><p><strong>CI</strong> — <code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds and headlessly smoke-runs the simulator (non-gating).</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sdk-setup.html" class="btn btn-neutral float-left" title="SDK Setup and Build Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tutorials/HelloWorld/ARCHITECTURE.html" class="btn btn-neutral float-right" title="HelloWorld - Introduction to UNA App Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
