@@ -14,6 +14,15 @@ Importing the pack
 2. Go to the **File browser** and choose **Import**, or drag the ``.fig`` file onto an open Figma project.
 3. Duplicate the frame you want to start from and lay out your own screen inside it.
 
+Penpot version
+---------------
+
+The same pack is also provided for `Penpot <https://penpot.app>`_, a free, open-source design tool: ``Docs/Templates/Penpot-UI-Kit/UNA-Watch-UI-Resource-Pack.penpot``, converted from pack version 1.0 with the Penpot Exporter plugin.
+
+:download:`Download the Penpot version <Templates/Penpot-UI-Kit/UNA-Watch-UI-Resource-Pack.penpot>`
+
+To import it, sign in to Penpot (a free account is enough), open the **⋯** menu on **Drafts** or on a project, choose **Import Penpot files**, and pick the ``.penpot`` file. The hand-off rules below apply to it as they do to the Figma file.
+
 From Figma to the app
 ----------------------
 
