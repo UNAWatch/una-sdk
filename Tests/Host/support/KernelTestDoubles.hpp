@@ -157,8 +157,10 @@ public:
      *    isSystem is always false.
      *  - **A name longer than ObjectInfo::name cannot round-trip.** It is
      *    reported clipped, exactly as the simulator's safe_strcpy would clip
-     *    it. Real backends cap a single name well below that, so seeding one
-     *    that long is a test-authoring mistake rather than a case to model.
+     *    it. FatFs on the watch allows 255-character names, exactly what
+     *    ObjectInfo::name holds, so the watch never clips one; seeding a
+     *    longer name is a test-authoring mistake. A full-width name is
+     *    real, though, and too long to join onto any directory.
      */
     class InMemoryDirectory : public SDK::Interface::IDirectory {
     public:

@@ -72,16 +72,10 @@ Config::Config(const SDK::Kernel &kernel)
             if (item.isDir || !hasUappExtension(item.name)) {
                 continue;
             }
-            // Per iteration and zero-initialised, so an entry whose path is
-            // declined below names nothing at all rather than inheriting what
-            // the last one left here.
-            char candidate[SDK::Interface::IFileSystem::skMaxPathLen] {};
-
             // ObjectInfo::name is as wide as a whole path, so "/" + name need
-            // not fit in one. A name too long to form a path is as unreadable
-            // as one whose flags will not load, and takes the same
-            // conservative branch: a truncated path would name some other
-            // file, and opening the wrong .uapp is worse than opening none.
+            // not fit in one, and a truncated path would name some other
+            // file. The kernel's scan skips a name too long to form a path
+            // and carries on, so this does too.
             //
             // Measuring first, rather than recovering the length from
             // snprintf, is what keeps the path free of anything to truncate --
@@ -89,14 +83,15 @@ Config::Config(const SDK::Kernel &kernel)
             // as wide as its destination earns at the -Os -Wall app builds use.
             const size_t nameLen = strlen(item.name);
             // The path is '/' + name + '\0', so nameLen + 2 bytes.
-            const bool nameFits = nameLen + 2 <= sizeof(candidate);
-            if (nameFits) {
-                candidate[0] = '/';
-                memcpy(&candidate[1], item.name, nameLen + 1); // includes the NUL
+            if (nameLen + 2 > SDK::Interface::IFileSystem::skMaxPathLen) {
+                continue;
             }
+            char candidate[SDK::Interface::IFileSystem::skMaxPathLen];
+            candidate[0] = '/';
+            memcpy(&candidate[1], item.name, nameLen + 1); // includes the NUL
 
             uint32_t flags = 0;
-            if (!nameFits || !readFlags(kernel, candidate, flags) ||
+            if (!readFlags(kernel, candidate, flags) ||
                     (flags & kFlagVariantAlias) == 0) {
                 realAppSeen = true;
                 break;

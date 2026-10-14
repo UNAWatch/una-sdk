@@ -199,7 +199,7 @@ TEST(VariantConfig, AnUnreadableCandidateCountsAsARealApp)
         << "a .uapp whose flags cannot be read must not be assumed to be an alias";
 }
 
-// A name too long to form a candidate path must be declined, not silently
+// A name too long to form a candidate path must be skipped, not silently
 // truncated -- because a truncated path can name a *different, existing*
 // file, and adopting that file's identity is the failure this guards.
 //
@@ -226,7 +226,7 @@ TEST(VariantConfig, ANameTooLongToFormAPathIsNotSilentlyTruncatedIntoAnotherApp)
         aliasUapp(R"({"schema":1,"name":"WRONG","fit":{"sport":99}})");
 
     // Positive control. "Runs classic" is also what a scan that saw nothing
-    // produces, so the decline below only means something once the same
+    // produces, so the skip below only means something once the same
     // payload is known to be adoptable when its name is one character
     // shorter -- isolating length as the sole reason for the difference.
     // (The decoy itself ends ".uap" and so is never a candidate in its own
@@ -251,40 +251,49 @@ TEST(VariantConfig, ANameTooLongToFormAPathIsNotSilentlyTruncatedIntoAnotherApp)
     SDK::Variant::Config config(fixture.kernel);
 
     EXPECT_FALSE(config.isVariant())
-        << "an unformable path must be declined, not clipped into a neighbour";
+        << "an unformable path must be skipped, not clipped into a neighbour";
     EXPECT_STRNE(config.name("Run"), "WRONG")
         << "the app must never adopt the identity of a file it reached by truncation";
     EXPECT_STREQ(config.name("Run"), "Run");
 }
 
-// A declined name must not inherit the path of the entry scanned before it.
-// If a candidate buffer outlived the iteration that filled it, an entry whose
-// own path cannot be formed would be read against whatever the last entry
-// left behind, and the app would adopt that one -- the same wrong-identity
-// failure a truncated path causes, by another route.
+// The kernel's scan skips a name too long to form a path and carries on, and
+// Config must pick the file the kernel picked. So the overlong entry neither
+// counts as a real app nor ends the scan: the alias before it is still this
+// variant's identity, and a real app after it still makes the app classic.
 //
-// "AAA.uapp" sorts first and is a perfectly good alias, so it is exactly what
-// a stale buffer would be holding. The overlong entry that follows must still
-// force the classic path.
-TEST(VariantConfig, ADeclinedNameDoesNotInheritThePreviousCandidatesPath)
+// 255 chars: survives the listing intact, overflows only once '/' is
+// prepended -- so its own path is never formed.
+TEST(VariantConfig, ANameTooLongToFormAPathIsSkippedAndTheScanCarriesOn)
 {
-    KernelFixture fixture;
-    fixture.fileSystem.seedFile(
-        "/AAA.uapp", aliasUapp(R"({"schema":1,"name":"STALE","fit":{"sport":11}})"));
-
-    // 255 chars: survives the listing intact, overflows only once '/' is
-    // prepended -- so its own path is never formed.
     const std::string longName = std::string(250, 'z') + ".uapp";
     ASSERT_EQ(longName.size(), 255u);
-    fixture.fileSystem.seedFile("/" + longName, aliasUapp(kWalkJson));
-    expectSandboxLists(fixture.fileSystem, { "AAA.uapp", longName });
 
-    SDK::Variant::Config config(fixture.kernel);
-    EXPECT_FALSE(config.isVariant())
-        << "an unformable candidate counts as a real app, whatever preceded it";
-    EXPECT_STRNE(config.name("Run"), "STALE")
-        << "the scan must not re-read the previous entry's path";
-    EXPECT_STREQ(config.name("Run"), "Run");
+    {
+        KernelFixture fixture;
+        fixture.fileSystem.seedFile("/AAA.uapp", aliasUapp(kWalkJson));
+        fixture.fileSystem.seedFile("/" + longName, realUapp());
+        expectSandboxLists(fixture.fileSystem, { "AAA.uapp", longName });
+
+        SDK::Variant::Config config(fixture.kernel);
+        EXPECT_TRUE(config.isVariant())
+            << "a skipped name is not a real app, whatever it holds";
+        EXPECT_STREQ(config.name("Run"), "Walk");
+    }
+
+    // '~' sorts after 'z', so the real app is only seen if the scan carries on
+    // past the skipped entry.
+    {
+        KernelFixture fixture;
+        fixture.fileSystem.seedFile("/AAA.uapp", aliasUapp(kWalkJson));
+        fixture.fileSystem.seedFile("/" + longName, aliasUapp(kWalkJson));
+        fixture.fileSystem.seedFile("/~real.uapp", realUapp());
+        expectSandboxLists(fixture.fileSystem, { "AAA.uapp", longName, "~real.uapp" });
+
+        SDK::Variant::Config config(fixture.kernel);
+        EXPECT_FALSE(config.isVariant()) << "the scan must not stop at a skipped name";
+        EXPECT_STREQ(config.name("Run"), "Run");
+    }
 }
 
 TEST(VariantConfig, NonUappFilesAreIgnored)

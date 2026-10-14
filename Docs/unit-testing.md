@@ -133,8 +133,11 @@ All deliberate. Check these before writing a test that leans on one:
   leading `.` in the name, as the POSIX simulator does; `isSystem` is always
   false.
 - **A name longer than `ObjectInfo::name` cannot round-trip**; it comes back
-  clipped, as the simulator's `safe_strcpy` would clip it. Real backends cap
-  a single name well below that. Names are deduplicated *before* clipping, so
+  clipped, as the simulator's `safe_strcpy` would clip it. FatFs on the watch
+  allows 255-character names, exactly what `ObjectInfo::name` holds, so the
+  watch never clips one and only a test can seed a longer name. A full-width
+  name is real, though, and cannot be joined onto any directory within
+  `skMaxPathLen`. Names are deduplicated *before* clipping, so
   two names differing only past that capacity come back as two identical
   entries — the one case where a listing repeats a name.
 
