@@ -194,7 +194,10 @@ bool InMemoryFileSystem::InMemoryFile::open(bool wMode, bool override)
 
     if (wMode) {
         auto& entry = mFs.files[mCanonicalPath];
-        entry.exists = true;
+        if (!entry.exists) {
+            entry.exists = true;
+            entry.created = mFs.nextCreated();
+        }
         if (override) {
             entry.content.clear();
         }
@@ -266,7 +269,10 @@ bool InMemoryFileSystem::InMemoryFile::write(const char* buff, size_t btw, size_
     }
 
     auto& entry = mFs.files[mCanonicalPath];
-    entry.exists = true;
+    if (!entry.exists) {
+        entry.exists = true;
+        entry.created = mFs.nextCreated();
+    }
 
     if (mPos > entry.content.size()) {
         entry.content.resize(mPos, '\0');
@@ -381,6 +387,10 @@ bool InMemoryFileSystem::directoryExists(const std::string& path) const
         return true;
     }
     const std::string prefix = dir + "/";
+    const auto below = directories.lower_bound(prefix);
+    if (below != directories.end() && below->compare(0, prefix.size(), prefix) == 0) {
+        return true;
+    }
     for (const auto& kv : files) {
         if (kv.second.exists && kv.first.compare(0, prefix.size(), prefix) == 0) {
             return true;
@@ -433,7 +443,10 @@ bool InMemoryFileSystem::InMemoryDirectory::create()
     if (mFs.fileExistsAt(mCanonicalPath) || !mFs.directoryExists(parent)) {
         return false;
     }
-    mFs.directories.insert(mCanonicalPath);
+    const uint64_t created = mFs.createdForNewDirectory(mCanonicalPath);
+    if (mFs.directories.insert(mCanonicalPath).second) {
+        mFs.mDirectoryCreated[mCanonicalPath] = created;
+    }
     return true;
 }
 
@@ -443,6 +456,12 @@ void InMemoryFileSystem::InMemoryDirectory::snapshot()
     mCursor = 0;
 
     std::map<std::string, Entry> byName;
+    const auto addDirectory = [&byName](const std::string& name, uint64_t created) {
+        auto [it, added] = byName.emplace(name, Entry{ name, true, 0, created });
+        if (!added) {
+            it->second.created = std::min(it->second.created, created);
+        }
+    };
     const std::string prefix = isRoot(mCanonicalPath) ? std::string() : mCanonicalPath + "/";
 
     for (const auto& kv : mFs.files) {
@@ -455,25 +474,29 @@ void InMemoryFileSystem::InMemoryDirectory::snapshot()
         }
         const size_t slash = rest.find('/');
         if (slash == std::string::npos) {
-            byName[rest] = Entry{ rest, false, kv.second.content.size() };
+            byName[rest] = Entry{ rest, false, kv.second.content.size(), kv.second.created };
         } else {
-            const std::string child = rest.substr(0, slash);
-            byName.emplace(child, Entry{ child, true, 0 });
+            addDirectory(rest.substr(0, slash), kv.second.created);
         }
     }
 
     for (const std::string& dir : mFs.directories) {
-        if (parentOf(dir) != mCanonicalPath || isRoot(dir)) {
+        if (dir.compare(0, prefix.size(), prefix) != 0) {
             continue;
         }
-        const std::string child = baseNameOf(dir);
-        byName.emplace(child, Entry{ child, true, 0 });
+        const std::string rest = dir.substr(prefix.size());
+        const auto created = mFs.mDirectoryCreated.find(dir);
+        addDirectory(rest.substr(0, rest.find('/')),
+                     created == mFs.mDirectoryCreated.end() ? 0 : created->second);
     }
 
     mEntries.reserve(byName.size());
     for (auto& kv : byName) {
         mEntries.push_back(std::move(kv.second));
     }
+    std::stable_sort(mEntries.begin(), mEntries.end(), [](const Entry& a, const Entry& b) {
+        return a.created < b.created;
+    });
 }
 
 bool InMemoryFileSystem::InMemoryDirectory::open()
@@ -526,6 +549,26 @@ bool InMemoryFileSystem::InMemoryDirectory::close()
     return true;
 }
 
+uint64_t InMemoryFileSystem::createdForNewDirectory(const std::string& canonical)
+{
+    if (!directoryExists(canonical)) {
+        return nextCreated();
+    }
+    uint64_t oldest = UINT64_MAX;
+    const std::string prefix = canonical + "/";
+    for (const auto& kv : files) {
+        if (kv.second.exists && kv.first.compare(0, prefix.size(), prefix) == 0) {
+            oldest = std::min(oldest, kv.second.created);
+        }
+    }
+    for (const auto& kv : mDirectoryCreated) {
+        if (directories.count(kv.first) != 0 && kv.first.compare(0, prefix.size(), prefix) == 0) {
+            oldest = std::min(oldest, kv.second);
+        }
+    }
+    return oldest;
+}
+
 bool InMemoryFileSystem::mkdir(const char* path)
 {
     if (path == nullptr) {
@@ -538,9 +581,11 @@ bool InMemoryFileSystem::mkdir(const char* path)
         }
     }
     for (std::string dir = requested; !isRoot(dir); dir = parentOf(dir)) {
+        const uint64_t created = createdForNewDirectory(dir);
         if (!directories.insert(dir).second) {
             break;
         }
+        mDirectoryCreated[dir] = created;
     }
     return true;
 }
@@ -626,6 +671,7 @@ bool InMemoryFileSystem::rename(const char* oldPath, const char* newPath)
     }
     InMemoryFileEntry moved = std::move(it->second);
     files.erase(it);
+    moved.created = nextCreated();
     files[target] = std::move(moved);
     return true;
 }
@@ -648,6 +694,7 @@ bool InMemoryFileSystem::copy(const char* oldPath, const char* newPath)
         return true;
     }
     InMemoryFileEntry entry = it->second;
+    entry.created = fileExistsAt(target) ? files[target].created : nextCreated();
     files[target] = std::move(entry);
     return true;
 }
@@ -683,13 +730,29 @@ bool InMemoryFileSystem::objectInfo(const char* path, ObjectInfo& item) const
     return true;
 }
 
+size_t& InMemoryFileSystem::PathCounts::operator[](const std::string& path)
+{
+    return mCounts[canonicalPath(path)];
+}
+
+size_t InMemoryFileSystem::PathCounts::at(const std::string& path) const
+{
+    return mCounts.at(canonicalPath(path));
+}
+
+size_t InMemoryFileSystem::PathCounts::count(const std::string& path) const
+{
+    return mCounts.count(canonicalPath(path));
+}
+
 bool InMemoryFileSystem::seedFile(const std::string& path, std::string content)
 {
     const std::string target = canonicalPath(path);
     if (!canHoldFileAt(target)) {
         return false;
     }
-    files[target] = InMemoryFileEntry{ std::move(content), true };
+    const uint64_t created = fileExistsAt(target) ? files[target].created : nextCreated();
+    files[target] = InMemoryFileEntry{ std::move(content), true, created };
     return true;
 }
 

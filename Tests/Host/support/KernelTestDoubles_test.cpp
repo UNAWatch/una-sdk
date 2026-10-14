@@ -16,6 +16,20 @@
 
 using SDK::TestSupport::InMemoryFileSystem;
 
+TEST(InMemoryFileSystem, InstrumentationReadsTheSameForEitherSpellingOfAPath)
+{
+    InMemoryFileSystem fs;
+    auto f = fs.file("/Activity/a.fit");
+    ASSERT_TRUE(f->open(/*wMode=*/true));
+    ASSERT_TRUE(f->flush());
+
+    EXPECT_EQ(fs.openHandles["/Activity/a.fit"], 1u);
+    EXPECT_EQ(fs.openHandles["Activity/a.fit"], 1u);
+    EXPECT_EQ(fs.openHandles.at("/Activity/a.fit/"), 1u);
+    EXPECT_EQ(fs.flushCounts.count("/Activity/a.fit"), 1u);
+    EXPECT_EQ(fs.flushCounts["Activity/a.fit"], 1u);
+}
+
 // The open-handle instrumentation is keyed by path: an IFile::rename() on an
 // OPEN handle must migrate the count to the new path. Without the migration
 // the old bucket stays nonzero forever (a phantom leak) and the eventual
@@ -144,7 +158,7 @@ TEST(InMemoryDirectory, ListsDirectChildrenOnly)
     fs.seedFile("Settings/app.json", "x");
 
     EXPECT_EQ(listDir(fs, "Activity"),
-              (std::vector<std::string>{ "evening.fit", "morning.fit" }));
+              (std::vector<std::string>{ "morning.fit", "evening.fit" }));
 }
 
 TEST(InMemoryDirectory, ReportsAnImpliedSubdirectoryWithIsDirSet)
@@ -184,7 +198,7 @@ TEST(InMemoryDirectory, AbsoluteAndRelativeSpellingsShareTheRoot)
     fs.seedFile("bare.txt", "y");
 
     EXPECT_EQ(listDir(fs, "/"),
-              (std::vector<std::string>{ "bare.txt", "leading-slash.txt" }));
+              (std::vector<std::string>{ "leading-slash.txt", "bare.txt" }));
 }
 
 TEST(InMemoryDirectory, SpellingsAgreeAtEveryDepthAndForLookupToo)
@@ -286,7 +300,7 @@ TEST(InMemoryDirectory, DotSegmentsAreNotResolved)
     EXPECT_FALSE(fs.exist("a/b/../b/c.txt"));
 
     fs.seedFile("a/./d.txt", "y");
-    EXPECT_EQ(listDir(fs, "a"), (std::vector<std::string>{ "./", "b/" }));
+    EXPECT_EQ(listDir(fs, "a"), (std::vector<std::string>{ "b/", "./" }));
     EXPECT_EQ(listDir(fs, "a/."), (std::vector<std::string>{ "d.txt" }));
 }
 
@@ -421,7 +435,93 @@ TEST(InMemoryFileSystem, ExistSeparatesTheRootFromAnEmptyPath)
     EXPECT_FALSE(fs.objectInfo(nullptr, item));
 }
 
-TEST(InMemoryDirectory, EnumerationOrderIsSortedAndReproducible)
+TEST(InMemoryDirectory, WhatCodeCreatesThroughTheInterfaceListsInCreationOrder)
+{
+    InMemoryFileSystem fs;
+    const auto write = [&fs](const char* path, const char* text) {
+        auto f = fs.file(path);
+        ASSERT_TRUE(f->open(/*wMode=*/true, /*override=*/true));
+        size_t written = 0;
+        ASSERT_TRUE(f->write(text, std::strlen(text), written));
+        ASSERT_TRUE(f->close());
+    };
+    write("d/zulu.txt", "z");
+    write("d/alpha.txt", "a");
+    ASSERT_TRUE(fs.dir("d/sub")->create());
+    ASSERT_TRUE(fs.copy("d/alpha.txt", "d/copy.txt"));
+    EXPECT_EQ(listDir(fs, "d"),
+              (std::vector<std::string>{ "zulu.txt", "alpha.txt", "sub/", "copy.txt" }));
+
+    write("d/zulu.txt", "again");
+    ASSERT_TRUE(fs.copy("d/zulu.txt", "d/alpha.txt"));
+    ASSERT_TRUE(fs.dir("d/sub")->create());
+    EXPECT_EQ(listDir(fs, "d"),
+              (std::vector<std::string>{ "zulu.txt", "alpha.txt", "sub/", "copy.txt" }))
+        << "an overwrite, a copy onto a file and creating an existing directory keep their place";
+
+    auto held = fs.file("d/alpha.txt");
+    ASSERT_TRUE(held->open(/*wMode=*/true));
+    ASSERT_TRUE(fs.remove("d/alpha.txt"));
+    size_t written = 0;
+    ASSERT_TRUE(held->write("a", 1, written));
+    ASSERT_TRUE(held->close());
+    EXPECT_EQ(listDir(fs, "d"),
+              (std::vector<std::string>{ "zulu.txt", "sub/", "copy.txt", "alpha.txt" }))
+        << "a write through a handle whose file was removed creates it again";
+
+    ASSERT_TRUE(fs.remove("d/zulu.txt"));
+    ASSERT_TRUE(fs.remove("d/copy.txt"));
+    ASSERT_TRUE(fs.copy("d/alpha.txt", "d/copy.txt"));
+    write("d/zulu.txt", "z");
+    EXPECT_EQ(listDir(fs, "d"),
+              (std::vector<std::string>{ "sub/", "alpha.txt", "copy.txt", "zulu.txt" }))
+        << "a re-created file goes last";
+}
+
+TEST(InMemoryDirectory, AnImpliedDirectorySitsWhereItsOldestContentDoes)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("r/a/x.txt", "x");
+    fs.seedFile("r/b.txt", "b");
+    for (int i = 0; i < 16; ++i) {
+        fs.seedFile("r/a/y" + std::to_string(i) + ".txt", "y");
+    }
+    EXPECT_EQ(listDir(fs, "r"), (std::vector<std::string>{ "a/", "b.txt" }));
+
+    ASSERT_TRUE(fs.remove("r/a/x.txt"));
+    EXPECT_EQ(listDir(fs, "r"), (std::vector<std::string>{ "b.txt", "a/" }));
+
+    ASSERT_TRUE(fs.mkdir("r/c/deeper"));
+    EXPECT_EQ(listDir(fs, "r"), (std::vector<std::string>{ "b.txt", "a/", "c/" }))
+        << "a directory beneath counts as content";
+}
+
+TEST(InMemoryDirectory, MakingAnImpliedDirectoryExplicitKeepsItsPlace)
+{
+    for (const bool viaCreate : { false, true }) {
+        InMemoryFileSystem fs;
+        fs.seedFile("a/x.txt", "x");
+        fs.seedFile("b.txt", "b");
+        if (viaCreate) {
+            ASSERT_TRUE(fs.dir("a")->create());
+        } else {
+            ASSERT_TRUE(fs.mkdir("a"));
+        }
+        ASSERT_TRUE(fs.remove("a/x.txt"));
+        EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "a/", "b.txt" })) << viaCreate;
+    }
+    InMemoryFileSystem fs;
+    fs.seedFile("a/x.txt", "x");
+    ASSERT_TRUE(fs.dir("a/b")->create());
+    fs.seedFile("z.txt", "z");
+    ASSERT_TRUE(fs.remove("a/x.txt"));
+    ASSERT_TRUE(fs.mkdir("a"));
+    ASSERT_TRUE(fs.remove("a/b"));
+    EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "a/", "z.txt" }))
+        << "held only by a directory beneath it";
+}
+
+TEST(InMemoryDirectory, EnumerationIsInCreationOrderAndReproducible)
 {
     InMemoryFileSystem fs;
     for (const char* name : { "zulu", "alpha", "mike", "bravo", "yankee" }) {
@@ -429,10 +529,22 @@ TEST(InMemoryDirectory, EnumerationOrderIsSortedAndReproducible)
     }
 
     const std::vector<std::string> expected{
-        "alpha.txt", "bravo.txt", "mike.txt", "yankee.txt", "zulu.txt"
+        "zulu.txt", "alpha.txt", "mike.txt", "bravo.txt", "yankee.txt"
     };
     EXPECT_EQ(listDir(fs, "d"), expected);
     EXPECT_EQ(listDir(fs, "d"), expected) << "and stable across repeated listings";
+
+    fs.seedFile("d/alpha.txt", "overwritten");
+    EXPECT_EQ(listDir(fs, "d"), expected) << "an overwrite keeps its place";
+
+    ASSERT_TRUE(fs.rename("d/zulu.txt", "d/xray.txt"));
+    ASSERT_TRUE(fs.remove("d/mike.txt"));
+    fs.seedFile("d/mike.txt", "x");
+    ASSERT_TRUE(fs.mkdir("d/sub"));
+    EXPECT_EQ(listDir(fs, "d"),
+              (std::vector<std::string>{ "alpha.txt", "bravo.txt", "yankee.txt", "xray.txt",
+                                         "mike.txt", "sub/" }))
+        << "a rename, a re-creation and a new directory each go last";
 }
 
 TEST(InMemoryDirectory, ReportsEntrySize)
@@ -594,7 +706,7 @@ TEST(InMemoryFileSystem, RenameAndCopyRefuseADestinationThatCannotHoldAFile)
     EXPECT_FALSE(fs.copy("src.txt", "d"));
     EXPECT_EQ(fs.readFile("src.txt"), "SRC") << "every refusal left the source alone";
     EXPECT_EQ(listDir(fs, "/"),
-              (std::vector<std::string>{ "blocker.txt", "d/", "src.txt" }));
+              (std::vector<std::string>{ "src.txt", "d/", "blocker.txt" }));
 
     EXPECT_FALSE(fs.rename("src.txt", "blocker.txt")) << "an existing file";
     EXPECT_FALSE(fs.rename("src.txt", "/blocker.txt/")) << "the same, spelled differently";
@@ -668,9 +780,23 @@ TEST(InMemoryDirectory, RemoveRefusesANonEmptyDirectory)
     ASSERT_TRUE(fs.mkdir("d/sub"));
     EXPECT_FALSE(fs.remove("d")) << "a directory holding only a subdirectory";
 
+    EXPECT_FALSE(fs.dir("d")->remove()) << "through IDirectory too";
+
     ASSERT_TRUE(fs.remove("d/sub"));
     EXPECT_TRUE(fs.remove("d")) << "empty now";
     EXPECT_FALSE(fs.exist("d"));
+}
+
+TEST(InMemoryDirectory, AnExplicitSubdirectoryKeepsItsImpliedParent)
+{
+    InMemoryFileSystem fs;
+    fs.seedFile("a/x.txt", "x");
+    ASSERT_TRUE(fs.dir("a/b")->create());
+    ASSERT_TRUE(fs.remove("a/x.txt"));
+
+    EXPECT_TRUE(fs.exist("a"));
+    EXPECT_EQ(listDir(fs, "/"), (std::vector<std::string>{ "a/" }));
+    EXPECT_FALSE(fs.seedFile("a", "file")) << "a file over a directory";
 }
 
 TEST(InMemoryDirectory, AnImpliedDirectoryVanishesWithItsLastChild)

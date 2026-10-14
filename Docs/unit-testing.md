@@ -71,7 +71,7 @@ auto dir = fixture.kernel.fs.dir("Activity");
 ASSERT_TRUE(dir->open());
 SDK::Interface::IFileSystem::ObjectInfo item{};
 while (dir->readNext(item)) {
-    // "archive" (isDir true), then "morning.fit" (isDir false)
+    // "morning.fit" (isDir false), then "archive" (isDir true)
 }
 dir->close();
 ```
@@ -80,12 +80,10 @@ Worth knowing:
 
 - **Direct children only.** `Activity/archive/old.fit` shows up as the
   directory `archive` when listing `Activity`.
-- **Enumeration is sorted by name**, so tests are reproducible. The device
-  makes no such promise, so rely on the order being stable, not on what it is.
 - **`mkdir()` creates parents** and succeeds if the directory already exists;
   `IDirectory::create()` does not create parents.
-- **A name from a listing is openable as `"/" + name`**, and a listing never
-  reports the same name twice, for every name that fits `ObjectInfo::name`.
+- **A listing never reports the same name twice**, for every name that fits
+  `ObjectInfo::name`.
 - Opening a directory that does not exist fails, so assert on `open()`.
 
 ### Prove the scan is live
@@ -100,34 +98,35 @@ property under test.
 
 Check these before writing a test that leans on one:
 
+- **Entries are listed in the order they were created**, which is not name
+  order, so seed in the order a test needs. Overwriting a file keeps its
+  place; a rename, or a file removed and created again, goes last, where
+  FatFs would reuse the first free slot. An implied directory sits where
+  its oldest remaining content does.
 - **A listing is a snapshot taken at `open()`.** Files seeded mid-scan appear
-  only after `readNext(item, /*reset=*/true)`, which rewinds without reading
-  an entry.
+  after `readNext(item, /*reset=*/true)`.
 - **An implied directory is only as durable as its contents.** It stops
-  existing when its last file is removed. Call `mkdir()` if a test needs it
-  to outlive its children.
+  existing when the last thing under it is removed. Call `mkdir()` if a test
+  needs it to outlive its children.
 - **Leading and trailing slashes are not significant**, and runs of `/`
   collapse: `/a.txt`, `a.txt`, `a.txt/` are one object, as are `a//b` and
   `a/b`.
-- **The instrumentation is keyed the same way.** `openHandles`,
-  `flushCounts` and the `closeGate` argument use the path without leading or
-  trailing slashes, so index them as `"Activity/a.fit"`, never
-  `"/Activity/a.fit"`.
+- **`closeGate` is passed the path without leading or trailing slashes.**
+  `openHandles` and `flushCounts` read the same for either spelling.
 - **Names are case-sensitive.** `Walk.uapp` and `WALK.UAPP` are two files.
 - **A file may be created under a directory that does not exist.** `mkdir()`
   the parents first if a test needs that failure.
 - **No `.` / `..` resolution.** Both are ordinary path segments.
 - **Directory rename is not modelled**; it returns false.
-- **`isHidden` is derived from a leading `.`** in the name; `isSystem` is
-  always false.
+- **`isHidden` is derived from a leading `.`** in the name.
 - **A name longer than `ObjectInfo::name` comes back clipped**, and two names
   differing only past that length come back as identical entries. FatFs caps
   a long file name at 255 characters, which fits, so only a test can seed
   such a name. A 255-character name is real, and cannot be joined onto any
   directory within `skMaxPathLen`.
 
-The fake refuses: one name as both a file and a directory (`mkdir()`,
-`IDirectory::create()`, a write-`open()` and `seedFile()` all enforce this);
+The fake refuses: a `mkdir()`, `IDirectory::create()`, write-`open()` or
+`seedFile()` where the other kind of object already holds the name;
 a removed path as the source of `rename()` or `copy()`; a destination that is
 the root, an existing directory, or under a file; a `rename()` onto an
 existing file, which FatFs `f_rename` also refuses; removing a directory that

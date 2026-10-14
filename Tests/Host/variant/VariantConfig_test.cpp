@@ -112,7 +112,7 @@ TEST(VariantConfig, ASingleAliasBecomesTheVariant)
     EXPECT_EQ(config.featureU32("autoLapMetres", 0u), 1000u);
 }
 
-TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenItSortsFirst)
+TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenListedFirst)
 {
     KernelFixture fixture;
     fixture.fileSystem.seedFile("/AAA-real.uapp", realUapp());
@@ -124,7 +124,7 @@ TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenItSortsFirst)
     EXPECT_STREQ(config.name("Run"), "Run");
 }
 
-TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenItSortsLast)
+TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenListedLast)
 {
     KernelFixture fixture;
     fixture.fileSystem.seedFile("/AAA-alias.uapp", aliasUapp(kWalkJson));
@@ -141,9 +141,9 @@ TEST(VariantConfig, TheFirstAliasEnumeratedWinsWhenThereAreSeveral)
 {
     KernelFixture fixture;
     fixture.fileSystem.seedFile(
-        "/AAA.uapp", aliasUapp(R"({"schema":1,"name":"First","fit":{"sport":11}})"));
+        "/ZZZ.uapp", aliasUapp(R"({"schema":1,"name":"First","fit":{"sport":11}})"));
     fixture.fileSystem.seedFile(
-        "/ZZZ.uapp", aliasUapp(R"({"schema":1,"name":"Second","fit":{"sport":12}})"));
+        "/AAA.uapp", aliasUapp(R"({"schema":1,"name":"Second","fit":{"sport":12}})"));
 
     SDK::Variant::Config config(fixture.kernel);
     ASSERT_TRUE(config.isVariant());
@@ -188,7 +188,7 @@ TEST(VariantConfig, ANameTooLongToFormAPathIsNotSilentlyTruncatedIntoAnotherApp)
     fixture.fileSystem.seedFile(longPath, aliasUapp(kWalkJson));
     fixture.fileSystem.seedFile(clippedPath, wrongAlias);
     expectSandboxLists(fixture.fileSystem,
-                       { clippedPath.substr(1), longPath.substr(1) });
+                       { longPath.substr(1), clippedPath.substr(1) });
 
     SDK::Variant::Config config(fixture.kernel);
 
