@@ -1,24 +1,3 @@
-/**
- ******************************************************************************
- * @file    VariantConfig_test.cpp
- * @brief   Tests for the app-side variant reader's sandbox-root scan.
- ******************************************************************************
- *
- * Config's constructor picks which .uapp in the sandbox root defines this
- * app's identity, following the mixed-directory determinism rules: any real
- * (non-alias) .uapp means the app runs as its classic self; otherwise the
- * first alias-flagged .uapp is the variant; and an unreadable candidate
- * counts as real. Those rules decide what a user sees their activity called,
- * so they are worth pinning.
- *
- * Every case here goes through a real directory scan, which InMemoryFileSystem
- * only supports now that it enumerates seeded files. Because most of these
- * expect the app to run classic -- the same answer a scan that saw nothing
- * would give -- they assert the scan is live before trusting its verdict.
- *
- ******************************************************************************
- */
-
 #include "SDK/Variant/VariantConfig.hpp"
 
 #include <gtest/gtest.h>
@@ -34,9 +13,7 @@ using SDK::TestSupport::KernelFixture;
 
 namespace {
 
-// On-disk .uapp layout, mirroring the private constants in VariantConfig.cpp.
-// Duplicated deliberately: if the reader's offsets drift from the format,
-// these tests should fail rather than drift along with it.
+// Restated rather than shared with VariantConfig.cpp, so a drifted offset there fails here.
 constexpr uint32_t kFlagVariantAlias = 0x40;
 constexpr size_t   kFlagsOffset      = 20;
 constexpr size_t   kPayloadOffset    = 48 + 3600 + 900;
@@ -54,7 +31,6 @@ void putU32(std::string& blob, size_t offset, uint32_t value)
     }
 }
 
-/// A real (non-alias) app binary: flags without the alias bit, no payload.
 std::string realUapp()
 {
     std::string blob(kPayloadOffset, '\0');
@@ -62,7 +38,6 @@ std::string realUapp()
     return blob;
 }
 
-/// An alias .uapp carrying @p json as its embedded variant config.
 std::string aliasUapp(const std::string& json, uint32_t payloadVersion = kPayloadVersion)
 {
     std::string blob(kConfigOffset + json.size(), '\0');
@@ -73,16 +48,19 @@ std::string aliasUapp(const std::string& json, uint32_t payloadVersion = kPayloa
     return blob;
 }
 
+constexpr size_t kLongestListedName = sizeof(SDK::Interface::IFileSystem::ObjectInfo::name) - 1;
+constexpr size_t kLongestPath = SDK::Interface::IFileSystem::skMaxPathLen - 1;
+
+std::string uappNameOfLength(size_t length, char fill)
+{
+    const std::string extension = ".uapp";
+    return std::string(length - extension.size(), fill) + extension;
+}
+
 const char* kWalkJson =
     R"({"schema":1,"name":"Walk","fit":{"sport":11,"subSport":0},)"
     R"("features":{"showCadence":true,"autoLapMetres":1000}})";
 
-/// Assert that the sandbox root really enumerates @p expected.
-///
-/// Every "runs classic" expectation below is also exactly what a scan that
-/// saw *nothing* produces, so on its own such a test cannot tell a correct
-/// decision from a dead enumerator or a path the fake failed to resolve.
-/// Calling this first makes each one prove its fixture is live.
 void expectSandboxLists(SDK::TestSupport::InMemoryFileSystem& fs,
                         const std::vector<std::string>& expected)
 {
@@ -98,10 +76,6 @@ void expectSandboxLists(SDK::TestSupport::InMemoryFileSystem& fs,
 }
 
 } // namespace
-
-// --------------------------------------------------------------------------
-// Identity selection
-// --------------------------------------------------------------------------
 
 TEST(VariantConfig, EmptySandboxIsTheClassicApp)
 {
@@ -138,10 +112,6 @@ TEST(VariantConfig, ASingleAliasBecomesTheVariant)
     EXPECT_EQ(config.featureU32("autoLapMetres", 0u), 1000u);
 }
 
-// The mixed-directory rule: a real binary alongside an alias means the app is
-// its classic self, whichever order the scan happens to encounter them in.
-// Both orderings are exercised because the scan short-circuits on the first
-// real app it sees, so only one of them takes the early-break path.
 TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenItSortsFirst)
 {
     KernelFixture fixture;
@@ -167,12 +137,7 @@ TEST(VariantConfig, ARealAppAlongsideAnAliasWinsWhenItSortsLast)
     EXPECT_STREQ(config.name("Run"), "Run");
 }
 
-// Degenerate case -- a sandbox root is meant to hold exactly one .uapp -- but
-// the reader still has to be deterministic about it rather than picking at
-// random. Note this pins "the first alias *encountered*": the fake enumerates
-// alphabetically so the test is reproducible, while the device enumerates in
-// directory-entry order. Do not read this as an alphabetical guarantee.
-TEST(VariantConfig, TheFirstAliasWinsWhenThereAreSeveral)
+TEST(VariantConfig, TheFirstAliasEnumeratedWinsWhenThereAreSeveral)
 {
     KernelFixture fixture;
     fixture.fileSystem.seedFile(
@@ -189,8 +154,6 @@ TEST(VariantConfig, AnUnreadableCandidateCountsAsARealApp)
 {
     KernelFixture fixture;
     fixture.fileSystem.seedFile("/AAA.uapp", aliasUapp(kWalkJson));
-    // Shorter than kFlagsOffset + sizeof(u32), so the flags read fails
-    // outright rather than returning whatever bytes happen to be there.
     fixture.fileSystem.seedFile("/truncated.uapp", "short");
     expectSandboxLists(fixture.fileSystem, { "AAA.uapp", "truncated.uapp" });
 
@@ -199,40 +162,21 @@ TEST(VariantConfig, AnUnreadableCandidateCountsAsARealApp)
         << "a .uapp whose flags cannot be read must not be assumed to be an alias";
 }
 
-// A name too long to form a candidate path must be skipped, not silently
-// truncated -- because a truncated path can name a *different, existing*
-// file, and adopting that file's identity is the failure this guards.
-//
-// The two seeds below are sized so that clipping the long one's path yields
-// exactly the short one's path:
-//   long  "/xxx...x.uapp"  (256 chars -- one over the buffer)
-//   clip  "/xxx...x.uap"   (255 chars -- what snprintf would leave behind)
-// The decoy ends ".uap", so it is never a candidate in its own right; the
-// only way to reach it is through the truncation being fixed here.
 TEST(VariantConfig, ANameTooLongToFormAPathIsNotSilentlyTruncatedIntoAnotherApp)
 {
     KernelFixture fixture;
 
-    // ObjectInfo::name carries 255 chars plus a terminator, so a name of
-    // exactly 255 survives the listing with its extension intact and
-    // overflows only once the scan prepends its '/'.
-    const std::string longName = std::string(250, 'x') + ".uapp";
+    const std::string longName = uappNameOfLength(kLongestListedName, 'x');
     ASSERT_EQ(longName.size(), 255u);
     const std::string longPath = "/" + longName;
-    const std::string clippedPath = longPath.substr(0, 255);
+    const std::string clippedPath = longPath.substr(0, kLongestPath);
     ASSERT_EQ(clippedPath, "/" + std::string(250, 'x') + ".uap");
 
     const std::string wrongAlias =
         aliasUapp(R"({"schema":1,"name":"WRONG","fit":{"sport":99}})");
 
-    // Positive control. "Runs classic" is also what a scan that saw nothing
-    // produces, so the skip below only means something once the same
-    // payload is known to be adoptable when its name is one character
-    // shorter -- isolating length as the sole reason for the difference.
-    // (The decoy itself ends ".uap" and so is never a candidate in its own
-    // right; truncation is the only way anything reaches it.)
     {
-        const std::string longestThatFits = "/" + std::string(249, 'x') + ".uapp";
+        const std::string longestThatFits = "/" + uappNameOfLength(kLongestPath - 1, 'x');
         ASSERT_EQ(longestThatFits.size(), 255u);
         KernelFixture control;
         control.fileSystem.seedFile(longestThatFits, wrongAlias);
@@ -243,8 +187,6 @@ TEST(VariantConfig, ANameTooLongToFormAPathIsNotSilentlyTruncatedIntoAnotherApp)
 
     fixture.fileSystem.seedFile(longPath, aliasUapp(kWalkJson));
     fixture.fileSystem.seedFile(clippedPath, wrongAlias);
-    // Both are really there and really enumerated: the clipped one sorts
-    // first, being a prefix of the other.
     expectSandboxLists(fixture.fileSystem,
                        { clippedPath.substr(1), longPath.substr(1) });
 
@@ -257,16 +199,9 @@ TEST(VariantConfig, ANameTooLongToFormAPathIsNotSilentlyTruncatedIntoAnotherApp)
     EXPECT_STREQ(config.name("Run"), "Run");
 }
 
-// The kernel's scan skips a name too long to form a path and carries on, and
-// Config must pick the file the kernel picked. So the overlong entry neither
-// counts as a real app nor ends the scan: the alias before it is still this
-// variant's identity, and a real app after it still makes the app classic.
-//
-// 255 chars: survives the listing intact, overflows only once '/' is
-// prepended -- so its own path is never formed.
 TEST(VariantConfig, ANameTooLongToFormAPathIsSkippedAndTheScanCarriesOn)
 {
-    const std::string longName = std::string(250, 'z') + ".uapp";
+    const std::string longName = uappNameOfLength(kLongestListedName, 'z');
     ASSERT_EQ(longName.size(), 255u);
 
     {
@@ -281,8 +216,6 @@ TEST(VariantConfig, ANameTooLongToFormAPathIsSkippedAndTheScanCarriesOn)
         EXPECT_STREQ(config.name("Run"), "Walk");
     }
 
-    // '~' sorts after 'z', so the real app is only seen if the scan carries on
-    // past the skipped entry.
     {
         KernelFixture fixture;
         fixture.fileSystem.seedFile("/AAA.uapp", aliasUapp(kWalkJson));
@@ -309,14 +242,10 @@ TEST(VariantConfig, NonUappFilesAreIgnored)
     EXPECT_STREQ(config.name("Run"), "Walk");
 }
 
-// The scan skips directory entries. Reaching this guard at all needs a fake
-// that really enumerates, since the loop body is where it lives.
-TEST(VariantConfig, SubdirectoriesAreSkipped)
+TEST(VariantConfig, ADirectoryNamedLikeAUappIsSkipped)
 {
     KernelFixture fixture;
     fixture.fileSystem.seedFile("/Walk.uapp", aliasUapp(kWalkJson));
-    // A directory that ends in ".uapp" would pass the extension test, so the
-    // isDir guard is the only thing stopping it being opened as a candidate.
     fixture.fileSystem.seedFile("/Stale.uapp/leftover.bin", "junk");
 
     SDK::Variant::Config config(fixture.kernel);
@@ -325,10 +254,6 @@ TEST(VariantConfig, SubdirectoriesAreSkipped)
         << "a directory named like an app must not be treated as one";
 }
 
-// --------------------------------------------------------------------------
-// Never brick a launch: a malformed alias falls back to classic defaults.
-// --------------------------------------------------------------------------
-
 TEST(VariantConfig, AnUnknownPayloadVersionFallsBackToClassic)
 {
     KernelFixture fixture;
@@ -336,7 +261,7 @@ TEST(VariantConfig, AnUnknownPayloadVersionFallsBackToClassic)
     expectSandboxLists(fixture.fileSystem, { "Walk.uapp" });
 
     SDK::Variant::Config config(fixture.kernel);
-    EXPECT_FALSE(config.isVariant()) << "a shipped binary must not guess at a newer layout";
+    EXPECT_FALSE(config.isVariant()) << "a newer payload layout is not guessed at";
     EXPECT_STREQ(config.name("Run"), "Run");
 }
 
@@ -375,8 +300,6 @@ TEST(VariantConfig, AZeroLengthConfigFallsBackToClassic)
 TEST(VariantConfig, MissingOptionalKeysLeaveCallerDefaultsInPlace)
 {
     KernelFixture fixture;
-    // A valid variant that names itself but says nothing about FIT identity
-    // or features.
     fixture.fileSystem.seedFile("/Hike.uapp", aliasUapp(R"({"schema":1,"name":"Hike"})"));
 
     SDK::Variant::Config config(fixture.kernel);

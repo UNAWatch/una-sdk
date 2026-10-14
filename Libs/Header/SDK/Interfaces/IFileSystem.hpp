@@ -40,11 +40,7 @@ public:
      * @brief   Structure to store directory item information.
      */
     struct ObjectInfo {
-        /// Leaf name of the item, not a path. Note this is as wide as a whole
-        /// path, so a maximal name cannot be joined onto a directory and still
-        /// fit in skMaxPathLen: code that builds a path from an enumerated
-        /// name must check the join for truncation rather than assume it fits.
-        char name[skMaxPathLen];
+        char name[skMaxPathLen];   ///< Name of the item.
         bool isDir;       ///< 'true' if the item is a directory.
         bool isHidden;    ///< 'true' if the item is hidden.
         bool isSystem;    ///< 'true' if the item is a system file.
