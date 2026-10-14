@@ -21,14 +21,14 @@ The same pack is also provided for `Penpot <https://penpot.app>`_, a free, open-
 
 :download:`Download the Penpot version <Templates/Penpot-UI-Kit/UNA-Watch-UI-Resource-Pack.penpot>`
 
-To import it, sign in to Penpot (a free account is enough), open the **⋯** menu on **Drafts** or on a project, choose **Import Penpot files**, and pick the ``.penpot`` file. The hand-off rules below apply to it as they do to the Figma file.
+To import it, sign in to Penpot (a free account is enough), open the projects menu, choose **Import files**, and pick the ``.penpot`` file.
 
-From Figma to the app
-----------------------
+From the design to the app
+---------------------------
 
-The watch renders what the TouchGFX Designer generates, so a Figma screen is a layout reference, not an asset that ships as-is. Two rules keep the hand-off cheap:
+The watch renders what the TouchGFX Designer generates, so a screen drawn in Figma or Penpot is a layout reference, not an asset that ships as-is. Two rules keep the hand-off cheap:
 
-* **Draw in Figma, rebuild in Designer.** Text, boxes, lines, and arcs are cheaper and sharper as TouchGFX primitives than as exported bitmaps, and they can be moved or recolored at runtime. Export a bitmap only for artwork that primitives cannot express.
+* **Draw in Figma or Penpot, rebuild in Designer.** Text, boxes, lines, and arcs are cheaper and sharper as TouchGFX primitives than as exported bitmaps, and they can be moved or recolored at runtime. Export a bitmap only for artwork that primitives cannot express.
 * **Export bitmaps at 1x, PNG.** Keep the pixel size the screen actually uses; the color format is picked when the image is imported into Designer. See :doc:`Tutorials/Images/ARCHITECTURE` for how images are added to an app.
 
 Ready-made TouchGFX containers that already implement several of these UI patterns in code are documented in :doc:`touchgfx-widgets`.
