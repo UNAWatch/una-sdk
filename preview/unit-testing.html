@@ -199,6 +199,83 @@ ctest<span class="w"> </span>--test-dir<span class="w"> </span>build-host<span c
 <li><p>Verify load/save behavior without device firmware or simulator runtime.</p></li>
 </ul>
 </section>
+<section id="testing-code-that-scans-a-directory">
+<h2>Testing Code That Scans A Directory<a class="headerlink" href="#testing-code-that-scans-a-directory" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">InMemoryFileSystem</span></code> enumerates what you seed, so code that walks a directory
+(<code class="docutils literal notranslate"><span class="pre">kernel.fs.dir(path)</span></code> then <code class="docutils literal notranslate"><span class="pre">readNext()</span></code>) can be tested directly. Seeding a
+file implies the directories along its path, with no <code class="docutils literal notranslate"><span class="pre">mkdir</span></code> needed:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">KernelFixture</span><span class="w"> </span><span class="n">fixture</span><span class="p">;</span>
+<span class="n">fixture</span><span class="p">.</span><span class="n">fileSystem</span><span class="p">.</span><span class="n">seedFile</span><span class="p">(</span><span class="s">"Activity/morning.fit"</span><span class="p">,</span><span class="w"> </span><span class="n">contents</span><span class="p">);</span>
+<span class="n">fixture</span><span class="p">.</span><span class="n">fileSystem</span><span class="p">.</span><span class="n">seedFile</span><span class="p">(</span><span class="s">"Activity/archive/old.fit"</span><span class="p">,</span><span class="w"> </span><span class="n">contents</span><span class="p">);</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fixture</span><span class="p">.</span><span class="n">kernel</span><span class="p">.</span><span class="n">fs</span><span class="p">.</span><span class="n">dir</span><span class="p">(</span><span class="s">"Activity"</span><span class="p">);</span>
+<span class="n">ASSERT_TRUE</span><span class="p">(</span><span class="n">dir</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">());</span>
+<span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IFileSystem</span><span class="o">::</span><span class="n">ObjectInfo</span><span class="w"> </span><span class="n">item</span><span class="p">{};</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">dir</span><span class="o">-&gt;</span><span class="n">readNext</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// "morning.fit" (isDir false), then "archive" (isDir true)</span>
+<span class="p">}</span>
+<span class="n">dir</span><span class="o">-&gt;</span><span class="n">close</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Worth knowing:</p>
+<ul class="simple">
+<li><p><strong>Direct children only.</strong> <code class="docutils literal notranslate"><span class="pre">Activity/archive/old.fit</span></code> shows up as the
+directory <code class="docutils literal notranslate"><span class="pre">archive</span></code> when listing <code class="docutils literal notranslate"><span class="pre">Activity</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">mkdir()</span></code> creates parents</strong> and succeeds if the directory already exists;
+<code class="docutils literal notranslate"><span class="pre">IDirectory::create()</span></code> does not create parents.</p></li>
+<li><p><strong>A listing never reports the same name twice</strong>, for every name that fits
+<code class="docutils literal notranslate"><span class="pre">ObjectInfo::name</span></code>.</p></li>
+<li><p>Opening a directory that does not exist fails, so assert on <code class="docutils literal notranslate"><span class="pre">open()</span></code>.</p></li>
+</ul>
+<section id="prove-the-scan-is-live">
+<h3>Prove the scan is live<a class="headerlink" href="#prove-the-scan-is-live" title="Link to this heading"></a></h3>
+<p>A test whose expectation is “nothing was found” cannot tell a correct
+decision from a scan that never ran. Where the expected outcome is a
+negative, assert first that the directory really enumerates what you seeded,
+or pair the test with a positive control that differs in exactly the one
+property under test.</p>
+</section>
+<section id="divergences-from-a-real-backend">
+<h3>Divergences from a real backend<a class="headerlink" href="#divergences-from-a-real-backend" title="Link to this heading"></a></h3>
+<p>Check these before writing a test that leans on one:</p>
+<ul class="simple">
+<li><p><strong>Entries are listed in the order they were created</strong>, which is not name
+order, so seed in the order a test needs. Overwriting a file keeps its
+place; a rename, or a file removed and created again, goes last, where
+FatFs would reuse the first free slot. An implied directory sits where
+its oldest remaining content does.</p></li>
+<li><p><strong>A listing is a snapshot taken at <code class="docutils literal notranslate"><span class="pre">open()</span></code>.</strong> Files seeded mid-scan appear
+after <code class="docutils literal notranslate"><span class="pre">readNext(item,</span> <span class="pre">/*reset=*/true)</span></code>.</p></li>
+<li><p><strong>An implied directory is only as durable as its contents.</strong> It stops
+existing when the last thing under it is removed. Call <code class="docutils literal notranslate"><span class="pre">mkdir()</span></code> if a test
+needs it to outlive its children.</p></li>
+<li><p><strong>Leading and trailing slashes are not significant</strong>, and runs of <code class="docutils literal notranslate"><span class="pre">/</span></code>
+collapse: <code class="docutils literal notranslate"><span class="pre">/a.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">a.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">a.txt/</span></code> are one object, as are <code class="docutils literal notranslate"><span class="pre">a//b</span></code> and
+<code class="docutils literal notranslate"><span class="pre">a/b</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">closeGate</span></code> is passed the path without leading or trailing slashes.</strong>
+<code class="docutils literal notranslate"><span class="pre">openHandles</span></code> and <code class="docutils literal notranslate"><span class="pre">flushCounts</span></code> read the same for either spelling.</p></li>
+<li><p><strong>Names are case-sensitive.</strong> <code class="docutils literal notranslate"><span class="pre">Walk.uapp</span></code> and <code class="docutils literal notranslate"><span class="pre">WALK.UAPP</span></code> are two files.</p></li>
+<li><p><strong>A file may be created under a directory that does not exist.</strong> <code class="docutils literal notranslate"><span class="pre">mkdir()</span></code>
+the parents first if a test needs that failure.</p></li>
+<li><p><strong>No <code class="docutils literal notranslate"><span class="pre">.</span></code> / <code class="docutils literal notranslate"><span class="pre">..</span></code> resolution.</strong> Both are ordinary path segments.</p></li>
+<li><p><strong>Directory rename is not modelled</strong>; it returns false.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">isHidden</span></code> is derived from a leading <code class="docutils literal notranslate"><span class="pre">.</span></code></strong> in the name.</p></li>
+<li><p><strong>A name longer than <code class="docutils literal notranslate"><span class="pre">ObjectInfo::name</span></code> comes back clipped</strong>, and two names
+differing only past that length come back as identical entries. FatFs caps
+a long file name at 255 characters, which fits, so only a test can seed
+such a name. A 255-character name is real, and cannot be joined onto any
+directory within <code class="docutils literal notranslate"><span class="pre">skMaxPathLen</span></code>.</p></li>
+</ul>
+<p>The fake refuses: a <code class="docutils literal notranslate"><span class="pre">mkdir()</span></code>, <code class="docutils literal notranslate"><span class="pre">IDirectory::create()</span></code>, write-<code class="docutils literal notranslate"><span class="pre">open()</span></code> or
+<code class="docutils literal notranslate"><span class="pre">seedFile()</span></code> where the other kind of object already holds the name;
+a removed path as the source of <code class="docutils literal notranslate"><span class="pre">rename()</span></code> or <code class="docutils literal notranslate"><span class="pre">copy()</span></code>; a destination that is
+the root, an existing directory, or under a file; a <code class="docutils literal notranslate"><span class="pre">rename()</span></code> onto an
+existing file, which FatFs <code class="docutils literal notranslate"><span class="pre">f_rename</span></code> also refuses; removing a directory that
+is not empty; and <code class="docutils literal notranslate"><span class="pre">close()</span></code> on a handle that is not open, so
+<code class="docutils literal notranslate"><span class="pre">EXPECT_TRUE(h-&gt;close())</span></code> is a real assertion. <code class="docutils literal notranslate"><span class="pre">failRenames</span></code> makes every
+<code class="docutils literal notranslate"><span class="pre">rename()</span></code> fail.</p>
+</section>
+</section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <ul class="simple">
