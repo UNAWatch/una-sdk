@@ -96,6 +96,11 @@ def check_makefile(text):
     # newline; a space after it ends the line just as surely as no backslash.
     if not m.group(0).endswith("\\"):
         return ["object_files := line does not end in a backslash continuation"]
+    # The backslash joins only the next physical line, so the .c mapping has
+    # to be that line: a blank line in between ends the assignment there.
+    next_line = text[m.end() + 1:].split("\n", 1)[0]
+    if not next_line.startswith("$(c_source_files:"):
+        return ["object_files := continuation is not followed by the $(c_source_files:...) line"]
     return []
 
 
@@ -168,6 +173,8 @@ def run_selftest():
         ("Makefile lost its continuation", GOOD_VCXPROJ, GOOD_MAKEFILE.replace(" \\\n", " \n"), 1),
         ("Makefile has a space after the backslash",
          GOOD_VCXPROJ, GOOD_MAKEFILE.replace(" \\\n", " \\ \n"), 1),
+        ("Makefile has a blank line after the backslash",
+         GOOD_VCXPROJ, GOOD_MAKEFILE.replace(" \\\n", " \\\n\n"), 1),
         ("_DEBUG first, Release swaps it", DEBUG_FIRST_RELEASE_OK, GOOD_MAKEFILE, 0),
         ("_DEBUG first, Release keeps it", DEBUG_FIRST_RELEASE_KEEPS_DEBUG, GOOD_MAKEFILE, 1),
         ("ResourceCompile ahead of ClCompile", RESOURCE_COMPILE_FIRST, GOOD_MAKEFILE, 1),
