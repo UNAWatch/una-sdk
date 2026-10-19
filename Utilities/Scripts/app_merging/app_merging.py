@@ -263,8 +263,12 @@ log_field("Image", f"{output_path} ({len(final_data)} bytes)")
 # unexpanded on Windows, where no shell globs it.
 for copy_dir in args.copy_to:
     copy_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(output_path, copy_dir / output_path.name)
-    log_field("Copied to", copy_dir / output_path.name)
+    copy_path = copy_dir / output_path.name
+    # A copy directory that is the output directory already holds the file.
+    if copy_path.exists() and copy_path.samefile(output_path):
+        continue
+    shutil.copy2(output_path, copy_path)
+    log_field("Copied to", copy_path)
 
 # ---------- optional .h ----------
 if args.header:
