@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-20",
+  "source_prepared_by": "Codex under brodyga45 direction",
+  "human_review": false,
+  "actual_watch_validation": false,
+  "SDK_commit": "d71d0dc3bad7d47282fcf5a4c53a3f0f2031afb1",
+  "LVGL_commit": "85aa60d18b3d5e5588d7b247abf90198f07c8a63",
+  "core": "PASS target/deuce/cap/undo; serialization; 608 single-bit damage cases; semantic rejection; sequence wrap",
+  "macOS_simulator": {
+    "compiler": "Apple Clang15",
+    "LVGL_heap_bytes": 65536,
+    "flows_passed": [
+      "add A/B, undo",
+      "restart restores saved round",
+      "winning round rejects additional points",
+      "undo winning point",
+      "cancel new round and target change",
+      "scroll all included license notices",
+      "one damaged save uses valid backup with recovery warning",
+      "both damaged saves require explicit new-round confirmation",
+      "write-open failure shows NOT SAVED",
+      "unsaved exit warning; cancel retains count; confirm exits",
+      "executable and runtime outside Documents; no privacy grant needed"
+    ]
+  },
+  "firmware": {
+    "compiler": "GNU ARM13.3.1",
+    "build": "PASS local arm-none-eabi crosscompile and official SDK packer",
+    "file": "Output/RallySlate_0.1.0.uapp",
+    "bytes": 179780,
+    "sha256": "aa3b7e638708f4cda43f7d0c311a6e3183db97d372dd8340996cd5b2f1732f62",
+    "development_app_id": "BEC65A5C096E4894",
+    "portal_id_obtained": false,
+    "SDK_ABI": 3,
+    "resolver_kernel_floor": "1.4.0"
+  },
+  "packaging": [
+    "development ID requires explicit flag",
+    "mismatched binary ID rejected",
+    "malformed CMake APP_ID rejected",
+    "official configuration-field validator accepts no declared fields",
+    "CRC and version checks pass"
+  ],
+  "not_established": [
+    "watch installation",
+    "actual-device peak memory or battery behavior",
+    "human field testing",
+    "originality across all existing watch apps",
+    "contest eligibility/acceptance",
+    "award or payment"
+  ]
+}
