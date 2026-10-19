@@ -48,6 +48,8 @@ The script performs comprehensive app packaging:
 - `-filename`: Base name for the output `.uapp`, overriding the one derived from `-name`. Use it when the
   launcher name has to change without moving the artifact — the phone's install/update flow and the release
   zip both key on the file name
+- `-copy-to`: Also copy the `.uapp` into this directory, creating it if missing; repeat for more than one.
+  The CMake build passes one per entry of `OUTPUT_PATH`
 - `-autostart`: Sets autostart flag in app metadata
 - `-type`: App type (Activity, Utility, Glance, Clockface)
 - `-out`: Custom output directory

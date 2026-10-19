@@ -362,11 +362,12 @@ endfunction()
 
 # Main function to build a complete watch app
 function(una_app_build_app)
-    set(OUTPUT_COPY_COMMANDS "")
+    # app_merging.py copies the .uapp into each OUTPUT_PATH itself, as only it
+    # knows the file name. A *.uapp wildcard here would reach cmake -E copy
+    # unexpanded on Windows, where no shell globs it, and fail the build.
+    set(APP_COPY_ARGS "")
     foreach(files IN LISTS OUTPUT_PATH)
-        list(APPEND OUTPUT_COPY_COMMANDS
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/*.uapp ${files}/
-        )
+        list(APPEND APP_COPY_ARGS -copy-to ${files})
     endforeach()
 
     # Final app merging. The merge needs the GUI ELF packed first, so ask whether
@@ -428,8 +429,7 @@ function(una_app_build_app)
 
     add_custom_target(${APP_NAME}App ALL
         DEPENDS ${APP_DEPENDS}
-        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} ${APP_FILE_NAME_ARGS} -type ${APP_TYPE} -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem
-        ${OUTPUT_COPY_COMMANDS}
+        COMMAND ${UNA_PYTHON_EXECUTABLE} ${SCRIPTS_PATH}/app_merging/app_merging.py ${APP_AUTOSTART_FLAG} ${APP_ICON_ARGS} -name ${APP_USER_NAME} ${APP_FILE_NAME_ARGS} -type ${APP_TYPE} -out ${CMAKE_CURRENT_BINARY_DIR} -appid ${APP_ID} -appver ${BUILD_VERSION} -scripts $ENV{UNA_SDK}/Libs/Source/AppSystem ${APP_COPY_ARGS}
         COMMENT "Merging ${APP_NAME} application"
     )
 endfunction()
