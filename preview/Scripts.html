@@ -360,6 +360,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">-filename</span></code>: Base name for the output <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>, overriding the one derived from <code class="docutils literal notranslate"><span class="pre">-name</span></code>. Use it when the
 launcher name has to change without moving the artifact — the phone’s install/update flow and the release
 zip both key on the file name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-copy-to</span></code>: Also copy the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> into this directory, creating it if missing; repeat for more than one.
+The CMake build passes one per entry of <code class="docutils literal notranslate"><span class="pre">OUTPUT_PATH</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-autostart</span></code>: Sets autostart flag in app metadata</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-type</span></code>: App type (Activity, Utility, Glance, Clockface)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-out</span></code>: Custom output directory</p></li>
