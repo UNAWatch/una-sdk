@@ -107,17 +107,17 @@ void Screen::render() {
     text(mRoot,"RALLY SLATE",34,22,172,dim);
     char line[48];
     if (mMode == Board) {
-        text(mRoot,"A +",18,56,60,cyan); text(mRoot,"UNDO",155,56,65);
+        if (mModel.dirty) text(mRoot,"NOT SAVED",26,42,188,0xff5555);
+        else if (mModel.recovered) text(mRoot,"RECOVERED SAVE",26,42,188,gold);
+        text(mRoot,"A +",18,61,60,cyan); text(mRoot,"UNDO",155,61,65);
         text(mRoot,"A",41,78,62,cyan); text(mRoot,"B",136,78,62,gold);
         number(mRoot,mModel.score.side(0),44,98,cyan);
         number(mRoot,mModel.score.side(1),138,98,gold);
         rect(mRoot,118,115,4,4,dim,1); rect(mRoot,118,131,4,4,dim,1);
         const int winner = mModel.score.winner();
-        if (mModel.dirty) std::snprintf(line,sizeof line,"NOT SAVED");
-        else if (mModel.recovered) std::snprintf(line,sizeof line,"RECOVERED SAVE");
-        else if (winner >= 0) std::snprintf(line,sizeof line,"ROUND %c WINS",'A'+winner);
+        if (winner >= 0) std::snprintf(line,sizeof line,"ROUND %c WINS",'A'+winner);
         else std::snprintf(line,sizeof line,"%u rallies  |  %s",mModel.score.count,mModel.hasSave()?"saved":"new");
-        text(mRoot,line,26,154,188,mModel.dirty ? 0xff5555 : white);
+        text(mRoot,line,26,154,188);
         text(mRoot,"B +",18,178,60,gold); text(mRoot,"MENU",155,178,65);
         std::snprintf(line,sizeof line,"First %u, by 2, cap 30",Rally::Score::targets[mModel.score.targetIndex]);
         text(mRoot,line,25,204,190,dim);

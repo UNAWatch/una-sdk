@@ -8,7 +8,7 @@
 #include "SDK/UnaLogger/Logger.h"
 
 Service::Service(SDK::Kernel& kernel)
-    : mKernel(SDK::KernelProviderService::GetInstance().getKernel())
+    : mKernel(kernel)
     , mGUIStarted(false)
 {}
 
@@ -16,7 +16,7 @@ void Service::run()
 {
     LOG_INFO("thread started\n");
 
-    
+    const uint32_t startedAt = mKernel.sys.getTimeMs();
     while (true) {
         SDK::MessageBase *msg;
         if (mKernel.comm.getMessage(msg, 1000)) {
@@ -44,6 +44,10 @@ void Service::run()
 
             // Release message after processing
             mKernel.comm.releaseMessage(msg);
+        }
+        if (!mGUIStarted && uint32_t(mKernel.sys.getTimeMs() - startedAt) >= 5000) {
+            LOG_INFO("No GUI or background work, exiting service\n");
+            return;
         }
     }
 
