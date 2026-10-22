@@ -148,9 +148,10 @@ struct TrackView {
               ID_INTERVALS, ID_TRACK1, ID_TRACK2, ID_TRACK3,
               ID_COUNT, ID_DEFAULT = ID_WORKOUT_GAUGE };
 
-    // End workout shows only while a structured workout runs.
+    // Lap shows only in a free run, End workout only while a structured
+    // workout runs.
     struct Action {
-        enum Id { ID_RESUME = 0, ID_END_WORKOUT, ID_SUMMARY, ID_SAVE, ID_DISCARD,
+        enum Id { ID_RESUME = 0, ID_LAP, ID_END_WORKOUT, ID_SUMMARY, ID_SAVE, ID_DISCARD,
                   ID_COUNT, ID_DEFAULT = ID_RESUME };
     };
 };

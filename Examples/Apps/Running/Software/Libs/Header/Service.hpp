@@ -192,6 +192,8 @@ private:
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
     uint32_t     mLapCarryMs          = 0;      ///< Time the last lap handed to this one.
+    std::time_t  mPausedLapUtc        = 0;      ///< When a lap was taken in this pause; 0 if none.
+    std::time_t  mLapPauseCarrySec    = 0;      ///< Pause the last lap handed to this one's elapsed span.
     Track::Data  mTrackData{};
 
     // -- Interval training state ----------------------------------------------
@@ -288,6 +290,9 @@ private:
         bool                 ranOut       = false;
         uint32_t             carryMs      = 0;
         float                stepM        = 0.0f;
+        /// A lap taken while paused ends where it was taken (pausedAtUtc),
+        /// splitting the pause; 0 ends it at the pause.
+        std::time_t          pausedAtUtc  = 0;
     };
     void saveLap(const LapEnd& end, float autoLapDistanceM = 0.0f);
     void stopTrack(bool discard);
