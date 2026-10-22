@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 import sys
 import re
+import shutil
 from PIL import Image
 
 # ---------- helpers ----------
@@ -127,6 +128,8 @@ parser.add_argument("-filename", default=None,
 parser.add_argument("-autostart", action="store_true", help="Set bit 3 (0x08) in flags for autostart")
 parser.add_argument("-type", required=True, choices=list(APP_TYPES.keys()), help="Application type")
 parser.add_argument("-out", type=str, help="Custom output directory (also the place where Tmp/*.srv and Tmp/*.gui are searched)")
+parser.add_argument("-copy-to", type=Path, action="append", default=[], metavar="DIR",
+                    help="Also copy the .uapp into DIR, created if missing (repeatable)")
 parser.add_argument("-header", action="store_true", help="Generate .h file with merged binary as C array")
 parser.add_argument("-normal_icon", type=Path, required=False, default=None, help="Path to normal 60x60 icon PNG")
 parser.add_argument("-small_icon", type=Path, required=False, default=None, help="Path to small 30x30 icon PNG")
@@ -254,6 +257,18 @@ log_field("LibC Version", format_semver_u32(libc_version_u32))
 log_field("Flags", f"0x{flags:08X}")
 log_field("CRC", f"0x{crc:08X}")
 log_field("Image", f"{output_path} ({len(final_data)} bytes)")
+
+# The copy is done here rather than by the build because only this script knows
+# the file name: a wildcard in the build's copy command reaches cmake -E copy
+# unexpanded on Windows, where no shell globs it.
+for copy_dir in args.copy_to:
+    copy_dir.mkdir(parents=True, exist_ok=True)
+    copy_path = copy_dir / output_path.name
+    # A copy directory that is the output directory already holds the file.
+    if copy_path.exists() and copy_path.samefile(output_path):
+        continue
+    shutil.copy2(output_path, copy_path)
+    log_field("Copied to", copy_path)
 
 # ---------- optional .h ----------
 if args.header:
