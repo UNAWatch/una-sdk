@@ -157,8 +157,9 @@ struct TrackView {
     enum Id { ID_INTERVALS = 0, ID_TRACK1, ID_TRACK2, ID_TRACK3,
               ID_COUNT, ID_DEFAULT = ID_INTERVALS };
 
+    // Lap shows only in a free run.
     struct Action {
-        enum Id { ID_RESUME = 0, ID_SUMMARY, ID_SAVE, ID_DISCARD,
+        enum Id { ID_RESUME = 0, ID_LAP, ID_SUMMARY, ID_SAVE, ID_DISCARD,
                   ID_COUNT, ID_DEFAULT = ID_RESUME };
     };
 };

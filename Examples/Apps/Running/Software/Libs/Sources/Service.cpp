@@ -1343,8 +1343,8 @@ void Service::pauseTrack(bool pause)
         buildPartialSummary();
         SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
     } else if (!pause && mTrackState == Track::State::PAUSED) {
-        // A lap taken in this pause ends now, before the counters resume, as
-        // one taken at that instant; see handleEvent(ManualLap).
+        // A lap taken in this pause is saved now, before the counters resume,
+        // ending where it was taken; see handleEvent(ManualLap).
         if (mPausedLapUtc != 0) {
             LapEnd end;
             end.pausedAtUtc = mPausedLapUtc;

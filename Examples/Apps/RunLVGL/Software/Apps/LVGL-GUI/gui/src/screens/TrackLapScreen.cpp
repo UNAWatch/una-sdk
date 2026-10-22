@@ -68,5 +68,11 @@ void TrackLapScreen::dismissCb(lv_timer_t* t)
 {
     auto* self = static_cast<TrackLapScreen*>(lv_timer_get_user_data(t));
     self->mDismiss = nullptr;   // one-shot: LVGL deletes the timer after this call
-    ScreenManager::instance().goTo(ScreenId::Track);
+    ScreenManager::instance().goTo(self->mModel.isLapFromPauseMenu() ? ScreenId::TrackAction
+                                                                      : ScreenId::Track);
+}
+
+void TrackLapScreen::onHide()
+{
+    mModel.setLapFromPauseMenu(false);
 }

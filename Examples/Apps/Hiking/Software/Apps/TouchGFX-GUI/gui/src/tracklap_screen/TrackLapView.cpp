@@ -93,5 +93,5 @@ void TrackLapView::handleKeyEvent(uint8_t key)
 
 void TrackLapView::onDismiss()
 {
-    application().gotoTrackScreenNoTransition();
+    presenter->dismiss();
 }

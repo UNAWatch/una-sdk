@@ -14,6 +14,9 @@ public:
     virtual void tearDownScreen();
 
     void setPositionId(uint16_t id);
+
+    /// Lap shows only in a free run.
+    void setFreeRun(bool freeRun);
     uint16_t getPositionId();
     void setUnitsImperial(bool isImperial);
     void setTimer(std::time_t sec);
@@ -35,6 +38,10 @@ protected:
     touchgfx::Callback<TrackActionView, MainMenuItem&, int16_t>       mUpdateItemCb;
     touchgfx::Callback<TrackActionView, MainMenuCenterItem&, int16_t> mUpdateCenterItemCb;
     touchgfx::Callback<TrackActionView, int16_t>                      mCarouselCb;
+
+    /// The item shown in row @p row.
+    uint16_t itemAt(int16_t row) const;
+    bool     mFreeRun = true;
 
     void updateItem(MainMenuItem& item, int16_t index);
     void updateCenterItem(MainMenuCenterItem& item, int16_t index);

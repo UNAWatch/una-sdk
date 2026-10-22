@@ -259,6 +259,8 @@ private:
     bool         mGpsWanted = false;                 ///< GPS_LOCATION should stay connected (pre-activity + active track); cleared in disconnect() so the retry never re-wakes the GNSS post-activity.
     bool         mSessionNotEmpty     = false;
     bool         mLapNotEmpty         = false;
+    std::time_t  mPausedLapUtc        = 0;      ///< When a lap was taken in this pause; 0 if none.
+    std::time_t  mLapPauseCarrySec    = 0;      ///< Pause the last lap handed to this one's elapsed span.
     Track::Data  mTrackData{};
 
     // -- Lifecycle ------------------------------------------------------------
@@ -287,7 +289,9 @@ private:
     void sendInitialInfoToGui();
     void startTrack(std::time_t utc);
     void processTrack();
-    void saveLap(float autoLapDistanceM = 0.0f);
+    /// A lap taken while paused ends where it was taken (pausedAtUtc),
+    /// splitting the pause; 0 ends it at the pause.
+    void saveLap(float autoLapDistanceM = 0.0f, std::time_t pausedAtUtc = 0);
     void stopTrack(bool discard);
     void pauseTrack(bool pause, PauseSource source);
     void updateAutoPause();
