@@ -9,7 +9,8 @@ TrackActionPresenter::TrackActionPresenter(TrackActionView& v)
 void TrackActionPresenter::activate()
 {
     view.setUnitsImperial(model->isUnitsImperial());
-    view.setWorkoutMode(model->getTrackData().workoutMode);
+    const Track::Data& data = model->getTrackData();
+    view.setMode(!data.intervalsMode && !data.workoutMode, data.workoutMode);
     onTrackData(model->getTrackData());
 
     // Reset idle timer
@@ -34,7 +35,18 @@ void TrackActionPresenter::onTrackData(const Track::Data& data)
     view.setElevation(data.elevation);
 }
 
+void TrackActionPresenter::onLapChanged(uint8_t /*lapEnd*/)
+{
+    model->setLapFromPauseMenu(true);
+    model->application().gotoTrackLapScreenNoTransition();
+}
+
 void TrackActionPresenter::resumeTrack()
 {
     model->trackResume();
+}
+
+void TrackActionPresenter::saveLap()
+{
+    model->saveLap();
 }
