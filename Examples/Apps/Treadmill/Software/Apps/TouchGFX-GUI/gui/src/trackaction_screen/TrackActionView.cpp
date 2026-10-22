@@ -47,6 +47,23 @@ void TrackActionView::setPositionId(uint16_t id)
     menuLayout.selectItem(id);
 }
 
+void TrackActionView::setFreeRun(bool freeRun)
+{
+    mFreeRun = freeRun;
+    menuLayout.getButtons().setR2(freeRun ? Buttons::AMBER : Buttons::NONE);
+    menuLayout.setNumberOfItems(freeRun ? Menu::ID_COUNT : Menu::ID_COUNT - 1);
+    menuLayout.invalidate();
+}
+
+uint16_t TrackActionView::itemAt(int16_t row) const
+{
+    // Outside a free run, Lap's row is left out.
+    if (!mFreeRun && row >= Menu::ID_LAP) {
+        return static_cast<uint16_t>(row + 1);
+    }
+    return static_cast<uint16_t>(row);
+}
+
 uint16_t TrackActionView::getPositionId()
 {
     return menuLayout.getSelectedItem();
@@ -93,15 +110,16 @@ void TrackActionView::updateItem(MainMenuItem& item, int16_t index)
 {
     static const TypedTextId sIds[Menu::ID_COUNT] = {
         T_TEXT_RESUME,
+        T_TEXT_LAP,
         T_TEXT_SUMMARY,
         T_TEXT_SAVE,
         T_TEXT_DISCARD,
     };
 
-    if (index < 0 || index >= static_cast<int16_t>(Menu::ID_COUNT)) return;
+    if (index < 0 || index >= menuLayout.getNumberOfItems()) return;
 
     MenuItemConfig cfg;
-    cfg.msgId = sIds[index];
+    cfg.msgId = sIds[itemAt(index)];
     item.apply(cfg);
 }
 
@@ -109,15 +127,16 @@ void TrackActionView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
 {
     static const TypedTextId sIds[Menu::ID_COUNT] = {
         T_TEXT_RESUME,
+        T_TEXT_LAP,
         T_TEXT_SUMMARY,
         T_TEXT_SAVE,
         T_TEXT_DISCARD,
     };
 
-    if (index < 0 || index >= static_cast<int16_t>(Menu::ID_COUNT)) return;
+    if (index < 0 || index >= menuLayout.getNumberOfItems()) return;
 
     MenuItemConfig cfg;
-    cfg.msgId = sIds[index];
+    cfg.msgId = sIds[itemAt(index)];
     item.apply(cfg);
 }
 
@@ -186,17 +205,20 @@ void TrackActionView::handleKeyEvent(uint8_t key)
     // which counts down while R1 stays held; releasing early returns here. Save & End
     // and the other items stay plain taps (Save routes to Calibrate & Save).
     if (key == SDK::GUI::Button::R1_PRESS) {
-        if (menuLayout.getSelectedItem() == Menu::ID_DISCARD) {
+        if (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem())) == Menu::ID_DISCARD) {
             presenter->setHoldConfirmMode(Model::HoldConfirmMode::Discard);
             application().gotoTrackHoldConfirmationScreenNoTransition();
         }
     }
 
     if (key == SDK::GUI::Button::R1) {
-        switch (menuLayout.getSelectedItem()) {
+        switch (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()))) {
         case Menu::ID_RESUME:
             presenter->resumeTrack();
             application().gotoTrackScreenNoTransition();
+            break;
+        case Menu::ID_LAP:
+            presenter->saveLap();
             break;
         case Menu::ID_SUMMARY:
             application().gotoTrackSummaryScreenNoTransition();
@@ -207,5 +229,11 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         default:
             break;
         }
+    }
+
+    // The lap button takes a lap here too, in a free run. The lap screen
+    // shows once the Service has taken it: it ignores a lap with nothing in it.
+    if (key == SDK::GUI::Button::R2 && mFreeRun) {
+        presenter->saveLap();
     }
 }

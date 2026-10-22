@@ -125,6 +125,16 @@ Model::HoldConfirmMode Model::getHoldConfirmMode() const
     return mHoldConfirmMode;
 }
 
+void Model::setLapFromPauseMenu(bool fromPauseMenu)
+{
+    mLapFromPauseMenu = fromPauseMenu;
+}
+
+bool Model::isLapFromPauseMenu() const
+{
+    return mLapFromPauseMenu;
+}
+
 void Model::setPendingIntervalsMode(bool mode)
 {
     mPendingIntervalsMode = mode;

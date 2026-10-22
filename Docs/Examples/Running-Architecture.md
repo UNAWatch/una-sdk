@@ -275,10 +275,12 @@ State transitions are handled by `startTrack()`, `stopTrack()`, `pauseTrack()`.
 Laps can be triggered automatically based on configurable thresholds:
 - **Distance-based**: Configurable via `MenuDistanceView` (`Settings::Alerts::Distance::Id`)
 - **Time-based**: Configurable via `MenuTimeView` (`Settings::Alerts::Time::Id`)
-- **Manual**: User-initiated via R2 button during tracking
+- **Manual**: User-initiated via R2 button during tracking; in a free run, also R2 or the Lap row on the pause menu (`TrackActionView`)
 - **Interval phases**: in intervals mode each phase is its own lap, and the distance and time laps above are off
 
 Lap data includes timing, distance, average pace, HR, and ascent/descent (written to FIT). Each FIT lap also records `lap_trigger`: `time` or `distance` for an automatic lap or a phase that ran out, `manual` for R2, and `session_end` for the lap that ends the activity. An interval phase's lap records its workout step (`wkt_step_index`) and `intensity` as well.
+
+A manual lap taken while paused is held in `mPausedLapUtc` and saved when the run resumes, before the counters resume, by `saveLap()` with `LapEnd::pausedAtUtc` set. That lap ends at the press: its FIT `timestamp` is the press time and its elapsed time includes the pause up to the press. The rest of the pause is carried in `mLapPauseCarrySec` into the next lap's `start_time` and elapsed time. If the run is saved without resuming, `stopTrack()` drops the held lap and the activity ends at the pause. A second press in the same pause and a lap with no records (`mLapNotEmpty`) are ignored, as is a paused lap in intervals mode or a structured workout. The Service sends `LAP_END` when it holds the lap, and `TrackActionPresenter::onLapChanged()` then shows `TrackLapView`, which returns to the pause menu.
 
 ### Interval Training
 
@@ -513,8 +515,8 @@ Key responsibilities:
 
 **Tracking** (all face cycling happens inside `TrackView` via swipeable containers):
 - `TrackView` — Active tracking screen; hosts `TrackFaceIntervals`, `TrackFaceTotal`, `TrackFaceLap`, `TrackFaceStatus` (swipe L1/L2)
-- `TrackActionView` — Pause menu: Resume / Summary / Save / Discard
-- `TrackLapView` — Lap-saved notification (auto-dismisses after 3 s)
+- `TrackActionView` — Pause menu: Resume / Lap / Summary / Save / Discard; Lap shows only in a free run
+- `TrackLapView` — Lap-saved notification (auto-dismisses after 3 s); returns to the pause menu for a lap taken there
 
 **Confirmations**:
 - `TrackStartConfirmationView` — Prompt to start without GPS fix; idle timeout → `MainView`

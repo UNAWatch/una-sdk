@@ -224,6 +224,16 @@ Model::HoldConfirmMode Model::getHoldConfirmMode() const
     return mHoldConfirmMode;
 }
 
+void Model::setLapFromPauseMenu(bool fromPauseMenu)
+{
+    mLapFromPauseMenu = fromPauseMenu;
+}
+
+bool Model::isLapFromPauseMenu() const
+{
+    return mLapFromPauseMenu;
+}
+
 void Model::saveTrack()
 {
     SDK::send_msg<CustomMessage::TrackStop>(mKernel, false);

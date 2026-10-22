@@ -145,9 +145,13 @@ void TrackView::handleKeyEvent(uint8_t key)
         application().gotoTrackActionScreenNoTransition();
     }
 
+    // While auto-paused the Service may ignore the lap (one per pause, none
+    // with nothing in it), so the lap screen waits for it to be taken.
     if (key == SDK::GUI::Button::R2) {
         presenter->saveLap();
-        application().gotoTrackLapScreenNoTransition();
+        if (!mPaused) {
+            application().gotoTrackLapScreenNoTransition();
+        }
     }
 }
 

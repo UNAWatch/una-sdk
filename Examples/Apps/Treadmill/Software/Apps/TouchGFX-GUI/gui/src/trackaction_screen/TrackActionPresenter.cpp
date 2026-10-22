@@ -9,6 +9,7 @@ TrackActionPresenter::TrackActionPresenter(TrackActionView& v)
 void TrackActionPresenter::activate()
 {
     view.setUnitsImperial(model->isUnitsImperial());
+    view.setFreeRun(!model->getTrackData().intervalsMode);
     onTrackData(model->getTrackData());
 
     // Reset idle timer
@@ -32,9 +33,20 @@ void TrackActionPresenter::onTrackData(const Track::Data& data)
     view.setAvgHR(data.avgHR);
 }
 
+void TrackActionPresenter::onLapChanged(uint8_t /*lapEnd*/)
+{
+    model->setLapFromPauseMenu(true);
+    model->application().gotoTrackLapScreenNoTransition();
+}
+
 void TrackActionPresenter::resumeTrack()
 {
     model->trackResume();
+}
+
+void TrackActionPresenter::saveLap()
+{
+    model->saveLap();
 }
 
 void TrackActionPresenter::saveRequested()

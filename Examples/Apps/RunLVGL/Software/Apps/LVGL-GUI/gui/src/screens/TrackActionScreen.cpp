@@ -17,6 +17,7 @@ constexpr uint32_t kCarouselPeriodMs = 3000;
 using Style = WheelMenu::Item::Style;
 const WheelMenu::Item kItems[App::MenuNav::TrackView::Action::ID_COUNT] = {
     { Style::Simple, "Resume" },
+    { Style::Simple, "Lap" },
     { Style::Simple, "End workout" },
     { Style::Simple, "Summary" },
     { Style::Simple, "Save & End" },
@@ -31,20 +32,28 @@ TrackActionScreen::TrackActionScreen(Model& model)
 
 uint16_t TrackActionScreen::itemAt(uint16_t row) const
 {
-    // Without a workout, End workout's row is left out.
-    if (!mWorkoutMode && row >= Menu::ID_END_WORKOUT) {
-        return static_cast<uint16_t>(row + 1);
+    // Outside a free run, Lap's row is left out; without a workout, End
+    // workout's.
+    uint16_t item = row;
+    if (!mFreeRun && item >= Menu::ID_LAP) {
+        ++item;
     }
-    return row;
+    if (!mWorkoutMode && item >= Menu::ID_END_WORKOUT) {
+        ++item;
+    }
+    return item;
 }
 
 void TrackActionScreen::build()
 {
-    // End workout shows only while a structured workout runs.
-    mWorkoutMode = mModel.getTrackData().workoutMode;
+    // Lap shows only in a free run, End workout only while a structured
+    // workout runs.
+    const Track::Data& data = mModel.getTrackData();
+    mWorkoutMode = data.workoutMode;
+    mFreeRun     = !data.intervalsMode && !data.workoutMode;
     uint16_t count = 0;
     for (uint16_t i = 0; i < Menu::ID_COUNT; ++i) {
-        if (mWorkoutMode || i != Menu::ID_END_WORKOUT) {
+        if ((mFreeRun || i != Menu::ID_LAP) && (mWorkoutMode || i != Menu::ID_END_WORKOUT)) {
             mItems[count++] = kItems[i];
         }
     }
@@ -52,7 +61,8 @@ void TrackActionScreen::build()
     mMenu    = std::make_unique<WheelMenu>(mRoot, mItems, count, -6);
     mButtons = std::make_unique<Widgets::Buttons>(mRoot);
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
-                  Widgets::Buttons::AMBER, Widgets::Buttons::NONE);
+                  Widgets::Buttons::AMBER,
+                  mFreeRun ? Widgets::Buttons::AMBER : Widgets::Buttons::NONE);
     mPause    = std::make_unique<Widgets::PauseIndicator>(mRoot, 200);
     mCarousel = std::make_unique<Widgets::InfoCarousel>(mRoot, 40, 0);
     mCarousel->setPeriodMs(kCarouselPeriodMs);
@@ -108,6 +118,9 @@ void TrackActionScreen::onKey(uint8_t code)
                     mModel.trackResume();
                     ScreenManager::instance().goTo(ScreenId::Track);
                     break;
+                case Menu::ID_LAP:
+                    mModel.saveLap();
+                    break;
                 case Menu::ID_SUMMARY:
                     ScreenManager::instance().goTo(ScreenId::TrackSummary);
                     break;
@@ -116,9 +129,23 @@ void TrackActionScreen::onKey(uint8_t code)
             }
             break;
 
+        // The lap screen shows once the Service has taken the lap: it ignores
+        // a lap with nothing in it.
+        case Btn::R2:
+            if (mFreeRun) {
+                mModel.saveLap();
+            }
+            break;
+
         default:
             break;
     }
+}
+
+void TrackActionScreen::onLapChanged(uint8_t /*lapEnd*/)
+{
+    mModel.setLapFromPauseMenu(true);
+    ScreenManager::instance().goTo(ScreenId::TrackLap);
 }
 
 void TrackActionScreen::onTrackData(const Track::Data& data)

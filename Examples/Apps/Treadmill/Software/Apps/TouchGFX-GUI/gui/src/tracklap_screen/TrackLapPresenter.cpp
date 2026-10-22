@@ -23,4 +23,14 @@ void TrackLapPresenter::activate()
 
 void TrackLapPresenter::deactivate()
 {
+    model->setLapFromPauseMenu(false);
+}
+
+void TrackLapPresenter::dismiss()
+{
+    if (model->isLapFromPauseMenu()) {
+        model->application().gotoTrackActionScreenNoTransition();
+    } else {
+        model->application().gotoTrackScreenNoTransition();
+    }
 }

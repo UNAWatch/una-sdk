@@ -18,7 +18,7 @@ void TrackActionView::setupScreen()
     menuLayout.getButtons().setL1(Buttons::NONE);
     menuLayout.getButtons().setL2(Buttons::NONE);
     menuLayout.getButtons().setR1(Buttons::AMBER);
-    menuLayout.getButtons().setR2(Buttons::NONE);
+    menuLayout.getButtons().setR2(Buttons::AMBER);
 
     menuLayout.setAnimationSteps(App::Config::kMenuAnimationSteps);
     menuLayout.setUpdateItemCallback(mUpdateItemCb);
@@ -81,6 +81,7 @@ void TrackActionView::updateItem(MainMenuItem& item, int16_t index)
 {
     static const TypedTextId sIds[Menu::ID_COUNT] = {
         T_TEXT_RESUME,
+        T_TEXT_LAP,
         T_TEXT_SUMMARY,
         T_TEXT_SAVE,
         T_TEXT_DISCARD,
@@ -97,6 +98,7 @@ void TrackActionView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
 {
     static const TypedTextId sIds[Menu::ID_COUNT] = {
         T_TEXT_RESUME,
+        T_TEXT_LAP,
         T_TEXT_SUMMARY,
         T_TEXT_SAVE,
         T_TEXT_DISCARD,
@@ -155,7 +157,7 @@ void TrackActionView::handleKeyEvent(uint8_t key)
 
     // Save & End / Discard start a hold-to-confirm: pressing (and holding) R1 opens the
     // countdown screen immediately; it counts down while R1 stays held and releasing
-    // early returns here. Resume/Summary stay plain taps.
+    // early returns here. Resume/Lap/Summary stay plain taps.
     if (key == SDK::GUI::Button::R1_PRESS) {
         switch (menuLayout.getSelectedItem()) {
         case Menu::ID_SAVE:
@@ -177,11 +179,20 @@ void TrackActionView::handleKeyEvent(uint8_t key)
             presenter->resumeTrack();
             application().gotoTrackScreenNoTransition();
             break;
+        case Menu::ID_LAP:
+            presenter->saveLap();
+            break;
         case Menu::ID_SUMMARY:
             application().gotoTrackSummaryScreenNoTransition();
             break;
         default:
             break;
         }
+    }
+
+    // The lap button takes a lap here too. The lap screen shows once the
+    // Service has taken it: it ignores a lap with nothing in it.
+    if (key == SDK::GUI::Button::R2) {
+        presenter->saveLap();
     }
 }
