@@ -76,6 +76,11 @@ public:
             return;
         }
 
+        // Window tracking (see windowIsLargerThanDisplay) in every mode; F4 is
+        // only taken over once the SDK housings are in use (mHousing below).
+        mWindowId = initialWindowId();
+        SDL_SetEventFilter(&WatchHAL::filterEvents, this);
+
         char path[320];
         SDL_Surface* probe = IMG_Load(localFileName(path, sizeof(path), bodyFile(0)));
         if (probe == nullptr) {
@@ -104,7 +109,6 @@ public:
         }
 
         mHousing = true;
-        SDL_SetEventFilter(&WatchHAL::filterF4, this);
         showBody(start == kNone ? 0 : start);
         if (start == kNone) {
             toggleSkin();
@@ -203,18 +207,40 @@ private:
     static constexpr float kBlack[3] = { 36.0f, 38.0f, 44.0f };    // R, G, B
     static constexpr float kWhite[3] = { 188.0f, 190.0f, 196.0f };
 
+    // The window setupSimulator() made, before the filter saw any event for it.
+    // Only this one lookup scans IDs: at start-up they are still low.
+    static Uint32 initialWindowId()
+    {
+        if (SDL_Window* w = SDL_GetKeyboardFocus()) {
+            return SDL_GetWindowID(w);
+        }
+        for (Uint32 id = 1; id < 64; ++id) {
+            if (SDL_Window* w = SDL_GetWindowFromID(id)) {
+                return SDL_GetWindowID(w);
+            }
+        }
+        return 0;
+    }
+
     static const char* bodyFile(int body)
     {
         static const char* files[kBodies] = { "landscape_white.png", "landscape_black.png", "landscape_teal.png" };
         return files[body];
     }
 
-    // F4 is taken here before HALSDL2's event loop sees it, and handled on the
-    // next tick from sampleKey(). mPassF4 lets our own F4 (skin on/off) through.
-    static int SDLCALL filterF4(void* self, SDL_Event* event)
+    // Every SDL event passes here before HALSDL2's event loop sees it.
+    // - Window events: remember the window's ID. HALSDL2 recreates its window
+    //   (new ID) on every skin change, and keeps the pointer file-static.
+    // - F4 (SDK housings only): taken here and handled on the next tick from
+    //   sampleKey(). mPassF4 lets our own F4 (skin on/off) through.
+    static int SDLCALL filterEvents(void* self, SDL_Event* event)
     {
         WatchHAL* hal = static_cast<WatchHAL*>(self);
-        if (event->type != SDL_KEYUP || event->key.keysym.sym != SDLK_F4) {
+        if (event->type == SDL_WINDOWEVENT) {
+            hal->mWindowId = event->window.windowID;
+            return 1;
+        }
+        if (!hal->mHousing || event->type != SDL_KEYUP || event->key.keysym.sym != SDLK_F4) {
             return 1;
         }
         if (hal->mPassF4.exchange(false)) {
@@ -354,13 +380,18 @@ private:
         return static_cast<const uint8_t*>(mSkin->pixels) + sy * mSkin->pitch + sx * 3;
     }
 
-    // HALSDL2 keeps its window and skin state private; the window is the
-    // display's size exactly when no skin is shown.
+    // HALSDL2 keeps its window and skin state private (the window pointer is
+    // file-static in HALSDL2.cpp); the window is the display's size exactly
+    // when no skin is shown. Mouse focus first, then keyboard focus, then the
+    // ID the event filter last saw.
     bool windowIsLargerThanDisplay() const
     {
         SDL_Window* window = SDL_GetMouseFocus();
-        for (Uint32 id = 1; window == nullptr && id < 16; ++id) {
-            window = SDL_GetWindowFromID(id);
+        if (window == nullptr) {
+            window = SDL_GetKeyboardFocus();
+        }
+        if (window == nullptr && mWindowId != 0) {
+            window = SDL_GetWindowFromID(mWindowId);
         }
         int ww = 0;
         int wh = 0;
@@ -392,6 +423,7 @@ private:
     bool              mPanelLook = false;
     std::atomic<bool> mF4Pending{ false };
     std::atomic<bool> mPassF4{ false };
+    std::atomic<Uint32> mWindowId{ 0 };  // HALSDL2's current window, from window events
     bool              mSkinTried = false;
     SDL_Surface*      mSkin = nullptr;   // the shown skin, for the display's corners
 };
