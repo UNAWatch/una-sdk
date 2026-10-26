@@ -1,6 +1,7 @@
 {
-  "latest": "sdk-v1.6.1",
+  "latest": "sdk-v1.6.2",
   "versions": [
+    "sdk-v1.6.2",
     "sdk-v1.6.1",
     "sdk-v1.6.0",
     "sdk-v1.5.0",

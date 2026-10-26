@@ -1,0 +1,527 @@
+name: CI Apps
+
+on:
+  push:
+    branches: [ develop, main ]
+    tags: [ 'apps-v*' ]
+  pull_request:
+
+env:
+  UNA_WORKSPACE: ${{ github.env.GITHUB_WORKSPACE }}
+  DOCKER_DRIVER: overlay2
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    container: python:3.11-slim
+    outputs:
+      apps: ${{ steps.generate.outputs.apps }}
+      variants: ${{ steps.generate.outputs.variants }}
+    steps:
+      - name: Setup GIT
+        # Debian base image (python:3.11-slim), so none of the Ubuntu mirror
+        # rewriting in cmake-build applies here. By-Hash does: deb.debian.org
+        # can be mid-publish too, and this job gates the whole workflow.
+        run: |
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git jq
+
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Guard the ABI -> minKernelVersion mapping
+        # (a) run the resolver self-tests; (b) fail if KERNEL_INTERFACE_VERSION was bumped
+        #     without an abi_kernel_map.json entry (also validates map format + monotonicity);
+        #     (c) --check the committed example app-manifest.json so its floor can't silently go
+        #     stale. See min_kernel_version.py.
+        run: |
+          python3 Utilities/Scripts/app_packer/test_min_kernel_version.py
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --print
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Files/OutputLVGL/app-manifest.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Waypoint/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/min_kernel_version.py --check Docs/Tutorials/Waypoint/OutputLVGL/app-manifest.json
+
+      - name: Validate app configuration declarations
+        # (a) run the validator's own self-tests -- the pattern dialect is the
+        #     part whose failures are silent, since a construct that slips
+        #     through ships a manifest that behaves differently on iOS and
+        #     Android; (b) enforce the configFields contract
+        #     (Docs/app-config-fields.md): the declaration itself, and the app's
+        #     constexpr SDK::AppConfig::Field table, which repeats the bounds the
+        #     app clamps to and would otherwise drift away from
+        #     app-manifest.json unnoticed. The Files tutorial declares no
+        #     configuration, so it also covers the "nothing to check" path.
+        run: |
+          python3 Utilities/Scripts/app_packer/test_validate_app_config.py
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Waypoint/Output/app-manifest.json \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Sources/AppConfigFields.cpp \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Header/AppConfigFields.hpp
+          # The LVGL build of Waypoint shares the service, so the same field table.
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Waypoint/OutputLVGL/app-manifest.json \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Sources/AppConfigFields.cpp \
+            --check-bounds Docs/Tutorials/Waypoint/Software/Libs/Header/AppConfigFields.hpp
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Files/Output/app-manifest.json
+          python3 Utilities/Scripts/app_packer/validate_app_config.py \
+            --check Docs/Tutorials/Files/OutputLVGL/app-manifest.json
+
+      - name: Validate narrowed font wildcard sets
+        # The largest fonts in the activity apps carry deliberately narrow
+        # WildcardCharacters sets, because a glyph bitmap is resident RAM on
+        # the watch. Anything written into one of those wildcards at runtime
+        # that has no glyph is drawn as FallbackCharacter -- on one screen,
+        # with nothing to see at build time.
+        #
+        # WildcardCharacters governs the wildcard ONLY: static translation
+        # text and the fallback glyph are built regardless. So the thing that
+        # needs protecting is the runtime text, which neither this tool nor
+        # the Designer file can see. Each app declares it in
+        # assets/texts/wildcard-requirements.json, and this step checks the
+        # declaration still fits the set.
+        #
+        # --require-manifest is what makes the declaration load-bearing: the
+        # six apps below cannot lose it silently. That matters because the
+        # same information used to live in an XML comment, and TouchGFX
+        # Designer rewrites texts.xml from its own model when it saves.
+        run: |
+          python3 Utilities/Scripts/app_packer/test_validate_wildcards.py
+          python3 Utilities/Scripts/app_packer/validate_wildcards.py \
+            --require-manifest \
+            --check Examples/Apps/Treadmill/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Running/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Hiking/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Cycling/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Workout/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml \
+            --check Examples/Apps/Stopwatch/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml
+          # Every other app too, without requiring a declaration: they have
+          # narrowed fonts that predate this check and no recorded coupling.
+          python3 Utilities/Scripts/app_packer/validate_wildcards.py \
+            $(for f in Examples/Apps/*/Software/Apps/TouchGFX-GUI/assets/texts/texts.xml; do \
+                echo --check "$f"; \
+              done)
+
+      - name: Generate app list
+        id: generate
+        run: |
+          output=$(python3 .github/scripts/generate-app-list.py)
+          echo "apps=$(echo "$output" | jq -c .apps)" >> $GITHUB_OUTPUT
+          echo "variants=$(echo "$output" | jq -c .variants)" >> $GITHUB_OUTPUT
+
+  cmake-build:
+    runs-on: ubuntu-latest
+    container: xanderhendriks/stm32cubeide:16.0
+    needs: prepare
+    # A backstop, not a budget. The compile itself is seconds and setup on a
+    # healthy mirror is a minute or two; this is only here so a degraded mirror
+    # fails the job instead of sitting on a runner for GitHub's six-hour
+    # default, which is what happened on 2026-09-11 (one job at 56 minutes,
+    # another at 49, both spending it all in apt). Deliberately far above a
+    # normal run: the aim is to bound a pathological one, not to police
+    # variance. host-tests, linux-simulator and msvs-source-sync all set one.
+    timeout-minutes: 30
+    strategy:
+      # One app's setup failing says nothing about the other twenty-three, and
+      # the default would cancel all of them. A mirror hiccup used to cost the
+      # whole matrix; now it costs one job. linux-simulator.yml already does
+      # this, which is why its jobs survived the 2026-09-11 archive outage.
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.prepare.outputs.apps) }}
+    steps:
+      - name: Setup GIT
+        run: |
+          # Both pockets go to the Azure mirror, which is the one GitHub's own
+          # runner images use and sits in the same datacentre as the runners.
+          # This step pulls ~87 MB of packages; from archive.ubuntu.com on
+          # 2026-09-11 that ran at 28.9 kB/s and took 50 minutes, in a job whose
+          # actual compile is seconds. security.ubuntu.com had already been
+          # repointed here for its own outages, which left every job depending
+          # on the one host -- so when it degraded there was nothing else to use.
+          # The scheme is matched and carried through so an already-Azure source
+          # cannot be rewritten a second time.
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i -E 's#(https?://)(security|archive)\.ubuntu\.com/ubuntu#\1azure.archive.ubuntu.com/ubuntu#g' {} +
+          # A mid-publish archive can serve a Release and a Packages.gz that
+          # disagree, failing update with "Hash Sum mismatch" (2026-09-11: the
+          # pair was even the opposite way round on different nodes). By-Hash
+          # fetches each index at the digest its Release names, so the two
+          # cannot disagree. `yes` and not `force`: where a suite does not
+          # advertise by-hash, apt falls back to today's behaviour rather than
+          # failing. It is an index-integrity setting only -- it says nothing
+          # about .debs, and nothing about throughput.
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git python3-full python3-pip python-is-python3 cmake
+
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          # RunLVGL's GUI is built from the LVGL submodule (ThirdParty/lvgl).
+          submodules: recursive
+
+      - name: Install scripts requirements
+        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
+
+      - name: Build app ${{ matrix.app }} with CMake
+        run: |
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-objcopy | head -n 1 | xargs dirname`:$PATH
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name make | head -n 1 | xargs dirname`:$PATH
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name make | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-gcc | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-g++ | head -n 1)
+          cd Examples/Apps/${{ matrix.app }}/Software/App*/*-CMake
+          export UNA_SDK=$GITHUB_WORKSPACE
+          mkdir -p build
+          cd build
+          # A release takes its version from the tag that triggered it.
+          # actions/checkout re-fetches that tag as lightweight, and among
+          # lightweight tags on one commit git describe picks the first by
+          # name, which can be an older release.
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            cmake .. -DBUILD_VERSION="${GITHUB_REF_NAME#apps-v}"
+          else
+            cmake ..
+          fi
+          make -j$(nproc)
+
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: app-${{ matrix.app }}
+          path: Examples/Apps/${{ matrix.app }}/Software/App*/*-CMake/build/*.uapp
+
+  # Shipped variants (Examples/Apps/Variants/*) are code-less alias .uapps
+  # packed against the freshly built target binaries, so they run after the
+  # app matrix. Each variant is uploaded as an app-<Name> artifact, which the
+  # release job's existing app-* glob then zips like any compiled app.
+  pack-variants:
+    runs-on: ubuntu-latest
+    needs: [prepare, cmake-build]
+    # Packing is seconds; this only bounds a wedged download or upload.
+    timeout-minutes: 15
+    if: needs.prepare.outputs.variants != '[]'
+    strategy:
+      # As in cmake-build: one variant's failure is not the others' news.
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJson(needs.prepare.outputs.variants) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Download built apps
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: built-apps
+          pattern: app-*
+
+      # Pillow feeds make_variant.py's PNG-to-ABGR2222 path, used by any
+      # variant with its own icons (Walking, since its designer icon landed)
+      # rather than icons: "target".
+      - name: Install packing requirements
+        run: python3 -m pip install Pillow
+
+      - name: Pack and verify variant ${{ matrix.variant }}
+        run: |
+          python3 Utilities/Scripts/app_merging/pack_variants.py \
+            --apps-root Examples/Apps \
+            --built-apps built-apps \
+            --only "${{ matrix.variant }}" \
+            --out variants-out
+
+      - name: Upload variant artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: app-${{ matrix.variant }}
+          path: variants-out/${{ matrix.variant }}/*.uapp
+          if-no-files-found: error
+
+  # The -fmacro-prefix-map prefixes in cmake/una-app.cmake fail *silently*: give an
+  # app a source root none of them cover, or respell LIBS_PATH, and the build still
+  # succeeds -- it just quietly goes back to baking the checkout path into .rodata.
+  # Nothing else in CI notices, because the matrix above builds every app from the
+  # one path where the SDK prefix happens to cover the app too. So build one app
+  # from two directories outside the SDK and require the bytes to match.
+  reproducible-build:
+    runs-on: ubuntu-latest
+    container: xanderhendriks/stm32cubeide:16.0
+    # As in cmake-build, and this one builds the same app twice.
+    timeout-minutes: 30
+    env:
+      # Workout asserts in its own Libs sources and has a GUI, so one build
+      # exercises the SDK and LIBS_PATH prefixes. The other two need a probe
+      # source injected below -- see the note on that step.
+      APP: Workout
+    steps:
+      - name: Setup GIT
+        run: |
+          # See the notes in cmake-build: the Azure mirror for throughput, and
+          # By-Hash so a mid-publish archive stays self-consistent.
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i -E 's#(https?://)(security|archive)\.ubuntu\.com/ubuntu#\1azure.archive.ubuntu.com/ubuntu#g' {} +
+          apt-get -o Acquire::By-Hash=yes update
+          apt-get install -y git python3-full python3-pip python-is-python3 cmake
+
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Install scripts requirements
+        run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
+
+      - name: Build ${{ env.APP }} from two different directories
+        run: |
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-objcopy | head -n 1 | xargs dirname`:$PATH
+          export PATH=/tmp/bin:`find /opt/st/stm32cubeide_* -type f -name make | head -n 1 | xargs dirname`:$PATH
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name make | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-gcc | head -n 1)
+          chmod +x $(find /opt/st/stm32cubeide_* -type f -name arm-none-eabi-g++ | head -n 1)
+          export UNA_SDK=$GITHUB_WORKSPACE
+          # Three of the four prefixes are given a translation unit that materialises
+          # __FILE__, in the throwaway copy only, so that a dead prefix becomes
+          # observable rather than merely unwitnessed. /una-app and /una-app-gui have
+          # no witness at all otherwise -- no app keeps a .cpp beside its
+          # CMakeLists.txt, and the GUI's only __FILE__ strings come from SDK headers.
+          # /una-app-libs does have one, but only three discretionary asserts in this
+          # app's own Libs sources: refactoring those away would turn this job red on
+          # every PR and block releases, blaming the prefix for someone else's
+          # cleanup. A probe costs one line and removes the hostage.
+          #
+          # /una-sdk is left on incidental coverage: 14 contributors spread across SDK
+          # sources are not going to drain at once, and the SDK is not copied here, so
+          # probing it would mean editing the checkout the other jobs share.
+          #
+          # Each probe is unreferenced, so --gc-sections drops it before it reaches the
+          # .elf -- the check step reads the objects instead. Distinct names because
+          # the project-dir and Libs probes land in the same service .elf and would
+          # otherwise be a duplicate symbol. A function, not
+          # `const char probe[] = __FILE__`: at file scope in C++ that array is const
+          # and so has internal linkage, and an unreferenced static is discarded
+          # before it ever reaches the object file.
+          #
+          # The two roots differ in depth and in length, so a path that survives
+          # into the binary changes its bytes rather than just its contents.
+          for root in /tmp/one /tmp/a/rather/deeper/two; do
+            mkdir -p "$root"
+            cp -a "$GITHUB_WORKSPACE/Examples/Apps/$APP" "$root/"
+            # Spelled for Workout's layout: several apps use Software/App instead, and
+            # not every app keeps its Libs sources in Libs/Sources, so changing APP
+            # means revisiting these paths. All three writes are redirections, so a
+            # wrong layout fails here rather than later.
+            apps="$root/$APP/Software/Apps"
+            # touchgfx.cmake globs gui/src and libs.cmake globs Libs/Sources, so only
+            # the project-dir probe needs naming in a source list.
+            printf 'const char* unaPrefixMapProbeGui() { return __FILE__; }\n' \
+              > "$apps/TouchGFX-GUI/gui/src/UnaPrefixMapProbe.cpp"
+            printf 'const char* unaPrefixMapProbeLibs() { return __FILE__; }\n' \
+              > "$root/$APP/Software/Libs/Sources/UnaPrefixMapProbe.cpp"
+            printf 'const char* unaPrefixMapProbeApp() { return __FILE__; }\n' \
+              > "$apps/$APP-CMake/UnaPrefixMapProbe.cpp"
+            sed -i 's|^set(SERVICE_SOURCES|set(SERVICE_SOURCES\n    ${CMAKE_CURRENT_SOURCE_DIR}/UnaPrefixMapProbe.cpp|' \
+              "$apps/$APP-CMake/CMakeLists.txt"
+            cd "$apps/$APP-CMake"
+            mkdir -p build
+            cd build
+            # No CMAKE_BUILD_TYPE on purpose: Release would define NDEBUG, and
+            # every assert path this job looks for would vanish with it.
+            cmake ..
+            make -j$(nproc)
+          done
+
+      # Steps in this container run under `sh -e`, not bash, so keep this POSIX.
+      - name: Require identical bytes, no build path, and every prefix still live
+        run: |
+          one=/tmp/one/$APP/Software/Apps/$APP-CMake/build
+          two=/tmp/a/rather/deeper/two/$APP/Software/Apps/$APP-CMake/build
+          # Per directory, not two-across: a 2/0 split also totals two, and would
+          # reach cmp with one empty operand and report it as differing bytes.
+          for dir in "$one" "$two"; do
+            found=$(find "$dir" -maxdepth 1 -name '*.uapp' | wc -l)
+            if [ "$found" -ne 1 ]; then
+              echo "::error::expected exactly one .uapp in $dir, found $found -- the checks below would not have compared what they claim to"
+              exit 1
+            fi
+          done
+          a=$(find "$one" -maxdepth 1 -name '*.uapp')
+          b=$(find "$two" -maxdepth 1 -name '*.uapp')
+          if ! cmp "$a" "$b"; then
+            echo "::error::$APP built at two paths produced different bytes"
+            exit 1
+          fi
+          for path in /tmp/one /tmp/a/rather/deeper/two "$GITHUB_WORKSPACE"; do
+            if grep -qaF -e "$path" "$a"; then
+              echo "::error::'$path' is baked into $APP -- a -fmacro-prefix-map prefix stopped matching"
+              exit 1
+            fi
+          done
+          # Absence of a host path is only evidence if there was a path to rewrite.
+          # NDEBUG, a folded assert or a respelled prefix can empty the binary of
+          # __FILE__ entirely, and then everything above passes while proving
+          # nothing. So require the rewritten root to still be present.
+          #
+          # This one is sound only *after* the host-path loop above, and only because
+          # of it: this repo is itself named una-sdk, so in CI the workspace is
+          # /__w/una-sdk/una-sdk and an entirely unrewritten SDK path still contains
+          # the substring "/una-sdk/". The preceding loop is what rules that out.
+          # Keep the two in this order, and don't lift this check out on its own.
+          for want in /una-sdk/; do
+            if ! grep -qaF -e "$want" "$a"; then
+              echo "::error::no '$want' string in $APP -- that prefix covers nothing now, so the comparison above proves nothing"
+              exit 1
+            fi
+          done
+          # The probed roots reach only the objects, never the .elf. *.obj never
+          # matches in this container -- the Makefile generator emits .o -- and is
+          # here so the same check runs unchanged against a local Ninja build.
+          # Both roots, not just the first: they are injected identically today, so
+          # one would do, but nothing here enforces that they stay identical.
+          for want in /una-app/UnaPrefixMapProbe.cpp \
+                      /una-app-libs/Sources/UnaPrefixMapProbe.cpp \
+                      /una-app-gui/gui/src/UnaPrefixMapProbe.cpp; do
+            for dir in "$one" "$two"; do
+              hits=$(find "$dir" \( -name '*.o' -o -name '*.obj' \) -exec grep -laF -e "$want" {} + | wc -l)
+              if [ "$hits" -eq 0 ]; then
+                echo "::error::no object under $dir holds '$want' -- either that prefix stopped matching, or the probe for it was not compiled (check the injection in the build step: the two globs and the sed anchor)"
+                exit 1
+              fi
+            done
+          done
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [cmake-build, pack-variants, reproducible-build]
+    # pack-variants is skipped when no variants exist; that must not skip the
+    # release with it (skipped needs propagate by default), so spell out the
+    # acceptable results instead. reproducible-build has no matrix and no `if`,
+    # so it always runs and success is the only acceptable result: a published
+    # .uapp that cannot be rebuilt from its source is the thing we are avoiding.
+    if: >-
+      startsWith(github.ref, 'refs/tags/apps-v') &&
+      !cancelled() &&
+      needs.cmake-build.result == 'success' &&
+      needs.reproducible-build.result == 'success' &&
+      (needs.pack-variants.result == 'success' || needs.pack-variants.result == 'skipped')
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y curl jq git
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+
+      - name: Prepare release zip
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          # Apps that are still built and CI-tested, but do NOT ship on the watch and
+          # are therefore left out of the release zip. Space-separated app names.
+          # HRMonitor is a pure SDK reference example, unlike its siblings under
+          # Examples/Apps which are the real shipping apps.
+          # NOT the same knob as APPS_EXCLUDED (see generate-app-list.py): that one
+          # drops an app from the build matrix entirely, so it stops being compiled
+          # and CI-tested. Use this one to ship less, that one to build less.
+          RELEASE_EXCLUDED_APPS: HRMonitor
+        run: |
+          mkdir -p temp/apps
+          for dir in artifacts/app-*; do
+            app=$(basename "$dir" | sed 's/^app-//')
+            if echo " $RELEASE_EXCLUDED_APPS " | grep -qF " $app "; then
+              echo "Excluding $app from the release zip (does not ship on the watch)"
+              continue
+            fi
+            mkdir -p "temp/apps/$app"
+            find "$dir" -name "*.uapp" -exec cp {} "temp/apps/$app/" \;
+          done
+          cd temp/apps
+          zip -r "../../una-apps-${REF_NAME}.zip" .
+
+      - id: create_release
+        name: Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          files: |
+            una-apps-${{ github.ref_name }}.zip
+          generate_release_notes: true
+
+      - name: Make release immutable
+        run: |
+          gh release edit "$TAG" --draft=false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - id: get_slack_params
+        name: Get required parameters for slack notification
+        run: |
+          RELEASE_JSON=$(gh release view "$TAG" --json body,author,createdAt,name,url)
+          DELIM="EOF_$(openssl rand -hex 16)"
+          echo "body<<$DELIM" >> $GITHUB_OUTPUT
+          echo "$RELEASE_JSON" | jq -r '.body' >> $GITHUB_OUTPUT
+          echo "$DELIM" >> $GITHUB_OUTPUT
+          echo "author=$(echo "$RELEASE_JSON" | jq -r '.author.login')" >> $GITHUB_OUTPUT
+          echo "created_at=$(echo "$RELEASE_JSON" | jq -r '.createdAt')" >> $GITHUB_OUTPUT
+          echo "name=$(echo "$RELEASE_JSON" | jq -r '.name')" >> $GITHUB_OUTPUT
+          echo "url=$(echo "$RELEASE_JSON" | jq -r '.url')" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - id: prepare_slack_payload
+        name: Prepare Slack payload
+        env:
+          BODY_RAW: ${{ steps.get_slack_params.outputs.body }}
+          SLACK_NAME: ${{ steps.get_slack_params.outputs.name }}
+          SLACK_TAG: ${{ github.ref_name }}
+          SLACK_AUTHOR: ${{ steps.get_slack_params.outputs.author }}
+          SLACK_CREATED: ${{ steps.get_slack_params.outputs.created_at }}
+          SLACK_URL: ${{ steps.get_slack_params.outputs.url }}
+        run: |
+          BODY="$BODY_RAW"
+          BODY=$(echo "$BODY" | sed 's/@\([a-zA-Z0-9_-]*\)/<https:\/\/github.com\/\1|@\1>/g')
+          BODY=$(echo "$BODY" | sed 's/^## \([^$]*\)$/*\1*/')
+          BODY=$(echo "$BODY" | sed 's/^* /- /')
+          BODY=$(echo "$BODY" | sed 's/\*\*Full Changelog\*\*:/ *Full Changelog*\n/')
+          if [ ${#BODY} -gt 2700 ]; then BODY="${BODY:0:2700}"$'\n''...'; fi
+          PAYLOAD=$(jq -c -n --arg name "$SLACK_NAME" --arg tag "$SLACK_TAG" --arg body "$BODY" --arg author "$SLACK_AUTHOR" --arg created "$SLACK_CREATED" --arg url "$SLACK_URL" '{
+            text: (":roller_coaster: *UNA Apps*: " + $name),
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: ("-------- :roller_coaster: *UNA Apps* --------\n*" + $name + "* (tag: " + $tag + ")\n\n" + $body + "\n\n:bust_in_silhouette: *Author*: " + $author + "\n:date: *Created*: " + $created + "\n\n:link: *Download*: " + $url)
+                }
+              }
+            ]
+          }')
+          echo "payload<<EOF" >> $GITHUB_OUTPUT
+          echo "$PAYLOAD" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@37ebaef184d7626c5f204ab8d3baff4262dd30f0 # v1.27.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: ${{ steps.prepare_slack_payload.outputs.payload }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

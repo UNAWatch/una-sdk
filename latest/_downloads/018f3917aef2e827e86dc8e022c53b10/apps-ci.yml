@@ -178,7 +178,15 @@ jobs:
           export UNA_SDK=$GITHUB_WORKSPACE
           mkdir -p build
           cd build
-          cmake ..
+          # A release takes its version from the tag that triggered it.
+          # actions/checkout re-fetches that tag as lightweight, and among
+          # lightweight tags on one commit git describe picks the first by
+          # name, which can be an older release.
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            cmake .. -DBUILD_VERSION="${GITHUB_REF_NAME#apps-v}"
+          else
+            cmake ..
+          fi
           make -j$(nproc)
 
       - name: Upload app artifacts

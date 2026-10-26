@@ -1,0 +1,928 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shared-data.html">Shared Data Between Apps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#C"><strong>C</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ 
+</div>
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api-reference.html#_CPPv4I0_6size_tE14CircularBuffer">CircularBuffer (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N14CircularBuffer3popER1T8uint32_t">CircularBuffer::pop (C++ function)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api-reference.html#_CPPv4N14CircularBuffer11popFromBackER1T8uint32_t">CircularBuffer::popFromBack (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N14CircularBuffer4pushERK1T8uint32_t">CircularBuffer::push (C++ function)</a>, <a href="api-reference.html#_CPPv4N14CircularBuffer4pushERR1T8uint32_t">[1]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N14CircularBuffer11pushToFrontERK1T8uint32_t">CircularBuffer::pushToFront (C++ function)</a>, <a href="api-reference.html#_CPPv4N14CircularBuffer11pushToFrontERR1T8uint32_t">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessorE">SDK::GuiCommandProcessor (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor24callCustomMessageHandlerEv">SDK::GuiCommandProcessor::callCustomMessageHandler (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor16consumeFrameTickEv">SDK::GuiCommandProcessor::consumeFrameTick (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor12getKeySampleER7uint8_t">SDK::GuiCommandProcessor::getKeySample (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK19GuiCommandProcessor15lastFrameNumberEv">SDK::GuiCommandProcessor::lastFrameNumber (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor23setAppLifeCycleCallbackEPN3SDK9Interface21IGuiLifeCycleCallbackE">SDK::GuiCommandProcessor::setAppLifeCycleCallback (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor23setCustomMessageHandlerEPN3SDK9Interface21ICustomMessageHandlerE">SDK::GuiCommandProcessor::setCustomMessageHandler (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor16waitForFrameTickEv">SDK::GuiCommandProcessor::waitForFrameTick (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK19GuiCommandProcessor23writeDisplayFrameBufferEPK7uint8_t">SDK::GuiCommandProcessor::writeDisplayFrameBuffer (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface8IAppCommE">SDK::Interface::IAppComm (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4I0DpEN3SDK9Interface8IAppComm15allocateMessageEP1TDpRR4Args">SDK::Interface::IAppComm::allocateMessage (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface8IAppComm10getMessageERP11MessageBase8uint32_t">SDK::Interface::IAppComm::getMessage (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK9Interface8IAppComm12getProcessIdEv">SDK::Interface::IAppComm::getProcessId (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface8IAppComm14releaseMessageEP11MessageBase">SDK::Interface::IAppComm::releaseMessage (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface8IAppComm11sendMessageEP11MessageBase8uint32_t">SDK::Interface::IAppComm::sendMessage (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface8IAppComm12sendResponseEP11MessageBase">SDK::Interface::IAppComm::sendResponse (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface10IAppMemoryE">SDK::Interface::IAppMemory (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface10IAppMemory4freeEPv">SDK::Interface::IAppMemory::free (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface10IAppMemory6mallocE6size_t">SDK::Interface::IAppMemory::malloc (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface10IAppMemory7reallocEPv6size_t">SDK::Interface::IAppMemory::realloc (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystemE">SDK::Interface::IFileSystem (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem4copyEPKcPKc">SDK::Interface::IFileSystem::copy (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem3dirEPKc">SDK::Interface::IFileSystem::dir (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK9Interface11IFileSystem5existEPKc">SDK::Interface::IFileSystem::exist (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem4fileEPKc">SDK::Interface::IFileSystem::file (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem5mkdirEPKc">SDK::Interface::IFileSystem::mkdir (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK9Interface11IFileSystem10objectInfoEPKcR10ObjectInfo">SDK::Interface::IFileSystem::objectInfo (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfoE">SDK::Interface::IFileSystem::ObjectInfo (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfo5isDirE">SDK::Interface::IFileSystem::ObjectInfo::isDir (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfo8isHiddenE">SDK::Interface::IFileSystem::ObjectInfo::isHidden (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfo8isSystemE">SDK::Interface::IFileSystem::ObjectInfo::isSystem (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfo4nameE">SDK::Interface::IFileSystem::ObjectInfo::name (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfo4sizeE">SDK::Interface::IFileSystem::ObjectInfo::size (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem10ObjectInfo3utcE">SDK::Interface::IFileSystem::ObjectInfo::utc (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem6removeEPKc">SDK::Interface::IFileSystem::remove (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem6renameEPKcPKc">SDK::Interface::IFileSystem::rename (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface11IFileSystem12skMaxPathLenE">SDK::Interface::IFileSystem::skMaxPathLen (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7IKernelE">SDK::Interface::IKernel (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ILoggerE">SDK::Interface::ILogger (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ILogger8mvprintfEPKcPKcPKciPKc7va_list">SDK::Interface::ILogger::mvprintf (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ILogger6printfEPKcz">SDK::Interface::ILogger::printf (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ILogger7vprintfEPKc7va_list">SDK::Interface::ILogger::vprintf (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ISystemE">SDK::Interface::ISystem (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ISystem5delayE8uint32_t">SDK::Interface::ISystem::delay (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ISystem4exitEi">SDK::Interface::ISystem::exit (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ISystem9getTimeMsEv">SDK::Interface::ISystem::getTimeMs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK9Interface7ISystem5yieldEv">SDK::Interface::ISystem::yield (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16JsonStreamReaderE">SDK::JsonStreamReader (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader3getEPKcR6int8_t">SDK::JsonStreamReader::get (C++ function)</a>, <a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader3getEPKcRNSt11string_viewE">[1]</a>, <a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader3getEPKcRPKcR6size_t">[2]</a>, <a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader3getEPKcRb">[3]</a>, <a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader3getEPKcRf">[4]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader14getArrayLengthEPKcR6size_t">SDK::JsonStreamReader::getArrayLength (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader7getNullEPKcRb">SDK::JsonStreamReader::getNull (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16JsonStreamReader7isValidEv">SDK::JsonStreamReader::isValid (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16JsonStreamReader16JsonStreamReaderEPKc6size_t">SDK::JsonStreamReader::JsonStreamReader (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK16JsonStreamReader16JsonStreamReaderEv">[1]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16JsonStreamReader10loadBufferEPKc6size_t">SDK::JsonStreamReader::loadBuffer (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16JsonStreamReader8validateEv">SDK::JsonStreamReader::validate (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL7BatteryE">SDK::LVGL::Battery (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL7Battery8setLevelE7uint8_t">SDK::LVGL::Battery::setLevel (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL7ButtonsE">SDK::LVGL::Buttons (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4DrawE">SDK::LVGL::Draw (C++ type)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw11applyScreenEP8lv_obj_t">SDK::LVGL::Draw::applyScreen (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3arcEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t7int32_t7int32_t8uint32_tb">SDK::LVGL::Draw::arc (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw8arcAngleE7int32_t">SDK::LVGL::Draw::arcAngle (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3boxEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t8uint32_t7int32_t">SDK::LVGL::Draw::box (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw9containerEP8lv_obj_t7int32_t7int32_t7int32_t7int32_t">SDK::LVGL::Draw::container (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3dotEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::dot (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5hlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::hline (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5imageEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t">SDK::LVGL::Draw::image (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw11imageTintedEP8lv_obj_tPK14lv_image_dsc_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::imageTinted (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw4initEv">SDK::LVGL::Draw::init (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5labelEP8lv_obj_tPK9lv_font_tPKc7int32_t7int32_t7int32_t15lv_text_align_t8uint32_t">SDK::LVGL::Draw::label (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw3rgbE8uint32_t">SDK::LVGL::Draw::rgb (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw6setArcEP8lv_obj_t7int32_t7int32_t">SDK::LVGL::Draw::setArc (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw11setArcColorEP8lv_obj_t8uint32_t">SDK::LVGL::Draw::setArcColor (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw9setHiddenEP8lv_obj_tb">SDK::LVGL::Draw::setHidden (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw4tintEP8lv_obj_t8uint32_t">SDK::LVGL::Draw::tint (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL4Draw5vlineEP8lv_obj_t7int32_t7int32_t7int32_t8uint32_t">SDK::LVGL::Draw::vline (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicatorE">SDK::LVGL::ScrollIndicator (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator9animateToE8uint16_t8uint32_ti">SDK::LVGL::ScrollIndicator::animateTo (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6ConfigE">SDK::LVGL::ScrollIndicator::Config (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6Config9handleLenE">SDK::LVGL::ScrollIndicator::Config::handleLen (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMaxE">SDK::LVGL::ScrollIndicator::Config::railMax (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6Config7railMinE">SDK::LVGL::ScrollIndicator::Config::railMin (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator4kBigE">SDK::LVGL::ScrollIndicator::kBig (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator6kSmallE">SDK::LVGL::ScrollIndicator::kSmall (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator9setActiveE8uint16_t">SDK::LVGL::ScrollIndicator::setActive (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15ScrollIndicator8setCountE8uint16_t">SDK::LVGL::ScrollIndicator::setCount (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRowE">SDK::LVGL::SensorStatusRow (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow8gpsStateEb">SDK::LVGL::SensorStatusRow::gpsState (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow7hrStateE7uint8_t">SDK::LVGL::SensorStatusRow::hrState (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow17hrStateFromSourceE7uint8_t7uint8_t">SDK::LVGL::SensorStatusRow::hrStateFromSource (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL15SensorStatusRow15SensorStatusRowEP8lv_obj_t7int32_t7int32_t7int32_t7int32_tPK14lv_image_dsc_tPK14lv_image_dsc_t">SDK::LVGL::SensorStatusRow::SensorStatusRow (C++ function)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9TimerRingE">SDK::LVGL::TimerRing (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9TimerRing11setProgressE8uint32_t">SDK::LVGL::TimerRing::setProgress (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9TimerRing12setRemainingE8uint32_t">SDK::LVGL::TimerRing::setRemaining (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL5TitleE">SDK::LVGL::Title (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL5Title5TitleEP8lv_obj_tPK9lv_font_tPKc">SDK::LVGL::Title::Title (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL6ToggleE">SDK::LVGL::Toggle (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenuE">SDK::LVGL::WheelMenu (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5FontsE">SDK::LVGL::WheelMenu::Fonts (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5Fonts6centerE">SDK::LVGL::WheelMenu::Fonts::center (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5Fonts4itemE">SDK::LVGL::WheelMenu::Fonts::item (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu5Fonts3tipE">SDK::LVGL::WheelMenu::Fonts::tip (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu10IconLayoutE">SDK::LVGL::WheelMenu::IconLayout (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5iconYE">SDK::LVGL::WheelMenu::IconLayout::iconY (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu10IconLayout5textWE">SDK::LVGL::WheelMenu::IconLayout::textW (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4ItemE">SDK::LVGL::WheelMenu::Item (C++ struct)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item10centerFontE">SDK::LVGL::WheelMenu::Item::centerFont (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item8itemTextE">SDK::LVGL::WheelMenu::Item::itemText (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item4textE">SDK::LVGL::WheelMenu::Item::text (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4Item8tipColorE">SDK::LVGL::WheelMenu::Item::tipColor (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu19kDefaultAnimationMsE">SDK::LVGL::WheelMenu::kDefaultAnimationMs (C++ member)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu4nextEv">SDK::LVGL::WheelMenu::next (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu7refreshEv">SDK::LVGL::WheelMenu::refresh (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu6selectE8uint16_t">SDK::LVGL::WheelMenu::select (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK4LVGL9WheelMenu8selectedEv">SDK::LVGL::WheelMenu::selected (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu14setAnimationMsE8uint32_t">SDK::LVGL::WheelMenu::setAnimationMs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu13setBackgroundE8uint32_t">SDK::LVGL::WheelMenu::setBackground (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu11setCircularEb">SDK::LVGL::WheelMenu::setCircular (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu16SlideMidCallbackE">SDK::LVGL::WheelMenu::SlideMidCallback (C++ type)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK4LVGL9WheelMenu9WheelMenuEP8lv_obj_tPK4Item8uint16_tRK5Fonts7int16_t">SDK::LVGL::WheelMenu::WheelMenu (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK11MessageBaseE">SDK::MessageBase (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase12getProcessIdEv">SDK::MessageBase::getProcessId (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase11getRefCountEv">SDK::MessageBase::getRefCount (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase9getResultEv">SDK::MessageBase::getResult (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase12getResultStrEv">SDK::MessageBase::getResultStr (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase7getTypeEv">SDK::MessageBase::getType (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase11isCompletedEv">SDK::MessageBase::isCompleted (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK11MessageBase13needsResponseEv">SDK::MessageBase::needsResponse (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK11MessageBasedlEPv">SDK::MessageBase::operator delete (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK11MessageBasedlEPvPv">[1]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK11MessageBasenwE6size_t">SDK::MessageBase::operator new (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK11MessageBasenwE6size_tPv">[1]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK11MessageBase12setProcessIdE8uint32_t">SDK::MessageBase::setProcessId (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK11MessageBase9setResultE13MessageResult">SDK::MessageBase::setResult (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4I0EN3SDK12MessageGuardE">SDK::MessageGuard (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10ConnectionE">SDK::Sensor::Connection (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection7connectEf8uint32_t">SDK::Sensor::Connection::connect (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection7connectEv">[1]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection10ConnectionE7uint8_tf8uint32_t">SDK::Sensor::Connection::Connection (C++ function)</a>, <a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection10ConnectionEN3SDK6Sensor4TypeEf8uint32_t">[1]</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection10disconnectEv">SDK::Sensor::Connection::disconnect (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection11isConnectedEv">SDK::Sensor::Connection::isConnected (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection7isValidEv">SDK::Sensor::Connection::isValid (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK6Sensor10Connection13matchesDriverE8uint16_t">SDK::Sensor::Connection::matchesDriver (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13AccelerometerE">SDK::SensorDataParser::Accelerometer (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer13AccelerometerEKN3SDK6Sensor8DataViewE">SDK::SensorDataParser::Accelerometer::Accelerometer (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer5FieldE">SDK::SensorDataParser::Accelerometer::Field (C++ enum)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer5Field5COUNTE">SDK::SensorDataParser::Accelerometer::Field::COUNT (C++ enumerator)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer5Field1XE">SDK::SensorDataParser::Accelerometer::Field::X (C++ enumerator)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer5Field1YE">SDK::SensorDataParser::Accelerometer::Field::Y (C++ enumerator)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer5Field1ZE">SDK::SensorDataParser::Accelerometer::Field::Z (C++ enumerator)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser13Accelerometer15getFieldsNumberEv">SDK::SensorDataParser::Accelerometer::getFieldsNumber (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer12getTimestampEv">SDK::SensorDataParser::Accelerometer::getTimestamp (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer14getTimestampUsEv">SDK::SensorDataParser::Accelerometer::getTimestampUs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer4getXEv">SDK::SensorDataParser::Accelerometer::getX (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer6getXYZERfRfRf">SDK::SensorDataParser::Accelerometer::getXYZ (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer4getYEv">SDK::SensorDataParser::Accelerometer::getY (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer4getZEv">SDK::SensorDataParser::Accelerometer::getZ (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser13Accelerometer11isDataValidEv">SDK::SensorDataParser::Accelerometer::isDataValid (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser12BatteryLevelE">SDK::SensorDataParser::BatteryLevel (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser12BatteryLevel12BatteryLevelEKN3SDK6Sensor8DataViewE">SDK::SensorDataParser::BatteryLevel::BatteryLevel (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser12BatteryLevel9getChargeEv">SDK::SensorDataParser::BatteryLevel::getCharge (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser12BatteryLevel15getFieldsNumberEv">SDK::SensorDataParser::BatteryLevel::getFieldsNumber (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser12BatteryLevel12getTimestampEv">SDK::SensorDataParser::BatteryLevel::getTimestamp (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser12BatteryLevel14getTimestampUsEv">SDK::SensorDataParser::BatteryLevel::getTimestampUs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser12BatteryLevel11isDataValidEv">SDK::SensorDataParser::BatteryLevel::isDataValid (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser11GpsLocationE">SDK::SensorDataParser::GpsLocation (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation11getAltitudeEv">SDK::SensorDataParser::GpsLocation::getAltitude (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation14getCoordinatesERfRfRf">SDK::SensorDataParser::GpsLocation::getCoordinates (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser11GpsLocation15getFieldsNumberEv">SDK::SensorDataParser::GpsLocation::getFieldsNumber (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation11getLatitudeEv">SDK::SensorDataParser::GpsLocation::getLatitude (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation12getLongitudeEv">SDK::SensorDataParser::GpsLocation::getLongitude (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation12getPrecisionEv">SDK::SensorDataParser::GpsLocation::getPrecision (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation12getTimestampEv">SDK::SensorDataParser::GpsLocation::getTimestamp (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation14getTimestampUsEv">SDK::SensorDataParser::GpsLocation::getTimestampUs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser11GpsLocation11GpsLocationEKN3SDK6Sensor8DataViewE">SDK::SensorDataParser::GpsLocation::GpsLocation (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation18isCoordinatesValidEv">SDK::SensorDataParser::GpsLocation::isCoordinatesValid (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser11GpsLocation11isDataValidEv">SDK::SensorDataParser::GpsLocation::isDataValid (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser9HeartRateE">SDK::SensorDataParser::HeartRate (C++ class)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser9HeartRate6getBpmEv">SDK::SensorDataParser::HeartRate::getBpm (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser9HeartRate15getFieldsNumberEv">SDK::SensorDataParser::HeartRate::getFieldsNumber (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser9HeartRate12getTimestampEv">SDK::SensorDataParser::HeartRate::getTimestamp (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser9HeartRate14getTimestampUsEv">SDK::SensorDataParser::HeartRate::getTimestampUs (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser9HeartRate13getTrustLevelEv">SDK::SensorDataParser::HeartRate::getTrustLevel (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4N3SDK16SensorDataParser9HeartRate9HeartRateEKN3SDK6Sensor8DataViewE">SDK::SensorDataParser::HeartRate::HeartRate (C++ function)</a>
+</li>
+      <li><a href="api-reference.html#_CPPv4NK3SDK16SensorDataParser9HeartRate11isDataValidEv">SDK::SensorDataParser::HeartRate::isDataValid (C++ function)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

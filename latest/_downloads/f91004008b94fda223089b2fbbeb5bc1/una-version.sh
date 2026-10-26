@@ -23,7 +23,9 @@ if [ -n "$BUILD_VERSION" ]; then
   export BUILD_VERSION
   log "BUILD_VERSION=$BUILD_VERSION"
   log "Exiting early as BUILD_VERSION was already set"
-  return 0
+  echo "BUILD_VERSION=$BUILD_VERSION"
+  # Sourced, return keeps the caller's shell; run with bash, exit ends it.
+  return 0 2>/dev/null || exit 0
 fi
 
 BUILD_VERSION="0.0.0-dev" # When version not recognized
