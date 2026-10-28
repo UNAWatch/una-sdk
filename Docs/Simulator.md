@@ -57,6 +57,7 @@ The example apps' simulators show the screen inside the UNA Watch, so the round 
 | **F4** | Next housing: white → black → teal → none → white. With none, the window is just the 240×240 display, with black corners as on the watch. |
 | **L** | Panel look on/off: the colours toned the way the real panel shows them (lifted blue-grey blacks, dimmer whites, about half the saturation). Only the PC window changes, not the app. |
 | **F3** | Screenshot (TouchGFX's own): the whole window, housing included, in `screenshots/` next to the simulator. For a flat 240×240 shot, press F4 until the housing is off first. |
+| **Drag** | The housing window has no title bar: drag it by the housing to move it (TouchGFX's right-button drag anywhere also works). |
 
 Start options (environment variables):
 
