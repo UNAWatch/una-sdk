@@ -17,7 +17,8 @@
  *   glass show the skin under them, so the screen sits in the bezel and its
  *   printed labels (UP, DOWN, START / SELECT / STOP, BACK) stay visible.
  *   **F4** cycles white -> black -> teal -> no housing -> white. Without the
- *   housing the corners are black, as on the watch.
+ *   housing the corners are black, as on the watch. The housing window has no
+ *   title bar: drag it by the housing (or anywhere with the right button).
  *   An app's own simulator/landscape.png (any other image) is left alone: F4
  *   then only toggles it, as in plain TouchGFX.
  * - **Panel look** (L, or UNA_SIM_LOOK=watch): every frame toned the way the
@@ -158,6 +159,7 @@ protected:
         const float cy = (h - 1) / 2.0f;
         const float r2 = kGlassRadius * kGlassRadius;
         const bool skinShown = windowIsLargerThanDisplay();
+        makeHousingDraggable();
         static const uint8_t black[3] = { 0, 0, 0 };
         for (int y = 0; y < h; ++y) {
             for (int x = 0; x < w; ++x) {
@@ -401,6 +403,36 @@ private:
         return ww > DISPLAY_WIDTH || wh > DISPLAY_HEIGHT;
     }
 
+    // A skinned window has no title bar, so HALSDL2 only moves it with a
+    // right-button drag. With an SDK housing, a left drag on the housing (anything
+    // outside the round glass) moves it too. Set on each new window: HALSDL2
+    // makes one on every skin change. An app's own skin is left alone, since
+    // where its display sits isn't known here.
+    void makeHousingDraggable()
+    {
+        const Uint32 id = mWindowId;
+        if (!mHousing || id == 0 || id == mHitTestWindowId) {
+            return;
+        }
+        if (SDL_Window* window = SDL_GetWindowFromID(id)) {
+            SDL_SetWindowHitTest(window, &WatchHAL::hitTest, nullptr);
+            mHitTestWindowId = id;
+        }
+    }
+
+    static SDL_HitTestResult SDLCALL hitTest(SDL_Window* window, const SDL_Point* p, void*)
+    {
+        int ww = 0;
+        int wh = 0;
+        SDL_GetWindowSize(window, &ww, &wh);
+        if (ww <= DISPLAY_WIDTH && wh <= DISPLAY_HEIGHT) {
+            return SDL_HITTEST_NORMAL; // no housing: the plain window, title bar and all
+        }
+        const float dx = p->x - (kSkinX + (DISPLAY_WIDTH - 1) / 2.0f);
+        const float dy = p->y - (kSkinY + (DISPLAY_HEIGHT - 1) / 2.0f);
+        return (dx * dx + dy * dy > kGlassRadius * kGlassRadius) ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
+    }
+
     static void toPanel(uint8_t& r, uint8_t& g, uint8_t& b)
     {
         const float in[3] = { static_cast<float>(r), static_cast<float>(g), static_cast<float>(b) };
@@ -415,7 +447,7 @@ private:
 
     static void printHelp()
     {
-        touchgfx_printf("WatchHAL: F4 = next watch housing (white, black, teal, none), L = panel colours, F3 = screenshot\n");
+        touchgfx_printf("WatchHAL: F4 = next watch housing (white, black, teal, none), L = panel colours, F3 = screenshot, drag the housing to move\n");
     }
 
     bool              mHousing = false;  // SDK skins in use, F4 cycles them
@@ -424,6 +456,7 @@ private:
     std::atomic<bool> mF4Pending{ false };
     std::atomic<bool> mPassF4{ false };
     std::atomic<Uint32> mWindowId{ 0 };  // HALSDL2's current window, from window events
+    Uint32            mHitTestWindowId = 0; // the window makeHousingDraggable() last set up
     bool              mSkinTried = false;
     SDL_Surface*      mSkin = nullptr;   // the shown skin, for the display's corners
 };
