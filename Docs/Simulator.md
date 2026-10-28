@@ -49,6 +49,31 @@ Note: If you move the application to another location, you need to update the re
    |                  \---------/                    |
    ---------------------------------------------------
    ```
+#### Watch housing and panel look {#watch-housing}
+The example apps' simulators show the screen inside the UNA Watch, so the round screen sits in its bezel with the button labels (UP, DOWN, START / SELECT / STOP, BACK) around it. This comes from `SDK/Simulator/WatchHAL.hpp`, which `simulator/main.cpp` uses in place of `touchgfx::HALSDL2`.
+
+| Key | What it does |
+|---|---|
+| **F4** | Next housing: white → black → teal → none → white. With none, the window is just the 240×240 display, with black corners as on the watch. |
+| **L** | Panel look on/off: the colours toned the way the real panel shows them (lifted blue-grey blacks, dimmer whites, about half the saturation). Only the PC window changes, not the app. |
+| **F3** | Screenshot (TouchGFX's own): the whole window, housing included, in `screenshots/` next to the simulator. For a flat 240×240 shot, press F4 until the housing is off first. |
+| **Drag** | The housing window has no title bar: drag it by the housing to move it (TouchGFX's right-button drag anywhere also works). |
+
+Start options (environment variables):
+
+| Variable | Values |
+|---|---|
+| `UNA_SIM_HOUSING` | `white` (default), `black`, `teal` or `none` |
+| `UNA_SIM_LOOK` | `watch` starts with the panel look on |
+| `UNA_SIM_SLOW` | `1`–`10`: every frame lasts that many times longer. The simulator already runs at the watch's frame rate, but the watch can fall behind on frames that redraw a lot, so animations feel faster on the PC. |
+
+Notes:
+- The housings are `Utilities/Simulator/Skins/landscape_<body>.png`, made from the [Figma UI kit](Templates/Figma-UI-Kit/README.md) renders by `make_skins.py` in the same folder. The app's `una/Makefile` copies them next to the simulator. F4 copies the chosen one over `landscape.png`, the only name TouchGFX loads, so the last housing stays until the next build.
+- An app with its own `simulator/landscape.png` keeps it: F4 then only toggles that skin, as in plain TouchGFX.
+- The skins are fully opaque on purpose. A skin with transparent pixels makes TouchGFX cut a shaped window, and the screen hole would be cut out with it.
+- The panel look is measured from one video of the real watch: close to the watch, not a calibrated profile.
+- A simulator built with Visual Studio (`simulator/msvs`) has no housing unless you copy the `landscape_*.png` files next to the `.exe`.
+- To use it in your own app, copy the `WatchHAL` lines from an example's `simulator/main.cpp` and the skin copy line from its `una/Makefile` (`post_build`).
 #### Buzzer
 1. Buzzer actions are printed in the terminal as log messages. Example:
    ```cpp

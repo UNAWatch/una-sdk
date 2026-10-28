@@ -10,6 +10,7 @@
 
 #include "SDK/Kernel/KernelBuilder.hpp"
 #include "SDK/Simulator/Kernel/Kernel.hpp"
+#include "SDK/Simulator/WatchHAL.hpp"
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Kernel/KernelProviderService.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
@@ -93,12 +94,14 @@ static int runTouchGFX(SDK::App::DualAppComm&  appComm,
     LCD& lcd = setupLCD();
     touchgfx::NoTouchController tc;
 
-    touchgfx::HAL& hal = touchgfx::touchgfx_generic_init<touchgfx::HALSDL2>(dma, lcd, tc, SIM_WIDTH, SIM_HEIGHT, 0, 0);
+    // WatchHAL = HALSDL2 + the watch housing (F4 cycles it) and the panel look (L).
+    touchgfx::HAL& hal = touchgfx::touchgfx_generic_init<SDK::Simulator::WatchHAL>(dma, lcd, tc, SIM_WIDTH, SIM_HEIGHT, 0, 0);
 
     setupSimulator(argc, argv, hal);
+    static_cast<SDK::Simulator::WatchHAL&>(hal).init();
 
     // Set custom frame rate
-    static_cast<touchgfx::HALSDL2&>(hal).setVsyncInterval(1000.0f / SDK::GUI::Config::kFrameRate);
+    static_cast<touchgfx::HALSDL2&>(hal).setVsyncInterval(SDK::Simulator::WatchHAL::frameIntervalMs(SDK::GUI::Config::kFrameRate));
 
     //// Ensure there is a console window to print to using printf() or
     //// std::cout, and read from using e.g. fgets or std::cin.
