@@ -407,27 +407,31 @@ private:
     // right-button drag. With an SDK housing, a left drag on the housing (anything
     // outside the round glass) moves it too. Set on each new window: HALSDL2
     // makes one on every skin change. An app's own skin is left alone, since
-    // where its display sits isn't known here.
+    // where its display sits isn't known here. The no-housing window gets no hit
+    // test: SDL (2.0.4, Windows) answers SDL_HITTEST_NORMAL with HTCLIENT even
+    // on the title bar, which would stop it dragging and its buttons working.
     void makeHousingDraggable()
     {
         const Uint32 id = mWindowId;
         if (!mHousing || id == 0 || id == mHitTestWindowId) {
             return;
         }
-        if (SDL_Window* window = SDL_GetWindowFromID(id)) {
-            SDL_SetWindowHitTest(window, &WatchHAL::hitTest, nullptr);
-            mHitTestWindowId = id;
+        SDL_Window* window = SDL_GetWindowFromID(id);
+        if (window == nullptr) {
+            return;
         }
-    }
-
-    static SDL_HitTestResult SDLCALL hitTest(SDL_Window* window, const SDL_Point* p, void*)
-    {
+        mHitTestWindowId = id;
         int ww = 0;
         int wh = 0;
         SDL_GetWindowSize(window, &ww, &wh);
-        if (ww <= DISPLAY_WIDTH && wh <= DISPLAY_HEIGHT) {
-            return SDL_HITTEST_NORMAL; // no housing: the plain window, title bar and all
+        if (ww > DISPLAY_WIDTH || wh > DISPLAY_HEIGHT) {
+            SDL_SetWindowHitTest(window, &WatchHAL::hitTest, nullptr);
         }
+    }
+
+    // Only on a window with the housing (see makeHousingDraggable).
+    static SDL_HitTestResult SDLCALL hitTest(SDL_Window*, const SDL_Point* p, void*)
+    {
         const float dx = p->x - (kSkinX + (DISPLAY_WIDTH - 1) / 2.0f);
         const float dy = p->y - (kSkinY + (DISPLAY_HEIGHT - 1) / 2.0f);
         return (dx * dx + dy * dy > kGlassRadius * kGlassRadius) ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
