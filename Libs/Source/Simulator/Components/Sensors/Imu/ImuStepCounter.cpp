@@ -28,6 +28,12 @@ namespace Sensor
               SDK::SensorDataParser::StepCounter::getFieldsNumber(),
               *this,
               Sensor::Driver::Mode::EVENT_BASED)
+    , mDailySensor(*this)
+    , mDailyDriver(mDailySensor,
+              SDK::Sensor::Type::STEP_COUNTER_DAILY,
+              SDK::SensorDataParser::StepCounter::getFieldsNumber(),
+              *this,
+              Sensor::Driver::Mode::EVENT_BASED)
     , mTimer()
     , mDataMutex()
 {
@@ -38,13 +44,20 @@ Sensor::Driver& ImuStepCounter::getDriver()
     return mDriver;
 }
 
+Sensor::Driver& ImuStepCounter::getDailyDriver()
+{
+    return mDailyDriver;
+}
+
 float ImuStepCounter::sdcStart(Sensor::Driver* driver, float period)
 {
     LOG_INFO("start\n");
 
-    mStepCounterSim.startStepCounter();
-
-    mTimer.start(mMinPeriod);
+    if (mActiveDrivers++ == 0) {
+        mStepCounterSim.startStepCounter();
+        mFirstSample = true;
+        mTimer.start(mMinPeriod);
+    }
 
     return period;
 }
@@ -53,9 +66,10 @@ void ImuStepCounter::sdcStop(Sensor::Driver* driver)
 {
     LOG_INFO("stop\n");
 
-    mTimer.stop();
-
-    mStepCounterSim.stopStepCounter();
+    if (mActiveDrivers && --mActiveDrivers == 0) {
+        mTimer.stop();
+        mStepCounterSim.stopStepCounter();
+    }
 }
 
 float ImuStepCounter::sdcUpdatePeriod(Sensor::Driver* driver, float period)
@@ -75,10 +89,9 @@ const char* ImuStepCounter::sdcGetDescription(Sensor::Driver* driver)
 
 void ImuStepCounter::sensorRefresh()
 {
-    static bool first = false;
     // Send data one time after connect
-    if (!first) {
-        first = true;
+    if (mFirstSample) {
+        mFirstSample = false;
         publishData(mStepCounterSim.getStepCounter());
         return;
     }
@@ -96,10 +109,12 @@ void ImuStepCounter::sensorRefresh()
 
 void ImuStepCounter::publishData(uint32_t value)
 {
-    auto& sample = mDriver.getDataSample();
-    sample.setTimestamp(SDK::Simulator::Mock::System::GetTimeMs());
-    sample.u[SDK::SensorDataParser::StepCounter::Field::STEP_COUNT] = value;
-    mDriver.pushDataSample();
+    for (auto* driver : {&mDriver, &mDailyDriver}) {
+        auto& sample = driver->getDataSample();
+        sample.setTimestamp(SDK::Simulator::Mock::System::GetTimeMs());
+        sample.u[SDK::SensorDataParser::StepCounter::Field::STEP_COUNT] = value;
+        driver->pushDataSample();
+    }
 }
 
 } /* namespace Sensor */

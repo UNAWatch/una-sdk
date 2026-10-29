@@ -12,6 +12,7 @@
  */
 
 #include "SDK/Simulator/Components/SensorDataSample.hpp"
+#include <new>
 
 namespace Sensor {
 
