@@ -62,6 +62,11 @@ std::mutex& Mutex::native()
 //// Semaphore
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Initialize a bounded semaphore using the host platform's synchronization primitives.
+ * @param max Maximum number of available permits.
+ * @param init Initial permit count, which must not exceed max.
+ */
 Semaphore::Semaphore(uint32_t max, uint32_t init)
 #ifdef _WIN32
 {
@@ -77,6 +82,7 @@ Semaphore::Semaphore(uint32_t max, uint32_t init)
 }
 #endif
 
+/** @brief Release native semaphore resources after all waiting threads have stopped. */
 Semaphore::~Semaphore()
 {
 #ifdef _WIN32
@@ -86,6 +92,11 @@ Semaphore::~Semaphore()
 #endif
 }
 
+/**
+ * @brief Wait for and consume one semaphore permit.
+ * @param timeout Maximum wait in milliseconds; zero polls and UINT32_MAX waits indefinitely.
+ * @return True if a permit was acquired, false on timeout or a native wait failure.
+ */
 bool Semaphore::take(uint32_t timeout)
 {
 #ifdef _WIN32
@@ -125,6 +136,7 @@ bool Semaphore::take(uint32_t timeout)
 #endif
 }
 
+/** @brief Return one permit and wake a waiter without exceeding the semaphore's maximum count. */
 void Semaphore::give()
 {
 #ifdef _WIN32

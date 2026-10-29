@@ -17,6 +17,7 @@ namespace Instance {
         return mInstance;
     }
 
+    /** @brief Register the configured mock drivers, including both session and daily step counters. */
     void SensorLayer::init()
     {
         Sensor::Manager& sm = Sensor::Manager::getInstance();
