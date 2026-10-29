@@ -90,6 +90,11 @@ namespace OS {
     private:
     #ifdef _WIN32
         HANDLE                mSem;
+    #elif defined(__APPLE__)
+        std::mutex            mSemaphoreMutex;
+        std::condition_variable mSemaphoreReady;
+        const uint32_t        mMax;
+        uint32_t              mCount;
     #else
         sem_t                 mSem;
         const uint32_t        mMax;
