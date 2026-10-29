@@ -42,7 +42,7 @@ void KernelMessageDispatcher::run()
 {
     Instance::SensorLayer::getInstance().init();
 
-    while (1) {
+    while (mRunning) {
         // Wait for message (blocks until available)
         SDK::MessageBase* msg = nullptr;
         mAppComm.receiveFromApp(msg, 500);
@@ -243,7 +243,9 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
         case SDK::MessageType::REQUEST_GLANCE_UPDATE: {
             LOG_DEBUG("Requests glance update\n");
 
-            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+            const auto& update = *static_cast<SDK::Message::RequestGlanceUpdate*>(msg);
+            const bool accepted = !mGlanceUpdateHandler || mGlanceUpdateHandler(update);
+            mMessageMgr.signalCompletion(msg, accepted ? SDK::MessageResult::SUCCESS : SDK::MessageResult::FAIL);
         } break;
 
         case SDK::MessageType::REQUEST_WIDGET_START: {

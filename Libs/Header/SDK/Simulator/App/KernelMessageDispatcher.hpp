@@ -9,7 +9,10 @@
 #define __KERNEL_MESSAGE_DISPATCHER_HPP
 
 #include <cstdint>
+#include <functional>
+#include <atomic>
 
+#include "SDK/Messages/CommandMessages.hpp"
 #include "SDK/Simulator/App/DualAppComm.hpp"
 #include "SDK/Simulator/App/MessageManager.hpp"
 #include "SDK/Interfaces/IVibro.hpp"
@@ -38,6 +41,10 @@ public:
     ~KernelMessageDispatcher() = default;
 
     void run();
+    void stop() { mRunning = false; }
+
+    using GlanceUpdateHandler = std::function<bool(const SDK::Message::RequestGlanceUpdate&)>;
+    void setGlanceUpdateHandler(GlanceUpdateHandler handler) { mGlanceUpdateHandler = handler; }
     
     //bool dispatchMessage(SDK::MessageBase* msg) override;
 
@@ -285,6 +292,8 @@ private:
 	SDK::Interface::IBuzzer&    mBuzzer;
 	WatchSettingsLocal          mLocalSettings;
     ::App::SensorListener         mSrvSensorListener;
+    GlanceUpdateHandler           mGlanceUpdateHandler;
+    std::atomic<bool>             mRunning{true};
 };
 
 } // namespace App

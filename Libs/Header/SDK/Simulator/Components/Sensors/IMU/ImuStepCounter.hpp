@@ -32,6 +32,7 @@ namespace Sensor
         ImuStepCounter();
         
         Sensor::Driver& getDriver();
+        Sensor::Driver& getDailyDriver();
 
         //// ISensorDriverCtrl
         float       sdcStart(Sensor::Driver* driver, float period)        override;
@@ -50,10 +51,22 @@ namespace Sensor
 
         void publishData(uint32_t value);
 
+        class DailySensor : public Interface::ISensor {
+        public:
+            explicit DailySensor(ImuStepCounter& owner) : mOwner(owner) {}
+            void sensorRefresh() override { mOwner.sensorRefresh(); }
+        private:
+            ImuStepCounter& mOwner;
+        };
+
         IStepCounter&     mStepCounterSim;
         Sensor::Driver    mDriver;
+        DailySensor       mDailySensor;
+        Sensor::Driver    mDailyDriver;
         ::Driver::SwTimer mTimer;
         OS::Mutex         mDataMutex;
+        uint32_t          mActiveDrivers = 0;
+        bool              mFirstSample = true;
     };
 
 } /* namespace Sensor */
