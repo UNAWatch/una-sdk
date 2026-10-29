@@ -17,6 +17,14 @@
 #include "SDK/Simulator/Kernel/Mock/Vibro.hpp"
 #include "SDK/UnaLogger/Logger.h"
 
+/**
+ * @brief Parse host options and run the real glance service against the mock kernel.
+ * @param argc Number of command-line arguments, including the executable name.
+ * @param argv Options for duration, screenshot output and window scale.
+ * @return Zero for help or a successful run with updates, one for initialization,
+ * capture or stop failure (or no updates), and two for invalid arguments.
+ * @details Joins the service and dispatcher before stopping background sensor threads.
+ */
 int main(int argc, char** argv)
 {
     SDK::Simulator::GlanceHost::Options options;

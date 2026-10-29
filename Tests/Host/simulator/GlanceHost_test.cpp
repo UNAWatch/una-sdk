@@ -12,12 +12,14 @@
 
 namespace
 {
+/** @brief Report a failed assertion while allowing the remaining regression checks to run. */
 bool check(bool condition, const char* message)
 {
     if (!condition) std::fprintf(stderr, "FAILED: %s\n", message);
     return condition;
 }
 
+/** @brief Compare an in-bounds surface pixel against exact decoded RGB channel values. */
 bool pixel(SDL_Surface* surface, int column, int row, uint8_t red, uint8_t green, uint8_t blue)
 {
     uint32_t packed = 0;
@@ -29,6 +31,10 @@ bool pixel(SDL_Surface* surface, int column, int row, uint8_t red, uint8_t green
 }
 }
 
+/**
+ * @brief Exercise semaphore waits and headless glance rendering with real LVGL output.
+ * @return Zero only if copying, colors, alpha, clipping, validation and clearing all pass.
+ */
 int main()
 {
     bool passed = true;

@@ -5,6 +5,12 @@ endif()
 set(UNA_LVGL_CONF "$ENV{UNA_SDK}/Libs/Header/SDK/Simulator/Glance/lv_conf.h")
 include(${CMAKE_CURRENT_LIST_DIR}/una-simulator.cmake)
 
+#[[
+Create a host glance executable and its shared runtime from service sources.
+APP_ID is required; SOURCES supplies Service implementations and INCLUDE_DIRS
+must expose Service.hpp and the project's ConfigurationSimulator.hpp layout.
+The target inherits the simulator kernel, SDL2, LVGL and C++17 requirements.
+]]
 function(una_add_glance_simulator target)
     cmake_parse_arguments(GLANCE "" "APP_ID" "SOURCES;INCLUDE_DIRS" ${ARGN})
     if(NOT GLANCE_APP_ID)

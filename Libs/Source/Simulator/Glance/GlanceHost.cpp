@@ -10,11 +10,13 @@
 #include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Simulator/Components/InstanceSensorLayer.hpp"
 
+/** @brief Supply the simulator's fallback font to LVGL. */
 extern "C" const lv_font_t* una_lvgl_default_font(void)
 {
     return &lv_font_montserrat_18;
 }
 
+/** @brief Report an LVGL assertion location and terminate the simulator. */
 extern "C" void una_lvgl_assert_failed(const char* file, int line)
 {
     std::fprintf(stderr, "LVGL assertion at %s:%d\n", file, line);
@@ -25,11 +27,13 @@ namespace SDK::Simulator
 {
 namespace
 {
+/** @brief Expand a glance RGB222 color to LVGL's eight-bit color channels. */
 lv_color_t color(uint8_t value)
 {
     return lv_color_make(((value >> 4) & 3) * 85, ((value >> 2) & 3) * 85, (value & 3) * 85);
 }
 
+/** @brief Approximate a kernel Poppins face with the closest bundled Montserrat size. */
 const lv_font_t* font(GlanceFont_t value)
 {
     switch (value) {
@@ -45,11 +49,13 @@ const lv_font_t* font(GlanceFont_t value)
 }
 }
 
+/** @brief Borrow the simulator communication and kernel interfaces and copy the host options. */
 GlanceHost::GlanceHost(SDK::App::DualAppComm& comm, const SDK::Kernel& kernel, const Options& options)
     : mComm(comm), mKernel(kernel), mOptions(options)
 {
 }
 
+/** @brief Release initialized LVGL and SDL resources on the window thread, including after partial initialization. */
 GlanceHost::~GlanceHost()
 {
     if (mDisplay) {
@@ -62,6 +68,10 @@ GlanceHost::~GlanceHost()
     if (mSdlReady) SDL_Quit();
 }
 
+/**
+ * @brief Initialize the SDL window and the 240 x 60 LVGL display on the window thread.
+ * @return True when all display resources are ready; false if initialization fails.
+ */
 bool GlanceHost::init()
 {
     SDL_SetMainReady();
@@ -95,6 +105,13 @@ bool GlanceHost::init()
     return true;
 }
 
+/**
+ * @brief Validate and snapshot a glance update before the dispatcher acknowledges it.
+ * @param update Controls and image buffers that remain readable for this call.
+ * @return False for invalid controls without replacing the last accepted snapshot.
+ * @details Copies text and visible image pixels under host ownership. The dispatcher
+ * thread may call this while the window thread renders the previous snapshot.
+ */
 bool GlanceHost::capture(const SDK::Message::RequestGlanceUpdate& update)
 {
     if (update.controlsNumber > kMaxControls || (update.controlsNumber && !update.controls)) return false;
@@ -125,12 +142,17 @@ bool GlanceHost::capture(const SDK::Message::RequestGlanceUpdate& update)
     return true;
 }
 
+/** @brief Return the number of accepted snapshots with synchronized access. */
 uint32_t GlanceHost::updateCount() const
 {
     std::lock_guard<std::mutex> lock(mMutex);
     return mUpdates;
 }
 
+/**
+ * @brief Allocate a lifecycle event and transfer its ownership to the service queue.
+ * @return False if message allocation or queue insertion fails.
+ */
 bool GlanceHost::send(SDK::MessageType::Type type)
 {
     auto message = SDK::make_msg(mKernel, type);
@@ -139,6 +161,10 @@ bool GlanceHost::send(SDK::MessageType::Type type)
     return true;
 }
 
+/**
+ * @brief Queue the glance start event after successful display initialization.
+ * @return False if the host is uninitialized, already started, or cannot queue the event.
+ */
 bool GlanceHost::start()
 {
     if (!mDisplay || mStarted) return false;
@@ -146,6 +172,10 @@ bool GlanceHost::start()
     return mStarted;
 }
 
+/**
+ * @brief Queue the glance stop event once so the service can release its sensors.
+ * @return True if already stopped or the event was queued; false on queue failure.
+ */
 bool GlanceHost::stop()
 {
     if (!mStarted) return true;
@@ -154,6 +184,13 @@ bool GlanceHost::stop()
     return true;
 }
 
+/**
+ * @brief Pump window events, render snapshots, and send 10 Hz ticks until stopped.
+ * @param keepRunning Optional service-liveness predicate evaluated on the window thread.
+ * @return True if the optional screenshot and the final stop event both succeed.
+ * @details Requires init(). Exits on window close, Escape, the configured duration,
+ * or a false predicate. Without start(), renders snapshots without service ticks.
+ */
 bool GlanceHost::run(const std::function<bool()>& keepRunning)
 {
     const uint32_t startedAt = SDL_GetTicks();
@@ -189,6 +226,11 @@ bool GlanceHost::run(const std::function<bool()>& keepRunning)
     return stop() && saved;
 }
 
+/**
+ * @brief Replace the LVGL scene with the latest accepted snapshot on the window thread.
+ * @details Drops cached image descriptors before releasing the previous snapshot;
+ * copied image and line buffers remain alive while their LVGL objects reference them.
+ */
 void GlanceHost::render()
 {
     {
@@ -261,6 +303,12 @@ void GlanceHost::render()
     }
 }
 
+/**
+ * @brief Copy an LVGL RGB565 flush region into the persistent screenshot and display frame.
+ * @param display Display whose user data identifies the host.
+ * @param area In-bounds frame rectangle supplied by LVGL.
+ * @param pixels Packed RGB565 rows covering the flush rectangle.
+ */
 void GlanceHost::flush(lv_display_t* display, const lv_area_t* area, uint8_t* pixels)
 {
     auto* host = static_cast<GlanceHost*>(lv_display_get_user_data(display));
@@ -272,6 +320,11 @@ void GlanceHost::flush(lv_display_t* display, const lv_area_t* area, uint8_t* pi
     lv_display_flush_ready(display);
 }
 
+/**
+ * @brief Write the current unscaled RGB565 frame as a BMP on the window thread.
+ * @param path Destination file; its parent directory must already exist.
+ * @return False if SDL cannot create a surface or write the screenshot.
+ */
 bool GlanceHost::saveScreenshot(const std::string& path) const
 {
     auto* surface = SDL_CreateRGBSurfaceFrom(const_cast<uint16_t*>(mFrame.data()), kWidth, kHeight,
