@@ -10,11 +10,12 @@
    alone its Release configuration.
 
    PlatformToolset is compared too, from the PropertyGroup labelled
-   Configuration. The later PropertyGroup for the same Condition only
-   sets OutDir and is not the toolset. Both absent counts as agreement,
-   and the value is not pinned to one toolset. TreatWarningAsError is
-   not compared: Release treats warnings as errors in some projects and
-   Debug does not, which is a separate choice (#358).
+   Configuration. Condition and Label may sit in either order, with
+   whitespace or a newline between them. The later PropertyGroup for the
+   same Condition only sets OutDir and is not the toolset. Both absent
+   counts as agreement, and the value is not pinned to one toolset.
+   TreatWarningAsError is not compared: Release treats warnings as errors
+   in some projects and Debug does not, which is a separate choice (#358).
 
 2. una/Makefile: the object_files assignment must keep the backslash that
    carries it onto the .c mapping line. Without it the second line parses as a
@@ -71,12 +72,15 @@ def element(block, name):
 def configuration_group(text, config):
     """The Configuration PropertyGroup for one config.
 
-    Condition and Label="Configuration" have to be on the same opening tag.
-    A search that can leave the tag binds the later OutDir group, which has
-    the same Condition and no toolset, and the mismatch disappears.
+    Condition and Label may come in either order. Whitespace between them,
+    including a newline, is fine. The lookaheads stop at the opening tag's
+    `>`, so the later OutDir group (same Condition, no Label) is not matched.
+    Both groups absent compares equal: the fixtures that predate this check
+    have no Configuration group.
     """
     m = re.search(
-        r"<PropertyGroup Condition=\"'\$\(Configuration\)\|\$\(Platform\)'=='%s\|Win32'\" Label=\"Configuration\">(.*?)</PropertyGroup>"
+        r"<PropertyGroup(?=[^>]*\sCondition=\"'\$\(Configuration\)\|\$\(Platform\)'=='%s\|Win32'\")"
+        r"(?=[^>]*\sLabel=\"Configuration\")[^>]*>(.*?)</PropertyGroup>"
         % config, text, re.S)
     return m.group(1) if m else ""
 
@@ -187,6 +191,25 @@ TOOLSET_MISMATCH = GOOD_VCXPROJ.replace(
     "  </PropertyGroup>\n",
     1)
 
+
+def split_toolset(debug_toolset, release_toolset):
+    """Configuration groups split across lines, attributes in either order."""
+    return GOOD_VCXPROJ.replace(
+        "<Project>\n",
+        "<Project>\n"
+        "  <PropertyGroup\n"
+        "      Label=\"Configuration\"\n"
+        "      Condition=\"'$(Configuration)|$(Platform)'=='Debug|Win32'\">\n"
+        "    <PlatformToolset>%s</PlatformToolset>\n"
+        "  </PropertyGroup>\n"
+        "  <PropertyGroup\n"
+        "      Condition=\"'$(Configuration)|$(Platform)'=='Release|Win32'\"\n"
+        "      Label=\"Configuration\">\n"
+        "    <PlatformToolset>%s</PlatformToolset>\n"
+        "  </PropertyGroup>\n" % (debug_toolset, release_toolset),
+        1)
+
+
 # Matching ResourceCompile blocks ahead of ClCompile must not mask a ClCompile
 # difference (here, Release losing its identity macro).
 RESOURCE_COMPILE_FIRST = GOOD_VCXPROJ.replace(
@@ -221,6 +244,8 @@ def run_selftest():
         ("missing Application.vcxproj", None, GOOD_MAKEFILE, 1),
         ("missing una/Makefile", GOOD_VCXPROJ, None, 1),
         ("Release PlatformToolset differs from Debug", TOOLSET_MISMATCH, GOOD_MAKEFILE, 1),
+        ("split Configuration tags, toolsets agree", split_toolset("v143", "v143"), GOOD_MAKEFILE, 0),
+        ("split Configuration tags, toolsets differ", split_toolset("v143", "v145"), GOOD_MAKEFILE, 1),
     ]
     failed = 0
     for name, vcxproj, makefile, expected in cases:
