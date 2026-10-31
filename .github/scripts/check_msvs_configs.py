@@ -9,6 +9,13 @@
    SDK headers from SDK.props, and nobody noticed: CI never builds MSVC, let
    alone its Release configuration.
 
+   PlatformToolset is compared too, from the PropertyGroup labelled
+   Configuration. The later PropertyGroup for the same Condition only
+   sets OutDir and is not the toolset. Both absent counts as agreement,
+   and the value is not pinned to one toolset. TreatWarningAsError is
+   not compared: Release treats warnings as errors in some projects and
+   Debug does not, which is a separate choice (#358).
+
 2. una/Makefile: the object_files assignment must keep the backslash that
    carries it onto the .c mapping line. Without it the second line parses as a
    separate (bogus) rule, which is harmless only while there are no .c files
@@ -61,6 +68,19 @@ def element(block, name):
     return m.group(1) if m else None
 
 
+def configuration_group(text, config):
+    """The Configuration PropertyGroup for one config.
+
+    Condition and Label="Configuration" have to be on the same opening tag.
+    A search that can leave the tag binds the later OutDir group, which has
+    the same Condition and no toolset, and the mismatch disappears.
+    """
+    m = re.search(
+        r"<PropertyGroup Condition=\"'\$\(Configuration\)\|\$\(Platform\)'=='%s\|Win32'\" Label=\"Configuration\">(.*?)</PropertyGroup>"
+        % config, text, re.S)
+    return m.group(1) if m else ""
+
+
 def check_vcxproj(text):
     """Return a list of problems with Release/Debug agreement."""
     debug = cl_compile(item_definition_group(text, "Debug"))
@@ -85,6 +105,12 @@ def check_vcxproj(text):
     missing = [e for e in debug_inc if e not in release_inc and e != INHERIT_INCLUDES]
     if missing:
         problems.append("Release AdditionalIncludeDirectories lacks Debug's: %s" % ";".join(missing))
+
+    debug_toolset = element(configuration_group(text, "Debug"), "PlatformToolset")
+    release_toolset = element(configuration_group(text, "Release"), "PlatformToolset")
+    if debug_toolset != release_toolset:
+        problems.append("Release PlatformToolset (%s) differs from Debug (%s)"
+                        % (release_toolset, debug_toolset))
     return problems
 
 
@@ -148,6 +174,19 @@ DEBUG_FIRST_RELEASE_OK = GOOD_VCXPROJ.replace("WIN32;_DEBUG;", "_DEBUG;WIN32;").
 DEBUG_FIRST_RELEASE_KEEPS_DEBUG = GOOD_VCXPROJ.replace("WIN32;_DEBUG;", "_DEBUG;WIN32;").replace(
     "WIN32;NDEBUG;", "_DEBUG;WIN32;")
 
+# Alarm Release was v145 while Debug stayed v143 (#358). The link name is
+# libtouchgfx_$(PlatformToolset).lib, and the tree ships no v145 library.
+TOOLSET_MISMATCH = GOOD_VCXPROJ.replace(
+    "<Project>\n",
+    "<Project>\n"
+    "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|Win32'\" Label=\"Configuration\">\n"
+    "    <PlatformToolset>v143</PlatformToolset>\n"
+    "  </PropertyGroup>\n"
+    "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|Win32'\" Label=\"Configuration\">\n"
+    "    <PlatformToolset>v145</PlatformToolset>\n"
+    "  </PropertyGroup>\n",
+    1)
+
 # Matching ResourceCompile blocks ahead of ClCompile must not mask a ClCompile
 # difference (here, Release losing its identity macro).
 RESOURCE_COMPILE_FIRST = GOOD_VCXPROJ.replace(
@@ -161,7 +200,8 @@ RESOURCE_COMPILE_FIRST = GOOD_VCXPROJ.replace(
 
 def run_selftest():
     """--selftest runs the checks against fixtures here, one per defect #288
-    found, so a checker that silently stops matching fails loudly instead."""
+    found, plus the PlatformToolset mismatch from #358, so a checker that
+    silently stops matching fails loudly instead."""
     cases = [
         ("clean project", GOOD_VCXPROJ, GOOD_MAKEFILE, 0),
         ("Release lacks identity macros",
@@ -180,6 +220,7 @@ def run_selftest():
         ("ResourceCompile ahead of ClCompile", RESOURCE_COMPILE_FIRST, GOOD_MAKEFILE, 1),
         ("missing Application.vcxproj", None, GOOD_MAKEFILE, 1),
         ("missing una/Makefile", GOOD_VCXPROJ, None, 1),
+        ("Release PlatformToolset differs from Debug", TOOLSET_MISMATCH, GOOD_MAKEFILE, 1),
     ]
     failed = 0
     for name, vcxproj, makefile, expected in cases:
