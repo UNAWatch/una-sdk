@@ -60,14 +60,22 @@ toplevel=""
 log "Attempting to get git directory"
 git_dir=$(git rev-parse --git-dir 2>&1 || echo "fatal: git rev-parse failed")
 log "git rev-parse --git-dir output: '$git_dir'"
-if echo "$git_dir" | grep -q "dubious ownership\\|unsafe repository\\|fatal:" ; then
+# "not a git repository" is also a fatal rev-parse, and it is the normal result
+# for a copied example. Only an ownership failure should touch safe.directory,
+# and a failed show-toplevel must not be stored as the directory value.
+if echo "$git_dir" | grep -q "dubious ownership\\|unsafe repository"; then
   log "Detected dubious ownership or unsafe repository, configuring safe.directory"
   git config --global safe.directory '*'
   log "Set global safe.directory to '*' "
-  toplevel=$(git rev-parse --show-toplevel 2>&1 || echo "fatal: git rev-parse failed")
-  log "git rev-parse --show-toplevel output after config: '$toplevel'"
-  git config --global safe.directory "$toplevel"
-  log "Set global safe.directory to '$toplevel'"
+  toplevel=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if [ -n "$toplevel" ]; then
+    log "git rev-parse --show-toplevel output after config: '$toplevel'"
+    git config --global safe.directory "$toplevel"
+    log "Set global safe.directory to '$toplevel'"
+  else
+    log "No repository toplevel after safe.directory; not storing the failed rev-parse"
+    toplevel="fatal: git rev-parse failed"
+  fi
 else
   toplevel=$(git rev-parse --show-toplevel 2>&1 || echo "fatal: git rev-parse failed")
   log "git rev-parse --show-toplevel output: '$toplevel'"
