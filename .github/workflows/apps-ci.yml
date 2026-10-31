@@ -31,6 +31,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Una version script leaves git config alone outside a repo
+        run: bash Utilities/Scripts/build-cube/test_una_version.sh
+
       - name: Guard the ABI -> minKernelVersion mapping
         # (a) run the resolver self-tests; (b) fail if KERNEL_INTERFACE_VERSION was bumped
         #     without an abi_kernel_map.json entry (also validates map format + monotonicity);
