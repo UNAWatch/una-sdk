@@ -34,6 +34,11 @@ PAYLOAD_OFFSET = MAIN_HEADER_SIZE + ICONS_SIZE
 PAYLOAD_SIZE = 32
 FLAGS_OFFSET = 20
 FLAG_APP_VARIANT_ALIAS = 0x40
+# Bit 0x04 is unassigned. The kernel's Validator::aliasIsValid rejects it,
+# so the accepted mask is 0x7B rather than every bit below 0x80.
+# make_variant.py never sets the bit; this catches an alias that would
+# pack here and then fail on the watch (#327).
+ALIAS_FLAGS_MASK = 0x7B
 APP_TYPE_MASK = 0x03
 APP_TYPES = {"Activity": 0, "Utility": 1, "Glance": 2, "Clockface": 3}
 
@@ -117,7 +122,7 @@ def verify_alias(path: Path, expected_appid: int, expected_target: int) -> None:
         fail(f"{path.name}: alias must carry libcVersion=0 and serviceSize=0")
     if not (flags & FLAG_APP_VARIANT_ALIAS):
         fail(f"{path.name}: FLAG_APP_VARIANT_ALIAS missing (flags=0x{flags:02X})")
-    if flags & ~0x7F:
+    if flags & ~ALIAS_FLAGS_MASK:
         fail(f"{path.name}: flags outside the alias mask (0x{flags:08X})")
     if 0 not in data[24:40]:
         fail(f"{path.name}: app_name is not NUL-terminated within 16 bytes")

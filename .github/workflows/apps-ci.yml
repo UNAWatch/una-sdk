@@ -105,6 +105,11 @@ jobs:
                 echo --check "$f"; \
               done)
 
+      - name: Alias flag mask
+        # verify_alias mirrors Validator::aliasIsValid. Bit 0x04 is unassigned
+        # and the kernel rejects it; 0x7F used to let that alias pack.
+        run: python3 Utilities/Scripts/app_merging/test_verify_alias.py
+
       - name: Generate app list
         id: generate
         run: |
