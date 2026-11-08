@@ -25,11 +25,7 @@
     #include <Windows.h>
     #include <array>
 #else
-    #ifdef __APPLE__
-        #include <dispatch/dispatch.h>
-    #else
-        #include <semaphore.h>
-    #endif
+    #include <semaphore.h>
     #include <ctime>
     #include <atomic>
     #include <array>
@@ -94,13 +90,13 @@ namespace OS {
     private:
     #ifdef _WIN32
         HANDLE                mSem;
-    #else
-    #ifdef __APPLE__
-        dispatch_semaphore_t  mSem;
-        uint32_t              mInitial = 0;   ///< libdispatch must get this back before release
+    #elif defined(__APPLE__)
+        std::mutex            mSemaphoreMutex;
+        std::condition_variable mSemaphoreReady;
+        const uint32_t        mMax;
+        uint32_t              mCount;
     #else
         sem_t                 mSem;
-    #endif
         const uint32_t        mMax;
         std::atomic<uint32_t> mCount;
     #endif

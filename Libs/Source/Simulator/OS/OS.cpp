@@ -62,53 +62,57 @@ std::mutex& Mutex::native()
 //// Semaphore
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Initialize a bounded semaphore using the host platform's synchronization primitives.
+ * @param max Maximum number of available permits.
+ * @param init Initial permit count, which must not exceed max.
+ */
 Semaphore::Semaphore(uint32_t max, uint32_t init)
 #ifdef _WIN32
 {
     mSem = CreateSemaphore(nullptr, init, max, nullptr);
 }
+#elif defined(__APPLE__)
+    : mMax(max), mCount(init)
+{}
 #else
     : mSem(), mMax(max), mCount(init)
 {
-#ifdef __APPLE__
-    mSem     = dispatch_semaphore_create(init);
-    mInitial = init;
-#else
     sem_init(&mSem, 0, init);
-#endif
 }
 #endif
 
+/** @brief Release native semaphore resources after all waiting threads have stopped. */
 Semaphore::~Semaphore()
 {
 #ifdef _WIN32
     CloseHandle(mSem);
-#elif defined(__APPLE__)
-    // libdispatch traps if a semaphore is released while its count is below
-    // the creation value; top it back up first.
-    while (mCount.load() < mInitial) {
-        dispatch_semaphore_signal(mSem);
-        mCount++;
-    }
-    dispatch_release(mSem);
-#else
+#elif !defined(__APPLE__)
     sem_destroy(&mSem);
 #endif
 }
 
+/**
+ * @brief Wait for and consume one semaphore permit.
+ * @param timeout Maximum wait in milliseconds; zero polls and UINT32_MAX waits indefinitely.
+ * @return True if a permit was acquired, false on timeout or a native wait failure.
+ */
 bool Semaphore::take(uint32_t timeout)
 {
 #ifdef _WIN32
     DWORD res = WaitForSingleObject(mSem, timeout);
     return res == WAIT_OBJECT_0;
+#elif defined(__APPLE__)
+    std::unique_lock<std::mutex> lock(mSemaphoreMutex);
+    if (timeout == UINT32_MAX) {
+        mSemaphoreReady.wait(lock, [this] { return mCount > 0; });
+    } else if (!mSemaphoreReady.wait_for(lock, std::chrono::milliseconds(timeout), [this] { return mCount > 0; })) {
+        return false;
+    }
+    --mCount;
+    return true;
 #else
     int result;
-#ifdef __APPLE__
-    dispatch_time_t when = (timeout == (uint32_t)-1)
-        ? DISPATCH_TIME_FOREVER
-        : dispatch_time(DISPATCH_TIME_NOW, (int64_t)timeout * 1000000);
-    result = (dispatch_semaphore_wait(mSem, when) == 0) ? 0 : -1;
-#else
     if (timeout == (uint32_t)-1) {
         result = sem_wait(&mSem);
     } else {
@@ -122,7 +126,6 @@ bool Semaphore::take(uint32_t timeout)
         }
         result = sem_timedwait(&mSem, &ts);
     }
-#endif
 
     if (result == 0) {
         mCount--;
@@ -133,10 +136,17 @@ bool Semaphore::take(uint32_t timeout)
 #endif
 }
 
+/** @brief Return one permit and wake a waiter without exceeding the semaphore's maximum count. */
 void Semaphore::give()
 {
 #ifdef _WIN32
     ReleaseSemaphore(mSem, 1, nullptr);
+#elif defined(__APPLE__)
+    std::lock_guard<std::mutex> lock(mSemaphoreMutex);
+    if (mCount < mMax) {
+        ++mCount;
+        mSemaphoreReady.notify_one();
+    }
 #else
     uint32_t old = mCount.load();
     while (true) {
@@ -145,11 +155,7 @@ void Semaphore::give()
         }
 
         if (mCount.compare_exchange_weak(old, old + 1)) {
-#ifdef __APPLE__
-            dispatch_semaphore_signal(mSem);
-#else
             sem_post(&mSem);
-#endif
             return;
         }
     }
