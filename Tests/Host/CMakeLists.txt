@@ -71,6 +71,7 @@ add_executable(una-sdk-host-tests
     utils/Utils_test.cpp
     utils/CopyUtf8_test.cpp
     utils/AlignedAlloc_test.cpp
+    utils/FixedQueue_test.cpp
     variant/VariantConfig_test.cpp
     support/KernelTestDoubles_test.cpp
     apps/Alarm/AlarmManager_test.cpp
@@ -120,10 +121,13 @@ target_include_directories(una-sdk-host-tests PRIVATE
     "${UNA_SDK_ROOT}/Examples/Apps/Timer/Software/Libs/Header"
 )
 
+find_package(Threads REQUIRED)
+
 target_link_libraries(una-sdk-host-tests PRIVATE
     sdk_host_test_support
     GTest::gtest_main
     GTest::gmock
+    Threads::Threads
 )
 
 enable_testing()
