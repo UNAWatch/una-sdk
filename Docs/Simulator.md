@@ -272,7 +272,8 @@ provides the source lists and `una_simulator_link_sdl2()`, which uses an install
 where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
 TouchGFX Designer. The build's architecture must match the SDL2 it links: 32-bit with the
 TouchGFX copy, x64 with a 64-bit installed package. The compiler is whatever CMake
-finds: GCC on Linux and WSL, MSVC on Windows. MSVC comes with the free *Build Tools for
+finds: GCC on Linux and WSL, MSVC on Windows, Apple Clang on macOS (with SDL2 from
+Homebrew, `brew install sdl2`). MSVC comes with the free *Build Tools for
 Visual Studio* as well as with the IDE, whose "C++ CMake tools for Windows" component
 also brings CMake and Ninja; the Ninja generator drives it from a developer command
 prompt (the x86 one for the 32-bit build), and the Visual Studio generator (`-A Win32`)
