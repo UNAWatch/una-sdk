@@ -54,26 +54,25 @@ else
   exit 1
 fi
 
-# Get top-level git dir for safe.directory (handles nested submodules)
-# Safe bootstrap for repo toplevel (Docker dubious ownership)
+# Get top-level git dir (handles nested submodules).
+# A copied example is not a repository, and that must not touch git config.
+# Dubious ownership is a one-shot -c plus process-local config for the rest of
+# this script. Nothing is written with `git config`, so a failed rev-parse
+# cannot land in safe.directory and '*' is never stored for other repos.
 toplevel=""
 log "Attempting to get git directory"
 git_dir=$(git rev-parse --git-dir 2>&1 || echo "fatal: git rev-parse failed")
 log "git rev-parse --git-dir output: '$git_dir'"
-# "not a git repository" is also a fatal rev-parse, and it is the normal result
-# for a copied example. Only an ownership failure should touch safe.directory,
-# and a failed show-toplevel must not be stored as the directory value.
 if echo "$git_dir" | grep -q "dubious ownership\\|unsafe repository"; then
-  log "Detected dubious ownership or unsafe repository, configuring safe.directory"
-  git config --global safe.directory '*'
-  log "Set global safe.directory to '*' "
-  toplevel=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  log "Detected dubious ownership or unsafe repository"
+  toplevel=$(git -c safe.directory='*' rev-parse --show-toplevel 2>/dev/null || true)
   if [ -n "$toplevel" ]; then
-    log "git rev-parse --show-toplevel output after config: '$toplevel'"
-    git config --global safe.directory "$toplevel"
-    log "Set global safe.directory to '$toplevel'"
+    log "git rev-parse --show-toplevel output: '$toplevel'"
+    export GIT_CONFIG_COUNT=1
+    export GIT_CONFIG_KEY_0=safe.directory
+    export GIT_CONFIG_VALUE_0="$toplevel"
   else
-    log "No repository toplevel after safe.directory; not storing the failed rev-parse"
+    log "No repository toplevel; not changing git config"
     toplevel="fatal: git rev-parse failed"
   fi
 else
