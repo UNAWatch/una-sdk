@@ -9,22 +9,21 @@ unset BUILD_VERSION
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
 empty=$(mktemp -d)
+inside=""
 cfg=$(mktemp)
 export GIT_CONFIG_GLOBAL="$cfg"
 
 cleanup() {
-  rm -rf "$empty"
-  rm -f "$cfg"
+  rm -rf "$empty" ${inside:+"$inside"} ${owned:+"$owned"} ${fake:+"$fake"}
+  rm -f "$cfg" ${log:+"$log"}
 }
 trap cleanup EXIT
 
-# Outside the checkout: rev-parse walks parent directories, and a directory
-# inside this repo is a real work tree.
-case "$empty" in
-  "$script_dir"*) echo "temp dir is inside the script tree: $empty" >&2; exit 1 ;;
-esac
-
-out=$(bash "$script_dir/una-version.sh" "$empty")
+# Git walks parent directories looking for .git. The ceiling is a directory
+# it must not enter, so it has to be the temp directory's parent. Listing the
+# temp directory itself does not stop the walk. This is what happens when
+# TMPDIR sits inside a checkout.
+out=$(GIT_CEILING_DIRECTORIES="$(dirname "$empty")" bash "$script_dir/una-version.sh" "$empty")
 
 status=0
 if git config --global --get-regexp '^safe\.' >/dev/null 2>&1; then
@@ -36,6 +35,16 @@ fi
 case "$out" in
   *BUILD_VERSION=0.0.0-dev*) ;;
   *) echo "expected BUILD_VERSION=0.0.0-dev, got: $out" >&2; status=1 ;;
+esac
+
+# Same check with the empty directory created inside this checkout. Without
+# the ceiling, rev-parse finds the SDK repo and the assertion above is a
+# false failure.
+inside=$(mktemp -d "$script_dir/.una-version-empty.XXXXXX")
+out=$(GIT_CEILING_DIRECTORIES="$(dirname "$inside")" bash "$script_dir/una-version.sh" "$inside")
+case "$out" in
+  *BUILD_VERSION=0.0.0-dev*) ;;
+  *) echo "directory inside the checkout was treated as the SDK repo: $out" >&2; status=1 ;;
 esac
 
 # Ownership failure used to run `git config --global safe.directory '*'`.
@@ -53,35 +62,24 @@ if [ "$1" = "config" ]; then
   echo "git config was invoked: $*" >> "$CALL_LOG"
   exit 0
 fi
-if [ "$1" = "rev-parse" ] && [ "$2" = "--git-dir" ]; then
-  if [ "${GIT_CONFIG_VALUE_0:-}" = "$OWNED_TOP" ]; then
-    echo ".git"
-    exit 0
-  fi
-  echo "fatal: detected dubious ownership in repository at '$PWD'"
+# Ownership errors are translated. This one is not the English phrase.
+# Only a -c safe.directory invocation may succeed.
+if [ "$1" != "-c" ]; then
+  echo "fatal: détection d'un propriétaire douteux" >&2
   exit 128
 fi
-if [ "$1" = "-c" ]; then
-  echo "$OWNED_TOP"
-  exit 0
-fi
-if [ "$1" = "describe" ]; then
-  echo "sdk-v1.2.3"
-  exit 0
-fi
-if [ "$1" = "rev-parse" ]; then
-  echo "abc1234"
-  exit 0
-fi
-if [ "$1" = "status" ]; then
-  exit 0
-fi
+case " $* " in
+  *" --show-toplevel "*) echo "$OWNED_TOP"; exit 0 ;;
+  *" describe "*) echo "sdk-v1.2.3"; exit 0 ;;
+  *" status "*) exit 0 ;;
+  *" rev-parse "*) echo "abc1234"; exit 0 ;;
+esac
 exit 1
 EOF
 chmod +x "$fake/git"
 
 cleanup() {
-  rm -rf "$empty" "$owned" "$fake"
+  rm -rf "$empty" "$inside" "$owned" "$fake"
   rm -f "$cfg" "$log"
 }
 trap cleanup EXIT
@@ -107,5 +105,30 @@ case "$out" in
   *BUILD_VERSION=1.2.3*) ;;
   *) echo "dubious-ownership path should version from the one-shot override, got: $out" >&2; status=1 ;;
 esac
+
+# setup-environment.sh and build-cube.sh source this script. Sourcing must
+# not leave GIT_CONFIG_* behind, including when the caller already set some.
+sourced=$(
+  set +eu
+  export GIT_CONFIG_COUNT=2
+  export GIT_CONFIG_KEY_0=user.name
+  export GIT_CONFIG_VALUE_0=kept
+  export CALL_LOG="$log" OWNED_TOP="$owned"
+  export PATH="$fake:$PATH"
+  unset BUILD_VERSION
+  # shellcheck disable=SC1090
+  . "$script_dir/una-version.sh" "$owned" >/dev/null
+  printf 'COUNT=%s\nKEY=%s\nVALUE=%s\nBUILD=%s\n' \
+    "${GIT_CONFIG_COUNT-}" "${GIT_CONFIG_KEY_0-}" "${GIT_CONFIG_VALUE_0-}" "${BUILD_VERSION-}"
+  if type _una_git >/dev/null 2>&1; then
+    echo HELPER=set
+  else
+    echo HELPER=unset
+  fi
+)
+printf '%s\n' "$sourced" | grep -q '^COUNT=2$' || { echo "sourced script replaced GIT_CONFIG_COUNT: $sourced" >&2; status=1; }
+printf '%s\n' "$sourced" | grep -q '^VALUE=kept$' || { echo "sourced script replaced GIT_CONFIG_VALUE_0: $sourced" >&2; status=1; }
+printf '%s\n' "$sourced" | grep -q '^BUILD=1.2.3$' || { echo "sourced script lost the version: $sourced" >&2; status=1; }
+printf '%s\n' "$sourced" | grep -q '^HELPER=unset$' || { echo "sourced script left _una_git defined: $sourced" >&2; status=1; }
 
 exit "$status"
