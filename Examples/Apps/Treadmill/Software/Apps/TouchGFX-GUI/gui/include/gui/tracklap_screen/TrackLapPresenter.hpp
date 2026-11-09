@@ -27,6 +27,9 @@ public:
 
     virtual ~TrackLapPresenter() {}
 
+    /** Leave for the screen the lap was taken on. */
+    void dismiss();
+
 private:
     TrackLapPresenter();
 

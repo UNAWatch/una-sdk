@@ -114,6 +114,10 @@ public:
     enum class HoldConfirmMode { Finish, Discard };
     void setHoldConfirmMode(HoldConfirmMode mode);
     HoldConfirmMode getHoldConfirmMode() const;
+
+    // A lap taken on the pause menu returns there from the lap screen.
+    void setLapFromPauseMenu(bool fromPauseMenu);
+    bool isLapFromPauseMenu() const;
     /// Post-run Calibrate & Save (§5): send the actual treadmill distance in
     /// metres (<= 0 means "skip" — finalise with the estimate).
     void trackCalibrate(float distanceActualM);
@@ -186,6 +190,7 @@ private:
 
     // Track
     HoldConfirmMode        mHoldConfirmMode       = HoldConfirmMode::Discard;
+    bool                   mLapFromPauseMenu      = false;
     bool                   mPendingIntervalsMode  = false;
     Track::IntervalsData   mPendingAlertIntervals {};  ///< Snapshot from last INTERVALS_PHASE_ALERT
     Track::State           mTrackState            {};

@@ -2,7 +2,8 @@
  ******************************************************************************
  * @file    TrackLapScreen.hpp
  * @brief   Lap popup: number, distance, time and average pace of the lap just
- *          ended, shown for five seconds, then back to the track faces.
+ *          ended, shown for five seconds, then back to the track faces, or to
+ *          the pause menu for a lap taken there.
  ******************************************************************************
  */
 
@@ -21,6 +22,7 @@ public:
     ~TrackLapScreen() override;
 
     void onShow() override;
+    void onHide() override;
 
 protected:
     void build() override;

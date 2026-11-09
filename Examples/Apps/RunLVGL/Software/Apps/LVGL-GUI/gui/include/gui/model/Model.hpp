@@ -104,6 +104,10 @@ public:
     void setHoldConfirmMode(HoldConfirmMode mode);
     HoldConfirmMode getHoldConfirmMode() const;
 
+    // A lap taken on the pause menu returns there from the lap screen.
+    void setLapFromPauseMenu(bool fromPauseMenu);
+    bool isLapFromPauseMenu() const;
+
     // Track
     void setPendingIntervalsMode(bool mode);
     bool isPendingIntervalsMode() const;
@@ -224,6 +228,7 @@ private:
 
     // Track
     HoldConfirmMode        mHoldConfirmMode       = HoldConfirmMode::Discard;
+    bool                   mLapFromPauseMenu      = false;
     bool                   mPendingIntervalsMode  = false;
     Track::IntervalsData   mPendingAlertIntervals {};  ///< Snapshot from last INTERVALS_PHASE_ALERT
     Track::State           mTrackState            {};

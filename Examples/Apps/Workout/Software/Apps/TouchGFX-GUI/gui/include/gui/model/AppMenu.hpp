@@ -84,7 +84,7 @@ struct TrackView {
               ID_COUNT, ID_DEFAULT = ID_TRACK1 };
 
     struct Action {
-        enum Id { ID_RESUME = 0, ID_SUMMARY, ID_SAVE, ID_DISCARD,
+        enum Id { ID_RESUME = 0, ID_LAP, ID_SUMMARY, ID_SAVE, ID_DISCARD,
                   ID_COUNT, ID_DEFAULT = ID_RESUME };
     };
 };

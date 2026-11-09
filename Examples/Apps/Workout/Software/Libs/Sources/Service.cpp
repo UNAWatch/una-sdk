@@ -382,6 +382,19 @@ void Service::handleEvent(const CustomMessage::TrackResume& /*event*/)
 
 void Service::handleEvent(const CustomMessage::ManualLap& /*event*/)
 {
+    // A lap taken while paused is held until the activity resumes, then ends
+    // where it was taken; an activity saved without resuming ends at the
+    // pause, as if it had not been taken. One per pause, and only with
+    // something in it.
+    if (mTrackState == Track::State::PAUSED) {
+        if (!mLapNotEmpty || mPausedLapUtc != 0) {
+            return;
+        }
+        mPausedLapUtc = mTimeCounter.getCurrent();
+        SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum + 1);
+        notifyLapEnd();
+        return;
+    }
     saveLap();
     SDK::send_msg<CustomMessage::LapEnded>(mKernel, mTrackData.lapNum);
     notifyLapEnd();
@@ -609,6 +622,8 @@ void Service::startTrack(std::time_t utc)
     mBatteryVoltage.reset(skBatteryLogPeriodMs);
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
+    mPausedLapUtc = 0;
+    mLapPauseCarrySec = 0;
 
     mSummary = ActivitySummary{};
     mSummary.laps.reserve(10);
@@ -715,7 +730,7 @@ void Service::updateHrDerivedMetrics()
     }
 }
 
-void Service::saveLap()
+void Service::saveLap(std::time_t pausedAtUtc)
 {
     // Accumulate lap into summary
     mSummary.laps.push_back({
@@ -730,16 +745,18 @@ void Service::saveLap()
     // Every user stop pauses first -- the GUI pauses on entering the stop menu
     // and the confirm needs a hold -- so the span between that pause and the
     // save is UI time, not activity time. End at the pause instant and trim the
-    // same tail from the elapsed span. A mid-activity lap is not paused, so both
-    // calls are no-ops there -- though only the GUI guarantees that: the
-    // ManualLap handler and the intervals phase advance do not check the state.
-    const std::time_t endUtc  = mTimeCounter.getEndValue();
-    const std::time_t tailSec = mTimeCounter.getTrailingPause();
+    // same tail from the elapsed span. A lap taken while paused ends where it
+    // was taken instead, and the rest of the pause goes to the next lap's
+    // elapsed span. A mid-activity lap is not paused, so the tail is zero there.
+    const std::time_t endUtc  = pausedAtUtc != 0 ? pausedAtUtc : mTimeCounter.getEndValue();
+    const std::time_t tailSec = mTimeCounter.getCurrent() - endUtc;
+    const std::time_t headSec = mLapPauseCarrySec;
+    mLapPauseCarrySec = pausedAtUtc != 0 ? tailSec : 0;
 
     fitLap.timestamp = endUtc;
-    fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal();
+    fitLap.timeStart = mTimeCounter.getCurrent() - mTimeCounter.getLapValueTotal() - headSec;
     fitLap.duration  = mTimeCounter.getLapValueActive();
-    fitLap.elapsed   = mTimeCounter.getLapValueTotal() - tailSec;
+    fitLap.elapsed   = mTimeCounter.getLapValueTotal() + headSec - tailSec;
 
     fitLap.hrAvg            = mHrCounter.getLapAverage();
     fitLap.hrMax            = mHrCounter.getLapMaximum();
@@ -794,6 +811,10 @@ void Service::stopTrack(bool discard)
     if (mTrackState == Track::State::INACTIVE) {
         return;
     }
+
+    // A lap taken in the pause that ends the activity is dropped: it ends at
+    // the pause, as if the lap had not been taken.
+    mPausedLapUtc = 0;
 
     if (!discard && mSessionNotEmpty) {
 
@@ -878,6 +899,14 @@ void Service::pauseTrack(bool pause)
         buildPartialSummary();
         SDK::send_msg<CustomMessage::Summary>(mKernel, &mSummary);
     } else if (!pause && mTrackState == Track::State::PAUSED) {
+        // A lap taken in this pause is saved now, before the counters resume,
+        // ending where it was taken; see handleEvent(ManualLap).
+        if (mPausedLapUtc != 0) {
+            const std::time_t pausedAtUtc = mPausedLapUtc;
+            mPausedLapUtc = 0;
+            saveLap(pausedAtUtc);
+        }
+
         mTimeCounter.resume();
         mDistanceCounter.resume();
         mSpeedCounter.resume();

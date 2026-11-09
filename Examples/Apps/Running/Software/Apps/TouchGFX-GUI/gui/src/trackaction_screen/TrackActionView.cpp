@@ -42,20 +42,27 @@ void TrackActionView::tearDownScreen()
 
 // ---- Presenter -> View ------------------------------------------------------
 
-void TrackActionView::setWorkoutMode(bool workout)
+void TrackActionView::setMode(bool freeRun, bool workout)
 {
+    mFreeRun     = freeRun;
     mWorkoutMode = workout;
-    menuLayout.setNumberOfItems(workout ? Menu::ID_COUNT : Menu::ID_COUNT - 1);
+    menuLayout.getButtons().setR2(freeRun ? Buttons::AMBER : Buttons::NONE);
+    menuLayout.setNumberOfItems(Menu::ID_COUNT - (freeRun ? 0 : 1) - (workout ? 0 : 1));
     menuLayout.invalidate();
 }
 
 uint16_t TrackActionView::itemAt(int16_t row) const
 {
-    // Without a workout, End workout's row is left out.
-    if (!mWorkoutMode && row >= Menu::ID_END_WORKOUT) {
-        return static_cast<uint16_t>(row + 1);
+    // Outside a free run, Lap's row is left out; without a workout, End
+    // workout's.
+    uint16_t item = static_cast<uint16_t>(row);
+    if (!mFreeRun && item >= Menu::ID_LAP) {
+        ++item;
     }
-    return static_cast<uint16_t>(row);
+    if (!mWorkoutMode && item >= Menu::ID_END_WORKOUT) {
+        ++item;
+    }
+    return item;
 }
 
 void TrackActionView::setPositionId(uint16_t id)
@@ -118,6 +125,7 @@ void TrackActionView::setElevation(float metres)
 
 static const TypedTextId sItemIds[App::MenuNav::TrackView::Action::ID_COUNT] = {
     T_TEXT_RESUME,
+    T_TEXT_LAP,
     T_TEXT_END_WORKOUT,
     T_TEXT_SUMMARY,
     T_TEXT_SAVE,
@@ -215,7 +223,7 @@ void TrackActionView::handleKeyEvent(uint8_t key)
 
     // Save & End / Discard / End workout start a hold-to-confirm: pressing (and
     // holding) R1 opens the countdown screen immediately; it counts down while R1
-    // stays held and releasing early returns here. Resume/Summary stay plain taps.
+    // stays held and releasing early returns here. Resume/Lap/Summary stay plain taps.
     if (key == SDK::GUI::Button::R1_PRESS) {
         switch (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()))) {
         case Menu::ID_END_WORKOUT:
@@ -241,11 +249,20 @@ void TrackActionView::handleKeyEvent(uint8_t key)
             presenter->resumeTrack();
             application().gotoTrackScreenNoTransition();
             break;
+        case Menu::ID_LAP:
+            presenter->saveLap();
+            break;
         case Menu::ID_SUMMARY:
             application().gotoTrackSummaryScreenNoTransition();
             break;
         default:
             break;
         }
+    }
+
+    // The lap button takes a lap here too, in a free run. The lap screen
+    // shows once the Service has taken it: it ignores a lap with nothing in it.
+    if (key == SDK::GUI::Button::R2 && mFreeRun) {
+        presenter->saveLap();
     }
 }

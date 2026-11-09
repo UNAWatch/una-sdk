@@ -43,6 +43,7 @@ void Model::invalidate()
     mInvalidate = true;
 }
 
+
 void Model::tick()
 {
 #if defined(SIMULATOR)
@@ -191,6 +192,16 @@ void Model::setHoldConfirmMode(HoldConfirmMode mode)
 Model::HoldConfirmMode Model::getHoldConfirmMode() const
 {
     return mHoldConfirmMode;
+}
+
+void Model::setLapFromPauseMenu(bool fromPauseMenu)
+{
+    mLapFromPauseMenu = fromPauseMenu;
+}
+
+bool Model::isLapFromPauseMenu() const
+{
+    return mLapFromPauseMenu;
 }
 
 void Model::saveTrack()

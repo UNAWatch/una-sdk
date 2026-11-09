@@ -89,7 +89,7 @@ struct TrackView {
 
     struct Action {
         enum Id {
-            ID_RESUME = 0, ID_SUMMARY, ID_SAVE, ID_DISCARD,
+            ID_RESUME = 0, ID_LAP, ID_SUMMARY, ID_SAVE, ID_DISCARD,
             ID_COUNT, ID_DEFAULT = ID_RESUME
         };
     };

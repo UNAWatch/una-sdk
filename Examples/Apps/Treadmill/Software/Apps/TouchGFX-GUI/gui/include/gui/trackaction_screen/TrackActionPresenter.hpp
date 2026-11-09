@@ -28,8 +28,10 @@ public:
     virtual ~TrackActionPresenter() {}
 
     virtual void onTrackData(const Track::Data& data) override;
+    virtual void onLapChanged(uint8_t lapEnd) override;
 
     void resumeTrack();
+    void saveLap();
 
     /** Select which action the shared hold-confirm screen will perform. */
     void setHoldConfirmMode(Model::HoldConfirmMode mode) { model->setHoldConfirmMode(mode); }

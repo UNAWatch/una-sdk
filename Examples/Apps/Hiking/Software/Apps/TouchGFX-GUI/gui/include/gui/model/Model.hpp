@@ -108,6 +108,10 @@ public:
     void setHoldConfirmMode(HoldConfirmMode mode);
     HoldConfirmMode getHoldConfirmMode() const;
 
+    // A lap taken on the pause menu returns there from the lap screen.
+    void setLapFromPauseMenu(bool fromPauseMenu);
+    bool isLapFromPauseMenu() const;
+
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
 
@@ -155,6 +159,7 @@ private:
 
     // Track
     HoldConfirmMode        mHoldConfirmMode = HoldConfirmMode::Discard;
+    bool                   mLapFromPauseMenu = false;
     Track::State           mTrackState      {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData       {};

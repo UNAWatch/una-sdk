@@ -33,7 +33,18 @@ void TrackActionPresenter::onTrackData(const Track::Data& data)
 
 }
 
+void TrackActionPresenter::onLapChanged(uint8_t /*lapEnd*/)
+{
+    model->setLapFromPauseMenu(true);
+    model->application().gotoTrackLapScreenNoTransition();
+}
+
 void TrackActionPresenter::resumeTrack()
 {
     model->trackResume();
+}
+
+void TrackActionPresenter::saveLap()
+{
+    model->saveLap();
 }

@@ -277,6 +277,16 @@ Model::HoldConfirmMode Model::getHoldConfirmMode() const
     return mHoldConfirmMode;
 }
 
+void Model::setLapFromPauseMenu(bool fromPauseMenu)
+{
+    mLapFromPauseMenu = fromPauseMenu;
+}
+
+bool Model::isLapFromPauseMenu() const
+{
+    return mLapFromPauseMenu;
+}
+
 void Model::trackCalibrate(float distanceActualM)
 {
     SDK::send_msg<CustomMessage::TrackCalibrate>(mKernel, distanceActualM);
