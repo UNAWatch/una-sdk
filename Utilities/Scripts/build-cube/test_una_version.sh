@@ -47,11 +47,11 @@ case "$out" in
   *) echo "directory inside the checkout was treated as the SDK repo: $out" >&2; status=1 ;;
 esac
 
-# Ownership failure used to run `git config --global safe.directory '*'`.
-# That disable sticks for every repo if the process dies before the follow-up
-# write, and it is the wrong place for a version script to grant trust.
-# A fake git reports dubious ownership; the script may pass -c, and must not
-# invoke `git config`.
+# Ownership failure used to run `git config --global safe.directory '*'`,
+# and later a one-shot `git -c safe.directory=*`. Either one trusts the
+# checkout, so a later git status runs its core.fsmonitor hook or an alias.
+# A fake git reports dubious ownership. The script must not pass -c and must
+# not invoke `git config`. The version stays the default.
 owned=$(mktemp -d)
 fake=$(mktemp -d)
 log=$(mktemp)
@@ -96,14 +96,19 @@ if grep -q "git config was invoked" "$log"; then
   cat "$log" >&2
   status=1
 fi
+if grep -q -- "-c" "$log" || grep -q "safe.directory" "$log"; then
+  echo "dubious-ownership path overrode safe.directory:" >&2
+  cat "$log" >&2
+  status=1
+fi
 if git config --global --get-regexp '^safe\.' >/dev/null 2>&1; then
   echo "safe.directory was written for a dubious repository:" >&2
   git config --global --get-regexp '^safe\.' >&2
   status=1
 fi
 case "$out" in
-  *BUILD_VERSION=1.2.3*) ;;
-  *) echo "dubious-ownership path should version from the one-shot override, got: $out" >&2; status=1 ;;
+  *BUILD_VERSION=0.0.0-dev*) ;;
+  *) echo "dubious-ownership path should keep the default version, got: $out" >&2; status=1 ;;
 esac
 
 # setup-environment.sh and build-cube.sh source this script. Sourcing must
@@ -128,7 +133,7 @@ sourced=$(
 )
 printf '%s\n' "$sourced" | grep -q '^COUNT=2$' || { echo "sourced script replaced GIT_CONFIG_COUNT: $sourced" >&2; status=1; }
 printf '%s\n' "$sourced" | grep -q '^VALUE=kept$' || { echo "sourced script replaced GIT_CONFIG_VALUE_0: $sourced" >&2; status=1; }
-printf '%s\n' "$sourced" | grep -q '^BUILD=1.2.3$' || { echo "sourced script lost the version: $sourced" >&2; status=1; }
+printf '%s\n' "$sourced" | grep -q '^BUILD=0.0.0-dev$' || { echo "sourced script trusted a rejected checkout: $sourced" >&2; status=1; }
 printf '%s\n' "$sourced" | grep -q '^HELPER=unset$' || { echo "sourced script left _una_git defined: $sourced" >&2; status=1; }
 
 exit "$status"
