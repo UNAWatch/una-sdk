@@ -152,19 +152,19 @@ bool GuiCommandProcessor::waitForFrameTick()
             default:
                 if (SDK::isApplicationSpecificMessage(msg->getType()) && mCustomMessageHandler) {
 
-                    // Remove oldest message if queue is full
-                    if (mUserQueue.full()) {
+                    // Drop the oldest and insert this one under one lock.
+                    // full(), pop(), and push() each lock on their own, so on
+                    // the simulator the SDL thread can drain a slot after
+                    // full() returns and this thread then fails a message
+                    // that still had room.
+                    if (auto dropped = mUserQueue.pushEvictingOldest(msg)) {
                         LOG_WARNING("Queue for custom messages is full\n");
-                        auto v = mUserQueue.pop();
-                        if (v) {
-                            auto msg = *v;
-                            msg->setResult(SDK::MessageResult::FAIL);
-                            mKernel.comm.sendResponse(msg);
-                            mKernel.comm.releaseMessage(msg);
-                        }
+                        auto queued = *dropped;
+                        queued->setResult(SDK::MessageResult::FAIL);
+                        mKernel.comm.sendResponse(queued);
+                        mKernel.comm.releaseMessage(queued);
                     }
-                    // Try to save message
-                    messageQueued = mUserQueue.push(msg);
+                    messageQueued = true;
 
                     if (!messageQueued) {
                         // Answer it here. The shared tail below releases
@@ -299,11 +299,10 @@ void GuiCommandProcessor::handleEvent(SDK::Message::EventButton* msg)
         default: return;
     }
 
-    if (!mButtonCodes.push(code)) {
-        // Queue full: drop the oldest so the most recent input stays responsive.
-        mButtonCodes.pop();
-        mButtonCodes.push(code);
-    }
+    // Drop the oldest when full so the newest press stays. One call: a
+    // separate pop after a failed push drops a second code if the GUI
+    // thread drains the queue in between.
+    mButtonCodes.pushEvictingOldest(code);
 }
 
 } // namespace SDK

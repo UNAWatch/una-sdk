@@ -20,10 +20,11 @@ public:
 #if defined(SIMULATOR)
     FixedQueue() = default;
 
-    FixedQueue(const FixedQueue& other) {
-        std::lock_guard<std::mutex> lock(other.mMutex);
-        copyFrom(other);
-    }
+    // Construct elements while the source is locked. Doing this in the
+    // body would default-construct data_ first and then assign, so a T
+    // that can be constructed but not assigned would no longer copy.
+    FixedQueue(const FixedQueue& other)
+        : FixedQueue(other, std::lock_guard<std::mutex>(other.mMutex)) {}
 
     FixedQueue& operator=(const FixedQueue& other) {
         if (this == &other) {
@@ -32,14 +33,15 @@ public:
         std::lock(mMutex, other.mMutex);
         std::lock_guard<std::mutex> lockA(mMutex, std::adopt_lock);
         std::lock_guard<std::mutex> lockB(other.mMutex, std::adopt_lock);
-        copyFrom(other);
+        data_ = other.data_;
+        mHead = other.mHead;
+        mTail = other.mTail;
+        mSize = other.mSize;
         return *this;
     }
 
-    FixedQueue(FixedQueue&& other) {
-        std::lock_guard<std::mutex> lock(other.mMutex);
-        takeFrom(other);
-    }
+    FixedQueue(FixedQueue&& other)
+        : FixedQueue(std::move(other), std::lock_guard<std::mutex>(other.mMutex)) {}
 
     FixedQueue& operator=(FixedQueue&& other) {
         if (this == &other) {
@@ -48,7 +50,13 @@ public:
         std::lock(mMutex, other.mMutex);
         std::lock_guard<std::mutex> lockA(mMutex, std::adopt_lock);
         std::lock_guard<std::mutex> lockB(other.mMutex, std::adopt_lock);
-        takeFrom(other);
+        data_ = std::move(other.data_);
+        mHead = other.mHead;
+        mTail = other.mTail;
+        mSize = other.mSize;
+        other.mHead = 0;
+        other.mTail = 0;
+        other.mSize = 0;
         return *this;
     }
 #endif
@@ -62,6 +70,27 @@ public:
         mTail = (mTail + 1) % Capacity;
         ++mSize;
         return true;
+    }
+
+    // Insert value. When the queue is full, remove the oldest element first
+    // and return it. Nothing is removed when there was room. The check, the
+    // removal, and the insert share one lock: full(), pop(), and push() each
+    // take their own, so the other thread can drain a slot after full()
+    // returns and the caller then drops an element that still had room.
+    std::optional<T> pushEvictingOldest(const T& value) {
+#if defined(SIMULATOR)
+        std::lock_guard<std::mutex> lock(mMutex);
+#endif
+        std::optional<T> evicted;
+        if (mSize == Capacity) {
+            evicted = data_[mHead];
+            mHead = (mHead + 1) % Capacity;
+            --mSize;
+        }
+        data_[mTail] = value;
+        mTail = (mTail + 1) % Capacity;
+        ++mSize;
+        return evicted;
     }
 
     std::optional<T> pop() {
@@ -98,18 +127,17 @@ public:
 
 private:
 #if defined(SIMULATOR)
-    void copyFrom(const FixedQueue& other) {
-        data_ = other.data_;
-        mHead = other.mHead;
-        mTail = other.mTail;
-        mSize = other.mSize;
-    }
+    FixedQueue(const FixedQueue& other, const std::lock_guard<std::mutex>&)
+        : data_(other.data_)
+        , mHead(other.mHead)
+        , mTail(other.mTail)
+        , mSize(other.mSize) {}
 
-    void takeFrom(FixedQueue& other) {
-        data_ = std::move(other.data_);
-        mHead = other.mHead;
-        mTail = other.mTail;
-        mSize = other.mSize;
+    FixedQueue(FixedQueue&& other, const std::lock_guard<std::mutex>&)
+        : data_(std::move(other.data_))
+        , mHead(other.mHead)
+        , mTail(other.mTail)
+        , mSize(other.mSize) {
         other.mHead = 0;
         other.mTail = 0;
         other.mSize = 0;
