@@ -756,7 +756,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N3SDK9Interface8IAppComm12sendResponseEP11MessageBase">
 <span id="_CPPv3N3SDK9Interface8IAppComm12sendResponseEP11MessageBase"></span><span id="_CPPv2N3SDK9Interface8IAppComm12sendResponseEP11MessageBase"></span><span id="SDK::Interface::IAppComm::sendResponse__MessageBaseP"></span><span class="target" id="classSDK_1_1Interface_1_1IAppComm_1afee6041565d455c27223d51ba6d2cd63"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sendResponse</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3SDK11MessageBaseE" title="SDK::MessageBase"><span class="n"><span class="pre">MessageBase</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N3SDK9Interface8IAppComm12sendResponseEP11MessageBase" title="Link to this definition"></a><br /></dt>
-<dd><p>Send response back to kernel (for request-response pattern) </p>
+<dd><p>Send response back to kernel (for request-response pattern). </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Only valid for messages with needsResponse() == true </p>
@@ -885,55 +885,55 @@
 </p>
 <p>Memory layout (4-byte aligned, 32 bytes total on 32-bit with vptr): <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Offset   </p></th>
-<th class="head"><p>Size   </p></th>
-<th class="head"><p>Field    </p></th>
+<tr class="row-odd"><th class="head"><p>Offset  </p></th>
+<th class="head"><p>Size  </p></th>
+<th class="head"><p>Field  </p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>0   </p></td>
-<td><p>4   </p></td>
-<td><p>vptr (virtual table pointer)    </p></td>
+<tr class="row-even"><td><p>0  </p></td>
+<td><p>4  </p></td>
+<td><p>vptr (virtual table pointer)  </p></td>
 </tr>
-<tr class="row-odd"><td><p>4   </p></td>
-<td><p>4   </p></td>
-<td><p>mMsgType    </p></td>
+<tr class="row-odd"><td><p>4  </p></td>
+<td><p>4  </p></td>
+<td><p>mMsgType  </p></td>
 </tr>
-<tr class="row-even"><td><p>8   </p></td>
-<td><p>1   </p></td>
-<td><p>mResult    </p></td>
+<tr class="row-even"><td><p>8  </p></td>
+<td><p>1  </p></td>
+<td><p>mResult  </p></td>
 </tr>
-<tr class="row-odd"><td><p>9   </p></td>
-<td><p>1   </p></td>
-<td><p>mReserved1    </p></td>
+<tr class="row-odd"><td><p>9  </p></td>
+<td><p>1  </p></td>
+<td><p>mReserved1  </p></td>
 </tr>
-<tr class="row-even"><td><p>10   </p></td>
-<td><p>1   </p></td>
-<td><p>mNeedsResponse    </p></td>
+<tr class="row-even"><td><p>10  </p></td>
+<td><p>1  </p></td>
+<td><p>mNeedsResponse  </p></td>
 </tr>
-<tr class="row-odd"><td><p>11   </p></td>
-<td><p>1   </p></td>
-<td><p>mCompleted (atomic&lt;bool&gt;, takes 1 bytes)    </p></td>
+<tr class="row-odd"><td><p>11  </p></td>
+<td><p>1  </p></td>
+<td><p>mCompleted (atomic&lt;bool&gt;, takes 1 bytes)  </p></td>
 </tr>
-<tr class="row-even"><td><p>12   </p></td>
-<td><p>4   </p></td>
-<td><p>mCompletionSemaphore (pointer)    </p></td>
+<tr class="row-even"><td><p>12  </p></td>
+<td><p>4  </p></td>
+<td><p>mCompletionSemaphore (pointer)  </p></td>
 </tr>
-<tr class="row-odd"><td><p>16   </p></td>
-<td><p>4   </p></td>
-<td><p>mRefCount (atomic&lt;uint32_t&gt;, takes 4 bytes)    </p></td>
+<tr class="row-odd"><td><p>16  </p></td>
+<td><p>4  </p></td>
+<td><p>mRefCount (atomic&lt;uint32_t&gt;, takes 4 bytes)  </p></td>
 </tr>
-<tr class="row-even"><td><p>20   </p></td>
-<td><p>4   </p></td>
-<td><p>mProcessId    </p></td>
+<tr class="row-even"><td><p>20  </p></td>
+<td><p>4  </p></td>
+<td><p>mProcessId  </p></td>
 </tr>
-<tr class="row-odd"><td><p>24   </p></td>
-<td><p>4   </p></td>
-<td><p>mReserved2    </p></td>
+<tr class="row-odd"><td><p>24  </p></td>
+<td><p>4  </p></td>
+<td><p>mReserved2  </p></td>
 </tr>
-<tr class="row-even"><td><p>28   </p></td>
-<td><p>4   </p></td>
-<td><p>mReserved3   </p></td>
+<tr class="row-even"><td><p>28  </p></td>
+<td><p>4  </p></td>
+<td><p>mReserved3  </p></td>
 </tr>
 </tbody>
 </table>
@@ -984,7 +984,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4NK3SDK11MessageBase12getProcessIdEv">
 <span id="_CPPv3NK3SDK11MessageBase12getProcessIdEv"></span><span id="_CPPv2NK3SDK11MessageBase12getProcessIdEv"></span><span id="SDK::MessageBase::getProcessIdC"></span><span class="target" id="classSDK_1_1MessageBase_1ae0a4cf8d92cad26fc8fca7a17c04e527"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getProcessId</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3SDK11MessageBase12getProcessIdEv" title="Link to this definition"></a><br /></dt>
-<dd><p>Get process ID (owner or target) </p>
+<dd><p>Get process ID (owner or target). </p>
 <dl class="field-list simple">
 <dt class="field-odd">Return values<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>Process</strong> – identifier assigned by kernel </p>
@@ -1081,7 +1081,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N3SDK11MessageBasenwE6size_tPv">
 <span id="_CPPv3N3SDK11MessageBasenwE6size_tPv"></span><span id="_CPPv2N3SDK11MessageBasenwE6size_tPv"></span><span id="SDK::MessageBase::new-operator__s.voidP"></span><span class="target" id="classSDK_1_1MessageBase_1a4d6b1cfff0c987e2ed9fa0891d2d5da4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="w"> </span><span class="o"><span class="pre">new</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ptr</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N3SDK11MessageBasenwE6size_tPv" title="Link to this definition"></a><br /></dt>
-<dd><p>Allow placement new (used by kernel infrastructure) </p>
+<dd><p>Allow placement new (used by kernel infrastructure). </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1098,7 +1098,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N3SDK11MessageBasedlEPv">
 <span id="_CPPv3N3SDK11MessageBasedlEPv"></span><span id="_CPPv2N3SDK11MessageBasedlEPv"></span><span id="SDK::MessageBase::delete-operator__voidP"></span><span class="target" id="classSDK_1_1MessageBase_1aea6364c9e02473de8783716d9a4aaf5a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="w"> </span><span class="o"><span class="pre">delete</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">*</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N3SDK11MessageBasedlEPv" title="Link to this definition"></a><br /></dt>
-<dd><p>Delete operator - no-op (memory managed by pool) </p>
+<dd><p>Delete operator - no-op (memory managed by pool). </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Cannot delete messages directly, must use releaseMessage() </p>
@@ -1108,7 +1108,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N3SDK11MessageBasedlEPvPv">
 <span id="_CPPv3N3SDK11MessageBasedlEPvPv"></span><span id="_CPPv2N3SDK11MessageBasedlEPvPv"></span><span id="SDK::MessageBase::delete-operator__voidP.voidP"></span><span class="target" id="classSDK_1_1MessageBase_1a4b13276dc6a6bf551733da368afaee26"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="w"> </span><span class="o"><span class="pre">delete</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ptr</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">place</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N3SDK11MessageBasedlEPvPv" title="Link to this definition"></a><br /></dt>
-<dd><p>Placement delete operator (for exception safety) </p>
+<dd><p>Placement delete operator (for exception safety). </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Called if placement new throws exception </p>
@@ -1488,7 +1488,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4NK3SDK16SensorDataParser9HeartRate6getBpmEv">
 <span id="_CPPv3NK3SDK16SensorDataParser9HeartRate6getBpmEv"></span><span id="_CPPv2NK3SDK16SensorDataParser9HeartRate6getBpmEv"></span><span id="SDK::SensorDataParser::HeartRate::getBpmC"></span><span class="target" id="classSDK_1_1SensorDataParser_1_1HeartRate_1a6046491b29b05d8c5ade43951d46c6bd"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getBpm</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3SDK16SensorDataParser9HeartRate6getBpmEv" title="Link to this definition"></a><br /></dt>
-<dd><p>Get heart rate in beats per minute (bpm) </p>
+<dd><p>Get heart rate in beats per minute (bpm). </p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Heart rate as float </p>
@@ -1535,7 +1535,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N3SDK16SensorDataParser9HeartRate15getFieldsNumberEv">
 <span id="_CPPv3N3SDK16SensorDataParser9HeartRate15getFieldsNumberEv"></span><span id="_CPPv2N3SDK16SensorDataParser9HeartRate15getFieldsNumberEv"></span><span id="SDK::SensorDataParser::HeartRate::getFieldsNumberCE"></span><span class="target" id="classSDK_1_1SensorDataParser_1_1HeartRate_1a09daaaead06267eff3f1408c86681cb2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getFieldsNumber</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK16SensorDataParser9HeartRate15getFieldsNumberEv" title="Link to this definition"></a><br /></dt>
-<dd><p>Get number of expected fields (always 2) </p>
+<dd><p>Get number of expected fields (always 2). </p>
 </dd></dl>
 
 </div>
@@ -1711,7 +1711,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4NK3SDK16SensorDataParser12BatteryLevel11isDataValidEv">
 <span id="_CPPv3NK3SDK16SensorDataParser12BatteryLevel11isDataValidEv"></span><span id="_CPPv2NK3SDK16SensorDataParser12BatteryLevel11isDataValidEv"></span><span id="SDK::SensorDataParser::BatteryLevel::isDataValidC"></span><span class="target" id="classSDK_1_1SensorDataParser_1_1BatteryLevel_1aabb016b4a8ed11ef0e0f9ea5144bfd74"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isDataValid</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3SDK16SensorDataParser12BatteryLevel11isDataValidEv" title="Link to this definition"></a><br /></dt>
-<dd><p>Check if data is valid (1 field, level within 0..100) </p>
+<dd><p>Check if data is valid (1 field, level within 0..100). </p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>true if valid </p>
@@ -1758,7 +1758,7 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N3SDK16SensorDataParser12BatteryLevel15getFieldsNumberEv">
 <span id="_CPPv3N3SDK16SensorDataParser12BatteryLevel15getFieldsNumberEv"></span><span id="_CPPv2N3SDK16SensorDataParser12BatteryLevel15getFieldsNumberEv"></span><span id="SDK::SensorDataParser::BatteryLevel::getFieldsNumberCE"></span><span class="target" id="classSDK_1_1SensorDataParser_1_1BatteryLevel_1a3ad47982a5654ba018767de1afba0fc4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getFieldsNumber</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3SDK16SensorDataParser12BatteryLevel15getFieldsNumberEv" title="Link to this definition"></a><br /></dt>
-<dd><p>Get number of expected fields (always 1) </p>
+<dd><p>Get number of expected fields (always 1). </p>
 </dd></dl>
 
 </div>
@@ -2440,7 +2440,7 @@ draws text or an icon takes it as a <code class="docutils literal notranslate"><
 <p>This class provides functionality to validate JSON buffers and retrieve various types of data from them using query.</p>
 <p>Query format: for details see description for JSON_Search() function.</p>
 <p>For example, if the provided buffer contains {“foo”:”abc”,”bar”:{“foo”:”xyz”}}, then a search for ‘foo’ would output abc, and a search for ‘bar.foo’ would output xyz.</p>
-<p>To get nested objects as string you can use method for retriveng strings <code class="docutils literal notranslate"><span class="pre">get(const</span> <span class="pre">char</span> <span class="pre">*query,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*&amp;outValue,</span> <span class="pre">size_t</span> <span class="pre">&amp;outLen)</span></code> ‘bar’ would output {“foo”:”xyz”}</p>
+<p>To get nested objects as string you can use method for retriveng strings <code class="docutils literal notranslate"><a class="reference internal" href="#classSDK_1_1JsonStreamReader_1af500ae21a7bbb9f946850bba547311a4"><span class="std std-ref"><span class="pre">get</span></span></a><span class="pre">(const</span> <span class="pre">char</span> <span class="pre">*query,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*&amp;outValue,</span> <span class="pre">size_t</span> <span class="pre">&amp;outLen)</span></code> ‘bar’ would output {“foo”:”xyz”}</p>
 <p>If the provided buffer contains [123,456,{“foo”:”abc”,”bar”:[88,99]}], then a search for ‘[1]’ would output 456, ‘[2].foo’ would output abc, and ‘[2].bar[0]’ would output 88. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>

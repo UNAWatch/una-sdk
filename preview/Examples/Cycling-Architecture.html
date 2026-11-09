@@ -509,9 +509,10 @@
 <ul class="simple">
 <li><p><strong>Distance-based</strong>: Configurable via <code class="docutils literal notranslate"><span class="pre">MenuDistanceView</span></code> (<code class="docutils literal notranslate"><span class="pre">Settings::Alerts::Distance::Id</span></code>)</p></li>
 <li><p><strong>Time-based</strong>: Configurable via <code class="docutils literal notranslate"><span class="pre">MenuTimeView</span></code> (<code class="docutils literal notranslate"><span class="pre">Settings::Alerts::Time::Id</span></code>)</p></li>
-<li><p><strong>Manual</strong>: User-initiated via R2 button during tracking</p></li>
+<li><p><strong>Manual</strong>: User-initiated via R2 button during tracking, or R2 or the Lap row on the pause menu (<code class="docutils literal notranslate"><span class="pre">TrackActionView</span></code>); R2 on the track screen also takes one during auto-pause</p></li>
 </ul>
 <p>Lap data includes timing, distance, average speed, HR, and ascent/descent (written to FIT).</p>
+<p>A manual lap taken while paused is held in <code class="docutils literal notranslate"><span class="pre">mPausedLapUtc</span></code> and saved when the activity resumes, before the counters resume, by <code class="docutils literal notranslate"><span class="pre">saveLap(0.0f,</span> <span class="pre">pausedAtUtc)</span></code>. That lap ends at the press: its FIT <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is the press time and its elapsed time includes the pause up to the press. The rest of the pause is carried in <code class="docutils literal notranslate"><span class="pre">mLapPauseCarrySec</span></code> into the next lap’s <code class="docutils literal notranslate"><span class="pre">start_time</span></code> and elapsed time. If the activity is saved without resuming, <code class="docutils literal notranslate"><span class="pre">stopTrack()</span></code> drops the held lap and the activity ends at the pause. A second press in the same pause and a lap with no records (<code class="docutils literal notranslate"><span class="pre">mLapNotEmpty</span></code>) are ignored. The Service sends <code class="docutils literal notranslate"><span class="pre">LAP_END</span></code> when it holds the lap, and <code class="docutils literal notranslate"><span class="pre">TrackActionPresenter::onLapChanged()</span></code> then shows <code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code>, which returns to the pause menu. During auto-pause, R2 on the track screen waits for <code class="docutils literal notranslate"><span class="pre">LAP_END</span></code> too (<code class="docutils literal notranslate"><span class="pre">TrackPresenter::onLapChanged()</span></code>), and the lap screen returns to the track screen.</p>
 </section>
 <section id="settings-and-persistence">
 <h3>Settings and Persistence<a class="headerlink" href="#settings-and-persistence" title="Link to this heading"></a></h3>
@@ -681,8 +682,8 @@
 <p><strong>Tracking</strong> (all face cycling happens inside <code class="docutils literal notranslate"><span class="pre">TrackView</span></code> via swipeable containers):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">TrackView</span></code> — Active tracking screen; hosts <code class="docutils literal notranslate"><span class="pre">TrackFaceTotal</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackFaceLap</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackFaceOverview</span></code>, <code class="docutils literal notranslate"><span class="pre">TrackFaceStatus</span></code> (swipe L1/L2)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">TrackActionView</span></code> — Pause menu: Resume / Summary / Save / Discard</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code> — Lap-saved notification (auto-dismisses after 3 s)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackActionView</span></code> — Pause menu: Resume / Lap / Summary / Save / Discard</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TrackLapView</span></code> — Lap-saved notification (auto-dismisses after 3 s); returns to the pause menu for a lap taken there</p></li>
 </ul>
 <p><strong>Confirmations</strong>:</p>
 <ul class="simple">
