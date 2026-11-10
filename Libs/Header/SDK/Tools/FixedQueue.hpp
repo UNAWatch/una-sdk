@@ -65,6 +65,9 @@ public:
 #if defined(SIMULATOR)
         std::lock_guard<std::mutex> lock(mMutex);
 #endif
+        if constexpr (Capacity == 0) {
+            return false;
+        }
         if (mSize == Capacity) return false;
         data_[mTail] = value;
         mTail = (mTail + 1) % Capacity;
