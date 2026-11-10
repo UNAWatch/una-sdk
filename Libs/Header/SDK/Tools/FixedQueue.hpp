@@ -81,6 +81,11 @@ public:
 #if defined(SIMULATOR)
         std::lock_guard<std::mutex> lock(mMutex);
 #endif
+        // Capacity 0 cannot store an element. Reading data_[0] on an empty
+        // array, or taking an index modulo 0, is undefined.
+        if constexpr (Capacity == 0) {
+            return std::nullopt;
+        }
         std::optional<T> evicted;
         if (mSize == Capacity) {
             evicted = data_[mHead];
