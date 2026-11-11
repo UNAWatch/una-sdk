@@ -1,7 +1,7 @@
 # Shipped activity variants
 
 A **variant** is a code-less alias `.uapp` that makes an existing app binary appear in the
-launcher as a separate activity (design: una-kernel `Docs/Multi-Activity-Apps-Design.md`).
+launcher as a separate activity.
 Each subdirectory here is the source of truth for one **shipped** variant:
 
 ```
