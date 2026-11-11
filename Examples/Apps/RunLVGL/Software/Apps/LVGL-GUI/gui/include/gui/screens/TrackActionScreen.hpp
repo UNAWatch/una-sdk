@@ -3,12 +3,13 @@
  * @file    TrackActionScreen.hpp
  * @brief   Paused-activity menu: Resume / Lap / End workout / Summary /
  *          Save & End / Discard, with a rotating stats panel above and the
- *          paused time below. Lap shows only in a free run, End workout only
- *          while a structured workout runs.
+ *          paused time below. Lap shows only in a free run until a lap is
+ *          taken in the pause, End workout only while a structured workout
+ *          runs.
  *
  * Port of the Run app's TrackActionView/Presenter. Entering pauses the track.
  * End workout, Save & End and Discard start a hold-to-confirm on R1 press;
- * Resume, Lap and Summary act on a click. R2 takes a lap too, in a free run.
+ * Resume, Lap and Summary act on a click. R2 takes a lap too, while Lap shows.
  ******************************************************************************
  */
 
@@ -47,7 +48,7 @@ private:
     uint16_t itemAt(uint16_t row) const;
 
     WheelMenu::Item mItems[Menu::ID_COUNT] {};
-    bool  mFreeRun      = true;
+    bool  mLapShown     = true;
     bool  mWorkoutMode  = false;
     bool  mIsImperial   = false;
     float mAvgPaceConv  = 0.0f;

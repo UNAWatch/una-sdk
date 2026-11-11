@@ -42,21 +42,20 @@ void TrackActionView::tearDownScreen()
 
 // ---- Presenter -> View ------------------------------------------------------
 
-void TrackActionView::setMode(bool freeRun, bool workout)
+void TrackActionView::setMode(bool lap, bool workout)
 {
-    mFreeRun     = freeRun;
+    mLapShown    = lap;
     mWorkoutMode = workout;
-    menuLayout.getButtons().setR2(freeRun ? Buttons::AMBER : Buttons::NONE);
-    menuLayout.setNumberOfItems(Menu::ID_COUNT - (freeRun ? 0 : 1) - (workout ? 0 : 1));
+    menuLayout.getButtons().setR2(lap ? Buttons::AMBER : Buttons::NONE);
+    menuLayout.setNumberOfItems(Menu::ID_COUNT - (lap ? 0 : 1) - (workout ? 0 : 1));
     menuLayout.invalidate();
 }
 
 uint16_t TrackActionView::itemAt(int16_t row) const
 {
-    // Outside a free run, Lap's row is left out; without a workout, End
-    // workout's.
+    // Without Lap, its row is left out; without a workout, End workout's.
     uint16_t item = static_cast<uint16_t>(row);
-    if (!mFreeRun && item >= Menu::ID_LAP) {
+    if (!mLapShown && item >= Menu::ID_LAP) {
         ++item;
     }
     if (!mWorkoutMode && item >= Menu::ID_END_WORKOUT) {
@@ -67,12 +66,17 @@ uint16_t TrackActionView::itemAt(int16_t row) const
 
 void TrackActionView::setPositionId(uint16_t id)
 {
-    menuLayout.selectItem(id);
+    // A left-out item selects the row above it: Lap's selects Resume.
+    int16_t row = 0;
+    for (int16_t r = 1; r < menuLayout.getNumberOfItems() && itemAt(r) <= id; ++r) {
+        row = r;
+    }
+    menuLayout.selectItem(row);
 }
 
 uint16_t TrackActionView::getPositionId()
 {
-    return menuLayout.getSelectedItem();
+    return itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()));
 }
 
 void TrackActionView::setUnitsImperial(bool isImperial)
@@ -260,9 +264,9 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         }
     }
 
-    // The lap button takes a lap here too, in a free run. The lap screen
+    // The lap button takes a lap here too, while Lap is shown. The lap screen
     // shows once the Service has taken it: it ignores a lap with nothing in it.
-    if (key == SDK::GUI::Button::R2 && mFreeRun) {
+    if (key == SDK::GUI::Button::R2 && mLapShown) {
         presenter->saveLap();
     }
 }

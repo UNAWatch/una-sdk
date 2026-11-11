@@ -13,8 +13,13 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    /// The selected item, by Menu id rather than row, as rows shift when
+    /// Lap is left out.
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
+
+    /// Shows the Lap item, and enables R2, when @p lap.
+    void setLapShown(bool lap);
     void setUnitsImperial(bool isImperial);
     void setTimer(std::time_t sec);
     void setCalories(float calories);
@@ -33,6 +38,10 @@ protected:
     touchgfx::Callback<TrackActionView, MainMenuItem&, int16_t>       mUpdateItemCb;
     touchgfx::Callback<TrackActionView, MainMenuCenterItem&, int16_t> mUpdateCenterItemCb;
     touchgfx::Callback<TrackActionView, int16_t>                      mCarouselCb;
+
+    /// The item shown in row @p row.
+    uint16_t itemAt(int16_t row) const;
+    bool     mLapShown = true;
 
     void updateItem(MainMenuItem& item, int16_t index);
     void updateCenterItem(MainMenuCenterItem& item, int16_t index);

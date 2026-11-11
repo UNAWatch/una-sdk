@@ -9,7 +9,8 @@ TrackActionPresenter::TrackActionPresenter(TrackActionView& v)
 void TrackActionPresenter::activate()
 {
     view.setUnitsImperial(model->isUnitsImperial());
-    view.setFreeRun(!model->getTrackData().intervalsMode);
+    // Lap is for a free run, and only once per pause.
+    view.setLapShown(!model->getTrackData().intervalsMode && !model->isPausedLapTaken());
     onTrackData(model->getTrackData());
 
     // Reset idle timer

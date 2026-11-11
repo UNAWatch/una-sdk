@@ -8,6 +8,8 @@ TrackActionPresenter::TrackActionPresenter(TrackActionView& v)
 void TrackActionPresenter::activate()
 {
     view.setUnitsImperial(model->isUnitsImperial());
+    // Lap is taken only once per pause.
+    view.setLapShown(!model->isPausedLapTaken());
     onTrackData(model->getTrackData());
 
     // Reset idle timer

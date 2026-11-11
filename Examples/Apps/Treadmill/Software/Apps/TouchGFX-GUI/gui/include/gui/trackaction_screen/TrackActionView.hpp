@@ -13,10 +13,12 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    /// The selected item, by Menu id rather than row, as rows shift when
+    /// Lap is left out.
     void setPositionId(uint16_t id);
 
-    /// Lap shows only in a free run.
-    void setFreeRun(bool freeRun);
+    /// Shows the Lap item, and enables R2, when @p lap.
+    void setLapShown(bool lap);
     uint16_t getPositionId();
     void setUnitsImperial(bool isImperial);
     void setTimer(std::time_t sec);
@@ -41,7 +43,7 @@ protected:
 
     /// The item shown in row @p row.
     uint16_t itemAt(int16_t row) const;
-    bool     mFreeRun = true;
+    bool     mLapShown = true;
 
     void updateItem(MainMenuItem& item, int16_t index);
     void updateCenterItem(MainMenuCenterItem& item, int16_t index);

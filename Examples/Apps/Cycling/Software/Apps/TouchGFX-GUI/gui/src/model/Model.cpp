@@ -225,6 +225,11 @@ bool Model::isLapFromPauseMenu() const
     return mLapFromPauseMenu;
 }
 
+bool Model::isPausedLapTaken() const
+{
+    return mPausedLapTaken;
+}
+
 void Model::saveTrack()
 {
     SDK::send_msg<CustomMessage::TrackStop>(mKernel, false);
@@ -376,6 +381,8 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
                     // decades-long pause, so leave it unset (0) and let the
                     // clock handler adopt the first real timestamp instead.
                     mPauseStartSec = mNowSec;
+                } else {
+                    mPausedLapTaken = false;
                 }
                 modelListener->onTrackState(mTrackState);
             }
@@ -391,6 +398,9 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
         case CustomMessage::LAP_END: {
             LOG_DEBUG("LAP_END\n");
             auto* msg = static_cast<CustomMessage::LapEnded*>(message);
+            if (mTrackState == Track::State::PAUSED) {
+                mPausedLapTaken = true;
+            }
             modelListener->onLapChanged(msg->lapNum);
         } break;
 
