@@ -1,4 +1,4 @@
-"""Build a code-less variant-alias .uapp (see Docs/Multi-Activity-Apps-Design.md).
+"""Build a code-less variant-alias .uapp.
 
 An alias reuses the real app's MainHeader layout, discriminated by flag bit
 0x40 (FLAG_APP_VARIANT_ALIAS), carries no code (serviceSize = 0, libcVersion

@@ -3,9 +3,8 @@
  * @file    VariantConfig.hpp
  * @brief   App-side reader for the embedded variant config.
  * @details A variant is a code-less alias .uapp in the app's own sandbox
- *          directory (see Docs/Multi-Activity-Apps-Design.md in the kernel
- *          repo). At startup the app opens the single .uapp in its sandbox
- *          root: a real binary means the app IS the base activity (all
+ *          directory. At startup the app opens the single .uapp in its
+ *          sandbox root: a real binary means the app IS the base activity (all
  *          defaults apply); an alias carries an embedded JSON config that
  *          renames the activity and adjusts its FIT identity and
  *          family-specific features. A bad or unreadable config must never
