@@ -190,13 +190,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="helloworld-introduction-to-una-app-architecture">
-<span id="tutorials-helloworld-architecture"></span><h1>HelloWorld - Introduction to UNA App Architecture<a class="headerlink" href="#helloworld-introduction-to-una-app-architecture" title="Link to this heading"></a></h1>
+  <section id="tutorials-helloworld-architecture">
+<span id="helloworld-introduction-to-una-app-architecture"></span><span id="helloworld---introduction-to-una-app-architecture"></span><h1>HelloWorld - Introduction to UNA App Architecture<a class="headerlink" href="#tutorials-helloworld-architecture" title="Link to this heading"></a></h1>
 <p>Welcome to the UNA SDK tutorial series! HelloWorld is your first step in learning to build applications for the UNA Watch platform. This tutorial focuses on the fundamental app architecture - how service and GUI components communicate - without the complexity of sensors or data logging.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/HelloWorld">Project Folder</a></p>
 <p>HelloWorld comes with two GUIs that show the same screen: one built with <strong>TouchGFX</strong>, one with <strong>LVGL</strong>. The service, the message contract and the build system are the same for both; only the GUI process differs. Pick the toolkit you prefer and follow that column through the series. The two are shown side by side so you can also compare them.</p>
 <section id="what-you-ll-learn">
-<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<span id="what-youll-learn"></span><h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>How to set up your development environment for UNA apps</p></li>
 <li><p>The basic structure of a UNA Watch application</p></li>
@@ -515,11 +515,11 @@ make
 <h2>Understanding UNA App Communication<a class="headerlink" href="#understanding-una-app-communication" title="Link to this heading"></a></h2>
 <p>HelloWorld demonstrates the two main ways UNA apps communicate between service and GUI:</p>
 <section id="sdk-custom-messages-service-gui">
-<h3>SDK Custom Messages (Service → GUI)<a class="headerlink" href="#sdk-custom-messages-service-gui" title="Link to this heading"></a></h3>
+<span id="sdk-custom-messages-service--gui"></span><h3>SDK Custom Messages (Service → GUI)<a class="headerlink" href="#sdk-custom-messages-service-gui" title="Link to this heading"></a></h3>
 <p>Used for real-time data updates. The service creates messages using <code class="docutils literal notranslate"><span class="pre">SDK::make_msg&lt;&gt;()</span></code> and sends them via the kernel. The GUI receives them in <code class="docutils literal notranslate"><span class="pre">Model::customMessageHandler()</span></code>.</p>
 </section>
 <section id="apptypes-events-gui-service">
-<h3>AppTypes Events (GUI → Service)<a class="headerlink" href="#apptypes-events-gui-service" title="Link to this heading"></a></h3>
+<span id="apptypes-events-gui--service"></span><h3>AppTypes Events (GUI → Service)<a class="headerlink" href="#apptypes-events-gui-service" title="Link to this heading"></a></h3>
 <p>Used for commands and configuration. The GUI sends events through the <code class="docutils literal notranslate"><span class="pre">IGuiBackend</span></code> interface, which the service implements to receive commands.</p>
 <p>These patterns form the foundation of all UNA app communication, and they are the same whichever toolkit draws the screen. Future tutorials will show how to implement specific features using these systems.</p>
 </section>

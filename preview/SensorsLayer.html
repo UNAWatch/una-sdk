@@ -813,7 +813,7 @@ window.runMermaid = runMermaid;</script>
 <p>Implementation in <a class="reference download internal" download="" href="_downloads/43a8b775da9fe6961375b8fc37bbb9c8/SensorConnection.cpp"><span class="xref download myst">SensorConnection.cpp</span></a>.</p>
 </section>
 <section id="data-reception-processing">
-<h2>Data Reception &amp; Processing<a class="headerlink" href="#data-reception-processing" title="Link to this heading"></a></h2>
+<span id="data-reception--processing"></span><h2>Data Reception &amp; Processing<a class="headerlink" href="#data-reception-processing" title="Link to this heading"></a></h2>
 <p><strong>Reception</strong>: Poll kernel IPC:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">Kernel</span><span class="o">&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">KernelProviderService</span><span class="o">::</span><span class="n">GetInstance</span><span class="p">().</span><span class="n">getKernel</span><span class="p">();</span>
 <span class="n">SDK</span><span class="o">::</span><span class="n">MessageBase</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">;</span>
@@ -889,14 +889,14 @@ vertical axis. Divide by 9.80665 to get g.</p>
 </div>
 </section>
 <section id="accelerometer-raw-0x11">
-<h3>ACCELEROMETER_RAW (0x11)<a class="headerlink" href="#accelerometer-raw-0x11" title="Link to this heading"></a></h3>
+<span id="accelerometer_raw-0x11"></span><h3>ACCELEROMETER_RAW (0x11)<a class="headerlink" href="#accelerometer-raw-0x11" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::AccelerometerRaw</span></code></p>
 <p><strong>Fields</strong>: X/Y/Z (int16_t raw)</p>
 <p><strong>Code Snippet</strong>:
 Similar, <code class="docutils literal notranslate"><span class="pre">int16_t</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">p.getX();</span></code> etc.</p>
 </section>
 <section id="magnetic-field-0x30">
-<h3>MAGNETIC_FIELD (0x30)<a class="headerlink" href="#magnetic-field-0x30" title="Link to this heading"></a></h3>
+<span id="magnetic_field-0x30"></span><h3>MAGNETIC_FIELD (0x30)<a class="headerlink" href="#magnetic-field-0x30" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::MagneticField</span></code></p>
 <p><strong>Fields</strong>:</p>
 <table class="docutils align-default">
@@ -986,7 +986,7 @@ in one of these samples - one from your own fusion, say:
 static and take plain values.</p>
 </section>
 <section id="magnetic-field-raw-0x31">
-<h3>MAGNETIC_FIELD_RAW (0x31)<a class="headerlink" href="#magnetic-field-raw-0x31" title="Link to this heading"></a></h3>
+<span id="magnetic_field_raw-0x31"></span><h3>MAGNETIC_FIELD_RAW (0x31)<a class="headerlink" href="#magnetic-field-raw-0x31" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::MagneticFieldRaw</span></code></p>
 <p><strong>Fields</strong>: X/Y/Z (float uT), the field exactly as measured</p>
 <p>No correction is applied and no bearing is offered: a direction taken from an
@@ -995,7 +995,7 @@ is what a calibration is derived from, and what shows how large those offsets
 are.</p>
 </section>
 <section id="heart-rate-0x41">
-<h3>HEART_RATE (0x41)<a class="headerlink" href="#heart-rate-0x41" title="Link to this heading"></a></h3>
+<span id="heart_rate-0x41"></span><h3>HEART_RATE (0x41)<a class="headerlink" href="#heart-rate-0x41" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::HeartRate</span></code></p>
 <p><strong>Fields</strong>:</p>
 <table class="docutils align-default">
@@ -1023,7 +1023,7 @@ are.</p>
 As above, <code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">bpm</span> <span class="pre">=</span> <span class="pre">p.getBpm();</span> <span class="pre">float</span> <span class="pre">trust</span> <span class="pre">=</span> <span class="pre">p.getTrustLevel();</span></code></p>
 </section>
 <section id="heart-rate-metrics-0x42">
-<h3>HEART_RATE_METRICS (0x42)<a class="headerlink" href="#heart-rate-metrics-0x42" title="Link to this heading"></a></h3>
+<span id="heart_rate_metrics-0x42"></span><h3>HEART_RATE_METRICS (0x42)<a class="headerlink" href="#heart-rate-metrics-0x42" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::HeartRateMetrics</span></code></p>
 <p><strong>Fields</strong>:</p>
 <table class="docutils align-default">
@@ -1049,23 +1049,23 @@ As above, <code class="docutils literal notranslate"><span class="pre">float</sp
 </table>
 </section>
 <section id="step-detector-0x50">
-<h3>STEP_DETECTOR (0x50)<a class="headerlink" href="#step-detector-0x50" title="Link to this heading"></a></h3>
+<span id="step_detector-0x50"></span><h3>STEP_DETECTOR (0x50)<a class="headerlink" href="#step-detector-0x50" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::StepDetector</span></code></p>
 <p><strong>Fields</strong>: STEP_DETECTED (u32 =1)</p>
 <p><strong>Code</strong>: <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(p.isStepDetected())</span> <span class="pre">{</span> <span class="pre">/*</span> <span class="pre">step</span> <span class="pre">*/</span> <span class="pre">}</span></code></p>
 </section>
 <section id="step-counter-0x51">
-<h3>STEP_COUNTER (0x51)<a class="headerlink" href="#step-counter-0x51" title="Link to this heading"></a></h3>
+<span id="step_counter-0x51"></span><h3>STEP_COUNTER (0x51)<a class="headerlink" href="#step-counter-0x51" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::StepCounter</span></code></p>
 <p><strong>Fields</strong>: STEP_COUNT (u32)</p>
 </section>
 <section id="floor-counter-0x60">
-<h3>FLOOR_COUNTER (0x60)<a class="headerlink" href="#floor-counter-0x60" title="Link to this heading"></a></h3>
+<span id="floor_counter-0x60"></span><h3>FLOOR_COUNTER (0x60)<a class="headerlink" href="#floor-counter-0x60" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::FloorCounter</span></code></p>
 <p><strong>Fields</strong>: FLOORS_UP (i32), FLOORS_DOWN (i32)</p>
 </section>
 <section id="ambient-temperature-0x70">
-<h3>AMBIENT_TEMPERATURE (0x70)<a class="headerlink" href="#ambient-temperature-0x70" title="Link to this heading"></a></h3>
+<span id="ambient_temperature-0x70"></span><h3>AMBIENT_TEMPERATURE (0x70)<a class="headerlink" href="#ambient-temperature-0x70" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Temperature</span></code></p>
 <p><strong>Fields</strong>: TEMP (float)</p>
 </section>
@@ -1080,19 +1080,19 @@ As above, <code class="docutils literal notranslate"><span class="pre">float</sp
 <p><strong>Fields</strong>: ALTITUDE (float m)</p>
 </section>
 <section id="wrist-motion-0xa0">
-<h3>WRIST_MOTION (0xA0)<a class="headerlink" href="#wrist-motion-0xa0" title="Link to this heading"></a></h3>
+<span id="wrist_motion-0xa0"></span><h3>WRIST_MOTION (0xA0)<a class="headerlink" href="#wrist-motion-0xa0" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::WristMotion</span></code></p>
 <p><strong>Fields</strong>: WRIST_MOTION (u32=1)</p>
 <p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(p.isWristMotion())</span> <span class="pre">{</span> <span class="pre">/*</span> <span class="pre">raise</span> <span class="pre">wrist</span> <span class="pre">*/</span> <span class="pre">}</span></code></p>
 </section>
 <section id="motion-detect-0xb0">
-<h3>MOTION_DETECT (0xB0)<a class="headerlink" href="#motion-detect-0xb0" title="Link to this heading"></a></h3>
+<span id="motion_detect-0xb0"></span><h3>MOTION_DETECT (0xB0)<a class="headerlink" href="#motion-detect-0xb0" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::MotionDetect</span></code></p>
 <p><strong>Fields</strong>: ID (u32: NO_MOTION=0, MOTION, SIG_MOTION)</p>
 <p><code class="docutils literal notranslate"><span class="pre">MotionDetect::Motion</span> <span class="pre">m</span> <span class="pre">=</span> <span class="pre">p.getID();</span></code></p>
 </section>
 <section id="activity-recognition-0xc0">
-<h3>ACTIVITY_RECOGNITION (0xC0)<a class="headerlink" href="#activity-recognition-0xc0" title="Link to this heading"></a></h3>
+<span id="activity_recognition-0xc0"></span><h3>ACTIVITY_RECOGNITION (0xC0)<a class="headerlink" href="#activity-recognition-0xc0" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::ActivityRecognition</span></code></p>
 <p><strong>Fields</strong>: ID (STILL=0, WALKING, RUNNING, UNKNOWN), CONFIDENCE (u8 %)</p>
 </section>
@@ -1130,38 +1130,38 @@ As above, <code class="docutils literal notranslate"><span class="pre">float</sp
 <p><code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">spo2</span> <span class="pre">=</span> <span class="pre">p.getSaturation();</span> <span class="pre">float</span> <span class="pre">trust</span> <span class="pre">=</span> <span class="pre">p.getTrustLevel();</span></code></p>
 </section>
 <section id="gps-location-0x110">
-<h3>GPS_LOCATION (0x110)<a class="headerlink" href="#gps-location-0x110" title="Link to this heading"></a></h3>
+<span id="gps_location-0x110"></span><h3>GPS_LOCATION (0x110)<a class="headerlink" href="#gps-location-0x110" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::GpsLocation</span></code></p>
 <p><strong>Fields</strong>: PRECISION (f m), COORDS_VALID (bool), LAT/LON (f deg), ALT (f m)</p>
 <p><code class="docutils literal notranslate"><span class="pre">p.getLatitude()</span></code>, <code class="docutils literal notranslate"><span class="pre">p.isCoordinatesValid()</span></code></p>
 </section>
 <section id="gps-speed-0x111">
-<h3>GPS_SPEED (0x111)<a class="headerlink" href="#gps-speed-0x111" title="Link to this heading"></a></h3>
+<span id="gps_speed-0x111"></span><h3>GPS_SPEED (0x111)<a class="headerlink" href="#gps-speed-0x111" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::GpsSpeed</span></code></p>
 <p><strong>Fields</strong>: SPEED (f m/s)</p>
 </section>
 <section id="gps-distance-0x112">
-<h3>GPS_DISTANCE (0x112)<a class="headerlink" href="#gps-distance-0x112" title="Link to this heading"></a></h3>
+<span id="gps_distance-0x112"></span><h3>GPS_DISTANCE (0x112)<a class="headerlink" href="#gps-distance-0x112" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::GpsDistance</span></code></p>
 <p><strong>Fields</strong>: DISTANCE (f m)</p>
 </section>
 <section id="battery-level-0x120">
-<h3>BATTERY_LEVEL (0x120)<a class="headerlink" href="#battery-level-0x120" title="Link to this heading"></a></h3>
+<span id="battery_level-0x120"></span><h3>BATTERY_LEVEL (0x120)<a class="headerlink" href="#battery-level-0x120" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::BatteryLevel</span></code></p>
 <p><strong>Fields</strong>: LEVEL (f 0-100 %)</p>
 </section>
 <section id="battery-charging-0x121">
-<h3>BATTERY_CHARGING (0x121)<a class="headerlink" href="#battery-charging-0x121" title="Link to this heading"></a></h3>
+<span id="battery_charging-0x121"></span><h3>BATTERY_CHARGING (0x121)<a class="headerlink" href="#battery-charging-0x121" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::BatteryCharging</span></code></p>
 <p><strong>Fields</strong>: CONNECTED (bool), CHARGING (bool)</p>
 </section>
 <section id="battery-metrics-0x122">
-<h3>BATTERY_METRICS (0x122)<a class="headerlink" href="#battery-metrics-0x122" title="Link to this heading"></a></h3>
+<span id="battery_metrics-0x122"></span><h3>BATTERY_METRICS (0x122)<a class="headerlink" href="#battery-metrics-0x122" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::BatteryMetrics</span></code></p>
 <p><strong>Fields</strong>: VOLTAGE (f V), CURRENT (f mA), AVERAGE_CURRENT (f mA), CAPACITY (f mAh), DESIGN_CAPACITY (f mAh)</p>
 </section>
 <section id="touch-detect-0x140">
-<h3>TOUCH_DETECT (0x140)<a class="headerlink" href="#touch-detect-0x140" title="Link to this heading"></a></h3>
+<span id="touch_detect-0x140"></span><h3>TOUCH_DETECT (0x140)<a class="headerlink" href="#touch-detect-0x140" title="Link to this heading"></a></h3>
 <p><strong>Parser</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::Touch</span></code></p>
 <p><strong>Fields</strong>: TOUCH (bool)</p>
 <p>For a sensor without a parser, read its fields through DataView, by the

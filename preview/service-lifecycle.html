@@ -572,7 +572,7 @@ window.runMermaid = runMermaid;</script>
 </table>
 </section>
 <section id="overview">
-<h2>1. Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<span id="1-overview"></span><h2>1. Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>Every <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> is <strong>two processes</strong>: a <em>service</em> that holds the app’s logic and state, and a
 <em>GUI</em> that draws it. They have <strong>independent lifetimes</strong>, and that makes a <strong>resident
 service</strong> — one that keeps state moving while nothing is on screen — a supported design.</p>
@@ -584,7 +584,7 @@ service</strong> — one that keeps state moving while nothing is on screen — 
 <p>The first is why a resident service works. The second is why it is your job to pace it, and
 why <strong>ending the service is your responsibility</strong>.</p>
 <section id="promised-and-not-promised">
-<h3>1.1 Promised, and not promised<a class="headerlink" href="#promised-and-not-promised" title="Link to this heading"></a></h3>
+<span id="11-promised-and-not-promised"></span><h3>1.1 Promised, and not promised<a class="headerlink" href="#promised-and-not-promised" title="Link to this heading"></a></h3>
 <p>An app that relies only on the left column keeps working. The right column is how the
 current kernel happens to behave; it is not a promise, and a later release may change it.</p>
 <table class="docutils align-default">
@@ -613,7 +613,7 @@ current kernel happens to behave; it is not a promise, and a later release may c
 </table>
 </section>
 <section id="who-needs-this">
-<h3>1.2 Who needs this<a class="headerlink" href="#who-needs-this" title="Link to this heading"></a></h3>
+<span id="12-who-needs-this"></span><h3>1.2 Who needs this<a class="headerlink" href="#who-needs-this" title="Link to this heading"></a></h3>
 <p>Read it if your app is any of these:</p>
 <ul class="simple">
 <li><p>state must keep moving with nobody looking — an alarm, a timer, a long-running count;</p></li>
@@ -627,7 +627,7 @@ do <strong>not</strong> need a resident service. See section 9.</p>
 </section>
 </section>
 <section id="the-two-processes">
-<h2>2. The two processes<a class="headerlink" href="#the-two-processes" title="Link to this heading"></a></h2>
+<span id="2-the-two-processes"></span><h2>2. The two processes<a class="headerlink" href="#the-two-processes" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p></p></th>
@@ -683,9 +683,9 @@ do <strong>not</strong> need a resident service. See section 9.</p>
     end note
     </pre></section>
 <section id="starting-a-service">
-<h2>3. Starting a service<a class="headerlink" href="#starting-a-service" title="Link to this heading"></a></h2>
+<span id="3-starting-a-service"></span><h2>3. Starting a service<a class="headerlink" href="#starting-a-service" title="Link to this heading"></a></h2>
 <section id="on-demand">
-<h3>3.1 On demand<a class="headerlink" href="#on-demand" title="Link to this heading"></a></h3>
+<span id="31-on-demand"></span><h3>3.1 On demand<a class="headerlink" href="#on-demand" title="Link to this heading"></a></h3>
 <p>The ordinary case. The user picks the app; the service is loaded and started, then the GUI.
 Once the GUI process has been <strong>loaded</strong> — before it has drawn anything or come on screen —
 the service receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_RUN</span></code>. That is your cue to send it the current
@@ -695,7 +695,7 @@ running and the GUI is not.</strong> Any “no GUI, so nobody wants me” exit t
 against that window — see section 5.2.</p>
 </section>
 <section id="autostart">
-<h3>3.2 Autostart<a class="headerlink" href="#autostart" title="Link to this heading"></a></h3>
+<span id="32-autostart"></span><h3>3.2 Autostart<a class="headerlink" href="#autostart" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span> <span class="pre">On</span></code> in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> (see <a class="reference internal" href="sdk-setup.html"><span class="std std-doc">sdk-setup.md</span></a>) sets a bit in the
 packed header. The watch reads it and <strong>starts the app’s service — and only the service —</strong>
 at boot, after it has scanned the installed apps, and again on leaving USB mass-storage mode.
@@ -730,7 +730,7 @@ is specifically about running <strong>before and without</strong> any GUI.</p></
 </ul>
 </section>
 <section id="the-glances-screen">
-<h3>3.3 The glances screen<a class="headerlink" href="#the-glances-screen" title="Link to this heading"></a></h3>
+<span id="33-the-glances-screen"></span><h3>3.3 The glances screen<a class="headerlink" href="#the-glances-screen" title="Link to this heading"></a></h3>
 <p>For an app whose <code class="docutils literal notranslate"><span class="pre">APP_TYPE</span></code> is <code class="docutils literal notranslate"><span class="pre">Glance</span></code>, opening the glances screen starts the <strong>service</strong>
 and never the GUI. The service then receives:</p>
 <table class="docutils align-default">
@@ -762,11 +762,11 @@ and runs on kernel 1.4.0 or earlier — see section 10.</p>
 </section>
 </section>
 <section id="what-a-resident-service-gets">
-<h2>4. What a resident service gets<a class="headerlink" href="#what-a-resident-service-gets" title="Link to this heading"></a></h2>
+<span id="4-what-a-resident-service-gets"></span><h2>4. What a resident service gets<a class="headerlink" href="#what-a-resident-service-gets" title="Link to this heading"></a></h2>
 <p>“Resident” here means the service is running and no GUI of its own is loaded — after
 <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_NOTIF_GUI_STOP</span></code>, or from boot under <code class="docutils literal notranslate"><span class="pre">APP_AUTOSTART</span></code>.</p>
 <section id="what-still-arrives">
-<h3>4.1 What still arrives<a class="headerlink" href="#what-still-arrives" title="Link to this heading"></a></h3>
+<span id="41-what-still-arrives"></span><h3>4.1 What still arrives<a class="headerlink" href="#what-still-arrives" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Source</p></th>
@@ -808,7 +808,7 @@ contract. A <code class="docutils literal notranslate"><span class="pre">default
 only forward-compatible shape. Never treat an unrequested message as a clock.</p>
 </section>
 <section id="what-paces-a-resident-service-nothing">
-<h3>4.2 What paces a resident service — nothing<a class="headerlink" href="#what-paces-a-resident-service-nothing" title="Link to this heading"></a></h3>
+<span id="42-what-paces-a-resident-service--nothing"></span><h3>4.2 What paces a resident service — nothing<a class="headerlink" href="#what-paces-a-resident-service-nothing" title="Link to this heading"></a></h3>
 <p>There is no periodic message you can rely on, and <strong>time passing is not an event</strong>. Never
 build on an unbounded wait for work that is due at a time:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Correct only for a service that genuinely has nothing to do between messages.</span>
@@ -876,9 +876,9 @@ when read, compute it on demand instead.</p></li>
 </section>
 </section>
 <section id="ending-a-service">
-<h2>5. Ending a service<a class="headerlink" href="#ending-a-service" title="Link to this heading"></a></h2>
+<span id="5-ending-a-service"></span><h2>5. Ending a service<a class="headerlink" href="#ending-a-service" title="Link to this heading"></a></h2>
 <section id="the-two-ways-out">
-<h3>5.1 The two ways out<a class="headerlink" href="#the-two-ways-out" title="Link to this heading"></a></h3>
+<span id="51-the-two-ways-out"></span><h3>5.1 The two ways out<a class="headerlink" href="#the-two-ways-out" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Return from <code class="docutils literal notranslate"><span class="pre">run()</span></code></strong> (or call <code class="docutils literal notranslate"><span class="pre">sys.exit()</span></code>). This is the app deciding it is done.</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code></strong> — the watch tearing the app down. Release the message, free what
@@ -897,7 +897,7 @@ reclaim a service that never exits or outstays its resource budget.</p>
 </div></blockquote>
 </section>
 <section id="guard-every-exit-against-startup">
-<h3>5.2 Guard every exit against startup<a class="headerlink" href="#guard-every-exit-against-startup" title="Link to this heading"></a></h3>
+<span id="52-guard-every-exit-against-startup"></span><h3>5.2 Guard every exit against startup<a class="headerlink" href="#guard-every-exit-against-startup" title="Link to this heading"></a></h3>
 <p>The service starts <em>before</em> the GUI on every normal launch, so “no GUI has started” is
 briefly true every single time. An unguarded <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(!mGuiStarted)</span> <span class="pre">return;</span></code> exits during launch
 and the app appears to fail to open. Every example that exits on its own therefore uses a
@@ -909,7 +909,7 @@ own work is finished. Drop any one and you get either a service that exits mid-l
 that never exits at all.</p>
 </section>
 <section id="the-asymmetry-that-catches-people">
-<h3>5.3 The asymmetry that catches people<a class="headerlink" href="#the-asymmetry-that-catches-people" title="Link to this heading"></a></h3>
+<span id="53-the-asymmetry-that-catches-people"></span><h3>5.3 The asymmetry that catches people<a class="headerlink" href="#the-asymmetry-that-catches-people" title="Link to this heading"></a></h3>
 <p>Which process exits determines what happens to the other:</p>
 <table class="docutils align-default">
 <thead>
@@ -936,7 +936,7 @@ itself.</p>
 startup-grace exits in section 5.4 are.</p>
 </section>
 <section id="the-patterns-in-the-examples">
-<h3>5.4 The patterns in the examples<a class="headerlink" href="#the-patterns-in-the-examples" title="Link to this heading"></a></h3>
+<span id="54-the-patterns-in-the-examples"></span><h3>5.4 The patterns in the examples<a class="headerlink" href="#the-patterns-in-the-examples" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Example</p></th>
@@ -986,7 +986,7 @@ come up to send the message it is waiting for.</p>
 </section>
 </section>
 <section id="gui-focus-suspend-and-resume">
-<h2>6. GUI focus: suspend and resume<a class="headerlink" href="#gui-focus-suspend-and-resume" title="Link to this heading"></a></h2>
+<span id="6-gui-focus-suspend-and-resume"></span><h2>6. GUI focus: suspend and resume<a class="headerlink" href="#gui-focus-suspend-and-resume" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">COMMAND_APP_GUI_SUSPEND</span></code> and <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_GUI_RESUME</span></code> mean <strong>“your GUI is / is no longer the
 thing on screen”</strong>. They are navigation, delivered when the user moves off your app’s screen
 and back onto it.</p>
@@ -1040,7 +1040,7 @@ resume.</strong> Never put app logic that must keep running in the GUI’s frame
 service’s job.</p>
 </section>
 <section id="what-ends-an-app-whatever-it-wants">
-<h2>7. What ends an app whatever it wants<a class="headerlink" href="#what-ends-an-app-whatever-it-wants" title="Link to this heading"></a></h2>
+<span id="7-what-ends-an-app-whatever-it-wants"></span><h2>7. What ends an app whatever it wants<a class="headerlink" href="#what-ends-an-app-whatever-it-wants" title="Link to this heading"></a></h2>
 <p>Two kinds, and the difference matters.</p>
 <p><strong>Orderly teardown — your service receives <code class="docutils literal notranslate"><span class="pre">COMMAND_APP_STOP</span></code> and a grace period:</strong></p>
 <table class="docutils align-default">
@@ -1087,7 +1087,7 @@ receives <code class="docutils literal notranslate"><span class="pre">COMMAND_AP
 not covered.</p>
 </section>
 <section id="memory-and-what-happens-when-it-runs-out">
-<h2>8. Memory, and what happens when it runs out<a class="headerlink" href="#memory-and-what-happens-when-it-runs-out" title="Link to this heading"></a></h2>
+<span id="8-memory-and-what-happens-when-it-runs-out"></span><h2>8. Memory, and what happens when it runs out<a class="headerlink" href="#memory-and-what-happens-when-it-runs-out" title="Link to this heading"></a></h2>
 <p>RAM is charged in two places, and both can fail:</p>
 <ul class="simple">
 <li><p><strong>At load.</strong> Each process’s code, data, bss and stack are allocated when it is loaded. The
@@ -1107,7 +1107,7 @@ resident as something you are accountable for, and see the “not promised” co
 1.1 before designing around the absence of enforcement.</p>
 </section>
 <section id="choosing-a-design">
-<h2>9. Choosing a design<a class="headerlink" href="#choosing-a-design" title="Link to this heading"></a></h2>
+<span id="9-choosing-a-design"></span><h2>9. Choosing a design<a class="headerlink" href="#choosing-a-design" title="Link to this heading"></a></h2>
 <p>Both designs below are correct. Pick on this question: <strong>must something happen at a time, or
 must something merely be correct when read?</strong></p>
 <table class="docutils align-default">
@@ -1148,7 +1148,7 @@ resident service down without warning. A resident service earns its thread only 
 something must <em>occur</em> while nobody is looking.</p>
 </section>
 <section id="behaviour-not-to-rely-on">
-<h2>10. Behaviour not to rely on<a class="headerlink" href="#behaviour-not-to-rely-on" title="Link to this heading"></a></h2>
+<span id="10-behaviour-not-to-rely-on"></span><h2>10. Behaviour not to rely on<a class="headerlink" href="#behaviour-not-to-rely-on" title="Link to this heading"></a></h2>
 <p>Two behaviours have changed since kernel 1.4.0, or are close enough to the edge of the
 contract that you should not build on them. Neither affects service lifecycle itself.</p>
 <p><strong>GUI ticks while suspended.</strong> On 1.4.0 a GUI that is loaded but off screen still receives
@@ -1163,7 +1163,7 @@ earlier SDK are affected. Either way, give every service a self-exit that does n
 on a GUI arriving.</p>
 </section>
 <section id="checklist">
-<h2>11. Checklist<a class="headerlink" href="#checklist" title="Link to this heading"></a></h2>
+<span id="11-checklist"></span><h2>11. Checklist<a class="headerlink" href="#checklist" title="Link to this heading"></a></h2>
 <p>Before shipping a service that outlives its GUI:</p>
 <ul class="simple">
 <li><p>[ ] There is a reachable path out of <code class="docutils literal notranslate"><span class="pre">run()</span></code> in <strong>every</strong> state the service can be in —
@@ -1185,7 +1185,7 @@ navigated away from does not close it.</p></li>
 </ul>
 </section>
 <section id="see-also">
-<h2>12. See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<span id="12-see-also"></span><h2>12. See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="Examples/Alarm-Architecture.html"><span class="std std-doc">Alarm</span></a> — autostart service, autonomous GUI launch</p></li>
 <li><p><a class="reference internal" href="Examples/Timer-Architecture.html"><span class="std std-doc">Timer</span></a> — bounded wait, self-release, background fire</p></li>

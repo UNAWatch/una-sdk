@@ -243,7 +243,7 @@
 </table>
 </section>
 <section id="overview">
-<h2>1. Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<span id="1-overview"></span><h2>1. Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>An app can declare a list of <strong>configuration fields</strong> in its <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code>. The companion
 app asks the user to fill them in when the app is installed, writes the answers to a JSON
 file next to the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> on the watch, and lets the user edit them again at any time. The
@@ -272,7 +272,7 @@ already exist:</p>
 </tbody>
 </table>
 <section id="what-this-is-not">
-<h3>1.1 What this is <em>not</em><a class="headerlink" href="#what-this-is-not" title="Link to this heading"></a></h3>
+<span id="11-what-this-is-not"></span><h3>1.1 What this is <em>not</em><a class="headerlink" href="#what-this-is-not" title="Link to this heading"></a></h3>
 <p><strong>Not a replacement for on-watch settings.</strong> Config fields are set rarely, from the phone.
 Anything the user changes <em>in the moment</em> — an alert distance mid-run, a timer duration —
 belongs in the app’s own on-watch settings. No value should live in both places.</p>
@@ -289,7 +289,7 @@ anything else whose disclosure matters. That is why there is no <code class="doc
 starts</strong> (section 7.2). It is not a live data feed.</p>
 </section>
 <section id="data-flow">
-<h3>1.2 Data flow<a class="headerlink" href="#data-flow" title="Link to this heading"></a></h3>
+<span id="12-data-flow"></span><h3>1.2 Data flow<a class="headerlink" href="#data-flow" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   <span class="n">app</span><span class="o">-</span><span class="n">manifest</span><span class="o">.</span><span class="n">json</span>                             <span class="n">Companion</span> <span class="n">app</span> <span class="p">(</span><span class="n">phone</span><span class="p">)</span>
    <span class="o">+---------------------+</span>                 <span class="o">+----------------------------+</span>
    <span class="o">|</span> <span class="s2">"configFile"</span>        <span class="o">|</span>  <span class="mf">1.</span> <span class="n">read</span> <span class="n">the</span>    <span class="o">|</span>                            <span class="o">|</span>
@@ -322,7 +322,7 @@ app generates.</p>
 </section>
 </section>
 <section id="declaring-fields-in-app-manifest-json">
-<h2>2. Declaring fields in <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code><a class="headerlink" href="#declaring-fields-in-app-manifest-json" title="Link to this heading"></a></h2>
+<span id="2-declaring-fields-in-app-manifestjson"></span><h2>2. Declaring fields in <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code><a class="headerlink" href="#declaring-fields-in-app-manifest-json" title="Link to this heading"></a></h2>
 <p>Two keys carry the declaration, and both are optional — an app that wants no configuration
 declares neither. They live in the app’s <strong><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code></strong>, the package metadata file
 the companion app reads (formerly <code class="docutils literal notranslate"><span class="pre">config.json</span></code>; see
@@ -336,7 +336,7 @@ manifest rather than guess at a format it was not built for — the same rule th
 <code class="docutils literal notranslate"><span class="pre">schema</span></code> key follows (section 4.2). It versions the manifest format, not the app: <code class="docutils literal notranslate"><span class="pre">appVersion</span></code>
 is the app’s own version and is unrelated.</p>
 <section id="configfile">
-<h3>2.1 <code class="docutils literal notranslate"><span class="pre">configFile</span></code><a class="headerlink" href="#configfile" title="Link to this heading"></a></h3>
+<span id="21-configfile"></span><h3>2.1 <code class="docutils literal notranslate"><span class="pre">configFile</span></code><a class="headerlink" href="#configfile" title="Link to this heading"></a></h3>
 <p>The name of the values file the companion app creates in the app’s directory on the watch.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"configFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app_config.json"</span>
 </pre></div>
@@ -374,7 +374,7 @@ rules, and it stops a malformed or hostile package from reaching outside the app
 directory.</p>
 </section>
 <section id="configfields">
-<h3>2.2 <code class="docutils literal notranslate"><span class="pre">configFields</span></code><a class="headerlink" href="#configfields" title="Link to this heading"></a></h3>
+<span id="22-configfields"></span><h3>2.2 <code class="docutils literal notranslate"><span class="pre">configFields</span></code><a class="headerlink" href="#configfields" title="Link to this heading"></a></h3>
 <p>An ordered array of field definitions. <strong>Array order is display order</strong> in the companion
 app.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"configFields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -386,7 +386,7 @@ app.</p>
 <p>At most <strong>32</strong> fields (section 8).</p>
 </section>
 <section id="attributes-common-to-every-field">
-<h3>2.3 Attributes common to every field<a class="headerlink" href="#attributes-common-to-every-field" title="Link to this heading"></a></h3>
+<span id="23-attributes-common-to-every-field"></span><h3>2.3 Attributes common to every field<a class="headerlink" href="#attributes-common-to-every-field" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Attribute</p></th>
@@ -440,7 +440,7 @@ gives CI something to cross-check.</p>
 a unit on a name or a switch has nothing to label.</p>
 </section>
 <section id="attributes-by-type">
-<h3>2.4 Attributes by type<a class="headerlink" href="#attributes-by-type" title="Link to this heading"></a></h3>
+<span id="24-attributes-by-type"></span><h3>2.4 Attributes by type<a class="headerlink" href="#attributes-by-type" title="Link to this heading"></a></h3>
 <section id="bool">
 <h4><code class="docutils literal notranslate"><span class="pre">bool</span></code><a class="headerlink" href="#bool" title="Link to this heading"></a></h4>
 <p>No extra attributes. <code class="docutils literal notranslate"><span class="pre">default</span></code> is <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
@@ -582,7 +582,7 @@ ASCII characters but only 4 four-byte emoji.</p>
 </section>
 </section>
 <section id="complete-example">
-<h3>2.5 Complete example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h3>
+<span id="25-complete-example"></span><h3>2.5 Complete example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"utility"</span><span class="p">],</span>
 <span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waypoint"</span><span class="p">,</span>
@@ -651,13 +651,13 @@ ASCII characters but only 4 four-byte emoji.</p>
 </section>
 </section>
 <section id="validation">
-<h2>3. Validation<a class="headerlink" href="#validation" title="Link to this heading"></a></h2>
+<span id="3-validation"></span><h2>3. Validation<a class="headerlink" href="#validation" title="Link to this heading"></a></h2>
 <p>Validation happens in the companion app, before anything is written. The watch app never
 sees an invalid value that the companion app produced — but it still defends itself
 (section 5.3), because a values file can also arrive from a hand edit over USB, from an
 older or newer build of the companion app, or from a downgraded <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>.</p>
 <section id="order-of-checks">
-<h3>3.1 Order of checks<a class="headerlink" href="#order-of-checks" title="Link to this heading"></a></h3>
+<span id="31-order-of-checks"></span><h3>3.1 Order of checks<a class="headerlink" href="#order-of-checks" title="Link to this heading"></a></h3>
 <p>Checks run in this order, and the <strong>first</strong> failure is what gets reported:</p>
 <ol class="arabic simple">
 <li><p><strong>Type</strong> — the entered value is of the declared type.</p></li>
@@ -669,7 +669,7 @@ older or newer build of the companion app, or from a downgraded <code class="doc
 <p>A fixed order means the same bad input always produces the same message, on both platforms.</p>
 </section>
 <section id="the-pattern-dialect">
-<h3>3.2 The <code class="docutils literal notranslate"><span class="pre">pattern</span></code> dialect<a class="headerlink" href="#the-pattern-dialect" title="Link to this heading"></a></h3>
+<span id="32-the-pattern-dialect"></span><h3>3.2 The <code class="docutils literal notranslate"><span class="pre">pattern</span></code> dialect<a class="headerlink" href="#the-pattern-dialect" title="Link to this heading"></a></h3>
 <p>A pattern must behave identically on iOS and Android, so the dialect is a deliberately small
 subset with no constructs whose semantics or performance differ between engines.</p>
 <p><strong>Matching is an implicit full match.</strong> The pattern must match the <strong>entire</strong> value. Do not
@@ -731,7 +731,7 @@ companion app must not trim whitespace — if leading or trailing spaces should 
 the pattern must say so.</p>
 </section>
 <section id="error-messages">
-<h3>3.3 Error messages<a class="headerlink" href="#error-messages" title="Link to this heading"></a></h3>
+<span id="33-error-messages"></span><h3>3.3 Error messages<a class="headerlink" href="#error-messages" title="Link to this heading"></a></h3>
 <p>A field’s <code class="docutils literal notranslate"><span class="pre">validationMessage</span></code> is shown for <strong>any</strong> failure on that field. One message per
 field is enough in practice, because a good message states the whole rule
 (<code class="docutils literal notranslate"><span class="pre">&quot;Up</span> <span class="pre">to</span> <span class="pre">16</span> <span class="pre">letters,</span> <span class="pre">digits</span> <span class="pre">and</span> <span class="pre">spaces.&quot;</span></code>) rather than one constraint at a time.</p>
@@ -740,9 +740,9 @@ constraint that failed (section 9.5), so a field is never reported with a bare �
 </section>
 </section>
 <section id="the-values-file">
-<h2>4. The values file<a class="headerlink" href="#the-values-file" title="Link to this heading"></a></h2>
+<span id="4-the-values-file"></span><h2>4. The values file<a class="headerlink" href="#the-values-file" title="Link to this heading"></a></h2>
 <section id="location-and-name">
-<h3>4.1 Location and name<a class="headerlink" href="#location-and-name" title="Link to this heading"></a></h3>
+<span id="41-location-and-name"></span><h3>4.1 Location and name<a class="headerlink" href="#location-and-name" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span><span class="o">/</span><span class="n">Apps</span><span class="o">/&lt;</span><span class="n">AppDir</span><span class="o">&gt;/&lt;</span><span class="n">configFile</span><span class="o">&gt;</span>
 </pre></div>
 </div>
@@ -752,7 +752,7 @@ relative to the file-transfer root. From inside the app, the sandbox makes it si
 <code class="docutils literal notranslate"><span class="pre">/&lt;configFile&gt;</span></code>.</p>
 </section>
 <section id="envelope">
-<h3>4.2 Envelope<a class="headerlink" href="#envelope" title="Link to this heading"></a></h3>
+<span id="42-envelope"></span><h3>4.2 Envelope<a class="headerlink" href="#envelope" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -787,7 +787,7 @@ defaults, rather than guess at a format it was not built for. This matches how
 files must not.)</p>
 </section>
 <section id="value-encoding">
-<h3>4.3 Value encoding<a class="headerlink" href="#value-encoding" title="Link to this heading"></a></h3>
+<span id="43-value-encoding"></span><h3>4.3 Value encoding<a class="headerlink" href="#value-encoding" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Declared type</p></th>
@@ -838,7 +838,7 @@ section 8 assumes their absence. <code class="docutils literal notranslate"><spa
 file contains some.</p>
 </section>
 <section id="which-keys-are-present">
-<h3>4.4 Which keys are present<a class="headerlink" href="#which-keys-are-present" title="Link to this heading"></a></h3>
+<span id="44-which-keys-are-present"></span><h3>4.4 Which keys are present<a class="headerlink" href="#which-keys-are-present" title="Link to this heading"></a></h3>
 <p>The companion app writes the file <strong>whenever the app declares any config fields</strong>, so its
 presence is predictable. It contains only the ids the user actually set, so <strong>key presence
 is not</strong> predictable:</p>
@@ -854,7 +854,7 @@ a value is reset to the app’s default.</p></li>
 to exist at all — a user can delete it over USB.</p>
 </section>
 <section id="unknown-keys">
-<h3>4.5 Unknown keys<a class="headerlink" href="#unknown-keys" title="Link to this heading"></a></h3>
+<span id="45-unknown-keys"></span><h3>4.5 Unknown keys<a class="headerlink" href="#unknown-keys" title="Link to this heading"></a></h3>
 <p>A reader must ignore keys it does not recognise, and a writer must preserve them
 (section 6.2). This is what makes a downgrade survivable: an older <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> that knows fewer
 fields does not destroy the values belonging to the newer one.</p>
@@ -870,9 +870,9 @@ already forbids it.</p>
 </section>
 </section>
 <section id="reading-configuration-in-the-app">
-<h2>5. Reading configuration in the app<a class="headerlink" href="#reading-configuration-in-the-app" title="Link to this heading"></a></h2>
+<span id="5-reading-configuration-in-the-app"></span><h2>5. Reading configuration in the app<a class="headerlink" href="#reading-configuration-in-the-app" title="Link to this heading"></a></h2>
 <section id="declare-the-field-table-once">
-<h3>5.1 Declare the field table once<a class="headerlink" href="#declare-the-field-table-once" title="Link to this heading"></a></h3>
+<span id="51-declare-the-field-table-once"></span><h3>5.1 Declare the field table once<a class="headerlink" href="#declare-the-field-table-once" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> never reaches the watch, so the app carries its own copy of the field
 contract — one <code class="docutils literal notranslate"><span class="pre">constexpr</span></code> table, in one place:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/AppConfig/AppConfig.hpp"</span>
@@ -904,7 +904,7 @@ against JSON), and keep <strong>preprocessor conditionals out of the table</stro
 source as text, so an entry inside an <code class="docutils literal notranslate"><span class="pre">#if</span></code> counts as present whether or not it compiles.</p>
 </section>
 <section id="read-the-values">
-<h3>5.2 Read the values<a class="headerlink" href="#read-the-values" title="Link to this heading"></a></h3>
+<span id="52-read-the-values"></span><h3>5.2 Read the values<a class="headerlink" href="#read-the-values" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::run</span><span class="p">()</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="c1">// Not in the constructor -- see the warning below.</span>
@@ -958,7 +958,7 @@ the tutorial holds a <code class="docutils literal notranslate"><span class="pre
 zero/empty value and logs a warning. There is no way to read an undeclared field.</p>
 </section>
 <section id="what-happens-when-things-go-wrong">
-<h3>5.3 What happens when things go wrong<a class="headerlink" href="#what-happens-when-things-go-wrong" title="Link to this heading"></a></h3>
+<span id="53-what-happens-when-things-go-wrong"></span><h3>5.3 What happens when things go wrong<a class="headerlink" href="#what-happens-when-things-go-wrong" title="Link to this heading"></a></h3>
 <p>Nothing in this path may prevent an app from starting. A config problem must degrade to
 defaults, never to a failed launch:</p>
 <table class="docutils align-default">
@@ -999,7 +999,7 @@ defaults, never to a failed launch:</p>
 </table>
 </section>
 <section id="in-the-simulator">
-<h3>5.4 In the simulator<a class="headerlink" href="#in-the-simulator" title="Link to this heading"></a></h3>
+<span id="54-in-the-simulator"></span><h3>5.4 In the simulator<a class="headerlink" href="#in-the-simulator" title="Link to this heading"></a></h3>
 <p>The host simulator’s app sandbox is a directory on your PC, so testing configuration means
 dropping a file into it — no phone required:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">simulator</span> <span class="n">working</span> <span class="n">directory</span><span class="o">&gt;/</span><span class="n">app_config</span><span class="o">.</span><span class="n">json</span>
@@ -1011,11 +1011,11 @@ configuration is supposed to look like.</p>
 </section>
 </section>
 <section id="writing-configuration-from-the-app">
-<h2>6. Writing configuration from the app<a class="headerlink" href="#writing-configuration-from-the-app" title="Link to this heading"></a></h2>
+<span id="6-writing-configuration-from-the-app"></span><h2>6. Writing configuration from the app<a class="headerlink" href="#writing-configuration-from-the-app" title="Link to this heading"></a></h2>
 <p>An app may write the values file, so a value that is convenient to capture on the watch —
 “set the target to where I am standing” — does not have to be typed into a phone.</p>
 <section id="api">
-<h3>6.1 API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<span id="61-api"></span><h3>6.1 API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">.</span><span class="n">setFloat</span><span class="p">(</span><span class="s">"targetLatitude"</span><span class="p">,</span><span class="w">  </span><span class="n">fix</span><span class="p">.</span><span class="n">latitude</span><span class="p">);</span>
 <span class="n">cfg</span><span class="p">.</span><span class="n">setFloat</span><span class="p">(</span><span class="s">"targetLongitude"</span><span class="p">,</span><span class="w"> </span><span class="n">fix</span><span class="p">.</span><span class="n">longitude</span><span class="p">);</span>
 
@@ -1048,7 +1048,7 @@ configuration is supposed to look like.</p>
 <p>A setter changes what the app sees immediately; <code class="docutils literal notranslate"><span class="pre">save()</span></code> is what makes it survive a restart.</p>
 </section>
 <section id="how-save-writes">
-<h3>6.2 How <code class="docutils literal notranslate"><span class="pre">save()</span></code> writes<a class="headerlink" href="#how-save-writes" title="Link to this heading"></a></h3>
+<span id="62-how-save-writes"></span><h3>6.2 How <code class="docutils literal notranslate"><span class="pre">save()</span></code> writes<a class="headerlink" href="#how-save-writes" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">save()</span></code> never truncates the live file in place, because a reset or a flat battery halfway
 through would leave the app with a half-written config and no way back:</p>
 <ol class="arabic simple">
@@ -1068,14 +1068,14 @@ repeated key keeps only its first copy (section 4.5).</p></li>
 </ul>
 </section>
 <section id="recovering-an-interrupted-write">
-<h3>6.3 Recovering an interrupted write<a class="headerlink" href="#recovering-an-interrupted-write" title="Link to this heading"></a></h3>
+<span id="63-recovering-an-interrupted-write"></span><h3>6.3 Recovering an interrupted write<a class="headerlink" href="#recovering-an-interrupted-write" title="Link to this heading"></a></h3>
 <p>If a reset lands between steps 3 and 4, the values file is missing but <code class="docutils literal notranslate"><span class="pre">&lt;configFile&gt;.tmp</span></code> is
 intact. On load, <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> detects exactly that — no values file, a parseable
 temporary file — and completes the rename before reading. A leftover temporary file that
 does not parse is deleted.</p>
 </section>
 <section id="both-sides-can-write-the-conflict-rule">
-<h3>6.4 Both sides can write: the conflict rule<a class="headerlink" href="#both-sides-can-write-the-conflict-rule" title="Link to this heading"></a></h3>
+<span id="64-both-sides-can-write-the-conflict-rule"></span><h3>6.4 Both sides can write: the conflict rule<a class="headerlink" href="#both-sides-can-write-the-conflict-rule" title="Link to this heading"></a></h3>
 <p>The file has two writers, so the rule is simply <strong>last writer wins</strong>, with one obligation on
 the companion app: it MUST re-read the file over FTS immediately before showing its edit
 screen, so what it displays is what is actually on the watch.</p>
@@ -1097,9 +1097,9 @@ changed the file, without transferring it again.</p>
 </section>
 </section>
 <section id="lifecycle">
-<h2>7. Lifecycle<a class="headerlink" href="#lifecycle" title="Link to this heading"></a></h2>
+<span id="7-lifecycle"></span><h2>7. Lifecycle<a class="headerlink" href="#lifecycle" title="Link to this heading"></a></h2>
 <section id="install">
-<h3>7.1 Install<a class="headerlink" href="#install" title="Link to this heading"></a></h3>
+<span id="71-install"></span><h3>7.1 Install<a class="headerlink" href="#install" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>The companion app reads <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code> from the package.</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">configFields</span></code> is non-empty, it shows the configuration screen, pre-filled from each
@@ -1111,7 +1111,7 @@ field’s <code class="docutils literal notranslate"><span class="pre">default</
 and written <em>after</em> it because the directory has to exist first.</p>
 </section>
 <section id="editing-later">
-<h3>7.2 Editing later<a class="headerlink" href="#editing-later" title="Link to this heading"></a></h3>
+<span id="72-editing-later"></span><h3>7.2 Editing later<a class="headerlink" href="#editing-later" title="Link to this heading"></a></h3>
 <p>The user can edit the configuration at any time. The companion app re-reads the file first
 (section 6.4), shows the current values, and writes the whole file back from offset 0 — an
 FTS write at offset 0 truncates, so a shorter document cannot leave stale bytes behind.</p>
@@ -1120,7 +1120,7 @@ changes take effect the <strong>next time they open the app</strong>. An app tha
 file changes carries on with the values it started with.</p>
 </section>
 <section id="updating-the-app">
-<h3>7.3 Updating the app<a class="headerlink" href="#updating-the-app" title="Link to this heading"></a></h3>
+<span id="73-updating-the-app"></span><h3>7.3 Updating the app<a class="headerlink" href="#updating-the-app" title="Link to this heading"></a></h3>
 <p>An update may add, remove or re-specify fields. The companion app merges, then always shows
 the configuration screen so the user sees the result:</p>
 <table class="docutils align-default">
@@ -1152,13 +1152,13 @@ across versions: renaming one is indistinguishable from deleting a field and add
 and the user’s value is lost.</p>
 </section>
 <section id="uninstall">
-<h3>7.4 Uninstall<a class="headerlink" href="#uninstall" title="Link to this heading"></a></h3>
+<span id="74-uninstall"></span><h3>7.4 Uninstall<a class="headerlink" href="#uninstall" title="Link to this heading"></a></h3>
 <p>Uninstalling deletes the app’s directory, and the values file with it. Nothing is retained,
 so a later reinstall starts from the app’s defaults.</p>
 </section>
 </section>
 <section id="limits">
-<h2>8. Limits<a class="headerlink" href="#limits" title="Link to this heading"></a></h2>
+<span id="8-limits"></span><h2>8. Limits<a class="headerlink" href="#limits" title="Link to this heading"></a></h2>
 <p>These are hard limits. Tooling rejects anything past them, and <code class="docutils literal notranslate"><span class="pre">SDK::AppConfig</span></code> is sized for
 them.</p>
 <table class="docutils align-default">
@@ -1225,10 +1225,10 @@ them.</p>
 </table>
 </section>
 <section id="companion-app-specification">
-<h2>9. Companion app specification<a class="headerlink" href="#companion-app-specification" title="Link to this heading"></a></h2>
+<span id="9-companion-app-specification"></span><h2>9. Companion app specification<a class="headerlink" href="#companion-app-specification" title="Link to this heading"></a></h2>
 <p>This section is normative for the mobile implementation.</p>
 <section id="reading-the-declaration">
-<h3>9.1 Reading the declaration<a class="headerlink" href="#reading-the-declaration" title="Link to this heading"></a></h3>
+<span id="91-reading-the-declaration"></span><h3>9.1 Reading the declaration<a class="headerlink" href="#reading-the-declaration" title="Link to this heading"></a></h3>
 <p>Check <code class="docutils literal notranslate"><span class="pre">manifest_version</span></code> first: it is required, and <code class="docutils literal notranslate"><span class="pre">1</span></code> is the only value this
 specification covers. Refuse a package that declares anything else rather than parsing on
 regardless. Then parse <code class="docutils literal notranslate"><span class="pre">configFields</span></code> from the package’s <code class="docutils literal notranslate"><span class="pre">app-manifest.json</span></code>, validate it
@@ -1237,7 +1237,7 @@ package that does not conform — a malformed declaration is a broken package, n
 around. Render fields in array order.</p>
 </section>
 <section id="install-flow">
-<h3>9.2 Install flow<a class="headerlink" href="#install-flow" title="Link to this heading"></a></h3>
+<span id="92-install-flow"></span><h3>9.2 Install flow<a class="headerlink" href="#install-flow" title="Link to this heading"></a></h3>
 <p>As section 7.1. A field with <code class="docutils literal notranslate"><span class="pre">required:</span> <span class="pre">true</span></code> blocks the install until it is satisfied;
 every other field may be left at its default. Write the values file only after the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>
 transfer has completed, to <code class="docutils literal notranslate"><span class="pre">/Apps/&lt;AppDir&gt;/&lt;configFile&gt;</span></code>, with a single <code class="docutils literal notranslate"><span class="pre">WRITE</span></code> at
@@ -1245,7 +1245,7 @@ offset 0. On FTS version 5 or later, a <code class="docutils literal notranslate
 arrived intact; on earlier versions it is unavailable and must not be sent.</p>
 </section>
 <section id="edit-flow">
-<h3>9.3 Edit flow<a class="headerlink" href="#edit-flow" title="Link to this heading"></a></h3>
+<span id="93-edit-flow"></span><h3>9.3 Edit flow<a class="headerlink" href="#edit-flow" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>Read <code class="docutils literal notranslate"><span class="pre">/Apps/&lt;AppDir&gt;/&lt;configFile&gt;</span></code> from the watch.</p></li>
 <li><p>If it is missing or unparseable, fall back to all defaults rather than showing an error —
@@ -1263,7 +1263,7 @@ fails any <code class="docutils literal notranslate"><span class="pre">minLength
 </ol>
 </section>
 <section id="input-controls">
-<h3>9.4 Input controls<a class="headerlink" href="#input-controls" title="Link to this heading"></a></h3>
+<span id="94-input-controls"></span><h3>9.4 Input controls<a class="headerlink" href="#input-controls" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type</p></th>
@@ -1290,7 +1290,7 @@ control, and <code class="docutils literal notranslate"><span class="pre">unit</
 the stored value.</p>
 </section>
 <section id="default-messages">
-<h3>9.5 Default messages<a class="headerlink" href="#default-messages" title="Link to this heading"></a></h3>
+<span id="95-default-messages"></span><h3>9.5 Default messages<a class="headerlink" href="#default-messages" title="Link to this heading"></a></h3>
 <p>Used when a field has no <code class="docutils literal notranslate"><span class="pre">validationMessage</span></code>. Wording is the implementation’s own; these are
 the cases that must be covered:</p>
 <table class="docutils align-default">
@@ -1319,7 +1319,7 @@ the cases that must be covered:</p>
 </table>
 </section>
 <section id="rules-that-must-not-be-broken">
-<h3>9.6 Rules that must not be broken<a class="headerlink" href="#rules-that-must-not-be-broken" title="Link to this heading"></a></h3>
+<span id="96-rules-that-must-not-be-broken"></span><h3>9.6 Rules that must not be broken<a class="headerlink" href="#rules-that-must-not-be-broken" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Never write an invalid value.</strong> Validation failures block the save.</p></li>
 <li><p><strong>Never write a key the app does not declare</strong>, and never drop a key that the watch’s copy
@@ -1343,7 +1343,7 @@ manifest’s own <code class="docutils literal notranslate"><span class="pre">ma
 </section>
 </section>
 <section id="tooling">
-<h2>10. Tooling<a class="headerlink" href="#tooling" title="Link to this heading"></a></h2>
+<span id="10-tooling"></span><h2>10. Tooling<a class="headerlink" href="#tooling" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/app_packer/validate_app_config.py</span></code> is the single implementation of the
 rules above:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate a package's declaration</span>
@@ -1363,7 +1363,7 @@ the declaration.</p>
 disagrees with.</p>
 </section>
 <section id="worked-example">
-<h2>11. Worked example<a class="headerlink" href="#worked-example" title="Link to this heading"></a></h2>
+<span id="11-worked-example"></span><h2>11. Worked example<a class="headerlink" href="#worked-example" title="Link to this heading"></a></h2>
 <p>The <a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html"><span class="std std-doc">Waypoint tutorial</span></a> is a complete utility app built
 around this feature: it declares five fields covering all four types (two floats, for the
 coordinate pair), navigates to the

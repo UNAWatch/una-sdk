@@ -74,7 +74,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#host-unit-tests">Host Unit Tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#touchgfx-windows-only-for-designer">TouchGFX (Windows-only for Designer)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#touchgfx-require-a-windows-host">TouchGFX (Windows-only for Designer)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-touchgfx-designer-for-visual-editing">Using TouchGFX Designer for Visual Editing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#integration-with-cmake">Integration with CMake</a></li>
@@ -180,8 +180,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="sdk-setup-and-build-overview">
-<span id="sdk-setup"></span><h1>SDK Setup and Build Overview<a class="headerlink" href="#sdk-setup-and-build-overview" title="Link to this heading"></a></h1>
+  <section id="sdk-setup">
+<span id="sdk-setup-and-build-overview"></span><h1>SDK Setup and Build Overview<a class="headerlink" href="#sdk-setup" title="Link to this heading"></a></h1>
 <p>This guide covers SDK installation, manual environment setup, and the CMake workflow for building example apps.</p>
 <p>The focus is on a <strong>manual, transparent setup</strong> (no helper scripts required on Linux) so you can see exactly which tools are used and which environment variables are expected.</p>
 <p>For platform architecture, see <a class="reference internal" href="platform-overview.html"><span class="std std-doc">platform overview</span></a>. For tutorials, see <a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld tutorial</span></a>.</p>
@@ -331,7 +331,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <section id="windows-setup">
 <h3>Windows Setup<a class="headerlink" href="#windows-setup" title="Link to this heading"></a></h3>
 <section id="id2">
-<h4>Get required software<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<span id="get-required-software-1"></span><h4>Get required software<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><a class="reference external" href="https://git-scm.com/install/windows">Git</a></p></li>
 <li><p><a class="reference external" href="https://www.python.org/downloads/windows/">Python 3</a> -  Notes:</p>
@@ -345,7 +345,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 </ul>
 </section>
 <section id="id3">
-<h4>Prepare<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<span id="prepare-1"></span><h4>Prepare<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
 <section id="id4">
 <h5>Clone and setup environment<a class="headerlink" href="#id4" title="Link to this heading"></a></h5>
 <div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Clone via SSH</span>
@@ -370,7 +370,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 </section>
 </section>
 <section id="id5">
-<h4>Copy and Build an Existing Example<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<span id="copy-and-build-an-existing-example-1"></span><h4>Copy and Build an Existing Example<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
 <p>This section demonstrates how to copy an existing app example (Alarm) and build it without modifications to verify your setup. For creating and customizing a new app by modifying a copy, see “Creating New Apps” below.</p>
 <div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># Copy entire project for simplicity</span>
 <span class="c"># Note: The copied folder will retain original names like Alarm-CMake. Use the original name in commands below (e.g., Alarm-CMake instead of MyAlarm-CMake).</span>
@@ -573,8 +573,8 @@ ctest<span class="w"> </span>--test-dir<span class="w"> </span>build-host<span c
 </div>
 <p>For test layout and guidance on adding tests for app examples, see <a class="reference internal" href="unit-testing.html"><span class="std std-doc">Host Unit Testing</span></a>.</p>
 </section>
-<section id="touchgfx-windows-only-for-designer">
-<span id="touchgfx-require-a-windows-host"></span><h2>TouchGFX (Windows-only for Designer)<a class="headerlink" href="#touchgfx-windows-only-for-designer" title="Link to this heading"></a></h2>
+<section id="touchgfx-require-a-windows-host">
+<span id="touchgfx-windows-only-for-designer"></span><h2>TouchGFX (Windows-only for Designer)<a class="headerlink" href="#touchgfx-require-a-windows-host" title="Link to this heading"></a></h2>
 <p>TouchGFX is a high-performance graphics framework designed for STM32 microcontrollers, enabling rich graphical user interfaces on embedded devices with limited resources.</p>
 <p>For now this is single supported way to create graphical applications for UNAwatch platform.</p>
 <p><strong>Note</strong>: Glances operates without TouchGFX framework, it uses embedded lightweight drawing API which allow to draw simple text and icons in glances menu.</p>

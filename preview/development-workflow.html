@@ -552,7 +552,7 @@ window.runMermaid = runMermaid;</script>
 <section id="workflow-stages">
 <h2>Workflow Stages<a class="headerlink" href="#workflow-stages" title="Link to this heading"></a></h2>
 <section id="planning">
-<h3>1. Planning<a class="headerlink" href="#planning" title="Link to this heading"></a></h3>
+<span id="1-planning"></span><h3>1. Planning<a class="headerlink" href="#planning" title="Link to this heading"></a></h3>
 <p>Before writing code, decide on your app type:</p>
 <ul class="simple">
 <li><p><strong>Activity</strong>: For long-running, interactive apps.</p></li>
@@ -562,7 +562,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="development">
-<h3>2. Development<a class="headerlink" href="#development" title="Link to this heading"></a></h3>
+<span id="2-development"></span><h3>2. Development<a class="headerlink" href="#development" title="Link to this heading"></a></h3>
 <p>Use the SDK interfaces to build your app logic.</p>
 <ul class="simple">
 <li><p>Implement the <strong>Service process</strong> for background tasks.</p></li>
@@ -571,7 +571,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="building">
-<h3>3. Building<a class="headerlink" href="#building" title="Link to this heading"></a></h3>
+<span id="3-building"></span><h3>3. Building<a class="headerlink" href="#building" title="Link to this heading"></a></h3>
 <p>Compile your app into an ELF binary using the provided toolchain.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>release
 </pre></div>
@@ -579,7 +579,7 @@ window.runMermaid = runMermaid;</script>
 <p>Ensure you are using the correct optimization flags for PIC execution.</p>
 </section>
 <section id="testing">
-<h3>4. Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
+<span id="4-testing"></span><h3>4. Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Simulator</strong>: Test UI and basic logic on your development machine.</p></li>
 <li><p><strong>Unit Tests</strong>: Write tests for individual components.</p></li>
@@ -587,7 +587,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="debugging">
-<h3>5. Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
+<span id="5-debugging"></span><h3>5. Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">ILogger</span></code> for real-time logging.</p></li>
 <li><p>Set breakpoints in the simulator.</p></li>
@@ -595,7 +595,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="packaging">
-<h3>6. Packaging<a class="headerlink" href="#packaging" title="Link to this heading"></a></h3>
+<span id="6-packaging"></span><h3>6. Packaging<a class="headerlink" href="#packaging" title="Link to this heading"></a></h3>
 <p>Package your ELF binary and assets into a <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> container using <code class="docutils literal notranslate"><span class="pre">app_packer.py</span></code>.</p>
 <ul class="simple">
 <li><p>Inject version metadata.</p></li>
@@ -603,7 +603,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="deployment">
-<h3>7. Deployment<a class="headerlink" href="#deployment" title="Link to this heading"></a></h3>
+<span id="7-deployment"></span><h3>7. Deployment<a class="headerlink" href="#deployment" title="Link to this heading"></a></h3>
 <p>Deploy your app to the watch via:</p>
 <ul class="simple">
 <li><p><strong>USB</strong>: For direct development flashing.</p></li>
@@ -611,7 +611,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="maintenance">
-<h3>8. Maintenance<a class="headerlink" href="#maintenance" title="Link to this heading"></a></h3>
+<span id="8-maintenance"></span><h3>8. Maintenance<a class="headerlink" href="#maintenance" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Monitor crash reports.</p></li>
 <li><p>Release version updates.</p></li>
@@ -850,7 +850,7 @@ window.runMermaid = runMermaid;</script>
 <section id="app-development-framework">
 <h2>App Development Framework<a class="headerlink" href="#app-development-framework" title="Link to this heading"></a></h2>
 <section id="app-architecture-lifecycle">
-<h3>App Architecture &amp; Lifecycle<a class="headerlink" href="#app-architecture-lifecycle" title="Link to this heading"></a></h3>
+<span id="app-architecture--lifecycle"></span><h3>App Architecture &amp; Lifecycle<a class="headerlink" href="#app-architecture-lifecycle" title="Link to this heading"></a></h3>
 <p><strong>Dual-Process Model:</strong></p>
 <ul class="simple">
 <li><p><strong>Service Process</strong>: Background logic, sensor access, data processing, glance notifications</p></li>
@@ -874,7 +874,7 @@ window.runMermaid = runMermaid;</script>
 </pre></div>
 </div>
 <section id="app-lifecycle-management">
-<h4>App Lifecycle &amp; Management<a class="headerlink" href="#app-lifecycle-management" title="Link to this heading"></a></h4>
+<span id="app-lifecycle--management"></span><h4>App Lifecycle &amp; Management<a class="headerlink" href="#app-lifecycle-management" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         stateDiagram-v2
     [*] --&gt; Created

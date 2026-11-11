@@ -224,7 +224,7 @@
            <div itemprop="articleBody">
              
   <section id="cycling-cycling-activity-tracking">
-<h1>Cycling - Cycling Activity Tracking<a class="headerlink" href="#cycling-cycling-activity-tracking" title="Link to this heading"></a></h1>
+<span id="cycling---cycling-activity-tracking"></span><h1>Cycling - Cycling Activity Tracking<a class="headerlink" href="#cycling-cycling-activity-tracking" title="Link to this heading"></a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>The Cycling app is a comprehensive cycling activity tracking application designed for wearable devices, specifically targeting cycling activities. It provides real-time tracking of distance, speed, pace, heart rate, elevation, and other essential metrics for cyclists. The app integrates multiple sensors including GPS, heart rate monitor, barometric pressure sensor, and battery monitoring to deliver accurate and detailed activity data.</p>
@@ -364,7 +364,7 @@
 <h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
 <p>The data processing pipeline transforms raw sensor data into meaningful fitness metrics.</p>
 <section id="sensor-data-reception">
-<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<span id="1-sensor-data-reception"></span><h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
 <p>Sensor data arrives through the kernel’s message system. The <code class="docutils literal notranslate"><span class="pre">handleSensorsData()</span></code> method identifies the source via <code class="docutils literal notranslate"><span class="pre">matchesDriver()</span></code>, constructs the appropriate parser, and forwards the value:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleSensorsData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorGpsLocation</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
@@ -383,7 +383,7 @@
 </div>
 </section>
 <section id="data-capture-infrastructure">
-<h4>2. Data Capture Infrastructure<a class="headerlink" href="#data-capture-infrastructure" title="Link to this heading"></a></h4>
+<span id="2-data-capture-infrastructure"></span><h4>2. Data Capture Infrastructure<a class="headerlink" href="#data-capture-infrastructure" title="Link to this heading"></a></h4>
 <p>GPS coordinates, battery level, and sensor metrics are collected through three complementary mechanisms that together ensure accurate, pause-aware data:</p>
 <p><strong>GPS state (<code class="docutils literal notranslate"><span class="pre">mGps</span></code>)</strong> — a simple struct updated on every GPS location event: fix flag, latitude/longitude, altitude (m), and timestamp. Used both for map building and for flagging whether coordinate/speed data is valid before writing to FIT.</p>
 <p><strong>Battery samplers</strong> — two <code class="docutils literal notranslate"><span class="pre">SDK::Metric::ThrottledSample</span></code> instances (<code class="docutils literal notranslate"><span class="pre">mBatterySoc</span></code>, <code class="docutils literal notranslate"><span class="pre">mBatteryVoltage</span></code>) that periodically write state-of-charge (%) and voltage (V) into the FIT file without flooding it with redundant records.</p>
@@ -413,7 +413,7 @@
 <p>Raw barometric altitude is pre-filtered through a <code class="docutils literal notranslate"><span class="pre">SimpleLPF</span></code> (α = 0.8) before being passed to <code class="docutils literal notranslate"><span class="pre">mAltitudeCounter</span></code>, because <code class="docutils literal notranslate"><span class="pre">DeltaCounter</span></code> does not perform any filtering itself.</p>
 </section>
 <section id="parser-classes">
-<h4>3. Parser Classes<a class="headerlink" href="#parser-classes" title="Link to this heading"></a></h4>
+<span id="3-parser-classes"></span><h4>3. Parser Classes<a class="headerlink" href="#parser-classes" title="Link to this heading"></a></h4>
 <p>Each sensor has a corresponding <code class="docutils literal notranslate"><span class="pre">SDK::SensorDataParser::*</span></code> class. The pattern is always the same: construct the parser from <code class="docutils literal notranslate"><span class="pre">data[0]</span></code>, check <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code>, then extract the value and feed it into the appropriate counter or struct field. The pressure sensor is slightly more complex because it requires a sea-level calibration on the first reading:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">SDK</span><span class="o">::</span><span class="n">SensorDataParser</span><span class="o">::</span><span class="n">Pressure</span><span class="w"> </span><span class="nf">parser</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">isDataValid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
@@ -428,7 +428,7 @@
 <p>All other parsers (<code class="docutils literal notranslate"><span class="pre">GpsLocation</span></code>, <code class="docutils literal notranslate"><span class="pre">GpsSpeed</span></code>, <code class="docutils literal notranslate"><span class="pre">GpsDistance</span></code>, <code class="docutils literal notranslate"><span class="pre">HeartRate</span></code>, <code class="docutils literal notranslate"><span class="pre">BatteryLevel</span></code>, <code class="docutils literal notranslate"><span class="pre">BatteryMetrics</span></code>, <code class="docutils literal notranslate"><span class="pre">WristMotion</span></code>) follow the simpler <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> → <code class="docutils literal notranslate"><span class="pre">counter.add(value)</span></code> / action pattern.</p>
 </section>
 <section id="track-processing-logic">
-<h4>4. Track Processing Logic<a class="headerlink" href="#track-processing-logic" title="Link to this heading"></a></h4>
+<span id="4-track-processing-logic"></span><h4>4. Track Processing Logic<a class="headerlink" href="#track-processing-logic" title="Link to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">processTrack()</span></code> method runs every second during active tracking:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::processTrack</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// GPS map building</span>
@@ -457,12 +457,12 @@
 </div>
 </section>
 <section id="fit-file-recording">
-<h4>5. FIT File Recording<a class="headerlink" href="#fit-file-recording" title="Link to this heading"></a></h4>
+<span id="5-fit-file-recording"></span><h4>5. FIT File Recording<a class="headerlink" href="#fit-file-recording" title="Link to this heading"></a></h4>
 <p>Activity data is recorded in FIT (Flexible and Interoperable Data Transfer) format, the standard for fitness devices.</p>
 <p>Each record is assembled from the current counter values and GPS state. Fields are optional — each is only written to the FIT file when marked valid via <code class="docutils literal notranslate"><span class="pre">RecordData::set(Field,</span> <span class="pre">bool)</span></code>. Fields include: coordinates, speed, altitude, heart rate, and battery (both <code class="docutils literal notranslate"><span class="pre">mBatterySoc</span></code> and <code class="docutils literal notranslate"><span class="pre">mBatteryVoltage</span></code> <code class="docutils literal notranslate"><span class="pre">ThrottledSample</span></code> instances must both be <code class="docutils literal notranslate"><span class="pre">isDue()</span></code> before the battery fields are written).</p>
 </section>
 <section id="error-handling-and-data-validation">
-<h4>6. Error Handling and Data Validation<a class="headerlink" href="#error-handling-and-data-validation" title="Link to this heading"></a></h4>
+<span id="6-error-handling-and-data-validation"></span><h4>6. Error Handling and Data Validation<a class="headerlink" href="#error-handling-and-data-validation" title="Link to this heading"></a></h4>
 <p><strong>GPS Fix State Management</strong>:</p>
 <p>Fix state changes are tracked via <code class="docutils literal notranslate"><span class="pre">mPreviousGpsFixState</span></code>. On every change the GUI is notified with a <code class="docutils literal notranslate"><span class="pre">GpsFix</span></code> message. The very first acquired fix also triggers <code class="docutils literal notranslate"><span class="pre">notifyFirstFix()</span></code> — backlight on, buzzer pattern (150 ms × 3), and a strong vibro click:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mPreviousGpsFixState</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">mGps</span><span class="p">.</span><span class="n">fix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>

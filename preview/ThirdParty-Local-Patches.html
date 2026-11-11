@@ -143,7 +143,7 @@
            <div itemprop="articleBody">
              
   <section id="una-sdk-local-patches-to-vendored-third-party-code">
-<h1>UNA SDK — Local Patches to Vendored (Third-Party) Code<a class="headerlink" href="#una-sdk-local-patches-to-vendored-third-party-code" title="Link to this heading"></a></h1>
+<span id="una-sdk--local-patches-to-vendored-third-party-code"></span><h1>UNA SDK — Local Patches to Vendored (Third-Party) Code<a class="headerlink" href="#una-sdk-local-patches-to-vendored-third-party-code" title="Link to this heading"></a></h1>
 <p>This document tracks deliberate modifications to files under <code class="docutils literal notranslate"><span class="pre">ThirdParty/</span></code> that
 diverge from the upstream vendor drop. These are <strong>not</strong> part of the SDK’s own
 source: when a vendored component is re-imported at a new version, the drop will
@@ -185,7 +185,7 @@ version, PR references, and status in the table below.</p></li>
 <section id="patches">
 <h2>Patches<a class="headerlink" href="#patches" title="Link to this heading"></a></h2>
 <section id="touchgfx-4-26-1">
-<h3>TouchGFX 4.26.1<a class="headerlink" href="#touchgfx-4-26-1" title="Link to this heading"></a></h3>
+<span id="touchgfx-4261"></span><h3>TouchGFX 4.26.1<a class="headerlink" href="#touchgfx-4-26-1" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>#</p></th>
@@ -208,7 +208,7 @@ version, PR references, and status in the table below.</p></li>
 </tbody>
 </table>
 <section id="linux-converter-execute-bit-186">
-<h4>1 — Linux converter execute bit (#186)<a class="headerlink" href="#linux-converter-execute-bit-186" title="Link to this heading"></a></h4>
+<span id="1--linux-converter-execute-bit-186"></span><h4>1 — Linux converter execute bit (#186)<a class="headerlink" href="#linux-converter-execute-bit-186" title="Link to this heading"></a></h4>
 <p>The prebuilt Linux asset converters ship without the execute bit, so <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">assets</span></code>
 fails on Linux/macOS until they are <code class="docutils literal notranslate"><span class="pre">chmod</span></code>’d by hand.</p>
 <ul class="simple">
@@ -220,7 +220,7 @@ git no-op on Windows checkouts.)</p></li>
 </ul>
 </section>
 <section id="textconvert-ruby-3-1-3-2-compatibility-189">
-<h4>2 — <code class="docutils literal notranslate"><span class="pre">textconvert</span></code> Ruby 3.1/3.2 compatibility (#189)<a class="headerlink" href="#textconvert-ruby-3-1-3-2-compatibility-189" title="Link to this heading"></a></h4>
+<span id="2--textconvert-ruby-3132-compatibility-189"></span><h4>2 — <code class="docutils literal notranslate"><span class="pre">textconvert</span></code> Ruby 3.1/3.2 compatibility (#189)<a class="headerlink" href="#textconvert-ruby-3-1-3-2-compatibility-189" title="Link to this heading"></a></h4>
 <p>TouchGFX 4.26.1 still uses Ruby APIs that were removed in supported Ruby releases,
 so the text converter crashes on any modern Ruby:</p>
 <ul class="simple">
