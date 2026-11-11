@@ -287,6 +287,11 @@ bool Model::isLapFromPauseMenu() const
     return mLapFromPauseMenu;
 }
 
+bool Model::isPausedLapTaken() const
+{
+    return mPausedLapTaken;
+}
+
 void Model::trackCalibrate(float distanceActualM)
 {
     SDK::send_msg<CustomMessage::TrackCalibrate>(mKernel, distanceActualM);
@@ -415,6 +420,9 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             auto* msg = static_cast<CustomMessage::TrackStateUpd*>(message);
             if (mTrackState != msg->state) {
                 mTrackState = msg->state;
+                if (mTrackState != Track::State::PAUSED) {
+                    mPausedLapTaken = false;
+                }
                 modelListener->onTrackState(mTrackState);
             }
         } break;
@@ -429,6 +437,9 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
         case CustomMessage::LAP_END: {
             LOG_DEBUG("LAP_END\n");
             auto* msg = static_cast<CustomMessage::LapEnded*>(message);
+            if (mTrackState == Track::State::PAUSED) {
+                mPausedLapTaken = true;
+            }
             modelListener->onLapChanged(msg->lapNum);
         } break;
 

@@ -118,6 +118,10 @@ public:
     // A lap taken on the pause menu returns there from the lap screen.
     void setLapFromPauseMenu(bool fromPauseMenu);
     bool isLapFromPauseMenu() const;
+
+    // The Service takes one lap per pause; once it has, the pause
+    // menu leaves Lap out until the activity resumes.
+    bool isPausedLapTaken() const;
     /// Post-run Calibrate & Save (§5): send the actual treadmill distance in
     /// metres (<= 0 means "skip" — finalise with the estimate).
     void trackCalibrate(float distanceActualM);
@@ -191,6 +195,7 @@ private:
     // Track
     HoldConfirmMode        mHoldConfirmMode       = HoldConfirmMode::Discard;
     bool                   mLapFromPauseMenu      = false;
+    bool                   mPausedLapTaken        = false;
     bool                   mPendingIntervalsMode  = false;
     Track::IntervalsData   mPendingAlertIntervals {};  ///< Snapshot from last INTERVALS_PHASE_ALERT
     Track::State           mTrackState            {};

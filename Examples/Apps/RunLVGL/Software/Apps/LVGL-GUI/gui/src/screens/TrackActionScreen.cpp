@@ -32,10 +32,9 @@ TrackActionScreen::TrackActionScreen(Model& model)
 
 uint16_t TrackActionScreen::itemAt(uint16_t row) const
 {
-    // Outside a free run, Lap's row is left out; without a workout, End
-    // workout's.
+    // Without Lap, its row is left out; without a workout, End workout's.
     uint16_t item = row;
-    if (!mFreeRun && item >= Menu::ID_LAP) {
+    if (!mLapShown && item >= Menu::ID_LAP) {
         ++item;
     }
     if (!mWorkoutMode && item >= Menu::ID_END_WORKOUT) {
@@ -46,14 +45,14 @@ uint16_t TrackActionScreen::itemAt(uint16_t row) const
 
 void TrackActionScreen::build()
 {
-    // Lap shows only in a free run, End workout only while a structured
-    // workout runs.
+    // Lap shows only in a free run, and only once per pause; End workout
+    // only while a structured workout runs.
     const Track::Data& data = mModel.getTrackData();
     mWorkoutMode = data.workoutMode;
-    mFreeRun     = !data.intervalsMode && !data.workoutMode;
+    mLapShown    = !data.intervalsMode && !data.workoutMode && !mModel.isPausedLapTaken();
     uint16_t count = 0;
     for (uint16_t i = 0; i < Menu::ID_COUNT; ++i) {
-        if ((mFreeRun || i != Menu::ID_LAP) && (mWorkoutMode || i != Menu::ID_END_WORKOUT)) {
+        if ((mLapShown || i != Menu::ID_LAP) && (mWorkoutMode || i != Menu::ID_END_WORKOUT)) {
             mItems[count++] = kItems[i];
         }
     }
@@ -62,7 +61,7 @@ void TrackActionScreen::build()
     mButtons = std::make_unique<Widgets::Buttons>(mRoot);
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
                   Widgets::Buttons::AMBER,
-                  mFreeRun ? Widgets::Buttons::AMBER : Widgets::Buttons::NONE);
+                  mLapShown ? Widgets::Buttons::AMBER : Widgets::Buttons::NONE);
     mPause    = std::make_unique<Widgets::PauseIndicator>(mRoot, 200);
     mCarousel = std::make_unique<Widgets::InfoCarousel>(mRoot, 40, 0);
     mCarousel->setPeriodMs(kCarouselPeriodMs);
@@ -74,14 +73,21 @@ void TrackActionScreen::onShow()
     mIsImperial = mModel.isUnitsImperial();
     onTrackData(mModel.getTrackData());
     mModel.resetIdleTimer();
-    mMenu->select(mModel.menu().track.action.get());
+    // The menu remembers the item, not the row, as rows shift when an item
+    // is left out; a left-out item selects the row above it: Lap's, Resume.
+    const uint16_t item = mModel.menu().track.action.get();
+    uint16_t row = 0;
+    for (uint16_t r = 1; r < mMenu->count() && itemAt(r) <= item; ++r) {
+        row = r;
+    }
+    mMenu->select(row);
     mCarousel->setCount(4);
     mModel.trackPause();
 }
 
 void TrackActionScreen::onHide()
 {
-    mModel.menu().track.action.set(mMenu->selected());
+    mModel.menu().track.action.set(itemAt(mMenu->selected()));
 }
 
 void TrackActionScreen::onKey(uint8_t code)
@@ -129,10 +135,10 @@ void TrackActionScreen::onKey(uint8_t code)
             }
             break;
 
-        // The lap screen shows once the Service has taken the lap: it ignores
-        // a lap with nothing in it.
+        // While Lap is shown. The lap screen shows once the Service has taken
+        // the lap: it ignores a lap with nothing in it.
         case Btn::R2:
-            if (mFreeRun) {
+            if (mLapShown) {
                 mModel.saveLap();
             }
             break;
