@@ -197,7 +197,7 @@
            <div itemprop="articleBody">
              
   <section id="glancehr-heart-rate-glance">
-<h1>GlanceHR - Heart Rate Glance<a class="headerlink" href="#glancehr-heart-rate-glance" title="Link to this heading"></a></h1>
+<span id="glancehr---heart-rate-glance"></span><h1>GlanceHR - Heart Rate Glance<a class="headerlink" href="#glancehr-heart-rate-glance" title="Link to this heading"></a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>The GlanceHR app is a simple wearable application designed to display real-time heart rate data in a compact glance view. It provides continuous heart rate monitoring with a clean, minimal interface that shows the current heart rate value alongside an icon. The app integrates heart rate sensor data and presents it through the UNA SDK’s glance framework, making it easily accessible from the watch face.</p>
@@ -280,7 +280,7 @@
 <h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
 <p>The data processing pipeline is streamlined for heart rate display, focusing on real-time updates and validity checking.</p>
 <section id="sensor-data-reception">
-<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<span id="1-sensor-data-reception"></span><h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
 <p>Heart rate data arrives through the kernel’s message system. The <code class="docutils literal notranslate"><span class="pre">handleSensorsData()</span></code> method processes the sensor data:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleSensorsData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mSensorHR</span><span class="p">.</span><span class="n">matchesDriver</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
@@ -298,7 +298,7 @@
 <p>Each sensor connection has a <code class="docutils literal notranslate"><span class="pre">matchesDriver()</span></code> method to identify the source of the data batch.</p>
 </section>
 <section id="data-validation-and-filtering">
-<h4>2. Data Validation and Filtering<a class="headerlink" href="#data-validation-and-filtering" title="Link to this heading"></a></h4>
+<span id="2-data-validation-and-filtering"></span><h4>2. Data Validation and Filtering<a class="headerlink" href="#data-validation-and-filtering" title="Link to this heading"></a></h4>
 <p>Raw heart rate data undergoes validation to ensure accuracy:</p>
 <p><strong>Heart Rate Validation:</strong></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -313,7 +313,7 @@
 <p>The app distinguishes between valid heart rate readings (&gt; 1.0 BPM) and invalid/calculating states.</p>
 </section>
 <section id="glance-update-logic">
-<h4>3. Glance Update Logic<a class="headerlink" href="#glance-update-logic" title="Link to this heading"></a></h4>
+<span id="3-glance-update-logic"></span><h4>3. Glance Update Logic<a class="headerlink" href="#glance-update-logic" title="Link to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">glanceUpdate()</span></code> method manages the display state based on data validity:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::glanceUpdate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mHrValue</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">mIsValid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -397,7 +397,7 @@
 </section>
 </section>
 <section id="id1">
-<h2>Sensor Integration<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<span id="sensor-integration-1"></span><h2>Sensor Integration<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>The GlanceHR app integrates a single physiological sensor through the UNA SDK’s sensor layer.</p>
 <section id="heart-rate-sensor">
 <h3>Heart Rate Sensor<a class="headerlink" href="#heart-rate-sensor" title="Link to this heading"></a></h3>

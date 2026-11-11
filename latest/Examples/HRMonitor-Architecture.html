@@ -197,7 +197,7 @@
            <div itemprop="articleBody">
              
   <section id="hrmonitor-heart-rate-monitor">
-<h1>HRMonitor - Heart Rate Monitor<a class="headerlink" href="#hrmonitor-heart-rate-monitor" title="Link to this heading"></a></h1>
+<span id="hrmonitor---heart-rate-monitor"></span><h1>HRMonitor - Heart Rate Monitor<a class="headerlink" href="#hrmonitor-heart-rate-monitor" title="Link to this heading"></a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>The HRMonitor app is an <strong>Activity</strong>-type application designed for wearable devices. It provides continuous heart rate monitoring with real-time display and persistent data recording in FIT file format. The app connects to a heart rate sensor, shows the current BPM and trust level on screen, and writes a one-second FIT record throughout the session.</p>
@@ -297,7 +297,7 @@
 <section id="data-processing-pipeline">
 <h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
 <section id="sensor-data-reception">
-<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<span id="1-sensor-data-reception"></span><h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
 <p>Sensor data arrives as <code class="docutils literal notranslate"><span class="pre">EVENT_SENSOR_LAYER_DATA</span></code>. The <code class="docutils literal notranslate"><span class="pre">handleSensorsData()</span></code> method identifies the source via <code class="docutils literal notranslate"><span class="pre">matchesDriver()</span></code> and parses the frame:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::handleSensorsData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">DataBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
 <span class="p">{</span>
@@ -317,11 +317,11 @@
 <p><code class="docutils literal notranslate"><span class="pre">mHr</span></code> and <code class="docutils literal notranslate"><span class="pre">mHrTl</span></code> are only updated while <code class="docutils literal notranslate"><span class="pre">mGuiStarted</span></code> is true. Values remain at 0.0 until the first valid sensor reading after GUI start.</p>
 </section>
 <section id="data-validation">
-<h4>2. Data Validation<a class="headerlink" href="#data-validation" title="Link to this heading"></a></h4>
+<span id="2-data-validation"></span><h4>2. Data Validation<a class="headerlink" href="#data-validation" title="Link to this heading"></a></h4>
 <p>The HR parser’s <code class="docutils literal notranslate"><span class="pre">isDataValid()</span></code> check rejects frames with out-of-range or missing signal. Trust level (0–3) is forwarded as-is to both the GUI and the FIT file; the app does not gate recording on trust level — all valid sensor frames contribute.</p>
 </section>
 <section id="fit-file-recording">
-<h4>3. FIT File Recording<a class="headerlink" href="#fit-file-recording" title="Link to this heading"></a></h4>
+<span id="3-fit-file-recording"></span><h4>3. FIT File Recording<a class="headerlink" href="#fit-file-recording" title="Link to this heading"></a></h4>
 <p>Heart rate data is recorded every second during active monitoring:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">time_t</span><span class="w"> </span><span class="n">utc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">processedUtc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">utc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>

@@ -863,7 +863,7 @@ window.runMermaid = runMermaid;</script>
 <section id="public-interfaces">
 <h3>Public Interfaces<a class="headerlink" href="#public-interfaces" title="Link to this heading"></a></h3>
 <section id="id1">
-<h4>TouchGFXHAL<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<span id="touchgfxhal-1"></span><h4>TouchGFXHAL<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
 <p>The TouchGFXHAL class extends the TouchGFX-generated HAL to provide UNA platform-specific customizations, including frame buffer management, button controller integration, and display initialization.</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TouchGFXHAL</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TouchGFXGeneratedHAL</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -887,7 +887,7 @@ window.runMermaid = runMermaid;</script>
 </div>
 </section>
 <section id="id2">
-<h4>TouchGFXCommandProcessor<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<span id="touchgfxcommandprocessor-1"></span><h4>TouchGFXCommandProcessor<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
 <p>The TouchGFXCommandProcessor serves as a singleton managing global GUI state, handling kernel message processing, lifecycle management, and button event translation.</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TouchGFXCommandProcessor</span><span class="w"> </span><span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
@@ -1382,7 +1382,7 @@ the <code class="docutils literal notranslate"><span class="pre">Refresh</span><
 <section id="core-integration-components">
 <h3>Core Integration Components<a class="headerlink" href="#core-integration-components" title="Link to this heading"></a></h3>
 <section id="id3">
-<h4>TouchGFXCommandProcessor<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<span id="touchgfxcommandprocessor-2"></span><h4>TouchGFXCommandProcessor<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
 <p>The TouchGFXCommandProcessor serves as a singleton command processor that acts as the central hub for UNA kernel integration, providing asynchronous message-based communication, lifecycle event handling, and frame buffer update coordination.</p>
 <ul class="simple">
 <li><p><strong>Location</strong>: <a class="reference download internal" download="" href="_downloads/80a3ddd6263f141369408de6bc2e1a36/GuiCommandProcessor.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Libs/Source/Port/GuiCommandProcessor.cpp</span></code></span></a>, <a class="reference download internal" download="" href="_downloads/188fe70a9fc743c098789eeefb2978ca/GuiCommandProcessor.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Port/GuiCommandProcessor.hpp</span></code></span></a>. <code class="docutils literal notranslate"><span class="pre">TouchGFXCommandProcessor</span></code> is a <code class="docutils literal notranslate"><span class="pre">using</span></code> alias kept for source compatibility; the class is shared with the LVGL port.</p></li>
@@ -1622,7 +1622,7 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 </div>
 </section>
 <section id="id4">
-<h4>Custom Message Handling<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<span id="custom-message-handling-1"></span><h4>Custom Message Handling<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
 <p>The port supports custom message handling interfaces that allow applications to process application-specific kernel messages through a dedicated message queue system.</p>
 <ul class="simple">
 <li><p><strong>Interface</strong>: <code class="docutils literal notranslate"><span class="pre">SDK::Interface::ICustomMessageHandler</span></code></p></li>
@@ -1784,7 +1784,7 @@ The HAL implements a deferred flush mechanism that coordinates frame buffer upda
 <section id="performance-optimization-guidelines">
 <h3>Performance Optimization Guidelines<a class="headerlink" href="#performance-optimization-guidelines" title="Link to this heading"></a></h3>
 <section id="id5">
-<h4>Memory Management<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<span id="memory-management-1"></span><h4>Memory Management<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Static Allocations</strong>: Prefer static frame buffer over dynamic allocation</p></li>
 <li><p><strong>Pool Allocation</strong>: Use TouchGFX’s internal memory pools for widgets</p></li>
@@ -2328,7 +2328,7 @@ for you.</p>
 </ul>
 </section>
 <section id="id6">
-<h4>Memory Management<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<span id="memory-management-2"></span><h4>Memory Management<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Message Lifetime</strong>: Ensure proper allocation/deallocation</p></li>
 <li><p><strong>Message Sizing</strong>: Keep message types small; every one is a pool block, and the largest pool is 256 bytes</p></li>
@@ -2383,7 +2383,7 @@ for you.</p>
 <section id="cmake-build-system-integration">
 <h3>CMake Build System Integration<a class="headerlink" href="#cmake-build-system-integration" title="Link to this heading"></a></h3>
 <section id="main-cmakelists-txt-structure">
-<h4>Main CMakeLists.txt Structure<a class="headerlink" href="#main-cmakelists-txt-structure" title="Link to this heading"></a></h4>
+<span id="main-cmakeliststxt-structure"></span><h4>Main CMakeLists.txt Structure<a class="headerlink" href="#main-cmakelists-txt-structure" title="Link to this heading"></a></h4>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.21</span><span class="p">)</span>
 <span class="nb">project</span><span class="p">(</span><span class="s">MyApp</span><span class="p">)</span>
 
@@ -2467,7 +2467,7 @@ for you.</p>
 </section>
 </section>
 <section id="id7">
-<h3>Development Workflow<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<span id="development-workflow-1"></span><h3>Development Workflow<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <section id="initial-project-setup">
 <h4>Initial Project Setup<a class="headerlink" href="#initial-project-setup" title="Link to this heading"></a></h4>
 <ol class="arabic simple">

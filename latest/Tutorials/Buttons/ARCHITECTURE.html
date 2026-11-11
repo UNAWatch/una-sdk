@@ -195,13 +195,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="buttons-handling-user-input-and-navigation">
-<span id="tutorials-buttons-architecture"></span><h1>Buttons - Handling User Input and Navigation<a class="headerlink" href="#buttons-handling-user-input-and-navigation" title="Link to this heading"></a></h1>
+  <section id="tutorials-buttons-architecture">
+<span id="buttons-handling-user-input-and-navigation"></span><span id="buttons---handling-user-input-and-navigation"></span><h1>Buttons - Handling User Input and Navigation<a class="headerlink" href="#tutorials-buttons-architecture" title="Link to this heading"></a></h1>
 <p>Welcome to the UNA SDK tutorial series! The Buttons app demonstrates fundamental concepts of user interaction on the UNA Watch platform. This tutorial focuses on building an application with screens reaction via hardware buttons, providing a foundation for more complex user interfaces.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Buttons">Project Folder</a></p>
 <p>As in HelloWorld, the app comes with a <strong>TouchGFX</strong> GUI and an <strong>LVGL</strong> GUI over the same service. Follow the toolkit you chose; the <a class="reference internal" href="#the-same-behaviour-in-two-toolkits">Two Toolkits</a> section shows the two side by side.</p>
 <section id="what-you-ll-learn">
-<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<span id="what-youll-learn"></span><h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>How to implement GUI applications with TouchGFX or LVGL</p></li>
 <li><p>Handling hardware button events for navigation</p></li>
@@ -563,7 +563,7 @@ make
 <section id="key-code-insights-for-new-developers">
 <h2>Key Code Insights for New Developers<a class="headerlink" href="#key-code-insights-for-new-developers" title="Link to this heading"></a></h2>
 <section id="mainview-cpp-mainscreen-cpp-structure">
-<h3>MainView.cpp / MainScreen.cpp Structure<a class="headerlink" href="#mainview-cpp-mainscreen-cpp-structure" title="Link to this heading"></a></h3>
+<span id="mainviewcpp--mainscreencpp-structure"></span><h3>MainView.cpp / MainScreen.cpp Structure<a class="headerlink" href="#mainview-cpp-mainscreen-cpp-structure" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code> / <code class="docutils literal notranslate"><span class="pre">onKey()</span></code> is the central point for user input</p></li>
 <li><p>Color changes use <code class="docutils literal notranslate"><span class="pre">touchgfx::Color::getColorFromRGB()</span></code> or <code class="docutils literal notranslate"><span class="pre">SDK::LVGL::Draw::rgb()</span></code></p></li>

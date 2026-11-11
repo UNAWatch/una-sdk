@@ -195,13 +195,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="scrollmenu-creating-scrollable-lists-and-menus">
-<span id="tutorials-scrollmenu-architecture"></span><h1>ScrollMenu - Creating Scrollable Lists and Menus<a class="headerlink" href="#scrollmenu-creating-scrollable-lists-and-menus" title="Link to this heading"></a></h1>
+  <section id="tutorials-scrollmenu-architecture">
+<span id="scrollmenu-creating-scrollable-lists-and-menus"></span><span id="scrollmenu---creating-scrollable-lists-and-menus"></span><h1>ScrollMenu - Creating Scrollable Lists and Menus<a class="headerlink" href="#tutorials-scrollmenu-architecture" title="Link to this heading"></a></h1>
 <p>Welcome to the UNA SDK tutorial series! The ScrollMenu app demonstrates fundamental concepts of menu navigation on the UNA Watch platform. This tutorial focuses on building an application with a scrollable menu using hardware buttons, providing a foundation for more complex user interfaces.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/ScrollMenu">Project Folder</a></p>
 <p>As in the earlier tutorials, the app comes with a <strong>TouchGFX</strong> GUI and an <strong>LVGL</strong> GUI over the same service. The menu is the first widget that differs substantially between the two: TouchGFX composes it from Designer containers and a <code class="docutils literal notranslate"><span class="pre">ScrollWheelWithSelectionStyle</span></code>, LVGL uses the SDK’s <code class="docutils literal notranslate"><span class="pre">WheelMenu</span></code>. See <a class="reference internal" href="#the-same-menu-in-two-toolkits">The Same Menu in Two Toolkits</a>.</p>
 <section id="what-you-ll-learn">
-<h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
+<span id="what-youll-learn"></span><h2>What You’ll Learn<a class="headerlink" href="#what-you-ll-learn" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>How to implement GUI applications with TouchGFX or LVGL</p></li>
 <li><p>Handling hardware button events for menu navigation</p></li>
@@ -644,7 +644,7 @@ make
 <section id="key-code-insights-for-new-developers">
 <h2>Key Code Insights for New Developers<a class="headerlink" href="#key-code-insights-for-new-developers" title="Link to this heading"></a></h2>
 <section id="mainview-cpp-mainscreen-cpp-structure">
-<h3>MainView.cpp / MainScreen.cpp Structure<a class="headerlink" href="#mainview-cpp-mainscreen-cpp-structure" title="Link to this heading"></a></h3>
+<span id="mainviewcpp--mainscreencpp-structure"></span><h3>MainView.cpp / MainScreen.cpp Structure<a class="headerlink" href="#mainview-cpp-mainscreen-cpp-structure" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">handleKeyEvent()</span></code> / <code class="docutils literal notranslate"><span class="pre">onKey()</span></code> is the central point for user input</p></li>
 <li><p>Menu navigation uses <code class="docutils literal notranslate"><span class="pre">menu1.selectPrev()</span></code> / <code class="docutils literal notranslate"><span class="pre">menu1.selectNext()</span></code> or <code class="docutils literal notranslate"><span class="pre">mMenu-&gt;prev()</span></code> / <code class="docutils literal notranslate"><span class="pre">mMenu-&gt;next()</span></code></p></li>

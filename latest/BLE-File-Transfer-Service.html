@@ -164,7 +164,7 @@
            <div itemprop="articleBody">
              
   <section id="una-watch-ble-file-transfer-service-fts">
-<h1>UNA Watch — BLE File Transfer Service (FTS)<a class="headerlink" href="#una-watch-ble-file-transfer-service-fts" title="Link to this heading"></a></h1>
+<span id="una-watch--ble-file-transfer-service-fts"></span><h1>UNA Watch — BLE File Transfer Service (FTS)<a class="headerlink" href="#una-watch-ble-file-transfer-service-fts" title="Link to this heading"></a></h1>
 <p>This document is the wire protocol for reading and writing files on a UNA Watch
 over Bluetooth Low Energy. It is what a companion app or integration implements
 against; it does not describe the watch’s internal implementation.</p>
@@ -319,7 +319,7 @@ watch (see <em>Read windowing</em> under the version-5 extensions below).</p></l
 </table>
 </section>
 <section id="notification-sizing-read-this-first">
-<h2>Notification sizing — read this first<a class="headerlink" href="#notification-sizing-read-this-first" title="Link to this heading"></a></h2>
+<span id="notification-sizing--read-this-first"></span><h2>Notification sizing — read this first<a class="headerlink" href="#notification-sizing-read-this-first" title="Link to this heading"></a></h2>
 <p>A GATT notification cannot carry more than the negotiated <strong>ATT payload = MTU −
 3</strong> bytes. Every FTS response has a fixed header, so the usable <em>data</em> per
 notification is smaller still. For <code class="docutils literal notranslate"><span class="pre">READ_DATA</span></code> (16-byte header) at MTU 220:</p>
@@ -605,7 +605,7 @@ for a <code class="docutils literal notranslate"><span class="pre">WRITE_PACING<
 <code class="docutils literal notranslate"><span class="pre">bytesAcked</span> <span class="pre">=</span> <span class="pre">totalSize</span> <span class="pre">−</span> <span class="pre">freeSpace</span></code>.</p>
 </section>
 <section id="delete-mkdir-list-move">
-<h2>Delete / MkDir / List / Move<a class="headerlink" href="#delete-mkdir-list-move" title="Link to this heading"></a></h2>
+<span id="delete--mkdir--list--move"></span><h2>Delete / MkDir / List / Move<a class="headerlink" href="#delete-mkdir-list-move" title="Link to this heading"></a></h2>
 <p><strong>DELETE <code class="docutils literal notranslate"><span class="pre">0x30</span></code></strong> → <code class="docutils literal notranslate"><span class="pre">0x31</span></code>: request <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength}</span></code> + path;
 response <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">status}</span></code>.</p>
 <p><strong>MKDIR <code class="docutils literal notranslate"><span class="pre">0x40</span></code></strong> → <code class="docutils literal notranslate"><span class="pre">0x41</span></code>: request <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength,</span> <span class="pre">reserved(4),</span> <span class="pre">currentTime(8)}</span></code> + path; response <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">status,</span> <span class="pre">reserved(6),</span> <span class="pre">truncatedTime(8)}</span></code>.</p>
@@ -721,7 +721,7 @@ windows can <em>reduce</em> throughput (more drops → more retransmits) and don
 compare (below).</p>
 </section>
 <section id="digest-integrity-without-read-back-una-extension">
-<h2>DIGEST — integrity without read-back (UNA extension)<a class="headerlink" href="#digest-integrity-without-read-back-una-extension" title="Link to this heading"></a></h2>
+<span id="digest--integrity-without-read-back-una-extension"></span><h2>DIGEST — integrity without read-back (UNA extension)<a class="headerlink" href="#digest-integrity-without-read-back-una-extension" title="Link to this heading"></a></h2>
 <p>Verify a file’s contents without transferring it back over BLE.</p>
 <p><strong>DIGEST <code class="docutils literal notranslate"><span class="pre">0x70</span></code></strong> (request): <code class="docutils literal notranslate"><span class="pre">{command,</span> <span class="pre">reserved,</span> <span class="pre">pathLength}</span></code> + path.</p>
 <p><strong>DIGEST_STATUS <code class="docutils literal notranslate"><span class="pre">0x71</span></code></strong> (response, 12 bytes):</p>

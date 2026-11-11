@@ -578,8 +578,8 @@ window.runMermaid = runMermaid;</script>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="platform-architecture">
-<span id="architecture-deep-dive"></span><h1>Platform Architecture<a class="headerlink" href="#platform-architecture" title="Link to this heading"></a></h1>
+  <section id="architecture-deep-dive">
+<span id="platform-architecture"></span><h1>Platform Architecture<a class="headerlink" href="#architecture-deep-dive" title="Link to this heading"></a></h1>
 <p>This document explains the technical magic that enables the UNA Watch platform.</p>
 <section id="core-concepts">
 <h2>Core Concepts<a class="headerlink" href="#core-concepts" title="Link to this heading"></a></h2>
@@ -649,7 +649,7 @@ window.runMermaid = runMermaid;</script>
 <section id="detailed-implementation-analysis">
 <h3>Detailed Implementation Analysis<a class="headerlink" href="#detailed-implementation-analysis" title="Link to this heading"></a></h3>
 <section id="backend-core-implementation-backend-cpp">
-<h4>1. Backend Core Implementation (Backend.cpp)<a class="headerlink" href="#backend-core-implementation-backend-cpp" title="Link to this heading"></a></h4>
+<span id="1-backend-core-implementation-backendcpp"></span><h4>1. Backend Core Implementation (Backend.cpp)<a class="headerlink" href="#backend-core-implementation-backend-cpp" title="Link to this heading"></a></h4>
 <p>The Backend class is a <strong>1,045-line orchestration engine</strong> that implements 10+ callback interfaces:</p>
 <p><strong>Thread Management:</strong></p>
 <ul class="simple">
@@ -971,7 +971,7 @@ window.runMermaid = runMermaid;</script>
     style TIMERS fill:#c8e6c9
     </pre></section>
 <section id="component-factory-implementation-componentfactory-cpp">
-<h4>3. Component Factory Implementation (ComponentFactory.cpp)<a class="headerlink" href="#component-factory-implementation-componentfactory-cpp" title="Link to this heading"></a></h4>
+<span id="3-component-factory-implementation-componentfactorycpp"></span><h4>3. Component Factory Implementation (ComponentFactory.cpp)<a class="headerlink" href="#component-factory-implementation-componentfactory-cpp" title="Link to this heading"></a></h4>
 <p><strong>Hardware Auto-Discovery (202 lines):</strong></p>
 <p><strong>I2C Bus Probing:</strong></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">ComponentFactory::scanModules</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -1284,7 +1284,7 @@ window.runMermaid = runMermaid;</script>
     style KK fill:#fff3e0
     </pre></section>
 <section id="sensor-layer-implementation-sensormanager-cpp">
-<h4>4. Sensor Layer Implementation (SensorManager.cpp)<a class="headerlink" href="#sensor-layer-implementation-sensormanager-cpp" title="Link to this heading"></a></h4>
+<span id="4-sensor-layer-implementation-sensormanagercpp"></span><h4>4. Sensor Layer Implementation (SensorManager.cpp)<a class="headerlink" href="#sensor-layer-implementation-sensormanager-cpp" title="Link to this heading"></a></h4>
 <p><strong>Multi-Sensor Coordination (251 lines):</strong></p>
 <p><strong>Driver Registration:</strong></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">Sensor::Manager::regDriver</span><span class="p">(</span><span class="n">Driver</span><span class="o">*</span><span class="w"> </span><span class="n">driver</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -1494,7 +1494,7 @@ window.runMermaid = runMermaid;</script>
     style THRESHOLDS fill:#fff3e0
     </pre></section>
 <section id="settings-management-implementation-settingsmanager-cpp">
-<h4>5. Settings Management Implementation (SettingsManager.cpp)<a class="headerlink" href="#settings-management-implementation-settingsmanager-cpp" title="Link to this heading"></a></h4>
+<span id="5-settings-management-implementation-settingsmanagercpp"></span><h4>5. Settings Management Implementation (SettingsManager.cpp)<a class="headerlink" href="#settings-management-implementation-settingsmanager-cpp" title="Link to this heading"></a></h4>
 <p><strong>JSON-Based Persistence (120 lines):</strong></p>
 <p><strong>Structured Configuration:</strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -1693,7 +1693,7 @@ window.runMermaid = runMermaid;</script>
     style F fill:#fff3e0
     </pre></section>
 <section id="file-system-implementation-filesystem-cpp">
-<h4>6. File System Implementation (FileSystem.cpp)<a class="headerlink" href="#file-system-implementation-filesystem-cpp" title="Link to this heading"></a></h4>
+<span id="6-file-system-implementation-filesystemcpp"></span><h4>6. File System Implementation (FileSystem.cpp)<a class="headerlink" href="#file-system-implementation-filesystem-cpp" title="Link to this heading"></a></h4>
 <p><strong>FatFs Wrapper (577 lines):</strong></p>
 <p><strong>Multi-Volume Management:</strong></p>
 <ul class="simple">
@@ -2038,7 +2038,7 @@ Event Loop Ready
 <section id="system-initialization-from-multiple-perspectives">
 <h3>System Initialization from Multiple Perspectives<a class="headerlink" href="#system-initialization-from-multiple-perspectives" title="Link to this heading"></a></h3>
 <section id="thread-perspective-rtos-task-initialization">
-<h4>1. Thread Perspective: RTOS Task Initialization<a class="headerlink" href="#thread-perspective-rtos-task-initialization" title="Link to this heading"></a></h4>
+<span id="1-thread-perspective-rtos-task-initialization"></span><h4>1. Thread Perspective: RTOS Task Initialization<a class="headerlink" href="#thread-perspective-rtos-task-initialization" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         stateDiagram-v2
     [*] --&gt; SystemReset: Power On / Reset
@@ -2082,7 +2082,7 @@ Event Loop Ready
     end note
     </pre></section>
 <section id="component-dependency-perspective-initialization-order">
-<h4>2. Component Dependency Perspective: Initialization Order<a class="headerlink" href="#component-dependency-perspective-initialization-order" title="Link to this heading"></a></h4>
+<span id="2-component-dependency-perspective-initialization-order"></span><h4>2. Component Dependency Perspective: Initialization Order<a class="headerlink" href="#component-dependency-perspective-initialization-order" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         graph TD
     subgraph &quot;Phase 1: Core Hardware&quot;
@@ -2152,7 +2152,7 @@ Event Loop Ready
     style TOUCHGFX fill:#c8e6c9
     </pre></section>
 <section id="timing-perspective-initialization-timeline">
-<h4>3. Timing Perspective: Initialization Timeline<a class="headerlink" href="#timing-perspective-initialization-timeline" title="Link to this heading"></a></h4>
+<span id="3-timing-perspective-initialization-timeline"></span><h4>3. Timing Perspective: Initialization Timeline<a class="headerlink" href="#timing-perspective-initialization-timeline" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         gantt
     title System Initialization Timeline(To-Do)
@@ -2194,7 +2194,7 @@ Event Loop Ready
     TouchGFX Init     :done, t24, after t23, 200ms
     </pre></section>
 <section id="memory-perspective-allocation-during-initialization">
-<h4>4. Memory Perspective: Allocation During Initialization<a class="headerlink" href="#memory-perspective-allocation-during-initialization" title="Link to this heading"></a></h4>
+<span id="4-memory-perspective-allocation-during-initialization"></span><h4>4. Memory Perspective: Allocation During Initialization<a class="headerlink" href="#memory-perspective-allocation-during-initialization" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         graph TD
     subgraph &quot;Static Memory (Compile-time)&quot;
@@ -2249,7 +2249,7 @@ Event Loop Ready
     style WORK_BUFFERS fill:#c8e6c9
     </pre></section>
 <section id="error-handling-perspective-fault-recovery-during-init">
-<h4>5. Error Handling Perspective: Fault Recovery During Init<a class="headerlink" href="#error-handling-perspective-fault-recovery-during-init" title="Link to this heading"></a></h4>
+<span id="5-error-handling-perspective-fault-recovery-during-init"></span><h4>5. Error Handling Perspective: Fault Recovery During Init<a class="headerlink" href="#error-handling-perspective-fault-recovery-during-init" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         flowchart TD
     A[Initialization Step] --&gt; B{Step Success?}
@@ -2291,7 +2291,7 @@ Event Loop Ready
     style U fill:#fff3e0
     </pre></section>
 <section id="power-management-perspective-energy-during-initialization">
-<h4>6. Power Management Perspective: Energy During Initialization<a class="headerlink" href="#power-management-perspective-energy-during-initialization" title="Link to this heading"></a></h4>
+<span id="6-power-management-perspective-energy-during-initialization"></span><h4>6. Power Management Perspective: Energy During Initialization<a class="headerlink" href="#power-management-perspective-energy-during-initialization" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         graph TD
     subgraph &quot;Power Sources&quot;
@@ -2343,7 +2343,7 @@ Event Loop Ready
     style WAKE_SOURCES fill:#c8e6c9
     </pre></section>
 <section id="data-flow-perspective-information-movement-during-init">
-<h4>7. Data Flow Perspective: Information Movement During Init<a class="headerlink" href="#data-flow-perspective-information-movement-during-init" title="Link to this heading"></a></h4>
+<span id="7-data-flow-perspective-information-movement-during-init"></span><h4>7. Data Flow Perspective: Information Movement During Init<a class="headerlink" href="#data-flow-perspective-information-movement-during-init" title="Link to this heading"></a></h4>
 <pre  class="mermaid">
         flowchart TD
     subgraph &quot;Configuration Data&quot;
@@ -2401,7 +2401,7 @@ Event Loop Ready
 </ul>
 </section>
 <section id="error-handling-robustness">
-<h3>Error Handling &amp; Robustness<a class="headerlink" href="#error-handling-robustness" title="Link to this heading"></a></h3>
+<span id="error-handling--robustness"></span><h3>Error Handling &amp; Robustness<a class="headerlink" href="#error-handling-robustness" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>CRC Validation</strong>: .uapp file integrity checking</p></li>
 <li><p><strong>Exception Safety</strong>: <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">(std::nothrow)</span></code> for OOM protection</p></li>
@@ -2455,7 +2455,7 @@ Event Loop Ready
     Note right of Backend: Central orchestrator~n~Implements 13 interfaces~n~1045 LOC
     </pre></section>
 <section id="ble-service-stack">
-<h4>8. BLE Service Stack<a class="headerlink" href="#ble-service-stack" title="Link to this heading"></a></h4>
+<span id="8-ble-service-stack"></span><h4>8. BLE Service Stack<a class="headerlink" href="#ble-service-stack" title="Link to this heading"></a></h4>
 <p><strong>Standard Services:</strong></p>
 <ul class="simple">
 <li><p><strong>Device Information Service</strong>: Manufacturer, model, serial, firmware info</p></li>
@@ -2529,7 +2529,7 @@ Event Loop Ready
     style BACKEND fill:#c8e6c9
     </pre></section>
 <section id="settings-management-settingsmanagerbase-hpp">
-<h4>9. Settings Management (SettingsManagerBase.hpp)<a class="headerlink" href="#settings-management-settingsmanagerbase-hpp" title="Link to this heading"></a></h4>
+<span id="9-settings-management-settingsmanagerbasehpp"></span><h4>9. Settings Management (SettingsManagerBase.hpp)<a class="headerlink" href="#settings-management-settingsmanagerbase-hpp" title="Link to this heading"></a></h4>
 <p><strong>Persistent Configuration:</strong></p>
 <ul class="simple">
 <li><p><strong>Template-Based</strong>: Type-safe settings storage and retrieval</p></li>
@@ -2539,7 +2539,7 @@ Event Loop Ready
 </ul>
 </section>
 <section id="power-management-system">
-<h4>10. Power Management System<a class="headerlink" href="#power-management-system" title="Link to this heading"></a></h4>
+<span id="10-power-management-system"></span><h4>10. Power Management System<a class="headerlink" href="#power-management-system" title="Link to this heading"></a></h4>
 <p><strong>Advanced Power States:</strong></p>
 <ul class="simple">
 <li><p><strong>Sleep Modes</strong>: Configurable low-power states with wake sources</p></li>
@@ -2599,7 +2599,7 @@ Event Loop Ready
     </pre></section>
 </section>
 <section id="id1">
-<h3>System Initialization Sequence<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<span id="system-initialization-sequence-1"></span><h3>System Initialization Sequence<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>HAL Init → RTOS Start → StartupTask → Hardware Init →
 File System → USB/BLE Setup → Sensor Layer → LCD/GUI →
 Backend Launch → TouchGFX Start → App Management Ready

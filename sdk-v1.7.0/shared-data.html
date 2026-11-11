@@ -1,0 +1,389 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shared Data Between Apps &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="UNA Watch — BLE File Transfer Service (FTS)" href="BLE-File-Transfer-Service.html" />
+    <link rel="prev" title="FIT Files Structure" href="FitFiles-Structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Shared Data Between Apps</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-path">The path</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#read-only-folders-at-the-volume-root">Read-only folders at the volume root</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#who-uses-it-today">Who uses it today</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-directory-before-opening-a-file-in-it">Create the directory before opening a file in it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#every-read-is-optional">Every read is optional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#share-only-what-is-shared">Share only what is shared</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#concurrent-access">Concurrent access</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expect-interrupted-writes">Expect interrupted writes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lifetime">Lifetime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#in-the-simulator">In the simulator</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Shared Data Between Apps</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/shared-data.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="shared-data-between-apps">
+<h1>Shared Data Between Apps<a class="headerlink" href="#shared-data-between-apps" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">SharedData/</span></code> is a directory that every app can read and write. An app reaches it from its
+own root as <code class="docutils literal notranslate"><span class="pre">../SharedData/</span></code>.</p>
+<p>It exists because some data belongs to the user, not to an app. Stride calibration is the
+case the SDK already ships: the Running app measures it outdoors with GNSS, and the
+Treadmill app needs it indoors where there is no GNSS.</p>
+<p>On the watch the directory sits beside the app directories rather than inside any of them —
+<code class="docutils literal notranslate"><span class="pre">Apps/SharedData/</span></code>, a sibling of <code class="docutils literal notranslate"><span class="pre">Apps/Running/</span></code> and the rest — and it is visible over USB
+mass storage, so you can read a shared file from a desktop or seed one by hand.</p>
+<p>For app-private files, see the <a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html"><span class="std std-doc">Files tutorial</span></a>.</p>
+<section id="the-path">
+<h2>The path<a class="headerlink" href="#the-path" title="Link to this heading"></a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">kPath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"../SharedData/stride.json"</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Paths are relative to the app’s own root. The whole path, filename included, must fit
+<code class="docutils literal notranslate"><span class="pre">IFileSystem::skMaxPathLen</span></code> (256 bytes).</p>
+<p><code class="docutils literal notranslate"><span class="pre">../SharedData/</span></code> is the only writable path that may leave your app’s root, and it is a
+whitelist rather than general parent traversal. The kernel resolves <code class="docutils literal notranslate"><span class="pre">../SharedData</span></code> and
+<code class="docutils literal notranslate"><span class="pre">../SharedData/&lt;name&gt;</span></code> to the shared directory, and rejects every other <code class="docutils literal notranslate"><span class="pre">..</span></code> segment
+outright — leading, embedded or trailing. The name is reserved by that rule, so an app
+cannot create a sibling directory that collides with it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">../SomethingElse/file</span></code> is rejected during path resolution, before any filesystem call is
+made. Note where that leaves you: <code class="docutils literal notranslate"><span class="pre">fs.file()</span></code> still hands back a non-null object, and it is
+<code class="docutils literal notranslate"><span class="pre">open()</span></code> that returns <code class="docutils literal notranslate"><span class="pre">false</span></code> — the same <code class="docutils literal notranslate"><span class="pre">false</span></code> you would get for a file that simply is not
+there. A null check will not catch a bad path, and nothing distinguishes “you left the
+sandbox” from “no such file”.</p>
+<p>Nested paths inside it do work. <code class="docutils literal notranslate"><span class="pre">../SharedData/maps/uk.map</span></code> resolves, and
+<code class="docutils literal notranslate"><span class="pre">mkdir(&quot;../SharedData/maps&quot;)</span></code> creates both levels.</p>
+<section id="read-only-folders-at-the-volume-root">
+<h3>Read-only folders at the volume root<a class="headerlink" href="#read-only-folders-at-the-volume-root" title="Link to this heading"></a></h3>
+<p>A path starting <code class="docutils literal notranslate"><span class="pre">:/</span></code> names a folder at the root of the volume the apps live on, beside
+<code class="docutils literal notranslate"><span class="pre">Apps/</span></code> rather than inside it. The kernel offers one: <code class="docutils literal notranslate"><span class="pre">:/Workouts</span></code>, which holds the
+structured workout files that <code class="docutils literal notranslate"><span class="pre">SDK::Workout::Library</span></code> reads
+(<a class="reference download internal" download="" href="_downloads/28d792b9b6f5d8da072f17d1e8b6b1bc/WorkoutLibrary.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">WorkoutLibrary.hpp:38-40</span></code></span></a>). It resolves
+<code class="docutils literal notranslate"><span class="pre">:/Workouts</span></code> and <code class="docutils literal notranslate"><span class="pre">:/Workouts/&lt;name&gt;</span></code>, rejects a <code class="docutils literal notranslate"><span class="pre">..</span></code> segment inside them, and rejects any
+other <code class="docutils literal notranslate"><span class="pre">:/</span></code> name.</p>
+<p>These folders are read-only to apps. Opening a file in one for writing returns <code class="docutils literal notranslate"><span class="pre">false</span></code>, and
+so do <code class="docutils literal notranslate"><span class="pre">write()</span></code>, <code class="docutils literal notranslate"><span class="pre">truncate()</span></code>, <code class="docutils literal notranslate"><span class="pre">rename()</span></code>, <code class="docutils literal notranslate"><span class="pre">remove()</span></code> and <code class="docutils literal notranslate"><span class="pre">mkdir()</span></code>. Data an app writes for
+other apps to read belongs in <code class="docutils literal notranslate"><span class="pre">../SharedData/</span></code>.</p>
+</section>
+</section>
+<section id="who-uses-it-today">
+<h2>Who uses it today<a class="headerlink" href="#who-uses-it-today" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Path</p></th>
+<th class="head"><p>Written by</p></th>
+<th class="head"><p>Read by</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">../SharedData/stride.json</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OutdoorStrideCalibrator::finalise()</span></code> (<a class="reference download internal" download="" href="_downloads/8bda127891dbf03af836275f49834850/OutdoorStrideCalibrator.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">OutdoorStrideCalibrator.hpp:59</span></code></span></a>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">StrideLut</span></code> (<a class="reference download internal" download="" href="_downloads/685ec82b5fce564399299684aa89bbe7/StrideLut.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">StrideLut.hpp:67</span></code></span></a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">../SharedData/stride.json.bak</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OutdoorStrideCalibrator</span></code>, when the store is oversized or will not parse (<a class="reference download internal" download="" href="_downloads/086a593f3803835a2f45b06cc041c58f/OutdoorStrideCalibrator.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">OutdoorStrideCalibrator.cpp:222-228</span></code></span></a>)</p></td>
+<td><p>recovery only</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">../SharedData/stride_trace.csv</span></code></p></td>
+<td><p>Running app, when tracing is on (<a class="reference download internal" download="" href="_downloads/be0c755b4a31fe28368de839ac9e103f/Service.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Running/.../Service.cpp:845</span></code></span></a>)</p></td>
+<td><p>diagnostic only</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">../SharedData/stride_deleted.json</span></code></p></td>
+<td><p>Treadmill app, backing up the LUT before a user-initiated clear (<a class="reference download internal" download="" href="_downloads/52e6cba16313905c9b5bedf99815b7de/Service.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Treadmill/.../Service.cpp:1191</span></code></span></a>)</p></td>
+<td><p>recovery only</p></td>
+</tr>
+</tbody>
+</table>
+<p>The last three are conditional — a watch that has never hit a corrupt store, never enabled
+tracing and never cleared its calibration holds only <code class="docutils literal notranslate"><span class="pre">stride.json</span></code>. Expect the others to
+appear, but do not require them.</p>
+</section>
+<section id="create-the-directory-before-opening-a-file-in-it">
+<h2>Create the directory before opening a file in it<a class="headerlink" href="#create-the-directory-before-opening-a-file-in-it" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">IFileSystem::mkdir()</span></code> creates missing parent directories. Opening a file does not. A writer
+that skips the <code class="docutils literal notranslate"><span class="pre">mkdir</span></code> works on your watch and fails on one that has never run a calibrating
+app:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Ensure the SharedData directory exists (FatFs f_open does not create</span>
+<span class="c1">// missing parents). "Already exists" counts as success.</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">slash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">strrchr</span><span class="p">(</span><span class="n">mPath</span><span class="p">,</span><span class="w"> </span><span class="sc">'/'</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">slash</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">dir</span><span class="p">[</span><span class="n">SDK</span><span class="o">::</span><span class="n">Interface</span><span class="o">::</span><span class="n">IFileSystem</span><span class="o">::</span><span class="n">skMaxPathLen</span><span class="p">]</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">snprintf</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">dir</span><span class="p">),</span><span class="w"> </span><span class="s">"%.*s"</span><span class="p">,</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">slash</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mPath</span><span class="p">),</span><span class="w"> </span><span class="n">mPath</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mFs</span><span class="p">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dir</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><a class="reference download internal" download="" href="_downloads/086a593f3803835a2f45b06cc041c58f/OutdoorStrideCalibrator.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">OutdoorStrideCalibrator.cpp:296-306</span></code></span></a></p>
+</section>
+<section id="every-read-is-optional">
+<h2>Every read is optional<a class="headerlink" href="#every-read-is-optional" title="Link to this heading"></a></h2>
+<p>Your reader has to work on a watch where nothing has written the file yet. That is the
+normal state of a new device, not an edge case.</p>
+<p><code class="docutils literal notranslate"><span class="pre">StrideLut::loadFromFile()</span></code> handles it by clearing itself and returning <code class="docutils literal notranslate"><span class="pre">false</span></code> when the
+file is absent or will not open
+(<a class="reference download internal" download="" href="_downloads/4022ae5b675f3df2e7b926b87ec4d041/StrideLut.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">StrideLut.cpp:163-175</span></code></span></a>). The caller gets an
+all-zero LUT and falls back to a default model.</p>
+<p>One caveat, and it bites precisely where this rule tells you to stop looking. <code class="docutils literal notranslate"><span class="pre">IFile::open()</span></code>
+returns a plain <code class="docutils literal notranslate"><span class="pre">bool</span></code>. File absent, file locked by another app’s write, timed out waiting
+for the volume, and too many files already open all arrive as the same <code class="docutils literal notranslate"><span class="pre">false</span></code>. A reader
+that treats every failure as “nothing has written this yet” will quietly mistake <em>another
+app is writing it right now</em> for <em>no data exists</em>, and fall back to defaults.</p>
+<p><code class="docutils literal notranslate"><span class="pre">StrideLut::loadFromFile()</span></code> does exactly that, and for stride calibration the cost is one
+session on a default model — a fair trade. If your shared file is larger or more expensive
+to regenerate, decide deliberately whether a failed read means “empty” or “try again later”.
+The filesystem will not tell you which it was.</p>
+</section>
+<section id="share-only-what-is-shared">
+<h2>Share only what is shared<a class="headerlink" href="#share-only-what-is-shared" title="Link to this heading"></a></h2>
+<p>App-specific data stays in the app’s own root even when it is closely related to something
+shared. The Treadmill app keeps its delta-LUT out:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">/// Delta-LUT filename in the Treadmill app's own root (NOT under SharedData).</span>
+</pre></div>
+</div>
+<p><a class="reference download internal" download="" href="_downloads/112d9ba3a84c11ce28b64b6169575762/CadenceStrideModelConfig.hpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">CadenceStrideModelConfig.hpp:72</span></code></span></a></p>
+<p>Ask whether another app would be <em>right</em> to read the file, not just curious about it. A
+user’s stride length is theirs and follows them between apps. A treadmill’s calibration
+offset only means anything inside the model that produced it.</p>
+</section>
+<section id="concurrent-access">
+<h2>Concurrent access<a class="headerlink" href="#concurrent-access" title="Link to this heading"></a></h2>
+<p>Two apps writing the same shared file cannot corrupt it, and cannot both hold it open.</p>
+<p>Filesystem calls are serialised — every operation takes a mutex before touching the media,
+so writes queue rather than interleave. On top of that the filesystem keeps a table of open
+files: it refuses a second open of anything already open for writing, and refuses a
+write-mode open of anything open at all. The loser simply gets <code class="docutils literal notranslate"><span class="pre">false</span></code> from <code class="docutils literal notranslate"><span class="pre">open()</span></code>.</p>
+<p>That table is small, and it is shared by the entire watch. The system log, the activity
+recorder, settings, and every process of every running app draw on the same budget of ten
+simultaneously open files. The eleventh open fails no matter who asks. An app that holds
+several shared files open at once is competing with everything else the watch is doing, and
+whether it fails depends on what that happens to be. Open what you need, use it, close it.</p>
+</section>
+<section id="expect-interrupted-writes">
+<h2>Expect interrupted writes<a class="headerlink" href="#expect-interrupted-writes" title="Link to this heading"></a></h2>
+<p>Apps are scheduled independently, and a watch can lose power mid-write.</p>
+<p>The obvious defence is not available: <strong><code class="docutils literal notranslate"><span class="pre">rename()</span></code> will not replace an existing file.</strong>
+Renaming onto a name already in use fails, so the POSIX idiom of writing a temporary file
+and renaming it over the original does not work here. You would have to remove the target
+first, which reopens the very window the idiom exists to close.</p>
+<p>What the SDK does instead is rotate and fall back. <code class="docutils literal notranslate"><span class="pre">RecordingMarker</span></code> writes a temporary
+file, moves the current good file aside to <code class="docutils literal notranslate"><span class="pre">.bak</span></code> (clearing any stale <code class="docutils literal notranslate"><span class="pre">.bak</span></code> first, because
+of the rename rule above), renames the temporary into place, and has its reader fall back to
+the <code class="docutils literal notranslate"><span class="pre">.bak</span></code> when the primary will not parse
+(<a class="reference download internal" download="" href="_downloads/9ba35c20d7b937a1b85f4b978f19311f/RecordingMarker.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">RecordingMarker.cpp:82-140</span></code></span></a>). A crash at any
+single step leaves at least one intact copy. Copy that shape when the file matters.</p>
+<p>Be clear-eyed about what the calibration store does <em>not</em> do. <code class="docutils literal notranslate"><span class="pre">OutdoorStrideCalibrator</span></code>
+overwrites <code class="docutils literal notranslate"><span class="pre">stride.json</span></code> in place, truncating on open, so a power loss mid-write leaves a
+torn file and no backup. The <code class="docutils literal notranslate"><span class="pre">.bak</span></code> in the table above is written later — on a subsequent
+load, once the store has proved larger than the calibrator accepts or failed to parse.
+Nothing checks that the copy succeeded, so even then it may be missing. That is recovery
+evidence, not protection.
+<code class="docutils literal notranslate"><span class="pre">stride_deleted.json</span></code> is not protection either: the Treadmill app writes it before an
+explicit user-initiated <em>clear calibration</em>, never before a routine save.</p>
+<p>The failure to design against is a reader that silently accepts half a record.</p>
+</section>
+<section id="lifetime">
+<h2>Lifetime<a class="headerlink" href="#lifetime" title="Link to this heading"></a></h2>
+<p>Shared files outlive the app that wrote them. <code class="docutils literal notranslate"><span class="pre">SharedData/</span></code> is a sibling of the app
+directories rather than a child of any one of them, so removing an app cannot take it along.
+That is the point — a user’s stride calibration should survive reinstalling Running.</p>
+<p>There is no automatic cleanup. No owner, no reference count, and no screen on the watch that
+lists shared files. Deletion happens only when something explicitly asks for it — an app
+acting on the user’s instruction, the way Treadmill’s clear-calibration action removes the
+stride store, or a factory reset, which clears the directory along with everything else
+under <code class="docutils literal notranslate"><span class="pre">Apps/</span></code>. Otherwise whatever you write stays.</p>
+<p>A user with a USB cable can delete shared files by hand, since the directory is visible over
+mass storage. That is a reasonable escape hatch for a calibration gone bad. It is not a
+substitute for being able to do it on the watch.</p>
+<p>For a few kilobytes of calibration none of this costs anything. For anything large — a
+downloaded map set, say — it means leaving data on the watch that nothing owns and no
+on-device screen can remove. If your app writes something big, give the user a way to
+remove it.</p>
+</section>
+<section id="in-the-simulator">
+<h2>In the simulator<a class="headerlink" href="#in-the-simulator" title="Link to this heading"></a></h2>
+<p>Two differences, and the second one is the one that will catch you.</p>
+<p>The simulator’s filesystem root is <code class="docutils literal notranslate"><span class="pre">Output/</span></code>
+(<a class="reference download internal" download="" href="_downloads/1b7d6c9f4e4ec740c47e365748242030/Kernel.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">Kernel.cpp:17</span></code></span></a>). It passes <code class="docutils literal notranslate"><span class="pre">..</span></code> through to
+the host filesystem instead of clamping it to that root, so <code class="docutils literal notranslate"><span class="pre">../SharedData/</span></code> lands beside
+<code class="docutils literal notranslate"><span class="pre">Output/</span></code> and not inside it. Apps behave correctly. The files are just not where you would
+first look for them. A <code class="docutils literal notranslate"><span class="pre">:/</span></code> path goes to <code class="docutils literal notranslate"><span class="pre">Volume/</span></code> inside that root, so <code class="docutils literal notranslate"><span class="pre">:/Workouts</span></code> is
+<code class="docutils literal notranslate"><span class="pre">Output/Volume/Workouts/</span></code>
+(<a class="reference download internal" download="" href="_downloads/76a0bf5c5555719088e5675b85a24e18/FileSystem.cpp"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">FileSystem.cpp:45-54</span></code></span></a>).</p>
+<p>More importantly, the simulator does not enforce the whitelist at all. It concatenates its
+prefix with your path and hands the result to the host filesystem, so <code class="docutils literal notranslate"><span class="pre">../anything/at/all</span></code>
+works in the simulator and fails on the watch — and the simulator gives you no hint that you
+have left the sandbox. Nor does it make <code class="docutils literal notranslate"><span class="pre">:/</span></code> folders read-only: a write there succeeds in
+the simulator and fails on the watch. If you invent a new shared path, check it against the rule in <em>The
+path</em> above rather than against what the simulator accepts.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="FitFiles-Structure.html" class="btn btn-neutral float-left" title="FIT Files Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="BLE-File-Transfer-Service.html" class="btn btn-neutral float-right" title="UNA Watch — BLE File Transfer Service (FTS)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

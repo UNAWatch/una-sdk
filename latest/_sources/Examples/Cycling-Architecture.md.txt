@@ -245,9 +245,11 @@ State transitions are handled by `startTrack()`, `stopTrack()`, `pauseTrack()`.
 Laps can be triggered automatically based on configurable thresholds:
 - **Distance-based**: Configurable via `MenuDistanceView` (`Settings::Alerts::Distance::Id`)
 - **Time-based**: Configurable via `MenuTimeView` (`Settings::Alerts::Time::Id`)
-- **Manual**: User-initiated via R2 button during tracking
+- **Manual**: User-initiated via R2 button during tracking, or R2 or the Lap row on the pause menu (`TrackActionView`); R2 on the track screen also takes one during auto-pause
 
 Lap data includes timing, distance, average speed, HR, and ascent/descent (written to FIT).
+
+A manual lap taken while paused is held in `mPausedLapUtc` and saved when the activity resumes, before the counters resume, by `saveLap(0.0f, pausedAtUtc)`. That lap ends at the press: its FIT `timestamp` is the press time and its elapsed time includes the pause up to the press. The rest of the pause is carried in `mLapPauseCarrySec` into the next lap's `start_time` and elapsed time. If the activity is saved without resuming, `stopTrack()` drops the held lap and the activity ends at the pause. A second press in the same pause and a lap with no records (`mLapNotEmpty`) are ignored. The Service sends `LAP_END` when it holds the lap, and `TrackActionPresenter::onLapChanged()` then shows `TrackLapView`, which returns to the pause menu. `Model` notes a `LAP_END` that arrives while paused (`isPausedLapTaken()`) until the track state leaves `PAUSED`; until then the pause menu leaves Lap out, R2 there does nothing, and a selected Lap falls back to Resume. The menu remembers its selection as a `Menu` item id, not a row. During auto-pause, R2 on the track screen waits for `LAP_END` too (`TrackPresenter::onLapChanged()`), and the lap screen returns to the track screen.
 
 ### Settings and Persistence
 
@@ -408,8 +410,8 @@ Key responsibilities:
 
 **Tracking** (all face cycling happens inside `TrackView` via swipeable containers):
 - `TrackView` — Active tracking screen; hosts `TrackFaceTotal`, `TrackFaceLap`, `TrackFaceOverview`, `TrackFaceStatus` (swipe L1/L2)
-- `TrackActionView` — Pause menu: Resume / Summary / Save / Discard
-- `TrackLapView` — Lap-saved notification (auto-dismisses after 3 s)
+- `TrackActionView` — Pause menu: Resume / Lap / Summary / Save / Discard; Lap shows until a lap is taken in the pause
+- `TrackLapView` — Lap-saved notification (auto-dismisses after 3 s); returns to the pause menu for a lap taken there
 
 **Confirmations**:
 - `TrackStartConfirmationView` — Prompt to start without GPS fix; idle timeout → `MainView`

@@ -565,7 +565,7 @@ window.runMermaid = runMermaid;</script>
            <div itemprop="articleBody">
              
   <section id="fitfiles-fit-file-creation-and-sensor-logging-tutorial">
-<h1>FitFiles - FIT File Creation and Sensor Logging Tutorial<a class="headerlink" href="#fitfiles-fit-file-creation-and-sensor-logging-tutorial" title="Link to this heading"></a></h1>
+<span id="fitfiles---fit-file-creation-and-sensor-logging-tutorial"></span><h1>FitFiles - FIT File Creation and Sensor Logging Tutorial<a class="headerlink" href="#fitfiles-fit-file-creation-and-sensor-logging-tutorial" title="Link to this heading"></a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>The FitFiles app is a focused tutorial demonstrating FIT (Flexible and Interoperable Data Transfer) file creation and sensor data logging on wearable devices. This app showcases how to collect heart rate and step counter data during glance sessions and store it in the industry-standard FIT format using the UNA SDK’s native <code class="docutils literal notranslate"><span class="pre">SDK::Fit</span></code> encoder.</p>
@@ -709,7 +709,7 @@ window.runMermaid = runMermaid;</script>
 <section id="data-processing-pipeline">
 <h3>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h3>
 <section id="sensor-data-reception">
-<h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
+<span id="1-sensor-data-reception"></span><h4>1. Sensor Data Reception<a class="headerlink" href="#sensor-data-reception" title="Link to this heading"></a></h4>
 <p>Heart rate and step data arrive through the kernel’s message system. The <code class="docutils literal notranslate"><span class="pre">onSdlNewData()</span></code> method processes both sensor types during active glance sessions:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::onSdlNewData</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">SDK</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">Data</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">stride</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mSessionOpen</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w">  </span><span class="c1">// Only process data during active sessions</span>
@@ -756,7 +756,7 @@ window.runMermaid = runMermaid;</script>
 </div>
 </section>
 <section id="session-management">
-<h4>2. Session Management<a class="headerlink" href="#session-management" title="Link to this heading"></a></h4>
+<span id="2-session-management"></span><h4>2. Session Management<a class="headerlink" href="#session-management" title="Link to this heading"></a></h4>
 <p>The app manages glance sessions with simple start/stop logic:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::startSession</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">time_t</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
@@ -781,7 +781,7 @@ window.runMermaid = runMermaid;</script>
 </div>
 </section>
 <section id="fit-file-creation-and-management">
-<h4>3. FIT File Creation and Management<a class="headerlink" href="#fit-file-creation-and-management" title="Link to this heading"></a></h4>
+<span id="3-fit-file-creation-and-management"></span><h4>3. FIT File Creation and Management<a class="headerlink" href="#fit-file-creation-and-management" title="Link to this heading"></a></h4>
 <p>The app creates properly formatted FIT files with headers, definitions, and data records:</p>
 <p><strong>FIT File Structure:</strong></p>
 <ul class="simple">
@@ -858,7 +858,7 @@ window.runMermaid = runMermaid;</script>
 <p>Each definition record is written to the file as it is emitted; the encoder remembers the expected payload size per local type and validates it on <code class="docutils literal notranslate"><span class="pre">write()</span></code> (<a class="reference internal" href="../../FitFiles-Structure.html#message-encoding"><span class="std std-ref">Message Encoding</span></a>).</p>
 </section>
 <section id="custom-developer-fields">
-<h4>4. Custom Developer Fields<a class="headerlink" href="#custom-developer-fields" title="Link to this heading"></a></h4>
+<span id="4-custom-developer-fields"></span><h4>4. Custom Developer Fields<a class="headerlink" href="#custom-developer-fields" title="Link to this heading"></a></h4>
 <p>The “steps” value is recorded as a FIT <em>developer field</em>. This needs two pieces: a <code class="docutils literal notranslate"><span class="pre">field_description</span></code> message that names and types the field, and a developer-field entry on the <code class="docutils literal notranslate"><span class="pre">record</span></code> definition (added above). The encoder declares the field description with a few fixed columns plus the variable-length <code class="docutils literal notranslate"><span class="pre">field_name</span></code>/<code class="docutils literal notranslate"><span class="pre">units</span></code> strings, sized exactly at encode time:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::writeStepsFieldDescription</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">"steps"</span><span class="p">;</span>
@@ -884,7 +884,7 @@ window.runMermaid = runMermaid;</script>
 </div>
 </section>
 <section id="session-and-activity-management">
-<h4>4. Session and Activity Management<a class="headerlink" href="#session-and-activity-management" title="Link to this heading"></a></h4>
+<span id="4-session-and-activity-management"></span><h4>4. Session and Activity Management<a class="headerlink" href="#session-and-activity-management" title="Link to this heading"></a></h4>
 <p>The app manages activity sessions with proper start/stop events and summaries:</p>
 <p><strong>Session Creation:</strong></p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">Service::startSession</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -950,7 +950,7 @@ window.runMermaid = runMermaid;</script>
 </ol>
 </section>
 <section id="id1">
-<h4>Data Persistence Strategy<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<span id="data-persistence-strategy-1"></span><h4>Data Persistence Strategy<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
 <p>The app saves data on session completion:</p>
 <ul class="simple">
 <li><p><strong>Session-based</strong>: Automatic save when glance session ends</p></li>
@@ -959,7 +959,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </section>
 <section id="id2">
-<h4>FIT File Writing Process<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<span id="fit-file-writing-process-1"></span><h4>FIT File Writing Process<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><strong>File Creation</strong>: (Re)create the FIT file truncated on each save</p></li>
 <li><p><strong>Header Management</strong>: <code class="docutils literal notranslate"><span class="pre">begin()</span></code> writes a placeholder header (data size + CRC patched at the end)</p></li>
@@ -1007,7 +1007,7 @@ window.runMermaid = runMermaid;</script>
 </section>
 </section>
 <section id="id3">
-<h2>Sensor Integration<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<span id="sensor-integration-1"></span><h2>Sensor Integration<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
 <p>The FitFiles app integrates with the UNA SDK’s sensor layer for heart rate and step counting during glance sessions:</p>
 <section id="heart-rate-and-step-counter-sensors">
 <h3>Heart Rate and Step Counter Sensors<a class="headerlink" href="#heart-rate-and-step-counter-sensors" title="Link to this heading"></a></h3>

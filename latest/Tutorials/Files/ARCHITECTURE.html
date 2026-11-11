@@ -583,7 +583,7 @@ window.runMermaid = runMermaid;</script>
            <div itemprop="articleBody">
              
   <section id="files-data-persistence-and-file-operations">
-<h1>Files - Data Persistence and File Operations<a class="headerlink" href="#files-data-persistence-and-file-operations" title="Link to this heading"></a></h1>
+<span id="files---data-persistence-and-file-operations"></span><h1>Files - Data Persistence and File Operations<a class="headerlink" href="#files-data-persistence-and-file-operations" title="Link to this heading"></a></h1>
 <p>This comprehensive tutorial demonstrates a complete settings management system for the UNA SDK, featuring persistent file-based storage, JSON serialization, and seamless GUI-Service communication. The tutorial implements three configurable settings with full CRUD operations, error handling, and an intuitive selectable settings interface using physical buttons for navigation and value cycling.</p>
 <p><a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/Docs/Tutorials/Files">Project Folder</a></p>
 <section id="overview">
@@ -647,7 +647,7 @@ make
 <h3>Settings Data Model<a class="headerlink" href="#settings-data-model" title="Link to this heading"></a></h3>
 <p>The system manages three distinct setting types:</p>
 <section id="decimal-counter-float-based-setting">
-<h4>1. Decimal Counter (Float-based Setting)<a class="headerlink" href="#decimal-counter-float-based-setting" title="Link to this heading"></a></h4>
+<span id="1-decimal-counter-float-based-setting"></span><h4>1. Decimal Counter (Float-based Setting)<a class="headerlink" href="#decimal-counter-float-based-setting" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Configurable numeric value for counting/display purposes</p></li>
 <li><p><strong>Type</strong>: <code class="docutils literal notranslate"><span class="pre">float</span></code> (GUI) / <code class="docutils literal notranslate"><span class="pre">int32_t</span></code> (Service - implementation detail)</p></li>
@@ -657,7 +657,7 @@ make
 </ul>
 </section>
 <section id="activity-type-enumeration-setting">
-<h4>2. Activity Type (Enumeration Setting)<a class="headerlink" href="#activity-type-enumeration-setting" title="Link to this heading"></a></h4>
+<span id="2-activity-type-enumeration-setting"></span><h4>2. Activity Type (Enumeration Setting)<a class="headerlink" href="#activity-type-enumeration-setting" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Activity category selection</p></li>
 <li><p><strong>Type</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::ActivityType</span></code> enum</p></li>
@@ -673,7 +673,7 @@ make
 </ul>
 </section>
 <section id="display-mode-enumeration-setting">
-<h4>3. Display Mode (Enumeration Setting)<a class="headerlink" href="#display-mode-enumeration-setting" title="Link to this heading"></a></h4>
+<span id="3-display-mode-enumeration-setting"></span><h4>3. Display Mode (Enumeration Setting)<a class="headerlink" href="#display-mode-enumeration-setting" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: UI display preference configuration</p></li>
 <li><p><strong>Type</strong>: <code class="docutils literal notranslate"><span class="pre">CustomMessage::DisplayMode</span></code> enum</p></li>
@@ -707,7 +707,7 @@ make
 <h3>Custom Message Types<a class="headerlink" href="#custom-message-types" title="Link to this heading"></a></h3>
 <p>The tutorial defines custom messages in the application-specific range (0x00000000-0x0000FFFF):</p>
 <section id="get-settings-0x00000002">
-<h4>GET_SETTINGS (0x00000002)<a class="headerlink" href="#get-settings-0x00000002" title="Link to this heading"></a></h4>
+<span id="get_settings-0x00000002"></span><h4>GET_SETTINGS (0x00000002)<a class="headerlink" href="#get-settings-0x00000002" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Direction</strong>: GUI → Service</p></li>
 <li><p><strong>Purpose</strong>: Request current settings from Service</p></li>
@@ -716,7 +716,7 @@ make
 </ul>
 </section>
 <section id="set-settings-0x00000003">
-<h4>SET_SETTINGS (0x00000003)<a class="headerlink" href="#set-settings-0x00000003" title="Link to this heading"></a></h4>
+<span id="set_settings-0x00000003"></span><h4>SET_SETTINGS (0x00000003)<a class="headerlink" href="#set-settings-0x00000003" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Direction</strong>: GUI → Service</p></li>
 <li><p><strong>Purpose</strong>: Update settings and persist to file</p></li>
@@ -731,7 +731,7 @@ make
 </ul>
 </section>
 <section id="settings-values-0x00000004">
-<h4>SETTINGS_VALUES (0x00000004)<a class="headerlink" href="#settings-values-0x00000004" title="Link to this heading"></a></h4>
+<span id="settings_values-0x00000004"></span><h4>SETTINGS_VALUES (0x00000004)<a class="headerlink" href="#settings-values-0x00000004" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><strong>Direction</strong>: Service → GUI</p></li>
 <li><p><strong>Purpose</strong>: Deliver current settings to GUI</p></li>
@@ -1274,7 +1274,7 @@ the reply, not for queue space — no send waits out a full queue.</p>
 <section id="key-learning-concepts">
 <h2>Key Learning Concepts<a class="headerlink" href="#key-learning-concepts" title="Link to this heading"></a></h2>
 <section id="persistent-storage">
-<h3>1. Persistent Storage<a class="headerlink" href="#persistent-storage" title="Link to this heading"></a></h3>
+<span id="1-persistent-storage"></span><h3>1. Persistent Storage<a class="headerlink" href="#persistent-storage" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>JSON serialization with SDK’s stream writers/readers</p></li>
 <li><p>File system abstraction for cross-platform compatibility</p></li>
@@ -1282,7 +1282,7 @@ the reply, not for queue space — no send waits out a full queue.</p>
 </ul>
 </section>
 <section id="inter-process-communication">
-<h3>2. Inter-Process Communication<a class="headerlink" href="#inter-process-communication" title="Link to this heading"></a></h3>
+<span id="2-inter-process-communication"></span><h3>2. Inter-Process Communication<a class="headerlink" href="#inter-process-communication" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Custom message type definition</p></li>
 <li><p>Asynchronous message passing</p></li>
@@ -1290,7 +1290,7 @@ the reply, not for queue space — no send waits out a full queue.</p>
 </ul>
 </section>
 <section id="gui-architecture">
-<h3>3. GUI Architecture<a class="headerlink" href="#gui-architecture" title="Link to this heading"></a></h3>
+<span id="3-gui-architecture"></span><h3>3. GUI Architecture<a class="headerlink" href="#gui-architecture" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Separation of concerns (Model/View/Presenter in TouchGFX, Model/Screen in LVGL)</p></li>
 <li><p>Event-driven UI updates</p></li>
@@ -1298,7 +1298,7 @@ the reply, not for queue space — no send waits out a full queue.</p>
 </ul>
 </section>
 <section id="error-recovery">
-<h3>4. Error Recovery<a class="headerlink" href="#error-recovery" title="Link to this heading"></a></h3>
+<span id="4-error-recovery"></span><h3>4. Error Recovery<a class="headerlink" href="#error-recovery" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Graceful degradation with defaults</p></li>
 <li><p>Comprehensive logging</p></li>
@@ -1306,7 +1306,7 @@ the reply, not for queue space — no send waits out a full queue.</p>
 </ul>
 </section>
 <section id="user-experience">
-<h3>5. User Experience<a class="headerlink" href="#user-experience" title="Link to this heading"></a></h3>
+<span id="5-user-experience"></span><h3>5. User Experience<a class="headerlink" href="#user-experience" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Immediate UI feedback for local changes</p></li>
 <li><p>Persistent storage for settings survival</p></li>

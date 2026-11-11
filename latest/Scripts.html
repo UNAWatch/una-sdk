@@ -301,7 +301,7 @@
 <td><p>Locates STM32 CubeIDE installation and sets environment variables.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference download internal" download="" href="_downloads/872013bdb59e084f36b9ea8eff4f2867/build-cube.sh"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">build-cube.sh</span></code></span></a></p></td>
-<td><p>Kernel firmware CI (una-kernel)</p></td>
+<td><p>Kernel firmware CI (<a class="reference external" href="https://github.com/UNAWatch/una-kernel-public">una-kernel-public</a>)</p></td>
 <td><p>Headless STM32CubeIDE build for kernel CubeIDE projects.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference download internal" download="" href="_downloads/ebc03d6d264cee8705063a6d682c1189/setup-environment.sh"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">setup-environment.sh</span></code></span></a></p></td>
@@ -320,7 +320,7 @@
 </table>
 </section>
 <section id="script-utilities-scripts-app-merging-app-merging-py-script-utilities-scripts-app-merging-app-merging-py">
-<h2>Script: Utilities/Scripts/app_merging/app_merging.py {#script-utilities-scripts-app_merging-app_merging-py}<a class="headerlink" href="#script-utilities-scripts-app-merging-app-merging-py-script-utilities-scripts-app-merging-app-merging-py" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsapp_mergingapp_mergingpy-script-utilities-scripts-app_merging-app_merging-py"></span><h2>Script: Utilities/Scripts/app_merging/app_merging.py {#script-utilities-scripts-app_merging-app_merging-py}<a class="headerlink" href="#script-utilities-scripts-app-merging-app-merging-py-script-utilities-scripts-app-merging-app-merging-py" title="Link to this heading"></a></h2>
 <section id="overview">
 <h3>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h3>
 <p>This Python script merges service and GUI ELF binaries into a unified UAPP format, incorporating icon conversion, version management, and CRC integrity checks.</p>
@@ -415,17 +415,17 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </section>
 </section>
 <section id="script-utilities-scripts-app-packer-app-packer-py-script-utilities-scripts-app-packer-app-packer-py">
-<h2>Script: Utilities/Scripts/app_packer/app_packer.py {#script-utilities-scripts-app_packer-app_packer-py}<a class="headerlink" href="#script-utilities-scripts-app-packer-app-packer-py-script-utilities-scripts-app-packer-app-packer-py" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsapp_packerapp_packerpy-script-utilities-scripts-app_packer-app_packer-py"></span><h2>Script: Utilities/Scripts/app_packer/app_packer.py {#script-utilities-scripts-app_packer-app_packer-py}<a class="headerlink" href="#script-utilities-scripts-app-packer-app-packer-py-script-utilities-scripts-app-packer-app-packer-py" title="Link to this heading"></a></h2>
 <section id="id1">
-<h3>Overview<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<span id="overview-1"></span><h3>Overview<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>This Python script converts ELF binaries into custom UAPP format packages, incorporating relocation handling, section padding, and optional C header generation for embedded deployment.</p>
 </section>
 <section id="id2">
-<h3>Purpose<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<span id="purpose-1"></span><h3>Purpose<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <p>To package ARM ELF binaries into a self-contained format suitable for loading on embedded targets, with support for dynamic relocation and memory layout management.</p>
 </section>
 <section id="id3">
-<h3>Functionality<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<span id="functionality-1"></span><h3>Functionality<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>The script provides comprehensive ELF processing:</p>
 <ol class="arabic simple">
 <li><p>ELF file parsing and section analysis</p></li>
@@ -437,7 +437,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id4">
-<h3>How It Works<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<span id="how-it-works-1"></span><h3>How It Works<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>ELF Analysis</strong>: Parses sections, identifies loadable segments, and calculates padding</p></li>
 <li><p><strong>Relocation Processing</strong>: Extracts ARM relocation information for runtime application</p></li>
@@ -449,7 +449,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id5">
-<h3>Key Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<span id="key-parameters-1"></span><h3>Key Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">-e,</span> <span class="pre">--elf</span></code>: Path to input ELF file (required)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-o,</span> <span class="pre">--out</span></code>: Output directory (required)</p></li>
@@ -459,7 +459,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id6">
-<h3>Dependencies<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<span id="dependencies-1"></span><h3>Dependencies<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Python 3</strong> runtime environment</p></li>
 <li><p><strong>pyelftools</strong>: For ELF file parsing and analysis</p></li>
@@ -468,7 +468,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id7">
-<h3>Usage Examples<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<span id="usage-examples-1"></span><h3>Usage Examples<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Standard UAPP generation</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>app_packer.py<span class="w"> </span>-e<span class="w"> </span>app.elf<span class="w"> </span>-o<span class="w"> </span>Output<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.2
@@ -485,7 +485,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id8">
-<h3>Error Handling<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<span id="error-handling-1"></span><h3>Error Handling<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Validates ELF file structure and section sizes</p></li>
 <li><p>Ensures sections are 4-byte aligned</p></li>
@@ -495,22 +495,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id9">
-<h3>Integration Context<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<span id="integration-context-1"></span><h3>Integration Context<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <p>Used in post-build processing to convert standard ELF outputs into custom embedded formats. Supports different deployment scenarios through flexible naming and header generation options.</p>
 </section>
 </section>
 <section id="script-utilities-scripts-png2abgr2222-png2abgr2222-py-script-utilities-scripts-png2abgr2222-png2abgr2222-py">
-<h2>Script: Utilities/Scripts/png2abgr2222/png2abgr2222.py {#script-utilities-scripts-png2abgr2222-png2abgr2222-py}<a class="headerlink" href="#script-utilities-scripts-png2abgr2222-png2abgr2222-py-script-utilities-scripts-png2abgr2222-png2abgr2222-py" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptspng2abgr2222png2abgr2222py-script-utilities-scripts-png2abgr2222-png2abgr2222-py"></span><h2>Script: Utilities/Scripts/png2abgr2222/png2abgr2222.py {#script-utilities-scripts-png2abgr2222-png2abgr2222-py}<a class="headerlink" href="#script-utilities-scripts-png2abgr2222-png2abgr2222-py-script-utilities-scripts-png2abgr2222-png2abgr2222-py" title="Link to this heading"></a></h2>
 <section id="id10">
-<h3>Overview<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<span id="overview-2"></span><h3>Overview<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <p>This Python script converts RGBA PNG images to ABGR2222 compressed format, generating C headers with embedded byte arrays and metadata macros for embedded graphics.</p>
 </section>
 <section id="id11">
-<h3>Purpose<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<span id="purpose-2"></span><h3>Purpose<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <p>To provide compressed icon data for embedded systems, converting standard PNG files into a compact 2-bit-per-channel format suitable for limited-color displays.</p>
 </section>
 <section id="id12">
-<h3>Functionality<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<span id="functionality-2"></span><h3>Functionality<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
 <p>The script offers comprehensive image conversion:</p>
 <ol class="arabic simple">
 <li><p>PNG loading and validation (square images required)</p></li>
@@ -521,7 +521,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id13">
-<h3>How It Works<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<span id="how-it-works-2"></span><h3>How It Works<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Image Loading</strong>: Opens PNG files and validates square dimensions</p></li>
 <li><p><strong>Transformation</strong>: Rotates 90 degrees clockwise and converts to ABGR2222</p></li>
@@ -531,7 +531,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id14">
-<h3>Key Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<span id="key-parameters-2"></span><h3>Key Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--inputs</span></code>: One or more input PNG files (required)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-o,</span> <span class="pre">--out</span></code>: Output header file path (default: derived from first input)</p></li>
@@ -540,14 +540,14 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id15">
-<h3>Dependencies<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<span id="dependencies-2"></span><h3>Dependencies<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Python 3</strong> with PIL (Pillow) library</p></li>
 <li><p><strong>pathlib</strong> and <strong>argparse</strong> for file and argument handling</p></li>
 </ul>
 </section>
 <section id="id16">
-<h3>Usage Examples<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<span id="usage-examples-2"></span><h3>Usage Examples<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Single icon conversion</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>png2abgr2222.py<span class="w"> </span>--inputs<span class="w"> </span>icon.png<span class="w"> </span>-o<span class="w"> </span>icon.h
@@ -569,7 +569,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id17">
-<h3>Error Handling<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<span id="error-handling-2"></span><h3>Error Handling<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Validates input files exist and are PNG format</p></li>
 <li><p>Ensures images are square (width == height)</p></li>
@@ -578,22 +578,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id18">
-<h3>Integration Context<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<span id="integration-context-2"></span><h3>Integration Context<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
 <p>Essential for embedded GUI development, converting designer-provided PNG assets into compressed formats suitable for watch displays. Integrates with build systems to generate headers for static icon inclusion.</p>
 </section>
 </section>
 <section id="script-utilities-scripts-export-stm32-tools-ps1-script-utilities-scripts-export-stm32-tools-ps1">
-<h2>Script: Utilities/Scripts/export-stm32-tools.ps1 {#script-utilities-scripts-export-stm32-tools-ps1}<a class="headerlink" href="#script-utilities-scripts-export-stm32-tools-ps1-script-utilities-scripts-export-stm32-tools-ps1" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsexport-stm32-toolsps1-script-utilities-scripts-export-stm32-tools-ps1"></span><h2>Script: Utilities/Scripts/export-stm32-tools.ps1 {#script-utilities-scripts-export-stm32-tools-ps1}<a class="headerlink" href="#script-utilities-scripts-export-stm32-tools-ps1-script-utilities-scripts-export-stm32-tools-ps1" title="Link to this heading"></a></h2>
 <section id="id19">
-<h3>Overview<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<span id="overview-3"></span><h3>Overview<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
 <p>This PowerShell script automates the detection and configuration of essential STM32 development tools on Windows systems. It locates common toolchains and utilities (arm-none-eabi-gcc, make, cmake, python), adds their directories to the user PATH permanently, and sets the UNA_SDK environment variable pointing to the SDK root directory.</p>
 </section>
 <section id="id20">
-<h3>Purpose<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<span id="purpose-3"></span><h3>Purpose<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
 <p>The primary purpose is to simplify environment setup for UNA Watch SDK development on Windows. By automatically discovering installed tools in standard locations and updating the PATH, it eliminates manual configuration steps required for building STM32-based applications using CMake, Make, and the ARM GCC toolchain.</p>
 </section>
 <section id="id21">
-<h3>Functionality<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<span id="functionality-3"></span><h3>Functionality<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
 <p>The script provides:</p>
 <ol class="arabic simple">
 <li><p><strong>Tool Discovery</strong>: Searches PATH first, then common installation directories for required executables</p></li>
@@ -603,7 +603,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id22">
-<h3>How It Works<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<span id="how-it-works-3"></span><h3>How It Works<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>SDK Root Calculation</strong>: Determines SDK root by navigating three parent directories from script location using <code class="docutils literal notranslate"><span class="pre">Split-Path</span></code></p></li>
 <li><p><strong>Tool Definition</strong>: Maps tool names to descriptions (arm-none-eabi-gcc → STM32 Toolchain GCC, etc.)</p></li>
@@ -623,13 +623,13 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id23">
-<h3>Key Parameters<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<span id="key-parameters-3"></span><h3>Key Parameters<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">-DryRun</span></code>: Switch enabling preview mode; displays changes without modification</p></li>
 </ul>
 </section>
 <section id="id24">
-<h3>Dependencies<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<span id="dependencies-3"></span><h3>Dependencies<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>PowerShell</strong>: Native Windows PowerShell environment</p></li>
 <li><p><strong>Target Tools</strong>:</p>
@@ -644,7 +644,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id25">
-<h3>Usage Examples<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<span id="usage-examples-3"></span><h3>Usage Examples<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Preview changes (dry run)</strong>:</p>
 <div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span><span class="p">.</span><span class="n">exe</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="s2">"Utilities/Scripts/export-stm32-tools.ps1"</span> <span class="n">-DryRun</span>
@@ -666,7 +666,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id26">
-<h3>Error Handling<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<span id="error-handling-3"></span><h3>Error Handling<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Uses <code class="docutils literal notranslate"><span class="pre">try-catch</span></code> blocks around <code class="docutils literal notranslate"><span class="pre">Get-Command</span></code> to handle missing tools gracefully</p></li>
 <li><p>Continues processing even if individual tools are not found, warning via <code class="docutils literal notranslate"><span class="pre">Write-Host</span></code></p></li>
@@ -675,22 +675,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id27">
-<h3>Integration Context<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<span id="integration-context-3"></span><h3>Integration Context<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
 <p>Designed as a one-time setup script for Windows developers working with the UNA Watch SDK. It prepares the environment for cross-platform build tools (CMake, Make) and STM32-specific toolchain, enabling seamless building of examples and applications. Typically run after tool installation (STM32CubeIDE, MSYS2, etc.) and before using CMake-based workflows or STM32CubeIDE projects.</p>
 </section>
 </section>
 <section id="script-utilities-scripts-build-cube-una-version-sh-script-utilities-scripts-build-cube-una-version-sh">
-<h2>Script: Utilities/Scripts/build-cube/una-version.sh {#script-utilities-scripts-build-cube-una-version-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-una-version-sh-script-utilities-scripts-build-cube-una-version-sh" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsbuild-cubeuna-versionsh-script-utilities-scripts-build-cube-una-version-sh"></span><h2>Script: Utilities/Scripts/build-cube/una-version.sh {#script-utilities-scripts-build-cube-una-version-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-una-version-sh-script-utilities-scripts-build-cube-una-version-sh" title="Link to this heading"></a></h2>
 <section id="id28">
-<h3>Overview<a class="headerlink" href="#id28" title="Link to this heading"></a></h3>
+<span id="overview-4"></span><h3>Overview<a class="headerlink" href="#id28" title="Link to this heading"></a></h3>
 <p>This comprehensive Bash script determines the build version for UNA Watch projects based on Git repository state, supporting semantic versioning, tags, and dirty state detection.</p>
 </section>
 <section id="id29">
-<h3>Purpose<a class="headerlink" href="#id29" title="Link to this heading"></a></h3>
+<span id="purpose-4"></span><h3>Purpose<a class="headerlink" href="#id29" title="Link to this heading"></a></h3>
 <p>To provide accurate version information for builds, enabling proper versioning of binaries and documentation of build provenance in CI/CD environments.</p>
 </section>
 <section id="id30">
-<h3>Functionality<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
+<span id="functionality-4"></span><h3>Functionality<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
 <p>The script implements sophisticated version detection:</p>
 <ol class="arabic simple">
 <li><p>Git repository state analysis</p></li>
@@ -701,7 +701,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id31">
-<h3>How It Works<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
+<span id="how-it-works-4"></span><h3>How It Works<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Git Availability Check</strong>: Verifies git command availability, falls back to default version if unavailable</p></li>
 <li><p><strong>Build Version Override</strong>: Uses existing BUILD_VERSION if already set</p></li>
@@ -712,20 +712,20 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id32">
-<h3>Key Parameters<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
+<span id="key-parameters-4"></span><h3>Key Parameters<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">$1</span></code>: Optional directory path to use for version detection (defaults to current directory)</p></li>
 </ul>
 </section>
 <section id="id33">
-<h3>Dependencies<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
+<span id="dependencies-4"></span><h3>Dependencies<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Git</strong>: Primary version detection mechanism</p></li>
 <li><p><strong>Standard Bash utilities</strong>: For string manipulation and file operations</p></li>
 </ul>
 </section>
 <section id="id34">
-<h3>Usage Examples<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
+<span id="usage-examples-4"></span><h3>Usage Examples<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Get version for current directory</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./una-version.sh
@@ -742,7 +742,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id35">
-<h3>Error Handling<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
+<span id="error-handling-4"></span><h3>Error Handling<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Gracefully handles non-Git environments with default version</p></li>
 <li><p>Manages Git dubious ownership issues in Docker</p></li>
@@ -751,22 +751,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id36">
-<h3>Integration Context<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
+<span id="integration-context-4"></span><h3>Integration Context<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
 <p>Critical component of build systems, ensuring that all built artifacts include accurate version metadata. Supports CI/CD by providing consistent versioning across different build environments.</p>
 </section>
 </section>
 <section id="script-utilities-scripts-build-cube-find-cube-sh-script-utilities-scripts-build-cube-find-cube-sh">
-<h2>Script: Utilities/Scripts/build-cube/find-cube.sh {#script-utilities-scripts-build-cube-find-cube-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-find-cube-sh-script-utilities-scripts-build-cube-find-cube-sh" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsbuild-cubefind-cubesh-script-utilities-scripts-build-cube-find-cube-sh"></span><h2>Script: Utilities/Scripts/build-cube/find-cube.sh {#script-utilities-scripts-build-cube-find-cube-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-find-cube-sh-script-utilities-scripts-build-cube-find-cube-sh" title="Link to this heading"></a></h2>
 <section id="id37">
-<h3>Overview<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
+<span id="overview-5"></span><h3>Overview<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
 <p>This Bash script locates and configures the STM32CubeIDE environment, including setting up necessary paths and installing system dependencies for headless builds.</p>
 </section>
 <section id="id38">
-<h3>Purpose<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
+<span id="purpose-5"></span><h3>Purpose<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
 <p>To automate the detection and setup of STM32CubeIDE installation and required build tools in headless Linux environments, ensuring consistent build environments across different systems.</p>
 </section>
 <section id="id39">
-<h3>Functionality<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
+<span id="functionality-5"></span><h3>Functionality<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
 <p>The script performs:</p>
 <ol class="arabic simple">
 <li><p>Installation of system dependencies (Python, Git, PIL)</p></li>
@@ -776,7 +776,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id40">
-<h3>How It Works<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
+<span id="how-it-works-5"></span><h3>How It Works<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Dependency Installation</strong>: Uses apt to install required packages for build processes</p></li>
 <li><p><strong>Path Configuration</strong>: Sets PATH to include tool directories</p></li>
@@ -786,13 +786,13 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id41">
-<h3>Key Parameters<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
+<span id="key-parameters-5"></span><h3>Key Parameters<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>No command-line parameters. All operations are automatic based on system state.</p></li>
 </ul>
 </section>
 <section id="id42">
-<h3>Dependencies<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
+<span id="dependencies-5"></span><h3>Dependencies<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>apt package manager</strong>: For system dependency installation</p></li>
 <li><p><strong>STM32CubeIDE</strong>: Must be installed in /opt/st/stm32cubeide_*/ directory structure</p></li>
@@ -800,7 +800,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id43">
-<h3>Usage Examples<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
+<span id="usage-examples-5"></span><h3>Usage Examples<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Setup build environment</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>./find-cube.sh
@@ -811,7 +811,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id44">
-<h3>Error Handling<a class="headerlink" href="#id44" title="Link to this heading"></a></h3>
+<span id="error-handling-5"></span><h3>Error Handling<a class="headerlink" href="#id44" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Exits with error if STM32CubeIDE is not found in expected locations</p></li>
 <li><p>Exits with error if arm-none-eabi-objcopy is missing</p></li>
@@ -819,22 +819,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id45">
-<h3>Integration Context<a class="headerlink" href="#id45" title="Link to this heading"></a></h3>
+<span id="integration-context-5"></span><h3>Integration Context<a class="headerlink" href="#id45" title="Link to this heading"></a></h3>
 <p>Used as part of the build setup process in CI/CD pipelines. The script ensures that all necessary tools are available and properly configured before attempting CubeIDE builds.</p>
 </section>
 </section>
 <section id="script-utilities-scripts-build-cube-build-cube-sh-script-utilities-scripts-build-cube-build-cube-sh">
-<h2>Script: Utilities/Scripts/build-cube/build-cube.sh {#script-utilities-scripts-build-cube-build-cube-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-build-cube-sh-script-utilities-scripts-build-cube-build-cube-sh" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsbuild-cubebuild-cubesh-script-utilities-scripts-build-cube-build-cube-sh"></span><h2>Script: Utilities/Scripts/build-cube/build-cube.sh {#script-utilities-scripts-build-cube-build-cube-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-build-cube-sh-script-utilities-scripts-build-cube-build-cube-sh" title="Link to this heading"></a></h2>
 <section id="id46">
-<h3>Overview<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
+<span id="overview-6"></span><h3>Overview<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
 <p>This Bash script provides automated headless building of STM32CubeIDE projects with integrated version management and preference patching capabilities.</p>
 </section>
 <section id="id47">
-<h3>Purpose<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
+<span id="purpose-6"></span><h3>Purpose<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
 <p>To enable reliable, automated builds of STM32CubeIDE projects in headless environments (such as CI/CD systems) while automatically injecting build version information.</p>
 </section>
 <section id="id48">
-<h3>Functionality<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
+<span id="functionality-6"></span><h3>Functionality<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
 <p>The script handles:</p>
 <ol class="arabic simple">
 <li><p>Version detection from Git repository state</p></li>
@@ -844,7 +844,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id49">
-<h3>How It Works<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
+<span id="how-it-works-6"></span><h3>How It Works<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Version Sourcing</strong>: Sources the <code class="docutils literal notranslate"><span class="pre">una-version.sh</span></code> script to determine BUILD_VERSION</p></li>
 <li><p><strong>Path Derivation</strong>: Extracts project name from IMPORT_PATH and sets up build data directory</p></li>
@@ -854,13 +854,13 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id50">
-<h3>Key Parameters<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
+<span id="key-parameters-6"></span><h3>Key Parameters<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">IMPORT_PATH</span></code>: Required path to the STM32CubeIDE project directory to be built</p></li>
 </ul>
 </section>
 <section id="id51">
-<h3>Dependencies<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
+<span id="dependencies-6"></span><h3>Dependencies<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>STM32CubeIDE</strong>: Must be installed and accessible via PATH or /opt/st/</p></li>
 <li><p><strong>Git</strong>: For version detection and repository state checking</p></li>
@@ -869,7 +869,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id52">
-<h3>Usage Examples<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
+<span id="usage-examples-6"></span><h3>Usage Examples<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Build a specific CubeIDE project</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./build-cube.sh<span class="w"> </span>/path/to/MyProject
@@ -887,7 +887,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id53">
-<h3>Error Handling<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
+<span id="error-handling-6"></span><h3>Error Handling<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Exits with error code if IMPORT_PATH is not provided</p></li>
 <li><p>Continues without version patching if BUILD_VERSION is not set</p></li>
@@ -896,22 +896,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id54">
-<h3>Integration Context<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
+<span id="integration-context-6"></span><h3>Integration Context<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
 <p>Designed for use in automated build environments. The version patching ensures that built binaries include proper version metadata, while the headless build capability allows integration with continuous integration systems that don’t have graphical interfaces.</p>
 </section>
 </section>
 <section id="script-utilities-scripts-build-cube-setup-environment-sh-script-utilities-scripts-build-cube-setup-environment-sh">
-<h2>Script: Utilities/Scripts/build-cube/setup-environment.sh {#script-utilities-scripts-build-cube-setup-environment-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-setup-environment-sh-script-utilities-scripts-build-cube-setup-environment-sh" title="Link to this heading"></a></h2>
+<span id="script-utilitiesscriptsbuild-cubesetup-environmentsh-script-utilities-scripts-build-cube-setup-environment-sh"></span><h2>Script: Utilities/Scripts/build-cube/setup-environment.sh {#script-utilities-scripts-build-cube-setup-environment-sh}<a class="headerlink" href="#script-utilities-scripts-build-cube-setup-environment-sh-script-utilities-scripts-build-cube-setup-environment-sh" title="Link to this heading"></a></h2>
 <section id="id55">
-<h3>Overview<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
+<span id="overview-7"></span><h3>Overview<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
 <p>This Bash script serves as a high-level setup script that coordinates the environment preparation for STM32CubeIDE builds by sourcing dependent setup scripts.</p>
 </section>
 <section id="id56">
-<h3>Purpose<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
+<span id="purpose-7"></span><h3>Purpose<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
 <p>To provide a single entry point for setting up the complete STM32CubeIDE build environment, including tool detection and version management.</p>
 </section>
 <section id="id57">
-<h3>Functionality<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
+<span id="functionality-7"></span><h3>Functionality<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
 <p>The script orchestrates the setup process by:</p>
 <ol class="arabic simple">
 <li><p>Displaying setup progress messages</p></li>
@@ -921,7 +921,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id58">
-<h3>How It Works<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
+<span id="how-it-works-7"></span><h3>How It Works<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Path Setup</strong>: Adds the build-cube directory to PATH for script accessibility</p></li>
 <li><p><strong>Tool Detection</strong>: Sources find-cube.sh to locate and configure STM32CubeIDE</p></li>
@@ -929,13 +929,13 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id59">
-<h3>Key Parameters<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
+<span id="key-parameters-7"></span><h3>Key Parameters<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">$1</span></code>: Optional directory parameter passed to una-version.sh for version detection context</p></li>
 </ul>
 </section>
 <section id="id60">
-<h3>Dependencies<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
+<span id="dependencies-7"></span><h3>Dependencies<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>find-cube.sh</strong>: For STM32CubeIDE tool detection and setup</p></li>
 <li><p><strong>una-version.sh</strong>: For build version determination</p></li>
@@ -943,7 +943,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id61">
-<h3>Usage Examples<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
+<span id="usage-examples-7"></span><h3>Usage Examples<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Setup environment for current directory</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup-environment.sh
@@ -958,29 +958,29 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id62">
-<h3>Error Handling<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
+<span id="error-handling-7"></span><h3>Error Handling<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Inherits error handling from sourced scripts</p></li>
 <li><p>Displays setup progress and completion messages</p></li>
 </ul>
 </section>
 <section id="id63">
-<h3>Integration Context<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
+<span id="integration-context-7"></span><h3>Integration Context<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
 <p>Acts as a coordinator script in build pipelines, ensuring all prerequisites are met before proceeding with STM32CubeIDE builds. Commonly used in automated build environments.</p>
 </section>
 </section>
 <section id="script-github-scripts-generate-tutorials-app-list-py-script-github-scripts-generate-tutorials-app-list-py">
-<h2>Script: .github/scripts/generate-tutorials-app-list.py {#script-github-scripts-generate-tutorials-app-list-py}<a class="headerlink" href="#script-github-scripts-generate-tutorials-app-list-py-script-github-scripts-generate-tutorials-app-list-py" title="Link to this heading"></a></h2>
+<span id="script-githubscriptsgenerate-tutorials-app-listpy-script-github-scripts-generate-tutorials-app-list-py"></span><h2>Script: .github/scripts/generate-tutorials-app-list.py {#script-github-scripts-generate-tutorials-app-list-py}<a class="headerlink" href="#script-github-scripts-generate-tutorials-app-list-py-script-github-scripts-generate-tutorials-app-list-py" title="Link to this heading"></a></h2>
 <section id="id64">
-<h3>Overview<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
+<span id="overview-8"></span><h3>Overview<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
 <p>This Python script is designed to generate a list of CMake-based application projects within the tutorials directory structure. It traverses the <code class="docutils literal notranslate"><span class="pre">Docs/Tutorials</span></code> directory to identify and catalog CMake projects, while providing flexibility to exclude certain applications and generate project-specific lists.</p>
 </section>
 <section id="id65">
-<h3>Purpose<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
+<span id="purpose-8"></span><h3>Purpose<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
 <p>The primary purpose of this script is to automate the discovery and listing of tutorial applications that use CMake build systems. It supports CI/CD workflows by providing a programmatic way to enumerate buildable tutorial projects, with built-in exclusion capabilities for managing which applications should be included in builds or deployments.</p>
 </section>
 <section id="id66">
-<h3>Functionality<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
+<span id="functionality-8"></span><h3>Functionality<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
 <p>The script operates in two main modes:</p>
 <ol class="arabic simple">
 <li><p><strong>General mode</strong>: Scans the entire tutorials directory and outputs a JSON object containing all discovered CMake applications</p></li>
@@ -988,7 +988,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id67">
-<h3>How It Works<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
+<span id="how-it-works-8"></span><h3>How It Works<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Directory Traversal</strong>: Uses <code class="docutils literal notranslate"><span class="pre">os.walk()</span></code> to recursively traverse the <code class="docutils literal notranslate"><span class="pre">Docs/Tutorials</span></code> directory</p></li>
 <li><p><strong>Directory Filtering</strong>: Applies exclusion rules to skip hidden directories, build artifacts, and other irrelevant folders</p></li>
@@ -999,14 +999,14 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id68">
-<h3>Key Parameters<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
+<span id="key-parameters-8"></span><h3>Key Parameters<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--app</span> <span class="pre">&lt;app_name&gt;</span></code>: Optional command-line argument to generate project list for a specific application</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">APPS_EXCLUDED</span></code>: Environment variable containing newline-separated list of application names to exclude</p></li>
 </ul>
 </section>
 <section id="id69">
-<h3>Dependencies<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
+<span id="dependencies-8"></span><h3>Dependencies<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Python 3</strong>: The script uses Python 3 features and syntax</p></li>
 <li><p><strong>Standard Library Modules</strong>:</p>
@@ -1019,7 +1019,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id70">
-<h3>Usage Examples<a class="headerlink" href="#id70" title="Link to this heading"></a></h3>
+<span id="usage-examples-8"></span><h3>Usage Examples<a class="headerlink" href="#id70" title="Link to this heading"></a></h3>
 <ol class="arabic">
 <li><p><strong>Generate complete app list</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>.github/scripts/generate-tutorials-app-list.py
@@ -1048,7 +1048,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id71">
-<h3>Error Handling<a class="headerlink" href="#id71" title="Link to this heading"></a></h3>
+<span id="error-handling-8"></span><h3>Error Handling<a class="headerlink" href="#id71" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Validates the presence of app name when <code class="docutils literal notranslate"><span class="pre">--app</span></code> flag is used</p></li>
 <li><p>Gracefully handles cases where excluded apps are requested</p></li>
@@ -1056,22 +1056,22 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ul>
 </section>
 <section id="id72">
-<h3>Integration Context<a class="headerlink" href="#id72" title="Link to this heading"></a></h3>
+<span id="integration-context-8"></span><h3>Integration Context<a class="headerlink" href="#id72" title="Link to this heading"></a></h3>
 <p>This script appears to be part of a GitHub Actions workflow system, likely used in CI/CD pipelines to dynamically determine which tutorial projects need to be built or tested. The exclusion mechanism allows for flexible project management without code changes.</p>
 </section>
 </section>
 <section id="script-github-scripts-generate-app-list-py-script-github-scripts-generate-app-list-py">
-<h2>Script: .github/scripts/generate-app-list.py {#script-github-scripts-generate-app-list-py}<a class="headerlink" href="#script-github-scripts-generate-app-list-py-script-github-scripts-generate-app-list-py" title="Link to this heading"></a></h2>
+<span id="script-githubscriptsgenerate-app-listpy-script-github-scripts-generate-app-list-py"></span><h2>Script: .github/scripts/generate-app-list.py {#script-github-scripts-generate-app-list-py}<a class="headerlink" href="#script-github-scripts-generate-app-list-py-script-github-scripts-generate-app-list-py" title="Link to this heading"></a></h2>
 <section id="id73">
-<h3>Overview<a class="headerlink" href="#id73" title="Link to this heading"></a></h3>
+<span id="overview-9"></span><h3>Overview<a class="headerlink" href="#id73" title="Link to this heading"></a></h3>
 <p>Discovers example applications under <code class="docutils literal notranslate"><span class="pre">Examples/Apps</span></code> that contain a <code class="docutils literal notranslate"><span class="pre">*-CMake</span></code> project directory.</p>
 </section>
 <section id="id74">
-<h3>Purpose<a class="headerlink" href="#id74" title="Link to this heading"></a></h3>
+<span id="purpose-9"></span><h3>Purpose<a class="headerlink" href="#id74" title="Link to this heading"></a></h3>
 <p>Feeds the <a class="reference download internal" download="" href="_downloads/018f3917aef2e827e86dc8e022c53b10/apps-ci.yml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">apps-ci.yml</span></code></span></a> build matrix with the list of apps to compile.</p>
 </section>
 <section id="id75">
-<h3>How It Works<a class="headerlink" href="#id75" title="Link to this heading"></a></h3>
+<span id="how-it-works-9"></span><h3>How It Works<a class="headerlink" href="#id75" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>Walks <code class="docutils literal notranslate"><span class="pre">Examples/Apps</span></code>, skipping hidden directories and: <code class="docutils literal notranslate"><span class="pre">.git</span></code>, <code class="docutils literal notranslate"><span class="pre">generated</span></code>, <code class="docutils literal notranslate"><span class="pre">Output</span></code>, <code class="docutils literal notranslate"><span class="pre">build</span></code>, <code class="docutils literal notranslate"><span class="pre">simulator</span></code>, <code class="docutils literal notranslate"><span class="pre">node_modules</span></code>, <code class="docutils literal notranslate"><span class="pre">.vscode</span></code>, <code class="docutils literal notranslate"><span class="pre">.github</span></code>.</p></li>
 <li><p>Treats any directory ending with <code class="docutils literal notranslate"><span class="pre">-CMake</span></code> as a buildable app trigger.</p></li>
@@ -1081,7 +1081,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </ol>
 </section>
 <section id="id76">
-<h3>Usage Examples<a class="headerlink" href="#id76" title="Link to this heading"></a></h3>
+<span id="usage-examples-9"></span><h3>Usage Examples<a class="headerlink" href="#id76" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>.github/scripts/generate-app-list.py
 </pre></div>
 </div>
@@ -1090,7 +1090,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 </div>
 </section>
 <section id="id77">
-<h3>Integration Context<a class="headerlink" href="#id77" title="Link to this heading"></a></h3>
+<span id="integration-context-9"></span><h3>Integration Context<a class="headerlink" href="#id77" title="Link to this heading"></a></h3>
 <p>Used by GitHub Actions <code class="docutils literal notranslate"><span class="pre">apps-ci.yml</span></code> on push/PR to <code class="docutils literal notranslate"><span class="pre">main</span></code>/<code class="docutils literal notranslate"><span class="pre">develop</span></code> and on <code class="docutils literal notranslate"><span class="pre">apps-v*</span></code> release tags.</p>
 </section>
 </section>

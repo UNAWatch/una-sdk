@@ -281,7 +281,7 @@ the surrounding text is meant to be copied.)</p>
 <p>See <a class="reference internal" href="#messages-over-256-bytes-vanish">Messages over 256 bytes vanish</a>.</p>
 </section>
 <section id="step-3-the-service-the-clock">
-<h3>Step 3: The service - the clock<a class="headerlink" href="#step-3-the-service-the-clock" title="Link to this heading"></a></h3>
+<span id="step-3-the-service---the-clock"></span><h3>Step 3: The service - the clock<a class="headerlink" href="#step-3-the-service-the-clock" title="Link to this heading"></a></h3>
 <p>A face draws nothing finer than a minute, so read the clock once a turn round
 the loop and let that same reading size the wait:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -369,7 +369,7 @@ may call as often as it likes and only a real change costs an IPC round trip:</p
 </div>
 </section>
 <section id="step-4-the-service-sensors">
-<h3>Step 4: The service - sensors<a class="headerlink" href="#step-4-the-service-sensors" title="Link to this heading"></a></h3>
+<span id="step-4-the-service---sensors"></span><h3>Step 4: The service - sensors<a class="headerlink" href="#step-4-the-service-sensors" title="Link to this heading"></a></h3>
 <p>Subscribe with <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Connection</span></code>, connect once at startup and hold it:
 a face is on screen whenever nothing else is, so there is no moment worth
 deferring to, and an event-driven subscription that only speaks on a change
@@ -672,7 +672,7 @@ whole face. <code class="docutils literal notranslate"><span class="pre">Circle:
 </ul>
 </section>
 <section id="arcs-sweep-clockwise-from-twelve-o-clock">
-<h3>Arcs sweep clockwise from twelve o’clock<a class="headerlink" href="#arcs-sweep-clockwise-from-twelve-o-clock" title="Link to this heading"></a></h3>
+<span id="arcs-sweep-clockwise-from-twelve-oclock"></span><h3>Arcs sweep clockwise from twelve o’clock<a class="headerlink" href="#arcs-sweep-clockwise-from-twelve-o-clock" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">Circle::setArc(start,</span> <span class="pre">end)</span></code> goes clockwise from 12. So a ring on the left of
 the face has its <em>start</em> at the bottom and its <em>end</em> at the top, and a ring on
 the right is the other way round – a mirrored pair of progress rings is two

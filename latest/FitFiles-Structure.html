@@ -326,7 +326,7 @@
 <h3>For New Developers: Getting Started Guide<a class="headerlink" href="#for-new-developers-getting-started-guide" title="Link to this heading"></a></h3>
 <p>If you’re new to FIT files and the UNA SDK, follow this reading path to build your understanding progressively:</p>
 <section id="phase-1-foundations-essential-read-first">
-<h4><strong>Phase 1: Foundations (Essential - Read First)</strong><a class="headerlink" href="#phase-1-foundations-essential-read-first" title="Link to this heading"></a></h4>
+<span id="phase-1-foundations-essential---read-first"></span><h4><strong>Phase 1: Foundations (Essential - Read First)</strong><a class="headerlink" href="#phase-1-foundations-essential-read-first" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><strong><a class="reference internal" href="#introduction-to-fit">Introduction to FIT</a></strong> - Understand what FIT is and why it’s used</p></li>
 <li><p><strong><a class="reference internal" href="#fit-file-format-basics">FIT File Format Basics</a></strong> - Learn binary format, data types, and scaling</p></li>
@@ -419,7 +419,7 @@
 </div>
 </section>
 <section id="optional-sdk-fit-helpers">
-<h4><strong>Optional SDK::Fit Helpers</strong><a class="headerlink" href="#optional-sdk-fit-helpers" title="Link to this heading"></a></h4>
+<span id="optional-sdkfit-helpers"></span><h4><strong>Optional SDK::Fit Helpers</strong><a class="headerlink" href="#optional-sdk-fit-helpers" title="Link to this heading"></a></h4>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Base-type identifiers, sizes and invalid sentinels</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDK/Fit/FitBaseType.hpp"</span>
 
@@ -487,7 +487,7 @@
 </section>
 </section>
 <section id="getting-started-where-to-find-activitywriter">
-<h2>🚀 Getting Started: Where to Find ActivityWriter<a class="headerlink" href="#getting-started-where-to-find-activitywriter" title="Link to this heading"></a></h2>
+<span id="-getting-started-where-to-find-activitywriter"></span><h2>🚀 Getting Started: Where to Find ActivityWriter<a class="headerlink" href="#getting-started-where-to-find-activitywriter" title="Link to this heading"></a></h2>
 <p><strong>In just 1 minute, here’s how to get the ActivityWriter code:</strong></p>
 <section id="location-in-una-sdk">
 <h3><strong>Location in UNA SDK</strong><a class="headerlink" href="#location-in-una-sdk" title="Link to this heading"></a></h3>
@@ -992,9 +992,9 @@ an ordered field list via <code class="docutils literal notranslate"><span class
 </section>
 </section>
 <section id="sdk-fit-encoder-deep-dive">
-<h2>SDK::Fit Encoder Deep Dive<a class="headerlink" href="#sdk-fit-encoder-deep-dive" title="Link to this heading"></a></h2>
+<span id="sdkfit-encoder-deep-dive"></span><h2>SDK::Fit Encoder Deep Dive<a class="headerlink" href="#sdk-fit-encoder-deep-dive" title="Link to this heading"></a></h2>
 <section id="what-is-sdk-fit">
-<h3>What is SDK::Fit?<a class="headerlink" href="#what-is-sdk-fit" title="Link to this heading"></a></h3>
+<span id="what-is-sdkfit"></span><h3>What is SDK::Fit?<a class="headerlink" href="#what-is-sdk-fit" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">SDK::Fit</span></code> is the SDK’s native, dependency-free FIT-format encoder. It lives in
 <code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Fit/</span></code> and has two parts:</p>
 <ul class="simple">
@@ -1104,13 +1104,13 @@ buffering.</p></li>
 <section id="step-by-step-fit-file-creation">
 <h2>Step-by-Step FIT File Creation<a class="headerlink" href="#step-by-step-fit-file-creation" title="Link to this heading"></a></h2>
 <section id="initialization-phase">
-<h3>1. Initialization Phase<a class="headerlink" href="#initialization-phase" title="Link to this heading"></a></h3>
+<span id="1-initialization-phase"></span><h3>1. Initialization Phase<a class="headerlink" href="#initialization-phase" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">ActivityWriter</span><span class="w"> </span><span class="n">writer</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="s">"/path/to/fit/files"</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="start-activity">
-<h3>2. Start Activity<a class="headerlink" href="#start-activity" title="Link to this heading"></a></h3>
+<span id="2-start-activity"></span><h3>2. Start Activity<a class="headerlink" href="#start-activity" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">AppInfo</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="p">,</span><span class="w"> </span><span class="n">devID</span><span class="p">,</span><span class="w"> </span><span class="n">appID</span><span class="p">};</span>
 <span class="n">writer</span><span class="p">.</span><span class="n">start</span><span class="p">(</span><span class="n">info</span><span class="p">);</span>
 </pre></div>
@@ -1126,7 +1126,7 @@ buffering.</p></li>
 </ul>
 </section>
 <section id="record-data-points">
-<h3>3. Record Data Points<a class="headerlink" href="#record-data-points" title="Link to this heading"></a></h3>
+<span id="3-record-data-points"></span><h3>3. Record Data Points<a class="headerlink" href="#record-data-points" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">RecordData</span><span class="w"> </span><span class="n">record</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="cm">/* populate data */</span><span class="p">};</span>
 <span class="n">record</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="n">RecordData</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">COORDS</span><span class="p">);</span>
 <span class="n">record</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="n">RecordData</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">HEART_RATE</span><span class="p">);</span>
@@ -1141,7 +1141,7 @@ buffering.</p></li>
 </ul>
 </section>
 <section id="add-laps">
-<h3>4. Add Laps<a class="headerlink" href="#add-laps" title="Link to this heading"></a></h3>
+<span id="4-add-laps"></span><h3>4. Add Laps<a class="headerlink" href="#add-laps" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LapData</span><span class="w"> </span><span class="n">lap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="cm">/* lap summary data */</span><span class="p">};</span>
 <span class="n">writer</span><span class="p">.</span><span class="n">addLap</span><span class="p">(</span><span class="n">lap</span><span class="p">);</span>
 </pre></div>
@@ -1151,7 +1151,7 @@ buffering.</p></li>
 </ul>
 </section>
 <section id="handle-pauses-resumes">
-<h3>5. Handle Pauses/Resumes<a class="headerlink" href="#handle-pauses-resumes" title="Link to this heading"></a></h3>
+<span id="5-handle-pausesresumes"></span><h3>5. Handle Pauses/Resumes<a class="headerlink" href="#handle-pauses-resumes" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">writer</span><span class="p">.</span><span class="n">pause</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
 <span class="c1">// ... paused activity</span>
 <span class="n">writer</span><span class="p">.</span><span class="n">resume</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
@@ -1162,7 +1162,7 @@ buffering.</p></li>
 </ul>
 </section>
 <section id="stop-and-finalize">
-<h3>6. Stop and Finalize<a class="headerlink" href="#stop-and-finalize" title="Link to this heading"></a></h3>
+<span id="6-stop-and-finalize"></span><h3>6. Stop and Finalize<a class="headerlink" href="#stop-and-finalize" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">TrackData</span><span class="w"> </span><span class="n">track</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="cm">/* final summary */</span><span class="p">};</span>
 <span class="n">writer</span><span class="p">.</span><span class="n">stop</span><span class="p">(</span><span class="n">track</span><span class="p">);</span>
 </pre></div>
@@ -1309,7 +1309,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 <section id="message-types-and-fields">
 <h2>Message Types and Fields<a class="headerlink" href="#message-types-and-fields" title="Link to this heading"></a></h2>
 <section id="id1">
-<h3>File ID Message<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<span id="file-id-message-1"></span><h3>File ID Message<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Identifies the file type and creator.</p></li>
 <li><p><strong>Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::FileId::*</span></code>):</p>
@@ -1325,7 +1325,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id2">
-<h3>Developer Data ID Message<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<span id="developer-data-id-message-1"></span><h3>Developer Data ID Message<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Registers the developer and app for custom fields.</p></li>
 <li><p><strong>Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::DeveloperDataId::*</span></code>):</p>
@@ -1337,7 +1337,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id3">
-<h3>Field Description Messages<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<span id="field-description-messages-1"></span><h3>Field Description Messages<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Describe custom developer fields.</p></li>
 <li><p><strong>Fields</strong> (per field, <code class="docutils literal notranslate"><span class="pre">field::FieldDescription::*</span></code>):</p>
@@ -1352,7 +1352,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id4">
-<h3>Record Messages<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<span id="record-messages-1"></span><h3>Record Messages<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Individual data points during the activity (e.g., every second).</p></li>
 <li><p><strong>Base Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::Record::*</span></code>, the common tail):</p>
@@ -1375,7 +1375,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id5">
-<h3>Lap Messages<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<span id="lap-messages-1"></span><h3>Lap Messages<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Summarize data for each lap.</p></li>
 <li><p><strong>Fields</strong>:</p>
@@ -1398,7 +1398,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id6">
-<h3>Session Messages<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<span id="session-messages-1"></span><h3>Session Messages<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Overall activity summary.</p></li>
 <li><p><strong>Fields</strong>: Similar to Lap, but for the entire session.</p></li>
@@ -1406,7 +1406,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id7">
-<h3>Event Messages<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<span id="event-messages-1"></span><h3>Event Messages<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Mark start/stop/pause/resume events.</p></li>
 <li><p><strong>Fields</strong> (<code class="docutils literal notranslate"><span class="pre">field::Event::*</span></code>):</p>
@@ -1419,7 +1419,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </ul>
 </section>
 <section id="id8">
-<h3>Activity Messages<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<span id="activity-messages-1"></span><h3>Activity Messages<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Purpose</strong>: Top-level activity info.</p></li>
 <li><p><strong>Fields</strong>:</p>
@@ -1436,7 +1436,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 <section id="activity-specific-variations">
 <h2>Activity-Specific Variations<a class="headerlink" href="#activity-specific-variations" title="Link to this heading"></a></h2>
 <section id="running-examples-apps-running">
-<h3>Running (Examples/Apps/Running/)<a class="headerlink" href="#running-examples-apps-running" title="Link to this heading"></a></h3>
+<span id="running-examplesappsrunning"></span><h3>Running (Examples/Apps/Running/)<a class="headerlink" href="#running-examples-apps-running" title="Link to this heading"></a></h3>
 <p><strong>Sport Type</strong>: <code class="docutils literal notranslate"><span class="pre">Sport::Running</span></code></p>
 <p><strong>Local Message Types</strong> (<code class="docutils literal notranslate"><span class="pre">enum</span> <span class="pre">Local</span></code>):</p>
 <ul class="simple">
@@ -1468,7 +1468,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </div>
 </section>
 <section id="cycling-examples-apps-cycling">
-<h3>Cycling (Examples/Apps/Cycling/)<a class="headerlink" href="#cycling-examples-apps-cycling" title="Link to this heading"></a></h3>
+<span id="cycling-examplesappscycling"></span><h3>Cycling (Examples/Apps/Cycling/)<a class="headerlink" href="#cycling-examples-apps-cycling" title="Link to this heading"></a></h3>
 <p><strong>Sport Type</strong>: <code class="docutils literal notranslate"><span class="pre">Sport::Cycling</span></code></p>
 <p><strong>Identical to Running</strong> except sport type. All record variants, battery fields, and session fields are the same.</p>
 <p><strong>Code Difference</strong>:</p>
@@ -1477,7 +1477,7 @@ shape is valid FIT — the definition message tells the decoder which it is.</p>
 </div>
 </section>
 <section id="hiking-examples-apps-hiking">
-<h3>Hiking (Examples/Apps/Hiking/)<a class="headerlink" href="#hiking-examples-apps-hiking" title="Link to this heading"></a></h3>
+<span id="hiking-examplesappshiking"></span><h3>Hiking (Examples/Apps/Hiking/)<a class="headerlink" href="#hiking-examples-apps-hiking" title="Link to this heading"></a></h3>
 <p><strong>Sport Type</strong>: <code class="docutils literal notranslate"><span class="pre">Sport::Hiking</span></code></p>
 <p>Structurally the same as Running – it shares the Record variants and the same
 developer-field approach. Any extra metrics are added as additional developer
@@ -1489,7 +1489,7 @@ definition order at the tail of the <code class="docutils literal notranslate"><
 </div>
 </section>
 <section id="hrmonitor-examples-apps-hrmonitor">
-<h3>HRMonitor (Examples/Apps/HRMonitor/)<a class="headerlink" href="#hrmonitor-examples-apps-hrmonitor" title="Link to this heading"></a></h3>
+<span id="hrmonitor-examplesappshrmonitor"></span><h3>HRMonitor (Examples/Apps/HRMonitor/)<a class="headerlink" href="#hrmonitor-examples-apps-hrmonitor" title="Link to this heading"></a></h3>
 <p><strong>Sport Type</strong>: <code class="docutils literal notranslate"><span class="pre">Sport::Generic</span></code></p>
 <p><strong>Simplified Structure</strong>:</p>
 <ul class="simple">
@@ -1577,7 +1577,7 @@ strings exactly, then writes the data record:</p>
 </div>
 </section>
 <section id="developer-fields-on-lap-session">
-<h3>Developer Fields on Lap / Session<a class="headerlink" href="#developer-fields-on-lap-session" title="Link to this heading"></a></h3>
+<span id="developer-fields-on-lap--session"></span><h3>Developer Fields on Lap / Session<a class="headerlink" href="#developer-fields-on-lap-session" title="Link to this heading"></a></h3>
 <p>Lap- and session-level custom metrics follow the same pattern: declare the
 <code class="docutils literal notranslate"><span class="pre">DevField</span></code> list on the <code class="docutils literal notranslate"><span class="pre">L_LAP</span></code> / <code class="docutils literal notranslate"><span class="pre">L_SESSION</span></code> definition, write a field
 description for each, then append the values at the tail of the corresponding
@@ -1844,7 +1844,7 @@ enums in the header (see “Constructor and Initialization”), and the
 </div>
 </section>
 <section id="definerecordmessages-record-variants">
-<h3>defineRecordMessages() - Record Variants<a class="headerlink" href="#definerecordmessages-record-variants" title="Link to this heading"></a></h3>
+<span id="definerecordmessages---record-variants"></span><h3>defineRecordMessages() - Record Variants<a class="headerlink" href="#definerecordmessages-record-variants" title="Link to this heading"></a></h3>
 <p>Each variant is a distinct local type that reuses the global Record message
 number; the differences are the field list and the attached developer fields.</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">ActivityWriter::defineRecordMessages</span><span class="p">()</span>
@@ -1872,7 +1872,7 @@ number; the differences are the field list and the attached developer fields.</p
 </div>
 </section>
 <section id="addrecord-variant-selection-and-data-write">
-<h3>addRecord() - Variant Selection and Data Write<a class="headerlink" href="#addrecord-variant-selection-and-data-write" title="Link to this heading"></a></h3>
+<span id="addrecord---variant-selection-and-data-write"></span><h3>addRecord() - Variant Selection and Data Write<a class="headerlink" href="#addrecord-variant-selection-and-data-write" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">ActivityWriter::addRecord</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RecordData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">record</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mFit</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
@@ -1915,7 +1915,7 @@ number; the differences are the field list and the attached developer fields.</p
 </div>
 </section>
 <section id="stop-method-finalization">
-<h3>stop() Method - Finalization<a class="headerlink" href="#stop-method-finalization" title="Link to this heading"></a></h3>
+<span id="stop-method---finalization"></span><h3>stop() Method - Finalization<a class="headerlink" href="#stop-method-finalization" title="Link to this heading"></a></h3>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">ActivityWriter::stop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">TrackData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">track</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mFit</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
@@ -2154,7 +2154,7 @@ activity is still a valid prefix on disk if recording is interrupted before
 </ul>
 </section>
 <section id="payload-definition-mismatch">
-<h3>Payload / Definition Mismatch<a class="headerlink" href="#payload-definition-mismatch" title="Link to this heading"></a></h3>
+<span id="payload--definition-mismatch"></span><h3>Payload / Definition Mismatch<a class="headerlink" href="#payload-definition-mismatch" title="Link to this heading"></a></h3>
 <p><strong>Symptom</strong>: <code class="docutils literal notranslate"><span class="pre">data(local).write()</span></code> returns false; the field count or sizes in a
 data record do not match its definition.</p>
 <p><strong>Check</strong>:</p>
