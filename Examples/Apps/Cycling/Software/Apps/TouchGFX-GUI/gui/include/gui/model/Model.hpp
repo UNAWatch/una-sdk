@@ -118,6 +118,11 @@ public:
     // A lap taken on the pause menu returns there from the lap screen.
     void setLapFromPauseMenu(bool fromPauseMenu);
     bool isLapFromPauseMenu() const;
+
+    // The Service takes one lap per pause; once it has, the pause
+    // menu leaves Lap out until the activity resumes.
+    bool isPausedLapTaken() const;
+
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
 
@@ -160,6 +165,7 @@ private:
     // Track
     HoldConfirmMode        mHoldConfirmMode = HoldConfirmMode::Discard;
     bool                   mLapFromPauseMenu = false;
+    bool                   mPausedLapTaken   = false;
     Track::State           mTrackState      {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData       {};

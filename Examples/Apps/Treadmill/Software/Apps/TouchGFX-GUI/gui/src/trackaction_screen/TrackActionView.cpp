@@ -44,21 +44,26 @@ void TrackActionView::tearDownScreen()
 
 void TrackActionView::setPositionId(uint16_t id)
 {
-    menuLayout.selectItem(id);
+    // A left-out item selects the row above it: Lap's selects Resume.
+    int16_t row = 0;
+    for (int16_t r = 1; r < menuLayout.getNumberOfItems() && itemAt(r) <= id; ++r) {
+        row = r;
+    }
+    menuLayout.selectItem(row);
 }
 
-void TrackActionView::setFreeRun(bool freeRun)
+void TrackActionView::setLapShown(bool lap)
 {
-    mFreeRun = freeRun;
-    menuLayout.getButtons().setR2(freeRun ? Buttons::AMBER : Buttons::NONE);
-    menuLayout.setNumberOfItems(freeRun ? Menu::ID_COUNT : Menu::ID_COUNT - 1);
+    mLapShown = lap;
+    menuLayout.getButtons().setR2(lap ? Buttons::AMBER : Buttons::NONE);
+    menuLayout.setNumberOfItems(lap ? Menu::ID_COUNT : Menu::ID_COUNT - 1);
     menuLayout.invalidate();
 }
 
 uint16_t TrackActionView::itemAt(int16_t row) const
 {
-    // Outside a free run, Lap's row is left out.
-    if (!mFreeRun && row >= Menu::ID_LAP) {
+    // Without Lap, its row is left out.
+    if (!mLapShown && row >= Menu::ID_LAP) {
         return static_cast<uint16_t>(row + 1);
     }
     return static_cast<uint16_t>(row);
@@ -66,7 +71,7 @@ uint16_t TrackActionView::itemAt(int16_t row) const
 
 uint16_t TrackActionView::getPositionId()
 {
-    return menuLayout.getSelectedItem();
+    return itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()));
 }
 
 void TrackActionView::setUnitsImperial(bool isImperial)
@@ -231,9 +236,9 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         }
     }
 
-    // The lap button takes a lap here too, in a free run. The lap screen
+    // The lap button takes a lap here too, while Lap is shown. The lap screen
     // shows once the Service has taken it: it ignores a lap with nothing in it.
-    if (key == SDK::GUI::Button::R2 && mFreeRun) {
+    if (key == SDK::GUI::Button::R2 && mLapShown) {
         presenter->saveLap();
     }
 }

@@ -13,12 +13,14 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 
+    /// The selected item, by Menu id rather than row, as rows shift when
+    /// an item is left out.
     void setPositionId(uint16_t id);
-
-    /// Lap shows only in a free run, End workout only while a structured
-    /// workout runs.
-    void setMode(bool freeRun, bool workout);
     uint16_t getPositionId();
+
+    /// Shows the Lap item (and enables R2) when @p lap, and End workout
+    /// while a structured workout runs.
+    void setMode(bool lap, bool workout);
     void setUnitsImperial(bool isImperial);
     void setTimer(std::time_t sec);
     void setAvgPace(float secPerM);
@@ -44,7 +46,7 @@ protected:
 
     /// The item shown in row @p row.
     uint16_t itemAt(int16_t row) const;
-    bool     mFreeRun     = true;
+    bool     mLapShown    = true;
     bool     mWorkoutMode = false;
 
     void updateItem(MainMenuItem& item, int16_t index);

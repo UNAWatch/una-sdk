@@ -10,7 +10,9 @@ void TrackActionPresenter::activate()
 {
     view.setUnitsImperial(model->isUnitsImperial());
     const Track::Data& data = model->getTrackData();
-    view.setMode(!data.intervalsMode && !data.workoutMode, data.workoutMode);
+    // Lap is for a free run, and only once per pause.
+    view.setMode(!data.intervalsMode && !data.workoutMode && !model->isPausedLapTaken(),
+                 data.workoutMode);
     onTrackData(model->getTrackData());
 
     // Reset idle timer

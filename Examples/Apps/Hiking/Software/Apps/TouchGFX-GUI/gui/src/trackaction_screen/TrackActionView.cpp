@@ -43,12 +43,34 @@ void TrackActionView::tearDownScreen()
 
 void TrackActionView::setPositionId(uint16_t id)
 {
-    menuLayout.selectItem(id);
+    // A left-out item selects the row above it: Lap's selects Resume.
+    int16_t row = 0;
+    for (int16_t r = 1; r < menuLayout.getNumberOfItems() && itemAt(r) <= id; ++r) {
+        row = r;
+    }
+    menuLayout.selectItem(row);
+}
+
+void TrackActionView::setLapShown(bool lap)
+{
+    mLapShown = lap;
+    menuLayout.getButtons().setR2(lap ? Buttons::AMBER : Buttons::NONE);
+    menuLayout.setNumberOfItems(lap ? Menu::ID_COUNT : Menu::ID_COUNT - 1);
+    menuLayout.invalidate();
+}
+
+uint16_t TrackActionView::itemAt(int16_t row) const
+{
+    // Without Lap, its row is left out.
+    if (!mLapShown && row >= Menu::ID_LAP) {
+        return static_cast<uint16_t>(row + 1);
+    }
+    return static_cast<uint16_t>(row);
 }
 
 uint16_t TrackActionView::getPositionId()
 {
-    return menuLayout.getSelectedItem();
+    return itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()));
 }
 
 void TrackActionView::setUnitsImperial(bool isImperial)
@@ -115,10 +137,10 @@ void TrackActionView::updateItem(MainMenuItem& item, int16_t index)
         T_TEXT_DISCARD,
     };
 
-    if (index < 0 || index >= static_cast<int16_t>(Menu::ID_COUNT)) return;
+    if (index < 0 || index >= menuLayout.getNumberOfItems()) return;
 
     MenuItemConfig cfg;
-    cfg.msgId = sIds[index];
+    cfg.msgId = sIds[itemAt(index)];
     item.apply(cfg);
 }
 
@@ -132,10 +154,10 @@ void TrackActionView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
         T_TEXT_DISCARD,
     };
 
-    if (index < 0 || index >= static_cast<int16_t>(Menu::ID_COUNT)) return;
+    if (index < 0 || index >= menuLayout.getNumberOfItems()) return;
 
     MenuItemConfig cfg;
-    cfg.msgId = sIds[index];
+    cfg.msgId = sIds[itemAt(index)];
     item.apply(cfg);
 }
 
@@ -218,7 +240,7 @@ void TrackActionView::handleKeyEvent(uint8_t key)
     // countdown screen immediately; it counts down while R1 stays held and releasing
     // early returns here. Resume/Lap/Summary stay plain taps.
     if (key == SDK::GUI::Button::R1_PRESS) {
-        switch (menuLayout.getSelectedItem()) {
+        switch (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()))) {
         case Menu::ID_SAVE:
             presenter->setHoldConfirmMode(Model::HoldConfirmMode::Finish);
             application().gotoTrackHoldConfirmationScreenNoTransition();
@@ -233,7 +255,7 @@ void TrackActionView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::R1) {
-        switch (menuLayout.getSelectedItem()) {
+        switch (itemAt(static_cast<int16_t>(menuLayout.getSelectedItem()))) {
         case Menu::ID_RESUME:
             presenter->resumeTrack();
             application().gotoTrackScreenNoTransition();
@@ -249,9 +271,9 @@ void TrackActionView::handleKeyEvent(uint8_t key)
         }
     }
 
-    // The lap button takes a lap here too. The lap screen shows once the
-    // Service has taken it: it ignores a lap with nothing in it.
-    if (key == SDK::GUI::Button::R2) {
+    // The lap button takes a lap here too, while Lap is shown. The lap screen
+    // shows once the Service has taken it: it ignores a lap with nothing in it.
+    if (key == SDK::GUI::Button::R2 && mLapShown) {
         presenter->saveLap();
     }
 }
