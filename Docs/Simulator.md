@@ -50,7 +50,7 @@ Note: If you move the application to another location, you need to update the re
    ---------------------------------------------------
    ```
 #### Watch housing and panel look {#watch-housing}
-The example apps' simulators show the screen inside the UNA Watch, so the round screen sits in its bezel with the button labels (UP, DOWN, START / SELECT / STOP, BACK) around it. This comes from `SDK/Simulator/WatchHAL.hpp`, which `simulator/main.cpp` uses in place of `touchgfx::HALSDL2`.
+The TouchGFX simulators of the example apps and the tutorials show the screen inside the UNA Watch, so the round screen sits in its bezel with the button labels (UP, DOWN, START / SELECT / STOP, BACK) around it. This comes from `SDK/Simulator/WatchHAL.hpp`, which `simulator/main.cpp` uses in place of `touchgfx::HALSDL2`.
 
 | Key | What it does |
 |---|---|
@@ -70,10 +70,8 @@ Start options (environment variables):
 Notes:
 - The housings are `Utilities/Simulator/Skins/landscape_<body>.png`, made from the [Figma UI kit](Templates/Figma-UI-Kit/README.md) renders by `make_skins.py` in the same folder. The app's `una/Makefile` copies them next to the simulator. F4 copies the chosen one over `landscape.png`, the only name TouchGFX loads, so the last housing stays until the next build.
 - An app with its own `simulator/landscape.png` keeps it: F4 then only toggles that skin, as in plain TouchGFX.
-- The skins are fully opaque on purpose. A skin with transparent pixels makes TouchGFX cut a shaped window, and the screen hole would be cut out with it.
-- The panel look is measured from one video of the real watch: close to the watch, not a calibrated profile.
 - A simulator built with Visual Studio (`simulator/msvs`) has no housing unless you copy the `landscape_*.png` files next to the `.exe`.
-- To use it in your own app, copy the `WatchHAL` lines from an example's `simulator/main.cpp` and the skin copy line from its `una/Makefile` (`post_build`).
+- To use it in your own app, copy the `WatchHAL` lines from an example's or a tutorial's `simulator/main.cpp` ([HelloWorld](Tutorials/HelloWorld/ARCHITECTURE.md) is the smallest) and the skin copy line from its `una/Makefile` (`post_build`).
 #### Buzzer
 1. Buzzer actions are printed in the terminal as log messages. Example:
    ```cpp

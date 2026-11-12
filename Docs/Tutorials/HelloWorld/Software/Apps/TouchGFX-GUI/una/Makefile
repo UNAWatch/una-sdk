@@ -216,6 +216,8 @@ endif
 post_build:
 	@mkdir -p $(binary_output_path)
 	@if [ -f simulator/landscape.png ]; then cp simulator/landscape.png $(binary_output_path); else rm -f $(binary_output_path)/landscape.png; fi
+	@# UNA Watch housings for SDK/Simulator/WatchHAL.hpp (F4 cycles them)
+	@if [ -d "$(UNA_SDK)/Utilities/Simulator/Skins" ]; then cp "$(UNA_SDK)"/Utilities/Simulator/Skins/landscape_*.png $(binary_output_path); fi
 	@if [ -f simulator/portrait.png ]; then cp simulator/portrait.png $(binary_output_path); else rm -f $(binary_output_path)/portrait.png; fi
 
 $(object_output_path)/touchgfx/%.o: $(touchgfx_path)/%.cpp config/gcc/app.mk
