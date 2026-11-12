@@ -57,6 +57,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 namespace SDK::Simulator {
 
@@ -151,10 +152,18 @@ protected:
     void renderLCD_FrameBufferToMemory(const touchgfx::Rect& rect, uint8_t* frameBuffer) override
     {
         // 24 bpp, bytes B, G, R (see HALSDL2::scaleTo24bpp), sized like the
-        // surface HALSDL2 makes from it. Rebuilt from the 8-bit framebuffer
-        // before every call, so changing it in place is safe.
+        // surface HALSDL2 makes from it. With an RGB888 framebuffer this is
+        // TouchGFX's own framebuffer, not a copy, so the corners and the panel
+        // look are painted into a copy of it: the app's frame stays untouched
+        // whatever its format.
         const int w = DISPLAY_WIDTH;
         const int h = DISPLAY_HEIGHT;
+        const size_t bytes = static_cast<size_t>(w) * h * 3;
+        if (mFrame.size() != bytes) {
+            mFrame.resize(bytes);
+        }
+        std::memcpy(mFrame.data(), frameBuffer, bytes);
+        frameBuffer = mFrame.data();
         const float cx = (w - 1) / 2.0f;
         const float cy = (h - 1) / 2.0f;
         const float r2 = kGlassRadius * kGlassRadius;
@@ -463,6 +472,7 @@ private:
     Uint32            mHitTestWindowId = 0; // the window makeHousingDraggable() last set up
     bool              mSkinTried = false;
     SDL_Surface*      mSkin = nullptr;   // the shown skin, for the display's corners
+    std::vector<uint8_t> mFrame;         // the 24 bpp frame with corners and look, as shown
 };
 
 } // namespace SDK::Simulator
