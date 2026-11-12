@@ -526,7 +526,11 @@ provides the source lists and <code class="docutils literal notranslate"><span c
 where CMake can find one and otherwise, on Windows, the 32-bit SDL2 shipped with
 TouchGFX Designer. The build’s architecture must match the SDL2 it links: 32-bit with the
 TouchGFX copy, x64 with a 64-bit installed package. The compiler is whatever CMake
-finds: GCC on Linux and WSL, MSVC on Windows. MSVC comes with the free <em>Build Tools for
+finds: GCC on Linux and WSL, MSVC on Windows, Apple Clang on macOS (with SDL2 from
+Homebrew, <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">sdl2</span></code>). On Apple Silicon that SDL2 is arm64 and lives under
+<code class="docutils literal notranslate"><span class="pre">/opt/homebrew</span></code>, so the simulator must be built arm64 too: a native CMake does
+both by default, while a CMake running under Rosetta needs
+<code class="docutils literal notranslate"><span class="pre">-DCMAKE_OSX_ARCHITECTURES=arm64</span> <span class="pre">-DCMAKE_PREFIX_PATH=/opt/homebrew</span></code>. MSVC comes with the free <em>Build Tools for
 Visual Studio</em> as well as with the IDE, whose “C++ CMake tools for Windows” component
 also brings CMake and Ninja; the Ninja generator drives it from a developer command
 prompt (the x86 one for the 32-bit build), and the Visual Studio generator (<code class="docutils literal notranslate"><span class="pre">-A</span> <span class="pre">Win32</span></code>)
