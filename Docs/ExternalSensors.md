@@ -75,3 +75,11 @@ against this SDK keeps working as the frame grows. Use this to label records or
 log separate FIT series (e.g. `hr_source`, internal-PPG, and external-strap HR)
 — do not gate HR display on it. Apps that only need BPM should stay on
 `HEART_RATE` and ignore `HEART_RATE_EX` entirely.
+
+## Beat-to-beat intervals (optional, experimental)
+
+A strap also reports the R-R interval of each beat, which is what HRV metrics
+are computed from. `RR_INTERVAL` (0x44) is the opt-in sensor type that carries
+them, one interval per frame, parsed with `SensorDataParserRrInterval`. There is
+no firmware producer yet, so the type exists to be built against, not shipped
+against.
