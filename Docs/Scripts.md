@@ -296,7 +296,7 @@ The script implements sophisticated version detection:
 2. **Build Version Override**: Uses existing BUILD_VERSION if already set
 3. **Directory Setup**: Changes to specified or current directory for Git operations
 4. **Repository Analysis**: Determines if in a Git repository, extracts version from tags or commit hashes
-6. **Version Construction**: Builds version string based on tags, commits, and dirty state
+5. **Version Construction**: Builds version string based on tags, commits, and dirty state
 
 ### Key Parameters
 - `$1`: Optional directory path to use for version detection (defaults to current directory)
