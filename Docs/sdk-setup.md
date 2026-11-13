@@ -57,8 +57,10 @@ sudo apt install -y git python3 python3-pip cmake build-essential
 To use the **Arm GNU Toolchain**, unpack the `x86_64-arm-none-eabi` archive and put its `bin` folder on `PATH`, then skip to **Clone and setup environment**:
 
 ```bash
-tar xf ~/Downloads/arm-gnu-toolchain-*-x86_64-arm-none-eabi.tar.xz -C "$HOME/.local"
-export PATH="$(echo "$HOME"/.local/arm-gnu-toolchain-*-x86_64-arm-none-eabi/bin):$PATH"
+# Replace 14.3.rel1 with the version you downloaded
+mkdir -p "$HOME/.local"
+tar xf ~/Downloads/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz -C "$HOME/.local"
+export PATH="$HOME/.local/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:$PATH"
 ```
 
 To use the ST toolchain instead:
@@ -137,7 +139,7 @@ cp -r "$UNA_SDK/Examples/Apps/Alarm/"* MyAlarm
 # Create build dir
 mkdir -p MyAlarm/build
 
-# Configure
+# Configure (with Ninja instead of make, use -G Ninja)
 cmake -G "Unix Makefiles" -S MyAlarm/Software/Apps/Alarm-CMake -B MyAlarm/build
 
 # Build
@@ -164,6 +166,12 @@ For zsh:
 echo 'export UNA_SDK="$HOME/path/to/una-sdk"' >> ~/.zshrc
 echo 'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
+```
+
+With the Arm GNU Toolchain, add its `bin` folder in place of the ST `PATH` line (in `~/.bashrc` or `~/.zshrc`, with the version you unpacked):
+
+```bash
+echo 'export PATH="$HOME/.local/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:$PATH"' >> ~/.bashrc
 ```
 
 ##### Note about distro `gcc-arm-none-eabi`
