@@ -81,11 +81,13 @@ To use the ST toolchain instead:
 
 2) Ensure the ST toolchain is on your `PATH`.
 
-If you installed **CubeCLT**, the toolchain is in `/opt/st/stm32cubeclt_<version>/GNU-tools-for-STM32/bin` (`ls /opt/st` shows the version). The installer adds that folder, with CubeCLT's CMake, Make and Ninja, to `PATH` for new login shells through `/etc/profile.d/cubeclt-bin-path_<version>.sh`. Log out and back in, or set it for the current shell:
+If you installed **CubeCLT**, the toolchain is in `/opt/st/stm32cubeclt_<version>/GNU-tools-for-STM32/bin`, or `~/st/stm32cubeclt_<version>/GNU-tools-for-STM32/bin` if you installed without `sudo` (`ls /opt/st` or `ls ~/st` shows the version). The installer adds that folder, with CubeCLT's CMake, Make and Ninja, to `PATH` for new bash login shells through `/etc/profile.d/cubeclt-bin-path_<version>.sh`; zsh does not read that file. Log out and back in, or set it for the current shell:
 
 ```bash
 # Replace 1.22.0 with the CubeCLT version you installed
 export PATH="/opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:$PATH"
+# If you installed without sudo, use the ~/st location instead
+export PATH="$HOME/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:$PATH"
 ```
 
 If you use the toolchain that ST's VS Code extension downloads, it is typically under `~/.local/share/stm32cube/bundles/gnu-tools-for-stm32/<version>/bin`:
@@ -178,7 +180,7 @@ echo 'export PATH="/opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:$PATH"' >
 source ~/.zshrc
 ```
 
-The `PATH` line above is for CubeCLT: use the version you installed, or the folder from **Toolchain and PATH** if your toolchain is elsewhere. A CubeCLT installed with `sudo` is already on `PATH` in login shells, through `/etc/profile.d`, so this line is optional there.
+The `PATH` line above is for CubeCLT: use the version you installed, or the folder from **Toolchain and PATH** if your toolchain is elsewhere. For bash, a CubeCLT installed with `sudo` is already on `PATH` in login shells, through `/etc/profile.d`, so the line is optional there. zsh does not read `/etc/profile.d`, so zsh users need the line.
 
 With the Arm GNU Toolchain, add its `bin` folder in place of the ST `PATH` line (in `~/.bashrc` or `~/.zshrc`, with the version you unpacked):
 
