@@ -190,9 +190,9 @@
 <ul class="simple">
 <li><p>Linux/macOS/Windows development machine</p></li>
 <li><p>CMake 3.21+ (for manual builds)</p></li>
-<li><p>A build tool: <code class="docutils literal notranslate"><span class="pre">make</span></code> (Unix Makefiles)</p></li>
+<li><p>A build tool: <code class="docutils literal notranslate"><span class="pre">make</span></code> (Unix Makefiles) or Ninja</p></li>
 <li><p>Python 3 + pip (for packaging/build utilities)</p></li>
-<li><p><strong>ST ARM GCC Toolchain (CRITICAL)</strong>: STM32CubeIDE or STM32CubeCLT version <strong>required</strong>. System <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> is often incompatible (newlib syscall stubs such as <code class="docutils literal notranslate"><span class="pre">_write</span></code> can be missing). See <a class="reference internal" href="#toolchain-setup">toolchain setup</a>.</p></li>
+<li><p><strong>ARM GCC toolchain</strong>: either the ST toolchain (GNU Tools for STM32, from STM32CubeIDE or STM32CubeCLT) or the <a class="reference external" href="https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads">Arm GNU Toolchain</a> (<code class="docutils literal notranslate"><span class="pre">arm-none-eabi</span></code>). A distribution’s <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> package is not supported. See <a class="reference internal" href="#toolchain-setup">toolchain setup</a>.</p></li>
 <li><p><strong>TouchGFX (Windows-only for Designer)</strong>: For GUI development - TouchGFX Designer requires Windows. See <a class="reference internal" href="#touchgfx-require-a-windows-host">TouchGFX</a> below.</p></li>
 <li><p>USB cable for device flashing</p></li>
 <li><p>Git for cloning the SDK (release tags use <code class="docutils literal notranslate"><span class="pre">sdk-v*</span></code> for the SDK and <code class="docutils literal notranslate"><span class="pre">apps-v*</span></code> for reference apps in <code class="docutils literal notranslate"><span class="pre">Examples/</span></code>)</p></li>
@@ -202,8 +202,12 @@
 </section>
 <section id="toolchain-setup">
 <span id="id1"></span><h2>Toolchain Setup<a class="headerlink" href="#toolchain-setup" title="Link to this heading"></a></h2>
-<p><strong>CRITICAL</strong>: Use STMicroelectronics GNU Tools for STM32 (from <strong>STM32CubeIDE</strong> or <strong>STM32CubeCLT</strong>).</p>
-<p>The system <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> shipped by many distros (often GCC 13+) is frequently incompatible with this SDK’s bare-metal/newlib expectations and may fail with undefined syscall stubs (<code class="docutils literal notranslate"><span class="pre">_write</span></code>, <code class="docutils literal notranslate"><span class="pre">_close</span></code>, etc.).</p>
+<p>Use one of these <code class="docutils literal notranslate"><span class="pre">arm-none-eabi</span></code> toolchains:</p>
+<ul class="simple">
+<li><p><strong>ST GNU Tools for STM32</strong>, installed with <strong>STM32CubeIDE</strong> or <strong>STM32CubeCLT</strong>.</p></li>
+<li><p><strong>Arm GNU Toolchain</strong> 14.3.Rel1 or later, from <a class="reference external" href="https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads">developer.arm.com</a>: the <code class="docutils literal notranslate"><span class="pre">arm-none-eabi</span></code> archive for your host. Unpack it anywhere and put its <code class="docutils literal notranslate"><span class="pre">bin</span></code> folder on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>. No ST software is needed with this toolchain.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> package shipped by many distros is frequently incompatible with this SDK’s bare-metal/newlib expectations and may fail with undefined syscall stubs (<code class="docutils literal notranslate"><span class="pre">_write</span></code>, <code class="docutils literal notranslate"><span class="pre">_close</span></code>, etc.).</p>
 <section id="linux-setup">
 <h3>Linux Setup<a class="headerlink" href="#linux-setup" title="Link to this heading"></a></h3>
 <section id="get-required-software">
@@ -213,7 +217,7 @@
 <li><p>Python 3 + pip (packaging utilities)</p></li>
 <li><p>CMake 3.21+</p></li>
 <li><p>make</p></li>
-<li><p><strong>STM32CubeIDE</strong> or <strong>STM32CubeCLT</strong> (provides the <strong>ST</strong> <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> toolchain)</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">arm-none-eabi</span></code> toolchain: <strong>STM32CubeIDE</strong> or <strong>STM32CubeCLT</strong> (ST toolchain), or the <strong>Arm GNU Toolchain</strong></p></li>
 </ul>
 <p>Install hints (keep it minimal; equivalents work on other distros):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ubuntu/Debian</span>
@@ -224,10 +228,18 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 </section>
 <section id="prepare">
 <h4>Prepare<a class="headerlink" href="#prepare" title="Link to this heading"></a></h4>
-<section id="toolchain-cubeide-cubeclt-and-path">
-<h5>Toolchain (CubeIDE/CubeCLT) and PATH<a class="headerlink" href="#toolchain-cubeide-cubeclt-and-path" title="Link to this heading"></a></h5>
+<section id="toolchain-and-path">
+<h5>Toolchain and PATH<a class="headerlink" href="#toolchain-and-path" title="Link to this heading"></a></h5>
+<p>To use the <strong>Arm GNU Toolchain</strong>, unpack the <code class="docutils literal notranslate"><span class="pre">x86_64-arm-none-eabi</span></code> archive and put its <code class="docutils literal notranslate"><span class="pre">bin</span></code> folder on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, then skip to <strong>Clone and setup environment</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Replace 14.3.rel1 with the version you downloaded</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.local"</span>
+tar<span class="w"> </span>xf<span class="w"> </span>~/Downloads/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz<span class="w"> </span>-C<span class="w"> </span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.local"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.local/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>To use the ST toolchain instead:</p>
 <ol class="arabic simple">
-<li><p>Install the ST toolchain (choose one):</p></li>
+<li><p>Install it (choose one):</p></li>
 </ol>
 <ul>
 <li><p><strong>STM32CubeCLT</strong> (CLI-first):
@@ -282,7 +294,7 @@ cmake<span class="w"> </span>--version<span class="w"> </span><span class="o">||
 make<span class="w"> </span>--version<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
 </pre></div>
 </div>
-<p>If <code class="docutils literal notranslate"><span class="pre">which</span> <span class="pre">arm-none-eabi-gcc</span></code> prints nothing, your ST toolchain bin directory is not on <code class="docutils literal notranslate"><span class="pre">PATH</span></code> yet. Add it (see <strong>Prepare</strong> above) and re-open your terminal.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">which</span> <span class="pre">arm-none-eabi-gcc</span></code> prints nothing, your toolchain’s bin directory is not on <code class="docutils literal notranslate"><span class="pre">PATH</span></code> yet. Add it (see <strong>Prepare</strong> above) and re-open your terminal.</p>
 </section>
 </section>
 <section id="copy-and-build-an-existing-example">
@@ -296,7 +308,7 @@ cp<span class="w"> </span>-r<span class="w"> </span><span class="s2">"</span><sp
 <span class="c1"># Create build dir</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>MyAlarm/build
 
-<span class="c1"># Configure</span>
+<span class="c1"># Configure (with Ninja instead of make, use -G Ninja)</span>
 cmake<span class="w"> </span>-G<span class="w"> </span><span class="s2">"Unix Makefiles"</span><span class="w"> </span>-S<span class="w"> </span>MyAlarm/Software/Apps/Alarm-CMake<span class="w"> </span>-B<span class="w"> </span>MyAlarm/build
 
 <span class="c1"># Build</span>
@@ -321,10 +333,14 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <span class="nb">source</span><span class="w"> </span>~/.zshrc
 </pre></div>
 </div>
+<p>With the Arm GNU Toolchain, add its <code class="docutils literal notranslate"><span class="pre">bin</span></code> folder in place of the ST <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line (in <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> or <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>, with the version you unpacked):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="$HOME/.local/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
 </section>
 <section id="note-about-distro-gcc-arm-none-eabi">
 <h5>Note about distro <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code><a class="headerlink" href="#note-about-distro-gcc-arm-none-eabi" title="Link to this heading"></a></h5>
-<p>If you installed <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> from your distro repositories and builds fail with missing syscall stubs, switch to the <strong>ST</strong> toolchain from CubeIDE/CubeCLT and ensure its <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> is the one found first in <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+<p>If you installed <code class="docutils literal notranslate"><span class="pre">gcc-arm-none-eabi</span></code> from your distro repositories and builds fail with missing syscall stubs, switch to the Arm GNU Toolchain or the ST toolchain from CubeIDE/CubeCLT, and ensure its <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> is the one found first in <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
 </section>
 </section>
 </section>
@@ -340,7 +356,12 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <li><p>Click “Disable path length limit” after installation</p></li>
 </ul>
 </li>
-<li><p><a class="reference external" href="https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software">STM32CubeIDE</a> - Provides Toolchain, CMake, Make utilities (<em>note</em>: STM32CubeCLT does not includes <code class="docutils literal notranslate"><span class="pre">make</span></code> program, which is required)</p></li>
+<li><p>A toolchain and build tools, either:</p>
+<ul>
+<li><p><a class="reference external" href="https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software">STM32CubeIDE</a> - Provides Toolchain, CMake, Make utilities (<em>note</em>: STM32CubeCLT does not includes <code class="docutils literal notranslate"><span class="pre">make</span></code> program, which is required), or</p></li>
+<li><p>the <a class="reference external" href="https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads">Arm GNU Toolchain</a> (<code class="docutils literal notranslate"><span class="pre">mingw-w64-x86_64-arm-none-eabi</span></code> zip; unpack it and add its <code class="docutils literal notranslate"><span class="pre">bin</span></code> folder to your user <code class="docutils literal notranslate"><span class="pre">PATH</span></code>), plus CMake and Ninja (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cmake</span> <span class="pre">ninja</span></code>). Build with <code class="docutils literal notranslate"><span class="pre">-G</span> <span class="pre">Ninja</span></code> instead of <code class="docutils literal notranslate"><span class="pre">-G</span> <span class="pre">&quot;Unix</span> <span class="pre">Makefiles&quot;</span></code> in the commands below.</p></li>
+</ul>
+</li>
 <li><p><a class="reference external" href="https://code.visualstudio.com/download">VS Code</a> - IDE</p></li>
 </ul>
 </section>
