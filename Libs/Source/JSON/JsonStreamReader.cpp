@@ -19,6 +19,10 @@ extern "C" {
 #include <cstdint>
 #include <stdio.h>
 
+// Numbers are parsed with strtol/strtoll/strtoul/strtod, which the kernel
+// exports. atoi, atof and the like are not exported, so they would be linked
+// from the toolchain's C library into the app.
+
 namespace SDK
 {
 
@@ -81,7 +85,7 @@ bool JsonStreamReader::get(const char *query, bool &outValue) const
         } else if (type == JSONFalse) {
             outValue = false;
         } else if (type == JSONNumber) {
-            int32_t temp = std::atoi(pValue);
+            int32_t temp = std::strtol(pValue, nullptr, 10);
             if (temp < 0 || temp > 1) {
                 return false;
             }
@@ -140,7 +144,7 @@ bool JsonStreamReader::get(const char *query, int32_t &outValue) const
     if (JSON_SearchConst(mData, mLen, query, std::strlen(query), &pValue,
                 &valueLen, &type) == JSONSuccess)
     {
-        outValue = static_cast<int32_t>(std::atoi(pValue));
+        outValue = static_cast<int32_t>(std::strtol(pValue, nullptr, 10));
         return true;
     }
     return false;
@@ -168,7 +172,7 @@ bool JsonStreamReader::get(const char *query, int64_t &outValue) const
     if (JSON_SearchConst(mData, mLen, query, std::strlen(query), &pValue,
                 &valueLen, &type) == JSONSuccess)
     {
-        outValue = static_cast<int64_t>(std::atoll(pValue));
+        outValue = static_cast<int64_t>(std::strtoll(pValue, nullptr, 10));
         return true;
     }
     return false;
@@ -196,7 +200,7 @@ bool JsonStreamReader::get(const char *query, float &outValue) const
     if (JSON_SearchConst(mData, mLen, query, std::strlen(query), &pValue,
                 &valueLen, &type) == JSONSuccess)
     {
-        outValue = static_cast<float>(std::atof(pValue));
+        outValue = static_cast<float>(std::strtod(pValue, nullptr));
         return true;
     }
     return false;
@@ -210,7 +214,7 @@ bool JsonStreamReader::get(const char *query, double &outValue) const
     if (JSON_SearchConst(mData, mLen, query, std::strlen(query), &pValue,
                 &valueLen, &type) == JSONSuccess)
     {
-        outValue = std::atof(pValue);
+        outValue = std::strtod(pValue, nullptr);
         return true;
     }
     return false;
