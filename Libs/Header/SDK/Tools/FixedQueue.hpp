@@ -16,6 +16,8 @@ namespace SDK::Tools {
 // The watch binary does not define SIMULATOR, so this stays a plain array.
 template <typename T, size_t Capacity>
 class FixedQueue {
+    static_assert(Capacity > 0, "FixedQueue capacity must be greater than zero");
+
 public:
 #if defined(SIMULATOR)
     FixedQueue() = default;
@@ -65,9 +67,6 @@ public:
 #if defined(SIMULATOR)
         std::lock_guard<std::mutex> lock(mMutex);
 #endif
-        if constexpr (Capacity == 0) {
-            return false;
-        }
         if (mSize == Capacity) return false;
         data_[mTail] = value;
         mTail = (mTail + 1) % Capacity;
@@ -84,11 +83,6 @@ public:
 #if defined(SIMULATOR)
         std::lock_guard<std::mutex> lock(mMutex);
 #endif
-        // Capacity 0 cannot store an element. Reading data_[0] on an empty
-        // array, or taking an index modulo 0, is undefined.
-        if constexpr (Capacity == 0) {
-            return std::nullopt;
-        }
         std::optional<T> evicted;
         if (mSize == Capacity) {
             evicted = data_[mHead];

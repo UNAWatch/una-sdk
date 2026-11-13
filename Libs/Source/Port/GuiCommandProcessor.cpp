@@ -166,17 +166,6 @@ bool GuiCommandProcessor::waitForFrameTick()
                     }
                     messageQueued = true;
 
-                    if (!messageQueued) {
-                        // Answer it here. The shared tail below releases
-                        // without responding, so a sender blocked on this
-                        // would wait out its whole timeout instead of being
-                        // woken. Unreachable today -- the eviction above
-                        // guarantees a slot -- but it is the one path left in
-                        // this function that drops a caller silently.
-                        msg->setResult(SDK::MessageResult::FAIL);
-                        mKernel.comm.sendResponse(msg);
-                    }
-
                 } else {
                     msg->setResult(SDK::MessageResult::FAIL);
                     mKernel.comm.sendResponse(msg);

@@ -108,14 +108,6 @@ TEST(FixedQueue, MoveConstructsElementsThatCannotBeAssigned) {
     EXPECT_TRUE(q.empty());
 }
 
-TEST(FixedQueue, ZeroCapacityInsertIsRejected) {
-    SDK::Tools::FixedQueue<int, 0> q;
-    EXPECT_FALSE(q.push(1));
-    EXPECT_FALSE(q.pushEvictingOldest(1).has_value());
-    EXPECT_TRUE(q.empty());
-    EXPECT_EQ(q.size(), 0u);
-}
-
 TEST(FixedQueue, PushEvictingOldestDropsTheHeadOnly) {
     SDK::Tools::FixedQueue<int, 2> q;
     EXPECT_FALSE(q.pushEvictingOldest(1).has_value());
