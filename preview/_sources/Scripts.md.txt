@@ -289,16 +289,14 @@ The script implements sophisticated version detection:
 1. Git repository state analysis
 2. Semantic version parsing from tags
 3. Dirty state detection for uncommitted changes
-4. Safe directory configuration for Docker environments
-5. Fallback to default version when Git is unavailable
+4. Fallback to default version when Git is unavailable
 
 ### How It Works
 1. **Git Availability Check**: Verifies git command availability, falls back to default version if unavailable
 2. **Build Version Override**: Uses existing BUILD_VERSION if already set
 3. **Directory Setup**: Changes to specified or current directory for Git operations
-4. **Safe Directory Config**: Configures Git safe.directory for containerized environments
-5. **Repository Analysis**: Determines if in a Git repository, extracts version from tags or commit hashes
-6. **Version Construction**: Builds version string based on tags, commits, and dirty state
+4. **Repository Analysis**: Determines if in a Git repository, extracts version from tags or commit hashes
+5. **Version Construction**: Builds version string based on tags, commits, and dirty state
 
 ### Key Parameters
 - `$1`: Optional directory path to use for version detection (defaults to current directory)
@@ -322,7 +320,7 @@ The script implements sophisticated version detection:
 
 ### Error Handling
 - Gracefully handles non-Git environments with default version
-- Manages Git dubious ownership issues in Docker
+- Does not modify Git `safe.directory`. In a container where the checkout is owned by another user, the caller must run `git config --global --add safe.directory "$path"` before sourcing this script, or version detection falls back to `0.0.0-dev`.
 - Logs detailed information about version detection process
 - Exits early if version already set or Git unavailable
 

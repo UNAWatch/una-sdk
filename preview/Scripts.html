@@ -696,7 +696,6 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 <li><p>Git repository state analysis</p></li>
 <li><p>Semantic version parsing from tags</p></li>
 <li><p>Dirty state detection for uncommitted changes</p></li>
-<li><p>Safe directory configuration for Docker environments</p></li>
 <li><p>Fallback to default version when Git is unavailable</p></li>
 </ol>
 </section>
@@ -706,7 +705,6 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 <li><p><strong>Git Availability Check</strong>: Verifies git command availability, falls back to default version if unavailable</p></li>
 <li><p><strong>Build Version Override</strong>: Uses existing BUILD_VERSION if already set</p></li>
 <li><p><strong>Directory Setup</strong>: Changes to specified or current directory for Git operations</p></li>
-<li><p><strong>Safe Directory Config</strong>: Configures Git safe.directory for containerized environments</p></li>
 <li><p><strong>Repository Analysis</strong>: Determines if in a Git repository, extracts version from tags or commit hashes</p></li>
 <li><p><strong>Version Construction</strong>: Builds version string based on tags, commits, and dirty state</p></li>
 </ol>
@@ -745,7 +743,7 @@ The CMake build passes one per entry of <code class="docutils literal notranslat
 <span id="error-handling-4"></span><h3>Error Handling<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Gracefully handles non-Git environments with default version</p></li>
-<li><p>Manages Git dubious ownership issues in Docker</p></li>
+<li><p>Does not modify Git <code class="docutils literal notranslate"><span class="pre">safe.directory</span></code>. In a container where the checkout is owned by another user, the caller must run <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">config</span> <span class="pre">--global</span> <span class="pre">--add</span> <span class="pre">safe.directory</span> <span class="pre">&quot;$path&quot;</span></code> before sourcing this script, or version detection falls back to <code class="docutils literal notranslate"><span class="pre">0.0.0-dev</span></code>.</p></li>
 <li><p>Logs detailed information about version detection process</p></li>
 <li><p>Exits early if version already set or Git unavailable</p></li>
 </ul>

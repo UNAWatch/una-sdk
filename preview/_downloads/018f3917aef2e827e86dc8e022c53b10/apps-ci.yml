@@ -31,6 +31,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Una version script leaves git config alone outside a repo
+        run: bash Utilities/Scripts/build-cube/test_una_version.sh
+
       - name: Guard the ABI -> minKernelVersion mapping
         # (a) run the resolver self-tests; (b) fail if KERNEL_INTERFACE_VERSION was bumped
         #     without an abi_kernel_map.json entry (also validates map format + monotonicity);
@@ -169,6 +172,9 @@ jobs:
           # RunLVGL's GUI is built from the LVGL submodule (ThirdParty/lvgl).
           submodules: recursive
 
+      - name: Trust workspace for Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
 
@@ -276,6 +282,9 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
+
+      - name: Trust workspace for Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt

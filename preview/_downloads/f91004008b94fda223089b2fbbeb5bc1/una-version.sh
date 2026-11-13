@@ -54,22 +54,18 @@ else
   exit 1
 fi
 
-# Get top-level git dir for safe.directory (handles nested submodules)
-# Safe bootstrap for repo toplevel (Docker dubious ownership)
-toplevel=""
-log "Attempting to get git directory"
-git_dir=$(git rev-parse --git-dir 2>&1 || echo "fatal: git rev-parse failed")
-log "git rev-parse --git-dir output: '$git_dir'"
-if echo "$git_dir" | grep -q "dubious ownership\\|unsafe repository\\|fatal:" ; then
-  log "Detected dubious ownership or unsafe repository, configuring safe.directory"
-  git config --global safe.directory '*'
-  log "Set global safe.directory to '*' "
-  toplevel=$(git rev-parse --show-toplevel 2>&1 || echo "fatal: git rev-parse failed")
-  log "git rev-parse --show-toplevel output after config: '$toplevel'"
-  git config --global safe.directory "$toplevel"
-  log "Set global safe.directory to '$toplevel'"
+# Discover the toplevel without writing git config and without reading the
+# error text. A plain rev-parse fails for "not a repository" and for
+# ownership, in any locale. Do not retry with safe.directory. That trusts
+# the checkout, and the git status below then runs a core.fsmonitor hook or
+# an alias from its config. A caller who means to build this tree sets
+# safe.directory, and the rev-parse then succeeds on its own.
+log "Attempting to get git toplevel"
+toplevel=$(git rev-parse --show-toplevel 2>/dev/null || true)
+if [ -z "$toplevel" ]; then
+  log "rev-parse failed; not overriding safe.directory"
+  toplevel="fatal: git rev-parse failed"
 else
-  toplevel=$(git rev-parse --show-toplevel 2>&1 || echo "fatal: git rev-parse failed")
   log "git rev-parse --show-toplevel output: '$toplevel'"
 fi
 log "toplevel: $toplevel"
@@ -78,7 +74,8 @@ if echo "$toplevel" | grep -q "fatal:"; then
   export BUILD_VERSION
   echo "BUILD_VERSION=$BUILD_VERSION"
   log "Script completed with default version"
-  exit 0
+  # Sourced, return keeps the caller's shell; run with bash, exit ends it.
+  return 0 2>/dev/null || exit 0
 fi
 if cd "$toplevel"; then
   log "Successfully changed directory to toplevel: $toplevel"
