@@ -53,10 +53,12 @@ Libs/Source/JSON/JsonStreamWriter.cpp\
 Libs/Source/Fit/FitCrc.cpp\
 Libs/Source/Fit/FitWriter.cpp\
 ADDITIONAL_SOURCES :=
-ADDITIONAL_INCLUDE_PATHS := $(SDK)/Libs/Header\
+# $$(SDK) is expanded by the sub-make, not here: MSYS (TouchGFX's Windows
+# shell) rewrites an exported value holding two C:/ paths as a Windows path
+# list on its way to make.exe, and the build breaks.
+ADDITIONAL_INCLUDE_PATHS := $$(SDK)/Libs/Header\
 ../../Libs/Header\
-\
-$(SDK)/ThirdParty/coreJSON/source/include\
+$$(SDK)/ThirdParty/coreJSON/source/include
 ADDITIONAL_LIBRARY_PATHS := 
 ADDITIONAL_LIBRARIES :=
 
