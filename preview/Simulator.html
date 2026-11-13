@@ -49,6 +49,12 @@
 <li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">UNA-Watch Simulator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#glance-simulator">Glance Simulator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-and-run-glancesteps">Build and Run GlanceSteps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automated-checks-and-screenshots">Automated Checks and Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-another-glance">Add Another Glance</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#need-components">Need Components</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-una-sdk-variable-install-una-sdk-variable">Install UNA_SDK variable {#install-una-sdk-variable}</a></li>
@@ -183,6 +189,81 @@
 <p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>. The <a class="reference internal" href="#lvgl-simulator"><span class="xref myst">LVGL simulators</span></a> are plain CMake projects that need a compiler and SDL2 but no IDE.<br />
 Note: If you move the application to another location, you need to update the relative path to <strong>TouchGFX library path</strong>.
 See: <a class="reference internal" href="#transfer-application"><span class="xref myst">Transfer Application</span></a></p>
+<section id="glance-simulator">
+<h2>Glance Simulator<a class="headerlink" href="#glance-simulator" title="Link to this heading"></a></h2>
+<p>Glances can run their real service code against the mock kernel in an SDL2
+window, without a separate GUI process or an ARM toolchain. The shared
+<code class="docutils literal notranslate"><span class="pre">SDK::Simulator::GlanceHost</span></code> displays the 240 x 60 glance area, supports text,
+ABGR2222 images (including transparency), lines and rectangles, and supplies
+start, 10 Hz tick and stop events. Closing the window or pressing Escape sends
+the stop event so the service can disconnect its sensors before shutdown.</p>
+<section id="build-and-run-glancesteps">
+<h3>Build and Run GlanceSteps<a class="headerlink" href="#build-and-run-glancesteps" title="Link to this heading"></a></h3>
+<p>Install a C++17 compiler, CMake 3.21 or newer, SDL2 development files, and the
+LVGL submodule. On macOS, install CMake and SDL2 with <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">cmake</span> <span class="pre">sdl2</span></code>;
+on Debian/Ubuntu, use <code class="docutils literal notranslate"><span class="pre">build-essential</span> <span class="pre">cmake</span> <span class="pre">libsdl2-dev</span></code>. Windows uses the same
+SDL2 discovery and 32-bit TouchGFX fallback as the LVGL app simulators.</p>
+<p>From the SDK root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">UNA_SDK</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">"</span>
+git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>ThirdParty/lvgl
+cmake<span class="w"> </span>-S<span class="w"> </span>Examples/Apps/GlanceSteps/Software/simulator<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-B<span class="w"> </span>Examples/Apps/GlanceSteps/Software/simulator/build<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
+cmake<span class="w"> </span>--build<span class="w"> </span>Examples/Apps/GlanceSteps/Software/simulator/build
+<span class="nb">cd</span><span class="w"> </span>Examples/Apps/GlanceSteps/Software/simulator/build/bin
+./GlanceStepsSimulator
+</pre></div>
+</div>
+<p>With a multi-configuration generator, build with <code class="docutils literal notranslate"><span class="pre">--config</span> <span class="pre">Debug</span></code> and run the
+executable from <code class="docutils literal notranslate"><span class="pre">build/bin/Debug</span></code>. In PowerShell, set
+<code class="docutils literal notranslate"><span class="pre">$env:UNA_SDK</span> <span class="pre">=</span> <span class="pre">(Get-Location).Path</span></code> instead of using <code class="docutils literal notranslate"><span class="pre">export</span></code>.</p>
+<p>The preview defaults to 3x scale; <code class="docutils literal notranslate"><span class="pre">--scale</span> <span class="pre">N</span></code> accepts 1 through 10. Simulated
+sensor parameters live in <code class="docutils literal notranslate"><span class="pre">Software/simulator/ConfigurationSimulator.hpp</span></code>.
+The daily step counter uses the mock’s session step sequence: it does not
+persist daily totals or simulate midnight rollover.</p>
+</section>
+<section id="automated-checks-and-screenshots">
+<h3>Automated Checks and Screenshots<a class="headerlink" href="#automated-checks-and-screenshots" title="Link to this heading"></a></h3>
+<p>From the SDK root, run the rendering and real-service lifecycle tests:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ctest<span class="w"> </span>--test-dir<span class="w"> </span>Examples/Apps/GlanceSteps/Software/simulator/build<span class="w"> </span>--output-on-failure
+</pre></div>
+</div>
+<p>For a finite headless run, from the binary directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">SDL_VIDEODRIVER</span><span class="o">=</span>dummy<span class="w"> </span>./GlanceStepsSimulator<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--duration-ms<span class="w"> </span><span class="m">3000</span><span class="w"> </span>--screenshot<span class="w"> </span>glance.bmp
+</pre></div>
+</div>
+<p>Screenshots are unscaled 240 x 60 BMP files. A failed screenshot or a run with
+no glance updates returns a nonzero exit code. The regression tests check
+control rendering, clipping, transparency, copied update buffers, invalid
+requests, live sensor updates and clean shutdown. Linux simulator CI runs
+these tests as its headless smoke check.</p>
+</section>
+<section id="add-another-glance">
+<h3>Add Another Glance<a class="headerlink" href="#add-another-glance" title="Link to this heading"></a></h3>
+<p>Use GlanceSteps’ <code class="docutils literal notranslate"><span class="pre">Software/simulator</span></code> directory as the template. The CMake
+helper in <code class="docutils literal notranslate"><span class="pre">cmake/una-glance-simulator.cmake</span></code> provides the shared runtime and
+entry point:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">include</span><span class="p">(</span><span class="o">$ENV{</span><span class="nv">UNA_SDK</span><span class="o">}</span><span class="s">/cmake/una-glance-simulator.cmake</span><span class="p">)</span>
+<span class="nb">una_add_glance_simulator</span><span class="p">(</span><span class="s">MyGlanceSimulator</span>
+<span class="w">   </span><span class="s">APP_ID</span><span class="w"> </span><span class="s2">"0123456789ABCDEF"</span>
+<span class="w">   </span><span class="s">SOURCES</span><span class="w"> </span><span class="o">${</span><span class="nv">LIBS_SOURCES</span><span class="o">}</span>
+<span class="w">   </span><span class="s">INCLUDE_DIRS</span><span class="w"> </span><span class="o">${</span><span class="nv">LIBS_INCLUDE_DIRS</span><span class="o">}</span><span class="w"> </span><span class="o">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="o">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The entry point expects <code class="docutils literal notranslate"><span class="pre">Service.hpp</span></code> with <code class="docutils literal notranslate"><span class="pre">Service(SDK::Kernel&amp;)</span></code> and <code class="docutils literal notranslate"><span class="pre">run()</span></code>,
+as the SDK glance examples provide. Keep the project’s sensor configuration
+reachable through the same include layout as GlanceSteps. No changes to the
+glance service are required. This rebuilds source for the host; it does not
+load a packaged <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>.</p>
+<p>The renderer uses size-matched LVGL Montserrat fonts in place of the kernel’s
+Poppins faces (25 and 35 map to 26 and 36). Font weight, italics, text metrics
+and antialiasing can differ from the watch. Use the preview for layout,
+lifecycle and data-flow testing, and verify pixel-exact typography and actual
+sensor behavior on hardware.</p>
+</section>
+</section>
 <section id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
 <section id="need-components">
