@@ -74,7 +74,7 @@ To use the ST toolchain instead:
   unzip stm32cubeclt_*-Lin-x86_64.sh.zip      # or the -Lin-Deb- zip
   sudo sh stm32cubeclt_*-Lin-x86_64.sh        # or the -Lin-Deb- installer
   ```
-  Run without `sudo`, the Generic Linux installer installs to `~/st/stm32cubeclt_<version>` instead.
+  Run without `sudo`, the Generic Linux installer installs to `~/st/stm32cubeclt_<version>` instead. It still asks for `sudo` to install the ST-Link debug tools and its `/etc/profile.d` entry; declining stops the installation.
 
 - **STM32CubeIDE** (IDE + toolchain):
   Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html
@@ -180,7 +180,7 @@ echo 'export PATH="/opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:$PATH"' >
 source ~/.zshrc
 ```
 
-The `PATH` line above is for CubeCLT: use the version you installed, or the folder from **Toolchain and PATH** if your toolchain is elsewhere. For bash, a CubeCLT installed with `sudo` is already on `PATH` in login shells, through `/etc/profile.d`, so the line is optional there. zsh does not read `/etc/profile.d`, so zsh users need the line.
+The `PATH` line above is for CubeCLT: use the version you installed, or the folder from **Toolchain and PATH** if your toolchain is elsewhere. For bash, CubeCLT is already on `PATH` in login shells, through the installer's `/etc/profile.d` entry, so the line is optional there. zsh does not read `/etc/profile.d`, so zsh users need the line.
 
 With the Arm GNU Toolchain, add its `bin` folder in place of the ST `PATH` line (in `~/.bashrc` or `~/.zshrc`, with the version you unpacked):
 
