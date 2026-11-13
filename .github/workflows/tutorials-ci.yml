@@ -57,6 +57,9 @@ jobs:
           # The LVGL GUI variants are built from the LVGL submodule (ThirdParty/lvgl).
           submodules: recursive
 
+      - name: Trust workspace for Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Install scripts requirements
         run: python3 -m pip install --break-system-packages -r Utilities/Scripts/app_packer/requirements.txt
 
