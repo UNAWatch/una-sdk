@@ -243,11 +243,13 @@ tar<span class="w"> </span>xf<span class="w"> </span>~/Downloads/arm-gnu-toolcha
 </ol>
 <ul>
 <li><p><strong>STM32CubeCLT</strong> (CLI-first):
-Download/install from: https://www.st.com/en/development-tools/stm32cubeclt.html</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chmod<span class="w"> </span>+x<span class="w"> </span>~/Downloads/STM32CubeCLT_Linux64_v1-*.run
-~/Downloads/STM32CubeCLT_Linux64_v1-*.run
+Download from: https://www.st.com/en/development-tools/stm32cubeclt.html. The Debian installer (<code class="docutils literal notranslate"><span class="pre">...-Lin-Deb-x86_64.sh.zip</span></code>) suits Debian and Ubuntu; the Generic Linux installer (<code class="docutils literal notranslate"><span class="pre">...-Lin-x86_64.sh.zip</span></code>) suits any distribution. Unzip it and run the installer with <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, which installs to <code class="docutils literal notranslate"><span class="pre">/opt/st/stm32cubeclt_&lt;version&gt;</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/Downloads
+unzip<span class="w"> </span>stm32cubeclt_*-Lin-x86_64.sh.zip<span class="w">      </span><span class="c1"># or the -Lin-Deb- zip</span>
+sudo<span class="w"> </span>sh<span class="w"> </span>stm32cubeclt_*-Lin-x86_64.sh<span class="w">        </span><span class="c1"># or the -Lin-Deb- installer</span>
 </pre></div>
 </div>
+<p>Run without <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, the Generic Linux installer installs to <code class="docutils literal notranslate"><span class="pre">~/st/stm32cubeclt_&lt;version&gt;</span></code> instead. It still asks for <code class="docutils literal notranslate"><span class="pre">sudo</span></code> to install the ST-Link debug tools and its <code class="docutils literal notranslate"><span class="pre">/etc/profile.d</span></code> entry; declining stops the installation.</p>
 </li>
 <li><p><strong>STM32CubeIDE</strong> (IDE + toolchain):
 Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html</p></li>
@@ -255,8 +257,16 @@ Download/install from: https://www.st.com/en/development-tools/stm32cubeide.html
 <ol class="arabic simple" start="2">
 <li><p>Ensure the ST toolchain is on your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p></li>
 </ol>
-<p>If you installed <strong>CubeCLT</strong>, the toolchain is typically under:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+<p>If you installed <strong>CubeCLT</strong>, the toolchain is in <code class="docutils literal notranslate"><span class="pre">/opt/st/stm32cubeclt_&lt;version&gt;/GNU-tools-for-STM32/bin</span></code>, or <code class="docutils literal notranslate"><span class="pre">~/st/stm32cubeclt_&lt;version&gt;/GNU-tools-for-STM32/bin</span></code> if you installed without <code class="docutils literal notranslate"><span class="pre">sudo</span></code> (<code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">/opt/st</span></code> or <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">~/st</span></code> shows the version). The installer adds that folder, with CubeCLT’s CMake, Make and Ninja, to <code class="docutils literal notranslate"><span class="pre">PATH</span></code> for new bash login shells through <code class="docutils literal notranslate"><span class="pre">/etc/profile.d/cubeclt-bin-path_&lt;version&gt;.sh</span></code>; zsh does not read that file. Log out and back in, or set it for the current shell:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Replace 1.22.0 with the CubeCLT version you installed</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+<span class="c1"># If you installed without sudo, use the ~/st location instead</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>If you use the toolchain that ST’s VS Code extension downloads, it is typically under <code class="docutils literal notranslate"><span class="pre">~/.local/share/stm32cube/bundles/gnu-tools-for-stm32/&lt;version&gt;/bin</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Replace 14.3.1+st.2 with the bundle version you have</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.local/share/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
 </pre></div>
 </div>
 <p>If <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> is still not found and you installed <strong>CubeIDE</strong>, add the directory that contains <code class="docutils literal notranslate"><span class="pre">arm-none-eabi-gcc</span></code> to your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> (it is usually a <code class="docutils literal notranslate"><span class="pre">.../plugins/...gnu-tools-for-stm32.../tools/bin</span></code> folder inside the CubeIDE installation).</p>
@@ -323,16 +333,17 @@ cmake<span class="w"> </span>--build<span class="w"> </span>MyAlarm/build
 <p>If you don’t want to export variables every time, add them to your shell profile.</p>
 <p>For bash:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export UNA_SDK="$HOME/path/to/una-sdk"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
-<span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="/opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
 <span class="nb">source</span><span class="w"> </span>~/.bashrc
 </pre></div>
 </div>
 <p>For zsh:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export UNA_SDK="$HOME/path/to/una-sdk"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
-<span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="/opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
 <span class="nb">source</span><span class="w"> </span>~/.zshrc
 </pre></div>
 </div>
+<p>The <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line above is for CubeCLT: use the version you installed, or the folder from <strong>Toolchain and PATH</strong> if your toolchain is elsewhere. For bash, CubeCLT is already on <code class="docutils literal notranslate"><span class="pre">PATH</span></code> in login shells, through the installer’s <code class="docutils literal notranslate"><span class="pre">/etc/profile.d</span></code> entry, so the line is optional there. zsh does not read <code class="docutils literal notranslate"><span class="pre">/etc/profile.d</span></code>, so zsh users need the line.</p>
 <p>With the Arm GNU Toolchain, add its <code class="docutils literal notranslate"><span class="pre">bin</span></code> folder in place of the ST <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line (in <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> or <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>, with the version you unpacked):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="$HOME/.local/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
 </pre></div>
