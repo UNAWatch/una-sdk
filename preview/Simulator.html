@@ -59,6 +59,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#simulation">Simulation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#buttons">Buttons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#watch-housing-and-panel-look-watch-housing">Watch housing and panel look {#watch-housing}</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#buzzer">Buzzer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#backlight">Backlight</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#vibro">Vibro</a></li>
@@ -255,6 +256,57 @@ See: <a class="reference internal" href="#transfer-application"><span class="xre
 </div>
 </li>
 </ol>
+</section>
+<section id="watch-housing-and-panel-look-watch-housing">
+<h4>Watch housing and panel look {#watch-housing}<a class="headerlink" href="#watch-housing-and-panel-look-watch-housing" title="Link to this heading"></a></h4>
+<p>The TouchGFX simulators of the example apps and the tutorials show the screen inside the UNA Watch, so the round screen sits in its bezel with the button labels (UP, DOWN, START / SELECT / STOP, BACK) around it. This comes from <code class="docutils literal notranslate"><span class="pre">SDK/Simulator/WatchHAL.hpp</span></code>, which <code class="docutils literal notranslate"><span class="pre">simulator/main.cpp</span></code> uses in place of <code class="docutils literal notranslate"><span class="pre">touchgfx::HALSDL2</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>F4</strong></p></td>
+<td><p>Next housing: white → black → teal → none → white. With none, the window is just the 240×240 display, with black corners as on the watch.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>L</strong></p></td>
+<td><p>Panel look on/off: the colours toned the way the real panel shows them (lifted blue-grey blacks, dimmer whites, about half the saturation). Only the PC window changes, not the app.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>F3</strong></p></td>
+<td><p>Screenshot (TouchGFX’s own): the whole window, housing included, in <code class="docutils literal notranslate"><span class="pre">screenshots/</span></code> next to the simulator. For a flat 240×240 shot, press F4 until the housing is off first.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Drag</strong></p></td>
+<td><p>The housing window has no title bar: drag it by the housing to move it (TouchGFX’s right-button drag anywhere also works).</p></td>
+</tr>
+</tbody>
+</table>
+<p>Start options (environment variables):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UNA_SIM_HOUSING</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">white</span></code> (default), <code class="docutils literal notranslate"><span class="pre">black</span></code>, <code class="docutils literal notranslate"><span class="pre">teal</span></code> or <code class="docutils literal notranslate"><span class="pre">none</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">UNA_SIM_LOOK</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">watch</span></code> starts with the panel look on</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UNA_SIM_SLOW</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code>–<code class="docutils literal notranslate"><span class="pre">10</span></code>: every frame lasts that many times longer. The simulator already runs at the watch’s frame rate, but the watch can fall behind on frames that redraw a lot, so animations feel faster on the PC.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>The housings are <code class="docutils literal notranslate"><span class="pre">Utilities/Simulator/Skins/landscape_&lt;body&gt;.png</span></code>, made from the <span class="xref myst">Figma UI kit</span> renders by <code class="docutils literal notranslate"><span class="pre">make_skins.py</span></code> in the same folder. The app’s <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code> copies them next to the simulator. F4 copies the chosen one over <code class="docutils literal notranslate"><span class="pre">landscape.png</span></code>, the only name TouchGFX loads, so the last housing stays until the next build.</p></li>
+<li><p>An app with its own <code class="docutils literal notranslate"><span class="pre">simulator/landscape.png</span></code> keeps it: F4 then only toggles that skin, as in plain TouchGFX.</p></li>
+<li><p>A simulator built with Visual Studio (<code class="docutils literal notranslate"><span class="pre">simulator/msvs</span></code>) has no housing unless you copy the <code class="docutils literal notranslate"><span class="pre">landscape_*.png</span></code> files next to the <code class="docutils literal notranslate"><span class="pre">.exe</span></code>.</p></li>
+<li><p>To use it in your own app, copy the <code class="docutils literal notranslate"><span class="pre">WatchHAL</span></code> lines from an example’s or a tutorial’s <code class="docutils literal notranslate"><span class="pre">simulator/main.cpp</span></code> (<a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html"><span class="std std-doc">HelloWorld</span></a> is the smallest) and the skin copy line from its <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code> (<code class="docutils literal notranslate"><span class="pre">post_build</span></code>).</p></li>
+</ul>
 </section>
 <section id="buzzer">
 <h4>Buzzer<a class="headerlink" href="#buzzer" title="Link to this heading"></a></h4>
