@@ -11,9 +11,9 @@ For platform architecture, see [platform overview](platform-overview.md). For tu
 
 - Linux/macOS/Windows development machine
 - CMake 3.21+ (for manual builds)
-- A build tool: `make` (Unix Makefiles)
+- A build tool: `make` (Unix Makefiles) or Ninja
 - Python 3 + pip (for packaging/build utilities)
-- **ST ARM GCC Toolchain (CRITICAL)**: STM32CubeIDE or STM32CubeCLT version **required**. System `gcc-arm-none-eabi` is often incompatible (newlib syscall stubs such as `_write` can be missing). See [toolchain setup](#toolchain-setup).
+- **ARM GCC toolchain**: either the ST toolchain (GNU Tools for STM32, from STM32CubeIDE or STM32CubeCLT) or the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads) (`arm-none-eabi`). A distribution's `gcc-arm-none-eabi` package is not supported. See [toolchain setup](#toolchain-setup).
 - **TouchGFX (Windows-only for Designer)**: For GUI development - TouchGFX Designer requires Windows. See [TouchGFX](#touchgfx-require-a-windows-host) below.
 - USB cable for device flashing
 - Git for cloning the SDK (release tags use `sdk-v*` for the SDK and `apps-v*` for reference apps in `Examples/`)
@@ -25,9 +25,12 @@ The rest of this document provides OS-specific, end-to-end setup sections (Linux
 (toolchain-setup)=
 ## Toolchain Setup
 
-**CRITICAL**: Use STMicroelectronics GNU Tools for STM32 (from **STM32CubeIDE** or **STM32CubeCLT**).
+Use one of these `arm-none-eabi` toolchains:
 
-The system `gcc-arm-none-eabi` shipped by many distros (often GCC 13+) is frequently incompatible with this SDK's bare-metal/newlib expectations and may fail with undefined syscall stubs (`_write`, `_close`, etc.).
+- **ST GNU Tools for STM32**, installed with **STM32CubeIDE** or **STM32CubeCLT**.
+- **Arm GNU Toolchain** 14.3.Rel1 or later, from [developer.arm.com](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads): the `arm-none-eabi` archive for your host. Unpack it anywhere and put its `bin` folder on `PATH`. No ST software is needed with this toolchain.
+
+The `gcc-arm-none-eabi` package shipped by many distros is frequently incompatible with this SDK's bare-metal/newlib expectations and may fail with undefined syscall stubs (`_write`, `_close`, etc.).
 
 ### Linux Setup
 
@@ -37,7 +40,7 @@ The system `gcc-arm-none-eabi` shipped by many distros (often GCC 13+) is freque
 - Python 3 + pip (packaging utilities)
 - CMake 3.21+
 - make
-- **STM32CubeIDE** or **STM32CubeCLT** (provides the **ST** `arm-none-eabi-gcc` toolchain)
+- An `arm-none-eabi` toolchain: **STM32CubeIDE** or **STM32CubeCLT** (ST toolchain), or the **Arm GNU Toolchain**
 
 Install hints (keep it minimal; equivalents work on other distros):
 
@@ -49,9 +52,18 @@ sudo apt install -y git python3 python3-pip cmake build-essential
 
 #### Prepare
 
-##### Toolchain (CubeIDE/CubeCLT) and PATH
+##### Toolchain and PATH
 
-1) Install the ST toolchain (choose one):
+To use the **Arm GNU Toolchain**, unpack the `x86_64-arm-none-eabi` archive and put its `bin` folder on `PATH`, then skip to **Clone and setup environment**:
+
+```bash
+tar xf ~/Downloads/arm-gnu-toolchain-*-x86_64-arm-none-eabi.tar.xz -C "$HOME/.local"
+export PATH="$(echo "$HOME"/.local/arm-gnu-toolchain-*-x86_64-arm-none-eabi/bin):$PATH"
+```
+
+To use the ST toolchain instead:
+
+1) Install it (choose one):
 
 - **STM32CubeCLT** (CLI-first):
   Download/install from: https://www.st.com/en/development-tools/stm32cubeclt.html
@@ -109,7 +121,7 @@ cmake --version || true
 make --version || true
 ```
 
-If `which arm-none-eabi-gcc` prints nothing, your ST toolchain bin directory is not on `PATH` yet. Add it (see **Prepare** above) and re-open your terminal.
+If `which arm-none-eabi-gcc` prints nothing, your toolchain's bin directory is not on `PATH` yet. Add it (see **Prepare** above) and re-open your terminal.
 
 #### Copy and Build an Existing Example
 
@@ -156,7 +168,7 @@ source ~/.zshrc
 
 ##### Note about distro `gcc-arm-none-eabi`
 
-If you installed `gcc-arm-none-eabi` from your distro repositories and builds fail with missing syscall stubs, switch to the **ST** toolchain from CubeIDE/CubeCLT and ensure its `arm-none-eabi-gcc` is the one found first in `PATH`.
+If you installed `gcc-arm-none-eabi` from your distro repositories and builds fail with missing syscall stubs, switch to the Arm GNU Toolchain or the ST toolchain from CubeIDE/CubeCLT, and ensure its `arm-none-eabi-gcc` is the one found first in `PATH`.
 
 ### Windows Setup
 
@@ -166,7 +178,9 @@ If you installed `gcc-arm-none-eabi` from your distro repositories and builds fa
 - [Python 3](https://www.python.org/downloads/windows/) -  Notes:
   - Enable "Add python.exe to PATH" checkmark
   - Click "Disable path length limit" after installation
-- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities (*note*: STM32CubeCLT does not includes `make` program, which is required)
+- A toolchain and build tools, either:
+  - [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) - Provides Toolchain, CMake, Make utilities (*note*: STM32CubeCLT does not includes `make` program, which is required), or
+  - the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads) (`mingw-w64-x86_64-arm-none-eabi` zip; unpack it and add its `bin` folder to your user `PATH`), plus CMake and Ninja (`pip install cmake ninja`). Build with `-G Ninja` instead of `-G "Unix Makefiles"` in the commands below.
 - [VS Code](https://code.visualstudio.com/download) - IDE
 
 #### Prepare
