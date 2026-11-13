@@ -3,6 +3,93 @@
 The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see [Linux (GCC)](#linux-gcc). The [LVGL simulators](#lvgl-simulator) are plain CMake projects that need a compiler and SDL2 but no IDE.   
 Note: If you move the application to another location, you need to update the relative path to **TouchGFX library path**.
       See: [Transfer Application](#transfer-application) 
+
+   ## Glance Simulator
+
+   Glances can run their real service code against the mock kernel in an SDL2
+   window, without a separate GUI process or an ARM toolchain. The shared
+   `SDK::Simulator::GlanceHost` displays the 240 x 60 glance area, supports text,
+   ABGR2222 images (including transparency), lines and rectangles, and supplies
+   start, 10 Hz tick and stop events. Closing the window or pressing Escape sends
+   the stop event so the service can disconnect its sensors before shutdown.
+
+   ### Build and Run GlanceSteps
+
+   Install a C++17 compiler, CMake 3.21 or newer, SDL2 development files, and the
+   LVGL submodule. On macOS, install CMake and SDL2 with `brew install cmake sdl2`;
+   on Debian/Ubuntu, use `build-essential cmake libsdl2-dev`. Windows uses the same
+   SDL2 discovery and 32-bit TouchGFX fallback as the LVGL app simulators.
+
+   From the SDK root:
+
+   ```bash
+   export UNA_SDK="$PWD"
+   git submodule update --init ThirdParty/lvgl
+   cmake -S Examples/Apps/GlanceSteps/Software/simulator \
+        -B Examples/Apps/GlanceSteps/Software/simulator/build \
+        -DCMAKE_BUILD_TYPE=Debug
+   cmake --build Examples/Apps/GlanceSteps/Software/simulator/build
+   cd Examples/Apps/GlanceSteps/Software/simulator/build/bin
+   ./GlanceStepsSimulator
+   ```
+
+   With a multi-configuration generator, build with `--config Debug` and run the
+   executable from `build/bin/Debug`. In PowerShell, set
+   `$env:UNA_SDK = (Get-Location).Path` instead of using `export`.
+
+   The preview defaults to 3x scale; `--scale N` accepts 1 through 10. Simulated
+   sensor parameters live in `Software/simulator/ConfigurationSimulator.hpp`.
+   The daily step counter uses the mock's session step sequence: it does not
+   persist daily totals or simulate midnight rollover.
+
+   ### Automated Checks and Screenshots
+
+   From the SDK root, run the rendering and real-service lifecycle tests:
+
+   ```bash
+   ctest --test-dir Examples/Apps/GlanceSteps/Software/simulator/build --output-on-failure
+   ```
+
+   For a finite headless run, from the binary directory:
+
+   ```bash
+   SDL_VIDEODRIVER=dummy ./GlanceStepsSimulator \
+      --duration-ms 3000 --screenshot glance.bmp
+   ```
+
+   Screenshots are unscaled 240 x 60 BMP files. A failed screenshot or a run with
+   no glance updates returns a nonzero exit code. The regression tests check
+   control rendering, clipping, transparency, copied update buffers, invalid
+   requests, live sensor updates and clean shutdown. Linux simulator CI runs
+   these tests as its headless smoke check.
+
+   ### Add Another Glance
+
+   Use GlanceSteps' `Software/simulator` directory as the template. The CMake
+   helper in `cmake/una-glance-simulator.cmake` provides the shared runtime and
+   entry point:
+
+   ```cmake
+   include($ENV{UNA_SDK}/cmake/una-glance-simulator.cmake)
+   una_add_glance_simulator(MyGlanceSimulator
+      APP_ID "0123456789ABCDEF"
+      SOURCES ${LIBS_SOURCES}
+      INCLUDE_DIRS ${LIBS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}
+   )
+   ```
+
+   The entry point expects `Service.hpp` with `Service(SDK::Kernel&)` and `run()`,
+   as the SDK glance examples provide. Keep the project's sensor configuration
+   reachable through the same include layout as GlanceSteps. No changes to the
+   glance service are required. This rebuilds source for the host; it does not
+   load a packaged `.uapp`.
+
+   The renderer uses size-matched LVGL Montserrat fonts in place of the kernel's
+   Poppins faces (25 and 35 map to 26 and 36). Font weight, italics, text metrics
+   and antialiasing can differ from the watch. Use the preview for layout,
+   lifecycle and data-flow testing, and verify pixel-exact typography and actual
+   sensor behavior on hardware.
+
 ## Getting Started
 ### Need Components
 1. Download and install [TouchGFX Designer](https://www.st.com/en/development-tools/touchgfxdesigner.html#get-software).

@@ -38,11 +38,16 @@ KernelMessageDispatcher::KernelMessageDispatcher(SDK::App::DualAppComm& appComm,
     , mSrvSensorListener(mAppComm, true)
 {}
 
+/**
+ * @brief Initialize mock sensors and dispatch queued requests until shutdown is requested.
+ * @details Completes unsupported requests with failure and releases each processed message.
+ * An idle queue is polled every 500 ms so stop() can terminate the dispatcher.
+ */
 void KernelMessageDispatcher::run()
 {
     Instance::SensorLayer::getInstance().init();
 
-    while (1) {
+    while (mRunning) {
         // Wait for message (blocks until available)
         SDK::MessageBase* msg = nullptr;
         mAppComm.receiveFromApp(msg, 500);
@@ -108,6 +113,12 @@ void KernelMessageDispatcher::appLifeCycleHandler(SDK::MessageBase* msg)
     }
 }
 
+/**
+ * @brief Handle mock settings, display, feedback, glance and widget requests.
+ * @param msg Pending request, or null to do nothing.
+ * @details A configured glance hook snapshots the update before completion; rejecting
+ * the snapshot reports failure. Without a hook, glance updates retain success-only behavior.
+ */
 void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
 {
     if (!msg) {
@@ -243,7 +254,9 @@ void KernelMessageDispatcher::appMsgHandler(SDK::MessageBase* msg)
         case SDK::MessageType::REQUEST_GLANCE_UPDATE: {
             LOG_DEBUG("Requests glance update\n");
 
-            mMessageMgr.signalCompletion(msg, SDK::MessageResult::SUCCESS);
+            const auto& update = *static_cast<SDK::Message::RequestGlanceUpdate*>(msg);
+            const bool accepted = !mGlanceUpdateHandler || mGlanceUpdateHandler(update);
+            mMessageMgr.signalCompletion(msg, accepted ? SDK::MessageResult::SUCCESS : SDK::MessageResult::FAIL);
         } break;
 
         case SDK::MessageType::REQUEST_WIDGET_START: {

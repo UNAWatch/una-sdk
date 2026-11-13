@@ -8,6 +8,7 @@ on:
       - 'cmake/**'
       - 'Examples/Apps/**'
       - 'Docs/Tutorials/**'
+      - 'Tests/Host/simulator/GlanceHost_test.cpp'
       - '.github/workflows/linux-simulator.yml'
   push:
     branches: [ main, develop ]
@@ -17,6 +18,7 @@ on:
       - 'cmake/**'
       - 'Examples/Apps/**'
       - 'Docs/Tutorials/**'
+      - 'Tests/Host/simulator/GlanceHost_test.cpp'
       - '.github/workflows/linux-simulator.yml'
   workflow_dispatch:
 
@@ -50,7 +52,7 @@ jobs:
 
           # Two kinds of simulator project, each printed as "<dir> <kind>":
           #   make   a TouchGFX GUI, built by simulator/gcc/Makefile
-          #   cmake  an LVGL GUI, built by simulator/CMakeLists.txt
+          #   cmake  an LVGL GUI or glance, built by simulator/CMakeLists.txt
           find_projects() {
             {
               find Examples/Apps Docs/Tutorials -path '*/simulator/gcc/Makefile' 2>/dev/null \
@@ -83,7 +85,7 @@ jobs:
               # "nothing to build" -- fail safe to a full build rather than skip.
               echo "::warning::Could not determine changed files for base ${BASE_SHA}; building all projects."
               BUILD_ALL=true
-            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|cmake/|\.github/workflows/linux-simulator\.yml)'; then
+            elif printf '%s\n' "$CHANGED" | grep -qE '^(Libs/|ThirdParty/|cmake/|Tests/Host/simulator/GlanceHost_test\.cpp|\.github/workflows/linux-simulator\.yml)'; then
               BUILD_ALL=true
             fi
           fi
@@ -170,6 +172,12 @@ jobs:
         shell: bash
         run: |
           cd "$APP_DIR"
+          if [ "$KIND" = cmake ] && [ -f simulator/build-ci/CTestTestfile.cmake ]; then
+            SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+              ctest --test-dir simulator/build-ci --output-on-failure 2>&1 \
+              | tee "$GITHUB_WORKSPACE/sim.log"
+            exit "${PIPESTATUS[0]}"
+          fi
           if [ "$KIND" = cmake ]; then
             BIN_DIR=simulator/build/bin
             EXE="$(find "$BIN_DIR" -maxdepth 1 -type f -perm -u+x | head -n 1)"

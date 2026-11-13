@@ -30,7 +30,7 @@ static inline void Sleep(uint32_t ms)
 
 namespace SDK::Simulator::Mock
 {
-    bool SystemGUI::mAppRunning = true;
+    std::atomic<bool> SystemGUI::mAppRunning{true};
     void (*SystemGUI::mStopHandler)() = nullptr;
 
     System::System()

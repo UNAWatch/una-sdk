@@ -21,6 +21,7 @@
 
 namespace Sensor
 {
+    /** @brief Bind ordinary and daily step drivers to one simulated step sequence. */
     ImuStepCounter::ImuStepCounter()
     : mStepCounterSim(ComponentSimulator::GetInstance().getSteCounter())
     , mDriver(*this,
@@ -28,7 +29,12 @@ namespace Sensor
               SDK::SensorDataParser::StepCounter::getFieldsNumber(),
               *this,
               Sensor::Driver::Mode::EVENT_BASED)
-    , mTimer()
+    , mDailySensor(*this)
+    , mDailyDriver(mDailySensor,
+              SDK::Sensor::Type::STEP_COUNTER_DAILY,
+              SDK::SensorDataParser::StepCounter::getFieldsNumber(),
+              *this,
+              Sensor::Driver::Mode::EVENT_BASED)
     , mDataMutex()
 {
 }
@@ -38,24 +44,49 @@ Sensor::Driver& ImuStepCounter::getDriver()
     return mDriver;
 }
 
+/** @brief Expose the session-based daily step driver for mock sensor registration. */
+Sensor::Driver& ImuStepCounter::getDailyDriver()
+{
+    return mDailyDriver;
+}
+
+/**
+ * @brief Activate a step driver, starting the shared sequence for the first active driver.
+ * @param driver Driver requesting activation; both step types share this callback.
+ * @param period Requested sampling period, returned unchanged.
+ * @return The accepted sampling period.
+ */
 float ImuStepCounter::sdcStart(Sensor::Driver* driver, float period)
 {
     LOG_INFO("start\n");
 
-    mStepCounterSim.startStepCounter();
-
-    mTimer.start(mMinPeriod);
+    // The two drivers start under different driver mutexes.
+    OS::MutexCS lock(mDataMutex);
+    if (mActiveDrivers++ == 0) {
+        mStepCounterSim.startStepCounter();
+    }
+    auto& channel = driver == &mDailyDriver ? mDailyChannel : mChannel;
+    channel.timer.start(mMinPeriod);
+    channel.firstSample = true;
 
     return period;
 }
 
+/**
+ * @brief Release a step driver's activation and stop the sequence after the last driver stops.
+ * @param driver Driver requesting deactivation; both step types share this callback.
+ */
 void ImuStepCounter::sdcStop(Sensor::Driver* driver)
 {
     LOG_INFO("stop\n");
 
-    mTimer.stop();
-
-    mStepCounterSim.stopStepCounter();
+    OS::MutexCS lock(mDataMutex);
+    auto& channel = driver == &mDailyDriver ? mDailyChannel : mChannel;
+    channel.firstSample = false;
+    channel.timer.stop();
+    if (mActiveDrivers && --mActiveDrivers == 0) {
+        mStepCounterSim.stopStepCounter();
+    }
 }
 
 float ImuStepCounter::sdcUpdatePeriod(Sensor::Driver* driver, float period)
@@ -75,31 +106,28 @@ const char* ImuStepCounter::sdcGetDescription(Sensor::Driver* driver)
 
 void ImuStepCounter::sensorRefresh()
 {
-    static bool first = false;
-    // Send data one time after connect
-    if (!first) {
-        first = true;
-        publishData(mStepCounterSim.getStepCounter());
-        return;
-    }
-
-    if (!mTimer.check()) {
-        return;
-    }
-
-    LOG_DEBUG("ENTRY\n");
-
-    publishData(mStepCounterSim.getStepCounter());
-
-    LOG_DEBUG("EXIT\n");
+    refresh(mDriver, mChannel);
 }
 
-void ImuStepCounter::publishData(uint32_t value)
+/**
+ * @brief Publish one driver's initial reading, then refresh it at its timer interval.
+ * @details Each registered sensor pushes only into its own driver, preserving the
+ * manager-then-driver lock order used by driver connection.
+ */
+void ImuStepCounter::refresh(Sensor::Driver& driver, Channel& channel)
 {
-    auto& sample = mDriver.getDataSample();
+    if (channel.firstSample.exchange(false) || channel.timer.check()) {
+        publishData(driver, mStepCounterSim.getStepCounter());
+    }
+}
+
+/** @brief Publish the shared session step count; no persistent daily rollover is modeled. */
+void ImuStepCounter::publishData(Sensor::Driver& driver, uint32_t value)
+{
+    auto& sample = driver.getDataSample();
     sample.setTimestamp(SDK::Simulator::Mock::System::GetTimeMs());
     sample.u[SDK::SensorDataParser::StepCounter::Field::STEP_COUNT] = value;
-    mDriver.pushDataSample();
+    driver.pushDataSample();
 }
 
 } /* namespace Sensor */

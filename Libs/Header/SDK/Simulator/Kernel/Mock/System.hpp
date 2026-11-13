@@ -4,6 +4,7 @@
 #include "SDK/Interfaces/ISystem.hpp"
 #include "SDK/Simulator/OS/OS.hpp"
 #include <chrono>
+#include <atomic>
 
 namespace SDK::Simulator::Mock
 {
@@ -49,7 +50,7 @@ namespace SDK::Simulator::Mock
         void     yield()              override;
 
 	private:
-        static bool mAppRunning;
+        static std::atomic<bool> mAppRunning;
         static void (*mStopHandler)();
     };
 

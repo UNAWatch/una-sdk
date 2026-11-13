@@ -17,6 +17,7 @@ namespace Instance {
         return mInstance;
     }
 
+    /** @brief Register the configured mock drivers, including both session and daily step counters. */
     void SensorLayer::init()
     {
         Sensor::Manager& sm = Sensor::Manager::getInstance();
@@ -52,6 +53,7 @@ namespace Instance {
 
 #if defined(IMU_STEP_COUNTER_SIM_ENABLE) && (IMU_STEP_COUNTER_SIM_ENABLE == 1)
         sm.regDriver(&mSensorImuStepCounter.getDriver());
+        sm.regDriver(&mSensorImuStepCounter.getDailyDriver());
 #endif //IMU_STEP_COUNTER_SIM_ENABLE
 
 #if defined(IMU_RUNNING_CADENCE_SIM_ENABLE) && (IMU_RUNNING_CADENCE_SIM_ENABLE == 1)
