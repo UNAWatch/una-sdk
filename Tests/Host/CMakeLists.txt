@@ -72,6 +72,8 @@ add_executable(una-sdk-host-tests
     utils/CopyUtf8_test.cpp
     utils/AlignedAlloc_test.cpp
     utils/FixedQueue_test.cpp
+    utils/FirmwareVersion_test.cpp
+    json/JsonStreamReader_test.cpp
     variant/VariantConfig_test.cpp
     support/KernelTestDoubles_test.cpp
     apps/Alarm/AlarmManager_test.cpp
