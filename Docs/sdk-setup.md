@@ -79,10 +79,18 @@ To use the ST toolchain instead:
 
 2) Ensure the ST toolchain is on your `PATH`.
 
-If you installed **CubeCLT**, the toolchain is typically under:
+If you installed **CubeCLT**, the toolchain is typically under `/opt/st/stm32cubeclt_<version>/GNU-tools-for-STM32/bin` (`ls /opt/st` shows the version):
 
 ```bash
-export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"
+# Replace 1.19.0 with the CubeCLT version you installed
+export PATH="/opt/st/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin:$PATH"
+```
+
+If you use the toolchain that ST's VS Code extension downloads, it is typically under `~/.local/share/stm32cube/bundles/gnu-tools-for-stm32/<version>/bin`:
+
+```bash
+# Replace 14.3.1+st.2 with the bundle version you have
+export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin:$PATH"
 ```
 
 If `arm-none-eabi-gcc` is still not found and you installed **CubeIDE**, add the directory that contains `arm-none-eabi-gcc` to your `PATH` (it is usually a `.../plugins/...gnu-tools-for-stm32.../tools/bin` folder inside the CubeIDE installation).
@@ -156,7 +164,7 @@ For bash:
 
 ```bash
 echo 'export UNA_SDK="$HOME/path/to/una-sdk"' >> ~/.bashrc
-echo 'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"' >> ~/.bashrc
+echo 'export PATH="/opt/st/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -164,9 +172,11 @@ For zsh:
 
 ```bash
 echo 'export UNA_SDK="$HOME/path/to/una-sdk"' >> ~/.zshrc
-echo 'export PATH="$HOME/.local/share/stm32cube/bundles/gnu-tools-for-stm32/*/bin:$PATH"' >> ~/.zshrc
+echo 'export PATH="/opt/st/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
+
+The `PATH` line above is for CubeCLT: use the version you installed, or the folder from **Toolchain and PATH** if your toolchain is elsewhere.
 
 With the Arm GNU Toolchain, add its `bin` folder in place of the ST `PATH` line (in `~/.bashrc` or `~/.zshrc`, with the version you unpacked):
 
