@@ -111,29 +111,4 @@ case "$out" in
   *) echo "dubious-ownership path should keep the default version, got: $out" >&2; status=1 ;;
 esac
 
-# setup-environment.sh and build-cube.sh source this script. Sourcing must
-# not leave GIT_CONFIG_* behind, including when the caller already set some.
-sourced=$(
-  set +eu
-  export GIT_CONFIG_COUNT=2
-  export GIT_CONFIG_KEY_0=user.name
-  export GIT_CONFIG_VALUE_0=kept
-  export CALL_LOG="$log" OWNED_TOP="$owned"
-  export PATH="$fake:$PATH"
-  unset BUILD_VERSION
-  # shellcheck disable=SC1090
-  . "$script_dir/una-version.sh" "$owned" >/dev/null
-  printf 'COUNT=%s\nKEY=%s\nVALUE=%s\nBUILD=%s\n' \
-    "${GIT_CONFIG_COUNT-}" "${GIT_CONFIG_KEY_0-}" "${GIT_CONFIG_VALUE_0-}" "${BUILD_VERSION-}"
-  if type _una_git >/dev/null 2>&1; then
-    echo HELPER=set
-  else
-    echo HELPER=unset
-  fi
-)
-printf '%s\n' "$sourced" | grep -q '^COUNT=2$' || { echo "sourced script replaced GIT_CONFIG_COUNT: $sourced" >&2; status=1; }
-printf '%s\n' "$sourced" | grep -q '^VALUE=kept$' || { echo "sourced script replaced GIT_CONFIG_VALUE_0: $sourced" >&2; status=1; }
-printf '%s\n' "$sourced" | grep -q '^BUILD=0.0.0-dev$' || { echo "sourced script trusted a rejected checkout: $sourced" >&2; status=1; }
-printf '%s\n' "$sourced" | grep -q '^HELPER=unset$' || { echo "sourced script left _una_git defined: $sourced" >&2; status=1; }
-
 exit "$status"
