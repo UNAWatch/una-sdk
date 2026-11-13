@@ -150,15 +150,14 @@ uint32_t GlanceHost::updateCount() const
 }
 
 /**
- * @brief Allocate a lifecycle event and transfer its ownership to the service queue.
+ * @brief Allocate a lifecycle event and queue it for the service.
  * @return False if message allocation or queue insertion fails.
  */
 bool GlanceHost::send(SDK::MessageType::Type type)
 {
+    // The queue retains its own reference; the guard releases the allocation's.
     auto message = SDK::make_msg(mKernel, type);
-    if (!message || !mComm.sendToService(message.get())) return false;
-    message.release();
-    return true;
+    return message && mComm.sendToService(message.get());
 }
 
 /**
@@ -187,9 +186,10 @@ bool GlanceHost::stop()
 /**
  * @brief Pump window events, render snapshots, and send 10 Hz ticks until stopped.
  * @param keepRunning Optional service-liveness predicate evaluated on the window thread.
- * @return True if the optional screenshot and the final stop event both succeed.
+ * @return True if the optional screenshot succeeds and the service receives stop or has exited.
  * @details Requires init(). Exits on window close, Escape, the configured duration,
- * or a false predicate. Without start(), renders snapshots without service ticks.
+ * or a false predicate. Retries a stop rejected by a full queue while the predicate
+ * reports a live service. Without start(), renders snapshots without service ticks.
  */
 bool GlanceHost::run(const std::function<bool()>& keepRunning)
 {
@@ -210,7 +210,7 @@ bool GlanceHost::run(const std::function<bool()>& keepRunning)
             if (tick) {
                 tick->frameNumber = ++mFrameNumber;
                 tick->timestamp = mKernel.sys.getTimeMs();
-                if (mComm.sendToService(tick.get())) tick.release();
+                mComm.sendToService(tick.get());
             }
             lastTick = now;
         }
@@ -223,7 +223,13 @@ bool GlanceHost::run(const std::function<bool()>& keepRunning)
         SDL_Delay(5);
     }
     const bool saved = mOptions.screenshot.empty() || saveScreenshot(mOptions.screenshot);
-    return stop() && saved;
+    bool stopped = stop();
+    while (!stopped && keepRunning && keepRunning()) {
+        SDL_Delay(10);
+        stopped = stop();
+    }
+    const bool serviceExited = keepRunning && !keepRunning();
+    return (stopped || serviceExited) && saved;
 }
 
 /**

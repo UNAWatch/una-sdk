@@ -19,6 +19,7 @@
 #include "SDK/Simulator/OS/OS.hpp"
 #include "SDK/Simulator/Components/ISensorsSim/IStepCounter.hpp"
 
+#include <atomic>
 #include <cstdint>
 
 using namespace Interface;
@@ -49,12 +50,18 @@ namespace Sensor
 
         static constexpr uint16_t mMinPeriod = 500;
 
-        void publishData(uint32_t value);
+        struct Channel {
+            ::Driver::SwTimer timer;
+            std::atomic<bool> firstSample{false};
+        };
+
+        void refresh(Sensor::Driver& driver, Channel& channel);
+        void publishData(Sensor::Driver& driver, uint32_t value);
 
         class DailySensor : public Interface::ISensor {
         public:
             explicit DailySensor(ImuStepCounter& owner) : mOwner(owner) {}
-            void sensorRefresh() override { mOwner.sensorRefresh(); }
+            void sensorRefresh() override { mOwner.refresh(mOwner.mDailyDriver, mOwner.mDailyChannel); }
         private:
             ImuStepCounter& mOwner;
         };
@@ -63,10 +70,10 @@ namespace Sensor
         Sensor::Driver    mDriver;
         DailySensor       mDailySensor;
         Sensor::Driver    mDailyDriver;
-        ::Driver::SwTimer mTimer;
+        Channel           mChannel;
+        Channel           mDailyChannel;
         OS::Mutex         mDataMutex;
         uint32_t          mActiveDrivers = 0;
-        bool              mFirstSample = true;
     };
 
 } /* namespace Sensor */
