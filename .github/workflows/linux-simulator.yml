@@ -102,10 +102,17 @@ jobs:
               take=true
             fi
             if $take; then
-              slug="$(printf '%s' "$d" | tr '/' '-')"   # unique artifact key (leaf names can collide)
-              SEL="$(printf '%s' "$SEL" \
-                | jq -c --arg n "$name" --arg d "$d" --arg s "$slug" --arg k "$kind" \
-                     '. + [{name:$n, dir:$d, slug:$s, kind:$k}]')"
+              # Every project builds 64-bit. An LVGL app also builds 32-bit, like
+              # the watch: its LVGL pool is then exactly the watch's, so an app
+              # that would run out of memory on the watch fails here (exit 4).
+              archs="x64"
+              case "$d" in */LVGL-GUI) archs="x64 x86" ;; esac
+              for arch in $archs; do
+                slug="$(printf '%s' "$d" | tr '/' '-')-$arch"   # unique artifact key (leaf names can collide)
+                SEL="$(printf '%s' "$SEL" \
+                  | jq -c --arg n "$name" --arg d "$d" --arg s "$slug" --arg k "$kind" --arg a "$arch" \
+                       '. + [{name:$n, dir:$d, slug:$s, kind:$k, arch:$a}]')"
+              done
             fi
           done < <(find_projects)
 
@@ -116,13 +123,13 @@ jobs:
             echo ""
             echo "- event: \`$EVENT\`  | build-all: \`$BUILD_ALL\`"
             echo "- selected $(printf '%s' "$SEL" | jq 'length') of $TOTAL project(s):"
-            printf '%s' "$SEL" | jq -r '.[] | "  - `" + .dir + "` (" + .kind + ")"'
+            printf '%s' "$SEL" | jq -r '.[] | "  - `" + .dir + "` (" + .kind + ", " + .arch + ")"'
           } >> "$GITHUB_STEP_SUMMARY"
 
   build:
     needs: discover
     if: needs.discover.outputs.projects != '[]'
-    name: build (${{ matrix.project.name }}, ${{ matrix.project.kind }})
+    name: build (${{ matrix.project.name }}, ${{ matrix.project.kind }}, ${{ matrix.project.arch }})
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -132,6 +139,7 @@ jobs:
     env:
       APP_DIR: ${{ matrix.project.dir }}
       KIND: ${{ matrix.project.kind }}
+      ARCH: ${{ matrix.project.arch }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -143,9 +151,26 @@ jobs:
 
       - name: Install simulator build dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri ninja-build
+          if [ "$ARCH" = x86 ]; then
+            # 32-bit: the multilib compilers and the i386 SDL2. A mirror can
+            # briefly serve i386 package lists out of step with amd64 ones
+            # ("unmet dependencies"), so retry with fresh lists.
+            sudo dpkg --add-architecture i386
+            for attempt in 1 2 3; do
+              sudo apt-get update
+              if sudo apt-get install -y --no-install-recommends \
+                   gcc-multilib g++-multilib libsdl2-dev:i386 ninja-build; then
+                break
+              fi
+              [ "$attempt" -lt 3 ] || exit 1
+              echo "::warning::apt-get install failed (attempt $attempt); retrying in 60 s"
+              sleep 60
+            done
+          else
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends \
+              libsdl2-dev libsdl2-image-dev libjpeg-dev ruby ruby-nokogiri ninja-build
+          fi
 
       - name: Build simulator
         id: build
@@ -158,7 +183,11 @@ jobs:
             # Configure in a scratch dir; the project places its binary in
             # simulator/build/bin whatever the build dir, so the mock file
             # system path resolves the same as for a developer's build.
-            { cmake -S simulator -B simulator/build-ci -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+            FLAGS=()
+            if [ "$ARCH" = x86 ]; then
+              FLAGS=(-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32)
+            fi
+            { cmake -S simulator -B simulator/build-ci -G Ninja -DCMAKE_BUILD_TYPE=Debug "${FLAGS[@]}" \
                 && cmake --build simulator/build-ci -j"$(nproc)"; } 2>&1 \
               | tee "$GITHUB_WORKSPACE/build.log"
           else
@@ -186,18 +215,25 @@ jobs:
             BIN_DIR=build/bin
             EXE=./simulator.out
           fi
-          # A scripted headless run (SDK/Simulator/Automation): boot, take a
-          # screenshot, exit. It must end on its own with exit code 0; timeout
-          # only catches a hang. Run from the binary's directory, where the
-          # mock file system lands.
-          printf '3000 screenshot boot\n3500 exit\n' > "$RUNNER_TEMP/smoke.txt"
+          # A scripted headless run (SDK/Simulator/Automation). The project's own
+          # simulator/smoke.txt if it has one, else: boot, take a screenshot,
+          # exit. Either takes a screenshot named "boot". The run must end on
+          # its own with exit code 0; timeout only catches a hang. Run from the
+          # binary's directory, where the mock file system lands.
+          SCRIPT="$PWD/simulator/smoke.txt"
+          if [ ! -f "$SCRIPT" ]; then
+            SCRIPT="$RUNNER_TEMP/smoke.txt"
+            printf '3000 screenshot boot\n3500 exit\n' > "$SCRIPT"
+          fi
           cd "$BIN_DIR"
           set +e
-          SDL_AUDIODRIVER=dummy timeout 60 "$EXE" --headless --script "$RUNNER_TEMP/smoke.txt" \
+          SDL_AUDIODRIVER=dummy timeout 60 "$EXE" --headless --script "$SCRIPT" \
             --out "$GITHUB_WORKSPACE/sim-out" > "$GITHUB_WORKSPACE/sim.log" 2>&1
           code=$?
           echo "exit=$code"
           echo "----- first 30 lines of sim.log -----"; head -30 "$GITHUB_WORKSPACE/sim.log" || true
+          grep "LVGL pool\|OUT OF MEMORY" "$GITHUB_WORKSPACE/sim.log" || true
+          [ "$code" -ne 4 ] || { echo "OUT OF MEMORY: the app ran out of LVGL pool ($ARCH build)"; exit 1; }
           [ "$code" -eq 0 ] || { echo "RUN FAILED: exit code $code"; exit 1; }
           # The service logs this on COMMAND_APP_NOTIF_GUI_RUN, in every app.
           grep -q "GUI is now running" "$GITHUB_WORKSPACE/sim.log" \
@@ -216,7 +252,7 @@ jobs:
           b="$BUILD_OUTCOME"; s="$SMOKE_OUTCOME"
           icon() { [ "$1" = success ] && echo '✅' || { [ "$1" = skipped ] && echo '⏭️' || echo '❌'; }; }
           {
-            echo "### $PROJECT_NAME ($KIND) — _(informational, non-gating)_"
+            echo "### $PROJECT_NAME ($KIND, $ARCH) — _(informational, non-gating)_"
             echo "| Stage | Result |"
             echo "|-------|--------|"
             echo "| Build | $(icon "$b") \`$b\` |"

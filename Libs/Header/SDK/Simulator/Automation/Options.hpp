@@ -24,7 +24,8 @@
  * Exit codes: 0 success, 1 a script step failed (a screenshot could not be
  * written, a replay file could not be read, a button event was lost), 2 bad
  * options or script, 3 the simulator did not shut down in time after it was
- * told to stop (whatever else happened before).
+ * told to stop (whatever else happened before), 4 the app ran out of memory
+ * (an LVGL app's pool, see SDK/Simulator/LVGL/LvglPool.hpp).
  */
 
 #ifndef SDK_SIMULATOR_AUTOMATION_OPTIONS_HPP
@@ -55,10 +56,11 @@ namespace SDK::Simulator::Automation
 
 /// Exit codes of a scripted run.
 enum ExitCode : int {
-    kExitOk         = 0,
-    kExitStepFailed = 1,
-    kExitBadInput   = 2,
-    kExitHung       = 3,
+    kExitOk          = 0,
+    kExitStepFailed  = 1,
+    kExitBadInput    = 2,
+    kExitHung        = 3,
+    kExitOutOfMemory = 4,
 };
 
 namespace detail
