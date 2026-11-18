@@ -481,7 +481,7 @@ Every simulator (TouchGFX apps, LVGL apps and glances) can run a script: a timel
 | `--script FILE` | Run the steps in `FILE`. |
 | `--headless` | No window. Frames are still rendered, and screenshots read them directly. Needs `--duration-ms` or an `exit` step. |
 | `--duration-ms N` | End the run after N ms. No step after N ms runs. |
-| `--out DIR` | Where screenshots and `sim.log` go. Default: `sim-out` in the working directory. |
+| `--out DIR` | Where screenshots and `sim.log` go, created if missing. Default: `sim-out` in the working directory. If it can't be made a directory or `sim.log` can't be written there, the run stops with exit code 2. |
 | `--fs-root DIR` | Root of the mock file system: what the app reads and writes (`settings.json`, `Activity/`…). Default: `../../../../../Output/` relative to the working directory. |
 
 When starting the simulator from TouchGFX Designer or Visual Studio, put the options in the `UNA_SIM_ARGS` environment variable instead, for example `UNA_SIM_ARGS=--script C:\work\run.txt`. Put a path with spaces in double quotes: `UNA_SIM_ARGS=--script "C:\My Scripts\run.txt"`.
@@ -517,7 +517,7 @@ One step per line, a time and then the step. `#` starts a comment.
 +500    exit
 ```
 
-A time is in ms from the start of the GUI. `+N` means N ms after the previous step, and a trailing `s` means seconds (`5s`, `+1.5s`). Times may not go backwards, and the latest is 4294967295 ms (about 49 days). With `UNA_SIM_SLOW` set, times stretch with the frames, so a script keeps its place in the GUI.
+A time is in ms from the start of the GUI. `+N` means N ms after the previous step, and a trailing `s` means seconds (`5s`, `+1.5s`). Times may not go backwards, and the latest is 4294967295 ms (about 49 days). In a TouchGFX app with `UNA_SIM_SLOW` set, times stretch with the frames, so a script keeps its place in the GUI. The LVGL and glance simulators don't slow their frames, and their script times are not stretched.
 
 | Step | Effect |
 |---|---|
@@ -541,7 +541,7 @@ The script is checked before the simulator starts. An unknown step, a bad button
 
 ### Replay files
 
-A replay file is CSV, one fix per line: seconds from the start of the replay, latitude and longitude in degrees, altitude in metres and speed in m/s (0 to 300). A first line that is not numbers is a header.
+A replay file is CSV, one fix per line: seconds from the start of the replay, latitude and longitude in degrees, altitude in metres (-1000 to 20000) and speed in m/s (0 to 300). A first line that is not numbers is a header.
 
 ```text
 t_s,lat,lon,alt_m,speed_mps

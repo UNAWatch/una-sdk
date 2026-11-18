@@ -150,14 +150,7 @@ public:
     /// Frame time in ms for setVsyncInterval(): the watch's, times UNA_SIM_SLOW (1-10).
     static float frameIntervalMs(float frameRate)
     {
-        float ms = 1000.0f / frameRate;
-        if (const char* slow = std::getenv("UNA_SIM_SLOW")) {
-            const float factor = static_cast<float>(std::atof(slow));
-            if (factor >= 1.0f && factor <= 10.0f) {
-                ms *= factor;
-            }
-        }
-        return ms;
+        return 1000.0f / frameRate * static_cast<float>(Automation::Options::slowFactor());
     }
 
     bool sampleKey(uint8_t& key) override
@@ -305,6 +298,12 @@ private:
     void endRun() override
     {
         touchgfx::HALSDL2::stopApplication();
+    }
+
+    // Frames last frameIntervalMs(): UNA_SIM_SLOW times the watch's.
+    double frameSlowdown() const override
+    {
+        return Automation::Options::slowFactor();
     }
 
     // Utilities/Simulator/Skins: display offset printed by make_skins.py (the

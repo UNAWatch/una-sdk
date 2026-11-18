@@ -17,7 +17,7 @@
  *     1,51.50742,-0.12776,11.1,2.9
  *
  * t_s is seconds from the start of the replay, increasing; lat and lon are
- * degrees, speed_mps is 0 to 300. A first line that is
+ * degrees, alt_m is -1000 to 20000, speed_mps is 0 to 300. A first line that is
  * not numbers is taken as a header. Until the first line's time the fix is that
  * line's; between two lines it is interpolated; after the last one it stays at
  * the last position with speed 0.
@@ -61,6 +61,9 @@ public:
 
     /// The fastest speed a replay file may give, m/s.
     static constexpr float kMaxReplaySpeed = 300.0f;
+    /// The altitudes a replay file may give, m.
+    static constexpr double kMinReplayAltitude = -1000.0;
+    static constexpr double kMaxReplayAltitude = 20000.0;
 
     static Overrides& get()
     {
@@ -239,8 +242,10 @@ private:
         } else if (fix.lon < -180.0) {
             fix.lon += 360.0;
         }
-        fix.alt   = static_cast<float>(a.alt + (b.alt - a.alt) * k);
-        fix.speed = static_cast<float>(a.speed + (b.speed - a.speed) * k);
+        // In double: the difference of two floats can overflow a float.
+        const double altA = a.alt, altB = b.alt, speedA = a.speed, speedB = b.speed;
+        fix.alt   = static_cast<float>(altA + (altB - altA) * k);
+        fix.speed = static_cast<float>(speedA + (speedB - speedA) * k);
         return fix;
     }
 
@@ -296,10 +301,14 @@ public:
                 continue;
             }
             TrackPoint p;
-            // " %n": where the row ends after any trailing whitespace; anything
-            // left there (a unit, a sixth field) makes the row invalid.
+            // All read as double and range-checked before narrowing: a %f value
+            // a float can't hold is undefined. " %n": where the row ends after
+            // any trailing whitespace; anything left there (a unit, a sixth
+            // field) makes the row invalid.
+            double alt = 0.0;
+            double speed = 0.0;
             int end = -1;
-            const int n = std::sscanf(line.c_str(), "%lf,%lf,%lf,%f,%f %n", &p.t, &p.lat, &p.lon, &p.alt, &p.speed, &end);
+            const int n = std::sscanf(line.c_str(), "%lf,%lf,%lf,%lf,%lf %n", &p.t, &p.lat, &p.lon, &alt, &speed, &end);
             if (n != 5 || end < 0 || line[static_cast<size_t>(end)] != '\0') {
                 if (n == 0 && track.empty() && number == 1) {
                     continue; // a header: the first line, not starting with a number
@@ -308,16 +317,20 @@ public:
                 return false;
             }
             if (!std::isfinite(p.t) || !std::isfinite(p.lat) || !std::isfinite(p.lon) ||
-                !std::isfinite(p.alt) || !std::isfinite(p.speed)) {
+                !std::isfinite(alt) || !std::isfinite(speed)) {
                 error = path + ":" + std::to_string(number) + ": values must be finite numbers";
                 return false;
             }
             if (p.t < 0.0 || p.lat < -90.0 || p.lat > 90.0 || p.lon < -180.0 || p.lon > 180.0 ||
-                p.speed < 0.0f || p.speed > kMaxReplaySpeed) {
+                alt < kMinReplayAltitude || alt > kMaxReplayAltitude ||
+                speed < 0.0 || speed > kMaxReplaySpeed) {
                 error = path + ":" + std::to_string(number) +
-                        ": out of range (t_s >= 0, lat -90..90, lon -180..180, speed_mps 0..300)";
+                        ": out of range (t_s >= 0, lat -90..90, lon -180..180, alt_m -1000..20000, "
+                        "speed_mps 0..300)";
                 return false;
             }
+            p.alt   = static_cast<float>(alt);
+            p.speed = static_cast<float>(speed);
             if (!track.empty() && p.t <= track.back().t) {
                 error = path + ":" + std::to_string(number) + ": t_s must increase";
                 return false;
