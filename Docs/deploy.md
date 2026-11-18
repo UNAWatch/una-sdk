@@ -23,7 +23,7 @@ While the cable is in, the watch also shows up as a serial port next to the driv
 **Restart without a power cycle.** `reset` restarts the watch. Run it instead of steps 4 to 6: copy the app, then `reset`, and the new app is loaded at startup.
 
 > [!WARNING]
-> Wait about 10 seconds after `reset` before opening the serial port again. A connection in the first seconds after startup puts the watch into factory test mode (prompt `una-test>`). Send nothing there; closing the port restarts the watch normally.
+> Wait about 10 seconds after `reset` before using the serial port again. Opening the port and typing anything within about 10 seconds of startup puts the watch into factory test mode (prompt `una-test>`). Opening it without typing only delays startup by up to 10 seconds. In test mode, type nothing more; closing the port restarts the watch normally.
 
 **Develop without unplugging (kernel X.Y.Z and later).** The `usb` command opens and closes the drive with the cable in:
 
