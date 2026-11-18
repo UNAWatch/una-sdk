@@ -32,21 +32,28 @@ int main(int argc, char** argv)
     for (int index = 1; index < argc; ++index) {
         const std::string argument = argv[index];
         if (argument == "--help") {
-            std::puts("Options: --duration-ms N --screenshot FILE.bmp --scale N. Esc closes the preview.");
+            std::puts("Options: --duration-ms N --screenshot FILE.bmp --scale N, and for scripted runs "
+                      "--script FILE --headless --out DIR --fs-root DIR "
+                      "(SDK/Simulator/Automation/Options.hpp). Esc closes the preview.");
             return 0;
+        }
+        // Shared simulator options, read and checked by SDK::Simulator::Automation::Options,
+        // which also ends the run at --duration-ms.
+        if (argument == "--headless") continue;
+        if (argument == "--script" || argument == "--out" || argument == "--fs-root" ||
+            argument == "--duration-ms") {
+            if (++index >= argc) return 2;
+            continue;
         }
         if (index + 1 >= argc) return 2;
         const std::string value = argv[++index];
         if (argument == "--screenshot") options.screenshot = value;
-        else if (argument == "--duration-ms" || argument == "--scale") {
+        else if (argument == "--scale") {
             uint32_t number = 0;
             const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
-            if (result.ec != std::errc{} || result.ptr != value.data() + value.size() || number == 0) return 2;
-            if (argument == "--duration-ms") options.durationMs = number;
-            else {
-                if (number > 10) return 2;
-                options.scale = static_cast<int>(number);
-            }
+            if (result.ec != std::errc{} || result.ptr != value.data() + value.size() || number == 0 ||
+                number > 10) return 2;
+            options.scale = static_cast<int>(number);
         } else return 2;
     }
 

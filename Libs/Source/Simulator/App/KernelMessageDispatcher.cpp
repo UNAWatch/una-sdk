@@ -36,7 +36,12 @@ KernelMessageDispatcher::KernelMessageDispatcher(SDK::App::DualAppComm& appComm,
 	, mBuzzer(buzzer)
     , mLocalSettings{}
     , mSrvSensorListener(mAppComm, true)
-{}
+{
+    // Construct the sensor layer here, on the main thread before any other
+    // thread starts: it registers the wrist handler a script's first steps
+    // may already need. run() registers its drivers on the dispatcher thread.
+    Instance::SensorLayer::getInstance();
+}
 
 /**
  * @brief Initialize mock sensors and dispatch queued requests until shutdown is requested.

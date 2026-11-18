@@ -17,6 +17,7 @@
 #include <random>
 #include <chrono>
 #include "SDK/Simulator/Components/ISensorsSim/IBatteryLevel.hpp"
+#include "SDK/Simulator/Automation/Overrides.hpp"
 
 
 namespace Simulator
@@ -36,6 +37,10 @@ namespace Simulator
 
         virtual float getBattLevel() override
         {
+            float percent = 0.0f;
+            if (SDK::Simulator::Automation::Overrides::get().battery(percent)) {
+                return percent;   // set by a simulator script
+            }
             return generateBatteryLevel();
         }
 

@@ -13,7 +13,9 @@
 #include "SDK/Port/GuiCommandProcessor.hpp"
 #include "SDK/GUI/Button.hpp"
 #include <SDK/Messages/MessageGuard.hpp>
+#include "SDK/Simulator/Automation/Options.hpp"
 
+// Relative to the working directory; --fs-root DIR replaces it.
 static constexpr char sFsPath[] = "../../../../../Output/";
 
 namespace SDK::Simulator
@@ -23,7 +25,7 @@ Kernel::Kernel(const char* name)
     : mName(name)
     , mLogger()
     , mAppMemory()
-    , mFilesystem(sFsPath)
+    , mFilesystem(SDK::Simulator::Automation::Options::get().fsRoot(sFsPath))
     , mISystem(nullptr)
     , mILogger(&mLogger)
     , mIAppMemory(&mAppMemory)

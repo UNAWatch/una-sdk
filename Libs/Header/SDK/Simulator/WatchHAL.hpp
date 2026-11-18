@@ -28,8 +28,15 @@
  *   every frame lasts that many times longer, to judge timing the way the watch
  *   feels on frames that redraw a lot.
  *
+ * - **Scripted and headless runs** (SDK/Simulator/Automation): --script FILE
+ *   presses buttons, sets sensor values and saves screenshots on a timeline;
+ *   --headless runs with no window; --duration-ms N ends the run. Screenshots
+ *   come from the frame itself (240x240, round display, black corners, panel
+ *   look if it is on), so they need no window.
+ *
  * Start options (environment): UNA_SIM_HOUSING=white|black|teal|none,
- * UNA_SIM_LOOK=watch, UNA_SIM_SLOW=<factor>.
+ * UNA_SIM_LOOK=watch, UNA_SIM_SLOW=<factor>. Command line (or UNA_SIM_ARGS):
+ * see SDK/Simulator/Automation/Options.hpp.
  *
  * How TouchGFX skins behave, and why it is done this way (HALSDL2, 4.26.1):
  * a skin with any transparency makes HALSDL2 cut a shaped window, and the
@@ -57,14 +64,35 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <deque>
+#include <memory>
+#include <utility>
 #include <vector>
+
+#include "SDK/GUI/Button.hpp"
+#include "SDK/Simulator/Automation/Options.hpp"
+#include "SDK/Simulator/Automation/Overrides.hpp"
+#include "SDK/Simulator/Automation/Png.hpp"
+#include "SDK/Simulator/Automation/Script.hpp"
 
 namespace SDK::Simulator {
 
-class WatchHAL : public touchgfx::HALSDL2
+class WatchHAL : public touchgfx::HALSDL2, private Automation::ScriptHost
 {
 public:
-    using touchgfx::HALSDL2::HALSDL2;
+    /// Same arguments as HALSDL2. Runs before setupSimulator() creates the
+    /// window, so a headless run never shows one.
+    template <typename... Args>
+    explicit WatchHAL(Args&&... args)
+        : touchgfx::HALSDL2(std::forward<Args>(args)...)
+    {
+        if (Automation::Options::get().headless()) {
+            // No window at all: SDL's dummy video driver, unless the caller chose one.
+            SDL_setenv("SDL_VIDEODRIVER", "dummy", 0);
+            setWindowVisible(false, false);
+        }
+        mScript = std::make_unique<Automation::Runner>(static_cast<Automation::ScriptHost&>(*this));
+    }
 
     /// Call once after setupSimulator(): reads the start options and shows the housing.
     void init()
@@ -137,6 +165,14 @@ public:
         if (mF4Pending.exchange(false)) {
             nextBody();
         }
+        // Called once per tick on the GUI thread: the script's clock. Its
+        // button codes go out one per tick, ahead of the keyboard's.
+        mScript->tick();
+        if (!mScriptKeys.empty()) {
+            key = mScriptKeys.front();
+            mScriptKeys.pop_front();
+            return true;
+        }
         if (!touchgfx::HALSDL2::sampleKey(key)) {
             return false;
         }
@@ -163,6 +199,9 @@ protected:
             mFrame.resize(bytes);
         }
         std::memcpy(mFrame.data(), frameBuffer, bytes);
+        if (Automation::Options::get().scripted()) {
+            mDisplayFrame = mFrame; // the app's frame, for screenshots
+        }
         frameBuffer = mFrame.data();
         const float cx = (w - 1) / 2.0f;
         const float cy = (h - 1) / 2.0f;
@@ -198,6 +237,76 @@ protected:
     }
 
 private:
+    // --- Automation::ScriptHost: what a --script run asks of the simulator ---
+
+    // A button as the kernel reports it: the press now; on release a click
+    // (short press) and then the release. Codes from SDK/GUI/Button.hpp.
+    void buttonDown(Automation::Button b) override
+    {
+        static const uint8_t press[] = { SDK::GUI::Button::L1_PRESS, SDK::GUI::Button::L2_PRESS,
+                                         SDK::GUI::Button::R1_PRESS, SDK::GUI::Button::R2_PRESS };
+        mScriptKeys.push_back(press[static_cast<int>(b)]);
+    }
+
+    void buttonUp(Automation::Button b, bool click) override
+    {
+        static const uint8_t clickCode[] = { SDK::GUI::Button::L1, SDK::GUI::Button::L2,
+                                             SDK::GUI::Button::R1, SDK::GUI::Button::R2 };
+        static const uint8_t release[] = { SDK::GUI::Button::L1_RELEASE, SDK::GUI::Button::L2_RELEASE,
+                                           SDK::GUI::Button::R1_RELEASE, SDK::GUI::Button::R2_RELEASE };
+        if (click) {
+            mScriptKeys.push_back(clickCode[static_cast<int>(b)]);
+        }
+        mScriptKeys.push_back(release[static_cast<int>(b)]);
+    }
+
+    // The display as the watch shows it: round, black outside the glass, in
+    // the panel look when that is on. No housing, whatever the window shows.
+    bool saveDisplay(const std::string& path) override
+    {
+        const int w = DISPLAY_WIDTH;
+        const int h = DISPLAY_HEIGHT;
+        if (mDisplayFrame.size() != static_cast<size_t>(w) * h * 3) {
+            Automation::Options::get().report("no frame has been drawn yet");
+            return false;
+        }
+        std::vector<uint8_t> rgb(mDisplayFrame.size());
+        const float cx = (w - 1) / 2.0f;
+        const float cy = (h - 1) / 2.0f;
+        const float r2 = kGlassRadius * kGlassRadius;
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                const uint8_t* s = mDisplayFrame.data() + 3 * (y * w + x); // B, G, R
+                uint8_t* d = rgb.data() + 3 * (y * w + x);                 // R, G, B
+                const float dx = x - cx;
+                const float dy = y - cy;
+                if (dx * dx + dy * dy > r2) {
+                    d[0] = d[1] = d[2] = 0;
+                    continue;
+                }
+                d[0] = s[2];
+                d[1] = s[1];
+                d[2] = s[0];
+                if (mPanelLook) {
+                    toPanel(d[0], d[1], d[2]);
+                }
+            }
+        }
+        return Automation::Png::writeRgb(path, w, h, rgb.data());
+    }
+
+    void wristMotion() override
+    {
+        if (!Automation::Overrides::get().wristMotion()) {
+            Automation::Options::get().fail("wrist: this simulator has no sensors");
+        }
+    }
+
+    void endRun() override
+    {
+        touchgfx::HALSDL2::stopApplication();
+    }
+
     // Utilities/Simulator/Skins: display offset printed by make_skins.py (the
     // same for every body), and the screen hole's radius (238 px across).
     static constexpr int   kSkinX = 69;
@@ -473,6 +582,9 @@ private:
     bool              mSkinTried = false;
     SDL_Surface*      mSkin = nullptr;   // the shown skin, for the display's corners
     std::vector<uint8_t> mFrame;         // the 24 bpp frame with corners and look, as shown
+    std::vector<uint8_t> mDisplayFrame;  // the app's last frame, B G R, for script screenshots
+    std::unique_ptr<Automation::Runner> mScript;
+    std::deque<uint8_t>  mScriptKeys;    // button codes from the script, one per tick
 };
 
 } // namespace SDK::Simulator

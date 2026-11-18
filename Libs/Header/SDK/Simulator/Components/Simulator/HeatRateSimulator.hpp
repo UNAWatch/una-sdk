@@ -13,10 +13,12 @@
 #ifndef __HEAT_RATE_SIMULATOR_HPP
 #define __HEAT_RATE_SIMULATOR_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <chrono>
 #include "SDK/Simulator/Components/ISensorsSim/IHeatRate.hpp"
+#include "SDK/Simulator/Automation/Overrides.hpp"
 
 
 namespace Simulator 
@@ -56,15 +58,27 @@ namespace Simulator
         {
             mPrevHR = mCurrentHR;
 
+            int fixed = 0;
+            if (SDK::Simulator::Automation::Overrides::get().heartRate(fixed)) {
+                // Set by a simulator script: that value, steady.
+                mCurrentHR = static_cast<uint8_t>(fixed > 255 ? 255 : fixed);
+                mPrevHR    = mCurrentHR;
+                updateStats();
+                return (int)mCurrentHR;
+            }
+
             int target = getTargetHR();
 
             double diff = target - mCurrentHR;
 
-            mCurrentHR += static_cast<uint8_t>(diff * 0.10);
-            mCurrentHR += static_cast<uint8_t>(mNoise(mRng));
-
-            if (mCurrentHR < mMinHR) mCurrentHR = mMinHR;
-            if (mCurrentHR > mMaxHR) mCurrentHR = mMaxHR;
+            // Signed until clamped: a step down (after a script's hr 255, say)
+            // is negative, and a negative value does not convert to uint8_t.
+            int hr = mCurrentHR;
+            hr += static_cast<int>(diff * 0.10);
+            hr += static_cast<int>(mNoise(mRng));
+            hr = (std::max)(hr, static_cast<int>(mMinHR));
+            hr = (std::min)(hr, static_cast<int>(mMaxHR));
+            mCurrentHR = static_cast<uint8_t>(hr);
 
             updateStats();
 
@@ -81,6 +95,10 @@ namespace Simulator
 
         virtual int getTrustLevel() override
         {
+            int fixed = 0;
+            if (SDK::Simulator::Automation::Overrides::get().heartRate(fixed)) {
+                return 3;   // a scripted value is always trusted
+            }
             int diff = std::abs(mCurrentHR - mPrevHR);
             int r = mTrustNoise(mRng);
 

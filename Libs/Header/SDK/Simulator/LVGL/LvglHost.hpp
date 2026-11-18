@@ -25,6 +25,10 @@
  *
  * The window is pumped from the port's frame hook, so all SDL calls and all
  * LVGL calls stay on the one GUI thread.
+ *
+ * Scripted and headless runs (SDK/Simulator/Automation): --script FILE drives
+ * the buttons, sensors and screenshots from the frame hook; --headless runs
+ * without SDL at all (no window, no video driver needed).
  ******************************************************************************
  */
 
@@ -33,11 +37,14 @@
 
 #include <atomic>
 #include <cstdint>
+#include <memory>
+#include <string>
 #include <thread>
 
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
 #include "SDK/Simulator/App/DualAppComm.hpp"
+#include "SDK/Simulator/Automation/Script.hpp"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -46,7 +53,7 @@ struct SDL_Texture;
 namespace SDK::Simulator
 {
 
-class LvglHost
+class LvglHost : private Automation::ScriptHost
 {
 public:
     struct Options {
@@ -89,10 +96,18 @@ private:
 
     bool sendToGui(SDK::MessageType::Type type);
     void sendToService(SDK::MessageType::Type type);
-    void sendButton(SDK::Message::EventButton::Id id, SDK::Message::EventButton::Event event);
+    bool sendButton(SDK::Message::EventButton::Id id, SDK::Message::EventButton::Event event);
     static bool keyToButton(int32_t key, SDK::Message::EventButton::Id& id);
     static bool keyToRawEvent(int32_t key, SDK::Message::EventButton::Id& id,
                               SDK::Message::EventButton::Event& event);
+    static SDK::Message::EventButton::Id buttonId(Automation::Button b);
+
+    // Automation::ScriptHost
+    void buttonDown(Automation::Button b) override;
+    void buttonUp(Automation::Button b, bool click) override;
+    bool saveDisplay(const std::string& path) override;
+    void wristMotion() override;
+    void endRun() override;
 
     SDK::App::DualAppComm& mComm;
     const SDK::Kernel&     mKernel;
@@ -110,8 +125,12 @@ private:
 
     uint32_t mShownFrame    = 0;
     bool     mStopRequested = false;
+    bool     mSuspendSent   = false;   ///< COMMAND_APP_GUI_SUSPEND queued (see requestStop)
+    bool     mStopWanted    = false;   ///< a script ended the run: retry requestStop() each frame
     uint32_t mPressedAtMs[4] = {};
     bool     mPressed[4]     = {};
+
+    std::unique_ptr<Automation::Runner> mScript;
 };
 
 } // namespace SDK::Simulator

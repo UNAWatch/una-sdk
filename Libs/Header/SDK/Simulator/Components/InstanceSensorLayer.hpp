@@ -22,6 +22,9 @@ namespace Instance {
         void init();
         void handlerButtons(uint8_t key);
 
+        /// A wrist-raise motion now, as the wrist-detect key gives (simulator scripts).
+        void wristMotion();
+
     private:
         SensorLayer();
         ~SensorLayer() = default;

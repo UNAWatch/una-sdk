@@ -17,6 +17,7 @@
 #include <random>
 #include <chrono>
 #include "SDK/Simulator/Components/ISensorsSim/IPressure.hpp"
+#include "SDK/Simulator/Automation/Overrides.hpp"
 
 
 namespace Simulator
@@ -40,6 +41,10 @@ namespace Simulator
 
         virtual float getPressure() override
         {
+            float hpa = 0.0f;
+            if (SDK::Simulator::Automation::Overrides::get().pressure(hpa)) {
+                return hpa;   // set by a simulator script
+            }
             return genetatePressure();
         }
 

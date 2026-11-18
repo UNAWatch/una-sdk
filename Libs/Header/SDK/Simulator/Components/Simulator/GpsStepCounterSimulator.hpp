@@ -15,6 +15,7 @@
 #include "SDK/Simulator/Components/ISensorsSim/IStepCounter.hpp"
 #include "SDK/Simulator/Components/SensorDataSample.hpp"
 #include "SDK/Simulator/OS/SwTimer.hpp"
+#include "SDK/Simulator/Automation/Overrides.hpp"
 #include <cstdint>
 #include <chrono>
 #include <random>
@@ -95,6 +96,8 @@ namespace Simulator
         float mStrideLength = 0.65f;     // meters per step
         uint32_t mTotalSteps = 0;
         float mStepAccumulator = 0.0f;
+        /// How far a script's GPS replay has been counted (SDK/Simulator/Automation/Overrides.hpp).
+        SDK::Simulator::Automation::Overrides::ReplayCursor mReplayCursor;
 
         // Track geometry
         const float mCenterLat = 49.2331f; ///< Track center latitude
