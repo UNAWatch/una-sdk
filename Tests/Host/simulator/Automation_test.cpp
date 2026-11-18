@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <random>
@@ -22,6 +23,18 @@ namespace
 {
 
 using namespace SDK::Simulator::Automation;
+
+// The tests run with the launch settings they set themselves: a developer's
+// UNA_SIM_ARGS (say --duration-ms) would otherwise reach Options, which is
+// built on first use, inside a test.
+[[maybe_unused]] const bool kSimArgsCleared = [] {
+#ifdef _WIN32
+    _putenv("UNA_SIM_ARGS=");
+#else
+    unsetenv("UNA_SIM_ARGS");
+#endif
+    return true;
+}();
 
 /// Records what a script asks of the simulator.
 class FakeHost : public ScriptHost
@@ -169,12 +182,10 @@ TEST_F(AutomationTest, ClickOnAButtonAlreadyDownDoesNothing)
 
 TEST_F(AutomationTest, WatchTimeSaturatesAtTheLatestTime)
 {
-    if (Options::slowFactor() != 1.0) {
-        GTEST_SKIP() << "UNA_SIM_SLOW is set";
-    }
     using namespace std::chrono;
     EXPECT_EQ(Options::toWatchMs(milliseconds(1500)), 1500u);
-    EXPECT_EQ(Options::toWatchMs(hours(24 * 60)), UINT32_MAX);   // 5184000000 ms
+    EXPECT_EQ(Options::toWatchMs(milliseconds(1500), 2.0), 750u);   // frames twice as long
+    EXPECT_EQ(Options::toWatchMs(hours(24 * 60)), UINT32_MAX);      // 5184000000 ms
 }
 
 TEST_F(AutomationTest, RelativeAndSecondTimes)
@@ -283,6 +294,18 @@ TEST_F(AutomationTest, ReplayFileRejectsTrailingText)
     EXPECT_FLOAT_EQ(track[0].speed, 3.0f);
 }
 
+TEST_F(AutomationTest, ReplayFileRejectsAnAltitudeOutOfRange)
+{
+    std::vector<Overrides::TrackPoint> track;
+    std::string error;
+    // 1e100 is beyond a float: checked as read, before it is narrowed.
+    EXPECT_FALSE(Overrides::loadTrack(write("high.csv", "0,51.5,-0.1,1e100,3\n"), track, error));
+    EXPECT_NE(error.find("high.csv:1: out of range"), std::string::npos);
+    EXPECT_FALSE(Overrides::loadTrack(write("deep.csv", "0,51.5,-0.1,-1001,3\n"), track, error));
+    EXPECT_TRUE(Overrides::loadTrack(write("ok.csv", "0,51.5,-0.1,-1000,3\n1,51.5,-0.1,20000,3\n"), track, error))
+        << error;
+}
+
 TEST_F(AutomationTest, ReplayFileRejectsOutOfRangeValues)
 {
     std::vector<Overrides::TrackPoint> track;
@@ -353,7 +376,8 @@ TEST_F(AutomationTest, ReplayHoldsTheFirstFixBeforeItsTime)
 
 TEST_F(AutomationTest, ReplayCrossesTheDateLineTheShortWay)
 {
-    // A 10 s leg, read a little way in: any point strictly between the two fixes
+    // A 10000 s leg (so a stalled test process stays inside it), read a little
+    // way in: any point strictly between the two fixes
     // lies within 1 degree of the date line, where the long way round passes 0.
     const auto lonPartWay = [this](const char* csv) {
         std::string error;
@@ -363,13 +387,13 @@ TEST_F(AutomationTest, ReplayCrossesTheDateLineTheShortWay)
         EXPECT_TRUE(Overrides::get().replayFix(fix));
         return fix.lon;
     };
-    const double east = lonPartWay("0,0,179,0,1\n10,0,-179,0,1\n");
+    const double east = lonPartWay("0,0,179,0,1\n10000,0,-179,0,1\n");
     EXPECT_GT(east, 179.0);
     EXPECT_LE(east, 180.0);
-    const double west = lonPartWay("0,0,-179,0,1\n10,0,179,0,1\n");
+    const double west = lonPartWay("0,0,-179,0,1\n10000,0,179,0,1\n");
     EXPECT_LT(west, -179.0);
     EXPECT_GE(west, -180.0);
-    const double plain = lonPartWay("0,0,10,0,1\n10,0,12,0,1\n");
+    const double plain = lonPartWay("0,0,10,0,1\n10000,0,12,0,1\n");
     EXPECT_GT(plain, 10.0);
     EXPECT_LT(plain, 12.0);
 }
@@ -503,6 +527,33 @@ TEST_F(AutomationDeathTest, ScreenshotOutsideOutStopsWithExitCode2)
             runner.loadScript(path);
         },
         ::testing::ExitedWithCode(kExitBadInput), "inside --out");
+}
+
+TEST_F(AutomationDeathTest, SecondScriptStopsWithExitCode2)
+{
+    const std::string first  = write("first.txt", "1000 wrist\n");
+    const std::string second = write("second.txt", "0 wrist\n");
+    EXPECT_EXIT(
+        {
+            FakeHost host;
+            Runner   runner(host, true);
+            runner.loadScript(first);
+            runner.loadScript(second);
+        },
+        ::testing::ExitedWithCode(kExitBadInput), "loaded only once");
+}
+
+TEST_F(AutomationDeathTest, ScriptAfterTheRunStartsStopsWithExitCode2)
+{
+    const std::string path = write("late-load.txt", "0 wrist\n");
+    EXPECT_EXIT(
+        {
+            FakeHost host;
+            Runner   runner(host, true);
+            runner.tickAt(500);
+            runner.loadScript(path);
+        },
+        ::testing::ExitedWithCode(kExitBadInput), "before the run starts");
 }
 
 TEST_F(AutomationDeathTest, ScreenshotOverTheLogStopsWithExitCode2)

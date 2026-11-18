@@ -14,8 +14,8 @@
  *     +0      hr 152
  *     30s     exit
  *
- * Times are watch time in ms from the start of the GUI (UNA_SIM_SLOW
- * stretches them with the frames), may not go backwards and end at
+ * Times are watch time in ms from the start of the GUI (in a TouchGFX app,
+ * UNA_SIM_SLOW stretches them with the frames), may not go backwards and end at
  * 4294967295 ms. With --duration-ms, nothing after it runs.
  *
  * Steps:
@@ -96,6 +96,10 @@ public:
 
     /// End the run: the host shuts its loop down normally.
     virtual void endRun() = 0;
+
+    /// How many times longer than the watch's each frame lasts (UNA_SIM_SLOW,
+    /// for a host that applies it): the script's clock runs that much slower.
+    virtual double frameSlowdown() const { return 1.0; }
 };
 
 class Runner
@@ -143,12 +147,13 @@ public:
             mStarted = true;
             mStart   = wallNow;
         }
-        tickAt(Options::toWatchMs(wallNow - mStart));
+        tickAt(Options::toWatchMs(wallNow - mStart, mHost.frameSlowdown()));
     }
 
     /// tick() at a given watch time (ms from the start); times must not go back.
     void tickAt(uint32_t now)
     {
+        mTicked = true;
         if (mStopped) {
             return;
         }
@@ -185,6 +190,8 @@ public:
         }
 
         if (duration != 0 && now >= duration) {
+            // Armed before the log write: a stderr pipe nobody reads could block it.
+            armWatchdog();
             Options::get().report("t=%u: --duration-ms reached", now);
             stopRun();
         }
@@ -193,8 +200,15 @@ public:
     bool stopped() const { return mStopped; }
 
     /// Read and check a script; a bad one ends the process (Options::abortRun).
+    /// Once, before the first tick: a second script would share the first's
+    /// timeline and running state.
     void loadScript(const std::string& path)
     {
+        if (mLoaded || mTicked) {
+            Options::get().abortRun("a script can be loaded only once, before the run starts (%s)",
+                                    path.c_str());
+        }
+        mLoaded = true;
         load(path);
     }
 
@@ -416,6 +430,9 @@ private:
     void run(const Step& s, uint32_t now)
     {
         Options& o = Options::get();
+        if (s.verb == "exit") {
+            armWatchdog();   // before the log write, as at --duration-ms
+        }
         o.report("t=%u line %d: %s", now, s.line, s.text.c_str());
         Overrides& ov = Overrides::get();
         Button b;
@@ -531,10 +548,16 @@ private:
             return;
         }
         mStopped = true;
+        armWatchdog();
+        mHost.endRun();
+    }
+
+    /// From the stop on, the process ends within the grace period (automated runs).
+    static void armWatchdog()
+    {
         if (Options::get().automated()) {
             Options::get().armShutdownWatchdog();
         }
-        mHost.endRun();
     }
 
     ScriptHost&           mHost;
@@ -543,6 +566,8 @@ private:
     std::vector<Release>  mReleases;
     std::filesystem::path mScriptDir;
     bool                  mHasExit = false;
+    bool                  mLoaded  = false;
+    bool                  mTicked  = false;   ///< tickAt() has run: too late to load
     bool                  mStarted = false;
     bool                  mStopped = false;
     std::chrono::steady_clock::time_point mStart;

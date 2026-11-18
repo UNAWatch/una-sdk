@@ -121,7 +121,12 @@ namespace Simulator {
     
     IGps::LocationInfo GpsStepCounterSimulator::getLocation()
     {
-        return mLoc;
+        LocationInfo loc = mLoc;
+        // Forced off: invalid now, not only once the worker has caught up.
+        if (Overrides::get().gpsFix() == Overrides::GpsFix::Off) {
+            loc.valid = false;
+        }
+        return loc;
     }
 
     void GpsStepCounterSimulator::updateLocation()

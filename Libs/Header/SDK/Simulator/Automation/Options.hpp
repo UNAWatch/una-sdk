@@ -105,7 +105,8 @@ public:
         return mFsRoot.c_str();
     }
 
-    /// A path inside the output directory, which is created on first use.
+    /// A path inside the output directory (made when an automated run starts,
+    /// else on first use).
     std::string outPath(const std::string& name)
     {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -198,11 +199,12 @@ public:
         }).detach();
     }
 
-    /// Watch time in ms for a wall-clock interval: divided by UNA_SIM_SLOW, so
-    /// a script keeps its place against the GUI when frames are slowed down.
-    static uint32_t toWatchMs(std::chrono::steady_clock::duration wall)
+    /// Watch time in ms for a wall-clock interval: divided by how much the host
+    /// slows its frames (ScriptHost::frameSlowdown()), so a script keeps its
+    /// place against the GUI.
+    static uint32_t toWatchMs(std::chrono::steady_clock::duration wall, double slowdown = 1.0)
     {
-        const double ms = std::chrono::duration<double, std::milli>(wall).count() / slowFactor();
+        const double ms = std::chrono::duration<double, std::milli>(wall).count() / slowdown;
         // Saturated: past UINT32_MAX ms the conversion would be undefined.
         if (!(ms < static_cast<double>(UINT32_MAX))) {
             return UINT32_MAX;
@@ -232,6 +234,19 @@ private:
         }
         parse(args);
         if (automated()) {
+            // The output directory and its sim.log must be usable before the
+            // run starts, not found missing at the end.
+            std::error_code ec;
+            std::filesystem::create_directories(mOutDir, ec);
+            if (!std::filesystem::is_directory(mOutDir, ec)) {
+                std::fprintf(stderr, "[sim] ERROR: --out %s is not a directory and cannot be made one\n",
+                             mOutDir.c_str());
+                std::_Exit(kExitBadInput);
+            }
+            if (logFile() == nullptr) {
+                std::fprintf(stderr, "[sim] ERROR: cannot write the run log in %s\n", mOutDir.c_str());
+                std::_Exit(kExitBadInput);
+            }
             // A failed step is reported however main() returns. Registered
             // while Options is still being built, so the handler runs after
             // Options is destroyed: it reads only the separate exit code.
@@ -262,7 +277,13 @@ private:
                     abortRun("--script needs a file");
                 }
             } else if (a == "--out") {
-                mOutDir = value("--out");
+                // Checked before it is kept: the error report itself writes
+                // sim.log there.
+                std::string out = value("--out");
+                if (out.empty()) {
+                    abortRun("--out needs a directory");
+                }
+                mOutDir = std::move(out);
             } else if (a == "--fs-root") {
                 std::string root = value("--fs-root");
                 if (root.empty()) {
