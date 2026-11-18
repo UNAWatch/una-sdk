@@ -86,6 +86,16 @@
 void Logger_init(SDK::Interface::ILogger& ilogger);
 
 /**
+ * @brief   Stop logging through an interface that is about to be destroyed.
+ *
+ * Messages logged afterwards are dropped. Does nothing if the logger was
+ * initialized with a different interface.
+ *
+ * @param[in]   ilogger     The interface passed to Logger_init()
+ */
+void Logger_deinit(SDK::Interface::ILogger& ilogger);
+
+/**
  * @brief   Output formatted log message with metadata.
  *
  * This function formats and outputs a log message with metadata including

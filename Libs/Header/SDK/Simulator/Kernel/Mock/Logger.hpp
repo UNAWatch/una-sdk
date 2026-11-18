@@ -42,6 +42,10 @@ static inline uint64_t GetTickCount64()
 }
 #endif
 
+// From SDK/UnaLogger/Logger.h, which is not included here: it defines
+// LOG_MODULE_PRX for the file that includes it.
+void Logger_deinit(SDK::Interface::ILogger& ilogger);
+
 namespace SDK::Simulator::Mock
 {
 
@@ -70,7 +74,13 @@ public:
         svlog(level, module_name, func, line, fmt, args);
     }
 
-    virtual ~Logger() = default;
+    /// The kernel that owns this logger can be destroyed before objects that
+    /// still log while they are torn down (a simulator's message core, if
+    /// main() declares it first): their messages are then dropped.
+    virtual ~Logger()
+    {
+        Logger_deinit(*this);
+    }
 
 private:
     static inline OS::Mutex mMutexLog;
