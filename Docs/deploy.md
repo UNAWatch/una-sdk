@@ -12,10 +12,42 @@
 6. Perform a watch power cycle: power off the watch and turn it on again.
 7. Press the top right button and check the app.
 
+### Faster Loop with the Cable In (USB Serial Console)
+
+While the cable is in, the watch also shows up as a serial port next to the drive: `USB Serial Device (COMx)` on Windows, `/dev/ttyACM*` on Linux, `/dev/cu.usbmodem*` on macOS. Open it in any serial terminal:
+
+- **Baud rate:** any. It is a USB port, so the rate is ignored.
+- **Line endings:** commands must end with a line feed (`\n`). A lone carriage return only echoes, so set the terminal to send LF or CR+LF on Enter.
+- **Prompt:** `una>`. Type `menu` to list the commands and `help <command>` for details.
+
+**Restart without a power cycle.** `reset` restarts the watch. Run it instead of steps 4 to 6: copy the app, then `reset`, and the new app is loaded at startup.
+
+> [!WARNING]
+> Wait about 10 seconds after `reset` before opening the serial port again. A connection in the first seconds after startup puts the watch into factory test mode (prompt `una-test>`). Send nothing there; closing the port restarts the watch normally.
+
+**Develop without unplugging (kernel X.Y.Z and later).** The `usb` command opens and closes the drive with the cable in:
+
+| Command | Does |
+|---|---|
+| `usb` | Shows whether the drive is open, a computer is connected, and reopen is on |
+| `usb drive on` | Opens the drive, as plugging the cable in does |
+| `usb drive off` | Closes the drive, as unplugging does: the settings are reloaded and the apps come back. Let any copy finish first |
+| `usb reopen on\|off` | Whether the drive also opens again after `reset` (default off) |
+
+The loop is then:
+
+```
+una> usb drive on      # the drive opens
+     ... copy the .uapp into Apps/<AppName>/ ...
+una> reset             # the watch restarts with the new app, usable on the cable
+```
+
+Opening or closing the drive reconnects the serial port, so reopen it in your terminal afterwards. On older kernels the drive does not come back after `reset`: unplug and plug the cable in again to copy the next build.
+
 ### Troubleshooting
 
 - If you do not see the app, check the hash sum of the copied file.
-- If the error still persists, use a **debug** adapter to monitor the watch debug UART Tx line to see the logs.
+- If the error still persists, use a **debug** adapter to monitor the watch debug UART Tx line (921600 baud, 8N1) to see the logs.
 - If you still encounter any platform issues, please create an issue at the [GitHub project issue page](https://github.com/UNAWatch/una-sdk/issues).
 - To discuss any issues, use [Discussions](https://github.com/UNAWatch/una-sdk/discussions).
 
