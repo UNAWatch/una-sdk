@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/Messages/CommandMessages.hpp"
 #include "SDK/Simulator/App/DualAppComm.hpp"
+#include "SDK/Simulator/Automation/Script.hpp"
 #include "lvgl.h"
 
 struct SDL_Window;
@@ -19,7 +21,7 @@ struct SDL_Texture;
 namespace SDK::Simulator
 {
 
-class GlanceHost
+class GlanceHost : private Automation::ScriptHost
 {
 public:
     static constexpr int kWidth = 240;
@@ -58,6 +60,14 @@ private:
     void render();
     bool send(SDK::MessageType::Type type);
 
+    // Automation::ScriptHost: a glance has no buttons.
+    bool hasButtons() const override { return false; }
+    void buttonDown(Automation::Button) override {}
+    void buttonUp(Automation::Button, bool) override {}
+    bool saveDisplay(const std::string& path) override;
+    void wristMotion() override;
+    void endRun() override { mEndRequested = true; }
+
     SDK::App::DualAppComm& mComm;
     const SDK::Kernel& mKernel;
     Options mOptions;
@@ -67,6 +77,7 @@ private:
     lv_display_t* mDisplay = nullptr;
     alignas(LV_DRAW_BUF_ALIGN) std::array<uint16_t, kWidth * kHeight> mBuffer{};
     std::array<uint16_t, kWidth * kHeight> mFrame{};
+    bool mFrameDrawn = false;   ///< LVGL has flushed into mFrame (window thread only)
     mutable std::mutex mMutex;
     std::vector<Control> mPending;
     std::vector<Control> mShown;
@@ -75,6 +86,8 @@ private:
     uint32_t mFrameNumber = 0;
     bool mSdlReady = false;
     bool mStarted = false;
+    bool mEndRequested = false;
+    std::unique_ptr<Automation::Runner> mScript;
 };
 
 }

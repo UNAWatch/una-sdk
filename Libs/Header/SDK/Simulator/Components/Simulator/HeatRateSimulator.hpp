@@ -17,6 +17,7 @@
 #include <random>
 #include <chrono>
 #include "SDK/Simulator/Components/ISensorsSim/IHeatRate.hpp"
+#include "SDK/Simulator/Automation/Overrides.hpp"
 
 
 namespace Simulator 
@@ -56,6 +57,15 @@ namespace Simulator
         {
             mPrevHR = mCurrentHR;
 
+            int fixed = 0;
+            if (SDK::Simulator::Automation::Overrides::get().heartRate(fixed)) {
+                // Set by a simulator script: that value, steady.
+                mCurrentHR = static_cast<uint8_t>(fixed > 255 ? 255 : fixed);
+                mPrevHR    = mCurrentHR;
+                updateStats();
+                return (int)mCurrentHR;
+            }
+
             int target = getTargetHR();
 
             double diff = target - mCurrentHR;
@@ -81,6 +91,10 @@ namespace Simulator
 
         virtual int getTrustLevel() override
         {
+            int fixed = 0;
+            if (SDK::Simulator::Automation::Overrides::get().heartRate(fixed)) {
+                return 3;   // a scripted value is always trusted
+            }
             int diff = std::abs(mCurrentHR - mPrevHR);
             int r = mTrustNoise(mRng);
 

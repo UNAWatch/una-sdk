@@ -9,10 +9,14 @@
  */
 #include "SDK/Simulator/Components/Simulator/GpsStepCounterSimulator.hpp"
 #include "SDK/SensorLayer/DataParsers/SensorDataParserGpsLocation.hpp"
+#include <algorithm>
 #include <cmath>
 #include <chrono>
 #include <random>
 #include <SDK/Simulator/Kernel/Mock/System.hpp>
+#include "SDK/Simulator/Automation/Overrides.hpp"
+
+using SDK::Simulator::Automation::Overrides;
 
 #define DATA_SAMPLE_COUNT  5
 
@@ -85,6 +89,19 @@ namespace Simulator {
                 flagGpsFix = true;
             }
 
+            // A simulator script can force the fix: on skips the search delay,
+            // off loses it (and the track stands still) until it is set back.
+            const Overrides::GpsFix forced = Overrides::get().gpsFix();
+            if (forced == Overrides::GpsFix::On) {
+                flagGpsFix = true;
+            } else if (forced == Overrides::GpsFix::Off) {
+                mLoc.valid = false;
+                mLastTime  = std::chrono::steady_clock::now();
+                // Standing still: a replay's distance meanwhile is not counted.
+                Overrides::get().replaySkip(mReplayCursor);
+                continue;
+            }
+
             if (flagGpsFix == false) {
                 continue;
             }
@@ -108,6 +125,25 @@ namespace Simulator {
         auto now = std::chrono::steady_clock::now();
         float dt = std::chrono::duration<float>(now - mLastTime).count();
         mLastTime = now;
+
+        // A track replayed by a simulator script replaces the simulated oval.
+        Overrides::TrackPoint fix;
+        double metres = 0.0;
+        if (Overrides::get().replayAdvance(mReplayCursor, fix, metres)) {
+            // The distance along the track since the previous update: none from
+            // before the replay started, all of it up to the replay's end.
+            mCurrentSpeed        = fix.speed;
+            mTotalDistanceMeters = static_cast<float>(metres);
+            updateStepCounter(mTotalDistanceMeters);
+            LocationInfo loc;
+            loc.valid     = true;
+            loc.lat       = static_cast<float>(fix.lat);
+            loc.lon       = static_cast<float>(fix.lon);
+            loc.alt       = fix.alt;
+            loc.precision = 3.0f;
+            mLoc = loc;
+            return;
+        }
 
         // Determine current segment of the track
         float distanceAlongLap = mTrackPosition;
@@ -235,6 +271,9 @@ namespace Simulator {
 
     bool GpsStepCounterSimulator::hasFix()
     {
+        if (Overrides::get().gpsFix() == Overrides::GpsFix::Off) {
+            return false;
+        }
         return mLoc.valid;
     }
 
@@ -245,6 +284,9 @@ namespace Simulator {
 
     float GpsStepCounterSimulator::getSpeed()
     {
+        if (Overrides::get().gpsFix() == Overrides::GpsFix::Off) {
+            return 0.0f;
+        }
         return mCurrentSpeed;
     }
 
@@ -308,13 +350,19 @@ namespace Simulator {
 
     void GpsStepCounterSimulator::updateStepCounter(float distance)
     {
-        mStepAccumulator += distance;
-
-        while (mStepAccumulator >= mStrideLength)
-        {
-            mTotalSteps++;
-            mStepAccumulator -= mStrideLength;
+        // Steps by division, not a subtraction loop: a float accumulator too
+        // large for a stride to change it would never leave the loop. Only a
+        // finite positive distance and stride count: infinity (from an
+        // infinite configured speed) would leave the accumulator NaN.
+        if (!(distance > 0.0f) || !std::isfinite(distance) ||
+            !(mStrideLength > 0.0f) || !std::isfinite(mStrideLength)) {
+            return;
         }
+        const double total = static_cast<double>(mStepAccumulator) + distance;
+        const double steps = std::floor(total / mStrideLength);
+        const double room  = static_cast<double>(UINT32_MAX - mTotalSteps);
+        mTotalSteps       += static_cast<uint32_t>((std::min)(steps, room));
+        mStepAccumulator   = static_cast<float>(total - steps * mStrideLength);
 
     }
 }
