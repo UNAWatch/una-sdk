@@ -23,6 +23,13 @@ void Logger_init(SDK::Interface::ILogger& ilogger)
     }
 }
 
+void Logger_deinit(SDK::Interface::ILogger& ilogger)
+{
+    if (sILogger == &ilogger) {
+        sILogger = nullptr;
+    }
+}
+
 void Logger_message(const char* level,
                     const char* module,
                     const char* func,
