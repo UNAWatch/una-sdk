@@ -20,7 +20,14 @@ While the cable is in, the watch also shows up as a serial port next to the driv
 - **Line endings:** commands must end with a line feed (`\n`). A lone carriage return only echoes, so set the terminal to send LF or CR+LF on Enter.
 - **Prompt:** `una>`. Type `menu` to list the commands and `help <command>` for details.
 
-**Restart without a power cycle.** `reset` restarts the watch. Run it instead of steps 4 to 6: copy the app, then `reset`, and the new app is loaded at startup.
+**Restart without a power cycle.** `reset` restarts the watch. Run it instead of steps 4 to 6: copy the app, flush the drive, then `reset`, and the new app is loaded at startup.
+
+**Flush before `reset` or `usb drive off`.** Both take the drive away without an eject, as pulling the cable does. A copy can look finished while the computer still holds part of it in its write cache, so write that out first:
+
+- **Windows (PowerShell):** `Write-VolumeCache <drive letter>`, for example `Write-VolumeCache E`
+- **Linux / macOS:** `sync`
+
+Ejecting the drive also flushes it. On Windows, though, ejecting also disconnects the serial port until the cable is replugged.
 
 > [!WARNING]
 > Wait about 10 seconds after `reset` before using the serial port again. Opening the port and typing anything within about 10 seconds of startup puts the watch into factory test mode (prompt `una-test>`). Opening it without typing only delays startup by up to 10 seconds. In test mode, type nothing more; closing the port restarts the watch normally.
@@ -31,14 +38,14 @@ While the cable is in, the watch also shows up as a serial port next to the driv
 |---|---|
 | `usb` | Shows whether the drive is open, a computer is connected, and reopen is on |
 | `usb drive on` | Opens the drive, as plugging the cable in does |
-| `usb drive off` | Closes the drive, as unplugging does: the settings are reloaded and the apps come back. Let any copy finish first |
+| `usb drive off` | Closes the drive, as unplugging does: the settings are reloaded and the apps come back. Flush the drive first (see above) |
 | `usb reopen on\|off` | Whether the drive also opens again after `reset` (default off) |
 
 The loop is then:
 
 ```
 una> usb drive on      # the drive opens
-     ... copy the .uapp into Apps/<AppName>/ ...
+     ... copy the .uapp into Apps/<AppName>/, then flush the drive ...
 una> reset             # the watch restarts with the new app, usable on the cable
 ```
 
