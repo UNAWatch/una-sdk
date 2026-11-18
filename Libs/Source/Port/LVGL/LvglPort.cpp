@@ -17,6 +17,10 @@
 #include "SDK/Kernel/KernelProviderGUI.hpp"
 #include "SDK/Port/GuiCommandProcessor.hpp"
 
+#ifdef SIMULATOR
+#include "SDK/Simulator/LVGL/LvglPool.hpp"
+#endif
+
 /// Build with -DUNA_LVGL_FRAME_STATS=1 to log, every 100 kernel ticks, how many
 /// frames reached the kernel and how evenly the ticks arrived.
 #ifndef UNA_LVGL_FRAME_STATS
@@ -109,6 +113,9 @@ Port& Port::GetInstance()
 void Port::init()
 {
     lv_init();
+#ifdef SIMULATOR
+    SDK::Simulator::LvglPool::install();
+#endif
 
     lv_tick_set_cb(&Port::tickCb);
     lv_log_register_print_cb(&Port::logCb);
@@ -203,6 +210,9 @@ void Port::onStop()
     if (mApp) {
         mApp->onStop();
     }
+#ifdef SIMULATOR
+    SDK::Simulator::LvglPool::reportPeak();
+#endif
     lv_deinit();
     mStopped = true;
 }
@@ -297,6 +307,11 @@ uint32_t Port::tickCb()
 
 void Port::logCb(lv_log_level_t level, const char* buf)
 {
+#ifdef SIMULATOR
+    if (SDK::Simulator::LvglPool::onLog(level, buf)) {
+        return;
+    }
+#endif
     switch (level) {
         case LV_LOG_LEVEL_ERROR: LOG_ERROR("%s\n", buf);   break;
         case LV_LOG_LEVEL_WARN:  LOG_WARNING("%s\n", buf); break;
