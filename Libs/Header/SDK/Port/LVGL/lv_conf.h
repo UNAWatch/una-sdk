@@ -113,7 +113,14 @@
 /* Logging goes to the kernel logger through the print callback the port registers. */
 #define LV_USE_LOG 1
 #if LV_USE_LOG
-    #define LV_LOG_LEVEL            LV_LOG_LEVEL_WARN
+    #if defined(SIMULATOR)
+        /* LVGL reports a failed allocation at INFO. The simulator turns it
+         * into a clear out-of-memory failure and drops the other INFO messages
+         * (SDK/Simulator/LVGL/LvglPool.hpp). */
+        #define LV_LOG_LEVEL        LV_LOG_LEVEL_INFO
+    #else
+        #define LV_LOG_LEVEL        LV_LOG_LEVEL_WARN
+    #endif
     #define LV_LOG_PRINTF           0
     #define LV_LOG_USE_TIMESTAMP    0
     #define LV_LOG_USE_FILE_LINE    1

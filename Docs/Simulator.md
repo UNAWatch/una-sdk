@@ -397,6 +397,45 @@ simulation, mock file system and keyboard mapping above apply unchanged.
 `.github/workflows/linux-simulator.yml` builds these CMake simulators on Linux and
 smoke-runs them headlessly, beside the TouchGFX ones.
 
+### LVGL memory pool {#lvgl-pool}
+
+On the watch LVGL allocates from one static pool of `LV_MEM_SIZE` bytes (40 KB unless the
+app's GUI compile definitions set it; RunLVGL sets 56 KB). LVGL's objects are mostly
+pointers, so the same screens need about twice as much pool in a 64-bit build as on the
+32-bit watch. The simulator handles this as follows (`Libs/Header/SDK/Simulator/LVGL/LvglPool.hpp`):
+
+- A 32-bit build (the Windows build with the TouchGFX SDL2, or `-m32` on Linux) has
+  exactly the watch's pool. An app that would run out of memory on the watch runs out here too.
+- A 64-bit build (Linux, macOS, x64 Windows) adds a second pool of `LV_MEM_SIZE`, so it
+  has twice the watch's pool. It does not show running out the way the watch would.
+- When the pool runs out, the simulator stops with exit code 4 and a message giving
+  the failed allocation, the pool size and its use, instead of crashing:
+
+  ```text
+  [sim] OUT OF MEMORY: LVGL couldn't allocate memory (104 bytes). Its pool is 24 KB (LV_MEM_SIZE), as on the watch; 20932 B were in use, the largest free block 56 B. Raise LV_MEM_SIZE in the app's GUI compile definitions, or use less LVGL memory.
+  ```
+
+- When the GUI stops, the simulator reports the pool's peak use, on the console and in
+  `sim.log`. A 32-bit build's figure is the watch's; a 64-bit build's overstates it.
+
+  ```text
+  [sim] LVGL pool: peak 31512 B of 57344 B (LV_MEM_SIZE), 54%.
+  ```
+
+To size the pool, take the peak from a 32-bit build after visiting the app's largest
+screens. The CI workflow builds each LVGL app 32-bit as well as 64-bit, and runs its
+`simulator/smoke.txt` script if it has one (otherwise it only boots the app), so an app
+that runs out of pool fails there.
+
+To build 32-bit on Debian/Ubuntu:
+
+```bash
+sudo dpkg --add-architecture i386 && sudo apt-get update
+sudo apt-get install -y gcc-multilib g++-multilib libsdl2-dev:i386 ninja-build
+cmake -S simulator -B simulator/build-x86 -G Ninja -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32
+cmake --build simulator/build-x86
+```
+
 ## Linux (GCC) {#linux-gcc}
 
 The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.
@@ -455,6 +494,7 @@ The exit code says how the run went:
 | 1 | A step failed: a screenshot could not be written, a replay file could not be read, or a button event was lost because the GUI's queue was full. |
 | 2 | Bad options or script. Nothing ran; the message names the line. |
 | 3 | The simulator did not shut down within 15 s of the end of the run, whatever happened before. |
+| 4 | The app ran out of memory: an LVGL app's pool was exhausted (see [LVGL memory pool](#lvgl-pool)). Also ends a run that is not scripted. |
 
 During a scripted or headless run, everything the app and the simulator log goes to `<out>/sim.log` as well as the console. Each step is logged as it runs, with its time and script line, starting `[sim]`.
 
