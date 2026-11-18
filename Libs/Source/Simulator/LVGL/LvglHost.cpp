@@ -16,6 +16,7 @@
 #include "SDK/Port/LVGL/LvglPort.hpp"
 #include "SDK/Simulator/Components/InstanceSensorLayer.hpp"
 #include "SDK/Simulator/Kernel/Mock/System.hpp"
+#include "SDK/Simulator/Automation/Png.hpp"
 
 #define LOG_MODULE_PRX      "LvglHost"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -68,6 +69,19 @@ LvglHost::~LvglHost()
 
 bool LvglHost::init()
 {
+    // Reads the options and the script first: a bad one ends the run here.
+    mScript = std::make_unique<Automation::Runner>(static_cast<Automation::ScriptHost&>(*this));
+
+    SDK::LVGL::Port::GetInstance().setFrameHook(&LvglHost::frameHook, this);
+    Mock::SystemGUI::SetStopHandler(&LvglHost::stopFromSystem);
+
+    if (Automation::Options::get().headless()) {
+        // No window: the port renders into its frame as always, and the
+        // script's screenshots read it from there.
+        LOG_INFO("Headless: no window.\n");
+        return true;
+    }
+
     SDL_SetMainReady();
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         LOG_ERROR("SDL_Init failed: %s\n", SDL_GetError());
@@ -97,9 +111,6 @@ bool LvglHost::init()
         LOG_ERROR("SDL_CreateTexture failed: %s\n", SDL_GetError());
         return false;
     }
-
-    SDK::LVGL::Port::GetInstance().setFrameHook(&LvglHost::frameHook, this);
-    Mock::SystemGUI::SetStopHandler(&LvglHost::stopFromSystem);
 
     LOG_INFO("Window %dx%d (x%d). Keys: 1=L1 2=L2 3=R1 4=R2 (q/w/e/r press, a/s/d/f release), Esc quits.\n",
              SDK::LVGL::kDisplayWidth, SDK::LVGL::kDisplayHeight, scale);
@@ -164,6 +175,12 @@ void LvglHost::frameHook(void* ctx)
     // (It may run for a button event too, so at most one extra tick queues.)
     self->mTickPending = false;
     self->pumpEvents();
+    if (self->mScript) {
+        self->mScript->tick();
+    }
+    if (self->mStopWanted && !self->mStopRequested) {
+        self->requestStop();   // a script's stop the full queue refused last frame
+    }
     self->present(false);
 }
 
@@ -177,6 +194,9 @@ void LvglHost::stopFromSystem()
 
 void LvglHost::pumpEvents()
 {
+    if (!mSdlReady) {
+        return;   // headless
+    }
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
@@ -236,6 +256,9 @@ void LvglHost::pumpEvents()
 
 void LvglHost::present(bool force)
 {
+    if (!mTexture) {
+        return;   // headless
+    }
     auto& port = SDK::LVGL::Port::GetInstance();
     if (!force && port.frameCount() == mShownFrame) {
         return;
@@ -268,11 +291,14 @@ void LvglHost::requestStop()
     }
     // Same order as the kernel: the GUI is taken off screen, then stopped.
     // The port handles COMMAND_APP_STOP by calling sys.exit(), which reaches
-    // stopFromSystem() and ends run(). The request is latched only once both
-    // commands are queued: after a stall the queue may be full, and the next
-    // Escape or close must then be able to try again.
-    if (sendToGui(SDK::MessageType::COMMAND_APP_GUI_SUSPEND) &&
-        sendToGui(SDK::MessageType::COMMAND_APP_STOP)) {
+    // stopFromSystem() and ends run(). After a stall the queue may be full and
+    // refuse either command; each is sent once, and the request is latched
+    // only when both are queued, so the next try (Escape, close, or the frame
+    // hook for a script's stop) sends what is still missing.
+    if (!mSuspendSent) {
+        mSuspendSent = sendToGui(SDK::MessageType::COMMAND_APP_GUI_SUSPEND);
+    }
+    if (mSuspendSent && sendToGui(SDK::MessageType::COMMAND_APP_STOP)) {
         mStopRequested = true;
     }
 }
@@ -323,18 +349,20 @@ void LvglHost::sendToService(SDK::MessageType::Type type)
     }
 }
 
-void LvglHost::sendButton(Btn::Id id, Btn::Event event)
+bool LvglHost::sendButton(Btn::Id id, Btn::Event event)
 {
     auto msg = SDK::make_msg<Btn>(mKernel);
     if (!msg) {
-        return;
+        return false;
     }
     msg->timestamp = mKernel.sys.getTimeMs();
     msg->id        = id;
     msg->event     = event;
     if (mComm.sendToGui(msg.get())) {
         msg.release();
+        return true;
     }
+    return false;
 }
 
 bool LvglHost::keyToButton(int32_t key, Btn::Id& id)
@@ -368,6 +396,72 @@ bool LvglHost::keyToRawEvent(int32_t key, Btn::Id& id, Btn::Event& event)
         case SDLK_f: id = Btn::Id::SW4; event = Btn::Event::RELEASE; return true;
         default:     return false;
     }
+}
+
+// --- scripted runs ------------------------------------------------------------
+
+Btn::Id LvglHost::buttonId(Automation::Button b)
+{
+    // Button ids follow the hardware: SW1=L1, SW2=R1, SW3=L2, SW4=R2.
+    switch (b) {
+        case Automation::Button::L1: return Btn::Id::SW1;
+        case Automation::Button::L2: return Btn::Id::SW3;
+        case Automation::Button::R1: return Btn::Id::SW2;
+        case Automation::Button::R2: return Btn::Id::SW4;
+    }
+    return Btn::Id::SW1;
+}
+
+void LvglHost::buttonDown(Automation::Button b)
+{
+    if (!sendButton(buttonId(b), Btn::Event::PRESS)) {
+        Automation::Options::get().fail("%s press lost: the GUI queue is full", Automation::buttonName(b));
+    }
+}
+
+void LvglHost::buttonUp(Automation::Button b, bool click)
+{
+    // The order the kernel emits: the click, then the release. A full queue
+    // loses the event, as it would on the watch; the run then fails.
+    if (click && !sendButton(buttonId(b), Btn::Event::CLICK)) {
+        Automation::Options::get().fail("%s click lost: the GUI queue is full", Automation::buttonName(b));
+    }
+    if (!sendButton(buttonId(b), Btn::Event::RELEASE)) {
+        Automation::Options::get().fail("%s release lost: the GUI queue is full", Automation::buttonName(b));
+    }
+}
+
+bool LvglHost::saveDisplay(const std::string& path)
+{
+    auto& port = SDK::LVGL::Port::GetInstance();
+    const uint8_t* src = port.frame();
+    if (src == nullptr || port.frameCount() == 0) {
+        Automation::Options::get().report("no frame has been drawn yet");
+        return false;
+    }
+    const int w = SDK::LVGL::kDisplayWidth;
+    const int h = SDK::LVGL::kDisplayHeight;
+    std::vector<uint8_t> rgb(static_cast<size_t>(w) * h * 3);
+    for (size_t i = 0; i < static_cast<size_t>(w) * h; ++i) {
+        const uint8_t px = src[i];   // ABGR2222: A[7:6] B[5:4] G[3:2] R[1:0]
+        rgb[i * 3]     = static_cast<uint8_t>((px & 0x03) * 85);
+        rgb[i * 3 + 1] = static_cast<uint8_t>(((px >> 2) & 0x03) * 85);
+        rgb[i * 3 + 2] = static_cast<uint8_t>(((px >> 4) & 0x03) * 85);
+    }
+    return Automation::Png::writeRgb(path, w, h, rgb.data());
+}
+
+void LvglHost::wristMotion()
+{
+    if (!Automation::Overrides::get().wristMotion()) {
+        Automation::Options::get().fail("wrist: this simulator has no sensors");
+    }
+}
+
+void LvglHost::endRun()
+{
+    mStopWanted = true;
+    requestStop();
 }
 
 } // namespace SDK::Simulator

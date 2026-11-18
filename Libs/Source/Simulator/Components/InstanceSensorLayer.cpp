@@ -7,6 +7,7 @@
 #include "SDK/Simulator/Components/SensorManager.hpp"
 #include "SDK/Simulator/Components/ComponentSimulator.hpp"
 #include <SDK/Simulator/Kernel/Mock/System.hpp>
+#include "SDK/Simulator/Automation/Overrides.hpp"
 
 namespace Instance {
 
@@ -69,6 +70,11 @@ namespace Instance {
         }
     }
 
+    void SensorLayer::wristMotion()
+    {
+        mSensorImuWrist.handleWristMotion(SDK::Simulator::Mock::System::GetTimeMs());
+    }
+
     SensorLayer::SensorLayer()
         : mSensorGpsAltimer()
         , mSensorGpsLocation()
@@ -89,6 +95,9 @@ namespace Instance {
         mComponent.setParamHeartRateSimulation(HEAT_RATE_SIM_MIN_HR, HEAT_RATE_SIM_MAX_HR, HEAT_RATE_SIM_TYPE_TRAINING);
         mComponent.setParamPressureSimulation(PRESSURE_SIM_PRESS_VALLUE);
         mComponent.setParamStepCounterSimulation(IMU_STEP_COUNTER_SIM_STRIDE_LENGTH);
+
+        // A script's wrist step reaches the IMU through here.
+        SDK::Simulator::Automation::Overrides::get().setWristHandler([this] { wristMotion(); });
     }
     }
 

@@ -9,6 +9,7 @@
 
 #include "SDK/Messages/MessageGuard.hpp"
 #include "SDK/Simulator/Components/InstanceSensorLayer.hpp"
+#include "SDK/Simulator/Automation/Png.hpp"
 
 /** @brief Supply the simulator's fallback font to LVGL. */
 extern "C" const lv_font_t* una_lvgl_default_font(void)
@@ -74,12 +75,21 @@ GlanceHost::~GlanceHost()
  */
 bool GlanceHost::init()
 {
+    // Reads the options and the script first: a bad one ends the run here.
+    // The glance's own options (--scale, --screenshot) are main()'s.
+    mScript = std::make_unique<Automation::Runner>(static_cast<Automation::ScriptHost&>(*this), true);
+    const bool headless = Automation::Options::get().headless();
+    if (headless) {
+        SDL_setenv("SDL_VIDEODRIVER", "dummy", 0);   // no window, unless the caller chose a driver
+    }
+
     SDL_SetMainReady();
     if (SDL_Init(SDL_INIT_VIDEO) != 0) return false;
     mSdlReady = true;
     const int scale = std::max(1, mOptions.scale);
+    // Hidden when headless, whatever video driver the caller chose.
     mWindow = SDL_CreateWindow(mOptions.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                               kWidth * scale, kHeight * scale, SDL_WINDOW_SHOWN);
+                               kWidth * scale, kHeight * scale, headless ? SDL_WINDOW_HIDDEN : SDL_WINDOW_SHOWN);
     if (!mWindow) return false;
     mRenderer = SDL_CreateRenderer(mWindow, -1, 0);
     if (!mRenderer) return false;
@@ -203,6 +213,10 @@ bool GlanceHost::run(const std::function<bool()>& keepRunning)
             else if (event.type == SDL_KEYDOWN && !event.key.repeat && event.key.keysym.sym > 0 && event.key.keysym.sym < 128)
                 Instance::SensorLayer::getInstance().handlerButtons(static_cast<uint8_t>(event.key.keysym.sym));
         }
+        if (mScript) {
+            mScript->tick();
+            if (mEndRequested) running = false;
+        }
         const uint32_t now = SDL_GetTicks();
         if (mOptions.durationMs && now - startedAt >= mOptions.durationMs) running = false;
         if (mStarted && now - lastTick >= 100) {
@@ -323,6 +337,7 @@ void GlanceHost::flush(lv_display_t* display, const lv_area_t* area, uint8_t* pi
         std::memcpy(host->mFrame.data() + row * kWidth + area->x1, pixels, width * sizeof(uint16_t));
         pixels += width * sizeof(uint16_t);
     }
+    host->mFrameDrawn = true;
     lv_display_flush_ready(display);
 }
 
@@ -339,6 +354,30 @@ bool GlanceHost::saveScreenshot(const std::string& path) const
     const bool saved = SDL_SaveBMP(surface, path.c_str()) == 0;
     SDL_FreeSurface(surface);
     return saved;
+}
+
+/** @brief Write the current frame as PNG, for a script's screenshot step. */
+bool GlanceHost::saveDisplay(const std::string& path)
+{
+    if (!mFrameDrawn) {
+        return false;   // nothing drawn yet, as the other hosts report
+    }
+    std::vector<uint8_t> rgb(static_cast<size_t>(kWidth) * kHeight * 3);
+    for (size_t i = 0; i < mFrame.size(); ++i) {
+        const uint16_t px = mFrame[i];   // RGB565
+        rgb[i * 3]     = static_cast<uint8_t>(((px >> 11) & 0x1F) * 255 / 31);
+        rgb[i * 3 + 1] = static_cast<uint8_t>(((px >> 5) & 0x3F) * 255 / 63);
+        rgb[i * 3 + 2] = static_cast<uint8_t>((px & 0x1F) * 255 / 31);
+    }
+    return Automation::Png::writeRgb(path, kWidth, kHeight, rgb.data());
+}
+
+/** @brief A wrist-raise motion, for a script's wrist step. */
+void GlanceHost::wristMotion()
+{
+    if (!Automation::Overrides::get().wristMotion()) {
+        Automation::Options::get().fail("wrist: this simulator has no sensors");
+    }
 }
 
 }

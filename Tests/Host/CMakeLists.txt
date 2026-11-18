@@ -58,6 +58,7 @@ add_executable(una-sdk-host-tests
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
     simulator/FileSystemMock_test.cpp
+    simulator/Automation_test.cpp
     sensorlayer/GyroscopeParser_test.cpp
     sensorlayer/MagneticFieldParser_test.cpp
     sensorlayer/MagneticFieldRawParser_test.cpp

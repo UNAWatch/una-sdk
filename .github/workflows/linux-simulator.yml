@@ -186,18 +186,25 @@ jobs:
             BIN_DIR=build/bin
             EXE=./simulator.out
           fi
-          # Dummy SDL drivers => headless. The sim is a GUI loop that never exits,
-          # so the watchdog reaps it; success = a boot marker, not the exit code.
-          # Run from the binary's directory, where the mock file system lands.
+          # A scripted headless run (SDK/Simulator/Automation): boot, take a
+          # screenshot, exit. It must end on its own with exit code 0; timeout
+          # only catches a hang. Run from the binary's directory, where the
+          # mock file system lands.
+          printf '3000 screenshot boot\n3500 exit\n' > "$RUNNER_TEMP/smoke.txt"
           cd "$BIN_DIR"
           set +e
-          SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
-            timeout 20 "$EXE" > "$GITHUB_WORKSPACE/sim.log" 2>&1
-          echo "exit=$?"
+          SDL_AUDIODRIVER=dummy timeout 60 "$EXE" --headless --script "$RUNNER_TEMP/smoke.txt" \
+            --out "$GITHUB_WORKSPACE/sim-out" > "$GITHUB_WORKSPACE/sim.log" 2>&1
+          code=$?
+          echo "exit=$code"
           echo "----- first 30 lines of sim.log -----"; head -30 "$GITHUB_WORKSPACE/sim.log" || true
+          [ "$code" -eq 0 ] || { echo "RUN FAILED: exit code $code"; exit 1; }
           # The service logs this on COMMAND_APP_NOTIF_GUI_RUN, in every app.
           grep -q "GUI is now running" "$GITHUB_WORKSPACE/sim.log" \
-            && echo "BOOT OK" || { echo "BOOT FAILED: marker not found"; exit 1; }
+            || { echo "BOOT FAILED: marker not found"; exit 1; }
+          [ -s "$GITHUB_WORKSPACE/sim-out/boot.png" ] \
+            || { echo "SCREENSHOT FAILED: sim-out/boot.png missing"; exit 1; }
+          echo "BOOT OK"
 
       - name: Write PASS/FAIL summary
         if: always()
@@ -226,6 +233,7 @@ jobs:
           path: |
             build.log
             sim.log
+            sim-out/
             ${{ matrix.project.dir }}/build/bin/simulator.out
             ${{ matrix.project.dir }}/simulator/build/bin/*
           if-no-files-found: ignore

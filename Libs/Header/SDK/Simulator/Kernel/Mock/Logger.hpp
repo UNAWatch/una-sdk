@@ -15,6 +15,7 @@
 #include "SDK/Interfaces/ILogger.hpp"
 
 #include "SDK/Simulator/OS/OS.hpp"
+#include "SDK/Simulator/Automation/Options.hpp"
 
 #include <cstdio>
 
@@ -146,11 +147,15 @@ private:
         char userMsg[2048];
         vsnprintf(userMsg, sizeof(userMsg), fmt, args);
 
+        char text[2200];
         if (idx) {
-            UNA_SIM_LOG_PRINTF("%s%s%-36s: %s", timeBuff, levelBuff, meta, userMsg);
+            snprintf(text, sizeof(text), "%s%s%-36s: %s", timeBuff, levelBuff, meta, userMsg);
         } else {
-            UNA_SIM_LOG_PRINTF("%s%s%s", timeBuff, levelBuff, userMsg);
-        } 
+            snprintf(text, sizeof(text), "%s%s%s", timeBuff, levelBuff, userMsg);
+        }
+        UNA_SIM_LOG_PRINTF("%s", text);
+        // A scripted or headless run also keeps the log in <out>/sim.log.
+        SDK::Simulator::Automation::Options::get().log(text);
     }
 };
 
