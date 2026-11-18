@@ -350,10 +350,11 @@ TEST_F(AutomationTest, ReplayFileRejectsNonFiniteValues)
 TEST_F(AutomationTest, ReplayStartsAtTheFirstFix)
 {
     std::string error;
-    ASSERT_TRUE(Overrides::get().startReplay(write("t.csv", "0,51.5,-0.1,20,3\n100,51.6,-0.1,30,3\n"), error));
+    ASSERT_TRUE(Overrides::get().startReplay(write("t.csv", "0,51.5,-0.1,20,3\n100000,51.6,-0.1,30,3\n"), error));
     Overrides::TrackPoint fix;
     ASSERT_TRUE(Overrides::get().replayFix(fix));
-    EXPECT_NEAR(fix.lat, 51.5, 0.001);   // a few ms into a 100 s track
+    // A few ms into a 100000 s track: within 0.001 degrees for its first 1000 s.
+    EXPECT_NEAR(fix.lat, 51.5, 0.001);
     Overrides::get().stopReplay();
     EXPECT_FALSE(Overrides::get().replayFix(fix));
 }
@@ -410,13 +411,31 @@ TEST_F(AutomationTest, ReplayDistanceFollowsTheSpeedsAlongTheTrack)
     EXPECT_NEAR(o.trackDistance(13, 30), 7.6, 1e-9);    // across the end: 3.6 -> 4 m/s for 2 s
     EXPECT_NEAR(o.trackDistance(20, 30), 0.0, 1e-9);    // after the end
 
-    // A sensor's first call counts from the start of the replay.
+    // A sensor's first call counts from the start of the replay: a few ms in,
+    // before a first fix 10000 s in, nothing has moved.
+    ASSERT_TRUE(Overrides::get().startReplay(write("late.csv", "10000,51.5,-0.1,20,2\n10010,51.6,-0.1,30,4\n"), error));
     Overrides::ReplayCursor cursor;
     Overrides::TrackPoint   fix;
     double metres = -1.0;
     ASSERT_TRUE(o.replayAdvance(cursor, fix, metres));
-    EXPECT_DOUBLE_EQ(metres, 0.0);   // a few ms in, before the first fix
+    EXPECT_DOUBLE_EQ(metres, 0.0);
     EXPECT_NE(cursor.replay, 0u);
+}
+
+TEST_F(AutomationTest, ReplayDistanceAddsUpAcrossSegments)
+{
+    std::string error;
+    // Three segments: 2 -> 4 m/s over 0-10 s, steady 4 m/s over 10-20 s, 4 -> 0 m/s over 20-30 s.
+    ASSERT_TRUE(Overrides::get().startReplay(
+        write("legs.csv", "0,51.5,-0.1,20,2\n10,51.5,-0.1,20,4\n20,51.5,-0.1,20,4\n30,51.5,-0.1,20,0\n"), error));
+    const Overrides& o = Overrides::get();
+    EXPECT_NEAR(o.trackDistance(0, 30), 30.0 + 40.0 + 20.0, 1e-9);   // all three
+    EXPECT_NEAR(o.trackDistance(5, 25), 17.5 + 40.0 + 15.0, 1e-9);   // part, whole, part
+    EXPECT_NEAR(o.trackDistance(10, 20), 40.0, 1e-9);                // exactly the middle one
+    EXPECT_NEAR(o.trackDistance(10, 10), 0.0, 1e-9);                 // on a fix, no time
+    // Split anywhere, the parts add up to the whole.
+    EXPECT_NEAR(o.trackDistance(0, 12.5) + o.trackDistance(12.5, 30), o.trackDistance(0, 30), 1e-9);
+    EXPECT_NEAR(o.trackDistance(0, 20) + o.trackDistance(20, 30), o.trackDistance(0, 30), 1e-9);
 }
 
 TEST_F(AutomationTest, PngHasTheExpectedLayout)
