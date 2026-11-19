@@ -73,15 +73,18 @@ lines, to files on its drive:
    ```json
    { "logCfg": { "logToFile": true } }
    ```
-   If the file exists, set only `logCfg.logToFile` and keep its other settings.
-2. **Restart the watch** (the setting is read at start-up). Then reproduce the problem.
+   If the file exists, note its current `logCfg.logToFile` value, then set only that and keep
+   its other settings.
+2. **Eject, disconnect and restart the watch** (the setting is read at start-up). Then reproduce
+   the problem.
 3. **Collect the files.** Reconnect, and read `Log/System/syslog_<id>_<NNNN>_<timestamp>.log`.
    - Files roll over at 1 MB and the newest 10 sessions are kept. The highest `NNNN` is the
      latest.
    - Lines carry the app's module prefix: the `LOG_MODULE_PRX` set at the top of each source
      file.
-4. **Turn it off again** when done (`"logToFile": false`, then restart), to save battery and
-   flash wear.
+4. **Put the setting back** when done: the value noted in step 1, or `false` if the file didn't
+   exist or the setting wasn't there. Logging costs battery and flash wear. Then eject,
+   disconnect and restart the watch.
 
 **Crashes:** crash dumps land in `Crash/` on the drive. Include them when reporting a crash.
 
