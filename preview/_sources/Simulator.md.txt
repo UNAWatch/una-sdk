@@ -1,6 +1,6 @@
 # UNA-Watch Simulator
 
-The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see [Linux (GCC)](#linux-gcc). The [LVGL simulators](#lvgl-simulator) are plain CMake projects that need a compiler and SDL2 but no IDE.   
+The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see [Linux (GCC)](#linux-gcc). The [LVGL simulators](#lvgl-simulator) are plain CMake projects that need a compiler and SDL2 but no IDE. All of them can be driven by a script and run without a window: see [Scripted and headless runs](#scripted-runs).   
 Note: If you move the application to another location, you need to update the relative path to **TouchGFX library path**.
       See: [Transfer Application](#transfer-application) 
 
@@ -58,7 +58,8 @@ Note: If you move the application to another location, you need to update the re
    ```
 
    Screenshots are unscaled 240 x 60 BMP files. A failed screenshot or a run with
-   no glance updates returns a nonzero exit code. The regression tests check
+   no glance updates returns a nonzero exit code. For a timeline of sensor values
+   and PNG screenshots, use a script (see [Scripted and headless runs](#scripted-runs)). The regression tests check
    control rendering, clipping, transparency, copied update buffers, invalid
    requests, live sensor updates and clean shutdown. Linux simulator CI runs
    these tests as its headless smoke check.
@@ -396,6 +397,45 @@ simulation, mock file system and keyboard mapping above apply unchanged.
 `.github/workflows/linux-simulator.yml` builds these CMake simulators on Linux and
 smoke-runs them headlessly, beside the TouchGFX ones.
 
+### LVGL memory pool {#lvgl-pool}
+
+On the watch LVGL allocates from one static pool of `LV_MEM_SIZE` bytes (40 KB unless the
+app's GUI compile definitions set it; RunLVGL sets 56 KB). LVGL's objects are mostly
+pointers, so the same screens need about twice as much pool in a 64-bit build as on the
+32-bit watch. The simulator handles this as follows (`Libs/Header/SDK/Simulator/LVGL/LvglPool.hpp`):
+
+- A 32-bit build (the Windows build with the TouchGFX SDL2, or `-m32` on Linux) has
+  exactly the watch's pool. An app that would run out of memory on the watch runs out here too.
+- A 64-bit build (Linux, macOS, x64 Windows) adds a second pool of `LV_MEM_SIZE`, so it
+  has twice the watch's pool. It does not show running out the way the watch would.
+- When the pool runs out, the simulator stops with exit code 4 and a message giving
+  the failed allocation, the pool size and its use, instead of crashing:
+
+  ```text
+  [sim] OUT OF MEMORY: LVGL couldn't allocate memory (104 bytes). Its pool is 24 KB (LV_MEM_SIZE), as on the watch; 20932 B were in use, the largest free block 56 B. Raise LV_MEM_SIZE in the app's GUI compile definitions, or use less LVGL memory.
+  ```
+
+- When the GUI stops, the simulator reports the pool's peak use, on the console and in
+  `sim.log`. A 32-bit build's figure is the watch's; a 64-bit build's overstates it.
+
+  ```text
+  [sim] LVGL pool: peak 31512 B of 57344 B (LV_MEM_SIZE), 54%.
+  ```
+
+To size the pool, take the peak from a 32-bit build after visiting the app's largest
+screens. The CI workflow builds each LVGL app 32-bit as well as 64-bit, and runs its
+`simulator/smoke.txt` script if it has one (otherwise it only boots the app), so an app
+that runs out of pool fails there.
+
+To build 32-bit on Debian/Ubuntu:
+
+```bash
+sudo dpkg --add-architecture i386 && sudo apt-get update
+sudo apt-get install -y gcc-multilib g++-multilib libsdl2-dev:i386 ninja-build
+cmake -S simulator -B simulator/build-x86 -G Ninja -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32
+cmake --build simulator/build-x86
+```
+
 ## Linux (GCC) {#linux-gcc}
 
 The simulator builds and runs on x86-64 Linux using GCC and SDL2. TouchGFX Designer is Windows-only, so on Linux you build and run directly from the command line rather than through the Designer/Visual Studio GUI.
@@ -413,9 +453,11 @@ sudo apt-get install -y build-essential libsdl2-dev libsdl2-image-dev libjpeg-de
 # Build (UNA_SDK is the absolute path to the repo root)
 UNA_SDK=/absolute/path/to/una-sdk make -f simulator/gcc/Makefile -j"$(nproc)"
 
-# Run headless (no X display needed)
-SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./build/bin/simulator.out
+# Run headless (no X display needed) for 10 s
+SDL_AUDIODRIVER=dummy ./build/bin/simulator.out --headless --duration-ms 10000
 ```
+
+[Scripted and headless runs](#scripted-runs) covers driving the buttons and sensors and taking screenshots without a window.
 
 The build links `touchgfx SDL2 SDL2_image jpeg rt m pthread dl`. To add your own headers or sources to the Linux build, edit `simulator/gcc/Makefile` (`ADDITIONAL_INCLUDE_PATHS` / `ADDITIONAL_SOURCES_UNA`), as described under [GCC](#gcc) above.
 
@@ -427,3 +469,120 @@ Linux support is spread across the repo rather than in one place:
 - **Vendored TouchGFX tooling (`ThirdParty/`)** — the Linux asset converters carry the execute bit and the `textconvert` Ruby scripts run on modern Ruby. See [`ThirdParty-Local-Patches.md`](ThirdParty-Local-Patches.md).
 - **Per-app config** — each `TouchGFX-GUI` project tracks `config/gcc/app.mk` (it holds the repo-relative `touchgfx_path` the Linux `una/Makefile` hard-includes), adds `-no-pie` to the Linux linker options in `una/Makefile`, and guards its `Windows.h` include with `#ifdef _WIN32`.
 - **CI** — `.github/workflows/linux-simulator.yml` builds and headlessly smoke-runs the simulator (non-gating).
+
+## Scripted and headless runs {#scripted-runs}
+
+Every simulator (TouchGFX apps, LVGL apps and glances) can run a script: a timeline that presses buttons, sets sensor values and saves screenshots, then ends the run. With `--headless` it runs without a window, so it works over SSH, in CI and in containers, and never takes keyboard focus. The options are read by the SDK (`Libs/Header/SDK/Simulator/Automation`), so an app's `simulator/main.cpp` needs no change.
+
+### Options
+
+| Option | Meaning |
+|---|---|
+| `--script FILE` | Run the steps in `FILE`. |
+| `--headless` | No window. Frames are still rendered, and screenshots read them directly. Needs `--duration-ms` or an `exit` step. |
+| `--duration-ms N` | End the run after N ms. No step after N ms runs. |
+| `--out DIR` | Where screenshots and `sim.log` go, created if missing. Default: `sim-out` in the working directory. If it can't be made a directory or `sim.log` can't be written there, the run stops with exit code 2. |
+| `--fs-root DIR` | Root of the mock file system: what the app reads and writes (`settings.json`, `Activity/`…). Default: `../../../../../Output/` relative to the working directory. |
+
+When starting the simulator from TouchGFX Designer or Visual Studio, put the options in the `UNA_SIM_ARGS` environment variable instead, for example `UNA_SIM_ARGS=--script C:\work\run.txt`. Put a path with spaces in double quotes: `UNA_SIM_ARGS=--script "C:\My Scripts\run.txt"`.
+
+The exit code says how the run went:
+
+| Code | Meaning |
+|---|---|
+| 0 | The run ended normally. |
+| 1 | A step failed: a screenshot could not be written, a replay file could not be read, or a button event was lost because the GUI's queue was full. |
+| 2 | Bad options or script. Nothing ran; the message names the line. |
+| 3 | The simulator did not shut down within 15 s of the end of the run, whatever happened before. |
+| 4 | The app ran out of memory: an LVGL app's pool was exhausted (see [LVGL memory pool](#lvgl-pool)). Also ends a run that is not scripted. |
+
+During a scripted or headless run, everything the app and the simulator log goes to `<out>/sim.log` as well as the console. Each step is logged as it runs, with its time and script line, starting `[sim]`.
+
+### Script format
+
+One step per line, a time and then the step. `#` starts a comment.
+
+```text
+# Running: start without a fix, get one, run on a recorded track, pause
+0       gps replay track.csv
+0       gps fix off
+1500    screenshot 01-no-fix
++500    gps fix on
+4000    screenshot 02-fix
++0      hr 152
++500    click R1
+15000   screenshot 03-running
++0      click R1
++1500   screenshot 04-paused
++500    exit
+```
+
+A time is in ms from the start of the GUI. `+N` means N ms after the previous step, and a trailing `s` means seconds (`5s`, `+1.5s`). Times may not go backwards, and the latest is 4294967295 ms (about 49 days). In a TouchGFX app with `UNA_SIM_SLOW` set, times stretch with the frames, so a script keeps its place in the GUI. The LVGL and glance simulators don't slow their frames, and their script times are not stretched.
+
+| Step | Effect |
+|---|---|
+| `click B` | Press button B and release it 100 ms later. B is `L1`, `L2`, `R1` or `R2`. |
+| `hold B MS` | Press B and release it MS ms later (a whole number). Use this for hold-to-confirm controls. |
+| `press B` / `release B` | Press or release B on its own. |
+| `screenshot NAME` | Save the display as `NAME` in the `--out` directory, as PNG. `.png` is added when NAME has no extension. NAME may name a folder inside `--out`, such as `shots/boot`; missing folders are made. NAME may not be an absolute path, contain `..` or `:`, or be `sim.log`. |
+| `hr BPM` / `hr auto` | A fixed heart rate (a whole number, 0-255, always trusted), or back to the simulated one. |
+| `battery PCT` / `battery auto` | A fixed battery level, 0-100. |
+| `pressure HPA` / `pressure auto` | A fixed barometric pressure, a positive number. |
+| `gps fix on` / `off` / `auto` | Force the GPS fix. `on` also skips the simulated search delay; `off` reports no fix and zero speed. `auto` has a fix only once the simulated search has ended. Without a fix the simulated track stands still and the step count stops; a replay keeps going, so when the fix returns the position jumps to where the replay has got to. |
+| `gps replay FILE` | Replay a recorded track (format below). `FILE` is relative to the script. |
+| `gps auto` | Stop the replay and the forced fix. |
+| `wrist` | A wrist-raise motion. In a simulator built without the sensor simulation (an app that uses no sensors) the step fails (exit code 1). |
+| `log TEXT` | Write TEXT to the console and `sim.log`, to mark a point in the log. |
+| `exit` | End the run. |
+
+Buttons reach the app the way the kernel reports them: the press when the button goes down, then on release a click (if it was down less than 500 ms) followed by the release. A `click`, `hold` or `press` of a button that is already down does nothing. In a TouchGFX app these are the codes in `SDK/GUI/Button.hpp`, one per frame. The keyboard keeps working in a windowed scripted run.
+
+The script is checked before the simulator starts. An unknown step, a bad button name, a missing replay file or a time that goes backwards stops the run with exit code 2 and the file and line.
+
+### Replay files
+
+A replay file is CSV, one fix per line: seconds from the start of the replay, latitude and longitude in degrees, altitude in metres (-1000 to 20000) and speed in m/s (0 to 300). A first line that is not numbers is a header.
+
+```text
+t_s,lat,lon,alt_m,speed_mps
+0,51.500000,-0.100000,20.0,3.0
+1,51.500027,-0.100000,20.1,3.0
+2,51.500054,-0.100000,20.1,3.0
+```
+
+Until the first line's time the fix is the first line's. Between two lines the position, altitude and speed are interpolated. After the last line the position stays where it ended, with speed 0. Starting or stopping a replay moves the position straight to the other track, which may be far away. An app that adds up distance from positions counts that jump, so start a replay at time 0, before the app has a fix.
+
+### Screenshots
+
+A screenshot is the 240 × 240 display as the watch shows it: round, black outside the glass, with no housing. With the panel look on (`L`, or `UNA_SIM_LOOK=watch`) it is toned like the panel. LVGL screenshots are the exact ABGR2222 frame the watch would receive, expanded to 8 bits per channel. Glance screenshots are 240 × 60. A screenshot taken before the first frame has been drawn fails (exit code 1).
+
+### Examples
+
+From the binary's directory, so the default mock file system path resolves as it does for a normal run:
+
+```bash
+# TouchGFX app (Linux build)
+./simulator.out --headless --script ~/run.txt --out ~/run-out
+
+# LVGL app
+./RunLVGLSimulator --headless --script ~/run.txt --out ~/run-out --fs-root ~/run-fs
+
+# Glance: no buttons, so a script uses only sensors, screenshots and exit
+./GlanceStepsSimulator --headless --script ~/glance.txt
+```
+
+```powershell
+# TouchGFX app (Visual Studio build), from build\Debug\bin
+.\Application.exe --headless --script C:\work\run.txt --out C:\work\run-out
+```
+
+On Windows, `Start-Process -Wait -PassThru` returns the exit code of the GUI-subsystem TouchGFX simulator, which a plain call from PowerShell does not wait for.
+
+`--fs-root` with a fresh directory starts the app with no saved settings or activities. Copy a `settings.json` into it first to start from known settings.
+
+### Limits
+
+- The simulator's message pool has no size limit, so a message too large for the watch's pools still arrives in the simulator.
+- There is no grade sensor; `SDK::Sensor::Type::GRADE` is never valid.
+- Fonts in the glance preview are LVGL's Montserrat in place of the watch's Poppins.
+- The service runs on the PC's clock, so sensor timing follows wall time, not `UNA_SIM_SLOW`.

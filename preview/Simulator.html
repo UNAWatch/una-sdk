@@ -81,10 +81,22 @@
 <li class="toctree-l3"><a class="reference internal" href="#regenerate-the-gui-regenerate-gui">Regenerate the GUI {#regenerate-gui}</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#lvgl-simulator-lvgl-simulator">LVGL simulator {#lvgl-simulator}</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lvgl-simulator-lvgl-simulator">LVGL simulator {#lvgl-simulator}</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lvgl-memory-pool-lvgl-pool">LVGL memory pool {#lvgl-pool}</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#linux-gcc-linux-gcc">Linux (GCC) {#linux-gcc}</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#build-and-run">Build and run</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#what-makes-the-linux-build-work">What makes the Linux build work</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scripted-and-headless-runs-scripted-runs">Scripted and headless runs {#scripted-runs}</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#script-format">Script format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replay-files">Replay files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screenshots">Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#limits">Limits</a></li>
 </ul>
 </li>
 </ul>
@@ -186,7 +198,7 @@
              
   <section id="una-watch-simulator">
 <h1>UNA-Watch Simulator<a class="headerlink" href="#una-watch-simulator" title="Link to this heading"></a></h1>
-<p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>. The <a class="reference internal" href="#lvgl-simulator"><span class="xref myst">LVGL simulators</span></a> are plain CMake projects that need a compiler and SDL2 but no IDE.<br />
+<p>The UNA Simulator runs on Windows (via TouchGFX Designer and Visual Studio) and on x86-64 Linux (via GCC and SDL2). The Getting Started steps below cover the Windows workflow for the TouchGFX apps; for Linux, see <a class="reference internal" href="#linux-gcc"><span class="xref myst">Linux (GCC)</span></a>. The <a class="reference internal" href="#lvgl-simulator"><span class="xref myst">LVGL simulators</span></a> are plain CMake projects that need a compiler and SDL2 but no IDE. All of them can be driven by a script and run without a window: see <a class="reference internal" href="#scripted-runs"><span class="xref myst">Scripted and headless runs</span></a>.<br />
 Note: If you move the application to another location, you need to update the relative path to <strong>TouchGFX library path</strong>.
 See: <a class="reference internal" href="#transfer-application"><span class="xref myst">Transfer Application</span></a></p>
 <section id="glance-simulator">
@@ -234,7 +246,8 @@ persist daily totals or simulate midnight rollover.</p>
 </pre></div>
 </div>
 <p>Screenshots are unscaled 240 x 60 BMP files. A failed screenshot or a run with
-no glance updates returns a nonzero exit code. The regression tests check
+no glance updates returns a nonzero exit code. For a timeline of sensor values
+and PNG screenshots, use a script (see <a class="reference internal" href="#scripted-runs"><span class="xref myst">Scripted and headless runs</span></a>). The regression tests check
 control rendering, clipping, transparency, copied update buffers, invalid
 requests, live sensor updates and clean shutdown. Linux simulator CI runs
 these tests as its headless smoke check.</p>
@@ -672,6 +685,42 @@ TouchGFX Designer nor Visual Studio is needed when SDL2 is installed. The sensor
 simulation, mock file system and keyboard mapping above apply unchanged.
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds these CMake simulators on Linux and
 smoke-runs them headlessly, beside the TouchGFX ones.</p>
+<section id="lvgl-memory-pool-lvgl-pool">
+<h3>LVGL memory pool {#lvgl-pool}<a class="headerlink" href="#lvgl-memory-pool-lvgl-pool" title="Link to this heading"></a></h3>
+<p>On the watch LVGL allocates from one static pool of <code class="docutils literal notranslate"><span class="pre">LV_MEM_SIZE</span></code> bytes (40 KB unless the
+app’s GUI compile definitions set it; RunLVGL sets 56 KB). LVGL’s objects are mostly
+pointers, so the same screens need about twice as much pool in a 64-bit build as on the
+32-bit watch. The simulator handles this as follows (<code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Simulator/LVGL/LvglPool.hpp</span></code>):</p>
+<ul>
+<li><p>A 32-bit build (the Windows build with the TouchGFX SDL2, or <code class="docutils literal notranslate"><span class="pre">-m32</span></code> on Linux) has
+exactly the watch’s pool. An app that would run out of memory on the watch runs out here too.</p></li>
+<li><p>A 64-bit build (Linux, macOS, x64 Windows) adds a second pool of <code class="docutils literal notranslate"><span class="pre">LV_MEM_SIZE</span></code>, so it
+has twice the watch’s pool. It does not show running out the way the watch would.</p></li>
+<li><p>When the pool runs out, the simulator stops with exit code 4 and a message giving
+the failed allocation, the pool size and its use, instead of crashing:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[sim] OUT OF MEMORY: LVGL couldn't allocate memory (104 bytes). Its pool is 24 KB (LV_MEM_SIZE), as on the watch; 20932 B were in use, the largest free block 56 B. Raise LV_MEM_SIZE in the app's GUI compile definitions, or use less LVGL memory.
+</pre></div>
+</div>
+</li>
+<li><p>When the GUI stops, the simulator reports the pool’s peak use, on the console and in
+<code class="docutils literal notranslate"><span class="pre">sim.log</span></code>. A 32-bit build’s figure is the watch’s; a 64-bit build’s overstates it.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[sim] LVGL pool: peak 31512 B of 57344 B (LV_MEM_SIZE), 54%.
+</pre></div>
+</div>
+</li>
+</ul>
+<p>To size the pool, take the peak from a 32-bit build after visiting the app’s largest
+screens. The CI workflow builds each LVGL app 32-bit as well as 64-bit, and runs its
+<code class="docutils literal notranslate"><span class="pre">simulator/smoke.txt</span></code> script if it has one (otherwise it only boots the app), so an app
+that runs out of pool fails there.</p>
+<p>To build 32-bit on Debian/Ubuntu:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>dpkg<span class="w"> </span>--add-architecture<span class="w"> </span>i386<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>gcc-multilib<span class="w"> </span>g++-multilib<span class="w"> </span>libsdl2-dev:i386<span class="w"> </span>ninja-build
+cmake<span class="w"> </span>-S<span class="w"> </span>simulator<span class="w"> </span>-B<span class="w"> </span>simulator/build-x86<span class="w"> </span>-G<span class="w"> </span>Ninja<span class="w"> </span>-DCMAKE_C_FLAGS<span class="o">=</span>-m32<span class="w"> </span>-DCMAKE_CXX_FLAGS<span class="o">=</span>-m32
+cmake<span class="w"> </span>--build<span class="w"> </span>simulator/build-x86
+</pre></div>
+</div>
+</section>
 </section>
 <section id="linux-gcc-linux-gcc">
 <h2>Linux (GCC) {#linux-gcc}<a class="headerlink" href="#linux-gcc-linux-gcc" title="Link to this heading"></a></h2>
@@ -686,10 +735,11 @@ sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w
 <span class="c1"># Build (UNA_SDK is the absolute path to the repo root)</span>
 <span class="nv">UNA_SDK</span><span class="o">=</span>/absolute/path/to/una-sdk<span class="w"> </span>make<span class="w"> </span>-f<span class="w"> </span>simulator/gcc/Makefile<span class="w"> </span>-j<span class="s2">"</span><span class="k">$(</span>nproc<span class="k">)</span><span class="s2">"</span>
 
-<span class="c1"># Run headless (no X display needed)</span>
-<span class="nv">SDL_VIDEODRIVER</span><span class="o">=</span>dummy<span class="w"> </span><span class="nv">SDL_AUDIODRIVER</span><span class="o">=</span>dummy<span class="w"> </span>./build/bin/simulator.out
+<span class="c1"># Run headless (no X display needed) for 10 s</span>
+<span class="nv">SDL_AUDIODRIVER</span><span class="o">=</span>dummy<span class="w"> </span>./build/bin/simulator.out<span class="w"> </span>--headless<span class="w"> </span>--duration-ms<span class="w"> </span><span class="m">10000</span>
 </pre></div>
 </div>
+<p><a class="reference internal" href="#scripted-runs"><span class="xref myst">Scripted and headless runs</span></a> covers driving the buttons and sensors and taking screenshots without a window.</p>
 <p>The build links <code class="docutils literal notranslate"><span class="pre">touchgfx</span> <span class="pre">SDL2</span> <span class="pre">SDL2_image</span> <span class="pre">jpeg</span> <span class="pre">rt</span> <span class="pre">m</span> <span class="pre">pthread</span> <span class="pre">dl</span></code>. To add your own headers or sources to the Linux build, edit <code class="docutils literal notranslate"><span class="pre">simulator/gcc/Makefile</span></code> (<code class="docutils literal notranslate"><span class="pre">ADDITIONAL_INCLUDE_PATHS</span></code> / <code class="docutils literal notranslate"><span class="pre">ADDITIONAL_SOURCES_UNA</span></code>), as described under <a class="reference internal" href="#gcc"><span class="xref myst">GCC</span></a> above.</p>
 </section>
 <section id="what-makes-the-linux-build-work">
@@ -700,6 +750,177 @@ sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w
 <li><p><strong>Vendored TouchGFX tooling (<code class="docutils literal notranslate"><span class="pre">ThirdParty/</span></code>)</strong> — the Linux asset converters carry the execute bit and the <code class="docutils literal notranslate"><span class="pre">textconvert</span></code> Ruby scripts run on modern Ruby. See <a class="reference internal" href="ThirdParty-Local-Patches.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">ThirdParty-Local-Patches.md</span></code></span></a>.</p></li>
 <li><p><strong>Per-app config</strong> — each <code class="docutils literal notranslate"><span class="pre">TouchGFX-GUI</span></code> project tracks <code class="docutils literal notranslate"><span class="pre">config/gcc/app.mk</span></code> (it holds the repo-relative <code class="docutils literal notranslate"><span class="pre">touchgfx_path</span></code> the Linux <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code> hard-includes), adds <code class="docutils literal notranslate"><span class="pre">-no-pie</span></code> to the Linux linker options in <code class="docutils literal notranslate"><span class="pre">una/Makefile</span></code>, and guards its <code class="docutils literal notranslate"><span class="pre">Windows.h</span></code> include with <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">_WIN32</span></code>.</p></li>
 <li><p><strong>CI</strong> — <code class="docutils literal notranslate"><span class="pre">.github/workflows/linux-simulator.yml</span></code> builds and headlessly smoke-runs the simulator (non-gating).</p></li>
+</ul>
+</section>
+</section>
+<section id="scripted-and-headless-runs-scripted-runs">
+<h2>Scripted and headless runs {#scripted-runs}<a class="headerlink" href="#scripted-and-headless-runs-scripted-runs" title="Link to this heading"></a></h2>
+<p>Every simulator (TouchGFX apps, LVGL apps and glances) can run a script: a timeline that presses buttons, sets sensor values and saves screenshots, then ends the run. With <code class="docutils literal notranslate"><span class="pre">--headless</span></code> it runs without a window, so it works over SSH, in CI and in containers, and never takes keyboard focus. The options are read by the SDK (<code class="docutils literal notranslate"><span class="pre">Libs/Header/SDK/Simulator/Automation</span></code>), so an app’s <code class="docutils literal notranslate"><span class="pre">simulator/main.cpp</span></code> needs no change.</p>
+<section id="options">
+<h3>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--script</span> <span class="pre">FILE</span></code></p></td>
+<td><p>Run the steps in <code class="docutils literal notranslate"><span class="pre">FILE</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--headless</span></code></p></td>
+<td><p>No window. Frames are still rendered, and screenshots read them directly. Needs <code class="docutils literal notranslate"><span class="pre">--duration-ms</span></code> or an <code class="docutils literal notranslate"><span class="pre">exit</span></code> step.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--duration-ms</span> <span class="pre">N</span></code></p></td>
+<td><p>End the run after N ms. No step after N ms runs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--out</span> <span class="pre">DIR</span></code></p></td>
+<td><p>Where screenshots and <code class="docutils literal notranslate"><span class="pre">sim.log</span></code> go, created if missing. Default: <code class="docutils literal notranslate"><span class="pre">sim-out</span></code> in the working directory. If it can’t be made a directory or <code class="docutils literal notranslate"><span class="pre">sim.log</span></code> can’t be written there, the run stops with exit code 2.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--fs-root</span> <span class="pre">DIR</span></code></p></td>
+<td><p>Root of the mock file system: what the app reads and writes (<code class="docutils literal notranslate"><span class="pre">settings.json</span></code>, <code class="docutils literal notranslate"><span class="pre">Activity/</span></code>…). Default: <code class="docutils literal notranslate"><span class="pre">../../../../../Output/</span></code> relative to the working directory.</p></td>
+</tr>
+</tbody>
+</table>
+<p>When starting the simulator from TouchGFX Designer or Visual Studio, put the options in the <code class="docutils literal notranslate"><span class="pre">UNA_SIM_ARGS</span></code> environment variable instead, for example <code class="docutils literal notranslate"><span class="pre">UNA_SIM_ARGS=--script</span> <span class="pre">C:\work\run.txt</span></code>. Put a path with spaces in double quotes: <code class="docutils literal notranslate"><span class="pre">UNA_SIM_ARGS=--script</span> <span class="pre">&quot;C:\My</span> <span class="pre">Scripts\run.txt&quot;</span></code>.</p>
+<p>The exit code says how the run went:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Code</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>The run ended normally.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>A step failed: a screenshot could not be written, a replay file could not be read, or a button event was lost because the GUI’s queue was full.</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>Bad options or script. Nothing ran; the message names the line.</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>The simulator did not shut down within 15 s of the end of the run, whatever happened before.</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>The app ran out of memory: an LVGL app’s pool was exhausted (see <a class="reference internal" href="#lvgl-pool"><span class="xref myst">LVGL memory pool</span></a>). Also ends a run that is not scripted.</p></td>
+</tr>
+</tbody>
+</table>
+<p>During a scripted or headless run, everything the app and the simulator log goes to <code class="docutils literal notranslate"><span class="pre">&lt;out&gt;/sim.log</span></code> as well as the console. Each step is logged as it runs, with its time and script line, starting <code class="docutils literal notranslate"><span class="pre">[sim]</span></code>.</p>
+</section>
+<section id="script-format">
+<h3>Script format<a class="headerlink" href="#script-format" title="Link to this heading"></a></h3>
+<p>One step per line, a time and then the step. <code class="docutils literal notranslate"><span class="pre">#</span></code> starts a comment.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Running: start without a fix, get one, run on a recorded track, pause
+0       gps replay track.csv
+0       gps fix off
+1500    screenshot 01-no-fix
++500    gps fix on
+4000    screenshot 02-fix
++0      hr 152
++500    click R1
+15000   screenshot 03-running
++0      click R1
++1500   screenshot 04-paused
++500    exit
+</pre></div>
+</div>
+<p>A time is in ms from the start of the GUI. <code class="docutils literal notranslate"><span class="pre">+N</span></code> means N ms after the previous step, and a trailing <code class="docutils literal notranslate"><span class="pre">s</span></code> means seconds (<code class="docutils literal notranslate"><span class="pre">5s</span></code>, <code class="docutils literal notranslate"><span class="pre">+1.5s</span></code>). Times may not go backwards, and the latest is 4294967295 ms (about 49 days). In a TouchGFX app with <code class="docutils literal notranslate"><span class="pre">UNA_SIM_SLOW</span></code> set, times stretch with the frames, so a script keeps its place in the GUI. The LVGL and glance simulators don’t slow their frames, and their script times are not stretched.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Step</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">click</span> <span class="pre">B</span></code></p></td>
+<td><p>Press button B and release it 100 ms later. B is <code class="docutils literal notranslate"><span class="pre">L1</span></code>, <code class="docutils literal notranslate"><span class="pre">L2</span></code>, <code class="docutils literal notranslate"><span class="pre">R1</span></code> or <code class="docutils literal notranslate"><span class="pre">R2</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hold</span> <span class="pre">B</span> <span class="pre">MS</span></code></p></td>
+<td><p>Press B and release it MS ms later (a whole number). Use this for hold-to-confirm controls.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">press</span> <span class="pre">B</span></code> / <code class="docutils literal notranslate"><span class="pre">release</span> <span class="pre">B</span></code></p></td>
+<td><p>Press or release B on its own.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">screenshot</span> <span class="pre">NAME</span></code></p></td>
+<td><p>Save the display as <code class="docutils literal notranslate"><span class="pre">NAME</span></code> in the <code class="docutils literal notranslate"><span class="pre">--out</span></code> directory, as PNG. <code class="docutils literal notranslate"><span class="pre">.png</span></code> is added when NAME has no extension. NAME may name a folder inside <code class="docutils literal notranslate"><span class="pre">--out</span></code>, such as <code class="docutils literal notranslate"><span class="pre">shots/boot</span></code>; missing folders are made. NAME may not be an absolute path, contain <code class="docutils literal notranslate"><span class="pre">..</span></code> or <code class="docutils literal notranslate"><span class="pre">:</span></code>, or be <code class="docutils literal notranslate"><span class="pre">sim.log</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hr</span> <span class="pre">BPM</span></code> / <code class="docutils literal notranslate"><span class="pre">hr</span> <span class="pre">auto</span></code></p></td>
+<td><p>A fixed heart rate (a whole number, 0-255, always trusted), or back to the simulated one.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">battery</span> <span class="pre">PCT</span></code> / <code class="docutils literal notranslate"><span class="pre">battery</span> <span class="pre">auto</span></code></p></td>
+<td><p>A fixed battery level, 0-100.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pressure</span> <span class="pre">HPA</span></code> / <code class="docutils literal notranslate"><span class="pre">pressure</span> <span class="pre">auto</span></code></p></td>
+<td><p>A fixed barometric pressure, a positive number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">fix</span> <span class="pre">on</span></code> / <code class="docutils literal notranslate"><span class="pre">off</span></code> / <code class="docutils literal notranslate"><span class="pre">auto</span></code></p></td>
+<td><p>Force the GPS fix. <code class="docutils literal notranslate"><span class="pre">on</span></code> also skips the simulated search delay; <code class="docutils literal notranslate"><span class="pre">off</span></code> reports no fix and zero speed. <code class="docutils literal notranslate"><span class="pre">auto</span></code> has a fix only once the simulated search has ended. Without a fix the simulated track stands still and the step count stops; a replay keeps going, so when the fix returns the position jumps to where the replay has got to.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">replay</span> <span class="pre">FILE</span></code></p></td>
+<td><p>Replay a recorded track (format below). <code class="docutils literal notranslate"><span class="pre">FILE</span></code> is relative to the script.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">auto</span></code></p></td>
+<td><p>Stop the replay and the forced fix.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wrist</span></code></p></td>
+<td><p>A wrist-raise motion. In a simulator built without the sensor simulation (an app that uses no sensors) the step fails (exit code 1).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">TEXT</span></code></p></td>
+<td><p>Write TEXT to the console and <code class="docutils literal notranslate"><span class="pre">sim.log</span></code>, to mark a point in the log.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">exit</span></code></p></td>
+<td><p>End the run.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Buttons reach the app the way the kernel reports them: the press when the button goes down, then on release a click (if it was down less than 500 ms) followed by the release. A <code class="docutils literal notranslate"><span class="pre">click</span></code>, <code class="docutils literal notranslate"><span class="pre">hold</span></code> or <code class="docutils literal notranslate"><span class="pre">press</span></code> of a button that is already down does nothing. In a TouchGFX app these are the codes in <code class="docutils literal notranslate"><span class="pre">SDK/GUI/Button.hpp</span></code>, one per frame. The keyboard keeps working in a windowed scripted run.</p>
+<p>The script is checked before the simulator starts. An unknown step, a bad button name, a missing replay file or a time that goes backwards stops the run with exit code 2 and the file and line.</p>
+</section>
+<section id="replay-files">
+<h3>Replay files<a class="headerlink" href="#replay-files" title="Link to this heading"></a></h3>
+<p>A replay file is CSV, one fix per line: seconds from the start of the replay, latitude and longitude in degrees, altitude in metres (-1000 to 20000) and speed in m/s (0 to 300). A first line that is not numbers is a header.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>t_s,lat,lon,alt_m,speed_mps
+0,51.500000,-0.100000,20.0,3.0
+1,51.500027,-0.100000,20.1,3.0
+2,51.500054,-0.100000,20.1,3.0
+</pre></div>
+</div>
+<p>Until the first line’s time the fix is the first line’s. Between two lines the position, altitude and speed are interpolated. After the last line the position stays where it ended, with speed 0. Starting or stopping a replay moves the position straight to the other track, which may be far away. An app that adds up distance from positions counts that jump, so start a replay at time 0, before the app has a fix.</p>
+</section>
+<section id="screenshots">
+<h3>Screenshots<a class="headerlink" href="#screenshots" title="Link to this heading"></a></h3>
+<p>A screenshot is the 240 × 240 display as the watch shows it: round, black outside the glass, with no housing. With the panel look on (<code class="docutils literal notranslate"><span class="pre">L</span></code>, or <code class="docutils literal notranslate"><span class="pre">UNA_SIM_LOOK=watch</span></code>) it is toned like the panel. LVGL screenshots are the exact ABGR2222 frame the watch would receive, expanded to 8 bits per channel. Glance screenshots are 240 × 60. A screenshot taken before the first frame has been drawn fails (exit code 1).</p>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<p>From the binary’s directory, so the default mock file system path resolves as it does for a normal run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># TouchGFX app (Linux build)</span>
+./simulator.out<span class="w"> </span>--headless<span class="w"> </span>--script<span class="w"> </span>~/run.txt<span class="w"> </span>--out<span class="w"> </span>~/run-out
+
+<span class="c1"># LVGL app</span>
+./RunLVGLSimulator<span class="w"> </span>--headless<span class="w"> </span>--script<span class="w"> </span>~/run.txt<span class="w"> </span>--out<span class="w"> </span>~/run-out<span class="w"> </span>--fs-root<span class="w"> </span>~/run-fs
+
+<span class="c1"># Glance: no buttons, so a script uses only sensors, screenshots and exit</span>
+./GlanceStepsSimulator<span class="w"> </span>--headless<span class="w"> </span>--script<span class="w"> </span>~/glance.txt
+</pre></div>
+</div>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># TouchGFX app (Visual Studio build), from build\Debug\bin</span>
+<span class="p">.\</span><span class="n">Application</span><span class="p">.</span><span class="n">exe</span> <span class="p">-</span><span class="n">-headless</span> <span class="p">-</span><span class="n">-script</span> <span class="n">C</span><span class="p">:\</span><span class="n">work</span><span class="p">\</span><span class="n">run</span><span class="p">.</span><span class="n">txt</span> <span class="p">-</span><span class="n">-out</span> <span class="n">C</span><span class="p">:\</span><span class="n">work</span><span class="p">\</span><span class="n">run-out</span>
+</pre></div>
+</div>
+<p>On Windows, <code class="docutils literal notranslate"><span class="pre">Start-Process</span> <span class="pre">-Wait</span> <span class="pre">-PassThru</span></code> returns the exit code of the GUI-subsystem TouchGFX simulator, which a plain call from PowerShell does not wait for.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--fs-root</span></code> with a fresh directory starts the app with no saved settings or activities. Copy a <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> into it first to start from known settings.</p>
+</section>
+<section id="limits">
+<h3>Limits<a class="headerlink" href="#limits" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>The simulator’s message pool has no size limit, so a message too large for the watch’s pools still arrives in the simulator.</p></li>
+<li><p>There is no grade sensor; <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type::GRADE</span></code> is never valid.</p></li>
+<li><p>Fonts in the glance preview are LVGL’s Montserrat in place of the watch’s Poppins.</p></li>
+<li><p>The service runs on the PC’s clock, so sensor timing follows wall time, not <code class="docutils literal notranslate"><span class="pre">UNA_SIM_SLOW</span></code>.</p></li>
 </ul>
 </section>
 </section>
