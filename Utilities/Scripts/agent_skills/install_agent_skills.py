@@ -204,7 +204,9 @@ def install(skill: Path, dest_root: Path, force: bool, dry_run: bool, record: di
         except OSError:
             unedited = False   # can't read it all: treat as edited (--force still replaces)
         if not unedited and not force:
-            return lines + [f"skipped  {dest} (edited locally; --force replaces it)"]
+            why = ("edited locally" if skill.name in record
+                   else "differs from the SDK's copy, and no install record says it is unedited")
+            return lines + [f"skipped  {dest} ({why}; --force replaces it)"]
         if not dry_run:
             replace_tree(skill, dest)
         record[skill.name] = tree_hash(skill)

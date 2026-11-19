@@ -226,6 +226,18 @@ def main():
         r = run("--target", str(proj), "--agent", "claude")
         expect(r.returncode == 0, "an unreadable record is treated as empty")
 
+        # With no record, a copy that differs can't be told from an edit: it is kept.
+        record_file.unlink()
+        differing = proj / ".claude" / "skills" / names[0] / "SKILL.md"
+        differing.write_text("older or edited\n", encoding="utf-8")
+        r = run("--target", str(proj), "--agent", "claude")
+        expect(r.returncode == 1 and "no install record" in r.stdout
+               and differing.read_text(encoding="utf-8") == "older or edited\n",
+               "with no record, a differing skill is skipped and kept")
+        r = run("--target", str(proj), "--agent", "claude", "--force")
+        expect(r.returncode == 0 and differing.read_bytes()
+               == (SKILLS / names[0] / "SKILL.md").read_bytes(), "--force then replaces it")
+
     with tempfile.TemporaryDirectory() as tmp:
         proj = Path(tmp)
         r = run("--target", str(proj), "--dry-run")

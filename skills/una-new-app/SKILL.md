@@ -177,7 +177,8 @@ editing code. A failure now is a copy or path problem, not the user's code.
     are enough for the first build;
   - fonts need Node.js, and images need the `pypng` and `lz4` Python packages
     (`pip install pypng lz4`);
-  - on Windows, `lvgl_assets.py` fails when the app and the SDK are on different drives;
+  - on Windows, both `lvgl_assets.py` and `gen_assets.py` fail when the app and the SDK are on
+    different drives (`C:` and `D:`), so keep them on the same drive;
   - declare each generated symbol in `gui/include/gui/Assets.hpp`.
 - **Logic worth testing:** put it in plain classes in `Software/Libs` that don't depend on the
   GUI, so the `una-unit-test` skill can test it on the PC.
