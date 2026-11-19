@@ -1,0 +1,16 @@
+{
+  "name": "una-sdk",
+  "owner": {
+    "name": "UNA Watch"
+  },
+  "metadata": {
+    "description": "Agent skills for UNA Watch app development."
+  },
+  "plugins": [
+    {
+      "name": "una-sdk",
+      "source": "./skills",
+      "description": "Skills for building UNA Watch apps: setup, new apps, unit tests, the scripted headless simulator, .uapp builds, on-watch testing and store releases."
+    }
+  ]
+}
