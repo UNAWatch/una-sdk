@@ -1,0 +1,19 @@
+{
+  "name": "una-sdk",
+  "description": "Skills for building UNA Watch apps with the UNA SDK: setup, new apps, unit tests, the scripted headless simulator, .uapp builds, on-watch testing and store releases.",
+  "version": "0.1.0",
+  "author": {
+    "name": "UNA Watch"
+  },
+  "homepage": "https://github.com/UNAWatch/una-sdk",
+  "repository": "https://github.com/UNAWatch/una-sdk",
+  "license": "MIT",
+  "keywords": [
+    "una-watch",
+    "smartwatch",
+    "embedded",
+    "touchgfx",
+    "lvgl"
+  ],
+  "skills": "./"
+}

@@ -4,6 +4,14 @@ The UNA Watch SDK provides a comprehensive suite of tools, libraries, and interf
 
 For full setup instructions (Linux/Windows, toolchain, environment variables, and a buildable example), see [Docs/sdk-setup.md](Docs/sdk-setup.md).
 
+Working with an AI coding agent? The SDK ships skills for each stage of building an app, from
+setup to a store release (see [Docs/agent-skills.md](Docs/agent-skills.md)). In Claude Code:
+
+```text
+/plugin marketplace add UNAWatch/una-sdk
+/plugin install una-sdk@una-sdk
+```
+
 ## Table of Contents
 
 1. [Overview](#overview)

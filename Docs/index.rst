@@ -27,6 +27,7 @@ Next steps:
    platform-overview
    sdk-setup
    Simulator
+   agent-skills
 
 .. toctree::
    :maxdepth: 4
