@@ -524,7 +524,7 @@ A time is in ms from the start of the GUI. `+N` means N ms after the previous st
 | `click B` | Press button B and release it 100 ms later. B is `L1`, `L2`, `R1` or `R2`. |
 | `hold B MS` | Press B and release it MS ms later (a whole number). Use this for hold-to-confirm controls. |
 | `press B` / `release B` | Press or release B on its own. |
-| `screenshot NAME` | Save the display as `NAME` in the `--out` directory, as PNG. `.png` is added when NAME has no extension. NAME may not be an absolute path, contain `..` or `:`, or be `sim.log`. |
+| `screenshot NAME` | Save the display as `NAME` in the `--out` directory, as PNG. `.png` is added when NAME has no extension. NAME may name a folder inside `--out`, such as `shots/boot`; missing folders are made. NAME may not be an absolute path, contain `..` or `:`, or be `sim.log`. |
 | `hr BPM` / `hr auto` | A fixed heart rate (a whole number, 0-255, always trusted), or back to the simulated one. |
 | `battery PCT` / `battery auto` | A fixed battery level, 0-100. |
 | `pressure HPA` / `pressure auto` | A fixed barometric pressure, a positive number. |

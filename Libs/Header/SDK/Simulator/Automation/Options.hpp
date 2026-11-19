@@ -106,16 +106,20 @@ public:
     }
 
     /// A path inside the output directory (made when an automated run starts,
-    /// else on first use).
+    /// else on first use). Folders in the name are made too, so a screenshot
+    /// named "shots/boot" can be written. A failure shows when the file is
+    /// opened.
     std::string outPath(const std::string& name)
     {
         std::lock_guard<std::mutex> lock(mMutex);
+        std::error_code ec;
         if (!mOutReady) {
-            std::error_code ec;
             std::filesystem::create_directories(mOutDir, ec);
             mOutReady = true;
         }
-        return (std::filesystem::path(mOutDir) / name).string();
+        const std::filesystem::path path = std::filesystem::path(mOutDir) / name;
+        std::filesystem::create_directories(path.parent_path(), ec);
+        return path.string();
     }
 
     /// Write a line to sim.log in the output directory (automated runs only).
