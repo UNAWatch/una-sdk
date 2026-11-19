@@ -60,8 +60,10 @@ python3 "$UNA_SDK/Utilities/Scripts/agent_skills/install_agent_skills.py" --user
   run can tell edits from older copies.
 - **No record:** without `.una-skills.json` (skills installed by hand, or the record deleted),
   the script can't tell an older copy from an edited one, so it leaves every skill that differs
-  from the SDK's copy alone. Check those skills for local changes, keep any you want, then run
-  with `--force`.
+  from the SDK's copy alone. Check those skills for local changes and keep any you want, then run
+  with `--force`. `--force` replaces every skill that differs from the SDK's copy, recorded or
+  not, in each folder the run fills (both, unless `--agent` names one). Run it with `--dry-run`
+  first to see the list.
 - **Links:** a skill folder that is a symbolic link or junction is never replaced, even with
   `--force`. Replace the link yourself.
 - **Skills only:** the script copies skills, not `AGENTS.md`. An app's own `AGENTS.md` can name
