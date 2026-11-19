@@ -133,22 +133,31 @@ A zip holding, at its root:
 Optionally, add preview screenshots in a `previews/` folder named by a `"previews"` key. Scripted
 simulator screenshots work well for this (skill `una-simulator`).
 
-Start from an empty `release/` folder and no old zip, so nothing from an earlier release goes
-in:
+Stage the files in a new temporary folder, so nothing from an earlier release goes in and no
+existing folder is touched. If `MyApp_1.2.0.zip` already exists, ask the developer before
+replacing it; the commands below stop rather than overwrite it.
 
 ```bash
-rm -rf release MyApp_1.2.0.zip
-mkdir release && cp Output/MyApp_1.2.0.uapp app-manifest.json release/
-cp Resources/icon_60x60.png release/icon.png
-(cd release && zip -r ../MyApp_1.2.0.zip .)
+(
+  set -e
+  if [ -e MyApp_1.2.0.zip ]; then echo "MyApp_1.2.0.zip exists" >&2; exit 1; fi
+  stage=$(mktemp -d)
+  cp Output/MyApp_1.2.0.uapp app-manifest.json "$stage"/
+  cp Resources/icon_60x60.png "$stage"/icon.png
+  out="$PWD/MyApp_1.2.0.zip"
+  (cd "$stage" && zip -r "$out" .)
+  rm -rf "$stage"
+)
 ```
 
 ```powershell
-Remove-Item -Recurse -Force release, MyApp_1.2.0.zip -ErrorAction SilentlyContinue
-New-Item -ItemType Directory release | Out-Null
-Copy-Item Output\MyApp_1.2.0.uapp, app-manifest.json release\
-Copy-Item Resources\icon_60x60.png release\icon.png
-Compress-Archive -Path release\* -DestinationPath MyApp_1.2.0.zip
+$ErrorActionPreference = 'Stop'
+if (Test-Path MyApp_1.2.0.zip) { throw 'MyApp_1.2.0.zip exists' }
+$stage = New-Item -ItemType Directory (Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid()))
+Copy-Item Output\MyApp_1.2.0.uapp, app-manifest.json $stage
+Copy-Item Resources\icon_60x60.png (Join-Path $stage icon.png)
+Compress-Archive -Path (Join-Path $stage '*') -DestinationPath MyApp_1.2.0.zip
+Remove-Item -Recurse $stage
 ```
 
 Before handing it over, check:
