@@ -96,8 +96,8 @@ with "region `RAM' overflowed"; raise the length or shrink the app.
   skill.
 - **`APP_TYPE`/`APP_AUTOSTART` "is not a boolean" or an unknown type:** fix the spelling in
   `CMakeLists.txt`.
-- **Missing icon:** add `Resources/icon_30x30.png` and `icon_60x60.png`, or set
-  `APP_USE_ICONS Off`.
+- **Missing icon:** add `Resources/icon_30x30.png` and `icon_60x60.png`. Every app type but
+  `Glance` needs both; only a glance can set `APP_USE_ICONS Off`.
 - **Undefined reference to a libc function** (`sscanf`, `strtod`…): apps link against the
   kernel's C library exports, not a full libc. A function the kernel doesn't export either fails
   to link, or pulls a copy into the app's RAM. Prefer the SDK's helpers, or simpler functions.

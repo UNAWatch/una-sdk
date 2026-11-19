@@ -52,9 +52,12 @@ python3 "$UNA_SDK/Utilities/Scripts/agent_skills/install_agent_skills.py" --user
 - **`--user`:** fills `~/.claude/skills` and `~/.agents/skills`. Codex and Cursor read the
   second. Antigravity reads home-folder skills from `~/.gemini/config/skills` instead: copy the
   skills there yourself, or install into each project with `--target`.
-- **Updating:** run the script again after updating the SDK. A skill that differs from the SDK's
-  copy, because it was edited locally, is left alone and reported. `--force` replaces it, and
-  `--dry-run` shows what would change.
+- **Updating:** run the script again after updating the SDK. Each run records what it installed
+  in `.una-skills.json` beside the skills folder (`.claude/.una-skills.json`,
+  `.agents/.una-skills.json`). A skill that still matches the record is updated to the SDK's new
+  copy. A skill that was edited locally is left alone and reported; `--force` replaces it.
+  `--dry-run` shows what would change. Commit the record with the skills, so a teammate's update
+  run can tell edits from older copies.
 - **Skills only:** the script copies skills, not `AGENTS.md`. An app's own `AGENTS.md` can name
   the skills and the SDK it builds against.
 

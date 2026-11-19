@@ -2,10 +2,11 @@
 """Self-contained tests for install_agent_skills.py (run: python test_install_agent_skills.py).
 
 Installs the SDK's real skills into throwaway folders and checks the copies, the skip of a
-locally edited skill, --force, --dry-run, --agent, links and junctions, and recovery
-from an interrupted or failed replacement. No pytest dependency."""
+locally edited skill, updates recorded in .una-skills.json, --force, --dry-run, --agent,
+links and junctions, and recovery from an interrupted or failed replacement. No pytest dependency."""
 import contextlib
 import io
+import json
 import os
 import shutil
 import subprocess
@@ -179,6 +180,51 @@ def main():
         expect(edited.read_text(encoding="utf-8") == "local edit\n", "the installed copy is kept")
         expect(not list(proj.rglob(".una-skills-*")), "a failed swap leaves no staging folder")
         expect((later / "SKILL.md").is_file(), "the other skills are still installed")
+
+    # After an SDK update: a skill installed from the older SDK and never edited is updated.
+    with tempfile.TemporaryDirectory() as tmp:
+        proj = Path(tmp)
+        run("--target", str(proj), "--agent", "claude")
+        installed = proj / ".claude" / "skills" / names[0]
+        record_file = proj / ".claude" / ".una-skills.json"
+        recorded = json.loads(record_file.read_text(encoding="utf-8"))["skills"]
+        expect(sorted(recorded) == names, "the install record lists every skill")
+        (installed / "SKILL.md").write_text("older version\n", encoding="utf-8")
+        recorded[names[0]] = tool.tree_hash(installed)   # as if installed from an older SDK
+        record_file.write_text(json.dumps({"skills": recorded}), encoding="utf-8")
+        r = run("--target", str(proj), "--agent", "claude")
+        expect(r.returncode == 0 and f"updated  {installed}" in r.stdout,
+               "an unedited skill from an older SDK is updated without --force")
+        expect((installed / "SKILL.md").read_bytes() == (SKILLS / names[0] / "SKILL.md").read_bytes(),
+               "the update installs the SDK's copy")
+        recorded = json.loads(record_file.read_text(encoding="utf-8"))["skills"]
+        expect(recorded[names[0]] == tool.tree_hash(SKILLS / names[0]),
+               "the record holds the updated copy")
+
+    # A checkout that turned LF into CRLF still matches the record.
+    with tempfile.TemporaryDirectory() as tmp:
+        a_dir, b_dir = Path(tmp) / "a", Path(tmp) / "b"
+        a_dir.mkdir()
+        b_dir.mkdir()
+        (a_dir / "SKILL.md").write_bytes(b"one\ntwo\n")
+        (b_dir / "SKILL.md").write_bytes(b"one\r\ntwo\r\n")
+        expect(tool.tree_hash(a_dir) == tool.tree_hash(b_dir), "the record ignores CRLF vs LF")
+        (b_dir / "SKILL.md").write_bytes(b"one\r\nthree\r\n")
+        expect(tool.tree_hash(a_dir) != tool.tree_hash(b_dir), "the record still sees an edit")
+
+    # Copies installed before the record existed are recorded once they match the SDK's.
+    with tempfile.TemporaryDirectory() as tmp:
+        proj = Path(tmp)
+        run("--target", str(proj), "--agent", "claude")
+        record_file = proj / ".claude" / ".una-skills.json"
+        record_file.unlink()
+        r = run("--target", str(proj), "--agent", "claude")
+        expect(r.returncode == 0 and record_file.is_file()
+               and sorted(json.loads(record_file.read_text(encoding="utf-8"))["skills"]) == names,
+               "a run with no record writes one for the matching copies")
+        record_file.write_text("not json", encoding="utf-8")
+        r = run("--target", str(proj), "--agent", "claude")
+        expect(r.returncode == 0, "an unreadable record is treated as empty")
 
     with tempfile.TemporaryDirectory() as tmp:
         proj = Path(tmp)

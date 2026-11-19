@@ -61,7 +61,7 @@ missing `_write`, `_close` and similar.
 |---|---|---|
 | Windows | `mingw-w64-x86_64-arm-none-eabi` zip | `pip install cmake ninja`; build with `-G Ninja` |
 | macOS (Apple Silicon) | `darwin-arm64-arm-none-eabi` | `brew install cmake ninja` |
-| macOS (Intel) | `darwin-x86_64-arm-none-eabi` | `brew install cmake ninja` |
+| macOS (Intel) | No Arm GNU Toolchain build at 14.3.Rel1 or later: use ST's GNU Tools for STM32 (in STM32CubeCLT), or Docker (below) | `brew install cmake ninja` |
 | Linux x86-64 | `x86_64-arm-none-eabi` tar.xz | `apt install cmake ninja-build python3-pip git` (or the distro's equivalent) |
 | Linux arm64 | `aarch64-arm-none-eabi` tar.xz | as above |
 

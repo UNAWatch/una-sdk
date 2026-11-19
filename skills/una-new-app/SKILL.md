@@ -170,7 +170,11 @@ editing code. A failure now is a copy or path problem, not the user's code.
   - screens are code in `LVGL-GUI/gui/src/screens`;
   - in the tutorials, fonts and images are listed in `LVGL-GUI/assets/assets.json`, converted
     with `python $UNA_SDK/Utilities/Scripts/lvgl_assets/lvgl_assets.py <path>/assets.json`.
-    `RunLVGL` converts its assets with its own `LVGL-GUI/assets/gen_assets.py` instead;
+    `RunLVGL` converts its assets with its own `LVGL-GUI/assets/gen_assets.py` instead. That
+    script finds the SDK by counting folders up from itself (`SDK_ROOT`), and takes its fonts
+    from the SDK's `Examples/Apps/Running`. In a copy outside the SDK, set `SDK_ROOT` from the
+    `UNA_SDK` environment variable before running it. The generated files the example ships
+    are enough for the first build;
   - fonts need Node.js, and images need the `pypng` and `lz4` Python packages
     (`pip install pypng lz4`);
   - on Windows, `lvgl_assets.py` fails when the app and the SDK are on different drives;

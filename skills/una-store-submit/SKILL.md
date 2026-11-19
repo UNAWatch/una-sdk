@@ -133,14 +133,19 @@ A zip holding, at its root:
 Optionally, add preview screenshots in a `previews/` folder named by a `"previews"` key. Scripted
 simulator screenshots work well for this (skill `una-simulator`).
 
+Start from an empty `release/` folder and no old zip, so nothing from an earlier release goes
+in:
+
 ```bash
-mkdir -p release && cp Output/MyApp_1.2.0.uapp app-manifest.json release/
+rm -rf release MyApp_1.2.0.zip
+mkdir release && cp Output/MyApp_1.2.0.uapp app-manifest.json release/
 cp Resources/icon_60x60.png release/icon.png
 (cd release && zip -r ../MyApp_1.2.0.zip .)
 ```
 
 ```powershell
-New-Item -ItemType Directory release -Force | Out-Null
+Remove-Item -Recurse -Force release, MyApp_1.2.0.zip -ErrorAction SilentlyContinue
+New-Item -ItemType Directory release | Out-Null
 Copy-Item Output\MyApp_1.2.0.uapp, app-manifest.json release\
 Copy-Item Resources\icon_60x60.png release\icon.png
 Compress-Archive -Path release\* -DestinationPath MyApp_1.2.0.zip
@@ -149,7 +154,7 @@ Compress-Archive -Path release\* -DestinationPath MyApp_1.2.0.zip
 Before handing it over, check:
 - `binary` and `icon` name files that are in the zip;
 - `id` equals the build's ID;
-- `appVersion` equals the `.uapp`'s version.
+- `appVersion` equals the version in the `.uapp`'s file name (`1.2.0` in `MyApp_1.2.0.uapp`).
 
 ## 6. Hand over
 

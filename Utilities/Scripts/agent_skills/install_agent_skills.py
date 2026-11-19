@@ -14,8 +14,10 @@ Usage:
 --target installs into a project (an app's repository), --user into ~/.claude/skills and
 ~/.agents/skills (read by Codex and Cursor; Antigravity reads ~/.gemini/config/skills).
 
-Only the SDK's own skill folders (una-*) are written. A skill already there and different
-from the SDK's is left alone unless --force is given, so local edits are not lost. A skill
+Only the SDK's own skill folders (una-*) are written. Each run records what it installed in
+.una-skills.json beside the skills folder (for example .claude/.una-skills.json). A skill that
+still matches that record is updated to the SDK's copy. One that differs from both the record
+and the SDK's copy was edited locally, and is left alone unless --force is given. A skill
 folder that is a symbolic link or a junction is never replaced.
 
 A replacement is copied into a staging folder beside the skills folder (for example
@@ -26,9 +28,12 @@ Run it again after updating the SDK to update the copies.
 """
 import argparse
 import filecmp
+import hashlib
+import json
 import os
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 SDK_ROOT = Path(__file__).resolve().parents[3]
@@ -60,6 +65,50 @@ def same_tree(a: Path, b: Path) -> bool:
     if mismatch or errors:
         return False
     return all(same_tree(a / d, b / d) for d in cmp.common_dirs)
+
+
+def tree_hash(folder: Path) -> str:
+    """A digest of every file's path and contents under folder. CRLF counts as LF, so a
+    checkout that converted line endings still matches the record."""
+    digest = hashlib.sha256()
+    for path in sorted(p for p in folder.rglob("*") if p.is_file()):
+        rel = path.relative_to(folder).as_posix().encode("utf-8")
+        digest.update(len(rel).to_bytes(4, "big") + rel)
+        data = path.read_bytes().replace(b"\r\n", b"\n")
+        digest.update(len(data).to_bytes(8, "big") + data)
+    return digest.hexdigest()
+
+
+def record_path(dest_root: Path) -> Path:
+    return dest_root.parent / ".una-skills.json"
+
+
+def load_record(dest_root: Path) -> dict:
+    """What earlier runs installed: skill name -> tree_hash. Empty if missing or unreadable."""
+    try:
+        data = json.loads(record_path(dest_root).read_text(encoding="utf-8"))
+        skills = data.get("skills", {})
+        return {k: v for k, v in skills.items() if isinstance(k, str) and isinstance(v, str)}
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
+def save_record(dest_root: Path, record: dict) -> None:
+    path = record_path(dest_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps({"skills": dict(sorted(record.items()))}, indent=2) + "\n"
+    # A temporary file of its own beside the record, swapped in whole.
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def is_link(path: Path) -> bool:
@@ -134,7 +183,9 @@ def replace_tree(skill: Path, dest: Path) -> None:
             pass   # cleaned up by the next run (recover)
 
 
-def install(skill: Path, dest_root: Path, force: bool, dry_run: bool) -> list:
+def install(skill: Path, dest_root: Path, force: bool, dry_run: bool, record: dict) -> list:
+    """Install one skill. record (skill name -> tree_hash of the installed copy) is updated
+    for what ends up installed."""
     dest = dest_root / skill.name
     restored, present = recover(dest, dry_run)
     lines = [restored] if restored else []
@@ -146,12 +197,18 @@ def install(skill: Path, dest_root: Path, force: bool, dry_run: bool) -> list:
         if not present.is_dir():
             return lines + [f"skipped  {dest} (exists and is not a folder)"]
         if same_tree(skill, present):
+            record[skill.name] = tree_hash(skill)
             return lines + [f"current  {dest}"]
-        if not force:
-            return lines + [f"skipped  {dest} (differs from the SDK's copy; --force replaces it)"]
+        try:
+            unedited = record.get(skill.name) == tree_hash(present)
+        except OSError:
+            unedited = False   # can't read it all: treat as edited (--force still replaces)
+        if not unedited and not force:
+            return lines + [f"skipped  {dest} (edited locally; --force replaces it)"]
         if not dry_run:
             replace_tree(skill, dest)
-        return lines + [f"replaced {dest}"]
+        record[skill.name] = tree_hash(skill)
+        return lines + [f"updated  {dest}" if unedited else f"replaced {dest}"]
     if not dry_run:
         dest_root.mkdir(parents=True, exist_ok=True)
         try:
@@ -162,6 +219,7 @@ def install(skill: Path, dest_root: Path, force: bool, dry_run: bool) -> list:
             if os.path.lexists(dest):
                 shutil.rmtree(dest, ignore_errors=True)
             raise
+    record[skill.name] = tree_hash(skill)
     return lines + [f"added    {dest}"]
 
 
@@ -191,15 +249,22 @@ def main(argv=None) -> int:
     skipped = failed = 0
     for agent in agents:
         dest_root = base / AGENT_DIRS[agent]
+        record = load_record(dest_root)
         for skill in skills:
             try:
-                lines = install(skill, dest_root, args.force, args.dry_run)
+                lines = install(skill, dest_root, args.force, args.dry_run, record)
             except OSError as e:
                 lines = [f"failed   {dest_root / skill.name} ({e})"]
             for line in lines:
                 skipped += line.startswith("skipped")
                 failed += line.startswith("failed")
                 print(line)
+        if not args.dry_run and dest_root.is_dir():
+            try:
+                save_record(dest_root, record)
+            except OSError as e:
+                print(f"failed   {record_path(dest_root)} ({e})")
+                failed += 1
 
     if args.dry_run:
         print("dry run: nothing was written")
