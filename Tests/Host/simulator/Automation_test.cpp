@@ -49,12 +49,14 @@ public:
     bool saveDisplay(const std::string& path) override
     {
         events.push_back("shot " + std::filesystem::path(path).filename().string());
+        shotFolderExists = std::filesystem::is_directory(std::filesystem::path(path).parent_path());
         return true;
     }
     void wristMotion() override { events.push_back("wrist"); }
     void endRun() override { events.push_back("end"); }
 
-    bool                     buttons = true;
+    bool                     buttons          = true;
+    bool                     shotFolderExists = false;   // at the last saveDisplay()
     std::vector<std::string> events;
 };
 
@@ -206,6 +208,25 @@ TEST_F(AutomationTest, RelativeAndSecondTimes)
     EXPECT_EQ(host.events, (std::vector<std::string>{ "wrist", "shot a.png" }));
     runner.tickAt(3000);
     EXPECT_EQ(host.events.back(), "shot b.png");
+}
+
+TEST_F(AutomationTest, ScreenshotInAFolderMakesTheFolder)
+{
+    // The folder is made inside --out (sim-out here); a unique name, removed after.
+    const std::string folder = "una-sim-test-shots-" + std::to_string(std::random_device{}());
+    const std::filesystem::path made =
+        std::filesystem::path(Options::get().outPath("x")).parent_path() / folder;
+
+    FakeHost host;
+    Runner   runner(host, true);
+    runner.loadScript(write("s.txt", "0 screenshot " + folder + "/sub/boot\n"));
+    runner.tickAt(0);
+
+    EXPECT_EQ(host.events, (std::vector<std::string>{ "shot boot.png" }));
+    EXPECT_TRUE(host.shotFolderExists);
+    EXPECT_TRUE(std::filesystem::is_directory(made / "sub"));
+    std::error_code ec;
+    std::filesystem::remove_all(made, ec);
 }
 
 TEST_F(AutomationTest, ExitEndsTheRunOnce)

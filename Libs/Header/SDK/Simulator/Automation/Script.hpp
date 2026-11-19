@@ -25,7 +25,7 @@
  *     press B            press B and keep it down
  *     release B          release B
  *     screenshot FILE    save the display as PNG in the --out directory (no absolute path,
- *                        no .., not sim.log)
+ *                        no .., not sim.log); folders in FILE are made as needed
  *     hr BPM | hr auto   fixed heart rate (whole, 0-255), or back to the simulated one
  *     battery PCT | battery auto     (0-100)
  *     pressure HPA | pressure auto   (a positive number)
