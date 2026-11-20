@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Coding Agents &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="HelloWorld - Introduction to UNA App Architecture" href="Tutorials/HelloWorld/ARCHITECTURE.html" />
+    <link rel="prev" title="UNA-Watch Simulator" href="Simulator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">AI Coding Agents</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#claude-code">Claude Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-agents-or-a-copy-in-the-app-s-repository">Other agents, or a copy in the app’s repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-the-agent-does-and-doesn-t-do">What the agent does and doesn’t do</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shared-data.html">Shared Data Between Apps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AI Coding Agents</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/agent-skills.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="agent-skills">
+<span id="ai-coding-agents"></span><h1>AI Coding Agents<a class="headerlink" href="#agent-skills" title="Link to this heading"></a></h1>
+<p>The SDK ships instructions for AI coding agents: a root
+<a class="reference external" href="https://github.com/UNAWatch/una-sdk/blob/main/AGENTS.md"><code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code></a> and a set of skills, one
+for each stage of building an app. A skill is a folder with a <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> (the open agent skills
+format), which an agent loads when a task matches its description.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Skill</p></th>
+<th class="head"><p>What it covers</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">una-setup</span></code></p></td>
+<td><p>Toolchain, SDK clone and <code class="docutils literal notranslate"><span class="pre">UNA_SDK</span></code> on Windows, macOS, Linux or Docker</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">una-new-app</span></code></p></td>
+<td><p>Starting an app from the closest example; choosing TouchGFX or LVGL</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">una-unit-test</span></code></p></td>
+<td><p>GoogleTest host tests for the app’s logic, with the SDK’s test doubles</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">una-simulator</span></code></p></td>
+<td><p>Building the simulator and driving it with scripts, headless</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">una-build-uapp</span></code></p></td>
+<td><p>Building the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>, versions, IDs and memory settings</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">una-test-on-watch</span></code></p></td>
+<td><p>Installing over USB, collecting the watch’s logs, on-watch checks</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">una-store-submit</span></code></p></td>
+<td><p>Preparing a store release: store ID, manifest, <code class="docutils literal notranslate"><span class="pre">minKernelVersion</span></code>, zip</p></td>
+</tr>
+</tbody>
+</table>
+<p>The skills live in <a class="reference external" href="https://github.com/UNAWatch/una-sdk/tree/main/skills"><code class="docutils literal notranslate"><span class="pre">skills/</span></code></a> in the SDK
+repository.</p>
+<section id="claude-code">
+<h2>Claude Code<a class="headerlink" href="#claude-code" title="Link to this heading"></a></h2>
+<p>The SDK repository is a Claude Code plugin marketplace. To install the skills for every project:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/plugin marketplace add UNAWatch/una-sdk
+/plugin install una-sdk@una-sdk
+</pre></div>
+</div>
+<p>Inside a clone of the SDK, Claude Code also reads <code class="docutils literal notranslate"><span class="pre">CLAUDE.md</span></code>, which points it at <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code>.</p>
+</section>
+<section id="other-agents-or-a-copy-in-the-app-s-repository">
+<span id="other-agents-or-a-copy-in-the-apps-repository"></span><h2>Other agents, or a copy in the app’s repository<a class="headerlink" href="#other-agents-or-a-copy-in-the-app-s-repository" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/agent_skills/install_agent_skills.py</span></code> copies the skills where agents look for
+them:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Folder</p></th>
+<th class="head"><p>Read by</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code></p></td>
+<td><p>Claude Code</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">.agents/skills/</span></code></p></td>
+<td><p>Codex, Cursor, Antigravity and other agents that read the shared <code class="docutils literal notranslate"><span class="pre">.agents</span></code> folder</p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Into an app's repository, for every agent</span>
+python3<span class="w"> </span><span class="s2">"</span><span class="nv">$UNA_SDK</span><span class="s2">/Utilities/Scripts/agent_skills/install_agent_skills.py"</span><span class="w"> </span>--target<span class="w"> </span>path/to/my-app
+
+<span class="c1"># Into your home folder, for every project</span>
+python3<span class="w"> </span><span class="s2">"</span><span class="nv">$UNA_SDK</span><span class="s2">/Utilities/Scripts/agent_skills/install_agent_skills.py"</span><span class="w"> </span>--user
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">--agent</span> <span class="pre">claude</span></code> or <code class="docutils literal notranslate"><span class="pre">--agent</span> <span class="pre">agents</span></code>:</strong> fills only one of the two folders.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">--user</span></code>:</strong> fills <code class="docutils literal notranslate"><span class="pre">~/.claude/skills</span></code> and <code class="docutils literal notranslate"><span class="pre">~/.agents/skills</span></code>. Codex and Cursor read the
+second. Antigravity reads home-folder skills from <code class="docutils literal notranslate"><span class="pre">~/.gemini/config/skills</span></code> instead: copy the
+skills there yourself, or install into each project with <code class="docutils literal notranslate"><span class="pre">--target</span></code>.</p></li>
+<li><p><strong>Updating:</strong> run the script again after updating the SDK. Each run records what it installed
+in <code class="docutils literal notranslate"><span class="pre">.una-skills.json</span></code> beside the skills folder (<code class="docutils literal notranslate"><span class="pre">.claude/.una-skills.json</span></code>,
+<code class="docutils literal notranslate"><span class="pre">.agents/.una-skills.json</span></code>). A skill that still matches the record is updated to the SDK’s new
+copy. A skill that was edited locally is left alone and reported; <code class="docutils literal notranslate"><span class="pre">--force</span></code> replaces it.
+<code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> shows what would change. Commit the record with the skills, so a teammate’s update
+run can tell edits from older copies.</p></li>
+<li><p><strong>No record:</strong> without <code class="docutils literal notranslate"><span class="pre">.una-skills.json</span></code> (skills installed by hand, or the record deleted),
+the script can’t tell an older copy from an edited one, so it leaves every skill that differs
+from the SDK’s copy alone. Check those skills for local changes and keep any you want, then run
+with <code class="docutils literal notranslate"><span class="pre">--force</span></code>. <code class="docutils literal notranslate"><span class="pre">--force</span></code> replaces every skill that differs from the SDK’s copy, recorded or
+not, in each folder the run fills (both, unless <code class="docutils literal notranslate"><span class="pre">--agent</span></code> names one). Run it with <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code>
+first to see the list.</p></li>
+<li><p><strong>Links:</strong> a skill folder that is a symbolic link or junction is never replaced, even with
+<code class="docutils literal notranslate"><span class="pre">--force</span></code>. Replace the link yourself.</p></li>
+<li><p><strong>Skills only:</strong> the script copies skills, not <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code>. An app’s own <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> can name
+the skills and the SDK it builds against.</p></li>
+</ul>
+</section>
+<section id="what-the-agent-does-and-doesn-t-do">
+<span id="what-the-agent-does-and-doesnt-do"></span><h2>What the agent does and doesn’t do<a class="headerlink" href="#what-the-agent-does-and-doesn-t-do" title="Link to this heading"></a></h2>
+<p>The skills have the agent do the work it can check itself:</p>
+<ul class="simple">
+<li><p>setting up the build;</p></li>
+<li><p>copying and renaming an example;</p></li>
+<li><p>writing and running unit tests;</p></li>
+<li><p>driving the simulator with scripts and reading its screenshots and logs;</p></li>
+<li><p>building the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>;</p></li>
+<li><p>preparing a store release.</p></li>
+</ul>
+<p>Steps that need a person stay with the developer, and the skills tell the agent to say so:</p>
+<ul class="simple">
+<li><p>connecting, restarting and wearing the watch;</p></li>
+<li><p>checks on the watch itself;</p></li>
+<li><p>signing in to the app store, uploading and publishing.</p></li>
+</ul>
+<p>macOS has not been tested by the SDK maintainers. Report problems at
+<a class="reference external" href="https://github.com/UNAWatch/una-sdk/issues">https://github.com/UNAWatch/una-sdk/issues</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Simulator.html" class="btn btn-neutral float-left" title="UNA-Watch Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tutorials/HelloWorld/ARCHITECTURE.html" class="btn btn-neutral float-right" title="HelloWorld - Introduction to UNA App Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
