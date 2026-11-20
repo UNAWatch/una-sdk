@@ -67,7 +67,9 @@ For a pull request to this repository:
   `-C Debug` to `ctest` on Windows.
 - **Code that only the simulators compile:** code under `Libs/Source/Simulator` is built only by
   the app simulators, so build one before opening a PR.
-- **Formatting:** apply `.clang-format`.
+- **Formatting:** match the surrounding code: 4-space indents, a function's opening brace on
+  its own line, and braces attached for control statements. Don't run clang-format over existing
+  files; the SDK's code doesn't follow `.clang-format`.
 - **Header guards:** `#ifndef NAME_HPP` style, with no leading underscores.
 - **Two source lists for TouchGFX simulators:** a source added to one must go into both its
   `simulator/msvs/Application.vcxproj` and its `simulator/gcc/Makefile`.
