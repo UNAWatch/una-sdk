@@ -12,10 +12,49 @@
 6. Perform a watch power cycle: power off the watch and turn it on again.
 7. Press the top right button and check the app.
 
+### Faster Loop with the Cable In (USB Serial Console)
+
+While the cable is in, the watch also shows up as a serial port next to the drive: `USB Serial Device (COMx)` on Windows, `/dev/ttyACM*` on Linux, `/dev/cu.usbmodem*` on macOS. Open it in any serial terminal:
+
+- **Baud rate:** any. It is a USB port, so the rate is ignored.
+- **Line endings:** commands must end with a line feed (`\n`). A lone carriage return only echoes, so set the terminal to send LF or CR+LF on Enter.
+- **Prompt:** `una>`. Type `menu` to list the commands and `help <command>` for details.
+
+**Restart without a power cycle.** `reset` restarts the watch. Run it instead of steps 4 to 6: copy the app, flush the drive, then `reset`, and the new app is loaded at startup.
+
+**Flush before `reset` or `usb drive off`.** Both take the drive away without an eject, as pulling the cable does. A copy can look finished while the computer still holds part of it in its write cache, so write that out first:
+
+- **Windows (PowerShell):** `Write-VolumeCache <drive letter>`, for example `Write-VolumeCache E`
+- **Linux / macOS:** `sync`
+
+Ejecting the drive also flushes it. On Windows, though, ejecting also disconnects the serial port until the cable is replugged.
+
+> [!WARNING]
+> Wait about 10 seconds after `reset` before using the serial port again. Opening the port and typing anything within about 10 seconds of startup puts the watch into factory test mode (prompt `una-test>`). Opening it without typing only delays startup by up to 10 seconds. In test mode, type nothing more; closing the port restarts the watch normally.
+
+**Develop without unplugging (kernel X.Y.Z and later).** The `usb` command opens and closes the drive with the cable in:
+
+| Command | Does |
+|---|---|
+| `usb` | Shows whether the drive is open, a computer is connected, and reopen is on |
+| `usb drive on` | Opens the drive, as plugging the cable in does |
+| `usb drive off` | Closes the drive, as unplugging does: the settings are reloaded and the apps come back. Flush the drive first (see above) |
+| `usb reopen on\|off` | Whether the drive also opens again after `reset` (default off) |
+
+The loop is then:
+
+```
+una> usb drive on      # the drive opens
+     ... copy the .uapp into Apps/<AppName>/, then flush the drive ...
+una> reset             # the watch restarts with the new app, usable on the cable
+```
+
+Opening or closing the drive reconnects the serial port, so reopen it in your terminal afterwards. On older kernels the drive does not come back after `reset`: unplug and plug the cable in again to copy the next build.
+
 ### Troubleshooting
 
 - If you do not see the app, check the hash sum of the copied file.
-- If the error still persists, use a **debug** adapter to monitor the watch debug UART Tx line to see the logs.
+- If the error still persists, use a **debug** adapter to monitor the watch debug UART Tx line (921600 baud, 8N1) to see the logs.
 - If you still encounter any platform issues, please create an issue at the [GitHub project issue page](https://github.com/UNAWatch/una-sdk/issues).
 - To discuss any issues, use [Discussions](https://github.com/UNAWatch/una-sdk/discussions).
 
