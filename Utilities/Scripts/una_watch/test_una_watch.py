@@ -140,6 +140,18 @@ def main():
         expect(True, "Developer on with protocol 2 is accepted")
         w = watch_with([("dev", b"developer mode: off\n#OK 2 off\n")])
         expect(raises(w.require_developer_mode, uw.WatchError), "Developer off is refused")
+        w = watch_with([("dev", b"developer mode: on\n#OK 3 on 1.8.0\n")])
+        w.require_developer_mode()
+        expect((w.protocol, w.firmware) == (3, "1.8.0"), "protocol 3 reports the firmware version")
+
+        w = watch_with([("dev", b"developer mode: on\n#OK 2 on\n")])
+        w.require_developer_mode()
+        (tmp / "k.ota").write_bytes(b"kernel")
+        expect(raises(lambda: uw.update_kernel(w, tmp / "k.ota"), uw.WatchError) and
+               not any(s.startswith("usb") for s in w.ser.sent),
+               "update-kernel refuses firmware without 'dev update', touching nothing")
+        expect(raises(lambda: uw.update_kernel(w, tmp / "track.csv"), uw.WatchError),
+               "update-kernel takes only an .ota")
 
         frame = bytes(range(256)) * 225          # 57600 bytes, includes 0x1E and 0x1F
         w = watch_with([("dev screen", b"#DATA 57600 240 240 abgr2222 %08X\n" % zlib.crc32(frame)
