@@ -71,7 +71,11 @@ The script format, its steps and the replay file format are those of the simulat
 
 - Times run on the computer's clock from the start of the run.
 - `click` holds the button 150 ms. `hold B MS` presses it and releases it MS ms later, while
-  later steps run at their own times.
+  later steps run at their own times. Steps run one at a time, so a release that falls due
+  while a screenshot is being sent (under a second) goes out just after it. `watch.log` lists
+  each step at its script time, adds the time it ran when that was 50 ms or more later, and
+  notes when each hold's button was released. As in the simulators, a `click`, `hold` or
+  `press` of a button the script already has down does nothing.
 - `screenshot` saves what the watch shows: the kernel's whole screen, as PNG, black outside the
   round glass.
 - `hr BPM` sets both heart-rate sensors (`HEART_RATE` and `HEART_RATE_EX`), always trusted.
@@ -137,7 +141,7 @@ in LF). Other tools can use it directly. Each command ends with a line `#OK ...`
 | `dev crc <path> [bytes]` | `#OK <size> <crc32>`: of the file, or of its first `bytes`. Paths are on the apps volume, as `/Apps/...`. |
 | `dev sensor <type> <values...>` | `#OK active\|idle`: whether anything is listening. `dev sensor <type> off`, or `dev sensor off` for all. |
 | `dev log on\|off` | `#OK`. While on, log text arrives between commands, between the bytes 0x1E and 0x1F. |
-| `dev update /Update/<file>.ota` | `#OK`, then the watch copies the file to its bootloader and restarts into it, which installs it. A refusal after the `#OK` arrives as `#ERR`. Needs the USB drive closed and the battery at 10% or more. |
+| `dev update /Update/<file>.ota` | The watch copies the file to its bootloader's volume (a few seconds), answers `#OK`, and restarts into the bootloader, which installs it. A refusal or failure is `#ERR` with the reason, and the watch stays up. Needs the USB drive closed and the battery at 10% or more. |
 
 Injected values and the log stream stop when the port closes or Developer goes off.
 
