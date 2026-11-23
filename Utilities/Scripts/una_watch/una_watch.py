@@ -535,14 +535,39 @@ def install(watch, uapp, folder=None, drive_arg=None, attempts=3):
             _restore(watch, drive_arg, folder, uapp.name, backups, state["written"], e)
         raise
     if backups:
+        _remove_backups(watch, drive_arg, folder, backups)
+    return watch_path
+
+
+def _remove_backups(watch, drive_arg, folder, backups):
+    """Delete the backups once the watch has taken the new version. For a few seconds after
+    the restart the watch refuses writes to its drive (Windows reports it as write-protected),
+    so this tries again for a while. The install has succeeded either way: a backup left
+    behind is only a warning, since the watch never loads a .bak."""
+    left = [bak for bak, _ in backups]
+    try:
         drive = open_drive(watch, drive_arg)
         try:
-            for bak, _ in backups:
-                if bak.exists():
-                    bak.unlink()
+            end = time.monotonic() + 20
+            while left:
+                for bak in list(left):
+                    try:
+                        if bak.exists():
+                            bak.unlink()
+                        left.remove(bak)
+                    except OSError:
+                        pass
+                if not left or time.monotonic() > end:
+                    break
+                time.sleep(1)
         finally:
             close_drive(watch, drive)
-    return watch_path
+    except (WatchError, OSError) as e:
+        print(f"warning: {e}", file=sys.stderr)
+    if left:
+        print(f"warning: the previous version's backup is still in Apps/{folder}: "
+              + ", ".join(b.name for b in left) + ". The watch does not load it; delete it "
+              "when convenient.", file=sys.stderr)
 
 
 def backup_name(path):
