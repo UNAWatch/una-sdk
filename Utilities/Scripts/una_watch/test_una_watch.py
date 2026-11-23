@@ -34,14 +34,18 @@ def raises(fn, exc):
 class FakePort:
     """Answers each command line with canned bytes, as the watch's console would."""
 
-    def __init__(self, replies):
+    def __init__(self, replies, clock=None):
         self.replies = replies
         self.pending = bytearray()
         self.sent = []
+        self.clock = clock
+        self.timed = []         # (clock time, line) of each write, with a clock
 
     def write(self, data):
         line = data.decode().strip()
         self.sent.append(line)
+        if self.clock:
+            self.timed.append((self.clock.t, line))
         self.pending += b"una> " + data
         for prefix, reply in self.replies:
             if line.startswith(prefix):
@@ -49,9 +53,24 @@ class FakePort:
                 break
 
     def read(self, n):
+        if self.clock:
+            self.clock.t += 0.005       # each read takes 5 ms of fake time
         out = bytes(self.pending[:n])
         del self.pending[:n]
         return out
+
+
+class FakeClock:
+    """Stands in for the time module in una_watch: time passes only as the fake port is read."""
+
+    def __init__(self):
+        self.t = 1000.0
+
+    def monotonic(self):
+        return self.t
+
+    def sleep(self, s):
+        self.t += s
 
     def close(self):
         pass
@@ -195,19 +214,54 @@ def main():
         expect(not w.file_matches("/Apps/x/x.uapp", uapp)[0],
                "a copy damaged only in its last 4 bytes does not")
 
-        # --- a hold doesn't hold up the timeline ------------------------------
+        # --- a hold doesn't hold up the timeline (on a fake clock) ---------------
         tiny = bytes([0xC0] * 4)
-        w = watch_with([("dev button", b"#OK\n"),
-                        ("dev screen", b"#DATA 4 2 2 abgr2222 %08X\n" % zlib.crc32(tiny) + tiny + b"\n#OK\n")])
-        script = tmp / "hold.txt"
-        script.write_text("0 hold R1 600\n+100 screenshot during\n")
-        with open(tmp / "watch.log", "wb") as log:
-            runner = uw.Runner(w, tmp / "out", log)
-            runner.run(uw.parse_script(script))
-        sent = [s for s in w.ser.sent if s.startswith("dev ")]
-        expect(sent == ["dev button R1 press", "dev screen", "dev button R1 release"],
+        screen_reply = b"#DATA 4 2 2 abgr2222 %08X\n" % zlib.crc32(tiny) + tiny + b"\n#OK\n"
+
+        def timed_run(text, replies):
+            clock = FakeClock()
+            real_time, uw.time = uw.time, clock
+            try:
+                w = uw.Watch()
+                w.ser = FakePort(replies, clock)
+                script = tmp / "timed.txt"
+                script.write_text(text)
+                with open(tmp / "watch.log", "wb") as log:
+                    runner = uw.Runner(w, tmp / "out", log)
+                    start = clock.t
+                    runner.run(uw.parse_script(script))
+                return runner, [(round(t - start, 2), s) for t, s in w.ser.timed
+                                if s.startswith("dev ")]
+            finally:
+                uw.time = real_time
+
+        def near(t, want):
+            return abs(t - want) <= 0.05
+
+        runner, timed = timed_run("0 hold R1 600\n+100 screenshot during\n",
+                                  [("dev button", b"#OK\n"), ("dev screen", screen_reply)])
+        expect([s for _, s in timed] == ["dev button R1 press", "dev screen", "dev button R1 release"],
                "a screenshot during a hold is taken while the button is down")
+        expect(near(timed[1][0], 0.1) and near(timed[2][0], 0.6),
+               f"at its own time, 100 ms in, and the release 600 ms in ({timed})")
         expect((tmp / "out" / "during.png").is_file() and not runner.failed, "and saved")
+
+        runner, timed = timed_run("0 press R1\n+100 hold R1 300\n+100 click R1\n+100 release R1\n",
+                                  [("dev button", b"#OK\n")])
+        expect([s for _, s in timed] == ["dev button R1 press", "dev button R1 release"],
+               "a hold or click of a button already down does nothing, as in the simulators")
+
+        fails = {"n": 0}
+
+        def flaky(line):
+            if line.endswith("release") and fails["n"] < 1:
+                fails["n"] += 1
+                return b"#ERR busy\n"
+            return b"#OK\n"
+        runner, timed = timed_run("0 hold R1 200\n", [("dev button", flaky)])
+        expect([s for _, s in timed] == ["dev button R1 press", "dev button R1 release",
+                                         "dev button R1 release"] and near(timed[2][0], 1.2),
+               "a release that fails to send is tried again a second later")
 
         (tmp / "x.uapp.bak").write_bytes(b"someone's")
         expect(uw.backup_name(tmp / "x.uapp").name == "x.uapp.bak2",
