@@ -988,7 +988,8 @@ class Runner:
         # Buttons the script has down, from press or hold until their release. As in the
         # simulators, a click, hold or press of a button already down does nothing.
         self.down = set()
-        self.t0 = None              # when the run started, for the times in watch.log
+        self.lost = False           # the port was lost while releasing at the end of the run
+        self.t0 = None             # when the run started, for the times in watch.log
 
     def note(self, text):
         self.log.write(f"[run] {text}\n".encode())
@@ -1032,6 +1033,14 @@ class Runner:
             except WatchError as e:
                 tries += 1
                 self.failed = True
+                if everything and str(e).startswith("lost the watch"):
+                    # The port is gone, and with it every button the run held down: closing
+                    # it releases them on the watch. Each further try would only wait out
+                    # the write timeout.
+                    self.note(f"releasing {button} failed: {e}")
+                    self.releases.clear()
+                    self.lost = True
+                    return
                 if tries < self.RELEASE_TRIES and not everything:
                     self.note(f"releasing {button} failed, trying again: {e}")
                     self.releases.append((time.monotonic() + 1.0, button, tries))
@@ -1174,7 +1183,7 @@ class Runner:
             # buttons a 'press' left down, which have no release due.
             if self.releases:
                 self.release_due(time.monotonic(), everything=True)
-            for button in sorted(self.down):
+            for button in sorted(self.down) if not self.lost else ():
                 try:
                     self.w.button(button, "release")
                     self.down.discard(button)
@@ -1182,6 +1191,8 @@ class Runner:
                 except WatchError as e:
                     self.failed = True
                     self.note(f"releasing {button} failed: {e}")
+                    if str(e).startswith("lost the watch"):
+                        break       # as for the holds above
 
 
 # --- command line ----------------------------------------------------------------
