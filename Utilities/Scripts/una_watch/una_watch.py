@@ -416,6 +416,27 @@ class Watch:
         self.cmd(f"dev stop {pid}")
         return pid
 
+    def mem(self):
+        """The watch's memory figures ('dev mem', protocol 4): a dict with sys_heap,
+        sys_heap_detail, os_heap and isr_stack ({key: bytes}), and tasks (a list of
+        {name, stack_free_min, priority, state})."""
+        if self.protocol < 4:
+            raise WatchError("this watch's firmware has no 'dev mem' (protocol 4)")
+        _, lines = self.cmd("dev mem")
+        out = {"tasks": []}
+        for text in lines:
+            what, _, rest = text.partition(" ")
+            if what == "task":
+                # The name comes last and may hold spaces.
+                fields, _, name = rest.partition(" name=")
+                task = dict(kv.split("=", 1) for kv in fields.split())
+                task = {k: (v if k == "state" else int(v)) for k, v in task.items()}
+                task["name"] = name
+                out["tasks"].append(task)
+            elif rest:
+                out[what] = {k: int(v) for k, v in (kv.split("=", 1) for kv in rest.split())}
+        return out
+
     def file_matches(self, watch_path, data):
         """(whether the file on the watch holds exactly `data`, its size, the CRC compared).
 
@@ -430,6 +451,32 @@ class Watch:
         payload, _ = self.cmd(f"dev crc {quoted(watch_path)}", timeout=60)
         whole = int(payload.split()[1], 16)
         return whole == zlib.crc32(data), size, whole
+
+
+def format_mem(m):
+    """The figures from Watch.mem() as a short report."""
+    def kb(n):
+        return f"{n / 1024:.1f} KB"
+    lines = []
+    s, d = m.get("sys_heap", {}), m.get("sys_heap_detail", {})
+    if s:
+        lines.append(f"system heap   {kb(s['free'])} free of {kb(s['total'])}, least free "
+                     f"{kb(s['min_ever'])}, most used {kb(s['peak_used'])}")
+    if d:
+        lines.append(f"              never handed out {kb(d['sbrk_headroom'])}; free inside "
+                     f"{kb(d['fordblks'])} in {d['ordblks']} pieces; app images {kb(d['images'])}")
+    o = m.get("os_heap", {})
+    if o:
+        lines.append(f"RTOS heap     {kb(o['free'])} free of {kb(o['total'])}, least free "
+                     f"{kb(o['min_ever'])}")
+    i = m.get("isr_stack", {})
+    if i:
+        lines.append(f"ISR stack     {i['used']} of {i['usable']} bytes used at most")
+    if m.get("tasks"):
+        lines.append("tasks (least stack free):")
+        for t in sorted(m["tasks"], key=lambda t: t["stack_free_min"]):
+            lines.append(f"  {t['stack_free_min']:>7} B  prio {t['priority']:>2}  {t['state']}  {t['name']}")
+    return "\n".join(lines)
 
 
 # --- screenshots ---------------------------------------------------------------
@@ -1302,6 +1349,8 @@ def main(argv=None):
     sub.add_parser("info", help="check the connection and list installed apps")
     sub.add_parser("apps", help="list installed apps: pid, type, folder, name")
     sub.add_parser("home", help="close the USB drive and dismiss the charging screen")
+    s = sub.add_parser("mem", help="the watch's heap, stack and per-task memory")
+    s.add_argument("--json", action="store_true", help="as JSON, for tracking over time")
     s = sub.add_parser("update-kernel", help="install a kernel .ota, as the phone app does")
     s.add_argument("ota")
     s.add_argument("--drive", help="where the watch's drive is mounted (default: found by its label)")
@@ -1426,6 +1475,13 @@ def main(argv=None):
                     print(f"{a['pid']}  {a['type']:<9}  {folder:<20}  {a['name']}")
             elif args.cmd == "home":
                 w.show_home()
+            elif args.cmd == "mem":
+                m = w.mem()
+                if args.json:
+                    import json
+                    print(json.dumps({"firmware": w.firmware, **m}, indent=2))
+                else:
+                    print(format_mem(m))
             elif args.cmd == "update-kernel":
                 update_kernel(w, args.ota, args.drive)
             elif args.cmd == "install":
