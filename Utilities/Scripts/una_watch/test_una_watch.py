@@ -310,6 +310,32 @@ def main():
                                          "dev button R2 release", "dev button R1 release"],
                "the end of a run releases a button left pressed, once, after the holds")
 
+        lost = {"on": False}
+
+        def unplug(line):
+            if line.endswith("press") and "L2" in line:
+                lost["on"] = True
+            return b"#OK\n"
+        real_button = uw.Watch.button
+
+        def button(self, name, action, ms=None):
+            if lost["on"]:
+                self.ser.write(f"dev button {name} {action}\r\n".encode())
+                raise uw.WatchError("lost the watch: port closed")
+            return real_button(self, name, action, ms)
+        uw.Watch.button = button
+        try:
+            for script in ("0 press R1\n+0 press R2\n+0 hold L1 5000\n+0 press L2\n+0 exit\n",
+                           "0 press R1\n+0 press R2\n+0 press L2\n+0 exit\n"):
+                lost["on"] = False
+                runner, timed = timed_run(script, [("dev button", unplug)])
+                releases = [s for _, s in timed if s.endswith("release")]
+                expect(len(releases) == 1 and runner.failed,
+                       f"with the watch lost, the end of a run stops after the first release "
+                       f"({releases})")
+        finally:
+            uw.Watch.button = real_button
+
         fails = {"n": 0}
 
         def flaky(line):
