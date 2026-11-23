@@ -183,6 +183,24 @@ def main():
         expect(not w.file_matches("/Apps/x/x.uapp", uapp)[0],
                "a copy damaged only in its last 4 bytes does not")
 
+        # --- a hold doesn't hold up the timeline ------------------------------
+        tiny = bytes([0xC0] * 4)
+        w = watch_with([("dev button", b"#OK\n"),
+                        ("dev screen", b"#DATA 4 2 2 abgr2222 %08X\n" % zlib.crc32(tiny) + tiny + b"\n#OK\n")])
+        script = tmp / "hold.txt"
+        script.write_text("0 hold R1 600\n+100 screenshot during\n")
+        with open(tmp / "watch.log", "wb") as log:
+            runner = uw.Runner(w, tmp / "out", log)
+            runner.run(uw.parse_script(script))
+        sent = [s for s in w.ser.sent if s.startswith("dev ")]
+        expect(sent == ["dev button R1 press", "dev screen", "dev button R1 release"],
+               "a screenshot during a hold is taken while the button is down")
+        expect((tmp / "out" / "during.png").is_file() and not runner.failed, "and saved")
+
+        (tmp / "x.uapp.bak").write_bytes(b"someone's")
+        expect(uw.backup_name(tmp / "x.uapp").name == "x.uapp.bak2",
+               "a backup never takes the name of a .bak already there")
+
         expect(uw.folder_name_ok("Stopwatch") and uw.folder_name_ok("ED66C90184FF55A0"),
                "app folder names are accepted")
         expect(not any(uw.folder_name_ok(n) for n in ("", "..", "a/b", "a\\b", "C:x", " x")),
