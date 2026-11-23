@@ -161,9 +161,10 @@ them.
   - the `.uapp` is damaged (verify the hash);
   - it isn't in its own folder under `Apps/`;
   - another `.uapp` in the same folder was loaded instead.
-- **App appears but closes at once:** with Developer on, start `una_watch.py log` before
-  launching the app, then reproduce it; otherwise collect the log files (above). Then read the
-  crash dumps in `Crash/`.
+- **App appears but closes at once:** with Developer on, run a short script with
+  `--launch APP`: the log in `watch.log` starts just before the app does. (`una_watch.py log`
+  holds the serial port, so no other command can run alongside it.) Without Developer, collect
+  the log files (above). Then read the crash dumps in `Crash/`.
 - **A script's screenshots show the charging screen:** the app wasn't started with `--launch`,
   or `launch`, which close the USB drive and dismiss that screen first.
 - **The phone app won't install a store app on this watch:** the watch's firmware may be older

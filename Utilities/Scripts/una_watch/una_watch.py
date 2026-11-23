@@ -338,8 +338,20 @@ class Watch:
         self.button("R2", "click")
         self.pump(0.5)
 
-    def screen(self):
-        """The display: (width, height, one ABGR2222 byte per pixel)."""
+    def screen(self, attempts=2):
+        """The display: (width, height, one ABGR2222 byte per pixel).
+
+        The watch holds the frame for up to 3 s while it is sent; a transfer slower than that
+        can catch the next frame part-way, which the CRC shows. Then it is taken again."""
+        for attempt in range(attempts):
+            try:
+                return self._screen_once()
+            except WatchError as e:
+                if "CRC mismatch" not in str(e) or attempt == attempts - 1:
+                    raise
+        raise WatchError("no screenshot")
+
+    def _screen_once(self):
         self._send("dev screen")
         deadline = time.monotonic() + 20
         while True:
@@ -512,18 +524,20 @@ def install(watch, uapp, folder=None, drive_arg=None, attempts=3):
     # The version being replaced is kept as <file>.uapp.bak, which the watch does not load,
     # until the watch has accepted the new one; on any failure before that, it is put back.
     backups = []
+    state = {"written": False}      # whether this install has written its copy
     try:
-        _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, backups)
+        _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, backups,
+                        state)
         print("restarting the watch so it finds the app")
         watch.restart(watch_path)
     except (WatchError, OSError) as e:
         if backups:
-            _restore(watch, drive_arg, folder, uapp.name, backups, e)
+            _restore(watch, drive_arg, folder, uapp.name, backups, state["written"], e)
         raise
     if backups:
         drive = open_drive(watch, drive_arg)
         try:
-            for bak in backups:
+            for bak, _ in backups:
                 if bak.exists():
                     bak.unlink()
         finally:
@@ -531,51 +545,72 @@ def install(watch, uapp, folder=None, drive_arg=None, attempts=3):
     return watch_path
 
 
-def _restore(watch, drive_arg, folder, name, backups, error):
-    """Put the replaced version back after a failed install, or say how to."""
+def backup_name(path):
+    """An unused name for a backup of path: <file>.bak, or <file>.bak2 and on if taken. A
+    .bak already there may be someone's; it is left alone."""
+    n = 1
+    while True:
+        bak = path.with_name(path.name + (".bak" if n == 1 else f".bak{n}"))
+        if not bak.exists():
+            return bak
+        n += 1
+
+
+def _restore(watch, drive_arg, folder, name, backups, written, error):
+    """Put the replaced version back after a failed install, or say how to. The new copy is
+    deleted only if this install wrote it: before that, a file of that name is the original."""
     print("putting the previous version back")
+    copy_removed = not written
+    left = list(backups)            # (backup, original name) not yet put back
     try:
         drive = open_drive(watch, drive_arg)
         try:
             dest = drive / "Apps" / folder / name
-            if dest.exists():
+            # The new copy goes first: a backup may be going back under the same name.
+            if written and dest.exists():
                 dest.unlink()
-            for bak in backups:
+            copy_removed = True
+            for bak, original in backups:
                 if bak.exists():
-                    bak.rename(bak.with_name(bak.name[:-len(".bak")]))
+                    bak.rename(bak.with_name(original))
+                left.remove((bak, original))
         finally:
             close_drive(watch, drive)
         watch.restart()
     except (WatchError, OSError) as e:
-        raise WatchError(f"{error}; and the previous version could not be put back ({e}): on the "
-                         f"watch's drive, in Apps/{folder}, rename "
-                         + ", ".join(b.name for b in backups) + " to drop '.bak', and delete "
-                         f"{name}") from e
+        todo = []
+        if not copy_removed:
+            todo.append(f"delete {name}")
+        todo += [f"rename {bak.name} to {original}" for bak, original in left]
+        how = (": on the watch's drive, in Apps/" + folder + ", " + "; then ".join(todo)
+               if todo else "; the previous version is back in place, and the watch needs a restart")
+        raise WatchError(f"{error}; and putting the previous version back failed ({e}){how}") from e
 
 
-def _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, backups):
+def _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, backups, state):
     for attempt in range(1, attempts + 1):
         print(f"opening the watch's USB drive (attempt {attempt})")
         drive = open_drive(watch, drive_arg)
         try:
             dest_dir = drive / "Apps" / folder
+            dest = dest_dir / uapp.name
             # Never touch another app's files: every .uapp already in the folder must carry
-            # this app's ID (its first 8 bytes).
-            others = [p.name for p in dest_dir.glob("*.uapp") if p.read_bytes()[:8] != data[:8]]
+            # this app's ID (its first 8 bytes). On a retry, the copy this install wrote is
+            # left out: damage can reach its first bytes too.
+            others = [p.name for p in dest_dir.glob("*.uapp")
+                      if not (attempt > 1 and p.name == dest.name) and p.read_bytes()[:8] != data[:8]]
             if others:
                 raise WatchError(f"Apps/{folder} holds another app ({', '.join(others)}): "
                                  "pass --folder to choose a different folder")
             dest_dir.mkdir(parents=True, exist_ok=True)
             if attempt == 1:
                 for old in dest_dir.glob("*.uapp"):
-                    bak = old.with_name(old.name + ".bak")
-                    if bak.exists():
-                        bak.unlink()
+                    bak = backup_name(old)
                     old.rename(bak)
-                    backups.append(bak)
-            dest = dest_dir / uapp.name
+                    backups.append((bak, old.name))
             if dest.exists():
                 dest.unlink()       # a damaged copy from the attempt before
+            state["written"] = True
             with open(dest, "wb") as f:
                 f.write(data)
                 f.flush()
@@ -754,6 +789,8 @@ class Runner:
         self.fix = "auto"
         self.last_gps = 0.0
         self.failed = False
+        # Buttons a 'hold' pressed, with when to release them: [(monotonic time, button)].
+        self.releases = []
 
     def note(self, text):
         self.log.write(f"[run] {text}\n".encode())
@@ -778,10 +815,24 @@ class Runner:
         self.w.sensor(GPS_LOCATION, None)
         self.w.sensor(GPS_SPEED, None)
 
+    def release_due(self, now, everything=False):
+        """Release the held buttons whose time has come (all of them, at the end of a run)."""
+        for due, button in sorted(self.releases):
+            if everything or due <= now:
+                self.releases.remove((due, button))
+                try:
+                    self.w.button(button, "release")
+                except WatchError as e:
+                    self.failed = True
+                    self.note(f"releasing {button} failed: {e}")
+
     def wait_until(self, t_end):
-        """Wait, collecting the log, and sending a GPS fix each second while one is due."""
+        """Wait, collecting the log, releasing held buttons on time, and sending a GPS fix each
+        second while one is due."""
         while True:
             now = time.monotonic()
+            if self.releases:
+                self.release_due(now)
             if (self.replay is not None or self.fix != "auto") and now - self.last_gps >= 1.0:
                 self.last_gps = now
                 try:
@@ -795,15 +846,26 @@ class Runner:
                     self.gps_off()
             if now >= t_end:
                 return
-            self.w.pump(min(0.05, t_end - now))
+            step = t_end - now
+            if self.releases:
+                step = min(step, max(min(d for d, _ in self.releases) - now, 0.0))
+            self.w.pump(min(0.05, step))
 
     def step(self, step, args):
         w = self.w
         if step == "click":
             w.button(args[0], "click")
         elif step == "hold":
-            w.button(args[0], "hold", int(args[1]))
+            # As in the simulators: pressed now, released MS later, while later steps keep
+            # their own times.
+            # The release is due before the press is sent: a press whose answer is lost
+            # still gets its release.
+            self.releases.append((time.monotonic() + int(args[1]) / 1000, args[0]))
+            w.button(args[0], "press")
         elif step in ("press", "release"):
+            if step == "release":
+                # Released by hand: a hold's pending release of it is done.
+                self.releases = [r for r in self.releases if r[1] != args[0]]
             w.button(args[0], step)
         elif step == "screenshot":
             name = args[0] if Path(args[0]).suffix else args[0] + ".png"
@@ -852,22 +914,30 @@ class Runner:
     def run(self, steps, duration_ms=None):
         t0 = time.monotonic()
         end = t0 + duration_ms / 1000 if duration_ms is not None else None
-        for t, line, step, args in steps:
-            due = t0 + t / 1000
-            if end is not None and due > end:
-                break
-            self.wait_until(due)
-            shown = " ".join(str(a) for a in args if not isinstance(a, list))
-            self.note(f"{t / 1000:8.3f}s line {line}: {step} {shown}".rstrip())
-            if step == "exit":
-                return
-            try:
-                self.step(step, args)
-            except (WatchError, OSError) as e:
-                self.failed = True
-                self.note(f"step failed: {e}")
-        if end is not None:
-            self.wait_until(end)
+        try:
+            for t, line, step, args in steps:
+                due = t0 + t / 1000
+                if end is not None and due > end:
+                    break
+                self.wait_until(due)
+                shown = " ".join(str(a) for a in args if not isinstance(a, list))
+                self.note(f"{t / 1000:8.3f}s line {line}: {step} {shown}".rstrip())
+                if step == "exit":
+                    return
+                try:
+                    self.step(step, args)
+                except (WatchError, OSError) as e:
+                    self.failed = True
+                    self.note(f"step failed: {e}")
+            if end is not None:
+                self.wait_until(end)
+            elif self.releases:
+                # The script ended during a hold: let the hold run its length.
+                self.wait_until(max(d for d, _ in self.releases))
+        finally:
+            # 'exit' or the end of the run lets go of anything still held.
+            if self.releases:
+                self.release_due(time.monotonic(), everything=True)
 
 
 # --- command line ----------------------------------------------------------------

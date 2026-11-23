@@ -69,7 +69,8 @@ The script format, its steps and the replay file format are those of the simulat
 [Script format](Simulator.md#scripted-runs). On the watch:
 
 - Times run on the computer's clock from the start of the run.
-- `click` holds the button 150 ms; `hold B MS` holds it MS ms.
+- `click` holds the button 150 ms. `hold B MS` presses it and releases it MS ms later, while
+  later steps run at their own times.
 - `screenshot` saves what the watch shows: the kernel's whole screen, as PNG, black outside the
   round glass.
 - `hr BPM` sets both heart-rate sensors (`HEART_RATE` and `HEART_RATE_EX`), always trusted.
