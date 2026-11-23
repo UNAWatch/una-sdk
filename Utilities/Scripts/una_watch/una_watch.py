@@ -72,6 +72,8 @@ class Watch:
     def __init__(self, port=None, log_sink=None):
         self.port_name = port
         self.serial_number = None     # the watch's USB serial number, once connected
+        self.protocol = 0             # of its 'dev' command, once checked
+        self.firmware = None          # its firmware version, from protocol 3
         self.ser = None
         self.raw = bytearray()
         self.buf = bytearray()
@@ -316,7 +318,9 @@ class Watch:
         if len(parts) < 2 or parts[1] != "on":
             raise WatchError("Developer is off: on the watch, open Settings > Device and switch "
                              "Developer on")
-        if int(parts[0]) < PROTOCOL:
+        self.protocol = int(parts[0])
+        self.firmware = parts[2] if len(parts) > 2 else None    # from protocol 3
+        if self.protocol < PROTOCOL:
             raise WatchError(f"the watch's 'dev' protocol is {parts[0]}; this tool needs {PROTOCOL}")
 
     def drive_open(self):
@@ -652,6 +656,68 @@ def _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, 
     raise WatchError(f"{watch_path} could not be copied intact in {attempts} attempts")
 
 
+def update_kernel(watch, ota, drive_arg=None):
+    """Install a kernel .ota as the phone app does: copy it to /Update/ over the USB drive,
+    check it, and have the watch hand it to the bootloader, which installs it on the restart
+    that follows. Returns the firmware version the watch comes back with."""
+    ota = Path(ota)
+    if ota.suffix.lower() != ".ota":
+        raise WatchError(f"{ota} is not an .ota file")
+    if not folder_name_ok(ota.name):
+        raise WatchError(f"'{ota.name}' can't be a file name on the watch")
+    if watch.protocol < 3:
+        raise WatchError("this watch's firmware has no 'dev update' (protocol 3): install a kernel "
+                         "with it by the bootloader or the phone app first")
+    data = ota.read_bytes()
+    before = watch.firmware
+    watch_path = f"/Update/{ota.name}"
+
+    print("opening the watch's USB drive")
+    drive = open_drive(watch, drive_arg)
+    try:
+        update_dir = drive / "Update"
+        update_dir.mkdir(exist_ok=True)
+        dest = update_dir / ota.name
+        if dest.exists():
+            dest.unlink()
+        with open(dest, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+    finally:
+        print("closing the drive")
+        close_drive(watch, drive)
+
+    same, size, crc = watch.file_matches(watch_path, data)
+    if not same:
+        raise WatchError(f"{watch_path} is damaged on the watch ({size} bytes, CRC {crc:08X}); "
+                         "run again")
+    print(f"{watch_path}: {size} bytes, matches")
+
+    watch.cmd(f"dev update {watch_path}", timeout=30)
+    print("the watch is copying the kernel to its bootloader and will restart")
+    # A refusal from the update itself arrives after the #OK, while the watch is still up;
+    # success shows as the port going away when the watch restarts.
+    end = time.monotonic() + 120
+    try:
+        while time.monotonic() < end:
+            watch.pump(0.5)
+            text = ANSI.sub(b"", bytes(watch.buf)).decode("utf-8", "replace")
+            if "#ERR" in text:
+                raise WatchError(text[text.index("#ERR") + 4:].strip().splitlines()[0])
+    except WatchError as e:
+        if not str(e).startswith("lost the watch"):
+            raise
+    else:
+        raise WatchError("the watch did not restart within 2 minutes")
+
+    print("installing; waiting for the watch to come back")
+    watch.reopen(gone_timeout=5, back_timeout=600)
+    watch.require_developer_mode()
+    print(f"firmware: {before} -> {watch.firmware}")
+    return watch.firmware
+
+
 def open_drive(watch, drive_arg=None):
     """Open the watch's USB drive and return where it is mounted."""
     watch.plain("usb drive on", 0.5)
@@ -983,6 +1049,9 @@ def main(argv=None):
     sub.add_parser("info", help="check the connection and list installed apps")
     sub.add_parser("apps", help="list installed apps: pid, type, folder, name")
     sub.add_parser("home", help="close the USB drive and dismiss the charging screen")
+    s = sub.add_parser("update-kernel", help="install a kernel .ota, as the phone app does")
+    s.add_argument("ota")
+    s.add_argument("--drive", help="where the watch's drive is mounted (default: found by its label)")
     s = sub.add_parser("install", help="copy a .uapp to the watch, check it, restart the watch")
     s.add_argument("uapp")
     s.add_argument("--folder", help="app folder under Apps/ (default: the app's folder, or its name)")
@@ -1096,12 +1165,15 @@ def main(argv=None):
         try:
             if args.cmd in ("info", "apps"):
                 if args.cmd == "info":
-                    print("watch connected, Developer on")
+                    print("watch connected, Developer on"
+                          + (f", firmware {w.firmware}" if w.firmware else ""))
                 for a in w.apps():
                     folder = a["path"].replace("\\", "/").split("/")[-2] if "/" in a["path"] else ""
                     print(f"{a['pid']}  {a['type']:<9}  {folder:<20}  {a['name']}")
             elif args.cmd == "home":
                 w.show_home()
+            elif args.cmd == "update-kernel":
+                update_kernel(w, args.ota, args.drive)
             elif args.cmd == "install":
                 install(w, args.uapp, args.folder, args.drive)
             elif args.cmd == "launch":

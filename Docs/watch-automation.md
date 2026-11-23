@@ -38,6 +38,7 @@ python3 Utilities/Scripts/una_watch/una_watch.py info
 |---|---|
 | `info`, `apps` | Check the connection, and list the installed apps: service PID, type, folder, name. |
 | `install FILE.uapp` | Copy the app to the watch over its USB drive, check the copy on the watch, and restart the watch so it finds the app. An update goes into the folder that already holds the app (matched by the app ID in the `.uapp`); a new app gets `Apps/<name>/`. `--folder` picks the folder, `--drive` the mount point. |
+| `update-kernel FILE.ota` | Install watch firmware, as the phone app does: copy the `.ota` to `Update/` over the USB drive, check the copy, and hand it to the bootloader, which installs it on the restart that follows. The battery must be at least 10%. Prints the firmware version before and after. |
 | `home` | Close the USB drive and dismiss the charging screen, leaving the home screen. |
 | `launch APP` | `home`, then start an app by name or PID. |
 | `stop APP` | Stop an app. |
@@ -122,7 +123,7 @@ in LF). Other tools can use it directly. Each command ends with a line `#OK ...`
 
 | Command | Reply |
 |---|---|
-| `dev` | `#OK <protocol> on\|off`: the protocol version (2) and Developer. |
+| `dev` | `#OK <protocol> on\|off <firmware>`: the protocol version (3), Developer, and the firmware version. |
 | `dev button L1\|L2\|R1\|R2 click\|press\|release\|hold <ms>` | `#OK` once done. |
 | `dev screen` | `#DATA <bytes> <width> <height> abgr2222 <crc32>`, the pixels, then `#OK`. One byte per pixel: bits 5-4 blue, 3-2 green, 1-0 red. |
 | `dev apps` | One line per app, tab-separated: service PID, type, app ID, `.uapp` path, name. Then `#OK`. |
@@ -130,6 +131,7 @@ in LF). Other tools can use it directly. Each command ends with a line `#OK ...`
 | `dev crc <path> [bytes]` | `#OK <size> <crc32>`: of the file, or of its first `bytes`. Paths are on the apps volume, as `/Apps/...`. |
 | `dev sensor <type> <values...>` | `#OK active\|idle`: whether anything is listening. `dev sensor <type> off`, or `dev sensor off` for all. |
 | `dev log on\|off` | `#OK`. While on, log text arrives between commands, between the bytes 0x1E and 0x1F. |
+| `dev update /Update/<file>.ota` | `#OK`, then the watch copies the file to its bootloader and restarts into it, which installs it. A refusal after the `#OK` arrives as `#ERR`. Needs the USB drive closed and the battery at 10% or more. |
 
 Injected values and the log stream stop when the port closes or Developer goes off.
 
