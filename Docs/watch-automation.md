@@ -107,11 +107,13 @@ dev sensor 110 3 1u 51.5 -0.1 20
 
 - **The USB drive.** Plugging the watch in opens its USB drive, and apps are stopped while it is
   open. The tool closes it (`usb drive off`) before starting an app, and opens it only to copy
-  files. Before closing it, the tool makes the computer let go of the drive: on Windows it
-  locks and dismounts the volume, which writes out everything cached; on macOS and Linux it
-  unmounts it. A drive taken back while the computer still has writes cached can lose them and
-  damage the watch's filesystem. If a program has files open on the drive, the tool stops and
-  leaves the drive open.
+  files. Whenever it closes the drive, the tool first makes the computer let go of it: on
+  Windows it locks and dismounts the volume, which writes out everything cached; on macOS it
+  unmounts it with `diskutil`, and on Linux with `gio mount -u` or `umount`. A drive taken back
+  while the computer still has writes cached can lose them and damage the watch's filesystem.
+  If a program has files open on the drive, or the user may not unmount it (on Linux, a mount
+  without the `user` option that the desktop didn't make), the tool stops and leaves the drive
+  open.
 - **Installing.** The app list is built when the watch starts, so `install` restarts the watch.
   A `.uapp` ends with the CRC-32 of the rest of the file; the copy is checked against everything
   before those last 4 bytes.

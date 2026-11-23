@@ -328,12 +328,25 @@ class Watch:
 
     def close_drive(self):
         """Close the USB drive if it is open. While it is, apps are stopped and the charging
-        screen can't be dismissed. The port reconnects."""
-        if self.drive_open():
+        screen can't be dismissed. The computer lets go of it first (see let_go_of_drive), so
+        nothing it has cached for the drive is lost. The port reconnects."""
+        if not self.drive_open():
+            return False
+        drive = find_drive()
+        if drive is None and self.count_ports() == 1:
+            # Not mounted (or not found): nothing on the computer can be holding writes for it.
+            pass
+        elif drive is None:
+            raise WatchError("the USB drive is open but can't be identified among several "
+                             "watches: close it with 'usb drive off' or unplug")
+        held = let_go_of_drive(drive) if drive is not None else None
+        try:
             self.plain("usb drive off", 0.5)
             self.reopen()
-            return True
-        return False
+        finally:
+            if held is not None:
+                held.release()
+        return True
 
     def show_home(self):
         """From what the watch shows on USB to the home screen: close the USB drive and dismiss
@@ -542,14 +555,23 @@ def let_go_of_drive(drive):
         return _WindowsVolume(drive)
     subprocess.run(["sync"])
     if platform.system() == "Darwin":
-        cmd = ["diskutil", "unmount", str(drive)]
+        cmds = [["diskutil", "unmount", str(drive)]]
     else:
-        cmd = ["umount", str(drive)]
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
-        raise WatchError(f"can't unmount the watch's drive {drive}: {r.stderr.strip()}; close "
-                         "anything using it and run again. The drive is still open.")
-    return None
+        # A desktop auto-mount is unmounted through gio as the user; umount works for a mount
+        # the user may unmount (fstab 'user'/'users').
+        cmds = [["gio", "mount", "-u", str(drive)], ["umount", str(drive)]]
+    errors = []
+    for cmd in cmds:
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True)
+        except FileNotFoundError:
+            continue
+        if r.returncode == 0:
+            return None
+        errors.append(r.stderr.strip())
+    raise WatchError(f"can't unmount the watch's drive {drive}: {'; '.join(errors) or 'no unmount tool'}"
+                     ". Close anything using it, or unmount it yourself, and run again. The drive "
+                     "is still open.")
 
 
 def folder_name_ok(name):
@@ -736,31 +758,40 @@ def update_kernel(watch, ota, drive_arg=None):
     if watch.protocol < 3:
         raise WatchError("this watch's firmware has no 'dev update' (protocol 3): install a kernel "
                          "with it by the bootloader or the phone app first")
+    if drive_arg is None and Watch.count_ports() > 1:
+        raise WatchError("more than one watch is connected: pass --drive to say which drive is "
+                         "this one's")
     data = ota.read_bytes()
     before = watch.firmware
     watch_path = f"/Update/{ota.name}"
 
-    print("opening the watch's USB drive")
-    drive = open_drive(watch, drive_arg)
-    try:
-        update_dir = drive / "Update"
-        update_dir.mkdir(exist_ok=True)
-        dest = update_dir / ota.name
-        if dest.exists():
-            dest.unlink()
-        with open(dest, "wb") as f:
-            f.write(data)
-            f.flush()
-            os.fsync(f.fileno())
-    finally:
-        print("closing the drive")
-        close_drive(watch, drive)
+    # A copy to the watch's drive is now and then damaged on the way, so each is checked on
+    # the watch and made again if it differs. Only an intact copy goes to the bootloader.
+    attempts = 3
+    for attempt in range(1, attempts + 1):
+        print(f"opening the watch's USB drive (attempt {attempt})")
+        drive = open_drive(watch, drive_arg)
+        try:
+            update_dir = drive / "Update"
+            update_dir.mkdir(exist_ok=True)
+            dest = update_dir / ota.name
+            if dest.exists():
+                dest.unlink()
+            with open(dest, "wb") as f:
+                f.write(data)
+                f.flush()
+                os.fsync(f.fileno())
+        finally:
+            print("closing the drive")
+            close_drive(watch, drive)
 
-    same, size, crc = watch.file_matches(watch_path, data)
-    if not same:
-        raise WatchError(f"{watch_path} is damaged on the watch ({size} bytes, CRC {crc:08X}); "
-                         "run again")
-    print(f"{watch_path}: {size} bytes, matches")
+        same, size, crc = watch.file_matches(watch_path, data)
+        if same:
+            print(f"{watch_path}: {size} bytes, matches")
+            break
+        print(f"copy damaged on the watch ({size} bytes, CRC {crc:08X}); copying again")
+    else:
+        raise WatchError(f"{watch_path} could not be copied intact in {attempts} attempts")
 
     watch.cmd(f"dev update {watch_path}", timeout=30)
     print("the watch is copying the kernel to its bootloader and will restart")
