@@ -175,6 +175,25 @@ def main():
         w.require_developer_mode()
         expect((w.protocol, w.firmware) == (3, "1.8.0"), "protocol 3 reports the firmware version")
 
+        mem_reply = (b"sys_heap free=500000 total=900000 min_ever=400000 peak_used=600000\n"
+                     b"sys_heap_detail sbrk_headroom=300000 fordblks=200000 ordblks=12 "
+                     b"uordblks=100000 keepcost=4096 images=50000\n"
+                     b"os_heap free=20000 total=40000 min_ever=15000\n"
+                     b"isr_stack used=664 usable=1024\n"
+                     b"task stack_free_min=512 priority=24 state=B name=Sensor.Mgr\n"
+                     b"task stack_free_min=96 priority=8 state=R name=App Run GUI\n#OK\n")
+        w = watch_with([("dev mem", mem_reply)])
+        w.protocol = 4
+        m = w.mem()
+        expect(m["sys_heap"]["free"] == 500000 and m["os_heap"]["min_ever"] == 15000
+               and m["isr_stack"]["used"] == 664, "dev mem figures are read")
+        expect([t["name"] for t in m["tasks"]] == ["Sensor.Mgr", "App Run GUI"]
+               and m["tasks"][1]["stack_free_min"] == 96 and m["tasks"][1]["state"] == "R",
+               "task lines are read, names with spaces included")
+        expect("App Run GUI" in uw.format_mem(m).splitlines()[5], "the report lists the tightest stack first")
+        w.protocol = 3
+        expect(raises(w.mem, uw.WatchError), "dev mem needs protocol 4")
+
         w = watch_with([("dev", b"developer mode: on\n#OK 2 on\n")])
         w.require_developer_mode()
         (tmp / "k.ota").write_bytes(b"kernel")
