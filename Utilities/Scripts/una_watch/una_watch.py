@@ -476,12 +476,80 @@ def find_drive(label="UNA WATCH"):
     return None
 
 
-def flush_drive(drive):
+class _WindowsVolume:
+    """The watch's volume, locked and dismounted until release(): every write the computer
+    has cached reaches the watch, and nothing on the computer can write to the drive while
+    the watch takes it back."""
+
+    GENERIC_READ, GENERIC_WRITE = 0x80000000, 0x40000000
+    FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING = 1, 2, 3
+    FSCTL_LOCK_VOLUME, FSCTL_DISMOUNT_VOLUME = 0x00090018, 0x00090020
+
+    def __init__(self, drive):
+        import ctypes
+        from ctypes import wintypes
+        self.k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.k32.CreateFileW.restype = wintypes.HANDLE
+        self.k32.CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                                         wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                                         wintypes.HANDLE]
+        self.k32.DeviceIoControl.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPVOID,
+                                             wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD,
+                                             ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+        self.k32.FlushFileBuffers.argtypes = [wintypes.HANDLE]
+        self.k32.CloseHandle.argtypes = [wintypes.HANDLE]
+        self.ctypes, self.wintypes = ctypes, wintypes
+        letter = str(drive)[0]
+        self.h = self.k32.CreateFileW(f"\\\\.\\{letter}:", self.GENERIC_READ | self.GENERIC_WRITE,
+                                      self.FILE_SHARE_READ | self.FILE_SHARE_WRITE, None,
+                                      self.OPEN_EXISTING, 0, None)
+        if self.h in (None, wintypes.HANDLE(-1).value):
+            raise WatchError(f"can't open the watch's drive {letter}: to close it "
+                             f"(error {ctypes.get_last_error()})")
+        self.k32.FlushFileBuffers(self.h)
+        # The lock is refused while another program has a file on the drive open.
+        end = time.monotonic() + 10
+        while not self._ioctl(self.FSCTL_LOCK_VOLUME):
+            if time.monotonic() > end:
+                err = ctypes.get_last_error()
+                self.release()
+                raise WatchError(f"a program has files open on the watch's drive {letter}: (error "
+                                 f"{err}); close them, then run again. The drive is still open.")
+            time.sleep(0.5)
+        if not self._ioctl(self.FSCTL_DISMOUNT_VOLUME):
+            err = ctypes.get_last_error()
+            self.release()
+            raise WatchError(f"can't dismount the watch's drive {letter}: (error {err}); "
+                             "the drive is still open")
+
+    def _ioctl(self, code):
+        n = self.wintypes.DWORD(0)
+        return bool(self.k32.DeviceIoControl(self.h, code, None, 0, None, 0,
+                                             self.ctypes.byref(n), None))
+
+    def release(self):
+        if self.h is not None:
+            self.k32.CloseHandle(self.h)
+            self.h = None
+
+
+def let_go_of_drive(drive):
+    """Make the computer finish with the watch's drive before the watch takes it back: every
+    cached write written out, the volume dismounted. Returns something to release() once the
+    watch has the drive. Handing the drive back without this can leave writes the watch never
+    gets, and damage its filesystem."""
     if platform.system() == "Windows":
-        subprocess.run(["powershell", "-NoProfile", "-Command", f"Write-VolumeCache {str(drive)[0]}"],
-                       capture_output=True)
+        return _WindowsVolume(drive)
+    subprocess.run(["sync"])
+    if platform.system() == "Darwin":
+        cmd = ["diskutil", "unmount", str(drive)]
     else:
-        subprocess.run(["sync"])
+        cmd = ["umount", str(drive)]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise WatchError(f"can't unmount the watch's drive {drive}: {r.stderr.strip()}; close "
+                         "anything using it and run again. The drive is still open.")
+    return None
 
 
 def folder_name_ok(name):
@@ -735,15 +803,20 @@ def open_drive(watch, drive_arg=None):
 
 
 def close_drive(watch, drive):
-    """Flush and close the USB drive. If the watch can't be reached, say how to close it."""
-    if drive is not None:
-        flush_drive(drive)
-    watch.plain("usb drive off", 0.5)
+    """Give the USB drive back to the watch: the computer lets go of it first (all writes out,
+    the volume dismounted), then 'usb drive off'. If the computer can't let go, the drive is
+    left open rather than taken back from under it."""
+    held = let_go_of_drive(drive) if drive is not None else None
     try:
-        watch.reopen()
-    except WatchError as e:
-        raise WatchError(f"{e}; the watch's USB drive may still be open: unplug the watch, or "
-                         "send 'usb drive off' on its serial console")
+        watch.plain("usb drive off", 0.5)
+        try:
+            watch.reopen()
+        except WatchError as e:
+            raise WatchError(f"{e}; the watch's USB drive may still be open: unplug the watch, "
+                             "or send 'usb drive off' on its serial console")
+    finally:
+        if held is not None:
+            held.release()
 
 
 # --- scripts -------------------------------------------------------------------
