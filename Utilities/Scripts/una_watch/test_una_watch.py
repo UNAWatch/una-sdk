@@ -76,6 +76,15 @@ class FakeClock:
         pass
 
 
+def crc_of_file(on_watch):
+    """A 'dev crc' reply for a file on the watch holding these bytes."""
+    def reply(line):
+        parts = line.split()
+        n = int(parts[3]) if len(parts) == 4 else len(on_watch)
+        return b"#OK %d %08X\n" % (len(on_watch), zlib.crc32(on_watch[:n]))
+    return reply
+
+
 def watch_with(replies, sink=None):
     w = uw.Watch(log_sink=sink)
     w.ser = FakePort(replies)
@@ -169,8 +178,57 @@ def main():
         expect(raises(lambda: uw.update_kernel(w, tmp / "k.ota"), uw.WatchError) and
                not any(s.startswith("usb") for s in w.ser.sent),
                "update-kernel refuses firmware without 'dev update', touching nothing")
-        expect(raises(lambda: uw.update_kernel(w, tmp / "track.csv"), uw.WatchError),
-               "update-kernel takes only an .ota")
+        w = watch_with([("dev", b"developer mode: on\n#OK 3 on 1.8.0\n")])
+        w.require_developer_mode()
+        try:
+            uw.update_kernel(w, tmp / "track.csv")
+            err = ""
+        except uw.WatchError as e:
+            err = str(e)
+        expect("not an .ota file" in err and not any(s.startswith("usb") for s in w.ser.sent),
+               "update-kernel takes only an .ota, even on a watch that has 'dev update'")
+
+        # The watch refuses the kernel: its reason is reported, and nothing waits for a restart.
+        drive = tmp / "drive"
+        drive.mkdir()
+        saved = uw.open_drive, uw.close_drive, uw.Watch.count_ports
+        uw.open_drive = lambda watch, drive_arg=None: drive
+        uw.close_drive = lambda watch, d: None
+        uw.Watch.count_ports = staticmethod(lambda: 1)
+        try:
+            w = watch_with([("dev crc", crc_of_file(b"kernel")),
+                            ("dev update", b"#ERR not a kernel for this watch\n"),
+                            ("dev", b"developer mode: on\n#OK 3 on 1.8.0\n")])
+            w.require_developer_mode()
+            w.reopen = lambda *a, **k: failures.append("update-kernel waited for a restart")
+            try:
+                uw.update_kernel(w, tmp / "k.ota")
+                err = ""
+            except uw.WatchError as e:
+                err = str(e)
+            expect("not a kernel for this watch" in err and (drive / "Update" / "k.ota").is_file(),
+                   "a kernel the watch refuses ends update-kernel with the watch's reason")
+        finally:
+            uw.open_drive, uw.close_drive, uw.Watch.count_ports = saved
+
+        # Giving the drive back fails: the computer's hold on the volume is still let go.
+        class Held:
+            released = False
+
+            def release(self):
+                Held.released = True
+        saved = uw.let_go_of_drive
+        uw.let_go_of_drive = lambda d: Held()
+        try:
+            w = watch_with([("usb", b"#OK\n")])
+
+            def lost(*a, **k):
+                raise uw.WatchError("lost the watch")
+            w.reopen = lost
+            expect(raises(lambda: uw.close_drive(w, drive), uw.WatchError) and Held.released,
+                   "the volume is released even when the watch does not come back")
+        finally:
+            uw.let_go_of_drive = saved
 
         frame = bytes(range(256)) * 225          # 57600 bytes, includes 0x1E and 0x1F
         w = watch_with([("dev screen", b"#DATA 57600 240 240 abgr2222 %08X\n" % zlib.crc32(frame)
@@ -199,12 +257,7 @@ def main():
         expect(uw.app_folder(apps, uapp) == "ED66C90184FF55A0", "an update finds its folder by app ID")
         expect(uw.app_folder(apps, struct.pack("<Q", 1) + b"x" * 8) is None, "a new app has no folder")
 
-        def crc_of(on_watch):
-            def reply(line):
-                parts = line.split()
-                n = int(parts[3]) if len(parts) == 4 else len(on_watch)
-                return b"#OK %d %08X\n" % (len(on_watch), zlib.crc32(on_watch[:n]))
-            return reply
+        crc_of = crc_of_file
         w = watch_with([("dev crc", crc_of(uapp))])
         expect(w.file_matches("/Apps/x/x.uapp", uapp)[0], "the copy on the watch matches")
         other = body[:-1] + b"X" + struct.pack("<I", zlib.crc32(body[:-1] + b"X"))
@@ -250,6 +303,12 @@ def main():
                                   [("dev button", b"#OK\n")])
         expect([s for _, s in timed] == ["dev button R1 press", "dev button R1 release"],
                "a hold or click of a button already down does nothing, as in the simulators")
+
+        runner, timed = timed_run("0 press R1\n+0 hold R2 100\n+200 log done\n",
+                                  [("dev button", b"#OK\n")])
+        expect([s for _, s in timed] == ["dev button R1 press", "dev button R2 press",
+                                         "dev button R2 release", "dev button R1 release"],
+               "the end of a run releases a button left pressed, once, after the holds")
 
         fails = {"n": 0}
 

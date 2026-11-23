@@ -339,13 +339,7 @@ class Watch:
         elif drive is None:
             raise WatchError("the USB drive is open but can't be identified among several "
                              "watches: close it with 'usb drive off' or unplug")
-        held = let_go_of_drive(drive) if drive is not None else None
-        try:
-            self.plain("usb drive off", 0.5)
-            self.reopen()
-        finally:
-            if held is not None:
-                held.release()
+        close_drive(self, drive)
         return True
 
     def show_home(self):
@@ -1176,9 +1170,18 @@ class Runner:
                 while self.releases:
                     self.wait_until(max(r[0] for r in self.releases))
         finally:
-            # 'exit' or the end of the run lets go of anything still held.
+            # 'exit' or the end of the run lets go of anything still held: holds first, then
+            # buttons a 'press' left down, which have no release due.
             if self.releases:
                 self.release_due(time.monotonic(), everything=True)
+            for button in sorted(self.down):
+                try:
+                    self.w.button(button, "release")
+                    self.down.discard(button)
+                    self.note(f"{time.monotonic() - t0:8.3f}s {button} released (end of run)")
+                except WatchError as e:
+                    self.failed = True
+                    self.note(f"releasing {button} failed: {e}")
 
 
 # --- command line ----------------------------------------------------------------
