@@ -37,6 +37,9 @@ jobs:
       - name: Agent skills install script
         run: python3 Utilities/Scripts/agent_skills/test_install_agent_skills.py
 
+      - name: Watch automation tool
+        run: python3 Utilities/Scripts/una_watch/test_una_watch.py
+
       - name: Guard the ABI -> minKernelVersion mapping
         # (a) run the resolver self-tests; (b) fail if KERNEL_INTERFACE_VERSION was bumped
         #     without an abi_kernel_map.json entry (also validates map format + monotonicity);

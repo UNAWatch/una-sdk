@@ -16,7 +16,7 @@ start a stage:
 | Unit-test the app's logic on the PC | [`una-unit-test`](skills/una-unit-test/SKILL.md) |
 | Run the app in the desktop simulator, scripted and headless | [`una-simulator`](skills/una-simulator/SKILL.md) |
 | Build the `.uapp` for the watch | [`una-build-uapp`](skills/una-build-uapp/SKILL.md) |
-| Install it on a watch and check it there | [`una-test-on-watch`](skills/una-test-on-watch/SKILL.md) |
+| Install it on a watch and check it there, unattended with Developer on | [`una-test-on-watch`](skills/una-test-on-watch/SKILL.md) |
 | Prepare a release for the app store | [`una-store-submit`](skills/una-store-submit/SKILL.md) |
 
 To use the skills in your own app's repository, or with an agent that doesn't read this file,

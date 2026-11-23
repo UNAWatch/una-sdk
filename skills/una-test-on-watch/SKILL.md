@@ -1,15 +1,47 @@
 ---
 name: una-test-on-watch
-description: Install a UNA Watch app (.uapp) on a real watch over USB, collect the watch's log files, and run through the checks only a watch can answer. Use when installing or updating an app on a UNA Watch, when an installed app doesn't appear or closes, or when reading logs or crash dumps from the watch.
+description: Install a UNA Watch app (.uapp) on a real watch over USB, drive it unattended (buttons, screenshots, injected sensor values, simulator scripts, live log) when the watch has Developer on, collect logs and crash dumps, and run through the checks only a watch can answer. Use when installing, updating or testing an app on a UNA Watch, when an installed app doesn't appear or closes, or when reading logs or crash dumps from the watch.
 ---
 
 # Test a UNA Watch app on the watch
 
-The user has to do the physical steps: plug in, eject, restart, press buttons, wear it. You
-prepare the files, tell them exactly what to do, verify what you can and read the logs. Say
-clearly which steps are theirs.
+With **Developer** on, you install, drive and check the app yourself over USB (next section).
+Without it, the user does the physical steps: plug in, eject, restart, press buttons. You prepare
+the files, tell them exactly what to do, verify what you can and read the logs. Either way, some
+checks need a person (wearing it, outdoors, feel and sound): say clearly which steps are theirs.
 
-## Install
+## Unattended, with Developer on
+
+The user does two things once: switches **Developer** on in the watch's Settings > Device, and
+connects the watch by USB. Ask them to. Then `Utilities/Scripts/una_watch/una_watch.py` in the
+SDK does the rest (needs `pip install pyserial`); `Docs/watch-automation.md` has the details.
+
+```bash
+una_watch() { python3 "$UNA_SDK/Utilities/Scripts/una_watch/una_watch.py" "$@"; }
+una_watch info                                # connection, Developer, installed apps
+una_watch install Output/MyApp_1.2.0.uapp     # copy, check on the watch, restart
+una_watch run run.txt --launch MyApp --out run-out
+```
+
+- **Installing** replaces the app's `.uapp` in its folder, and leaves its `settings.json`,
+  `Activity/` and other files alone. Installing on the user's watch is still their call: ask
+  first.
+- **Scripts** are the simulator's (skill `una-simulator`): the same file runs on the watch.
+  `--launch` starts the app; the script's time 0 follows. Screenshots and `watch.log` (the
+  watch's log for the run) land in `--out`. Look at the screenshots: they are the check that
+  each screen looks right on the panel.
+- **One-off steps:** `screenshot FILE.png`, `button R1 click`, `launch MyApp`, `stop MyApp`,
+  `log --seconds 30`.
+- **Injected sensor values** stand in for the real sensor for every listener, the watch's own
+  daily records included, until the run ends. Use them to reach screens a desk can't (a GPS fix,
+  a heart rate), and still check real sensors on the wrist.
+- **Exit code 5** means no usable watch. The message says whether it is not connected, has
+  firmware without Developer (use the steps below), or has Developer off.
+
+Then go through [Checks only a watch can answer](#checks-only-a-watch-can-answer) with the user
+for the items a script can't judge.
+
+## Install by hand
 
 1. **Build** the `.uapp` (skill `una-build-uapp`).
 2. **Connect.** The user connects the watch by USB. It mounts as a USB drive (volume label
@@ -17,7 +49,9 @@ clearly which steps are theirs.
    seconds. Find the drive by its label, or ask the user which drive it is. Don't assume a drive
    letter or mount point.
 3. **Copy into the app's folder.** The `.uapp` goes in `Apps/<AppName>/` on the drive. Create the
-   folder for a new app. Folder name and file name are free, but use the app's name.
+   folder for a new app. Folder name and file name are free, but use the app's name. An update
+   goes in the folder that already holds the app: one installed by the phone app is in
+   `Apps/<its app ID>/`.
    - The watch loads the first `.uapp` it finds in each folder, so a folder must hold exactly one.
      When updating, copy the new `.uapp` in first. If it has the same file name as the old one
      (untagged builds are all `<Name>_0.0.0-dev.uapp`), the copy overwrites it and nothing is
@@ -92,7 +126,10 @@ The same log is also sent out of the watch's debug UART, which needs a debug ada
 
 ## Checks only a watch can answer
 
-Walk the user through these. Report each answer: they are the gaps the simulator can't cover.
+Report each answer: they are the gaps the simulator can't cover. With Developer on, a script's
+screenshots answer the first three groups (what is on screen); timing, sensors, lifecycle and
+battery still need the user to watch or wear it. Without Developer, walk the user through all of
+them.
 
 - **It appears and opens:**
   - the app is in the list with the right name and icon;
@@ -124,7 +161,11 @@ Walk the user through these. Report each answer: they are the gaps the simulator
   - the `.uapp` is damaged (verify the hash);
   - it isn't in its own folder under `Apps/`;
   - another `.uapp` in the same folder was loaded instead.
-- **App appears but closes at once:** collect logs (above) and crash dumps from `Crash/`.
+- **App appears but closes at once:** with Developer on, start `una_watch.py log` before
+  launching the app, then reproduce it; otherwise collect the log files (above). Then read the
+  crash dumps in `Crash/`.
+- **A script's screenshots show the charging screen:** the app wasn't started with `--launch`,
+  or `launch`, which close the USB drive and dismiss that screen first.
 - **The phone app won't install a store app on this watch:** the watch's firmware may be older
   than the app's `minKernelVersion` (skill `una-store-submit`). The user updates the watch's
   firmware.
