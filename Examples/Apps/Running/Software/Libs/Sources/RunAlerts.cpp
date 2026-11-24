@@ -144,8 +144,15 @@ void Monitor::Gate::tick(Zone zone, bool reading, Kind above, Kind below, bool b
     }
 }
 
-Kind Monitor::Gate::takePending()
+Kind Monitor::Gate::takePending(Zone zone)
 {
+    const Zone shows = (mPending == Kind::PaceFast || mPending == Kind::HrHigh) ? Zone::Above
+                     : (mPending == Kind::PaceSlow || mPending == Kind::HrLow)  ? Zone::Below
+                     : mPending == Kind::BackIn                                 ? Zone::In
+                                                                                : Zone::Unknown;
+    if (mPending == Kind::None || zone != shows) {
+        return Kind::None;
+    }
     const Kind kind = mPending;
     mPending = Kind::None;
     return kind;
@@ -214,37 +221,40 @@ void Monitor::resume()
 
 Alert Monitor::tick(const Input& in, bool quiet)
 {
+    Zone paceZone = Zone::Unknown;
     if (mPaceOn) {
         const uint32_t stepCm = in.distanceCm > mPaceStartCm ? in.distanceCm - mPaceStartCm : 0u;
         mSpeedGauge.tick(in.speedMps, in.speedValid, stepCm);
-        mPaceGate.tick(mSpeedGauge.zone(), in.speedValid, Kind::PaceFast, Kind::PaceSlow, mBackInTap);
+        paceZone = mSpeedGauge.zone();
+        mPaceGate.tick(paceZone, in.speedValid, Kind::PaceFast, Kind::PaceSlow, mBackInTap);
     }
 
+    Zone hrZone = Zone::Unknown;
     if (mHrOn) {
         mHrGauge.tick(in.hrBpm, in.hrValid);
-        Zone zone = mHrGauge.zone();
-        if (zone == Zone::In || zone == Zone::Above) {
+        hrZone = mHrGauge.zone();
+        if (hrZone == Zone::In || hrZone == Zone::Above) {
             mLowArmed = true;
-        } else if (zone == Zone::Below && !mLowArmed) {
-            zone = Zone::Unknown;
+        } else if (hrZone == Zone::Below && !mLowArmed) {
+            hrZone = Zone::Unknown;
         }
-        mHrGate.tick(zone, in.hrValid, Kind::HrHigh, Kind::HrLow, mBackInTap);
+        mHrGate.tick(hrZone, in.hrValid, Kind::HrHigh, Kind::HrLow, mBackInTap);
     }
 
     Alert alert;
     if (quiet) {
         return alert;
     }
-    // One at a time, pace first: the other plays once this one has. A
-    // channel without a reading keeps its alert until the reading is back,
-    // when the gate decides again whether it still applies; the gauge's
-    // value would be the last one heard, not the runner's.
-    alert.kind = in.speedValid ? mPaceGate.takePending() : Kind::None;
+    // One at a time, pace first: the other plays once this one has. An alert
+    // plays only while its gauge still shows it: through a lost reading, and
+    // the gauge settling once the reading is back, it waits, so the value it
+    // carries is the runner's now, not the last one heard.
+    alert.kind = mPaceGate.takePending(paceZone);
     if (alert.kind != Kind::None) {
         alert.value = alert.kind == Kind::BackIn ? 0.0f : paceValue();
         return alert;
     }
-    alert.kind = in.hrValid ? mHrGate.takePending() : Kind::None;
+    alert.kind = mHrGate.takePending(hrZone);
     if (alert.kind != Kind::None && alert.kind != Kind::BackIn) {
         alert.value = mHrGauge.valueBpm();
     }
