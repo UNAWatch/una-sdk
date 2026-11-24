@@ -27,6 +27,10 @@ TrackViewBase::TrackViewBase()
     trackFaceLap.setVisible(false);
     add(trackFaceLap);
 
+    trackFacePace.setXY(0, 0);
+    trackFacePace.setVisible(false);
+    add(trackFacePace);
+
     trackFaceTotal.setXY(0, 0);
     add(trackFaceTotal);
 
@@ -46,6 +50,7 @@ void TrackViewBase::setupScreen()
     buttons.initialize();
     trackFaceStatus.initialize();
     trackFaceLap.initialize();
+    trackFacePace.initialize();
     trackFaceTotal.initialize();
     trackFaceIntervals.initialize();
     transitionBegins();

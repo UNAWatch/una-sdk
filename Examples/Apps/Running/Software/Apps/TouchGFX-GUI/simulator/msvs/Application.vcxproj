@@ -237,6 +237,8 @@
     <ClCompile Include="..\..\gui\src\containers\WorkoutFaceStep.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\WorkoutStepCard.cpp"/>
     <ClCompile Include="..\..\gui\src\common\WorkoutUi.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\TrackFacePace.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\containers\TrackFacePaceBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -614,6 +616,8 @@
     <ClInclude Include="..\..\gui\include\gui\containers\WorkoutLabel.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\WorkoutStepCard.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\common\WorkoutUi.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\TrackFacePace.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TrackFacePaceBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

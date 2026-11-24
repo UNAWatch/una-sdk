@@ -66,6 +66,7 @@ void TrackScreen::build()
 
     buildFaceStatus();
     buildFaceLap();
+    buildFacePace();
     buildFaceTotal();
     buildFaceIntervals();
 
@@ -120,6 +121,28 @@ void TrackScreen::buildFaceLap()
     Theme::label(f, F::Italic18, "Lap Time", 75, 204, 91);
 }
 
+void TrackScreen::buildFacePace()
+{
+    lv_obj_t* f = mFacePace = Theme::container(mRoot, 0, 0, 240, 240);
+    // Top: the totals face's distance row (same x, widths and fonts), raised
+    // into the top slot under the caption, at the totals face's top caption
+    // and value y. "99.99 km" stays at least 11 px inside the round display.
+    Theme::label(f, F::Italic18, "Distance", 0, 10, 240);
+    mPfDistanceValue = Theme::label(f, F::SemiBold35, Strings::kNoValue, 53, 30, 134);
+    mPfDistanceUnits = Theme::label(f, F::Regular18, Strings::kKm, 178, 48, 45, LV_TEXT_ALIGN_LEFT);
+    Theme::hline(f, 35, 79, 170);
+    // Middle: the lap face's two-column row.
+    Theme::label(f, F::Italic18, "Avg Lap", 20, 88, 88);
+    mPfAvgLapValue = Theme::label(f, F::SemiBold35, Strings::kNoValue, 9, 111, 118);
+    Theme::vline(f, 119, 79, 80);
+    Theme::label(f, F::Italic18, "Avg Pace", 132, 88, 88);
+    mPfAvgPaceValue = Theme::label(f, F::SemiBold35, Strings::kNoValue, 114, 111, 118);
+    Theme::hline(f, 35, 159, 170);
+    // Bottom: the totals face's timer.
+    mPfTimerValue = Theme::label(f, F::SemiBold35, "0:00:00", 35, 162, 170);
+    Theme::label(f, F::Italic18, "Timer", 0, 204, 240);
+}
+
 void TrackScreen::buildFaceStatus()
 {
     lv_obj_t* f = mFaceStatus = Theme::container(mRoot, 0, 0, 240, 240);
@@ -138,12 +161,15 @@ const uint16_t* TrackScreen::faces(uint16_t& count) const
 {
     static const uint16_t kWorkout[] = {
         FaceId::ID_WORKOUT_GAUGE, FaceId::ID_WORKOUT_STEP, FaceId::ID_WORKOUT_NEXT,
-        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
     };
     static const uint16_t kIntervals[] = {
-        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE,
+        FaceId::ID_TRACK3,
     };
-    static const uint16_t kFree[] = { FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3 };
+    static const uint16_t kFree[] = {
+        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
+    };
 
     switch (mMode) {
         case Mode::Workout:
@@ -249,6 +275,7 @@ void TrackScreen::showFace(uint16_t id)
     setHidden(mFaceIntervals,         id != FaceId::ID_INTERVALS);
     setHidden(mFaceTotal,             id != FaceId::ID_TRACK1);
     setHidden(mFaceLap,               id != FaceId::ID_TRACK2);
+    setHidden(mFacePace,              id != FaceId::ID_TRACK_PACE);
     setHidden(mFaceStatus,            id != FaceId::ID_TRACK3);
     setHidden(mWorkoutGauge->root(),  id != FaceId::ID_WORKOUT_GAUGE);
     setHidden(mWorkoutStep->root(),   id != FaceId::ID_WORKOUT_STEP);
@@ -326,6 +353,17 @@ void TrackScreen::onTrackData(const Track::Data& data)
     Fmt::heartRate(buf, sizeof(buf), data.hr);
     lv_label_set_text(mHrValue, buf);
     mHrZone->setHR(data.hr < App::Display::kMinHR ? 0.0f : data.hr, mHrThresholds, mHrThresholdCount);
+
+    // Pace face: this lap's average pace beside the whole run's
+    Fmt::distanceTotal(buf, sizeof(buf), Fmt::distUnits(data.distance, mIsImperial));
+    lv_label_set_text(mPfDistanceValue, buf);
+    lv_label_set_text(mPfDistanceUnits, Fmt::units(mIsImperial));
+    Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(data.lapPace, mIsImperial));
+    lv_label_set_text(mPfAvgLapValue, buf);
+    Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(data.avgPace, mIsImperial));
+    lv_label_set_text(mPfAvgPaceValue, buf);
+    Fmt::hms(buf, sizeof(buf), data.totalTime);
+    lv_label_set_text(mPfTimerValue, buf);
 
     // Workout faces: the live pace under a step with no target, the lap
     // averages on the step face.

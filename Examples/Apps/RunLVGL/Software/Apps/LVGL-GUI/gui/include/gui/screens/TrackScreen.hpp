@@ -1,9 +1,9 @@
 /**
  ******************************************************************************
  * @file    TrackScreen.hpp
- * @brief   The live activity screen: the totals, lap and status faces, after
- *          the three workout faces in a structured workout or the intervals
- *          face in Intervals. L1/L2 page faces, R1 opens the action menu, R2
+ * @brief   The live activity screen: the totals, lap, pace and status faces,
+ *          after the three workout faces in a structured workout or the
+ *          intervals face in Intervals. L1/L2 page faces, R1 opens the action menu, R2
  *          marks a lap (or moves to the next step or interval phase).
  *
  * Port of the Run app's TrackView/TrackPresenter and its TrackFace* containers.
@@ -54,6 +54,7 @@ private:
     void buildFaceIntervals();
     void buildFaceTotal();
     void buildFaceLap();
+    void buildFacePace();
     void buildFaceStatus();
     void updateMode(const Track::Data& data);
     /// The faces of the current mode, in L2 order.
@@ -72,6 +73,7 @@ private:
     lv_obj_t* mFaceIntervals = nullptr;
     lv_obj_t* mFaceTotal     = nullptr;
     lv_obj_t* mFaceLap       = nullptr;
+    lv_obj_t* mFacePace      = nullptr;
     lv_obj_t* mFaceStatus    = nullptr;
 
     // Intervals face
@@ -96,6 +98,13 @@ private:
     lv_obj_t* mLapDistValue  = nullptr;
     lv_obj_t* mLapTimerValue = nullptr;
     std::unique_ptr<Widgets::HeartRateZone> mHrZone;
+
+    // Pace face: total distance; this lap's and the whole run's average pace; timer
+    lv_obj_t* mPfDistanceValue = nullptr;
+    lv_obj_t* mPfDistanceUnits = nullptr;
+    lv_obj_t* mPfAvgLapValue   = nullptr;
+    lv_obj_t* mPfAvgPaceValue  = nullptr;
+    lv_obj_t* mPfTimerValue    = nullptr;
 
     // Status face
     lv_obj_t* mDayTime  = nullptr;
