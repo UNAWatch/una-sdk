@@ -4,6 +4,7 @@
 No watch and no pyserial needed: the console is a fake that answers like the watch. Covers
 the script parser, replay interpolation, PNG output, log frames, command replies, screenshots,
 the .uapp check and finding an app's folder."""
+import os
 import shlex
 import struct
 import sys
@@ -436,6 +437,32 @@ def main():
         expect([p.name for p in uw.uapp_files(mixed)] == ["Demo.UAPP"]
                and uw.uapp_files(tmp / "absent") == [],
                "app files are found whatever the case of their extension")
+
+        notes = tmp / "notes.txt"
+        notes.write_bytes(uapp)
+        expect(raises(lambda: uw.install(watch_with([]), notes, "New", str(tmp)), uw.WatchError),
+               "install takes only a .uapp")
+
+        # Linux: the watch's volume is found by its label wherever it is mounted. A plain file
+        # stands in for the by-label link, which resolves to the device.
+        # (A label with a space is written UNA\x20WATCH there, a name Windows can't hold, so
+        # that case runs elsewhere only.)
+        by_label = tmp / "by-label"
+        by_label.mkdir()
+        labels = ["WATCH"] + (["UNA WATCH"] if os.name != "nt" else [])
+        mounts = tmp / "mounts"
+        for label in labels:
+            device = by_label / label.replace(" ", "\\x20")
+            device.write_bytes(b"")
+            mounts.write_text(f"proc /proc proc rw 0 0\n{device} /mnt/my\\040watch vfat rw 0 0\n")
+            expect(uw.linux_mount_of_label(label, str(by_label), str(mounts))
+                   == Path("/mnt/my watch"),
+                   f"a mount of the volume labelled '{label}' is found wherever it is")
+        mounts.write_text("proc /proc proc rw 0 0\n")
+        expect(uw.linux_mount_of_label("WATCH", str(by_label), str(mounts)) is None,
+               "a labelled volume that isn't mounted is not found")
+        expect(uw.linux_mount_of_label("WATCH", str(tmp / "none"), str(mounts)) is None,
+               "nor one with no label link")
 
         # An explicit --drive is used only once something is mounted there.
         closed = []

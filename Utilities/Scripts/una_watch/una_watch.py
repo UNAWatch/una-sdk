@@ -475,10 +475,34 @@ def find_drive(label="UNA WATCH"):
                 if (Path(root) / "Apps").is_dir():
                     unlabelled.append(Path(root))
         return unlabelled[0] if len(unlabelled) == 1 else None
+    if platform.system() == "Linux":
+        mounted = linux_mount_of_label(label)
+        if mounted is not None:
+            return mounted
     user = os.environ.get("USER", "")
     for base in (f"/Volumes/{label}", f"/media/{user}/{label}", f"/run/media/{user}/{label}"):
         if Path(base).is_dir():
             return Path(base)
+    return None
+
+
+def linux_mount_of_label(label, by_label="/dev/disk/by-label", mounts="/proc/mounts"):
+    """Where Linux has the volume with this label mounted, wherever that is (a mount point of
+    the user's own included), or None. The device comes from /dev/disk/by-label, where a space
+    is written \\x20; /proc/mounts writes one in a mount point as \\040."""
+    link = Path(by_label) / label.replace(" ", "\\x20")
+    try:
+        if not link.exists():
+            return None
+        device = os.path.realpath(link)
+        with open(mounts, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                fields = line.split()
+                if len(fields) >= 2 and os.path.realpath(fields[0]) == device:
+                    return Path(re.sub(r"\\([0-7]{3})", lambda m: chr(int(m.group(1), 8)),
+                                       fields[1]))
+    except OSError:
+        return None
     return None
 
 
@@ -598,6 +622,10 @@ def install(watch, uapp, folder=None, drive_arg=None, attempts=3):
     An update goes into the folder that already holds the app, whatever its files are called;
     a new app gets Apps/<name>/."""
     uapp = Path(uapp)
+    if uapp.suffix.lower() != ".uapp":
+        # The watch loads only .uapp files, and a file of another kind's name in the folder
+        # would be replaced without a backup.
+        raise WatchError(f"{uapp} is not a .uapp file")
     data = uapp.read_bytes()
     if len(data) < 12:
         raise WatchError(f"{uapp} is too short to be a .uapp")
