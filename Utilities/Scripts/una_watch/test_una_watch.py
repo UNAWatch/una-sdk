@@ -187,9 +187,9 @@ def main():
         m = w.mem()
         expect(m["sys_heap"]["free"] == 500000 and m["os_heap"]["min_ever"] == 15000
                and m["isr_stack"]["used"] == 664, "dev mem figures are read")
-        expect([t["name"] for t in m["tasks"]] == ["Sensor.Mgr", "App Run GUI"]
-               and m["tasks"][1]["stack_free_min"] == 96 and m["tasks"][1]["state"] == "R",
-               "task lines are read, names with spaces included")
+        expect([t["name"] for t in m["tasks"]] == ["App Run GUI", "Sensor.Mgr"]
+               and m["tasks"][0]["stack_free_min"] == 96 and m["tasks"][0]["state"] == "R",
+               "task lines are read, names with spaces included, the least stack free first")
         expect("App Run GUI" in uw.format_mem(m).splitlines()[5], "the report lists the tightest stack first")
         w.protocol = 3
         expect(raises(w.mem, uw.WatchError), "dev mem needs protocol 4")

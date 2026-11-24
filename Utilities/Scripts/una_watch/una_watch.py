@@ -418,8 +418,8 @@ class Watch:
 
     def mem(self):
         """The watch's memory figures ('dev mem', protocol 4): a dict with sys_heap,
-        sys_heap_detail, os_heap and isr_stack ({key: bytes}), and tasks (a list of
-        {name, stack_free_min, priority, state})."""
+        sys_heap_detail, os_heap and isr_stack ({key: value}), and tasks (a list of
+        {name, stack_free_min, priority, state}, the least stack free first)."""
         if self.protocol < 4:
             raise WatchError("this watch's firmware has no 'dev mem' (protocol 4)")
         _, lines = self.cmd("dev mem")
@@ -435,6 +435,7 @@ class Watch:
                 out["tasks"].append(task)
             elif rest:
                 out[what] = {k: int(v) for k, v in (kv.split("=", 1) for kv in rest.split())}
+        out["tasks"].sort(key=lambda t: t["stack_free_min"])
         return out
 
     def file_matches(self, watch_path, data):
@@ -474,7 +475,7 @@ def format_mem(m):
         lines.append(f"ISR stack     {i['used']} of {i['usable']} bytes used at most")
     if m.get("tasks"):
         lines.append("tasks (least stack free):")
-        for t in sorted(m["tasks"], key=lambda t: t["stack_free_min"]):
+        for t in m["tasks"]:
             lines.append(f"  {t['stack_free_min']:>7} B  prio {t['priority']:>2}  {t['state']}  {t['name']}")
     return "\n".join(lines)
 

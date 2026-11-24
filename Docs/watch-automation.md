@@ -45,7 +45,7 @@ python3 Utilities/Scripts/una_watch/una_watch.py info
 | `screenshot FILE.png` | Save the display. |
 | `button B ACTION [MS]` | `B` is `L1`, `L2`, `R1` or `R2`; `ACTION` is `click`, `press`, `release` or `hold MS`. |
 | `log [--seconds N]` | Print the watch's log as it is written. |
-| `mem [--json]` | The watch's memory: system and RTOS heap (free, least free, most used, fragmentation), the interrupt stack, and the least stack each task has had free. `--json` gives the figures with the firmware version, for tracking them over time. |
+| `mem [--json]` | The watch's memory: system and RTOS heap (free, least free, most used, fragmentation), the interrupt stack, and the least stack each task has had free. `--json` gives the figures with the firmware version, for tracking them over time. Needs firmware with `dev mem` (protocol 4); an older watch's refusal says so. |
 | `run SCRIPT` | Run a simulator script on the watch (below). |
 
 The exit code is 0 on success, 1 when the command failed (the message says why), and 5 when there
@@ -137,7 +137,7 @@ in LF). Other tools can use it directly. Each command ends with a line `#OK ...`
 | Command | Reply |
 |---|---|
 | `dev` | `#OK <protocol> on\|off <firmware>`: the protocol version (4), Developer, and the firmware version. |
-| `dev mem` | Lines of `<what> key=value ...`, all in bytes: `sys_heap` (free, total, min_ever, peak_used), `sys_heap_detail` (sbrk_headroom, fordblks, ordblks, uordblks, keepcost, images), `os_heap` (free, total, min_ever), `isr_stack` (used, usable), and one `task` line per task (stack_free_min, priority, state, then name, which may hold spaces). Then `#OK`. |
+| `dev mem` | Lines of `<what> key=value ...`: `sys_heap` (free, total, min_ever, peak_used), `sys_heap_detail` (sbrk_headroom, fordblks, ordblks, uordblks, keepcost, images), `os_heap` (free, total, min_ever), `isr_stack` (used, usable), and one `task` line per task (stack_free_min, priority, state, then name, which may hold spaces). Sizes are in bytes; `ordblks` is a count of free blocks, `priority` a number, `state` one letter (`R` running, `r` ready, `B` blocked, `S` suspended, `D` deleted). Then `#OK`. |
 | `dev button L1\|L2\|R1\|R2 click\|press\|release\|hold <ms>` | `#OK` once done. |
 | `dev screen` | `#DATA <bytes> <width> <height> abgr2222 <crc32>`, the pixels, then `#OK`. One byte per pixel: bits 5-4 blue, 3-2 green, 1-0 red. |
 | `dev apps` | One line per app, tab-separated: service PID, type, app ID, `.uapp` path, name. Then `#OK`. |
