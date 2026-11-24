@@ -211,7 +211,8 @@ public:
     void resume();
 
     /// One active second. @p quiet: something else is sounding, so an alert
-    /// due now waits. Returns the alert to play now, if any; pace before HR.
+    /// due now waits; so does one whose channel has no reading this second.
+    /// Returns the alert to play now, if any; pace before HR.
     Alert tick(const Input& in, bool quiet);
 
     bool paceOn() const { return mPaceOn; }

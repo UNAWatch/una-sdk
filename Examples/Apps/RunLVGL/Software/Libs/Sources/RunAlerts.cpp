@@ -235,13 +235,16 @@ Alert Monitor::tick(const Input& in, bool quiet)
     if (quiet) {
         return alert;
     }
-    // One at a time, pace first: the other plays once this one has.
-    alert.kind = mPaceGate.takePending();
+    // One at a time, pace first: the other plays once this one has. A
+    // channel without a reading keeps its alert until the reading is back,
+    // when the gate decides again whether it still applies; the gauge's
+    // value would be the last one heard, not the runner's.
+    alert.kind = in.speedValid ? mPaceGate.takePending() : Kind::None;
     if (alert.kind != Kind::None) {
         alert.value = alert.kind == Kind::BackIn ? 0.0f : paceValue();
         return alert;
     }
-    alert.kind = mHrGate.takePending();
+    alert.kind = in.hrValid ? mHrGate.takePending() : Kind::None;
     if (alert.kind != Kind::None && alert.kind != Kind::BackIn) {
         alert.value = mHrGauge.valueBpm();
     }
