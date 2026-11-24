@@ -457,11 +457,12 @@ def main():
             device.write_bytes(b"")
             # Written as /proc/mounts writes it: a space in the device path too is \040.
             source = str(device).replace(" ", "\\040")
-            mounts.write_text(f"proc /proc proc rw 0 0\n{source} /mnt/my\\040watch vfat rw 0 0\n")
+            mounts.write_text(f"proc /proc proc rw 0 0\n{source} /mnt/my\\040watch vfat rw 0 0\n",
+                              encoding="utf-8")       # as the code reads /proc/mounts
             expect(uw.linux_mount_of_label(label, str(by_label), str(mounts))
                    == Path("/mnt/my watch"),
                    f"a mount of the volume labelled '{label}' is found wherever it is")
-        mounts.write_text("proc /proc proc rw 0 0\n")
+        mounts.write_text("proc /proc proc rw 0 0\n", encoding="utf-8")
         expect(uw.linux_mount_of_label("WATCH", str(by_label), str(mounts)) is None,
                "a labelled volume that isn't mounted is not found")
         expect(uw.linux_mount_of_label("WATCH", str(tmp / "none"), str(mounts)) is None,
