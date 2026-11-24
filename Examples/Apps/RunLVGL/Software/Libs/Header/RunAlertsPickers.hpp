@@ -218,14 +218,16 @@ inline uint32_t fieldValue(Field field, const Settings::RunAlerts& cfg, bool imp
     return 0;
 }
 
-/// "4:30" for a pace in display seconds, "--:--" for 0.
+/// "4:30" for a pace in display seconds, "--:--" for 0. A pace slower than
+/// 99:59 (a runner all but standing) shows as 99:59, so the text is never
+/// longer than 5 characters.
 inline void paceText(uint32_t displaySec, char* out, size_t size)
 {
     if (displaySec == 0) {
         std::snprintf(out, size, "--:--");
     } else {
-        std::snprintf(out, size, "%u:%02u",
-                      static_cast<unsigned>(displaySec / 60u), static_cast<unsigned>(displaySec % 60u));
+        const uint32_t sec = displaySec < 6000u ? displaySec : 5999u;
+        std::snprintf(out, size, "%u:%02u", static_cast<unsigned>(sec / 60u), static_cast<unsigned>(sec % 60u));
     }
 }
 

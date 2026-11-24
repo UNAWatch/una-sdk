@@ -25,10 +25,15 @@ public:
      */
     virtual void deactivate();
 
+    /// Another alert while this one shows: show it instead, for the full time.
+    virtual void onRunAlert() override;
+
     virtual ~TrackRunAlertPresenter() {}
 
 private:
     TrackRunAlertPresenter();
+
+    void showAlert();
 
     TrackRunAlertView& view;
 };

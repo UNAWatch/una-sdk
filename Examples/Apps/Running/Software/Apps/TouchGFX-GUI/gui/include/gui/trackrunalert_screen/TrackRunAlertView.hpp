@@ -20,6 +20,8 @@ public:
     virtual void tearDownScreen();
 
     void setAlert(Track::RunAlertKind kind, float value, bool imperial);
+    /// Show for the full three seconds again from now.
+    void restartDismiss() { mDismissTimer.start(); }
 
 private:
     void onDismiss();
