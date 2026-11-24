@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driving a watch from a computer {#watch-automation} &mdash; UNA Watch SDK 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bf225e5d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/version-selector.js?v=50f89983"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="AI Coding Agents" href="agent-skills.html" />
+    <link rel="prev" title="UNA-Watch Simulator" href="Simulator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UNA Watch SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="platform-overview.html">Platform Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdk-setup.html">SDK Setup and Build Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Simulator.html">UNA-Watch Simulator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Driving a watch from a computer {#watch-automation}</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#turn-on-developer">Turn on Developer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-up-the-computer">Set up the computer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-a-simulator-script-on-the-watch">Running a simulator script on the watch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sensor-values">Sensor values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-happens-on-the-watch">What happens on the watch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-serial-commands">The serial commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="agent-skills.html">AI Coding Agents</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🧩 Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/HelloWorld/ARCHITECTURE.html">HelloWorld - Introduction to UNA App Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Buttons/ARCHITECTURE.html">Buttons - Handling User Input and Navigation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/ScrollMenu/ARCHITECTURE.html">ScrollMenu - Creating Scrollable Lists and Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Images/ARCHITECTURE.html">Images - Working with Graphics and Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Sensors/ARCHITECTURE.html">Sensors - Integrating Hardware Sensors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Files/ARCHITECTURE.html">Files - Data Persistence and File Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/FitFiles/ARCHITECTURE.html">FitFiles - FIT File Creation and Sensor Logging Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/Waypoint/ARCHITECTURE.html">Waypoint - Configuration from the Companion App</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/RunLVGL/ARCHITECTURE.html">RunLVGL - Building a Watch App GUI with LVGL</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📱 Example Apps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Running-Architecture.html">Running - Running Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Alarm-Architecture.html">Alarm - Alarm Clock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Timer-Architecture.html">Timer - Countdown Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Cycling-Architecture.html">Cycling - Cycling Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Hiking-Architecture.html">Hiking - Hiking Activity Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/HRMonitor-Architecture.html">HRMonitor - Heart Rate Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/Stopwatch-Architecture.html">Stopwatch - Interval Timer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceAnalogue-Architecture.html">ClockfaceAnalogue - Analogue Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfacePeak-Architecture.html">ClockfacePeak - Peak Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceSmile-Architecture.html">ClockfaceSmile - Smile Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceConsole-Architecture.html">ClockfaceConsole - Console Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/ClockfaceRetro-Architecture.html">ClockfaceRetro - Retro Clockface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceHR-Architecture.html">GlanceHR - Heart Rate Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples/GlanceSteps-Architecture.html">GlanceSteps - Step Counter Glance</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🏗️ Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sdk-overview.html">SDK Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="service-lifecycle.html">Service Lifecycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SensorsLayer.html">Sensor Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture-deep-dive.html">Platform Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development-workflow.html">Development Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scripts.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TouchGFX-Port-Architecture.html">TouchGFX Port Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="touchgfx-widgets.html">TouchGFX Widgets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing-a-clockface.html">Writing a Watch Face</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figma-ui-kit.html">Figma UI Resource Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FitFiles-Structure.html">FIT Files Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shared-data.html">Shared Data Between Apps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📡 BLE Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html">UNA Watch — BLE File Transfer Service (FTS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#classic-operations-protocol-version-4">Classic operations (protocol version 4)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-File-Transfer-Service.html#fast-transfer-extensions-protocol-version-5">Fast-transfer extensions (protocol version 5)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BLE-Services-Overview.html">UNA Watch — BLE Services Overview</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🎋 Apps Sharing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">How to Deploy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-json.html">App Manifest JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app-config-fields.html">App Configuration Fields</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🤝 Community &amp; Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community-support.html">Community &amp; Support</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UNA Watch SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Driving a watch from a computer {#watch-automation}</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/watch-automation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="driving-a-watch-from-a-computer-watch-automation">
+<h1>Driving a watch from a computer {#watch-automation}<a class="headerlink" href="#driving-a-watch-from-a-computer-watch-automation" title="Link to this heading"></a></h1>
+<p>With <strong>Developer</strong> switched on, a watch connected by USB can be driven from a computer with no
+one touching it: buttons pressed, screenshots taken, apps installed and launched, sensor values
+injected and the log read as it is written. <code class="docutils literal notranslate"><span class="pre">Utilities/Scripts/una_watch/una_watch.py</span></code> does all
+of this, and runs the same script files as the <a class="reference internal" href="Simulator.html#scripted-runs"><span class="std std-ref">simulators</span></a>, so a
+script written against the simulator also runs on a watch.</p>
+<section id="turn-on-developer">
+<h2>Turn on Developer<a class="headerlink" href="#turn-on-developer" title="Link to this heading"></a></h2>
+<p>On the watch, open <strong>Settings &gt; Device</strong>, scroll to <strong>Developer</strong> and press the top-right button
+(R1) to switch it <strong>On</strong>. It stays on across restarts. While it is off, the watch refuses every
+command below except the check of whether it is on.</p>
+<p>Anything plugged into the watch’s USB port can drive it while Developer is on, including reading
+the screen. Switch it off when you are done.</p>
+</section>
+<section id="set-up-the-computer">
+<h2>Set up the computer<a class="headerlink" href="#set-up-the-computer" title="Link to this heading"></a></h2>
+<p>Python 3.8 or newer and pyserial:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pyserial
+</pre></div>
+</div>
+<p>The tool finds the watch by its USB ID (VID 0483, PID 52A4), so no port needs naming. Pass
+<code class="docutils literal notranslate"><span class="pre">--port</span></code> to choose one when several watches are connected.</p>
+</section>
+<section id="commands">
+<h2>Commands<a class="headerlink" href="#commands" title="Link to this heading"></a></h2>
+<p>From the SDK root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>Utilities/Scripts/una_watch/una_watch.py<span class="w"> </span>info
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">info</span></code>, <code class="docutils literal notranslate"><span class="pre">apps</span></code></p></td>
+<td><p>Check the connection, and list the installed apps: service PID, type, folder, name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">install</span> <span class="pre">FILE.uapp</span></code></p></td>
+<td><p>Copy the app to the watch over its USB drive, check the copy on the watch, and restart the watch so it finds the app. An update goes into the folder that already holds the app (matched by the app ID in the <code class="docutils literal notranslate"><span class="pre">.uapp</span></code>); a new app gets <code class="docutils literal notranslate"><span class="pre">Apps/&lt;name&gt;/</span></code>. <code class="docutils literal notranslate"><span class="pre">--folder</span></code> picks the folder, <code class="docutils literal notranslate"><span class="pre">--drive</span></code> the mount point.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">update-kernel</span> <span class="pre">FILE.ota</span></code></p></td>
+<td><p>Install watch firmware, as the phone app does: copy the <code class="docutils literal notranslate"><span class="pre">.ota</span></code> to <code class="docutils literal notranslate"><span class="pre">Update/</span></code> over the USB drive, check the copy, and hand it to the bootloader, which installs it on the restart that follows. The battery must be at least 10%. Prints the firmware version before and after.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">home</span></code></p></td>
+<td><p>Close the USB drive and dismiss the charging screen, leaving the home screen.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">launch</span> <span class="pre">APP</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">home</span></code>, then start an app by name or PID.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">APP</span></code></p></td>
+<td><p>Stop an app.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">screenshot</span> <span class="pre">FILE.png</span></code></p></td>
+<td><p>Save the display.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">button</span> <span class="pre">B</span> <span class="pre">ACTION</span> <span class="pre">[MS]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">B</span></code> is <code class="docutils literal notranslate"><span class="pre">L1</span></code>, <code class="docutils literal notranslate"><span class="pre">L2</span></code>, <code class="docutils literal notranslate"><span class="pre">R1</span></code> or <code class="docutils literal notranslate"><span class="pre">R2</span></code>; <code class="docutils literal notranslate"><span class="pre">ACTION</span></code> is <code class="docutils literal notranslate"><span class="pre">click</span></code>, <code class="docutils literal notranslate"><span class="pre">press</span></code>, <code class="docutils literal notranslate"><span class="pre">release</span></code> or <code class="docutils literal notranslate"><span class="pre">hold</span> <span class="pre">MS</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">[--seconds</span> <span class="pre">N]</span></code></p></td>
+<td><p>Print the watch’s log as it is written.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">SCRIPT</span></code></p></td>
+<td><p>Run a simulator script on the watch (below).</p></td>
+</tr>
+</tbody>
+</table>
+<p>The exit code is 0 on success, 1 when the command failed (the message says why), and 5 when there
+is no usable watch: none connected, firmware without Developer, or Developer off.</p>
+<p><code class="docutils literal notranslate"><span class="pre">install</span></code> never replaces another app’s files: if the folder it would use holds a <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> with a
+different app ID, it stops and asks for <code class="docutils literal notranslate"><span class="pre">--folder</span></code>. With more than one watch connected, it needs
+<code class="docutils literal notranslate"><span class="pre">--drive</span></code>.</p>
+</section>
+<section id="running-a-simulator-script-on-the-watch">
+<h2>Running a simulator script on the watch<a class="headerlink" href="#running-a-simulator-script-on-the-watch" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>Utilities/Scripts/una_watch/una_watch.py<span class="w"> </span>run<span class="w"> </span>run.txt<span class="w"> </span>--launch<span class="w"> </span>MyApp<span class="w"> </span>--out<span class="w"> </span>run-out
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--launch</span> <span class="pre">APP</span></code></p></td>
+<td><p>Close the USB drive, dismiss the charging screen and start the app. The script’s time 0 is 2 s after the start.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--out</span> <span class="pre">DIR</span></code></p></td>
+<td><p>Where screenshots and <code class="docutils literal notranslate"><span class="pre">watch.log</span></code> go. Default: <code class="docutils literal notranslate"><span class="pre">watch-out</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--duration-ms</span> <span class="pre">N</span></code></p></td>
+<td><p>End the run after N ms.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The script format, its steps and the replay file format are those of the simulators: see
+<a class="reference internal" href="Simulator.html#scripted-runs"><span class="std std-ref">Script format</span></a>. On the watch:</p>
+<ul class="simple">
+<li><p>Times run on the computer’s clock from the start of the run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">click</span></code> holds the button 150 ms. <code class="docutils literal notranslate"><span class="pre">hold</span> <span class="pre">B</span> <span class="pre">MS</span></code> presses it and releases it MS ms later, while
+later steps run at their own times. Steps run one at a time, so a release that falls due
+while a screenshot is being sent (under a second) goes out just after it. <code class="docutils literal notranslate"><span class="pre">watch.log</span></code> lists
+each step at its script time, adds the time it ran when that was 50 ms or more later, and
+notes when each hold’s button was released. As in the simulators, a <code class="docutils literal notranslate"><span class="pre">click</span></code>, <code class="docutils literal notranslate"><span class="pre">hold</span></code> or
+<code class="docutils literal notranslate"><span class="pre">press</span></code> of a button the script already has down does nothing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">screenshot</span></code> saves what the watch shows: the kernel’s whole screen, as PNG, black outside the
+round glass.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hr</span> <span class="pre">BPM</span></code> sets both heart-rate sensors (<code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code> and <code class="docutils literal notranslate"><span class="pre">HEART_RATE_EX</span></code>), always trusted.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">fix</span> <span class="pre">on</span></code> without a replay reports a fixed position. <code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">replay</span></code> sends one fix a second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wrist</span></code> sends one wrist-motion event.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">watch.log</span></code> holds the watch’s log for the run, with each step marked <code class="docutils literal notranslate"><span class="pre">[run]</span></code>.</p></li>
+</ul>
+<p>At the end of a run every injected sensor goes back to the real one.</p>
+<p>Exit codes are as for the simulators: 0 the run ended, 1 a step failed, 2 bad options or
+script. Code 5 means no usable watch.</p>
+</section>
+<section id="sensor-values">
+<h2>Sensor values<a class="headerlink" href="#sensor-values" title="Link to this heading"></a></h2>
+<p>A script’s sensor steps replace what a sensor publishes. Every listener gets the injected values
+at the sampling rate it asked for, batched as the sensor’s own would be: the app, and the
+watch’s own consumers too, such as the daily
+heart-rate record. Nothing is published while nothing is listening. The kernel’s own battery and
+GPS status icons read the hardware directly, so they keep showing the real state.</p>
+<p>Injection ends when the serial port closes, so it lasts as long as the run that started it, and
+when Developer is switched off.</p>
+<p>Other tools inject with <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span></code> (below). <code class="docutils literal notranslate"><span class="pre">TYPE</span></code> is the <code class="docutils literal notranslate"><span class="pre">SDK::Sensor::Type</span></code> value in hex
+(<code class="docutils literal notranslate"><span class="pre">SDK/SensorLayer/SensorTypes.hpp</span></code>), and the values are the type’s fields in the order of its
+parser (<code class="docutils literal notranslate"><span class="pre">SDK/SensorLayer/DataParsers/</span></code>): a plain number is a float, <code class="docutils literal notranslate"><span class="pre">3u</span></code> an unsigned field and
+<code class="docutils literal notranslate"><span class="pre">-3i</span></code> a signed one. For example, a GPS fix at 51.5 N, 0.1 W, 20 m, accurate to 3 m:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dev sensor 110 3 1u 51.5 -0.1 20
+</pre></div>
+</div>
+</section>
+<section id="what-happens-on-the-watch">
+<h2>What happens on the watch<a class="headerlink" href="#what-happens-on-the-watch" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>The USB drive.</strong> Plugging the watch in opens its USB drive, and apps are stopped while it is
+open. The tool closes it (<code class="docutils literal notranslate"><span class="pre">usb</span> <span class="pre">drive</span> <span class="pre">off</span></code>) before starting an app, and opens it only to copy
+files. Whenever it closes the drive, the tool first makes the computer let go of it: on
+Windows it locks and dismounts the volume, which writes out everything cached; on macOS it
+unmounts it with <code class="docutils literal notranslate"><span class="pre">diskutil</span></code>, and on Linux with <code class="docutils literal notranslate"><span class="pre">gio</span> <span class="pre">mount</span> <span class="pre">-u</span></code> or <code class="docutils literal notranslate"><span class="pre">umount</span></code>. A drive taken back
+while the computer still has writes cached can lose them and damage the watch’s filesystem.
+If a program has files open on the drive, or the user may not unmount it (on Linux, a mount
+without the <code class="docutils literal notranslate"><span class="pre">user</span></code> option that the desktop didn’t make), the tool stops and leaves the drive
+open.</p></li>
+<li><p><strong>Installing.</strong> The app list is built when the watch starts, so <code class="docutils literal notranslate"><span class="pre">install</span></code> restarts the watch.
+A <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> ends with the CRC-32 of the rest of the file; the copy is checked against everything
+before those last 4 bytes.</p></li>
+<li><p><strong>Test mode.</strong> For a few seconds after the watch starts with USB connected, any input on its
+serial port puts it in test mode, where only factory commands work. When the tool lands there
+it sends <code class="docutils literal notranslate"><span class="pre">boot</span></code>, which restarts the watch without that window, and carries on.</p></li>
+</ul>
+</section>
+<section id="the-serial-commands">
+<h2>The serial commands<a class="headerlink" href="#the-serial-commands" title="Link to this heading"></a></h2>
+<p>The tool uses the <code class="docutils literal notranslate"><span class="pre">dev</span></code> command of the watch’s USB serial console (115200 8N1; send lines ending
+in LF). Other tools can use it directly. Each command ends with a line <code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">...</span></code> or
+<code class="docutils literal notranslate"><span class="pre">#ERR</span> <span class="pre">&lt;reason&gt;</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command</p></th>
+<th class="head"><p>Reply</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">&lt;protocol&gt;</span> <span class="pre">on|off</span> <span class="pre">&lt;firmware&gt;</span></code>: the protocol version (3), Developer, and the firmware version.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">button</span> <span class="pre">L1|L2|R1|R2</span> <span class="pre">click|press|release|hold</span> <span class="pre">&lt;ms&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span></code> once done.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">screen</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#DATA</span> <span class="pre">&lt;bytes&gt;</span> <span class="pre">&lt;width&gt;</span> <span class="pre">&lt;height&gt;</span> <span class="pre">abgr2222</span> <span class="pre">&lt;crc32&gt;</span></code>, the pixels, then <code class="docutils literal notranslate"><span class="pre">#OK</span></code>. One byte per pixel: bits 5-4 blue, 3-2 green, 1-0 red.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">apps</span></code></p></td>
+<td><p>One line per app, tab-separated: service PID, type, app ID, <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> path, name. Then <code class="docutils literal notranslate"><span class="pre">#OK</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">launch</span> <span class="pre">&lt;pid&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">stop</span> <span class="pre">&lt;pid&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span></code>. Either of an app’s PIDs is accepted.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">crc</span> <span class="pre">&lt;path&gt;</span> <span class="pre">[bytes]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">&lt;size&gt;</span> <span class="pre">&lt;crc32&gt;</span></code>: of the file, or of its first <code class="docutils literal notranslate"><span class="pre">bytes</span></code>. Paths are on the apps volume, as <code class="docutils literal notranslate"><span class="pre">/Apps/...</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">&lt;type&gt;</span> <span class="pre">&lt;values...&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">active|idle</span></code>: whether anything is listening. <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">&lt;type&gt;</span> <span class="pre">off</span></code>, or <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">off</span></code> for all.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">log</span> <span class="pre">on|off</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span></code>. While on, log text arrives between commands, between the bytes 0x1E and 0x1F.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">update</span> <span class="pre">/Update/&lt;file&gt;.ota</span></code></p></td>
+<td><p>The watch copies the file to its bootloader’s volume (a few seconds), answers <code class="docutils literal notranslate"><span class="pre">#OK</span></code>, and restarts into the bootloader, which installs it. A refusal or failure is <code class="docutils literal notranslate"><span class="pre">#ERR</span></code> with the reason, and the watch stays up. Needs the USB drive closed and the battery at 10% or more.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Injected values and the log stream stop when the port closes or Developer goes off.</p>
+<p>In test mode (prompt <code class="docutils literal notranslate"><span class="pre">una-test&gt;</span></code>), <code class="docutils literal notranslate"><span class="pre">boot</span></code> leaves test mode as described above.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Simulator.html" class="btn btn-neutral float-left" title="UNA-Watch Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="agent-skills.html" class="btn btn-neutral float-right" title="AI Coding Agents" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, UNA Watch Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

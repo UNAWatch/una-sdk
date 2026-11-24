@@ -27,6 +27,7 @@ Next steps:
    platform-overview
    sdk-setup
    Simulator
+   watch-automation
    agent-skills
 
 .. toctree::
