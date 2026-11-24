@@ -268,7 +268,8 @@ round glass.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">hr</span> <span class="pre">BPM</span></code> sets both heart-rate sensors (<code class="docutils literal notranslate"><span class="pre">HEART_RATE</span></code> and <code class="docutils literal notranslate"><span class="pre">HEART_RATE_EX</span></code>), always trusted.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">fix</span> <span class="pre">on</span></code> without a replay reports a fixed position. <code class="docutils literal notranslate"><span class="pre">gps</span> <span class="pre">replay</span></code> sends one fix a second.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">wrist</span></code> sends one wrist-motion event.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">watch.log</span></code> holds the watch’s log for the run, with each step marked <code class="docutils literal notranslate"><span class="pre">[run]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">watch.log</span></code> holds the watch’s log for the run, with each step marked <code class="docutils literal notranslate"><span class="pre">[run]</span></code>, so a screenshot
+can’t take that name: a script that has one runs in the simulators but is refused here.</p></li>
 </ul>
 <p>At the end of a run every injected sensor goes back to the real one.</p>
 <p>Exit codes are as for the simulators: 0 the run ended, 1 a step failed, 2 bad options or

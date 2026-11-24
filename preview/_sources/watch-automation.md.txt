@@ -81,7 +81,8 @@ The script format, its steps and the replay file format are those of the simulat
 - `hr BPM` sets both heart-rate sensors (`HEART_RATE` and `HEART_RATE_EX`), always trusted.
 - `gps fix on` without a replay reports a fixed position. `gps replay` sends one fix a second.
 - `wrist` sends one wrist-motion event.
-- `watch.log` holds the watch's log for the run, with each step marked `[run]`.
+- `watch.log` holds the watch's log for the run, with each step marked `[run]`, so a screenshot
+  can't take that name: a script that has one runs in the simulators but is refused here.
 
 At the end of a run every injected sensor goes back to the real one.
 
