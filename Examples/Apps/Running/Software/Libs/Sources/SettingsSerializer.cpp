@@ -53,12 +53,14 @@ static void loadRunAlerts(const SDK::JsonStreamReader& reader, Settings::RunAler
     // whatever the struct held.
     out = RA{};
 
-    uint32_t runSec  = out.runWalkRunSec;
-    uint32_t walkSec = out.runWalkWalkSec;
+    // Read 64-bit, so the range checks below see a value too big for 32 bits
+    // as it is, not wrapped to a small one (strtoul is 64-bit on a PC).
+    uint64_t runSec  = out.runWalkRunSec;
+    uint64_t walkSec = out.runWalkWalkSec;
     float    fast    = 0.0f;
     float    slow    = 0.0f;
-    uint32_t high    = 0;
-    uint32_t low     = 0;
+    uint64_t high    = 0;
+    uint64_t low     = 0;
 
     reader.get("run_alerts.run_walk_en",        out.runWalkEn);
     reader.get("run_alerts.run_walk_run_time",  runSec);
@@ -69,13 +71,13 @@ static void loadRunAlerts(const SDK::JsonStreamReader& reader, Settings::RunAler
     reader.get("run_alerts.hr_low",             low);
     reader.get("run_alerts.back_in_tap",        out.backInTap);
 
-    const auto timeOk = [](uint32_t s) { return s >= RA::kRunWalkMinSec && s <= RA::kRunWalkMaxSec; };
+    const auto timeOk = [](uint64_t s) { return s >= RA::kRunWalkMinSec && s <= RA::kRunWalkMaxSec; };
     // Written so that a NaN fails it too.
     const auto paceOk = [](float p) { return p >= RA::kPaceMinSecPerKm && p <= RA::kPaceMaxSecPerKm; };
-    const auto hrOk   = [](uint32_t b) { return b >= RA::kHrMinBpm && b <= RA::kHrMaxBpm; };
+    const auto hrOk   = [](uint64_t b) { return b >= RA::kHrMinBpm && b <= RA::kHrMaxBpm; };
 
-    if (timeOk(runSec))  { out.runWalkRunSec  = runSec; }
-    if (timeOk(walkSec)) { out.runWalkWalkSec = walkSec; }
+    if (timeOk(runSec))  { out.runWalkRunSec  = static_cast<uint32_t>(runSec); }
+    if (timeOk(walkSec)) { out.runWalkWalkSec = static_cast<uint32_t>(walkSec); }
     out.paceFastSecPerKm = paceOk(fast) ? fast : 0.0f;
     out.paceSlowSecPerKm = paceOk(slow) ? slow : 0.0f;
     out.hrHighBpm        = hrOk(high) ? static_cast<uint8_t>(high) : 0;

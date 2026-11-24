@@ -410,6 +410,8 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         if (parser.isDataValid()) {
             mHrCounter.add(parser.getBpm());           // arbitrated (kernel's choice)
             mTrackData.hrTrustLevel = parser.getTrustLevel();
+            mHrSampled   = true;
+            mHrSampleMs  = mKernel.sys.getTimeMs();
             mHrSource     = static_cast<uint8_t>(parser.getSource());
             mHrOpticalBpm = static_cast<uint8_t>(parser.getOpticalBpm());
             mHrExternalBpm= static_cast<uint8_t>(parser.getExternalBpm());
@@ -1763,6 +1765,14 @@ bool Service::hasTrustedHr() const
     return mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3;
 }
 
+bool Service::hasFreshTrustedHr() const
+{
+    // Samples come every second; the counter and trust level keep the
+    // last one's values when the sensor goes quiet.
+    return hasTrustedHr() && mHrSampled
+        && SDK::Timer::elapsed(mKernel.sys.getTimeMs(), mHrSampleMs) < skHrFreshMs;
+}
+
 bool Service::hrBand(const SDK::Workout::Step& step, float& low, float& high) const
 {
     // Zone n is [threshold n-1, threshold n); the last threshold is maximum HR.
@@ -1852,7 +1862,7 @@ void Service::processWorkout()
     // the distance across a lost fix has come in.
     mSpeedGauge.tick(speedMs, mSpeedFilter.isValid() && mGpsCatchUp.caughtUp(),
                      st.stepDistanceCm);
-    mHrGauge.tick(mHrCounter.getCurrent(), hasTrustedHr());
+    mHrGauge.tick(mHrCounter.getCurrent(), hasFreshTrustedHr());
 
     const auto alert = mZoneAlerts.tick(targetZone());
     const bool beep  = mLeadIn.tick(st);
@@ -2108,7 +2118,8 @@ void Service::processRunAlerts()
     in.speedValid = mSpeedFilter.isValid() && mGpsCatchUp.caughtUp() && mGps.fix;
     in.distanceCm = activeDistanceCm();
     in.hrBpm      = mHrCounter.getCurrent();
-    in.hrValid    = hasTrustedHr();
+    // No reading once the sensor has been quiet for skHrFreshMs.
+    in.hrValid    = hasFreshTrustedHr();
 
     // Never over another alert: not while the buzzer started less than
     // RunAlerts::kQuietMs ago (a lap, a phase change, a lead-in beep, a

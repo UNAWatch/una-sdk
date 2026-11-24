@@ -163,6 +163,32 @@ TEST(RunAlertsSettings, NegativeAndHugeValuesFallBack)
     EXPECT_EQ(ra.hrLowBpm, 0);
 }
 
+TEST(RunAlertsSettings, ValuesPast32BitsDoNotWrapIntoRange)
+{
+    // 2^32 + 5, + 60, + 170 and + 120: cut to 32 bits, each would pass its
+    // range check.
+    KernelFixture fixture;
+    fixture.fileSystem.seedFile("settings.json", R"({
+        "version": 1,
+        "run_alerts": {
+            "run_walk_run_time": 4294967301,
+            "run_walk_walk_time": 4294967356,
+            "hr_high": 4294967466,
+            "hr_low": 4294967416
+        }
+    })");
+
+    Settings settings {};
+    SettingsSerializer serializer(fixture.kernel, "settings.json");
+    ASSERT_TRUE(serializer.load(settings));
+
+    const Settings::RunAlerts& ra = settings.runAlerts;
+    EXPECT_EQ(ra.runWalkRunSec, 240u);
+    EXPECT_EQ(ra.runWalkWalkSec, 60u);
+    EXPECT_EQ(ra.hrHighBpm, 0);
+    EXPECT_EQ(ra.hrLowBpm, 0);
+}
+
 TEST(RunAlertsSettings, RangeEdgesLoadAsIs)
 {
     KernelFixture fixture;

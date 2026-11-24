@@ -48,6 +48,9 @@ private:
     static constexpr uint32_t skBacklightTimeout     = 5000;
     static constexpr uint32_t skSamplePeriod         = 1000;
     static constexpr uint32_t skSampleLatency        = 1000;
+    /// A heart rate older than this no longer counts for the workout's
+    /// heart-rate gauge or the range alerts.
+    static constexpr uint32_t skHrFreshMs            = 10000;
 
     static constexpr float    skMapDistanceThreshold = 10.0f; // meters
     static constexpr uint32_t skMapMaxPoints         = 70;
@@ -148,6 +151,8 @@ private:
     uint8_t                                             mHrSource = 0;      ///< Latest HR source (HeartRateEx::Source) for the icon + FIT hr_source.
     uint8_t                                             mHrOpticalBpm = 0;  ///< Latest raw optical (PPG) bpm, for the FIT hr_optical series.
     uint8_t                                             mHrExternalBpm = 0; ///< Latest raw external (strap) bpm, for the FIT hr_external series.
+    bool                                                mHrSampled = false; ///< A heart-rate sample has arrived
+    uint32_t                                            mHrSampleMs = 0;    ///< When the latest one arrived (getTimeMs())
     SDK::Filter::SimpleLPF                              mAltitudeFilter;
     SDK::Metric::DeltaCounter                           mAltitudeCounter;
 
@@ -355,6 +360,9 @@ private:
     /// A heart-rate target as a bpm band, from the watch's HR thresholds.
     bool hrBand(const SDK::Workout::Step& step, float& low, float& high) const;
     bool hasTrustedHr() const;
+    /// hasTrustedHr(), and the reading is under skHrFreshMs old: a sensor that
+    /// has gone quiet leaves its last value behind, which no alert may act on.
+    bool hasFreshTrustedHr() const;
     /// The watch's local date, or 0 if its clock is not set.
     SDK::Workout::Ymd localDate();
 

@@ -551,6 +551,35 @@ TEST(RunAlertsArbitration, PendingAlertDroppedWhenBackInFirst)
     EXPECT_TRUE(run.heard.empty());
 }
 
+TEST(RunAlertsArbitration, PendingPaceAlertWaitsForGps)
+{
+    // Too slow is due at 31 while something else is sounding; when that ends
+    // GPS is gone, so the alert waits for a reading rather than playing the
+    // last pace heard.
+    SimRun run(paceRange());
+    run.pace(30, 400.0f);
+    for (int i = 0; i < 5; ++i) run.step(mps(400.0f), true, 0.0f, false, true);
+    for (int i = 0; i < 10; ++i) run.step(mps(400.0f), false);
+    EXPECT_TRUE(run.heard.empty());
+    run.pace(1, 400.0f);
+    ASSERT_EQ(run.heard.size(), 1u);
+    EXPECT_EQ(run.heard[0].sec, 46u);
+    EXPECT_EQ(run.heard[0].kind, Kind::PaceSlow);
+}
+
+TEST(RunAlertsArbitration, PendingHrAlertWaitsForATrustedReading)
+{
+    SimRun run(hrRange(0, 160));
+    run.heart(30, 170.0f);
+    for (int i = 0; i < 5; ++i) run.step(mps(300.0f), true, 170.0f, true, true);
+    run.heart(10, 170.0f, false);
+    EXPECT_TRUE(run.heard.empty());
+    run.heart(1, 170.0f);
+    ASSERT_EQ(run.heard.size(), 1u);
+    EXPECT_EQ(run.heard[0].sec, 46u);
+    EXPECT_EQ(run.heard[0].kind, Kind::HrHigh);
+}
+
 TEST(RunAlertsArbitration, BuzzClockQuietFor2500Ms)
 {
     RunAlerts::BuzzClock clock;
