@@ -486,8 +486,8 @@ def main():
                    "of where it was mounted instead")
             ports["n"] = 2
             closed.clear()
-            expect(raises(lambda: uw.open_drive(w, str(mixed)), uw.WatchError) and closed == [None],
-                   "among several watches the drive is not looked for elsewhere")
+            expect(raises(lambda: uw.open_drive(w, str(mixed)), uw.WatchError) and closed == [],
+                   "among several watches the drive is left open rather than closed on a guess")
             uw.os.path.ismount = lambda p: True
             expect(uw.open_drive(w, str(mixed)) == mixed, "a mounted --drive is used")
         finally:

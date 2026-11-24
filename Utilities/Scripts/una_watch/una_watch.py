@@ -883,10 +883,15 @@ def open_drive(watch, drive_arg=None):
         drive = Path(drive_arg)
         while not (os.path.ismount(drive) and drive.is_dir()):
             if time.monotonic() >= end:
+                if Watch.count_ports() > 1:
+                    # This watch's drive may be mounted elsewhere, and among several watches
+                    # the tool can't tell which drive it is: it is left open, as by close_drive.
+                    raise WatchError(f"nothing was mounted at {drive}; the watch's drive is "
+                                     "left open: eject it on the computer, then send "
+                                     "'usb drive off' or unplug")
                 # The drive may have been mounted somewhere else: found there, it is let go of
-                # before the watch takes it back. Not looked for among several watches, where
-                # the drive found could be another's.
-                close_drive(watch, find_drive() if Watch.count_ports() == 1 else None)
+                # before the watch takes it back.
+                close_drive(watch, find_drive())
                 raise WatchError(f"nothing was mounted at {drive}")
             time.sleep(0.5)
         return drive
