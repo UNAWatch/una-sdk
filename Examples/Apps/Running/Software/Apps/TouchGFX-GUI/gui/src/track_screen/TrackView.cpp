@@ -37,12 +37,15 @@ const uint16_t* TrackView::faces(uint16_t& count) const
 {
     static const uint16_t kWorkout[] = {
         FaceId::ID_WORKOUT_GAUGE, FaceId::ID_WORKOUT_STEP, FaceId::ID_WORKOUT_NEXT,
-        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
     };
     static const uint16_t kIntervals[] = {
-        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3,
+        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE,
+        FaceId::ID_TRACK3,
     };
-    static const uint16_t kFree[] = { FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK3 };
+    static const uint16_t kFree[] = {
+        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
+    };
 
     switch (mMode) {
     case Mode::Workout:
@@ -94,6 +97,7 @@ void TrackView::setPositionId(uint16_t id)
     trackFaceIntervals.setVisible(id == FaceId::ID_INTERVALS);
     trackFaceTotal.setVisible(id == FaceId::ID_TRACK1);
     trackFaceLap.setVisible(id == FaceId::ID_TRACK2);
+    trackFacePace.setVisible(id == FaceId::ID_TRACK_PACE);
     trackFaceStatus.setVisible(id == FaceId::ID_TRACK3);
     mWorkoutGauge.setVisible(id == FaceId::ID_WORKOUT_GAUGE);
     mWorkoutStep.setVisible(id == FaceId::ID_WORKOUT_STEP);
@@ -102,6 +106,7 @@ void TrackView::setPositionId(uint16_t id)
     trackFaceIntervals.invalidate();
     trackFaceTotal.invalidate();
     trackFaceLap.invalidate();
+    trackFacePace.invalidate();
     trackFaceStatus.invalidate();
     mWorkoutGauge.invalidate();
     mWorkoutStep.invalidate();
@@ -152,6 +157,12 @@ void TrackView::setTrackData(const Track::Data& data)
     trackFaceLap.setDistance(distConv(data.lapDistance));
     trackFaceLap.setTimer(data.lapTime);
     trackFaceLap.setHR(data.hr, mHrThresholds, mHrThresholdCount);
+
+    // Pace face: this lap's average pace beside the whole run's
+    trackFacePace.setDistance(distConv(data.distance), mIsImperial);
+    trackFacePace.setAvgLap(paceConv(data.lapPace));
+    trackFacePace.setAvgPace(paceConv(data.avgPace));
+    trackFacePace.setTimer(data.totalTime);
 
     if (mMode == Mode::Intervals) {
         const Track::IntervalsData& iv = data.intervals;

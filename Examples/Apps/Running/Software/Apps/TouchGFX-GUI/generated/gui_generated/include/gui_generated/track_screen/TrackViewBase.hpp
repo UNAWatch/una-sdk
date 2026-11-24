@@ -12,6 +12,7 @@
 #include <gui/containers/Buttons.hpp>
 #include <gui/containers/TrackFaceStatus.hpp>
 #include <gui/containers/TrackFaceLap.hpp>
+#include <gui/containers/TrackFacePace.hpp>
 #include <gui/containers/TrackFaceTotal.hpp>
 #include <gui/containers/TrackFaceIntervals.hpp>
 
@@ -36,6 +37,7 @@ protected:
     Buttons buttons;
     TrackFaceStatus trackFaceStatus;
     TrackFaceLap trackFaceLap;
+    TrackFacePace trackFacePace;
     TrackFaceTotal trackFaceTotal;
     TrackFaceIntervals trackFaceIntervals;
 

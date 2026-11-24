@@ -371,6 +371,12 @@
       <Text Id="TEXT_LAP_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Lap Pace</Translation>
       </Text>
+      <Text Id="TEXT_AVG_LAP" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Avg Lap</Translation>
+      </Text>
+      <Text Id="TEXT_AVG_PACE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Avg Pace</Translation>
+      </Text>
       <Text Id="TEXT_PERCENT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">%</Translation>
       </Text>
@@ -596,6 +602,18 @@
         <Translation Language="GB">44.44</Translation>
       </Text>
       <Text Id="__SingleUse_KERT" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">0:05:49</Translation>
+      </Text>
+      <Text Id="__SingleUse_D7QX" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">44.44</Translation>
+      </Text>
+      <Text Id="__SingleUse_L4VA" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">8:32</Translation>
+      </Text>
+      <Text Id="__SingleUse_P9GR" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">8:32</Translation>
+      </Text>
+      <Text Id="__SingleUse_T2MZ" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">0:05:49</Translation>
       </Text>
     </TextGroup>

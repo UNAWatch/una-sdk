@@ -639,6 +639,15 @@
           },
           {
             "Type": "CustomContainerInstance",
+            "Name": "trackFacePace",
+            "Width": 240,
+            "Height": 240,
+            "Visible": false,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "TrackFacePace"
+          },
+          {
+            "Type": "CustomContainerInstance",
             "Name": "trackFaceTotal",
             "Width": 240,
             "Height": 240,
@@ -3271,6 +3280,251 @@
             "Height": 71,
             "LockPosition": true,
             "CustomContainerDefinitionName": "HeartRateZone"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "TrackFacePace",
+        "Width": 240,
+        "Height": 240,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "timerText",
+            "X": 95,
+            "Y": 204,
+            "Width": 51,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "AutoSize": true,
+            "Wildcard1": {
+              "TextId": "TEXT_TIMER"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "timerValue",
+            "X": 35,
+            "Y": 162,
+            "Width": 170,
+            "Height": 42,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_T2MZ",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "line3",
+            "X": 35,
+            "Y": 159,
+            "Width": 170,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "EndX": 170.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "avgPaceValue",
+            "X": 123,
+            "Y": 111,
+            "Width": 100,
+            "Height": 48,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_P9GR",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "avgPaceText",
+            "X": 132,
+            "Y": 88,
+            "Width": 88,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_AVG_PACE",
+              "UseBuffer": true,
+              "BufferSize": 15
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "line2",
+            "X": 119,
+            "Y": 79,
+            "Width": 3,
+            "Height": 80,
+            "LockPosition": true,
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "EndY": 80.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "avgLapValue",
+            "X": 18,
+            "Y": 111,
+            "Width": 100,
+            "Height": 48,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_L4VA",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "avgLapText",
+            "X": 20,
+            "Y": 88,
+            "Width": 88,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_AVG_LAP",
+              "UseBuffer": true,
+              "BufferSize": 15
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "line1",
+            "X": 35,
+            "Y": 79,
+            "Width": 170,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "EndX": 170.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "distanceUnits",
+            "X": 178,
+            "Y": 48,
+            "Width": 45,
+            "Height": 19,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_18_L",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_KM",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "distanceValue",
+            "X": 53,
+            "Y": 30,
+            "Width": 134,
+            "Height": 42,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_35",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_D7QX",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "distanceText",
+            "X": 81,
+            "Y": 10,
+            "Width": 79,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_ITALIC_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "AutoSize": true,
+            "Wildcard1": {
+              "TextId": "TEXT_DISTANCE",
+              "UseBuffer": true,
+              "BufferSize": 15
+            }
           }
         ],
         "Interactions": []

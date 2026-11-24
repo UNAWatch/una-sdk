@@ -143,9 +143,11 @@ struct Root {
 // TrackAction is always an overlay of TrackView, so it lives inside it.
 // Which faces show depends on the run: a structured workout has its three
 // faces first, Intervals its one, then the faces every run has.
+// The track screens' face lists set the order the faces show in; these values
+// only name them (ID_TRACK_PACE shows between ID_TRACK2 and ID_TRACK3).
 struct TrackView {
     enum Id { ID_WORKOUT_GAUGE = 0, ID_WORKOUT_STEP, ID_WORKOUT_NEXT,
-              ID_INTERVALS, ID_TRACK1, ID_TRACK2, ID_TRACK3,
+              ID_INTERVALS, ID_TRACK1, ID_TRACK2, ID_TRACK3, ID_TRACK_PACE,
               ID_COUNT, ID_DEFAULT = ID_WORKOUT_GAUGE };
 
     // Lap shows only in a free run, End workout only while a structured
