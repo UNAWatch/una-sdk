@@ -4,6 +4,7 @@
 No watch and no pyserial needed: the console is a fake that answers like the watch. Covers
 the script parser, replay interpolation, PNG output, log frames, command replies, screenshots,
 the .uapp check and finding an app's folder."""
+import locale
 import os
 import shlex
 import struct
@@ -454,7 +455,9 @@ def main():
         for label in labels:
             device = by_label / label.replace(" ", "\\x20")
             device.write_bytes(b"")
-            mounts.write_text(f"proc /proc proc rw 0 0\n{device} /mnt/my\\040watch vfat rw 0 0\n")
+            # Written as /proc/mounts writes it: a space in the device path too is \040.
+            source = str(device).replace(" ", "\\040")
+            mounts.write_text(f"proc /proc proc rw 0 0\n{source} /mnt/my\\040watch vfat rw 0 0\n")
             expect(uw.linux_mount_of_label(label, str(by_label), str(mounts))
                    == Path("/mnt/my watch"),
                    f"a mount of the volume labelled '{label}' is found wherever it is")
@@ -466,19 +469,30 @@ def main():
 
         # An explicit --drive is used only once something is mounted there.
         closed = []
-        saved = uw.close_drive, uw.time, uw.os.path.ismount
+        saved = (uw.close_drive, uw.time, uw.os.path.ismount, uw.find_drive,
+                 uw.Watch.count_ports)
         uw.close_drive = lambda watch, d: closed.append(d)
+        uw.find_drive = lambda: Path("/mnt/elsewhere")
+        ports = {"n": 1}
+        uw.Watch.count_ports = staticmethod(lambda: ports["n"])
         uw.time = FakeClock()
         try:
             w = watch_with([("usb", b"#OK\n")])
             w.ser.clock = uw.time
             w.reopen = lambda *a, **k: None
+            expect(raises(lambda: uw.open_drive(w, str(mixed)), uw.WatchError)
+                   and closed == [Path("/mnt/elsewhere")],
+                   "a --drive where nothing is mounted is refused, and the drive closed, let go "
+                   "of where it was mounted instead")
+            ports["n"] = 2
+            closed.clear()
             expect(raises(lambda: uw.open_drive(w, str(mixed)), uw.WatchError) and closed == [None],
-                   "a --drive where nothing is mounted is refused, and the drive closed")
+                   "among several watches the drive is not looked for elsewhere")
             uw.os.path.ismount = lambda p: True
             expect(uw.open_drive(w, str(mixed)) == mixed, "a mounted --drive is used")
         finally:
-            uw.close_drive, uw.time, uw.os.path.ismount = saved
+            (uw.close_drive, uw.time, uw.os.path.ismount, uw.find_drive,
+             uw.Watch.count_ports) = saved
 
         # With several watches connected, closing the drive refuses rather than guess.
         saved = uw.Watch.count_ports
@@ -491,11 +505,55 @@ def main():
         finally:
             uw.Watch.count_ports = saved
 
-        not_text = tmp / "not_text.txt"
-        not_text.write_bytes(b"0 log \x81\x8d\n")
-        expect(raises(lambda: uw.parse_script(not_text), uw.ScriptError)
-               and uw.main(["run", str(not_text)]) == 2,
-               "a script that isn't text is a bad script (exit code 2)")
+        # A byte neither UTF-8 nor this computer's own text encoding can read (scripts are read
+        # in the latter); an encoding that reads every byte, like Latin-1, leaves none to test.
+        encoding = locale.getpreferredencoding(False)
+
+        def unreadable(b):
+            try:
+                bytes([b]).decode(encoding)
+                return False
+            except UnicodeDecodeError:
+                return True
+        bad = next((b for b in range(0x80, 0x100) if unreadable(b)), None)
+        if bad is not None:
+            not_text = tmp / "not_text.txt"
+            not_text.write_bytes(b"0 log " + bytes([bad]) + b"\n")
+            expect(raises(lambda: uw.parse_script(not_text), uw.ScriptError)
+                   and uw.main(["run", str(not_text)]) == 2,
+                   "a script that isn't text is a bad script (exit code 2)")
+
+        # Interrupted while waiting for the port to come back, the restore reconnects first.
+        restore_drive = tmp / "restore-drive"
+        (restore_drive / "Apps" / "New").mkdir(parents=True)
+        saved = uw._copy_and_check, uw.open_drive, uw.close_drive
+
+        def interrupted_reconnect(watch, uapp_path, data, folder, watch_path, drive_arg,
+                                  attempts, backups, state):
+            state["written"] = True
+            watch.ser = None            # the port went with 'usb drive off'
+            raise KeyboardInterrupt
+        uw._copy_and_check = interrupted_reconnect
+        def open_needing_port(watch, drive_arg=None):
+            if watch.ser is None:
+                raise uw.WatchError("lost the watch: no port")
+            return restore_drive
+        uw.open_drive = open_needing_port
+        uw.close_drive = lambda watch, d: None
+        try:
+            w = watch_with([])
+            port = w.ser
+            reopened = []
+
+            def reopen_port(*a, **k):
+                reopened.append(True)
+                w.ser = port
+            w.open = reopen_port
+            w.restart = lambda *a, **k: None
+            expect(raises(lambda: uw.install(w, new_app, "New", str(tmp)), KeyboardInterrupt)
+                   and reopened, "a restore after an interrupted reconnect opens the port first")
+        finally:
+            uw._copy_and_check, uw.open_drive, uw.close_drive = saved
 
         (tmp / "x.uapp.bak").write_bytes(b"someone's")
         expect(uw.backup_name(tmp / "x.uapp").name == "x.uapp.bak2",
