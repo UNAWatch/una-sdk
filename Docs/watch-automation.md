@@ -91,7 +91,8 @@ script. Code 5 means no usable watch.
 ## Sensor values
 
 A script's sensor steps replace what a sensor publishes. Every listener gets the injected values
-at the sensor's own rate: the app, and the watch's own consumers too, such as the daily
+at the sampling rate it asked for, batched as the sensor's own would be: the app, and the
+watch's own consumers too, such as the daily
 heart-rate record. Nothing is published while nothing is listening. The kernel's own battery and
 GPS status icons read the hardware directly, so they keep showing the real state.
 

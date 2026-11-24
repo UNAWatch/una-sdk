@@ -424,11 +424,11 @@ class Watch:
         .uapp is the same constant: the CRC of all but those last 4 bytes tells builds apart,
         and the whole-file CRC then covers the last 4 bytes too."""
         n = max(len(data) - 4, 0)
-        payload, _ = self.cmd(f"dev crc {watch_path} {n}", timeout=60)
+        payload, _ = self.cmd(f"dev crc {quoted(watch_path)} {n}", timeout=60)
         size, crc = (int(payload.split()[0]), int(payload.split()[1], 16))
         if size != len(data) or crc != zlib.crc32(data[:n]):
             return False, size, crc
-        payload, _ = self.cmd(f"dev crc {watch_path}", timeout=60)
+        payload, _ = self.cmd(f"dev crc {quoted(watch_path)}", timeout=60)
         whole = int(payload.split()[1], 16)
         return whole == zlib.crc32(data), size, whole
 
@@ -566,6 +566,14 @@ def let_go_of_drive(drive):
     raise WatchError(f"can't unmount the watch's drive {drive}: {'; '.join(errors) or 'no unmount tool'}"
                      ". Close anything using it, or unmount it yourself, and run again. The drive "
                      "is still open.")
+
+
+def quoted(path):
+    """A path as one argument of a watch command: the console splits a command at spaces
+    outside quotes. FAT allows no double quote in a name, so none needs escaping."""
+    if '"' in path:
+        raise WatchError(f"no double quote is allowed in a path on the watch: {path}")
+    return f'"{path}"'
 
 
 def folder_name_ok(name):
@@ -798,7 +806,7 @@ def update_kernel(watch, ota, drive_arg=None):
     # The watch answers once the kernel is in place for its bootloader (copying it takes a
     # few seconds), or with #ERR and the reason; then it restarts.
     print("the watch is copying the kernel to its bootloader")
-    watch.cmd(f"dev update {watch_path}", timeout=120)
+    watch.cmd(f"dev update {quoted(watch_path)}", timeout=120)
     end = time.monotonic() + 30
     try:
         while time.monotonic() < end:

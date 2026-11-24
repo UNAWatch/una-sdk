@@ -4,6 +4,7 @@
 No watch and no pyserial needed: the console is a fake that answers like the watch. Covers
 the script parser, replay interpolation, PNG output, log frames, command replies, screenshots,
 the .uapp check and finding an app's folder."""
+import shlex
 import struct
 import sys
 import tempfile
@@ -195,9 +196,14 @@ def main():
         uw.open_drive = lambda watch, drive_arg=None: drive
         uw.close_drive = lambda watch, d: None
         uw.Watch.count_ports = staticmethod(lambda: 1)
+        updates = []
+
+        def refuse_update(line):
+            updates.append(line)
+            return b"#ERR not a kernel for this watch\n"
         try:
             w = watch_with([("dev crc", crc_of_file(b"kernel")),
-                            ("dev update", b"#ERR not a kernel for this watch\n"),
+                            ("dev update", refuse_update),
                             ("dev", b"developer mode: on\n#OK 3 on 1.8.0\n")])
             w.require_developer_mode()
             w.reopen = lambda *a, **k: failures.append("update-kernel waited for a restart")
@@ -208,6 +214,9 @@ def main():
                 err = str(e)
             expect("not a kernel for this watch" in err and (drive / "Update" / "k.ota").is_file(),
                    "a kernel the watch refuses ends update-kernel with the watch's reason")
+            expect(len(updates) == 1 and shlex.split(updates[0])[2:] == ["/Update/k.ota"]
+                   and updates[0].split()[2].startswith('"'),
+                   "dev update sends the path quoted, as one argument")
         finally:
             uw.open_drive, uw.close_drive, uw.Watch.count_ports = saved
 
@@ -266,6 +275,20 @@ def main():
         w = watch_with([("dev crc", crc_of(uapp[:-1] + bytes([uapp[-1] ^ 0xFF])))])
         expect(not w.file_matches("/Apps/x/x.uapp", uapp)[0],
                "a copy damaged only in its last 4 bytes does not")
+
+        # The console splits a command at spaces outside quotes: a path with a space is quoted.
+        sent = []
+
+        def crc_seen(line):
+            sent.append(line)
+            return crc_of(uapp)(line.replace('"/Apps/My App/My App_1.0.0.uapp"', "/x"))
+        w = watch_with([("dev crc", crc_seen)])
+        expect(w.file_matches("/Apps/My App/My App_1.0.0.uapp", uapp)[0]
+               and all(shlex.split(l)[2] == "/Apps/My App/My App_1.0.0.uapp" for l in sent)
+               and [len(shlex.split(l)) for l in sent] == [4, 3],
+               "dev crc sends a path with a space as one argument")
+        expect(raises(lambda: uw.quoted('/Apps/a"b'), uw.WatchError),
+               "a path with a double quote is refused, as it can't be sent")
 
         # --- a hold doesn't hold up the timeline (on a fake clock) ---------------
         tiny = bytes([0xC0] * 4)
