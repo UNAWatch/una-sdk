@@ -489,7 +489,10 @@ def find_drive(label="UNA WATCH"):
 def linux_mount_of_label(label, by_label="/dev/disk/by-label", mounts="/proc/mounts"):
     """Where Linux has the volume with this label mounted, wherever that is (a mount point of
     the user's own included), or None. The device comes from /dev/disk/by-label, where a space
-    is written \\x20; /proc/mounts writes one in a mount point as \\040."""
+    is written \\x20; /proc/mounts writes one in a device or mount point as \\040."""
+    def unescape(field):
+        return re.sub(r"\\([0-7]{3})", lambda m: chr(int(m.group(1), 8)), field)
+
     link = Path(by_label) / label.replace(" ", "\\x20")
     try:
         if not link.exists():
@@ -498,9 +501,8 @@ def linux_mount_of_label(label, by_label="/dev/disk/by-label", mounts="/proc/mou
         with open(mounts, encoding="utf-8", errors="replace") as f:
             for line in f:
                 fields = line.split()
-                if len(fields) >= 2 and os.path.realpath(fields[0]) == device:
-                    return Path(re.sub(r"\\([0-7]{3})", lambda m: chr(int(m.group(1), 8)),
-                                       fields[1]))
+                if len(fields) >= 2 and os.path.realpath(unescape(fields[0])) == device:
+                    return Path(unescape(fields[1]))
     except OSError:
         return None
     return None
@@ -731,6 +733,9 @@ def _restore(watch, drive_arg, folder, name, backups, written, error):
     copy_removed = not written
     left = list(backups)            # (backup, original) not yet put back
     try:
+        if watch.ser is None:
+            # Interrupted, or timed out, while waiting for the port to come back.
+            watch.open()
         drive = open_drive(watch, drive_arg)
         try:
             app_dir = drive / "Apps" / folder
@@ -878,7 +883,10 @@ def open_drive(watch, drive_arg=None):
         drive = Path(drive_arg)
         while not (os.path.ismount(drive) and drive.is_dir()):
             if time.monotonic() >= end:
-                close_drive(watch, None)
+                # The drive may have been mounted somewhere else: found there, it is let go of
+                # before the watch takes it back. Not looked for among several watches, where
+                # the drive found could be another's.
+                close_drive(watch, find_drive() if Watch.count_ports() == 1 else None)
                 raise WatchError(f"nothing was mounted at {drive}")
             time.sleep(0.5)
         return drive
