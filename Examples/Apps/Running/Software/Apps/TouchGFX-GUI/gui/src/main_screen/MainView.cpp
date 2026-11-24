@@ -62,17 +62,24 @@ uint16_t MainView::getPositionId()
     return menuLayout.getSelectedItem();
 }
 
-void MainView::setArmedWorkout(const char* name)
+void MainView::setArmedWorkout(const char* name, bool runWalk)
 {
-    mArmed = name != nullptr;
+    mArmed   = name != nullptr;
+    mRunWalk = !mArmed && runWalk;
     MenuItemConfig& start = mCenterItems[Menu::ID_START];
     if (mArmed) {
         WorkoutUi::toText(name, mArmedName, sizeof(mArmedName) / sizeof(mArmedName[0]));
         WorkoutUi::fitWidth(mArmedName, T_TMP_ITALIC_18, 180);
         start.style   = MenuItemConfig::TIP;
+        start.tipId   = TYPED_TEXT_INVALID;
         start.tipText = mArmedName;
+    } else if (mRunWalk) {
+        start.style   = MenuItemConfig::TIP;
+        start.tipId   = T_TEXT_RUN_WALK;
+        start.tipText = nullptr;
     } else {
         start.style   = MenuItemConfig::SIMPLE;
+        start.tipId   = TYPED_TEXT_INVALID;
         start.tipText = nullptr;
     }
     menuLayout.invalidate();
@@ -182,8 +189,8 @@ void MainView::onConfirm()
 
     switch (idx) {
     case Menu::ID_START:
-        if (mGpsFix == true && mArmed) {
-            // A workout starts with the countdown, as Intervals do.
+        if (mGpsFix == true && (mArmed || mRunWalk)) {
+            // A workout or Run/Walk starts with the countdown, as Intervals do.
             presenter->setPendingIntervalsMode(false);
             application().gotoTrackIntervalsCountdownScreenNoTransition();
         } else if (mGpsFix == true) {

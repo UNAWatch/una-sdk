@@ -84,6 +84,34 @@ struct Settings {
     };
 
 
+    /**
+     * @struct RunAlerts
+     * @brief Settings > Run Alerts: the Run/Walk start, and the pace and
+     *        heart-rate range alerts. See RunAlerts.hpp.
+     *
+     * Pace is kept in s/km whatever the units setting. A pace or heart-rate
+     * limit of 0 is Off. The ranges below are what the settings file accepts;
+     * outside them a limit loads as Off and a Run/Walk time as its default.
+     */
+    struct RunAlerts {
+        static constexpr uint32_t kRunWalkMinSec   = 5;
+        static constexpr uint32_t kRunWalkMaxSec   = 3600;
+        static constexpr float    kPaceMinSecPerKm = 60.0f;
+        static constexpr float    kPaceMaxSecPerKm = 1800.0f;
+        static constexpr uint8_t  kHrMinBpm        = 30;
+        static constexpr uint8_t  kHrMaxBpm        = 240;
+
+        bool     runWalkEn        = false;  ///< A plain Start runs Run/Walk on the intervals engine.
+        uint32_t runWalkRunSec    = 240;    ///< Run phase, s (4:00).
+        uint32_t runWalkWalkSec   = 60;     ///< Walk phase, s (1:00).
+        float    paceFastSecPerKm = 0.0f;   ///< Too Fast: alert at a quicker pace, s/km. 0 - Off
+        float    paceSlowSecPerKm = 0.0f;   ///< Too Slow: alert at a slower pace, s/km. 0 - Off
+        uint8_t  hrHighBpm        = 0;      ///< HR High, bpm. 0 - Off
+        uint8_t  hrLowBpm         = 0;      ///< HR Low, bpm. 0 - Off
+        bool     backInTap        = false;  ///< A vibration tap on coming back in range (pace and HR).
+    };
+
+
     // Fields
     uint32_t version = kVersion;    ///< Settings version.
 
@@ -94,6 +122,8 @@ struct Settings {
     Alerts::Time::Id     alertTimeId     = Alerts::Time::ID_OFF;     ///< Time alert option.
 
     Intervals intervals {};  ///< Interval training settings.
+
+    RunAlerts runAlerts {};  ///< Run/Walk, pace and heart-rate alerts.
 
 };
 

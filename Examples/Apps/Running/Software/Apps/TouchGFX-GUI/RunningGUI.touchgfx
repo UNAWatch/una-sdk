@@ -315,6 +315,248 @@
         ]
       },
       {
+        "Name": "MenuRunAlerts",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunAlerts"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "MenuRunWalk",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunWalk"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "MenuRunLimits",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunLimits"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "MenuRunPaceLimit",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunPaceLimit"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "MenuRunAlertPicker",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "picker",
+            "X": 0,
+            "Y": 0,
+            "Width": 240,
+            "Height": 240,
+            "CustomContainerDefinitionName": "TwoTonePicker"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunAlertPicker"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "MenuRunHrList",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "menuLayout",
+            "Width": 240,
+            "Height": 240,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "MainMenuLayout"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunHrList"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "MenuRunAlertSaved",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "TextArea",
+            "Name": "savedText",
+            "X": 73,
+            "Y": 150,
+            "Width": 95,
+            "Height": 38,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_30",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "AutoSize": true,
+            "Wildcard1": {
+              "TextId": "TEXT_SAVED"
+            }
+          },
+          {
+            "Type": "Image",
+            "Name": "icon",
+            "X": 95,
+            "Y": 95,
+            "Width": 50,
+            "Height": 50,
+            "LockPosition": true,
+            "RelativeFilename": "CircleTick_50x50.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "messageText",
+            "X": 30,
+            "Y": 53,
+            "Width": 180,
+            "Height": 32,
+            "LockPosition": true,
+            "TextId": "TMP_MEDIUM_25",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW_TEXT",
+              "UseBuffer": true,
+              "BufferSize": 32
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "MenuRunAlertSaved"
+            }
+          }
+        ]
+      },
+      {
         "Name": "MenuIntervals",
         "CanvasBufferSize": 3600,
         "Components": [
@@ -865,6 +1107,99 @@
               "Type": "ActionGotoScreen",
               "ScreenTransitionType": "ScreenTransitionNone",
               "ActionComponent": "TrackLap"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "TrackRunAlert",
+        "CanvasBufferSize": 3600,
+        "Components": [
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "buttons",
+            "Y": 47,
+            "Width": 240,
+            "Height": 146,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Buttons"
+          },
+          {
+            "Type": "Line",
+            "Name": "line1",
+            "X": 70,
+            "Y": 164,
+            "Width": 100,
+            "Height": 3,
+            "LockPosition": true,
+            "Color": {
+              "Green": 128,
+              "Blue": 128
+            },
+            "EndX": 100.0,
+            "LineWidth": 10.0,
+            "LineEndingStyle": "Round"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "valueText",
+            "Y": 86,
+            "Width": 240,
+            "Height": 44,
+            "LockPosition": true,
+            "TextId": "TMP_SEMIBOLD_40",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW_TEXT",
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "unitText",
+            "Y": 132,
+            "Width": 240,
+            "Height": 23,
+            "LockPosition": true,
+            "TextId": "TMP_REGULAR_18",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 192,
+              "Green": 192,
+              "Blue": 192
+            },
+            "Wildcard1": {
+              "TextId": "TEXT_NEW_TEXT",
+              "UseBuffer": true,
+              "BufferSize": 8
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "title",
+            "X": 50,
+            "Width": 140,
+            "Height": 41,
+            "LockPosition": true,
+            "CustomContainerDefinitionName": "Title"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerScreenTransitionBegins"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "TrackRunAlert"
             }
           }
         ]

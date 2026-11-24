@@ -41,6 +41,7 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type WORKOUT_DETAILS           = 0x00000014;
     constexpr SDK::MessageType::Type WORKOUT_DATA              = 0x00000015;
     constexpr SDK::MessageType::Type WORKOUT_STEP              = 0x00000016;
+    constexpr SDK::MessageType::Type RUN_ALERT                 = 0x00000019;
 
     // GUI --> Service
     constexpr SDK::MessageType::Type SETTINGS_SAVE         = 0x0000000A;
@@ -342,6 +343,29 @@ namespace CustomMessage {
         {}
     };
 
+    /**
+     * A pace or heart-rate range alert, sent as it plays. @p value is the
+     * smoothed pace in s/m (as Track::Data::pace) for a pace alert, or the
+     * heart rate in bpm. Coming back in range sends nothing.
+     */
+    struct RunAlert : public SDK::MessageBase {
+        uint8_t kind;   ///< Track::RunAlertKind
+        float   value;
+
+        RunAlert()
+            : SDK::MessageBase(RUN_ALERT)
+            , kind(0)
+            , value(0.0f)
+        {}
+
+        RunAlert(Track::RunAlertKind kind, float value)
+            : RunAlert()
+        {
+            this->kind  = static_cast<uint8_t>(kind);
+            this->value = value;
+        }
+    };
+
     // GUI --> Service
     struct SettingsSave : public SDK::MessageBase {
         // Application settings
@@ -424,6 +448,9 @@ namespace CustomMessage {
     // The kernel's largest message block is 256 bytes.
     static_assert(sizeof(WorkoutData) <= 256, "WorkoutData must fit a message block");
     static_assert(sizeof(WorkoutStep) <= 256, "WorkoutStep must fit a message block");
+    static_assert(sizeof(RunAlert) <= 256, "RunAlert must fit a message block");
+    static_assert(sizeof(SettingsUpd) <= 256, "SettingsUpd must fit a message block");
+    static_assert(sizeof(TrackDataUpd) <= 256, "TrackDataUpd must fit a message block");
 
 } // namespace CustomMessage
 

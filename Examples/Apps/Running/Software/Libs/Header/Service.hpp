@@ -30,6 +30,7 @@
 #include "ActivitySummarySerializer.hpp"
 #include "ActivityWriter.hpp"
 #include "Commands.hpp"
+#include "RunAlerts.hpp"
 #include "WristTiltDetector.hpp"
 
 class Service : public WristTiltDetector::IListener
@@ -200,6 +201,7 @@ private:
 
     bool mIntervalsMode      = false;
     bool mIntervalsCompleted = false; ///< Set after workout completed; blocks further phase processing
+    bool mRunWalkMode        = false; ///< The intervals are Run/Walk's (a plain Start with Run/Walk on)
 
     /// The intervals settings as a workout program, which mEngine runs step
     /// by step. The program is about 15 KB: the Service is statically
@@ -247,6 +249,11 @@ private:
 
     /// HR zone thresholds from the system settings; the last is maximum HR.
     uint8_t mHrThresholds[CustomMessage::kHrThresholdsCount] = {};
+
+    // -- Pace and heart-rate range alerts -------------------------------------
+
+    RunAlerts::Monitor   mRunAlerts;  ///< About 1.2 KB: the Service is statically allocated.
+    RunAlerts::BuzzClock mBuzzClock;  ///< When the buzzer last started, so alerts never overlap.
 
     // -- Lifecycle ------------------------------------------------------------
 
@@ -339,7 +346,8 @@ private:
     void sendWorkoutData();
     void sendWorkoutSteps();
     void sendWorkoutStep(const SDK::Workout::Step* step, bool next);
-    void playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert);
+    /// A target zone alert. @p twice false plays the pattern once (range alerts).
+    void playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert, bool twice = true);
     void playAlertTwice(const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count);
     void sendAlertRepeat();
     /// The zone of the current step's target, Unknown with none.
@@ -353,6 +361,12 @@ private:
     /// The run's active time and distance, as the workout engine counts them.
     uint32_t activeTimeMs() const;
     uint32_t activeDistanceCm() const;
+
+    // -- Pace and heart-rate range alerts -------------------------------------
+
+    /// One active second of the range alerts; plays one if due.
+    void processRunAlerts();
+    void playRunAlert(const RunAlerts::Alert& alert);
 
     // -- Notifications --------------------------------------------------------
 

@@ -151,6 +151,79 @@ struct Time {
     }
 };
 
+// -----------------------------------------------------------------------------
+// BoundedTime: minutes:seconds between bounds set at run time, seconds in 5 s
+// steps. For the Run Alerts pickers (Run/Walk times, pace limits), whose
+// bounds come from RunAlerts::pickerBounds() and sit on the 5 s step. A
+// minutes step that would cross a bound stops on it.
+// -----------------------------------------------------------------------------
+struct BoundedTime {
+    enum Stage { MIN = 0, SEC };
+    static constexpr uint32_t kStepSec = 5;
+
+    Stage    stage    = MIN;
+    uint32_t total    = 0;
+    uint32_t minTotal = 0;
+    uint32_t maxTotal = 0;
+
+    void seed(uint32_t totalSeconds, uint32_t lo, uint32_t hi)
+    {
+        minTotal = lo;
+        maxTotal = hi;
+        total    = totalSeconds < lo ? lo : (totalSeconds > hi ? hi : totalSeconds);
+        stage    = MIN;
+    }
+    uint32_t minutes() const { return total / 60u; }
+    uint32_t seconds() const { return total % 60u; }
+
+    void dec()
+    {
+        if (stage == MIN) {
+            if (total > minTotal) total = total >= minTotal + 60u ? total - 60u : minTotal;
+        } else if (seconds() >= kStepSec && total >= minTotal + kStepSec) {
+            total -= kStepSec;
+        }
+    }
+    void inc()
+    {
+        if (stage == MIN) {
+            if (total < maxTotal) total = total + 60u <= maxTotal ? total + 60u : maxTotal;
+        } else if (seconds() + kStepSec < 60u && total + kStepSec <= maxTotal) {
+            total += kStepSec;
+        }
+    }
+    bool atSec() const { return stage == SEC; }
+    void toSec() { stage = SEC; }
+    void toMin() { stage = MIN; }
+    uint32_t totalSeconds() const { return total; }
+
+    /// @p subLeft / @p subRight: the subtitles ("Mins." / "Secs.", or a
+    /// pace's "Min/km" / "Sec"). @p insetLeft for a wide left subtitle.
+    void render(Widgets::TwoTonePicker& p, const char* subLeft = "Mins.", const char* subRight = "Secs.",
+                bool insetLeft = false) const
+    {
+        const bool leftActive = (stage == MIN);
+        char left[8], right[8], up1[8] = "", up2[8] = "";
+        snprintf(left, sizeof left, "%02u", static_cast<unsigned>(minutes()));
+        snprintf(right, sizeof right, "%02u", static_cast<unsigned>(seconds()));
+        // The values above: the next ones a press would reach.
+        if (leftActive) {
+            const uint32_t maxMin = maxTotal / 60u;
+            if (minutes() + 1u <= maxMin) snprintf(up1, sizeof up1, "%02u", static_cast<unsigned>(minutes() + 1u));
+            if (minutes() + 2u <= maxMin) snprintf(up2, sizeof up2, "%02u", static_cast<unsigned>(minutes() + 2u));
+        } else {
+            for (uint32_t k = 1; k <= 2; ++k) {
+                const uint32_t s = seconds() + k * kStepSec;
+                if (s < 60u && total + k * kStepSec <= maxTotal) {
+                    snprintf(k == 1 ? up1 : up2, sizeof up1, "%02u", static_cast<unsigned>(s));
+                }
+            }
+        }
+        p.renderSubtitleDual(subLeft, subRight, leftActive, insetLeft);
+        p.renderValue(leftActive, left, right, ":", up1, up2);
+    }
+};
+
 } // namespace PickerLogic
 
 #endif // PICKER_LOGIC_HPP

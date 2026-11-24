@@ -92,6 +92,7 @@ Libs/Source/Workout/ScheduleState.cpp\
 Libs/Source/Workout/StepLabel.cpp\
 ../../Libs/Sources/ActivitySummarySerializer.cpp\
 ../../Libs/Sources/ActivityWriter.cpp\
+../../Libs/Sources/RunAlerts.cpp\
 ../../Libs/Sources/Service.cpp\
 ../../Libs/Sources/SettingsSerializer.cpp\
 ../../Libs/Sources/WristTiltDetector.cpp\

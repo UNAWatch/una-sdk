@@ -43,6 +43,15 @@ enum class ScreenId : uint8_t {
     MenuAlertTime,
     MenuAlertDistanceSaved,
     MenuAlertTimeSaved,
+    // Settings > Run Alerts
+    MenuRunAlerts,
+    MenuRunWalk,
+    MenuRunPace,
+    MenuRunHr,
+    MenuRunPaceLimit,
+    MenuRunAlertPicker,
+    MenuRunHrList,
+    MenuRunAlertSaved,
     // Activity
     TrackStartConfirm,
     TrackIntervalsCountdown,
@@ -53,6 +62,7 @@ enum class ScreenId : uint8_t {
     TrackAction,
     TrackHoldConfirm,
     TrackLap,
+    TrackRunAlert,
     TrackSaved,
     TrackDiscarded,
     TrackSummary,

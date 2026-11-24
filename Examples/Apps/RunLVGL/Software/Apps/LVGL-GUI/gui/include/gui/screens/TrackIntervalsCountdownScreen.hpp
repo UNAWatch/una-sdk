@@ -2,8 +2,9 @@
  ******************************************************************************
  * @file    TrackIntervalsCountdownScreen.hpp
  * @brief   Five-second countdown before an intervals workout, summarising the
- *          configured repeats, run and rest, or before an armed workout, with
- *          its name, totals and steps. R1 starts now, R2 cancels; the ring
+ *          configured repeats, run and rest, before an armed workout, with
+ *          its name, totals and steps, or before Run/Walk, with its run and
+ *          walk times. R1 starts now, R2 cancels; the ring
  *          drains and the workout starts when it empties.
  ******************************************************************************
  */
@@ -38,6 +39,8 @@ private:
     /// The countdown is for an armed workout: one is armed and Intervals
     /// were not chosen from their menu.
     bool isWorkout() const;
+    /// The countdown is for Run/Walk: a plain Start with Run/Walk on.
+    bool isRunWalk() const;
 
     bool     mStarted = false;
     uint32_t mShownSeconds = 0;

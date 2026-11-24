@@ -141,6 +141,13 @@ void Model::saveSettings(const Settings& sett)
     SDK::send_msg<CustomMessage::SettingsSave>(mKernel, mSettings);
 }
 
+void Model::saveRunAlert(uint32_t value)
+{
+    Settings sett = mSettings;
+    RunAlerts::setField(mRunAlertField, value, mUnitsImperial, sett.runAlerts);
+    saveSettings(sett);
+}
+
 
 // GPS
 
@@ -197,10 +204,21 @@ const Track::IntervalsData& Model::getPendingAlertIntervals() const
     return mPendingAlertIntervals;
 }
 
+RunAlerts::StartMode Model::startMode(bool intervalsRequested) const
+{
+    return RunAlerts::startMode(intervalsRequested, intervalsRequested ? kNoWorkout : mArmedWorkout,
+                                mSettings.runAlerts);
+}
+
 // Navigation contract (callers must follow):
 //
-//   intervalsMode = false
+//   intervalsMode = false, Run/Walk off
 //       TrackStartConfirmation -> gotoTrackScreen  (TrackFaceTotal)
+//
+//   intervalsMode = false, Run/Walk on
+//       TrackStartConfirmation -> gotoTrackIntervalsCountdown
+//       TrackIntervalsCountdown (on confirm / timer expire):
+//           gotoTrackIntervalsAlertScreen  (RUN phase)
 //
 //   intervalsMode = true
 //       TrackStartConfirmationIntervals -> gotoTrackIntervalsCountdown
@@ -216,13 +234,16 @@ void Model::trackStart(bool intervalsMode)
     // An armed workout is followed unless Intervals were chosen; either way
     // it is used up by this run.
     const int16_t workout = intervalsMode ? kNoWorkout : mArmedWorkout;
+    // A plain Start runs Run/Walk when it is on; the service makes the same
+    // choice from the same settings, so the message stays as it was.
+    const bool runWalk = startMode(intervalsMode) == RunAlerts::StartMode::RunWalk;
     mArmedWorkout = kNoWorkout;
 
-    mTrackData.intervalsMode = intervalsMode;
+    mTrackData.intervalsMode = intervalsMode || runWalk;
     mTrackData.workoutMode   = workout != kNoWorkout;
     if (mTrackData.workoutMode) {
         mMenu.track.set(App::MenuNav::TrackView::ID_WORKOUT_GAUGE);
-    } else if (intervalsMode) {
+    } else if (mTrackData.intervalsMode) {
         mMenu.track.set(App::MenuNav::TrackView::ID_INTERVALS);
     }
     mStepCard    = false;
@@ -230,7 +251,19 @@ void Model::trackStart(bool intervalsMode)
     mWorkoutStep = WorkoutStepInfo{};
     mWorkoutNext = WorkoutStepInfo{};
 
-    if (intervalsMode) {
+    if (runWalk) {
+        // As Service::startTrack(): the timed RUN phase first, open repeats,
+        // no warm-up. The countdown goes straight to the RUN pop-up, before
+        // any INTERVALS_PHASE_ALERT, so it gets the same data now.
+        Track::IntervalsData& iv = mTrackData.intervals;
+        iv               = Track::IntervalsData{};
+        iv.phase         = Track::IntervalsPhase::RUN;
+        iv.metric        = Track::IntervalsMetric::TIME_REMAINING;
+        iv.repeat        = 1;
+        iv.phaseTimerSec = static_cast<time_t>(mSettings.runAlerts.runWalkRunSec);
+        iv.runWalk       = true;
+        mPendingAlertIntervals = iv;
+    } else if (intervalsMode) {
         const Settings::Intervals& cfg = mSettings.intervals;
         Track::IntervalsData& iv       = mTrackData.intervals;
 
@@ -552,6 +585,14 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             auto* msg          = static_cast<CustomMessage::IntervalsPhaseAlert*>(message);
             mPendingAlertIntervals = msg->intervals;
             modelListener->onIntervalsPhaseAlert();
+        } break;
+
+        case CustomMessage::RUN_ALERT: {
+            LOG_DEBUG("RUN_ALERT\n");
+            auto* msg       = static_cast<CustomMessage::RunAlert*>(message);
+            mRunAlert.kind  = static_cast<Track::RunAlertKind>(msg->kind);
+            mRunAlert.value = msg->value;
+            modelListener->onRunAlert();
         } break;
 
         case CustomMessage::INTERVALS_WORKOUT_COMPLETED: {

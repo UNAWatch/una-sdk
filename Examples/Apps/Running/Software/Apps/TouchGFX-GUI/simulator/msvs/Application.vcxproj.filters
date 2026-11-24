@@ -706,6 +706,102 @@
     <Filter Include="Header Files\generated\gui_generated\workouttoday_screen">
       <UniqueIdentifier>9027E38E-6D2D-401E-DFA6-3F40728F76C9</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\gui\menurunwalk_screen">
+      <UniqueIdentifier>450EAB77-0A18-9EB6-94EE-F1D3E26A8615</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunwalk_screen">
+      <UniqueIdentifier>FB0F4C67-F956-7D4A-95A2-C47C0D4CD52B</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menurunpacelimit_screen">
+      <UniqueIdentifier>84D06700-2927-F9CA-C0C3-773E11F1AA95</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunpacelimit_screen">
+      <UniqueIdentifier>B4E366E3-A34F-DACB-1637-B39564E679CA</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menurunlimits_screen">
+      <UniqueIdentifier>003D94F5-7B34-B26E-4528-28F9F2F4918A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunlimits_screen">
+      <UniqueIdentifier>DBC085B5-616B-F9B6-9BBC-E37A0B6BDFC8</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menurunhrlist_screen">
+      <UniqueIdentifier>B9812A3E-0B1F-F822-69C1-A29ADF37443F</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunhrlist_screen">
+      <UniqueIdentifier>32B9C727-7BE4-2CC8-2137-B134626E84FB</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menurunalerts_screen">
+      <UniqueIdentifier>CCCC0FE3-9113-87A1-CB52-328F776C6D22</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunalerts_screen">
+      <UniqueIdentifier>9EBF24EC-78E1-4DD0-7901-55DF4BD7161D</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menurunalertsaved_screen">
+      <UniqueIdentifier>5B55FBEB-0367-92CA-0764-D936DD2DE7DB</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunalertsaved_screen">
+      <UniqueIdentifier>8668261E-E4ED-CE98-2823-6493E508CFF4</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\menurunalertpicker_screen">
+      <UniqueIdentifier>F8380F2B-23D0-229E-9AF5-603D97626B5D</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\menurunalertpicker_screen">
+      <UniqueIdentifier>82F67952-D58B-2272-6396-01D8B941CCFB</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunwalk_screen">
+      <UniqueIdentifier>E593720F-B7CB-CDAE-4DEE-1429FDAD0930</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunwalk_screen">
+      <UniqueIdentifier>35AE9A5B-E29C-A7D4-7276-85DA971B9E56</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunpacelimit_screen">
+      <UniqueIdentifier>609C4FDF-47B9-CDD3-FD03-C9CB8BBB3EA6</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunpacelimit_screen">
+      <UniqueIdentifier>9C14CAFD-6BE6-1F7B-E41F-DA49D5DF7819</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunlimits_screen">
+      <UniqueIdentifier>65736B51-B790-9AEB-5104-02FE18DAE792</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunlimits_screen">
+      <UniqueIdentifier>789AB3B5-E06D-0948-8CA1-C448E18E1A7A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunhrlist_screen">
+      <UniqueIdentifier>383D6238-A0BD-E9F0-D593-D68B80E41535</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunhrlist_screen">
+      <UniqueIdentifier>27139447-4843-043A-03A7-51A2A3A29B45</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunalerts_screen">
+      <UniqueIdentifier>7AA1BF6E-CED5-7F41-6564-71CD1841EDA0</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunalerts_screen">
+      <UniqueIdentifier>D83AEBFB-BCDE-74EA-616C-A65BB7539B9A</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunalertsaved_screen">
+      <UniqueIdentifier>79408EA6-9013-9A7B-26BA-E680868EC6A9</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunalertsaved_screen">
+      <UniqueIdentifier>36EA2542-3AB6-286A-441F-5E78656817E5</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\menurunalertpicker_screen">
+      <UniqueIdentifier>D2C19F29-8758-2322-CC18-2A4921C22FC3</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\menurunalertpicker_screen">
+      <UniqueIdentifier>8968724E-1B8C-86B7-B95B-6EABFF27EE18</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\trackrunalert_screen">
+      <UniqueIdentifier>BA79EDC9-3044-58F9-1E4C-9A04A428A537</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\trackrunalert_screen">
+      <UniqueIdentifier>17EFF077-00CE-46CA-D33D-EA8D00FCD34E</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\trackrunalert_screen">
+      <UniqueIdentifier>64FC9443-416F-AF35-6207-EAAF40512EEB</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\trackrunalert_screen">
+      <UniqueIdentifier>14CF23A6-65A6-3EE2-7D78-BC1B8190047D</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(SdkPath)\Libs\Source\Fit\FitCrc.cpp">
@@ -937,6 +1033,9 @@
       <Filter>Libs\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\Libs\Sources\ActivityWriter.cpp">
+      <Filter>Libs\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Libs\Sources\RunAlerts.cpp">
       <Filter>Libs\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp">
@@ -1901,6 +2000,153 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TrackFacePaceBase.hpp">
       <Filter>Header Files\generated\gui_generated\containers</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\menurunalertpicker_screen\MenuRunAlertPickerPresenter.cpp">
+      <Filter>Source Files\gui\menurunalertpicker_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunalertpicker_screen\MenuRunAlertPickerView.cpp">
+      <Filter>Source Files\gui\menurunalertpicker_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunalertpicker_screen\MenuRunAlertPickerViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunalertpicker_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunalertsaved_screen\MenuRunAlertSavedPresenter.cpp">
+      <Filter>Source Files\gui\menurunalertsaved_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunalertsaved_screen\MenuRunAlertSavedView.cpp">
+      <Filter>Source Files\gui\menurunalertsaved_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunalertsaved_screen\MenuRunAlertSavedViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunalertsaved_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunalerts_screen\MenuRunAlertsPresenter.cpp">
+      <Filter>Source Files\gui\menurunalerts_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunalerts_screen\MenuRunAlertsView.cpp">
+      <Filter>Source Files\gui\menurunalerts_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunalerts_screen\MenuRunAlertsViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunalerts_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunhrlist_screen\MenuRunHrListPresenter.cpp">
+      <Filter>Source Files\gui\menurunhrlist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunhrlist_screen\MenuRunHrListView.cpp">
+      <Filter>Source Files\gui\menurunhrlist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunhrlist_screen\MenuRunHrListViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunhrlist_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunlimits_screen\MenuRunLimitsPresenter.cpp">
+      <Filter>Source Files\gui\menurunlimits_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunlimits_screen\MenuRunLimitsView.cpp">
+      <Filter>Source Files\gui\menurunlimits_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunlimits_screen\MenuRunLimitsViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunlimits_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunpacelimit_screen\MenuRunPaceLimitPresenter.cpp">
+      <Filter>Source Files\gui\menurunpacelimit_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunpacelimit_screen\MenuRunPaceLimitView.cpp">
+      <Filter>Source Files\gui\menurunpacelimit_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunpacelimit_screen\MenuRunPaceLimitViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunpacelimit_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunwalk_screen\MenuRunWalkPresenter.cpp">
+      <Filter>Source Files\gui\menurunwalk_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\menurunwalk_screen\MenuRunWalkView.cpp">
+      <Filter>Source Files\gui\menurunwalk_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunwalk_screen\MenuRunWalkViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\menurunwalk_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertpicker_screen\MenuRunAlertPickerPresenter.hpp">
+      <Filter>Header Files\gui\menurunalertpicker_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertpicker_screen\MenuRunAlertPickerView.hpp">
+      <Filter>Header Files\gui\menurunalertpicker_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunalertpicker_screen\MenuRunAlertPickerViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunalertpicker_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertsaved_screen\MenuRunAlertSavedPresenter.hpp">
+      <Filter>Header Files\gui\menurunalertsaved_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertsaved_screen\MenuRunAlertSavedView.hpp">
+      <Filter>Header Files\gui\menurunalertsaved_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunalertsaved_screen\MenuRunAlertSavedViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunalertsaved_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunalerts_screen\MenuRunAlertsPresenter.hpp">
+      <Filter>Header Files\gui\menurunalerts_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunalerts_screen\MenuRunAlertsView.hpp">
+      <Filter>Header Files\gui\menurunalerts_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunalerts_screen\MenuRunAlertsViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunalerts_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunhrlist_screen\MenuRunHrListPresenter.hpp">
+      <Filter>Header Files\gui\menurunhrlist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunhrlist_screen\MenuRunHrListView.hpp">
+      <Filter>Header Files\gui\menurunhrlist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunhrlist_screen\MenuRunHrListViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunhrlist_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunlimits_screen\MenuRunLimitsPresenter.hpp">
+      <Filter>Header Files\gui\menurunlimits_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunlimits_screen\MenuRunLimitsView.hpp">
+      <Filter>Header Files\gui\menurunlimits_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunlimits_screen\MenuRunLimitsViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunlimits_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunpacelimit_screen\MenuRunPaceLimitPresenter.hpp">
+      <Filter>Header Files\gui\menurunpacelimit_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunpacelimit_screen\MenuRunPaceLimitView.hpp">
+      <Filter>Header Files\gui\menurunpacelimit_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunpacelimit_screen\MenuRunPaceLimitViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunpacelimit_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunwalk_screen\MenuRunWalkPresenter.hpp">
+      <Filter>Header Files\gui\menurunwalk_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\menurunwalk_screen\MenuRunWalkView.hpp">
+      <Filter>Header Files\gui\menurunwalk_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunwalk_screen\MenuRunWalkViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\menurunwalk_screen</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\gui\src\trackrunalert_screen\TrackRunAlertPresenter.cpp">
+      <Filter>Source Files\gui\trackrunalert_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\trackrunalert_screen\TrackRunAlertView.cpp">
+      <Filter>Source Files\gui\trackrunalert_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackrunalert_screen\TrackRunAlertViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\trackrunalert_screen</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\gui\include\gui\common\RunAlertsUi.hpp">
+      <Filter>Header Files\gui\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\trackrunalert_screen\TrackRunAlertPresenter.hpp">
+      <Filter>Header Files\gui\trackrunalert_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\trackrunalert_screen\TrackRunAlertView.hpp">
+      <Filter>Header Files\gui\trackrunalert_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackrunalert_screen\TrackRunAlertViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\trackrunalert_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

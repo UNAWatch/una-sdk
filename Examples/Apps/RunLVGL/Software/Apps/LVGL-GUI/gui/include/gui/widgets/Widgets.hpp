@@ -184,7 +184,8 @@ public:
     /// One centred teal subtitle (distance pickers).
     void renderSubtitleSingle(const char* label);
     /// Two subtitles, one over each column; the active one teal (time picker).
-    void renderSubtitleDual(const char* left, const char* right, bool leftActive);
+    /// @p insetLeft moves a wide left subtitle ("Min/km") clear of the L1 arc.
+    void renderSubtitleDual(const char* left, const char* right, bool leftActive, bool insetLeft = false);
     /// The composite value plus the two upcoming values of the active component.
     void renderValue(bool leftActive, const char* left, const char* right, const char* sep,
                      const char* up1, const char* up2);

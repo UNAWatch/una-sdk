@@ -35,6 +35,7 @@ public:
     void onTime(uint8_t hour, uint8_t minute, uint8_t sec) override;
     void onLapChanged(uint8_t lapEnd) override;
     void onIntervalsPhaseAlert() override;
+    void onRunAlert() override;
     void onIntervalsWorkoutCompleted() override;
     void onGpsFix(bool acquired) override;
     void onAccessoryStatus(uint8_t state, const char* name) override;

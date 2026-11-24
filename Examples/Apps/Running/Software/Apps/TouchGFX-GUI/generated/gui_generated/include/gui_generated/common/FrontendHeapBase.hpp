@@ -26,6 +26,20 @@
 #include <gui/menutime_screen/MenuTimePresenter.hpp>
 #include <gui/menutimesaved_screen/MenuTimeSavedView.hpp>
 #include <gui/menutimesaved_screen/MenuTimeSavedPresenter.hpp>
+#include <gui/menurunalerts_screen/MenuRunAlertsView.hpp>
+#include <gui/menurunalerts_screen/MenuRunAlertsPresenter.hpp>
+#include <gui/menurunwalk_screen/MenuRunWalkView.hpp>
+#include <gui/menurunwalk_screen/MenuRunWalkPresenter.hpp>
+#include <gui/menurunlimits_screen/MenuRunLimitsView.hpp>
+#include <gui/menurunlimits_screen/MenuRunLimitsPresenter.hpp>
+#include <gui/menurunpacelimit_screen/MenuRunPaceLimitView.hpp>
+#include <gui/menurunpacelimit_screen/MenuRunPaceLimitPresenter.hpp>
+#include <gui/menurunalertpicker_screen/MenuRunAlertPickerView.hpp>
+#include <gui/menurunalertpicker_screen/MenuRunAlertPickerPresenter.hpp>
+#include <gui/menurunhrlist_screen/MenuRunHrListView.hpp>
+#include <gui/menurunhrlist_screen/MenuRunHrListPresenter.hpp>
+#include <gui/menurunalertsaved_screen/MenuRunAlertSavedView.hpp>
+#include <gui/menurunalertsaved_screen/MenuRunAlertSavedPresenter.hpp>
 #include <gui/menuintervals_screen/MenuIntervalsView.hpp>
 #include <gui/menuintervals_screen/MenuIntervalsPresenter.hpp>
 #include <gui/menuintervalsrepeats_screen/MenuIntervalsRepeatsView.hpp>
@@ -48,6 +62,8 @@
 #include <gui/track_screen/TrackPresenter.hpp>
 #include <gui/tracklap_screen/TrackLapView.hpp>
 #include <gui/tracklap_screen/TrackLapPresenter.hpp>
+#include <gui/trackrunalert_screen/TrackRunAlertView.hpp>
+#include <gui/trackrunalert_screen/TrackRunAlertPresenter.hpp>
 #include <gui/trackaction_screen/TrackActionView.hpp>
 #include <gui/trackaction_screen/TrackActionPresenter.hpp>
 #include <gui/trackholdconfirmation_screen/TrackHoldConfirmationView.hpp>
@@ -103,6 +119,13 @@ public:
             touchgfx::meta::TypeList< MenuDistanceSavedView,
             touchgfx::meta::TypeList< MenuTimeView,
             touchgfx::meta::TypeList< MenuTimeSavedView,
+            touchgfx::meta::TypeList< MenuRunAlertsView,
+            touchgfx::meta::TypeList< MenuRunWalkView,
+            touchgfx::meta::TypeList< MenuRunLimitsView,
+            touchgfx::meta::TypeList< MenuRunPaceLimitView,
+            touchgfx::meta::TypeList< MenuRunAlertPickerView,
+            touchgfx::meta::TypeList< MenuRunHrListView,
+            touchgfx::meta::TypeList< MenuRunAlertSavedView,
             touchgfx::meta::TypeList< MenuIntervalsView,
             touchgfx::meta::TypeList< MenuIntervalsRepeatsView,
             touchgfx::meta::TypeList< MenuIntervalsRunView,
@@ -114,6 +137,7 @@ public:
             touchgfx::meta::TypeList< TrackStartConfirmationView,
             touchgfx::meta::TypeList< TrackView,
             touchgfx::meta::TypeList< TrackLapView,
+            touchgfx::meta::TypeList< TrackRunAlertView,
             touchgfx::meta::TypeList< TrackActionView,
             touchgfx::meta::TypeList< TrackHoldConfirmationView,
             touchgfx::meta::TypeList< TrackDiscardedView,
@@ -127,7 +151,7 @@ public:
             touchgfx::meta::TypeList< WorkoutMenuView,
             touchgfx::meta::TypeList< WorkoutDetailsView,
             touchgfx::meta::TypeList< TrackWorkoutStepView,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedViewTypes;
 
     /**
@@ -146,6 +170,13 @@ public:
             touchgfx::meta::TypeList< MenuDistanceSavedPresenter,
             touchgfx::meta::TypeList< MenuTimePresenter,
             touchgfx::meta::TypeList< MenuTimeSavedPresenter,
+            touchgfx::meta::TypeList< MenuRunAlertsPresenter,
+            touchgfx::meta::TypeList< MenuRunWalkPresenter,
+            touchgfx::meta::TypeList< MenuRunLimitsPresenter,
+            touchgfx::meta::TypeList< MenuRunPaceLimitPresenter,
+            touchgfx::meta::TypeList< MenuRunAlertPickerPresenter,
+            touchgfx::meta::TypeList< MenuRunHrListPresenter,
+            touchgfx::meta::TypeList< MenuRunAlertSavedPresenter,
             touchgfx::meta::TypeList< MenuIntervalsPresenter,
             touchgfx::meta::TypeList< MenuIntervalsRepeatsPresenter,
             touchgfx::meta::TypeList< MenuIntervalsRunPresenter,
@@ -157,6 +188,7 @@ public:
             touchgfx::meta::TypeList< TrackStartConfirmationPresenter,
             touchgfx::meta::TypeList< TrackPresenter,
             touchgfx::meta::TypeList< TrackLapPresenter,
+            touchgfx::meta::TypeList< TrackRunAlertPresenter,
             touchgfx::meta::TypeList< TrackActionPresenter,
             touchgfx::meta::TypeList< TrackHoldConfirmationPresenter,
             touchgfx::meta::TypeList< TrackDiscardedPresenter,
@@ -170,7 +202,7 @@ public:
             touchgfx::meta::TypeList< WorkoutMenuPresenter,
             touchgfx::meta::TypeList< WorkoutDetailsPresenter,
             touchgfx::meta::TypeList< TrackWorkoutStepPresenter,
-            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
+            touchgfx::meta::Nil > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >
             > GeneratedPresenterTypes;
 
     /**

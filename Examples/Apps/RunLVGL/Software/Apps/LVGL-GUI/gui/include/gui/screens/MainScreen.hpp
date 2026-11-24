@@ -49,6 +49,7 @@ private:
 
     bool mGpsFix = false;
     bool mArmed  = false;
+    bool mRunWalk = false;  ///< Start runs Run/Walk (on, and no workout armed)
     char mArmedName[64] = "";
     WheelMenu::Item mItems[Menu::ID_COUNT] {};
 

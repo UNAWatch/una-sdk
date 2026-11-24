@@ -23,6 +23,20 @@
 #include <gui/menutime_screen/MenuTimePresenter.hpp>
 #include <gui/menutimesaved_screen/MenuTimeSavedView.hpp>
 #include <gui/menutimesaved_screen/MenuTimeSavedPresenter.hpp>
+#include <gui/menurunalerts_screen/MenuRunAlertsView.hpp>
+#include <gui/menurunalerts_screen/MenuRunAlertsPresenter.hpp>
+#include <gui/menurunwalk_screen/MenuRunWalkView.hpp>
+#include <gui/menurunwalk_screen/MenuRunWalkPresenter.hpp>
+#include <gui/menurunlimits_screen/MenuRunLimitsView.hpp>
+#include <gui/menurunlimits_screen/MenuRunLimitsPresenter.hpp>
+#include <gui/menurunpacelimit_screen/MenuRunPaceLimitView.hpp>
+#include <gui/menurunpacelimit_screen/MenuRunPaceLimitPresenter.hpp>
+#include <gui/menurunalertpicker_screen/MenuRunAlertPickerView.hpp>
+#include <gui/menurunalertpicker_screen/MenuRunAlertPickerPresenter.hpp>
+#include <gui/menurunhrlist_screen/MenuRunHrListView.hpp>
+#include <gui/menurunhrlist_screen/MenuRunHrListPresenter.hpp>
+#include <gui/menurunalertsaved_screen/MenuRunAlertSavedView.hpp>
+#include <gui/menurunalertsaved_screen/MenuRunAlertSavedPresenter.hpp>
 #include <gui/menuintervals_screen/MenuIntervalsView.hpp>
 #include <gui/menuintervals_screen/MenuIntervalsPresenter.hpp>
 #include <gui/menuintervalsrepeats_screen/MenuIntervalsRepeatsView.hpp>
@@ -45,6 +59,8 @@
 #include <gui/track_screen/TrackPresenter.hpp>
 #include <gui/tracklap_screen/TrackLapView.hpp>
 #include <gui/tracklap_screen/TrackLapPresenter.hpp>
+#include <gui/trackrunalert_screen/TrackRunAlertView.hpp>
+#include <gui/trackrunalert_screen/TrackRunAlertPresenter.hpp>
 #include <gui/trackaction_screen/TrackActionView.hpp>
 #include <gui/trackaction_screen/TrackActionPresenter.hpp>
 #include <gui/trackholdconfirmation_screen/TrackHoldConfirmationView.hpp>
@@ -178,6 +194,97 @@ void FrontendApplicationBase::gotoMenuTimeSavedScreenNoTransition()
 void FrontendApplicationBase::gotoMenuTimeSavedScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<MenuTimeSavedView, MenuTimeSavedPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunAlerts
+
+void FrontendApplicationBase::gotoMenuRunAlertsScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunAlertsScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunAlertsScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunAlertsView, MenuRunAlertsPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunWalk
+
+void FrontendApplicationBase::gotoMenuRunWalkScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunWalkScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunWalkScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunWalkView, MenuRunWalkPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunLimits
+
+void FrontendApplicationBase::gotoMenuRunLimitsScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunLimitsScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunLimitsScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunLimitsView, MenuRunLimitsPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunPaceLimit
+
+void FrontendApplicationBase::gotoMenuRunPaceLimitScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunPaceLimitScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunPaceLimitScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunPaceLimitView, MenuRunPaceLimitPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunAlertPicker
+
+void FrontendApplicationBase::gotoMenuRunAlertPickerScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunAlertPickerScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunAlertPickerScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunAlertPickerView, MenuRunAlertPickerPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunHrList
+
+void FrontendApplicationBase::gotoMenuRunHrListScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunHrListScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunHrListScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunHrListView, MenuRunHrListPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// MenuRunAlertSaved
+
+void FrontendApplicationBase::gotoMenuRunAlertSavedScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoMenuRunAlertSavedScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoMenuRunAlertSavedScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<MenuRunAlertSavedView, MenuRunAlertSavedPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
 // MenuIntervals
@@ -321,6 +428,19 @@ void FrontendApplicationBase::gotoTrackLapScreenNoTransition()
 void FrontendApplicationBase::gotoTrackLapScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<TrackLapView, TrackLapPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// TrackRunAlert
+
+void FrontendApplicationBase::gotoTrackRunAlertScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoTrackRunAlertScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoTrackRunAlertScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<TrackRunAlertView, TrackRunAlertPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }
 
 // TrackAction

@@ -14,7 +14,7 @@ void TrackFaceIntervals::initialize()
 // Phase appearance
 // =============================================================================
 
-void TrackFaceIntervals::setPhase(Track::IntervalsPhase phase, uint8_t repeat, uint8_t totalRepeats)
+void TrackFaceIntervals::setPhase(Track::IntervalsPhase phase, uint8_t repeat, uint8_t totalRepeats, bool runWalk)
 {
     paceText.setVisible(false);
     hrText.setVisible(false);
@@ -41,7 +41,7 @@ void TrackFaceIntervals::setPhase(Track::IntervalsPhase phase, uint8_t repeat, u
         hrText.setVisible(false);
         break;
     case Track::IntervalsPhase::REST:
-        titleId = T_TEXT_REST_UC;
+        titleId = runWalk ? T_TEXT_WALK_UC : T_TEXT_REST_UC;
         color   = mColorRest;
         intervalsTimer.setLineVisible(true);
         imageHeartRate.setVisible(true);

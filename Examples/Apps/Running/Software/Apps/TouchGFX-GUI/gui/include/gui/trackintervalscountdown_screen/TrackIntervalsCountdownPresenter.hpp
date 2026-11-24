@@ -32,6 +32,8 @@ public:
     /// The countdown is for an armed workout: one is armed and Intervals
     /// were not chosen from their menu.
     bool isWorkout() const;
+    /// The countdown is for Run/Walk: a plain Start with Run/Walk on.
+    bool isRunWalk() const;
 
 private:
     TrackIntervalsCountdownPresenter();

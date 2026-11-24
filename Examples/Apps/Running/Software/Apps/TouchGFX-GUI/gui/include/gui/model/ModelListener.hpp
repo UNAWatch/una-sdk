@@ -27,6 +27,8 @@ public:
     virtual void onTrackData(const Track::Data& data) {}
     virtual void onLapChanged(uint8_t lapEnd) {}
     virtual void onIntervalsPhaseAlert() {}
+    /// A pace or heart-rate alert played (Model::getRunAlert()).
+    virtual void onRunAlert() {}
     virtual void onIntervalsWorkoutCompleted() {}
     virtual void onActivitySummary(const ActivitySummary& summary) {}
     virtual void onAccessoryStatus(uint8_t state, const char* name) {}  // WP-S4

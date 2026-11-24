@@ -39,8 +39,9 @@ public:
     void renderSubtitleSingle(TypedTextId label);
 
     /// Two subtitles over each column; the active one is teal, the other grey
-    /// (time picker). @p leftActive selects which one is teal.
-    void renderSubtitleDual(TypedTextId left, TypedTextId right, bool leftActive);
+    /// (time picker). @p leftActive selects which one is teal. @p insetLeft
+    /// moves a wide left subtitle (Min/km) clear of the L1 arc.
+    void renderSubtitleDual(TypedTextId left, TypedTextId right, bool leftActive, bool insetLeft = false);
 
     /**
      * Render the big composite value and the two upcoming values.

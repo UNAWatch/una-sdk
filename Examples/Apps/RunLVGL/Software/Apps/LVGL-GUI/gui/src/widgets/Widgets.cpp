@@ -438,10 +438,12 @@ void TwoTonePicker::renderSubtitleSingle(const char* label)
     lv_label_set_text(mSubRight, "");
 }
 
-void TwoTonePicker::renderSubtitleDual(const char* left, const char* right, bool leftActive)
+void TwoTonePicker::renderSubtitleDual(const char* left, const char* right, bool leftActive, bool insetLeft)
 {
-    lv_obj_set_pos(mSubLeft, 5, 58);
-    lv_obj_set_width(mSubLeft, 110);
+    // Inset: centred on x 73, so a wide "Min/km" starts no further left than
+    // "Mins." does and keeps clear of the L1 arc.
+    lv_obj_set_pos(mSubLeft, insetLeft ? 31 : 5, 58);
+    lv_obj_set_width(mSubLeft, insetLeft ? 84 : 110);
     lv_label_set_text(mSubLeft, left);
     lv_obj_set_style_text_color(mSubLeft, Theme::rgb(leftActive ? kPickerActive : kPickerInactive), LV_PART_MAIN);
     lv_label_set_text(mSubRight, right);

@@ -26,8 +26,9 @@ public:
      * @param phase        Current interval phase.
      * @param repeat       1-based repeat index (shown as "n/total" during RUN/REST).
      * @param totalRepeats Total number of RUN-REST cycles.
+     * @param runWalk      Run/Walk: the REST phase is titled WALK.
      */
-    void setPhase(Track::IntervalsPhase phase, uint8_t repeat, uint8_t totalRepeats);
+    void setPhase(Track::IntervalsPhase phase, uint8_t repeat, uint8_t totalRepeats, bool runWalk = false);
 
     /**
      * @brief Update the timer -- always shows remaining time, no description, no line.

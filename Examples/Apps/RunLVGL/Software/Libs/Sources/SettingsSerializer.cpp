@@ -39,6 +39,59 @@ static Settings::Intervals::Metric strToMetric(std::string_view str)
     return Settings::Intervals::Metric::OPEN; // default
 }
 
+/**
+ * Read the run alerts, falling back to the defaults for anything missing or
+ * out of range: a Run/Walk time to its default, a pace or heart-rate limit to
+ * Off. An inverted pair (Too Fast not quicker than Too Slow, HR Low not below
+ * HR High) turns both its limits Off.
+ */
+static void loadRunAlerts(const SDK::JsonStreamReader& reader, Settings::RunAlerts& out)
+{
+    using RA = Settings::RunAlerts;
+
+    // Defaults first, so a file from before these keys loads the defaults
+    // whatever the struct held.
+    out = RA{};
+
+    uint32_t runSec  = out.runWalkRunSec;
+    uint32_t walkSec = out.runWalkWalkSec;
+    float    fast    = 0.0f;
+    float    slow    = 0.0f;
+    uint32_t high    = 0;
+    uint32_t low     = 0;
+
+    reader.get("run_alerts.run_walk_en",        out.runWalkEn);
+    reader.get("run_alerts.run_walk_run_time",  runSec);
+    reader.get("run_alerts.run_walk_walk_time", walkSec);
+    reader.get("run_alerts.pace_fast",          fast);
+    reader.get("run_alerts.pace_slow",          slow);
+    reader.get("run_alerts.hr_high",            high);
+    reader.get("run_alerts.hr_low",             low);
+    reader.get("run_alerts.back_in_tap",        out.backInTap);
+
+    const auto timeOk = [](uint32_t s) { return s >= RA::kRunWalkMinSec && s <= RA::kRunWalkMaxSec; };
+    // Written so that a NaN fails it too.
+    const auto paceOk = [](float p) { return p >= RA::kPaceMinSecPerKm && p <= RA::kPaceMaxSecPerKm; };
+    const auto hrOk   = [](uint32_t b) { return b >= RA::kHrMinBpm && b <= RA::kHrMaxBpm; };
+
+    if (timeOk(runSec))  { out.runWalkRunSec  = runSec; }
+    if (timeOk(walkSec)) { out.runWalkWalkSec = walkSec; }
+    out.paceFastSecPerKm = paceOk(fast) ? fast : 0.0f;
+    out.paceSlowSecPerKm = paceOk(slow) ? slow : 0.0f;
+    out.hrHighBpm        = hrOk(high) ? static_cast<uint8_t>(high) : 0;
+    out.hrLowBpm         = hrOk(low)  ? static_cast<uint8_t>(low)  : 0;
+
+    if (out.paceFastSecPerKm > 0.0f && out.paceSlowSecPerKm > 0.0f
+        && out.paceFastSecPerKm >= out.paceSlowSecPerKm) {
+        out.paceFastSecPerKm = 0.0f;
+        out.paceSlowSecPerKm = 0.0f;
+    }
+    if (out.hrHighBpm > 0 && out.hrLowBpm > 0 && out.hrLowBpm >= out.hrHighBpm) {
+        out.hrHighBpm = 0;
+        out.hrLowBpm  = 0;
+    }
+}
+
 
 SettingsSerializer::SettingsSerializer(const SDK::Kernel& kernel,
     const char *pathToFile) :
@@ -92,6 +145,17 @@ bool SettingsSerializer::save(const Settings &settings)
     writer.add("warm_up",       settings.intervals.warmUp);
     writer.add("cool_down",     settings.intervals.coolDown);
     writer.add("last_rest",     settings.intervals.lastRest);
+    writer.endMap();
+
+    writer.startMap("run_alerts");
+    writer.add("run_walk_en",        settings.runAlerts.runWalkEn);
+    writer.add("run_walk_run_time",  settings.runAlerts.runWalkRunSec);
+    writer.add("run_walk_walk_time", settings.runAlerts.runWalkWalkSec);
+    writer.add("pace_fast",          settings.runAlerts.paceFastSecPerKm);
+    writer.add("pace_slow",          settings.runAlerts.paceSlowSecPerKm);
+    writer.add("hr_high",            settings.runAlerts.hrHighBpm);
+    writer.add("hr_low",             settings.runAlerts.hrLowBpm);
+    writer.add("back_in_tap",        settings.runAlerts.backInTap);
     writer.endMap();
 
     writer.endMap();
@@ -192,6 +256,8 @@ bool SettingsSerializer::load(Settings &settings)
     if (reader.get("intervals.rest_metric", metric)) {
         settings.intervals.restMetric = strToMetric(metric);
     }
+
+    loadRunAlerts(reader, settings.runAlerts);
 
     delete[] buffer;
 

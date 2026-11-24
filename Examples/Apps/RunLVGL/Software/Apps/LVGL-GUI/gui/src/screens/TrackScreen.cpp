@@ -32,11 +32,12 @@ constexpr uint32_t kIvNeutral = Color::WHITE;
 constexpr uint32_t kIvRun     = Color::CYAN;
 constexpr uint32_t kIvRest    = Color::WHITE;  // amber means too slow on a workout
 
-const char* phaseTitle(Track::IntervalsPhase phase)
+/// @p runWalk: Run/Walk, whose REST phase is a walk.
+const char* phaseTitle(Track::IntervalsPhase phase, bool runWalk)
 {
     switch (phase) {
         case Track::IntervalsPhase::RUN:       return "RUN";
-        case Track::IntervalsPhase::REST:      return "REST";
+        case Track::IntervalsPhase::REST:      return runWalk ? "WALK" : "REST";
         case Track::IntervalsPhase::COOL_DOWN: return "COOL DOWN";
         default:                               return "WARM UP";
     }
@@ -396,7 +397,7 @@ void TrackScreen::setIntervalsPhase(const Track::IntervalsData& iv)
     const bool run  = iv.phase == Track::IntervalsPhase::RUN;
     const bool rest = iv.phase == Track::IntervalsPhase::REST;
 
-    mIntervalsTitle->setText(phaseTitle(iv.phase));
+    mIntervalsTitle->setText(phaseTitle(iv.phase, iv.runWalk));
     mIntervalsTimer->setColor(run ? kIvRun : rest ? kIvRest : kIvNeutral);
     mIntervalsTimer->setLineVisible(run || rest);
 
@@ -501,6 +502,12 @@ void TrackScreen::onLapChanged(uint8_t /*lapEnd*/)
 void TrackScreen::onIntervalsPhaseAlert()
 {
     ScreenManager::instance().goTo(ScreenId::TrackIntervalsAlert);
+}
+
+void TrackScreen::onRunAlert()
+{
+    // Like the other pop-ups, only from the track faces.
+    ScreenManager::instance().goTo(ScreenId::TrackRunAlert);
 }
 
 void TrackScreen::onIntervalsWorkoutCompleted()

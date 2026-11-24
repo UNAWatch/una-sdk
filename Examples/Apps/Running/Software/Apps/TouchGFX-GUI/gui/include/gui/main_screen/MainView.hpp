@@ -21,8 +21,9 @@ public:
     void setPositionId(uint16_t id);
     uint16_t getPositionId();
 
-    /// The armed workout's name under Start; nullptr when none is armed.
-    void setArmedWorkout(const char* name);
+    /// Start's hint: the armed workout's name (nullptr when none is armed),
+    /// else "Run/Walk" when @p runWalk (a plain Start runs it), else none.
+    void setArmedWorkout(const char* name, bool runWalk = false);
 
     virtual void handleTickEvent() override;
 
@@ -33,6 +34,7 @@ protected:
     SDK::GUI::SensorStatusRow mSensorRow;
 
     bool mArmed = false;
+    bool mRunWalk = false;  ///< Start runs Run/Walk (on, and no workout armed)
     touchgfx::Unicode::UnicodeChar mArmedName[32] {};
 
     MenuItemConfig mItems[Menu::ID_COUNT] {};

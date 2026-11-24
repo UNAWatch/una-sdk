@@ -17,6 +17,9 @@ public:
     /// The countdown before an armed workout: its name, totals and steps.
     void setWorkout(const SDK::Workout::Library::Entry& entry, bool isImperial);
 
+    /// The countdown before Run/Walk: "Reps: Open", then the run and walk times.
+    void setRunWalk(uint32_t runSec, uint32_t walkSec);
+
 protected:
     static const uint32_t kTimeoutSec = 5;
     uint32_t mLastDisplayedSecond = 0;
