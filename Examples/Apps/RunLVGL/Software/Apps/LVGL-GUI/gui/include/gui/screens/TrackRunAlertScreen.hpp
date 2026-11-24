@@ -22,11 +22,14 @@ public:
     ~TrackRunAlertScreen() override;
 
     void onShow() override;
+    /// Another alert while this one shows: show it instead, for the full time.
+    void onRunAlert() override;
 
 protected:
     void build() override;
 
 private:
+    void showAlert();
     static void dismissCb(lv_timer_t* t);
 
     lv_timer_t* mDismiss = nullptr;

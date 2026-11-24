@@ -801,6 +801,11 @@ TEST(RunAlertsPickers, HintTexts)
     EXPECT_STREQ(buf, "20:00");
     RunAlerts::paceText(0, buf, sizeof(buf));
     EXPECT_STREQ(buf, "--:--");
+    // Slower than 99:59 stays 5 characters.
+    RunAlerts::paceText(5999, buf, sizeof(buf));
+    EXPECT_STREQ(buf, "99:59");
+    RunAlerts::paceText(20000, buf, sizeof(buf));
+    EXPECT_STREQ(buf, "99:59");
 
     Settings::RunAlerts cfg;
     RunAlerts::paceRangeText(cfg, false, buf, sizeof(buf));

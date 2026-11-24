@@ -203,7 +203,7 @@ struct BoundedTime {
                 bool insetLeft = false) const
     {
         const bool leftActive = (stage == MIN);
-        char left[8], right[8], up1[8] = "", up2[8] = "";
+        char left[12], right[12], up1[12] = "", up2[12] = "";
         snprintf(left, sizeof left, "%02u", static_cast<unsigned>(minutes()));
         snprintf(right, sizeof right, "%02u", static_cast<unsigned>(seconds()));
         // The values above: the next ones a press would reach.

@@ -38,6 +38,22 @@ void TrackRunAlertScreen::build()
 
 void TrackRunAlertScreen::onShow()
 {
+    showAlert();
+
+    mDismiss = lv_timer_create(&TrackRunAlertScreen::dismissCb, kDismissMs, this);
+    lv_timer_set_repeat_count(mDismiss, 1);
+}
+
+void TrackRunAlertScreen::onRunAlert()
+{
+    showAlert();
+    if (mDismiss) {
+        lv_timer_reset(mDismiss);
+    }
+}
+
+void TrackRunAlertScreen::showAlert()
+{
     mModel.resetIdleTimer();
 
     const Model::RunAlertInfo& a = mModel.getRunAlert();
@@ -48,9 +64,6 @@ void TrackRunAlertScreen::onShow()
     RunAlerts::alertValueText(a.kind, a.value, imperial, buf, sizeof(buf));
     lv_label_set_text(mValue, buf);
     lv_label_set_text(mUnit, RunAlerts::alertUnit(a.kind, imperial));
-
-    mDismiss = lv_timer_create(&TrackRunAlertScreen::dismissCb, kDismissMs, this);
-    lv_timer_set_repeat_count(mDismiss, 1);
 }
 
 void TrackRunAlertScreen::dismissCb(lv_timer_t* t)

@@ -8,12 +8,23 @@ TrackRunAlertPresenter::TrackRunAlertPresenter(TrackRunAlertView& v)
 
 void TrackRunAlertPresenter::activate()
 {
-    model->resetIdleTimer();
-
-    const Model::RunAlertInfo& a = model->getRunAlert();
-    view.setAlert(a.kind, a.value, model->isUnitsImperial());
+    showAlert();
 }
 
 void TrackRunAlertPresenter::deactivate()
 {
+}
+
+void TrackRunAlertPresenter::onRunAlert()
+{
+    showAlert();
+    view.restartDismiss();
+}
+
+void TrackRunAlertPresenter::showAlert()
+{
+    model->resetIdleTimer();
+
+    const Model::RunAlertInfo& a = model->getRunAlert();
+    view.setAlert(a.kind, a.value, model->isUnitsImperial());
 }
