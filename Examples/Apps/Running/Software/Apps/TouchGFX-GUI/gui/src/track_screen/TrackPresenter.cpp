@@ -137,6 +137,12 @@ void TrackPresenter::onIntervalsPhaseAlert()
     model->application().gotoTrackIntervalsAlertScreenNoTransition();
 }
 
+void TrackPresenter::onRunAlert()
+{
+    // Like the other pop-ups, only from the track faces.
+    model->application().gotoTrackRunAlertScreenNoTransition();
+}
+
 void TrackPresenter::onIntervalsWorkoutCompleted()
 {
     model->application().gotoTrackIntervalsWorkoutCompletedScreenNoTransition();

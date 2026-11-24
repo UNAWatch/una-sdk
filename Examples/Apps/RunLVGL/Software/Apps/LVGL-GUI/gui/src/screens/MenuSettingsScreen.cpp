@@ -19,6 +19,7 @@ MenuSettingsScreen::MenuSettingsScreen(Model& model)
 void MenuSettingsScreen::build()
 {
     mItems[Menu::ID_ALERTS]      = { Style::Simple, "Lap Alerts" };
+    mItems[Menu::ID_RUN_ALERTS]  = { Style::Simple, "Run Alerts" };
     mItems[Menu::ID_PHONE_NOTIF] = { Style::Toggle, "Phone\nNotif.", "Phone Notif.", &poppins_semibold_25 };
 
     mMenu      = std::make_unique<WheelMenu>(mRoot, mItems, Menu::ID_COUNT);
@@ -53,6 +54,8 @@ void MenuSettingsScreen::onKey(uint8_t code)
         case Btn::R1:
             if (mMenu->selected() == Menu::ID_ALERTS) {
                 ScreenManager::instance().goTo(ScreenId::MenuAlerts);
+            } else if (mMenu->selected() == Menu::ID_RUN_ALERTS) {
+                ScreenManager::instance().goTo(ScreenId::MenuRunAlerts);
             } else {
                 Settings sett = mModel.getSettings();
                 sett.phoneNotifEn = !sett.phoneNotifEn;

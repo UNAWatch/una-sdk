@@ -37,7 +37,8 @@ void TrackIntervalsAlertView::tearDownScreen()
 
 void TrackIntervalsAlertView::setPhase(Track::IntervalsPhase phase,
                                         uint8_t repeat,
-                                        uint8_t totalRepeats)
+                                        uint8_t totalRepeats,
+                                        bool runWalk)
 {
     touchgfx::colortype color = kColorNeutral;
     TypedTextId titleId       = T_TEXT_WARM_UP_UC;
@@ -52,7 +53,8 @@ void TrackIntervalsAlertView::setPhase(Track::IntervalsPhase phase,
         color   = kColorRun;
         break;
     case Track::IntervalsPhase::REST:
-        titleId = T_TEXT_REST_UC;
+        // Run/Walk's REST phase is a walk.
+        titleId = runWalk ? T_TEXT_WALK_UC : T_TEXT_REST_UC;
         color   = kColorRest;
         break;
     case Track::IntervalsPhase::COOL_DOWN:

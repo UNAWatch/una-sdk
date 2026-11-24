@@ -18,6 +18,7 @@
 #include "Settings.hpp"
 #include "ActivitySummary.hpp"
 #include "Track.hpp"
+#include "RunAlerts.hpp"
 #include "AppMenu.hpp"
 
 
@@ -107,11 +108,29 @@ public:
     // menu leaves Lap out until the activity resumes.
     bool isPausedLapTaken() const;
 
+    // Settings > Run Alerts: the setting the shared picker, list and Saved
+    // screens are editing.
+    void setRunAlertField(RunAlerts::Field field) { mRunAlertField = field; }
+    RunAlerts::Field runAlertField() const { return mRunAlertField; }
+    /// Store @p value in the field being edited (RunAlerts::setField()) and save.
+    void saveRunAlert(uint32_t value);
+
     // Track
     void setPendingIntervalsMode(bool mode);
     bool isPendingIntervalsMode() const;
     const Track::IntervalsData& getPendingAlertIntervals() const;
+    /// Starts the run Start chose. With @p intervalsMode false a plain Start
+    /// runs an armed workout, else Run/Walk when it is on, else a free run.
     void trackStart(bool intervalsMode);
+    /// What Start runs now (RunAlerts::startMode(), as the service decides).
+    /// @p intervalsRequested: Start came from the Intervals menu.
+    RunAlerts::StartMode startMode(bool intervalsRequested) const;
+    /// The last pace or heart-rate alert, for its pop-up.
+    struct RunAlertInfo {
+        Track::RunAlertKind kind  = Track::RunAlertKind::PACE_FAST;
+        float               value = 0.0f;  ///< s/m for a pace, bpm for heart rate
+    };
+    const RunAlertInfo& getRunAlert() const { return mRunAlert; }
     void intervalsNextPhase();
     bool isTrackActive() const;
     void trackPause();
@@ -225,13 +244,16 @@ private:
     uint8_t mBatteryLevel   = 0;
     uint8_t mAccessoryState = 0;   // SDK::Accessory::State (0 = UNAVAILABLE)
 
+    RunAlerts::Field       mRunAlertField         = RunAlerts::Field::RunTime;
+
     // Track
     HoldConfirmMode        mHoldConfirmMode       = HoldConfirmMode::Discard;
     bool                   mLapFromPauseMenu      = false;
     bool                   mPausedLapTaken        = false;
     bool                   mPendingIntervalsMode  = false;
     Track::IntervalsData   mPendingAlertIntervals {};  ///< Snapshot from last INTERVALS_PHASE_ALERT
-    Track::State           mTrackState            {};
+    RunAlertInfo           mRunAlert              {};  ///< From the last RUN_ALERT
+    Track::State          mTrackState            {};
     const ActivitySummary* mActivitySummary = nullptr;
     Track::Data            mTrackData             {};
 

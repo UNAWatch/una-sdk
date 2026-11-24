@@ -121,8 +121,46 @@ struct Root {
 
     struct Settings {
         enum Id {
-            ID_ALERTS = 0, ID_PHONE_NOTIF,
+            ID_ALERTS = 0, ID_RUN_ALERTS, ID_PHONE_NOTIF,
             ID_COUNT, ID_DEFAULT = ID_ALERTS
+        };
+
+        // Run Alerts: Run/Walk, Pace and Heart Rate submenus, and the
+        // Back in Range toggle. The pickers' rules are RunAlerts.hpp's.
+        struct RunAlerts {
+            enum Id {
+                ID_RUN_WALK = 0, ID_PACE, ID_HEART_RATE, ID_BACK_IN,
+                ID_COUNT, ID_DEFAULT = ID_RUN_WALK
+            };
+
+            struct RunWalk {
+                enum Id {
+                    ID_STATUS = 0, ID_RUN_TIME, ID_WALK_TIME,
+                    ID_COUNT, ID_DEFAULT = ID_STATUS
+                };
+            };
+
+            struct Pace {
+                enum Id {
+                    ID_FAST = 0, ID_SLOW,
+                    ID_COUNT, ID_DEFAULT = ID_FAST
+                };
+            };
+
+            struct HeartRate {
+                enum Id {
+                    ID_HIGH = 0, ID_LOW,
+                    ID_COUNT, ID_DEFAULT = ID_HIGH
+                };
+            };
+
+            // Too Fast / Too Slow: Off, or Pace (opens the picker).
+            struct PaceLimit {
+                enum Id {
+                    ID_OFF = 0, ID_PACE,
+                    ID_COUNT, ID_DEFAULT = ID_OFF
+                };
+            };
         };
 
         struct Alerts {
@@ -197,11 +235,22 @@ struct Nav : Position<Root> {
         void reset()         { Position<Root::Workouts>::reset(); resetChildren(); }
     };
 
-    // Settings node -- alerts picker is a child
+    // Run Alerts node -- its three submenus are children
+    struct RunAlertsNav : Position<Root::Settings::RunAlerts> {
+        Position<Root::Settings::RunAlerts::RunWalk>   runWalk;
+        Position<Root::Settings::RunAlerts::Pace>      pace;
+        Position<Root::Settings::RunAlerts::HeartRate> hr;
+
+        void resetChildren() { runWalk.reset(); pace.reset(); hr.reset(); }
+        void reset()         { Position<Root::Settings::RunAlerts>::reset(); resetChildren(); }
+    };
+
+    // Settings node -- alerts picker and run alerts are children
     struct SettingsNav : Position<Root::Settings> {
         Position<Root::Settings::Alerts> alerts;
+        RunAlertsNav                     runAlerts;
 
-        void resetChildren() { alerts.reset(); }
+        void resetChildren() { alerts.reset(); runAlerts.reset(); }
         void reset()         { Position<Root::Settings>::reset(); resetChildren(); }
     };
 

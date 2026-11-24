@@ -40,10 +40,17 @@ void TwoTonePicker::renderSubtitleSingle(TypedTextId label)
     subRight.invalidate();
 }
 
-void TwoTonePicker::renderSubtitleDual(TypedTextId left, TypedTextId right, bool leftActive)
+void TwoTonePicker::renderSubtitleDual(TypedTextId left, TypedTextId right, bool leftActive, bool insetLeft)
 {
     // Two labels, one centred over each value column; active one teal.
-    subLeft.setPosition(5, 58, 110, 28);
+    // Inset: centred on x 73, so a wide Min/km starts no further left than
+    // Mins. does and keeps clear of the L1 arc.
+    subLeft.invalidate();
+    if (insetLeft) {
+        subLeft.setPosition(31, 58, 84, 28);
+    } else {
+        subLeft.setPosition(5, 58, 110, 28);
+    }
     subLeft.setTypedText(touchgfx::TypedText(T_TMP_ITALIC_20));
     Unicode::snprintf(subLeftBuffer, SUBLEFT_SIZE, "%s",
         touchgfx::TypedText(left).getText());

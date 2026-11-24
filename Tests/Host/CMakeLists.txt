@@ -55,6 +55,8 @@ add_executable(una-sdk-host-tests
     workout/WorkoutLibrary_test.cpp
     workout/StepLabel_test.cpp
     apps/Running/ActivityWriter_test.cpp
+    apps/Running/RunAlerts_test.cpp
+    apps/Running/RunAlertsSettings_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
     simulator/FileSystemMock_test.cpp
@@ -85,6 +87,7 @@ add_executable(una-sdk-host-tests
     "${UNA_SDK_ROOT}/Examples/Apps/Timer/Software/Libs/Sources/TimerManager.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/SettingsSerializer.cpp"
     "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/ActivityWriter.cpp"
+    "${UNA_SDK_ROOT}/Examples/Apps/Running/Software/Libs/Sources/RunAlerts.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/OutdoorStrideCalibrator.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/StrideLut.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/Calibration/CadenceStrideModel.cpp"

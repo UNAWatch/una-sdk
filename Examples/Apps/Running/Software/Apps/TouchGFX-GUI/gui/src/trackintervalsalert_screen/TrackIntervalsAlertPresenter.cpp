@@ -12,7 +12,7 @@ void TrackIntervalsAlertPresenter::activate()
     // the latter may not be updated yet when this screen activates.
     const Track::IntervalsData& iv = model->getPendingAlertIntervals();
 
-    view.setPhase(iv.phase, iv.repeat, iv.totalRepeats);
+    view.setPhase(iv.phase, iv.repeat, iv.totalRepeats, iv.runWalk);
 
     if (iv.metric == Track::IntervalsMetric::DISTANCE) {
         const bool imperial     = model->isUnitsImperial();

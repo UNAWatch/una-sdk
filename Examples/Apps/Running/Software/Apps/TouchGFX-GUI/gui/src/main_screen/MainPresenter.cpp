@@ -25,7 +25,7 @@ void MainPresenter::onWorkoutList()
     if (lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size()) {
         view.setArmedWorkout(lib->entry(static_cast<size_t>(armed)).name);
     } else {
-        view.setArmedWorkout(nullptr);
+        view.setArmedWorkout(nullptr, model->startMode(false) == RunAlerts::StartMode::RunWalk);
     }
 }
 

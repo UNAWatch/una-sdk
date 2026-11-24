@@ -46,6 +46,8 @@ public:
     virtual void onTrackData(const Track::Data& data) { (void)data; }
     virtual void onLapChanged(uint8_t lapEnd) { (void)lapEnd; }
     virtual void onIntervalsPhaseAlert() {}
+    /// A pace or heart-rate alert played (Model::getRunAlert()).
+    virtual void onRunAlert() {}
     virtual void onIntervalsWorkoutCompleted() {}
     virtual void onActivitySummary(const ActivitySummary& summary) { (void)summary; }
     virtual void onAccessoryStatus(uint8_t state, const char* name) { (void)state; (void)name; }

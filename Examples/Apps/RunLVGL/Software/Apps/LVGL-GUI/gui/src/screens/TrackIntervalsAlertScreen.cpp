@@ -50,7 +50,8 @@ void TrackIntervalsAlertScreen::onShow()
     switch (iv.phase) {
         case Track::IntervalsPhase::RUN:       title = "RUN";       color = Color::CYAN;        break;
         // Amber means too slow on a workout, so rest is white.
-        case Track::IntervalsPhase::REST:      title = "REST";      color = Color::WHITE; break;
+        // Run/Walk's REST phase is a walk.
+        case Track::IntervalsPhase::REST:      title = iv.runWalk ? "WALK" : "REST"; color = Color::WHITE; break;
         case Track::IntervalsPhase::COOL_DOWN: title = "COOL DOWN"; break;
         default: break;
     }

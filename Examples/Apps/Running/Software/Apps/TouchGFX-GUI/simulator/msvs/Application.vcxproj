@@ -78,6 +78,7 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Simulator\Components\SensorDriver.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\ActivitySummarySerializer.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\ActivityWriter.cpp"/>
+    <ClCompile Include="..\..\..\..\Libs\Sources\RunAlerts.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\SettingsSerializer.cpp"/>
     <ClCompile Include="..\..\..\..\Libs\Sources\WristTiltDetector.cpp"/>
@@ -239,6 +240,30 @@
     <ClCompile Include="..\..\gui\src\common\WorkoutUi.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\TrackFacePace.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\TrackFacePaceBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunalertpicker_screen\MenuRunAlertPickerPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunalertpicker_screen\MenuRunAlertPickerView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunalertpicker_screen\MenuRunAlertPickerViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunalertsaved_screen\MenuRunAlertSavedPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunalertsaved_screen\MenuRunAlertSavedView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunalertsaved_screen\MenuRunAlertSavedViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunalerts_screen\MenuRunAlertsPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunalerts_screen\MenuRunAlertsView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunalerts_screen\MenuRunAlertsViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunhrlist_screen\MenuRunHrListPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunhrlist_screen\MenuRunHrListView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunhrlist_screen\MenuRunHrListViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunlimits_screen\MenuRunLimitsPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunlimits_screen\MenuRunLimitsView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunlimits_screen\MenuRunLimitsViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunpacelimit_screen\MenuRunPaceLimitPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunpacelimit_screen\MenuRunPaceLimitView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunpacelimit_screen\MenuRunPaceLimitViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunwalk_screen\MenuRunWalkPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\menurunwalk_screen\MenuRunWalkView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\menurunwalk_screen\MenuRunWalkViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackrunalert_screen\TrackRunAlertPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\trackrunalert_screen\TrackRunAlertView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\trackrunalert_screen\TrackRunAlertViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -618,6 +643,31 @@
     <ClInclude Include="..\..\gui\include\gui\common\WorkoutUi.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\TrackFacePace.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\TrackFacePaceBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertpicker_screen\MenuRunAlertPickerPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertpicker_screen\MenuRunAlertPickerView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunalertpicker_screen\MenuRunAlertPickerViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertsaved_screen\MenuRunAlertSavedPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunalertsaved_screen\MenuRunAlertSavedView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunalertsaved_screen\MenuRunAlertSavedViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunalerts_screen\MenuRunAlertsPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunalerts_screen\MenuRunAlertsView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunalerts_screen\MenuRunAlertsViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunhrlist_screen\MenuRunHrListPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunhrlist_screen\MenuRunHrListView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunhrlist_screen\MenuRunHrListViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunlimits_screen\MenuRunLimitsPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunlimits_screen\MenuRunLimitsView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunlimits_screen\MenuRunLimitsViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunpacelimit_screen\MenuRunPaceLimitPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunpacelimit_screen\MenuRunPaceLimitView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunpacelimit_screen\MenuRunPaceLimitViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunwalk_screen\MenuRunWalkPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\menurunwalk_screen\MenuRunWalkView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\menurunwalk_screen\MenuRunWalkViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\common\RunAlertsUi.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackrunalert_screen\TrackRunAlertPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\trackrunalert_screen\TrackRunAlertView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\trackrunalert_screen\TrackRunAlertViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

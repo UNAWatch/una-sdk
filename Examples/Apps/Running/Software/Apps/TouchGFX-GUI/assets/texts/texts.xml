@@ -292,6 +292,108 @@
       <Text Id="TEXT_PHONE_BR_NOTIF_DOT" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">Phone&#10;Notif.</Translation>
       </Text>
+      <Text Id="TEXT_RUN_ALERTS" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Run Alerts</Translation>
+      </Text>
+      <Text Id="TEXT_RUN_ALERTS_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">RUN ALERTS</Translation>
+      </Text>
+      <Text Id="TEXT_RUN_WALK" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Run/Walk</Translation>
+      </Text>
+      <Text Id="TEXT_RUN_WALK_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">RUN/WALK</Translation>
+      </Text>
+      <Text Id="TEXT_RUN_TIME" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Run Time</Translation>
+      </Text>
+      <Text Id="TEXT_RUN_TIME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">RUN TIME</Translation>
+      </Text>
+      <Text Id="TEXT_WALK_TIME" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Walk Time</Translation>
+      </Text>
+      <Text Id="TEXT_WALK_TIME_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">WALK TIME</Translation>
+      </Text>
+      <Text Id="TEXT_PACE_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">PACE</Translation>
+      </Text>
+      <Text Id="TEXT_HEART_RATE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Heart Rate</Translation>
+      </Text>
+      <Text Id="TEXT_TOO_FAST" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Too Fast</Translation>
+      </Text>
+      <Text Id="TEXT_TOO_FAST_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">TOO FAST</Translation>
+      </Text>
+      <Text Id="TEXT_TOO_SLOW" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Too Slow</Translation>
+      </Text>
+      <Text Id="TEXT_TOO_SLOW_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">TOO SLOW</Translation>
+      </Text>
+      <Text Id="TEXT_HIGH" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">High</Translation>
+      </Text>
+      <Text Id="TEXT_LOW" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Low</Translation>
+      </Text>
+      <Text Id="TEXT_HR_HIGH_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">HR HIGH</Translation>
+      </Text>
+      <Text Id="TEXT_HR_LOW_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">HR LOW</Translation>
+      </Text>
+      <Text Id="TEXT_BACK_IN_RANGE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Back in Range</Translation>
+      </Text>
+      <Text Id="TEXT_BACK_BR_IN_RANGE" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Back in&#10;Range</Translation>
+      </Text>
+      <Text Id="TEXT_ON" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">On</Translation>
+      </Text>
+      <Text Id="TEXT_OFF" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Off</Translation>
+      </Text>
+      <Text Id="TEXT_PICKER_MIN_KM" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Min/km</Translation>
+      </Text>
+      <Text Id="TEXT_PICKER_MIN_MI" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Min/mi</Translation>
+      </Text>
+      <Text Id="TEXT_PICKER_SEC" Alignment="Center" TypographyId="Poppins_Italic_20">
+        <Translation Language="GB">Sec</Translation>
+      </Text>
+      <Text Id="TEXT_WALK" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Walk</Translation>
+      </Text>
+      <Text Id="TEXT_WALK_UC" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">WALK</Translation>
+      </Text>
+      <Text Id="TEXT_ALERT_TOO_FAST" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Too fast</Translation>
+      </Text>
+      <Text Id="TEXT_ALERT_TOO_SLOW" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">Too slow</Translation>
+      </Text>
+      <Text Id="TEXT_ALERT_HR_HIGH" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">HR high</Translation>
+      </Text>
+      <Text Id="TEXT_ALERT_HR_LOW" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">HR low</Translation>
+      </Text>
+      <Text Id="TEXT_PER_KM" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">/km</Translation>
+      </Text>
+      <Text Id="TEXT_PER_MI" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">/mi</Translation>
+      </Text>
+      <Text Id="TEXT_BPM" Alignment="Left" TypographyId="Poppins_Regular_18">
+        <Translation Language="GB">bpm</Translation>
+      </Text>
       <Text Id="TEXT_MINUTES_LC" Alignment="Left" TypographyId="Poppins_Regular_18">
         <Translation Language="GB">minutes</Translation>
       </Text>

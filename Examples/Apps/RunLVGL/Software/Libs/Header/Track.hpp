@@ -67,6 +67,21 @@ struct IntervalsData {
     uint8_t         totalRepeats  = 0;    ///< Total number of RUN-REST cycles
     std::time_t     phaseTimerSec = 0;    ///< Seconds (meaning depends on metric)
     float           distRemaining = 0.0f; ///< Metres remaining (DISTANCE metric only)
+    bool            runWalk       = false; ///< Run/Walk: the REST phase is shown as "Walk"
+};
+
+// =============================================================================
+// Pace and heart-rate range alerts
+// =============================================================================
+
+/**
+ * @brief Which range alert played; see CustomMessage::RunAlert.
+ */
+enum class RunAlertKind : uint8_t {
+    PACE_FAST = 0,  ///< Quicker than the Too Fast pace
+    PACE_SLOW,      ///< Slower than the Too Slow pace
+    HR_HIGH,        ///< Above HR High
+    HR_LOW          ///< Below HR Low
 };
 
 // =============================================================================

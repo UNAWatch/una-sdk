@@ -71,16 +71,22 @@ void MainScreen::onShow()
 
 void MainScreen::onWorkoutList()
 {
-    // The armed workout's name under Start, shown when Start is selected.
+    // The armed workout's name under Start, shown when Start is selected;
+    // else "Run/Walk" when a plain Start runs it.
     const SDK::Workout::Library* lib = mModel.getWorkoutLibrary();
     const int16_t armed = mModel.getArmedWorkout();
     mArmed = lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size();
+    mRunWalk = !mArmed && mModel.startMode(false) == RunAlerts::StartMode::RunWalk;
     WheelMenu::Item& start = mItems[Menu::ID_START];
     if (mArmed) {
         WorkoutUi::toText(lib->entry(static_cast<size_t>(armed)).name, mArmedName, sizeof(mArmedName));
         WorkoutUi::fitWidth(mArmedName, sizeof(mArmedName), Theme::font(Theme::Font::Italic18), 180);
         start.style   = Style::Tip;
         start.tip     = mArmedName;
+        start.itemTip = "";
+    } else if (mRunWalk) {
+        start.style   = Style::Tip;
+        start.tip     = RunAlerts::kRunWalkName;
         start.itemTip = "";
     } else {
         start.style   = Style::Simple;
@@ -120,8 +126,8 @@ void MainScreen::confirm()
 {
     switch (mMenu->selected()) {
         case Menu::ID_START:
-            if (mGpsFix && mArmed) {
-                // A workout starts with the countdown, as Intervals do.
+            if (mGpsFix && (mArmed || mRunWalk)) {
+                // A workout or Run/Walk starts with the countdown, as Intervals do.
                 mModel.setPendingIntervalsMode(false);
                 ScreenManager::instance().goTo(ScreenId::TrackIntervalsCountdown);
             } else if (mGpsFix) {

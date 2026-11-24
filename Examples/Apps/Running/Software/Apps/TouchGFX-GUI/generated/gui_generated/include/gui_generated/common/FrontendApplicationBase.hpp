@@ -41,6 +41,27 @@ public:
     // MenuTimeSaved
     void gotoMenuTimeSavedScreenNoTransition();
 
+    // MenuRunAlerts
+    void gotoMenuRunAlertsScreenNoTransition();
+
+    // MenuRunWalk
+    void gotoMenuRunWalkScreenNoTransition();
+
+    // MenuRunLimits
+    void gotoMenuRunLimitsScreenNoTransition();
+
+    // MenuRunPaceLimit
+    void gotoMenuRunPaceLimitScreenNoTransition();
+
+    // MenuRunAlertPicker
+    void gotoMenuRunAlertPickerScreenNoTransition();
+
+    // MenuRunHrList
+    void gotoMenuRunHrListScreenNoTransition();
+
+    // MenuRunAlertSaved
+    void gotoMenuRunAlertSavedScreenNoTransition();
+
     // MenuIntervals
     void gotoMenuIntervalsScreenNoTransition();
 
@@ -73,6 +94,9 @@ public:
 
     // TrackLap
     void gotoTrackLapScreenNoTransition();
+
+    // TrackRunAlert
+    void gotoTrackRunAlertScreenNoTransition();
 
     // TrackAction
     void gotoTrackActionScreenNoTransition();
@@ -139,6 +163,27 @@ protected:
     // MenuTimeSaved
     void gotoMenuTimeSavedScreenNoTransitionImpl();
 
+    // MenuRunAlerts
+    void gotoMenuRunAlertsScreenNoTransitionImpl();
+
+    // MenuRunWalk
+    void gotoMenuRunWalkScreenNoTransitionImpl();
+
+    // MenuRunLimits
+    void gotoMenuRunLimitsScreenNoTransitionImpl();
+
+    // MenuRunPaceLimit
+    void gotoMenuRunPaceLimitScreenNoTransitionImpl();
+
+    // MenuRunAlertPicker
+    void gotoMenuRunAlertPickerScreenNoTransitionImpl();
+
+    // MenuRunHrList
+    void gotoMenuRunHrListScreenNoTransitionImpl();
+
+    // MenuRunAlertSaved
+    void gotoMenuRunAlertSavedScreenNoTransitionImpl();
+
     // MenuIntervals
     void gotoMenuIntervalsScreenNoTransitionImpl();
 
@@ -171,6 +216,9 @@ protected:
 
     // TrackLap
     void gotoTrackLapScreenNoTransitionImpl();
+
+    // TrackRunAlert
+    void gotoTrackRunAlertScreenNoTransitionImpl();
 
     // TrackAction
     void gotoTrackActionScreenNoTransitionImpl();

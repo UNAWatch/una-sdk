@@ -24,6 +24,13 @@
 #include "gui/screens/MenuAlertsScreen.hpp"
 #include "gui/screens/MenuAlertValueScreen.hpp"
 #include "gui/screens/AlertSavedScreen.hpp"
+#include "gui/screens/MenuRunAlertsScreen.hpp"
+#include "gui/screens/MenuRunWalkScreen.hpp"
+#include "gui/screens/MenuRunLimitsScreen.hpp"
+#include "gui/screens/MenuRunPaceLimitScreen.hpp"
+#include "gui/screens/RunAlertPickerScreen.hpp"
+#include "gui/screens/MenuRunHrListScreen.hpp"
+#include "gui/screens/RunAlertSavedScreen.hpp"
 #include "gui/screens/TrackStartConfirmScreen.hpp"
 #include "gui/screens/TrackIntervalsCountdownScreen.hpp"
 #include "gui/screens/TrackScreen.hpp"
@@ -32,6 +39,7 @@
 #include "gui/screens/TrackActionScreen.hpp"
 #include "gui/screens/TrackHoldConfirmScreen.hpp"
 #include "gui/screens/TrackLapScreen.hpp"
+#include "gui/screens/TrackRunAlertScreen.hpp"
 #include "gui/screens/TrackResultScreen.hpp"
 #include "gui/screens/TrackSummaryScreen.hpp"
 #include "gui/screens/TrackWorkoutStepScreen.hpp"
@@ -150,6 +158,14 @@ Screen* ScreenManager::create(ScreenId id)
         case ScreenId::MenuAlertTime:             return new MenuAlertValueScreen(m, Alert::Time);
         case ScreenId::MenuAlertDistanceSaved:    return new AlertSavedScreen(m, Alert::Distance);
         case ScreenId::MenuAlertTimeSaved:        return new AlertSavedScreen(m, Alert::Time);
+        case ScreenId::MenuRunAlerts:             return new MenuRunAlertsScreen(m);
+        case ScreenId::MenuRunWalk:               return new MenuRunWalkScreen(m);
+        case ScreenId::MenuRunPace:               return new MenuRunLimitsScreen(m, MenuRunLimitsScreen::Kind::Pace);
+        case ScreenId::MenuRunHr:                 return new MenuRunLimitsScreen(m, MenuRunLimitsScreen::Kind::HeartRate);
+        case ScreenId::MenuRunPaceLimit:          return new MenuRunPaceLimitScreen(m);
+        case ScreenId::MenuRunAlertPicker:        return new RunAlertPickerScreen(m);
+        case ScreenId::MenuRunHrList:             return new MenuRunHrListScreen(m);
+        case ScreenId::MenuRunAlertSaved:         return new RunAlertSavedScreen(m);
 
         case ScreenId::TrackStartConfirm:         return new TrackStartConfirmScreen(m);
         case ScreenId::TrackIntervalsCountdown:   return new TrackIntervalsCountdownScreen(m);
@@ -160,6 +176,7 @@ Screen* ScreenManager::create(ScreenId id)
         case ScreenId::TrackAction:               return new TrackActionScreen(m);
         case ScreenId::TrackHoldConfirm:          return new TrackHoldConfirmScreen(m);
         case ScreenId::TrackLap:                  return new TrackLapScreen(m);
+        case ScreenId::TrackRunAlert:             return new TrackRunAlertScreen(m);
         case ScreenId::TrackSaved:                return new TrackResultScreen(m, TrackResultScreen::Result::Saved);
         case ScreenId::TrackDiscarded:            return new TrackResultScreen(m, TrackResultScreen::Result::Discarded);
         case ScreenId::TrackSummary:              return new TrackSummaryScreen(m);

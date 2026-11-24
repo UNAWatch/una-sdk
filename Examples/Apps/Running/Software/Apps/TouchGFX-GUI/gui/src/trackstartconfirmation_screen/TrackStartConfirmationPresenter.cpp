@@ -25,9 +25,10 @@ void TrackStartConfirmationPresenter::onIdleTimeout()
 
 void TrackStartConfirmationPresenter::startTrack()
 {
-    if (model->isPendingIntervalsMode() || model->getArmedWorkout() != Model::kNoWorkout) {
-        // The user already configured intervals in the menu and chose Start
-        // without a GPS fix; confirming proceeds straight to the countdown.
+    if (model->startMode(model->isPendingIntervalsMode()) != RunAlerts::StartMode::Free) {
+        // Intervals were configured, a workout armed, or Run/Walk is on, and
+        // Start chosen without a GPS fix; confirming proceeds straight to the
+        // countdown.
         model->application().gotoTrackIntervalsCountdownScreenNoTransition();
     } else {
         model->trackStart(false);

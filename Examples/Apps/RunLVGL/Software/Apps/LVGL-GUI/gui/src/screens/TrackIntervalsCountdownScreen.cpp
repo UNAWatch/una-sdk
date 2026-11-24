@@ -54,6 +54,11 @@ bool TrackIntervalsCountdownScreen::isWorkout() const
     return lib != nullptr && armed >= 0 && static_cast<size_t>(armed) < lib->size();
 }
 
+bool TrackIntervalsCountdownScreen::isRunWalk() const
+{
+    return mModel.startMode(mModel.isPendingIntervalsMode()) == RunAlerts::StartMode::RunWalk;
+}
+
 void TrackIntervalsCountdownScreen::onShow()
 {
     mModel.resetIdleTimer();
@@ -72,6 +77,19 @@ void TrackIntervalsCountdownScreen::onShow()
         WorkoutUi::fitWidth(buf, sizeof(buf), font, kLineW);
         lv_label_set_text(mRun, buf);
         snprintf(buf, sizeof(buf), "%u steps", static_cast<unsigned>(e.steps));
+        lv_label_set_text(mRest, buf);
+    } else if (isRunWalk()) {
+        // Run/Walk repeats until stopped: "Reps: Open", then both times.
+        const Settings::RunAlerts& ra = mModel.getSettings().runAlerts;
+        char reps[8];
+        Fmt::intervalsRepeats(reps, sizeof(reps), 0);
+        snprintf(buf, sizeof(buf), "Reps: %s", reps);
+        lv_label_set_text(mReps, buf);
+        Fmt::intervalsPhaseSummary(buf, sizeof(buf), "Run", Settings::Intervals::TIME, ra.runWalkRunSec, 0.0f,
+                                   imperial);
+        lv_label_set_text(mRun, buf);
+        Fmt::intervalsPhaseSummary(buf, sizeof(buf), "Walk", Settings::Intervals::TIME, ra.runWalkWalkSec, 0.0f,
+                                   imperial);
         lv_label_set_text(mRest, buf);
     } else {
         const Settings::Intervals& iv = mModel.getSettings().intervals;
@@ -105,7 +123,8 @@ void TrackIntervalsCountdownScreen::onKey(uint8_t code)
         startTrack();
     } else if (code == Btn::R2) {
         lv_anim_delete(this, nullptr);
-        ScreenManager::instance().goTo(isWorkout() ? ScreenId::Main : ScreenId::MenuIntervals);
+        // A workout or Run/Walk came from Start on the main menu.
+        ScreenManager::instance().goTo(isWorkout() || isRunWalk() ? ScreenId::Main : ScreenId::MenuIntervals);
     }
 }
 
@@ -139,6 +158,12 @@ void TrackIntervalsCountdownScreen::startTrack()
         // The step card for the first step follows from the Track screen.
         mModel.trackStart(false);
         ScreenManager::instance().goTo(ScreenId::Track);
+        return;
+    }
+    if (isRunWalk()) {
+        // Run/Walk opens with the RUN pop-up (the model pre-filled it).
+        mModel.trackStart(false);
+        ScreenManager::instance().goTo(ScreenId::TrackIntervalsAlert);
         return;
     }
     mModel.trackStart(true);

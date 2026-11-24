@@ -167,7 +167,7 @@ void TrackView::setTrackData(const Track::Data& data)
     if (mMode == Mode::Intervals) {
         const Track::IntervalsData& iv = data.intervals;
 
-        trackFaceIntervals.setPhase(iv.phase, iv.repeat, iv.totalRepeats);
+        trackFaceIntervals.setPhase(iv.phase, iv.repeat, iv.totalRepeats, iv.runWalk);
 
         if (iv.metric == Track::IntervalsMetric::DISTANCE) {
             trackFaceIntervals.setPhaseDistance(distConv(iv.distRemaining), mIsImperial);

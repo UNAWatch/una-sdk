@@ -63,6 +63,10 @@ void MenuSettingsView::updateItem(MainMenuItem& item, int16_t index)
         cfg.style = MenuItemConfig::SIMPLE;
         cfg.msgId = T_TEXT_LAP_ALERTS;
         break;
+    case Menu::ID_RUN_ALERTS:
+        cfg.style = MenuItemConfig::SIMPLE;
+        cfg.msgId = T_TEXT_RUN_ALERTS;
+        break;
     case Menu::ID_PHONE_NOTIF:
         cfg.style    = MenuItemConfig::TIP;
         cfg.msgId    = T_TEXT_PHONE_NOTIF_DOT;
@@ -85,6 +89,10 @@ void MenuSettingsView::updateCenterItem(MainMenuCenterItem& item, int16_t index)
     case Menu::ID_ALERTS:
         cfg.style = MenuItemConfig::SIMPLE;
         cfg.msgId = T_TEXT_LAP_ALERTS;
+        break;
+    case Menu::ID_RUN_ALERTS:
+        cfg.style = MenuItemConfig::SIMPLE;
+        cfg.msgId = T_TEXT_RUN_ALERTS;
         break;
     case Menu::ID_PHONE_NOTIF:
         cfg.style       = MenuItemConfig::TOGGLE;
@@ -115,6 +123,9 @@ void MenuSettingsView::handleKeyEvent(uint8_t key)
         switch (id) {
         case Menu::ID_ALERTS:
             application().gotoMenuAlertsScreenNoTransition();
+            break;
+        case Menu::ID_RUN_ALERTS:
+            application().gotoMenuRunAlertsScreenNoTransition();
             break;
         case Menu::ID_PHONE_NOTIF:
             mPhoneNotif = !mPhoneNotif;

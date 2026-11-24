@@ -131,6 +131,21 @@ void TrackIntervalsCountdownView::setWorkout(const SDK::Workout::Library::Entry&
     restText.invalidate();
 }
 
+void TrackIntervalsCountdownView::setRunWalk(uint32_t runSec, uint32_t walkSec)
+{
+    // Run/Walk repeats until stopped; both phases are timed.
+    Unicode::snprintf(repsTextBuffer, REPSTEXT_SIZE, "%s: %s",
+        touchgfx::TypedText(T_TEXT_REPS).getText(), touchgfx::TypedText(T_TEXT_OPEN).getText());
+    Unicode::snprintf(runTextBuffer, RUNTEXT_SIZE, "%s: %02u:%02u",
+        touchgfx::TypedText(T_TEXT_RUN).getText(), runSec / 60u, runSec % 60u);
+    Unicode::snprintf(restTextBuffer, RESTTEXT_SIZE, "%s: %02u:%02u",
+        touchgfx::TypedText(T_TEXT_WALK).getText(), walkSec / 60u, walkSec % 60u);
+
+    repsText.invalidate();
+    runText.invalidate();
+    restText.invalidate();
+}
+
 void TrackIntervalsCountdownView::handleKeyEvent(uint8_t key)
 {
     if (key == SDK::GUI::Button::L1) {
@@ -144,7 +159,8 @@ void TrackIntervalsCountdownView::handleKeyEvent(uint8_t key)
     }
 
     if (key == SDK::GUI::Button::R2) {
-        if (presenter->isWorkout()) {
+        // A workout or Run/Walk came from Start on the main menu.
+        if (presenter->isWorkout() || presenter->isRunWalk()) {
             application().gotoMainScreenNoTransition();
         } else {
             application().gotoMenuIntervalsScreenNoTransition();
