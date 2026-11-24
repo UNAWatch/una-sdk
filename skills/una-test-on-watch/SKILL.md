@@ -127,9 +127,10 @@ The same log is also sent out of the watch's debug UART, which needs a debug ada
 ## Checks only a watch can answer
 
 Report each answer: they are the gaps the simulator can't cover. With Developer on, a script's
-screenshots answer the first three groups (what is on screen); timing, sensors, lifecycle and
-battery still need the user to watch or wear it. Without Developer, walk the user through all of
-them.
+screenshots answer most of the first three groups (what is on screen: layout, clipping, the
+colours drawn), but whether text and icons are readable on the panel itself needs the user to
+look at the watch; timing, sensors, lifecycle and battery need the user to watch or wear it too.
+Without Developer, walk the user through all of them.
 
 - **It appears and opens:**
   - the app is in the list with the right name and icon;
