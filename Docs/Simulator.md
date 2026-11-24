@@ -472,7 +472,7 @@ Linux support is spread across the repo rather than in one place:
 
 ## Scripted and headless runs {#scripted-runs}
 
-Every simulator (TouchGFX apps, LVGL apps and glances) can run a script: a timeline that presses buttons, sets sensor values and saves screenshots, then ends the run. With `--headless` it runs without a window, so it works over SSH, in CI and in containers, and never takes keyboard focus. The options are read by the SDK (`Libs/Header/SDK/Simulator/Automation`), so an app's `simulator/main.cpp` needs no change. The same script runs on a watch connected by USB: see [Driving a watch from a computer](watch-automation.md).
+Every simulator (TouchGFX apps, LVGL apps and glances) can run a script: a timeline that presses buttons, sets sensor values and saves screenshots, then ends the run. With `--headless` it runs without a window, so it works over SSH, in CI and in containers, and never takes keyboard focus. The options are read by the SDK (`Libs/Header/SDK/Simulator/Automation`), so an app's `simulator/main.cpp` needs no change. The same script runs on a watch connected by USB, except that there a screenshot can't be named `watch.log`, the run's log: see [Driving a watch from a computer](watch-automation.md).
 
 ### Options
 

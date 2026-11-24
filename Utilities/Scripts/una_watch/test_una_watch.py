@@ -294,7 +294,7 @@ def main():
         tiny = bytes([0xC0] * 4)
         screen_reply = b"#DATA 4 2 2 abgr2222 %08X\n" % zlib.crc32(tiny) + tiny + b"\n#OK\n"
 
-        def timed_run(text, replies):
+        def timed_run(text, replies, duration_ms=None, catch=False):
             clock = FakeClock()
             real_time, uw.time = uw.time, clock
             try:
@@ -304,8 +304,14 @@ def main():
                 script.write_text(text)
                 with open(tmp / "watch.log", "wb") as log:
                     runner = uw.Runner(w, tmp / "out", log)
+                    runner.stopped = None
                     start = clock.t
-                    runner.run(uw.parse_script(script))
+                    try:
+                        runner.run(uw.parse_script(script), duration_ms)
+                    except uw.WatchError as e:
+                        if not catch:
+                            raise
+                        runner.stopped = str(e)
                 return runner, [(round(t - start, 2), s) for t, s in w.ser.timed
                                 if s.startswith("dev ")]
             finally:
@@ -370,6 +376,99 @@ def main():
         expect([s for _, s in timed] == ["dev button R1 press", "dev button R1 release",
                                          "dev button R1 release"] and near(timed[2][0], 1.2),
                "a release that fails to send is tried again a second later")
+
+        def always_busy(line):
+            return b"#ERR busy\n" if line.endswith("release") else b"#OK\n"
+        runner, timed = timed_run("0 hold R1 200\n+5000 click R2\n", [("dev button", always_busy)],
+                                  catch=True)
+        releases = [s for _, s in timed if s.endswith("release")]
+        expect(runner.stopped and "failed 3 times" in runner.stopped and len(releases) == 4
+               and not any("R2" in s for _, s in timed),
+               f"a release that fails every try stops the run, which tries once more ({timed})")
+
+        def slow_screen(line):
+            uw.time.t += 0.5            # the transfer takes half a second
+            return screen_reply
+        runner, timed = timed_run("0 screenshot slow\n+100 click R1\n",
+                                  [("dev screen", slow_screen), ("dev button", b"#OK\n")],
+                                  duration_ms=200)
+        expect([s for _, s in timed] == ["dev screen"],
+               f"no step starts after the end of the run, even one due before it ({timed})")
+
+        # Interrupted while the drive is being changed, an install puts it back; not once the
+        # watch is restarting.
+        new_app = tmp / "New_1.0.0.uapp"
+        new_app.write_bytes(uapp)
+        restored = []
+        saved = uw._copy_and_check, uw._restore
+
+        def copy_then_interrupt(watch, uapp_path, data, folder, watch_path, drive_arg, attempts,
+                                backups, state):
+            backups.append(("New_0.9.0.uapp.bak", "New_0.9.0.uapp"))
+            state["written"] = True
+            raise KeyboardInterrupt
+        uw._restore = lambda *a: restored.append(a)
+        try:
+            uw._copy_and_check = copy_then_interrupt
+            w = watch_with([])
+            expect(raises(lambda: uw.install(w, new_app, "New", str(tmp)), KeyboardInterrupt)
+                   and len(restored) == 1, "Ctrl+C during the copy puts the previous version back")
+
+            def copied(watch, uapp_path, data, folder, watch_path, drive_arg, attempts, backups,
+                       state):
+                state["written"] = True
+            uw._copy_and_check = copied
+
+            def interrupt(*a, **k):
+                raise KeyboardInterrupt
+            w = watch_with([])
+            w.restart = interrupt
+            restored.clear()
+            expect(raises(lambda: uw.install(w, new_app, "New", str(tmp)), KeyboardInterrupt)
+                   and not restored, "Ctrl+C while the watch restarts leaves the new version")
+        finally:
+            uw._copy_and_check, uw._restore = saved
+
+        mixed = tmp / "mixed"
+        mixed.mkdir()
+        (mixed / "Demo.UAPP").write_bytes(b"x")
+        (mixed / "notes.txt").write_bytes(b"x")
+        expect([p.name for p in uw.uapp_files(mixed)] == ["Demo.UAPP"]
+               and uw.uapp_files(tmp / "absent") == [],
+               "app files are found whatever the case of their extension")
+
+        # An explicit --drive is used only once something is mounted there.
+        closed = []
+        saved = uw.close_drive, uw.time, uw.os.path.ismount
+        uw.close_drive = lambda watch, d: closed.append(d)
+        uw.time = FakeClock()
+        try:
+            w = watch_with([("usb", b"#OK\n")])
+            w.ser.clock = uw.time
+            w.reopen = lambda *a, **k: None
+            expect(raises(lambda: uw.open_drive(w, str(mixed)), uw.WatchError) and closed == [None],
+                   "a --drive where nothing is mounted is refused, and the drive closed")
+            uw.os.path.ismount = lambda p: True
+            expect(uw.open_drive(w, str(mixed)) == mixed, "a mounted --drive is used")
+        finally:
+            uw.close_drive, uw.time, uw.os.path.ismount = saved
+
+        # With several watches connected, closing the drive refuses rather than guess.
+        saved = uw.Watch.count_ports
+        uw.Watch.count_ports = staticmethod(lambda: 2)
+        try:
+            w = watch_with([("usb", b"drive: open\n#OK\n")])
+            expect(raises(w.close_drive, uw.WatchError)
+                   and not any(s.startswith("usb drive off") for s in w.ser.sent),
+                   "with several watches, the drive is not closed on a guess")
+        finally:
+            uw.Watch.count_ports = saved
+
+        not_text = tmp / "not_text.txt"
+        not_text.write_bytes(b"0 log \x81\x8d\n")
+        expect(raises(lambda: uw.parse_script(not_text), uw.ScriptError)
+               and uw.main(["run", str(not_text)]) == 2,
+               "a script that isn't text is a bad script (exit code 2)")
 
         (tmp / "x.uapp.bak").write_bytes(b"someone's")
         expect(uw.backup_name(tmp / "x.uapp").name == "x.uapp.bak2",

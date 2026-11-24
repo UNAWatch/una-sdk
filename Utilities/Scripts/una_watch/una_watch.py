@@ -332,14 +332,13 @@ class Watch:
         nothing it has cached for the drive is lost. The port reconnects."""
         if not self.drive_open():
             return False
-        drive = find_drive()
-        if drive is None and self.count_ports() == 1:
-            # Not mounted (or not found): nothing on the computer can be holding writes for it.
-            pass
-        elif drive is None:
-            raise WatchError("the USB drive is open but can't be identified among several "
-                             "watches: close it with 'usb drive off' or unplug")
-        close_drive(self, drive)
+        if self.count_ports() > 1:
+            # A drive found by its label could be another watch's: letting go of that one and
+            # closing this one's would leave this one's under the computer's cached writes.
+            raise WatchError("the USB drive is open, and with several watches connected the "
+                             "tool can't tell which drive is this one's: eject it on the "
+                             "computer, then send 'usb drive off' or unplug")
+        close_drive(self, find_drive())
         return True
 
     def show_home(self):
@@ -627,10 +626,18 @@ def install(watch, uapp, folder=None, drive_arg=None, attempts=3):
         _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, backups,
                         state)
         print("restarting the watch so it finds the app")
+        state["restarting"] = True
         watch.restart(watch_path)
     except (WatchError, OSError) as e:
         if backups or state["written"]:
             _restore(watch, drive_arg, folder, uapp.name, backups, state["written"], e)
+        raise
+    except KeyboardInterrupt:
+        # Interrupted while the drive was being changed: put it back as for a failure. Not once
+        # the watch is restarting: it may already have taken the new version.
+        if (backups or state["written"]) and not state.get("restarting"):
+            _restore(watch, drive_arg, folder, uapp.name, backups, state["written"],
+                     WatchError("interrupted"))
         raise
     if backups:
         _remove_backups(watch, drive_arg, folder, backups)
@@ -667,6 +674,14 @@ def _remove_backups(watch, drive_arg, folder, backups):
         print(f"warning: the previous version's backup is still in Apps/{folder}: "
               + ", ".join(left) + ". The watch does not load it; delete it when convenient.",
               file=sys.stderr)
+
+
+def uapp_files(folder):
+    """The .uapp files in a folder, whatever the case of the extension: the watch's volume
+    ignores case, where a glob on Linux or macOS would miss Demo.UAPP."""
+    if not folder.is_dir():
+        return []
+    return [p for p in folder.iterdir() if p.is_file() and p.suffix.lower() == ".uapp"]
 
 
 def backup_name(path):
@@ -726,14 +741,14 @@ def _copy_and_check(watch, uapp, data, folder, watch_path, drive_arg, attempts, 
             # Never touch another app's files: every .uapp already in the folder must carry
             # this app's ID (its first 8 bytes). On a retry, the copy this install wrote is
             # left out: damage can reach its first bytes too.
-            others = [p.name for p in dest_dir.glob("*.uapp")
+            others = [p.name for p in uapp_files(dest_dir)
                       if not (attempt > 1 and p.name == dest.name) and p.read_bytes()[:8] != data[:8]]
             if others:
                 raise WatchError(f"Apps/{folder} holds another app ({', '.join(others)}): "
                                  "pass --folder to choose a different folder")
             dest_dir.mkdir(parents=True, exist_ok=True)
             if attempt == 1:
-                for old in dest_dir.glob("*.uapp"):
+                for old in uapp_files(dest_dir):
                     bak = backup_name(old)
                     old.rename(bak)
                     backups.append((bak.name, old.name))
@@ -828,8 +843,18 @@ def open_drive(watch, drive_arg=None):
     """Open the watch's USB drive and return where it is mounted."""
     watch.plain("usb drive on", 0.5)
     watch.reopen()
-    drive = Path(drive_arg) if drive_arg else None
     end = time.monotonic() + 30
+    if drive_arg:
+        # The port can come back before the volume is mounted, and until it is, writes to the
+        # mount point would land on the computer's own disk.
+        drive = Path(drive_arg)
+        while not (os.path.ismount(drive) and drive.is_dir()):
+            if time.monotonic() >= end:
+                close_drive(watch, None)
+                raise WatchError(f"nothing was mounted at {drive}")
+            time.sleep(0.5)
+        return drive
+    drive = None
     while drive is None and time.monotonic() < end:
         drive = find_drive()
         if drive is None:
@@ -843,8 +868,12 @@ def open_drive(watch, drive_arg=None):
 def close_drive(watch, drive):
     """Give the USB drive back to the watch: the computer lets go of it first (all writes out,
     the volume dismounted), then 'usb drive off'. If the computer can't let go, the drive is
-    left open rather than taken back from under it."""
+    left open rather than taken back from under it. A drive not found may still be mounted
+    where the tool doesn't look (a mount point of the user's own): whatever the computer has
+    cached for any drive goes out first (POSIX; on Windows the drive is found by its label)."""
     held = let_go_of_drive(drive) if drive is not None else None
+    if drive is None and hasattr(os, "sync"):
+        os.sync()
     try:
         watch.plain("usb drive off", 0.5)
         try:
@@ -929,7 +958,11 @@ def parse_script(path):
     """The steps of a simulator script, checked: (time_ms, line, step, args)."""
     steps, prev = [], 0.0
     base = Path(path).parent
-    for n, line in enumerate(Path(path).read_text().splitlines(), 1):
+    try:
+        text = Path(path).read_text()
+    except UnicodeDecodeError as e:
+        raise ScriptError(f"{path}: not a text file (byte {e.start}: {e.reason})")
+    for n, line in enumerate(text.splitlines(), 1):
         line = line.split("#", 1)[0].strip()
         if not line:
             continue
@@ -1052,6 +1085,11 @@ class Runner:
                 if tries < self.RELEASE_TRIES and not everything:
                     self.note(f"releasing {button} failed, trying again: {e}")
                     self.releases.append((time.monotonic() + 1.0, button, tries))
+                elif not everything:
+                    # The button may still be down, and later steps would go on around it: the
+                    # run stops, and its end tries the release once more before the port
+                    # closes, which releases it anyway.
+                    raise WatchError(f"releasing {button} failed {tries} times: {e}")
                 else:
                     self.note(f"releasing {button} failed: {e}")
 
@@ -1169,6 +1207,8 @@ class Runner:
                 if end is not None and due > end:
                     break
                 self.wait_until(due)
+                if end is not None and time.monotonic() > end:
+                    break           # a step before ran past the end of the run
                 shown = " ".join(str(a) for a in args if not isinstance(a, list))
                 ran = time.monotonic() - t0
                 late = f" (ran at {ran:.3f}s)" if ran - t / 1000 >= 0.05 else ""
@@ -1327,11 +1367,12 @@ def main(argv=None):
                 print(f"error: {e}", file=sys.stderr)
                 return EXIT_FAILED
             finally:
-                sys.stdout.write(decoder.decode(b"", final=True))
+                # 'dev log off' can bring the last of the log: the decoder ends after it.
                 try:
                     w.cmd("dev log off")
                 except WatchError:
                     pass
+                sys.stdout.write(decoder.decode(b"", final=True))
             return EXIT_OK
 
         try:
