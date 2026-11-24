@@ -555,29 +555,62 @@ TEST(RunAlertsArbitration, PendingPaceAlertWaitsForGps)
 {
     // Too slow is due at 31 while something else is sounding; when that ends
     // GPS is gone, so the alert waits for a reading rather than playing the
-    // last pace heard.
+    // last pace heard, and plays once the gauge shows the pace slow again.
     SimRun run(paceRange());
     run.pace(30, 400.0f);
     for (int i = 0; i < 5; ++i) run.step(mps(400.0f), true, 0.0f, false, true);
     for (int i = 0; i < 10; ++i) run.step(mps(400.0f), false);
     EXPECT_TRUE(run.heard.empty());
-    run.pace(1, 400.0f);
+    run.pace(30, 400.0f);
     ASSERT_EQ(run.heard.size(), 1u);
-    EXPECT_EQ(run.heard[0].sec, 46u);
+    EXPECT_GE(run.heard[0].sec, 46u);
     EXPECT_EQ(run.heard[0].kind, Kind::PaceSlow);
+    EXPECT_GT(run.heard[0].value * 1000.0f, 330.0f);  // slower than Too Slow
+}
+
+TEST(RunAlertsArbitration, PendingPaceAlertDroppedWhenGpsReturnsInRange)
+{
+    // GPS comes back with the runner at 5:00, inside the range: "Too slow"
+    // must never play. The distance run meanwhile arrives with the first fix,
+    // as on the watch.
+    SimRun run(paceRange());
+    run.pace(30, 400.0f);
+    for (int i = 0; i < 5; ++i) run.step(mps(400.0f), true, 0.0f, false, true);
+    for (int i = 0; i < 10; ++i) run.step(mps(300.0f), false);
+    run.distanceCm += 10.0f * mps(300.0f) * 100.0f;
+    run.pace(60, 300.0f);
+    EXPECT_TRUE(run.heard.empty());
 }
 
 TEST(RunAlertsArbitration, PendingHrAlertWaitsForATrustedReading)
 {
+    // HR High is due while something else is sounding; the reading is lost,
+    // then comes back still high: the alert plays once the gauge, settling
+    // after the gap, shows it high again.
     SimRun run(hrRange(0, 160));
     run.heart(30, 170.0f);
     for (int i = 0; i < 5; ++i) run.step(mps(300.0f), true, 170.0f, true, true);
     run.heart(10, 170.0f, false);
     EXPECT_TRUE(run.heard.empty());
     run.heart(1, 170.0f);
+    EXPECT_TRUE(run.heard.empty());  // the gauge is settling: not yet
+    run.heart(15, 170.0f);
     ASSERT_EQ(run.heard.size(), 1u);
-    EXPECT_EQ(run.heard[0].sec, 46u);
+    EXPECT_GT(run.heard[0].sec, 46u);
     EXPECT_EQ(run.heard[0].kind, Kind::HrHigh);
+    EXPECT_EQ(run.heard[0].value, 170.0f);
+}
+
+TEST(RunAlertsArbitration, PendingHrAlertDroppedWhenItReturnsInRange)
+{
+    // The reading comes back at 140, inside the range: "HR high 140" must
+    // never play.
+    SimRun run(hrRange(0, 160));
+    run.heart(30, 170.0f);
+    for (int i = 0; i < 5; ++i) run.step(mps(300.0f), true, 170.0f, true, true);
+    run.heart(10, 170.0f, false);
+    run.heart(30, 140.0f);
+    EXPECT_TRUE(run.heard.empty());
 }
 
 TEST(RunAlertsArbitration, BuzzClockQuietFor2500Ms)

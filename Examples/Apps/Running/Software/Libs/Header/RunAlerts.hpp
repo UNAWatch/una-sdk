@@ -211,7 +211,8 @@ public:
     void resume();
 
     /// One active second. @p quiet: something else is sounding, so an alert
-    /// due now waits; so does one whose channel has no reading this second.
+    /// due now waits; so does one whose gauge does not show it this second
+    /// (no reading, or not settled since the reading came back).
     /// Returns the alert to play now, if any; pace before HR.
     Alert tick(const Input& in, bool quiet);
 
@@ -231,7 +232,12 @@ private:
         /// is disarmed).
         void tick(SDK::Workout::Zone zone, bool reading, Kind above, Kind below, bool backInTap);
 
-        Kind takePending();
+        /// The pending alert, if @p zone (the gauge's now) still bears it
+        /// out: Above for a fast or high alert, Below for a slow or low one,
+        /// In for the back-in tap. Otherwise it stays pending, through a
+        /// gauge that has no reading or has not settled yet (NoSignal,
+        /// Unknown); a zone back in range has already dropped it in tick().
+        Kind takePending(SDK::Workout::Zone zone);
 
     private:
         static bool isOut(Kind kind) { return kind != Kind::None && kind != Kind::BackIn; }
