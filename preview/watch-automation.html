@@ -219,7 +219,10 @@ the screen. Switch it off when you are done.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">[--seconds</span> <span class="pre">N]</span></code></p></td>
 <td><p>Print the watch’s log as it is written.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">SCRIPT</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">[--json]</span></code></p></td>
+<td><p>The watch’s memory: system and RTOS heap (free, least free, most used, fragmentation), the interrupt stack, and the least stack each task has had free. <code class="docutils literal notranslate"><span class="pre">--json</span></code> gives the figures with the firmware version, for tracking them over time. Needs firmware with <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">mem</span></code> (protocol 4); an older watch’s refusal says so.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">SCRIPT</span></code></p></td>
 <td><p>Run a simulator script on the watch (below).</p></td>
 </tr>
 </tbody>
@@ -325,30 +328,33 @@ in LF). Other tools can use it directly. Each command ends with a line <code cla
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">&lt;protocol&gt;</span> <span class="pre">on|off</span> <span class="pre">&lt;firmware&gt;</span></code>: the protocol version (3), Developer, and the firmware version.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">&lt;protocol&gt;</span> <span class="pre">on|off</span> <span class="pre">&lt;firmware&gt;</span></code>: the protocol version (4), Developer, and the firmware version.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">button</span> <span class="pre">L1|L2|R1|R2</span> <span class="pre">click|press|release|hold</span> <span class="pre">&lt;ms&gt;</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">mem</span></code></p></td>
+<td><p>Lines of <code class="docutils literal notranslate"><span class="pre">&lt;what&gt;</span> <span class="pre">key=value</span> <span class="pre">...</span></code>: <code class="docutils literal notranslate"><span class="pre">sys_heap</span></code> (free, total, min_ever, peak_used), <code class="docutils literal notranslate"><span class="pre">sys_heap_detail</span></code> (sbrk_headroom, fordblks, ordblks, uordblks, keepcost, images), <code class="docutils literal notranslate"><span class="pre">os_heap</span></code> (free, total, min_ever), <code class="docutils literal notranslate"><span class="pre">isr_stack</span></code> (used, usable), and one <code class="docutils literal notranslate"><span class="pre">task</span></code> line per task (stack_free_min, priority, state, then name, which may hold spaces). Sizes are in bytes; <code class="docutils literal notranslate"><span class="pre">ordblks</span></code> is a count of free blocks, <code class="docutils literal notranslate"><span class="pre">priority</span></code> a number, <code class="docutils literal notranslate"><span class="pre">state</span></code> one letter (<code class="docutils literal notranslate"><span class="pre">R</span></code> running, <code class="docutils literal notranslate"><span class="pre">r</span></code> ready, <code class="docutils literal notranslate"><span class="pre">B</span></code> blocked, <code class="docutils literal notranslate"><span class="pre">S</span></code> suspended, <code class="docutils literal notranslate"><span class="pre">D</span></code> deleted). Then <code class="docutils literal notranslate"><span class="pre">#OK</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">button</span> <span class="pre">L1|L2|R1|R2</span> <span class="pre">click|press|release|hold</span> <span class="pre">&lt;ms&gt;</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#OK</span></code> once done.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">screen</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">screen</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#DATA</span> <span class="pre">&lt;bytes&gt;</span> <span class="pre">&lt;width&gt;</span> <span class="pre">&lt;height&gt;</span> <span class="pre">abgr2222</span> <span class="pre">&lt;crc32&gt;</span></code>, the pixels, then <code class="docutils literal notranslate"><span class="pre">#OK</span></code>. One byte per pixel: bits 5-4 blue, 3-2 green, 1-0 red.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">apps</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">apps</span></code></p></td>
 <td><p>One line per app, tab-separated: service PID, type, app ID, <code class="docutils literal notranslate"><span class="pre">.uapp</span></code> path, name. Then <code class="docutils literal notranslate"><span class="pre">#OK</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">launch</span> <span class="pre">&lt;pid&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">stop</span> <span class="pre">&lt;pid&gt;</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">launch</span> <span class="pre">&lt;pid&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">stop</span> <span class="pre">&lt;pid&gt;</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#OK</span></code>. Either of an app’s PIDs is accepted.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">crc</span> <span class="pre">&lt;path&gt;</span> <span class="pre">[bytes]</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">crc</span> <span class="pre">&lt;path&gt;</span> <span class="pre">[bytes]</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">&lt;size&gt;</span> <span class="pre">&lt;crc32&gt;</span></code>: of the file, or of its first <code class="docutils literal notranslate"><span class="pre">bytes</span></code>. Paths are on the apps volume, as <code class="docutils literal notranslate"><span class="pre">/Apps/...</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">&lt;type&gt;</span> <span class="pre">&lt;values...&gt;</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">&lt;type&gt;</span> <span class="pre">&lt;values...&gt;</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#OK</span> <span class="pre">active|idle</span></code>: whether anything is listening. <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">&lt;type&gt;</span> <span class="pre">off</span></code>, or <code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">sensor</span> <span class="pre">off</span></code> for all.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">log</span> <span class="pre">on|off</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">log</span> <span class="pre">on|off</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#OK</span></code>. While on, log text arrives between commands, between the bytes 0x1E and 0x1F.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">update</span> <span class="pre">/Update/&lt;file&gt;.ota</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span> <span class="pre">update</span> <span class="pre">/Update/&lt;file&gt;.ota</span></code></p></td>
 <td><p>The watch copies the file to its bootloader’s volume (a few seconds), answers <code class="docutils literal notranslate"><span class="pre">#OK</span></code>, and restarts into the bootloader, which installs it. A refusal or failure is <code class="docutils literal notranslate"><span class="pre">#ERR</span></code> with the reason, and the watch stays up. Needs the USB drive closed and the battery at 10% or more.</p></td>
 </tr>
 </tbody>
