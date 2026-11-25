@@ -24,6 +24,7 @@ All available sensor types are defined in [`SDK::Sensor::Type`](../Libs/Header/S
 | Cardio | HEART_BEAT | 0x40 | Beat peak event | No | - |
 | Cardio | HEART_RATE | 0x41 | Current heart rate (bpm) | Yes | BPM (float), TRUST_LEVEL (float) - 2 |
 | Cardio | HEART_RATE_METRICS | 0x42 | Aggregated metrics (AHR, RHR) | Yes | AHR (float bpm), RHR (float bpm) - 2 |
+| Cardio | RR_INTERVAL | 0x44 | Beat-to-beat R-R interval (experimental, no producer yet) | Yes | RR_MS (float ms), SOURCE (u32), FLAGS (u32) - 3 |
 | Pedometer | STEP_DETECTOR | 0x50 | Step event | Yes | STEP_DETECTED (u32=1) - 1 |
 | Pedometer | STEP_COUNTER | 0x51 | Step count since reboot | Yes | STEP_COUNT (u32) - 1 |
 | Pedometer | FLOOR_COUNTER | 0x60 | Floor counter | Yes | FLOORS_UP (i32), FLOORS_DOWN (i32) - 2 |
@@ -244,6 +245,21 @@ As above, `float bpm = p.getBpm(); float trust = p.getTrustLevel();`
 |-------|------|------|------|
 | 0 | AHR | float | bpm |
 | 1 | RHR | float | bpm |
+
+### RR_INTERVAL (0x44)
+
+**Parser**: `SDK::SensorDataParser::RrInterval`
+
+**Fields**:
+| Index | Name | Type | Unit |
+|-------|------|------|------|
+| 0 | RR_MS | float | ms |
+| 1 | SOURCE | u32 | `HeartRateEx::Source`: 0 unknown, 1 optical, 2 external strap |
+| 2 | FLAGS | u32 | bit 0 DISCONTINUITY, bit 1 ARTIFACT_SUSPECT |
+
+Experimental and opt-in: there is no firmware producer yet, so do not ship
+against it. One interval per frame, so iterate `DataBatch::size()`. The
+timestamp and flag semantics are in the parser header.
 
 ### STEP_DETECTOR (0x50)
 
