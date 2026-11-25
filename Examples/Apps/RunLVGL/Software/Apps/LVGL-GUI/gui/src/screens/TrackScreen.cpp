@@ -288,9 +288,9 @@ void TrackScreen::showPopup()
 {
     // The step card or pop-up replaces this screen on the next frame. Until
     // then the faces are left as they are, so a new step does not show on
-    // them before its card.
-    mLeaving = true;
-    ScreenManager::instance().goToWaitingPopup();
+    // them before its card. If the switch could not be scheduled they carry
+    // on, and the pop-up still waits for the next try.
+    mLeaving = ScreenManager::instance().goToWaitingPopup();
 }
 
 void TrackScreen::onKey(uint8_t code)

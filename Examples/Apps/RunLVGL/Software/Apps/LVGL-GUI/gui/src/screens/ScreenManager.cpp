@@ -59,7 +59,7 @@ void ScreenManager::start(Model& model, ScreenId first)
     switchNow(first);
 }
 
-void ScreenManager::goTo(ScreenId id)
+bool ScreenManager::goTo(ScreenId id)
 {
     if (id == ScreenId::Track && mModel) {
         // Each goes back to the Track screen when it is done, which opens the
@@ -73,10 +73,11 @@ void ScreenManager::goTo(ScreenId id)
             // so the next goTo() tries again rather than waiting for a call
             // that will never come.
             LOG_ERROR("Switch to screen %u could not be scheduled\n", static_cast<unsigned>(id));
-            return;
+            return false;
         }
         mPendingSet = true;
     }
+    return true;
 }
 
 bool ScreenManager::goToWaitingPopup()
@@ -85,8 +86,7 @@ bool ScreenManager::goToWaitingPopup()
     if (id == ScreenId::Track) {
         return false;
     }
-    goTo(id);
-    return true;
+    return goTo(id);
 }
 
 ScreenId ScreenManager::trackOrPopup() const
