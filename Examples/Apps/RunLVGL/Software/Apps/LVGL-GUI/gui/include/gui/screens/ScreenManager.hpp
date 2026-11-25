@@ -78,11 +78,13 @@ public:
 
     /// Request a switch; performed on the next frame. The Track screen is
     /// reached through the step card or a pop-up while one waits to be shown
-    /// (goToWaitingPopup()).
-    void goTo(ScreenId id);
+    /// (goToWaitingPopup()). False if LVGL had no room to schedule it; the
+    /// next goTo() tries again.
+    bool goTo(ScreenId id);
 
     /// Open the step card if a step started while another screen showed, else
-    /// the first pop-up waiting (Model::waitingPopup()). False if none is.
+    /// the first pop-up waiting (Model::waitingPopup()). False if none is, or
+    /// if the switch could not be scheduled.
     bool goToWaitingPopup();
 
 private:
