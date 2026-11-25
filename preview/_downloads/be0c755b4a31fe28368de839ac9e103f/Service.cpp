@@ -410,6 +410,8 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
         if (parser.isDataValid()) {
             mHrCounter.add(parser.getBpm());           // arbitrated (kernel's choice)
             mTrackData.hrTrustLevel = parser.getTrustLevel();
+            mHrSampled   = true;
+            mHrSampleMs  = mKernel.sys.getTimeMs();
             mHrSource     = static_cast<uint8_t>(parser.getSource());
             mHrOpticalBpm = static_cast<uint8_t>(parser.getOpticalBpm());
             mHrExternalBpm= static_cast<uint8_t>(parser.getExternalBpm());
@@ -514,9 +516,13 @@ void Service::handleEvent(const CustomMessage::TrackStart& event)
     // and the GPS could have already updated the current time.
     mTimeTracker.init();
 
-    // A workout from the list replaces any armed intervals.
+    // A workout from the list replaces any armed intervals, and Run/Walk
+    // applies only to a plain Start. Run/Walk runs on the intervals engine.
+    static_assert(RunAlerts::kNoWorkout == CustomMessage::TrackStart::kNoWorkout, "same no-workout value");
+    const RunAlerts::StartMode mode = RunAlerts::startMode(event.intervalsMode, event.workout, mSettings.runAlerts);
     mWorkoutRequested = event.workout;
-    mIntervalsMode    = event.intervalsMode && event.workout == CustomMessage::TrackStart::kNoWorkout;
+    mRunWalkMode      = mode == RunAlerts::StartMode::RunWalk;
+    mIntervalsMode    = mode == RunAlerts::StartMode::Intervals || mRunWalkMode;
 
     startTrack(mTimeTracker.getExpectedUTC());
 }
@@ -648,6 +654,7 @@ void Service::playBuzzerPattern(uint16_t beepMs, uint8_t count, uint16_t silence
     if (count == 0) {
         return;
     }
+    mBuzzClock.started(mKernel.sys.getTimeMs());
 
     // A series of N beeps needs 2*N-1 notes (beeps + silences between them).
     // Cap to what fits in skMaxNotes: max count = (skMaxNotes + 1) / 2 = 5.
@@ -680,6 +687,7 @@ void Service::playBuzzerNotes(const SDK::Message::RequestBuzzerPlay::Note notes[
     if (count > SDK::Message::RequestBuzzerPlay::skMaxNotes) {
         count = SDK::Message::RequestBuzzerPlay::skMaxNotes;
     }
+    mBuzzClock.started(mKernel.sys.getTimeMs());
 
     auto* msg = mKernel.comm.allocateMessage<SDK::Message::RequestBuzzerPlay>();
     if (msg) {
@@ -864,6 +872,10 @@ void Service::startTrack(std::time_t utc)
     mPausedLapUtc = 0;
     mLapPauseCarrySec = 0;
 
+    // Pace and heart-rate range alerts, with the settings at the start. Before
+    // the workout starts: its first step sets the alerts' first segment.
+    mRunAlerts.configure(mSettings.runAlerts);
+
     // Intervals mode initialization
     mIntervalsCompleted = false;
     mTrackData.intervalsMode = mIntervalsMode;
@@ -882,6 +894,11 @@ void Service::startTrack(std::time_t utc)
     mTrackData.workoutMode = mWorkoutMode;
     if (mWorkoutMode) {
         sendWorkoutSteps();
+    }
+    if (mIntervalsMode) {
+        mRunAlerts.startSegment(RunAlerts::forPhase(mTrackData.intervals.phase), activeDistanceCm());
+    } else if (!mWorkoutMode) {
+        mRunAlerts.startSegment(RunAlerts::kFreeRun, activeDistanceCm());
     }
 
     // Each workout step is a lap: reserve them all up front.
@@ -1094,6 +1111,8 @@ void Service::processTrack()
             notifyLapEnd();
         }
 
+        // After this second's lap alert, so a range alert waits for it.
+        processRunAlerts();
     }
 
 }
@@ -1367,6 +1386,7 @@ void Service::pauseTrack(bool pause)
             mHrGauge.resume();
         }
         mAltitudeCounter.resume();
+        mRunAlerts.resume();
 
         mActivityWriter.resume(mTimeCounter.getCurrent());
 
@@ -1467,7 +1487,18 @@ void Service::startIntervals()
     mIntervalsSpec.warmUp   = cfg.warmUp;
     mIntervalsSpec.coolDown = cfg.coolDown;
     mIntervalsSpec.lastRest = cfg.lastRest;
+    if (mRunWalkMode) {
+        // Run/Walk has its own times, so the Intervals settings stay as they are.
+        mIntervalsSpec = RunAlerts::runWalkSpec(mSettings.runAlerts);
+        LOG_INFO("Run/Walk: run %u s, walk %u s\n",
+                 static_cast<unsigned>(mSettings.runAlerts.runWalkRunSec),
+                 static_cast<unsigned>(mSettings.runAlerts.runWalkWalkSec));
+    }
     mIntervalsLayout = SDK::Workout::buildIntervals(mIntervalsSpec, mProgram);
+    if (mRunWalkMode) {
+        static_assert(sizeof(RunAlerts::kRunWalkName) <= sizeof(mProgram.name), "name fits");
+        std::memcpy(mProgram.name, RunAlerts::kRunWalkName, sizeof(RunAlerts::kRunWalkName));
+    }
     mEngine.start(mProgram, 0, 0);
     mLeadIn.stepStarted();
 
@@ -1475,7 +1506,8 @@ void Service::startIntervals()
     // totalRepeats is the literal number of RUN-REST cycles the user selected.
     // repeatsNum == 0 means 'Open' (unlimited): totalRepeats stays 0 and the GUI
     // shows just the current repeat with no total.
-    mTrackData.intervals.totalRepeats = cfg.repeatsNum;
+    mTrackData.intervals.totalRepeats = mRunWalkMode ? 0 : cfg.repeatsNum;
+    mTrackData.intervals.runWalk      = mRunWalkMode;
     updateIntervalsData();
 }
 
@@ -1521,6 +1553,7 @@ void Service::onIntervalsStepEnded(SDK::Workout::Engine::Change how)
         mIntervalsCompleted = true;
         mIntervalsMode = false;
         mTrackData.intervalsMode = false;
+        mRunAlerts.startSegment(RunAlerts::kFreeRun, activeDistanceCm());
 
         notifyStepChange();
         SDK::send_msg<CustomMessage::IntervalsWorkoutCompleted>(mKernel);
@@ -1530,6 +1563,7 @@ void Service::onIntervalsStepEnded(SDK::Workout::Engine::Change how)
     // Every change of phase alerts the same way, whether the phase ran out
     // or the runner moved on with R2.
     updateIntervalsData();
+    mRunAlerts.startSegment(RunAlerts::forPhase(mTrackData.intervals.phase), activeDistanceCm());
     SDK::send_msg<CustomMessage::IntervalsPhaseAlert>(mKernel, mTrackData.intervals);
     notifyStepChange();
 }
@@ -1732,6 +1766,14 @@ bool Service::hasTrustedHr() const
     return mHrCounter.getCurrent() > 20 && mTrackData.hrTrustLevel >= 1 && mTrackData.hrTrustLevel <= 3;
 }
 
+bool Service::hasFreshTrustedHr() const
+{
+    // Samples come every second; the counter and trust level keep the
+    // last one's values when the sensor goes quiet.
+    return hasTrustedHr() && mHrSampled
+        && SDK::Timer::elapsed(mKernel.sys.getTimeMs(), mHrSampleMs) < skHrFreshMs;
+}
+
 bool Service::hrBand(const SDK::Workout::Step& step, float& low, float& high) const
 {
     // Zone n is [threshold n-1, threshold n); the last threshold is maximum HR.
@@ -1770,7 +1812,8 @@ void Service::startWorkoutStep()
 
     // Both gauges run on every step: an untargeted one still has a value and
     // a step average to show.
-    if (s.target == SDK::Workout::Target::Speed && s.speedLowMmps > 0 && s.speedHighMmps > 0) {
+    const bool speedTargeted = s.target == SDK::Workout::Target::Speed && s.speedLowMmps > 0 && s.speedHighMmps > 0;
+    if (speedTargeted) {
         mBandLow  = static_cast<float>(std::min(s.speedLowMmps, s.speedHighMmps)) / 1000.0f;
         mBandHigh = static_cast<float>(std::max(s.speedLowMmps, s.speedHighMmps)) / 1000.0f;
         mSpeedGauge.startStep(mBandLow, mBandHigh);
@@ -1780,13 +1823,17 @@ void Service::startWorkoutStep()
 
     float low = 0.0f;
     float high = 0.0f;
-    if (s.target == SDK::Workout::Target::HeartRate && hrBand(s, low, high)) {
+    const bool hrTargeted = s.target == SDK::Workout::Target::HeartRate && hrBand(s, low, high);
+    if (hrTargeted) {
         mBandLow  = low;
         mBandHigh = high;
         mHrGauge.startStep(low, high);
     } else {
         mHrGauge.startStep();
     }
+
+    // The range alerts stand aside for the step's own target.
+    mRunAlerts.startSegment(RunAlerts::forStep(s.intensity, speedTargeted, hrTargeted), activeDistanceCm());
 }
 
 SDK::Workout::Zone Service::targetZone() const
@@ -1816,7 +1863,7 @@ void Service::processWorkout()
     // the distance across a lost fix has come in.
     mSpeedGauge.tick(speedMs, mSpeedFilter.isValid() && mGpsCatchUp.caughtUp(),
                      st.stepDistanceCm);
-    mHrGauge.tick(mHrCounter.getCurrent(), hasTrustedHr());
+    mHrGauge.tick(mHrCounter.getCurrent(), hasFreshTrustedHr());
 
     const auto alert = mZoneAlerts.tick(targetZone());
     const bool beep  = mLeadIn.tick(st);
@@ -1876,6 +1923,7 @@ void Service::endWorkout()
     mEngine.stop();
     mWorkoutMode = false;
     mTrackData.workoutMode = false;
+    mRunAlerts.startSegment(RunAlerts::kFreeRun, activeDistanceCm());
 }
 
 void Service::sendWorkoutData()
@@ -1991,13 +2039,14 @@ void Service::sendAlertRepeat()
     mAlertRepeat = nullptr;
 }
 
-void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert)
+void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert, bool twice)
 {
     // Pitch, rhythm and loudness tell them apart: too slow is long and falls
     // from C7 to C6 twice, too fast is short and rises from C8 to C9 twice,
     // and back in range rises through a C7 major triad (4 : 5 : 6). A kernel
     // without pitch support plays every note at its default pitch, so the
-    // rhythms alone still tell them apart. Each plays twice, about 1 s apart.
+    // rhythms alone still tell them apart. Each plays twice, about 1 s apart,
+    // unless @p twice is false (the range alerts), which plays it once.
     static constexpr uint16_t kLowHz  = 1047;  // C6
     static constexpr uint16_t kHighHz = 8372;  // C9
     static constexpr uint16_t kMidHz  = 4186;  // C8
@@ -2029,21 +2078,72 @@ void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert)
         {80, 100, 0, kHighHz},
     };
 
+    const auto play = [&](const SDK::Message::RequestBuzzerPlay::Note notes[], uint8_t count) {
+        if (twice) {
+            playAlertTwice(notes, count);
+        } else {
+            playBuzzerNotes(notes, count);
+        }
+    };
+
     backlightOn();
     switch (alert) {
     case SDK::Workout::ZoneAlerts::Alert::Above:  // too fast, or heart rate too high
-        playAlertTwice(kAbove, sizeof(kAbove) / sizeof(kAbove[0]));
+        play(kAbove, sizeof(kAbove) / sizeof(kAbove[0]));
         playVibroPattern(SDK::Message::RequestVibroPlay::Effect::DOUBLE_CLICK_100);
         break;
     case SDK::Workout::ZoneAlerts::Alert::Below:  // too slow, or heart rate too low
-        playAlertTwice(kBelow, sizeof(kBelow) / sizeof(kBelow[0]));
+        play(kBelow, sizeof(kBelow) / sizeof(kBelow[0]));
         playVibroPattern(SDK::Message::RequestVibroPlay::Effect::ALERT_750MS_100);
         break;
     case SDK::Workout::ZoneAlerts::Alert::BackIn:  // brief and cheerful
-        playAlertTwice(kBackIn, sizeof(kBackIn) / sizeof(kBackIn[0]));
+        play(kBackIn, sizeof(kBackIn) / sizeof(kBackIn[0]));
         playVibroPattern(SDK::Message::RequestVibroPlay::Effect::STRONG_CLICK_100);
         break;
     default:
         break;
+    }
+}
+
+
+// =============================================================================
+// Pace and heart-rate range alerts
+// =============================================================================
+
+void Service::processRunAlerts()
+{
+    RunAlerts::Input in;
+    in.speedMps   = mSpeedFilter.getSpeed();
+    // As the workout's pace gauge has it (processWorkout()), and no reading
+    // without a fix.
+    in.speedValid = mSpeedFilter.isValid() && mGpsCatchUp.caughtUp() && mGps.fix;
+    in.distanceCm = activeDistanceCm();
+    in.hrBpm      = mHrCounter.getCurrent();
+    // No reading once the sensor has been quiet for skHrFreshMs.
+    in.hrValid    = hasFreshTrustedHr();
+
+    // Never over another alert: not while the buzzer started less than
+    // RunAlerts::kQuietMs ago (a lap, a phase change, a lead-in beep, a
+    // workout's zone alert or a range alert), nor while a workout alert's
+    // second playing is still to come.
+    const bool quiet = mBuzzClock.quiet(mKernel.sys.getTimeMs()) || mAlertRepeat != nullptr;
+    playRunAlert(mRunAlerts.tick(in, quiet));
+}
+
+void Service::playRunAlert(const RunAlerts::Alert& alert)
+{
+    // As RunAlerts::feedback() says: the workout zone alerts' patterns, played
+    // once (playZoneAlert() also turns the backlight on); back in range is a
+    // vibration tap only.
+    const RunAlerts::Feedback fb = RunAlerts::feedback(alert.kind);
+    if (fb.sound != SDK::Workout::ZoneAlerts::Alert::None) {
+        playZoneAlert(fb.sound, false);
+    }
+    if (fb.tap) {
+        playVibroPattern(SDK::Message::RequestVibroPlay::Effect::STRONG_CLICK_100);
+    }
+    if (fb.message) {
+        LOG_INFO("Range alert %u: %.4f\n", static_cast<unsigned>(fb.kind), alert.value);
+        SDK::send_msg<CustomMessage::RunAlert>(mKernel, fb.kind, alert.value);
     }
 }
