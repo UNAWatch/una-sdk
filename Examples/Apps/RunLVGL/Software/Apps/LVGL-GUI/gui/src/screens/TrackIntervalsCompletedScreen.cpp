@@ -36,6 +36,8 @@ void TrackIntervalsCompletedScreen::build()
 
 void TrackIntervalsCompletedScreen::onShow()
 {
+    mModel.takePopup(Model::Popup::Completed);
+
     // Only a notice: the service has already left intervals mode and opened a
     // fresh lap, so the session continues on the normal track faces.
     mDismiss = lv_timer_create(&TrackIntervalsCompletedScreen::dismissCb, kDismissMs, this);

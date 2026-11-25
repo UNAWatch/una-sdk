@@ -61,9 +61,10 @@ void ScreenManager::start(Model& model, ScreenId first)
 
 void ScreenManager::goTo(ScreenId id)
 {
-    if (id == ScreenId::Track && mModel && mModel->hasStepCard()) {
-        // The card goes back to the Track screen when it is done.
-        id = ScreenId::TrackWorkoutStep;
+    if (id == ScreenId::Track && mModel) {
+        // Each goes back to the Track screen when it is done, which opens the
+        // next one waiting.
+        id = trackOrPopup();
     }
     mPending = id;
     if (!mPendingSet) {
@@ -75,6 +76,30 @@ void ScreenManager::goTo(ScreenId id)
             return;
         }
         mPendingSet = true;
+    }
+}
+
+bool ScreenManager::goToWaitingPopup()
+{
+    const ScreenId id = mModel ? trackOrPopup() : ScreenId::Track;
+    if (id == ScreenId::Track) {
+        return false;
+    }
+    goTo(id);
+    return true;
+}
+
+ScreenId ScreenManager::trackOrPopup() const
+{
+    if (mModel->hasStepCard()) {
+        return ScreenId::TrackWorkoutStep;
+    }
+    switch (mModel->waitingPopup()) {
+        case Model::Popup::Lap:       return ScreenId::TrackLap;
+        case Model::Popup::Phase:     return ScreenId::TrackIntervalsAlert;
+        case Model::Popup::RunAlert:  return ScreenId::TrackRunAlert;
+        case Model::Popup::Completed: return ScreenId::TrackIntervalsCompleted;
+        default:                      return ScreenId::Track;
     }
 }
 

@@ -46,11 +46,11 @@ private:
     TrackPresenter();
 
     void updateMode(const Track::Data& data);
-    void showStepCard();
+    void showPopup();
 
     TrackView& view;
     int        mMode    = -1;     ///< TrackView::Mode, -1 until set
-    bool       mLeaving = false;  ///< The step card is to replace this screen
+    bool       mLeaving = false;  ///< A pop-up or step card is to replace this screen
 };
 
 #endif // TRACKPRESENTER_HPP

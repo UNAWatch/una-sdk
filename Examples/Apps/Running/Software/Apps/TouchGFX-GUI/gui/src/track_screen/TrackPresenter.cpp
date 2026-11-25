@@ -49,20 +49,21 @@ void TrackPresenter::activate()
     view.setGpsFix(model->hasGpsFix());
     view.setAccessoryStatus(model->getAccessoryState());
 
-    // A step that started while another screen showed gets its card before
-    // this screen (FrontendApplication::gotoTrackScreenNoTransition()). This
-    // catches one that started after that choice was made, in the same tick.
-    if (model->takeStepCard()) {
-        showStepCard();
+    // A step card or pop-up that came while another screen showed opens
+    // before this screen (FrontendApplication::gotoTrackScreenNoTransition()).
+    // This catches one that came after that choice was made, in the same tick.
+    if (model->hasStepCard() || model->waitingPopup() != Model::Popup::None) {
+        showPopup();
     }
 }
 
-void TrackPresenter::showStepCard()
+void TrackPresenter::showPopup()
 {
-    // The card replaces this screen at the next tick. Until then the faces
-    // are left as they are, so the new step does not show on them first.
+    // The step card or pop-up replaces this screen at the next tick. Until
+    // then the faces are left as they are, so a new step does not show on
+    // them before its card.
     mLeaving = true;
-    model->application().gotoTrackWorkoutStepScreenNoTransition();
+    model->application().gotoWaitingPopup();
 }
 
 void TrackPresenter::deactivate()
@@ -110,8 +111,8 @@ void TrackPresenter::onWorkoutStep(bool next)
         return;
     }
     // activate() shows the new step when the card hands back.
-    if (model->takeStepCard()) {
-        showStepCard();
+    if (model->hasStepCard()) {
+        showPopup();
         return;
     }
     view.setWorkoutStep(model->getWorkoutStep(false));
@@ -127,25 +128,27 @@ void TrackPresenter::onTime(uint8_t hour, uint8_t minute, uint8_t sec)
     view.setTime(hour, minute);
 }
 
+// The model has put each pop-up on its waiting list (Model::waitingPopup());
+// one that comes while another pop-up shows opens when that one is done.
+
 void TrackPresenter::onLapChanged(uint8_t lapEnd)
 {
-    model->application().gotoTrackLapScreenNoTransition();
+    showPopup();
 }
 
 void TrackPresenter::onIntervalsPhaseAlert()
 {
-    model->application().gotoTrackIntervalsAlertScreenNoTransition();
+    showPopup();
 }
 
 void TrackPresenter::onRunAlert()
 {
-    // Like the other pop-ups, only from the track faces.
-    model->application().gotoTrackRunAlertScreenNoTransition();
+    showPopup();
 }
 
 void TrackPresenter::onIntervalsWorkoutCompleted()
 {
-    model->application().gotoTrackIntervalsWorkoutCompletedScreenNoTransition();
+    showPopup();
 }
 
 void TrackPresenter::onGpsFix(bool acquired)

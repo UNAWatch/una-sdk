@@ -8,17 +8,30 @@ TrackLapPresenter::TrackLapPresenter(TrackLapView& v)
 
 void TrackLapPresenter::activate()
 {
+    showLap();
+}
+
+void TrackLapPresenter::onLapChanged(uint8_t /*lapEnd*/)
+{
+    showLap();
+    view.restartDismiss();
+}
+
+void TrackLapPresenter::showLap()
+{
+    model->takePopup(Model::Popup::Lap);
+
     // Reset idle timer
     model->resetIdleTimer();
 
     view.setUnitsImperial(model->isUnitsImperial());
 
-    const Track::Data& data = model->getTrackData();
+    const Model::LapInfo& lap = model->getLap();
 
-    view.setLapNum(data.lapNum);
-    view.setDistance(data.lapDistance);
-    view.setTimer(data.lapTime);
-    view.setPace(data.lapPace);
+    view.setLapNum(lap.num);
+    view.setDistance(lap.distance);
+    view.setTimer(lap.time);
+    view.setPace(lap.pace);
 }
 
 void TrackLapPresenter::deactivate()

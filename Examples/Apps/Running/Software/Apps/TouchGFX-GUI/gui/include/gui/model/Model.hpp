@@ -207,6 +207,24 @@ public:
     /// A step card is waiting to be shown; unlike takeStepCard() it stays.
     bool hasStepCard() const { return mStepCard; }
 
+    /// The pop-ups that show over the track faces, besides the step card. One
+    /// that comes while another shows waits, and they show in the order they
+    /// came; each takes itself off the list as it shows (takePopup()).
+    enum class Popup : uint8_t { None, Lap, Phase, RunAlert, Completed };
+    /// The first to come of the pop-ups still waiting, or None.
+    Popup waitingPopup() const { return mWaitingCount > 0 ? mWaiting[0] : Popup::None; }
+    /// @p popup is showing: it waits no longer.
+    void takePopup(Popup popup);
+    /// The lap a lap pop-up shows, as it stood when the lap was taken: a
+    /// pop-up that waits would otherwise show the next lap.
+    struct LapInfo {
+        uint32_t    num      = 0;     ///< Track::Data::lapNum
+        float       distance = 0.0f;  ///< m
+        std::time_t time     = 0;     ///< s
+        float       pace     = 0.0f;  ///< s/m
+    };
+    const LapInfo& getLap() const { return mLap; }
+
 private:
     // Fields required for GUI <-> Service communication
     ModelListener*           modelListener;
@@ -222,6 +240,8 @@ private:
     bool customMessageHandler(SDK::MessageBase* message) override;
 
     void decIdleTimer();
+    void waitPopup(Popup popup);
+    void keepLap();
     bool isAnyKeyPressed(uint8_t key) const;
 
     // State
@@ -265,6 +285,10 @@ private:
     uint16_t        mChosenWorkout  = 0;
     int16_t         mArmedWorkout   = kNoWorkout;
     bool            mStepCard       = false;
+    static constexpr uint8_t kPopups = 4;  ///< Popup kinds besides None
+    Popup           mWaiting[kPopups] {};
+    uint8_t         mWaitingCount   = 0;
+    LapInfo         mLap            {};
     bool            mDetailsFromToday = false;
     WorkoutFace     mWorkoutFace    {};
     WorkoutStepInfo mWorkoutStep    {};

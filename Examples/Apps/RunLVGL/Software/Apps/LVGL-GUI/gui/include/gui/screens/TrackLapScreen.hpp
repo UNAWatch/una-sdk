@@ -23,12 +23,16 @@ public:
 
     void onShow() override;
     void onHide() override;
+    /// The lap the screen opened for (lap button) has come back, or another
+    /// ended: show it, for the full time again.
+    void onLapChanged(uint8_t lapEnd) override;
 
 protected:
     void build() override;
 
 private:
     static void dismissCb(lv_timer_t* t);
+    void showLap();
 
     lv_timer_t* mDismiss = nullptr;
     lv_obj_t* mDistance = nullptr;

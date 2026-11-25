@@ -63,7 +63,7 @@ private:
     uint16_t faceIndex(uint16_t id) const;  ///< Its place in faces(), or count
     /// Show face @p id, or the mode's first face if the run has no such face.
     void showFace(uint16_t id);
-    void showStepCard();
+    void showPopup();
     void setWorkoutFace(const Model::WorkoutFace& face);
     void setWorkoutStep(const Model::WorkoutStepInfo& step);
     void setTime(uint8_t h, uint8_t m);
@@ -124,7 +124,7 @@ private:
 
     Mode     mMode          = Mode::Free;
     bool     mModeSet       = false;  ///< mMode set by the first updateMode()
-    bool     mLeaving       = false;  ///< The step card is to replace this screen
+    bool     mLeaving       = false;  ///< A pop-up or step card is to replace this screen
     bool     mHeartRateStep = false;  ///< The current step's target is a heart rate
     float    mLivePace      = 0.0f;   ///< s/km or s/mi
     float    mLapPace       = 0.0f;

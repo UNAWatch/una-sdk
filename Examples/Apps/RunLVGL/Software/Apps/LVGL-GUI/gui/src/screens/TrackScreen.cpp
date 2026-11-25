@@ -250,11 +250,11 @@ void TrackScreen::onShow()
     onGpsFix(mModel.hasGpsFix());
     onAccessoryStatus(mModel.getAccessoryState(), "");
 
-    // A step that started while another screen showed gets its card before
-    // this screen (ScreenManager::goTo()). This catches one that started
+    // A step card or pop-up that came while another screen showed opens
+    // before this screen (ScreenManager::goTo()). This catches one that came
     // after that choice was made.
-    if (mModel.takeStepCard()) {
-        showStepCard();
+    if (mModel.hasStepCard() || mModel.waitingPopup() != Model::Popup::None) {
+        showPopup();
     }
 }
 
@@ -284,12 +284,13 @@ void TrackScreen::showFace(uint16_t id)
     mIndicator->setActive(index);
 }
 
-void TrackScreen::showStepCard()
+void TrackScreen::showPopup()
 {
-    // The card replaces this screen on the next frame. Until then the faces
-    // are left as they are, so the new step does not show on them first.
+    // The step card or pop-up replaces this screen on the next frame. Until
+    // then the faces are left as they are, so a new step does not show on
+    // them before its card.
     mLeaving = true;
-    ScreenManager::instance().goTo(ScreenId::TrackWorkoutStep);
+    ScreenManager::instance().goToWaitingPopup();
 }
 
 void TrackScreen::onKey(uint8_t code)
@@ -436,8 +437,8 @@ void TrackScreen::onWorkoutStep(bool next)
         return;
     }
     // onShow() shows the new step when the card hands back.
-    if (mModel.takeStepCard()) {
-        showStepCard();
+    if (mModel.hasStepCard()) {
+        showPopup();
         return;
     }
     setWorkoutStep(mModel.getWorkoutStep(false));
@@ -494,25 +495,27 @@ void TrackScreen::setTime(uint8_t h, uint8_t m)
     }
 }
 
+// The model has put each pop-up on its waiting list (Model::waitingPopup());
+// one that comes while another pop-up shows opens when that one is done.
+
 void TrackScreen::onLapChanged(uint8_t /*lapEnd*/)
 {
-    ScreenManager::instance().goTo(ScreenId::TrackLap);
+    showPopup();
 }
 
 void TrackScreen::onIntervalsPhaseAlert()
 {
-    ScreenManager::instance().goTo(ScreenId::TrackIntervalsAlert);
+    showPopup();
 }
 
 void TrackScreen::onRunAlert()
 {
-    // Like the other pop-ups, only from the track faces.
-    ScreenManager::instance().goTo(ScreenId::TrackRunAlert);
+    showPopup();
 }
 
 void TrackScreen::onIntervalsWorkoutCompleted()
 {
-    ScreenManager::instance().goTo(ScreenId::TrackIntervalsCompleted);
+    showPopup();
 }
 
 void TrackScreen::onGpsFix(bool acquired)

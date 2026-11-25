@@ -18,8 +18,13 @@ public:
 
     virtual ~TrackIntervalsAlertPresenter() {}
 
+    /// A new phase while this one shows: show it, for the full time again.
+    virtual void onIntervalsPhaseAlert() override;
+
 private:
     TrackIntervalsAlertPresenter();
+
+    void showPhase();
 
     TrackIntervalsAlertView& view;
 };

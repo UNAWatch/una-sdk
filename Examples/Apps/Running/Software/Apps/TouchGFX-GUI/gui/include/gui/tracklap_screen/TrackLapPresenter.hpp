@@ -27,11 +27,17 @@ public:
 
     virtual ~TrackLapPresenter() {}
 
+    /// The lap the screen opened for (lap button) has come back, or another
+    /// ended: show it, for the full time again.
+    virtual void onLapChanged(uint8_t lapEnd) override;
+
     /** Leave for the screen the lap was taken on. */
     void dismiss();
 
 private:
     TrackLapPresenter();
+
+    void showLap();
 
     TrackLapView& view;
 };

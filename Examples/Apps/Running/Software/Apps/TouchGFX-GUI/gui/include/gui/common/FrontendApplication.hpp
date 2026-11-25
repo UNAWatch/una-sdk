@@ -44,10 +44,14 @@ public:
 #endif
     }
 
-    /// The Track screen, or the step card first if a step started while
-    /// another screen showed: the Track screen would otherwise draw the new
-    /// step for a frame before the card replaced it.
+    /// The Track screen, or first a pop-up that is waiting (gotoWaitingPopup()):
+    /// the Track screen would otherwise draw for a frame before it, and a new
+    /// step show on the faces before its card.
     void gotoTrackScreenNoTransition();
+
+    /// Open the step card if a step started while another screen showed, else
+    /// the first pop-up waiting (Model::waitingPopup()). False if none is.
+    bool gotoWaitingPopup();
 
 private:
 };

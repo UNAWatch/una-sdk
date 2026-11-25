@@ -48,6 +48,9 @@ public:
      */
     void setPhaseOpen();
 
+    /// Show for the full five seconds again from now.
+    void restartDismiss() { mDismissTimer.start(); }
+
 private:
     void onDismissTimerFired();
 

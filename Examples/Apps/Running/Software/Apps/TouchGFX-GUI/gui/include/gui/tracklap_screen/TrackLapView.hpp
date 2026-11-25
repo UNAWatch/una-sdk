@@ -19,6 +19,8 @@ public:
     void setDistance(float metres);
     void setTimer(std::time_t sec);
     void setPace(float secPerM);
+    /// Show for the full five seconds again from now.
+    void restartDismiss() { mDismissTimer.start(); }
 
 protected:
     virtual void handleKeyEvent(uint8_t key) override;

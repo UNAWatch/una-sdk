@@ -41,6 +41,24 @@ void TrackIntervalsAlertScreen::build()
 
 void TrackIntervalsAlertScreen::onShow()
 {
+    showPhase();
+
+    mDismiss = lv_timer_create(&TrackIntervalsAlertScreen::dismissCb, kDismissMs, this);
+    lv_timer_set_repeat_count(mDismiss, 1);
+}
+
+void TrackIntervalsAlertScreen::onIntervalsPhaseAlert()
+{
+    showPhase();
+    if (mDismiss) {
+        lv_timer_reset(mDismiss);
+    }
+}
+
+void TrackIntervalsAlertScreen::showPhase()
+{
+    mModel.takePopup(Model::Popup::Phase);
+
     // Use the snapshot carried by the alert message, not the live track data,
     // which may not have caught up with the new phase yet.
     const Track::IntervalsData& iv = mModel.getPendingAlertIntervals();
@@ -81,9 +99,6 @@ void TrackIntervalsAlertScreen::onShow()
     } else {
         lv_obj_add_flag(mRepeats, LV_OBJ_FLAG_HIDDEN);
     }
-
-    mDismiss = lv_timer_create(&TrackIntervalsAlertScreen::dismissCb, kDismissMs, this);
-    lv_timer_set_repeat_count(mDismiss, 1);
 }
 
 void TrackIntervalsAlertScreen::dismissCb(lv_timer_t* t)
