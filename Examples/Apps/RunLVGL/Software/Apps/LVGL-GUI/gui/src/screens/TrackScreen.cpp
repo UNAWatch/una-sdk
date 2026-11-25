@@ -331,6 +331,14 @@ void TrackScreen::onTrackData(const Track::Data& data)
     if (mLeaving) {
         return;
     }
+    // A step card or pop-up whose switch could not be scheduled is tried
+    // again with each update, not left until the next event.
+    if (mModel.hasStepCard() || mModel.waitingPopup() != Model::Popup::None) {
+        showPopup();
+        if (mLeaving) {
+            return;
+        }
+    }
     // A workout that completes or is ended drops to a free run.
     updateMode(data);
 
