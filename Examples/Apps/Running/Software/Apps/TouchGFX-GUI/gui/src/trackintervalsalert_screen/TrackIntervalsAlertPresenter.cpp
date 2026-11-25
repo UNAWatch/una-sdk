@@ -8,6 +8,19 @@ TrackIntervalsAlertPresenter::TrackIntervalsAlertPresenter(TrackIntervalsAlertVi
 
 void TrackIntervalsAlertPresenter::activate()
 {
+    showPhase();
+}
+
+void TrackIntervalsAlertPresenter::onIntervalsPhaseAlert()
+{
+    showPhase();
+    view.restartDismiss();
+}
+
+void TrackIntervalsAlertPresenter::showPhase()
+{
+    model->takePopup(Model::Popup::Phase);
+
     // Use the snapshot carried by the alert message, not getTrackData().intervals --
     // the latter may not be updated yet when this screen activates.
     const Track::IntervalsData& iv = model->getPendingAlertIntervals();

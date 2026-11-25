@@ -77,8 +77,13 @@ public:
     void start(Model& model, ScreenId first);
 
     /// Request a switch; performed on the next frame. The Track screen is
-    /// reached through the step card while one waits to be shown.
+    /// reached through the step card or a pop-up while one waits to be shown
+    /// (goToWaitingPopup()).
     void goTo(ScreenId id);
+
+    /// Open the step card if a step started while another screen showed, else
+    /// the first pop-up waiting (Model::waitingPopup()). False if none is.
+    bool goToWaitingPopup();
 
 private:
     ScreenManager() = default;
@@ -86,6 +91,8 @@ private:
     static void asyncCb(void* user);
     void switchNow(ScreenId id);
     Screen* create(ScreenId id);
+    /// The step card or the first pop-up waiting, else Track.
+    ScreenId trackOrPopup() const;
 
     Model*   mModel   = nullptr;
     Screen*  mCurrent = nullptr;

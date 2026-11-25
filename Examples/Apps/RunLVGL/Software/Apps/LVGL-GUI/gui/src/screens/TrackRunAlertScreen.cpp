@@ -54,6 +54,7 @@ void TrackRunAlertScreen::onRunAlert()
 
 void TrackRunAlertScreen::showAlert()
 {
+    mModel.takePopup(Model::Popup::RunAlert);
     mModel.resetIdleTimer();
 
     const Model::RunAlertInfo& a = mModel.getRunAlert();

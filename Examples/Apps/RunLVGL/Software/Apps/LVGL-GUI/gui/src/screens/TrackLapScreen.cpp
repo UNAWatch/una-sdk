@@ -45,23 +45,37 @@ void TrackLapScreen::build()
 
 void TrackLapScreen::onShow()
 {
-    mModel.resetIdleTimer();
-
-    const bool imperial   = mModel.isUnitsImperial();
-    const Track::Data& d  = mModel.getTrackData();
-    char buf[16];
-
-    snprintf(buf, sizeof(buf), "Lap %lu", static_cast<unsigned long>(d.lapNum + 1));
-    mTitle->setText(buf);
-    Fmt::distanceLap(buf, sizeof(buf), Fmt::distUnits(d.lapDistance, imperial));
-    lv_label_set_text(mDistance, buf);
-    Fmt::shortTime(buf, sizeof(buf), d.lapTime);
-    lv_label_set_text(mTime, buf);
-    Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(d.lapPace, imperial));
-    lv_label_set_text(mPace, buf);
+    showLap();
 
     mDismiss = lv_timer_create(&TrackLapScreen::dismissCb, kDismissMs, this);
     lv_timer_set_repeat_count(mDismiss, 1);
+}
+
+void TrackLapScreen::onLapChanged(uint8_t /*lapEnd*/)
+{
+    showLap();
+    if (mDismiss) {
+        lv_timer_reset(mDismiss);
+    }
+}
+
+void TrackLapScreen::showLap()
+{
+    mModel.takePopup(Model::Popup::Lap);
+    mModel.resetIdleTimer();
+
+    const bool imperial       = mModel.isUnitsImperial();
+    const Model::LapInfo& lap = mModel.getLap();
+    char buf[16];
+
+    snprintf(buf, sizeof(buf), "Lap %lu", static_cast<unsigned long>(lap.num + 1));
+    mTitle->setText(buf);
+    Fmt::distanceLap(buf, sizeof(buf), Fmt::distUnits(lap.distance, imperial));
+    lv_label_set_text(mDistance, buf);
+    Fmt::shortTime(buf, sizeof(buf), lap.time);
+    lv_label_set_text(mTime, buf);
+    Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(lap.pace, imperial));
+    lv_label_set_text(mPace, buf);
 }
 
 void TrackLapScreen::dismissCb(lv_timer_t* t)

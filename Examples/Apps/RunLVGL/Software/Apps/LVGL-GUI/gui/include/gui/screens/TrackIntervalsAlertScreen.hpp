@@ -21,12 +21,15 @@ public:
     ~TrackIntervalsAlertScreen() override;
 
     void onShow() override;
+    /// A new phase while this one shows: show it, for the full time again.
+    void onIntervalsPhaseAlert() override;
 
 protected:
     void build() override;
 
 private:
     static void dismissCb(lv_timer_t* t);
+    void showPhase();
 
     lv_timer_t* mDismiss = nullptr;
     lv_obj_t*   mRepeats = nullptr;

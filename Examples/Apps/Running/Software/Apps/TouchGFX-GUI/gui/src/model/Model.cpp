@@ -247,6 +247,7 @@ void Model::trackStart(bool intervalsMode)
         mMenu.track.set(App::MenuNav::TrackView::ID_INTERVALS);
     }
     mStepCard    = false;
+    mWaitingCount = 0;
     mWorkoutFace = WorkoutFace{};
     mWorkoutStep = WorkoutStepInfo{};
     mWorkoutNext = WorkoutStepInfo{};
@@ -335,6 +336,8 @@ const Track::Data& Model::getTrackData() const
 
 void Model::saveLap()
 {
+    // The track faces open the lap pop-up now, before LAP_END comes back.
+    keepLap();
     SDK::send_msg<CustomMessage::ManualLap>(mKernel);
 }
 
@@ -446,6 +449,40 @@ bool Model::takeStepCard()
     const bool card = mStepCard;
     mStepCard = false;
     return card;
+}
+
+void Model::takePopup(Popup popup)
+{
+    for (uint8_t i = 0; i < mWaitingCount; ++i) {
+        if (mWaiting[i] == popup) {
+            for (uint8_t j = i + 1; j < mWaitingCount; ++j) {
+                mWaiting[j - 1] = mWaiting[j];
+            }
+            --mWaitingCount;
+            return;
+        }
+    }
+}
+
+void Model::waitPopup(Popup popup)
+{
+    // Once each: one already waiting shows the latest data when it shows.
+    for (uint8_t i = 0; i < mWaitingCount; ++i) {
+        if (mWaiting[i] == popup) {
+            return;
+        }
+    }
+    if (mWaitingCount < kPopups) {
+        mWaiting[mWaitingCount++] = popup;
+    }
+}
+
+void Model::keepLap()
+{
+    mLap.num      = mTrackData.lapNum;
+    mLap.distance = mTrackData.lapDistance;
+    mLap.time     = mTrackData.lapTime;
+    mLap.pace     = mTrackData.lapPace;
 }
 
 
@@ -577,6 +614,9 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             if (mTrackState == Track::State::PAUSED) {
                 mPausedLapTaken = true;
             }
+            // The track data still holds the lap just ended.
+            keepLap();
+            waitPopup(Popup::Lap);
             modelListener->onLapChanged(msg->lapNum);
         } break;
 
@@ -584,6 +624,7 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             LOG_DEBUG("INTERVALS_PHASE_ALERT\n");
             auto* msg          = static_cast<CustomMessage::IntervalsPhaseAlert*>(message);
             mPendingAlertIntervals = msg->intervals;
+            waitPopup(Popup::Phase);
             modelListener->onIntervalsPhaseAlert();
         } break;
 
@@ -592,11 +633,13 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
             auto* msg       = static_cast<CustomMessage::RunAlert*>(message);
             mRunAlert.kind  = static_cast<Track::RunAlertKind>(msg->kind);
             mRunAlert.value = msg->value;
+            waitPopup(Popup::RunAlert);
             modelListener->onRunAlert();
         } break;
 
         case CustomMessage::INTERVALS_WORKOUT_COMPLETED: {
             LOG_DEBUG("INTERVALS_WORKOUT_COMPLETED\n");
+            waitPopup(Popup::Completed);
             modelListener->onIntervalsWorkoutCompleted();
         } break;
 

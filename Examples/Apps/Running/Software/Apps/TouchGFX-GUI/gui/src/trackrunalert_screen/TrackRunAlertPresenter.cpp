@@ -23,6 +23,7 @@ void TrackRunAlertPresenter::onRunAlert()
 
 void TrackRunAlertPresenter::showAlert()
 {
+    model->takePopup(Model::Popup::RunAlert);
     model->resetIdleTimer();
 
     const Model::RunAlertInfo& a = model->getRunAlert();

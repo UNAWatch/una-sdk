@@ -9,6 +9,8 @@ TrackIntervalsWorkoutCompletedPresenter::TrackIntervalsWorkoutCompletedPresenter
 
 void TrackIntervalsWorkoutCompletedPresenter::activate()
 {
+    model->takePopup(Model::Popup::Completed);
+
     // This screen is only a notification that the programmed workout finished.
     // The session keeps running (the Service dropped out of intervals mode and
     // started a fresh lap); the view returns to the track screen so the user can
