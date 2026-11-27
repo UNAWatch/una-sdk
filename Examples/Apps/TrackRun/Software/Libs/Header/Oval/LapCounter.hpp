@@ -331,6 +331,8 @@ private:
     bool     mHaveStepPos  = false;
     Vec2     mStepPos;
     uint32_t mStepPosT     = 0;
+    bool     mHaveOdoT     = false;
+    uint32_t mOdoT         = 0;   ///< The last reading's time
 
     // Current lap. Progress is a fraction of a lap, piecewise across lane
     // changes: a segment starts at the lap start or at the last lane change.

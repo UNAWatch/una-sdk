@@ -104,7 +104,14 @@ TEST(TrackSource, TheDistanceFollowsTheLaneAndNeverDecreases)
         const double lane3M = Oval::LaneTable::outdoor().lapLengthM(3);
         EXPECT_TRUE(neverDecreases(o.totalM)) << "seed " << seed;
         EXPECT_NEAR(o.totalM.back(), 5.0 * lane3M, 0.02 * 5.0 * lane3M) << "seed " << seed;
-        EXPECT_NEAR(o.speedMps.back(), 4.0f, 0.4f) << "seed " << seed << ": the live speed";
+        // The live speed over the last minute, on average: a single reading
+        // carries the GPS noise.
+        ASSERT_GT(o.speedMps.size(), 60u);
+        float sum = 0.0f;
+        for (size_t k = o.speedMps.size() - 60; k < o.speedMps.size(); ++k) {
+            sum += o.speedMps[k];
+        }
+        EXPECT_NEAR(sum / 60.0f, 4.0f, 0.2f) << "seed " << seed << ": the live speed";
     }
 }
 

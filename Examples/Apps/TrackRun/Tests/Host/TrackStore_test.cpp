@@ -547,3 +547,46 @@ TEST(TrackStore, LaterVersionLoadsWhatItCan)
     EXPECT_TRUE(back.find(7)->clockwise);
     EXPECT_TRUE(std::isnan(back.find(7)->altM));
 }
+
+TEST(TrackStore, ATrackAnUpdateMadeNewKeepsItsPlace)
+{
+    // An update whose stored track has gone is saved as new. A later new
+    // track in the same run must not take its place, even with every date
+    // the same (the clock not set).
+    TrackStore st;
+    for (int i = 0; i < 10; ++i) {
+        st.saveNew(modelEast(1000.0 * i), FitQuality(), 0u);
+    }
+    ASSERT_TRUE(st.forget(1));
+    ASSERT_TRUE(st.forget(2));
+    StoreOutcome o[3];
+    o[0].kind  = StoreOutcome::Kind::Updated;   // Track 2, gone
+    o[0].model = modelEast(20000.0);
+    o[1].kind  = StoreOutcome::Kind::New;
+    o[1].model = modelEast(30000.0);
+    o[2].kind  = StoreOutcome::Kind::New;
+    o[2].model = modelEast(40000.0);
+    const uint8_t numbers[3] = {2, 0, 0};
+    TrackStore::Applied a[3];
+    st.applyRun(o, numbers, 3, 0u, a);
+    ASSERT_EQ(a[0].kind, StoreOutcome::Kind::New);
+    for (double east : {20000.0, 30000.0, 40000.0}) {
+        EXPECT_NE(st.findNear(modelEast(east).centreLat(), modelEast(east).centreLon()), nullptr)
+            << "the track " << east << " m east is stored";
+    }
+}
+
+TEST(TrackStore, AFitTheLoaderWouldDropIsNotSaved)
+{
+    // A bend radius beyond the loader's 30 to 45 m: not saved, rather than
+    // saved and dropped at the next start.
+    TrackStore st;
+    EXPECT_EQ(st.saveNew(modelAt(kLat, kLon, 30.0f, 46.0f), FitQuality(), 1u).number, 0u);
+    EXPECT_EQ(st.count(), 0u);
+    const uint8_t n = st.saveNew(modelAt(kLat, kLon, 30.0f, 45.0f), FitQuality(), 1u).number;
+    ASSERT_NE(n, 0u);
+    char buf[TrackStore::kMaxSerialisedBytes];
+    const size_t len = st.serialise(buf, sizeof buf);
+    TrackStore back;
+    EXPECT_EQ(back.load(buf, len).loaded, 1u) << "45 m loads back";
+}

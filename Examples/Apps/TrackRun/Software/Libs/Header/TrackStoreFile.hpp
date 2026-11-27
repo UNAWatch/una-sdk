@@ -58,6 +58,7 @@ private:
     SDK::Kernel& mKernel;
     bool         mNewer = false;
     const char*  mRecovered = nullptr; ///< A side file the tracks were loaded from, not yet in place
+    bool         mMainUnread = false;  ///< tracks.txt is there but could not be read: kept, not saved over
     char         mBuf[Oval::TrackStore::kMaxSerialisedBytes] = {};
 };
 

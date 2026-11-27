@@ -544,6 +544,7 @@ Session::Events Session::update(const Sample& s) noexcept
     mLastT = s.tMs;
 
     bool good = isGood(s);
+    bool wild = false; // a fix far from the frame, not used
     Vec2 p;
     if (good) {
         if (!mFrame.hasOrigin()) {
@@ -557,6 +558,7 @@ Session::Events Session::update(const Sample& s) noexcept
             // edge of the frame).
             if (++mFarFixes < kRecentreReadings) {
                 good = false;
+                wild = true;
                 p    = Vec2();
             } else {
                 recentre(s.lat, s.lon);
@@ -587,7 +589,15 @@ Session::Events Session::update(const Sample& s) noexcept
     case Segment::None:
         break;
     case Segment::Track:
-        trackStep(s, good, p, added, ev);
+        if (wild) {
+            // The Tracker gets it as a reading with no fix: its time and the
+            // kernel's distance still count, its position does not.
+            Sample noFix = s;
+            noFix.fix    = false;
+            trackStep(noFix, good, p, added, ev);
+        } else {
+            trackStep(s, good, p, added, ev);
+        }
         break;
     case Segment::Road:
         roadStep(s, added, ev);

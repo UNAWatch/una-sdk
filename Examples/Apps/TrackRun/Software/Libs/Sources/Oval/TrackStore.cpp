@@ -424,7 +424,9 @@ bool TrackStore::fill(TrackRecord& r, const TrackModel& m, const FitQuality& q) 
     r.scaleM      = qf(clampQuality(q.scaleM), kQualityDp);
     r.shapeM      = qf(clampQuality(q.shapeM), kQualityDp);
     r.version     = kFormatVersion;
-    return true;
+    // Only what load() takes back (a fit beyond its bounds would be saved,
+    // then dropped at the next start).
+    return r.lat >= -90.0 && r.lat <= 90.0 && r.kerbRadiusM >= 30.0f && r.kerbRadiusM <= 45.0f;
 }
 
 TrackStore::SaveResult TrackStore::saveNew(const TrackModel& model, const FitQuality& q, uint32_t nowS,
@@ -575,8 +577,10 @@ void TrackStore::applyRun(const StoreOutcome* outcomes, const uint8_t* suppliedN
             const bool isNew = outcomes[i].kind == StoreOutcome::Kind::New;
             if (isNew == (pass == 1)) {
                 out[i] = apply(outcomes[i], suppliedNumbers[i], nowS, keep);
-                if (isNew && out[i].number >= 1 && out[i].number <= kMaxTracks) {
-                    keep = static_cast<uint16_t>(keep | (1u << (out[i].number - 1))); // and a new one saved
+                // And a new one saved, also one an update made new (its
+                // stored track gone): a later new one must not take its slot.
+                if (out[i].kind == StoreOutcome::Kind::New && out[i].number >= 1 && out[i].number <= kMaxTracks) {
+                    keep = static_cast<uint16_t>(keep | (1u << (out[i].number - 1)));
                 }
             }
         }

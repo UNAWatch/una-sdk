@@ -35,6 +35,7 @@ bool TrackStoreFile::readAll(const char* path, size_t& len)
 Oval::TrackStore::LoadReport TrackStoreFile::load(Oval::TrackStore& store, const char** fromPath)
 {
     mRecovered = nullptr;
+    mMainUnread = false;
     // save() writes .tmp in full before it moves tracks.txt aside, so with
     // tracks.txt missing .tmp is the newer store and .bak the older. A file
     // whose header or lines are damaged is passed over for a whole one; a
@@ -48,7 +49,13 @@ Oval::TrackStore::LoadReport TrackStoreFile::load(Oval::TrackStore& store, const
     uint32_t    bestN = 0;
     Oval::TrackStore::LoadReport rep;
     for (int i = 0; i < 3; ++i) {
-        if (!readAll(kTry[i], len) || len == 0) {
+        const bool read = readAll(kTry[i], len);
+        if (!read || len == 0) {
+            // tracks.txt there but not read (an I/O error, not damage that
+            // was checked): it is not replaced, nor saved over, this time.
+            if (i == 0 && !read && mKernel.fs.exist(kPath)) {
+                mMainUnread = true;
+            }
             continue;
         }
         rep = store.load(mBuf, len);
@@ -84,7 +91,9 @@ Oval::TrackStore::LoadReport TrackStoreFile::load(Oval::TrackStore& store, const
             LOG_WARNING("Stored tracks dropped: %u cut off, %u bad CRC, %u bad field, %u duplicate; %u other lines\n",
                         rep.truncated, rep.badChecksum, rep.badField, rep.duplicate, rep.otherLines);
         }
-        if (which > 0) {
+        if (which > 0 && mMainUnread) {
+            LOG_WARNING("Stored tracks from [%s]: [%s] could not be read and is left as it is\n", from, kPath);
+        } else if (which > 0) {
             LOG_WARNING("Stored tracks recovered from [%s] (a save was interrupted)\n", from);
             // Put in place, so the next save (which rewrites tracks.tmp and
             // clears tracks.bak) cannot lose the only good copy.
@@ -125,6 +134,10 @@ TrackStoreFile::SaveResult TrackStoreFile::save(const Oval::TrackStore& store)
     if (mNewer) {
         LOG_WARNING("Stored tracks not saved: the file was written by a newer version\n");
         return SaveResult::SkippedNewer;
+    }
+    if (mMainUnread) {
+        LOG_ERROR("Stored tracks not saved: [%s] could not be read at the start\n", kPath);
+        return SaveResult::Failed;
     }
     if (!promoteRecovered()) {
         // The only good copy is still a side file the steps below rewrite.

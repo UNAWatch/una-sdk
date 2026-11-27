@@ -230,6 +230,30 @@ TEST(ServiceTracksFile, AFailedSaveLeavesTheOldStoreToLoad)
     EXPECT_EQ(back.count(), 0u) << "not the unsaved store";
 }
 
+TEST(ServiceTracksFile, AMainFileThatCannotBeReadIsLeftAndNotSavedOver)
+{
+    // tracks.txt is there but cannot be read (an I/O error; here a folder of
+    // that name): the older copy loads for the run, tracks.txt is not
+    // replaced by it, and nothing is saved over it.
+    KernelFixture fx;
+    TrackStoreFile seed(fx.kernel);
+    ASSERT_EQ(seed.save(storeWith(3)), TrackStoreFile::SaveResult::Saved);
+    const std::string text = fx.fileSystem.readFile(TrackStoreFile::kPath);
+    fx.fileSystem.remove(TrackStoreFile::kPath);
+    fx.fileSystem.seedFile(TrackStoreFile::kBakPath, text);
+    ASSERT_TRUE(fx.fileSystem.mkdir(TrackStoreFile::kPath));
+
+    TrackStoreFile file(fx.kernel);
+    Oval::TrackStore st;
+    const char* from = nullptr;
+    EXPECT_EQ(file.load(st, &from).loaded, 3u);
+    EXPECT_STREQ(from, TrackStoreFile::kBakPath);
+    EXPECT_TRUE(fx.fileSystem.exist(TrackStoreFile::kPath)) << "left as it is";
+    EXPECT_TRUE(fx.fileSystem.fileExistsAt(TrackStoreFile::kBakPath)) << "not moved over it";
+    EXPECT_EQ(file.save(storeWith(4)), TrackStoreFile::SaveResult::Failed);
+    EXPECT_EQ(fx.fileSystem.readFile(TrackStoreFile::kBakPath), text) << "the copy untouched";
+}
+
 TEST(ServiceTracksFile, AGarbageAltitudeIsStoredAsNone)
 {
     // A finite altitude too large to write in the store's digits would make
