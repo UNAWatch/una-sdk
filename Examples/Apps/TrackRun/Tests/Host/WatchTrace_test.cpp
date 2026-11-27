@@ -92,7 +92,11 @@ TEST(TraceReplay, WatchTrace)
         }
     }
     std::stable_sort(tr.commands.begin(), tr.commands.end(),
-                     [](const TraceGen::Command& a, const TraceGen::Command& b) { return a.beforeSample < b.beforeSample; });
+                     [](const TraceGen::Command& a, const TraceGen::Command& b) {
+                         // In time order within one gap between readings.
+                         return a.beforeSample != b.beforeSample ? a.beforeSample < b.beforeSample
+                                                                 : Oval::msDiff(a.tMs, b.tMs) < 0;
+                     });
 
     const Replay::SessionResult r = Replay::runSession(tr, Oval::LaneTable::outdoor(), Oval::Config(),
                                                        stored > 0 ? &store : nullptr);

@@ -91,6 +91,14 @@ bool PaceWindow::timeAt(float totalM, uint32_t& tMs) const noexcept
     if (mCount == 0 || totalM > at(0).totalM) {
         return false;
     }
+    if (mCount == 1) {
+        // One reading: its time, for its own total only.
+        if (totalM == at(0).totalM) {
+            tMs = at(0).tMs;
+            return true;
+        }
+        return false;
+    }
     for (uint8_t b = 0; b + 1u < mCount; ++b) {
         const Entry& hi = at(b);
         const Entry& lo = at(static_cast<uint8_t>(b + 1u));

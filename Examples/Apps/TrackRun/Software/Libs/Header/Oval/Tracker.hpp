@@ -55,6 +55,7 @@
 #include "Oval/LapCounter.hpp"
 #include "Oval/LapTiming.hpp"
 #include "Oval/LocalFrame.hpp"
+#include "Oval/PauseLog.hpp"
 #include "Oval/Sample.hpp"
 #include "Oval/TrackModel.hpp"
 #include "Oval/TrackStore.hpp"
@@ -338,7 +339,7 @@ private:
     float nearest(float rel, float ref) const noexcept; ///< rel plus whole laps, nearest ref
     void  beginLine(float rel, uint32_t tMs) noexcept;
     float recentSpeed(uint32_t tMs) const noexcept;
-    void  anchor(float rel, uint32_t tMs, float allowM, Events& ev) noexcept;
+    void  anchor(float rel, uint32_t tMs, float allowM, Events& ev, bool afterPause = false) noexcept;
     void  rebaseModel(const TrackModel& next, Vec2 nextDrift) noexcept;
     void  lineReading(Vec2 p, uint32_t tMs, Events& ev) noexcept;
     float advance(float z, float pred, uint32_t tMs, bool gap, Events& ev) noexcept;
@@ -384,6 +385,7 @@ private:
     // Pause bookkeeping, as LapCounter
     bool     mPaused        = false;
     bool     mHadPause      = false;
+    PauseLog mPauses;                ///< Every recent pause, for times before more than one
     uint32_t mPauseStartT   = 0;
     uint32_t mPausedTotalMs = 0;
     uint32_t mLastPauseT    = 0;

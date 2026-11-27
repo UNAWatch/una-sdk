@@ -227,9 +227,9 @@ bool SettingsSerializer::load(Settings &settings)
     settings.calibTraceEn = false;  // deterministic default for legacy files
     reader.get("calib_trace_en", settings.calibTraceEn);
     // last_lane: 1 to kLanes, or 0 for "No lane"; anything else is lane 1.
-    uint8_t lane = 1;
+    uint32_t lane = 1;   // read wide: a value past 255 is not narrowed into range
     reader.get("last_lane", lane);
-    settings.lastLane = lane <= Settings::kLanes ? lane : 1;
+    settings.lastLane = lane <= Settings::kLanes ? static_cast<uint8_t>(lane) : 1;
     reader.get("lane_hold_en", settings.laneHoldEn);
     uint8_t distId = static_cast<uint8_t>(Settings::Alerts::Distance::ID_DEFAULT);
     uint8_t timeId = static_cast<uint8_t>(Settings::Alerts::Time::ID_OFF);

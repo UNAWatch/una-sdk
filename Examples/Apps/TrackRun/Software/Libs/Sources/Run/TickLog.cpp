@@ -62,8 +62,10 @@ void TickLog::add(uint32_t tMs, float hrBpm, float speedMps, float altM, float a
         return;
     }
     if (mCount == kSize) {
-        mLeftT    = timeOf(mE[mHead]);
-        mLeftAny  = true;
+        mLeftT      = timeOf(mE[mHead]);
+        mLeftAscDm  = mE[mHead].ascDm;
+        mLeftDescDm = mE[mHead].descDm;
+        mLeftAny    = true;
     }
     if (mCount == kSize && mCarry.set) {
         // The oldest tick leaves the log: kept in sum if the oldest split
@@ -186,12 +188,12 @@ TickLog::Stats TickLog::stats(uint32_t startMs, uint32_t endMs) const noexcept
         const bool     base  = carried && mCarry.base;
         st.ascentM  = dmSpan(base ? mCarry.ascDm : a.ascDm, z.ascDm);
         st.descentM = dmSpan(base ? mCarry.descDm : a.descDm, z.descDm);
-    } else if (carried && mCarry.base) {
-        // Every tick of the split has left (in the carry), and the oldest kept
-        // is at its end: the climb from the carry's base to that tick.
-        const Entry& z = back(static_cast<uint16_t>(mCount - 1u));
-        st.ascentM  = dmSpan(mCarry.ascDm, z.ascDm);
-        st.descentM = dmSpan(mCarry.descDm, z.descDm);
+    } else if (carried && mCarry.base && mLeftAny) {
+        // Every tick of the split has left (in the carry): the climb from the
+        // carry's base to the last tick that left, the split's last (the
+        // oldest kept is at or after its end, not in it).
+        st.ascentM  = dmSpan(mCarry.ascDm, mLeftAscDm);
+        st.descentM = dmSpan(mCarry.descDm, mLeftDescDm);
     }
     return st;
 }

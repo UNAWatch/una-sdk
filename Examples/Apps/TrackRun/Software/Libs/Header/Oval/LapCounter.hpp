@@ -35,6 +35,7 @@
 #include "Oval/Config.hpp"
 #include "Oval/LaneTable.hpp"
 #include "Oval/LocalFrame.hpp"
+#include "Oval/PauseLog.hpp"
 #include "Oval/Sample.hpp"
 
 #include <cstdint>
@@ -273,6 +274,9 @@ private:
     // Pause bookkeeping (all on the sample clock)
     bool     mPaused         = false;
     bool     mHadPause       = false;
+    PauseLog mPauses;                 ///< Every recent pause, for spans that hold more than one
+    bool     mHavePendingLen = false; ///< The held pass's lap length, kept at a lane change after it
+    float    mPendingLenM    = 0.0f;
     uint32_t mPauseStartT    = 0;
     uint32_t mPausedTotalMs  = 0; ///< Completed pauses only
     uint32_t mLastPauseT     = 0; ///< Start of the last completed pause

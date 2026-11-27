@@ -128,6 +128,7 @@ void LapCounter::clearRun() noexcept
     mLastPauseT    = 0;
     mLastPauseMs   = 0;
     mResumeT       = 0;
+    mPauses.reset();
 
     mFrame.clear();
     mPrev         = Reading();
@@ -178,6 +179,7 @@ void LapCounter::clearRun() noexcept
     mRatio      = 1.0f;
     mOneLap     = LapPoint();
     mPending    = LapPoint();
+    mHavePendingLen = false;
     mGapInLap   = false;
 
     mCreditedM  = 0.0;
@@ -384,6 +386,7 @@ void LapCounter::pause(uint32_t tMs) noexcept
     }
     mPaused      = true;
     mPauseStartT = tMs;
+    mPauses.pause(tMs);
 }
 
 void LapCounter::resume(uint32_t tMs) noexcept
@@ -391,6 +394,7 @@ void LapCounter::resume(uint32_t tMs) noexcept
     if (!mRunning || !mPaused) {
         return;
     }
+    mPauses.resume(tMs);
     int32_t len = msDiff(tMs, mPauseStartT);
     if (len < 0) {
         len = 0;
@@ -407,6 +411,12 @@ bool LapCounter::setLane(uint8_t lane) noexcept
 {
     if (!mTable.isValidLane(lane)) {
         return false;
+    }
+    if (mRunning && mHaveBaseline && mState == GateState::Passed && !mHavePendingLen) {
+        // A pass held, then the lane changed: the lap ended at the pass, on
+        // the lanes run up to it. Its length is kept for when it is credited.
+        mPendingLenM    = creditLengthM();
+        mHavePendingLen = true;
     }
     if (mRunning && mHaveBaseline) {
         // Close the segment: what is run so far stays credited at the old
@@ -536,13 +546,15 @@ inline float limitStep(float d, int32_t dtMs, float maxSpeedMps) noexcept
 
 void LapCounter::updateOdometer(const Sample& s, bool good, Vec2 p) noexcept
 {
-    float delta = 0.0f;
-    bool  have  = false;
+    float    delta = 0.0f;
+    bool     have  = false;
+    uint32_t fromT = s.tMs; // where the step began
 
-    // The kernel's distance is a running total: use its differences. It stays
-    // flat through a dropout and then jumps, so the speed limit runs from the
-    // last time it moved. A NaN drops the reference, so a total that grew
-    // meanwhile is not counted twice when it comes back.
+    // The kernel's distance is a running total: use its differences, each
+    // over the time since the last reading. It stays flat through a dropout
+    // and then jumps, so the speed limit runs from the last time it moved. A
+    // NaN drops the reference, so a total that grew meanwhile is not counted
+    // twice when it comes back.
     if (std::isfinite(s.gpsDistM)) {
         if (mHaveGpsDist) {
             const float d = s.gpsDistM - mLastGpsDistM;
@@ -550,12 +562,18 @@ void LapCounter::updateOdometer(const Sample& s, bool good, Vec2 p) noexcept
                 delta = limitStep(d, msDiff(s.tMs, mLastGpsDistT), mCfg.maxSpeedMps);
                 mLastGpsDistT = s.tMs;
             }
-            have = true;
+            have  = true;
+            fromT = mHaveOdoT ? mOdoT : s.tMs;
         } else {
             mLastGpsDistT = s.tMs;
         }
         mHaveGpsDist  = true;
         mLastGpsDistM = s.gpsDistM;
+        if (!good) {
+            // The way to here is counted: a position step later starts from
+            // the next good position, not across this.
+            mHaveStepPos = false;
+        }
     } else {
         mHaveGpsDist = false;
     }
@@ -565,17 +583,17 @@ void LapCounter::updateOdometer(const Sample& s, bool good, Vec2 p) noexcept
         if (!have && mHaveStepPos) {
             delta = limitStep(length(p - mStepPos), msDiff(s.tMs, mStepPosT), mCfg.maxSpeedMps);
             have  = true;
+            fromT = mStepPosT;
         }
         mHaveStepPos = true;
         mStepPos     = p;
         mStepPosT    = s.tMs;
     }
 
-    // The first reading after a resume spans the resume: only the share of
-    // it after the resume is running (with no reading during the pause, the
-    // whole pause's movement would otherwise count).
-    if (have && mHadPause && mHaveOdoT && msDiff(mResumeT, mOdoT) > 0 && msDiff(s.tMs, mResumeT) >= 0) {
-        delta *= static_cast<float>(msDiff(s.tMs, mResumeT)) / static_cast<float>(msDiff(s.tMs, mOdoT));
+    // A step across a pause (or several) counts only its active share: with
+    // no reading in a pause, its movement would otherwise count.
+    if (have) {
+        delta *= mPauses.activeShare(fromT, s.tMs);
     }
     mHaveOdoT = true;
     mOdoT     = s.tMs;
@@ -1135,7 +1153,8 @@ void LapCounter::onForwardPass(const Reading& prev, const Reading& cur, float f,
         completeLap(EventType::Lap, at, ev, !hidden);
         mState = GateState::Out;
     } else if (mState == GateState::Armed) {
-        mPending = at;
+        mPending        = at;
+        mHavePendingLen = false;
         mState   = GateState::Passed;
     }
 }
@@ -1185,7 +1204,10 @@ void LapCounter::checkMissedLaps(uint32_t prevT, float prevOdo, Events& ev) noex
 
 void LapCounter::completeLap(EventType type, const LapPoint& at, Events& ev, bool learnRatio) noexcept
 {
-    const float len = creditLengthM();
+    // A held pass with a lane change after it: the length on the lanes run
+    // up to the pass.
+    const float len = (mHavePendingLen && &at == &mPending) ? mPendingLenM : creditLengthM();
+    mHavePendingLen = false;
 
     // Only a lap ending on a real crossing teaches the GPS ratio.
     if (type == EventType::Lap && learnRatio) {
@@ -1223,6 +1245,7 @@ void LapCounter::startLap(const LapPoint& at) noexcept
     mSegMetres  = 0.0f;
     mOneLap     = LapPoint();
     mPending    = LapPoint();
+    mHavePendingLen = false;
     mGapInLap   = false;
     mEstFloor   = 0.0f;
 }
@@ -1260,21 +1283,8 @@ uint32_t LapCounter::activeAt(uint32_t tMs) const noexcept
     if (since <= 0) {
         return 0;
     }
-    int64_t paused = mPausedTotalMs;
-    if (mPaused) {
-        const int32_t in = msDiff(tMs, mPauseStartT);
-        if (in > 0) {
-            paused += in;
-        }
-    } else if (mHadPause && msDiff(tMs, mResumeT) < 0) {
-        // tMs is before the last resume: only the part of that pause before
-        // tMs counts.
-        paused -= mLastPauseMs;
-        const int32_t into = msDiff(tMs, mLastPauseT);
-        if (into > 0) {
-            paused += (static_cast<uint32_t>(into) < mLastPauseMs) ? into : static_cast<int32_t>(mLastPauseMs);
-        }
-    }
+    // Only the pauses, and parts of them, before tMs.
+    const int64_t paused = mPauses.pausedBefore(mStartT, tMs);
     const int64_t a = static_cast<int64_t>(since) - paused;
     return a > 0 ? static_cast<uint32_t>(a) : 0;
 }

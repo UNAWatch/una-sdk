@@ -5,6 +5,7 @@
 #include "PortableRandom.hpp"
 #include "TraceCsv.hpp"
 
+#include "Oval/PauseLog.hpp"
 #include "Run/PaceWindow.hpp"
 #include "Run/SensorClock.hpp"
 #include "Run/TimeUnwrap.hpp"
@@ -398,6 +399,8 @@ TEST(TickLog, PackedMatchesUnpacked)
     // the 6.5 km modulo, and a late track's flattening.
     static Run::TickLog packed;
     static UnpackedTickLog old;
+    packed = Run::TickLog();    // fresh on each run of the test (--gtest_repeat)
+    old    = UnpackedTickLog();
     std::mt19937 rng(PortableRandom::seeded(6003u));
     PortableRandom::Uniform u01(0.0, 1.0);
     uint32_t t   = 0xFFFFFFFFu - 400000u; // the 32-bit wrap comes 400 s in
@@ -451,7 +454,8 @@ TEST(TickLog, PackedMatchesUnpacked)
         }
     }
     EXPECT_GT(checks, 700u);
-    EXPECT_LE(sizeof(Run::TickLog), 900u * 14u + 16u + 28u) << "900 ticks of 14 bytes, and the carry";
+    EXPECT_LE(sizeof(Run::TickLog), 900u * 14u + 16u + 28u + 4u)
+        << "900 ticks of 14 bytes, the carry, and the climb of the last tick that left";
 }
 
 TEST(TickLog, ASplitLongerThanTheLogKeepsItsWholeStats)
@@ -612,4 +616,44 @@ TEST(TraceFormat, WatchLinesReadBackWithTheHostReader)
     EXPECT_LT(f.rows[2].s.hdop, 0.0f);
     EXPECT_NEAR(f.rows[2].trackDistM, 3.25f, 1e-4f);
     EXPECT_EQ(f.rows[2].lane, 2);
+}
+
+// ---------------------------------------------------------------------------
+// PauseLog
+// ---------------------------------------------------------------------------
+
+TEST(PauseLog, SpansWithSeveralPausesCountEachOne)
+{
+    // Pauses at 1.5 to 2 s and 3 to 4 s.
+    Oval::PauseLog p;
+    p.pause(1500);
+    p.resume(2000);
+    p.pause(3000);
+    p.resume(4000);
+    EXPECT_EQ(p.pausedIn(1000, 5000), 1500u);
+    EXPECT_FLOAT_EQ(p.activeShare(1000, 5000), 2500.0f / 4000.0f) << "both pauses, not only the latest";
+    EXPECT_FLOAT_EQ(p.activeShare(2000, 3000), 1.0f);
+    EXPECT_FLOAT_EQ(p.activeShare(3200, 3800), 0.0f);
+    EXPECT_EQ(p.pausedBefore(0, 1000), 0u) << "no pause had begun";
+    EXPECT_EQ(p.pausedBefore(0, 1750), 250u);
+    EXPECT_EQ(p.pausedBefore(0, 3500), 1000u);
+    EXPECT_EQ(p.pausedBefore(0, 6000), 1500u);
+    EXPECT_TRUE(p.pausedAt(1600));
+    EXPECT_FALSE(p.pausedAt(2500));
+
+    // One in force: open to the time asked about.
+    p.pause(7000);
+    EXPECT_EQ(p.pausedIn(6000, 8000), 1000u);
+    EXPECT_EQ(p.pausedBefore(0, 9000), 3500u);
+    EXPECT_TRUE(p.pausedAt(7500));
+}
+
+TEST(PauseLog, AcrossTheClocksWrap)
+{
+    Oval::PauseLog p;
+    const uint32_t t0 = 0xFFFFFFFFu - 500u;
+    p.pause(t0);
+    p.resume(t0 + 1000u);   // wraps
+    EXPECT_EQ(p.pausedIn(t0 - 1000u, t0 + 2000u), 1000u);
+    EXPECT_FLOAT_EQ(p.activeShare(t0 - 1000u, t0 + 1000u), 0.5f);
 }

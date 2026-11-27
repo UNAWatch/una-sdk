@@ -25,6 +25,8 @@ public:
     void onShow() override;
     void onHide() override;
     void onKey(uint8_t code) override;
+    /// A hold of Lap under way stops: its release cannot come while suspended.
+    void onSuspend() override { mLaneHold.stop(); }
     /// The lap the screen opened for (lap button) has come back, or another
     /// ended: show it, for the full time again.
     void onLapChanged(uint8_t lapEnd) override;

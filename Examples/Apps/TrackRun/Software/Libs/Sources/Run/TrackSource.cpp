@@ -159,8 +159,12 @@ void TrackSource::finish() noexcept
 
 void TrackSource::elevation(const Baro& baro) noexcept
 {
+    const bool hold = mSession.holdElevation();
     if (baro.valid) {
-        if (mHaveBaro && !mHeld) {
+        // Climb counts off the track only. The tick a hold begins on adds
+        // none: the climb since the join is backed out below, and this
+        // tick's is not in the log yet.
+        if (mHaveBaro && !mHeld && !hold) {
             const float dA = baro.ascentM - mLastBaroAsc;
             const float dD = baro.descentM - mLastBaroDesc;
             mEffAsc += dA > 0.0f ? dA : 0.0f;
@@ -171,7 +175,6 @@ void TrackSource::elevation(const Baro& baro) noexcept
         mBaroAlt      = baro.altM;
         mHaveBaro     = true;
     }
-    const bool hold = mSession.holdElevation();
     if (hold && !mHeld) {
         // Held at the barometric altitude where the runner joined the track,
         // and any climb since a join found late is backed out.

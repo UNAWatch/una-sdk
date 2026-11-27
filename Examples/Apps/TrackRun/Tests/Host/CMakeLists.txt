@@ -127,7 +127,6 @@ add_executable(trackrun-service-tests
     "${SDK_TESTS}/support/KernelTestDoubles.cpp"
     "${UNA_SDK_ROOT}/Libs/Source/UnaLogger/Logger.cpp"
 
-    "${APP_LIBS}/Sources/AtomicFile.cpp"
     "${APP_LIBS}/Sources/SettingsSerializer.cpp"
     "${APP_LIBS}/Sources/ActivitySummarySerializer.cpp"
     "${APP_LIBS}/Sources/TrackStoreFile.cpp"

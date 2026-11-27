@@ -111,8 +111,13 @@ bool LapTiming::timeOfTotal(float target, uint32_t beforeMs, uint32_t afterMs, u
         const float    f  = (target - a.total) / (b.total - a.total);
         const int32_t  dt = msDiff(b.tMs, a.tMs);
         const uint32_t tc = a.tMs + static_cast<uint32_t>(std::lround(f * static_cast<float>(dt > 0 ? dt : 0)));
+        // The fitted time: a line through several readings times it better
+        // than the two either side, but never after the newest reading.
+        uint32_t       fitMs  = 0;
+        const uint32_t newest = at(static_cast<uint8_t>(mCount - 1u)).tMs;
         if ((a.flags & kCalibrated) && (b.flags & kCalibrated)
-            && fitTotalCrossing(tc, target, beforeMs, afterMs, outMs)) {
+            && fitTotalCrossing(tc, target, beforeMs, afterMs, fitMs)) {
+            outMs = msDiff(newest, fitMs) < 0 ? newest : fitMs;
             return true;
         }
         outMs = tc;

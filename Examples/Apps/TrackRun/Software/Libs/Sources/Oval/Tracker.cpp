@@ -131,6 +131,7 @@ void Tracker::clearRun() noexcept
     mLastPauseT    = 0;
     mLastPauseMs   = 0;
     mResumeT       = 0;
+    mPauses.reset();
 
     mCreditedM      = 0.0;
     mLaps           = 0;
@@ -284,8 +285,24 @@ void Tracker::pause(uint32_t tMs) noexcept
     if (!mRunning || mPaused) {
         return;
     }
+    // The runner ran on from the last reading to the pause: that much is
+    // credited, at the speed then, as the odometer credits its share of the
+    // interval. Short of the line, so the lap still ends on a reading.
+    if (mLine && !mOff && mMode == Mode::Calibrated && mV >= mCfg.stillMps) {
+        const int32_t sinceMs = msDiff(tMs, mFilterT);
+        if (sinceMs > 0 && sinceMs <= static_cast<int32_t>(mCfg.maxCrossGapMs)) {
+            const float onto   = mX + mV * 0.001f * static_cast<float>(sinceMs);
+            const float before = lapLen() - 0.5f;
+            const float to     = onto < before ? onto : before;
+            if (to > mUmax) {
+                mLapMetres += to - mUmax;
+                mUmax       = to;
+            }
+        }
+    }
     mPaused      = true;
     mPauseStartT = tMs;
+    mPauses.pause(tMs);
 }
 
 void Tracker::resume(uint32_t tMs) noexcept
@@ -294,6 +311,7 @@ void Tracker::resume(uint32_t tMs) noexcept
     if (!mRunning || !mPaused) {
         return;
     }
+    mPauses.resume(tMs);
     int32_t len = msDiff(tMs, mPauseStartT);
     if (len < 0) {
         len = 0;
@@ -794,13 +812,21 @@ void Tracker::beginLine(float rel, uint32_t tMs) noexcept
     mLastCounterTotal = mCounter.totalDistanceM();
 }
 
-void Tracker::anchor(float rel, uint32_t tMs, float allowM, Events& ev) noexcept
+void Tracker::anchor(float rel, uint32_t tMs, float allowM, Events& ev, bool afterPause) noexcept
 {
     // Back on the line after a pause or time off the track. Ground covered
     // meanwhile is not credited beyond allowM: only what the runner runs from
-    // here.
+    // here. After time off the track a move within outlierM is taken as
+    // noise.
     const float len = lapLen();
-    if (rel > mUmax + mCfg.outlierM + allowM) {
+    if (afterPause) {
+        // As in Run: what was run before the pause and what is run from the
+        // resume both count, and the way between does not. The lap's credit
+        // runs on from this reading, ahead of the mark or behind it, so its
+        // noise is as likely to add a few metres as to take them off.
+        mUmax    = rel;
+        mAltered = true;
+    } else if (rel > mUmax + mCfg.outlierM + allowM) {
         // Further on than allowM: allowM of it is credited (after a short
         // spell off, as far as running on at the speed before would have
         // gone), the rest is not. Crediting none of it would make a false
@@ -1028,7 +1054,7 @@ void Tracker::lineReading(Vec2 p, uint32_t tMs, Events& ev) noexcept
         mNeedAnchor = false;
     } else if (mNeedAnchor) {
         mNeedAnchor = false;
-        anchor(nearest(rel, mUmax), tMs, 0.0f, ev);
+        anchor(nearest(rel, mUmax), tMs, 0.0f, ev, true);
         return;
     }
 
@@ -1925,19 +1951,8 @@ uint32_t Tracker::activeAt(uint32_t tMs) const noexcept
     if (since <= 0) {
         return 0;
     }
-    int64_t paused = mPausedTotalMs;
-    if (mPaused) {
-        const int32_t in = msDiff(tMs, mPauseStartT);
-        if (in > 0) {
-            paused += in;
-        }
-    } else if (mHadPause && msDiff(tMs, mResumeT) < 0) {
-        paused -= mLastPauseMs;
-        const int32_t into = msDiff(tMs, mLastPauseT);
-        if (into > 0) {
-            paused += (static_cast<uint32_t>(into) < mLastPauseMs) ? into : static_cast<int32_t>(mLastPauseMs);
-        }
-    }
+    // Only the pauses, and parts of them, before tMs.
+    const int64_t paused = mPauses.pausedBefore(mStartT, tMs);
     const int64_t a = static_cast<int64_t>(since) - paused;
     return a > 0 ? static_cast<uint32_t>(a) : 0;
 }

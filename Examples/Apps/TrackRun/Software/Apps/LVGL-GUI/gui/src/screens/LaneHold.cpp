@@ -37,6 +37,7 @@ void LaneHold::fireCb(lv_timer_t* t)
 {
     auto* self   = static_cast<LaneHold*>(lv_timer_get_user_data(t));
     self->mTimer = nullptr;   // one-shot: LVGL deletes the timer after this call
-    self->mModel.setLaneFrom(Model::LaneFrom::Run);
+    // A lap taken from the pause menu: the picker goes back there.
+    self->mModel.setLaneFrom(self->mModel.isLapFromPauseMenu() ? Model::LaneFrom::Pause : Model::LaneFrom::Run);
     ScreenManager::instance().goTo(ScreenId::Lane);
 }

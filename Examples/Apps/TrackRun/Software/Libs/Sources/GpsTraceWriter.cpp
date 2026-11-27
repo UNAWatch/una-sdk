@@ -50,19 +50,24 @@ bool GpsTraceWriter::open(const char* fitPath, uint32_t startMs, uint8_t lane, c
     const char* slash = fitPath != nullptr ? std::strrchr(fitPath, '/') : nullptr;
     const char* stamp = slash != nullptr ? std::strstr(slash, "activity_") : nullptr;
     const char* dot   = stamp != nullptr ? std::strrchr(stamp, '.') : nullptr;
+    // On a failed open the pre-run readings go too: they are this start's,
+    // not the next one's.
     if (stamp == nullptr || dot == nullptr) {
         LOG_ERROR("No FIT file to pair the trace with\n");
+        clearPreRun();
         return false;
     }
     const int n = std::snprintf(mPath, sizeof(mPath), "%.*strace_%.*s.csv", static_cast<int>(slash + 1 - fitPath),
                                 fitPath, static_cast<int>(dot - (stamp + 9)), stamp + 9);
     if (n <= 0 || static_cast<size_t>(n) >= sizeof(mPath)) {
+        clearPreRun();
         return false;
     }
     mFile = mKernel.fs.file(mPath);
     if (!mFile || !mFile->open(true, true)) {
         LOG_ERROR("Cannot create [%s]\n", mPath);
         mFile.reset();
+        clearPreRun();
         return false;
     }
     mCreated = true;

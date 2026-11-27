@@ -590,3 +590,21 @@ TEST(TrackStore, AFitTheLoaderWouldDropIsNotSaved)
     TrackStore back;
     EXPECT_EQ(back.load(buf, len).loaded, 1u) << "45 m loads back";
 }
+
+TEST(TrackStore, AVersionTooLargeToReadIsNewerAllTheSame)
+{
+    // A header version past what the report holds (255) is a later version:
+    // never saved over.
+    TrackStore st;
+    st.saveNew(modelAt(kLat, kLon), FitQuality(), 1u);
+    char buf[TrackStore::kMaxSerialisedBytes];
+    std::string text(buf, st.serialise(buf, sizeof buf));
+    for (const char* v : {"v=300", "v=123456789012345678901234"}) {
+        std::string t = text;
+        t.replace(t.find("v=1"), 3, v);
+        TrackStore back;
+        const TrackStore::LoadReport r = back.load(t.data(), t.size());
+        EXPECT_TRUE(r.headerOk) << v;
+        EXPECT_TRUE(r.newerVersion) << v;
+    }
+}

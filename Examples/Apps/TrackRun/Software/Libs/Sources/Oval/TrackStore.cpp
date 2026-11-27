@@ -738,16 +738,24 @@ TrackStore::LoadReport TrackStore::load(const char* text, size_t len) noexcept
             break;
         }
         if (isFirst && same(s, w, kHeader)) {
+            bool beyond = false; // a version too large for the report's field: newer all the same
             forEachField(s, n, w, [&](const char* k, size_t kn, const char* v, size_t vn) {
                 uint64_t u = 0;
                 if (same(k, kn, "v") && parseUint(v, vn, 255, u)) {
                     rep.version = static_cast<uint8_t>(u);
+                } else if (same(k, kn, "v") && vn > 0) {
+                    // Digits past 255 (any number of them): a later version.
+                    bool digits = true;
+                    for (size_t i = 0; i < vn; ++i) {
+                        digits = digits && isDigit(v[i]);
+                    }
+                    beyond = beyond || digits;
                 } else if (same(k, kn, "count") && parseUint(v, vn, 255, u)) {
                     rep.expected = static_cast<uint8_t>(u);
                 }
             });
-            rep.headerOk     = rep.version > 0;
-            rep.newerVersion = rep.version > kFormatVersion;
+            rep.headerOk     = rep.version > 0 || beyond;
+            rep.newerVersion = rep.version > kFormatVersion || beyond;
             continue;
         }
         if (!same(s, w, kTrack) || n > kMaxLineBytes) {

@@ -28,6 +28,8 @@ public:
 
     void onShow() override;
     void onKey(uint8_t code) override;
+    /// A hold of Lap under way stops: its release cannot come while suspended.
+    void onSuspend() override { mLaneHold.stop(); }
 
 protected:
     void build() override;

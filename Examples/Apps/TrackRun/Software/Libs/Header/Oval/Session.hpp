@@ -46,6 +46,7 @@
 #include "Oval/Config.hpp"
 #include "Oval/LaneTable.hpp"
 #include "Oval/LocalFrame.hpp"
+#include "Oval/PauseLog.hpp"
 #include "Oval/Sample.hpp"
 #include "Oval/TrackModel.hpp"
 #include "Oval/TrackStore.hpp"
@@ -244,6 +245,8 @@ private:
         bool     haveStep   = false;
         Vec2     stepP;
         uint32_t stepT      = 0;
+        bool     haveT      = false;
+        uint32_t lastT      = 0;   ///< The last reading's time
     };
 
     struct Visited {
@@ -336,6 +339,7 @@ private:
     bool     mRunning = false;
     bool     mHaveT   = false;
     bool     mPaused  = false;
+    PauseLog mPauses;              ///< Every recent pause, for a step across more than one
     bool     mFinished = false;
     uint32_t mStartT  = 0;
     uint32_t mLastT   = 0;

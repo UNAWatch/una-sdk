@@ -79,8 +79,8 @@ Out drive(const TraceGen::Trace& tr, Run::TrackSource& src, const Oval::TrackSto
 
 bool neverDecreases(const std::vector<float>& v)
 {
-    for (size_t i = 1; i < v.size(); ++i) {
-        if (v[i] < v[i - 1]) {
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (!std::isfinite(v[i]) || (i > 0 && v[i] < v[i - 1])) {
             return false;
         }
     }
@@ -177,7 +177,10 @@ TEST(TrackSource, APauseHoldsTheDistance)
     }
     ASSERT_GT(lastPaused, firstPaused);
     const size_t base = tr.startIndex;
-    EXPECT_NEAR(o.totalM[lastPaused - base], o.totalM[firstPaused - base], 1.0f) << "nothing counts while paused";
+    ASSERT_GT(firstPaused, base) << "a reading before the pause";
+    // Against the last reading before the pause: the first paused one adds
+    // nothing either.
+    EXPECT_NEAR(o.totalM[lastPaused - base], o.totalM[firstPaused - 1 - base], 1.0f) << "nothing counts while paused";
 }
 
 TEST(TrackSource, TheElevationIsHeldOnATrack)

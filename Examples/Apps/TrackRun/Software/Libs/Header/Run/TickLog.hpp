@@ -51,7 +51,8 @@ public:
 
     void reset() noexcept
     {
-        mHead = 0; mCount = 0; mNewestT = 0; mLeftT = 0; mLeftAny = false; mCarry = Carry();
+        mHead = 0; mCount = 0; mNewestT = 0; mLeftT = 0; mLeftAny = false; mLeftAscDm = 0; mLeftDescDm = 0;
+        mCarry = Carry();
     }
 
     /** The oldest split still held starts at fromMs (the run's start, then
@@ -119,6 +120,8 @@ private:
     uint16_t mCount = 0;
     uint32_t mLeftT   = 0;     ///< The newest tick that has left the log
     bool     mLeftAny = false;
+    uint16_t mLeftAscDm  = 0;  ///< Its ascent and descent so far
+    uint16_t mLeftDescDm = 0;
     Carry    mCarry;
 };
 

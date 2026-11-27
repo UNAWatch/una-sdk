@@ -111,7 +111,7 @@ A row is about 65 to 72 bytes, so an hour is about 250 KB. The file is flushed e
 - **Pre-run.** Rows with mode `pre` are passed to `prime()`.
 - **Start.** `start()` is called at `start_ms`. Without it, Start is placed halfway between the last `pre` row and the next row.
 - **Lane.** The starting lane comes from the `lane` meta line, or else from the first row after Start. A change in the `lane` column is a `setLane()` before that row; a blank is `setLane(0)`, "No lane". A file with no `lane` column sets no lane. This suits a file made by `fromTrace()`, whose lanes are all the runner's.
-- **Pause and resume.** These are placed halfway between the rows where `mode` turns to `pause` and back. So a replayed lap that holds a pause can differ from the watch's by up to half a second of active time. Lap counts and credited distances are not affected.
+- **Pause and resume.** These are placed halfway between the rows where `mode` turns to `pause` and back. So a replayed lap that holds a pause can differ from the watch's by up to half a second of active time. Lap counts are not affected. A reading's step across a resume counts only its share after the resume, so a replayed total can differ from the watch's by up to the share of that one step that falls between the two resume times.
 - **Readings.** Every row from Start on goes to `update()`, and `finish()` is called after the last.
 - **Actions.** `toTrace()` reads no action line. `TraceReplay.WatchTrace` (below) replays a watch's file from them: it drops the lane changes `toTrace()` took from the `lane` column, which also follows the joins and exits the run made by itself, and adds the `lane_set` lines as `setLane()`, "No lane" included.
 
@@ -123,7 +123,7 @@ Tests/Host/build/Release/trackrun-host-tests.exe --gtest_filter=TraceReplay.Watc
 Remove-Item Env:TRACKRUN_TRACE
 ```
 
-A trace that replays to the watch's result can be copied into `Tests/Host/data/` and made into a test with `TraceCsv::read` and `TraceCsv::toTrace`, asserting what the run should have given.
+A trace that replays to the watch's result can be copied into `Tests/Host/data/` and made into a test: `TraceCsv::read`, `TraceCsv::toTrace`, and then the same actions as `TraceReplay.WatchTrace` (the `lane` column's changes dropped, the `lane_set` lines added), asserting what the run should have given.
 
 ### Versions
 

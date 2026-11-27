@@ -722,7 +722,11 @@ TEST(Tracker, PauseMidLapKeepsTheLapExact)
         g.run(kTailM, runner());
         const Trace tr = g.finish();
         const Replay::TrackerResult r = Replay::runTracker(tr, LaneTable::outdoor(), defaultCfg(), &stored);
-        EXPECT_TRUE(lapsRight(tr, r, 3000)) << "seed " << seed;
+        // Nothing moved in the pause counts, as in Run: the reading at the
+        // resume sets where running starts again, so its GPS noise (3 m
+        // here) can add a few metres to the lap that holds the pause or take
+        // a few off.
+        EXPECT_TRUE(lapsRight(tr, r, 3000, false, 10.0)) << "seed " << seed;
         // The paused minute is not in the lap time.
         const Replay::TimeErrors te = Replay::lapTimeErrors(tr, r);
         EXPECT_LT(worstAbs(te.refined), 2000.0);

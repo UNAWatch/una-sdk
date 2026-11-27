@@ -221,6 +221,12 @@ TEST(ServiceTracksFile, AFailedSaveLeavesTheOldStoreToLoad)
     EXPECT_EQ(file.save(storeWith(3)), TrackStoreFile::SaveResult::Failed);
     fx.fileSystem.failRenames = false;
     EXPECT_FALSE(fx.fileSystem.exist(TrackStoreFile::kTmpPath));
+    {
+        // The old store is still the one to load.
+        Oval::TrackStore old;
+        TrackStoreFile   reread(fx.kernel);
+        EXPECT_EQ(reread.load(old).loaded, 1u);
+    }
     // Lost too: say the start before had been interrupted.
     fx.fileSystem.remove(TrackStoreFile::kPath);
     Oval::TrackStore back;

@@ -141,6 +141,7 @@ void Session::clearRun() noexcept
     mStore = nullptr;
     mFrame.clear();
     mOdo = Odometer();
+    mPauses.reset();
 
     mRunning  = false;
     mHaveT    = false;
@@ -366,6 +367,7 @@ void Session::pause(uint32_t tMs) noexcept
     }
     mPaused     = true;
     mPauseFromT = tMs;
+    mPauses.pause(tMs);
     addAct(tMs, kActPause);
     if (mTracker.isRunning()) {
         mTracker.pause(tMs);
@@ -378,6 +380,7 @@ void Session::resume(uint32_t tMs) noexcept
         return;
     }
     mPaused = false;
+    mPauses.resume(tMs);
     addAct(tMs, kActResume);
     if (mTracker.isRunning()) {
         mTracker.resume(tMs);
@@ -670,8 +673,9 @@ void Session::updateShown() noexcept
 void Session::odometer(const Sample& s, bool good, Vec2 p) noexcept
 {
     // As counting mode reads the kernel's distance (LapCounter::updateOdometer).
-    float delta = 0.0f;
-    bool  have  = false;
+    float    delta = 0.0f;
+    bool     have  = false;
+    uint32_t fromT = s.tMs; // where the step began
     if (std::isfinite(s.gpsDistM)) {
         if (mOdo.haveGps) {
             const float d = s.gpsDistM - mOdo.lastGps;
@@ -679,12 +683,16 @@ void Session::odometer(const Sample& s, bool good, Vec2 p) noexcept
                 delta        = limitStep(d, msDiff(s.tMs, mOdo.lastGpsT), cfg().maxSpeedMps);
                 mOdo.lastGpsT = s.tMs;
             }
-            have = true;
+            have  = true;
+            fromT = mOdo.haveT ? mOdo.lastT : s.tMs;
         } else {
             mOdo.lastGpsT = s.tMs;
         }
         mOdo.haveGps = true;
         mOdo.lastGps = s.gpsDistM;
+        if (!good) {
+            mOdo.haveStep = false; // counted to here: a position step starts afresh
+        }
     } else {
         mOdo.haveGps = false;
     }
@@ -692,11 +700,19 @@ void Session::odometer(const Sample& s, bool good, Vec2 p) noexcept
         if (!have && mOdo.haveStep) {
             delta = limitStep(length(p - mOdo.stepP), msDiff(s.tMs, mOdo.stepT), cfg().maxSpeedMps);
             have  = true;
+            fromT = mOdo.stepT;
         }
         mOdo.haveStep = true;
         mOdo.stepP    = p;
         mOdo.stepT    = s.tMs;
     }
+    // A step across a pause counts only its active share (with no reading in
+    // the pause, its movement would otherwise count).
+    if (have) {
+        delta *= mPauses.activeShare(fromT, s.tMs);
+    }
+    mOdo.haveT = true;
+    mOdo.lastT = s.tMs;
     if (have && !mPaused) {
         mOdo.m += static_cast<double>(delta);
     }
@@ -1388,6 +1404,8 @@ void Session::roadKilometres(uint32_t prevT, float prevOdo, Events& ev) noexcept
         addEvent(ev, EventType::RoadKilometre, t);
         if (ev.count > 0 && ev.items[ev.count - 1].type == EventType::RoadKilometre) {
             ev.items[ev.count - 1].kilometre = mKmCount;
+            // The total at the split, not at this reading.
+            ev.items[ev.count - 1].totalM -= segM - target;
         }
     }
 }
@@ -1601,16 +1619,28 @@ void Session::endVisit() noexcept
         m.setGeo(T.counter().frame());
     }
 
+    // An earlier visit to a track not stored is this one if its centre is
+    // near and its heading and bend agree (as the visit check judges a track
+    // the same): two ovals side by side stay two.
+    const auto sameTrack = [this](const TrackModel& a, const TrackModel& b) {
+        if (!a.hasGeo() || !b.hasGeo()
+            || distM(a.centreLat(), a.centreLon(), b.centreLat(), b.centreLon()) > cfg().storeReplaceNearM) {
+            return false;
+        }
+        float dh = std::fmod(std::fabs(a.headingRad() - b.headingRad()), 3.14159265f);
+        if (dh > 0.5f * 3.14159265f) {
+            dh = 3.14159265f - dh;
+        }
+        return dh * 57.2957795f <= cfg().visitReplaceHeadingDeg
+            && std::fabs(a.kerbRadiusM() - b.kerbRadiusM()) <= cfg().visitReplaceRM;
+    };
     int idx = -1;
     for (uint8_t i = 0; i < kMaxVisited && idx < 0; ++i) {
         const Visited& v = mVisited[i];
         if (!v.used) {
             continue;
         }
-        if (number != 0 ? v.number == number
-                              : (v.number == 0 && m.hasGeo() && v.model.hasGeo()
-                                 && distM(v.model.centreLat(), v.model.centreLon(), m.centreLat(), m.centreLon())
-                                        <= cfg().storeReplaceNearM)) {
+        if (number != 0 ? v.number == number : (v.number == 0 && sameTrack(v.model, m))) {
             idx = i;
         }
     }
@@ -1794,7 +1824,16 @@ void Session::nearStep(const Sample& s, bool added, Events& ev) noexcept
     Vec2     pNew = pointAt(newest);
     float    sNew = m.project(pNew, 0.0f).s;
     uint32_t q    = newest;
+    uint32_t tNew = timeAt(newest);
     for (;;) {
+        // A gap in the ring (a pause, a GPS outage) ends the stretch: the
+        // chord across it is not running along the track.
+        const uint32_t tq = timeAt(q);
+        if (q != newest && msDiff(tNew, tq) > static_cast<int32_t>(kJoinGapMs)) {
+            ++q;   // the oldest point taken is the one after the gap
+            break;
+        }
+        tNew = tq;
         const Vec2 pq = pointAt(q);
         const TrackModel::Projection pr = m.project(pq, 0.0f);
         lats[n++] = pr.lateralM;
