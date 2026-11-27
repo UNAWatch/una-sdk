@@ -76,6 +76,7 @@ add_executable(trackrun-host-tests
     NeighbourSweep_test.cpp
     RunModules_test.cpp
     TrackSource_test.cpp
+    WatchTrace_test.cpp
     TraceGen.cpp
     Replay.cpp
     TraceCsv.cpp

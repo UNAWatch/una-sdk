@@ -917,18 +917,6 @@ void Service::startTrack(std::time_t utc)
         mCalibrator.enableTrace("../SharedData/stride_trace.csv");
     }
 
-    // The run's distance from the lane. Before the first GPS reading the
-    // sensor clock is not known: the run starts on it at the first reading.
-    mStartSysMs = sysMs();
-    mRunLane    = mSettings.lastLane;
-    mLaneMin    = 0;
-    mLaneMax    = 0;
-    if (mClock.synced()) {
-        startTrackSource(sensorNow());
-    } else {
-        mSrcStartPending = true;
-    }
-
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
     mLapCarryMs = 0;
@@ -994,6 +982,19 @@ void Service::startTrack(std::time_t utc)
     info.devID = DEV_ID;
     info.appID = APP_ID;
     mActivityWriter.start(info);
+
+    // The run's distance from the lane, once the FIT file is open (the GPS
+    // trace pairs with it). Before the first GPS reading the sensor clock is
+    // not known: the run starts on it at the first reading.
+    mStartSysMs = sysMs();
+    mRunLane    = mSettings.lastLane;
+    mLaneMin    = 0;
+    mLaneMax    = 0;
+    if (mClock.synced()) {
+        startTrackSource(sensorNow());
+    } else {
+        mSrcStartPending = true;
+    }
 
     if (mIntervalsMode || mWorkoutMode) {
         mActivityWriter.addWorkout(mProgram);
@@ -2548,6 +2549,7 @@ void Service::traceRow(const Oval::Sample& s, float rawPrecision, bool preRun)
         return;
     }
     r.trackDistM = mTrackSrc.totalM();
+    r.lap        = mTrackSrc.session().runLaps();
     r.mode       = mTrackSrc.traceMode();
     r.lane       = mTrackSrc.session().lane();
     r.segment    = mTrackSrc.traceSegment();
