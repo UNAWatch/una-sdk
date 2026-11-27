@@ -33,8 +33,13 @@ struct Delta {
  *  a pace that means nothing. */
 constexpr float kMinChartM = 100.0f;
 
+/** A wider gap than this (s) is no comparison; it also keeps the rounded
+ *  gap inside int32_t. */
+constexpr double kMaxDiffS = 86400.0;
+
 /** timeS over m against prevTimeS over prevM, by pace. None if either lap
- *  has no time or no distance. */
+ *  has no time or no distance, or if the two differ by a day or more (a lap
+ *  of a few millimetres before a long one), which says nothing. */
 inline Delta compare(uint32_t timeS, float m, uint32_t prevTimeS, float prevM)
 {
     Delta d;
@@ -43,12 +48,15 @@ inline Delta compare(uint32_t timeS, float m, uint32_t prevTimeS, float prevM)
     }
     const double expected = static_cast<double>(prevTimeS) * static_cast<double>(m) / static_cast<double>(prevM);
     const double diff     = static_cast<double>(timeS) - expected;
+    if (!(diff > -kMaxDiffS && diff < kMaxDiffS)) {
+        return d;
+    }
     d.s       = static_cast<int32_t>(diff < 0.0 ? diff - 0.5 : diff + 0.5);
     d.verdict = d.s < 0 ? Verdict::Faster : d.s > 0 ? Verdict::Slower : Verdict::Even;
     return d;
 }
 
-/** The chip's text, after its arrow: "3 s faster", "1:02 slower", "Even";
+/** The chip's text: "3 s faster", "1:02 slower", "Even";
  *  empty with nothing to compare. */
 inline void line(char* buf, size_t n, const Delta& d)
 {

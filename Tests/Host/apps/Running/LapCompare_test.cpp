@@ -54,6 +54,8 @@ TEST(LapCompare, NothingToCompare)
     EXPECT_EQ(LapCompare::compare(270, 0.0f, 270, 1000.0f).verdict, Verdict::None);
     EXPECT_EQ(LapCompare::compare(270, 1000.0f, 0, 1000.0f).verdict, Verdict::None);
     EXPECT_EQ(LapCompare::compare(270, 1000.0f, 270, 0.0f).verdict, Verdict::None);
+    // A few millimetres before a long lap: the gap is beyond any comparison.
+    EXPECT_EQ(LapCompare::compare(300, 1000.0f, 3600, 0.001f).verdict, Verdict::None);
     EXPECT_EQ(text(Delta()), "");
 }
 
