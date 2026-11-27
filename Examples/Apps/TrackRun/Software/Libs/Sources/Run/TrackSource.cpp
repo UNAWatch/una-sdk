@@ -89,9 +89,11 @@ void TrackSource::reading(const Oval::Sample& s) noexcept
     }
 
     // Live speed: a correction in the total is not running (no pace spike).
-    const float after = mSession.totalDistanceM();
-    mPace.add(s.tMs, after);
+    // Paused, the window holds where it was (the pace shown freezes), and
+    // starts again at the resume.
     if (!mPaused) {
+        const float after = mSession.totalDistanceM();
+        mPace.add(s.tMs, after);
         const uint32_t dt   = diff(s.tMs, prevT) > 0 ? static_cast<uint32_t>(diff(s.tMs, prevT)) : 0u;
         const float    jump = correctionJumpM(after - before, dt, recent, forced);
         if (jump > 0.0f) {

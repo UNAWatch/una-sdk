@@ -50,7 +50,7 @@ bool lapsRight(const TraceGen::Trace& tr, const Replay::TrackerResult& r, uint8_
     for (size_t k = 0; k < r.laps.size(); ++k) {
         const uint32_t end = r.refined[k] ? r.refinedEndMs[k] : r.laps[k].tMs;
         if (std::abs(Oval::msDiff(end, tr.crossMs[k])) > static_cast<int32_t>(endTolMs)
-            || std::fabs(r.laps[k].lapLengthM - len) > 0.01f) {
+            || !(std::fabs(r.laps[k].lapLengthM - len) <= 0.01f)) {   // a NaN length is wrong too
             return false;
         }
     }

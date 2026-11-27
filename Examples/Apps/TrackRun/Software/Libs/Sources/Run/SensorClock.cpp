@@ -20,7 +20,9 @@ int32_t SensorClock::onSample(uint32_t sensorMs, uint32_t sysMs) noexcept
         mHaveOut = false;
         return jump;
     }
-    if (obs - mOffset > 0) {
+    // Offsets are modulo 2^32: compared by unsigned difference (a signed one
+    // can overflow).
+    if (static_cast<int32_t>(static_cast<uint32_t>(obs) - static_cast<uint32_t>(mOffset)) > 0) {
         // Less latency than any reading so far: the better offset, at once.
         // now() moves forward, never back.
         mOffset  = obs;
@@ -28,7 +30,7 @@ int32_t SensorClock::onSample(uint32_t sensorMs, uint32_t sysMs) noexcept
         return 0;
     }
     // A smaller offset: the clocks may be drifting apart. Follow it slowly.
-    const int32_t  gap     = mOffset - obs;
+    const int32_t  gap     = static_cast<int32_t>(static_cast<uint32_t>(mOffset) - static_cast<uint32_t>(obs));
     const uint32_t elapsed = sysMs - mSlewSys;
     const uint32_t allow   = (elapsed / 1000u) * kSlewMsPerS;
     if (allow > 0u) {
