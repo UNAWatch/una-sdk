@@ -55,7 +55,7 @@ struct Position {
 // -----------------------------------------------------------------------------
 
 struct Root {
-    enum Id { ID_START = 0, ID_WORKOUTS, ID_INTERVALS, ID_SETTINGS,
+    enum Id { ID_START = 0, ID_LANE, ID_WORKOUTS, ID_INTERVALS, ID_SETTINGS,
               ID_COUNT, ID_DEFAULT = ID_START };
 
     // The workout list: a Free run row while a workout is armed, then one
@@ -121,7 +121,7 @@ struct Root {
 
     struct Settings {
         enum Id {
-            ID_ALERTS = 0, ID_RUN_ALERTS, ID_PHONE_NOTIF,
+            ID_ALERTS = 0, ID_RUN_ALERTS, ID_TRACKS, ID_LANE_HOLD, ID_PHONE_NOTIF,
             ID_COUNT, ID_DEFAULT = ID_ALERTS
         };
 
@@ -185,13 +185,13 @@ struct Root {
 // only name them (ID_TRACK_PACE shows between ID_TRACK2 and ID_TRACK3).
 struct TrackView {
     enum Id { ID_WORKOUT_GAUGE = 0, ID_WORKOUT_STEP, ID_WORKOUT_NEXT,
-              ID_INTERVALS, ID_TRACK1, ID_TRACK2, ID_TRACK3, ID_TRACK_PACE,
+              ID_INTERVALS, ID_TRACK1, ID_TRACK2, ID_TRACK3, ID_TRACK_PACE, ID_TRACK_CLOCK,
               ID_COUNT, ID_DEFAULT = ID_WORKOUT_GAUGE };
 
     // Lap shows only in a free run, End workout only while a structured
     // workout runs.
     struct Action {
-        enum Id { ID_RESUME = 0, ID_LAP, ID_END_WORKOUT, ID_SUMMARY, ID_SAVE, ID_DISCARD,
+        enum Id { ID_RESUME = 0, ID_LAP, ID_LANE, ID_END_WORKOUT, ID_SUMMARY, ID_SAVE, ID_DISCARD,
                   ID_COUNT, ID_DEFAULT = ID_RESUME };
     };
 };

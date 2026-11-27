@@ -20,6 +20,8 @@ void MenuSettingsScreen::build()
 {
     mItems[Menu::ID_ALERTS]      = { Style::Simple, "Lap Alerts" };
     mItems[Menu::ID_RUN_ALERTS]  = { Style::Simple, "Run Alerts" };
+    mItems[Menu::ID_TRACKS]      = { Style::Simple, "Tracks" };
+    mItems[Menu::ID_LANE_HOLD]   = { Style::Toggle, "Lane\nShortcut", "Lane Shortcut", &poppins_semibold_25 };
     mItems[Menu::ID_PHONE_NOTIF] = { Style::Toggle, "Phone\nNotif.", "Phone Notif.", &poppins_semibold_25 };
 
     mMenu      = std::make_unique<WheelMenu>(mRoot, mItems, Menu::ID_COUNT);
@@ -56,6 +58,14 @@ void MenuSettingsScreen::onKey(uint8_t code)
                 ScreenManager::instance().goTo(ScreenId::MenuAlerts);
             } else if (mMenu->selected() == Menu::ID_RUN_ALERTS) {
                 ScreenManager::instance().goTo(ScreenId::MenuRunAlerts);
+            } else if (mMenu->selected() == Menu::ID_TRACKS) {
+                ScreenManager::instance().goTo(ScreenId::MenuTracks);
+            } else if (mMenu->selected() == Menu::ID_LANE_HOLD) {
+                // A hold of Lap in a run opens the lane picker.
+                Settings sett = mModel.getSettings();
+                sett.laneHoldEn = !sett.laneHoldEn;
+                mModel.saveSettings(sett);
+                onSettings(sett);
             } else {
                 Settings sett = mModel.getSettings();
                 sett.phoneNotifEn = !sett.phoneNotifEn;
@@ -74,6 +84,7 @@ void MenuSettingsScreen::onKey(uint8_t code)
 void MenuSettingsScreen::onSettings(const Settings& settings)
 {
     mItems[Menu::ID_PHONE_NOTIF].toggleState = settings.phoneNotifEn;
+    mItems[Menu::ID_LANE_HOLD].toggleState   = settings.laneHoldEn;
     mMenu->refresh();
 }
 

@@ -45,6 +45,7 @@ private:
     bool                   mFired = false;
     uint32_t               mShown = 3;
 
+    char      mText[32] = "";
     lv_obj_t* mNumber = nullptr;
     std::unique_ptr<Widgets::TimerRing> mRing;
     std::unique_ptr<Widgets::Buttons>   mButtons;

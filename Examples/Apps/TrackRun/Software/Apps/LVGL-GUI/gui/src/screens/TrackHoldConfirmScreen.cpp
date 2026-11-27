@@ -10,6 +10,8 @@
 #include "gui/theme/Theme.hpp"
 #include "gui/Assets.hpp"
 
+#include <cstdio>
+
 using namespace SDK::GUI;
 
 TrackHoldConfirmScreen::TrackHoldConfirmScreen(Model& model)
@@ -27,6 +29,7 @@ void TrackHoldConfirmScreen::build()
     mMode = mModel.getHoldConfirmMode();
     const bool finish = mMode == Model::HoldConfirmMode::Finish;
     const bool end    = mMode == Model::HoldConfirmMode::EndWorkout;
+    const bool forget = mMode == Model::HoldConfirmMode::Forget;
 
     // Green to finish, red to discard; amber to end a workout, as the run
     // goes on, so it is neither.
@@ -41,8 +44,14 @@ void TrackHoldConfirmScreen::build()
                   Widgets::Buttons::NONE);
 
     Theme::imageTinted(mRoot, &img_tickgreen_22x17, 186, 60, color);
-    Theme::label(mRoot, Theme::Font::Medium18,
-                 finish ? "Hold to\nFinish" : end ? "Hold to\nEnd workout" : "Hold to\nDiscard", 53, 67, 133);
+    if (forget) {
+        // A short first line, clear of the R1 mark.
+        std::snprintf(mText, sizeof(mText), "Hold to\nforget Track %u", static_cast<unsigned>(mModel.chosenTrack()));
+        Theme::label(mRoot, Theme::Font::Medium18, mText, 43, 67, 154);
+    } else {
+        Theme::label(mRoot, Theme::Font::Medium18,
+                     finish ? "Hold to\nFinish" : end ? "Hold to\nEnd workout" : "Hold to\nDiscard", 53, 67, 133);
+    }
     mNumber = Theme::label(mRoot, Theme::Font::SemiBold60, "3", 102, 103, 36);
 }
 
@@ -90,7 +99,8 @@ void TrackHoldConfirmScreen::cancel()
         return;
     }
     lv_anim_delete(this, nullptr);
-    ScreenManager::instance().goTo(ScreenId::TrackAction);
+    ScreenManager::instance().goTo(mMode == Model::HoldConfirmMode::Forget ? ScreenId::MenuTrackDetail
+                                                                          : ScreenId::TrackAction);
 }
 
 void TrackHoldConfirmScreen::animExecCb(void* var, int32_t value)
@@ -119,6 +129,11 @@ void TrackHoldConfirmScreen::animReadyCb(lv_anim_t* a)
     switch (self->mMode) {
         case Model::HoldConfirmMode::Finish:
             ScreenManager::instance().goTo(ScreenId::TrackSaved);
+            break;
+        case Model::HoldConfirmMode::Forget:
+            // The other tracks keep their numbers; the list comes back fresh.
+            self->mModel.forgetTrack(self->mModel.chosenTrack());
+            ScreenManager::instance().goTo(ScreenId::MenuTracks);
             break;
         case Model::HoldConfirmMode::EndWorkout:
             // The run carries on as a free run; the action menu paused it.

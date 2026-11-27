@@ -46,6 +46,10 @@
 #include "gui/screens/WorkoutDetailsScreen.hpp"
 #include "gui/screens/WorkoutListScreen.hpp"
 #include "gui/screens/WorkoutMenuScreen.hpp"
+#include "gui/screens/LaneScreen.hpp"
+#include "gui/screens/TrackNoticeScreen.hpp"
+#include "gui/screens/TracksScreen.hpp"
+#include "gui/screens/TrackDetailScreen.hpp"
 
 ScreenManager& ScreenManager::instance()
 {
@@ -99,6 +103,7 @@ ScreenId ScreenManager::trackOrPopup() const
         case Model::Popup::Phase:     return ScreenId::TrackIntervalsAlert;
         case Model::Popup::RunAlert:  return ScreenId::TrackRunAlert;
         case Model::Popup::Completed: return ScreenId::TrackIntervalsCompleted;
+        case Model::Popup::Notice:    return ScreenId::TrackNotice;
         default:                      return ScreenId::Track;
     }
 }
@@ -191,6 +196,9 @@ Screen* ScreenManager::create(ScreenId id)
         case ScreenId::MenuRunAlertPicker:        return new RunAlertPickerScreen(m);
         case ScreenId::MenuRunHrList:             return new MenuRunHrListScreen(m);
         case ScreenId::MenuRunAlertSaved:         return new RunAlertSavedScreen(m);
+        case ScreenId::MenuTracks:                return new TracksScreen(m);
+        case ScreenId::MenuTrackDetail:           return new TrackDetailScreen(m);
+        case ScreenId::Lane:                      return new LaneScreen(m);
 
         case ScreenId::TrackStartConfirm:         return new TrackStartConfirmScreen(m);
         case ScreenId::TrackIntervalsCountdown:   return new TrackIntervalsCountdownScreen(m);
@@ -205,6 +213,7 @@ Screen* ScreenManager::create(ScreenId id)
         case ScreenId::TrackSaved:                return new TrackResultScreen(m, TrackResultScreen::Result::Saved);
         case ScreenId::TrackDiscarded:            return new TrackResultScreen(m, TrackResultScreen::Result::Discarded);
         case ScreenId::TrackSummary:              return new TrackSummaryScreen(m);
+        case ScreenId::TrackNotice:               return new TrackNoticeScreen(m);
     }
     return nullptr;
 }

@@ -102,7 +102,7 @@ public:
     uint8_t getAccessoryState() const;
 
     // Hold-to-confirm: which action the shared TrackHoldConfirmation screen performs.
-    enum class HoldConfirmMode { Finish, Discard, EndWorkout };
+    enum class HoldConfirmMode { Finish, Discard, EndWorkout, Forget };
     void setHoldConfirmMode(HoldConfirmMode mode);
     HoldConfirmMode getHoldConfirmMode() const;
 
@@ -148,6 +148,43 @@ public:
     void discardTrack();
     bool isTrackSummaryAvailable() const;
     const ActivitySummary& getTrackSummary() const;
+
+    // Track Run: the lane and the stored tracks
+
+    /// The start screen's track (CustomMessage::PreRunTrack).
+    struct PreRun {
+        uint8_t  status      = CustomMessage::PreRunTrack::UNKNOWN;
+        uint8_t  trackNumber = 0;
+        uint8_t  lane        = 1;     ///< The lane Start uses; 0: "No lane"
+        bool     weakGps     = false;
+        uint16_t uses        = 0;
+    };
+    const PreRun& getPreRun() const { return mPreRun; }
+    /// 1 to 8, or 0 for "No lane": before a run, the lane Start uses; in a
+    /// run, the lane from now.
+    void    setLane(uint8_t lane);
+    /// In a run, the run's lane; else the one Start uses.
+    uint8_t currentLane() const;
+    /// Settings > Lane shortcut: a hold of Lap opens the lane picker.
+    bool    laneShortcut() const { return mSettings.laneHoldEn; }
+    /// Where the lane picker goes back to.
+    enum class LaneFrom : uint8_t { Start, Pause, Run };
+    void     setLaneFrom(LaneFrom from) { mLaneFrom = from; }
+    LaneFrom laneFrom() const { return mLaneFrom; }
+
+    /// The stored tracks (CustomMessage::TrackList), for Settings > Tracks.
+    struct Tracks {
+        uint8_t                              count     = 0;
+        int32_t                              tzOffsetS = 0;
+        CustomMessage::TrackList::Entry      tracks[CustomMessage::TrackList::kMax] {};
+        bool                                 received  = false;
+    };
+    const Tracks& getTracks() const { return mTracks; }
+    void requestTrackList();
+    void forgetTrack(uint8_t number);
+    /// The stored track Settings > Tracks has open.
+    void    setChosenTrack(uint8_t number) { mChosenTrack = number; }
+    uint8_t chosenTrack() const { return mChosenTrack; }
 
     // Structured workouts
     static constexpr int16_t kNoWorkout = CustomMessage::TrackStart::kNoWorkout;
@@ -216,7 +253,7 @@ public:
     /// The pop-ups that show over the track faces, besides the step card. One
     /// that comes while another shows waits, and they show in the order they
     /// came; each takes itself off the list as it shows (takePopup()).
-    enum class Popup : uint8_t { None, Lap, Phase, RunAlert, Completed };
+    enum class Popup : uint8_t { None, Lap, Phase, RunAlert, Completed, Notice };
     /// The first to come of the pop-ups still waiting, or None.
     Popup waitingPopup() const { return mWaitingCount > 0 ? mWaiting[0] : Popup::None; }
     /// @p popup is showing: it waits no longer.
@@ -231,6 +268,16 @@ public:
         LapCompare::Delta delta {};   ///< Against the lap before it, by pace
     };
     const LapInfo& getLap() const { return mLap; }
+    /// The track notice: a known track the run joined by itself, or a new
+    /// track's calibration locked.
+    struct NoticeInfo {
+        enum class Kind : uint8_t { Joined, Locked };
+        Kind    kind        = Kind::Joined;
+        uint8_t trackNumber = 0;   ///< Joined: 0 for a track not stored, visited earlier in the run
+        uint8_t lane        = 0;   ///< Joined
+        uint8_t newNumber   = 0;   ///< Locked: the number it saves as; 0 if none is free
+    };
+    const NoticeInfo& getNotice() const { return mNotice; }
 
 private:
     // Fields required for GUI <-> Service communication
@@ -292,7 +339,7 @@ private:
     uint16_t        mChosenWorkout  = 0;
     int16_t         mArmedWorkout   = kNoWorkout;
     bool            mStepCard       = false;
-    static constexpr uint8_t kPopups = 4;  ///< Popup kinds besides None
+    static constexpr uint8_t kPopups = 5;  ///< Popup kinds besides None
     Popup           mWaiting[kPopups] {};
     uint8_t         mWaitingCount   = 0;
     LapInfo         mLap            {};
@@ -301,6 +348,15 @@ private:
     WorkoutFace     mWorkoutFace    {};
     WorkoutStepInfo mWorkoutStep    {};
     WorkoutStepInfo mWorkoutNext    {};
+
+    // Track Run
+    PreRun          mPreRun         {};
+    LaneFrom        mLaneFrom       = LaneFrom::Start;
+    Tracks          mTracks         {};
+    uint8_t         mChosenTrack    = 0;
+    NoticeInfo      mNotice         {};
+    uint16_t        mAutoJoinsSeen  = 0;   ///< Track::OnTrack::autoJoins already noticed
+    uint8_t         mLastCal        = Track::OnTrack::CAL_NONE;
 };
 
 #endif // MODEL_HPP

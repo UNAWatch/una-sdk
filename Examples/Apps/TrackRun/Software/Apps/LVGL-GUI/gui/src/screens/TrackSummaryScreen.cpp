@@ -29,6 +29,24 @@ constexpr int32_t kBarMinH   = 40;
 constexpr int32_t kBarGap    = 3;
 constexpr int32_t kFastLineY = 162;
 constexpr int32_t kSlowLineY = 184;
+
+// The track page's rows between RunLVGL's lines.
+constexpr int32_t kTrackRuleY  = 118;
+constexpr int32_t kLanesLineY  = 124;
+constexpr int32_t kTrackRule2Y = 151;
+constexpr int32_t kLine1Y      = 156;
+constexpr int32_t kLine2Y      = 177;
+
+/// "2.41 km" or "1.50 mi" for a total; under a kilometre (or a mile), metres.
+void distanceText(char* buf, size_t n, float m, bool imperial)
+{
+    const float unitM = imperial ? 1609.344f : 1000.0f;
+    if (m < unitM) {
+        std::snprintf(buf, n, "%u m", static_cast<unsigned>(m + 0.5f));
+    } else {
+        std::snprintf(buf, n, "%.2f %s", static_cast<double>(m / unitM), imperial ? "mi" : "km");
+    }
+}
 } // namespace
 
 TrackSummaryScreen::TrackSummaryScreen(Model& model)
@@ -47,6 +65,7 @@ void TrackSummaryScreen::build()
     buildFaceLaps();
     buildFaceChart();
     buildFaceHeartRate();
+    buildFaceTrack();
     buildFaceOverview();
     buildFaceMap();
 }
@@ -87,6 +106,76 @@ void TrackSummaryScreen::buildFaceHeartRate()
     mAvgHr = Theme::label(f, F::SemiBold40, Strings::kNoValue, 70, 150, 100);
     Theme::image(f, &img_heart_30x30, 105, 48);
     mTitles[FACE_HEARTRATE] = std::make_unique<Widgets::Title>(f, "HEART RATE");
+}
+
+void TrackSummaryScreen::buildFaceTrack()
+{
+    lv_obj_t* f = mFaces[FACE_TRACK] = Theme::container(mRoot, 0, 0, 240, 240);
+    mTrackLine = Theme::label(f, F::Medium18, "", 30, 46, 180);
+    // "New track saved as Track 3" takes two lines.
+    lv_label_set_long_mode(mTrackLine, LV_LABEL_LONG_WRAP);
+    lv_obj_set_height(mTrackLine, LV_SIZE_CONTENT);
+    mCalLine    = Theme::label(f, F::Regular16, "", 25, 96, 190);
+    Theme::hline(f, 25, kTrackRuleY, 190);
+    mLanesLine  = Theme::label(f, F::Medium18, "", 25, kLanesLineY, 190);
+    Theme::hline(f, 25, kTrackRule2Y, 190);
+    mRoadLine   = Theme::label(f, F::Regular16, "", 25, kLine1Y, 190);
+    mTrackMLine = Theme::label(f, F::Regular16, "", 25, kLine2Y, 190);
+    mTitles[FACE_TRACK] = std::make_unique<Widgets::Title>(f, "TRACK");
+}
+
+void TrackSummaryScreen::setTrackFace(const TrackRunSummary& tr)
+{
+    char buf[48];
+    // The track, and what the run did to it.
+    if (tr.savedNumber != 0) {
+        std::snprintf(buf, sizeof(buf), "New track saved as Track %u", static_cast<unsigned>(tr.savedNumber));
+    } else if (tr.trackNumber != 0) {
+        std::snprintf(buf, sizeof(buf), "Track %u", static_cast<unsigned>(tr.trackNumber));
+    } else if (tr.notStandard) {
+        std::snprintf(buf, sizeof(buf), "Not a standard track");
+    } else if (tr.onTrack) {
+        std::snprintf(buf, sizeof(buf), "New track, not saved");
+    } else {
+        std::snprintf(buf, sizeof(buf), "Road only");
+    }
+    lv_label_set_text(mTrackLine, buf);
+    if (tr.calLocked || tr.savedNumber != 0) {
+        std::snprintf(buf, sizeof(buf), "Calibration locked");
+    } else if (tr.trackNumber != 0) {
+        std::snprintf(buf, sizeof(buf), "Stored calibration");
+    } else if (tr.onTrack && !tr.notStandard) {
+        std::snprintf(buf, sizeof(buf), "Calibration not locked");
+    } else {
+        buf[0] = '\0';
+    }
+    lv_label_set_text(mCalLine, buf);
+
+    // The lane: "Lane 2", or "Lanes 1 to 3" when it changed.
+    const uint8_t lo = tr.laneMin != 0 ? tr.laneMin : tr.laneLast;
+    const uint8_t hi = tr.laneMax != 0 ? tr.laneMax : tr.laneLast;
+    if (!tr.onTrack || lo == 0) {
+        buf[0] = '\0';
+    } else if (lo == hi) {
+        std::snprintf(buf, sizeof(buf), "Lane %u", static_cast<unsigned>(lo));
+    } else {
+        std::snprintf(buf, sizeof(buf), "Lanes %u to %u", static_cast<unsigned>(lo), static_cast<unsigned>(hi));
+    }
+    lv_label_set_text(mLanesLine, buf);
+
+    // Road and track distance, for a run with both.
+    char m[16];
+    if (tr.roadM >= 1.0f && tr.trackM >= 1.0f) {
+        distanceText(m, sizeof(m), tr.roadM, mIsImperial);
+        std::snprintf(buf, sizeof(buf), "Road %s", m);
+        lv_label_set_text(mRoadLine, buf);
+        distanceText(m, sizeof(m), tr.trackM, mIsImperial);
+        std::snprintf(buf, sizeof(buf), "Track %s", m);
+        lv_label_set_text(mTrackMLine, buf);
+    } else {
+        lv_label_set_text(mRoadLine, "");
+        lv_label_set_text(mTrackMLine, "");
+    }
 }
 
 void TrackSummaryScreen::buildFaceChart()
@@ -165,6 +254,7 @@ void TrackSummaryScreen::setSummary(const ActivitySummary& s)
     lv_label_set_text(mAvgHr, buf);
 
     mMap->setMap(s.map);
+    setTrackFace(s.trackRun);
 
     mLaps = &s.laps;
     lv_label_set_text_fmt(mLapsCount, "%lu LAPS", static_cast<unsigned long>(s.laps.size()));
@@ -180,7 +270,7 @@ void TrackSummaryScreen::setSummary(const ActivitySummary& s)
     mLapPage  = 0;
     mLapPages = s.laps.empty() ? 0 : static_cast<uint8_t>((s.laps.size() + kLapPageSize - 1) / kLapPageSize);
     setChart(s.laps);
-    mIndicator->setCount(static_cast<uint16_t>(3 + (mHasChart ? 1 : 0) + mLapPages));
+    mIndicator->setCount(static_cast<uint16_t>(kFixedFaces + (mHasChart ? 1 : 0) + mLapPages));
     fillLapRows();
 }
 
@@ -293,10 +383,10 @@ void TrackSummaryScreen::fillLapRows()
         char buf[16];
         snprintf(buf, sizeof(buf), "%lu.", static_cast<unsigned long>(idx + 1));
         lv_label_set_text(mLapRows[r][0], buf);
-        const float dist = Fmt::distUnits(lap.distance, mIsImperial);
-        Fmt::fixed(buf, sizeof(buf), dist, dist < 100.0f ? 2 : 1);
+        // Metres, as a track is measured.
+        snprintf(buf, sizeof(buf), "%lu", static_cast<unsigned long>(lap.distance > 0.0f ? lap.distance + 0.5f : 0.0f));
         lv_label_set_text(mLapRows[r][1], buf);
-        lv_label_set_text(mLapRows[r][2], Fmt::units(mIsImperial));
+        lv_label_set_text(mLapRows[r][2], "m");
         Fmt::shortTime(buf, sizeof(buf), lap.duration);
         lv_label_set_text(mLapRows[r][3], buf);
         Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(lap.paceAvg, mIsImperial));

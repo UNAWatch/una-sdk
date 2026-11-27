@@ -15,7 +15,9 @@
 
 #include <memory>
 
+#include "gui/screens/LaneHold.hpp"
 #include "gui/screens/Screen.hpp"
+#include "gui/widgets/Kit.hpp"
 #include "gui/widgets/Widgets.hpp"
 #include "gui/widgets/WorkoutFaces.hpp"
 
@@ -57,6 +59,8 @@ private:
     void buildFaceLap();
     void buildFacePace();
     void buildFaceStatus();
+    void buildFaceClock();
+    void updateClock(const Track::Data& data);
     void updateMode(const Track::Data& data);
     /// The faces of the current mode, in L2 order.
     const uint16_t* faces(uint16_t& count) const;
@@ -76,6 +80,31 @@ private:
     lv_obj_t* mFaceLap       = nullptr;
     lv_obj_t* mFacePace      = nullptr;
     lv_obj_t* mFaceStatus    = nullptr;
+    lv_obj_t* mFaceClock     = nullptr;
+
+    // Lap clock face (Track Run): the lap's clock leads, the last lap and
+    // its chip, this lap's metres and the pace, the lane and the track, and
+    // the ring round the bezel filling towards the auto-lap.
+    std::unique_ptr<Kit::TrackRing> mRing;
+    lv_obj_t* mClockHeader = nullptr;
+    std::unique_ptr<Kit::BigFigure> mLapClock;
+    bool      mClockSmall  = false;   ///< The 40 px face, from an hour
+    lv_obj_t* mLastLabel   = nullptr;
+    lv_obj_t* mLastLap     = nullptr;
+    lv_obj_t* mChip        = nullptr;
+    lv_obj_t* mChipText    = nullptr;
+    Kit::Row  mLastRow;
+    lv_obj_t* mLapMetres   = nullptr;
+    lv_obj_t* mLapUnit     = nullptr;
+    lv_obj_t* mSplitLine   = nullptr;
+    lv_obj_t* mClockPace   = nullptr;
+    lv_obj_t* mPaceUnit    = nullptr;
+    Kit::Row  mLapRow;
+    std::unique_ptr<Kit::LaneBadge> mBadge;
+    lv_obj_t* mWeakGps     = nullptr;
+    lv_obj_t* mFooter      = nullptr;
+    Kit::Row  mFooterRow;
+    LaneHold  mLaneHold;
 
     // Intervals face
     std::unique_ptr<Widgets::Title>          mIntervalsTitle;

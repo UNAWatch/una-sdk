@@ -174,6 +174,9 @@ RunAlerts::StartMode Model::startMode(bool intervalsRequested) const
 void Model::trackStart(bool intervalsMode)
 {
     mLapCompare.reset();   // a new run: no lap before its first
+    mAutoJoinsSeen = 0;
+    mLastCal       = Track::OnTrack::CAL_NONE;
+    mTrackData.onTrack = Track::OnTrack{};
     // An armed workout is followed unless Intervals were chosen; either way
     // it is used up by this run.
     const int16_t workout = intervalsMode ? kNoWorkout : mArmedWorkout;
@@ -288,6 +291,32 @@ void Model::saveTrack()
 void Model::discardTrack()
 {
     SDK::send_msg<CustomMessage::TrackStop>(mKernel, true);
+}
+
+void Model::setLane(uint8_t lane)
+{
+    if (!isTrackActive()) {
+        mPreRun.lane = lane;   // the start screen shows it at once
+    } else {
+        mTrackData.onTrack.lane = lane;
+    }
+    SDK::send_msg<CustomMessage::SetLane>(mKernel, lane);
+}
+
+uint8_t Model::currentLane() const
+{
+    return isTrackActive() ? mTrackData.onTrack.lane : mPreRun.lane;
+}
+
+void Model::requestTrackList()
+{
+    mTracks.received = false;
+    SDK::send_msg<CustomMessage::TrackListReq>(mKernel);
+}
+
+void Model::forgetTrack(uint8_t number)
+{
+    SDK::send_msg<CustomMessage::ForgetTrack>(mKernel, number);
 }
 
 bool Model::isTrackSummaryAvailable() const
@@ -548,7 +577,46 @@ bool Model::customMessageHandler(SDK::MessageBase* message)
         case CustomMessage::TRACK_DATA_UPDATE: {
             auto* msg  = static_cast<CustomMessage::TrackDataUpd*>(message);
             mTrackData = msg->data;
+            // A known track the run joined by itself: the notice, once. Read
+            // from the live state, so a lost message costs nothing.
+            const Track::OnTrack& o = mTrackData.onTrack;
+            if (o.autoJoins > mAutoJoinsSeen) {
+                mAutoJoinsSeen       = o.autoJoins;
+                mNotice.kind         = NoticeInfo::Kind::Joined;
+                mNotice.trackNumber  = o.trackNumber;
+                mNotice.lane         = o.lane;
+                waitPopup(Popup::Notice);
+            }
+            // A new track's calibration locked: what it saves as.
+            if (o.cal == Track::OnTrack::LOCKED && mLastCal != Track::OnTrack::LOCKED && o.trackNumber == 0
+                && mLastCal != Track::OnTrack::CAL_NONE) {
+                mNotice.kind      = NoticeInfo::Kind::Locked;
+                mNotice.newNumber = o.newTrackNumber;
+                waitPopup(Popup::Notice);
+            }
+            mLastCal = o.cal;
             modelListener->onTrackData(mTrackData);
+        } break;
+
+        case CustomMessage::PRE_RUN_TRACK: {
+            auto* msg = static_cast<CustomMessage::PreRunTrack*>(message);
+            mPreRun.status      = msg->status;
+            mPreRun.trackNumber = msg->trackNumber;
+            mPreRun.lane        = msg->lane;
+            mPreRun.weakGps     = msg->weakGps;
+            mPreRun.uses        = msg->uses;
+            modelListener->onPreRun();
+        } break;
+
+        case CustomMessage::TRACK_LIST: {
+            auto* msg = static_cast<CustomMessage::TrackList*>(message);
+            mTracks.count     = msg->count <= CustomMessage::TrackList::kMax ? msg->count : CustomMessage::TrackList::kMax;
+            mTracks.tzOffsetS = msg->tzOffsetS;
+            for (uint8_t i = 0; i < mTracks.count; ++i) {
+                mTracks.tracks[i] = msg->tracks[i];
+            }
+            mTracks.received = true;
+            modelListener->onTrackList();
         } break;
 
         case CustomMessage::LAP_END: {

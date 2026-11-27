@@ -11,6 +11,8 @@
 #include "gui/Assets.hpp"
 #include "gui/Format.hpp"
 #include "gui/Strings.hpp"
+#include "gui/TrackText.hpp"
+#include "gui/theme/Kit.hpp"
 
 #include <cstring>
 
@@ -51,10 +53,53 @@ void setHidden(lv_obj_t* obj, bool hidden)
         lv_obj_remove_flag(obj, LV_OBJ_FLAG_HIDDEN);
     }
 }
+
+// Lap clock face (Track Run's design kit, theme/Kit.hpp).
+constexpr int32_t kHeaderY       = 37;
+constexpr int32_t kClockBaseY    = 110;   // 40 px from an hour on the same baseline
+constexpr int32_t kLastLabelY    = 121;
+constexpr int32_t kLastLapY      = 115;
+constexpr int32_t kChipY         = 117;
+constexpr int32_t kChipH         = 24;
+constexpr int32_t kChipPadX      = 8;
+constexpr int32_t kDividerY      = 148;
+constexpr int32_t kLapRowY       = 151;   // this lap's metres and the pace
+constexpr int32_t kUnitY         = 154;
+constexpr int32_t kSplitLineY    = 153;
+constexpr int32_t kBadgeY        = 176;   // Kit::LaneBadge, 20 x 24
+constexpr int32_t kFooterY       = 179;
+constexpr float   kRingLapM      = 400.0f; // The ring's lap with no distance auto-lap
+constexpr uint8_t kCalLockLaps   = 4;      // Laps a new track's calibration takes
+
+lv_obj_t* rowText(lv_obj_t* parent, F f, const char* s, int32_t y, uint32_t color)
+{
+    lv_obj_t* l = Kit::text(parent, f, s, color);
+    lv_obj_set_y(l, y);
+    return l;
+}
+
+void setText(lv_obj_t* label, const char* text)
+{
+    if (std::strcmp(lv_label_get_text(label), text) != 0) {
+        lv_label_set_text(label, text);
+    }
+}
+
+/// "1:21", or "1:02:03" from an hour.
+void clockText(char* buf, size_t n, uint32_t s)
+{
+    if (s >= 3600u) {
+        std::snprintf(buf, n, "%u:%02u:%02u", static_cast<unsigned>(s / 3600u),
+                      static_cast<unsigned>(s / 60u % 60u), static_cast<unsigned>(s % 60u));
+    } else {
+        std::snprintf(buf, n, "%u:%02u", static_cast<unsigned>(s / 60u), static_cast<unsigned>(s % 60u));
+    }
+}
 } // namespace
 
 TrackScreen::TrackScreen(Model& model)
     : Screen(model)
+    , mLaneHold(model)
 {
 }
 
@@ -66,6 +111,7 @@ void TrackScreen::build()
                   Widgets::Buttons::NONE, Widgets::Buttons::AMBER);
 
     buildFaceStatus();
+    buildFaceClock();
     buildFaceLap();
     buildFacePace();
     buildFaceTotal();
@@ -160,16 +206,17 @@ void TrackScreen::buildFaceStatus()
 
 const uint16_t* TrackScreen::faces(uint16_t& count) const
 {
+    // The lap clock leads a free run, and follows a workout's own faces.
     static const uint16_t kWorkout[] = {
         FaceId::ID_WORKOUT_GAUGE, FaceId::ID_WORKOUT_STEP, FaceId::ID_WORKOUT_NEXT,
-        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
+        FaceId::ID_TRACK_CLOCK, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
     };
     static const uint16_t kIntervals[] = {
-        FaceId::ID_INTERVALS, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE,
-        FaceId::ID_TRACK3,
+        FaceId::ID_INTERVALS, FaceId::ID_TRACK_CLOCK, FaceId::ID_TRACK1, FaceId::ID_TRACK2,
+        FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
     };
     static const uint16_t kFree[] = {
-        FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
+        FaceId::ID_TRACK_CLOCK, FaceId::ID_TRACK1, FaceId::ID_TRACK2, FaceId::ID_TRACK_PACE, FaceId::ID_TRACK3,
     };
 
     switch (mMode) {
@@ -278,6 +325,7 @@ void TrackScreen::showFace(uint16_t id)
     setHidden(mFaceLap,               id != FaceId::ID_TRACK2);
     setHidden(mFacePace,              id != FaceId::ID_TRACK_PACE);
     setHidden(mFaceStatus,            id != FaceId::ID_TRACK3);
+    setHidden(mFaceClock,             id != FaceId::ID_TRACK_CLOCK);
     setHidden(mWorkoutGauge->root(),  id != FaceId::ID_WORKOUT_GAUGE);
     setHidden(mWorkoutStep->root(),   id != FaceId::ID_WORKOUT_STEP);
     setHidden(mWorkoutNext->root(),   id != FaceId::ID_WORKOUT_NEXT);
@@ -296,6 +344,7 @@ void TrackScreen::showPopup()
 void TrackScreen::onKey(uint8_t code)
 {
     namespace Btn = SDK::GUI::Button;
+    mLaneHold.onKey(code);   // a hold of Lap: the lane picker
     uint16_t count = 0;
     const uint16_t* list = faces(count);
     const uint16_t index = faceIndex(mFaceId);
@@ -397,8 +446,145 @@ void TrackScreen::onTrackData(const Track::Data& data)
         lv_label_set_text(mIvHr, buf);
     }
 
+    updateClock(data);
+
     mHrSource = data.hrSource;
     updateHrIcon();
+}
+
+void TrackScreen::buildFaceClock()
+{
+    using namespace Kit;
+    lv_obj_t* f = mFaceClock = Theme::container(mRoot, 0, 0, 240, 240);
+    mRing = std::make_unique<TrackRing>(f);
+
+    mClockHeader = Theme::label(f, kHeader, "", 35, kHeaderY, 170, LV_TEXT_ALIGN_CENTER, kText);
+    mLapClock    = std::make_unique<BigFigure>(f, kClockBaseY, kHuge, kText);
+
+    // "Last 1:21" and its chip (Run's, LapCompare), centred as one group.
+    mLastLabel = rowText(f, kSmall, "Last", kLastLabelY, kText);
+    mLastLap   = rowText(f, kAction, Strings::kNoValue, kLastLapY, kText);
+    mChip      = Theme::box(f, 0, kChipY, 60, kChipH, SDK::GUI::Color::WHITE);
+    mChipText  = Theme::label(mChip, F::Medium18, "", kChipPadX, 0, LV_SIZE_CONTENT, LV_TEXT_ALIGN_LEFT,
+                              SDK::GUI::Color::BLACK);
+    mLastRow.add(mLastLabel);
+    mLastRow.add(mLastLap, 8);
+    mLastRow.add(mChip, 8);
+
+    divider(f, kDividerY);
+
+    // This lap's metres and the pace in the watch's unit, one centred group.
+    mLapMetres = rowText(f, kChoice, "0", kLapRowY, kText);
+    mLapUnit   = rowText(f, kSmall, "m", kUnitY, kText);
+    mSplitLine = Theme::box(f, 0, kSplitLineY, 1, 20, kTeal);
+    mClockPace = rowText(f, kChoice, Strings::kNoValue, kLapRowY, kText);
+    mPaceUnit  = rowText(f, kSmall, "/km", kUnitY, kText);
+    mLapRow.add(mLapMetres);
+    mLapRow.add(mLapUnit, 5);
+    mLapRow.add(mSplitLine, 5);
+    mLapRow.add(mClockPace, 5);
+    mLapRow.add(mPaceUnit, 5);
+
+    // The lane badge and the track; weak GPS in place of the badge.
+    mBadge   = std::make_unique<LaneBadge>(f, 0, kBadgeY);
+    mWeakGps = Theme::imageTinted(f, &img_sensorgpslight, 0, kBadgeY, kAccent);
+    mFooter  = rowText(f, kSmall, "", kFooterY, kText);
+    mFooterRow.add(mBadge->obj());
+    mFooterRow.add(mWeakGps);
+    mFooterRow.add(mFooter, 5);
+}
+
+void TrackScreen::updateClock(const Track::Data& data)
+{
+    const Track::OnTrack& o = data.onTrack;
+    char buf[40];
+
+    // Header: the lap in progress, or a new track's calibration while it runs.
+    const unsigned lap = static_cast<unsigned>(data.lapNum + 1u);
+    if (o.segment == Track::OnTrack::TRACK
+        && (o.cal == Track::OnTrack::CALIBRATING || o.cal == Track::OnTrack::PROVISIONAL)) {
+        std::snprintf(buf, sizeof(buf), "Calibrating %u/%u",
+                      static_cast<unsigned>(o.calLaps < kCalLockLaps ? o.calLaps : kCalLockLaps),
+                      static_cast<unsigned>(kCalLockLaps));
+    } else if (o.segment == Track::OnTrack::ROAD) {
+        std::snprintf(buf, sizeof(buf), "Road  Lap %u", lap);
+    } else {
+        std::snprintf(buf, sizeof(buf), "Lap %u", lap);
+    }
+    setText(mClockHeader, buf);
+
+    // The lap's clock; from an hour the 40 px face, to fit.
+    const uint32_t lapS = static_cast<uint32_t>(data.lapTime);
+    clockText(buf, sizeof(buf), lapS);
+    mLapClock->set(buf);
+    const bool hour = lapS >= 3600u;
+    if (hour != mClockSmall) {
+        mClockSmall = hour;
+        mLapClock->setFont(hour ? Kit::kBig : Kit::kHuge);
+    }
+
+    // The last lap and its chip, as the lap pop-up has them.
+    const Model::LapInfo& last = mModel.getLap();
+    const bool haveLast = data.lapNum > 0 && last.time > 0;
+    if (haveLast) {
+        clockText(buf, sizeof(buf), static_cast<uint32_t>(last.time));
+        setText(mLastLap, buf);
+    } else {
+        setText(mLastLap, Strings::kNoValue);
+    }
+    const LapCompare::Delta& d = last.delta;
+    const bool chip = haveLast && d.verdict != LapCompare::Verdict::None;
+    setHidden(mChip, !chip);
+    if (chip) {
+        char line[24];
+        LapCompare::line(line, sizeof(line), d);
+        setText(mChipText, line);
+        lv_obj_update_layout(mChipText);
+        lv_obj_set_width(mChip, lv_obj_get_width(mChipText) + 2 * kChipPadX);
+        const uint32_t fill = d.verdict == LapCompare::Verdict::Faster ? SDK::GUI::Color::LIME_SOFT
+                            : d.verdict == LapCompare::Verdict::Slower ? SDK::GUI::Color::SALMON
+                                                                        : SDK::GUI::Color::WHITE;
+        lv_obj_set_style_bg_color(mChip, Theme::rgb(fill), LV_PART_MAIN);
+    }
+    mLastRow.layout();
+
+    // This lap's metres, and the live pace.
+    std::snprintf(buf, sizeof(buf), "%u", static_cast<unsigned>(data.lapDistance > 0.0f ? data.lapDistance : 0.0f));
+    setText(mLapMetres, buf);
+    Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(data.pace, mIsImperial));
+    setText(mClockPace, buf);
+    setText(mPaceUnit, mIsImperial ? "/mi" : "/km");
+    mLapRow.layout();
+
+    // The lane and the track; weak GPS in place of the badge, and on the
+    // road no badge.
+    TrackText::where(buf, sizeof(buf), o);
+    // "Not a standard track" and the badge are wider than the bezel allows
+    // at the bottom: the run screen says it short.
+    setText(mFooter, o.cal == Track::OnTrack::NOT_STANDARD && o.segment == Track::OnTrack::TRACK
+                         ? "Not standard" : buf);
+    mBadge->set(o.lane);
+    setHidden(mWeakGps, !o.weakGps);
+    setHidden(mBadge->obj(), o.weakGps || o.lane == 0 || o.segment != Track::OnTrack::TRACK);
+    mFooterRow.layout();
+
+    // The ring: the share of this lap run, towards the distance auto-lap
+    // (400 m without one).
+    using Mode = Kit::TrackRing::Mode;
+    const Settings& s = mModel.getSettings();
+    const float lapM  = s.alertDistanceId != Settings::Alerts::Distance::ID_OFF
+                            ? Settings::Alerts::Distance::toMeters(s.alertDistanceId, false) : kRingLapM;
+    const float share = data.lapDistance > 0.0f ? data.lapDistance / lapM : 0.0f;
+    const uint16_t permille = share >= 1.0f ? 1000u : static_cast<uint16_t>(share * 1000.0f);
+    Mode mode = Mode::Lap;
+    if (o.segment == Track::OnTrack::ROAD) {
+        mode = Mode::Road;
+    } else if (o.cal == Track::OnTrack::CALIBRATING || o.cal == Track::OnTrack::PROVISIONAL) {
+        mode = Mode::Calibrating;
+    } else if (o.segment == Track::OnTrack::NONE) {
+        mode = Mode::Idle;
+    }
+    mRing->set(mode, permille, o.calLaps < kCalLockLaps ? o.calLaps : kCalLockLaps);
 }
 
 void TrackScreen::setIntervalsPhase(const Track::IntervalsData& iv)

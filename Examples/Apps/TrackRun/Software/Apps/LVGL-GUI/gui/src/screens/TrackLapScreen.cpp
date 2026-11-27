@@ -26,7 +26,13 @@ constexpr int32_t kChipH = 22;
 
 TrackLapScreen::TrackLapScreen(Model& model)
     : Screen(model)
+    , mLaneHold(model)
 {
+}
+
+void TrackLapScreen::onKey(uint8_t code)
+{
+    mLaneHold.onKey(code);   // a hold of Lap: the lane picker
 }
 
 TrackLapScreen::~TrackLapScreen()
@@ -39,7 +45,7 @@ TrackLapScreen::~TrackLapScreen()
 void TrackLapScreen::build()
 {
     using F = Theme::Font;
-    Theme::label(mRoot, F::Italic18, "Dist.", 18, 58, 100);
+    Theme::label(mRoot, F::Italic18, "Metres", 18, 58, 100);
     mDistance = Theme::label(mRoot, F::SemiBold35, Strings::kNoValue, 18, 82, 100);
     Theme::vline(mRoot, 119, 84, 44);
     Theme::label(mRoot, F::Italic18, "Time", 122, 58, 100);
@@ -83,7 +89,8 @@ void TrackLapScreen::showLap()
 
     snprintf(buf, sizeof(buf), "Lap %lu", static_cast<unsigned long>(lap.num + 1));
     mTitle->setText(buf);
-    Fmt::distanceLap(buf, sizeof(buf), Fmt::distUnits(lap.distance, imperial));
+    // Metres, as a track is measured.
+    snprintf(buf, sizeof(buf), "%lu", static_cast<unsigned long>(lap.distance > 0.0f ? lap.distance + 0.5f : 0.0f));
     lv_label_set_text(mDistance, buf);
     Fmt::shortTime(buf, sizeof(buf), lap.time);
     lv_label_set_text(mTime, buf);

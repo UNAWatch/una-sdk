@@ -52,6 +52,11 @@ enum class ScreenId : uint8_t {
     MenuRunAlertPicker,
     MenuRunHrList,
     MenuRunAlertSaved,
+    // Settings > Tracks
+    MenuTracks,
+    MenuTrackDetail,
+    // The lane picker
+    Lane,
     // Activity
     TrackStartConfirm,
     TrackIntervalsCountdown,
@@ -66,6 +71,7 @@ enum class ScreenId : uint8_t {
     TrackSaved,
     TrackDiscarded,
     TrackSummary,
+    TrackNotice,
 };
 
 class ScreenManager

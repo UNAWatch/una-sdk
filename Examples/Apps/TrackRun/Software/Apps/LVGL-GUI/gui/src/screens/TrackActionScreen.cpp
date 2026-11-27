@@ -18,6 +18,7 @@ using Style = WheelMenu::Item::Style;
 const WheelMenu::Item kItems[App::MenuNav::TrackView::Action::ID_COUNT] = {
     { Style::Simple, "Resume" },
     { Style::Simple, "Lap" },
+    { Style::Simple, "Lane" },
     { Style::Simple, "End workout" },
     { Style::Simple, "Summary" },
     { Style::Simple, "Save & End" },
@@ -126,6 +127,10 @@ void TrackActionScreen::onKey(uint8_t code)
                     break;
                 case Menu::ID_LAP:
                     mModel.saveLap();
+                    break;
+                case Menu::ID_LANE:
+                    mModel.setLaneFrom(Model::LaneFrom::Pause);
+                    ScreenManager::instance().goTo(ScreenId::Lane);
                     break;
                 case Menu::ID_SUMMARY:
                     ScreenManager::instance().goTo(ScreenId::TrackSummary);

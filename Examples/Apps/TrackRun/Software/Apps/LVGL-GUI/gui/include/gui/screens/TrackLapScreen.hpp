@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include "gui/screens/LaneHold.hpp"
 #include "gui/screens/Screen.hpp"
 #include "gui/widgets/Widgets.hpp"
 
@@ -23,6 +24,7 @@ public:
 
     void onShow() override;
     void onHide() override;
+    void onKey(uint8_t code) override;
     /// The lap the screen opened for (lap button) has come back, or another
     /// ended: show it, for the full time again.
     void onLapChanged(uint8_t lapEnd) override;
@@ -35,6 +37,7 @@ private:
     void showLap();
 
     lv_timer_t* mDismiss = nullptr;
+    LaneHold    mLaneHold;
     lv_obj_t* mDistance = nullptr;
     lv_obj_t* mTime     = nullptr;
     lv_obj_t* mPace     = nullptr;

@@ -11,6 +11,7 @@
 #include "gui/Assets.hpp"
 #include "gui/Strings.hpp"
 #include "gui/WorkoutUi.hpp"
+#include "gui/TrackText.hpp"
 
 #define LOG_MODULE_PRX      "MainScreen"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
@@ -23,8 +24,11 @@ namespace
 // Same items and geometry as MainView::setupItems() in the TouchGFX app.
 using Style = WheelMenu::Item::Style;
 const WheelMenu::Item kItems[App::MenuNav::Root::ID_COUNT] = {
-    // ID_START: a Tip naming the workout when one is armed (onWorkoutList)
+    // ID_START: a Tip naming the workout when one is armed (onWorkoutList),
+    // else the track and lane (onPreRun)
     { Style::Simple, "Start", nullptr, &poppins_semibold_35 },
+    // ID_LANE: the lane picker, with the lane Start uses as its Tip
+    { Style::Tip, "Lane" },
     // ID_WORKOUTS
     { Style::Simple, "Workouts" },
     // ID_INTERVALS: icon beside left-aligned text, in both slots
@@ -69,6 +73,11 @@ void MainScreen::onShow()
     onWorkoutList();
 }
 
+void MainScreen::onPreRun()
+{
+    onWorkoutList();
+}
+
 void MainScreen::onWorkoutList()
 {
     // The armed workout's name under Start, shown when Start is selected;
@@ -89,10 +98,17 @@ void MainScreen::onWorkoutList()
         start.tip     = RunAlerts::kRunWalkName;
         start.itemTip = "";
     } else {
-        start.style   = Style::Simple;
-        start.tip     = nullptr;
-        start.itemTip = nullptr;
+        // The track Start is at and the lane it starts in.
+        const Model::PreRun& p = mModel.getPreRun();
+        TrackText::preRun(mTrackLine, sizeof(mTrackLine), p.status, p.trackNumber, p.lane);
+        start.style   = Style::Tip;
+        start.tip     = mTrackLine;
+        start.itemTip = "";
     }
+    WheelMenu::Item& lane = mItems[Menu::ID_LANE];
+    TrackText::lane(mLaneText, sizeof(mLaneText), mModel.getPreRun().lane);
+    lane.tip     = mLaneText;
+    lane.itemTip = "";
     mMenu->refresh();
     checkTodayPrompt();
 }
@@ -137,6 +153,10 @@ void MainScreen::confirm()
                 mModel.setPendingIntervalsMode(false);
                 ScreenManager::instance().goTo(ScreenId::TrackStartConfirm);
             }
+            break;
+        case Menu::ID_LANE:
+            mModel.setLaneFrom(Model::LaneFrom::Start);
+            ScreenManager::instance().goTo(ScreenId::Lane);
             break;
         case Menu::ID_WORKOUTS:
             ScreenManager::instance().goTo(ScreenId::WorkoutList);

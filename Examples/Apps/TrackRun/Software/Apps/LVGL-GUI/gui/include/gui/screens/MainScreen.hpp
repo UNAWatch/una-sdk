@@ -35,6 +35,7 @@ public:
     void onGpsFix(bool acquired) override;
     void onAccessoryStatus(uint8_t state, const char* name) override;
     void onWorkoutList() override;
+    void onPreRun() override;
 
 protected:
     void build() override;
@@ -51,6 +52,8 @@ private:
     bool mArmed  = false;
     bool mRunWalk = false;  ///< Start runs Run/Walk (on, and no workout armed)
     char mArmedName[64] = "";
+    char mTrackLine[32] = "";  ///< Under Start: "Track 2, Lane 1"
+    char mLaneText[12]  = "";  ///< Under Lane: "Lane 1"
     WheelMenu::Item mItems[Menu::ID_COUNT] {};
 
     std::unique_ptr<Widgets::Title>           mTitle;

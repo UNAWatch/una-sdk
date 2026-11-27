@@ -55,6 +55,8 @@ public:
     virtual void onWorkoutDetails() {}
     virtual void onWorkoutData(const Model::WorkoutFace& face) { (void)face; }
     virtual void onWorkoutStep(bool next) { (void)next; }
+    virtual void onPreRun() {}
+    virtual void onTrackList() {}
 
 protected:
     Model* model;

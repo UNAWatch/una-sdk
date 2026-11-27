@@ -32,7 +32,9 @@ protected:
     void build() override;
 
 private:
-    enum Face : uint8_t { FACE_MAP = 0, FACE_OVERVIEW, FACE_HEARTRATE, FACE_CHART, FACE_LAPS, FACE_COUNT };
+    enum Face : uint8_t { FACE_MAP = 0, FACE_OVERVIEW, FACE_TRACK, FACE_HEARTRATE, FACE_CHART, FACE_LAPS, FACE_COUNT };
+    /// The faces every run has: map, overview, track, heart rate.
+    static constexpr uint8_t kFixedFaces = FACE_HEARTRATE + 1;
 
     static constexpr uint8_t kLapPageSize = 3;   ///< rows advanced per L1/L2 press
     static constexpr uint8_t kLapVisible  = 5;   ///< rows on screen at once
@@ -42,6 +44,8 @@ private:
     void buildFaceMap();
     void buildFaceOverview();
     void buildFaceHeartRate();
+    void buildFaceTrack();
+    void setTrackFace(const TrackRunSummary& tr);
     void buildFaceChart();
     void buildFaceLaps();
 
@@ -65,6 +69,13 @@ private:
     lv_obj_t* mAvgPace          = nullptr;
     lv_obj_t* mTimer            = nullptr;
     std::unique_ptr<Widgets::Map> mMap;
+
+    // Track: the track, its calibration, the lanes, road and track distance
+    lv_obj_t* mTrackLine  = nullptr;
+    lv_obj_t* mCalLine    = nullptr;
+    lv_obj_t* mLanesLine  = nullptr;
+    lv_obj_t* mRoadLine   = nullptr;
+    lv_obj_t* mTrackMLine = nullptr;
 
     // Heart rate
     lv_obj_t* mMaxHr = nullptr;
