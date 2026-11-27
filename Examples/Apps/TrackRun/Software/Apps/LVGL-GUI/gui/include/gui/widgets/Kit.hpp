@@ -85,8 +85,8 @@ public:
 
     explicit TrackRing(lv_obj_t* parent);
 
-    /// permille: 0 to 1000 of the lap or road split (held by the caller so it
-    /// never runs back, Ui::RingProgress); calLaps 0 to 4 in Calibrating.
+    /// permille: 0 to 1000, the share of the lap shown; calLaps 0 to 4 in
+    /// Calibrating.
     void set(Mode mode, uint16_t permille, uint8_t calLaps = 0);
 
     void setHidden(bool hidden);

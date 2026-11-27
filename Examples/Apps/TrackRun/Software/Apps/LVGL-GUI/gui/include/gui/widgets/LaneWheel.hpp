@@ -6,8 +6,8 @@
  *          circular, so it stops at either end. Up (L1) moves to the item
  *          above, Down (L2) to the one below.
  *
- * Used by the pre-run screen and the lane picker during a run (the pause
- * menu's "Change lane", or a hold of Lap).
+ * Used by the lane picker (LaneScreen), from the start screen, the pause
+ * menu or a hold of Lap.
  *
  * The wheel is the SDK's, as RunLVGL's menus. The lane badge
  * sits on the lens beside the selected lane (the SDK wheel has no badge of
