@@ -38,6 +38,8 @@ private:
     lv_obj_t* mDistance = nullptr;
     lv_obj_t* mTime     = nullptr;
     lv_obj_t* mPace     = nullptr;
+    lv_obj_t* mChip     = nullptr;   ///< Against the lap before: green faster, coral slower, white even
+    lv_obj_t* mChipText = nullptr;
     std::unique_ptr<Widgets::Title> mTitle;
 };
 

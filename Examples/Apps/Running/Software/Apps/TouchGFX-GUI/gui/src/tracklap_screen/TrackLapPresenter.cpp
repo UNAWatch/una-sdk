@@ -32,6 +32,7 @@ void TrackLapPresenter::showLap()
     view.setDistance(lap.distance);
     view.setTimer(lap.time);
     view.setPace(lap.pace);
+    view.setDelta(lap.delta);
 }
 
 void TrackLapPresenter::deactivate()

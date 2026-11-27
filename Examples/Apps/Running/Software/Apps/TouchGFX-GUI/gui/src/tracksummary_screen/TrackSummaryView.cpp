@@ -10,6 +10,11 @@ void TrackSummaryView::setupScreen()
 {
     TrackSummaryViewBase::setupScreen();
 
+    summaryFaceChart.initialize();
+    summaryFaceChart.setXY(0, 0);
+    summaryFaceChart.setVisible(false);
+    add(summaryFaceChart);
+
     buttons.setL1(Buttons::NONE);
     buttons.setL2(Buttons::NONE);
     buttons.setR1(Buttons::NONE);
@@ -55,7 +60,8 @@ void TrackSummaryView::setSummary(const ActivitySummary& s, bool isImperial, boo
 
     summaryFaceLaps.setLaps(s.laps, isImperial);
     mLapsPageCount = summaryFaceLaps.getPageCount();
-    scrollIndicator.setCount(3 + mLapsPageCount);
+    summaryFaceChart.setLaps(s.laps, isImperial);
+    scrollIndicator.setCount(3 + (summaryFaceChart.hasChart() ? 1 : 0) + mLapsPageCount);
 
     if (isPaused) {
         buttons.setR1(Buttons::NONE);
@@ -71,11 +77,13 @@ void TrackSummaryView::updateFace()
     summaryFaceMap.setVisible(mCurrentFace == FACE_MAP);
     summaryFaceOverview.setVisible(mCurrentFace == FACE_OVERVIEW);
     summaryFaceHeartRate.setVisible(mCurrentFace == FACE_HEARTRATE);
+    summaryFaceChart.setVisible(mCurrentFace == FACE_CHART);
     summaryFaceLaps.setVisible(mCurrentFace == FACE_LAPS);
 
     summaryFaceMap.invalidate();
     summaryFaceOverview.invalidate();
     summaryFaceHeartRate.invalidate();
+    summaryFaceChart.invalidate();
     summaryFaceLaps.invalidate();
 
     updateScrollIndicator();
@@ -83,10 +91,33 @@ void TrackSummaryView::updateFace()
 
 void TrackSummaryView::updateScrollIndicator()
 {
-    const uint8_t id = (mCurrentFace < FACE_LAPS)
-        ? mCurrentFace
-        : static_cast<uint8_t>(FACE_LAPS + summaryFaceLaps.getScrollPage());
+    const uint8_t chart = summaryFaceChart.hasChart() ? 1 : 0;
+    const uint8_t id    = mCurrentFace <= FACE_HEARTRATE ? mCurrentFace
+                        : mCurrentFace == FACE_CHART     ? static_cast<uint8_t>(FACE_CHART)
+                                                         : static_cast<uint8_t>(FACE_CHART + chart + summaryFaceLaps.getScrollPage());
     scrollIndicator.animateToId(id);
+}
+
+uint8_t TrackSummaryView::nextFace(uint8_t face) const
+{
+    if (face < FACE_HEARTRATE) {
+        return static_cast<uint8_t>(face + 1);
+    }
+    if (face == FACE_HEARTRATE && summaryFaceChart.hasChart()) {
+        return FACE_CHART;
+    }
+    if (face < FACE_LAPS && mLapsPageCount > 0) {
+        return FACE_LAPS;
+    }
+    return FACE_COUNT;
+}
+
+uint8_t TrackSummaryView::prevFace(uint8_t face) const
+{
+    if (face == FACE_LAPS) {
+        return summaryFaceChart.hasChart() ? FACE_CHART : FACE_HEARTRATE;
+    }
+    return face > FACE_MAP ? static_cast<uint8_t>(face - 1) : FACE_COUNT;
 }
 
 void TrackSummaryView::handleKeyEvent(uint8_t key)
@@ -97,8 +128,8 @@ void TrackSummaryView::handleKeyEvent(uint8_t key)
                 summaryFaceLaps.scrollDown();
                 updateScrollIndicator();
             }
-        } else if (mCurrentFace < FACE_HEARTRATE || mLapsPageCount > 0) {
-            mCurrentFace++;
+        } else if (nextFace(mCurrentFace) != FACE_COUNT) {
+            mCurrentFace = nextFace(mCurrentFace);
             updateFace();
         }
         return;
@@ -110,11 +141,11 @@ void TrackSummaryView::handleKeyEvent(uint8_t key)
                 summaryFaceLaps.scrollUp();
                 updateScrollIndicator();
             } else {
-                mCurrentFace--;
+                mCurrentFace = prevFace(mCurrentFace);
                 updateFace();
             }
-        } else if (mCurrentFace > FACE_MAP) {
-            mCurrentFace--;
+        } else if (prevFace(mCurrentFace) != FACE_COUNT) {
+            mCurrentFace = prevFace(mCurrentFace);
             updateFace();
         }
         return;

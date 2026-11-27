@@ -1,8 +1,9 @@
 /**
  ******************************************************************************
  * @file    TrackSummaryScreen.hpp
- * @brief   Activity summary: map, overview, heart rate and a paged lap list,
- *          browsed with L1/L2.
+ * @brief   Activity summary: map, overview, heart rate, the lap pace chart
+ *          (with two or more laps to chart) and a paged lap list, browsed
+ *          with L1/L2.
  *
  * Port of the Run app's TrackSummaryView and its SummaryFace* containers.
  * Reached from the action menu while paused (R2 returns there) or after a
@@ -31,24 +32,30 @@ protected:
     void build() override;
 
 private:
-    enum Face : uint8_t { FACE_MAP = 0, FACE_OVERVIEW, FACE_HEARTRATE, FACE_LAPS };
+    enum Face : uint8_t { FACE_MAP = 0, FACE_OVERVIEW, FACE_HEARTRATE, FACE_CHART, FACE_LAPS, FACE_COUNT };
 
     static constexpr uint8_t kLapPageSize = 3;   ///< rows advanced per L1/L2 press
     static constexpr uint8_t kLapVisible  = 5;   ///< rows on screen at once
     static constexpr uint8_t kLapColumns  = 5;   ///< index, distance, units, time, pace
+    static constexpr uint8_t kMaxBars     = 24;  ///< the chart's last laps
 
     void buildFaceMap();
     void buildFaceOverview();
     void buildFaceHeartRate();
+    void buildFaceChart();
     void buildFaceLaps();
 
     void setSummary(const ActivitySummary& s);
     void showFace(uint8_t face);
     void updateIndicator();
     void fillLapRows();
+    void setChart(const std::vector<LapSummary>& laps);
+    uint8_t nextFace(uint8_t face) const;   ///< FACE_COUNT if none
+    uint8_t prevFace(uint8_t face) const;
+    static void drawBars(lv_event_t* e);
     void backToTrack();
 
-    lv_obj_t* mFaces[4] = {};
+    lv_obj_t* mFaces[FACE_COUNT] = {};
 
     // Map + overview headers
     lv_obj_t* mMapDistance      = nullptr;
@@ -69,9 +76,20 @@ private:
     lv_obj_t* mLapRows[kLapVisible][kLapColumns] = {};
     const std::vector<LapSummary>* mLaps = nullptr;
 
+    // Lap pace chart: one bar per lap of LapCompare::kMinChartM or more
+    lv_obj_t* mBars     = nullptr;
+    lv_obj_t* mFastLine = nullptr;
+    lv_obj_t* mSlowLine = nullptr;
+    float     mBarPace[kMaxBars]   = {};   ///< s/m
+    uint16_t  mBarNumber[kMaxBars] = {};   ///< The lap's number in the list
+    uint8_t   mBarCount = 0;
+    int       mBarFast  = -1;
+    int       mBarSlow  = -1;
+    bool      mHasChart = false;
+
     std::unique_ptr<Widgets::Buttons>         mButtons;
     std::unique_ptr<Widgets::ScrollIndicator> mIndicator;
-    std::unique_ptr<Widgets::Title>           mTitles[4];
+    std::unique_ptr<Widgets::Title>           mTitles[FACE_COUNT];
 
     uint8_t mFace       = FACE_MAP;
     bool    mIsImperial = false;

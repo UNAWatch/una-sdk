@@ -12,8 +12,24 @@
 #include "gui/Format.hpp"
 #include "gui/Strings.hpp"
 
+#include "LapCompare.hpp"
+
 using namespace SDK::GUI;
 using F = Theme::Font;
+
+namespace
+{
+// The lap pace chart: bars from kBarMinH (the fastest lap) to kBarsH (the
+// slowest), the others between by their pace; the two lines under it.
+constexpr int32_t kBarsX     = 37;
+constexpr int32_t kBarsY     = 68;
+constexpr int32_t kBarsW     = 166;
+constexpr int32_t kBarsH     = 86;
+constexpr int32_t kBarMinH   = 40;
+constexpr int32_t kBarGap    = 3;
+constexpr int32_t kFastLineY = 162;
+constexpr int32_t kSlowLineY = 184;
+} // namespace
 
 TrackSummaryScreen::TrackSummaryScreen(Model& model)
     : Screen(model)
@@ -29,6 +45,7 @@ void TrackSummaryScreen::build()
     mIndicator->setCount(3);
 
     buildFaceLaps();
+    buildFaceChart();
     buildFaceHeartRate();
     buildFaceOverview();
     buildFaceMap();
@@ -70,6 +87,17 @@ void TrackSummaryScreen::buildFaceHeartRate()
     mAvgHr = Theme::label(f, F::SemiBold40, Strings::kNoValue, 70, 150, 100);
     Theme::image(f, &img_heart_30x30, 105, 48);
     mTitles[FACE_HEARTRATE] = std::make_unique<Widgets::Title>(f, "HEART RATE");
+}
+
+void TrackSummaryScreen::buildFaceChart()
+{
+    // One object draws every bar.
+    lv_obj_t* f = mFaces[FACE_CHART] = Theme::container(mRoot, 0, 0, 240, 240);
+    mBars = Theme::container(f, kBarsX, kBarsY, kBarsW, kBarsH);
+    lv_obj_add_event_cb(mBars, &TrackSummaryScreen::drawBars, LV_EVENT_DRAW_MAIN, this);
+    mFastLine = Theme::label(f, F::Regular16, "", 25, kFastLineY, 190);
+    mSlowLine = Theme::label(f, F::Regular14, "", 30, kSlowLineY, 180);
+    mTitles[FACE_CHART] = std::make_unique<Widgets::Title>(f, "LAP PACE");
 }
 
 void TrackSummaryScreen::buildFaceLaps()
@@ -151,8 +179,103 @@ void TrackSummaryScreen::setSummary(const ActivitySummary& s)
 
     mLapPage  = 0;
     mLapPages = s.laps.empty() ? 0 : static_cast<uint8_t>((s.laps.size() + kLapPageSize - 1) / kLapPageSize);
-    mIndicator->setCount(static_cast<uint16_t>(3 + mLapPages));
+    setChart(s.laps);
+    mIndicator->setCount(static_cast<uint16_t>(3 + (mHasChart ? 1 : 0) + mLapPages));
     fillLapRows();
+}
+
+void TrackSummaryScreen::setChart(const std::vector<LapSummary>& laps)
+{
+    // The last kMaxBars laps long enough to chart, by pace (LapCompare), each
+    // with its number in the lap list.
+    const size_t n = laps.size();
+    size_t charted = 0;
+    for (size_t i = 0; i < n; ++i) {
+        charted += laps[i].distance >= LapCompare::kMinChartM && laps[i].paceAvg > 0.0f ? 1u : 0u;
+    }
+    const size_t skip = charted > kMaxBars ? charted - kMaxBars : 0;
+    size_t seen = 0;
+    mBarCount = 0;
+    for (size_t i = 0; i < n && mBarCount < kMaxBars; ++i) {
+        const LapSummary& l = laps[i];
+        if (!(l.distance >= LapCompare::kMinChartM && l.paceAvg > 0.0f) || seen++ < skip) {
+            continue;
+        }
+        mBarNumber[mBarCount] = static_cast<uint16_t>(i + 1);
+        mBarPace[mBarCount++] = l.paceAvg;
+    }
+    const LapCompare::Extremes e = LapCompare::extremes(
+        mBarCount, [this](size_t i) { return mBarPace[i]; }, [](size_t) { return LapCompare::kMinChartM; });
+    mBarFast  = e.fastest;
+    mBarSlow  = e.slowest;
+    mHasChart = e.fastest >= 0;
+    char buf[40];
+    char p[16];
+    const char* unit = mIsImperial ? "/mi" : "/km";
+    if (mHasChart) {
+        Fmt::pace(p, sizeof(p), Fmt::paceUnits(mBarPace[mBarFast], mIsImperial));
+        snprintf(buf, sizeof(buf), "Fastest lap %u  %s %s", static_cast<unsigned>(mBarNumber[mBarFast]), p, unit);
+        lv_label_set_text(mFastLine, buf);
+        Fmt::pace(p, sizeof(p), Fmt::paceUnits(mBarPace[mBarSlow], mIsImperial));
+        snprintf(buf, sizeof(buf), "Slowest lap %u  %s %s", static_cast<unsigned>(mBarNumber[mBarSlow]), p, unit);
+        lv_label_set_text(mSlowLine, buf);
+    }
+    lv_obj_invalidate(mBars);
+}
+
+void TrackSummaryScreen::drawBars(lv_event_t* e)
+{
+    auto* self = static_cast<TrackSummaryScreen*>(lv_event_get_user_data(e));
+    if (!self->mHasChart) {
+        return;
+    }
+    lv_layer_t* layer = lv_event_get_layer(e);
+    lv_area_t box;
+    lv_obj_get_coords(self->mBars, &box);
+    const int32_t n     = self->mBarCount;
+    const int32_t pitch = kBarsW / (n < 6 ? 6 : n);
+    const int32_t w     = pitch > kBarGap + 1 ? pitch - kBarGap : 1;
+    const int32_t x0    = box.x1 + (kBarsW - pitch * n + kBarGap) / 2;
+    const float   lo    = self->mBarPace[self->mBarFast];
+    const float   hi    = self->mBarPace[self->mBarSlow];
+    lv_draw_rect_dsc_t d;
+    lv_draw_rect_dsc_init(&d);
+    for (int32_t i = 0; i < n; ++i) {
+        const float   p = self->mBarPace[i];
+        const int32_t h = hi > lo ? kBarMinH + static_cast<int32_t>((p - lo) * (kBarsH - kBarMinH) / (hi - lo) + 0.5f)
+                                  : kBarsH;
+        const uint32_t color = i == self->mBarFast ? Color::LIME_SOFT
+                             : i == self->mBarSlow ? Color::SALMON : Color::TEAL;
+        d.bg_color = Theme::rgb(color);
+        lv_area_t a;
+        a.x1 = x0 + i * pitch;
+        a.x2 = a.x1 + w - 1;
+        a.y2 = box.y2;
+        a.y1 = box.y2 - h + 1;
+        lv_draw_rect(layer, &d, &a);
+    }
+}
+
+uint8_t TrackSummaryScreen::nextFace(uint8_t face) const
+{
+    if (face < FACE_HEARTRATE) {
+        return static_cast<uint8_t>(face + 1);
+    }
+    if (face == FACE_HEARTRATE && mHasChart) {
+        return FACE_CHART;
+    }
+    if (face < FACE_LAPS && mLapPages > 0) {
+        return FACE_LAPS;
+    }
+    return FACE_COUNT;
+}
+
+uint8_t TrackSummaryScreen::prevFace(uint8_t face) const
+{
+    if (face == FACE_LAPS) {
+        return mHasChart ? FACE_CHART : FACE_HEARTRATE;
+    }
+    return face > FACE_MAP ? static_cast<uint8_t>(face - 1) : FACE_COUNT;
 }
 
 void TrackSummaryScreen::fillLapRows()
@@ -184,7 +307,7 @@ void TrackSummaryScreen::fillLapRows()
 void TrackSummaryScreen::showFace(uint8_t face)
 {
     mFace = face;
-    for (uint8_t i = 0; i < 4; ++i) {
+    for (uint8_t i = 0; i < FACE_COUNT; ++i) {
         if (i == face) {
             lv_obj_remove_flag(mFaces[i], LV_OBJ_FLAG_HIDDEN);
         } else {
@@ -196,7 +319,10 @@ void TrackSummaryScreen::showFace(uint8_t face)
 
 void TrackSummaryScreen::updateIndicator()
 {
-    const uint8_t id = mFace < FACE_LAPS ? mFace : static_cast<uint8_t>(FACE_LAPS + mLapPage);
+    const uint8_t chart = mHasChart ? 1 : 0;
+    const uint8_t id    = mFace <= FACE_HEARTRATE ? mFace
+                        : mFace == FACE_CHART     ? static_cast<uint8_t>(FACE_CHART)
+                                                  : static_cast<uint8_t>(FACE_CHART + chart + mLapPage);
     mIndicator->setActive(id);
 }
 
@@ -211,8 +337,8 @@ void TrackSummaryScreen::onKey(uint8_t code)
                     fillLapRows();
                     updateIndicator();
                 }
-            } else if (mFace < FACE_HEARTRATE || mLapPages > 0) {
-                showFace(mFace + 1);
+            } else if (nextFace(mFace) != FACE_COUNT) {
+                showFace(nextFace(mFace));
             }
             break;
 
@@ -223,10 +349,10 @@ void TrackSummaryScreen::onKey(uint8_t code)
                     fillLapRows();
                     updateIndicator();
                 } else {
-                    showFace(mFace - 1);
+                    showFace(prevFace(mFace));
                 }
-            } else if (mFace > FACE_MAP) {
-                showFace(mFace - 1);
+            } else if (prevFace(mFace) != FACE_COUNT) {
+                showFace(prevFace(mFace));
             }
             break;
 
