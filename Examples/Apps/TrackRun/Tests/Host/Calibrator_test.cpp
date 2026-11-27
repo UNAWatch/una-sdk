@@ -447,15 +447,18 @@ TEST(Calibrator, RejectionMargins)
         g.begin(0.01f * seed, static_cast<uint8_t>(1 + seed % 8));
         g.runLaps(6.5, runner(3.0f + 0.04f * seed));
         const CalRun r = calibrate(g.finish(), track, open);
+        size_t eligible = 0;
         for (const auto& f : r.fits) {
             if (f.laps < def.calRejectLaps) {
                 continue;
             }
+            ++eligible;
             stdMaxShape = std::max(stdMaxShape, f.shapeM);
             stdMaxScale = std::max(stdMaxScale, f.scaleM);
             stdMaxR     = std::max(stdMaxR, f.kerbRadiusM);
             stdMinR     = std::min(stdMinR, f.kerbRadiusM);
         }
+        EXPECT_GT(eligible, 0u) << "seed " << seed << ": no fit from lap " << def.calRejectLaps;
     }
     std::printf("[ margins  ] standard tracks from lap %d: R %.2f to %.2f m (edges %.2f, %.2f), shape up to %.2f m "
                 "(limit %.2f), scale up to %.2f m (limit %.2f)\n",
@@ -479,13 +482,16 @@ TEST(Calibrator, RejectionMargins)
             g.begin(0.1f * seed, 1);
             g.runLaps(6.5, runner(5.0f));
             const CalRun r = calibrate(g.finish(), track, open);
+            size_t eligible = 0;
             for (const auto& f : r.fits) {
                 if (f.laps < def.calRejectLaps) {
                     continue;
                 }
+                ++eligible;
                 worstR     = std::min(worstR, f.kerbRadiusM - rHigh);
                 worstShape = std::min(worstShape, f.shapeM - def.maxShapeM);
             }
+            EXPECT_GT(eligible, 0u) << sh.name << " seed " << seed << ": no fit from lap " << def.calRejectLaps;
         }
         std::printf("[ margins  ] %-12s from lap %d: R at least %.2f m beyond the edge; shape %+.2f m against its "
                     "limit\n",

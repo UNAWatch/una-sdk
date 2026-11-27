@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <limits>
 
 namespace TraceGen {
@@ -70,6 +72,12 @@ Generator::Generator(const Track& track, const Noise& noise, uint32_t seed)
     mSinH = PortableMath::sin(h);
     mFrame.setOrigin(track.centreLat, track.centreLon);
     mSpeedPhase = 2.0 * kPi * mUni(mRng);
+    // Every interval moves the clock on: the jitter stays below the period.
+    if (mNoise.periodMs == 0 || mNoise.periodJitterMs >= mNoise.periodMs) {
+        std::fprintf(stderr, "TraceGen: periodMs %u with jitter %u cannot advance the clock\n",
+                     static_cast<unsigned>(mNoise.periodMs), static_cast<unsigned>(mNoise.periodJitterMs));
+        std::abort();
+    }
 
     const size_t n = std::min(track.pathU.size(), track.pathV.size());
     if (n >= 3) {
@@ -199,7 +207,7 @@ Generator::P Generator::trackPoint(double tau, double r) const
 {
     if (mPathLen > 0.0) {
         const double a = std::fmod(std::max(tau, 0.0) / 4.0 * mPathLen, mPathLen);
-        const size_t n = mTrack.pathU.size();
+        const size_t n = mPathCum.size() - 1; // the vertices the path was built from
         size_t i = static_cast<size_t>(std::upper_bound(mPathCum.begin(), mPathCum.end(), a) - mPathCum.begin());
         i = std::min(std::max<size_t>(i, 1), n);
         const double seg = mPathCum[i] - mPathCum[i - 1];
@@ -344,6 +352,9 @@ void Generator::emitSample()
             const double d = PortableMath::hypot(w.x - mTrueX, w.y - mTrueY) * mNoise.distScale;
             mGpsDist += d;
             mOut.gpsDistM += d;
+            if (mOnRoad) {
+                mGpsRoad += d;
+            }
             mHaveDistPos = false; // the next fix restarts the sum, no chord
         }
     }
@@ -427,19 +438,24 @@ void Generator::moveAlong(double ds, double v, double dt)
         dTau += 4.0;
     }
 
+    const double thr = mTauGate + 4.0 * static_cast<double>(mOut.crossMs.size() - mSegCross0 + 1 + mGatesOff);
     if (!mCredit) {
         // Off the track: the runner goes round the outside, which is not
-        // track distance and does not end a lap.
+        // track distance and does not end a lap. A pass of the start point
+        // made there is skipped: the next lap ends at the next pass.
+        if (ds > 0.0 && mTu < thr && mTu + dTau >= thr) {
+            ++mGatesOff;
+        }
         mTu += dTau;
         mTau = tauNew;
         return;
     }
     const double laneLen = laneLengthM(mLane);
     bool crossed = false;
-    if (ds > 0.0) {
+    if (ds > 0.0 && mStarted) {
         // Lap k ends the first time the unwrapped position passes the start
         // point for the k-th time; going back and forth over it does not.
-        const double thr = mTauGate + 4.0 * static_cast<double>(mOut.crossMs.size() - mSegCross0 + 1);
+        // A rolling start's run-in, before Start, ends none.
         if (mTu < thr && mTu + dTau >= thr) {
             double toGate = arcOf(std::fmod(mTauGate, 4.0), r) - a0;
             while (toGate < 0.0) {
@@ -913,6 +929,7 @@ void Generator::joinTrack(double tau, uint8_t lane)
     mOffset = mTargetOffset = laneOffset(lane);
     mTau = mTu = mTauGate = tau;
     mSegCross0    = mOut.crossMs.size();
+    mGatesOff     = 0;
     mFrac         = 0.0;
     mSegFracStart = 0.0;
     mCreditBase   = 0.0;
@@ -963,6 +980,7 @@ void Generator::lapPress()
     mSegFracStart = 0.0;
     mTauGate      = mTu;
     mSegCross0    = mOut.crossMs.size();
+    mGatesOff     = 0;
     mLapPhysStart = mPhys;
 }
 

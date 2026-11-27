@@ -46,7 +46,12 @@ inline double uniform01(std::mt19937& rng)
 class Uniform {
 public:
     explicit Uniform(double lo = 0.0, double hi = 1.0) : mLo(lo), mHi(hi) {}
-    double operator()(std::mt19937& rng) const { return mLo + (mHi - mLo) * uniform01(rng); }
+    double operator()(std::mt19937& rng) const
+    {
+        // Rounding can land on hi when lo and hi are close: the value below.
+        const double v = mLo + (mHi - mLo) * uniform01(rng);
+        return v < mHi ? v : std::nextafter(mHi, mLo);
+    }
 
 private:
     double mLo;
@@ -59,7 +64,9 @@ public:
     UniformInt(int lo, int hi) : mLo(lo), mN(static_cast<uint64_t>(static_cast<int64_t>(hi) - lo + 1)) {}
     int operator()(std::mt19937& rng) const
     {
-        return mLo + static_cast<int>((static_cast<uint64_t>(rng()) * mN) >> 32);
+        // Added as 64 bits: the offset alone can be past INT_MAX.
+        const uint64_t off = (static_cast<uint64_t>(rng()) * mN) >> 32;
+        return static_cast<int>(static_cast<int64_t>(mLo) + static_cast<int64_t>(off));
     }
 
 private:

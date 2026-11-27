@@ -183,8 +183,8 @@ TEST(ReturnVisit, AlignmentSettling)
                         const bool   ok = std::sqrt(de * de + dn * dn) <= 1.5;
                         if (ok && settled == SIZE_MAX) {
                             settled = i;
-                        } else if (!ok && t.alignment().aligning) {
-                            settled = SIZE_MAX;
+                        } else if (!ok) {
+                            settled = SIZE_MAX; // not staying so: from the next time within
                         }
                     });
                 EXPECT_EQ(modeChanges(r), 0u);

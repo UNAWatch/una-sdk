@@ -39,8 +39,12 @@ const char* kindName(Kind k)
 
 uint32_t envU(const char* name, uint32_t dflt)
 {
-    const char* v = std::getenv(name);
-    return v != nullptr ? static_cast<uint32_t>(std::strtoul(v, nullptr, 10)) : dflt;
+    return OvalTest::envSeed(name, dflt);
+}
+
+uint32_t envRuns(const char* name, uint32_t dflt)
+{
+    return OvalTest::envNumber(name, dflt);
 }
 
 struct SweepRun {
@@ -165,6 +169,8 @@ void sweep(uint32_t seed0, uint32_t runs, double maxOffsetM, Totals& t)
         t.laps += r.laps.size();
         bool bad = false;
         std::string why;
+        bool   haveExit = false;   // this run's exit against the true one
+        double exitS    = 0.0;
 
         if (r.decreases != 0) {
             ++t.decreases;
@@ -207,12 +213,12 @@ void sweep(uint32_t seed0, uint32_t runs, double maxOffsetM, Totals& t)
             if (entries == 1 && exits == 1 && r.changes.size() == 2) {
                 const size_t js = sampleAtOrAfter(tr, r.changes[0].tMs);
                 const size_t xs = sampleAtOrAfter(tr, r.changes[1].tMs);
-                bool         amb = false;
-                const size_t want = trueLapsBetween(tr, js, xs, laneLen, 15.0, amb);
-                const SegLaps s = lapsBetween(r, r.changes[0].tMs, r.changes[1].tMs, laneLen);
-                if (amb) {
+                const TrueLaps tl   = trueLapsBetween(tr, js, xs, laneLen, 15.0);
+                const size_t   want = tl.want;
+                const SegLaps  s    = lapsBetween(r, r.changes[0].tMs, r.changes[1].tMs, laneLen);
+                if (tl.ambiguous) {
                     ++t.ambiguous;
-                    if (s.laps + 1 < want || s.laps > want + 1) {
+                    if (s.laps < tl.lo || s.laps > tl.hi) {
                         bad = true;
                         why += " laps far off;";
                     }
@@ -225,7 +231,9 @@ void sweep(uint32_t seed0, uint32_t runs, double maxOffsetM, Totals& t)
                     bad = true;
                     why += " missed lap;";
                 }
-                t.exitS.push_back(Oval::msDiff(r.changes[1].tMs, tr.visits[0].exitMs) / 1000.0);
+                exitS    = Oval::msDiff(r.changes[1].tMs, tr.visits[0].exitMs) / 1000.0;
+                haveExit = true;
+                t.exitS.push_back(exitS);
                 t.joinS.push_back(Oval::msDiff(r.changes[0].tMs, tr.visits[0].joinMs) / 1000.0);
                 if (run.kind == Kind::Stored && !r.joinSample.empty()) {
                     const double off = std::hypot(run.offE, run.offN);
@@ -248,10 +256,10 @@ void sweep(uint32_t seed0, uint32_t runs, double maxOffsetM, Totals& t)
                 const Allowance a = allowance(tr, r);
                 t.roadNetM.push_back(std::max(0.0, std::fabs(r.finalRoad - road) - a.gpsM));
                 t.totalErrM.push_back(r.finalTotal - (road + tr.trueTrackM.back()));
-                if (std::fabs(t.totalErrM.back()) > 25.0 || (!t.exitS.empty() && std::fabs(t.exitS.back()) > 10.0)) {
+                if (std::fabs(t.totalErrM.back()) > 25.0 || (haveExit && std::fabs(exitS) > 10.0)) {
                     std::printf("[ sweep    ] note: run %u (seed %u, %s, lane %u, noise %.1f, offset %.1f m): total %+.1f m, exit %+.1f s\n",
                                 n, seed, kindName(run.kind), run.lane, run.noise, std::hypot(run.offE, run.offN),
-                                t.totalErrM.back(), t.exitS.empty() ? 0.0 : t.exitS.back());
+                                t.totalErrM.back(), haveExit ? exitS : 0.0);
                 }
             }
         } else if (run.kind == Kind::TrackOnly) {
@@ -286,6 +294,13 @@ void sweep(uint32_t seed0, uint32_t runs, double maxOffsetM, Totals& t)
                 t.falseLaps += r.laps.size();
                 bad = true;
                 why += " laps on the road;";
+            }
+            for (const Session::Event& c : r.changes) {
+                if (c.segment == Session::Segment::Track) {
+                    ++t.falseEntries;
+                    bad = true;
+                    why += " a track segment on the road;";
+                }
             }
             const double gps = tr.gpsRoadM.back();
             t.roadErrM.push_back(std::fabs(r.finalRoad - gps));
@@ -328,7 +343,7 @@ void print(const char* title, const Totals& t)
 
 TEST(SessionSweep, MixedRuns)
 {
-    const uint32_t runs = envU("TRACKRUN_SESSION_RUNS", 200);
+    const uint32_t runs = envRuns("TRACKRUN_SESSION_RUNS", 200);
     const uint32_t seed = envU("TRACKRUN_SESSION_SEED", 1);
     Totals t;
     sweep(seed, runs, 5.0, t);
@@ -347,7 +362,7 @@ TEST(SessionSweep, LargeDailyOffsets)
 {
     // The same invariants with a day's offset up to 20 m: only the entry
     // to a stored track may come later.
-    const uint32_t runs = envU("TRACKRUN_SESSION_RUNS", 200);
+    const uint32_t runs = envRuns("TRACKRUN_SESSION_RUNS", 200);
     const uint32_t seed = envU("TRACKRUN_SESSION_SEED", 1) + 7u;
     Totals t;
     sweep(seed, runs, 20.0, t);
@@ -415,7 +430,7 @@ TEST(SessionSweep, DISABLED_Lap2Margins)
 {
     // The calibrator's fit at two laps of coverage: standard tracks (R 35 to
     // 38 m, lanes 1 to 8, noise 2 to 5 m) against park loops of 380 to 440 m.
-    const uint32_t runs = envU("TRACKRUN_SESSION_RUNS", 300);
+    const uint32_t runs = envRuns("TRACKRUN_SESSION_RUNS", 300);
     for (int park = 0; park < 2; ++park) {
         std::vector<double> rr, shape, scale;
         size_t passed = 0, total = 0;

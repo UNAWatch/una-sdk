@@ -150,6 +150,7 @@ struct SessionResult {
     std::vector<float>   track;
     std::vector<uint8_t> segment;
     std::vector<uint8_t> hold;    // holdElevation()
+    std::vector<uint8_t> trackNumbers; // trackNumber() from Start, each change once
     size_t decreases     = 0;
     float  worstDecrease = 0.0f;
     float  finalTotal    = 0.0f;

@@ -661,6 +661,14 @@ TEST(Session, APauseJustAfterArrivingStaysOutOfTheLaps)
         for (const Session::Event& e : r.laps) {
             EXPECT_LT(e.track.lapDurationMs, 200000u) << "seed " << seed << ": a lap of about 90 s holds the pause";
         }
+        // Lap 1 against the running time from the true entry to the first
+        // pass of the line (the pause comes after the entry), within the
+        // few seconds a join's entry is placed from the readings.
+        ASSERT_FALSE(tr.visits.empty());
+        ASSERT_FALSE(tr.crossActiveMs.empty());
+        const double activeAtJoin = Oval::msDiff(tr.visits[0].joinMs, tr.startMs);
+        const double lap1S        = (static_cast<double>(tr.crossActiveMs[0]) - activeAtJoin) / 1000.0;
+        EXPECT_NEAR(r.laps[0].track.lapDurationMs / 1000.0, lap1S, 15.0) << "seed " << seed << ": running time only";
     }
 }
 
@@ -677,6 +685,10 @@ TEST(Session, OneWildFixFarAwayChangesNothing)
     storeTrack(store, tk, 2.0, -1.5);
     const Replay::SessionResult clean = Replay::runSession(tr, Oval::LaneTable::outdoor(), Oval::Config(), &store);
     ASSERT_FALSE(tr.visits.empty());
+    // Without the wild fix the track is joined and every lap counted.
+    ASSERT_EQ(clean.joins.size(), 1u);
+    ASSERT_GT(tr.visits[0].laps, 0u);
+    ASSERT_EQ(clean.runLaps, tr.visits[0].laps);
     const size_t k = tr.visits[0].joinSample > 20 ? tr.visits[0].joinSample - 20 : tr.startIndex + 1;
     tr.samples[k].lat += 0.045; // about 5 km north
     const Replay::SessionResult wild = Replay::runSession(tr, Oval::LaneTable::outdoor(), Oval::Config(), &store);

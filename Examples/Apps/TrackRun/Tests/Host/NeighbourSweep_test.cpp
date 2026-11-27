@@ -61,8 +61,7 @@ bool lapsRight(const TraceGen::Trace& tr, const Replay::TrackerResult& r, uint8_
 
 TEST(NeighbourSweep, TurnedNeighbourAt40And60m)
 {
-    const char* runsEnv = std::getenv("TRACKRUN_NEIGHBOUR_RUNS");
-    const int   total   = runsEnv ? std::atoi(runsEnv) : 300;
+    const int total = static_cast<int>(envNumber("TRACKRUN_NEIGHBOUR_RUNS", 300));
     for (double apart : {40.0, 60.0}) {
         std::mt19937 rng(PortableRandom::seeded(20261028u + static_cast<uint32_t>(apart)));
         auto uni  = [&](double a, double b) { return PortableRandom::Uniform(a, b)(rng); };

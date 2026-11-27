@@ -52,10 +52,8 @@ struct Stats {
 TEST(Sweep, TwoHundredRandomisedRuns)
 {
     const Oval::LaneTable table   = Oval::LaneTable::outdoor();
-    const char*           seedEnv = std::getenv("TRACKRUN_SWEEP_SEED");
-    const char*           runsEnv = std::getenv("TRACKRUN_SWEEP_RUNS");
-    const int             total   = runsEnv ? std::atoi(runsEnv) : 200;
-    std::mt19937 rng(PortableRandom::seeded(seedEnv ? static_cast<uint32_t>(std::strtoul(seedEnv, nullptr, 10)) : 20261006u));
+    const int             total   = static_cast<int>(OvalTest::envNumber("TRACKRUN_SWEEP_RUNS", 200));
+    std::mt19937 rng(PortableRandom::seeded(OvalTest::envSeed("TRACKRUN_SWEEP_SEED", 20261006u)));
     auto uni = [&](double a, double b) { return PortableRandom::Uniform(a, b)(rng); };
     auto pick = [&](int a, int b) { return PortableRandom::UniformInt(a, b)(rng); };
 

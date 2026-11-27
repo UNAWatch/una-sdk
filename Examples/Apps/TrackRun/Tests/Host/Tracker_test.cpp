@@ -262,6 +262,7 @@ static void partLapSweep(float sigma, std::vector<double>& supplied, std::vector
                                                                fromScratch ? nullptr : &stored);
             EXPECT_TRUE(lapsRight(tr, r, 5000)) << "sigma " << sigma << " seed " << seed;
             const std::vector<double> e = partLapErrors(tr, r);
+            EXPECT_FALSE(e.empty()) << "sigma " << sigma << " seed " << seed << ": never calibrated";
             (fromScratch ? scratch : supplied).insert((fromScratch ? scratch : supplied).end(), e.begin(), e.end());
         }
     }

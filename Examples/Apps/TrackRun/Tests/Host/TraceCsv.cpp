@@ -46,6 +46,12 @@ bool toDouble(const std::string& s, double& v)
     return end != nullptr && *end == '\0';
 }
 
+// A whole number from lo to hi: finite and integral before it is cast.
+bool toWhole(const std::string& s, double lo, double hi, double& v)
+{
+    return toDouble(s, v) && std::isfinite(v) && v == std::floor(v) && v >= lo && v <= hi;
+}
+
 uint32_t midpoint(uint32_t a, uint32_t b)
 {
     const int32_t d = Oval::msDiff(b, a);
@@ -134,14 +140,20 @@ bool parse(std::istream& in, File& out, std::string& error, float uereM)
         auto field = [&](int c) { return (c >= 0 && c < static_cast<int>(f.size())) ? f[c] : std::string(); };
         Row r;
         double v = 0.0;
-        if (!toDouble(field(cT), v) || v < 0.0 || v > 4294967295.0) {
+        if (!toWhole(field(cT), 0.0, 4294967295.0, v)) {
             error = "bad t_ms on data line " + std::to_string(lineNo);
             return false;
         }
         r.s.tMs = static_cast<uint32_t>(v);
         r.s.fix = field(cFix) == "1";
-        r.s.lat = toDouble(field(cLat), v) ? v : 0.0;
-        r.s.lon = toDouble(field(cLon), v) ? v : 0.0;
+        // A fix needs both coordinates: a row without them is kept, as no
+        // fix, for its time and distance.
+        double lat = 0.0, lon = 0.0;
+        const bool haveLat = toDouble(field(cLat), lat) && std::isfinite(lat) && std::fabs(lat) <= 90.0;
+        const bool haveLon = toDouble(field(cLon), lon) && std::isfinite(lon) && std::fabs(lon) <= 180.0;
+        r.s.lat = haveLat ? lat : 0.0;
+        r.s.lon = haveLon ? lon : 0.0;
+        r.s.fix = r.s.fix && haveLat && haveLon;
         if (toDouble(field(cAlt), v)) {
             r.altM = static_cast<float>(v);
         }
@@ -152,12 +164,23 @@ bool parse(std::istream& in, File& out, std::string& error, float uereM)
         if (toDouble(field(cTrack), v)) {
             r.trackDistM = static_cast<float>(v);
         }
-        if (toDouble(field(cLap), v)) {
+        if (!field(cLap).empty()) {
+            if (!toWhole(field(cLap), 0.0, 65535.0, v)) {
+                error = "bad lap on data line " + std::to_string(lineNo);
+                return false;
+            }
             r.lap = static_cast<int>(v);
         }
         r.mode = field(cMode);
         if (cLane >= 0) {
-            r.lane = toDouble(field(cLane), v) ? static_cast<int>(v) : 0; // blank: "No lane"
+            r.lane = 0; // blank: "No lane"
+            if (!field(cLane).empty()) {
+                if (!toWhole(field(cLane), 0.0, 255.0, v)) {
+                    error = "bad lane on data line " + std::to_string(lineNo);
+                    return false;
+                }
+                r.lane = static_cast<int>(v);
+            }
         }
         out.rows.push_back(r);
     }
@@ -221,7 +244,8 @@ bool write(const std::string& path, const File& f)
         return false;
     }
     write(os, f);
-    return static_cast<bool>(os);
+    os.close(); // the last bytes are written here: checked after it
+    return !os.fail();
 }
 
 TraceGen::Trace toTrace(const File& f)
@@ -254,7 +278,28 @@ TraceGen::Trace toTrace(const File& f)
         tr.startLane = static_cast<uint8_t>(f.rows[start].lane);
     }
 
+    // The first counted row against the state at Start: paused, or on
+    // another lane, from the outset.
     int lane = tr.startLane;
+    if (start < f.rows.size()) {
+        const Row& first = f.rows[start];
+        if (first.mode == "pause") {
+            TraceGen::Command c;
+            c.beforeSample = start;
+            c.kind = TraceGen::CmdKind::Pause;
+            c.tMs  = tr.startMs;
+            tr.commands.push_back(c);
+        }
+        if (first.lane >= 0 && first.lane != lane) {
+            TraceGen::Command c;
+            c.beforeSample = start;
+            c.kind = TraceGen::CmdKind::SetLane;
+            c.tMs  = tr.startMs;
+            c.lane = static_cast<uint8_t>(first.lane);
+            tr.commands.push_back(c);
+            lane = first.lane;
+        }
+    }
     for (size_t i = start + 1; i < f.rows.size(); ++i) {
         const Row& a = f.rows[i - 1];
         const Row& b = f.rows[i];

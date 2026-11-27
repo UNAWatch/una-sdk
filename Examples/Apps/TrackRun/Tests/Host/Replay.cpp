@@ -14,6 +14,26 @@ Result run(const TraceGen::Trace& tr, const Oval::LaneTable& table, const Oval::
     size_t nextCmd = 0;
     float  last    = 0.0f;
 
+    auto record = [&](const Oval::LapCounter::Events& ev, size_t i) {
+        for (uint8_t k = 0; k < ev.count; ++k) {
+            r.events.push_back(ev.items[k]);
+            r.eventSample.push_back(i);
+        }
+    };
+    // The commands due before reading `before`, recorded at reading i (a
+    // Lap press can credit a pending pass).
+    auto commands = [&](size_t before, size_t i) {
+        for (; nextCmd < tr.commands.size() && tr.commands[nextCmd].beforeSample <= before; ++nextCmd) {
+            const TraceGen::Command& c = tr.commands[nextCmd];
+            switch (c.kind) {
+            case TraceGen::CmdKind::Pause:   counter.pause(c.tMs); break;
+            case TraceGen::CmdKind::Resume:  counter.resume(c.tMs); break;
+            case TraceGen::CmdKind::SetLane: counter.setLane(c.lane); break;
+            case TraceGen::CmdKind::LapPress: record(counter.restartLap(c.tMs), i); break;
+            }
+        }
+    };
+
     for (size_t i = 0; i < tr.samples.size(); ++i) {
         if (i < tr.startIndex) {
             counter.prime(tr.samples[i]);
@@ -23,21 +43,8 @@ Result run(const TraceGen::Trace& tr, const Oval::LaneTable& table, const Oval::
         if (i == tr.startIndex) {
             counter.start(tr.startMs, tr.startLane, table);
         }
-        for (; nextCmd < tr.commands.size() && tr.commands[nextCmd].beforeSample <= i; ++nextCmd) {
-            const TraceGen::Command& c = tr.commands[nextCmd];
-            switch (c.kind) {
-            case TraceGen::CmdKind::Pause:   counter.pause(c.tMs); break;
-            case TraceGen::CmdKind::Resume:  counter.resume(c.tMs); break;
-            case TraceGen::CmdKind::SetLane: counter.setLane(c.lane); break;
-            case TraceGen::CmdKind::LapPress: (void)counter.restartLap(c.tMs); break;
-            }
-        }
-
-        const Oval::LapCounter::Events ev = counter.update(tr.samples[i]);
-        for (uint8_t k = 0; k < ev.count; ++k) {
-            r.events.push_back(ev.items[k]);
-            r.eventSample.push_back(i);
-        }
+        commands(i, i);
+        record(counter.update(tr.samples[i]), i);
 
         const float total = counter.totalDistanceM();
         if (total < last) {
@@ -49,12 +56,13 @@ Result run(const TraceGen::Trace& tr, const Oval::LaneTable& table, const Oval::
         last = total;
         r.total.push_back(total);
     }
-    // Stop: a pass still pending is credited, as the service will do.
-    const Oval::LapCounter::Events fin = counter.finish();
-    for (uint8_t k = 0; k < fin.count; ++k) {
-        r.events.push_back(fin.items[k]);
-        r.eventSample.push_back(tr.samples.empty() ? 0 : tr.samples.size() - 1);
+    // Commands after the last reading, then Stop: a pass still pending is
+    // credited, as the service will do.
+    const size_t lastSample = tr.samples.empty() ? 0 : tr.samples.size() - 1;
+    if (tr.samples.size() > tr.startIndex) {
+        commands(tr.samples.size(), lastSample);
     }
+    record(counter.finish(), lastSample);
     r.laps       = counter.lapsCompleted();
     r.missed     = counter.missedLapsCredited();
     r.finalTotal = counter.totalDistanceM();
@@ -173,6 +181,18 @@ TrackerResult runTracker(const TraceGen::Trace& tr, const Oval::LaneTable& table
         }
     };
 
+    auto commands = [&](size_t before, size_t i) {
+        for (; nextCmd < tr.commands.size() && tr.commands[nextCmd].beforeSample <= before; ++nextCmd) {
+            const TraceGen::Command& c = tr.commands[nextCmd];
+            switch (c.kind) {
+            case TraceGen::CmdKind::Pause:   t.pause(c.tMs); break;
+            case TraceGen::CmdKind::Resume:  t.resume(c.tMs); break;
+            case TraceGen::CmdKind::SetLane: t.setLane(c.lane); break;
+            case TraceGen::CmdKind::LapPress: record(t.restartLap(c.tMs), i); break;
+            }
+        }
+    };
+
     for (size_t i = 0; i < tr.samples.size(); ++i) {
         if (i < tr.startIndex) {
             t.prime(tr.samples[i]);
@@ -187,15 +207,7 @@ TrackerResult runTracker(const TraceGen::Trace& tr, const Oval::LaneTable& table
                 r.calibratedAt = i;
             }
         }
-        for (; nextCmd < tr.commands.size() && tr.commands[nextCmd].beforeSample <= i; ++nextCmd) {
-            const TraceGen::Command& c = tr.commands[nextCmd];
-            switch (c.kind) {
-            case TraceGen::CmdKind::Pause:   t.pause(c.tMs); break;
-            case TraceGen::CmdKind::Resume:  t.resume(c.tMs); break;
-            case TraceGen::CmdKind::SetLane: t.setLane(c.lane); break;
-            case TraceGen::CmdKind::LapPress: record(t.restartLap(c.tMs), i); break;
-            }
-        }
+        commands(i, i);
         record(t.update(tr.samples[i]), i);
 
         const float total = t.totalDistanceM();
@@ -216,7 +228,11 @@ TrackerResult runTracker(const TraceGen::Trace& tr, const Oval::LaneTable& table
             hook(i, t);
         }
     }
-    record(t.finish(), tr.samples.empty() ? 0 : tr.samples.size() - 1);
+    const size_t lastSample = tr.samples.empty() ? 0 : tr.samples.size() - 1;
+    if (tr.samples.size() > tr.startIndex) {
+        commands(tr.samples.size(), lastSample); // after the last reading
+    }
+    record(t.finish(), lastSample);
     r.finalTotal  = t.totalDistanceM();
     r.largestHold = t.largestHoldM();
     r.finalMode   = t.mode();
@@ -306,6 +322,18 @@ SessionResult runSession(const TraceGen::Trace& tr, const Oval::LaneTable& table
         }
     };
 
+    auto commands = [&](size_t before, size_t i) {
+        for (; nextCmd < tr.commands.size() && tr.commands[nextCmd].beforeSample <= before; ++nextCmd) {
+            const TraceGen::Command& c = tr.commands[nextCmd];
+            switch (c.kind) {
+            case TraceGen::CmdKind::Pause:    s.pause(c.tMs); break;
+            case TraceGen::CmdKind::Resume:   s.resume(c.tMs); break;
+            case TraceGen::CmdKind::SetLane:  record(s.setLane(c.lane, c.tMs), i); break;
+            case TraceGen::CmdKind::LapPress: record(s.lapPress(c.tMs), i); break;
+            }
+        }
+    };
+
     for (size_t i = 0; i < tr.samples.size(); ++i) {
         if (i < tr.startIndex) {
             s.prime(tr.samples[i]);
@@ -319,15 +347,7 @@ SessionResult runSession(const TraceGen::Trace& tr, const Oval::LaneTable& table
         if (i == tr.startIndex) {
             s.start(tr.startMs, tr.startLane, table, store);
         }
-        for (; nextCmd < tr.commands.size() && tr.commands[nextCmd].beforeSample <= i; ++nextCmd) {
-            const TraceGen::Command& c = tr.commands[nextCmd];
-            switch (c.kind) {
-            case TraceGen::CmdKind::Pause:    s.pause(c.tMs); break;
-            case TraceGen::CmdKind::Resume:   s.resume(c.tMs); break;
-            case TraceGen::CmdKind::SetLane:  record(s.setLane(c.lane, c.tMs), i); break;
-            case TraceGen::CmdKind::LapPress: record(s.lapPress(c.tMs), i); break;
-            }
-        }
+        commands(i, i);
         record(s.update(tr.samples[i]), i);
 
         const float total = s.totalDistanceM();
@@ -343,11 +363,18 @@ SessionResult runSession(const TraceGen::Trace& tr, const Oval::LaneTable& table
         r.track.push_back(s.trackDistanceM());
         r.segment.push_back(static_cast<uint8_t>(s.segment()));
         r.hold.push_back(s.holdElevation() ? 1 : 0);
+        if (r.trackNumbers.empty() || r.trackNumbers.back() != s.trackNumber()) {
+            r.trackNumbers.push_back(s.trackNumber());
+        }
         if (hook) {
             hook(i, s);
         }
     }
-    record(s.finish(), tr.samples.empty() ? 0 : tr.samples.size() - 1);
+    const size_t lastSample = tr.samples.empty() ? 0 : tr.samples.size() - 1;
+    if (tr.samples.size() > tr.startIndex) {
+        commands(tr.samples.size(), lastSample); // after the last reading
+    }
+    record(s.finish(), lastSample);
     r.finalTotal   = s.totalDistanceM();
     r.finalRoad    = s.roadDistanceM();
     r.finalTrack   = s.trackDistanceM();

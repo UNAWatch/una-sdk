@@ -80,6 +80,30 @@ inline TraceGen::Noise metresAccuracy(TraceGen::Noise n)
     return n;
 }
 
+// A whole number from the environment variable name, or dflt when it is not
+// set. A value that is not a whole number from lo to hi fails the test and
+// gives lo, so a typo cannot turn a sweep into one that runs nothing.
+inline uint32_t envNumber(const char* name, uint32_t dflt, uint32_t lo = 1u, uint32_t hi = 1000000u)
+{
+    const char* v = std::getenv(name);
+    if (v == nullptr) {
+        return dflt;
+    }
+    char*                    end = nullptr;
+    const unsigned long long n   = (*v >= '0' && *v <= '9') ? std::strtoull(v, &end, 10) : 0ull;
+    if (end == nullptr || end == v || *end != '\0' || n < lo || n > hi) {
+        ADD_FAILURE() << name << "=" << v << ": expected a whole number from " << lo << " to " << hi;
+        return lo;
+    }
+    return static_cast<uint32_t>(n);
+}
+
+// A seed from the environment variable name, or dflt when it is not set.
+inline uint32_t envSeed(const char* name, uint32_t dflt)
+{
+    return envNumber(name, dflt, 0u, 0xFFFFFFFFu);
+}
+
 // Checks that hold for every scenario: the total never went down, the lap
 // count matches the truth, every lap end is near the true pass of the start
 // point, and the credited total at the last lap is exact.
@@ -101,7 +125,7 @@ inline ::testing::AssertionResult wholeLapsRight(const TraceGen::Trace& tr, cons
     }
     if (!r.events.empty()) {
         const double expected = Replay::creditedAfter(tr, r.events.size());
-        if (std::fabs(r.events.back().totalM - expected) > 0.01) {
+        if (!(std::fabs(r.events.back().totalM - expected) <= 0.01)) {
             return ::testing::AssertionFailure() << "total at the last lap " << r.events.back().totalM
                                                  << " m, expected " << expected << " m";
         }
@@ -110,12 +134,17 @@ inline ::testing::AssertionResult wholeLapsRight(const TraceGen::Trace& tr, cons
 }
 
 // For tests that drive LapCounter by hand: counts readings where the total
-// went down (Replay::run() does the same for the others).
+// went down (Replay::run() does the same for the others). A total that is
+// not a number counts as one, and the next is compared with the last good one.
 struct NeverDecreases {
     float  last      = 0.0f;
     size_t decreases = 0;
     void check(float total)
     {
+        if (!std::isfinite(total)) {
+            ++decreases;
+            return;
+        }
         if (total < last) {
             ++decreases;
         }

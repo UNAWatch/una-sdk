@@ -79,6 +79,7 @@ TEST(LapCounter, NoiseOf3mWithDrift)
         const Replay::Result r = Replay::run(tr);
         EXPECT_TRUE(wholeLapsRight(tr, r, 3000)) << "seed " << seed;
         EXPECT_EQ(r.missed, 0) << "seed " << seed;
+        ASSERT_FALSE(r.events.empty()) << "no laps";
         EXPECT_NEAR(r.events.back().totalM, 4000.0f, 0.01f);
         const Replay::Match m = Replay::match(tr, r, 3000);
         EXPECT_LT(worstAbs(m.lapTimeErrMs), 3000.0) << "seed " << seed;
@@ -96,6 +97,7 @@ TEST(LapCounter, NoiseOf5mWithDrift)
         const Replay::Result r = Replay::run(tr);
         EXPECT_TRUE(wholeLapsRight(tr, r, 4000)) << "seed " << seed;
         EXPECT_EQ(r.missed, 0) << "seed " << seed;
+        ASSERT_FALSE(r.events.empty()) << "no laps";
         EXPECT_NEAR(r.events.back().totalM, 4000.0f, 0.01f);
     }
 }
@@ -216,6 +218,7 @@ TEST(LapCounter, TwoMinutesStandingOnTheLineBeforeRunning)
         EXPECT_FALSE(anyEventBetween(r, tr.startIndex, ranFrom)) << "seed " << seed;
         // Standing still adds no distance, whatever GPS distance did.
         EXPECT_EQ(r.total[ranFrom - 1], 0.0f) << "seed " << seed;
+        ASSERT_FALSE(r.events.empty()) << "no laps";
         EXPECT_NEAR(r.events.back().totalM, 2000.0f, 0.01f);
     }
 }
@@ -302,6 +305,7 @@ TEST(LapCounter, ThirtySecondDropoutMidLap)
         const Replay::Result r = Replay::run(tr);
         EXPECT_TRUE(wholeLapsRight(tr, r, 3000)) << "seed " << seed;
         EXPECT_EQ(r.missed, 0) << "seed " << seed;
+        ASSERT_FALSE(r.events.empty()) << "no laps";
         EXPECT_NEAR(r.events.back().totalM, 2400.0f, 0.01f);
     }
 }
@@ -356,6 +360,7 @@ TEST(LapCounter, LongDropoutHidingTheFarSideAndTheGate)
         // The credited lap is timed where GPS distance said one lap.
         EXPECT_TRUE(wholeLapsRight(tr, r, 15000)) << "seed " << seed;
         EXPECT_EQ(r.missed, 1) << "seed " << seed;
+        ASSERT_FALSE(r.events.empty()) << "no laps";
         EXPECT_NEAR(r.events.back().totalM, 2000.0f, 0.01f);
     }
 }
@@ -518,6 +523,16 @@ TEST(LapCounter, PauseMidLapFreezesDistanceAndTime)
     EXPECT_TRUE(wholeLapsRight(tr, r, 3000));
     EXPECT_EQ(r.missed, 0);
     EXPECT_FALSE(anyEventBetween(r, pausedFrom, pausedTo));
+    // The first paused reading adds only the run up to the pause (its share
+    // of the interval), at most 6 m/s of it; the rest add nothing.
+    ASSERT_GT(pausedFrom, tr.startIndex);
+    uint32_t pauseT = 0;
+    for (const TraceGen::Command& c : tr.commands) {
+        pauseT = c.kind == TraceGen::CmdKind::Pause ? c.tMs : pauseT;
+    }
+    const double upToPause = 0.006 * Oval::msDiff(pauseT, tr.samples[pausedFrom - 1].tMs);
+    EXPECT_GE(r.total[pausedFrom], r.total[pausedFrom - 1]);
+    EXPECT_LE(r.total[pausedFrom] - r.total[pausedFrom - 1], upToPause + 0.01) << "the first paused reading";
     for (size_t i = pausedFrom + 1; i < pausedTo; ++i) {
         EXPECT_EQ(r.total[i], r.total[pausedFrom]) << "reading " << i;
     }
@@ -553,6 +568,15 @@ TEST(LapCounter, WalkingAcrossTheGateWhilePaused)
         ASSERT_EQ(r.events.size(), 5u) << "seed " << seed;
         EXPECT_EQ(r.missed, 1) << "seed " << seed;
         EXPECT_EQ(r.events[1].type, LapCounter::EventType::MissedLap);
+        // Timed in the pause, where the line was passed, and not at the
+        // resume (13 s in; the pass is 7 s in, give or take the noise).
+        uint32_t pauseT = 0, resumeT = 0;
+        for (const TraceGen::Command& c : tr.commands) {
+            pauseT  = c.kind == TraceGen::CmdKind::Pause ? c.tMs : pauseT;
+            resumeT = c.kind == TraceGen::CmdKind::Resume ? c.tMs : resumeT;
+        }
+        EXPECT_GE(Oval::msDiff(r.events[1].tMs, pauseT), 0) << "seed " << seed;
+        EXPECT_LE(Oval::msDiff(r.events[1].tMs, resumeT), -3000) << "seed " << seed;
         EXPECT_NEAR(r.events.back().totalM, 2000.0f, 0.01f);
         for (size_t k = 2; k < 5; ++k) {
             EXPECT_EQ(r.events[k].type, LapCounter::EventType::Lap);
@@ -605,6 +629,7 @@ TEST(LapCounter, Detour200mThenRejoin)
             const Replay::Result r = Replay::run(tr);
             EXPECT_TRUE(wholeLapsRight(tr, r, 3000)) << "at " << at << " seed " << seed;
             EXPECT_EQ(r.missed, 0) << "at " << at << " seed " << seed;
+            ASSERT_FALSE(r.events.empty()) << "no laps";
             EXPECT_NEAR(r.events.back().totalM, 2400.0f, 0.01f);
         }
     }

@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <vector>
@@ -104,12 +105,15 @@ TEST(OffLanes, EdgeLanesLeaveOnceOrStay)
         for (int i = 0; i < 180; ++i) {
             d.step(off, 0.0f);
         }
+        // On the track before the offset, so a leave is one made after it.
+        ASSERT_FALSE(d.wasOff) << "lane " << int(c.lane) << ": off the track in the warm-up";
+        ASSERT_FALSE(d.everLeft) << "lane " << int(c.lane) << ": left in the warm-up";
         d.onOff = d.offOn = 0;
         for (int i = 0; i < 240; ++i) {
             d.step(off, c.lat, 4.0f);
         }
         EXPECT_EQ(d.everLeft, c.leaves) << "lane " << int(c.lane) << " at " << c.lat << " m";
-        EXPECT_LE(d.onOff, c.leaves ? 1 : 0) << "lane " << int(c.lane) << " at " << c.lat << " m";
+        EXPECT_EQ(d.onOff, c.leaves ? 1 : 0) << "lane " << int(c.lane) << " at " << c.lat << " m";
         EXPECT_EQ(d.offOn, 0) << "lane " << int(c.lane) << " at " << c.lat << " m: no flipping back";
     }
 }
@@ -308,6 +312,26 @@ TEST(LaneSetting, ALaneAfterPoorGpsWaitsForAGoodReading)
         const Replay::SessionResult r = Replay::runSession(tr);
         EXPECT_EQ(r.changes.size(), 1u) << "seed " << seed << ": onto the track and staying there";
         EXPECT_GE(r.laps.size(), 3u) << "seed " << seed;
+        // The first good reading after the lane was set.
+        size_t laneAt = tr.samples.size();
+        for (const TraceGen::Command& c : tr.commands) {
+            if (c.kind == TraceGen::CmdKind::SetLane) {
+                laneAt = c.beforeSample;
+            }
+        }
+        size_t good = laneAt;
+        while (good < tr.samples.size()
+               && !(tr.samples[good].fix && tr.samples[good].hdop >= 0.0f && tr.samples[good].hdop <= Oval::Config().maxHdop)) {
+            ++good;
+        }
+        ASSERT_LT(good, tr.samples.size()) << "seed " << seed;
+        ASSERT_GT(good, laneAt) << "seed " << seed << ": poor readings after the lane was set";
+        for (size_t i = laneAt; i < good; ++i) {
+            EXPECT_EQ(r.segment[i], static_cast<uint8_t>(Session::Segment::Road))
+                << "seed " << seed << ": on the road until a good reading, reading " << i;
+        }
+        ASSERT_FALSE(r.changes.empty()) << "seed " << seed;
+        EXPECT_EQ(r.changes[0].tMs, tr.samples[good].tMs) << "seed " << seed << ": the visit begins at it";
     }
 }
 
@@ -319,6 +343,13 @@ TraceGen::Track movedBy(const TraceGen::Track& t, double e, double n)
     TraceGen::Track m = t;
     f.toLatLon(Oval::Vec2{static_cast<float>(e), static_cast<float>(n)}, m.centreLat, m.centreLon);
     return m;
+}
+
+// The run picked the neighbour first and started again on the right track.
+bool restartedOn(const Replay::SessionResult& r, uint8_t neighbour, uint8_t right)
+{
+    const auto w = std::find(r.trackNumbers.begin(), r.trackNumbers.end(), neighbour);
+    return w != r.trackNumbers.end() && std::find(w, r.trackNumbers.end(), right) != r.trackNumbers.end();
 }
 } // namespace
 
@@ -355,7 +386,7 @@ TEST(LaneSetting, APausedJoinRestartedOnANeighbourKeepsThePauseOut)
         }
         ASSERT_GE(from, 0.0f);
         Oval::TrackStore store;
-        store.saveNew(wm, Oval::FitQuality{3.0f, 0.5f}, 1760000000u);
+        const uint8_t wNum = store.saveNew(wm, Oval::FitQuality{3.0f, 0.5f}, 1760000000u).number;
         const uint8_t mNum = store.saveNew(mm, Oval::FitQuality{3.0f, 0.5f}, 1760000000u).number;
         TraceGen::Generator g(m, n, 5000u + seed);
         g.begin(from, lane);
@@ -382,7 +413,8 @@ TEST(LaneSetting, APausedJoinRestartedOnANeighbourKeepsThePauseOut)
                 dur1 = e.track.lapDurationMs; // the refined one last
             }
         }
-        if (!r.laps.empty() && r.laps[0].trackNumber == mNum && !tr.crossActiveMs.empty()) {
+        if (restartedOn(r, wNum, mNum) && !r.laps.empty() && r.laps[0].trackNumber == mNum
+            && !tr.crossActiveMs.empty()) {
             ++restarted;
             EXPECT_NEAR(dur1 / 1000.0, tr.crossActiveMs[0] / 1000.0 - 2.0, 5.0) << "seed " << seed;
         }
@@ -423,7 +455,7 @@ TEST(LaneSetting, ARestartOnANeighbourKeepsTheLaneChanges)
         }
         ASSERT_GE(from, 0.0f);
         Oval::TrackStore store;
-        store.saveNew(wm, Oval::FitQuality{3.0f, 0.5f}, 1760000000u);
+        const uint8_t wNum = store.saveNew(wm, Oval::FitQuality{3.0f, 0.5f}, 1760000000u).number;
         const uint8_t mNum = store.saveNew(mm, Oval::FitQuality{3.0f, 0.5f}, 1760000000u).number;
         TraceGen::Generator g(m, n, 5000u + seed);
         g.begin(from, lane);
@@ -435,7 +467,8 @@ TEST(LaneSetting, ARestartOnANeighbourKeepsTheLaneChanges)
         TraceGen::Trace tr = g.finish();
         tr.startLane = Session::kNoLane;
         const Replay::SessionResult r = Replay::runSession(tr, Oval::LaneTable::outdoor(), Oval::Config(), &store);
-        if (!r.laps.empty() && r.laps[0].trackNumber == mNum && !tr.lapCreditM.empty()) {
+        if (restartedOn(r, wNum, mNum) && !r.laps.empty() && r.laps[0].trackNumber == mNum
+            && !tr.lapCreditM.empty()) {
             ++restarted;
             EXPECT_NEAR(r.laps[0].track.lapLengthM, tr.lapCreditM[0], 6.0) << "seed " << seed;
         }

@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <limits>
 #include <cstring>
 #include <random>
 
@@ -148,6 +149,14 @@ TEST(PortableRandom, Distributions)
     EXPECT_NEAR(static_cast<double>(beyond3) / n, 0.0027, 0.0003); // P(|z| > 3) = 0.27%
 }
 
+namespace {
+// The larger error so far; one that is not a number is the worst there is.
+double worse(double worst, double err)
+{
+    return std::isfinite(err) ? std::max(worst, err) : std::numeric_limits<double>::infinity();
+}
+} // namespace
+
 // The written-out log agrees with the maths library's to within 4 ulp (2 on
 // this PC's; what matters is that it is the same everywhere, not the last bit).
 TEST(PortableRandom, LogMatchesTheLibrary)
@@ -160,7 +169,7 @@ TEST(PortableRandom, LogMatchesTheLibrary)
         const double want = std::log(x);
         const double got  = PortableMath::ln(x);
         const double ulp  = std::fabs(std::nextafter(want, 2.0 * want + 1.0) - want);
-        worst = std::max(worst, want == 0.0 ? std::fabs(got) : std::fabs(got - want) / ulp);
+        worst = worse(worst, want == 0.0 ? std::fabs(got) : std::fabs(got - want) / ulp);
     }
     std::printf("[ portable ] ln against std::log: worst %.2f ulp\n", worst);
     EXPECT_LE(worst, 4.0);
@@ -176,13 +185,13 @@ TEST(PortableMath, MatchesTheLibrary)
     double sinErr = 0.0, cosErr = 0.0, expErr = 0.0, atanErr = 0.0;
     for (int i = 0; i < 200000; ++i) {
         const double a = PortableRandom::uniform(rng, -4000.0, 4000.0);
-        sinErr = std::max(sinErr, std::fabs(PortableMath::sin(a) - std::sin(a)));
-        cosErr = std::max(cosErr, std::fabs(PortableMath::cos(a) - std::cos(a)));
+        sinErr = worse(sinErr, std::fabs(PortableMath::sin(a) - std::sin(a)));
+        cosErr = worse(cosErr, std::fabs(PortableMath::cos(a) - std::cos(a)));
         const double x = PortableRandom::uniform(rng, -40.0, 40.0);
-        expErr = std::max(expErr, std::fabs(PortableMath::exp(x) / std::exp(x) - 1.0));
+        expErr = worse(expErr, std::fabs(PortableMath::exp(x) / std::exp(x) - 1.0));
         const double y = PortableRandom::uniform(rng, -100.0, 100.0);
         const double z = PortableRandom::uniform(rng, -100.0, 100.0);
-        atanErr = std::max(atanErr, std::fabs(PortableMath::atan2(y, z) - std::atan2(y, z)));
+        atanErr = worse(atanErr, std::fabs(PortableMath::atan2(y, z) - std::atan2(y, z)));
     }
     std::printf("[ portable ] against the library: sin %.1e, cos %.1e, exp %.1e (relative), atan2 %.1e\n", sinErr,
                 cosErr, expErr, atanErr);

@@ -173,8 +173,18 @@ bool sameLine(const std::string& want, const std::string& got, std::string& why)
             }
             continue;
         }
-        const double d = std::fabs(std::strtod(a[i].c_str(), nullptr) - std::strtod(b[i].c_str(), nullptr));
-        if (d > (k == 'm' ? kGoldenM : kGoldenMs)) {
+        // Both numbers to the end of the field, and finite: "nan" would pass
+        // any tolerance.
+        char*        endA = nullptr;
+        char*        endB = nullptr;
+        const double x    = std::strtod(a[i].c_str(), &endA);
+        const double y    = std::strtod(b[i].c_str(), &endB);
+        if (*endA != '\0' || *endB != '\0' || !std::isfinite(x) || !std::isfinite(y)) {
+            why = "field " + std::to_string(i) + " is not a number";
+            return false;
+        }
+        const double d = std::fabs(x - y);
+        if (!(d <= (k == 'm' ? kGoldenM : kGoldenMs))) {
             why = "field " + std::to_string(i) + " is " + std::to_string(d) + (k == 'm' ? " m" : " ms") + " out";
             return false;
         }
@@ -186,9 +196,21 @@ bool sameLine(const std::string& want, const std::string& got, std::string& why)
 
 TEST(Hdop, DISABLED_WriteUnknownHdopGolden)
 {
-    std::ofstream f(goldenPath(), std::ios::binary);
-    ASSERT_TRUE(f.good());
-    f << goldenText();
+    // The golden file's inputs are the default seed set's.
+    ASSERT_EQ(PortableRandom::seedSet(), 0u) << "unset TRACKRUN_SEED_SET to write the golden file";
+    // Written beside it and put in its place only when whole, so a failed
+    // write leaves the old one.
+    const std::string path = goldenPath();
+    const std::string tmp  = path + ".tmp";
+    {
+        std::ofstream f(tmp, std::ios::binary | std::ios::trunc);
+        ASSERT_TRUE(f.good()) << tmp;
+        f << goldenText();
+        f.close();
+        ASSERT_FALSE(f.fail()) << "writing " << tmp;
+    }
+    std::remove(path.c_str());
+    ASSERT_EQ(std::rename(tmp.c_str(), path.c_str()), 0) << tmp << " to " << path;
 }
 
 // A run with no HDOP at all behaves exactly as the golden file records: every
@@ -407,7 +429,7 @@ SpellRun spellRun(Place place, double durS, int spellLap, uint8_t lane, float si
             return ::testing::AssertionFailure() << "lap " << k + 1 << (real ? "" : " (across a gap)") << " ends "
                                                  << err << " ms from the truth";
         }
-        if (std::fabs(r.laps[k].lapLengthM - lapM) > 0.01f) {
+        if (!(std::fabs(r.laps[k].lapLengthM - lapM) <= 0.01f)) {   // a NaN length is wrong too
             return ::testing::AssertionFailure() << "lap " << k + 1 << " credited " << r.laps[k].lapLengthM << " m";
         }
     }

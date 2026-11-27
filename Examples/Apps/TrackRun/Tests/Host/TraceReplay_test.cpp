@@ -115,6 +115,7 @@ TEST(TraceReplay, ReplaysTheFixture)
     TraceCsv::File f;
     std::string err;
     ASSERT_TRUE(TraceCsv::read(kFixtureV1, f, err)) << err;
+    ASSERT_FALSE(f.rows.empty());
     EXPECT_FLOAT_EQ(f.rows[0].s.hdop, 3.7f / 4.0f);
     EXPECT_FLOAT_EQ(Oval::hdopErrorM(f.rows[0].s.hdop, Oval::Config()), 3.7f);
 }
@@ -180,6 +181,8 @@ TEST(TraceReplay, RoundTripsAGeneratedTrace)
     // moment, so only the lap count and the credited distance must agree.
     const Replay::Result direct = Replay::run(tr);
     const Replay::Result viaCsv = Replay::run(back);
+    ASSERT_EQ(direct.events.size(), tr.crossMs.size());
+    ASSERT_FALSE(direct.events.empty());
     ASSERT_EQ(direct.events.size(), viaCsv.events.size());
     EXPECT_NEAR(direct.events.back().totalM, viaCsv.events.back().totalM, 0.5f);
     EXPECT_EQ(viaCsv.decreases, 0u);

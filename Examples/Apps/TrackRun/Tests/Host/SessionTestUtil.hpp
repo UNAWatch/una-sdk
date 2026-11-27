@@ -227,16 +227,32 @@ inline size_t sampleAtOrAfter(const TraceGen::Trace& tr, uint32_t tMs)
 
 // Laps the runner really completed from the reading at the Session's join
 // time to the reading at its exit time (forward progress along the line,
-// whole laps). ambiguous: within marginM of a whole lap, where either count
-// is right.
-inline size_t trueLapsBetween(const TraceGen::Trace& tr, size_t from, size_t to, double laneLenM,
-                              double marginM, bool& ambiguous)
+// whole laps), and the counts that are right: within marginM of a whole lap
+// either count beside it is.
+struct TrueLaps {
+    size_t want      = 0;
+    size_t lo        = 0;
+    size_t hi        = 0;
+    bool   ambiguous = false;
+};
+
+inline TrueLaps trueLapsBetween(const TraceGen::Trace& tr, size_t from, size_t to, double laneLenM, double marginM)
 {
     const double d    = tr.truePhysM[to] - tr.truePhysM[from];
     const double laps = d / laneLenM;
     const double frac = laps - std::floor(laps);
-    ambiguous = frac * laneLenM < marginM || (1.0 - frac) * laneLenM < marginM;
-    return static_cast<size_t>(std::floor(laps));
+    TrueLaps t;
+    t.want = static_cast<size_t>(std::floor(laps));
+    t.lo   = t.want;
+    t.hi   = t.want;
+    if (frac * laneLenM < marginM && t.want > 0) {
+        t.lo        = t.want - 1;   // just past a whole lap
+        t.ambiguous = true;
+    } else if ((1.0 - frac) * laneLenM < marginM) {
+        t.hi        = t.want + 1;   // just short of one
+        t.ambiguous = true;
+    }
+    return t;
 }
 
 // The GPS distance (kernel total) added at reading i.
@@ -272,10 +288,12 @@ inline Allowance allowance(const TraceGen::Trace& tr, const Replay::SessionResul
         a.diffM  += std::fabs(gps - trk);
         ++a.transitions;
     };
-    for (size_t v = 0; v < tr.visits.size() && 2 + 2 * v < r.changes.size(); ++v) {
-        between(sampleAtOrAfter(tr, r.changes[1 + 2 * v].tMs), tr.visits[v].joinSample);
-        if (tr.visits[v].exitMs != 0) {
-            between(sampleAtOrAfter(tr, r.changes[2 + 2 * v].tMs), tr.visits[v].exitSample);
+    // The Session's changes go join, exit, join, exit: visit v's join is
+    // change 2v and its exit 2v + 1.
+    for (size_t v = 0; v < tr.visits.size() && 2 * v < r.changes.size(); ++v) {
+        between(sampleAtOrAfter(tr, r.changes[2 * v].tMs), tr.visits[v].joinSample);
+        if (tr.visits[v].exitMs != 0 && 2 * v + 1 < r.changes.size()) {
+            between(sampleAtOrAfter(tr, r.changes[2 * v + 1].tMs), tr.visits[v].exitSample);
         }
     }
     return a;

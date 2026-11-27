@@ -4,8 +4,10 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <limits>
 
 using Oval::LocalFrame;
 using Oval::Vec2;
@@ -49,7 +51,12 @@ double worstRelativeError(double lat0, double lon0)
             destination(lat0, lon0, bearing, dist, lat, lon);
             const double ref = haversineM(lat0, lon0, lat, lon);
             const double got = Oval::length(f.toLocal(lat, lon));
-            worst = std::max(worst, std::fabs(got - ref) / ref);
+            const double err = std::fabs(got - ref) / ref;
+            if (!std::isfinite(err)) {
+                ADD_FAILURE() << "bearing " << bearing << ", " << dist << " m: " << got << " m";
+                return std::numeric_limits<double>::infinity();
+            }
+            worst = std::max(worst, err);
         }
     }
     return worst;

@@ -314,6 +314,7 @@ private:
     double mPhysPos = 0.0, mPhysMax = 0.0; // along-line position, and its high-water mark
     bool   mCredit = true;  // false while off the track
     size_t mSegCross0 = 0;  // crossings before the current join or Lap press
+    size_t mGatesOff  = 0;  // passes of the start point made off the track since
 
     // Road
     bool   mOnRoad  = false;

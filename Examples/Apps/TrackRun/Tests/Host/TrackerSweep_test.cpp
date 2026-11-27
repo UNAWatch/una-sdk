@@ -29,10 +29,8 @@ using namespace OvalTest;
 TEST(TrackerSweep, TwoHundredRandomisedRuns)
 {
     const Oval::LaneTable table   = Oval::LaneTable::outdoor();
-    const char*           seedEnv = std::getenv("TRACKRUN_SWEEP_SEED");
-    const char*           runsEnv = std::getenv("TRACKRUN_SWEEP_RUNS");
-    const int             total   = runsEnv ? std::atoi(runsEnv) : 200;
-    std::mt19937 rng(PortableRandom::seeded(seedEnv ? static_cast<uint32_t>(std::strtoul(seedEnv, nullptr, 10)) : 20261009u));
+    const int             total   = static_cast<int>(envNumber("TRACKRUN_SWEEP_RUNS", 200));
+    std::mt19937 rng(PortableRandom::seeded(envSeed("TRACKRUN_SWEEP_SEED", 20261009u)));
     auto uni  = [&](double a, double b) { return PortableRandom::Uniform(a, b)(rng); };
     auto pick = [&](int a, int b) { return PortableRandom::UniformInt(a, b)(rng); };
 
@@ -241,10 +239,9 @@ TEST(TrackerSweep, LapTimesOnTheLapCounterSweepTraces)
 TEST(TrackerSweep, StoredTracksWithDailyOffsets)
 {
     const Oval::LaneTable table   = Oval::LaneTable::outdoor();
+    const int             total   = static_cast<int>(envNumber("TRACKRUN_SWEEP_RUNS", 200));
     const char*           seedEnv = std::getenv("TRACKRUN_SWEEP_SEED");
-    const char*           runsEnv = std::getenv("TRACKRUN_SWEEP_RUNS");
-    const int             total   = runsEnv ? std::atoi(runsEnv) : 200;
-    std::mt19937 rng(PortableRandom::seeded(seedEnv ? static_cast<uint32_t>(std::strtoul(seedEnv, nullptr, 10)) + 4u : 20261013u));
+    std::mt19937 rng(PortableRandom::seeded(seedEnv ? envSeed("TRACKRUN_SWEEP_SEED", 0u) + 4u : 20261013u));
     auto uni  = [&](double a, double b) { return PortableRandom::Uniform(a, b)(rng); };
     auto pick = [&](int a, int b) { return PortableRandom::UniformInt(a, b)(rng); };
 

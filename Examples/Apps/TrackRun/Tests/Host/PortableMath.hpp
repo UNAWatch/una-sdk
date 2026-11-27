@@ -6,12 +6,17 @@
 // ARM), so a trace built with them would come out a little different on each. These
 // are built only on + - * /, sqrt and exact operations (floor, frexp, ldexp),
 // which IEEE 754 rounds the same way everywhere, as long as no multiply-add is
-// fused (Tests/Host/CMakeLists.txt turns that off for GCC and Clang; MSVC does
-// not fuse by default). They agree with the library to a few units in the
-// last place; what matters is that they agree with themselves everywhere.
+// fused (Tests/Host/CMakeLists.txt turns that off for GCC and Clang, and the
+// pragma below for MSVC, whose default depends on its version). They agree
+// with the library to a few units in the last place; what matters is that
+// they agree with themselves everywhere.
 //
 // Host only. Not part of the watch build.
 #pragma once
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#pragma fp_contract(off)
+#endif
 
 #include <cmath>
 #include <cstdint>

@@ -392,6 +392,7 @@ TEST(StartSweep, JumpsAtStartStandingAndRolling)
                         middleBetter, percentile(endSmall, 0.95), percentile(endSmall, 1.0));
             EXPECT_EQ(falseLaps, 0u) << viaName(via) << " " << starts[how];
             EXPECT_EQ(failed, 0u) << viaName(via) << " " << starts[how];
+            EXPECT_GT(target, 0u) << viaName(via) << " " << starts[how] << ": no start over 20 m out to correct";
             // A start judged from four readings at 2 to 3 m noise: where they
             // do not agree it is left as it was (the laps still count), so a
             // few are missed; at least 9 in 10 corrected.
@@ -405,8 +406,7 @@ namespace {
 
 uint32_t envCount(const char* name, uint32_t dflt)
 {
-    const char* v = std::getenv(name);
-    return v != nullptr ? static_cast<uint32_t>(std::strtoul(v, nullptr, 10)) : dflt;
+    return envSeed(name, dflt);
 }
 
 } // namespace
@@ -514,7 +514,7 @@ JoinSweep joinApproachSweep()
         {"along the lane", 40.0, 1.0, false, false},
         {"car park start", 12.0, 22.0, true, true},
     };
-    const uint32_t runs = envCount("TRACKRUN_JOIN_RUNS", 30);
+    const uint32_t runs = envNumber("TRACKRUN_JOIN_RUNS", 30);
     const Oval::LaneTable table = Oval::LaneTable::outdoor();
     for (int stored = 0; stored < 2; ++stored) {
         std::vector<double> lap1All, aAll, lap1AllR, aAllR, bandLo, bandHi;
@@ -680,6 +680,7 @@ TEST(StartSweep, JoinLap1AtEveryApproach)
     // one run with a lap wrong.
     const JoinSweep s = joinApproachSweep();
     for (int stored = 0; stored < 2; ++stored) {
+        ASSERT_FALSE(s.lap1[stored].empty()) << (stored ? "stored" : "runner") << ": no lap 1 measured";
         EXPECT_LE(s.wrong[stored], 1u) << (stored ? "stored" : "runner");
         EXPECT_LE(std::fabs(meanOf(s.lap1[stored])), 2.0) << (stored ? "stored" : "runner");
         EXPECT_LE(percentile(s.abs1[stored], 0.95), 12.0) << (stored ? "stored" : "runner");
@@ -692,6 +693,7 @@ TEST(Targets, JoinLap1Within5mAt95th)
 {
     const JoinSweep s = joinApproachSweep();
     for (int stored = 0; stored < 2; ++stored) {
+        ASSERT_FALSE(s.abs1[stored].empty()) << (stored ? "stored" : "runner") << ": no lap 1 measured";
         EXPECT_LE(percentile(s.abs1[stored], 0.95), 5.0) << (stored ? "stored" : "runner");
     }
 }
