@@ -31,7 +31,7 @@ these facts. Don't decide for them:
 | Host for editing screens | Windows only (Designer, and its `tgfx` command-line generator) | Any |
 | ST software needed | TouchGFX Designer, free with an ST account | None with the Arm GNU Toolchain |
 | Simulator | Visual Studio project (Windows) or a Makefile (Linux x86-64) | Plain CMake + SDL2: Windows, Linux, macOS |
-| Examples | Every app in `Examples/Apps` except `RunLVGL` and the glances, and every tutorial with a GUI | `RunLVGL` and the `LVGL-GUI` variant of most tutorials |
+| Examples | Every app in `Examples/Apps` except `RunLVGL`, `TrackRun` and the glances, and every tutorial with a GUI | `RunLVGL`, `TrackRun` and the `LVGL-GUI` variant of most tutorials |
 
 Both run on the same kernel. The kernel only receives finished frames, so the choice doesn't
 affect what the app can do with sensors, files or the service. Docs: the `RunLVGL` tutorial at
