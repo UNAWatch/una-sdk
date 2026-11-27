@@ -290,6 +290,8 @@ private:
     uint32_t mStartSysMs      = 0;     ///< System time of Start
     uint32_t mPauseSysMs      = 0;     ///< System time of the pause in force
     uint8_t  mRunLane         = 1;     ///< The lane Start used
+    float    mLapAscentM      = 0.0f;  ///< mTrackSrc's ascent and descent at the lap's start
+    float    mLapDescentM     = 0.0f;
     uint8_t  mLaneMin         = 0;     ///< Lanes run on a track (summary)
     uint8_t  mLaneMax         = 0;
     /// The start screen's track as last sent (CustomMessage::PreRunTrack).
@@ -432,6 +434,8 @@ private:
     /// A GPS reading: the start screen's track, or the run's distance.
     void onGpsReading(const SDK::SensorDataParser::GpsLocation& parser);
     void startTrackSource(uint32_t startMs);
+    /// The track distance into the distance counter, up to now.
+    void commitDistance();
     /// The live speed from the track distance, and whether it can be used.
     float liveSpeed() const { return mTrackSrc.speedMps(); }
     bool  liveSpeedValid() const;

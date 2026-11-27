@@ -25,11 +25,13 @@ bool TrackStoreFile::readAll(const char* path, size_t& len)
     }
     // A store is at most kMaxSerialisedBytes; anything beyond is not read
     // (TrackStore::load counts a cut-off last line).
+    // A read that fails is a file not read, whatever it gave; a short read
+    // at the end of the file is not a failure.
     size_t got = 0;
     const bool ok = f->read(mBuf, sizeof(mBuf), got);
     f->close();
-    len = got;
-    return ok || got > 0;
+    len = ok ? got : 0;
+    return ok;
 }
 
 Oval::TrackStore::LoadReport TrackStoreFile::load(Oval::TrackStore& store, const char** fromPath)
@@ -74,6 +76,9 @@ Oval::TrackStore::LoadReport TrackStoreFile::load(Oval::TrackStore& store, const
         which = best;
         rep   = store.load(mBuf, len);
     } else if (from == nullptr) {
+        // With none read again, nothing loads; tracks.txt, if it was the
+        // one, is not saved over.
+        mMainUnread = mMainUnread || best == 0;
         rep = store.load(mBuf, 0);
     }
     if (fromPath != nullptr) {

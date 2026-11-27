@@ -300,6 +300,9 @@ void Service::run()
 
                 SDK::send_msg<CustomMessage::Battery>(mKernel, static_cast<uint8_t>(mBatterySoc.get()));
 
+                // The start screen's weak GPS goes on with no readings too.
+                updatePreRun();
+
                 // Update GPS fix
                 if (mPreviousGpsFixState != mGps.fix) {
                     mPreviousGpsFixState = mGps.fix;
@@ -579,8 +582,14 @@ void Service::handleEvent(const CustomMessage::TrackStop& event)
 void Service::handleEvent(const CustomMessage::SettingsSave& event)
 {
     bool updCaps = mSettings.phoneNotifEn != event.settings.phoneNotifEn;
+    // The lane is the service's own (SetLane): the GUI's copy of the
+    // settings can hold an older one.
+    const uint8_t lane = mSettings.lastLane;
     mSettings = event.settings;
-    mSettingsSerializer.save(event.settings);
+    mSettings.lastLane = lane;
+    if (!mSettingsSerializer.save(mSettings)) {
+        LOG_ERROR("Settings not saved\n");
+    }
 
     if (updCaps) {
         setCapabilities();
@@ -919,6 +928,8 @@ void Service::startTrack(std::time_t utc)
 
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
+    mLapAscentM  = 0.0f;
+    mLapDescentM = 0.0f;
     mLapCarryMs = 0;
     mPausedLapUtc = 0;
     mLapPauseCarrySec = 0;
@@ -1197,8 +1208,18 @@ void Service::processTrack()
 
 }
 
+void Service::commitDistance()
+{
+    // The distance counter takes the track distance at each tick; a lap,
+    // pause or stop between ticks takes it up to now.
+    if (mTrackSrc.running()) {
+        mDistanceCounter.add(mTrackSrc.totalM());
+    }
+}
+
 void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
 {
+    commitDistance();
     // The time counter counts whole seconds. A workout step that ran out
     // ended between two of them: what came after its end (end.carryMs) goes
     // to the next lap, and this lap gets what the last one handed it.
@@ -1260,8 +1281,13 @@ void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
     fitLap.hrAvg     = mHrCounter.getLapAverage();
     fitLap.hrMax     = mHrCounter.getLapMaximum();
 
-    fitLap.ascent    = mAltitudeCounter.getLapAscent();
-    fitLap.descent   = mAltitudeCounter.getLapDescent();
+    // As the session's: none counted on a track.
+    const float lapAsc  = mTrackSrc.ascentM() - mLapAscentM;
+    const float lapDesc = mTrackSrc.descentM() - mLapDescentM;
+    fitLap.ascent    = lapAsc > 0.0f ? lapAsc : 0.0f;
+    fitLap.descent   = lapDesc > 0.0f ? lapDesc : 0.0f;
+    mLapAscentM      = mTrackSrc.ascentM();
+    mLapDescentM     = mTrackSrc.descentM();
 
     fitLap.wktStepIndex = end.wktStepIndex;
     fitLap.intensity    = end.intensity;
@@ -1275,7 +1301,7 @@ void Service::saveLap(const LapEnd& end, float autoLapDistanceM)
     LOG_INFO("Distance: %.3f m\n", lapDistance);
     LOG_INFO("Speed: %.3f / %.3f m/s\n", lapSpeed, mSpeedCounter.getLapMaximum());
     LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getLapAverage(), mHrCounter.getLapMaximum());
-    LOG_INFO("Ascent/Descent: %.1f / %.1f m\n", mAltitudeCounter.getLapAscent(), mAltitudeCounter.getLapDescent());
+    LOG_INFO("Ascent/Descent: %.1f / %.1f m\n", fitLap.ascent, fitLap.descent);
 
     // Reset lap counters
     mTimeCounter.resetLap();
@@ -1324,6 +1350,9 @@ void Service::stopTrack(bool discard)
     // the pause, as if it had not been taken.
     mPausedLapUtc = 0;
 
+    if (mTrackState != Track::State::PAUSED) {
+        commitDistance();
+    }
     mSrcStartPending = false;
     mTrackSrc.finish();
 
@@ -1438,6 +1467,7 @@ void Service::pauseTrack(bool pause)
     }
 
     if (pause && mTrackState == Track::State::ACTIVE) {
+        commitDistance();
         mTimeCounter.pause();
         mDistanceCounter.pause();
         mSpeedCounter.pause();
@@ -2416,7 +2446,9 @@ void Service::handleEvent(const CustomMessage::SetLane& event)
     // The lane Start uses next time, and this run's from here.
     if (mSettings.lastLane != event.lane) {
         mSettings.lastLane = event.lane;
-        mSettingsSerializer.save(mSettings);
+        if (!mSettingsSerializer.save(mSettings)) {
+            LOG_ERROR("Lane %u not saved for the next run\n", event.lane);
+        }
     }
     if (mTrackState == Track::State::INACTIVE) {
         LOG_INFO("Start lane: %u\n", event.lane);

@@ -574,7 +574,7 @@ void LapCounter::updateOdometer(const Sample& s, bool good, Vec2 p) noexcept
     // The first reading after a resume spans the resume: only the share of
     // it after the resume is running (with no reading during the pause, the
     // whole pause's movement would otherwise count).
-    if (have && mHadPause && mHaveOdoT && msDiff(mResumeT, mOdoT) > 0 && msDiff(s.tMs, mResumeT) > 0) {
+    if (have && mHadPause && mHaveOdoT && msDiff(mResumeT, mOdoT) > 0 && msDiff(s.tMs, mResumeT) >= 0) {
         delta *= static_cast<float>(msDiff(s.tMs, mResumeT)) / static_cast<float>(msDiff(s.tMs, mOdoT));
     }
     mHaveOdoT = true;

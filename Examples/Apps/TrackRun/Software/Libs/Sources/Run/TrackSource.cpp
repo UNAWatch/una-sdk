@@ -139,17 +139,9 @@ bool TrackSource::setLane(uint8_t lane, uint32_t tMs) noexcept
         return false;
     }
     bool ok = false;
-    const float before = mSession.totalDistanceM();
     const Session::Events ev = mSession.setLane(lane, tMs, &ok);
-    // A lane counts from here, so the total does not usually move; any rise
-    // here, between two readings, is a correction, not running, and the
-    // window moves with it.
-    const float jump = mSession.totalDistanceM() - before;
-    if (jump > 0.0f) {
-        mPace.rebase(jump);
-    }
-    if (ev.count > 0 || ok) {
-        mCorrection = true; // the next rise may be a jump too (a join replayed)
+    if (ev.count > 0) {
+        mCorrection = true; // onto a track or off it: the next rise is a jump, not pace
     }
     return ok;
 }
