@@ -1,7 +1,18 @@
 #include <gui/tracklap_screen/TrackLapView.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
+#include <SDK/GUI/Color.hpp>
 
 
 static constexpr uint16_t kDismissTicks = SDK::Utils::secToTicks(5, App::Config::kFrameRate);
+
+// The delta chip, under the pace (moved up 8 px for it), inside the round
+// screen at its corners. As RunLVGL's.
+static constexpr int16_t kPaceTextY = 130;
+static constexpr int16_t kPaceY     = 150;
+static constexpr int16_t kChipX     = 60;
+static constexpr int16_t kChipY     = 201;
+static constexpr int16_t kChipW     = 120;
+static constexpr int16_t kChipH     = 22;
 
 TrackLapView::TrackLapView()
     : mDismissCb(this, &TrackLapView::onDismiss)
@@ -11,6 +22,19 @@ TrackLapView::TrackLapView()
 void TrackLapView::setupScreen()
 {
     TrackLapViewBase::setupScreen();
+
+    paceText.setY(kPaceTextY);
+    paceValue.setY(kPaceY);
+    mChip.setPosition(kChipX, kChipY, kChipW, kChipH);
+    mChip.setColor(touchgfx::colortype(SDK::GUI::Color::WHITE));
+    mChip.setVisible(false);
+    add(mChip);
+    mChipText.setPosition(kChipX, kChipY, kChipW, kChipH);
+    mChipText.setTypedText(touchgfx::TypedText(T_TMP_MEDIUM_18));
+    mChipText.setColor(touchgfx::colortype(SDK::GUI::Color::BLACK));
+    mChipText.setWildcard(mChipBuf);
+    mChipText.setVisible(false);
+    add(mChipText);
 
     buttons.setL1(Buttons::NONE);
     buttons.setL2(Buttons::NONE);
@@ -42,6 +66,25 @@ void TrackLapView::setLapNum(uint32_t n)
         touchgfx::TypedText(T_TEXT_LAP).getText(), n + 1);
 
     title.set(buffer);
+}
+
+void TrackLapView::setDelta(const LapCompare::Delta& d)
+{
+    const bool show = d.verdict != LapCompare::Verdict::None;
+    if (show) {
+        char line[kChipTextSize];
+        LapCompare::line(line, sizeof(line), d);
+        touchgfx::Unicode::strncpy(mChipBuf, line, kChipTextSize - 1);
+        mChipBuf[kChipTextSize - 1] = 0;
+        const uint32_t fill = d.verdict == LapCompare::Verdict::Faster ? SDK::GUI::Color::LIME_SOFT
+                            : d.verdict == LapCompare::Verdict::Slower ? SDK::GUI::Color::SALMON
+                                                                        : SDK::GUI::Color::WHITE;
+        mChip.setColor(touchgfx::colortype(fill));
+    }
+    mChip.setVisible(show);
+    mChipText.setVisible(show);
+    mChip.invalidate();
+    mChipText.invalidate();
 }
 
 void TrackLapView::setPace(float secPerM)

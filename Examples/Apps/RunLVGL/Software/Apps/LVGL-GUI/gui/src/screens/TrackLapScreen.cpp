@@ -11,9 +11,17 @@
 #include "gui/Format.hpp"
 #include "gui/Strings.hpp"
 
+#include "LapCompare.hpp"
+
 namespace
 {
 constexpr uint32_t kDismissMs = 5000;
+
+// The delta chip, under the pace, inside the round screen at its corners.
+constexpr int32_t kChipX = 60;
+constexpr int32_t kChipY = 201;
+constexpr int32_t kChipW = 120;
+constexpr int32_t kChipH = 22;
 } // namespace
 
 TrackLapScreen::TrackLapScreen(Model& model)
@@ -37,9 +45,14 @@ void TrackLapScreen::build()
     Theme::label(mRoot, F::Italic18, "Time", 122, 58, 100);
     mTime = Theme::label(mRoot, F::SemiBold35, "0:00", 122, 82, 100);
     Theme::hline(mRoot, 35, 127, 170);
-    Theme::label(mRoot, F::Italic18, "Avg. Pace", 70, 137, 100);
+    Theme::label(mRoot, F::Italic18, "Avg. Pace", 70, 130, 100);
     // Full width: a slow pace such as "22:00" is wider than the design's 100 px box.
-    mPace = Theme::label(mRoot, F::SemiBold40, Strings::kNoValue, 0, 158, 240);
+    mPace = Theme::label(mRoot, F::SemiBold40, Strings::kNoValue, 0, 150, 240);
+    // Against the lap before (LapCompare): black words on green (faster),
+    // coral (slower) or white (even); hidden with nothing to compare.
+    mChip     = Theme::box(mRoot, kChipX, kChipY, kChipW, kChipH, SDK::GUI::Color::WHITE);
+    mChipText = Theme::label(mRoot, F::Medium18, "", kChipX, kChipY, kChipW, LV_TEXT_ALIGN_CENTER,
+                             SDK::GUI::Color::BLACK);
     mTitle = std::make_unique<Widgets::Title>(mRoot, "Lap");
 }
 
@@ -76,6 +89,20 @@ void TrackLapScreen::showLap()
     lv_label_set_text(mTime, buf);
     Fmt::pace(buf, sizeof(buf), Fmt::paceUnits(lap.pace, imperial));
     lv_label_set_text(mPace, buf);
+
+    const LapCompare::Delta& d = lap.delta;
+    const bool show = d.verdict != LapCompare::Verdict::None;
+    Theme::setHidden(mChip, !show);
+    Theme::setHidden(mChipText, !show);
+    if (show) {
+        char line[24];
+        LapCompare::line(line, sizeof(line), d);
+        lv_label_set_text(mChipText, line);
+        const uint32_t fill = d.verdict == LapCompare::Verdict::Faster ? SDK::GUI::Color::LIME_SOFT
+                            : d.verdict == LapCompare::Verdict::Slower ? SDK::GUI::Color::SALMON
+                                                                        : SDK::GUI::Color::WHITE;
+        lv_obj_set_style_bg_color(mChip, Theme::rgb(fill), LV_PART_MAIN);
+    }
 }
 
 void TrackLapScreen::dismissCb(lv_timer_t* t)

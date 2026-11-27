@@ -4,7 +4,11 @@
 #include <gui_generated/tracklap_screen/TrackLapViewBase.hpp>
 #include <gui/tracklap_screen/TrackLapPresenter.hpp>
 #include <touchgfx/Callback.hpp>
+#include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <SDK/GUI/CountdownTimer.hpp>
+
+#include "LapCompare.hpp"
 
 class TrackLapView : public TrackLapViewBase
 {
@@ -19,6 +23,8 @@ public:
     void setDistance(float metres);
     void setTimer(std::time_t sec);
     void setPace(float secPerM);
+    /// The chip under the pace: against the lap before, by pace.
+    void setDelta(const LapCompare::Delta& d);
     /// Show for the full five seconds again from now.
     void restartDismiss() { mDismissTimer.start(); }
 
@@ -29,6 +35,13 @@ private:
     void onDismiss();
 
     bool mIsImperial = false;
+
+    // The delta chip: black words on green (faster), coral (slower) or
+    // white (even); hidden with nothing to compare.
+    static constexpr uint16_t kChipTextSize = 24;
+    touchgfx::Box                          mChip;
+    touchgfx::TextAreaWithOneWildcard      mChipText;
+    touchgfx::Unicode::UnicodeChar         mChipBuf[kChipTextSize] {};
 
     SDK::GUI::CountdownTimer            mDismissTimer;
     touchgfx::Callback<TrackLapView>    mDismissCb;

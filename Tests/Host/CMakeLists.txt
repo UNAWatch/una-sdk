@@ -57,6 +57,7 @@ add_executable(una-sdk-host-tests
     apps/Running/ActivityWriter_test.cpp
     apps/Running/RunAlerts_test.cpp
     apps/Running/RunAlertsSettings_test.cpp
+    apps/Running/LapCompare_test.cpp
     sensorlayer/HeartRateParser_test.cpp
     sensorlayer/HeartRateExParser_test.cpp
     simulator/FileSystemMock_test.cpp

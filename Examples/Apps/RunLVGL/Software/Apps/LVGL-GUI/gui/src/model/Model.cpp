@@ -173,6 +173,7 @@ RunAlerts::StartMode Model::startMode(bool intervalsRequested) const
 // Service (~1 s after start). Mirrors Service::startTrack().
 void Model::trackStart(bool intervalsMode)
 {
+    mLapCompare.reset();   // a new run: no lap before its first
     // An armed workout is followed unless Intervals were chosen; either way
     // it is used up by this run.
     const int16_t workout = intervalsMode ? kNoWorkout : mArmedWorkout;
@@ -419,6 +420,7 @@ void Model::keepLap()
     mLap.distance = mTrackData.lapDistance;
     mLap.time     = mTrackData.lapTime;
     mLap.pace     = mTrackData.lapPace;
+    mLap.delta    = mLapCompare.add(mLap.num, static_cast<uint32_t>(mLap.time), mLap.distance);
 }
 
 // Private

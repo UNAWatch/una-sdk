@@ -205,6 +205,7 @@
     <ClCompile Include="..\..\gui\src\containers\SummaryFaceHeartRate.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\SummaryFaceHeartRateBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\SummaryFaceLaps.cpp"/>
+    <ClCompile Include="..\..\gui\src\containers\SummaryFaceChart.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\SummaryFaceLapsBase.cpp"/>
     <ClCompile Include="..\..\gui\src\containers\SummaryFaceMap.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\containers\SummaryFaceMapBase.cpp"/>
@@ -606,6 +607,7 @@
     <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceHeartRate.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\SummaryFaceHeartRateBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceLaps.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceChart.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\SummaryFaceLapsBase.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\containers\SummaryFaceMap.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\containers\SummaryFaceMapBase.hpp"/>

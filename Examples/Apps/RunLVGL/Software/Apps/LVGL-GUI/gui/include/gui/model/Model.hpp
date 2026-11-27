@@ -27,6 +27,7 @@
 #include "Settings.hpp"
 #include "ActivitySummary.hpp"
 #include "Track.hpp"
+#include "LapCompare.hpp"
 #include "RunAlerts.hpp"
 #include "AppMenu.hpp"
 
@@ -227,6 +228,7 @@ public:
         float       distance = 0.0f;  ///< m
         std::time_t time     = 0;     ///< s
         float       pace     = 0.0f;  ///< s/m
+        LapCompare::Delta delta {};   ///< Against the lap before it, by pace
     };
     const LapInfo& getLap() const { return mLap; }
 
@@ -294,6 +296,7 @@ private:
     Popup           mWaiting[kPopups] {};
     uint8_t         mWaitingCount   = 0;
     LapInfo         mLap            {};
+    LapCompare::Tracker mLapCompare;   ///< Each lap against the one before
     bool            mDetailsFromToday = false;
     WorkoutFace     mWorkoutFace    {};
     WorkoutStepInfo mWorkoutStep    {};
