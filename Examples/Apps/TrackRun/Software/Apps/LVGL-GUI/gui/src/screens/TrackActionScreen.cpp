@@ -1,0 +1,196 @@
+/**
+ ******************************************************************************
+ * @file    TrackActionScreen.cpp
+ * @brief   Paused-activity menu (see TrackActionScreen.hpp).
+ ******************************************************************************
+ */
+
+#include "gui/screens/TrackActionScreen.hpp"
+#include "gui/screens/ScreenManager.hpp"
+#include "gui/theme/Theme.hpp"
+#include "gui/Format.hpp"
+
+namespace
+{
+constexpr uint32_t kCarouselPeriodMs = 3000;
+
+using Style = WheelMenu::Item::Style;
+const WheelMenu::Item kItems[App::MenuNav::TrackView::Action::ID_COUNT] = {
+    { Style::Simple, "Resume" },
+    { Style::Simple, "Lap" },
+    { Style::Simple, "End workout" },
+    { Style::Simple, "Summary" },
+    { Style::Simple, "Save & End" },
+    { Style::Simple, "Discard" },
+};
+} // namespace
+
+TrackActionScreen::TrackActionScreen(Model& model)
+    : Screen(model)
+{
+}
+
+uint16_t TrackActionScreen::itemAt(uint16_t row) const
+{
+    // Without Lap, its row is left out; without a workout, End workout's.
+    uint16_t item = row;
+    if (!mLapShown && item >= Menu::ID_LAP) {
+        ++item;
+    }
+    if (!mWorkoutMode && item >= Menu::ID_END_WORKOUT) {
+        ++item;
+    }
+    return item;
+}
+
+void TrackActionScreen::build()
+{
+    // Lap shows only in a free run, and only once per pause; End workout
+    // only while a structured workout runs.
+    const Track::Data& data = mModel.getTrackData();
+    mWorkoutMode = data.workoutMode;
+    mLapShown    = !data.intervalsMode && !data.workoutMode && !mModel.isPausedLapTaken();
+    uint16_t count = 0;
+    for (uint16_t i = 0; i < Menu::ID_COUNT; ++i) {
+        if ((mLapShown || i != Menu::ID_LAP) && (mWorkoutMode || i != Menu::ID_END_WORKOUT)) {
+            mItems[count++] = kItems[i];
+        }
+    }
+    // Surrounding item text sits 6 px higher than the default (TrackActionView).
+    mMenu    = std::make_unique<WheelMenu>(mRoot, mItems, count, -6);
+    mButtons = std::make_unique<Widgets::Buttons>(mRoot);
+    mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
+                  Widgets::Buttons::AMBER,
+                  mLapShown ? Widgets::Buttons::AMBER : Widgets::Buttons::NONE);
+    mPause    = std::make_unique<Widgets::PauseIndicator>(mRoot, 200);
+    mCarousel = std::make_unique<Widgets::InfoCarousel>(mRoot, 40, 0);
+    mCarousel->setPeriodMs(kCarouselPeriodMs);
+    mCarousel->setCallback(&TrackActionScreen::carouselCb, this);
+}
+
+void TrackActionScreen::onShow()
+{
+    mIsImperial = mModel.isUnitsImperial();
+    onTrackData(mModel.getTrackData());
+    mModel.resetIdleTimer();
+    // The menu remembers the item, not the row, as rows shift when an item
+    // is left out; a left-out item selects the row above it: Lap's, Resume.
+    const uint16_t item = mModel.menu().track.action.get();
+    uint16_t row = 0;
+    for (uint16_t r = 1; r < mMenu->count() && itemAt(r) <= item; ++r) {
+        row = r;
+    }
+    mMenu->select(row);
+    mCarousel->setCount(4);
+    mModel.trackPause();
+}
+
+void TrackActionScreen::onHide()
+{
+    mModel.menu().track.action.set(itemAt(mMenu->selected()));
+}
+
+void TrackActionScreen::onKey(uint8_t code)
+{
+    namespace Btn = SDK::GUI::Button;
+    switch (code) {
+        case Btn::L1: mMenu->prev(); break;
+        case Btn::L2: mMenu->next(); break;
+
+        // Save & End / Discard / End workout start a hold-to-confirm the
+        // moment R1 goes down; the countdown screen runs while R1 stays held.
+        case Btn::R1_PRESS:
+            switch (itemAt(mMenu->selected())) {
+                case Menu::ID_END_WORKOUT:
+                    mModel.setHoldConfirmMode(Model::HoldConfirmMode::EndWorkout);
+                    ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+                    break;
+                case Menu::ID_SAVE:
+                    mModel.setHoldConfirmMode(Model::HoldConfirmMode::Finish);
+                    ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+                    break;
+                case Menu::ID_DISCARD:
+                    mModel.setHoldConfirmMode(Model::HoldConfirmMode::Discard);
+                    ScreenManager::instance().goTo(ScreenId::TrackHoldConfirm);
+                    break;
+                default:
+                    break;
+            }
+            break;
+
+        case Btn::R1:
+            switch (itemAt(mMenu->selected())) {
+                case Menu::ID_RESUME:
+                    mModel.trackResume();
+                    ScreenManager::instance().goTo(ScreenId::Track);
+                    break;
+                case Menu::ID_LAP:
+                    mModel.saveLap();
+                    break;
+                case Menu::ID_SUMMARY:
+                    ScreenManager::instance().goTo(ScreenId::TrackSummary);
+                    break;
+                default:
+                    break;
+            }
+            break;
+
+        // While Lap is shown. The lap screen shows once the Service has taken
+        // the lap: it ignores a lap with nothing in it.
+        case Btn::R2:
+            if (mLapShown) {
+                mModel.saveLap();
+            }
+            break;
+
+        default:
+            break;
+    }
+}
+
+void TrackActionScreen::onLapChanged(uint8_t /*lapEnd*/)
+{
+    mModel.setLapFromPauseMenu(true);
+    ScreenManager::instance().goTo(ScreenId::TrackLap);
+}
+
+void TrackActionScreen::onTrackData(const Track::Data& data)
+{
+    mPause->setTime(data.totalTime);
+    mAvgPaceConv   = Fmt::paceUnits(data.avgPace, mIsImperial);
+    mDistanceConv  = Fmt::distUnits(data.distance, mIsImperial);
+    mAvgHr         = data.avgHR;
+    mElevationConv = mIsImperial ? SDK::Utils::metersToFeet(data.elevation) : data.elevation;
+    mCarousel->refresh();
+}
+
+void TrackActionScreen::carouselCb(void* user, int16_t index)
+{
+    static_cast<TrackActionScreen*>(user)->updateCarousel(index);
+}
+
+void TrackActionScreen::updateCarousel(int16_t index)
+{
+    char buf[16];
+    switch (index) {
+        case 0:
+            mCarousel->setTitle("AVG. PACE");
+            Fmt::pace(buf, sizeof(buf), mAvgPaceConv);
+            break;
+        case 1:
+            mCarousel->setTitle("DISTANCE");
+            Fmt::distanceTotal(buf, sizeof(buf), mDistanceConv);
+            break;
+        case 2:
+            mCarousel->setTitle("AVG. HR");
+            Fmt::heartRate(buf, sizeof(buf), mAvgHr);
+            break;
+        case 3:
+            mCarousel->setTitle("ELEVATION");
+            snprintf(buf, sizeof(buf), "%d", static_cast<int>(mElevationConv));
+            break;
+        default:
+            return;
+    }
+    mCarousel->setValue(buf);
+}

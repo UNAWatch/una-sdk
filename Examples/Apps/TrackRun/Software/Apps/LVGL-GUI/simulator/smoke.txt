@@ -1,0 +1,9 @@
+# CI smoke run (.github/workflows/linux-simulator.yml): boot, then start a run,
+# which builds the Track screen, the largest user of LVGL's pool.
+0      gps fix on
+3000   screenshot boot
++500   click R1
++6000  screenshot running
++0     click R1
++1500  screenshot after-r1
++500   exit
