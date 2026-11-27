@@ -33,6 +33,12 @@
 #include "SDK/Calibration/StrideMath.hpp"
 #include "SDK/Workout/StepLabel.hpp"
 
+#include "Oval/LaneTable.hpp"
+
+#if defined(SIMULATOR)
+#include "Oval/Config.hpp"
+#endif
+
 #define LOG_MODULE_PRX      "Service"
 #define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
 #include "SDK/UnaLogger/Logger.h"
@@ -54,6 +60,17 @@ static float getPace(float speed, float threshold)
 static float speedFromTotals(float distanceM, float activeTimeS)
 {
     return (activeTimeS > 0.0f) ? (distanceM / activeTimeS) : 0.0f;
+}
+
+// Days from 1970-01-01 to a civil date (proleptic Gregorian).
+static int64_t daysFromCivil(int64_t y, unsigned m, unsigned d)
+{
+    y -= m <= 2 ? 1 : 0;
+    const int64_t  era = (y >= 0 ? y : y - 399) / 400;
+    const unsigned yoe = static_cast<unsigned>(y - era * 400);
+    const unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
+    const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    return era * 146097 + static_cast<int64_t>(doe) - 719468;
 }
 
 } // namespace
@@ -86,6 +103,10 @@ Service::Service(SDK::Kernel &kernel)
         , mWristTiltDetector()
         , mCalibrator(mKernel.fs)
         , mSchedule(mKernel.fs)
+        , mStoreFile(kernel)
+#if TRACKRUN_GPS_TRACE_EN
+        , mTrace(kernel)
+#endif
 {
     mTimeCounter.init();
     mDistanceCounter.init();
@@ -124,6 +145,10 @@ void Service::run()
     if (!mActivitySummarySerializer.load(mSummary)) {
         LOG_WARNING("Failed to load activity summary\n");
     }
+
+    // The stored tracks
+    mStoreFile.load(mStore);
+    LOG_INFO("%u stored tracks\n", mStore.count());
 
     // Recover any activity a previous boot left unfinished (power loss /
     // crash mid-recording), before any new track can start.
@@ -210,6 +235,18 @@ void Service::run()
                 case CustomMessage::WORKOUT_END:  {
                     LOG_DEBUG("WORKOUT_END\n");
                     handleEvent(*static_cast<CustomMessage::WorkoutEnd*>(msg));
+                } break;
+
+                case CustomMessage::SET_LANE:  {
+                    handleEvent(*static_cast<CustomMessage::SetLane*>(msg));
+                } break;
+
+                case CustomMessage::TRACK_LIST_REQ:  {
+                    handleEvent(*static_cast<CustomMessage::TrackListReq*>(msg));
+                } break;
+
+                case CustomMessage::FORGET_TRACK:  {
+                    handleEvent(*static_cast<CustomMessage::ForgetTrack*>(msg));
                 } break;
 
                 // Sensors messages
@@ -363,6 +400,7 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
             }
             mGpsCatchUp.onLocation(mGps.fix, parser.getTimestamp());
             LOG_DEBUG("Location: fix %u, lat %f, lon %f\n", mGps.fix, mGps.latitude, mGps.longitude);
+            onGpsReading(parser);
         }
     } else if (mSensorGpsSpeed.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsSpeed parser(data[0]);
@@ -389,7 +427,9 @@ void Service::handleSensorsData(uint16_t handle, SDK::Sensor::DataBatch& data)
     } else if (mSensorGpsDistance.matchesDriver(handle)) {
         SDK::SensorDataParser::GpsDistance parser(data[0]);
         if (parser.isDataValid()) {
-            mDistanceCounter.add(parser.getDistance());
+            // The road's distance, through the Session (onGpsReading()): the
+            // run's distance comes from mTrackSrc.
+            mLatestGpsDistM = parser.getDistance();
             mGpsCatchUp.onDistance(parser.getTimestamp());
             LOG_DEBUG("Distance: %.2f m\n", parser.getDistance());
         }
@@ -500,6 +540,7 @@ void Service::onStartGUI()
     sendInitialInfoToGui();
     scanWorkouts();
     sendWorkoutList();
+    updatePreRun(true);
 }
 
 void Service::onStopGUI()
@@ -739,17 +780,27 @@ ActivityWriter::RecordData Service::prepareRecordData()
 
     fitRecord.timestamp    = mTimeCounter.getCurrent();
 
-    fitRecord.set(ActivityWriter::RecordData::Field::COORDS, mGps.fix);
-    fitRecord.latitude     = mGps.latitude;
-    fitRecord.longitude    = mGps.longitude;
+    // On a calibrated track the position is on the runner's lane line.
+    double laneLat = 0.0, laneLon = 0.0;
+    if (mTrackSrc.lanePosition(laneLat, laneLon)) {
+        fitRecord.set(ActivityWriter::RecordData::Field::COORDS, true);
+        fitRecord.latitude  = static_cast<float>(laneLat);
+        fitRecord.longitude = static_cast<float>(laneLon);
+    } else {
+        fitRecord.set(ActivityWriter::RecordData::Field::COORDS, mGps.fix);
+        fitRecord.latitude  = mGps.latitude;
+        fitRecord.longitude = mGps.longitude;
+    }
 
-    // The corrected speed of this tick rather than the display window, so the
-    // records agree with max_speed. It is still the receiver's 10 s average.
-    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, mSpeedFilter.hasCurrentSample());
-    fitRecord.speed        = mSpeedFilter.getInstantSpeed();
+    // The live speed from the run's distance, as the display has it, so the
+    // records agree with max_speed.
+    fitRecord.set(ActivityWriter::RecordData::Field::SPEED, liveSpeed() > 0.0f);
+    fitRecord.speed        = liveSpeed();
 
-    fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mAltitudeCounter.isValid());
-    fitRecord.altitude     = mAltitudeCounter.getCurrent();
+    // Held on a track at the altitude where the runner joined it.
+    float altM = 0.0f;
+    fitRecord.set(ActivityWriter::RecordData::Field::ALTITUDE, mTrackSrc.altitude(altM));
+    fitRecord.altitude     = altM;
 
     const bool hasHeartRate = hasTrustedHr();
     fitRecord.set(ActivityWriter::RecordData::Field::HEART_RATE, hasHeartRate);
@@ -866,6 +917,18 @@ void Service::startTrack(std::time_t utc)
         mCalibrator.enableTrace("../SharedData/stride_trace.csv");
     }
 
+    // The run's distance from the lane. Before the first GPS reading the
+    // sensor clock is not known: the run starts on it at the first reading.
+    mStartSysMs = sysMs();
+    mRunLane    = mSettings.lastLane;
+    mLaneMin    = 0;
+    mLaneMax    = 0;
+    if (mClock.synced()) {
+        startTrackSource(sensorNow());
+    } else {
+        mSrcStartPending = true;
+    }
+
     mSessionNotEmpty = false;
     mLapNotEmpty = false;
     mLapCarryMs = 0;
@@ -962,6 +1025,19 @@ void Service::processTrack()
     mTrackData.totalTime = mTimeCounter.getValueActive();
     mTrackData.lapTime = mTimeCounter.getLapValueActive();
 
+    // The run's distance, from the lane on a track, else the GPS distance.
+    if (mTrackState == Track::State::ACTIVE) {
+        Run::Baro baro;
+        baro.valid    = mAltitudeCounter.isValid();
+        baro.altM     = mAltitudeCounter.getCurrent();
+        baro.ascentM  = mAltitudeCounter.getAscent();
+        baro.descentM = mAltitudeCounter.getDescent();
+        mTrackSrc.tick(sensorNow(), baro);
+    }
+    if (mTrackSrc.running()) {
+        mDistanceCounter.add(mTrackSrc.totalM());
+    }
+
     // Distance, m
     mTrackData.distance = mDistanceCounter.getValueActive();
     mTrackData.lapDistance = mDistanceCounter.getLapValueActive();
@@ -982,13 +1058,12 @@ void Service::processTrack()
     // every statistic derives from the corrected speed, at a uniform 1 Hz. The
     // INSTANT value goes in, not the smoothed one, so a maximum keeps its peak.
     if (mTrackState == Track::State::ACTIVE) {
+        // The GPS speed, for the stride calibrator only.
         mSpeedFilter.tick(mGpsSpeedMs, mGpsSpeedValid && mGpsSpeedFresh,
                           mGps.latitude, mGps.longitude, mGps.fix && mGpsPosFresh);
-        if (mSpeedFilter.hasCurrentSample()) {
-            // A tick can see two samples and the filter keeps the newest, so the
-            // maxima take the higher of it and the tick's peak, on the same scale.
-            const float peak = mGpsSpeedPeakMs * mSpeedFilter.getScale();
-            mSpeedCounter.add(std::max(mSpeedFilter.getInstantSpeed(), peak));
+        // The maxima from the live speed, which the display shows.
+        if (liveSpeed() > 0.0f) {
+            mSpeedCounter.add(liveSpeed());
         }
     }
     // Consumed every tick, paused or not, so a sample counts as fresh only on the
@@ -996,7 +1071,9 @@ void Service::processTrack()
     mGpsSpeedFresh  = false;
     mGpsPosFresh    = false;
     mGpsSpeedPeakMs = 0.0f;
-    mTrackData.speed = mSpeedFilter.getSpeed();
+    // The live speed: the run's distance over a rolling window
+    // (Run::TrackSource), not the GPS speed, which reads a few per cent slow.
+    mTrackData.speed = liveSpeed();
 
     mTrackData.avgSpeed    = speedFromTotals(mTrackData.distance, mTrackData.totalTime);
     mTrackData.maxSpeed    = mSpeedCounter.getMaximum();
@@ -1006,7 +1083,7 @@ void Service::processTrack()
 
     // Pace, s/m
     const float kMinSpeed = mSpeedCounter.getMinValid();
-    mTrackData.pace = mSpeedFilter.getPace();
+    mTrackData.pace = getPace(mTrackData.speed, kMinSpeed);
     mTrackData.avgPace = getPace(mTrackData.avgSpeed, kMinSpeed);
     mTrackData.lapPace = getPace(mTrackData.avgLapSpeed, kMinSpeed);
 
@@ -1020,8 +1097,11 @@ void Service::processTrack()
     mTrackData.maxLapHR = mHrCounter.getLapMaximum();
 
 
-    // Altitude, m
-    mTrackData.elevation = mAltitudeCounter.getCurrent();
+    // Altitude, m: held on a track
+    float altM = 0.0f;
+    mTrackData.elevation = mTrackSrc.altitude(altM) ? altM : mAltitudeCounter.getCurrent();
+
+    updateOnTrack();
 
     // Intervals state machine - only while actively running (not paused)
     if (mIntervalsMode && mTrackState == Track::State::ACTIVE) {
@@ -1226,7 +1306,7 @@ void Service::buildPartialSummary()
     mSummary.time      = mTimeCounter.getValueActive();
     mSummary.distance  = mDistanceCounter.getValueActive();
     mSummary.speedAvg  = speedFromTotals(mSummary.distance, mSummary.time);
-    mSummary.elevation = mAltitudeCounter.getAscent();
+    mSummary.elevation = mTrackSrc.ascentM();   // no climbing counted on a track
     mSummary.paceAvg   = getPace(mSummary.speedAvg, mSpeedCounter.getMinValid());
     mSummary.hrMax     = mHrCounter.getMaximum();
     mSummary.hrAvg     = mHrCounter.getAverage();
@@ -1243,11 +1323,17 @@ void Service::stopTrack(bool discard)
     // the pause, as if it had not been taken.
     mPausedLapUtc = 0;
 
+    mSrcStartPending = false;
+    mTrackSrc.finish();
+
     if (!discard && mSessionNotEmpty) {
 
         if (mTrackState != Track::State::PAUSED) {
             mActivityWriter.pause(mTimeCounter.getCurrent());
         }
+
+        // The stored tracks, and the summary's track page.
+        finishStore();
 
         if (mLapNotEmpty) {
             // The lap that ends the activity: a workout step's, if one is
@@ -1290,8 +1376,8 @@ void Service::stopTrack(bool discard)
         fitTrack.hrAvg     = mHrCounter.getAverage();
         fitTrack.hrMax     = mHrCounter.getMaximum();
 
-        fitTrack.ascent    = mAltitudeCounter.getAscent();
-        fitTrack.descent   = mAltitudeCounter.getDescent();
+        fitTrack.ascent    = mTrackSrc.ascentM();
+        fitTrack.descent   = mTrackSrc.descentM();
 
         if (mActivityWriter.stop(fitTrack)) {
             notifyNewActivity();
@@ -1309,8 +1395,14 @@ void Service::stopTrack(bool discard)
             // Do NOT notify: the .fit is left unfinished, so the crash-recovery
             // marker (if any) stays for the next boot to finalize.
         }
+#if TRACKRUN_GPS_TRACE_EN
+        mTrace.close();
+#endif
     } else {
         mActivityWriter.discard();
+#if TRACKRUN_GPS_TRACE_EN
+        mTrace.discard();
+#endif
     }
 
     mTrackState  = Track::State::INACTIVE;
@@ -1320,7 +1412,8 @@ void Service::stopTrack(bool discard)
     LOG_INFO("Distance: %.3f m\n", mDistanceCounter.getValueActive());
     LOG_INFO("Speed: %.3f / %.3f m/s\n", speedFromTotals(mDistanceCounter.getValueActive(), mTimeCounter.getValueActive()), mSpeedCounter.getMaximum());
     LOG_INFO("Heart rate: %.0f / %.0f bpm\n", mHrCounter.getAverage(), mHrCounter.getMaximum());
-    LOG_INFO("Ascent/Descent: %.1f / %.1f m\n", mAltitudeCounter.getAscent(), mAltitudeCounter.getDescent());
+    LOG_INFO("Ascent/Descent: %.1f / %.1f m (barometer %.1f / %.1f m)\n", mTrackSrc.ascentM(), mTrackSrc.descentM(),
+             mAltitudeCounter.getAscent(), mAltitudeCounter.getDescent());
 
     SDK::send_msg<CustomMessage::TrackStateUpd>(mKernel, mTrackState);
 
@@ -1351,6 +1444,8 @@ void Service::pauseTrack(bool pause)
         mAltitudeCounter.pause();
 
         mActivityWriter.pause(mTimeCounter.getCurrent());
+        mPauseSysMs = sysMs();
+        mTrackSrc.pause(sensorNow());
 
         mCalibrator.pause();   // stop ingesting, reset steady-state counter
 
@@ -1371,6 +1466,7 @@ void Service::pauseTrack(bool pause)
         }
 
         mTimeCounter.resume();
+        mTrackSrc.resume(sensorNow());   // and the live speed window starts again
         mDistanceCounter.resume();
         mSpeedCounter.resume();
         // Drop the pre-pause samples: they describe the effort before the break.
@@ -1516,10 +1612,10 @@ void Service::processIntervals()
         return;
     }
 
-    const float speedMs = mSpeedFilter.getSpeed();
+    const float speedMs = liveSpeed();
     const uint32_t speedMmps = speedMs > 0.0f ? static_cast<uint32_t>(speedMs * 1000.0f) : 0u;
     const auto how = mEngine.update(activeTimeMs(), activeDistanceCm(), speedMmps,
-                                    mSpeedFilter.hasCurrentSample());
+                                    liveSpeedValid());
     if (how != SDK::Workout::Engine::Change::None) {
         onIntervalsStepEnded(how);
         return;
@@ -1846,10 +1942,10 @@ SDK::Workout::Zone Service::targetZone() const
 
 void Service::processWorkout()
 {
-    const float    speedMs   = mSpeedFilter.getSpeed();
+    const float    speedMs   = liveSpeed();
     const uint32_t speedMmps = speedMs > 0.0f ? static_cast<uint32_t>(speedMs * 1000.0f) : 0u;
     const auto how = mEngine.update(activeTimeMs(), activeDistanceCm(), speedMmps,
-                                    mSpeedFilter.hasCurrentSample());
+                                    liveSpeedValid());
     if (how != SDK::Workout::Engine::Change::None) {
         onWorkoutStepEnded(how);
         return;
@@ -1860,7 +1956,7 @@ void Service::processWorkout()
     // The filter's validity rides over a second that brings no fresh sample;
     // the gauge treats a false as a lost signal, and so it must stay until
     // the distance across a lost fix has come in.
-    mSpeedGauge.tick(speedMs, mSpeedFilter.isValid() && mGpsCatchUp.caughtUp(),
+    mSpeedGauge.tick(speedMs, liveSpeedValid(),
                      st.stepDistanceCm);
     mHrGauge.tick(mHrCounter.getCurrent(), hasFreshTrustedHr());
 
@@ -2112,10 +2208,9 @@ void Service::playZoneAlert(SDK::Workout::ZoneAlerts::Alert alert, bool twice)
 void Service::processRunAlerts()
 {
     RunAlerts::Input in;
-    in.speedMps   = mSpeedFilter.getSpeed();
-    // As the workout's pace gauge has it (processWorkout()), and no reading
-    // without a fix.
-    in.speedValid = mSpeedFilter.isValid() && mGpsCatchUp.caughtUp() && mGps.fix;
+    in.speedMps   = liveSpeed();
+    // As the workout's pace gauge has it (processWorkout()).
+    in.speedValid = liveSpeedValid();
     in.distanceCm = activeDistanceCm();
     in.hrBpm      = mHrCounter.getCurrent();
     // No reading once the sensor has been quiet for skHrFreshMs.
@@ -2145,4 +2240,321 @@ void Service::playRunAlert(const RunAlerts::Alert& alert)
         LOG_INFO("Range alert %u: %.4f\n", static_cast<unsigned>(fb.kind), alert.value);
         SDK::send_msg<CustomMessage::RunAlert>(mKernel, fb.kind, alert.value);
     }
+}
+
+// =============================================================================
+// Track Run: the run's distance from the lane, the lane, stored tracks
+// =============================================================================
+
+void Service::onGpsReading(const SDK::SensorDataParser::GpsLocation& parser)
+{
+    const uint32_t sys = sysMs();
+    const uint32_t tMs = mGpsUnwrap(parser.getTimestamp());
+    // The first reading sets the clock's offset outright. No run is timed on
+    // it before then (startTrack() waits for it), so nothing has to move.
+    mClock.onSample(tMs, sys);
+
+    float lat = 0.0f, lon = 0.0f, alt = 0.0f;
+    parser.getCoordinates(lat, lon, alt);
+    const float precision = parser.getPrecision();
+    Oval::Sample s;
+    s.tMs  = tMs;
+    s.fix  = parser.isCoordinatesValid();
+    s.lat  = lat;
+    s.lon  = lon;
+    s.altM = s.fix ? alt : std::numeric_limits<float>::quiet_NaN();
+#if defined(SIMULATOR)
+    // The simulator reports precision as 3 + |N(0, 1.5)| "metres", not HDOP:
+    // read as HDOP it would be nearly always poor. Scaled by 1 / uereM it
+    // reads as good GPS, 0.75 to 1.25 (docs/OVAL.md).
+    s.hdop = precision / Oval::Config().uereM;
+#else
+    s.hdop = precision; // read as HDOP (docs/OVAL.md)
+#endif
+    s.gpsDistM = mLatestGpsDistM;
+
+    if (mTrackState == Track::State::INACTIVE) {
+        // The start screen: the start point, and "Track n" or "New track".
+        mTrackSrc.prime(s);
+        mPreRunWeak.add(tMs, s.fix, s.hdop, mTrackSrc.session().config().maxHdop);
+        traceRow(s, precision, true);
+        updatePreRun();
+        return;
+    }
+    if (mSrcStartPending) {
+        // Start was pressed before the first reading: the run starts on the
+        // sensor clock at the press.
+        startTrackSource(tMs - (sys - mStartSysMs));
+        if (mTrackState == Track::State::PAUSED) {
+            mTrackSrc.pause(tMs - (sys - mPauseSysMs));
+        }
+    }
+    mTrackSrc.reading(s);
+    traceRow(s, precision, false);
+}
+
+void Service::startTrackSource(uint32_t startMs)
+{
+    mSrcStartPending = false;
+    if (!mTrackSrc.start(startMs, mRunLane, Oval::LaneTable::outdoor(), &mStore)) {
+        LOG_ERROR("The track distance did not start (lane %u)\n", mRunLane);
+        return;
+    }
+    LOG_INFO("Track Run started: lane %u, %u stored tracks, %s\n", mRunLane, mStore.count(),
+             mRunLane == Oval::Session::kNoLane           ? "on the road"
+             : mTrackSrc.session().trackNumber() != 0     ? "on a stored track"
+                                                          : "on a track not stored");
+#if TRACKRUN_GPS_TRACE_EN
+    const char*  text  = nullptr;
+    const size_t len   = mStoreFile.serialise(mStore, text);
+    float        scale = 0.0f;
+#if defined(SIMULATOR)
+    scale = 1.0f / Oval::Config().uereM;
+#endif
+    mTrace.open(mActivityWriter.fitPath(), startMs, mRunLane, BUILD_VERSION, text, len, scale);
+#endif
+}
+
+bool Service::liveSpeedValid() const
+{
+    // The window needs a few seconds of readings, and GPS that is not weak.
+    return mTrackSrc.running() && liveSpeed() > 0.0f && !mTrackData.onTrack.weakGps;
+}
+
+void Service::updateOnTrack()
+{
+    Track::OnTrack& o = mTrackData.onTrack;
+    const Run::TrackStatus st = mTrackSrc.status(sensorNow());
+    o.segment     = static_cast<uint8_t>(st.segment);
+    o.trackNumber = st.trackNumber;
+    o.lane        = st.lane;
+    o.cal         = static_cast<uint8_t>(st.cal);
+    o.calLaps     = st.calLaps;
+    o.weakGps     = st.weakGps;
+    o.autoJoins   = st.autoJoins;
+    o.trackM      = mTrackSrc.session().trackDistanceM();
+    // The number a new track would be saved as: the lowest free one, as
+    // TrackStore::save() picks it; 0 when the store is full.
+    o.newTrackNumber = 0;
+    for (uint8_t n = 1; n <= Oval::TrackStore::kMaxTracks; ++n) {
+        if (mStore.find(n) == nullptr) {
+            o.newTrackNumber = n;
+            break;
+        }
+    }
+    // The lanes run on a track, for the summary.
+    if (st.segment == Oval::Session::Segment::Track && st.lane != Oval::Session::kNoLane) {
+        mLaneMin = mLaneMin == 0 || st.lane < mLaneMin ? st.lane : mLaneMin;
+        mLaneMax = st.lane > mLaneMax ? st.lane : mLaneMax;
+    }
+}
+
+void Service::finishStore()
+{
+    const Oval::Session& s = mTrackSrc.session();
+    TrackRunSummary& tr = mSummary.trackRun;
+    tr = TrackRunSummary{};
+    tr.onTrack     = mLaneMax != 0;
+    tr.laneMin     = mLaneMin;
+    tr.laneMax     = mLaneMax;
+    tr.laneLast    = s.lane();
+    tr.roadM       = s.roadDistanceM();
+    tr.trackM      = s.trackDistanceM();
+    tr.notStandard = mTrackData.onTrack.cal == Track::OnTrack::NOT_STANDARD;
+
+    // Dates are UNIX seconds from the watch clock. There is no "clock is set"
+    // flag in the SDK: a time before 2024 is taken as not set, and 0 passed.
+    const std::time_t now  = std::time(nullptr);
+    const uint32_t    nowS = now >= static_cast<std::time_t>(1704067200) ? static_cast<uint32_t>(now) : 0u;
+    if (nowS == 0) {
+        LOG_WARNING("Watch clock not set: track dates saved as 0\n");
+    }
+    bool changed = false;
+    const Oval::TrackStore    before = mStore;
+    Oval::StoreOutcome        outcomes[Oval::Session::kMaxVisited];
+    uint8_t                   numbers[Oval::Session::kMaxVisited] = {};
+    Oval::TrackStore::Applied applied[Oval::Session::kMaxVisited];
+    const uint8_t visits = s.visitedCount() < Oval::Session::kMaxVisited ? s.visitedCount() : Oval::Session::kMaxVisited;
+    for (uint8_t i = 0; i < visits; ++i) {
+        outcomes[i] = s.storeOutcome(i, numbers[i]);
+    }
+    mStore.applyRun(outcomes, numbers, visits, nowS, applied);
+    for (uint8_t i = 0; i < visits; ++i) {
+        const Oval::TrackStore::Applied& ap = applied[i];
+        LOG_INFO("Track visit %u: outcome %u for track %u -> track %u%s%s, lane %u\n", i,
+                 static_cast<unsigned>(outcomes[i].kind), numbers[i], ap.number,
+                 ap.replaced != 0 ? " (replaced the least recently used)" : "", ap.changed ? ", store changed" : "",
+                 outcomes[i].lane);
+        changed = changed || ap.changed;
+        if (numbers[i] != 0 && tr.trackNumber == 0) {
+            tr.trackNumber = numbers[i];
+        }
+        if (ap.kind == Oval::StoreOutcome::Kind::New && ap.number != 0 && tr.savedNumber == 0) {
+            tr.savedNumber = ap.number;
+        }
+        if (ap.kind == Oval::StoreOutcome::Kind::New || ap.kind == Oval::StoreOutcome::Kind::Updated
+            || ap.kind == Oval::StoreOutcome::Kind::Replaced) {
+            tr.calLocked = true;
+        }
+    }
+    if (changed && mStoreFile.save(mStore) != TrackStoreFile::SaveResult::Saved) {
+        // Not written: the store goes back to what tracks.txt holds, and no
+        // "New track saved as Track n" for a track the next start will not have.
+        mStore = before;
+        tr.savedNumber = 0;
+        LOG_WARNING("Stored tracks not saved: the run's track changes are lost\n");
+    }
+}
+
+void Service::handleEvent(const CustomMessage::SetLane& event)
+{
+    // 1 to 8, or 0: "No lane" (the road).
+    if (event.lane > Settings::kLanes) {
+        return;
+    }
+    // The lane Start uses next time, and this run's from here.
+    if (mSettings.lastLane != event.lane) {
+        mSettings.lastLane = event.lane;
+        mSettingsSerializer.save(mSettings);
+    }
+    if (mTrackState == Track::State::INACTIVE) {
+        LOG_INFO("Start lane: %u\n", event.lane);
+        updatePreRun();
+        return;
+    }
+    if (mSrcStartPending) {
+        // Started, but the run waits for its first reading: the lane it
+        // starts in.
+        mRunLane = event.lane;
+        LOG_INFO("Lane %u for the start\n", event.lane);
+        return;
+    }
+    const uint32_t t = sensorNow();
+    if (mTrackSrc.setLane(event.lane, t)) {
+#if TRACKRUN_GPS_TRACE_EN
+        mTrace.action("lane_set", t, event.lane);
+#endif
+        LOG_INFO("Lane set to %u%s\n", event.lane, event.lane == 0 ? " (no lane)" : "");
+    } else {
+        LOG_INFO("Lane %u not set\n", event.lane);
+    }
+}
+
+void Service::handleEvent(const CustomMessage::TrackListReq& /*event*/)
+{
+    sendTrackList();
+}
+
+void Service::handleEvent(const CustomMessage::ForgetTrack& event)
+{
+    // Settings > Tracks: the others keep their numbers.
+    if (mTrackState != Track::State::INACTIVE) {
+        LOG_WARNING("Forget track %u refused: a run is in progress\n", event.number);
+    } else {
+        const Oval::TrackStore before = mStore;
+        if (!mStore.forget(event.number)) {
+            LOG_WARNING("Forget track %u: no such track\n", event.number);
+        } else if (mStoreFile.save(mStore) != TrackStoreFile::SaveResult::Saved) {
+            // Not written: the track would be back at the next start, so it
+            // stays now too, and the list the GUI is sent still has it.
+            mStore = before;
+            LOG_WARNING("Track %u not forgotten: tracks.txt could not be saved\n", event.number);
+        } else {
+            LOG_INFO("Track %u forgotten; %u tracks left\n", event.number, mStore.count());
+        }
+    }
+    sendTrackList();
+    updatePreRun(true);
+}
+
+void Service::sendTrackList()
+{
+    if (!mGuiStarted) {
+        return;
+    }
+    auto msg = SDK::make_msg<CustomMessage::TrackList>(mKernel);
+    if (!msg) {
+        return;
+    }
+    const Oval::TrackRecord* list[Oval::TrackStore::kMaxTracks] = {};
+    const uint8_t n = mStore.list(list);
+    msg->count = n < CustomMessage::TrackList::kMax ? n : CustomMessage::TrackList::kMax;
+    for (uint8_t i = 0; i < msg->count; ++i) {
+        msg->tracks[i].number    = list[i]->number;
+        msg->tracks[i].uses      = static_cast<uint16_t>(list[i]->uses);
+        msg->tracks[i].lastUsedS = list[i]->lastUsedS;
+    }
+    // Local time less UTC, from the watch's own conversion, for the dates.
+    const std::time_t utc = std::time(nullptr);
+    const std::tm     loc = mTimeTracker.getLocalTime(utc);
+    const int64_t days = daysFromCivil(loc.tm_year + 1900, static_cast<unsigned>(loc.tm_mon + 1),
+                                       static_cast<unsigned>(loc.tm_mday));
+    const int64_t localS = days * 86400 + loc.tm_hour * 3600 + loc.tm_min * 60 + loc.tm_sec;
+    msg->tzOffsetS = static_cast<int32_t>(localS - static_cast<int64_t>(utc));
+    msg.send();
+}
+
+void Service::updatePreRun(bool force)
+{
+    if (mTrackState != Track::State::INACTIVE || !mGuiStarted) {
+        return;
+    }
+    const Run::PreRun pr = mTrackSrc.preRun(&mStore);
+    PreRunState m;
+    m.status      = pr.status == Run::PreRun::Status::Stored ? CustomMessage::PreRunTrack::STORED
+                  : pr.status == Run::PreRun::Status::New    ? CustomMessage::PreRunTrack::NEW_TRACK
+                                                              : CustomMessage::PreRunTrack::UNKNOWN;
+    m.trackNumber = pr.trackNumber;
+    m.uses        = pr.uses;
+    m.lane        = mSettings.lastLane;
+    m.weakGps     = mPreRunWeak.weak(sensorNow());
+    if (!force && mPreRunSentOnce && m.status == mPreRunSent.status && m.trackNumber == mPreRunSent.trackNumber
+        && m.lane == mPreRunSent.lane && m.weakGps == mPreRunSent.weakGps && m.uses == mPreRunSent.uses) {
+        return;
+    }
+    auto msg = SDK::make_msg<CustomMessage::PreRunTrack>(mKernel);
+    if (msg) {
+        msg->status      = m.status;
+        msg->trackNumber = m.trackNumber;
+        msg->lane        = m.lane;
+        msg->weakGps     = m.weakGps;
+        msg->uses        = m.uses;
+        // Taken as sent only once it is: one not sent goes again next time.
+        if (msg.send()) {
+            mPreRunSent     = m;
+            mPreRunSentOnce = true;
+        }
+    }
+}
+
+void Service::traceRow(const Oval::Sample& s, float rawPrecision, bool preRun)
+{
+#if TRACKRUN_GPS_TRACE_EN
+    Run::TraceFormat::Row r;
+    r.tMs      = s.tMs;
+    r.fix      = s.fix;
+    r.lat      = s.lat;
+    r.lon      = s.lon;
+    r.altM     = s.altM;
+    r.hdop     = rawPrecision; // as the sensor gave it
+    r.gpsDistM = s.gpsDistM;
+    if (preRun) {
+        r.mode = "pre";
+        r.lane = mSettings.lastLane;
+        mTrace.preRun(r);
+        return;
+    }
+    if (!mTrace.isOpen()) {
+        return;
+    }
+    r.trackDistM = mTrackSrc.totalM();
+    r.mode       = mTrackSrc.traceMode();
+    r.lane       = mTrackSrc.session().lane();
+    r.segment    = mTrackSrc.traceSegment();
+    mTrace.row(r);
+#else
+    (void)s;
+    (void)rawPrecision;
+    (void)preRun;
+#endif
 }

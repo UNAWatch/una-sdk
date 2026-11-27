@@ -335,7 +335,7 @@ bool ActivityWriter::stop(const TrackData& track)
         .u16(static_cast<uint16_t>(track.descent))
         .u16(mLapCounter)
         .u8(static_cast<uint8_t>(fit::Sport::Running))
-        .u8(static_cast<uint8_t>(fit::SubSport::Generic))
+        .u8(static_cast<uint8_t>(fit::SubSport::Track))
         .u8(static_cast<uint8_t>(track.hrAvg))
         .u8(static_cast<uint8_t>(track.hrMax))
         .write() && ok;
@@ -403,6 +403,11 @@ void ActivityWriter::addMessageEvent(std::time_t t, fit::EventType type)
         .u8(static_cast<uint8_t>(fit::Event::Timer))
         .u8(static_cast<uint8_t>(type))
         .write();
+}
+
+const char* ActivityWriter::fitPath() const
+{
+    return (mFit && mFile) ? mFile->getPath() : nullptr;
 }
 
 bool ActivityWriter::recoverInterrupted()

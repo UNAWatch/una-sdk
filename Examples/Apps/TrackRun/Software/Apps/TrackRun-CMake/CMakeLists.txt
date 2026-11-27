@@ -56,6 +56,19 @@ set(SERVICE_INCLUDE_DIRS
 )
 una_app_build_service(${APP_NAME}Service.elf)
 
+# Build kind: release (the default, as the app ships) or tester, which also
+# writes a GPS trace beside each activity (docs/GPS_TRACE_FORMAT.md).
+#   cmake -DTRACKRUN_BUILD=tester ...
+set(TRACKRUN_BUILD "release" CACHE STRING "Build kind: release or tester")
+set_property(CACHE TRACKRUN_BUILD PROPERTY STRINGS release tester)
+if(NOT TRACKRUN_BUILD MATCHES "^(release|tester)$")
+    message(FATAL_ERROR "TRACKRUN_BUILD is release or tester, not '${TRACKRUN_BUILD}'")
+endif()
+message(STATUS "Track Run: ${TRACKRUN_BUILD} build")
+if(TRACKRUN_BUILD STREQUAL "tester")
+    target_compile_definitions(${APP_NAME}Service.elf PRIVATE TRACKRUN_TESTER_BUILD=1)
+endif()
+
 # Build GUI (LVGL)
 set(GUI_SOURCES
     ${GUI_APP_SOURCES}

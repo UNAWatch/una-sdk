@@ -36,11 +36,12 @@ protected:
 private:
     using DistanceMenu = Settings::Alerts::Distance;
     using TimeMenu     = Settings::Alerts::Time;
-    static constexpr uint16_t kMaxCount = 7;   // both lists have 7 entries
+    static constexpr uint16_t kMaxCount = 7;   // the longer list (time) has 7 entries
 
     void save();
 
-    Kind mKind;
+    Kind     mKind;
+    uint16_t mCount = 0;   ///< Entries in this list
     WheelMenu::Item mItems[kMaxCount] {};
     char mCenterTexts[kMaxCount][16] {};
     char mItemTexts[kMaxCount][16] {};

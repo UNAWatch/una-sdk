@@ -133,6 +133,8 @@ bool SettingsSerializer::save(const Settings &settings)
     writer.add("auto_pause_en",  settings.autoPauseEn);
     writer.add("phone_notif_en", settings.phoneNotifEn);
     writer.add("calib_trace_en", settings.calibTraceEn);
+    writer.add("last_lane",      settings.lastLane);
+    writer.add("lane_hold_en",   settings.laneHoldEn);
     writer.add("alert_distance_id", static_cast<uint8_t>(settings.alertDistanceId));
     writer.add("alert_time_id",     static_cast<uint8_t>(settings.alertTimeId));
 
@@ -224,6 +226,11 @@ bool SettingsSerializer::load(Settings &settings)
     reader.get("phone_notif_en", settings.phoneNotifEn);
     settings.calibTraceEn = false;  // deterministic default for legacy files
     reader.get("calib_trace_en", settings.calibTraceEn);
+    // last_lane: 1 to kLanes, or 0 for "No lane"; anything else is lane 1.
+    uint8_t lane = 1;
+    reader.get("last_lane", lane);
+    settings.lastLane = lane <= Settings::kLanes ? lane : 1;
+    reader.get("lane_hold_en", settings.laneHoldEn);
     uint8_t distId = static_cast<uint8_t>(Settings::Alerts::Distance::ID_DEFAULT);
     uint8_t timeId = static_cast<uint8_t>(Settings::Alerts::Time::ID_OFF);
     reader.get("alert_distance_id", distId);

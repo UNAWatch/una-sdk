@@ -215,19 +215,14 @@ inline void intervalsPhaseSummary(char* buf, size_t n, const char* label, Settin
 
 // --- Lap alert texts ---------------------------------------------------------
 
-/// "OFF", "<n> km" or "<n> mile(s)".
-inline void alertDistance(char* buf, size_t n, Settings::Alerts::Distance::Id id, bool imperial)
+/// "OFF" or "<n> m": metres on any watch.
+inline void alertDistance(char* buf, size_t n, Settings::Alerts::Distance::Id id, bool /*imperial*/)
 {
     if (id == Settings::Alerts::Distance::ID_OFF) {
         snprintf(buf, n, "OFF");
         return;
     }
-    const unsigned v = Settings::Alerts::Distance::kValues[id];
-    if (imperial) {
-        snprintf(buf, n, "%u %s", v, v > 1 ? "miles" : "mile");
-    } else {
-        snprintf(buf, n, "%u km", v);
-    }
+    snprintf(buf, n, "%u m", static_cast<unsigned>(Settings::Alerts::Distance::kValues[id]));
 }
 
 /// "OFF", "<n> min", or with @p longForm "<n> minute(s)".

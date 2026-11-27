@@ -135,6 +135,10 @@ public:
     /// before any new activity is started.
     bool recoverInterrupted();
 
+    /// The .fit being written (between start() and stop()), else nullptr. The
+    /// GPS trace takes its stamp from it, so the two files pair.
+    const char* fitPath() const;
+
 private:
     /// Local message types (FIT record header, 0-15).
     enum Local : uint8_t {

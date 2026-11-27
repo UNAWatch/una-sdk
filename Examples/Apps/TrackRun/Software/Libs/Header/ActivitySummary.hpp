@@ -29,6 +29,23 @@ struct LapSummary {
 };
 
 /**
+ * @struct TrackRunSummary
+ * @brief  What the summary adds for Track Run: the track page.
+ */
+struct TrackRunSummary {
+    uint8_t  trackNumber = 0;     ///< The stored track used, 0 if none
+    uint8_t  savedNumber = 0;     ///< A new track saved as this number, 0 if none
+    bool     onTrack     = false; ///< Any of the run was on a track
+    bool     notStandard = false; ///< "Not a standard track" (counting only)
+    bool     calLocked   = false; ///< Calibration locked in this run (a new track, or a visit blended in)
+    uint8_t  laneMin     = 0;     ///< Lanes run on the track (laneMin == laneMax: one lane)
+    uint8_t  laneMax     = 0;
+    uint8_t  laneLast    = 0;     ///< The lane at the end
+    float    roadM       = 0.0f;  ///< Distance off the track
+    float    trackM      = 0.0f;  ///< Distance on the track
+};
+
+/**
  * @struct ActivitySummary
  * @brief Represents a common summary track information.
  */
@@ -44,6 +61,8 @@ struct ActivitySummary {
     SDK::TrackMapScreen map; ///< Track map
 
     std::vector<LapSummary> laps; ///< Per-lap summary data
+
+    TrackRunSummary trackRun {};
 };
 
 #endif // ACTIVITY_SUMMARY_HPP

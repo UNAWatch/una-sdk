@@ -2,6 +2,7 @@
 #define SERVICE_HPP
 
 #include <ctime>   // std::time_t (mLastCalibUtc, startTrack, ...)
+#include <limits>
 
 #include "SDK/Kernel/Kernel.hpp"
 #include "SDK/SensorLayer/SensorConnection.hpp"
@@ -32,6 +33,20 @@
 #include "Commands.hpp"
 #include "RunAlerts.hpp"
 #include "WristTiltDetector.hpp"
+
+#include "BuildFlags.hpp"
+#include "Oval/Sample.hpp"
+#include "Oval/TrackStore.hpp"
+#include "Run/SensorClock.hpp"
+#include "Run/TimeUnwrap.hpp"
+#include "Run/TrackSource.hpp"
+#include "Run/WeakGps.hpp"
+#include "TrackStoreFile.hpp"
+#if TRACKRUN_GPS_TRACE_EN
+#include "GpsTraceWriter.hpp"
+#endif
+
+namespace SDK::SensorDataParser { class GpsLocation; }
 
 class Service : public WristTiltDetector::IListener
 {
@@ -260,6 +275,37 @@ private:
     RunAlerts::Monitor   mRunAlerts;  ///< About 1.2 KB: the Service is statically allocated.
     RunAlerts::BuzzClock mBuzzClock;  ///< When the buzzer last started, so alerts never overlap.
 
+    // -- Track Run: distance from the lane --------------------------------------
+
+    /// The run's distance, live speed and altitude (in place of the kernel's
+    /// GPS distance and the GPS speed), and the stored tracks.
+    Run::TrackSource mTrackSrc;
+    Oval::TrackStore mStore;
+    TrackStoreFile   mStoreFile;
+    Run::SensorClock mClock;          ///< "Now" on the GPS readings' clock
+    Run::TimeUnwrap  mGpsUnwrap;
+    Run::WeakGps     mPreRunWeak;     ///< Weak GPS on the start screen
+    float    mLatestGpsDistM = std::numeric_limits<float>::quiet_NaN(); ///< The kernel's cumulative GPS distance
+    bool     mSrcStartPending = false; ///< Start pressed before the first GPS reading
+    uint32_t mStartSysMs      = 0;     ///< System time of Start
+    uint32_t mPauseSysMs      = 0;     ///< System time of the pause in force
+    uint8_t  mRunLane         = 1;     ///< The lane Start used
+    uint8_t  mLaneMin         = 0;     ///< Lanes run on a track (summary)
+    uint8_t  mLaneMax         = 0;
+    /// The start screen's track as last sent (CustomMessage::PreRunTrack).
+    struct PreRunState {
+        uint8_t  status      = 0;
+        uint8_t  trackNumber = 0;
+        uint8_t  lane        = 0;
+        bool     weakGps     = false;
+        uint16_t uses        = 0;
+    };
+    PreRunState mPreRunSent;
+    bool        mPreRunSentOnce = false;
+#if TRACKRUN_GPS_TRACE_EN
+    GpsTraceWriter mTrace;
+#endif
+
     // -- Lifecycle ------------------------------------------------------------
 
     void connectGps();
@@ -283,6 +329,9 @@ private:
     void handleEvent(const CustomMessage::IntervalsNextPhase& event);
     void handleEvent(const CustomMessage::WorkoutDetailsRequest& event);
     void handleEvent(const CustomMessage::WorkoutEnd& event);
+    void handleEvent(const CustomMessage::SetLane& event);
+    void handleEvent(const CustomMessage::TrackListReq& event);
+    void handleEvent(const CustomMessage::ForgetTrack& event);
 
     // -- Track control --------------------------------------------------------
 
@@ -375,6 +424,25 @@ private:
     /// One active second of the range alerts; plays one if due.
     void processRunAlerts();
     void playRunAlert(const RunAlerts::Alert& alert);
+
+    // -- Track Run --------------------------------------------------------------
+
+    uint32_t sysMs() const { return mKernel.sys.getTimeMs(); }
+    uint32_t sensorNow() { return mClock.now(sysMs()); }
+    /// A GPS reading: the start screen's track, or the run's distance.
+    void onGpsReading(const SDK::SensorDataParser::GpsLocation& parser);
+    void startTrackSource(uint32_t startMs);
+    /// The live speed from the track distance, and whether it can be used.
+    float liveSpeed() const { return mTrackSrc.speedMps(); }
+    bool  liveSpeedValid() const;
+    /// The track's state into mTrackData, each tick.
+    void updateOnTrack();
+    /// At the end of a run: the store's tracks updated, and the summary's
+    /// track page.
+    void finishStore();
+    void updatePreRun(bool force = false);
+    void sendTrackList();
+    void traceRow(const Oval::Sample& s, float rawPrecision, bool preRun);
 
     // -- Notifications --------------------------------------------------------
 

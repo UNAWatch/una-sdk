@@ -9,7 +9,7 @@
 #include "gui/screens/ScreenManager.hpp"
 #include "gui/Format.hpp"
 
-static_assert(Settings::Alerts::Distance::ID_COUNT == 7 && Settings::Alerts::Time::ID_COUNT == 7,
+static_assert(Settings::Alerts::Distance::ID_COUNT <= 7 && Settings::Alerts::Time::ID_COUNT <= 7,
               "alert value lists are sized for 7 entries");
 
 MenuAlertValueScreen::MenuAlertValueScreen(Model& model, Kind kind)
@@ -21,7 +21,9 @@ MenuAlertValueScreen::MenuAlertValueScreen(Model& model, Kind kind)
 void MenuAlertValueScreen::build()
 {
     const bool imperial = mModel.isUnitsImperial();
-    for (uint16_t i = 0; i < kMaxCount; ++i) {
+    mCount = mKind == Kind::Distance ? static_cast<uint16_t>(DistanceMenu::ID_COUNT)
+                                     : static_cast<uint16_t>(TimeMenu::ID_COUNT);
+    for (uint16_t i = 0; i < mCount; ++i) {
         if (mKind == Kind::Distance) {
             Fmt::alertDistance(mCenterTexts[i], sizeof(mCenterTexts[i]), static_cast<DistanceMenu::Id>(i), imperial);
             mItems[i] = { WheelMenu::Item::Style::Simple, mCenterTexts[i] };
@@ -32,7 +34,7 @@ void MenuAlertValueScreen::build()
             mItems[i] = { WheelMenu::Item::Style::Simple, mCenterTexts[i], mItemTexts[i] };
         }
     }
-    mMenu    = std::make_unique<WheelMenu>(mRoot, mItems, kMaxCount);
+    mMenu    = std::make_unique<WheelMenu>(mRoot, mItems, mCount);
     mButtons = std::make_unique<Widgets::Buttons>(mRoot);
     mButtons->set(Widgets::Buttons::NONE, Widgets::Buttons::NONE,
                   Widgets::Buttons::AMBER, Widgets::Buttons::WHITE);

@@ -96,6 +96,25 @@ enum class RunAlertKind : uint8_t {
  *       carries are corrected against the position track and smoothed. The
  *       averages are not: they come from the distance and time totals.
  */
+/**
+ * Where the run is on a track, each tick (Run::TrackSource::status()).
+ */
+struct OnTrack {
+    enum Segment : uint8_t { NONE = 0, ROAD, TRACK };   ///< As Oval::Session::Segment
+    /// As Run::CalState
+    enum Cal : uint8_t { CAL_NONE = 0, CALIBRATING, PROVISIONAL, LOCKED, NOT_STANDARD, STORED };
+
+    uint8_t  segment        = NONE;
+    uint8_t  trackNumber    = 0;     ///< A stored track's number; 0 if not stored
+    uint8_t  lane           = 0;     ///< 0: "No lane" (the road)
+    uint8_t  cal            = CAL_NONE;
+    uint8_t  calLaps        = 0;     ///< Laps of calibration so far (until locked)
+    uint8_t  newTrackNumber = 0;     ///< The number a new track would be saved as; 0 if none free
+    bool     weakGps        = false;
+    uint16_t autoJoins      = 0;     ///< Known tracks the run joined by itself, this run (the notice)
+    float    trackM         = 0.0f;  ///< Distance on a track so far
+};
+
 struct Data {
 
     // Pace, s/m
@@ -137,6 +156,8 @@ struct Data {
 
     // Interval training (populated only when intervalsMode == true)
     IntervalsData intervals {};
+
+    OnTrack onTrack {};
 };
 
 } // namespace Track

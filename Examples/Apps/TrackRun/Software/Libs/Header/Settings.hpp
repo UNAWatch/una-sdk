@@ -21,17 +21,22 @@ struct Settings {
     /// Settings version.
     static constexpr uint8_t kVersion = 1;
 
+    /// Lanes on a track; a lane of 0 is "No lane" (the road).
+    static constexpr uint8_t kLanes = 8;
+
     struct Alerts {
+        /// Auto-lap by distance, in metres on any watch: a track is
+        /// measured in metres. The distance is the runner's, so in an outer
+        /// lane a 400 m lap ends a little further round each time.
         struct Distance {
             enum Id : uint8_t {
-                ID_OFF = 0, ID_KM_MILL_1, ID_KM_MILL_2, ID_KM_MILL_3,
-                ID_KM_MILL_4, ID_KM_MILL_5, ID_KM_MILL_10,
-                ID_COUNT, ID_DEFAULT = ID_KM_MILL_1
+                ID_OFF = 0, ID_M_200, ID_M_400, ID_M_800, ID_M_1000, ID_M_1600,
+                ID_COUNT, ID_DEFAULT = ID_M_400
             };
-            static constexpr uint16_t kValues[ID_COUNT] = { 0, 1, 2, 3, 4, 5, 10 };
+            static constexpr uint16_t kValues[ID_COUNT] = { 0, 200, 400, 800, 1000, 1600 };
 
-            static float toMeters(Id id, bool isImperial) {
-                return kValues[id] * (isImperial ? 1609.34f : 1000.0f);
+            static float toMeters(Id id, bool /*isImperial*/) {
+                return static_cast<float>(kValues[id]);
             }
         };
 
@@ -124,6 +129,8 @@ struct Settings {
     Intervals intervals {};  ///< Interval training settings.
 
     RunAlerts runAlerts {};  ///< Run/Walk, pace and heart-rate alerts.
+    uint8_t   lastLane   = 1;     ///< The lane Start uses, 1 to kLanes, or 0: "No lane" (the service owns it)
+    bool      laneHoldEn = true;  ///< Hold Lap during a run for the lane picker
 
 };
 

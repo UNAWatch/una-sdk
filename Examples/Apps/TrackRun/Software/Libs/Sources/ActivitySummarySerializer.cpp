@@ -79,6 +79,19 @@ bool ActivitySummarySerializer::save(const ActivitySummary& summary)
     }
     writer.endArray();
 
+    // Track Run
+    const TrackRunSummary& tr = summary.trackRun;
+    writer.add("tr_track", static_cast<uint32_t>(tr.trackNumber));
+    writer.add("tr_saved", static_cast<uint32_t>(tr.savedNumber));
+    writer.add("tr_on_track", tr.onTrack);
+    writer.add("tr_not_std", tr.notStandard);
+    writer.add("tr_locked", tr.calLocked);
+    writer.add("tr_lane_min", static_cast<uint32_t>(tr.laneMin));
+    writer.add("tr_lane_max", static_cast<uint32_t>(tr.laneMax));
+    writer.add("tr_lane_last", static_cast<uint32_t>(tr.laneLast));
+    writer.add("tr_road_m", tr.roadM);
+    writer.add("tr_track_m", tr.trackM);
+
     writer.endMap();
 
     file->flush();
@@ -187,6 +200,21 @@ bool ActivitySummarySerializer::load(ActivitySummary& summary)
 
         summary.laps.push_back(lap);
     }
+
+    // Track Run. Any key missing: its default.
+    TrackRunSummary& tr = summary.trackRun;
+    tr = TrackRunSummary{};
+    uint32_t u = 0;
+    if (reader.get("tr_track", u))     { tr.trackNumber = static_cast<uint8_t>(u); }
+    if (reader.get("tr_saved", u))     { tr.savedNumber = static_cast<uint8_t>(u); }
+    reader.get("tr_on_track", tr.onTrack);
+    reader.get("tr_not_std", tr.notStandard);
+    reader.get("tr_locked", tr.calLocked);
+    if (reader.get("tr_lane_min", u))  { tr.laneMin = static_cast<uint8_t>(u); }
+    if (reader.get("tr_lane_max", u))  { tr.laneMax = static_cast<uint8_t>(u); }
+    if (reader.get("tr_lane_last", u)) { tr.laneLast = static_cast<uint8_t>(u); }
+    reader.get("tr_road_m", tr.roadM);
+    reader.get("tr_track_m", tr.trackM);
 
 #if 1
     // Track map as HEX-String

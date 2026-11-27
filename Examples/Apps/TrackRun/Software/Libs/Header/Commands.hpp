@@ -42,6 +42,8 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type WORKOUT_DATA              = 0x00000015;
     constexpr SDK::MessageType::Type WORKOUT_STEP              = 0x00000016;
     constexpr SDK::MessageType::Type RUN_ALERT                 = 0x00000019;
+    constexpr SDK::MessageType::Type PRE_RUN_TRACK             = 0x0000001A;
+    constexpr SDK::MessageType::Type TRACK_LIST                = 0x0000001B;
 
     // GUI --> Service
     constexpr SDK::MessageType::Type SETTINGS_SAVE         = 0x0000000A;
@@ -53,6 +55,9 @@ namespace CustomMessage {
     constexpr SDK::MessageType::Type INTERVALS_NEXT_PHASE  = 0x00000011;  ///< R2: next interval phase or workout step
     constexpr SDK::MessageType::Type WORKOUT_DETAILS_REQUEST = 0x00000017;
     constexpr SDK::MessageType::Type WORKOUT_END             = 0x00000018;
+    constexpr SDK::MessageType::Type SET_LANE                = 0x0000001C;
+    constexpr SDK::MessageType::Type TRACK_LIST_REQ          = 0x0000001D;
+    constexpr SDK::MessageType::Type FORGET_TRACK            = 0x0000001E;
 
     // Service <-> GUI
     struct SettingsUpd : public SDK::MessageBase {
@@ -445,7 +450,59 @@ namespace CustomMessage {
     };
 
 
+    // -- Track Run ---------------------------------------------------------------
+
+    /// The start screen's track, sent whenever it changes, and the lane that
+    /// Start will use.
+    struct PreRunTrack : public SDK::MessageBase {
+        enum Status : uint8_t { UNKNOWN = 0, NEW_TRACK, STORED }; ///< UNKNOWN: no fix yet
+        uint8_t  status      = UNKNOWN;
+        uint8_t  trackNumber = 0;   ///< STORED: "Track n"
+        uint8_t  lane        = 1;   ///< 0: "No lane"
+        bool     weakGps     = false;
+        uint16_t uses        = 0;   ///< STORED: runs that used it
+        PreRunTrack() : SDK::MessageBase(PRE_RUN_TRACK) {}
+    };
+
+    /// The lane: set on the start screen, from the pause menu or by holding
+    /// Lap in a run. 1 to 8, or 0 for "No lane" (the road).
+    struct SetLane : public SDK::MessageBase {
+        uint8_t lane = 1;
+        SetLane() : SDK::MessageBase(SET_LANE) {}
+        explicit SetLane(uint8_t lane) : SetLane() { this->lane = lane; }
+    };
+
+    /// Asks for the stored tracks (Settings > Tracks).
+    struct TrackListReq : public SDK::MessageBase {
+        TrackListReq() : SDK::MessageBase(TRACK_LIST_REQ) {}
+    };
+
+    /// The stored tracks, ordered by number: the reply to TrackListReq and
+    /// to ForgetTrack.
+    struct TrackList : public SDK::MessageBase {
+        static constexpr uint8_t kMax = 10;   ///< Oval::TrackStore::kMaxTracks
+        struct Entry {
+            uint32_t lastUsedS = 0;   ///< UNIX seconds, 0 if the clock was not set
+            uint16_t uses      = 0;   ///< Runs that used it
+            uint8_t  number    = 0;   ///< "Track n"
+        };
+        uint8_t count     = 0;
+        int32_t tzOffsetS = 0;        ///< Local time less UTC, for the dates
+        Entry   tracks[kMax] {};
+        TrackList() : SDK::MessageBase(TRACK_LIST) {}
+    };
+
+    /// Forget one stored track (the others keep their numbers). Refused
+    /// while a run is on. The service replies with a fresh TrackList.
+    struct ForgetTrack : public SDK::MessageBase {
+        uint8_t number = 0;
+        ForgetTrack() : SDK::MessageBase(FORGET_TRACK) {}
+        explicit ForgetTrack(uint8_t number) : ForgetTrack() { this->number = number; }
+    };
+
     // The kernel's largest message block is 256 bytes.
+    static_assert(sizeof(PreRunTrack) <= 256, "PreRunTrack must fit a message block");
+    static_assert(sizeof(TrackList) <= 256, "TrackList must fit a message block");
     static_assert(sizeof(WorkoutData) <= 256, "WorkoutData must fit a message block");
     static_assert(sizeof(WorkoutStep) <= 256, "WorkoutStep must fit a message block");
     static_assert(sizeof(RunAlert) <= 256, "RunAlert must fit a message block");
